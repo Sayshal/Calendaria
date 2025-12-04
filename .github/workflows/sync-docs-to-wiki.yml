@@ -1,0 +1,27 @@
+name: Sync Docs to Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/**
+      - .github/workflows/sync-docs-to-wiki.yml
+
+concurrency:
+  group: sync-docs-to-wiki
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync-to-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync docs to wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          path: docs
+          commit-message: 'Auto-sync documentation from docs folder'

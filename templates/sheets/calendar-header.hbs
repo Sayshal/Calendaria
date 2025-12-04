@@ -1,0 +1,52 @@
+<header class="calendar-header">
+  <div class="calendar-controls">
+    <button type="button" data-action="previousMonth" title="Previous Month">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <h2 class="calendar-title">
+      {{#if calendarData}}
+        {{calendarData.monthName}} {{calendarData.year}}
+      {{else}}
+        Calendar
+      {{/if}}
+    </h2>
+
+    <button type="button" data-action="nextMonth" title="Next Month">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="calendar-actions">
+    <button type="button" data-action="today" title="Go to Today">
+      <i class="fas fa-calendar-day"></i> Today
+    </button>
+
+    {{#if editable}}
+      <button type="button" data-action="addNoteToday" title="Add Note for Today" class="add-note-today-btn">
+        <i class="fas fa-plus"></i> Add Note
+      </button>
+    {{/if}}
+
+    {{#if selectedDate}}
+      <button type="button" data-action="setAsCurrentDate" title="Set Selected Date as Current" class="set-current-date-btn">
+        <i class="fas fa-clock"></i> Set as Current
+      </button>
+    {{/if}}
+
+    <div class="view-selector">
+      <button type="button" data-action="changeView" data-mode="month"
+        class="{{#if (eq displayMode 'month')}}active{{/if}}">
+        Month
+      </button>
+      <button type="button" data-action="changeView" data-mode="week"
+        class="{{#if (eq displayMode 'week')}}active{{/if}}">
+        Week
+      </button>
+      <button type="button" data-action="changeView" data-mode="year"
+        class="{{#if (eq displayMode 'year')}}active{{/if}}">
+        Year
+      </button>
+    </div>
+  </div>
+</header>

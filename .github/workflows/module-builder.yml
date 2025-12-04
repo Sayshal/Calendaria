@@ -1,0 +1,164 @@
+name: Module Builder
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REPO_URL: https://github.com/${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      release-notes: ${{ steps.set-release-notes.outputs.release-notes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Version
+        id: get-version
+        run: |
+          # Read the output of get-version.js line by line into an array
+          mapfile -t version_data < <(node .github/workflows/get-version.js)
+
+          # Extract values safely
+          summary=$(git log -1 --pretty=%s)
+          version=$(echo "$summary" | grep -o -E '[v]?[0-9]+\.[0-9]+\.[0-9]+' | head -n1 | sed 's/^v//')
+
+          compat_min=$(echo "${version_data[1]}" | sed 's/^COMPAT_MIN://')
+          compat_verified=$(echo "${version_data[2]}" | sed 's/^COMPAT_VERIFIED://')
+          compat_max=$(echo "${version_data[3]}" | sed 's/^COMPAT_MAX://')
+
+          module_id=$(echo "${version_data[4]}" | sed 's/^MODULE_ID://')
+          module_title=$(echo "${version_data[5]}" | sed 's/^MODULE_TITLE://')
+          module_url=$(echo "${version_data[6]}" | sed 's/^MODULE_URL://')
+
+          # Output to GitHub Actions
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "compat_min=$compat_min" >> $GITHUB_OUTPUT
+          echo "compat_verified=$compat_verified" >> $GITHUB_OUTPUT
+          echo "compat_max=$compat_max" >> $GITHUB_OUTPUT
+          echo "module_id=$module_id" >> $GITHUB_OUTPUT
+          echo "module_title=$module_title" >> $GITHUB_OUTPUT
+          echo "module_url=$module_url" >> $GITHUB_OUTPUT
+
+          # Debug prints (optional)
+          echo "Debug Info:"
+          echo "Version: $version"
+          echo "Module ID: $module_id"
+          echo "Module Title: $module_title"
+          echo "Module URL: $module_url"
+          echo "Compat: $compat_min - $compat_verified - $compat_max"
+
+      - name: Debug Version
+        run: |
+          echo "Version from previous step: ${{ steps.get-version.outputs.version }}"
+
+      - name: Update module.json with Version
+        run: |
+          if [ -z "${{ steps.get-version.outputs.version }}" ]; then
+            echo "Error: No version specified"
+            exit 1
+          fi
+          node .github/workflows/update-module.js "${{ steps.get-version.outputs.version }}"
+
+      - name: Set Release Notes
+        id: set-release-notes
+        run: |
+          release_notes=$(git log -1 --pretty=%B | grep '^-' | sed 's/^ //')
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$release_notes" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "$release_notes" > release_notes.txt
+
+      - name: Zip Files
+        run: |
+          # Create a zip with only the specified folders and files
+          zip -r ./module.zip \
+            lang/ \
+            scripts/ \
+            styles/ \
+            templates/ \
+            tours/ \
+            assets/ \
+            LICENSE \
+            module.json \
+            README.md
+
+      - name: Create Release
+        id: create-release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          name: Release ${{ steps.get-version.outputs.version }}
+          draft: false
+          prerelease: false
+          body: ${{ steps.set-release-notes.outputs.release_notes }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: './module.zip, ./module.json'
+          tag: ${{ steps.get-version.outputs.version }}
+
+      - name: Release Foundry Package
+        run: |
+          # Use properly quoted bash variables to preserve spaces
+          cat << EOF > payload.json
+          {
+            "id": "${{ steps.get-version.outputs.module_id }}",
+            "release": {
+              "version": "${{ steps.get-version.outputs.version }}",
+              "manifest": "${{ env.REPO_URL }}/releases/latest/download/module.json",
+              "download": "${{ env.REPO_URL }}/releases/latest/download/module.zip",
+              "notes": "${{ env.REPO_URL }}/releases/tag/${{ steps.get-version.outputs.version }}",
+              "compatibility": {
+                "minimum": "${{ steps.get-version.outputs.compat_min }}",
+                "verified": "${{ steps.get-version.outputs.compat_verified }}",
+                "maximum": "${{ steps.get-version.outputs.compat_max }}"
+              }
+            }
+          }
+          EOF
+
+          cat payload.json  # Debug: Print the payload
+
+          curl -X POST "https://foundryvtt.com/_api/packages/release_version/" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${{ secrets.FOUNDRY_API_TOKEN }}" \
+            -d @payload.json
+
+      - name: Post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          RELEASE_NOTES=$(< release_notes.txt)
+
+          JSON_PAYLOAD=$(jq -n \
+            --arg title "${{ steps.get-version.outputs.module_title }} Release" \
+            --arg version "${{ steps.get-version.outputs.version }}" \
+            --arg foundry_url "https://foundryvtt.com/packages/${{ steps.get-version.outputs.module_id }}" \
+            --arg release_url "${{ env.REPO_URL }}/releases/download/${{ steps.get-version.outputs.version }}/module.json" \
+            --arg download_url "${{ env.REPO_URL }}/releases/download/${{ steps.get-version.outputs.version }}/module.zip" \
+            --arg release_notes "$RELEASE_NOTES" \
+            --arg compat_min "${{ steps.get-version.outputs.compat_min }}" \
+            --arg compat_max "${{ steps.get-version.outputs.compat_max }}" \
+            '{
+            content: "<@&1384920094597185556> <@&1384922261408190505>",
+              embeds: [{
+                title: $title,
+                fields: [
+                  {name: "Version", value: $version, inline: true},
+                  {name: "Core Compatibility", value: ($compat_min + " - " + $compat_max), inline: true},
+                  {name: "Foundry Package", value: $foundry_url, inline: false},
+                  {name: "Release Tag", value: $release_url, inline: false},
+                  {name: "Manual Download", value: $download_url, inline: false},
+                  {name: "Release Notes", value: $release_notes, inline: false}
+                ]
+              }]
+            }')
+
+          echo "JSON Payload:"
+          echo "$JSON_PAYLOAD" | jq '.'
+
+          curl -H "Content-Type: application/json" \
+              -d "$JSON_PAYLOAD" \
+              $DISCORD_WEBHOOK

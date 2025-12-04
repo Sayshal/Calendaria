@@ -1,0 +1,89 @@
+<div class="calendar-note-form">
+  {{!-- Row 1: Date | Time | Repeat --}}
+  <div class="form-row-1">
+    <fieldset class="date-fieldset">
+      <legend>Date</legend>
+      <div class="date-inputs">
+        <div class="date-row">
+          <label>Start</label>
+          <button type="button" class="date-picker-button" data-action="selectDate" data-date-field="startDate" data-tooltip="Select start date for this note">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="date-display">{{startDateDisplay}}</span>
+          </button>
+          <input type="hidden" name="system.startDate.year" value="{{system.startDate.year}}" />
+          <input type="hidden" name="system.startDate.month" value="{{system.startDate.month}}" />
+          <input type="hidden" name="system.startDate.day" value="{{system.startDate.day}}" />
+        </div>
+
+        <div class="date-row">
+          <label>End</label>
+          <button type="button" class="date-picker-button" data-action="selectDate" data-date-field="endDate" data-tooltip="Select end date for this note">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="date-display">{{endDateDisplay}}</span>
+          </button>
+          <input type="hidden" name="system.endDate.year" value="{{system.endDate.year}}" />
+          <input type="hidden" name="system.endDate.month" value="{{system.endDate.month}}" />
+          <input type="hidden" name="system.endDate.day" value="{{system.endDate.day}}" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="time-fieldset">
+      <legend>Time</legend>
+      <div class="time-controls">
+        <input type="time" name="system.startDate.time" value="{{timeValue}}" {{#if system.allDay}}disabled{{/if}} data-tooltip="Set the time of day for this note" />
+        <label class="all-day-label">
+          <input type="checkbox" name="system.allDay" {{checked system.allDay}} data-tooltip="Mark this note as an all-day event" />
+          All Day
+        </label>
+      </div>
+      <input type="hidden" name="system.startDate.hour" value="{{system.startDate.hour}}" />
+      <input type="hidden" name="system.startDate.minute" value="{{system.startDate.minute}}" />
+    </fieldset>
+
+    <fieldset class="repeat-fieldset">
+      <legend>Repeat</legend>
+      <select name="system.repeat" data-tooltip="Set how often this note repeats">
+        {{#each repeatOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </fieldset>
+  </div>
+
+  {{!-- Row 2: Emblem | GM Only --}}
+  <div class="form-row-2">
+    <fieldset class="emblem-fieldset">
+      <legend>Emblem</legend>
+      <div class="emblem-controls">
+        <div class="icon-picker" data-action="selectIcon" data-icon-type="{{iconType}}" data-tooltip="Click to choose an icon. Right-click to switch between image and font modes">
+          {{#if (eq iconType "fontawesome")}}
+            <i class="{{system.icon}} icon-preview" style="color: {{system.color}}"></i>
+          {{else}}
+            <img src="{{system.icon}}" alt="Note Icon" class="icon-preview" style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);" />
+          {{/if}}
+          <input type="hidden" name="system.icon" value="{{system.icon}}" />
+          <input type="hidden" name="system.iconType" value="{{iconType}}" />
+        </div>
+        <input type="color" name="system.color" value="{{system.color}}" class="color-input" data-tooltip="Choose a color for the icon" />
+      </div>
+    </fieldset>
+
+    <fieldset class="gm-only-fieldset">
+      <legend>Visibility</legend>
+      <label class="gm-only-control">
+        <input type="checkbox" name="system.gmOnly" {{checked system.gmOnly}} data-tooltip="Hide this note from players" />
+        GM Only
+      </label>
+    </fieldset>
+  </div>
+
+  {{!-- Bottom row: ProseMirror Editor --}}
+  <fieldset class="editor-fieldset">
+    <legend>Note Content</legend>
+    <prose-mirror id="note-content" name="text.content"
+      value="{{text.content}}"
+      aria-label="Note Content">
+    </prose-mirror>
+  </fieldset>
+</div>

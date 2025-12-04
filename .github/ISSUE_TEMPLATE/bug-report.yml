@@ -1,0 +1,49 @@
+name: Bug Report
+description: File a bug report
+title: '[BUG] '
+labels: ['bug']
+assignees:
+  - Sayshal
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to report an issue with the module. Please fill out all the fields to the best of your ability.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: input
+    id: module-version
+    attributes:
+      label: Module Version
+      description: What version of the package?
+      placeholder: '1.0.0'
+    validations:
+      required: true
+  - type: input
+    id: core-version
+    attributes:
+      label: Foundry Version
+      description: What version of foundry?
+      placeholder: '12.331'
+    validations:
+      required: true
+  - type: input
+    id: system-version
+    attributes:
+      label: D&D Version
+      description: What version of the system?
+      placeholder: '5.1.2'
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell

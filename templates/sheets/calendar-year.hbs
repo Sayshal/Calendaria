@@ -1,0 +1,26 @@
+<div class="calendar-year-view">
+  {{#if calendarData.yearGrid}}
+    <div class="year-grid">
+      {{#each calendarData.yearGrid}}
+        <div class="year-row">
+          {{#each this}}
+            <div class="year-cell {{#if isCurrent}}current-year{{/if}}" data-year="{{year}}">
+              <div class="year-header">{{year}}</div>
+              <div class="year-months">
+                {{#each months}}
+                  <div class="month-mini" data-year="{{year}}" data-month="{{month}}" data-tooltip="{{tooltipText}}">
+                    {{abbreviation}}
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="no-calendar">
+      <p>No calendar configured.</p>
+    </div>
+  {{/if}}
+</div>

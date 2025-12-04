@@ -1,0 +1,44 @@
+<div class="calendar-week-view">
+  {{#if calendarData}}
+    <div class="week-grid">
+      <!-- Time header row -->
+      <div class="week-time-header">
+        <div class="week-day-label-header">Day</div>
+        {{#each calendarData.timeSlots}}
+          <div class="week-time-slot-header">{{label}}</div>
+        {{/each}}
+      </div>
+
+      <!-- Day rows -->
+      {{#each calendarData.days}}
+        <div class="week-day-row {{#if isToday}}today{{/if}}">
+          <div class="week-day-label">
+            <div class="day-name">{{dayName}}</div>
+            <div class="day-date">{{monthName}} {{day}}</div>
+          </div>
+          {{#each ../calendarData.timeSlots}}
+            <div
+              class="week-time-slot {{#if (and ../isToday (eq hour ../currentHour))}}current-hour{{/if}} {{#if (and ../../selectedTimeSlot (eq ../../selectedTimeSlot.day ../day) (eq ../../selectedTimeSlot.month ../month) (eq ../../selectedTimeSlot.year ../year) (eq ../../selectedTimeSlot.hour hour))}}selected{{/if}}"
+              data-day="{{../day}}" data-month="{{../month}}" data-year="{{../year}}" data-hour="{{hour}}"
+              data-action="selectTimeSlot">
+              {{#each ../notes}}
+                {{#if (and (gte system.startDate.hour hour) (lt system.startDate.hour endHour))}}
+                  <div class="week-event" style="background-color: {{system.color}};" title="{{name}}"
+                    data-action="editNote" data-note-id="{{id}}" data-hour="{{system.startDate.hour}}">
+                    <span
+                      class="event-time">{{system.startDate.hour}}:{{#if (lt system.startDate.minute 10)}}0{{/if}}{{system.startDate.minute}}</span>
+                    <span class="event-name">{{name}}</span>
+                  </div>
+                {{/if}}
+              {{/each}}
+            </div>
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="no-calendar">
+      <p>No calendar configured. Select a calendar in the settings.</p>
+    </div>
+  {{/if}}
+</div>

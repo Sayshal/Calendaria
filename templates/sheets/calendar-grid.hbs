@@ -1,0 +1,50 @@
+<div class="calendar-grid">
+  {{#if calendarData}}
+    <div class="calendar-weekdays" style="grid-template-columns: repeat({{calendarData.daysInWeek}}, minmax(80px, 1fr));">
+      {{#each calendarData.weekdays}}
+        <div class="weekday-header">{{this}}</div>
+      {{/each}}
+    </div>
+
+    <div class="calendar-days">
+      {{#each calendarData.weeks}}
+        <div class="calendar-week" style="grid-template-columns: repeat({{../calendarData.daysInWeek}}, minmax(80px, 1fr));">
+          {{#each this}}
+            {{#if empty}}
+              <div class="calendar-day empty"></div>
+            {{else}}
+              <div class="calendar-day {{#if isToday}}today{{/if}} {{#if isSelected}}selected{{/if}} {{#if notes.length}}has-notes{{/if}} {{#if isOddDay}}odd-day{{/if}}"
+                data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-action="selectDay">
+                <div class="day-number">{{day}}</div>
+                {{#if notes.length}}
+                  <div class="day-notes">
+                    {{#each notes}}
+                      <div class="note-indicator" style="background-color: {{system.color}}" title="{{name}}"
+                        data-action="editNote" data-note-id="{{id}}">
+                        {{#if (eq system.iconType "fontawesome")}}
+                          <i class="{{system.icon}}" style="color: {{system.color}}"></i>
+                        {{else}}
+                          <img src="{{system.icon}}" alt="{{name}}" style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);" />
+                        {{/if}}
+                      </div>
+                    {{/each}}
+                  </div>
+                {{/if}}
+                {{#if ../../../editable}}
+                  <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
+                    data-month="{{month}}" data-day="{{day}}" title="Add Note">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                {{/if}}
+              </div>
+            {{/if}}
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="no-calendar">
+      <p>No calendar configured. Select a calendar in the settings.</p>
+    </div>
+  {{/if}}
+</div>

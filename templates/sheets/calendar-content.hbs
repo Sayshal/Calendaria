@@ -1,0 +1,9 @@
+<div class="calendar-main-content">
+  {{#if (eq displayMode 'year')}}
+    {{> "modules/calendaria/templates/sheets/calendar-year.hbs"}}
+  {{else if (eq displayMode 'week')}}
+    {{> "modules/calendaria/templates/sheets/calendar-week.hbs"}}
+  {{else}}
+    {{> "modules/calendaria/templates/sheets/calendar-grid.hbs"}}
+  {{/if}}
+</div>

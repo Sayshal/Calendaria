@@ -1,0 +1,17 @@
+name: Feature Request
+description: 'Request a new feature'
+title: '[FEATURE] '
+labels: ['enhancement']
+assignees:
+  - Sayshal
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to suggest a new feature for the module. Please fill out all the fields to the best of your ability.
+  - type: textarea
+    id: feature
+    attributes:
+      label: What is the feature?
+    validations:
+      required: true
