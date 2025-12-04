@@ -31,6 +31,14 @@
   "CALENDARIA.Settings.ResetPosition.Name": "Reset Calendar Position",
   "CALENDARIA.Settings.ResetPosition.Success": "Calendar position has been reset.",
   "CALENDARIA.UI.AddNote": "Add Note",
+  "CALENDARIA.UI.AllDayTooltip": "Mark this note as an all-day event",
   "CALENDARIA.UI.Cancel": "Cancel",
+  "CALENDARIA.UI.ColorTooltip": "Choose a color for the icon",
+  "CALENDARIA.UI.EndDateTooltip": "Select end date for this note",
+  "CALENDARIA.UI.GmOnlyTooltip": "Hide this note from players",
+  "CALENDARIA.UI.IconPickerTooltip": "Click to choose an icon. Right-click to switch between image and font modes",
+  "CALENDARIA.UI.RepeatTooltip": "Set how often this note repeats",
+  "CALENDARIA.UI.StartDateTooltip": "Select start date for this note",
+  "CALENDARIA.UI.TimeTooltip": "Set the time of day for this note",
   "TYPES.JournalEntryPage.calendaria.calendarnote": "Calendar Note"
 }

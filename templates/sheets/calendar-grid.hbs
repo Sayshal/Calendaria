@@ -25,12 +25,11 @@
                 {{#if notes.length}}
                   <div class="day-notes">
                     {{#each notes}}
-                      <div class="note-indicator" style="background-color: {{system.color}}" data-tooltip="{{name}}"
-                        data-action="editNote" data-note-id="{{id}}">
+                      <div class="note-indicator" data-tooltip="{{name}}" data-action="editNote" data-note-id="{{id}}">
                         {{#if (eq system.iconType "fontawesome")}}
                           <i class="{{system.icon}}" style="color: {{system.color}}"></i>
                         {{else}}
-                          <img src="{{system.icon}}" alt="{{name}}" style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);" />
+                          <img src="{{system.icon}}" alt="{{name}}" style="width: 16px; height: 16px;" />
                         {{/if}}
                       </div>
                     {{/each}}

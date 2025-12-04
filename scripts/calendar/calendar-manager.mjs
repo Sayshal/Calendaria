@@ -425,4 +425,26 @@ export default class CalendarManager {
 
     return calendar.findFestivalDay();
   }
+
+  /**
+   * Get the current calendar date and time.
+   * Uses game.time.components and applies calendar year offset.
+   * @returns {object}  Current date/time object with year, month, day, hour, minute
+   */
+  static getCurrentDateTime() {
+    // Get time components from game time
+    const components = game.time.components;
+
+    // Get active calendar for year offset
+    const calendar = this.getActiveCalendar();
+    const yearOffset = calendar?.yearZero ?? 0;
+
+    return {
+      year: components.year + yearOffset,
+      month: components.month,
+      day: components.dayOfMonth,
+      hour: components.hour,
+      minute: components.minute
+    };
+  }
 }
