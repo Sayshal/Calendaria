@@ -46,6 +46,21 @@ export function registerSettings() {
   });
 
   // ========================================//
+  //  Sync & Multiplayer                     //
+  // ========================================//
+
+  /** Primary GM user ID override for sync operations */
+  game.settings.register(MODULE.ID, SETTINGS.PRIMARY_GM, {
+    name: 'CALENDARIA.Settings.PrimaryGM.Name',
+    hint: 'CALENDARIA.Settings.PrimaryGM.Hint',
+    scope: 'world',
+    config: true,
+    type: String,
+    default: null,
+    requiresReload: false
+  });
+
+  // ========================================//
   //  Technical                              //
   // ========================================//
 

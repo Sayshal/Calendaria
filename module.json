@@ -65,6 +65,7 @@
       }
     ]
   },
+  "socket": true,
   "styles": [
     "styles/calendaria.css"
   ],

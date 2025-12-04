@@ -9,6 +9,7 @@ import { registerSettings } from './scripts/settings.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
+import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import { CalendariaHUD } from './scripts/applications/calendaria-hud.mjs';
 import { TEMPLATES } from './scripts/constants.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
@@ -23,6 +24,7 @@ Hooks.once('init', async () => {
   initializeLogger();
   registerKeybindings();
   registerHooks();
+  CalendariaSocket.initialize();
 
   // Register CalendarNote document type
   Object.assign(CONFIG.JournalEntryPage.dataModels, { 'calendaria.calendarnote': CalendarNoteDataModel });
@@ -66,6 +68,7 @@ globalThis['CALENDARIA'] = {
   CalendariaHUD,
   CalendariaCalendar,
   CalendarManager,
+  CalendariaSocket,
   NoteManager,
   CalendarApplication,
   toggleCalendarVisibility

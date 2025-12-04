@@ -23,6 +23,8 @@
   "CALENDARIA.Settings.Logger.Choices.Warnings": "Warnings & Errors",
   "CALENDARIA.Settings.Logger.Hint": "Set the level of debug logging output for the Calendaria module.",
   "CALENDARIA.Settings.Logger.Name": "Logging Level",
+  "CALENDARIA.Settings.PrimaryGM.Hint": "Override which GM is designated as the primary GM for sync operations. Leave blank to automatically use the GM with the lowest user ID. Enter a specific user ID to manually set the primary GM.",
+  "CALENDARIA.Settings.PrimaryGM.Name": "Primary GM Override",
   "CALENDARIA.Settings.ResetPosition.Confirm": "This will reset the calendar to its default position. Are you sure?",
   "CALENDARIA.Settings.ResetPosition.Hint": "Reset the calendar HUD to its default position.",
   "CALENDARIA.Settings.ResetPosition.Label": "Reset Position",

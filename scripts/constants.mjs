@@ -45,6 +45,7 @@ export const MODULE = {
  * @property {string} CALENDAR_POSITION - Saved position of the draggable calendar
  * @property {string} DARKNESS_SYNC - Default setting for syncing scene darkness with sun position
  * @property {string} CALENDARS - Stored calendar configurations and active calendar
+ * @property {string} PRIMARY_GM - Override for which user ID is the primary GM for sync operations
  */
 
 /**
@@ -64,7 +65,10 @@ export const SETTINGS = {
   DARKNESS_SYNC: 'darknessSync',
 
   /** @type {string} Stored calendar configurations and active calendar */
-  CALENDARS: 'calendars'
+  CALENDARS: 'calendars',
+
+  /** @type {string} Override for which user ID is the primary GM for sync operations */
+  PRIMARY_GM: 'primaryGM'
 };
 
 /**
