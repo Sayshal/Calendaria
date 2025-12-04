@@ -6,7 +6,7 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SYSTEM } from '../constants.mjs';
+import { MODULE, SETTINGS, SYSTEM, SOCKET_TYPES, HOOKS } from '../constants.mjs';
 import { log } from './logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 
@@ -58,21 +58,21 @@ export class CalendariaSocket {
     log(3, `Socket message received: ${type}`, data);
 
     switch (type) {
-      case this.TYPES.CLOCK_UPDATE:
+      case SOCKET_TYPES.CLOCK_UPDATE:
         // TODO: Requires TimeKeeper implementation
         log(2, 'CLOCK_UPDATE handler deferred - TimeKeeper not yet implemented');
         break;
 
-      case this.TYPES.DATE_CHANGE:
+      case SOCKET_TYPES.DATE_CHANGE:
         this.#handleDateChange(data);
         break;
 
-      case this.TYPES.NOTE_UPDATE:
+      case SOCKET_TYPES.NOTE_UPDATE:
         // TODO: Requires NoteManager implementation
         log(2, 'NOTE_UPDATE handler deferred - NoteManager not yet implemented');
         break;
 
-      case this.TYPES.CALENDAR_SWITCH:
+      case SOCKET_TYPES.CALENDAR_SWITCH:
         this.#handleCalendarSwitch(data);
         break;
 
@@ -122,7 +122,7 @@ export class CalendariaSocket {
     }
 
     // Emit hook for other systems to respond
-    Hooks.callAll('calendaria.remoteDateChange', data);
+    Hooks.callAll(HOOKS.REMOTE_DATE_CHANGE, data);
   }
 
   /**

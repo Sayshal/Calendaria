@@ -150,3 +150,116 @@ export const SYSTEM = {
     return game.system?.id === 'dnd5e';
   }
 };
+
+/**
+ * Custom Calendaria hook names fired by the module.
+ * Other modules and macros can listen for these hooks to respond to Calendaria events.
+ *
+ * @typedef {Object} HookNames
+ * @property {string} CALENDAR_SWITCHED - Fired when the active calendar is switched locally
+ * @property {string} REMOTE_CALENDAR_SWITCH - Fired when a remote calendar switch is received
+ * @property {string} CALENDAR_ADDED - Fired when a new calendar is added to the registry
+ * @property {string} CALENDAR_REMOVED - Fired when a calendar is removed from the registry
+ * @property {string} REMOTE_DATE_CHANGE - Fired when a remote date/time change is received
+ * @property {string} NOTE_CREATED - Fired when a calendar note is created
+ * @property {string} NOTE_UPDATED - Fired when a calendar note is updated
+ * @property {string} NOTE_DELETED - Fired when a calendar note is deleted
+ */
+
+/**
+ * Custom Calendaria hook names.
+ * These hooks are fired by the module and can be listened to by other modules and macros.
+ *
+ * @type {HookNames}
+ */
+export const HOOKS = {
+  /** @type {string} Fired when the active calendar is switched locally */
+  CALENDAR_SWITCHED: 'calendaria.calendarSwitched',
+
+  /** @type {string} Fired when a remote calendar switch is received */
+  REMOTE_CALENDAR_SWITCH: 'calendaria.remoteCalendarSwitch',
+
+  /** @type {string} Fired when a new calendar is added to the registry */
+  CALENDAR_ADDED: 'calendaria.calendarAdded',
+
+  /** @type {string} Fired when a calendar is removed from the registry */
+  CALENDAR_REMOVED: 'calendaria.calendarRemoved',
+
+  /** @type {string} Fired when a remote date/time change is received */
+  REMOTE_DATE_CHANGE: 'calendaria.remoteDateChange',
+
+  /** @type {string} Fired when a calendar note is created */
+  NOTE_CREATED: 'calendaria.noteCreated',
+
+  /** @type {string} Fired when a calendar note is updated */
+  NOTE_UPDATED: 'calendaria.noteUpdated',
+
+  /** @type {string} Fired when a calendar note is deleted */
+  NOTE_DELETED: 'calendaria.noteDeleted'
+};
+
+/**
+ * Journal page type identifiers used by the module.
+ *
+ * @typedef {Object} JournalTypes
+ * @property {string} CALENDAR_NOTE - Calendar note journal page type
+ */
+
+/**
+ * Journal page type identifiers.
+ * These are used for registering and identifying custom journal page types.
+ *
+ * @type {JournalTypes}
+ */
+export const JOURNAL_TYPES = {
+  /** @type {string} Calendar note journal page type */
+  CALENDAR_NOTE: 'calendaria.calendarnote'
+};
+
+/**
+ * Sheet registration identifiers used by the module.
+ *
+ * @typedef {Object} SheetIds
+ * @property {string} CALENDARIA - Main sheet registration ID
+ */
+
+/**
+ * Sheet registration identifiers.
+ * These are used when registering custom document sheets with Foundry.
+ *
+ * @type {SheetIds}
+ */
+export const SHEET_IDS = {
+  /** @type {string} Main sheet registration ID for Calendaria sheets */
+  CALENDARIA: 'calendaria'
+};
+
+/**
+ * Socket message types for multiplayer synchronization.
+ *
+ * @typedef {Object} SocketTypes
+ * @property {string} CLOCK_UPDATE - Clock/time update message
+ * @property {string} DATE_CHANGE - Date change message
+ * @property {string} NOTE_UPDATE - Note update message
+ * @property {string} CALENDAR_SWITCH - Calendar switch message
+ */
+
+/**
+ * Socket message types for multiplayer synchronization.
+ * These define the different types of messages sent over the socket for syncing.
+ *
+ * @type {SocketTypes}
+ */
+export const SOCKET_TYPES = {
+  /** @type {string} Clock/time update message */
+  CLOCK_UPDATE: 'clockUpdate',
+
+  /** @type {string} Date change message */
+  DATE_CHANGE: 'dateChange',
+
+  /** @type {string} Note update message */
+  NOTE_UPDATE: 'noteUpdate',
+
+  /** @type {string} Calendar switch message */
+  CALENDAR_SWITCH: 'calendarSwitch'
+};

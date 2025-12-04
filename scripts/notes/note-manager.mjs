@@ -7,7 +7,7 @@
  * @author Tyler
  */
 
-import { MODULE, SYSTEM } from '../constants.mjs';
+import { MODULE, SYSTEM, HOOKS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { getDefaultNoteData, validateNoteData, sanitizeNoteData, createNoteStub, getPredefinedCategories, getCategoryDefinition } from './note-data.mjs';
@@ -114,7 +114,7 @@ export default class NoteManager {
     if (stub) {
       NoteManager.#noteIndex.set(page.id, stub);
       log(3, `Added note to index: ${page.name}`);
-      Hooks.callAll('calendaria.noteCreated', stub);
+      Hooks.callAll(HOOKS.NOTE_CREATED, stub);
     }
   }
 
@@ -132,13 +132,13 @@ export default class NoteManager {
     if (stub) {
       NoteManager.#noteIndex.set(page.id, stub);
       log(3, `Updated note in index: ${page.name}`);
-      Hooks.callAll('calendaria.noteUpdated', stub);
+      Hooks.callAll(HOOKS.NOTE_UPDATED, stub);
     } else {
       // Page is no longer a calendar note, remove from index
       if (NoteManager.#noteIndex.has(page.id)) {
         NoteManager.#noteIndex.delete(page.id);
         log(3, `Removed note from index: ${page.name}`);
-        Hooks.callAll('calendaria.noteDeleted', page.id);
+        Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
 
@@ -159,7 +159,7 @@ export default class NoteManager {
     if (NoteManager.#noteIndex.has(page.id)) {
       NoteManager.#noteIndex.delete(page.id);
       log(3, `Deleted note from index: ${page.name}`);
-      Hooks.callAll('calendaria.noteDeleted', page.id);
+      Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
     }
   }
 

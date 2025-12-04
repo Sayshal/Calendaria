@@ -11,7 +11,7 @@ import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import { CalendariaHUD } from './scripts/applications/calendaria-hud.mjs';
-import { TEMPLATES } from './scripts/constants.mjs';
+import { TEMPLATES, JOURNAL_TYPES, SHEET_IDS } from './scripts/constants.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
 import NoteManager from './scripts/notes/note-manager.mjs';
@@ -28,14 +28,14 @@ Hooks.once('init', async () => {
   CalendariaSocket.initialize();
 
   // Register CalendarNote document type
-  Object.assign(CONFIG.JournalEntryPage.dataModels, { 'calendaria.calendarnote': CalendarNoteDataModel });
+  Object.assign(CONFIG.JournalEntryPage.dataModels, { [JOURNAL_TYPES.CALENDAR_NOTE]: CalendarNoteDataModel });
 
   // Initialize sheet classes
-  CONFIG.JournalEntryPage.sheetClasses['calendaria.calendarnote'] = {};
+  CONFIG.JournalEntryPage.sheetClasses[JOURNAL_TYPES.CALENDAR_NOTE] = {};
 
   // Register CalendarNote sheet
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, 'calendaria', CalendarNoteSheet, {
-    types: ['calendaria.calendarnote'],
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, SHEET_IDS.CALENDARIA, CalendarNoteSheet, {
+    types: [JOURNAL_TYPES.CALENDAR_NOTE],
     makeDefault: true,
     label: 'Calendar Note'
   });

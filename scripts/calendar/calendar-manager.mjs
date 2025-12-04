@@ -7,7 +7,7 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SYSTEM } from '../constants.mjs';
+import { MODULE, SETTINGS, SYSTEM, HOOKS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
@@ -221,7 +221,7 @@ export default class CalendarManager {
 
     // Emit hook for calendar switch
     const calendar = CalendarRegistry.get(id);
-    Hooks.callAll('calendaria.calendarSwitched', id, calendar);
+    Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
 
     // Note: For dnd5e, the updateSetting hook will handle HUD refresh after reload
     // For other systems, HUD refresh could be handled differently
@@ -252,7 +252,7 @@ export default class CalendarManager {
     ui.notifications.info(`Calendar switched to ${calendarName} by GM`);
 
     // Emit hook
-    Hooks.callAll('calendaria.remoteCalendarSwitch', id, calendar);
+    Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
 
     // Re-render calendar HUD if available
     if (SYSTEM.isDnd5e && dnd5e?.ui?.calendar) dnd5e.ui.calendar.render();
@@ -275,7 +275,7 @@ export default class CalendarManager {
       const calendar = CalendarRegistry.register(id, definition);
       await this.saveCalendars();
 
-      Hooks.callAll('calendaria.calendarAdded', id, calendar);
+      Hooks.callAll(HOOKS.CALENDAR_ADDED, id, calendar);
       log(3, `Added calendar: ${id}`);
 
       return calendar;
@@ -307,7 +307,7 @@ export default class CalendarManager {
     const removed = CalendarRegistry.unregister(id);
     if (removed) {
       await this.saveCalendars();
-      Hooks.callAll('calendaria.calendarRemoved', id);
+      Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
       log(3, `Removed calendar: ${id}`);
     }
 
