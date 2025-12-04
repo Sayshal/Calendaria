@@ -18,6 +18,7 @@ import NoteManager from './scripts/notes/note-manager.mjs';
 import { CalendarApplication } from './scripts/applications/calendar-application.mjs';
 import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model.mjs';
 import { CalendarNoteSheet } from './scripts/sheets/calendar-note-sheet.mjs';
+import { CalendariaAPI } from './scripts/api.mjs';
 
 Hooks.once('init', async () => {
   registerSettings();
@@ -71,5 +72,6 @@ globalThis['CALENDARIA'] = {
   CalendariaSocket,
   NoteManager,
   CalendarApplication,
-  toggleCalendarVisibility
+  toggleCalendarVisibility,
+  api: CalendariaAPI
 };

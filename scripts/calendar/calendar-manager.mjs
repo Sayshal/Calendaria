@@ -87,7 +87,6 @@ export default class CalendarManager {
         // Convert dnd5e calendar definition to CalendariaCalendar
         const calendar = new CalendariaCalendar(calendarData);
         CalendarRegistry.register(id, calendar);
-        log(3, `Loaded dnd5e calendar: ${id}`);
       } catch (error) {
         log(2, `Error loading dnd5e calendar:`, error);
       }
