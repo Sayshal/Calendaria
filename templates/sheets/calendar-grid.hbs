@@ -13,7 +13,7 @@
             {{#if empty}}
               <div class="calendar-day empty"></div>
             {{else}}
-              <div class="calendar-day {{#if isToday}}today{{/if}} {{#if isSelected}}selected{{/if}} {{#if notes.length}}has-notes{{/if}} {{#if isOddDay}}odd-day{{/if}} {{#if isFestival}}festival-day{{/if}}"
+              <div class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
                 data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-action="selectDay"
                 {{#if festivalName}}data-tooltip="{{festivalName}}"{{/if}}>
                 <div class="day-number">
@@ -43,6 +43,22 @@
                 {{/if}}
               </div>
             {{/if}}
+          {{/each}}
+
+          <!-- Multi-day event bars -->
+          {{#each multiDayEvents}}
+            <div class="event-bar"
+                 style="left: {{left}}%; width: {{width}}%; top: calc(22px + {{row}} * 26px); background-color: {{color}};"
+                 data-tooltip="{{name}}"
+                 data-action="editNote"
+                 data-note-id="{{id}}">
+              {{#if (eq iconType "fontawesome")}}
+                <i class="{{icon}} event-bar-icon"></i>
+              {{else if icon}}
+                <img src="{{icon}}" alt="{{name}}" class="event-bar-icon" />
+              {{/if}}
+              <span class="event-bar-text">{{name}}</span>
+            </div>
           {{/each}}
         </div>
       {{/each}}

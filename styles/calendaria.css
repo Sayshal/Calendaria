@@ -339,9 +339,11 @@
 }
 
 .calendar-week {
+  position: relative;
   display: grid;
   gap: 2px;
   flex: 1;
+  min-height: 140px; /* Increased to accommodate event bars */
 }
 
 .calendar-day {
@@ -498,140 +500,213 @@
 }
 
 /* ======================================== */
-/* Week View Styles                         */
+/* Multi-Day Event Bar Styles (Month View) */
+/* ======================================== */
+
+.event-bar {
+  position: absolute;
+  height: 24px;
+  border-radius: 12px;
+  padding: 2px 10px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgb(255 255 255);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  transition: all 0.15s ease;
+  z-index: 10;
+  border: 1px solid rgb(0 0 0 / 10%);
+  text-shadow:
+    -1px -1px 0 rgb(0 0 0 / 50%),
+    1px -1px 0 rgb(0 0 0 / 50%),
+    -1px 1px 0 rgb(0 0 0 / 50%),
+    1px 1px 0 rgb(0 0 0 / 50%),
+    0 2px 4px rgb(0 0 0 / 40%);
+  -webkit-text-stroke: 0.5px rgb(0 0 0 / 30%);
+  pointer-events: auto;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 30%);
+    z-index: 20;
+    filter: brightness(1.1);
+  }
+
+  .event-bar-icon {
+    margin-right: 6px;
+    color: rgb(255 255 255);
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 40%));
+    flex-shrink: 0;
+
+    &:is(img) {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .event-bar-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ======================================== */
+/* Week View Styles - 24-Hour Grid         */
 /* ======================================== */
 
 .calendar-week-view {
   flex: 1;
   overflow: auto;
   padding: 0.5rem;
+  background: var(--calendaria-bg);
 }
 
 .week-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: fit-content;
+  display: grid;
+  grid-template-columns: 60px repeat(7, minmax(120px, 1fr));
+  gap: 1px;
+  background: var(--calendaria-border-light);
+  border: 1px solid var(--calendaria-border);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.week-time-header {
+.week-time-column {
   display: grid;
-  grid-template-columns: 120px repeat(12, 70px);
-  gap: 2px;
-  position: sticky;
-  top: 0;
+  grid-template-rows: 50px repeat(24, 40px);
+  background: var(--calendaria-bg-lighter);
+}
+
+.week-day-column {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: 1 / -1;
+  position: relative;
   background: var(--calendaria-bg);
-  z-index: 10;
-  margin-bottom: 2px;
-}
-
-.week-day-label-header {
-  padding: 0.5rem;
-  background: var(--calendaria-bg-lighter);
-  font-weight: bold;
-  text-align: center;
-  border: 1px solid var(--calendaria-border-light);
-}
-
-.week-time-slot-header {
-  padding: 0.5rem;
-  background: var(--calendaria-bg-lighter);
-  font-weight: bold;
-  text-align: center;
-  font-size: 0.85rem;
-  border: 1px solid var(--calendaria-border-light);
-}
-
-.week-day-row {
-  display: grid;
-  grid-template-columns: 120px repeat(12, 70px);
-  gap: 2px;
-  min-height: 56px;
 
   &.today {
-    .week-day-label {
-      border: 2px solid var(--calendaria-today);
+    background: rgb(255 100 0 / 5%);
+
+    .week-day-header {
+      background: rgb(255 100 0 / 15%);
+      border-bottom: 2px solid var(--calendaria-today);
     }
   }
 }
 
-.week-day-label {
-  padding: 0.5rem;
+.week-day-label-header {
+  padding: 0.75rem 0.5rem;
   background: var(--calendaria-bg-lighter);
-  border: 1px solid var(--calendaria-border-light);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--calendaria-border);
+}
+
+.week-time-label {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--calendaria-text-dim);
+  text-align: right;
+  border-bottom: 1px solid var(--calendaria-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.week-day-header {
+  padding: 0.5rem;
+  background: var(--calendaria-bg);
+  border-bottom: 1px solid var(--calendaria-border);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 
   .day-name {
-    font-weight: bold;
+    font-weight: 700;
     font-size: 0.9rem;
   }
 
   .day-date {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--calendaria-text-dim);
   }
 }
 
-.week-time-slot {
-  position: relative;
+.week-time-cell {
   background: var(--calendaria-bg);
-  border: 1px solid var(--calendaria-border-light);
-  min-height: 56px;
-  padding: 0.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  overflow: hidden;
+  border-bottom: 1px solid var(--calendaria-border-light);
+  min-height: 40px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease;
 
   &:hover {
     background: var(--calendaria-bg-hover);
   }
 
   &.current-hour {
-    background: rgb(255 100 0 / 15%);
-    border: 2px solid var(--calendaria-today);
-    box-shadow: inset 0 0 8px rgb(255 100 0 / 20%);
-  }
-
-  &.selected {
-    background: rgb(74 144 226 / 30%);
-    border: 2px solid var(--calendaria-primary);
-    box-shadow: 0 0 8px var(--calendaria-primary);
+    background: rgb(255 100 0 / 12%);
+    border-left: 3px solid var(--calendaria-today);
+    box-shadow: inset 0 0 10px rgb(255 100 0 / 15%);
   }
 }
 
-.week-event {
-  padding: 0.25rem;
-  border-radius: 3px;
-  font-size: 0.75rem;
+.week-event-block {
+  padding: 6px 8px;
+  margin: 0 4px;
+  border-radius: 4px;
+  border-left: 4px solid rgb(0 0 0 / 30%);
+  font-size: 12px;
+  color: rgb(255 255 255);
+  overflow: hidden;
   cursor: pointer;
-  transition: transform 0.1s ease;
+  z-index: 10;
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 15%),
+    inset 0 1px 0 rgb(255 255 255 / 20%);
+  transition: all 0.15s ease;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 40%);
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
-  border: 1px solid rgb(0 0 0 / 30%);
-  color: rgb(255 255 255);
+  gap: 2px;
+  justify-content: flex-start;
 
   &:hover {
-    transform: scale(1.02);
-    box-shadow: 0 2px 4px rgb(0 0 0 / 30%);
+    filter: brightness(1.15);
+    box-shadow:
+      0 4px 8px rgb(0 0 0 / 25%),
+      inset 0 1px 0 rgb(255 255 255 / 30%);
+    z-index: 20;
+    transform: translateX(-2px);
   }
 
   .event-time {
-    font-weight: bold;
-    font-size: 0.7rem;
+    font-weight: 700;
+    font-size: 10px;
+    opacity: 0.95;
+    letter-spacing: 0.3px;
   }
 
   .event-name {
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.3;
   }
 }
 

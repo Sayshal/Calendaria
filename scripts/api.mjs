@@ -28,7 +28,14 @@ export const CalendariaAPI = {
    * console.log(now.year, now.month, now.dayOfMonth);
    */
   getCurrentDateTime() {
-    return game.time.components;
+    const components = game.time.components;
+    const calendar = CalendarManager.getActiveCalendar();
+    const yearZero = calendar?.years?.yearZero ?? 0;
+
+    return {
+      ...components,
+      year: components.year + yearZero
+    };
   },
 
   /**
@@ -63,7 +70,15 @@ export const CalendariaAPI = {
       return game.time.worldTime;
     }
 
-    return await game.time.set(components);
+    // Convert display year to internal year if year is provided
+    const internalComponents = { ...components };
+    if (components.year !== undefined) {
+      const calendar = CalendarManager.getActiveCalendar();
+      const yearZero = calendar?.years?.yearZero ?? 0;
+      internalComponents.year = components.year - yearZero;
+    }
+
+    return await game.time.set(internalComponents);
   },
 
   /**
@@ -288,10 +303,19 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunrise !== 'function') return null;
 
-    const sunrise = calendar.sunrise();
-    if (sunrise === null) return null;
+    const targetHour = calendar.sunrise();
+    if (targetHour === null) return null;
 
-    return this.#getTimeUntilThreshold(sunrise);
+    const components = game.time.components;
+    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
+    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : (24 - currentHour) + targetHour;
+
+    const hours = Math.floor(hoursUntil);
+    const remainingMinutes = (hoursUntil - hours) * 60;
+    const minutes = Math.floor(remainingMinutes);
+    const seconds = Math.floor((remainingMinutes - minutes) * 60);
+
+    return { hours, minutes, seconds };
   },
 
   /**
@@ -305,10 +329,19 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunset !== 'function') return null;
 
-    const sunset = calendar.sunset();
-    if (sunset === null) return null;
+    const targetHour = calendar.sunset();
+    if (targetHour === null) return null;
 
-    return this.#getTimeUntilThreshold(sunset);
+    const components = game.time.components;
+    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
+    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : (24 - currentHour) + targetHour;
+
+    const hours = Math.floor(hoursUntil);
+    const remainingMinutes = (hoursUntil - hours) * 60;
+    const minutes = Math.floor(remainingMinutes);
+    const seconds = Math.floor((remainingMinutes - minutes) * 60);
+
+    return { hours, minutes, seconds };
   },
 
   /**
@@ -322,7 +355,17 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
 
-    return this.#getTimeUntilThreshold(0); // Midnight is at hour 0
+    const targetHour = 0;
+    const components = game.time.components;
+    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
+    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : (24 - currentHour) + targetHour;
+
+    const hours = Math.floor(hoursUntil);
+    const remainingMinutes = (hoursUntil - hours) * 60;
+    const minutes = Math.floor(remainingMinutes);
+    const seconds = Math.floor((remainingMinutes - minutes) * 60);
+
+    return { hours, minutes, seconds };
   },
 
   /**
@@ -336,32 +379,11 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
 
-    return this.#getTimeUntilThreshold(12); // Midday is at hour 12
-  },
-
-  /**
-   * Calculate time until a specific hour threshold.
-   *
-   * @param {number} targetHour - Target hour (0-23)
-   * @returns {Object} Time delta {hours, minutes, seconds}
-   * @private
-   */
-  #getTimeUntilThreshold(targetHour) {
+    const targetHour = 12;
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
+    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : (24 - currentHour) + targetHour;
 
-    let hoursUntil;
-
-    // Calculate hours until target
-    if (currentHour < targetHour) {
-      // Target is later today
-      hoursUntil = targetHour - currentHour;
-    } else {
-      // Target is tomorrow
-      hoursUntil = (24 - currentHour) + targetHour;
-    }
-
-    // Convert to hours, minutes, seconds
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
@@ -417,6 +439,8 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return '';
 
+    // If no components provided, use current game time (internal year)
+    const isInternalComponents = !components;
     components = components || game.time.components;
 
     // Use calendar's format method if available
@@ -425,6 +449,8 @@ export const CalendariaAPI = {
     }
 
     // Fallback to basic formatting
-    return `${components.dayOfMonth + 1} ${calendar.months.values[components.month]?.name ?? 'Unknown'} ${components.year + calendar.years.yearZero}`;
+    // Only add yearZero if components are internal (from game.time.components)
+    const displayYear = isInternalComponents ? components.year + calendar.years.yearZero : components.year;
+    return `${components.dayOfMonth + 1} ${calendar.months.values[components.month]?.name ?? 'Unknown'} ${displayYear}`;
   }
 };

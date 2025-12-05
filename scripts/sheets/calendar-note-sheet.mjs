@@ -87,11 +87,23 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     // Get active calendar
     const calendar = CalendarManager.getActiveCalendar();
 
-    // Get current calendar date as fallback
-    const calendarCurrentDate = calendar?.current || {};
-    const currentYear = calendarCurrentDate.year || 1492;
-    const currentMonth = calendarCurrentDate.month ?? 0;
-    const currentDay = calendarCurrentDate.day || 1;
+    // Get current game time as fallback
+    const components = game.time.components || { year: 1492, month: 0, dayOfMonth: 0 };
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const currentYear = components.year + yearZero;
+    const currentMonth = components.month ?? 0;
+    const currentDay = (components.dayOfMonth ?? 0) + 1; // Convert 0-indexed to 1-indexed
+
+    // Debug logging
+    log(1, '[CalendarNoteSheet] Date defaults:', {
+      gameTimeComponents: game.time.components,
+      yearZero,
+      currentYear,
+      currentMonth,
+      currentDay,
+      startDate: this.document.system.startDate,
+      endDate: this.document.system.endDate
+    });
 
     // Auto-detect Font Awesome icons
     if (context.system.icon && context.system.icon.startsWith('fa')) context.iconType = 'fontawesome';
@@ -108,6 +120,18 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const endMonth = this.document.system.endDate?.month ?? startMonth;
     const endDay = this.document.system.endDate?.day || startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
+
+    // Debug: Final calculated values
+    log(1, '[CalendarNoteSheet] Final date values:', {
+      startYear,
+      startMonth,
+      startDay,
+      endYear,
+      endMonth,
+      endDay,
+      startDateDisplay: context.startDateDisplay,
+      endDateDisplay: context.endDateDisplay
+    });
 
     // Format time as HH:mm
     const hour = String(this.document.system.startDate.hour ?? 12).padStart(2, '0');
@@ -367,11 +391,21 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       return;
     }
 
-    // Get current calendar date as fallback
-    const calendarCurrentDate = calendar.current || {};
-    const fallbackYear = calendarCurrentDate.year || 1492;
-    const fallbackMonth = calendarCurrentDate.month ?? 0;
-    const fallbackDay = calendarCurrentDate.day || 1;
+    // Get current game time as fallback
+    const components = game.time.components;
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const fallbackYear = components.year + yearZero;
+    const fallbackMonth = components.month ?? 0;
+    const fallbackDay = (components.dayOfMonth ?? 0) + 1; // Convert 0-indexed to 1-indexed
+
+    log(1, '[CalendarNoteSheet] Date picker defaults:', {
+      gameTimeComponents: game.time.components,
+      yearZero,
+      fallbackYear,
+      fallbackMonth,
+      fallbackDay,
+      dateField
+    });
 
     // Get current date values from form (or use calendar's current date as fallback)
     const yearInput = form.querySelector(`input[name="system.${dateField}.year"]`);
@@ -379,7 +413,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const dayInput = form.querySelector(`input[name="system.${dateField}.day"]`);
 
     const currentYear = parseInt(yearInput?.value) || fallbackYear;
-    const currentMonth = parseInt(monthInput?.value) ?? fallbackMonth;
+    const parsedMonth = parseInt(monthInput?.value);
+    const currentMonth = !isNaN(parsedMonth) ? parsedMonth : fallbackMonth;
     const currentDay = parseInt(dayInput?.value) || fallbackDay;
 
     // Show date picker dialog
