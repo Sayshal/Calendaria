@@ -7,79 +7,22 @@
  */
 
 /**
- * Prelocalize a string value if it appears to be a localization key.
- * @param {string} value - The value to localize
- * @returns {string} Localized string or original value
- * @private
- */
-function localizeIfKey(value) {
-  if (typeof value !== 'string') return value;
-  // Only localize if it looks like a localization key (contains dots and no spaces)
-  if (value.includes('.') && !value.includes(' ')) {
-    return game.i18n.localize(value);
-  }
-  return value;
-}
-
-/**
  * Prelocalize calendar configuration data.
- * Walks through the calendar definition and replaces localization keys with their localized values.
+ * Recursively walks through the calendar definition and replaces localization keys with their localized values.
  *
  * @param {object} calendarData - Calendar definition object to prelocalize
  * @returns {object} The same calendar object with prelocalized strings
  */
 export function preLocalizeCalendar(calendarData) {
-  // Prelocalize calendar name
-  if (calendarData.name) {
-    calendarData.name = localizeIfKey(calendarData.name);
-  }
-
-  // Prelocalize month names and abbreviations
-  if (calendarData.months?.values) {
-    for (const month of calendarData.months.values) {
-      if (month.name) month.name = localizeIfKey(month.name);
-      if (month.abbreviation) month.abbreviation = localizeIfKey(month.abbreviation);
+  for (const key in calendarData) {
+    const value = calendarData[key];
+    if (typeof value === 'string') calendarData[key] = game.i18n.localize(value);
+    else if (Array.isArray(value)) {
+      for (const item of value) if (typeof item === 'object' && item !== null) preLocalizeCalendar(item);
+    } else if (typeof value === 'object' && value !== null) {
+      preLocalizeCalendar(value);
     }
   }
-
-  // Prelocalize day/weekday names
-  if (calendarData.days?.values) {
-    for (const day of calendarData.days.values) {
-      if (day.name) day.name = localizeIfKey(day.name);
-    }
-  }
-
-  // Prelocalize season names
-  if (calendarData.seasons?.values) {
-    for (const season of calendarData.seasons.values) {
-      if (season.name) season.name = localizeIfKey(season.name);
-    }
-  }
-
-  // Prelocalize festival names (Calendaria-specific)
-  if (calendarData.festivals) {
-    for (const festival of calendarData.festivals) {
-      if (festival.name) festival.name = localizeIfKey(festival.name);
-    }
-  }
-
-  // Prelocalize moon names and phase names (Calendaria-specific)
-  if (calendarData.moons) {
-    for (const moon of calendarData.moons) {
-      if (moon.name) moon.name = localizeIfKey(moon.name);
-      if (moon.phases) {
-        for (const phase of moon.phases) {
-          if (phase.name) phase.name = localizeIfKey(phase.name);
-        }
-      }
-    }
-  }
-
-  // Prelocalize metadata description
-  if (calendarData.metadata?.description) {
-    calendarData.metadata.description = localizeIfKey(calendarData.metadata.description);
-  }
-
   return calendarData;
 }
 
@@ -117,9 +60,7 @@ export function findFestivalDay(calendar, time = game.time.worldTime) {
   if (!calendar.festivals || calendar.festivals.length === 0) return null;
 
   const components = typeof time === 'number' ? calendar.timeToComponents(time) : time;
-  return calendar.festivals.find(
-    (f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1
-  ) ?? null;
+  return calendar.festivals.find((f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1) ?? null;
 }
 
 /**
