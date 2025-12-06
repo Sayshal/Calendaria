@@ -68,7 +68,10 @@ export const SETTINGS = {
   CALENDARS: 'calendars',
 
   /** @type {string} Override for which user ID is the primary GM for sync operations */
-  PRIMARY_GM: 'primaryGM'
+  PRIMARY_GM: 'primaryGM',
+
+  /** @type {string} User-created custom calendar definitions */
+  CUSTOM_CALENDARS: 'customCalendars'
 };
 
 /**
@@ -124,6 +127,23 @@ export const TEMPLATES = {
     CALENDAR_YEAR: `modules/${MODULE.ID}/templates/sheets/calendar-year.hbs`,
     /** @type {string} Calendar note form template */
     CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`
+  },
+
+  EDITOR: {
+    /** @type {string} Calendar editor basic info tab */
+    TAB_BASIC: `modules/${MODULE.ID}/templates/editor/tab-basic.hbs`,
+    /** @type {string} Calendar editor months tab */
+    TAB_MONTHS: `modules/${MODULE.ID}/templates/editor/tab-months.hbs`,
+    /** @type {string} Calendar editor weekdays tab */
+    TAB_WEEKDAYS: `modules/${MODULE.ID}/templates/editor/tab-weekdays.hbs`,
+    /** @type {string} Calendar editor time tab */
+    TAB_TIME: `modules/${MODULE.ID}/templates/editor/tab-time.hbs`,
+    /** @type {string} Calendar editor seasons tab */
+    TAB_SEASONS: `modules/${MODULE.ID}/templates/editor/tab-seasons.hbs`,
+    /** @type {string} Calendar editor moons tab */
+    TAB_MOONS: `modules/${MODULE.ID}/templates/editor/tab-moons.hbs`,
+    /** @type {string} Calendar editor festivals tab */
+    TAB_FESTIVALS: `modules/${MODULE.ID}/templates/editor/tab-festivals.hbs`
   }
 };
 
@@ -181,6 +201,9 @@ export const HOOKS = {
 
   /** @type {string} Fired when a new calendar is added to the registry */
   CALENDAR_ADDED: 'calendaria.calendarAdded',
+
+  /** @type {string} Fired when an existing calendar is updated */
+  CALENDAR_UPDATED: 'calendaria.calendarUpdated',
 
   /** @type {string} Fired when a calendar is removed from the registry */
   CALENDAR_REMOVED: 'calendaria.calendarRemoved',

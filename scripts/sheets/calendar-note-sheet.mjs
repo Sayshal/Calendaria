@@ -146,7 +146,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       { value: 'monthly', label: 'Monthly', selected: this.document.system.repeat === 'monthly' },
       { value: 'yearly', label: 'Yearly', selected: this.document.system.repeat === 'yearly' }
     ];
-    log(3, 'DEBUG', { context });
     return context;
   }
 
@@ -486,7 +485,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         }
       },
       render: (event, dialog) => {
-        log(1, 'DEBUG:', { event, dialog });
         const html = dialog.element;
         // Update day options when month changes
         const monthSelect = html.querySelector('#month-select');

@@ -22,6 +22,7 @@ import { CalendarNoteSheet } from './scripts/sheets/calendar-note-sheet.mjs';
 import { CalendariaAPI } from './scripts/api.mjs';
 import { RENESCARA_CALENDAR, RENESCARA_DEFAULT_DATE } from './scripts/calendar/data/renescara-calendar.mjs';
 import { preLocalizeCalendar } from './scripts/calendar/calendar-utils.mjs';
+import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
 
 Hooks.once('init', async () => {
   registerSettings();
@@ -57,18 +58,49 @@ Hooks.once('i18nInit', () => {
   log(3, 'Prelocalized Renescara calendar data');
 });
 
-// Hook into D&D 5e's calendar setup to add our calendar BEFORE it reads the setting
+// Hook into D&D 5e's calendar setup to take over calendar system completely
 Hooks.once('dnd5e.setupCalendar', () => {
-  // Create a CalendariaCalendar instance with Renescara calendar definition
+  // Create CalendariaCalendar instances for all calendars
   const renescaraCalendar = new CalendariaCalendar(RENESCARA_CALENDAR);
 
+  // Add Renescara to dnd5e's calendar list with our class
   CONFIG.DND5E.calendar.calendars.push({
     value: 'renescara',
     label: 'CALENDARIA.Calendar.RENESCARA.Name',
-    config: renescaraCalendar
+    config: renescaraCalendar,
+    class: CalendariaCalendar
   });
 
-  log(3, 'Added Renescarran Calendar to D&D 5e calendar selection');
+  // Load any custom calendars from settings and add them to the list
+  try {
+    const customCalendars = game.settings.get('calendaria', 'customCalendars') || {};
+    for (const [id, calendarData] of Object.entries(customCalendars)) {
+      const calendar = new CalendariaCalendar(calendarData);
+      CONFIG.DND5E.calendar.calendars.push({
+        value: id,
+        label: calendarData.name || id,
+        config: calendar,
+        class: CalendariaCalendar
+      });
+      log(3, `Added custom calendar "${id}" to D&D 5e calendar selection`);
+    }
+  } catch (e) {
+    // Setting may not exist yet on first load
+    log(3, 'No custom calendars found');
+  }
+
+  // Get the currently selected calendar from dnd5e settings
+  const selectedCalendarId = game.settings.get('dnd5e', 'calendar');
+  const calendarEntry = CONFIG.DND5E.calendar.calendars.find((c) => c.value === selectedCalendarId);
+
+  // Set up CONFIG.time with CalendariaCalendar class
+  CONFIG.time.worldCalendarClass = CalendariaCalendar;
+  CONFIG.time.worldCalendarConfig = calendarEntry?.config?.toObject?.() ?? calendarEntry?.config ?? renescaraCalendar.toObject();
+
+  log(3, `Calendaria taking over calendar system with: ${selectedCalendarId || 'renescara'}`);
+
+  // Return false to prevent dnd5e from overwriting our setup
+  return false;
 });
 
 Hooks.once('ready', async () => {
@@ -115,6 +147,7 @@ globalThis['CALENDARIA'] = {
   CalendariaSocket,
   NoteManager,
   CalendarApplication,
+  CalendarEditor,
   toggleCalendarVisibility,
   api: CalendariaAPI
 };
