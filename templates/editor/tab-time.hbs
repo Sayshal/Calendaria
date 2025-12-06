@@ -1,0 +1,47 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  <fieldset>
+    <legend>{{localize "CALENDARIA.Editor.Section.TimeStructure"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.DaysPerYear"}}</label>
+      <div class="form-fields">
+        <input type="text" value="{{daysPerYearDisplay}}" disabled>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaysPerYearComputed"}}</p>
+    </div>
+
+    <div class="notice warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{localize "CALENDARIA.Editor.Warning.TimeSettings"}}
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.HoursPerDay"}}</label>
+      <div class="form-fields">
+        <input type="number" name="days.hoursPerDay" value="{{calendar.days.hoursPerDay}}" min="1" step="1">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.MinutesPerHour"}}</label>
+      <div class="form-fields">
+        <input type="number" name="days.minutesPerHour" value="{{calendar.days.minutesPerHour}}" min="1" step="1">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.SecondsPerMinute"}}</label>
+      <div class="form-fields">
+        <input type="number" name="days.secondsPerMinute" value="{{calendar.days.secondsPerMinute}}" min="1" step="1">
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="time-summary">
+    <legend>{{localize "CALENDARIA.Editor.Section.TimeSummary"}}</legend>
+    <ul>
+      <li>{{localize "CALENDARIA.Editor.Summary.SecondsPerDay" seconds=secondsPerDay}}</li>
+      <li>{{localize "CALENDARIA.Editor.Summary.SecondsPerYear" seconds=secondsPerYear}}</li>
+    </ul>
+  </fieldset>
+</section>

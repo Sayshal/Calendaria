@@ -1,0 +1,51 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  <div class="items-list months-list">
+    <div class="list-header flexrow">
+      <span class="col-name"
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthName'}}">{{localize "CALENDARIA.Editor.Column.Name"}}</span>
+      <span class="col-abbr"
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthAbbr'}}">{{localize "CALENDARIA.Editor.Column.Abbreviation"}}</span>
+      <span class="col-days"
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthDays'}}">{{localize "CALENDARIA.Editor.Column.Days"}}</span>
+      <span class="col-leap"
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthLeap'}}">{{localize "CALENDARIA.Editor.Column.Leap"}}</span>
+      <span class="col-type"
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthType'}}">{{localize "CALENDARIA.Editor.Column.Type"}}</span>
+      <span class="col-controls"></span>
+    </div>
+
+    {{#each monthsWithNav}}
+      <div class="item month-item flexrow" data-index="{{this.index}}">
+        <input type="text" name="months.{{this.index}}.name" value="{{this.name}}" class="col-name">
+        <input type="text" name="months.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
+        <input type="number" name="months.{{this.index}}.days" value="{{this.days}}" min="1" class="col-days">
+        <input type="number" name="months.{{this.index}}.leapDays" value="{{this.leapDays}}" min="0" class="col-leap">
+        <select name="months.{{this.index}}.type" class="col-type">
+          <option value="" {{#unless this.type}}selected{{/unless}}>{{localize "CALENDARIA.Editor.MonthType.Standard"}}
+          </option>
+          <option value="intercalary" {{#if (eq this.type "intercalary")}}selected{{/if}}>
+            {{localize "CALENDARIA.Editor.MonthType.Intercalary"}}</option>
+        </select>
+
+        <div class="item-controls col-controls">
+          <button type="button" data-action="addMonth" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddMonth'}}">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button type="button" data-action="moveMonthUp" data-index="{{this.index}}"
+            {{#if this.isFirst}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
+            <i class="fas fa-chevron-up"></i>
+          </button>
+          <button type="button" data-action="moveMonthDown" data-index="{{this.index}}"
+            {{#if this.isLast}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <button type="button" data-action="removeMonth" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveMonth'}}">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</section>

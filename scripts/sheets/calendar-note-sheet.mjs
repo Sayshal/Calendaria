@@ -18,7 +18,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     actions: {
       selectIcon: this._onSelectIcon,
       selectDate: this._onSelectDate,
-      save: this._onSaveAndClose,
+      saveAndClose: this._onSaveAndClose,
       reset: this._onReset
     },
     form: {
@@ -64,7 +64,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'header-control icon fa-solid fa-save';
-    saveBtn.dataset.action = 'save';
+    saveBtn.dataset.action = 'saveAndClose';
     saveBtn.dataset.tooltip = 'Save & Close';
     saveBtn.setAttribute('aria-label', 'Save & Close');
     controlsContainer.appendChild(saveBtn);
@@ -87,11 +87,23 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     // Get active calendar
     const calendar = CalendarManager.getActiveCalendar();
 
-    // Get current calendar date as fallback
-    const calendarCurrentDate = calendar?.current || {};
-    const currentYear = calendarCurrentDate.year || 1492;
-    const currentMonth = calendarCurrentDate.month ?? 0;
-    const currentDay = calendarCurrentDate.day || 1;
+    // Get current game time as fallback
+    const components = game.time.components || { year: 1492, month: 0, dayOfMonth: 0 };
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const currentYear = components.year + yearZero;
+    const currentMonth = components.month ?? 0;
+    const currentDay = (components.dayOfMonth ?? 0) + 1; // Convert 0-indexed to 1-indexed
+
+    // Debug logging
+    log(1, '[CalendarNoteSheet] Date defaults:', {
+      gameTimeComponents: game.time.components,
+      yearZero,
+      currentYear,
+      currentMonth,
+      currentDay,
+      startDate: this.document.system.startDate,
+      endDate: this.document.system.endDate
+    });
 
     // Auto-detect Font Awesome icons
     if (context.system.icon && context.system.icon.startsWith('fa')) context.iconType = 'fontawesome';
@@ -109,6 +121,18 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const endDay = this.document.system.endDate?.day || startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
 
+    // Debug: Final calculated values
+    log(1, '[CalendarNoteSheet] Final date values:', {
+      startYear,
+      startMonth,
+      startDay,
+      endYear,
+      endMonth,
+      endDay,
+      startDateDisplay: context.startDateDisplay,
+      endDateDisplay: context.endDateDisplay
+    });
+
     // Format time as HH:mm
     const hour = String(this.document.system.startDate.hour ?? 12).padStart(2, '0');
     const minute = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
@@ -122,7 +146,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       { value: 'monthly', label: 'Monthly', selected: this.document.system.repeat === 'monthly' },
       { value: 'yearly', label: 'Yearly', selected: this.document.system.repeat === 'yearly' }
     ];
-    log(3, 'DEBUG', { context });
     return context;
   }
 
@@ -367,11 +390,21 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       return;
     }
 
-    // Get current calendar date as fallback
-    const calendarCurrentDate = calendar.current || {};
-    const fallbackYear = calendarCurrentDate.year || 1492;
-    const fallbackMonth = calendarCurrentDate.month ?? 0;
-    const fallbackDay = calendarCurrentDate.day || 1;
+    // Get current game time as fallback
+    const components = game.time.components;
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const fallbackYear = components.year + yearZero;
+    const fallbackMonth = components.month ?? 0;
+    const fallbackDay = (components.dayOfMonth ?? 0) + 1; // Convert 0-indexed to 1-indexed
+
+    log(1, '[CalendarNoteSheet] Date picker defaults:', {
+      gameTimeComponents: game.time.components,
+      yearZero,
+      fallbackYear,
+      fallbackMonth,
+      fallbackDay,
+      dateField
+    });
 
     // Get current date values from form (or use calendar's current date as fallback)
     const yearInput = form.querySelector(`input[name="system.${dateField}.year"]`);
@@ -379,7 +412,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const dayInput = form.querySelector(`input[name="system.${dateField}.day"]`);
 
     const currentYear = parseInt(yearInput?.value) || fallbackYear;
-    const currentMonth = parseInt(monthInput?.value) ?? fallbackMonth;
+    const parsedMonth = parseInt(monthInput?.value);
+    const currentMonth = !isNaN(parsedMonth) ? parsedMonth : fallbackMonth;
     const currentDay = parseInt(dayInput?.value) || fallbackDay;
 
     // Show date picker dialog
@@ -451,7 +485,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         }
       },
       render: (event, dialog) => {
-        log(1, 'DEBUG:', { event, dialog });
         const html = dialog.element;
         // Update day options when month changes
         const monthSelect = html.querySelector('#month-select');
@@ -478,11 +511,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   static async _onSaveAndClose(event, target) {
     // Submit the form
-    const form = this.element.querySelector('form');
-    if (!form) return;
-
     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-    form.dispatchEvent(submitEvent);
+    this.element.dispatchEvent(submitEvent);
 
     // Close the sheet after a brief delay to allow save to complete
     setTimeout(() => {
@@ -496,12 +526,99 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {HTMLElement} target - The capturing HTML element
    */
   static async _onReset(event, target) {
-    // Reset the form
-    const form = this.element.querySelector('form');
-    if (!form) return;
+    // Get current calendar date/time as defaults
+    const calendar = CalendarManager.getActiveCalendar();
+    const currentDateTime = CalendarManager.getCurrentDateTime();
 
-    form.reset();
-    // Re-render to show default values
-    this.render();
+    const currentYear = currentDateTime.year;
+    const currentMonth = currentDateTime.month;
+    const currentDay = currentDateTime.day;
+    const currentHour = currentDateTime.hour;
+    const currentMinute = currentDateTime.minute;
+
+    const form = this.element;
+
+    // Reset title
+    const titleInput = form.querySelector('input[name="name"]');
+    if (titleInput) titleInput.value = 'New Note';
+
+    // Reset emblem
+    const iconInput = form.querySelector('input[name="system.icon"]');
+    const iconTypeInput = form.querySelector('input[name="system.iconType"]');
+    const colorInput = form.querySelector('input[name="system.color"]');
+    if (iconInput) iconInput.value = 'icons/svg/book.svg';
+    if (iconTypeInput) iconTypeInput.value = 'image';
+    if (colorInput) colorInput.value = '#4a9eff';
+
+    // Update icon preview
+    const iconPicker = form.querySelector('.icon-picker');
+    if (iconPicker) {
+      iconPicker.dataset.iconType = 'image';
+      const existingIcon = iconPicker.querySelector('i, img');
+      if (existingIcon) {
+        const img = document.createElement('img');
+        img.src = 'icons/svg/book.svg';
+        img.alt = 'Note Icon';
+        img.className = 'icon-preview';
+        img.style.filter = 'drop-shadow(0px 1000px 0 #4a9eff)';
+        img.style.transform = 'translateY(-1000px)';
+        existingIcon.replaceWith(img);
+      }
+    }
+
+    // Reset visibility
+    const gmOnlyInput = form.querySelector('input[name="system.gmOnly"]');
+    if (gmOnlyInput) gmOnlyInput.checked = false;
+
+    // Reset dates to current calendar date
+    const startYearInput = form.querySelector('input[name="system.startDate.year"]');
+    const startMonthInput = form.querySelector('input[name="system.startDate.month"]');
+    const startDayInput = form.querySelector('input[name="system.startDate.day"]');
+    if (startYearInput) startYearInput.value = currentYear;
+    if (startMonthInput) startMonthInput.value = currentMonth;
+    if (startDayInput) startDayInput.value = currentDay;
+
+    const endYearInput = form.querySelector('input[name="system.endDate.year"]');
+    const endMonthInput = form.querySelector('input[name="system.endDate.month"]');
+    const endDayInput = form.querySelector('input[name="system.endDate.day"]');
+    if (endYearInput) endYearInput.value = currentYear;
+    if (endMonthInput) endMonthInput.value = currentMonth;
+    if (endDayInput) endDayInput.value = currentDay;
+
+    // Update date display
+    const dateDisplay = this._formatDateDisplay(calendar, currentYear, currentMonth, currentDay);
+    const startDateDisplay = form.querySelector('[data-date-field="startDate"] .date-display');
+    const endDateDisplay = form.querySelector('[data-date-field="endDate"] .date-display');
+    if (startDateDisplay) startDateDisplay.textContent = dateDisplay;
+    if (endDateDisplay) endDateDisplay.textContent = dateDisplay;
+
+    // Reset time to current time
+    const hourInput = form.querySelector('input[name="system.startDate.hour"]');
+    const minuteInput = form.querySelector('input[name="system.startDate.minute"]');
+    const timeInput = form.querySelector('input[name="system.startDate.time"]');
+    if (hourInput) hourInput.value = currentHour;
+    if (minuteInput) minuteInput.value = currentMinute;
+    if (timeInput) timeInput.value = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+
+    // Reset all day checkbox
+    const allDayInput = form.querySelector('input[name="system.allDay"]');
+    if (allDayInput) {
+      allDayInput.checked = false;
+      if (timeInput) timeInput.disabled = false;
+    }
+
+    // Reset repeat to never
+    const repeatSelect = form.querySelector('select[name="system.repeat"]');
+    if (repeatSelect) repeatSelect.value = 'never';
+
+    // Reset ProseMirror editor
+    const proseMirror = form.querySelector('prose-mirror#note-content');
+    if (proseMirror) {
+      // Try to clear the content by setting value
+      proseMirror.value = '';
+      // Also try setting innerHTML as a fallback
+      const editorContent = proseMirror.querySelector('.ProseMirror');
+      if (editorContent) editorContent.innerHTML = '<p></p>';
+    }
   }
 }

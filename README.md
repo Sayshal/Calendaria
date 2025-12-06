@@ -24,6 +24,26 @@ A hopefully-system-agnostic Foundry VTT module  that provides calendar and time 
 - **Enhanced UI** - Theme system, search, compact/full views
 - **Event reminders** - Notification system for upcoming events
 
+## API Usage
+
+Calendaria provides a comprehensive public API for macros and module integration. Access it via `CALENDARIA.api`.
+
+**Quick Examples:**
+
+```javascript
+// Get current date/time
+const now = CALENDARIA.api.getCurrentDateTime();
+
+// Advance time (GM only)
+await CALENDARIA.api.advanceTime({ hour: 8 });
+
+// Get moon phase
+const moon = CALENDARIA.api.getMoonPhase(0);
+
+// Check for festivals
+const festival = CALENDARIA.api.getCurrentFestival();
+```
+
 ## Development
 
 - **Alpha Release Milestone**: [View Milestone](https://github.com/Sayshal/Calendaria/milestone/1)

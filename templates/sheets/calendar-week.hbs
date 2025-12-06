@@ -1,39 +1,52 @@
 <div class="calendar-week-view">
   {{#if calendarData}}
     <div class="week-grid">
-      <!-- Time header row -->
-      <div class="week-time-header">
-        <div class="week-day-label-header">Day</div>
-        {{#each calendarData.timeSlots}}
-          <div class="week-time-slot-header">{{label}}</div>
-        {{/each}}
-      </div>
+      <!-- Empty corner cell -->
+      <div class="week-corner-header"></div>
+
+      <!-- Hour labels row -->
+      {{#each calendarData.timeSlots}}
+        <div class="week-hour-label">{{label}}</div>
+      {{/each}}
 
       <!-- Day rows -->
       {{#each calendarData.days}}
-        <div class="week-day-row {{#if isToday}}today{{/if}}">
-          <div class="week-day-label">
-            <div class="day-name">{{dayName}}</div>
-            <div class="day-date">{{monthName}} {{day}}</div>
-          </div>
-          {{#each ../calendarData.timeSlots}}
-            <div
-              class="week-time-slot {{#if (and ../isToday (eq hour ../currentHour))}}current-hour{{/if}} {{#if (and ../../selectedTimeSlot (eq ../../selectedTimeSlot.day ../day) (eq ../../selectedTimeSlot.month ../month) (eq ../../selectedTimeSlot.year ../year) (eq ../../selectedTimeSlot.hour hour))}}selected{{/if}}"
-              data-day="{{../day}}" data-month="{{../month}}" data-year="{{../year}}" data-hour="{{hour}}"
-              data-action="selectTimeSlot">
-              {{#each ../notes}}
-                {{#if (and (gte system.startDate.hour hour) (lt system.startDate.hour endHour))}}
-                  <div class="week-event" style="background-color: {{system.color}};" title="{{name}}"
-                    data-action="editNote" data-note-id="{{id}}" data-hour="{{system.startDate.hour}}">
-                    <span
-                      class="event-time">{{system.startDate.hour}}:{{#if (lt system.startDate.minute 10)}}0{{/if}}{{system.startDate.minute}}</span>
-                    <span class="event-name">{{name}}</span>
-                  </div>
-                {{/if}}
-              {{/each}}
-            </div>
-          {{/each}}
+        <!-- Day name cell -->
+        <div class="week-day-header {{#if isToday}}today{{/if}}">
+          <div class="day-name">{{dayName}}</div>
+          <div class="day-date">{{monthName}} {{day}}</div>
         </div>
+
+        <!-- Hour grid cells for this day -->
+        {{#each ../calendarData.timeSlots}}
+          <div class="week-time-cell {{#if (and ../isToday (eq hour ../currentHour))}}current-hour{{/if}}"
+               data-day="{{../day}}"
+               data-month="{{../month}}"
+               data-year="{{../year}}"
+               data-hour="{{hour}}"
+               data-action="selectTimeSlot">
+            <!-- Event blocks positioned within cells -->
+            {{#each ../eventBlocks}}
+              {{#if (eq hour ../../startHour)}}
+                <div class="week-event-block"
+                     style="grid-column: span {{hourSpan}}; background-color: {{color}};"
+                     data-tooltip="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}"
+                     data-action="editNote"
+                     data-note-id="{{id}}">
+                  <div class="event-time">{{startTime}}</div>
+                  <div class="event-name">
+                    {{#if (eq iconType "fontawesome")}}
+                      <i class="{{icon}}" style="margin-right: 4px;"></i>
+                    {{else if icon}}
+                      <img src="{{icon}}" alt="{{name}}" style="width: 12px; height: 12px; margin-right: 4px;" />
+                    {{/if}}
+                    {{name}}
+                  </div>
+                </div>
+              {{/if}}
+            {{/each}}
+          </div>
+        {{/each}}
       {{/each}}
     </div>
   {{else}}

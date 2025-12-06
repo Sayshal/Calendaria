@@ -1,0 +1,112 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  {{#if moonsWithNav.length}}
+    <div class="items-list moons-list">
+      {{#each moonsWithNav}}
+        <div class="item moon-item" data-index="{{this.index}}">
+          <div class="moon-header flexrow">
+            <div class="form-group col-name">
+              <label
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MoonName'}}">{{localize "CALENDARIA.Editor.Field.Name"}}</label>
+              <input type="text" name="moons.{{this.index}}.name" value="{{this.name}}">
+            </div>
+            <div class="form-group col-cycle">
+              <label
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleLength'}}">{{localize "CALENDARIA.Editor.Field.CycleLength"}}</label>
+              <input type="number" name="moons.{{this.index}}.cycleLength" value="{{this.cycleLength}}" min="1"
+                step="1">
+            </div>
+            <div class="item-controls">
+              <button type="button" data-action="addMoon" data-index="{{this.index}}"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddMoon'}}">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button type="button" data-action="removeMoon" data-index="{{this.index}}"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveMoon'}}">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="moon-fields">
+            <fieldset class="reference-date">
+              <legend>{{localize "CALENDARIA.Editor.Section.ReferenceDate"}}</legend>
+              <p class="hint">{{localize "CALENDARIA.Editor.Hint.ReferenceDate"}}</p>
+
+              <div class="date-fields flexrow">
+                <div class="form-group">
+                  <label>{{localize "CALENDARIA.Editor.Field.Year"}}</label>
+                  <input type="number" name="moons.{{this.index}}.referenceDate.year"
+                    value="{{this.referenceDate.year}}" step="1">
+                </div>
+                <div class="form-group">
+                  <label>{{localize "CALENDARIA.Editor.Field.Month"}}</label>
+                  <select name="moons.{{this.index}}.referenceDate.month">
+                    {{#each this.refMonthOptions}}
+                      <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>{{localize "CALENDARIA.Editor.Field.Day"}}</label>
+                  <input type="number" name="moons.{{this.index}}.referenceDate.day" value="{{this.referenceDate.day}}"
+                    min="1" step="1">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="moon-phases-section">
+              <legend>{{localize "CALENDARIA.Editor.Section.MoonPhases"}}</legend>
+
+              <div class="phases-list">
+                <div class="list-header flexrow">
+                  <span class="col-icon"
+                    data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.PhaseIcon'}}">{{localize "CALENDARIA.Editor.Column.Icon"}}</span>
+                  <span class="col-phase-name"
+                    data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.PhaseName'}}">{{localize "CALENDARIA.Editor.Column.Phase"}}</span>
+                  <span class="col-start"
+                    data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.PhaseStart'}}">{{localize "CALENDARIA.Editor.Column.StartPercent"}}</span>
+                  <span class="col-end"
+                    data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.PhaseEnd'}}">{{localize "CALENDARIA.Editor.Column.EndPercent"}}</span>
+                </div>
+
+                {{#each this.phasesWithIndex}}
+                  <div class="phase-item flexrow" data-phase-index="{{this.index}}">
+                    <div class="col-icon">
+                      <button type="button" class="phase-icon-btn" data-action="pickMoonPhaseIcon"
+                        data-moon-index="{{this.moonIndex}}" data-phase-index="{{this.index}}"
+                        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.ClickToChange'}}">
+                        {{#if this.isImagePath}}
+                          <img src="{{this.icon}}" alt="{{this.name}}">
+                        {{else}}
+                          <span class="phase-emoji">{{this.icon}}</span>
+                        {{/if}}
+                      </button>
+                      <input type="hidden" name="moons.{{this.moonIndex}}.phases.{{this.index}}.icon"
+                        value="{{this.icon}}">
+                    </div>
+                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.name" value="{{this.name}}"
+                      class="col-phase-name">
+                    <input type="number" name="moons.{{this.moonIndex}}.phases.{{this.index}}.startPercent"
+                      value="{{this.startPercent}}" min="0" max="100" step="0.1" class="col-start">
+                    <input type="number" name="moons.{{this.moonIndex}}.phases.{{this.index}}.endPercent"
+                      value="{{this.endPercent}}" min="0" max="100" step="0.1" class="col-end">
+                  </div>
+                {{/each}}
+              </div>
+
+              <p class="hint phase-hint">{{localize "CALENDARIA.Editor.Hint.PhasePercentage"}}</p>
+            </fieldset>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-list">
+      <p>{{localize "CALENDARIA.Editor.NoMoons"}}</p>
+      <button type="button" data-action="addMoon" data-index="-1">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.Editor.AddMoon"}}
+      </button>
+    </div>
+  {{/if}}
+</section>

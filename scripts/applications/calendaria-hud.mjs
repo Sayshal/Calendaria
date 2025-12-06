@@ -1,27 +1,32 @@
 /**
  * Draggable Calendar HUD
- * Extends the D&D 5e CalendarHUD to add drag functionality
+ * Extends the D&D 5e CalendarHUD to add drag functionality when available.
+ * For non-dnd5e systems, this module does not provide a HUD - systems must provide their own.
  * @module Applications/CalendariaHUD
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { MODULE, SETTINGS, TEMPLATES, SYSTEM } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 
 /**
- * Extended CalendarHUD with drag functionality built-in
+ * Determine base class - extends dnd5e CalendarHUD when available, otherwise stub.
+ * Check for dnd5e global at module load time (game.system not yet initialized).
  */
-export class CalendariaHUD extends dnd5e.applications.calendar.CalendarHUD {
+const BaseClass = typeof dnd5e !== 'undefined' && dnd5e.applications?.calendar?.CalendarHUD ? dnd5e.applications.calendar.CalendarHUD : class CalendarHUDStub {};
+
+/**
+ * Enhanced Calendar HUD with dragging, positioning, and time rotation features.
+ * Only functional when running on the dnd5e system.
+ */
+export class CalendariaHUD extends BaseClass {
   /** @override */
-  static DEFAULT_OPTIONS = {
-    ...super.DEFAULT_OPTIONS
-  };
+  static DEFAULT_OPTIONS = typeof dnd5e !== 'undefined' && dnd5e.applications?.calendar?.CalendarHUD ? { ...super.DEFAULT_OPTIONS } : {};
 
   /* -------------------------------------------- */
 
   /** @override */
   _insertElement(element) {
-    // Replace existing if present
     const existing = document.getElementById(element.id);
     if (existing) existing.replaceWith(element);
     else document.body.append(this.element);
@@ -49,7 +54,7 @@ export class CalendariaHUD extends dnd5e.applications.calendar.CalendarHUD {
   /* -------------------------------------------- */
 
   /**
-   * Restore saved position from settings
+   * Restore saved position from settings, or center if none saved.
    */
   #restorePosition() {
     try {
@@ -76,14 +81,11 @@ export class CalendariaHUD extends dnd5e.applications.calendar.CalendarHUD {
   /* -------------------------------------------- */
 
   /**
-   * Enable dragging functionality
+   * Enable dragging functionality on the calendar core element.
    */
   #enableDragging() {
     const dragHandle = this.element.querySelector('.calendar-core');
-    if (!dragHandle) {
-      log(2, 'Calendar core not found for dragging');
-      return;
-    }
+    if (!dragHandle) return;
 
     dragHandle.style.cursor = 'move';
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
@@ -139,39 +141,27 @@ export class CalendariaHUD extends dnd5e.applications.calendar.CalendarHUD {
   /* -------------------------------------------- */
 
   /**
-   * Reverse the calendar widget animation direction by adding CSS class
+   * Reverse the calendar widget animation direction.
    */
   #reverseWidgetAnimation() {
     const widget = this.element.querySelector('.calendar-widget');
-    if (!widget) {
-      log(2, 'Calendar widget not found for animation reversal');
-      return;
-    }
-
-    // Add CSS class to reverse the animation
-    widget.classList.add('reverse-animation');
-    log(3, 'Calendar widget animation reversed via CSS class');
+    if (widget) widget.classList.add('reverse-animation');
   }
 
   /* -------------------------------------------- */
 
   /**
-   * Enable right-click handler for time rotation
+   * Enable right-click handler to open time rotation dial.
    */
   #enableTimeRotation() {
     const widget = this.element.querySelector('.calendar-widget');
-    if (!widget) {
-      log(2, 'Calendar widget not found for time rotation');
-      return;
-    }
+    if (!widget) return;
 
     widget.addEventListener('contextmenu', (event) => {
       event.preventDefault();
       event.stopPropagation();
       this.#openTimeRotationDial(event);
     });
-
-    log(3, 'Time rotation right-click handler enabled');
   }
 
   /* -------------------------------------------- */
@@ -541,7 +531,7 @@ export class CalendariaHUD extends dnd5e.applications.calendar.CalendarHUD {
       log(3, 'Calendar position reset to default');
 
       // If the calendar is currently rendered, center it on the viewport
-      if (dnd5e.ui.calendar?.element) {
+      if (dnd5e?.ui?.calendar?.element) {
         const calendar = dnd5e.ui.calendar.element;
         const rect = calendar.getBoundingClientRect();
 

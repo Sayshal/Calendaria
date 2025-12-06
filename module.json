@@ -15,17 +15,19 @@
     "verified": "13.351"
   },
   "description": "A FVTT Module to handle calendar operations, passage of real time, and automated effect expiry.",
+  "documentTypes": {
+    "JournalEntryPage": {
+      "calendarnote": {
+        "htmlFields": [
+          "text.content"
+        ]
+      }
+    }
+  },
   "download": "",
   "esmodules": [
     "calendaria.mjs"
   ],
-  "documentTypes": {
-    "JournalEntryPage": {
-      "calendarnote": {
-        "htmlFields": ["text.content"]
-      }
-    }
-  },
   "flags": {
     "hotReload": {
       "extensions": [
@@ -52,19 +54,8 @@
   "license": "https://github.com/Sayshal/calendaria?tab=MIT-1-ov-file",
   "manifest": "https://github.com/Sayshal/calendaria/releases/latest/download/module.json",
   "readme": "https://github.com/Sayshal/calendaria?tab=readme-ov-file",
-  "relationships": {
-    "systems": [
-      {
-        "compatibility": {
-          "maximum": "5.9.9",
-          "minimum": "5.2.0",
-          "verified": "5.2.0"
-        },
-        "id": "dnd5e",
-        "type": "system"
-      }
-    ]
-  },
+  "relationships": {},
+  "socket": true,
   "styles": [
     "styles/calendaria.css"
   ],
