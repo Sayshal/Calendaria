@@ -8,6 +8,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -40,6 +41,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       deleteNote: CalendarApplication._onDeleteNote,
       changeView: CalendarApplication._onChangeView,
       selectDay: CalendarApplication._onSelectDay,
+      selectMonth: CalendarApplication._onSelectMonth,
       setAsCurrentDate: CalendarApplication._onSetAsCurrentDate,
       selectTimeSlot: CalendarApplication._onSelectTimeSlot
     },
@@ -55,7 +57,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   };
 
   get title() {
-    return this.calendar?.name;
+    return this.calendar?.name || '';
   }
 
   /**
@@ -74,7 +76,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     if (this._currentDate) return this._currentDate;
 
     // Use current game time
-    const components = game.time.components || { year: 1492, month: 0, day: 1, dayOfMonth: 0 };
+    const components = game.time.components;
+
     const calendar = this.calendar;
 
     // Adjust year for display (add yearZero offset)
@@ -107,15 +110,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         }
       }
     }
-    console.log(
-      `[Calendaria] Found ${notes.length} calendar notes:`,
-      notes.map((n) => ({
-        name: n.name,
-        date: `${n.system.startDate.year}-${n.system.startDate.month + 1}-${n.system.startDate.day}`,
-        color: n.system.color,
-        gmOnly: n.system.gmOnly
-      }))
-    );
     return notes;
   }
 
@@ -216,6 +210,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     let dayIndex = startDayOfWeek;
     for (let day = 1; day <= daysInMonth; day++) {
       const dayNotes = this._getNotesForDay(notes, year, month, day);
+
+      // Check if this day is a festival day
+      const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
+
       currentWeek.push({
         day,
         year,
@@ -223,7 +221,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         isToday: this._isToday(year, month, day),
         isSelected: this._isSelected(year, month, day),
         notes: dayNotes,
-        isOddDay: dayIndex % 2 === 1
+        isOddDay: dayIndex % 2 === 1,
+        isFestival: !!festivalDay,
+        festivalName: festivalDay ? game.i18n.localize(festivalDay.name) : null
       });
       dayIndex++;
 
@@ -238,6 +238,14 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     while (currentWeek.length > 0 && currentWeek.length < daysInWeek) currentWeek.push({ empty: true });
 
     if (currentWeek.length > 0) weeks.push(currentWeek);
+
+    // Find multi-day events and attach them to their respective weeks
+    const allMultiDayEvents = this._findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth);
+
+    // Attach events to their weeks
+    weeks.forEach((week, weekIndex) => {
+      week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
+    });
 
     return {
       year,
@@ -322,15 +330,22 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       }
     }
 
-    // Generate time slots (2-hour increments)
+    // Generate time slots (1-hour increments for 24-hour view)
     const timeSlots = [];
-    for (let hour = 0; hour < 24; hour += 2) {
+    for (let hour = 0; hour < 24; hour++) {
       timeSlots.push({
         label: `${hour.toString().padStart(2, '0')}:00`,
-        hour: hour,
-        endHour: hour + 2
+        hour: hour
       });
     }
+
+    // Create event blocks for week view
+    const eventBlocks = this._createEventBlocks(notes, days);
+
+    // Attach event blocks to their respective days
+    days.forEach((day) => {
+      day.eventBlocks = eventBlocks.filter((block) => block.year === day.year && block.month === day.month && block.day === day.day);
+    });
 
     return {
       year: weekStartYear,
@@ -339,7 +354,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       days: days,
       timeSlots: timeSlots,
       weekdays: calendar.days?.values?.map((wd) => game.i18n.localize(wd.name)) || [],
-      daysInWeek
+      daysInWeek,
+      currentHour
     };
   }
 
@@ -433,7 +449,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   _getNotesForDay(notePages, year, month, day) {
     return notePages.filter((page) => {
       const start = page.system.startDate;
-      return start.year === year && start.month === month && start.day === day;
+      const end = page.system.endDate;
+
+      // Only include events that start on this day
+      if (start.year !== year || start.month !== month || start.day !== day) return false;
+
+      // Exclude multi-day events (they're shown as event bars instead)
+      if (end && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) return false;
+
+      // Include single-day events and events without end dates
+      return true;
     });
   }
 
@@ -449,6 +474,226 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       const start = page.system.startDate;
       return start.year === year && start.month === month;
     });
+  }
+
+  /**
+   * Find multi-day events and calculate their visual representation
+   * @param {Array} notes - All note pages
+   * @param {number} year - Current year
+   * @param {number} month - Current month
+   * @param {number} startDayOfWeek - Offset for first day of month
+   * @param {number} daysInWeek - Number of days in a week
+   * @param {number} daysInMonth - Number of days in this month
+   * @returns {Array} Array of event bar data
+   * @private
+   */
+  _findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth) {
+    const events = [];
+    const rows = []; // Track occupied spans for each row
+
+    // Filter and prepare events with priority (earlier start times = higher priority)
+    const multiDayEvents = notes
+      .map((note) => {
+        const start = note.system.startDate;
+        const end = note.system.endDate;
+
+        // Only process events that start this month and have an end date
+        if (start.year !== year || start.month !== month || !end) return null;
+
+        // Calculate if this is truly a multi-day event
+        const startDay = start.day;
+        const endDay = end.month === month ? end.day : daysInMonth;
+
+        if (endDay <= startDay) return null; // Not multi-day
+
+        // Calculate priority: all-day events appear first (priority -1), then by start hour
+        // All-day events have no hour set, or explicitly marked with allDay flag
+        const isAllDay = start.hour == null || note.system.allDay;
+        const priority = isAllDay ? -1 : start.hour;
+
+        return { note, start, end, startDay, endDay, priority };
+      })
+      .filter((e) => e !== null)
+      .sort((a, b) => a.priority - b.priority); // Sort by priority (earlier = higher)
+
+    multiDayEvents.forEach(({ note, start, end, startDay, endDay }) => {
+
+      // Calculate grid positions
+      const startPosition = startDay - 1 + startDayOfWeek; // 0-indexed
+      const endPosition = endDay - 1 + startDayOfWeek;
+
+      const startWeekIndex = Math.floor(startPosition / daysInWeek);
+      const endWeekIndex = Math.floor(endPosition / daysInWeek);
+
+      // Find the first available row where this event doesn't overlap with existing events
+      let eventRow = rows.length; // Default to new row if no space found
+      for (let r = 0; r < rows.length; r++) {
+        const rowEvents = rows[r] || [];
+        const hasOverlap = rowEvents.some((existing) => {
+          // Check if this event overlaps with any existing event in this row
+          return !(endPosition < existing.start || startPosition > existing.end);
+        });
+        if (!hasOverlap) {
+          eventRow = r;
+          break;
+        }
+      }
+      // If we need a new row (eventRow equals rows.length), create it
+      if (eventRow >= rows.length) rows.push([]);
+
+      // Mark this span as occupied in the chosen row
+      rows[eventRow].push({ start: startPosition, end: endPosition });
+
+      // Handle events that span multiple weeks
+      if (startWeekIndex === endWeekIndex) {
+        // Event fits in one week
+        const startColumn = startPosition % daysInWeek; // 0-indexed for this week
+        const endColumn = endPosition % daysInWeek; // 0-indexed for this week
+        const left = (startColumn / daysInWeek) * 100;
+        const width = ((endColumn - startColumn + 1) / daysInWeek) * 100;
+
+        events.push({
+          id: note.id,
+          name: note.name,
+          color: note.system.color || '#4a86e8',
+          icon: note.system.icon,
+          iconType: note.system.iconType,
+          weekIndex: startWeekIndex,
+          left,
+          width,
+          row: eventRow
+        });
+      } else {
+        // Event spans multiple weeks - create a bar for each week segment
+        for (let weekIdx = startWeekIndex; weekIdx <= endWeekIndex; weekIdx++) {
+          const weekStart = weekIdx * daysInWeek;
+          const weekEnd = weekStart + daysInWeek - 1;
+
+          const segmentStart = Math.max(startPosition, weekStart);
+          const segmentEnd = Math.min(endPosition, weekEnd);
+
+          const startColumn = segmentStart % daysInWeek;
+          const endColumn = segmentEnd % daysInWeek;
+          const left = (startColumn / daysInWeek) * 100;
+          const width = ((endColumn - startColumn + 1) / daysInWeek) * 100;
+
+          events.push({
+            id: `${note.id}-week-${weekIdx}`,
+            name: note.name,
+            color: note.system.color || '#4a86e8',
+            icon: note.system.icon,
+            iconType: note.system.iconType,
+            weekIndex: weekIdx,
+            left,
+            width,
+            row: eventRow,
+            isSegment: true
+          });
+        }
+      }
+    });
+
+    return events;
+  }
+
+  /**
+   * Create event blocks for week view with proper time positioning
+   * @param {Array} notes - All note pages
+   * @param {Array} days - Days in the week
+   * @returns {Array} Array of event block data
+   * @private
+   */
+  _createEventBlocks(notes, days) {
+    const blocks = [];
+
+    notes.forEach((note) => {
+      const start = note.system.startDate;
+      const end = note.system.endDate;
+
+      // Find which day this event is on
+      const dayMatch = days.find((d) => d.year === start.year && d.month === start.month && d.day === start.day);
+      if (!dayMatch) return;
+
+      // Calculate grid row positioning (add 2 for header rows)
+      const startRow = start.hour + 2;
+      const duration = end && end.year === start.year && end.month === start.month && end.day === start.day ? end.hour - start.hour : 1;
+      const endRow = startRow + Math.max(duration, 1);
+
+      // Format times
+      const startTime = `${start.hour.toString().padStart(2, '0')}:${start.minute.toString().padStart(2, '0')}`;
+      const endTime = end ? `${end.hour.toString().padStart(2, '0')}:${end.minute.toString().padStart(2, '0')}` : null;
+
+      blocks.push({
+        id: note.id,
+        name: note.name,
+        color: note.system.color || '#4a86e8',
+        icon: note.system.icon,
+        iconType: note.system.iconType,
+        day: start.day,
+        month: start.month,
+        year: start.year,
+        startRow,
+        endRow,
+        startTime,
+        endTime,
+        duration
+      });
+    });
+
+    return blocks;
+  }
+
+  /* -------------------------------------------- */
+  /*  Lifecycle Methods                           */
+  /* -------------------------------------------- */
+
+  /**
+   * Set up hook listeners when the application is first rendered
+   * @param {ApplicationRenderContext} context - Render context
+   * @param {object} options - Render options
+   * @override
+   */
+  async _onFirstRender(context, options) {
+    await super._onFirstRender(context, options);
+
+    // Set up hook to re-render when journal entries are updated, created, or deleted
+    this._hookIds = [];
+
+    // Listen for journal entry page updates
+    this._hookIds.push(
+      Hooks.on('updateJournalEntryPage', (page, changes, options, userId) => {
+        if (page.type === 'calendaria.calendar-note') this.render();
+      })
+    );
+
+    // Listen for journal entry page creation
+    this._hookIds.push(
+      Hooks.on('createJournalEntryPage', (page, options, userId) => {
+        if (page.type === 'calendaria.calendar-note') this.render();
+      })
+    );
+
+    // Listen for journal entry page deletion
+    this._hookIds.push(
+      Hooks.on('deleteJournalEntryPage', (page, options, userId) => {
+        if (page.type === 'calendaria.calendar-note') this.render();
+      })
+    );
+  }
+
+  /**
+   * Clean up hook listeners when the application is closed
+   * @param {object} options - Close options
+   * @override
+   */
+  async _onClose(options) {
+    // Remove all hook listeners
+    if (this._hookIds) {
+      this._hookIds.forEach((id) => Hooks.off(id));
+      this._hookIds = [];
+    }
+
+    await super._onClose(options);
   }
 
   /* -------------------------------------------- */
@@ -505,28 +750,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       hour = 12;
     }
 
-    // Create new journal entry with calendar note page
-    const journal = await JournalEntry.create({
-      name: `Note - ${month}/${day}/${year}`,
-      pages: [
-        {
-          name: 'New Note',
-          type: 'calendaria.calendarnote',
-          system: {
-            startDate: {
-              year: parseInt(year),
-              month: parseInt(month),
-              day: parseInt(day),
-              hour: parseInt(hour),
-              minute: 0
-            }
-          }
+    // Create note using NoteManager (which creates it as a page in the calendar journal)
+    const page = await NoteManager.createNote({
+      name: 'New Note',
+      noteData: {
+        startDate: {
+          year: parseInt(year),
+          month: parseInt(month),
+          day: parseInt(day),
+          hour: parseInt(hour),
+          minute: 0
         }
-      ]
+      }
     });
 
     // Open the note for editing
-    journal.pages.contents[0].sheet.render(true);
+    if (page) {
+      page.sheet.render(true);
+    }
 
     // Clear the selected time slot
     this._selectedTimeSlot = null;
@@ -555,28 +796,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       minute = today.minute ?? 0;
     }
 
-    // Create new journal entry with calendar note page
-    const journal = await JournalEntry.create({
-      name: `Note - ${month + 1}/${day}/${year}`,
-      pages: [
-        {
-          name: 'New Note',
-          type: 'calendaria.calendarnote',
-          system: {
-            startDate: {
-              year: parseInt(year),
-              month: parseInt(month),
-              day: parseInt(day),
-              hour: parseInt(hour),
-              minute: parseInt(minute)
-            }
-          }
+    // Create note using NoteManager (which creates it as a page in the calendar journal)
+    const page = await NoteManager.createNote({
+      name: 'New Note',
+      noteData: {
+        startDate: {
+          year: parseInt(year),
+          month: parseInt(month),
+          day: parseInt(day),
+          hour: parseInt(hour),
+          minute: parseInt(minute)
         }
-      ]
+      }
     });
 
     // Open the note for editing
-    journal.pages.contents[0].sheet.render(true);
+    if (page) {
+      page.sheet.render(true);
+    }
 
     // Clear the selected time slot
     this._selectedTimeSlot = null;
@@ -586,11 +823,13 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   }
 
   static async _onEditNote(event, target) {
-    const pageId = target.dataset.noteId;
+    let pageId = target.dataset.noteId;
+
+    // Handle segmented event IDs (e.g., "abc123-week-1" -> "abc123")
+    if (pageId.includes('-week-')) pageId = pageId.split('-week-')[0];
+
     const page = game.journal.find((j) => j.pages.get(pageId))?.pages.get(pageId);
-    if (page) {
-      page.sheet.render(true);
-    }
+    if (page) page.sheet.render(true);
   }
 
   static async _onDeleteNote(event, target) {
@@ -608,12 +847,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
       if (confirmed) {
         // If the journal only has this one page, delete the entire journal entry
-        if (journal.pages.size === 1) {
-          await journal.delete();
-        } else {
-          // Otherwise just delete the page
-          await page.delete();
-        }
+        if (journal.pages.size === 1) await journal.delete();
+        else await page.delete();
+
         await this.render();
       }
     }
@@ -625,17 +861,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     await this.render();
   }
 
+  static async _onSelectMonth(event, target) {
+    const year = parseInt(target.dataset.year);
+    const month = parseInt(target.dataset.month);
+
+    // Switch to month view and navigate to the selected month
+    this._displayMode = 'month';
+    this.currentDate = { year, month, day: 1 };
+    await this.render();
+  }
+
   static async _onSelectDay(event, target) {
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
 
     // Toggle selection - if clicking the same day, deselect it
-    if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.day === day) {
-      this._selectedDate = null;
-    } else {
-      this._selectedDate = { year, month, day };
-    }
+    if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.day === day) this._selectedDate = null;
+    else this._selectedDate = { year, month, day };
 
     await this.render();
   }
@@ -646,21 +889,19 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
 
-    // Convert display year back to internal year
-    const internalYear = this._selectedDate.year - yearZero;
-
-    // Convert day of month (1-indexed) to 0-indexed
-    const dayOfMonth = this._selectedDate.day - 1;
-
     // Use the calendar's jumpToDate method if available
     if (calendar && typeof calendar.jumpToDate === 'function') {
+      // calendar.jumpToDate expects display year and 1-indexed day
       await calendar.jumpToDate({
-        year: this._selectedDate.year,
+        year: this._selectedDate.year, // Display year
         month: this._selectedDate.month,
-        day: this._selectedDate.day
+        day: this._selectedDate.day // 1-indexed day (jumpToDate subtracts 1 internally)
       });
     } else {
       // Fallback: construct time components and set world time
+      // For internal components, we need to subtract yearZero and convert day to 0-indexed dayOfMonth
+      const internalYear = this._selectedDate.year - yearZero;
+      const dayOfMonth = this._selectedDate.day - 1; // Convert 1-indexed day to 0-indexed dayOfMonth
       const components = {
         year: internalYear,
         month: this._selectedDate.month,
@@ -689,16 +930,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const hour = parseInt(target.dataset.hour);
 
     // Toggle selection - if clicking the same slot, deselect it
-    if (
-      this._selectedTimeSlot?.year === year &&
-      this._selectedTimeSlot?.month === month &&
-      this._selectedTimeSlot?.day === day &&
-      this._selectedTimeSlot?.hour === hour
-    ) {
-      this._selectedTimeSlot = null;
-    } else {
-      this._selectedTimeSlot = { year, month, day, hour };
-    }
+    if (this._selectedTimeSlot?.year === year && this._selectedTimeSlot?.month === month && this._selectedTimeSlot?.day === day && this._selectedTimeSlot?.hour === hour) this._selectedTimeSlot = null;
+    else this._selectedTimeSlot = { year, month, day, hour };
 
     await this.render();
   }

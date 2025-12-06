@@ -140,21 +140,24 @@ export function sanitizeNoteData(noteData) {
 
 /**
  * Create a note stub for indexing (lightweight reference).
- * @param {JournalEntry} journal  Journal entry document
+ * @param {JournalEntryPage} page  Journal entry page document
  * @returns {object|null}  Note stub or null if not a calendar note
  */
-export function createNoteStub(journal) {
-  const flagData = journal.getFlag('calendaria', 'noteData');
+export function createNoteStub(page) {
+  // Only process calendaria.calendarnote pages
+  if (page.type !== 'calendaria.calendarnote') return null;
+
+  const flagData = page.system;
 
   if (!flagData || !flagData.isCalendarNote) return null;
 
   return {
-    id: journal.id,
-    name: journal.name,
-    flagData: migratedData,
-    visible: journal.testUserPermission(game.user, 'OBSERVER'),
-    folder: journal.folder?.id || null,
-    ownership: journal.ownership
+    id: page.id,
+    name: page.name,
+    flagData: flagData,
+    visible: page.testUserPermission(game.user, 'OBSERVER'),
+    journalId: page.parent?.id || null,
+    ownership: page.ownership
   };
 }
 

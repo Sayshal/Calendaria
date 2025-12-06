@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { SYSTEM } from '../constants.mjs';
 import { log } from './logger.mjs';
 
 /**
@@ -25,13 +26,14 @@ export function registerKeybindings() {
 }
 
 /**
- * Toggle calendar visibility
+ * Toggle calendar visibility.
+ * Only works when on dnd5e system which provides the calendar HUD.
  */
 export function toggleCalendarVisibility() {
+  // Only toggle visibility for dnd5e system
+  if (!SYSTEM.isDnd5e) return;
+
   const prefs = game.settings.get('dnd5e', 'calendarPreferences');
   const newVisibility = !prefs.visible;
-  game.settings.set('dnd5e', 'calendarPreferences', {
-    ...prefs,
-    visible: newVisibility
-  });
+  game.settings.set('dnd5e', 'calendarPreferences', { ...prefs, visible: newVisibility });
 }

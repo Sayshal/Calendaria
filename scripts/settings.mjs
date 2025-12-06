@@ -7,6 +7,7 @@
 import { MODULE, SETTINGS } from './constants.mjs';
 import { log } from './utils/logger.mjs';
 import { ResetPositionDialog } from './applications/settings/reset-position.mjs';
+import { CalendarEditor } from './applications/calendar-editor.mjs';
 
 /**
  * Register all module settings with Foundry VTT.
@@ -45,6 +46,30 @@ export function registerSettings() {
     default: null
   });
 
+  /** User-created custom calendar definitions */
+  game.settings.register(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, {
+    name: 'Custom Calendars',
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: {}
+  });
+
+  // ========================================//
+  //  Sync & Multiplayer                     //
+  // ========================================//
+
+  /** Primary GM user ID override for sync operations */
+  game.settings.register(MODULE.ID, SETTINGS.PRIMARY_GM, {
+    name: 'CALENDARIA.Settings.PrimaryGM.Name',
+    hint: 'CALENDARIA.Settings.PrimaryGM.Hint',
+    scope: 'world',
+    config: true,
+    type: String,
+    default: null,
+    requiresReload: false
+  });
+
   // ========================================//
   //  Technical                              //
   // ========================================//
@@ -67,6 +92,16 @@ export function registerSettings() {
     onChange: (value) => {
       MODULE.LOG_LEVEL = parseInt(value);
     }
+  });
+
+  /** Settings menu button to open calendar editor */
+  game.settings.registerMenu(MODULE.ID, 'calendarEditor', {
+    name: 'CALENDARIA.Settings.CalendarEditor.Name',
+    hint: 'CALENDARIA.Settings.CalendarEditor.Hint',
+    label: 'CALENDARIA.Settings.CalendarEditor.Label',
+    icon: 'fas fa-calendar-plus',
+    type: CalendarEditor,
+    restricted: true
   });
 
   /** Settings menu button to reset calendar position */
