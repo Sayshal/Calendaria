@@ -53,6 +53,9 @@ export class CalendariaHUD extends BaseClass {
 
     // Inject the Open Calendar button
     this.#injectOpenCalendarButton();
+
+    // Inject the Lock Position button
+    this.#injectLockButton();
   }
 
   /* -------------------------------------------- */
@@ -91,7 +94,26 @@ export class CalendariaHUD extends BaseClass {
     const dragHandle = this.element.querySelector('.calendar-core');
     if (!dragHandle) return;
 
-    dragHandle.style.cursor = 'move';
+    // Check if position is locked
+    const isLocked = game.settings.get(MODULE.ID, SETTINGS.POSITION_LOCKED);
+
+    // Add/update blocking handler for locked state
+    if (!dragHandle._lockHandler) {
+      dragHandle._lockHandler = (event) => {
+        if (game.settings.get(MODULE.ID, SETTINGS.POSITION_LOCKED)) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      };
+      // Block both mousedown and pointerdown in capture phase
+      dragHandle.addEventListener('mousedown', dragHandle._lockHandler, true);
+      dragHandle.addEventListener('pointerdown', dragHandle._lockHandler, true);
+    }
+
+    // Set cursor based on lock state
+    dragHandle.style.cursor = isLocked ? 'default' : 'move';
+
+    // Always create Draggable - blocking handler prevents it when locked
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
 
     let dragStartX = 0;
@@ -196,6 +218,57 @@ export class CalendariaHUD extends BaseClass {
     // Add click handler
     li.querySelector('button').addEventListener('click', () => {
       new CalendarApplication().render(true);
+    });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Inject the Lock Position button into the endButtons menu.
+   */
+  #injectLockButton() {
+    const endButtons = this.element.querySelector('[data-application-part="endButtons"]');
+    if (!endButtons) return;
+
+    // Check if already injected
+    if (endButtons.querySelector('[data-action="toggleLock"]')) return;
+
+    // Get current lock state
+    const isLocked = game.settings.get(MODULE.ID, SETTINGS.POSITION_LOCKED);
+    const label = game.i18n.localize(isLocked ? 'CALENDARIA.HUD.UnlockPosition' : 'CALENDARIA.HUD.LockPosition');
+    const icon = isLocked ? 'fa-lock' : 'fa-lock-open';
+
+    // Create button element
+    const li = document.createElement('li');
+    li.className = 'calendar-button';
+    li.innerHTML = `
+      <button type="button" data-action="toggleLock" data-tooltip="${label}" aria-label="${label}" data-tooltip-direction="RIGHT">
+        <i class="fas ${icon}"></i>
+      </button>
+    `;
+
+    // Append as last child
+    endButtons.appendChild(li);
+
+    // Add click handler
+    const button = li.querySelector('button');
+    button.addEventListener('click', async () => {
+      const currentLock = game.settings.get(MODULE.ID, SETTINGS.POSITION_LOCKED);
+      const newLock = !currentLock;
+      await game.settings.set(MODULE.ID, SETTINGS.POSITION_LOCKED, newLock);
+
+      // Update button UI in-place (avoid full re-render which causes position jump)
+      const newLabel = game.i18n.localize(newLock ? 'CALENDARIA.HUD.UnlockPosition' : 'CALENDARIA.HUD.LockPosition');
+      const newIcon = newLock ? 'fa-lock' : 'fa-lock-open';
+      button.dataset.tooltip = newLabel;
+      button.setAttribute('aria-label', newLabel);
+      button.querySelector('i').className = `fas ${newIcon}`;
+
+      // Update cursor on drag handle
+      const dragHandle = this.element.querySelector('.calendar-core');
+      if (dragHandle) {
+        dragHandle.style.cursor = newLock ? 'default' : 'move';
+      }
     });
   }
 

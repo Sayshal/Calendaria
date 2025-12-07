@@ -27,6 +27,15 @@ export function registerSettings() {
     default: null
   });
 
+  /** Whether the calendar HUD position is locked */
+  game.settings.register(MODULE.ID, SETTINGS.POSITION_LOCKED, {
+    name: 'Position Locked',
+    scope: 'user',
+    config: false,
+    type: Boolean,
+    default: false
+  });
+
   /** Default setting for syncing scene darkness with sun position */
   game.settings.register(MODULE.ID, SETTINGS.DARKNESS_SYNC, {
     name: 'CALENDARIA.Settings.DarknessSync.Name',

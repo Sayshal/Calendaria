@@ -269,6 +269,8 @@
   "CALENDARIA.Settings.ResetPosition.Label": "Reset Position",
   "CALENDARIA.Settings.ResetPosition.Name": "Reset Calendar Position",
   "CALENDARIA.Settings.ResetPosition.Success": "Calendar position has been reset.",
+  "CALENDARIA.HUD.LockPosition": "Lock Position",
+  "CALENDARIA.HUD.UnlockPosition": "Unlock Position",
   "CALENDARIA.HUD.OpenCalendar": "Open Calendar",
   "CALENDARIA.UI.AddNote": "Add Note",
   "CALENDARIA.UI.AllDayTooltip": "Mark this note as an all-day event",

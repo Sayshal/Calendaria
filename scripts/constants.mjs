@@ -71,7 +71,10 @@ export const SETTINGS = {
   PRIMARY_GM: 'primaryGM',
 
   /** @type {string} User-created custom calendar definitions */
-  CUSTOM_CALENDARS: 'customCalendars'
+  CUSTOM_CALENDARS: 'customCalendars',
+
+  /** @type {string} Whether the calendar HUD position is locked */
+  POSITION_LOCKED: 'positionLocked'
 };
 
 /**
