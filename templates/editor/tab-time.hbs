@@ -44,4 +44,52 @@
       <li>{{localize "CALENDARIA.Editor.Summary.SecondsPerYear" seconds=secondsPerYear}}</li>
     </ul>
   </fieldset>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.DaylightEnabled"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="daylight.enabled" {{#if calendar.daylight.enabled}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightEnabled"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
+      <div class="form-fields">
+        <input type="number" name="daylight.shortestDay" value="{{calendar.daylight.shortestDay}}" min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
+        <span class="units">{{localize "CALENDARIA.Editor.Units.Hours"}}</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.ShortestDay"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
+      <div class="form-fields">
+        <input type="number" name="daylight.longestDay" value="{{calendar.daylight.longestDay}}" min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
+        <span class="units">{{localize "CALENDARIA.Editor.Units.Hours"}}</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.LongestDay"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.WinterSolstice"}}</label>
+      <div class="form-fields">
+        <input type="number" name="daylight.winterSolstice" value="{{calendar.daylight.winterSolstice}}" min="0" max="{{daysPerYear}}" step="1">
+        <span class="units">{{localize "CALENDARIA.Editor.Units.DayOfYear"}}</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WinterSolstice"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Field.SummerSolstice"}}</label>
+      <div class="form-fields">
+        <input type="number" name="daylight.summerSolstice" value="{{calendar.daylight.summerSolstice}}" min="0" max="{{daysPerYear}}" step="1">
+        <span class="units">{{localize "CALENDARIA.Editor.Units.DayOfYear"}}</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.SummerSolstice"}}</p>
+    </div>
+  </fieldset>
 </section>

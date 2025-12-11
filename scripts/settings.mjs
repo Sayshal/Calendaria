@@ -67,6 +67,15 @@ export function registerSettings() {
     range: { min: 1, max: 10, step: 1 }
   });
 
+  /** Sticky states for compact calendar */
+  game.settings.register(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
+    name: 'Compact Calendar Sticky States',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: { timeControls: false, sidebar: false, position: false }
+  });
+
   /** Default setting for syncing scene darkness with sun position */
   game.settings.register(MODULE.ID, SETTINGS.DARKNESS_SYNC, {
     name: 'CALENDARIA.Settings.DarknessSync.Name',

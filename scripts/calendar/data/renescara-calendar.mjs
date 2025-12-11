@@ -141,6 +141,9 @@ export const RENESCARA_CALENDAR = {
     ]
   },
 
+  // Daylight settings - The Long Night (winter) and SolsticeCrown (summer)
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 281, summerSolstice: 126 },
+
   // Calendar metadata
   metadata: {
     id: 'renescara',

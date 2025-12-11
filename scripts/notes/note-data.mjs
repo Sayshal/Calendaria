@@ -37,6 +37,7 @@ export function getDefaultNoteData() {
     reminderOffset: 0,
     macro: null,
     sceneId: null,
+    author: null,
     isCalendarNote: true,
     version: 1
   };
@@ -134,6 +135,7 @@ export function sanitizeNoteData(noteData) {
     reminderOffset: noteData.reminderOffset ?? defaults.reminderOffset,
     macro: noteData.macro || null,
     sceneId: noteData.sceneId || null,
+    author: noteData.author || null,
     isCalendarNote: true,
     version: noteData.version || defaults.version
   };

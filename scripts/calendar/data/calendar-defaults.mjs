@@ -37,7 +37,8 @@ export const GREGORIAN = {
       { name: 'CALENDARIA.Season.Winter', dayStart: 355, dayEnd: 78 }
     ]
   },
-  eras: [{ name: 'CALENDARIA.Era.CommonEra', abbreviation: 'CALENDARIA.Era.CE', startYear: 1, endYear: null, format: 'suffix' }]
+  eras: [{ name: 'CALENDARIA.Era.CommonEra', abbreviation: 'CALENDARIA.Era.CE', startYear: 1, endYear: null, format: 'suffix' }],
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 355, summerSolstice: 172 }
 };
 
 /**
@@ -53,7 +54,8 @@ export const HARPTOS = {
       { name: 'CALENDARIA.Season.Winter', dayStart: 335, dayEnd: 59 }
     ]
   },
-  eras: [{ name: 'CALENDARIA.Era.DaleReckoning', abbreviation: 'CALENDARIA.Era.DR', startYear: 1, endYear: null, format: 'suffix' }]
+  eras: [{ name: 'CALENDARIA.Era.DaleReckoning', abbreviation: 'CALENDARIA.Era.DR', startYear: 1, endYear: null, format: 'suffix' }],
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 355, summerSolstice: 172 }
 };
 
 /**
@@ -72,7 +74,8 @@ export const GREYHAWK = {
       { name: 'CALENDARIA.Season.Winter', dayStart: 330, dayEnd: 55 }
     ]
   },
-  eras: [{ name: 'CALENDARIA.Era.CommonYear', abbreviation: 'CALENDARIA.Era.CY', startYear: 1, endYear: null, format: 'suffix' }]
+  eras: [{ name: 'CALENDARIA.Era.CommonYear', abbreviation: 'CALENDARIA.Era.CY', startYear: 1, endYear: null, format: 'suffix' }],
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 354, summerSolstice: 172 }
 };
 
 /**
@@ -101,7 +104,8 @@ export const KHORVAIRE = {
       { name: 'CALENDARIA.Season.Winter', dayStart: 308, dayEnd: 55 }
     ]
   },
-  eras: [{ name: 'CALENDARIA.Era.YearOfTheKingdom', abbreviation: 'CALENDARIA.Era.YK', startYear: 1, endYear: null, format: 'suffix' }]
+  eras: [{ name: 'CALENDARIA.Era.YearOfTheKingdom', abbreviation: 'CALENDARIA.Era.YK', startYear: 1, endYear: null, format: 'suffix' }],
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 326, summerSolstice: 158 }
 };
 
 /* -------------------------------------------- */

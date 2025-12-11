@@ -8,6 +8,7 @@
 
 import { MODULE, SETTINGS, TEMPLATES, HOOKS } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { CalendarApplication } from './calendar-application.mjs';
@@ -34,8 +35,17 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {Array} Hook references for cleanup */
   #hooks = [];
 
-  /** @type {boolean} Whether time controls are locked visible */
-  #controlsLocked = false;
+  /** @type {boolean} Sticky time controls */
+  #stickyTimeControls = false;
+
+  /** @type {boolean} Sticky sidebar */
+  #stickySidebar = false;
+
+  /** @type {boolean} Sticky position (immovable) */
+  #stickyPosition = false;
+
+  /** @type {ContextMenu|null} Active sticky options menu */
+  #stickyMenu = null;
 
   /** @type {number|null} Timeout ID for hiding controls */
   #hideTimeout = null;
@@ -52,10 +62,16 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Time controls visibility state (survives re-render) */
   #controlsVisible = false;
 
+  /** @type {boolean} Notes panel visibility state */
+  #notesPanelVisible = false;
+
+  /** @type {boolean} Whether sidebar is locked due to notes panel */
+  #sidebarLocked = false;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'compact-calendar',
-    classes: ['compact-calendar'],
+    classes: ['calendaria', 'compact-calendar'],
     position: {
       width: 'auto',
       height: 'auto',
@@ -79,6 +95,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       reverse5x: CompactCalendar._onReverse5x,
       setCurrentDate: CompactCalendar._onSetCurrentDate,
       toggleLock: CompactCalendar._onToggleLock,
+      viewNotes: CompactCalendar._onViewNotes,
+      closeNotesPanel: CompactCalendar._onCloseNotesPanel,
+      openNote: CompactCalendar._onOpenNote,
+      editNote: CompactCalendar._onEditNote,
       toSunrise: CompactCalendar._onToSunrise,
       toMidday: CompactCalendar._onToMidday,
       toSunset: CompactCalendar._onToSunset,
@@ -149,16 +169,34 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showSetCurrentDate = false;
     if (game.user.isGM && this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(calendar);
-      context.showSetCurrentDate =
-        this._selectedDate.year !== today.year ||
-        this._selectedDate.month !== today.month ||
-        this._selectedDate.day !== today.day;
+      context.showSetCurrentDate = this._selectedDate.year !== today.year || this._selectedDate.month !== today.month || this._selectedDate.day !== today.day;
     }
 
     // Pass visibility states to template to prevent flicker on re-render
-    context.sidebarVisible = this.#sidebarVisible;
-    context.controlsVisible = this.#controlsVisible || this.#controlsLocked;
-    context.controlsLocked = this.#controlsLocked;
+    context.sidebarVisible = this.#sidebarVisible || this.#sidebarLocked || this.#stickySidebar;
+    context.controlsVisible = this.#controlsVisible || this.#stickyTimeControls;
+    context.controlsLocked = this.#stickyTimeControls;
+    context.notesPanelVisible = this.#notesPanelVisible;
+    context.sidebarLocked = this.#sidebarLocked || this.#stickySidebar;
+    context.stickyTimeControls = this.#stickyTimeControls;
+    context.stickySidebar = this.#stickySidebar;
+    context.stickyPosition = this.#stickyPosition;
+    context.hasAnyStickyMode = this.#stickyTimeControls || this.#stickySidebar || this.#stickyPosition;
+
+    // Get notes for selected date if notes panel is visible
+    if (this.#notesPanelVisible && this._selectedDate) {
+      context.selectedDateNotes = this._getSelectedDateNotes();
+      context.selectedDateLabel = this._formatSelectedDate();
+    }
+
+    // Show view notes button if selected date has notes
+    context.showViewNotes = false;
+    if (this._selectedDate) {
+      const allNotes = ViewUtils.getCalendarNotes();
+      const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
+      const noteCount = this._countNotesOnDay(visibleNotes, this._selectedDate.year, this._selectedDate.month, this._selectedDate.day);
+      context.showViewNotes = noteCount > 0;
+    }
 
     return context;
   }
@@ -195,7 +233,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Add days
     for (let day = 1; day <= daysInMonth; day++) {
-      const hasNotes = ViewUtils.hasNotesOnDay(visibleNotes, year, month, day);
+      const noteCount = this._countNotesOnDay(visibleNotes, year, month, day);
       const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
 
       // Get first moon phase only using shared utility
@@ -207,7 +245,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         month,
         isToday: ViewUtils.isToday(year, month, day, calendar),
         isSelected: this._isSelected(year, month, day),
-        hasNotes,
+        hasNotes: noteCount > 0,
+        noteCount,
         isFestival: !!festivalDay,
         festivalName: festivalDay ? game.i18n.localize(festivalDay.name) : null,
         moonIcon: moonData?.icon ?? null,
@@ -260,6 +299,114 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     return this._selectedDate.year === year && this._selectedDate.month === month && this._selectedDate.day === day;
   }
 
+  /**
+   * Count notes on a specific day.
+   * @param {JournalEntryPage[]} notes - Visible notes
+   * @param {number} year - Year
+   * @param {number} month - Month
+   * @param {number} day - Day (1-indexed)
+   * @returns {number}
+   */
+  _countNotesOnDay(notes, year, month, day) {
+    return notes.filter((page) => {
+      const start = page.system.startDate;
+      const end = page.system.endDate;
+
+      if (start.year === year && start.month === month && start.day === day) return true;
+
+      if (end?.year != null && end?.month != null && end?.day != null) {
+        const startDate = new Date(start.year, start.month, start.day);
+        const endDate = new Date(end.year, end.month, end.day);
+        const checkDate = new Date(year, month, day);
+        if (checkDate >= startDate && checkDate <= endDate) return true;
+      }
+
+      return false;
+    }).length;
+  }
+
+  /**
+   * Get notes for the selected date, sorted by time (all-day first, then by start time).
+   * @returns {object[]}
+   */
+  _getSelectedDateNotes() {
+    if (!this._selectedDate) return [];
+
+    const { year, month, day } = this._selectedDate;
+    const notes = ViewUtils.getNotesOnDay(year, month, day);
+
+    return notes
+      .map((page) => {
+        const start = page.system.startDate;
+        const end = page.system.endDate;
+        const isAllDay = page.system.allDay;
+        const icon = page.system.icon || 'fas fa-sticky-note';
+        const color = page.system.color || '#4a90e2';
+
+        // Format time range
+        let timeLabel = '';
+        if (isAllDay) {
+          timeLabel = game.i18n.localize('CALENDARIA.CompactCalendar.AllDay');
+        } else {
+          const startTime = this._formatTime(start.hour, start.minute);
+          const endTime = this._formatTime(end.hour, end.minute);
+          timeLabel = `${startTime} - ${endTime}`;
+        }
+
+        // Get author name from author document
+        const authorName = page.system.author?.name || game.i18n.localize('CALENDARIA.CompactCalendar.Unknown');
+
+        return {
+          id: page.id,
+          parentId: page.parent.id,
+          name: page.name,
+          icon,
+          isImageIcon: icon.includes('/'),
+          color,
+          timeLabel,
+          isAllDay,
+          startHour: start.hour ?? 0,
+          startMinute: start.minute ?? 0,
+          author: authorName,
+          isOwner: page.isOwner
+        };
+      })
+      .sort((a, b) => {
+        // All-day events first
+        if (a.isAllDay && !b.isAllDay) return -1;
+        if (!a.isAllDay && b.isAllDay) return 1;
+        // Then by start time
+        if (a.startHour !== b.startHour) return a.startHour - b.startHour;
+        return a.startMinute - b.startMinute;
+      });
+  }
+
+  /**
+   * Format the selected date as a label.
+   * @returns {string}
+   */
+  _formatSelectedDate() {
+    if (!this._selectedDate) return '';
+    const { year, month, day } = this._selectedDate;
+    const calendar = this.calendar;
+    const monthData = calendar.months?.values?.[month];
+    const monthName = monthData ? game.i18n.localize(monthData.name) : '';
+    const yearDisplay = calendar.formatYearWithEra?.(year) ?? String(year);
+    return `${monthName} ${day}, ${yearDisplay}`;
+  }
+
+  /**
+   * Format hour and minute as time string.
+   * @param {number} hour - Hour (0-23)
+   * @param {number} minute - Minute (0-59)
+   * @returns {string}
+   */
+  _formatTime(hour, minute) {
+    const h = (hour ?? 0).toString().padStart(2, '0');
+    const m = (minute ?? 0).toString().padStart(2, '0');
+    return `${h}:${m}`;
+  }
+
   /* -------------------------------------------- */
   /*  Lifecycle                                   */
   /* -------------------------------------------- */
@@ -287,7 +434,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     // Clock state hook
     Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
 
-    // Sidebar auto-hide
+    // Sidebar auto-hide (respects lock state and sticky sidebar)
     const container = this.element.querySelector('.compact-calendar-container');
     const sidebar = this.element.querySelector('.compact-sidebar');
     if (container && sidebar) {
@@ -297,6 +444,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         sidebar.classList.add('visible');
       });
       container.addEventListener('mouseleave', () => {
+        if (this.#sidebarLocked || this.#stickySidebar) return;
         const delay = game.settings.get(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY) * 1000;
         this.#sidebarTimeout = setTimeout(() => {
           this.#sidebarVisible = false;
@@ -315,7 +463,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         timeControls.classList.add('visible');
       };
       const hideControls = () => {
-        if (this.#controlsLocked) return;
+        if (this.#stickyTimeControls) return;
         const delay = game.settings.get(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY) * 1000;
         this.#hideTimeout = setTimeout(() => {
           this.#controlsVisible = false;
@@ -332,6 +480,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
+
+    // Restore sticky states from settings
+    this.#restoreStickyStates();
 
     // Initialize day tracking for re-render optimization
     this.#lastDay = ViewUtils.getCurrentViewedDate(this.calendar)?.day;
@@ -410,6 +561,44 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Restore sticky states from settings.
+   */
+  #restoreStickyStates() {
+    const states = game.settings.get(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES);
+    if (!states) return;
+
+    this.#stickyTimeControls = states.timeControls ?? false;
+    this.#stickySidebar = states.sidebar ?? false;
+    this.#stickyPosition = states.position ?? false;
+
+    // Apply restored states
+    if (this.#stickyTimeControls) {
+      const timeControls = this.element.querySelector('.compact-time-controls');
+      timeControls?.classList.add('visible');
+      this.#controlsVisible = true;
+    }
+
+    if (this.#stickySidebar) {
+      const sidebar = this.element.querySelector('.compact-sidebar');
+      sidebar?.classList.add('visible');
+      this.#sidebarVisible = true;
+    }
+
+    this._updatePinButtonState();
+  }
+
+  /**
+   * Save sticky states to settings.
+   */
+  async #saveStickyStates() {
+    await game.settings.set(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
+      timeControls: this.#stickyTimeControls,
+      sidebar: this.#stickySidebar,
+      position: this.#stickyPosition
+    });
+  }
+
+  /**
    * Enable dragging on the top row.
    */
   #enableDragging() {
@@ -425,6 +614,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const originalMouseDown = drag._onDragMouseDown.bind(drag);
     drag._onDragMouseDown = (event) => {
+      // Prevent dragging when position is locked
+      if (this.#stickyPosition) return;
+
       const rect = this.element.getBoundingClientRect();
       elementStartLeft = rect.left;
       elementStartTop = rect.top;
@@ -498,9 +690,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   #onClockStateChange() {
     if (!this.rendered) return;
     const running = TimeKeeper.running;
-    const tooltip = running
-      ? game.i18n.localize('CALENDARIA.TimeKeeper.Stop')
-      : game.i18n.localize('CALENDARIA.TimeKeeper.Start');
+    const tooltip = running ? game.i18n.localize('CALENDARIA.TimeKeeper.Stop') : game.i18n.localize('CALENDARIA.TimeKeeper.Start');
 
     // Update time-toggle in time-display
     const timeToggle = this.element.querySelector('.time-toggle');
@@ -627,9 +817,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         icon.classList.toggle('fa-play', !TimeKeeper.running);
         icon.classList.toggle('fa-pause', TimeKeeper.running);
       }
-      timeToggle.dataset.tooltip = TimeKeeper.running
-        ? game.i18n.localize('CALENDARIA.TimeKeeper.Stop')
-        : game.i18n.localize('CALENDARIA.TimeKeeper.Start');
+      timeToggle.dataset.tooltip = TimeKeeper.running ? game.i18n.localize('CALENDARIA.TimeKeeper.Stop') : game.i18n.localize('CALENDARIA.TimeKeeper.Start');
     }
   }
 
@@ -657,30 +845,181 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Toggle time controls pin state.
+   * Show sticky options context menu.
    * @param {PointerEvent} event - Click event
    * @param {HTMLElement} target - Button element
    */
   static _onToggleLock(event, target) {
-    this.#controlsLocked = !this.#controlsLocked;
-    const pinBtn = this.element.querySelector('.pin-btn');
+    // Close menu if already open
+    if (this.#stickyMenu) {
+      this.#stickyMenu.close();
+      this.#stickyMenu = null;
+      return;
+    }
+
+    const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
+
+    // Bind toggle methods to preserve instance context
+    const toggleTime = this._toggleStickyTimeControls.bind(this);
+    const toggleSidebar = this._toggleStickySidebar.bind(this);
+    const togglePosition = this._toggleStickyPosition.bind(this);
+
+    const menuItems = [
+      {
+        name: 'CALENDARIA.CompactCalendar.StickyTimeControls',
+        icon: `<i class="fas fa-clock"></i>`,
+        callback: toggleTime,
+        classes: this.#stickyTimeControls ? ['sticky-active'] : []
+      },
+      {
+        name: 'CALENDARIA.CompactCalendar.StickySidebar',
+        icon: `<i class="fas fa-bars"></i>`,
+        callback: toggleSidebar,
+        classes: this.#stickySidebar ? ['sticky-active'] : []
+      },
+      {
+        name: 'CALENDARIA.CompactCalendar.StickyPosition',
+        icon: `<i class="fas fa-lock"></i>`,
+        callback: togglePosition,
+        classes: this.#stickyPosition ? ['sticky-active'] : []
+      }
+    ];
+
+    // Create and render context menu at button position
+    this.#stickyMenu = new ContextMenu(this.element, '.pin-btn', menuItems, {
+      fixed: true,
+      jQuery: false,
+      onClose: () => {
+        this.#stickyMenu = null;
+      }
+    });
+    this.#stickyMenu.render(target);
+  }
+
+  /**
+   * Toggle sticky time controls.
+   */
+  _toggleStickyTimeControls() {
+    this.#stickyTimeControls = !this.#stickyTimeControls;
     const timeControls = this.element.querySelector('.compact-time-controls');
 
-    if (this.#controlsLocked) {
-      pinBtn?.classList.add('pinned');
+    if (this.#stickyTimeControls) {
       clearTimeout(this.#hideTimeout);
-      // Show controls immediately when pinned
       timeControls?.classList.add('visible');
       this.#controlsVisible = true;
     } else {
-      pinBtn?.classList.remove('pinned');
-      // Start hide timer
       const delay = game.settings.get(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY) * 1000;
       this.#hideTimeout = setTimeout(() => {
         this.#controlsVisible = false;
         timeControls?.classList.remove('visible');
       }, delay);
     }
+
+    this._updatePinButtonState();
+    this.#saveStickyStates();
+  }
+
+  /**
+   * Toggle sticky sidebar.
+   */
+  _toggleStickySidebar() {
+    this.#stickySidebar = !this.#stickySidebar;
+    const sidebar = this.element.querySelector('.compact-sidebar');
+
+    // Update locked class based on combined state
+    const shouldBeLocked = this.#stickySidebar || this.#sidebarLocked;
+    sidebar?.classList.toggle('locked', shouldBeLocked);
+
+    if (this.#stickySidebar) {
+      clearTimeout(this.#sidebarTimeout);
+      sidebar?.classList.add('visible');
+      this.#sidebarVisible = true;
+    } else if (!this.#sidebarLocked) {
+      const delay = game.settings.get(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY) * 1000;
+      this.#sidebarTimeout = setTimeout(() => {
+        this.#sidebarVisible = false;
+        sidebar?.classList.remove('visible');
+      }, delay);
+    }
+
+    this._updatePinButtonState();
+    this.#saveStickyStates();
+  }
+
+  /**
+   * Toggle sticky position (locks calendar in place).
+   */
+  _toggleStickyPosition() {
+    this.#stickyPosition = !this.#stickyPosition;
+    this._updatePinButtonState();
+    this.#saveStickyStates();
+  }
+
+  /**
+   * Update pin button visual state based on active sticky modes.
+   */
+  _updatePinButtonState() {
+    const pinBtn = this.element.querySelector('.pin-btn');
+    const topRow = this.element.querySelector('.compact-top-row');
+
+    if (pinBtn) {
+      const hasAnySticky = this.#stickyTimeControls || this.#stickySidebar || this.#stickyPosition;
+      pinBtn.classList.toggle('has-sticky', hasAnySticky);
+      pinBtn.classList.toggle('sticky-time', this.#stickyTimeControls);
+      pinBtn.classList.toggle('sticky-sidebar', this.#stickySidebar);
+      pinBtn.classList.toggle('sticky-position', this.#stickyPosition);
+    }
+
+    // Update cursor on drag handle when position is locked
+    if (topRow) {
+      topRow.classList.toggle('position-locked', this.#stickyPosition);
+    }
+  }
+
+  /**
+   * Open the notes panel for the selected date.
+   */
+  static async _onViewNotes(event, target) {
+    if (!this._selectedDate) return;
+    this.#notesPanelVisible = true;
+    this.#sidebarLocked = true;
+    this.#sidebarVisible = true;
+    await this.render();
+  }
+
+  /**
+   * Close the notes panel.
+   */
+  static async _onCloseNotesPanel(event, target) {
+    this.#notesPanelVisible = false;
+    this.#sidebarLocked = false;
+    await this.render();
+  }
+
+  /**
+   * Open a note in view mode.
+   * @param {PointerEvent} event - Click event
+   * @param {HTMLElement} target - Element with data-page-id and data-journal-id
+   */
+  static _onOpenNote(event, target) {
+    const pageId = target.dataset.pageId;
+    const journalId = target.dataset.journalId;
+    const journal = game.journal.get(journalId);
+    const page = journal?.pages.get(pageId);
+    if (page) page.sheet.render(true);
+  }
+
+  /**
+   * Open a note in edit mode.
+   * @param {PointerEvent} event - Click event
+   * @param {HTMLElement} target - Element with data-page-id and data-journal-id
+   */
+  static _onEditNote(event, target) {
+    const pageId = target.dataset.pageId;
+    const journalId = target.dataset.journalId;
+    const journal = game.journal.get(journalId);
+    const page = journal?.pages.get(pageId);
+    if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
   /**
@@ -695,11 +1034,12 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Advance time to midday (half of hoursPerDay).
+   * Advance time to solar midday (midpoint between sunrise and sunset).
    */
   static async _onToMidday() {
-    const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
-    await this.#advanceToHour(hoursPerDay / 2);
+    const calendar = this.calendar;
+    const targetHour = calendar?.solarMidday?.() ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
+    await this.#advanceToHour(targetHour);
   }
 
   /**
@@ -714,10 +1054,23 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Advance time to midnight (0:00 next day).
+   * Advance time to solar midnight (midpoint of night period).
    */
   static async _onToMidnight() {
-    await this.#advanceToHour(0, true);
+    const calendar = this.calendar;
+    if (calendar?.solarMidnight) {
+      const targetHour = calendar.solarMidnight();
+      const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
+      // Solar midnight may exceed hoursPerDay, meaning it's technically tomorrow
+      if (targetHour >= hoursPerDay) {
+        await this.#advanceToHour(targetHour - hoursPerDay, true);
+      } else {
+        await this.#advanceToHour(targetHour);
+      }
+    } else {
+      // Fallback: midnight = 0:00 next day
+      await this.#advanceToHour(0, true);
+    }
   }
 
   /**

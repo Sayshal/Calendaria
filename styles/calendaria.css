@@ -50,6 +50,14 @@
   /* Festival/special day colors */
   --calendaria-festival-border: rgb(212 175 55);
   --calendaria-festival-text: rgb(255 215 0);
+  --calendaria-festival-bg: rgb(212 175 55 / 15%);
+
+  /* Selection colors */
+  --calendaria-selected-bg: rgb(74 144 226 / 15%);
+
+  /* Note badge colors */
+  --calendaria-note-badge-bg: rgb(225 180 56);
+  --calendaria-note-badge-text: rgb(0 0 0);
 
   /* Event bar colors */
   --calendaria-event-shadow: rgb(0 0 0 / 20%);
@@ -2139,7 +2147,11 @@
 
   .color-categories-grid {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   .color-category {
@@ -2214,9 +2226,15 @@
     }
   }
 
-  footer.form-footer button {
-    flex: unset;
-    width: auto;
+  footer.form-footer {
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 0;
+
+    button {
+      flex: unset;
+      width: auto;
+    }
   }
 }
 
@@ -2225,8 +2243,8 @@
 /* ======================================== */
 
 .compact-calendar {
-  --compact-day-size: 45px;
-  --compact-gap: 2px;
+  --compact-day-size: 52px;
+  --compact-gap: 3px;
 
   position: fixed;
   z-index: 250;
@@ -2235,11 +2253,29 @@
     position: relative;
     background: var(--calendaria-bg);
     border: 1px solid var(--calendaria-border);
-    border-radius: 8px;
+    border-radius: 14px;
     box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
     overflow: visible;
     display: flex;
     flex-direction: column;
+    transition: border-radius 0.2s ease;
+
+    /* Unround right corners when sidebar is visible or locked */
+    &:has(.compact-sidebar:is(.visible, .locked)) {
+      border-radius: 14px 0 0 14px;
+
+      .compact-top-row {
+        border-radius: 14px 0 0;
+      }
+
+      .compact-time-display {
+        border-radius: 0 0 0 14px;
+      }
+
+      .compact-time-controls {
+        border-radius: 0 0 0 14px;
+      }
+    }
   }
 
   /* Top Row: Action Buttons + Close */
@@ -2250,7 +2286,8 @@
     padding: 6px 8px;
     background: var(--calendaria-bg-lighter);
     border-bottom: 1px solid var(--calendaria-border-light);
-    cursor: move;
+    border-radius: 14px 14px 0 0;
+    cursor: pointer;
 
     .spacer {
       flex: 1;
@@ -2269,7 +2306,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.15s, color 0.15s;
+      transition:
+        background 0.15s,
+        color 0.15s;
       flex-shrink: 0;
 
       &:hover {
@@ -2277,8 +2316,16 @@
       }
     }
 
-    .pin-btn.pinned {
+    .pin-btn.has-sticky {
+      color: var(--calendaria-primary);
+    }
+
+    .pin-btn.sticky-position {
       color: var(--calendaria-error);
+    }
+
+    &.position-locked {
+      cursor: default;
     }
   }
 
@@ -2286,8 +2333,8 @@
   .compact-sidebar {
     position: absolute;
     left: 100%;
-    top: 0;
-    bottom: 0;
+    top: -1px;
+    bottom: -1px;
     width: 30px;
     z-index: -1;
     display: flex;
@@ -2297,13 +2344,206 @@
     gap: 4px;
     background: var(--calendaria-bg-lighter);
     border-left: 1px solid var(--calendaria-border-light);
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 14px 14px 0;
     transform: translateX(-100%);
     transition: transform 0.2s ease;
   }
 
   .compact-sidebar.visible {
     transform: translateX(0);
+  }
+
+  .compact-sidebar.locked {
+    transform: translateX(0);
+  }
+
+  /* Unround sidebar right corners when notes panel is visible */
+  .compact-calendar-container:has(.compact-notes-panel.visible) .compact-sidebar {
+    border-radius: 0;
+  }
+
+  /* Notes Panel - slides out from sidebar */
+  .compact-notes-panel {
+    position: absolute;
+    left: calc(100% + 30px);
+    top: -1px;
+    bottom: -1px;
+    width: 220px;
+    z-index: -2;
+    display: flex;
+    flex-direction: column;
+    background: var(--calendaria-bg);
+    border: 1px solid var(--calendaria-border);
+    border-left: none;
+    border-radius: 0 14px 14px 0;
+    box-shadow: 4px 0 12px rgb(0 0 0 / 30%);
+    transform: translateX(-100%);
+    opacity: 0;
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+    pointer-events: none;
+  }
+
+  .compact-notes-panel.visible {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .notes-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 6px 8px;
+    background: var(--calendaria-bg-lighter);
+    border-bottom: 1px solid var(--calendaria-border-light);
+    border-radius: 0 14px 0 0;
+  }
+
+  .notes-panel-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--calendaria-title-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notes-panel-close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--calendaria-text);
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition:
+      background 0.15s,
+      color 0.15s;
+
+    &:hover {
+      background: var(--calendaria-bg-hover);
+      color: var(--calendaria-error);
+    }
+  }
+
+  .notes-panel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .notes-panel-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--calendaria-bg-lighter);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--calendaria-bg-hover);
+    }
+  }
+
+  .note-item-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 14px;
+    }
+
+    img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+  }
+
+  .note-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .note-item-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--calendaria-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .note-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    color: var(--calendaria-text-dim);
+  }
+
+  .note-item-time {
+    white-space: nowrap;
+  }
+
+  .note-item-author {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &::before {
+      content: '•';
+      margin-right: 6px;
+    }
+  }
+
+  .note-item-edit {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--calendaria-text-dim);
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0;
+    transition:
+      opacity 0.15s,
+      background 0.15s,
+      color 0.15s;
+
+    &:hover {
+      background: var(--calendaria-bg-hover);
+      color: var(--calendaria-primary);
+    }
+  }
+
+  .notes-panel-item:hover .note-item-edit {
+    opacity: 1;
   }
 
   .sidebar-btn {
@@ -2439,11 +2679,11 @@
 
     &.selected {
       box-shadow: inset 0 0 0 2px var(--calendaria-primary);
-      background: rgb(74 144 226 / 15%);
+      background: var(--calendaria-selected-bg);
     }
 
     &.festival {
-      background: rgb(212 175 55 / 15%);
+      background: var(--calendaria-festival-bg);
 
       .day-num {
         color: var(--calendaria-festival-text);
@@ -2456,15 +2696,21 @@
       color: var(--calendaria-day-number);
     }
 
-    .note-dot {
+    .note-badge {
       position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 5px;
-      height: 5px;
-      background: var(--calendaria-primary);
-      border-radius: 50%;
+      bottom: 2.5px;
+      left: 2.4px;
+      width: 15px;
+      height: 15px;
+      padding: 0 2px;
+      background: var(--calendaria-note-badge-bg);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--calendaria-note-badge-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .moon-tiny {
@@ -2473,7 +2719,6 @@
       right: 2px;
       width: 12px;
       height: 12px;
-      opacity: 0.7;
     }
   }
 
@@ -2487,6 +2732,7 @@
     padding: 8px 10px;
     background: var(--calendaria-bg-lighter);
     border-top: 1px solid var(--calendaria-border-light);
+    border-radius: 0 0 14px 14px;
     cursor: pointer;
 
     .time-value {
@@ -2550,8 +2796,11 @@
     padding: 8px 10px;
     background: var(--calendaria-bg-lighter);
     border-top: 1px solid var(--calendaria-border-light);
+    border-radius: 0 0 14px 14px;
     transform: translateY(-100%);
-    transition: transform 0.25s ease, margin-bottom 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      margin-bottom 0.25s ease;
 
     &.visible {
       margin-bottom: 0;
@@ -2640,6 +2889,16 @@
     &.date {
       font-size: 0.85rem;
     }
+  }
+}
+
+/* Context menu sticky option active indicator */
+#context-menu .context-item.sticky-active {
+  background: var(--calendaria-primary);
+  color: var(--color-text-light-highlight, rgb(255 255 255));
+
+  &:hover {
+    background: var(--calendaria-primary);
   }
 }
 

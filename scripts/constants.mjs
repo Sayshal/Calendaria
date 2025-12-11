@@ -101,7 +101,10 @@ export const SETTINGS = {
   COMPACT_CALENDAR_OPEN: 'compactCalendarOpen',
 
   /** @type {string} Delay in seconds before auto-hiding compact calendar controls */
-  COMPACT_CONTROLS_DELAY: 'compactControlsDelay'
+  COMPACT_CONTROLS_DELAY: 'compactControlsDelay',
+
+  /** @type {string} Sticky states for compact calendar (time controls, sidebar, position) */
+  COMPACT_STICKY_STATES: 'compactStickyStates'
 };
 
 /**

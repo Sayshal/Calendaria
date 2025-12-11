@@ -82,7 +82,10 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       gmOnly: new fields.BooleanField({ initial: false }),
 
       // Notification control - when true, suppresses automatic notifications when event triggers
-      silent: new fields.BooleanField({ initial: false })
+      silent: new fields.BooleanField({ initial: false }),
+
+      // Author - user ID of the creator (auto-set on creation)
+      author: new fields.DocumentAuthorField(foundry.documents.BaseUser)
     };
   }
 }

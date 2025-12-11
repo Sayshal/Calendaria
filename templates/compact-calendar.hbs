@@ -1,12 +1,12 @@
 <div class="compact-calendar-container">
   {{!-- Top Row: Open Full + Pin Controls + Close --}}
-  <div class="compact-top-row">
+  <div class="compact-top-row{{#if stickyPosition}} position-locked{{/if}}">
     <button type="button" class="action-btn" data-action="openFull"
       data-tooltip="{{localize 'CALENDARIA.CompactCalendar.OpenFull'}}">
       <i class="fas fa-expand"></i>
     </button>
     {{#if isGM}}
-    <button type="button" class="action-btn pin-btn{{#if controlsLocked}} pinned{{/if}}" data-action="toggleLock"
+    <button type="button" class="action-btn pin-btn{{#if hasAnyStickyMode}} has-sticky{{/if}}{{#if stickyTimeControls}} sticky-time{{/if}}{{#if stickySidebar}} sticky-sidebar{{/if}}{{#if stickyPosition}} sticky-position{{/if}}" data-action="toggleLock"
       data-tooltip="{{localize 'CALENDARIA.CompactCalendar.PinControls'}}">
       <i class="fas fa-thumbtack"></i>
     </button>
@@ -19,7 +19,7 @@
   </div>
 
   {{!-- Slim Right Sidebar --}}
-  <div class="compact-sidebar{{#if sidebarVisible}} visible{{/if}}">
+  <div class="compact-sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
     <button type="button" class="sidebar-btn" data-action="today"
       data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Today'}}">
       <i class="fas fa-calendar-day"></i>
@@ -34,6 +34,49 @@
       <i class="fas fa-calendar-plus"></i>
     </button>
     {{/if}}
+    {{#if showViewNotes}}
+    <button type="button" class="sidebar-btn" data-action="viewNotes"
+      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.ViewNotes'}}">
+      <i class="fas fa-list"></i>
+    </button>
+    {{/if}}
+  </div>
+
+  {{!-- Notes Panel (slides out from sidebar) --}}
+  <div class="compact-notes-panel{{#if notesPanelVisible}} visible{{/if}}">
+    <div class="notes-panel-header">
+      <span class="notes-panel-title">{{selectedDateLabel}}</span>
+      <button type="button" class="notes-panel-close" data-action="closeNotesPanel"
+        data-tooltip="{{localize 'CALENDARIA.CompactCalendar.CloseNotesPanel'}}">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="notes-panel-list">
+      {{#each selectedDateNotes}}
+      <div class="notes-panel-item" data-action="openNote" data-page-id="{{id}}" data-journal-id="{{parentId}}">
+        <div class="note-item-icon" style="color: {{color}}">
+          {{#if isImageIcon}}
+          <img src="{{icon}}" alt="" />
+          {{else}}
+          <i class="{{icon}}"></i>
+          {{/if}}
+        </div>
+        <div class="note-item-content">
+          <div class="note-item-title">{{name}}</div>
+          <div class="note-item-meta">
+            <span class="note-item-time">{{timeLabel}}</span>
+            <span class="note-item-author">{{author}}</span>
+          </div>
+        </div>
+        {{#if isOwner}}
+        <button type="button" class="note-item-edit" data-action="editNote" data-page-id="{{id}}" data-journal-id="{{parentId}}"
+          data-tooltip="{{localize 'CALENDARIA.ContextMenu.EditNote'}}">
+          <i class="fas fa-edit"></i>
+        </button>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
   </div>
 
   {{!-- Month Navigation Row --}}
@@ -71,7 +114,7 @@
         data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
         {{#if festivalName}}data-tooltip="{{festivalName}}"{{/if}}>
         <span class="day-num">{{day}}</span>
-        {{#if hasNotes}}<span class="note-dot"></span>{{/if}}
+        {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
         {{#if moonIcon}}<img class="moon-tiny" src="{{moonIcon}}" alt="{{moonPhase}}" data-tooltip="{{moonPhase}}" />{{/if}}
       </div>
       {{/if}}

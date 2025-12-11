@@ -31,8 +31,6 @@ const DEFAULT_COLORS = {
   buttonBorder: '#4a4a4a',
   primary: '#4a90e2',
   today: '#ff6400',
-  todayBg: '#ff640033',
-  currentHour: '#ff640020',
   festivalBorder: '#d4af37',
   festivalText: '#ffd700'
 };
@@ -62,8 +60,6 @@ const COLOR_DEFINITIONS = [
   // Accents
   { key: 'primary', label: 'CALENDARIA.ThemeEditor.Colors.Primary', category: 'accents' },
   { key: 'today', label: 'CALENDARIA.ThemeEditor.Colors.Today', category: 'accents' },
-  { key: 'todayBg', label: 'CALENDARIA.ThemeEditor.Colors.TodayBackground', category: 'accents' },
-  { key: 'currentHour', label: 'CALENDARIA.ThemeEditor.Colors.CurrentHour', category: 'accents' },
   // Festivals
   { key: 'festivalBorder', label: 'CALENDARIA.ThemeEditor.Colors.FestivalBorder', category: 'festivals' },
   { key: 'festivalText', label: 'CALENDARIA.ThemeEditor.Colors.FestivalText', category: 'festivals' }
@@ -396,8 +392,6 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       buttonBorder: '--calendaria-button-border',
       primary: '--calendaria-primary',
       today: '--calendaria-today',
-      todayBg: '--calendaria-today-bg',
-      currentHour: '--calendaria-current-hour',
       festivalBorder: '--calendaria-festival-border',
       festivalText: '--calendaria-festival-text'
     };
@@ -406,6 +400,32 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (colors[key]) {
         cssVars.push(`${cssVar}: ${colors[key]};`);
       }
+    }
+
+    // Derive semi-transparent variants from base colors
+    const hexToRgb = (hex) => {
+      const h = hex.replace('#', '');
+      return {
+        r: parseInt(h.substring(0, 2), 16),
+        g: parseInt(h.substring(2, 4), 16),
+        b: parseInt(h.substring(4, 6), 16)
+      };
+    };
+
+    if (colors.today) {
+      const { r, g, b } = hexToRgb(colors.today);
+      cssVars.push(`--calendaria-today-bg: rgb(${r} ${g} ${b} / 20%);`);
+      cssVars.push(`--calendaria-current-hour: rgb(${r} ${g} ${b} / 12%);`);
+    }
+
+    if (colors.primary) {
+      const { r, g, b } = hexToRgb(colors.primary);
+      cssVars.push(`--calendaria-selected-bg: rgb(${r} ${g} ${b} / 15%);`);
+    }
+
+    if (colors.festivalBorder) {
+      const { r, g, b } = hexToRgb(colors.festivalBorder);
+      cssVars.push(`--calendaria-festival-bg: rgb(${r} ${g} ${b} / 15%);`);
     }
 
     // Apply to .calendaria elements

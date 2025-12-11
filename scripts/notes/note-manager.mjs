@@ -280,20 +280,23 @@ export default class NoteManager {
       const dayOfMonth = sanitized.startDate.day;
       const sort = monthPage.sort + dayOfMonth;
 
-      const page = await JournalEntryPage.create({
-        name,
-        type: 'calendaria.calendarnote',
-        system: sanitized,
-        title: { level: 2, show: true },
-        flags: {
-          [MODULE.ID]: {
-            monthIndex,
-            calendarId
-          }
+      const page = await JournalEntryPage.create(
+        {
+          name,
+          type: 'calendaria.calendarnote',
+          system: sanitized,
+          title: { level: 2, show: true },
+          flags: {
+            [MODULE.ID]: {
+              monthIndex,
+              calendarId
+            }
+          },
+          sort,
+          ...journalData
         },
-        sort,
-        ...journalData
-      }, { parent: journal });
+        { parent: journal }
+      );
 
       log(3, `Created calendar note page: ${name} under ${monthPage.name}`);
       return page;
@@ -669,18 +672,21 @@ export default class NoteManager {
 
     // Create new description page
     try {
-      const page = await JournalEntryPage.create({
-        name: 'Calendar Description',
-        type: 'text',
-        text: { content: description },
-        title: { level: 1, show: true },
-        flags: {
-          [MODULE.ID]: {
-            isDescriptionPage: true
-          }
+      const page = await JournalEntryPage.create(
+        {
+          name: 'Calendar Description',
+          type: 'text',
+          text: { content: description },
+          title: { level: 1, show: true },
+          flags: {
+            [MODULE.ID]: {
+              isDescriptionPage: true
+            }
+          },
+          sort: 0
         },
-        sort: 0
-      }, { parent: journal });
+        { parent: journal }
+      );
 
       log(3, `Created description page for ${journal.name}`);
       return page;
@@ -719,19 +725,22 @@ export default class NoteManager {
         // Create new month page
         try {
           const monthName = game.i18n.localize(month.name);
-          const page = await JournalEntryPage.create({
-            name: monthName,
-            type: 'text',
-            text: { content: `<p>Events for this month will appear below.</p>` },
-            title: { level: 1, show: true },
-            flags: {
-              [MODULE.ID]: {
-                isMonthPage: true,
-                monthIndex: i
-              }
+          const page = await JournalEntryPage.create(
+            {
+              name: monthName,
+              type: 'text',
+              text: { content: `<p>Events for this month will appear below.</p>` },
+              title: { level: 1, show: true },
+              flags: {
+                [MODULE.ID]: {
+                  isMonthPage: true,
+                  monthIndex: i
+                }
+              },
+              sort: (i + 1) * 1000 // Leave room for description page at 0
             },
-            sort: (i + 1) * 1000 // Leave room for description page at 0
-          }, { parent: journal });
+            { parent: journal }
+          );
 
           log(3, `Created month page for ${monthName}`);
           monthPages.push(page);

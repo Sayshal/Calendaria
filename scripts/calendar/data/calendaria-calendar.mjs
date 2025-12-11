@@ -85,6 +85,26 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           system: new StringField({ required: false }) // e.g., "Forgotten Realms", "Eberron"
         },
         { required: false }
+      ),
+
+      /**
+       * Daylight configuration for dynamic sunrise/sunset
+       * @type {object}
+       */
+      daylight: new SchemaField(
+        {
+          /** Enable dynamic daylight calculation based on seasons */
+          enabled: new foundry.data.fields.BooleanField({ required: false, initial: false }),
+          /** Hours of daylight on the shortest day (winter solstice) */
+          shortestDay: new NumberField({ required: false, initial: 8, min: 0 }),
+          /** Hours of daylight on the longest day (summer solstice) */
+          longestDay: new NumberField({ required: false, initial: 16, min: 0 }),
+          /** Day of year for winter solstice (shortest day) - 0-indexed */
+          winterSolstice: new NumberField({ required: false, initial: 355, integer: true, min: 0 }),
+          /** Day of year for summer solstice (longest day) - 0-indexed */
+          summerSolstice: new NumberField({ required: false, initial: 172, integer: true, min: 0 })
+        },
+        { required: false }
       )
     };
   }
@@ -137,20 +157,94 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get the sunrise time for a given day.
+   * Uses dynamic daylight calculation if enabled, otherwise static 25% of day.
    * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
    * @returns {number}                      Sunrise time in hours.
    */
   sunrise(time = game.time.components) {
-    return this.days.hoursPerDay * 0.25;
+    const daylightHrs = this._getDaylightHoursForDay(time);
+    const midday = this.days.hoursPerDay / 2;
+    return midday - daylightHrs / 2;
   }
 
   /**
    * Get the sunset time for a given day.
+   * Uses dynamic daylight calculation if enabled, otherwise static 75% of day.
    * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
    * @returns {number}                      Sunset time in hours.
    */
   sunset(time = game.time.components) {
-    return this.days.hoursPerDay * 0.75;
+    const daylightHrs = this._getDaylightHoursForDay(time);
+    const midday = this.days.hoursPerDay / 2;
+    return midday + daylightHrs / 2;
+  }
+
+  /**
+   * Get solar midday - the midpoint between sunrise and sunset.
+   * This varies throughout the year when dynamic daylight is enabled.
+   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
+   * @returns {number}                      Solar midday time in hours.
+   */
+  solarMidday(time = game.time.components) {
+    return (this.sunrise(time) + this.sunset(time)) / 2;
+  }
+
+  /**
+   * Get solar midnight - the midpoint of the night period.
+   * This is halfway between sunset and the next sunrise.
+   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
+   * @returns {number}                      Solar midnight time in hours (may exceed hoursPerDay for next day).
+   */
+  solarMidnight(time = game.time.components) {
+    const sunsetHour = this.sunset(time);
+    const nightHours = this.days.hoursPerDay - this.daylightHours(time);
+    return sunsetHour + nightHours / 2;
+  }
+
+  /**
+   * Calculate daylight hours for a specific day based on dynamic daylight settings.
+   * @param {number|TimeComponents} [time]  The time to use.
+   * @returns {number}                      Hours of daylight for this day.
+   * @private
+   */
+  _getDaylightHoursForDay(time = game.time.components) {
+    // Default: static 50% daylight (sunrise at 25%, sunset at 75%)
+    if (!this.daylight?.enabled) {
+      return this.days.hoursPerDay * 0.5;
+    }
+
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+
+    // Calculate day of year (0-indexed)
+    let dayOfYear = components.dayOfMonth;
+    for (let i = 0; i < components.month; i++) {
+      dayOfYear += this.months.values[i]?.days ?? 0;
+    }
+
+    const daysPerYear = this.days.daysPerYear ?? 365;
+    const { shortestDay, longestDay, winterSolstice, summerSolstice } = this.daylight;
+
+    // Calculate position in the annual cycle using cosine interpolation
+    // Winter solstice = shortest day, Summer solstice = longest day
+    const daysSinceWinter = (dayOfYear - winterSolstice + daysPerYear) % daysPerYear;
+    const daysBetweenSolstices = (summerSolstice - winterSolstice + daysPerYear) % daysPerYear;
+
+    // Use cosine for smooth transition: 0 at winter, 1 at summer, 0 at winter again
+    let progress;
+    if (daysSinceWinter <= daysBetweenSolstices) {
+      // Between winter and summer solstice (days getting longer)
+      progress = daysSinceWinter / daysBetweenSolstices;
+    } else {
+      // Between summer and winter solstice (days getting shorter)
+      const daysSinceSummer = daysSinceWinter - daysBetweenSolstices;
+      const daysWinterToSummer = daysPerYear - daysBetweenSolstices;
+      progress = 1 - daysSinceSummer / daysWinterToSummer;
+    }
+
+    // Cosine interpolation for natural transition
+    const cosineProgress = (1 - Math.cos(progress * Math.PI)) / 2;
+
+    return shortestDay + (longestDay - shortestDay) * cosineProgress;
   }
 
   /**
