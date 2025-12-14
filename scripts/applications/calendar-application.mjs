@@ -292,8 +292,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
     });
 
-    // Get current season and era
-    const currentSeason = calendar.getCurrentSeason?.();
+    // Get season and era for the viewed month (use mid-month day for accuracy)
+    const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
+    const currentSeason = calendar.getCurrentSeason?.(viewedComponents);
     const currentEra = calendar.getCurrentEra?.();
 
     return {
@@ -411,8 +412,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     }
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
 
-    // Get current season and era
-    const currentSeason = calendar.getCurrentSeason?.();
+    // Get season and era for the viewed week (use mid-week day)
+    const midWeekDay = days[Math.floor(days.length / 2)];
+    const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: (midWeekDay?.day ?? day) - 1 };
+    const currentSeason = calendar.getCurrentSeason?.(viewedComponents);
     const currentEra = calendar.getCurrentEra?.();
 
     return {
@@ -468,8 +471,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       yearGrid.push(yearRow);
     }
 
-    // Get current season and era
-    const currentSeason = calendar.getCurrentSeason?.();
+    // Get season for the viewed year (use first month)
+    const viewedComponents = { month: 0, dayOfMonth: 0 };
+    const currentSeason = calendar.getCurrentSeason?.(viewedComponents);
     const currentEra = calendar.getCurrentEra?.();
 
     return {

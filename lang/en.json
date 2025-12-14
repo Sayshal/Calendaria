@@ -409,6 +409,9 @@
   "CALENDARIA.Importer.SimpleCalendar.Name": "Simple Calendar",
   "CALENDARIA.Importer.SimpleCalendar.NoCalendars": "No calendars found in Simple Calendar module settings.",
   "CALENDARIA.Importer.SimpleCalendar.NotInstalled": "Simple Calendar module is not installed or active.",
+  "CALENDARIA.Importer.FantasyCalendar.Description": "Import calendar data from Fantasy-Calendar.com JSON exports.",
+  "CALENDARIA.Importer.FantasyCalendar.InvalidFormat": "Invalid Fantasy-Calendar export format. Expected static_data and dynamic_data fields.",
+  "CALENDARIA.Importer.FantasyCalendar.Name": "Fantasy-Calendar.com",
   "CALENDARIA.Importer.Success": "Successfully imported calendar \"{name}\"",
   "CALENDARIA.Importer.Title": "Import Calendar",
   "CALENDARIA.Keybinds.ToggleCalendar.Hint": "Show or hide the calendar HUD",
@@ -566,5 +569,12 @@
   "CALENDARIA.UI.StartDateTooltip": "Select start date for this note",
   "CALENDARIA.UI.StartTimeTooltip": "Set the start time for this note",
   "CALENDARIA.UI.TimeTooltip": "Set the time of day for this note",
+  "CALENDARIA.Weekday.Friday": "Friday",
+  "CALENDARIA.Weekday.Monday": "Monday",
+  "CALENDARIA.Weekday.Saturday": "Saturday",
+  "CALENDARIA.Weekday.Sunday": "Sunday",
+  "CALENDARIA.Weekday.Thursday": "Thursday",
+  "CALENDARIA.Weekday.Tuesday": "Tuesday",
+  "CALENDARIA.Weekday.Wednesday": "Wednesday",
   "TYPES.JournalEntryPage.calendaria.calendarnote": "Calendar Note"
 }

@@ -133,7 +133,19 @@ export function dayOfWeek(date) {
       return (monthData.startingWeekday + dayIndex) % daysInWeek;
     }
 
-    const components = { year: date.year, month: date.month, day: date.day, hour: 0, minute: 0, second: 0 };
+    // Convert display year to internal year (subtract yearZero)
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const internalYear = date.year - yearZero;
+
+    // Convert day of month (1-indexed) to day of year (0-indexed)
+    // componentsToTime expects day as day-of-year, ignoring month
+    let dayOfYear = (date.day ?? 1) - 1; // Convert 1-indexed to 0-indexed
+    const monthDays = calendar.months?.values || [];
+    for (let i = 0; i < date.month && i < monthDays.length; i++) {
+      dayOfYear += monthDays[i]?.days || 30;
+    }
+
+    const components = { year: internalYear, day: dayOfYear, hour: 0, minute: 0, second: 0 };
     const time = calendar.componentsToTime(components);
     const timeComponents = calendar.timeToComponents(time);
 

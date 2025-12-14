@@ -259,9 +259,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if (currentWeek.length > 0) weeks.push(currentWeek);
 
-    // Get current season
+    // Get season for the viewed month (use mid-month day for accuracy)
     let season = null;
-    const currentSeason = calendar.getCurrentSeason?.();
+    const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
+    const currentSeason = calendar.getCurrentSeason?.(viewedComponents);
     if (currentSeason) season = game.i18n.localize(currentSeason.name);
 
     return {

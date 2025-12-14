@@ -70,7 +70,7 @@ export function validateNoteData(noteData) {
   if (noteData.allDay !== undefined && typeof noteData.allDay !== 'boolean') errors.push('allDay must be a boolean');
 
   // Validate repeat
-  const validRepeatValues = ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon'];
+  const validRepeatValues = ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked'];
   if (noteData.repeat && !validRepeatValues.includes(noteData.repeat)) errors.push(`repeat must be one of: ${validRepeatValues.join(', ')}`);
 
   // Validate repeat interval

@@ -241,7 +241,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #loadInitialData(data, suggestedId) {
     this.#calendarData = foundry.utils.deepClone(data);
 
+    // Debug: log incoming years config
+    log(3, `Initial data years config:`, data.years);
+    log(3, `Cloned data years config:`, this.#calendarData.years);
+
     // Ensure all required structures exist
+    if (!this.#calendarData.years) this.#calendarData.years = { yearZero: 0, firstWeekday: 0, leapYear: null };
     if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: [] };
     if (!this.#calendarData.eras) this.#calendarData.eras = [];
     if (!this.#calendarData.festivals) this.#calendarData.festivals = [];

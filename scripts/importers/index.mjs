@@ -9,6 +9,7 @@
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
 import SimpleCalendarImporter from './simple-calendar-importer.mjs';
+import FantasyCalendarImporter from './fantasy-calendar-importer.mjs';
 
 /**
  * Registry of all available importers.
@@ -97,6 +98,7 @@ export function initializeImporters() {
 
   // Register built-in importers
   registerImporter(SimpleCalendarImporter);
+  registerImporter(FantasyCalendarImporter);
 
   log(3, `Importer registry initialized with ${IMPORTERS.size} importers`);
 }
