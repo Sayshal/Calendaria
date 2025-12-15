@@ -62,13 +62,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
       /**
        * Festival/intercalary days (days outside normal calendar structure)
-       * @type {Array<{name: string, month: number, day: number}>}
+       * @type {Array<{name: string, month: number, day: number, leapYearOnly: boolean, countsForWeekday: boolean}>}
        */
       festivals: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
           month: new NumberField({ required: true, nullable: false, min: 1, integer: true }),
-          day: new NumberField({ required: true, nullable: false, min: 1, integer: true })
+          day: new NumberField({ required: true, nullable: false, min: 1, integer: true }),
+          leapYearOnly: new BooleanField({ required: false, initial: false }),
+          countsForWeekday: new BooleanField({ required: false, initial: true })
         })
       ),
 
@@ -193,6 +195,71 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           minute: new NumberField({ required: false, integer: true, initial: 0, min: 0 })
         },
         { required: false, nullable: true }
+      ),
+
+      /**
+       * Custom AM/PM notation for 12-hour time display.
+       * @type {object}
+       */
+      amPmNotation: new SchemaField(
+        {
+          am: new StringField({ required: false, initial: 'AM' }),
+          pm: new StringField({ required: false, initial: 'PM' })
+        },
+        { required: false }
+      ),
+
+      /**
+       * Canonical hours - named time-of-day periods (e.g., Matins, Lauds, Prime).
+       * @type {Array<{name: string, abbreviation: string, startHour: number, endHour: number}>}
+       */
+      canonicalHours: new ArrayField(
+        new SchemaField({
+          name: new StringField({ required: true }),
+          abbreviation: new StringField({ required: false }),
+          startHour: new NumberField({ required: true, nullable: false, min: 0, integer: true }),
+          endHour: new NumberField({ required: true, nullable: false, min: 0, integer: true })
+        })
+      ),
+
+      /**
+       * Named weeks configuration.
+       * Supports both month-based (reset each month) and year-based (ISO 8601 style) counting.
+       * @type {object}
+       */
+      weeks: new SchemaField(
+        {
+          enabled: new BooleanField({ required: false, initial: false }),
+          type: new StringField({
+            required: false,
+            initial: 'year-based',
+            choices: ['month-based', 'year-based']
+          }),
+          perMonth: new NumberField({ required: false, integer: true, min: 1 }),
+          names: new ArrayField(
+            new SchemaField({
+              name: new StringField({ required: true }),
+              abbreviation: new StringField({ required: false })
+            })
+          )
+        },
+        { required: false }
+      ),
+
+      /**
+       * Custom date format templates.
+       * Uses {{variable}} syntax with variables from dateFormattingParts().
+       * @type {object}
+       */
+      dateFormats: new SchemaField(
+        {
+          short: new StringField({ required: false, initial: '{{d}} {{b}}' }),
+          long: new StringField({ required: false, initial: '{{d}} {{B}}, {{y}}' }),
+          full: new StringField({ required: false, initial: '{{B}} {{d}}, {{y}}' }),
+          time: new StringField({ required: false, initial: '{{H}}:{{M}}' }),
+          time12: new StringField({ required: false, initial: '{{h}}:{{M}} {{p}}' })
+        },
+        { required: false }
       )
     };
   }
@@ -471,11 +538,20 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Find festival day for current day.
    * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, month: number, day: number}|null}
+   * @returns {{name: string, month: number, day: number, leapYearOnly: boolean}|null}
    */
   findFestivalDay(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    return this.festivals?.find((f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1) ?? null;
+    const displayYear = components.year + (this.years?.yearZero ?? 0);
+    const isLeap = this.isLeapYear(displayYear);
+
+    return this.festivals?.find((f) => {
+      // Check date match
+      if (f.month !== components.month + 1 || f.day !== components.dayOfMonth + 1) return false;
+      // If leap-year-only festival, only show in leap years
+      if (f.leapYearOnly && !isLeap) return false;
+      return true;
+    }) ?? null;
   }
 
   /**
@@ -485,6 +561,52 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   isFestivalDay(time = game.time.worldTime) {
     return this.findFestivalDay(time) !== null;
+  }
+
+  /**
+   * Count festival days that don't count for weekday calculation before a given date in the same year.
+   * Used to adjust weekday calculations for intercalary days.
+   * @param {number|TimeComponents} time  Time to check up to.
+   * @returns {number} Number of non-counting festival days before this date in the year.
+   */
+  countNonWeekdayFestivalsBefore(time) {
+    if (!this.festivals?.length) return 0;
+
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const displayYear = components.year + (this.years?.yearZero ?? 0);
+    const isLeap = this.isLeapYear(displayYear);
+
+    // Current date as 1-indexed (month: 1-N, day: 1-N)
+    const currentMonth = components.month + 1;
+    const currentDay = components.dayOfMonth + 1;
+
+    let count = 0;
+    for (const festival of this.festivals) {
+      // Skip festivals that count for weekdays (default behavior)
+      if (festival.countsForWeekday !== false) continue;
+
+      // Skip leap-year-only festivals in non-leap years
+      if (festival.leapYearOnly && !isLeap) continue;
+
+      // Check if festival is before current date (not including current date)
+      if (festival.month < currentMonth) {
+        count++;
+      } else if (festival.month === currentMonth && festival.day < currentDay) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Check if a specific date is a non-counting festival day.
+   * @param {number|TimeComponents} time  Time to check.
+   * @returns {boolean} True if date is a festival that doesn't count for weekdays.
+   */
+  isNonWeekdayFestival(time) {
+    const festival = this.findFestivalDay(time);
+    return festival?.countsForWeekday === false;
   }
 
   /* -------------------------------------------- */
@@ -822,6 +944,129 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /* -------------------------------------------- */
+  /*  Canonical Hour Methods                      */
+  /* -------------------------------------------- */
+
+  /**
+   * Get the current canonical hour for a given time.
+   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
+   * @returns {{name: string, abbreviation: string, startHour: number, endHour: number}|null}
+   */
+  getCanonicalHour(time = game.time.worldTime) {
+    if (!this.canonicalHours?.length) return null;
+
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const currentHour = components.hour;
+
+    // Find matching canonical hour
+    for (const ch of this.canonicalHours) {
+      // Handle wrapping (e.g., night watch from 22:00 to 03:00)
+      if (ch.startHour <= ch.endHour) {
+        // Normal range
+        if (currentHour >= ch.startHour && currentHour < ch.endHour) return ch;
+      } else {
+        // Wrapping range (crosses midnight)
+        if (currentHour >= ch.startHour || currentHour < ch.endHour) return ch;
+      }
+    }
+
+    // Fallback: check for exact end hour match (some definitions may use inclusive end)
+    for (const ch of this.canonicalHours) {
+      if (currentHour === ch.endHour) return ch;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get all canonical hours for this calendar.
+   * @returns {Array<{name: string, abbreviation: string, startHour: number, endHour: number}>}
+   */
+  getAllCanonicalHours() {
+    return this.canonicalHours ?? [];
+  }
+
+  /* -------------------------------------------- */
+  /*  Named Week Methods                          */
+  /* -------------------------------------------- */
+
+  /**
+   * Get the current week number and name for a given time.
+   * Supports both month-based and year-based week counting.
+   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
+   * @returns {{weekNumber: number, weekName: string, weekAbbr: string, type: string}|null}
+   */
+  getCurrentWeek(time = game.time.worldTime) {
+    if (!this.weeks?.enabled || !this.weeks?.names?.length) return null;
+
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const daysInWeek = this.days?.values?.length || 7;
+    const weekNames = this.weeks.names;
+
+    let weekNumber;
+    if (this.weeks.type === 'month-based') {
+      // Week number within the current month (1-indexed)
+      const dayOfMonth = components.dayOfMonth; // 0-indexed
+      weekNumber = Math.floor(dayOfMonth / daysInWeek);
+    } else {
+      // Week number within the year (0-indexed, then converted to 1-indexed)
+      let dayOfYear = components.dayOfMonth;
+      for (let i = 0; i < components.month; i++) {
+        dayOfYear += this.months.values[i]?.days ?? 0;
+      }
+      weekNumber = Math.floor(dayOfYear / daysInWeek);
+    }
+
+    // Get week name (cycle through names array)
+    const nameIndex = weekNumber % weekNames.length;
+    const week = weekNames[nameIndex];
+
+    return {
+      weekNumber: weekNumber + 1, // Convert to 1-indexed for display
+      weekName: game.i18n.localize(week?.name ?? ''),
+      weekAbbr: week?.abbreviation ? game.i18n.localize(week.abbreviation) : '',
+      type: this.weeks.type
+    };
+  }
+
+  /**
+   * Get week number within the year (1-indexed).
+   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
+   * @returns {number} Week number (1-indexed).
+   */
+  getWeekOfYear(time = game.time.worldTime) {
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const daysInWeek = this.days?.values?.length || 7;
+
+    let dayOfYear = components.dayOfMonth;
+    for (let i = 0; i < components.month; i++) {
+      dayOfYear += this.months.values[i]?.days ?? 0;
+    }
+
+    return Math.floor(dayOfYear / daysInWeek) + 1;
+  }
+
+  /**
+   * Get week number within the month (1-indexed).
+   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
+   * @returns {number} Week number (1-indexed).
+   */
+  getWeekOfMonth(time = game.time.worldTime) {
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const daysInWeek = this.days?.values?.length || 7;
+
+    return Math.floor(components.dayOfMonth / daysInWeek) + 1;
+  }
+
+  /**
+   * Get all named weeks for this calendar.
+   * @returns {Array<{name: string, abbreviation: string}>}
+   */
+  getAllNamedWeeks() {
+    return this.weeks?.names ?? [];
+  }
+
+  /* -------------------------------------------- */
   /*  Cycle Methods                               */
   /* -------------------------------------------- */
 
@@ -925,6 +1170,27 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   static dateFormattingParts(calendar, components) {
     const month = calendar.months.values[components.month];
     const year = components.year + (calendar.years?.yearZero ?? 0);
+
+    // 12-hour time calculation
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const midday = Math.floor(hoursPerDay / 2);
+    const hour24 = components.hour;
+    const isPM = hour24 >= midday;
+    const hour12 = hour24 === 0 ? midday : hour24 > midday ? hour24 - midday : hour24;
+    const amPm = calendar.amPmNotation ?? {};
+    const period = isPM ? (amPm.pm || 'PM') : (amPm.am || 'AM');
+
+    // Canonical hour lookup
+    const canonicalHour = calendar.getCanonicalHour?.(components);
+    const chName = canonicalHour ? game.i18n.localize(canonicalHour.name) : '';
+    const chAbbr = canonicalHour?.abbreviation ? game.i18n.localize(canonicalHour.abbreviation) : '';
+
+    // Named week lookup
+    const currentWeek = calendar.getCurrentWeek?.(components);
+    const weekName = currentWeek?.weekName ?? '';
+    const weekAbbr = currentWeek?.weekAbbr ?? '';
+    const weekNum = currentWeek?.weekNumber ?? calendar.getWeekOfYear?.(components) ?? 1;
+
     return {
       y: year,
       yyyy: String(year).padStart(4, '0'),
@@ -938,8 +1204,18 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       j: String(components.day + 1).padStart(3, '0'),
       w: String(components.dayOfWeek + 1),
       H: String(components.hour).padStart(2, '0'),
+      h: String(hour12),
+      hh: String(hour12).padStart(2, '0'),
       M: String(components.minute).padStart(2, '0'),
-      S: String(components.second).padStart(2, '0')
+      S: String(components.second).padStart(2, '0'),
+      p: period,
+      P: period.toUpperCase(),
+      ch: chName,
+      chAbbr: chAbbr,
+      W: weekNum,
+      WW: String(weekNum).padStart(2, '0'),
+      WN: weekName,
+      Wn: weekAbbr
     };
   }
 
@@ -998,5 +1274,88 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   static formatHoursMinutesSeconds(calendar, components, options = {}) {
     const context = CalendariaCalendar.dateFormattingParts(calendar, components);
     return `${context.H}:${context.M}:${context.S}`;
+  }
+
+  /**
+   * Format time in 12-hour format with AM/PM notation.
+   * @param {CalendariaCalendar} calendar  The calendar instance.
+   * @param {TimeComponents} components    Time components.
+   * @param {object} options               Formatting options.
+   * @param {boolean} [options.seconds=false]  Include seconds.
+   * @returns {string} Formatted time string (e.g., "3:45 PM").
+   */
+  static formatTime12Hour(calendar, components, options = {}) {
+    const context = CalendariaCalendar.dateFormattingParts(calendar, components);
+    if (options.seconds) {
+      return `${context.h}:${context.M}:${context.S} ${context.p}`;
+    }
+    return `${context.h}:${context.M} ${context.p}`;
+  }
+
+  /**
+   * Format a date using a custom template or predefined format.
+   * @param {CalendariaCalendar} calendar  The calendar instance.
+   * @param {TimeComponents} components    Time components.
+   * @param {string} format                Template key ('short', 'long', 'full', 'time', 'time12') or custom template.
+   * @returns {string} Formatted date string.
+   */
+  static formatDateWithTemplate(calendar, components, format = 'long') {
+    const context = CalendariaCalendar.dateFormattingParts(calendar, components);
+
+    // Get template from calendar's dateFormats or use format as template
+    let template;
+    if (calendar.dateFormats?.[format]) {
+      template = calendar.dateFormats[format];
+    } else if (format.includes('{{')) {
+      // Format is already a template
+      template = format;
+    } else {
+      // Fallback to default formats
+      const defaults = {
+        short: '{{d}} {{b}}',
+        long: '{{d}} {{B}}, {{y}}',
+        full: '{{B}} {{d}}, {{y}}',
+        time: '{{H}}:{{M}}',
+        time12: '{{h}}:{{M}} {{p}}'
+      };
+      template = defaults[format] ?? defaults.long;
+    }
+
+    // Replace all {{variable}} placeholders
+    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      return context[key] !== undefined ? context[key] : match;
+    });
+  }
+
+  /**
+   * Get available format variables with descriptions.
+   * @returns {object} Map of variable names to descriptions.
+   */
+  static getFormatVariables() {
+    return {
+      y: 'Year (e.g., 1492)',
+      yyyy: 'Year, zero-padded (e.g., 1492)',
+      B: 'Full month name (e.g., January)',
+      b: 'Month abbreviation (e.g., Jan)',
+      m: 'Month ordinal (e.g., 1)',
+      mm: 'Month ordinal, zero-padded (e.g., 01)',
+      d: 'Day of month (e.g., 5)',
+      dd: 'Day of month, zero-padded (e.g., 05)',
+      j: 'Day of year, zero-padded (e.g., 005)',
+      w: 'Day of week (1-7)',
+      H: 'Hour, 24-hour, zero-padded (e.g., 14)',
+      h: 'Hour, 12-hour (e.g., 2)',
+      hh: 'Hour, 12-hour, zero-padded (e.g., 02)',
+      M: 'Minute, zero-padded (e.g., 05)',
+      S: 'Second, zero-padded (e.g., 09)',
+      p: 'AM/PM (e.g., PM)',
+      P: 'AM/PM uppercase (e.g., PM)',
+      ch: 'Canonical hour name',
+      chAbbr: 'Canonical hour abbreviation',
+      W: 'Week number',
+      WW: 'Week number, zero-padded',
+      WN: 'Named week name',
+      Wn: 'Named week abbreviation'
+    };
   }
 }

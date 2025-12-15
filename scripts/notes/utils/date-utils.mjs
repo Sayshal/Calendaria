@@ -117,6 +117,7 @@ export function monthsBetween(startDate, endDate) {
 /**
  * Get day of week for a date (0 = first day of week).
  * Respects month's startingWeekday if set.
+ * Accounts for intercalary days that don't count for weekday calculation.
  * @param {object} date  Date to check
  * @returns {number}  Day of week index
  */
@@ -130,7 +131,15 @@ export function dayOfWeek(date) {
     if (monthData?.startingWeekday != null) {
       const daysInWeek = calendar.days?.values?.length || 7;
       const dayIndex = (date.day ?? 1) - 1;
-      return (monthData.startingWeekday + dayIndex) % daysInWeek;
+
+      // Adjust for non-counting festivals even within fixed-weekday months
+      const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({
+        year: date.year - (calendar.years?.yearZero ?? 0),
+        month: date.month,
+        dayOfMonth: (date.day ?? 1) - 1
+      }) ?? 0;
+
+      return (monthData.startingWeekday + dayIndex - nonCountingDays + daysInWeek * 100) % daysInWeek;
     }
 
     // Convert display year to internal year (subtract yearZero)
@@ -145,7 +154,17 @@ export function dayOfWeek(date) {
       dayOfYear += monthDays[i]?.days || 30;
     }
 
-    const components = { year: internalYear, day: dayOfYear, hour: 0, minute: 0, second: 0 };
+    // Count non-counting festival days before this date to adjust weekday calculation
+    const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({
+      year: internalYear,
+      month: date.month,
+      dayOfMonth: (date.day ?? 1) - 1
+    }) ?? 0;
+
+    // Adjust dayOfYear by subtracting non-counting days
+    const adjustedDayOfYear = dayOfYear - nonCountingDays;
+
+    const components = { year: internalYear, day: adjustedDayOfYear, hour: 0, minute: 0, second: 0 };
     const time = calendar.componentsToTime(components);
     const timeComponents = calendar.timeToComponents(time);
 

@@ -1953,16 +1953,65 @@
   .festivals-list {
     .col-name {
       flex: 2;
-      min-width: 120px;
+      min-width: 100px;
     }
 
     .col-month {
-      width: 130px;
+      width: 110px;
       flex: none;
     }
 
     .col-day {
+      width: 50px;
+      flex: none;
+    }
+
+    .col-leap,
+    .col-weekday {
+      width: 70px;
+      flex: none;
+      text-align: center;
+    }
+
+    .col-controls {
+      width: 50px;
+      flex: none;
+    }
+  }
+
+  /* Canonical hours columns */
+  .canonical-hours-list {
+    .col-name {
+      flex: 2;
+      min-width: 100px;
+    }
+
+    .col-abbr {
+      width: 80px;
+      flex: none;
+    }
+
+    .col-start,
+    .col-end {
       width: 60px;
+      flex: none;
+    }
+
+    .col-controls {
+      width: 50px;
+      flex: none;
+    }
+  }
+
+  /* Named weeks columns */
+  .named-weeks-list {
+    .col-name {
+      flex: 2;
+      min-width: 120px;
+    }
+
+    .col-abbr {
+      width: 100px;
       flex: none;
     }
 

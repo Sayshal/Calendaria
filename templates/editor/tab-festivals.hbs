@@ -8,6 +8,10 @@
           data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.FestivalMonth'}}">{{localize "CALENDARIA.Editor.Field.Month"}}</span>
         <span class="col-day"
           data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.FestivalDay'}}">{{localize "CALENDARIA.Editor.Column.Day"}}</span>
+        <span class="col-leap"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.LeapYearOnly'}}">{{localize "CALENDARIA.Editor.Field.LeapYearOnly"}}</span>
+        <span class="col-weekday"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CountsForWeekday'}}">{{localize "CALENDARIA.Editor.Field.CountsForWeekday"}}</span>
         <span class="col-controls"></span>
       </div>
 
@@ -21,6 +25,14 @@
             {{/each}}
           </select>
           <input type="number" name="festivals.{{this.index}}.day" value="{{this.day}}" min="1" class="col-day">
+
+          <label class="col-leap checkbox">
+            <input type="checkbox" name="festivals.{{this.index}}.leapYearOnly" {{#if this.leapYearOnly}}checked{{/if}}>
+          </label>
+
+          <label class="col-weekday checkbox">
+            <input type="checkbox" name="festivals.{{this.index}}.countsForWeekday" {{#unless (eq this.countsForWeekday false)}}checked{{/unless}}>
+          </label>
 
           <div class="item-controls col-controls">
             <button type="button" data-action="addFestival" data-index="{{this.index}}"

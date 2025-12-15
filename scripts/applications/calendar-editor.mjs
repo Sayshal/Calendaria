@@ -56,6 +56,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeCycle: CalendarEditor.#onRemoveCycle,
       addCycleEntry: CalendarEditor.#onAddCycleEntry,
       removeCycleEntry: CalendarEditor.#onRemoveCycleEntry,
+      addCanonicalHour: CalendarEditor.#onAddCanonicalHour,
+      removeCanonicalHour: CalendarEditor.#onRemoveCanonicalHour,
+      addNamedWeek: CalendarEditor.#onAddNamedWeek,
+      removeNamedWeek: CalendarEditor.#onRemoveNamedWeek,
       loadCalendar: CalendarEditor.#onLoadCalendar,
       saveCalendar: CalendarEditor.#onSaveCalendar,
       resetCalendar: CalendarEditor.#onResetCalendar,
@@ -201,6 +205,23 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       moons: [],
       cycles: [],
       cycleFormat: '',
+      canonicalHours: [],
+      weeks: {
+        enabled: false,
+        type: 'year-based',
+        names: []
+      },
+      amPmNotation: {
+        am: 'AM',
+        pm: 'PM'
+      },
+      dateFormats: {
+        short: '{{d}} {{b}}',
+        long: '{{d}} {{B}}, {{y}}',
+        full: '{{B}} {{d}}, {{y}}',
+        time: '{{H}}:{{M}}',
+        time12: '{{h}}:{{M}} {{p}}'
+      },
       metadata: {
         id: '',
         description: '',
@@ -514,6 +535,23 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cycleFormat = this.#calendarData.cycleFormat || '';
     context.basedOnOptions = basedOnOptions;
 
+    // Prepare canonical hours
+    context.canonicalHoursWithNav = (this.#calendarData.canonicalHours || []).map((ch, idx) => ({
+      ...ch,
+      index: idx
+    }));
+
+    // Prepare named weeks
+    const currentWeeksType = this.#calendarData.weeks?.type || 'year-based';
+    context.weeksTypeOptions = [
+      { value: 'year-based', label: 'CALENDARIA.Editor.WeeksType.YearBased', selected: currentWeeksType === 'year-based' },
+      { value: 'month-based', label: 'CALENDARIA.Editor.WeeksType.MonthBased', selected: currentWeeksType === 'month-based' }
+    ];
+    context.namedWeeksWithNav = (this.#calendarData.weeks?.names || []).map((week, idx) => ({
+      ...week,
+      index: idx
+    }));
+
     // Prepare solstice month/day values from day-of-year
     const daylight = this.#calendarData.daylight || {};
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
@@ -785,13 +823,32 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateErasFromFormData(data);
 
     // Process festivals array
-    this.#updateArrayFromFormData(data, 'festivals', this.#calendarData.festivals, ['name', 'month', 'day']);
+    this.#updateArrayFromFormData(data, 'festivals', this.#calendarData.festivals, ['name', 'month', 'day', 'leapYearOnly', 'countsForWeekday']);
 
     // Process moons array
     this.#updateMoonsFromFormData(data);
 
     // Process cycles array
     this.#updateCyclesFromFormData(data);
+
+    // AM/PM notation
+    if (!this.#calendarData.amPmNotation) this.#calendarData.amPmNotation = {};
+    this.#calendarData.amPmNotation.am = data['amPmNotation.am'] || 'AM';
+    this.#calendarData.amPmNotation.pm = data['amPmNotation.pm'] || 'PM';
+
+    // Date formats
+    if (!this.#calendarData.dateFormats) this.#calendarData.dateFormats = {};
+    this.#calendarData.dateFormats.short = data['dateFormats.short'] || '{{d}} {{b}}';
+    this.#calendarData.dateFormats.long = data['dateFormats.long'] || '{{d}} {{B}}, {{y}}';
+    this.#calendarData.dateFormats.full = data['dateFormats.full'] || '{{B}} {{d}}, {{y}}';
+    this.#calendarData.dateFormats.time = data['dateFormats.time'] || '{{H}}:{{M}}';
+    this.#calendarData.dateFormats.time12 = data['dateFormats.time12'] || '{{h}}:{{M}} {{p}}';
+
+    // Canonical hours
+    this.#updateCanonicalHoursFromFormData(data);
+
+    // Named weeks
+    this.#updateNamedWeeksFromFormData(data);
   }
 
   /**
@@ -822,7 +879,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         if (data[key] !== undefined) {
           if (field === 'leapDays' || field === 'startingWeekday') item[field] = isNaN(parseInt(data[key])) ? null : parseInt(data[key]);
           else if (field === 'days' || field === 'day' || field === 'month' || field === 'dayStart' || field === 'dayEnd') item[field] = parseInt(data[key]) || 0;
-          else if (field === 'isRestDay') item[field] = !!data[key];
+          else if (field === 'isRestDay' || field === 'leapYearOnly' || field === 'countsForWeekday') item[field] = !!data[key];
           else item[field] = data[key];
         }
       }
@@ -1037,6 +1094,64 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#calendarData.cycles = newCycles;
+  }
+
+  /**
+   * Update canonical hours from form data.
+   * @param {object} data - Form data
+   * @private
+   */
+  #updateCanonicalHoursFromFormData(data) {
+    const indices = new Set();
+    for (const key of Object.keys(data)) {
+      const match = key.match(/^canonicalHours\.(\d+)\./);
+      if (match) indices.add(parseInt(match[1]));
+    }
+
+    const sortedIndices = [...indices].sort((a, b) => a - b);
+    const newCanonicalHours = [];
+
+    for (const idx of sortedIndices) {
+      newCanonicalHours.push({
+        name: data[`canonicalHours.${idx}.name`] || '',
+        abbreviation: data[`canonicalHours.${idx}.abbreviation`] || '',
+        startHour: parseInt(data[`canonicalHours.${idx}.startHour`]) || 0,
+        endHour: parseInt(data[`canonicalHours.${idx}.endHour`]) || 0
+      });
+    }
+
+    this.#calendarData.canonicalHours = newCanonicalHours;
+  }
+
+  /**
+   * Update named weeks from form data.
+   * @param {object} data - Form data
+   * @private
+   */
+  #updateNamedWeeksFromFormData(data) {
+    if (!this.#calendarData.weeks) this.#calendarData.weeks = {};
+
+    this.#calendarData.weeks.enabled = !!data['weeks.enabled'];
+    this.#calendarData.weeks.type = data['weeks.type'] || 'year-based';
+
+    // Find all name indices
+    const indices = new Set();
+    for (const key of Object.keys(data)) {
+      const match = key.match(/^weeks\.names\.(\d+)\./);
+      if (match) indices.add(parseInt(match[1]));
+    }
+
+    const sortedIndices = [...indices].sort((a, b) => a - b);
+    const newNames = [];
+
+    for (const idx of sortedIndices) {
+      newNames.push({
+        name: data[`weeks.names.${idx}.name`] || '',
+        abbreviation: data[`weeks.names.${idx}.abbreviation`] || ''
+      });
+    }
+
+    this.#calendarData.weeks.names = newNames;
   }
 
   /* -------------------------------------------- */
@@ -1455,6 +1570,65 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!cycle?.entries || cycle.entries.length <= 1) return;
 
     cycle.entries.splice(entryIdx, 1);
+    this.render();
+  }
+
+  /**
+   * Add a new canonical hour.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onAddCanonicalHour(event, target) {
+    if (!this.#calendarData.canonicalHours) this.#calendarData.canonicalHours = [];
+    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.canonicalHours.length - 1;
+    const insertIdx = afterIdx + 1;
+    const totalHours = this.#calendarData.canonicalHours.length;
+    this.#calendarData.canonicalHours.splice(insertIdx, 0, {
+      name: game.i18n.format('CALENDARIA.Editor.Default.CanonicalHourName', { num: totalHours + 1 }),
+      abbreviation: '',
+      startHour: totalHours * 3,
+      endHour: (totalHours + 1) * 3
+    });
+    this.render();
+  }
+
+  /**
+   * Remove a canonical hour.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onRemoveCanonicalHour(event, target) {
+    const idx = parseInt(target.dataset.index);
+    this.#calendarData.canonicalHours.splice(idx, 1);
+    this.render();
+  }
+
+  /**
+   * Add a new named week.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onAddNamedWeek(event, target) {
+    if (!this.#calendarData.weeks) this.#calendarData.weeks = { enabled: false, type: 'year-based', names: [] };
+    if (!this.#calendarData.weeks.names) this.#calendarData.weeks.names = [];
+    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.weeks.names.length - 1;
+    const insertIdx = afterIdx + 1;
+    const totalWeeks = this.#calendarData.weeks.names.length;
+    this.#calendarData.weeks.names.splice(insertIdx, 0, {
+      name: game.i18n.format('CALENDARIA.Editor.Default.WeekName', { num: totalWeeks + 1 }),
+      abbreviation: ''
+    });
+    this.render();
+  }
+
+  /**
+   * Remove a named week.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onRemoveNamedWeek(event, target) {
+    const idx = parseInt(target.dataset.index);
+    this.#calendarData.weeks.names.splice(idx, 1);
     this.render();
   }
 
