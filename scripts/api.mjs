@@ -13,6 +13,10 @@ import NoteManager from './notes/note-manager.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import { log } from './utils/logger.mjs';
 import { HOOKS } from './constants.mjs';
+import { CalendarApplication } from './applications/calendar-application.mjs';
+import { CalendarEditor } from './applications/calendar-editor.mjs';
+import { CompactCalendar } from './applications/compact-calendar.mjs';
+import WeatherManager from './weather/weather-manager.mjs';
 
 /**
  * Public API for Calendaria module.
@@ -786,7 +790,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.openCalendar({ date: { year: 1492, month: 5, day: 1 } });
    */
   async openCalendar(options = {}) {
-    const { CalendarApplication } = await import('./applications/calendar-application.mjs');
     const app = new CalendarApplication();
     return app.render(true, options);
   },
@@ -806,7 +809,6 @@ export const CalendariaAPI = {
       return null;
     }
 
-    const { CalendarEditor } = await import('./applications/calendar-editor.mjs');
     const app = new CalendarEditor({ calendarId });
     return app.render(true);
   },
@@ -818,7 +820,6 @@ export const CalendariaAPI = {
    * CALENDARIA.api.showCompactCalendar();
    */
   async showCompactCalendar() {
-    const { CompactCalendar } = await import('./applications/compact-calendar.mjs');
     return CompactCalendar.show();
   },
 
@@ -828,7 +829,6 @@ export const CalendariaAPI = {
    * CALENDARIA.api.hideCompactCalendar();
    */
   async hideCompactCalendar() {
-    const { CompactCalendar } = await import('./applications/compact-calendar.mjs');
     CompactCalendar.hide();
   },
 
@@ -838,7 +838,6 @@ export const CalendariaAPI = {
    * CALENDARIA.api.toggleCompactCalendar();
    */
   async toggleCompactCalendar() {
-    const { CompactCalendar } = await import('./applications/compact-calendar.mjs');
     CompactCalendar.toggle();
   },
 
@@ -1042,7 +1041,7 @@ export const CalendariaAPI = {
    * if (weather) console.log(`Current weather: ${weather.label}`);
    */
   getCurrentWeather() {
-    return import('./weather/weather-manager.mjs').then((m) => m.default.getCurrentWeather());
+    return WeatherManager.getCurrentWeather();
   },
 
   /**
@@ -1056,7 +1055,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.setWeather('snow', { temperature: -5 });
    */
   async setWeather(presetId, options = {}) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.setWeather(presetId, options);
   },
 
@@ -1078,7 +1076,6 @@ export const CalendariaAPI = {
    * });
    */
   async setCustomWeather(weatherData) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.setCustomWeather(weatherData);
   },
 
@@ -1089,7 +1086,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.clearWeather();
    */
   async clearWeather() {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.clearWeather();
   },
 
@@ -1104,7 +1100,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.generateWeather({ climate: 'polar' });
    */
   async generateWeather(options = {}) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.generateAndSetWeather(options);
   },
 
@@ -1119,7 +1114,6 @@ export const CalendariaAPI = {
    * forecast.forEach(day => console.log(day.preset.label, day.temperature));
    */
   async getWeatherForecast(options = {}) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.getForecast(options);
   },
 
@@ -1131,7 +1125,6 @@ export const CalendariaAPI = {
    * console.log(climate); // 'temperate'
    */
   async getCurrentClimate() {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.getCurrentClimate();
   },
 
@@ -1143,7 +1136,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.setClimate('polar');
    */
   async setClimate(climateId) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.setClimate(climateId);
   },
 
@@ -1155,7 +1147,6 @@ export const CalendariaAPI = {
    * presets.forEach(p => console.log(p.id, p.label));
    */
   async getWeatherPresets() {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.getAllPresets();
   },
 
@@ -1167,7 +1158,6 @@ export const CalendariaAPI = {
    * climates.forEach(c => console.log(c.id, c.label));
    */
   async getClimateZones() {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.getClimateZones();
   },
 
@@ -1190,7 +1180,6 @@ export const CalendariaAPI = {
    * });
    */
   async addWeatherPreset(preset) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.addCustomPreset(preset);
   },
 
@@ -1202,7 +1191,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.removeWeatherPreset('acid-rain');
    */
   async removeWeatherPreset(presetId) {
-    const WeatherManager = (await import('./weather/weather-manager.mjs')).default;
     return WeatherManager.removeCustomPreset(presetId);
   },
 
