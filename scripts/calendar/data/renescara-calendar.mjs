@@ -1,33 +1,4 @@
 /**
- * TODO: Add the following to showcase all Calendaria features:
- *
- * Weather:
- * - weather.zones[] with multiple climate zones (e.g., temperate, arctic, tropical)
- * - weather.zones[].temperatures per-season temp ranges for each zone
- * - weather.zones[].presets with enabled presets and chance values
- *
- * Time & Eras:
- * - eras[] with era definitions (e.g., Age of Dawn, Age of Sundering)
- * - canonicalHours[] named time periods (e.g., Dawn Watch, High Sun, Eventide)
- * - amPmNotation custom AM/PM labels
- *
- * Cycles:
- * - cycles[] repeating named cycles (e.g., zodiac signs, elemental weeks)
- * - cycleFormat template for displaying cycle values
- *
- * Weeks:
- * - weeks.enabled, weeks.type, weeks.names[] for named week support
- *
- * Date Formats:
- * - dateFormats custom templates (short, long, full, time, time12)
- *
- * Moons (optional enhancements):
- * - moons[].color hex tint color
- * - moons[].hidden visibility toggle
- * - moons[].phases[].risingName/fadingName sub-phase names
- */
-
-/**
  * Renescarran Calendar
  * A unique calendar system for the world of Renescara.
  *
@@ -47,20 +18,38 @@
 import CalendariaCalendar from './calendaria-calendar.mjs';
 
 /**
- * Generate standard moon phases for a given cycle length.
- * @param {number} cycleLength - Length of the moon cycle in days
+ * Generate moon phases with custom names for Aela (Silver Sister).
  * @returns {Array} Array of moon phase definitions
  */
-function generateMoonPhases(cycleLength) {
+function generateAelaPhases() {
+  const prefix = 'CALENDARIA.Calendar.RENESCARA.Moon.Aela.Phase';
   return [
-    { name: 'CALENDARIA.MoonPhase.NewMoon', icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg', start: 0, end: 0.125 },
-    { name: 'CALENDARIA.MoonPhase.WaxingCrescent', icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg', start: 0.125, end: 0.25 },
-    { name: 'CALENDARIA.MoonPhase.FirstQuarter', icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg', start: 0.25, end: 0.375 },
-    { name: 'CALENDARIA.MoonPhase.WaxingGibbous', icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg', start: 0.375, end: 0.5 },
-    { name: 'CALENDARIA.MoonPhase.FullMoon', icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg', start: 0.5, end: 0.625 },
-    { name: 'CALENDARIA.MoonPhase.WaningGibbous', icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg', start: 0.625, end: 0.75 },
-    { name: 'CALENDARIA.MoonPhase.LastQuarter', icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg', start: 0.75, end: 0.875 },
-    { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg', start: 0.875, end: 1 }
+    { name: `${prefix}.DarkSister.Name`, risingName: `${prefix}.DarkSister.Rising`, fadingName: `${prefix}.DarkSister.Fading`, icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg', start: 0, end: 0.125 },
+    { name: `${prefix}.Growing.Name`, risingName: `${prefix}.Growing.Rising`, fadingName: `${prefix}.Growing.Fading`, icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg', start: 0.125, end: 0.25 },
+    { name: `${prefix}.Growing.Name`, risingName: `${prefix}.Growing.Rising`, fadingName: `${prefix}.Growing.Fading`, icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg', start: 0.25, end: 0.375 },
+    { name: `${prefix}.Growing.Name`, risingName: `${prefix}.Growing.Rising`, fadingName: `${prefix}.Growing.Fading`, icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg', start: 0.375, end: 0.5 },
+    { name: `${prefix}.SilverCrown.Name`, risingName: `${prefix}.SilverCrown.Rising`, fadingName: `${prefix}.SilverCrown.Fading`, icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg', start: 0.5, end: 0.625 },
+    { name: `${prefix}.Fading.Name`, risingName: `${prefix}.Fading.Rising`, fadingName: `${prefix}.Fading.Fading`, icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg', start: 0.625, end: 0.75 },
+    { name: `${prefix}.Fading.Name`, risingName: `${prefix}.Fading.Rising`, fadingName: `${prefix}.Fading.Fading`, icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg', start: 0.75, end: 0.875 },
+    { name: `${prefix}.Fading.Name`, risingName: `${prefix}.Fading.Rising`, fadingName: `${prefix}.Fading.Fading`, icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg', start: 0.875, end: 1 }
+  ];
+}
+
+/**
+ * Generate moon phases with ominous names for Ruan (Rust Wanderer).
+ * @returns {Array} Array of moon phase definitions
+ */
+function generateRuanPhases() {
+  const prefix = 'CALENDARIA.Calendar.RENESCARA.Moon.Ruan.Phase';
+  return [
+    { name: `${prefix}.HiddenEye.Name`, risingName: `${prefix}.HiddenEye.Rising`, fadingName: `${prefix}.HiddenEye.Fading`, icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg', start: 0, end: 0.125 },
+    { name: `${prefix}.Awakening.Name`, risingName: `${prefix}.Awakening.Rising`, fadingName: `${prefix}.Awakening.Fading`, icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg', start: 0.125, end: 0.25 },
+    { name: `${prefix}.Awakening.Name`, risingName: `${prefix}.Awakening.Rising`, fadingName: `${prefix}.Awakening.Fading`, icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg', start: 0.25, end: 0.375 },
+    { name: `${prefix}.Awakening.Name`, risingName: `${prefix}.Awakening.Rising`, fadingName: `${prefix}.Awakening.Fading`, icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg', start: 0.375, end: 0.5 },
+    { name: `${prefix}.BloodMoon.Name`, risingName: `${prefix}.BloodMoon.Rising`, fadingName: `${prefix}.BloodMoon.Fading`, icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg', start: 0.5, end: 0.625 },
+    { name: `${prefix}.Closing.Name`, risingName: `${prefix}.Closing.Rising`, fadingName: `${prefix}.Closing.Fading`, icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg', start: 0.625, end: 0.75 },
+    { name: `${prefix}.Closing.Name`, risingName: `${prefix}.Closing.Rising`, fadingName: `${prefix}.Closing.Fading`, icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg', start: 0.75, end: 0.875 },
+    { name: `${prefix}.Closing.Name`, risingName: `${prefix}.Closing.Rising`, fadingName: `${prefix}.Closing.Fading`, icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg', start: 0.875, end: 1 }
   ];
 }
 
@@ -141,21 +130,25 @@ export const RENESCARA_CALENDAR = {
     {
       name: 'CALENDARIA.Calendar.RENESCARA.Moon.Aela',
       cycleLength: 28,
-      phases: generateMoonPhases(28),
+      color: '#C0C0C0', // Silver
+      hidden: false,
+      phases: generateAelaPhases(),
       referenceDate: {
         year: 3247,
-        month: 0, // 0-indexed: Thawmoon
-        day: 1 // 1-indexed: First day of month
+        month: 0,
+        day: 1
       }
     },
     {
       name: 'CALENDARIA.Calendar.RENESCARA.Moon.Ruan',
       cycleLength: 73,
-      phases: generateMoonPhases(73),
+      color: '#B44622', // Rust-red
+      hidden: false,
+      phases: generateRuanPhases(),
       referenceDate: {
         year: 3247,
-        month: 0, // 0-indexed: Thawmoon
-        day: 19 // 1-indexed: Offset by 18 days (18 + 1 = 19)
+        month: 0,
+        day: 19
       }
     }
   ],
@@ -179,6 +172,206 @@ export const RENESCARA_CALENDAR = {
     description: 'CALENDARIA.Calendar.RENESCARA.Description',
     author: 'calendaria',
     system: 'Renescara'
+  },
+
+  // Weather zones - 4 regional climates with Gyre-influenced fantasy weather
+  weather: {
+    zones: [
+      {
+        id: 'valdris',
+        name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Valdris',
+        description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Valdris.Description',
+        temperatures: {
+          Spring: { min: -18, max: 10 },
+          Summer: { min: 10, max: 41 },
+          Autumn: { min: -3, max: 19 },
+          Winter: { min: -35, max: -4 },
+          _default: { min: -10, max: 15 }
+        },
+        presets: [
+          { id: 'clear', enabled: true, chance: 5 },
+          { id: 'partly-cloudy', enabled: true, chance: 4 },
+          { id: 'cloudy', enabled: true, chance: 3 },
+          { id: 'overcast', enabled: true, chance: 3 },
+          { id: 'snow', enabled: true, chance: 4 },
+          { id: 'blizzard', enabled: true, chance: 2 },
+          { id: 'fog', enabled: true, chance: 2 },
+          { id: 'windy', enabled: true, chance: 3 },
+          { id: 'aether-haze', enabled: true, chance: 2 },
+          { id: 'luminous-sky', enabled: true, chance: 3 },
+          { id: 'veilfall', enabled: true, chance: 1 },
+          { id: 'gravewind', enabled: true, chance: 2 },
+          { id: 'nullfront', enabled: true, chance: 2 },
+          { id: 'ley-surge', enabled: true, chance: 2 }
+        ]
+      },
+      {
+        id: 'lys',
+        name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Lys',
+        description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Lys.Description',
+        temperatures: {
+          Spring: { min: 5, max: 25 },
+          Summer: { min: 18, max: 38 },
+          Autumn: { min: 8, max: 28 },
+          Winter: { min: -5, max: 18 },
+          _default: { min: 8, max: 25 }
+        },
+        presets: [
+          { id: 'clear', enabled: true, chance: 6 },
+          { id: 'partly-cloudy', enabled: true, chance: 5 },
+          { id: 'cloudy', enabled: true, chance: 3 },
+          { id: 'rain', enabled: true, chance: 4 },
+          { id: 'drizzle', enabled: true, chance: 3 },
+          { id: 'thunderstorm', enabled: true, chance: 2 },
+          { id: 'fog', enabled: true, chance: 3 },
+          { id: 'windy', enabled: true, chance: 3 },
+          { id: 'aether-haze', enabled: true, chance: 2 },
+          { id: 'luminous-sky', enabled: true, chance: 1 },
+          { id: 'veilfall', enabled: true, chance: 1 },
+          { id: 'gravewind', enabled: true, chance: 1 },
+          { id: 'nullfront', enabled: true, chance: 1 },
+          { id: 'ley-surge', enabled: true, chance: 2 }
+        ]
+      },
+      {
+        id: 'sanctus',
+        name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Sanctus',
+        description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Sanctus.Description',
+        temperatures: {
+          Spring: { min: -25, max: 5 },
+          Summer: { min: -5, max: 22 },
+          Autumn: { min: -20, max: 8 },
+          Winter: { min: -50, max: -20 },
+          _default: { min: -20, max: 5 }
+        },
+        presets: [
+          { id: 'clear', enabled: true, chance: 4 },
+          { id: 'partly-cloudy', enabled: true, chance: 3 },
+          { id: 'cloudy', enabled: true, chance: 3 },
+          { id: 'overcast', enabled: true, chance: 4 },
+          { id: 'snow', enabled: true, chance: 5 },
+          { id: 'blizzard', enabled: true, chance: 4 },
+          { id: 'fog', enabled: true, chance: 2 },
+          { id: 'windy', enabled: true, chance: 4 },
+          { id: 'aether-haze', enabled: true, chance: 3 },
+          { id: 'luminous-sky', enabled: true, chance: 4 },
+          { id: 'veilfall', enabled: true, chance: 2 },
+          { id: 'gravewind', enabled: true, chance: 3 },
+          { id: 'nullfront', enabled: true, chance: 4 },
+          { id: 'ley-surge', enabled: true, chance: 2 }
+        ]
+      },
+      {
+        id: 'thornwood',
+        name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Thornwood',
+        description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Thornwood.Description',
+        temperatures: {
+          Spring: { min: -8, max: 22 },
+          Summer: { min: 12, max: 35 },
+          Autumn: { min: -2, max: 25 },
+          Winter: { min: -25, max: 5 },
+          _default: { min: 0, max: 20 }
+        },
+        presets: [
+          { id: 'clear', enabled: true, chance: 4 },
+          { id: 'partly-cloudy', enabled: true, chance: 4 },
+          { id: 'cloudy', enabled: true, chance: 3 },
+          { id: 'overcast', enabled: true, chance: 3 },
+          { id: 'rain', enabled: true, chance: 3 },
+          { id: 'fog', enabled: true, chance: 4 },
+          { id: 'mist', enabled: true, chance: 4 },
+          { id: 'thunderstorm', enabled: true, chance: 2 },
+          { id: 'aether-haze', enabled: true, chance: 4 },
+          { id: 'luminous-sky', enabled: true, chance: 2 },
+          { id: 'veilfall', enabled: true, chance: 5 },
+          { id: 'gravewind', enabled: true, chance: 4 },
+          { id: 'nullfront', enabled: true, chance: 3 },
+          { id: 'ley-surge', enabled: true, chance: 5 }
+        ]
+      }
+    ]
+  },
+
+  // Eras - Three Ages of Renescara
+  eras: [
+    {
+      name: 'CALENDARIA.Calendar.RENESCARA.Era.FirstAge',
+      abbreviation: 'CALENDARIA.Calendar.RENESCARA.Era.FirstAge.Abbr',
+      startYear: -2000,
+      endYear: -500,
+      template: 'Year {{yearInEra}} of the {{era}}'
+    },
+    {
+      name: 'CALENDARIA.Calendar.RENESCARA.Era.DarkCenturies',
+      abbreviation: 'CALENDARIA.Calendar.RENESCARA.Era.DarkCenturies.Abbr',
+      startYear: -500,
+      endYear: 0,
+      template: 'Year {{yearInEra}} of the {{era}}'
+    },
+    {
+      name: 'CALENDARIA.Calendar.RENESCARA.Era.SecondAge',
+      abbreviation: 'CALENDARIA.Calendar.RENESCARA.Era.SecondAge.Abbr',
+      startYear: 1,
+      endYear: null,
+      template: 'Year {{year}} of the {{era}}'
+    }
+  ],
+
+  // Canonical hours - 6 watches based on weekday themes
+  canonicalHours: [
+    { name: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.DawnWatch', abbreviation: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.DawnWatch.Abbr', startHour: 5, endHour: 9 },
+    { name: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.IronHours', abbreviation: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.IronHours.Abbr', startHour: 9, endHour: 13 },
+    { name: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.GreenHours', abbreviation: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.GreenHours.Abbr', startHour: 13, endHour: 17 },
+    { name: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.MerchantsBell', abbreviation: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.MerchantsBell.Abbr', startHour: 17, endHour: 21 },
+    { name: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.ShadeHours', abbreviation: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.ShadeHours.Abbr', startHour: 21, endHour: 1 },
+    { name: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.MoonWatch', abbreviation: 'CALENDARIA.Calendar.RENESCARA.CanonicalHour.MoonWatch.Abbr', startHour: 1, endHour: 5 }
+  ],
+
+  // AM/PM notation - Sunward/Moonward
+  amPmNotation: {
+    am: 'CALENDARIA.Calendar.RENESCARA.Time.Sunward',
+    pm: 'CALENDARIA.Calendar.RENESCARA.Time.Moonward',
+    amAbbr: 'CALENDARIA.Calendar.RENESCARA.Time.Sunward.Abbr',
+    pmAbbr: 'CALENDARIA.Calendar.RENESCARA.Time.Moonward.Abbr'
+  },
+
+  // Cycles - The Five Wanderers (5-year planetary cycle)
+  cycles: [
+    {
+      name: 'CALENDARIA.Calendar.RENESCARA.Cycle.FiveWanderers',
+      length: 5,
+      offset: 0,
+      basedOn: 'year',
+      entries: [
+        { name: 'CALENDARIA.Calendar.RENESCARA.Cycle.Ferrus' },
+        { name: 'CALENDARIA.Calendar.RENESCARA.Cycle.Verdantis' },
+        { name: 'CALENDARIA.Calendar.RENESCARA.Cycle.Crystallus' },
+        { name: 'CALENDARIA.Calendar.RENESCARA.Cycle.Umbralis' },
+        { name: 'CALENDARIA.Calendar.RENESCARA.Cycle.Temporis' }
+      ]
+    }
+  ],
+  cycleFormat: 'Year of {{1}}',
+
+  // Weeks - Month-based with thematic names
+  weeks: {
+    enabled: true,
+    type: 'month-based',
+    names: [
+      { name: 'CALENDARIA.Calendar.RENESCARA.Week.Rising', abbreviation: 'CALENDARIA.Calendar.RENESCARA.Week.Rising.Abbr' },
+      { name: 'CALENDARIA.Calendar.RENESCARA.Week.Fullness', abbreviation: 'CALENDARIA.Calendar.RENESCARA.Week.Fullness.Abbr' },
+      { name: 'CALENDARIA.Calendar.RENESCARA.Week.Turning', abbreviation: 'CALENDARIA.Calendar.RENESCARA.Week.Turning.Abbr' },
+      { name: 'CALENDARIA.Calendar.RENESCARA.Week.Fading', abbreviation: 'CALENDARIA.Calendar.RENESCARA.Week.Fading.Abbr' }
+    ]
+  },
+
+  // Date formats
+  dateFormats: {
+    short: '{{d}} {{b}}',
+    long: '{{d}} {{B}}, {{y}}',
+    full: '{{B}} {{d}}, {{y}} ({{ch}})',
+    time: '{{H}}:{{M}}',
+    time12: '{{h}}:{{M}} {{p}}'
   }
 };
 
