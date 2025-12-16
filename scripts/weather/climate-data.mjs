@@ -1,80 +1,103 @@
 /**
- * Climate zone definitions for procedural weather generation.
- * Each climate defines temperature ranges and weather probabilities by season.
+ * Climate zone templates for procedural weather generation.
+ * Each template defines default temperature ranges and weather probabilities by season.
+ * Templates can be copied to create calendar-specific climate zones.
  *
  * @module Weather/ClimateData
  * @author Tyler
  */
 
+import { ALL_PRESETS } from './weather-presets.mjs';
+
 /**
- * Climate zone definitions.
+ * Climate zone template definitions.
  * Weather probabilities are relative weights (higher = more likely).
+ * Temperatures are stored per-season with a _default fallback.
  *
  * @type {object}
  */
-export const CLIMATE_ZONES = {
-  tropical: {
-    id: 'tropical',
-    label: 'CALENDARIA.Weather.Climate.Tropical',
-    description: 'CALENDARIA.Weather.Climate.TropicalDesc',
-    temperature: {
-      default: { min: 24, max: 35 }
+export const CLIMATE_ZONE_TEMPLATES = {
+  arctic: {
+    id: 'arctic',
+    name: 'CALENDARIA.Weather.Climate.Arctic',
+    description: 'CALENDARIA.Weather.Climate.ArcticDesc',
+    temperatures: {
+      Spring: { min: -15, max: 0 },
+      Summer: { min: -5, max: 8 },
+      Autumn: { min: -20, max: -5 },
+      Winter: { min: -45, max: -20 },
+      _default: { min: -25, max: -5 }
     },
     weather: {
+      summer: {
+        clear: 3,
+        'partly-cloudy': 3,
+        snow: 3,
+        blizzard: 2,
+        windy: 3,
+        fog: 1
+      },
+      winter: {
+        blizzard: 6,
+        snow: 5,
+        overcast: 2,
+        windy: 4
+      },
       default: {
-        clear: 8,
-        'partly-cloudy': 5,
-        rain: 7,
-        thunderstorm: 3,
-        fog: 2,
-        sunshower: 1
+        snow: 5,
+        blizzard: 4,
+        overcast: 3,
+        windy: 3,
+        clear: 1
       }
     }
   },
 
-  subtropical: {
-    id: 'subtropical',
-    label: 'CALENDARIA.Weather.Climate.Subtropical',
-    description: 'CALENDARIA.Weather.Climate.SubtropicalDesc',
-    temperature: {
-      summer: { min: 15, max: 32 },
-      winter: { min: 5, max: 17 },
-      default: { min: 10, max: 25 }
+  subarctic: {
+    id: 'subarctic',
+    name: 'CALENDARIA.Weather.Climate.Subarctic',
+    description: 'CALENDARIA.Weather.Climate.SubarcticDesc',
+    temperatures: {
+      Spring: { min: -10, max: 8 },
+      Summer: { min: 5, max: 18 },
+      Autumn: { min: -5, max: 10 },
+      Winter: { min: -35, max: -10 },
+      _default: { min: -10, max: 5 }
     },
     weather: {
       summer: {
-        clear: 5,
+        clear: 4,
         'partly-cloudy': 4,
-        rain: 5,
-        drizzle: 2,
-        sunshower: 1
+        rain: 3,
+        snow: 1,
+        mist: 2
       },
       winter: {
-        clear: 2,
-        cloudy: 4,
-        rain: 3,
-        mist: 2,
-        fog: 1
+        snow: 6,
+        blizzard: 4,
+        overcast: 3,
+        windy: 3
       },
       default: {
-        clear: 4,
-        'partly-cloudy': 5,
+        snow: 4,
         cloudy: 3,
-        rain: 2
+        overcast: 3,
+        windy: 2,
+        clear: 2
       }
     }
   },
 
   temperate: {
     id: 'temperate',
-    label: 'CALENDARIA.Weather.Climate.Temperate',
+    name: 'CALENDARIA.Weather.Climate.Temperate',
     description: 'CALENDARIA.Weather.Climate.TemperateDesc',
-    temperature: {
-      summer: { min: 18, max: 30 },
-      winter: { min: -5, max: 5 },
-      spring: { min: 8, max: 18 },
-      autumn: { min: 8, max: 18 },
-      default: { min: 8, max: 20 }
+    temperatures: {
+      Spring: { min: 8, max: 18 },
+      Summer: { min: 18, max: 30 },
+      Autumn: { min: 8, max: 18 },
+      Winter: { min: -5, max: 5 },
+      _default: { min: 8, max: 20 }
     },
     weather: {
       summer: {
@@ -114,14 +137,108 @@ export const CLIMATE_ZONES = {
     }
   },
 
+  subtropical: {
+    id: 'subtropical',
+    name: 'CALENDARIA.Weather.Climate.Subtropical',
+    description: 'CALENDARIA.Weather.Climate.SubtropicalDesc',
+    temperatures: {
+      Spring: { min: 15, max: 28 },
+      Summer: { min: 22, max: 35 },
+      Autumn: { min: 15, max: 28 },
+      Winter: { min: 5, max: 17 },
+      _default: { min: 12, max: 28 }
+    },
+    weather: {
+      summer: {
+        clear: 5,
+        'partly-cloudy': 4,
+        rain: 5,
+        drizzle: 2,
+        thunderstorm: 3,
+        sunshower: 1
+      },
+      winter: {
+        clear: 2,
+        cloudy: 4,
+        rain: 3,
+        mist: 2,
+        fog: 1
+      },
+      default: {
+        clear: 4,
+        'partly-cloudy': 5,
+        cloudy: 3,
+        rain: 2
+      }
+    }
+  },
+
+  tropical: {
+    id: 'tropical',
+    name: 'CALENDARIA.Weather.Climate.Tropical',
+    description: 'CALENDARIA.Weather.Climate.TropicalDesc',
+    temperatures: {
+      Spring: { min: 24, max: 32 },
+      Summer: { min: 26, max: 35 },
+      Autumn: { min: 24, max: 32 },
+      Winter: { min: 22, max: 30 },
+      _default: { min: 24, max: 35 }
+    },
+    weather: {
+      default: {
+        clear: 8,
+        'partly-cloudy': 5,
+        rain: 7,
+        thunderstorm: 3,
+        fog: 2,
+        sunshower: 1
+      }
+    }
+  },
+
+  arid: {
+    id: 'arid',
+    name: 'CALENDARIA.Weather.Climate.Arid',
+    description: 'CALENDARIA.Weather.Climate.AridDesc',
+    temperatures: {
+      Spring: { min: 18, max: 35 },
+      Summer: { min: 28, max: 48 },
+      Autumn: { min: 18, max: 35 },
+      Winter: { min: 5, max: 22 },
+      _default: { min: 15, max: 40 }
+    },
+    weather: {
+      summer: {
+        clear: 10,
+        'partly-cloudy': 3,
+        sandstorm: 2,
+        windy: 1
+      },
+      winter: {
+        clear: 6,
+        'partly-cloudy': 4,
+        cloudy: 2,
+        drizzle: 1
+      },
+      default: {
+        clear: 8,
+        'partly-cloudy': 4,
+        sandstorm: 1,
+        windy: 1
+      }
+    }
+  },
+
   polar: {
     id: 'polar',
-    label: 'CALENDARIA.Weather.Climate.Polar',
+    name: 'CALENDARIA.Weather.Climate.Polar',
     description: 'CALENDARIA.Weather.Climate.PolarDesc',
-    temperature: {
-      summer: { min: -5, max: 10 },
-      winter: { min: -40, max: -10 },
-      default: { min: -15, max: 0 }
+    temperatures: {
+      Spring: { min: -20, max: -5 },
+      Summer: { min: -5, max: 10 },
+      Autumn: { min: -25, max: -10 },
+      Winter: { min: -50, max: -25 },
+      _default: { min: -30, max: -10 }
     },
     weather: {
       summer: {
@@ -149,50 +266,66 @@ export const CLIMATE_ZONES = {
 };
 
 /**
- * Get a climate zone by ID.
+ * Get a climate zone template by ID.
  * @param {string} id - Climate zone ID
- * @returns {object|null} Climate zone or null
+ * @returns {object|null} Climate zone template or null
  */
-export function getClimateZone(id) {
-  return CLIMATE_ZONES[id] ?? null;
+export function getClimateZoneTemplate(id) {
+  return CLIMATE_ZONE_TEMPLATES[id] ?? null;
 }
 
 /**
- * Get all climate zone IDs.
+ * Get all climate zone template IDs.
  * @returns {string[]} Climate zone IDs
  */
-export function getClimateZoneIds() {
-  return Object.keys(CLIMATE_ZONES);
+export function getClimateZoneTemplateIds() {
+  return Object.keys(CLIMATE_ZONE_TEMPLATES);
 }
 
 /**
- * Get weather probabilities for a climate and season.
- * Falls back to 'default' if season not defined.
- * @param {string} climateId - Climate zone ID
- * @param {string} [season] - Season name (spring, summer, autumn, winter)
- * @returns {object} Weather probabilities map
+ * Get a fully populated zone config object from a template.
+ * Includes preset configurations based on the template's weather probabilities.
+ * @param {string} templateId - Climate zone template ID
+ * @param {string[]} [seasonNames=['Spring', 'Summer', 'Autumn', 'Winter']] - Season names for temperature keys
+ * @returns {object|null} Populated zone config object
  */
-export function getWeatherProbabilities(climateId, season) {
-  const climate = getClimateZone(climateId);
-  if (!climate) return {};
+export function getDefaultZoneConfig(templateId, seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']) {
+  const template = getClimateZoneTemplate(templateId);
+  if (!template) return null;
 
-  const seasonLower = season?.toLowerCase();
-  return climate.weather[seasonLower] ?? climate.weather.default ?? {};
-}
+  // Build temperatures object using provided season names
+  const temperatures = { _default: template.temperatures._default ?? { min: 10, max: 22 } };
+  for (const season of seasonNames) {
+    // Try to match season name to template temperatures
+    const templateTemp = template.temperatures[season] ?? template.temperatures[season.toLowerCase()] ?? template.temperatures._default;
+    if (templateTemp) temperatures[season] = { ...templateTemp };
+  }
 
-/**
- * Get temperature range for a climate and season.
- * Falls back to 'default' if season not defined.
- * @param {string} climateId - Climate zone ID
- * @param {string} [season] - Season name
- * @returns {object} Temperature range { min, max }
- */
-export function getTemperatureRange(climateId, season) {
-  const climate = getClimateZone(climateId);
-  if (!climate) return { min: 10, max: 20 };
+  // Build preset configurations from weather probabilities
+  const presets = [];
+  const defaultWeather = template.weather?.default ?? {};
+  const totalWeight = Object.values(defaultWeather).reduce((sum, w) => sum + w, 0);
 
-  const seasonLower = season?.toLowerCase();
-  return climate.temperature[seasonLower] ?? climate.temperature.default ?? { min: 10, max: 20 };
+  for (const preset of ALL_PRESETS) {
+    const weight = defaultWeather[preset.id] ?? 0;
+    const chance = totalWeight > 0 ? Math.round((weight / totalWeight) * 100 * 100) / 100 : 0;
+
+    presets.push({
+      id: preset.id,
+      enabled: weight > 0,
+      chance,
+      tempMin: preset.tempMin ?? null,
+      tempMax: preset.tempMax ?? null
+    });
+  }
+
+  return {
+    id: template.id,
+    name: template.name,
+    description: template.description ?? '',
+    temperatures,
+    presets
+  };
 }
 
 /**
@@ -212,4 +345,15 @@ export function normalizeSeasonName(seasonName) {
   if (lower.includes('winter') || lower.includes('hibernal')) return 'winter';
 
   return 'default';
+}
+
+/**
+ * Get all template IDs as options for a dropdown.
+ * @returns {Array<{value: string, label: string}>} Options array
+ */
+export function getClimateTemplateOptions() {
+  return Object.values(CLIMATE_ZONE_TEMPLATES).map((t) => ({
+    value: t.id,
+    label: t.name
+  }));
 }

@@ -1,13 +1,13 @@
 /**
  * Procedural weather generation based on climate zones and seasons.
  * Uses weighted random selection with optional seeded randomness.
+ * Uses zone-based config from calendar for generation.
  *
  * @module Weather/WeatherGenerator
  * @author Tyler
  */
 
-import { getWeatherProbabilities, getTemperatureRange, normalizeSeasonName } from './climate-data.mjs';
-import { getPreset, getAllPresets } from './weather-presets.mjs';
+import { getPreset } from './weather-presets.mjs';
 
 /**
  * Seeded random number generator (mulberry32).
@@ -58,28 +58,51 @@ function weightedSelect(weights, randomFn = Math.random) {
 }
 
 /**
- * Generate weather for a given climate and season.
+ * Generate weather using zone config from calendar.
  * @param {object} options - Generation options
- * @param {string} options.climate - Climate zone ID
- * @param {string} [options.season] - Season name
+ * @param {object} options.zoneConfig - Climate zone config object from calendar
+ * @param {string} [options.season] - Season name for temperature lookup
  * @param {number} [options.seed] - Random seed for deterministic generation
  * @param {object[]} [options.customPresets=[]] - Custom weather presets
  * @returns {object} Generated weather { preset, temperature }
  */
-export function generateWeather({ climate, season, seed, customPresets = [] }) {
+export function generateWeather({ zoneConfig, season, seed, customPresets = [] }) {
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
 
-  // Get weather probabilities for this climate/season
-  const probabilities = getWeatherProbabilities(climate, normalizeSeasonName(season));
+  // Build probability map from enabled presets
+  const probabilities = {};
+  for (const preset of zoneConfig?.presets ?? []) {
+    if (preset.enabled && preset.chance > 0) {
+      probabilities[preset.id] = preset.chance;
+    }
+  }
+
+  // If no presets enabled, default to clear
+  if (Object.keys(probabilities).length === 0) {
+    probabilities.clear = 1;
+  }
 
   // Select weather type
   const weatherId = weightedSelect(probabilities, randomFn);
-
-  // Get the preset
   const preset = getPreset(weatherId, customPresets);
 
-  // Generate temperature
-  const tempRange = getTemperatureRange(climate, normalizeSeasonName(season));
+  // Get temperature range from zone config
+  let tempRange = { min: 10, max: 22 };
+  if (zoneConfig?.temperatures) {
+    const temps = zoneConfig.temperatures;
+    // Try season, then _default
+    if (season && temps[season]) {
+      tempRange = temps[season];
+    } else if (temps._default) {
+      tempRange = temps._default;
+    }
+  }
+
+  // Check for preset-specific temperature overrides
+  const presetConfig = zoneConfig?.presets?.find((p) => p.id === weatherId);
+  if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
+  if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
+
   const temperature = Math.round(tempRange.min + randomFn() * (tempRange.max - tempRange.min));
 
   return {
@@ -89,10 +112,10 @@ export function generateWeather({ climate, season, seed, customPresets = [] }) {
 }
 
 /**
- * Generate weather for a specific date.
+ * Generate weather for a specific date using zone config.
  * Uses date-based seeding for consistent results.
  * @param {object} options - Generation options
- * @param {string} options.climate - Climate zone ID
+ * @param {object} options.zoneConfig - Climate zone config
  * @param {string} [options.season] - Season name
  * @param {number} options.year - Year
  * @param {number} options.month - Month (0-indexed)
@@ -100,15 +123,15 @@ export function generateWeather({ climate, season, seed, customPresets = [] }) {
  * @param {object[]} [options.customPresets=[]] - Custom weather presets
  * @returns {object} Generated weather
  */
-export function generateWeatherForDate({ climate, season, year, month, day, customPresets = [] }) {
+export function generateWeatherForDate({ zoneConfig, season, year, month, day, customPresets = [] }) {
   const seed = dateSeed(year, month, day);
-  return generateWeather({ climate, season, seed, customPresets });
+  return generateWeather({ zoneConfig, season, seed, customPresets });
 }
 
 /**
- * Generate a forecast for multiple days.
+ * Generate a forecast for multiple days using zone config.
  * @param {object} options - Generation options
- * @param {string} options.climate - Climate zone ID
+ * @param {object} options.zoneConfig - Climate zone config
  * @param {string} [options.season] - Season name (assumed constant for forecast period)
  * @param {number} options.startYear - Starting year
  * @param {number} options.startMonth - Starting month (0-indexed)
@@ -119,7 +142,7 @@ export function generateWeatherForDate({ climate, season, year, month, day, cust
  * @returns {object[]} Array of weather forecasts
  */
 export function generateForecast({
-  climate,
+  zoneConfig,
   season,
   startYear,
   startMonth,
@@ -129,9 +152,6 @@ export function generateForecast({
   getSeasonForDate
 }) {
   const forecast = [];
-
-  // Simple date iteration (doesn't handle month boundaries perfectly)
-  // In production, use calendar's date math
   let year = startYear;
   let month = startMonth;
   let day = startDay;
@@ -139,7 +159,7 @@ export function generateForecast({
   for (let i = 0; i < days; i++) {
     const currentSeason = getSeasonForDate ? getSeasonForDate(year, month, day) : season;
     const weather = generateWeatherForDate({
-      climate,
+      zoneConfig,
       season: currentSeason,
       year,
       month,
@@ -154,7 +174,6 @@ export function generateForecast({
       ...weather
     });
 
-    // Increment day (simplified - proper implementation uses calendar)
     day++;
   }
 

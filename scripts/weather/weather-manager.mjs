@@ -1,6 +1,7 @@
 /**
  * Weather Manager - Core state management and API for the weather system.
  * Handles current weather state, settings integration, and procedural generation.
+ * Reads weather configuration from the active calendar's climate zones.
  *
  * @module Weather/WeatherManager
  * @author Tyler
@@ -10,9 +11,9 @@ import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { getPreset, getAllPresets, ALL_PRESETS, WEATHER_CATEGORIES, STK_WEATHER_MAP } from './weather-presets.mjs';
-import { CLIMATE_ZONES, getClimateZone, getClimateZoneIds, normalizeSeasonName } from './climate-data.mjs';
-import { generateWeather, generateWeatherForDate, generateForecast } from './weather-generator.mjs';
+import { getPreset, getAllPresets, ALL_PRESETS, WEATHER_CATEGORIES } from './weather-presets.mjs';
+import { CLIMATE_ZONE_TEMPLATES } from './climate-data.mjs';
+import { generateWeather, generateForecast } from './weather-generator.mjs';
 
 /**
  * Weather Manager singleton.
@@ -183,9 +184,9 @@ class WeatherManager {
   /* -------------------------------------------- */
 
   /**
-   * Generate and set weather based on current climate and season.
+   * Generate and set weather based on active calendar's climate zone.
    * @param {object} [options={}] - Generation options
-   * @param {string} [options.climate] - Climate override (uses setting if not provided)
+   * @param {string} [options.zoneId] - Zone ID override (uses active if not provided)
    * @param {string} [options.season] - Season override (uses current if not provided)
    * @param {boolean} [options.broadcast=true] - Whether to broadcast
    * @returns {Promise<object>} Generated weather
@@ -196,12 +197,17 @@ class WeatherManager {
       return this.#currentWeather;
     }
 
-    const climate = options.climate || this.getCurrentClimate();
+    const zoneConfig = this.getActiveZone(options.zoneId);
+    if (!zoneConfig) {
+      log(2, 'No climate zone configured');
+      return this.#currentWeather;
+    }
+
     const season = options.season || this.#getCurrentSeasonName();
     const customPresets = this.getCustomPresets();
 
     const result = generateWeather({
-      climate,
+      zoneConfig,
       season,
       customPresets
     });
@@ -224,25 +230,26 @@ class WeatherManager {
   }
 
   /**
-   * Generate a weather forecast.
+   * Generate a weather forecast using active calendar's zone config.
    * @param {object} [options={}] - Forecast options
    * @param {number} [options.days=7] - Number of days
-   * @param {string} [options.climate] - Climate override
+   * @param {string} [options.zoneId] - Zone ID override
    * @returns {object[]} Forecast array
    */
   getForecast(options = {}) {
-    const climate = options.climate || this.getCurrentClimate();
-    const days = options.days || 7;
-    const customPresets = this.getCustomPresets();
-
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
 
+    const zoneConfig = this.getActiveZone(options.zoneId);
+    if (!zoneConfig) return [];
+
+    const days = options.days || 7;
+    const customPresets = this.getCustomPresets();
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
 
     return generateForecast({
-      climate,
+      zoneConfig,
       startYear: components.year + yearZero,
       startMonth: components.month,
       startDay: (components.dayOfMonth ?? 0) + 1,
@@ -260,7 +267,10 @@ class WeatherManager {
    * @private
    */
   async #onDayChange() {
-    const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.WEATHER_AUTO_GENERATE);
+    // Check calendar's weather.autoGenerate flag
+    const calendar = CalendarManager.getActiveCalendar();
+    const autoGenerate = calendar?.weather?.autoGenerate ?? false;
+
     if (!autoGenerate || !game.user.isGM) return;
 
     // Only primary GM generates
@@ -283,43 +293,67 @@ class WeatherManager {
   }
 
   /* -------------------------------------------- */
-  /*  Climate Settings                            */
+  /*  Active Zone Management                      */
   /* -------------------------------------------- */
 
   /**
-   * Get the current climate zone ID.
-   * @returns {string} Climate zone ID
+   * Get the active climate zone config from the calendar.
+   * @param {string} [zoneId] - Optional zone ID override
+   * @returns {object|null} Zone config object
    */
-  getCurrentClimate() {
-    return game.settings.get(MODULE.ID, SETTINGS.CURRENT_CLIMATE) || 'temperate';
+  getActiveZone(zoneId) {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.weather?.zones?.length) return null;
+
+    const targetId = zoneId ?? calendar.weather.activeZone ?? 'temperate';
+    return calendar.weather.zones.find((z) => z.id === targetId) ?? calendar.weather.zones[0] ?? null;
   }
 
   /**
-   * Set the current climate zone.
-   * @param {string} climateId - Climate zone ID
+   * Set the active climate zone on the calendar.
+   * @param {string} zoneId - Zone ID to set as active
    * @returns {Promise<void>}
    */
-  async setClimate(climateId) {
+  async setActiveZone(zoneId) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can set climate');
+      log(1, 'Only GMs can set active zone');
       return;
     }
 
-    if (!getClimateZone(climateId)) {
-      log(2, `Invalid climate zone: ${climateId}`);
+    const calendarId = CalendarManager.getActiveCalendarId();
+    if (!calendarId) return;
+
+    const calendarData = CalendarManager.getCalendarData(calendarId);
+    if (!calendarData?.weather) return;
+
+    // Validate zone exists
+    const zone = calendarData.weather.zones?.find((z) => z.id === zoneId);
+    if (!zone) {
+      log(2, `Climate zone not found: ${zoneId}`);
       return;
     }
 
-    await game.settings.set(MODULE.ID, SETTINGS.CURRENT_CLIMATE, climateId);
-    log(3, `Climate set to: ${climateId}`);
+    calendarData.weather.activeZone = zoneId;
+    await CalendarManager.updateCalendar(calendarId, calendarData);
+
+    log(3, `Active climate zone set to: ${zoneId}`);
   }
 
   /**
-   * Get all available climate zones.
-   * @returns {object[]} Climate zone objects
+   * Get all climate zones for the active calendar.
+   * @returns {object[]} Array of zone config objects
    */
-  getClimateZones() {
-    return Object.values(CLIMATE_ZONES);
+  getCalendarZones() {
+    const calendar = CalendarManager.getActiveCalendar();
+    return calendar?.weather?.zones ?? [];
+  }
+
+  /**
+   * Get all available climate zone templates.
+   * @returns {object[]} Climate zone template objects
+   */
+  getClimateZoneTemplates() {
+    return Object.values(CLIMATE_ZONE_TEMPLATES);
   }
 
   /* -------------------------------------------- */
@@ -473,44 +507,6 @@ class WeatherManager {
    */
   getCategories() {
     return WEATHER_CATEGORIES;
-  }
-
-  /* -------------------------------------------- */
-  /*  Import Helpers                              */
-  /* -------------------------------------------- */
-
-  /**
-   * Map STK weather ID to Calendaria preset.
-   * Creates custom preset if no match found.
-   * @param {string} stkId - STK weather ID
-   * @param {object} [stkData] - Original STK weather data for fallback
-   * @returns {Promise<string>} Calendaria preset ID
-   */
-  async mapSTKWeather(stkId, stkData = {}) {
-    // Check direct mapping
-    const mappedId = STK_WEATHER_MAP[stkId];
-    if (mappedId) return mappedId;
-
-    // No mapping - create custom preset from STK data
-    if (stkData.label || stkData.id) {
-      const customId = `stk-${stkId}`;
-      const existing = this.getPreset(customId);
-
-      if (!existing) {
-        await this.addCustomPreset({
-          id: customId,
-          label: stkData.label || stkId,
-          icon: stkData.icon || 'fa-question',
-          color: stkData.color || '#888888',
-          description: `Imported from Simple Timekeeping: ${stkId}`
-        });
-      }
-
-      return customId;
-    }
-
-    // Fallback to clear
-    return 'clear';
   }
 
   /* -------------------------------------------- */

@@ -2545,23 +2545,59 @@
   /*  Weather Tab Styles                          */
   /* -------------------------------------------- */
 
-  /* Climate/auto-generate header row */
+  /* Zone selector and auto-generate header row */
   .weather-header {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-cool-4);
 
-    .form-group {
-      margin: 0;
+    .zone-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
 
-      label {
-        white-space: nowrap;
+      .form-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+      }
+
+      .zone-select {
+        min-width: 150px;
       }
     }
 
-    .climate-select {
-      width: 150px;
+    .zone-actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .zone-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-cool-5);
+      border: 1px solid var(--color-cool-4);
+      border-radius: 3px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+
+      &:hover {
+        background: var(--color-cool-4);
+        color: var(--color-text-primary);
+      }
+    }
+
+    .auto-generate {
+      margin: 0;
     }
   }
 
@@ -2590,6 +2626,32 @@
 
       i.toggle-icon {
         transition: transform 0.2s;
+      }
+
+      .category-select-all {
+        margin: 0;
+        padding: 0;
+      }
+
+      .category-name {
+        flex: 1;
+      }
+
+      .category-stats {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 400;
+        font-size: var(--font-size-12);
+        color: var(--color-text-secondary);
+
+        .category-percent {
+          min-width: 40px;
+          text-align: right;
+        }
+
+        .category-count {
+          opacity: 0.7;
+        }
       }
 
       &:hover {

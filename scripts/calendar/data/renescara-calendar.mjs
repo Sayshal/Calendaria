@@ -1,4 +1,33 @@
 /**
+ * TODO: Add the following to showcase all Calendaria features:
+ *
+ * Weather:
+ * - weather.zones[] with multiple climate zones (e.g., temperate, arctic, tropical)
+ * - weather.zones[].temperatures per-season temp ranges for each zone
+ * - weather.zones[].presets with enabled presets and chance values
+ *
+ * Time & Eras:
+ * - eras[] with era definitions (e.g., Age of Dawn, Age of Sundering)
+ * - canonicalHours[] named time periods (e.g., Dawn Watch, High Sun, Eventide)
+ * - amPmNotation custom AM/PM labels
+ *
+ * Cycles:
+ * - cycles[] repeating named cycles (e.g., zodiac signs, elemental weeks)
+ * - cycleFormat template for displaying cycle values
+ *
+ * Weeks:
+ * - weeks.enabled, weeks.type, weeks.names[] for named week support
+ *
+ * Date Formats:
+ * - dateFormats custom templates (short, long, full, time, time12)
+ *
+ * Moons (optional enhancements):
+ * - moons[].color hex tint color
+ * - moons[].hidden visibility toggle
+ * - moons[].phases[].risingName/fadingName sub-phase names
+ */
+
+/**
  * Renescarran Calendar
  * A unique calendar system for the world of Renescara.
  *

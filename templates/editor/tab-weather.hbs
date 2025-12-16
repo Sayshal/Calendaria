@@ -1,15 +1,31 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  {{! Weather header: climate zone and auto-generate }}
+  {{! Weather header: zone selector and auto-generate }}
   <div class="weather-header">
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Weather.Climate.Label"}}</label>
-      <select name="weather.defaultClimate" class="climate-select">
-        {{#each climateOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
-        {{/each}}
-      </select>
+    <div class="zone-controls">
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.Label"}}</label>
+        <select name="weather.activeZone" class="zone-select">
+          {{#each zoneOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="zone-actions">
+        <button type="button" class="zone-btn" data-action="addZone"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.Add'}}">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button type="button" class="zone-btn" data-action="editZone"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.Edit'}}">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="zone-btn" data-action="deleteZone"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.Delete'}}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
     </div>
-    <div class="form-group">
+    <div class="form-group auto-generate">
       <label class="checkbox">
         <input type="checkbox" name="weather.autoGenerate" {{#if calendar.weather.autoGenerate}}checked{{/if}}>
         {{localize "CALENDARIA.Editor.Weather.AutoGenerate"}}
@@ -23,8 +39,15 @@
       <div class="weather-category" data-category="{{category.id}}">
         <div class="category-header" data-action="toggleCategory">
           <i class="fas fa-chevron-down toggle-icon"></i>
-          <span>{{localize category.label}}</span>
-          <span class="category-count">({{category.presets.length}})</span>
+          <label class="checkbox category-select-all">
+            <input type="checkbox" data-action="toggleCategorySelectAll" data-category="{{category.id}}"
+                   {{#if category.allEnabled}}checked{{/if}}>
+          </label>
+          <span class="category-name">{{localize category.label}}</span>
+          <span class="category-stats">
+            <span class="category-percent">{{category.totalChance}}%</span>
+            <span class="category-count">({{category.enabledCount}}/{{category.presets.length}})</span>
+          </span>
         </div>
         <div class="category-content">
           {{! Column headers }}

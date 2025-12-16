@@ -12,6 +12,7 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import { createImporter } from '../importers/index.mjs';
 import { formatEraTemplate } from '../calendar/calendar-utils.mjs';
 import { ALL_PRESETS, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
+import { CLIMATE_ZONE_TEMPLATES, getDefaultZoneConfig, getClimateTemplateOptions } from '../weather/climate-data.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -67,7 +68,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       toggleCategory: CalendarEditor.#onToggleCategory,
       resetWeatherPreset: CalendarEditor.#onResetWeatherPreset,
-      toggleDescription: CalendarEditor.#onToggleDescription
+      toggleDescription: CalendarEditor.#onToggleDescription,
+      addZone: CalendarEditor.#onAddZone,
+      editZone: CalendarEditor.#onEditZone,
+      deleteZone: CalendarEditor.#onDeleteZone,
+      toggleCategorySelectAll: CalendarEditor.#onToggleCategorySelectAll
     }
   };
 
@@ -787,18 +792,24 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #prepareWeatherContext(context) {
     const weather = this.#calendarData.weather || {};
-    const savedPresets = weather.presets || [];
+    const zones = weather.zones || [];
+    const activeZoneId = weather.activeZone || 'temperate';
 
-    // Climate options
-    const currentClimate = weather.defaultClimate || 'temperate';
-    context.climateOptions = [
-      { value: 'arctic', label: 'CALENDARIA.Editor.Weather.Climate.Arctic', selected: currentClimate === 'arctic' },
-      { value: 'subarctic', label: 'CALENDARIA.Editor.Weather.Climate.Subarctic', selected: currentClimate === 'subarctic' },
-      { value: 'temperate', label: 'CALENDARIA.Editor.Weather.Climate.Temperate', selected: currentClimate === 'temperate' },
-      { value: 'subtropical', label: 'CALENDARIA.Editor.Weather.Climate.Subtropical', selected: currentClimate === 'subtropical' },
-      { value: 'tropical', label: 'CALENDARIA.Editor.Weather.Climate.Tropical', selected: currentClimate === 'tropical' },
-      { value: 'arid', label: 'CALENDARIA.Editor.Weather.Climate.Arid', selected: currentClimate === 'arid' }
-    ];
+    // Build zone options for dropdown
+    context.zoneOptions = zones.map((z) => ({
+      value: z.id,
+      label: z.name,
+      selected: z.id === activeZoneId
+    }));
+
+    // If no zones, add a default placeholder
+    if (context.zoneOptions.length === 0) {
+      context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
+    }
+
+    // Get the active zone's presets
+    const activeZone = zones.find((z) => z.id === activeZoneId) || zones[0] || null;
+    const savedPresets = activeZone?.presets || [];
 
     // Temperature unit
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
@@ -810,23 +821,29 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     context.weatherCategories = Object.values(WEATHER_CATEGORIES).map((cat) => {
       const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
+      let categoryChance = 0;
+      let enabledCount = 0;
 
       const presetsWithData = categoryPresets.map((preset) => {
         // Find saved config for this preset
         const saved = savedPresets.find((s) => s.id === preset.id) || {};
 
         // Use saved values or fall back to preset defaults
-        const chance = saved.chance ?? preset.chance ?? 0;
+        const chance = saved.chance ?? 0;
         const enabled = saved.enabled ?? false;
-        if (enabled) totalChance += chance;
+        if (enabled) {
+          totalChance += chance;
+          categoryChance += chance;
+          enabledCount++;
+        }
 
         const presetData = {
           ...preset,
           index: presetIndex++,
           enabled,
           chance: chance.toFixed(2),
-          tempMin: saved.tempMin ?? preset.tempMin ?? '',
-          tempMax: saved.tempMax ?? preset.tempMax ?? '',
+          tempMin: saved.tempMin ?? '',
+          tempMax: saved.tempMax ?? '',
           customDescription: saved.description || ''
         };
 
@@ -836,7 +853,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return {
         id: cat.id,
         label: cat.label,
-        presets: presetsWithData
+        presets: presetsWithData,
+        totalChance: categoryChance.toFixed(1),
+        enabledCount,
+        allEnabled: enabledCount === presetsWithData.length && presetsWithData.length > 0
       };
     }).filter((cat) => cat.presets.length > 0);
 
@@ -1285,9 +1305,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateWeatherFromFormData(data) {
-    if (!this.#calendarData.weather) this.#calendarData.weather = {};
+    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: [], activeZone: null, autoGenerate: false };
 
-    this.#calendarData.weather.defaultClimate = data['weather.defaultClimate'] || 'temperate';
+    // Update active zone and auto-generate settings
+    const selectedZone = data['weather.activeZone'];
+    if (selectedZone) this.#calendarData.weather.activeZone = selectedZone;
     this.#calendarData.weather.autoGenerate = !!data['weather.autoGenerate'];
 
     // Find all preset indices
@@ -1323,7 +1345,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       newPresets.push(preset);
     }
 
-    this.#calendarData.weather.presets = newPresets;
+    // Update presets on the active zone
+    const activeZoneId = this.#calendarData.weather.activeZone;
+    const zones = this.#calendarData.weather.zones || [];
+    const activeZone = zones.find((z) => z.id === activeZoneId);
+
+    if (activeZone) {
+      activeZone.presets = newPresets;
+    }
   }
 
   /* -------------------------------------------- */
@@ -1850,6 +1879,210 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     popover.classList.toggle('show');
+  }
+
+  /**
+   * Add a new climate zone from a template.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onAddZone(event, target) {
+    const templateOptions = getClimateTemplateOptions();
+    const selectHtml = templateOptions
+      .map((opt) => `<option value="${opt.value}">${game.i18n.localize(opt.label)}</option>`)
+      .join('');
+
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.CopyFrom')}</label>
+          <select name="template">${selectHtml}</select>
+        </div>
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Name')}</label>
+          <input type="text" name="name" placeholder="${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Name')}">
+        </div>
+      </form>
+    `;
+
+    const result = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Add') },
+      content,
+      ok: {
+        callback: (event, button, dialog) => {
+          const form = button.form;
+          return {
+            template: form.elements.template.value,
+            name: form.elements.name.value
+          };
+        }
+      }
+    });
+
+    if (!result) return;
+
+    // Get season names from the calendar for temperature keys
+    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['Spring', 'Summer', 'Autumn', 'Winter'];
+
+    // Create zone from template
+    const zoneConfig = getDefaultZoneConfig(result.template, seasonNames);
+    if (!zoneConfig) return;
+
+    // Generate unique ID
+    const baseId = result.name?.toLowerCase().replace(/\s+/g, '-') || result.template;
+    let zoneId = baseId;
+    let counter = 1;
+    const existingIds = (this.#calendarData.weather?.zones || []).map((z) => z.id);
+    while (existingIds.includes(zoneId)) {
+      zoneId = `${baseId}-${counter++}`;
+    }
+
+    zoneConfig.id = zoneId;
+    zoneConfig.name = result.name || game.i18n.localize(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
+
+    // Add to calendar
+    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: [], activeZone: null, autoGenerate: false };
+    if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = [];
+
+    this.#calendarData.weather.zones.push(zoneConfig);
+    this.#calendarData.weather.activeZone = zoneConfig.id;
+
+    this.render();
+  }
+
+  /**
+   * Edit the active climate zone.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onEditZone(event, target) {
+    const zones = this.#calendarData.weather?.zones || [];
+    const activeZoneId = this.#calendarData.weather?.activeZone;
+    const zone = zones.find((z) => z.id === activeZoneId);
+
+    if (!zone) {
+      ui.notifications.warn(game.i18n.localize('CALENDARIA.Editor.Weather.Zone.NoZones'));
+      return;
+    }
+
+    // Get season names from calendar
+    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['Spring', 'Summer', 'Autumn', 'Winter'];
+
+    // Build temperature fields for each season
+    const tempRows = seasonNames.map((season) => {
+      const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
+      return `
+        <div class="form-group temperature-row">
+          <label>${season}</label>
+          <input type="number" name="temp_${season}_min" value="${temp.min}" placeholder="${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.TempMin')}">
+          <span>–</span>
+          <input type="number" name="temp_${season}_max" value="${temp.max}" placeholder="${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.TempMax')}">
+        </div>
+      `;
+    }).join('');
+
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Name')}</label>
+          <input type="text" name="name" value="${zone.name}">
+        </div>
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Description')}</label>
+          <textarea name="description">${zone.description || ''}</textarea>
+        </div>
+        <fieldset>
+          <legend>${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Temperatures')}</legend>
+          ${tempRows}
+        </fieldset>
+      </form>
+    `;
+
+    const result = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Edit') },
+      content,
+      ok: {
+        callback: (event, button, dialog) => {
+          const form = button.form;
+          const data = { name: form.elements.name.value, description: form.elements.description.value, temperatures: {} };
+
+          for (const season of seasonNames) {
+            data.temperatures[season] = {
+              min: parseInt(form.elements[`temp_${season}_min`].value) || 0,
+              max: parseInt(form.elements[`temp_${season}_max`].value) || 20
+            };
+          }
+
+          return data;
+        }
+      }
+    });
+
+    if (!result) return;
+
+    // Update zone
+    zone.name = result.name;
+    zone.description = result.description;
+    zone.temperatures = result.temperatures;
+
+    this.render();
+  }
+
+  /**
+   * Delete the active climate zone.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onDeleteZone(event, target) {
+    const zones = this.#calendarData.weather?.zones || [];
+    const activeZoneId = this.#calendarData.weather?.activeZone;
+    const zoneIdx = zones.findIndex((z) => z.id === activeZoneId);
+
+    if (zoneIdx < 0) {
+      ui.notifications.warn(game.i18n.localize('CALENDARIA.Editor.Weather.Zone.NoZones'));
+      return;
+    }
+
+    const zone = zones[zoneIdx];
+    const confirm = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('CALENDARIA.Editor.Weather.Zone.Delete') },
+      content: `<p>${game.i18n.format('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`
+    });
+
+    if (!confirm) return;
+
+    zones.splice(zoneIdx, 1);
+
+    // Select another zone if available
+    if (zones.length > 0) {
+      this.#calendarData.weather.activeZone = zones[0].id;
+    } else {
+      this.#calendarData.weather.activeZone = null;
+    }
+
+    this.render();
+  }
+
+  /**
+   * Toggle all presets in a category.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static #onToggleCategorySelectAll(event, target) {
+    event.stopPropagation();
+
+    const categoryId = target.dataset.category;
+    if (!categoryId) return;
+
+    const shouldEnable = target.checked;
+    const categoryDiv = this.element.querySelector(`.weather-category[data-category="${categoryId}"]`);
+    if (!categoryDiv) return;
+
+    // Toggle all preset checkboxes in this category
+    const checkboxes = categoryDiv.querySelectorAll('.preset-enabled');
+    checkboxes.forEach((cb) => {
+      cb.checked = shouldEnable;
+    });
   }
 
   /**

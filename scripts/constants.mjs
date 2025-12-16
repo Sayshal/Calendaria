@@ -116,12 +116,6 @@ export const SETTINGS = {
   /** @type {string} Current weather state */
   CURRENT_WEATHER: 'currentWeather',
 
-  /** @type {string} Current climate zone */
-  CURRENT_CLIMATE: 'currentClimate',
-
-  /** @type {string} Whether to auto-generate weather on day change */
-  WEATHER_AUTO_GENERATE: 'weatherAutoGenerate',
-
   /** @type {string} Custom weather presets created by the GM */
   CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
 

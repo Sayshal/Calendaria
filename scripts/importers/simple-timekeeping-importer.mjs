@@ -12,6 +12,7 @@ import { log } from '../utils/logger.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
 
 /**
  * Importer for Simple Timekeeping module data.
@@ -406,6 +407,13 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
           : `Imported from Simple Timekeeping: ${config.calendar}`,
         system: calendar.name || config.calendar,
         importedFrom: 'simple-timekeeping'
+      },
+
+      // Weather - default temperate zone
+      weather: {
+        activeZone: 'temperate',
+        autoGenerate: false,
+        zones: [getDefaultZoneConfig('temperate')]
       }
     };
   }

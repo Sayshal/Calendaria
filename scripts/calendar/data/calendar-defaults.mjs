@@ -1,10 +1,12 @@
 /**
  * Default configurations for D&D 5e calendars.
- * Provides moons, seasons, and eras for calendars loaded from CONFIG.DND5E.calendar.calendars.
+ * Provides moons, seasons, eras, and weather for calendars loaded from CONFIG.DND5E.calendar.calendars.
  *
  * @module Calendar/Data/CalendarDefaults
  * @author Tyler
  */
+
+import { getDefaultZoneConfig } from '../../weather/climate-data.mjs';
 
 /**
  * Standard 8-phase moon cycle used by most calendars.
@@ -25,6 +27,20 @@ const STANDARD_PHASES = [
 /* -------------------------------------------- */
 
 /**
+ * Create default weather config with a temperate zone.
+ * @param {string[]} [seasonNames] - Season names for temperature keys
+ * @returns {object} Default weather config
+ */
+function createDefaultWeather(seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']) {
+  const zone = getDefaultZoneConfig('temperate', seasonNames);
+  return {
+    activeZone: 'temperate',
+    autoGenerate: false,
+    zones: zone ? [zone] : []
+  };
+}
+
+/**
  * Gregorian calendar defaults (Real World)
  */
 export const GREGORIAN = {
@@ -38,7 +54,8 @@ export const GREGORIAN = {
     ]
   },
   eras: [{ name: 'CALENDARIA.Era.CommonEra', abbreviation: 'CALENDARIA.Era.CE', startYear: 1, endYear: null, format: 'suffix', template: null }],
-  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 355, summerSolstice: 172 }
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 355, summerSolstice: 172 },
+  weather: createDefaultWeather()
 };
 
 /**
@@ -55,7 +72,8 @@ export const HARPTOS = {
     ]
   },
   eras: [{ name: 'CALENDARIA.Era.DaleReckoning', abbreviation: 'CALENDARIA.Era.DR', startYear: 1, endYear: null, format: 'suffix', template: null }],
-  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 355, summerSolstice: 172 }
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 355, summerSolstice: 172 },
+  weather: createDefaultWeather()
 };
 
 /**
@@ -75,7 +93,8 @@ export const GREYHAWK = {
     ]
   },
   eras: [{ name: 'CALENDARIA.Era.CommonYear', abbreviation: 'CALENDARIA.Era.CY', startYear: 1, endYear: null, format: 'suffix', template: null }],
-  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 354, summerSolstice: 172 }
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 354, summerSolstice: 172 },
+  weather: createDefaultWeather()
 };
 
 /**
@@ -105,7 +124,8 @@ export const KHORVAIRE = {
     ]
   },
   eras: [{ name: 'CALENDARIA.Era.YearOfTheKingdom', abbreviation: 'CALENDARIA.Era.YK', startYear: 1, endYear: null, format: 'suffix', template: null }],
-  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 326, summerSolstice: 158 }
+  daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 326, summerSolstice: 158 },
+  weather: createDefaultWeather()
 };
 
 /* -------------------------------------------- */

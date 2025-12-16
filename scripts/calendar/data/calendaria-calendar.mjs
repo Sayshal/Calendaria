@@ -260,6 +260,42 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           time12: new StringField({ required: false, initial: '{{h}}:{{M}} {{p}}' })
         },
         { required: false }
+      ),
+
+      /**
+       * Weather configuration for this calendar.
+       * Each climate zone stores independent preset configurations and temperature ranges.
+       * @type {object}
+       */
+      weather: new SchemaField(
+        {
+          /** Currently active climate zone ID */
+          activeZone: new StringField({ required: false, initial: 'temperate' }),
+          /** Auto-generate weather on day change */
+          autoGenerate: new BooleanField({ required: false, initial: false }),
+          /** Climate zones with per-season temperatures and preset configs */
+          zones: new ArrayField(
+            new SchemaField({
+              id: new StringField({ required: true }),
+              name: new StringField({ required: true }),
+              description: new StringField({ required: false }),
+              /** Dynamic temperatures keyed by season name, plus _default fallback */
+              temperatures: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
+              /** Preset configurations for this zone */
+              presets: new ArrayField(
+                new SchemaField({
+                  id: new StringField({ required: true }),
+                  enabled: new BooleanField({ required: false, initial: false }),
+                  chance: new NumberField({ required: false, initial: 0 }),
+                  tempMin: new NumberField({ required: false, nullable: true }),
+                  tempMax: new NumberField({ required: false, nullable: true }),
+                  description: new StringField({ required: false })
+                })
+              )
+            })
+          )
+        },
+        { required: false }
       )
     };
   }
@@ -1357,5 +1393,58 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       WN: 'Named week name',
       Wn: 'Named week abbreviation'
     };
+  }
+
+  /* -------------------------------------------- */
+  /*  Climate Zone Methods                        */
+  /* -------------------------------------------- */
+
+  /**
+   * Get the active climate zone configuration.
+   * @returns {object|null} Active zone object or null
+   */
+  getActiveClimateZone() {
+    const zones = this.weather?.zones ?? [];
+    const activeId = this.weather?.activeZone ?? 'temperate';
+    return zones.find((z) => z.id === activeId) ?? zones[0] ?? null;
+  }
+
+  /**
+   * Get a climate zone by ID.
+   * @param {string} id - Zone ID
+   * @returns {object|null} Zone object or null
+   */
+  getClimateZoneById(id) {
+    return this.weather?.zones?.find((z) => z.id === id) ?? null;
+  }
+
+  /**
+   * Get temperature range for a season in a specific zone.
+   * Falls back to _default if season not found.
+   * @param {string} zoneId - Climate zone ID
+   * @param {string} seasonName - Season name (localized or key)
+   * @returns {{min: number, max: number}} Temperature range
+   */
+  getTemperatureForSeason(zoneId, seasonName) {
+    const zone = this.getClimateZoneById(zoneId);
+    if (!zone?.temperatures) return { min: 10, max: 22 };
+
+    // Try exact match first, then lowercase, then _default
+    const temps = zone.temperatures;
+    if (temps[seasonName]) return temps[seasonName];
+
+    const lowerSeason = seasonName?.toLowerCase();
+    const matchedKey = Object.keys(temps).find((k) => k.toLowerCase() === lowerSeason);
+    if (matchedKey) return temps[matchedKey];
+
+    return temps._default ?? { min: 10, max: 22 };
+  }
+
+  /**
+   * Get all climate zone IDs for this calendar.
+   * @returns {string[]} Array of zone IDs
+   */
+  getClimateZoneIds() {
+    return this.weather?.zones?.map((z) => z.id) ?? [];
   }
 }
