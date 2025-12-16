@@ -62,7 +62,7 @@
                 <span class="temp-separator">–</span>
                 <input type="number" name="weather.presets.{{preset.index}}.tempMax"
                        value="{{preset.tempMax}}" placeholder="—">
-                <span class="temp-unit">{{tempUnit}}</span>
+                <span class="temp-unit">{{@root.tempUnit}}</span>
               </div>
               <div class="preset-actions">
                 <button type="button" data-action="toggleDescription" data-preset-id="{{preset.id}}"

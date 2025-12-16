@@ -29,7 +29,7 @@ export const STANDARD_WEATHER = [
     icon: 'fa-cloud-sun',
     color: '#D0E8FF',
     category: 'standard',
-    chance: 20,
+    chance: 18,
     tempMin: 15,
     tempMax: 28
   },
@@ -40,7 +40,7 @@ export const STANDARD_WEATHER = [
     icon: 'fa-cloud',
     color: '#B0C4DE',
     category: 'standard',
-    chance: 15,
+    chance: 14,
     tempMin: 12,
     tempMax: 24
   },
@@ -95,7 +95,7 @@ export const STANDARD_WEATHER = [
     icon: 'fa-water',
     color: '#F0F8FF',
     category: 'standard',
-    chance: 5,
+    chance: 4,
     tempMin: 8,
     tempMax: 18
   },
@@ -106,7 +106,7 @@ export const STANDARD_WEATHER = [
     icon: 'fa-wind',
     color: '#E0F7FA',
     category: 'standard',
-    chance: 8,
+    chance: 4,
     tempMin: 10,
     tempMax: 25
   },
@@ -117,7 +117,7 @@ export const STANDARD_WEATHER = [
     icon: 'fa-cloud-sun-rain',
     color: '#FCEABB',
     category: 'standard',
-    chance: 4,
+    chance: 2,
     tempMin: 15,
     tempMax: 26
   }
@@ -135,7 +135,7 @@ export const SEVERE_WEATHER = [
     icon: 'fa-bolt',
     color: '#FFD966',
     category: 'severe',
-    chance: 0,
+    chance: 2,
     tempMin: 15,
     tempMax: 28
   },
@@ -146,7 +146,7 @@ export const SEVERE_WEATHER = [
     icon: 'fa-snowman',
     color: '#E0F7FF',
     category: 'severe',
-    chance: 0,
+    chance: 0.5,
     tempMin: -20,
     tempMax: -5
   },
@@ -157,7 +157,7 @@ export const SEVERE_WEATHER = [
     icon: 'fa-snowflake',
     color: '#FFFFFF',
     category: 'severe',
-    chance: 0,
+    chance: 1,
     tempMin: -10,
     tempMax: 2
   },
@@ -168,7 +168,7 @@ export const SEVERE_WEATHER = [
     icon: 'fa-cloud-meatball',
     color: '#D1EFFF',
     category: 'severe',
-    chance: 0,
+    chance: 0.5,
     tempMin: 5,
     tempMax: 18
   },
@@ -179,7 +179,7 @@ export const SEVERE_WEATHER = [
     icon: 'fa-poo-storm',
     color: '#FFD1DC',
     category: 'severe',
-    chance: 0,
+    chance: 0.5,
     tempMin: 18,
     tempMax: 35
   },
@@ -190,7 +190,7 @@ export const SEVERE_WEATHER = [
     icon: 'fa-hurricane',
     color: '#FFE599',
     category: 'severe',
-    chance: 0,
+    chance: 0.5,
     tempMin: 22,
     tempMax: 35
   }
@@ -208,7 +208,7 @@ export const ENVIRONMENTAL_WEATHER = [
     icon: 'fa-cloud',
     color: '#DADADA',
     category: 'environmental',
-    chance: 0,
+    chance: 1.5,
     tempMin: 15,
     tempMax: 40
   },
@@ -219,7 +219,7 @@ export const ENVIRONMENTAL_WEATHER = [
     icon: 'fa-cloud-sun',
     color: '#F4E1A1',
     category: 'environmental',
-    chance: 0,
+    chance: 1.5,
     tempMin: 25,
     tempMax: 45
   },
@@ -230,7 +230,7 @@ export const ENVIRONMENTAL_WEATHER = [
     icon: 'fa-star',
     color: '#E0BBFF',
     category: 'environmental',
-    chance: 0,
+    chance: 1.5,
     tempMin: -5,
     tempMax: 10
   }
@@ -248,7 +248,7 @@ export const FANTASY_WEATHER = [
     icon: 'fa-sun',
     color: '#4A4A4A',
     category: 'fantasy',
-    chance: 0,
+    chance: 0.5,
     tempMin: 5,
     tempMax: 20
   },

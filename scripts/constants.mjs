@@ -200,6 +200,8 @@ export const TEMPLATES = {
   },
 
   EDITOR: {
+    /** @type {string} Calendar editor tab navigation */
+    TAB_NAVIGATION: `modules/${MODULE.ID}/templates/editor/tab-navigation.hbs`,
     /** @type {string} Calendar editor basic info tab */
     TAB_BASIC: `modules/${MODULE.ID}/templates/editor/tab-basic.hbs`,
     /** @type {string} Calendar editor months tab */

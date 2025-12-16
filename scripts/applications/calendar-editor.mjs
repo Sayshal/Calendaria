@@ -73,7 +73,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    tabs: { template: 'templates/generic/tab-navigation.hbs' },
+    tabs: { template: TEMPLATES.EDITOR.TAB_NAVIGATION },
     basic: { template: TEMPLATES.EDITOR.TAB_BASIC, scrollable: [''] },
     months: { template: TEMPLATES.EDITOR.TAB_MONTHS, scrollable: [''] },
     weekdays: { template: TEMPLATES.EDITOR.TAB_WEEKDAYS, scrollable: [''] },
@@ -684,6 +684,40 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
       // Listen for changes
       templateInput.addEventListener('input', (event) => updatePreview(event.target));
+    }
+
+    // Add listener for weather chance and enabled inputs to update total dynamically
+    this.#setupWeatherTotalListener();
+  }
+
+  /**
+   * Set up event listeners for weather chance updates.
+   * @private
+   */
+  #setupWeatherTotalListener() {
+    const updateTotal = () => {
+      let total = 0;
+      for (const item of this.element.querySelectorAll('.weather-preset-item')) {
+        const enabled = item.querySelector('.preset-enabled')?.checked;
+        const chanceInput = item.querySelector('.preset-chance input');
+        if (enabled && chanceInput) total += Number(chanceInput.value) || 0;
+      }
+      const totalEl = this.element.querySelector('.weather-totals .total-value');
+      if (totalEl) {
+        totalEl.textContent = `${total.toFixed(2)}%`;
+        totalEl.classList.toggle('valid', Math.abs(total - 100) < 0.1);
+        totalEl.classList.toggle('warning', Math.abs(total - 100) >= 0.1);
+      }
+    };
+
+    // Listen to chance inputs
+    for (const input of this.element.querySelectorAll('.preset-chance input')) {
+      input.addEventListener('input', updateTotal);
+    }
+
+    // Listen to enabled checkboxes
+    for (const checkbox of this.element.querySelectorAll('.preset-enabled')) {
+      checkbox.addEventListener('change', updateTotal);
     }
   }
 
