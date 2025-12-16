@@ -99,7 +99,7 @@
 
   {{!-- Weather Badge --}}
   {{#if weather}}
-  <div class="compact-weather-badge{{#if isGM}} clickable{{/if}}" data-action="{{#if isGM}}cycleWeather{{else}}{{/if}}"
+  <div class="compact-weather-badge{{#if isGM}} clickable{{/if}}" data-action="{{#if isGM}}openWeatherPicker{{else}}{{/if}}"
     style="--weather-color: {{weather.color}}"
     data-tooltip="{{weather.tooltip}}">
     <i class="fas {{weather.icon}}"></i>
@@ -108,10 +108,16 @@
     <span class="weather-temp">{{weather.temperature}}°</span>
     {{/if}}
   </div>
+  {{else if isGM}}
+  <div class="compact-weather-badge clickable no-weather" data-action="openWeatherPicker"
+    data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
+    <i class="fas fa-cloud"></i>
+    <span class="weather-label">{{localize 'CALENDARIA.Weather.None'}}</span>
+  </div>
   {{/if}}
 
   {{!-- Mini Calendar Grid --}}
-  <div class="compact-grid">
+  <div class="compact-grid" style="--compact-weekday-count: {{calendarData.daysInWeek}}">
     <div class="compact-weekdays">
       {{#each calendarData.weekdays}}
       <div class="weekday">{{this}}</div>

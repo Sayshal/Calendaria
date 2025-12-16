@@ -1,7 +1,7 @@
 <div class="calendar-main-content">
   <div class="calendar-nav">
     <button type="button" data-action="navigate" data-direction="previous"
-      title="{{#if (eq displayMode 'week')}}Previous Week{{else if (eq displayMode 'year')}}Previous Years{{else}}Previous Month{{/if}}">
+      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.CalendarApp.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -15,13 +15,30 @@
     </h2>
 
     <button type="button" data-action="navigate" data-direction="next"
-      title="{{#if (eq displayMode 'week')}}Next Week{{else if (eq displayMode 'year')}}Next Years{{else}}Next Month{{/if}}">
+      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.CalendarApp.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
 
-  {{#if (or calendarData.currentSeason calendarData.currentEra cycleText)}}
+  {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather editable)}}
     <div class="calendar-indicators">
+      {{#if weather}}
+        <span class="weather-indicator{{#if editable}} clickable{{/if}}" data-action="{{#if editable}}openWeatherPicker{{else}}{{/if}}"
+          style="--weather-color: {{weather.color}}"
+          data-tooltip="{{weather.tooltip}}">
+          <i class="fas {{weather.icon}}"></i>
+          {{weather.label}}
+          {{#if weather.temperature}}
+            <span class="weather-temp">{{weather.temperature}}</span>
+          {{/if}}
+        </span>
+      {{else if editable}}
+        <span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+          data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
+          <i class="fas fa-cloud"></i>
+          {{localize 'CALENDARIA.Weather.None'}}
+        </span>
+      {{/if}}
       {{#if calendarData.currentSeason}}
         <span class="season-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentSeason'}}">
           <i class="fas fa-leaf"></i>

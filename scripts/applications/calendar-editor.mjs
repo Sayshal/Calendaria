@@ -11,6 +11,7 @@ import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { createImporter } from '../importers/index.mjs';
 import { formatEraTemplate } from '../calendar/calendar-utils.mjs';
+import { ALL_PRESETS, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -63,7 +64,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       loadCalendar: CalendarEditor.#onLoadCalendar,
       saveCalendar: CalendarEditor.#onSaveCalendar,
       resetCalendar: CalendarEditor.#onResetCalendar,
-      deleteCalendar: CalendarEditor.#onDeleteCalendar
+      deleteCalendar: CalendarEditor.#onDeleteCalendar,
+      toggleCategory: CalendarEditor.#onToggleCategory,
+      resetWeatherPreset: CalendarEditor.#onResetWeatherPreset,
+      toggleDescription: CalendarEditor.#onToggleDescription
     }
   };
 
@@ -79,6 +83,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     festivals: { template: TEMPLATES.EDITOR.TAB_FESTIVALS, scrollable: [''] },
     moons: { template: TEMPLATES.EDITOR.TAB_MOONS, scrollable: [''] },
     cycles: { template: TEMPLATES.EDITOR.TAB_CYCLES, scrollable: [''] },
+    weather: { template: TEMPLATES.EDITOR.TAB_WEATHER, scrollable: [''] },
     footer: { template: 'templates/generic/form-footer.hbs' }
   };
 
@@ -94,7 +99,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'eras', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Editor.Tab.Eras' },
         { id: 'festivals', icon: 'fas fa-star', label: 'CALENDARIA.Editor.Tab.Festivals' },
         { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Editor.Tab.Moons' },
-        { id: 'cycles', icon: 'fas fa-redo', label: 'CALENDARIA.Editor.Tab.Cycles' }
+        { id: 'cycles', icon: 'fas fa-redo', label: 'CALENDARIA.Editor.Tab.Cycles' },
+        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Editor.Tab.Weather' }
       ],
       initial: 'basic'
     }
@@ -155,7 +161,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     } else if (options.initialData) {
       this.#loadInitialData(options.initialData, options.suggestedId);
     } else {
-      this.#initializeBlankCalendar();
+      // Default to loading the active calendar
+      const activeCalendar = CalendarManager.getActiveCalendar();
+      if (activeCalendar?.metadata?.id) {
+        this.#calendarId = activeCalendar.metadata.id;
+        this.#isEditing = true;
+        this.#loadExistingCalendar(this.#calendarId);
+      } else {
+        this.#initializeBlankCalendar();
+      }
     }
   }
 
@@ -227,6 +241,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         description: '',
         author: game.user.name,
         system: ''
+      },
+      weather: {
+        defaultClimate: 'temperate',
+        autoGenerate: false,
+        presets: []
       }
     };
   }
@@ -247,6 +266,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!this.#calendarData.cycles) this.#calendarData.cycles = [];
       if (!this.#calendarData.cycleFormat) this.#calendarData.cycleFormat = '';
       if (!this.#calendarData.metadata) this.#calendarData.metadata = {};
+      if (!this.#calendarData.weather) this.#calendarData.weather = { defaultClimate: 'temperate', autoGenerate: false, presets: [] };
     } else {
       log(2, `Calendar ${calendarId} not found, initializing blank`);
       this.#initializeBlankCalendar();
@@ -275,6 +295,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#calendarData.cycles) this.#calendarData.cycles = [];
     if (!this.#calendarData.cycleFormat) this.#calendarData.cycleFormat = '';
     if (!this.#calendarData.metadata) this.#calendarData.metadata = {};
+    if (!this.#calendarData.weather) this.#calendarData.weather = { defaultClimate: 'temperate', autoGenerate: false, presets: [] };
 
     // Store suggested ID for later use
     if (suggestedId) this.#calendarData.metadata.suggestedId = suggestedId;
@@ -299,8 +320,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   get title() {
-    if (this.#isEditing) return game.i18n.format('CALENDARIA.Editor.TitleEdit', { name: this.#calendarData?.name || this.#calendarId });
-    return game.i18n.localize('CALENDARIA.Editor.Title');
+    const name = this.#calendarData?.name || game.i18n.localize('CALENDARIA.Editor.NewCalendar');
+    return game.i18n.format('CALENDARIA.Editor.TitleEdit', { name });
   }
 
   /* -------------------------------------------- */
@@ -572,6 +593,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       selected: opt.value === summerSolstice.month
     }));
 
+    // Weather context
+    this.#prepareWeatherContext(context);
+
     // Footer buttons
     context.buttons = [
       { type: 'button', action: 'saveCalendar', icon: 'fas fa-save', label: 'CALENDARIA.Editor.Button.Save' },
@@ -722,6 +746,70 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return dayOfYear;
   }
 
+  /**
+   * Prepare weather context for the weather tab.
+   * @param {object} context - Render context to populate
+   * @private
+   */
+  #prepareWeatherContext(context) {
+    const weather = this.#calendarData.weather || {};
+    const savedPresets = weather.presets || [];
+
+    // Climate options
+    const currentClimate = weather.defaultClimate || 'temperate';
+    context.climateOptions = [
+      { value: 'arctic', label: 'CALENDARIA.Editor.Weather.Climate.Arctic', selected: currentClimate === 'arctic' },
+      { value: 'subarctic', label: 'CALENDARIA.Editor.Weather.Climate.Subarctic', selected: currentClimate === 'subarctic' },
+      { value: 'temperate', label: 'CALENDARIA.Editor.Weather.Climate.Temperate', selected: currentClimate === 'temperate' },
+      { value: 'subtropical', label: 'CALENDARIA.Editor.Weather.Climate.Subtropical', selected: currentClimate === 'subtropical' },
+      { value: 'tropical', label: 'CALENDARIA.Editor.Weather.Climate.Tropical', selected: currentClimate === 'tropical' },
+      { value: 'arid', label: 'CALENDARIA.Editor.Weather.Climate.Arid', selected: currentClimate === 'arid' }
+    ];
+
+    // Temperature unit
+    const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
+    context.tempUnit = tempUnit === 'fahrenheit' ? 'F' : 'C';
+
+    // Build weather categories with presets
+    let presetIndex = 0;
+    let totalChance = 0;
+
+    context.weatherCategories = Object.values(WEATHER_CATEGORIES).map((cat) => {
+      const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
+
+      const presetsWithData = categoryPresets.map((preset) => {
+        // Find saved config for this preset
+        const saved = savedPresets.find((s) => s.id === preset.id) || {};
+
+        // Use saved values or fall back to preset defaults
+        const chance = saved.chance ?? preset.chance ?? 0;
+        const enabled = saved.enabled ?? false;
+        if (enabled) totalChance += chance;
+
+        const presetData = {
+          ...preset,
+          index: presetIndex++,
+          enabled,
+          chance: chance.toFixed(2),
+          tempMin: saved.tempMin ?? preset.tempMin ?? '',
+          tempMax: saved.tempMax ?? preset.tempMax ?? '',
+          customDescription: saved.description || ''
+        };
+
+        return presetData;
+      });
+
+      return {
+        id: cat.id,
+        label: cat.label,
+        presets: presetsWithData
+      };
+    }).filter((cat) => cat.presets.length > 0);
+
+    context.totalChance = totalChance.toFixed(2);
+    context.chancesValid = Math.abs(totalChance - 100) < 0.1;
+  }
+
   /* -------------------------------------------- */
   /*  Form Handling                               */
   /* -------------------------------------------- */
@@ -849,6 +937,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Named weeks
     this.#updateNamedWeeksFromFormData(data);
+
+    // Weather config
+    this.#updateWeatherFromFormData(data);
   }
 
   /**
@@ -1152,6 +1243,53 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#calendarData.weeks.names = newNames;
+  }
+
+  /**
+   * Update weather config from form data.
+   * @param {object} data - Form data
+   * @private
+   */
+  #updateWeatherFromFormData(data) {
+    if (!this.#calendarData.weather) this.#calendarData.weather = {};
+
+    this.#calendarData.weather.defaultClimate = data['weather.defaultClimate'] || 'temperate';
+    this.#calendarData.weather.autoGenerate = !!data['weather.autoGenerate'];
+
+    // Find all preset indices
+    const presetIndices = new Set();
+    for (const key of Object.keys(data)) {
+      const match = key.match(/^weather\.presets\.(\d+)\./);
+      if (match) presetIndices.add(parseInt(match[1]));
+    }
+
+    const sortedIndices = [...presetIndices].sort((a, b) => a - b);
+    const newPresets = [];
+
+    for (const idx of sortedIndices) {
+      const id = data[`weather.presets.${idx}.id`];
+      if (!id) continue;
+
+      const preset = {
+        id,
+        enabled: !!data[`weather.presets.${idx}.enabled`],
+        chance: parseFloat(data[`weather.presets.${idx}.chance`]) || 0
+      };
+
+      // Only store temp values if they're set
+      const tempMin = data[`weather.presets.${idx}.tempMin`];
+      const tempMax = data[`weather.presets.${idx}.tempMax`];
+      if (tempMin !== '' && tempMin != null) preset.tempMin = parseInt(tempMin);
+      if (tempMax !== '' && tempMax != null) preset.tempMax = parseInt(tempMax);
+
+      // Only store description if it's customized
+      const desc = data[`weather.presets.${idx}.description`]?.trim();
+      if (desc) preset.description = desc;
+
+      newPresets.push(preset);
+    }
+
+    this.#calendarData.weather.presets = newPresets;
   }
 
   /* -------------------------------------------- */
@@ -1630,6 +1768,54 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const idx = parseInt(target.dataset.index);
     this.#calendarData.weeks.names.splice(idx, 1);
     this.render();
+  }
+
+  /**
+   * Toggle a weather category's collapsed state.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onToggleCategory(event, target) {
+    const category = target.closest('.weather-category');
+    if (category) category.classList.toggle('collapsed');
+  }
+
+  /**
+   * Reset a weather preset to its default values.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onResetWeatherPreset(event, target) {
+    const presetId = target.dataset.presetId;
+    if (!presetId) return;
+
+    // Find and remove this preset from saved config
+    const presets = this.#calendarData.weather?.presets || [];
+    const idx = presets.findIndex((p) => p.id === presetId);
+    if (idx >= 0) {
+      presets.splice(idx, 1);
+      this.render();
+    }
+  }
+
+  /**
+   * Toggle description popover visibility.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static #onToggleDescription(event, target) {
+    const presetItem = target.closest('.weather-preset-item');
+    if (!presetItem) return;
+
+    const popover = presetItem.querySelector('.description-popover');
+    if (!popover) return;
+
+    // Close any other open popovers
+    this.element.querySelectorAll('.description-popover.show').forEach((p) => {
+      if (p !== popover) p.classList.remove('show');
+    });
+
+    popover.classList.toggle('show');
   }
 
   /**

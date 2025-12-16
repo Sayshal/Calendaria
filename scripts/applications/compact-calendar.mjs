@@ -15,6 +15,7 @@ import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { CalendarApplication } from './calendar-application.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { openWeatherPicker } from '../weather/weather-picker.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -105,7 +106,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       toMidday: CompactCalendar._onToMidday,
       toSunset: CompactCalendar._onToSunset,
       toMidnight: CompactCalendar._onToMidnight,
-      cycleWeather: CompactCalendar._onCycleWeather
+      openWeatherPicker: CompactCalendar._onOpenWeatherPicker
     }
   };
 
@@ -214,7 +215,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       label: game.i18n.localize(weather.label),
       icon: weather.icon,
       color: weather.color,
-      temperature: weather.temperature,
+      temperature: WeatherManager.formatTemperature(weather.temperature),
       tooltip: weather.description ? game.i18n.localize(weather.description) : game.i18n.localize(weather.label)
     };
   }
@@ -295,6 +296,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       yearDisplay: calendar.formatYearWithEra?.(year) ?? String(year),
       season,
       weeks,
+      daysInWeek,
       weekdays:
         calendar.days?.values?.map((wd) => {
           const name = game.i18n.localize(wd.name);
@@ -799,6 +801,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static async _onOpenFull(event, target) {
+    // Close this compact calendar
+    await this.close();
+
+    // Open the full calendar
     new CalendarApplication().render(true);
   }
 
@@ -1107,9 +1113,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Cycle through weather presets or open weather picker.
    * For now, generates new weather based on climate/season.
    */
-  static async _onCycleWeather() {
+  static async _onOpenWeatherPicker() {
     if (!game.user.isGM) return;
-    await WeatherManager.generateAndSetWeather();
+    await openWeatherPicker();
   }
 
   /* -------------------------------------------- */

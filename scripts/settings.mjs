@@ -219,6 +219,21 @@ export function registerSettings() {
     default: false
   });
 
+  /** Temperature unit (Celsius or Fahrenheit) */
+  game.settings.register(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, {
+    name: 'CALENDARIA.Settings.TemperatureUnit.Name',
+    hint: 'CALENDARIA.Settings.TemperatureUnit.Hint',
+    scope: 'world',
+    config: true,
+    type: new foundry.data.fields.StringField({
+      choices: {
+        celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius',
+        fahrenheit: 'CALENDARIA.Settings.TemperatureUnit.Fahrenheit'
+      },
+      initial: 'celsius'
+    })
+  });
+
   /** Custom weather presets */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, {
     name: 'Custom Weather Presets',

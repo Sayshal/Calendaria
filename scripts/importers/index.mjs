@@ -11,6 +11,7 @@ import BaseImporter from './base-importer.mjs';
 import SimpleCalendarImporter from './simple-calendar-importer.mjs';
 import FantasyCalendarImporter from './fantasy-calendar-importer.mjs';
 import SeasonsStarsImporter from './seasons-stars-importer.mjs';
+import SimpleTimekeepingImporter from './simple-timekeeping-importer.mjs';
 
 /**
  * Registry of all available importers.
@@ -101,6 +102,7 @@ export function initializeImporters() {
   registerImporter(SimpleCalendarImporter);
   registerImporter(FantasyCalendarImporter);
   registerImporter(SeasonsStarsImporter);
+  registerImporter(SimpleTimekeepingImporter);
 
   log(3, `Importer registry initialized with ${IMPORTERS.size} importers`);
 }

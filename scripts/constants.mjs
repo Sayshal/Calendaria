@@ -125,6 +125,9 @@ export const SETTINGS = {
   /** @type {string} Custom weather presets created by the GM */
   CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
 
+  /** @type {string} Temperature unit preference (celsius or fahrenheit) */
+  TEMPERATURE_UNIT: 'temperatureUnit',
+
   /* -------------------------------------------- */
   /*  Macro Triggers                              */
   /* -------------------------------------------- */
@@ -214,7 +217,9 @@ export const TEMPLATES = {
     /** @type {string} Calendar editor festivals tab */
     TAB_FESTIVALS: `modules/${MODULE.ID}/templates/editor/tab-festivals.hbs`,
     /** @type {string} Calendar editor cycles tab */
-    TAB_CYCLES: `modules/${MODULE.ID}/templates/editor/tab-cycles.hbs`
+    TAB_CYCLES: `modules/${MODULE.ID}/templates/editor/tab-cycles.hbs`,
+    /** @type {string} Calendar editor weather tab */
+    TAB_WEATHER: `modules/${MODULE.ID}/templates/editor/tab-weather.hbs`
   },
 
   IMPORTER: {

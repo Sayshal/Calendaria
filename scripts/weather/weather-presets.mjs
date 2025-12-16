@@ -17,7 +17,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.ClearDesc',
     icon: 'fa-sun',
     color: '#FFEE88',
-    category: 'standard'
+    category: 'standard',
+    chance: 15,
+    tempMin: 18,
+    tempMax: 32
   },
   {
     id: 'partly-cloudy',
@@ -25,7 +28,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.PartlyCloudyDesc',
     icon: 'fa-cloud-sun',
     color: '#D0E8FF',
-    category: 'standard'
+    category: 'standard',
+    chance: 20,
+    tempMin: 15,
+    tempMax: 28
   },
   {
     id: 'cloudy',
@@ -33,7 +39,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.CloudyDesc',
     icon: 'fa-cloud',
     color: '#B0C4DE',
-    category: 'standard'
+    category: 'standard',
+    chance: 15,
+    tempMin: 12,
+    tempMax: 24
   },
   {
     id: 'overcast',
@@ -41,7 +50,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.OvercastDesc',
     icon: 'fa-smog',
     color: '#CCCCCC',
-    category: 'standard'
+    category: 'standard',
+    chance: 10,
+    tempMin: 10,
+    tempMax: 20
   },
   {
     id: 'drizzle',
@@ -49,7 +61,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.DrizzleDesc',
     icon: 'fa-cloud-rain',
     color: '#CDEFFF',
-    category: 'standard'
+    category: 'standard',
+    chance: 8,
+    tempMin: 8,
+    tempMax: 18
   },
   {
     id: 'rain',
@@ -57,7 +72,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.RainDesc',
     icon: 'fa-cloud-showers-heavy',
     color: '#A0D8EF',
-    category: 'standard'
+    category: 'standard',
+    chance: 10,
+    tempMin: 10,
+    tempMax: 22
   },
   {
     id: 'fog',
@@ -65,7 +83,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.FogDesc',
     icon: 'fa-smog',
     color: '#E6E6E6',
-    category: 'standard'
+    category: 'standard',
+    chance: 5,
+    tempMin: 5,
+    tempMax: 15
   },
   {
     id: 'mist',
@@ -73,7 +94,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.MistDesc',
     icon: 'fa-water',
     color: '#F0F8FF',
-    category: 'standard'
+    category: 'standard',
+    chance: 5,
+    tempMin: 8,
+    tempMax: 18
   },
   {
     id: 'windy',
@@ -81,7 +105,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.WindyDesc',
     icon: 'fa-wind',
     color: '#E0F7FA',
-    category: 'standard'
+    category: 'standard',
+    chance: 8,
+    tempMin: 10,
+    tempMax: 25
   },
   {
     id: 'sunshower',
@@ -89,7 +116,10 @@ export const STANDARD_WEATHER = [
     description: 'CALENDARIA.Weather.SunshowerDesc',
     icon: 'fa-cloud-sun-rain',
     color: '#FCEABB',
-    category: 'standard'
+    category: 'standard',
+    chance: 4,
+    tempMin: 15,
+    tempMax: 26
   }
 ];
 
@@ -104,7 +134,10 @@ export const SEVERE_WEATHER = [
     description: 'CALENDARIA.Weather.ThunderstormDesc',
     icon: 'fa-bolt',
     color: '#FFD966',
-    category: 'severe'
+    category: 'severe',
+    chance: 0,
+    tempMin: 15,
+    tempMax: 28
   },
   {
     id: 'blizzard',
@@ -112,7 +145,10 @@ export const SEVERE_WEATHER = [
     description: 'CALENDARIA.Weather.BlizzardDesc',
     icon: 'fa-snowman',
     color: '#E0F7FF',
-    category: 'severe'
+    category: 'severe',
+    chance: 0,
+    tempMin: -20,
+    tempMax: -5
   },
   {
     id: 'snow',
@@ -120,7 +156,10 @@ export const SEVERE_WEATHER = [
     description: 'CALENDARIA.Weather.SnowDesc',
     icon: 'fa-snowflake',
     color: '#FFFFFF',
-    category: 'severe'
+    category: 'severe',
+    chance: 0,
+    tempMin: -10,
+    tempMax: 2
   },
   {
     id: 'hail',
@@ -128,7 +167,10 @@ export const SEVERE_WEATHER = [
     description: 'CALENDARIA.Weather.HailDesc',
     icon: 'fa-cloud-meatball',
     color: '#D1EFFF',
-    category: 'severe'
+    category: 'severe',
+    chance: 0,
+    tempMin: 5,
+    tempMax: 18
   },
   {
     id: 'tornado',
@@ -136,7 +178,10 @@ export const SEVERE_WEATHER = [
     description: 'CALENDARIA.Weather.TornadoDesc',
     icon: 'fa-poo-storm',
     color: '#FFD1DC',
-    category: 'severe'
+    category: 'severe',
+    chance: 0,
+    tempMin: 18,
+    tempMax: 35
   },
   {
     id: 'hurricane',
@@ -144,7 +189,10 @@ export const SEVERE_WEATHER = [
     description: 'CALENDARIA.Weather.HurricaneDesc',
     icon: 'fa-hurricane',
     color: '#FFE599',
-    category: 'severe'
+    category: 'severe',
+    chance: 0,
+    tempMin: 22,
+    tempMax: 35
   }
 ];
 
@@ -159,7 +207,10 @@ export const ENVIRONMENTAL_WEATHER = [
     description: 'CALENDARIA.Weather.AshfallDesc',
     icon: 'fa-cloud',
     color: '#DADADA',
-    category: 'environmental'
+    category: 'environmental',
+    chance: 0,
+    tempMin: 15,
+    tempMax: 40
   },
   {
     id: 'sandstorm',
@@ -167,7 +218,10 @@ export const ENVIRONMENTAL_WEATHER = [
     description: 'CALENDARIA.Weather.SandstormDesc',
     icon: 'fa-cloud-sun',
     color: '#F4E1A1',
-    category: 'environmental'
+    category: 'environmental',
+    chance: 0,
+    tempMin: 25,
+    tempMax: 45
   },
   {
     id: 'luminous-sky',
@@ -175,7 +229,10 @@ export const ENVIRONMENTAL_WEATHER = [
     description: 'CALENDARIA.Weather.LuminousSkyDesc',
     icon: 'fa-star',
     color: '#E0BBFF',
-    category: 'environmental'
+    category: 'environmental',
+    chance: 0,
+    tempMin: -5,
+    tempMax: 10
   }
 ];
 
@@ -190,7 +247,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.BlackSunDesc',
     icon: 'fa-sun',
     color: '#4A4A4A',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 5,
+    tempMax: 20
   },
   {
     id: 'ley-surge',
@@ -198,7 +258,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.LeySurgeDesc',
     icon: 'fa-bolt',
     color: '#B3E5FC',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 10,
+    tempMax: 25
   },
   {
     id: 'aether-haze',
@@ -206,7 +269,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.AetherHazeDesc',
     icon: 'fa-smog',
     color: '#E6CCFF',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 12,
+    tempMax: 22
   },
   {
     id: 'nullfront',
@@ -214,7 +280,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.NullfrontDesc',
     icon: 'fa-ban',
     color: '#808080',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 0,
+    tempMax: 15
   },
   {
     id: 'permafrost-surge',
@@ -222,7 +291,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.PermafrostSurgeDesc',
     icon: 'fa-icicles',
     color: '#D0FFFF',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: -30,
+    tempMax: -10
   },
   {
     id: 'gravewind',
@@ -230,7 +302,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.GravewindDesc',
     icon: 'fa-wind',
     color: '#C9C9FF',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 5,
+    tempMax: 18
   },
   {
     id: 'veilfall',
@@ -238,7 +313,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.VeilfallDesc',
     icon: 'fa-water',
     color: '#E0F7F9',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 8,
+    tempMax: 20
   },
   {
     id: 'arcane',
@@ -246,7 +324,10 @@ export const FANTASY_WEATHER = [
     description: 'CALENDARIA.Weather.ArcaneDesc',
     icon: 'fa-wind',
     color: '#FFFACD',
-    category: 'fantasy'
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 15,
+    tempMax: 28
   }
 ];
 

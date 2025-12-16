@@ -382,6 +382,7 @@
   color: var(--calendaria-text-dim);
 }
 
+.weather-indicator,
 .season-indicator,
 .era-indicator,
 .cycle-indicator {
@@ -392,6 +393,44 @@
   i {
     font-size: 0.65rem;
   }
+}
+
+/* Weather indicator styling */
+.weather-indicator {
+  color: var(--weather-color, var(--calendaria-text-dim));
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+}
+
+.weather-indicator.clickable {
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.weather-indicator.clickable:hover {
+  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+  border-color: var(--weather-color, var(--calendaria-text-dim));
+}
+
+.weather-indicator.no-weather {
+  color: var(--calendaria-text-dim);
+  background: transparent;
+  border: 1px dashed var(--calendaria-border);
+}
+
+.weather-indicator.no-weather:hover {
+  background: color-mix(in srgb, var(--color-positive-bg) 20%, transparent);
+  border-color: var(--color-positive-fg);
+}
+
+.weather-indicator .weather-temp {
+  margin-left: 0.25rem;
+  font-size: 0.7rem;
+  opacity: 0.8;
 }
 
 /* Header - action buttons */
@@ -1593,30 +1632,75 @@
 /* ======================================== */
 
 .calendar-editor {
-  /* Flex layout for sticky footer */
+  --editor-sidebar-width: 140px;
+  --editor-footer-height: 3.5rem;
+
+  /* Override standard-form gap */
+  &.standard-form {
+    gap: 0;
+  }
+
+  /* Button overrides - cleaner, borderless look */
+  button,
+  a.button {
+    border: none;
+    background: transparent;
+    transition:
+      background 0.15s ease,
+      opacity 0.15s ease;
+
+    &:hover {
+      background: var(--color-cool-5);
+      border: none;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+
+  /* Primary action buttons (Save, Submit) keep background */
+  button[type='submit'],
+  button.primary {
+    background: var(--button-background-color);
+    border: 1px solid var(--button-border-color);
+
+    &:hover {
+      background: var(--button-hover-background-color);
+      border-color: var(--button-hover-border-color);
+    }
+  }
+
+  /* Window content is the positioning context */
   .window-content {
-    display: flex;
-    flex-direction: column;
+    position: relative;
     height: 100%;
+    padding: 0; /* Override Foundry's default padding */
+    gap: 0; /* Override Foundry's default gap */
+    overflow: hidden;
   }
 
-  .window-content > form {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
+  /* Flex rows should align items to top */
+  .flexrow {
+    align-items: flex-start;
   }
 
-  /* Tab visibility (standard-form handles most tab styling) */
+  /* Tab content - positioned to the right of sidebar, above footer */
   section.tab {
     display: none;
+    position: absolute;
+    inset: 0 0 var(--editor-footer-height) var(--editor-sidebar-width);
     padding: 1rem;
     overflow-y: auto;
 
     &.active {
       display: flex;
       flex-direction: column;
-      flex: 1;
       gap: 1rem;
     }
   }
@@ -1843,7 +1927,10 @@
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
     font-weight: 600;
+    font-size: var(--font-size-12);
     color: var(--color-text-secondary);
+    text-align: center;
+    justify-content: center;
 
     > span {
       text-align: center;
@@ -2095,42 +2182,36 @@
     }
   }
 
+  /* Moon list - shared grid for header and rows */
+  .moons-list {
+    .moon-header {
+      display: grid;
+      grid-template-columns: 1fr 100px 90px 50px;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    /* First moon-item has header row - add bottom border after headers */
+    .moon-item:first-child .moon-header {
+      grid-template-rows: auto auto;
+      row-gap: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-cool-4);
+    }
+  }
+
   /* Moon Item */
   .moon-item {
     flex-direction: column;
     align-items: stretch;
-    padding: 0.75rem;
+    padding: 0.75rem 0.5rem;
 
     .moon-header {
-      display: flex;
-      align-items: flex-end;
-      gap: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
-
-      .form-group {
-        label {
-          white-space: nowrap;
-        }
-      }
-
-      .col-name {
-        flex: 0 1 auto;
-
-        input {
-          min-width: 300px;
-        }
-      }
+      border-bottom: 1px solid var(--color-cool-5);
 
       .col-cycle {
-        flex: 0 0 auto;
-        min-width: 100px;
-        max-width: 120px;
-      }
-
-      .col-color {
-        flex: 0 0 auto;
-        width: 100px;
+        text-align: right;
       }
 
       .color-input-wrapper {
@@ -2139,9 +2220,9 @@
         gap: 6px;
       }
 
-      .col-color input[type='color'] {
-        width: 50px;
-        height: 28px;
+      input[type='color'] {
+        width: 40px;
+        height: 24px;
         padding: 2px;
         cursor: pointer;
       }
@@ -2168,8 +2249,9 @@
       }
 
       .item-controls {
-        flex: none;
-        margin-left: auto;
+        display: flex;
+        gap: 0.25rem;
+        justify-content: flex-end;
         padding-bottom: 2px;
       }
     }
@@ -2199,7 +2281,6 @@
           font-weight: bold;
           font-size: var(--font-size-12);
           padding: 0.25rem 0.5rem;
-          background: var(--color-cool-5);
           border-bottom: 1px solid var(--color-cool-4);
         }
 
@@ -2394,14 +2475,285 @@
     color: var(--color-text-secondary);
   }
 
-  /* Footer Buttons */
+  /* Footer Buttons - positioned at bottom */
   footer.form-footer {
-    padding: 1rem;
+    position: absolute;
+    inset: auto 0 0;
+    padding: 0.75rem 1rem;
     justify-content: center;
+    background: var(--color-cool-5);
+    border-top: 1px solid var(--color-cool-4);
 
     button {
       flex: unset;
       width: fit-content;
+    }
+  }
+
+  /* -------------------------------------------- */
+  /*  Vertical Tab Sidebar Layout                 */
+  /* -------------------------------------------- */
+
+  /* Vertical tab navigation sidebar */
+  nav.sheet-tabs {
+    position: absolute;
+    inset: 0 auto var(--editor-footer-height) 0;
+    flex-direction: column;
+    justify-content: flex-start; /* Override Foundry's space-evenly */
+    align-items: stretch;
+    width: var(--editor-sidebar-width);
+    padding: 0;
+    border-top: none;
+    border-right: 1px solid var(--color-cool-4);
+    border-bottom: none;
+    gap: 0.125rem;
+    overflow-y: auto;
+
+    /* Tab buttons - text left, icon right */
+    .item {
+      flex-direction: row-reverse; /* Icon on right */
+      justify-content: flex-end; /* Push content to left */
+      padding: 0.5rem 0.75rem;
+      border-radius: 0;
+      border-left: 3px solid transparent;
+      border-bottom: none;
+      font-size: var(--font-size-13);
+      white-space: nowrap;
+
+      i {
+        width: 1.25em;
+        text-align: center;
+        margin-right: 0;
+        margin-left: 0.5rem;
+      }
+
+      /* Active tab indicator on left */
+      &.active {
+        border-left-color: var(--color-warm-1);
+        background: var(--color-cool-5);
+      }
+
+      &:hover:not(.active) {
+        background: var(--color-cool-5-50);
+      }
+    }
+  }
+
+  /* -------------------------------------------- */
+  /*  Weather Tab Styles                          */
+  /* -------------------------------------------- */
+
+  /* Climate/auto-generate header row */
+  .weather-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-cool-4);
+    margin-bottom: 1rem;
+
+    .form-group {
+      margin: 0;
+    }
+
+    .climate-select {
+      width: 150px;
+    }
+  }
+
+  /* Weather presets list */
+  .weather-presets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Weather category group */
+  .weather-category {
+    border: 1px solid var(--color-cool-4);
+    border-radius: 4px;
+    overflow: hidden;
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--color-cool-5);
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+
+      i.toggle-icon {
+        transition: transform 0.2s;
+      }
+
+      &:hover {
+        background: var(--color-cool-4);
+      }
+    }
+
+    &.collapsed {
+      .category-header i.toggle-icon {
+        transform: rotate(-90deg);
+      }
+
+      .category-content {
+        display: none;
+      }
+    }
+  }
+
+  /* Weather preset header and items - compact row grid */
+  .weather-preset-header,
+  .weather-preset-item {
+    display: grid;
+    grid-template-columns: 24px 28px 1fr 90px 130px 50px;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .weather-preset-header {
+    font-size: var(--font-size-12);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-cool-4);
+    padding-bottom: 0.5rem;
+
+    > span {
+      text-align: center;
+    }
+
+    .col-name {
+      text-align: left;
+    }
+  }
+
+  .weather-preset-item {
+    position: relative;
+    border-bottom: 1px solid var(--color-cool-5);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:nth-child(odd) {
+      background: var(--color-cool-5-50);
+    }
+
+    .preset-enabled {
+      justify-self: center;
+    }
+
+    .preset-icon {
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    .preset-name {
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preset-chance {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      input {
+        width: 60px;
+        text-align: right;
+      }
+    }
+
+    .preset-temp {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      input {
+        width: 45px;
+        text-align: right;
+      }
+
+      .temp-separator,
+      .temp-unit {
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-12);
+      }
+    }
+
+    .preset-actions {
+      display: flex;
+      gap: 0.25rem;
+
+      button {
+        padding: 0.25rem;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    /* Description popover */
+    .description-popover {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: var(--color-cool-5);
+      border: 1px solid var(--color-cool-4);
+      border-radius: 4px;
+      padding: 0.5rem;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+
+      &.show {
+        display: block;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 60px;
+        resize: vertical;
+        font-size: var(--font-size-13);
+      }
+    }
+  }
+
+  /* Weather totals row */
+  .weather-totals {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-cool-5);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+
+    .total-label {
+      font-weight: 600;
+    }
+
+    .total-value {
+      font-size: var(--font-size-16);
+
+      &.warning {
+        color: var(--color-level-warning);
+      }
+
+      &.valid {
+        color: var(--color-level-success);
+      }
+    }
+
+    .total-hint {
+      font-size: var(--font-size-12);
+      color: var(--color-text-secondary);
+      margin-left: auto;
     }
   }
 }
@@ -3126,7 +3478,7 @@
 
   .compact-weekdays {
     display: grid;
-    grid-template-columns: repeat(7, var(--compact-day-size));
+    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
     gap: var(--compact-gap);
     margin-bottom: 4px;
 
@@ -3142,7 +3494,7 @@
 
   .compact-days {
     display: grid;
-    grid-template-columns: repeat(7, var(--compact-day-size));
+    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
     gap: var(--compact-gap);
   }
 
@@ -3789,6 +4141,109 @@
         &:hover {
           opacity: 0.85;
         }
+      }
+    }
+  }
+}
+
+/* ======================================== */
+/* Weather Picker Application               */
+/* ======================================== */
+
+.weather-picker-app {
+  .window-content {
+    padding: 0.75rem;
+    background: var(--calendaria-bg);
+  }
+
+  .weather-picker-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .weather-category {
+    .category-header {
+      margin: 0 0 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--calendaria-border);
+      font-size: 0.85rem;
+      color: var(--calendaria-text-dim);
+      font-weight: 600;
+    }
+
+    .weather-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 0.4rem;
+    }
+  }
+
+  .weather-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    background: color-mix(in srgb, var(--weather-color) 20%, var(--calendaria-bg-lighter));
+    border: 1px solid color-mix(in srgb, var(--weather-color) 50%, transparent);
+    color: var(--calendaria-text);
+    transition: all 0.15s ease;
+    text-align: left;
+
+    &:hover {
+      background: color-mix(in srgb, var(--weather-color) 35%, var(--calendaria-bg-lighter));
+      border-color: var(--weather-color);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    i {
+      color: var(--weather-color);
+      font-size: 0.9rem;
+      width: 1rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .weather-label {
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .weather-picker-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--calendaria-border);
+
+    .random-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      background: var(--calendaria-primary);
+      border: none;
+      border-radius: 4px;
+      color: rgb(255 255 255);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+
+      &:hover {
+        opacity: 0.85;
+      }
+
+      i {
+        font-size: 1rem;
       }
     }
   }

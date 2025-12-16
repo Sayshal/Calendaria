@@ -512,6 +512,25 @@ class WeatherManager {
     // Fallback to clear
     return 'clear';
   }
+
+  /* -------------------------------------------- */
+  /*  Temperature Formatting                       */
+  /* -------------------------------------------- */
+
+  /**
+   * Format a temperature value with the configured unit.
+   * @param {number} celsius - Temperature in Celsius
+   * @returns {string} Formatted temperature with unit symbol
+   */
+  formatTemperature(celsius) {
+    if (celsius == null) return '';
+    const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
+    if (unit === 'fahrenheit') {
+      const fahrenheit = Math.round(celsius * 9 / 5 + 32);
+      return `${fahrenheit}°F`;
+    }
+    return `${Math.round(celsius)}°C`;
+  }
 }
 
 // Export singleton instance

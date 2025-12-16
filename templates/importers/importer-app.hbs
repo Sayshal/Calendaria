@@ -158,7 +158,7 @@
               </div>
               {{#each extractedNotes}}
                 <div class="note-row">
-                  <span class="note-name" title="{{this.name}}">{{this.name}}</span>
+                  <span class="note-name" data-tooltip="{{this.name}}">{{this.name}}</span>
                   <span class="note-date">{{this.startDate.month}}/{{this.startDate.day}}</span>
                   <select name="noteType[{{@index}}]" class="note-type-select">
                     <option value="skip">{{localize "CALENDARIA.Importer.Notes.Skip"}}</option>

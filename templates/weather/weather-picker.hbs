@@ -1,0 +1,23 @@
+<div class="weather-picker-content">
+  {{#each categories}}
+  <div class="weather-category">
+    <h4 class="category-header">{{label}}</h4>
+    <div class="weather-buttons">
+      {{#each presets}}
+      <button type="button" class="weather-btn" data-action="selectWeather" data-preset-id="{{id}}"
+        style="--weather-color: {{color}}" data-tooltip="{{description}}">
+        <i class="fas {{icon}}"></i>
+        <span class="weather-label">{{label}}</span>
+      </button>
+      {{/each}}
+    </div>
+  </div>
+  {{/each}}
+
+  <div class="weather-picker-footer">
+    <button type="button" class="random-btn" data-action="randomWeather">
+      <i class="fas fa-dice"></i>
+      {{localize "CALENDARIA.Weather.Picker.Random"}}
+    </button>
+  </div>
+</div>

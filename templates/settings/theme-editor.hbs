@@ -13,11 +13,11 @@
               <input type="text" class="color-hex" value="{{this.value}}" readonly>
               {{#if this.isCustom}}
                 <button type="button" class="reset-color" data-action="resetColor" data-key="{{this.key}}"
-                        title="{{localize 'CALENDARIA.ThemeEditor.ResetToDefault'}}">
+                        data-tooltip="{{localize 'CALENDARIA.ThemeEditor.ResetToDefault'}}">
                   <i class="fas fa-undo"></i>
                 </button>
               {{else}}
-                <span class="default-indicator" title="{{localize 'CALENDARIA.ThemeEditor.UsingDefault'}}">
+                <span class="default-indicator" data-tooltip="{{localize 'CALENDARIA.ThemeEditor.UsingDefault'}}">
                   <i class="fas fa-check"></i>
                 </span>
               {{/if}}

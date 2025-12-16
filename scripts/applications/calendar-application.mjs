@@ -11,8 +11,10 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
-import { MODULE, SETTINGS } from '../constants.mjs';
+import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
+import { openWeatherPicker } from '../weather/weather-picker.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -45,7 +47,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       selectDay: CalendarApplication._onSelectDay,
       selectMonth: CalendarApplication._onSelectMonth,
       setAsCurrentDate: CalendarApplication._onSetAsCurrentDate,
-      selectTimeSlot: CalendarApplication._onSelectTimeSlot
+      selectTimeSlot: CalendarApplication._onSelectTimeSlot,
+      toggleCompact: CalendarApplication._onToggleCompact,
+      openWeatherPicker: CalendarApplication._onOpenWeatherPicker
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -146,6 +150,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Moon phases setting for use in calendar data generation
     context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES);
+
+    // Weather badge data
+    context.weather = this._getWeatherContext();
 
     // Get cycle values for display in header (based on viewed date, not world time)
     if (calendar.cycles?.length) {
@@ -874,6 +881,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         if (page.type === 'calendaria.calendarnote') debouncedRender();
       })
     });
+
+    // Listen for weather changes
+    this._hooks.push({
+      name: HOOKS.WEATHER_CHANGE,
+      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender())
+    });
   }
 
   /**
@@ -1188,6 +1201,47 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     else this._selectedTimeSlot = { year, month, day, hour };
 
     await this.render();
+  }
+
+  /**
+   * Toggle between full and compact calendar views.
+   * Closes this window and opens the compact calendar.
+   */
+  static async _onToggleCompact(event, target) {
+    // Close this full calendar
+    await this.close();
+
+    // Open or focus the compact calendar
+    const { CompactCalendar } = await import('./compact-calendar.mjs');
+    const existing = Object.values(ui.windows).find((w) => w instanceof CompactCalendar);
+    if (existing) existing.render(true, { focus: true });
+    else new CompactCalendar().render(true);
+  }
+
+  /**
+   * Cycle through weather presets or generate new weather.
+   */
+  static async _onOpenWeatherPicker(event, target) {
+    if (!game.user.isGM) return;
+    await openWeatherPicker();
+  }
+
+  /**
+   * Get weather context for template.
+   * @returns {object|null} Weather context or null if no weather set
+   */
+  _getWeatherContext() {
+    const weather = WeatherManager.getCurrentWeather();
+    if (!weather) return null;
+
+    return {
+      id: weather.id,
+      label: game.i18n.localize(weather.label),
+      icon: weather.icon,
+      color: weather.color,
+      temperature: WeatherManager.formatTemperature(weather.temperature),
+      tooltip: weather.description ? game.i18n.localize(weather.description) : game.i18n.localize(weather.label)
+    };
   }
 
   /**
