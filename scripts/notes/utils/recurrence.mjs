@@ -145,6 +145,10 @@ export function isRecurringMatch(noteData, targetDate) {
       matches = matchesYearly(startDate, targetDate, interval);
       break;
 
+    case 'range':
+      if (!noteData.rangePattern) return false;
+      return matchesRangePattern(noteData.rangePattern, targetDate, startDate, repeatEndDate);
+
     default:
       return false;
   }
@@ -475,6 +479,77 @@ function getLastDayOfMonth(date) {
 }
 
 /**
+ * Check if note matches range pattern recurrence.
+ * Range pattern specifies year/month/day as exact values, ranges, or wildcards.
+ * @param {object} pattern - Range pattern { year, month, day }
+ * @param {object} targetDate - Date to check
+ * @param {object} startDate - Note start date (filter: don't match before this)
+ * @param {object} [repeatEndDate] - Note repeat end date (filter: don't match after this)
+ * @returns {boolean} True if matches
+ */
+function matchesRangePattern(pattern, targetDate, startDate, repeatEndDate) {
+  const { year, month, day } = pattern;
+
+  // Check date bounds first (day-level comparison)
+  if (compareDays(targetDate, startDate) < 0) return false;
+  if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
+
+  // Check year range/value
+  if (!matchesRangeBit(year, targetDate.year)) return false;
+
+  // Check month range/value
+  if (!matchesRangeBit(month, targetDate.month)) return false;
+
+  // Check day range/value
+  if (!matchesRangeBit(day, targetDate.day)) return false;
+
+  return true;
+}
+
+/**
+ * Check if a value matches a range bit specification.
+ * Range bit can be:
+ * - null/undefined: match any value
+ * - number: exact match
+ * - [min, max]: inclusive range (each can be number or null)
+ *   - [null, null]: match any
+ *   - [min, null]: >= min
+ *   - [null, max]: <= max
+ *   - [min, max]: between inclusive
+ * @param {number|Array|null} rangeBit - Range specification
+ * @param {number} value - Value to check
+ * @returns {boolean} True if value matches range bit
+ */
+function matchesRangeBit(rangeBit, value) {
+  // null or undefined = match any
+  if (rangeBit == null) return true;
+
+  // Single number = exact match
+  if (typeof rangeBit === 'number') {
+    return value === rangeBit;
+  }
+
+  // Array [min, max]
+  if (Array.isArray(rangeBit) && rangeBit.length === 2) {
+    const [min, max] = rangeBit;
+
+    // [null, null] = match any
+    if (min === null && max === null) return true;
+
+    // [min, null] = >= min
+    if (min !== null && max === null) return value >= min;
+
+    // [null, max] = <= max
+    if (min === null && max !== null) return value <= max;
+
+    // [min, max] = between inclusive
+    return value >= min && value <= max;
+  }
+
+  return false;
+}
+
+/**
  * Get all occurrences of a recurring note within a date range.
  * @param {object} noteData  Note flag data
  * @param {object} rangeStart  Start of range
@@ -558,6 +633,23 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
       } else {
         currentDate = addDays(currentDate, 1);
       }
+      iterations++;
+    }
+    return occurrences;
+  }
+
+  // For range-based repeat, iterate day by day and check pattern
+  if (repeat === 'range') {
+    let currentDate = compareDays(startDate, rangeStart) >= 0 ? { ...startDate } : { ...rangeStart };
+    let iterations = 0;
+    const maxIterations = 10000;
+
+    while (compareDays(currentDate, rangeEnd) <= 0 && iterations < maxIterations) {
+      if (isRecurringMatch(noteData, currentDate)) {
+        occurrences.push({ ...currentDate });
+        if (occurrences.length >= maxOccurrences) break;
+      }
+      currentDate = addDays(currentDate, 1);
       iterations++;
     }
     return occurrences;
@@ -669,6 +761,14 @@ export function getRecurrenceDescription(noteData) {
     const checkInterval = randomConfig?.checkInterval ?? 'daily';
     const intervalLabel = checkInterval === 'weekly' ? 'week' : checkInterval === 'monthly' ? 'month' : 'day';
     let description = `${probability}% chance each ${intervalLabel}`;
+    description = appendMaxOccurrences(description);
+    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
+    return description;
+  }
+
+  // Handle range-based repeat
+  if (repeat === 'range') {
+    let description = describeRangePattern(noteData.rangePattern);
     description = appendMaxOccurrences(description);
     if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
     return description;
@@ -838,4 +938,54 @@ function getMoonConditionsDescription(moonConditions) {
   }
 
   return descriptions.join('; ');
+}
+
+/**
+ * Generate human-readable description of a range pattern.
+ * @param {object} pattern - Range pattern { year, month, day }
+ * @returns {string} Description like "year=2020-2025, month=0, day=15"
+ */
+function describeRangePattern(pattern) {
+  if (!pattern) return 'Custom range pattern';
+
+  const { year, month, day } = pattern;
+
+  const yearDesc = describeRangeBit(year, 'year');
+  const monthDesc = describeRangeBit(month, 'month');
+  const dayDesc = describeRangeBit(day, 'day');
+
+  const parts = [yearDesc, monthDesc, dayDesc].filter(Boolean);
+  return parts.length > 0 ? `Range: ${parts.join(', ')}` : 'Custom range pattern';
+}
+
+/**
+ * Generate human-readable description of a single range bit.
+ * @param {number|Array|null} bit - Range bit (number, [min, max], or null)
+ * @param {string} unit - Unit name ('year', 'month', 'day')
+ * @returns {string|null} Description or null if any value
+ */
+function describeRangeBit(bit, unit) {
+  if (bit == null) return null;
+
+  // Single number = exact value
+  if (typeof bit === 'number') return `${unit}=${bit}`;
+
+  // Array [min, max]
+  if (Array.isArray(bit) && bit.length === 2) {
+    const [min, max] = bit;
+
+    // [null, null] = any
+    if (min === null && max === null) return `any ${unit}`;
+
+    // [min, null] = >= min
+    if (min !== null && max === null) return `${unit}>=${min}`;
+
+    // [null, max] = <= max
+    if (min === null && max !== null) return `${unit}<=${max}`;
+
+    // [min, max] = range
+    return `${unit}=${min}-${max}`;
+  }
+
+  return null;
 }

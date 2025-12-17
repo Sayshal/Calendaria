@@ -136,6 +136,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
       });
     }
+
+    // Add range type select listeners
+    const rangeTypeSelects = htmlElement.querySelectorAll('.range-type-select');
+    rangeTypeSelects.forEach((select) => {
+      select.addEventListener('change', () => {
+        this.render(false); // Re-render to show/hide input fields
+      });
+    });
   }
 
   /**
@@ -363,6 +371,55 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.linkedNoteName = linkedNote?.name || 'Unknown Event';
     }
 
+    // Prepare range pattern context
+    context.showRangeConfig = this.document.system.repeat === 'range';
+    const rangePattern = this.document.system.rangePattern || {};
+
+    // Helper to determine range type for a component
+    const getRangeType = (bit) => {
+      if (bit == null || (Array.isArray(bit) && bit[0] === null && bit[1] === null)) return 'any';
+      if (typeof bit === 'number') return 'exact';
+      if (Array.isArray(bit)) return 'range';
+      return 'any';
+    };
+
+    // Year
+    const yearType = getRangeType(rangePattern.year);
+    context.rangeYearAny = yearType === 'any';
+    context.rangeYearExact = yearType === 'exact';
+    context.rangeYearRange = yearType === 'range';
+    context.rangeYearValue = yearType === 'exact' ? rangePattern.year : '';
+    context.rangeYearMin = yearType === 'range' ? (rangePattern.year[0] ?? '') : '';
+    context.rangeYearMax = yearType === 'range' ? (rangePattern.year[1] ?? '') : '';
+
+    // Month
+    const monthType = getRangeType(rangePattern.month);
+    context.rangeMonthAny = monthType === 'any';
+    context.rangeMonthExact = monthType === 'exact';
+    context.rangeMonthRange = monthType === 'range';
+    const rangeMonthValue = monthType === 'exact' ? rangePattern.month : null;
+    const rangeMonthMin = monthType === 'range' ? rangePattern.month[0] : null;
+    const rangeMonthMax = monthType === 'range' ? rangePattern.month[1] : null;
+
+    // Build month options for dropdowns
+    const months = calendar?.months?.values || [];
+    context.monthOptions = months.map((m, idx) => ({
+      index: idx,
+      name: game.i18n.localize(m.name),
+      selected: rangeMonthValue === idx,
+      selectedMin: rangeMonthMin === idx,
+      selectedMax: rangeMonthMax === idx
+    }));
+
+    // Day
+    const dayType = getRangeType(rangePattern.day);
+    context.rangeDayAny = dayType === 'any';
+    context.rangeDayExact = dayType === 'exact';
+    context.rangeDayRange = dayType === 'range';
+    context.rangeDayValue = dayType === 'exact' ? rangePattern.day : '';
+    context.rangeDayMin = dayType === 'range' ? (rangePattern.day[0] ?? '') : '';
+    context.rangeDayMax = dayType === 'range' ? (rangePattern.day[1] ?? '') : '';
+
     // Prepare category options with selected state
     const selectedCategories = this.document.system.categories || [];
     context.categoryOptions = getAllCategories().map((cat) => ({
@@ -498,7 +555,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       if (endTimeInput) endTimeInput.disabled = event.target.checked;
     }
 
-    // Handle repeat type changes to show/hide moon/random/linked/options sections
+    // Handle repeat type changes to show/hide moon/random/linked/range/options sections
     if (event.target?.name === 'system.repeat') {
       const form = event.target.closest('form');
       const repeatValue = event.target.value;
@@ -506,15 +563,17 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const moonRow = form?.querySelector('.form-row-moon');
       const randomRow = form?.querySelector('.form-row-random');
       const linkedRow = form?.querySelector('.form-row-linked');
+      const rangeRow = form?.querySelector('.form-row-range');
       const repeatOptions = form?.querySelector('.repeat-options');
 
       if (moonRow) moonRow.style.display = repeatValue === 'moon' ? '' : 'none';
       if (randomRow) randomRow.style.display = repeatValue === 'random' ? '' : 'none';
       if (linkedRow) linkedRow.style.display = repeatValue === 'linked' ? '' : 'none';
+      if (rangeRow) rangeRow.style.display = repeatValue === 'range' ? '' : 'none';
       if (repeatOptions) repeatOptions.style.display = repeatValue !== 'never' ? '' : 'none';
 
       // Re-render if section doesn't exist yet (to create repeat-options or other sections)
-      const needsRerender = (repeatValue === 'moon' && !moonRow) || (repeatValue === 'random' && !randomRow) || (repeatValue === 'linked' && !linkedRow) || (repeatValue !== 'never' && !repeatOptions);
+      const needsRerender = (repeatValue === 'moon' && !moonRow) || (repeatValue === 'random' && !randomRow) || (repeatValue === 'linked' && !linkedRow) || (repeatValue === 'range' && !rangeRow) || (repeatValue !== 'never' && !repeatOptions);
       if (needsRerender) {
         this.render();
       }
@@ -539,6 +598,59 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         imgPreview.style.transform = 'translateY(-1000px)';
       }
     }
+  }
+
+  /**
+   * Process form data to convert range pattern UI fields into proper structure.
+   * @param {Event} event - Form submission event
+   * @param {HTMLFormElement} form - The form element
+   * @param {FormDataExtended} formData - Extended form data
+   * @override
+   */
+  async _processFormData(event, form, formData) {
+    const data = await super._processFormData(event, form, formData);
+
+    // Build range pattern from individual fields
+    if (data.system?.repeat === 'range') {
+      const rangePattern = {};
+
+      // Helper to get range type value from form
+      const getRangeValue = (component) => {
+        const typeSelect = form.querySelector(`select[data-range-type="${component}"]`);
+        if (!typeSelect) return null;
+
+        const type = typeSelect.value;
+        if (type === 'any') return [null, null]; // Wildcard
+
+        if (type === 'exact') {
+          const valueInput = form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}"]`) || form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}"]`);
+          if (!valueInput || valueInput.value === '') return null;
+          return Number(valueInput.value);
+        }
+
+        if (type === 'range') {
+          const minInput = form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Min"]`) || form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Min"]`);
+          const maxInput = form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Max"]`) || form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Max"]`);
+
+          const min = minInput && minInput.value !== '' ? Number(minInput.value) : null;
+          const max = maxInput && maxInput.value !== '' ? Number(maxInput.value) : null;
+          return [min, max];
+        }
+
+        return null;
+      };
+
+      rangePattern.year = getRangeValue('year');
+      rangePattern.month = getRangeValue('month');
+      rangePattern.day = getRangeValue('day');
+
+      data.system.rangePattern = rangePattern;
+    } else {
+      // Clear rangePattern if not using range repeat
+      data.system.rangePattern = null;
+    }
+
+    return data;
   }
 
   /**

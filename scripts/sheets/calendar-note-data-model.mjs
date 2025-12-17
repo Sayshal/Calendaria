@@ -38,7 +38,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
 
       // Recurrence
       repeat: new fields.StringField({
-        choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random'],
+        choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range'],
         initial: 'never'
       }),
 
@@ -86,6 +86,30 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         },
         { nullable: true }
       ),
+
+      // Linked event configuration (for repeat: 'linked')
+      linkedEvent: new fields.SchemaField(
+        {
+          noteId: new fields.StringField({ required: true, blank: false }),
+          offset: new fields.NumberField({ integer: true, initial: 0 })
+        },
+        { nullable: true }
+      ),
+
+      // Range pattern configuration (for repeat: 'range')
+      rangePattern: new fields.SchemaField(
+        {
+          year: new fields.JSONField({ nullable: true }), // number | [min, max] | null
+          month: new fields.JSONField({ nullable: true }), // number | [min, max] | null
+          day: new fields.JSONField({ nullable: true }) // number | [min, max] | null
+        },
+        { nullable: true }
+      ),
+
+      // Week-based recurrence fields
+      weekday: new fields.NumberField({ integer: true, min: 0, nullable: true }), // For weekly: 0-indexed day of week
+      seasonIndex: new fields.NumberField({ integer: true, min: 0, nullable: true }), // For seasonal: 0-indexed season
+      weekNumber: new fields.NumberField({ integer: true, min: 1, nullable: true }), // For weekOfMonth: 1-indexed week
 
       // Organization
       categories: new fields.ArrayField(new fields.StringField(), { initial: [] }),

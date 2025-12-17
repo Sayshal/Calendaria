@@ -34,6 +34,7 @@ export function getDefaultNoteData() {
     weekNumber: null, // For weekOfMonth recurrence: 1-indexed week number
     moonConditions: [], // Array of { moonIndex, phaseStart, phaseEnd } (0-1 values)
     linkedEvent: null, // { noteId: string, offset: number } - occurs X days from linked event
+    rangePattern: null, // { year, month, day } - each can be number | [min, max] | null
     categories: [],
     color: '#4a9eff',
     icon: 'fas fa-calendar',
@@ -72,9 +73,11 @@ export function validateNoteData(noteData) {
   // Validate allDay
   if (noteData.allDay !== undefined && typeof noteData.allDay !== 'boolean') errors.push('allDay must be a boolean');
 
-  // Validate repeat
-  const validRepeatValues = ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth'];
-  if (noteData.repeat && !validRepeatValues.includes(noteData.repeat)) errors.push(`repeat must be one of: ${validRepeatValues.join(', ')}`);
+  // Validate repeat - get choices from data model to avoid duplication
+  const validRepeatValues = foundry.documents.JournalEntryPage.TYPES['calendaria.calendarnote']?.schema?.getField('repeat')?.choices || [];
+  if (noteData.repeat && validRepeatValues.length > 0 && !validRepeatValues.includes(noteData.repeat)) {
+    errors.push(`repeat must be one of: ${validRepeatValues.join(', ')}`);
+  }
 
   // Validate weekday (for weekly recurrence)
   if (noteData.weekday !== undefined && noteData.weekday !== null) {
@@ -124,6 +127,35 @@ export function validateNoteData(noteData) {
       }
       if (typeof noteData.linkedEvent.offset !== 'number') {
         errors.push('linkedEvent.offset must be a number');
+      }
+    }
+  }
+
+  // Validate range pattern
+  if (noteData.rangePattern !== undefined && noteData.rangePattern !== null) {
+    if (typeof noteData.rangePattern !== 'object') {
+      errors.push('rangePattern must be an object or null');
+    } else {
+      // Validate each range bit (year, month, day)
+      for (const field of ['year', 'month', 'day']) {
+        const bit = noteData.rangePattern[field];
+        if (bit !== undefined && bit !== null) {
+          if (typeof bit === 'number') {
+            // Single number is valid
+            continue;
+          } else if (Array.isArray(bit) && bit.length === 2) {
+            // Array [min, max] where each can be number or null
+            const [min, max] = bit;
+            if (min !== null && typeof min !== 'number') {
+              errors.push(`rangePattern.${field}[0] must be number or null`);
+            }
+            if (max !== null && typeof max !== 'number') {
+              errors.push(`rangePattern.${field}[1] must be number or null`);
+            }
+          } else {
+            errors.push(`rangePattern.${field} must be number, [min, max], or null`);
+          }
+        }
       }
     }
   }
@@ -184,6 +216,7 @@ export function sanitizeNoteData(noteData) {
     weekNumber: noteData.weekNumber ?? null,
     moonConditions: Array.isArray(noteData.moonConditions) ? noteData.moonConditions : defaults.moonConditions,
     linkedEvent: noteData.linkedEvent || null,
+    rangePattern: noteData.rangePattern || null,
     categories: Array.isArray(noteData.categories) ? noteData.categories : defaults.categories,
     color: noteData.color || defaults.color,
     icon: noteData.icon || defaults.icon,

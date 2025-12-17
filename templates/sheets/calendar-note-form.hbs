@@ -238,6 +238,97 @@
     </div>
   {{/if}}
 
+  {{!-- Range Pattern Configuration (shown when repeat is 'range') --}}
+  {{#if showRangeConfig}}
+    <div class="form-row-range">
+      <fieldset class="range-config-fieldset">
+        <legend>Range Pattern Settings</legend>
+        <div class="range-config-inputs">
+
+          {{!-- Year Configuration --}}
+          <div class="range-component">
+            <label>Year</label>
+            <div class="range-controls">
+              <select data-range-type="year" class="range-type-select">
+                <option value="any" {{#if rangeYearAny}}selected{{/if}}>Any Year</option>
+                <option value="exact" {{#if rangeYearExact}}selected{{/if}}>Exact Year</option>
+                <option value="range" {{#if rangeYearRange}}selected{{/if}}>Year Range</option>
+              </select>
+              <div class="range-value-inputs">
+                {{#if rangeYearExact}}
+                  <input type="number" name="rangeYear" value="{{rangeYearValue}}" placeholder="Year" step="1" />
+                {{else if rangeYearRange}}
+                  <input type="number" name="rangeYearMin" value="{{rangeYearMin}}" placeholder="Min" step="1" />
+                  <span>to</span>
+                  <input type="number" name="rangeYearMax" value="{{rangeYearMax}}" placeholder="Max" step="1" />
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+          {{!-- Month Configuration --}}
+          <div class="range-component">
+            <label>Month</label>
+            <div class="range-controls">
+              <select data-range-type="month" class="range-type-select">
+                <option value="any" {{#if rangeMonthAny}}selected{{/if}}>Any Month</option>
+                <option value="exact" {{#if rangeMonthExact}}selected{{/if}}>Exact Month</option>
+                <option value="range" {{#if rangeMonthRange}}selected{{/if}}>Month Range</option>
+              </select>
+              <div class="range-value-inputs">
+                {{#if rangeMonthExact}}
+                  <select name="rangeMonth">
+                    {{#each monthOptions}}
+                      <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+                    {{/each}}
+                  </select>
+                {{else if rangeMonthRange}}
+                  <select name="rangeMonthMin">
+                    {{#each monthOptions}}
+                      <option value="{{index}}" {{#if selectedMin}}selected{{/if}}>{{name}}</option>
+                    {{/each}}
+                  </select>
+                  <span>to</span>
+                  <select name="rangeMonthMax">
+                    {{#each monthOptions}}
+                      <option value="{{index}}" {{#if selectedMax}}selected{{/if}}>{{name}}</option>
+                    {{/each}}
+                  </select>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+          {{!-- Day Configuration --}}
+          <div class="range-component">
+            <label>Day</label>
+            <div class="range-controls">
+              <select data-range-type="day" class="range-type-select">
+                <option value="any" {{#if rangeDayAny}}selected{{/if}}>Any Day</option>
+                <option value="exact" {{#if rangeDayExact}}selected{{/if}}>Exact Day</option>
+                <option value="range" {{#if rangeDayRange}}selected{{/if}}>Day Range</option>
+              </select>
+              <div class="range-value-inputs">
+                {{#if rangeDayExact}}
+                  <input type="number" name="rangeDay" value="{{rangeDayValue}}" placeholder="Day" min="1" max="31" step="1" />
+                {{else if rangeDayRange}}
+                  <input type="number" name="rangeDayMin" value="{{rangeDayMin}}" placeholder="Min" min="1" max="31" step="1" />
+                  <span>to</span>
+                  <input type="number" name="rangeDayMax" value="{{rangeDayMax}}" placeholder="Max" min="1" max="31" step="1" />
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <p class="hint">
+          Define a pattern matching specific years, months, and days. Use ranges for events spanning multiple periods.
+          Example: Year 2020-2025, Month January, Day 15th = "Every January 15 from 2020 to 2025"
+        </p>
+      </fieldset>
+    </div>
+  {{/if}}
+
   {{!-- Row 3: Categories --}}
   <div class="form-row-3">
     <fieldset class="categories-fieldset">
