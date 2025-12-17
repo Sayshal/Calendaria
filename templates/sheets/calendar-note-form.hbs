@@ -104,133 +104,138 @@
         {{/each}}
       </select>
       {{#if showRepeatOptions}}
-      <div class="repeat-options">
-        <label data-tooltip="CALENDARIA.UI.MaxOccurrencesTooltip">
-          Max
-          <input type="number" name="system.maxOccurrences" value="{{system.maxOccurrences}}" min="0" step="1" placeholder="∞" />
-        </label>
-      </div>
+        <div class="repeat-options">
+          <label data-tooltip="CALENDARIA.UI.MaxOccurrencesTooltip">
+            Max
+            <input type="number" name="system.maxOccurrences" value="{{system.maxOccurrences}}" min="0" step="1"
+              placeholder="∞" />
+          </label>
+        </div>
       {{/if}}
     </fieldset>
   </div>
 
   {{!-- Moon Conditions (shown when repeat is 'moon' or conditions exist) --}}
   {{#if showMoonConditions}}
-  <div class="form-row-moon">
-    <fieldset class="moon-conditions-fieldset">
-      <legend>Moon Conditions</legend>
-      {{#if hasMoons}}
-        {{!-- Existing conditions --}}
-        {{#if moonConditions.length}}
-        <div class="moon-conditions-list">
-          {{#each moonConditions}}
-            <div class="moon-condition-tag">
-              <span class="moon-name">{{moonName}}</span>
-              <span class="phase-name">{{phaseName}}</span>
-              <button type="button" class="remove-condition" data-action="removeMoonCondition" data-index="{{index}}" data-tooltip="Remove condition">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          {{/each}}
-        </div>
-        {{/if}}
-        {{!-- Add new condition --}}
-        <div class="add-moon-condition">
-          <select name="newMoonCondition.moonIndex">
-            <option value="">Select Moon...</option>
-            {{#each moons}}
-              <option value="{{index}}">{{name}}</option>
-            {{/each}}
-          </select>
-          <select name="newMoonCondition.phase">
-            <option value="">Select Phase...</option>
-            {{#each moons}}
-              {{#each phases}}
-                <option value="{{start}}-{{end}}" data-moon="{{@../index}}">{{name}}</option>
+    <div class="form-row-moon">
+      <fieldset class="moon-conditions-fieldset">
+        <legend>Moon Conditions</legend>
+        {{#if hasMoons}}
+          {{!-- Existing conditions --}}
+          {{#if moonConditions.length}}
+            <div class="moon-conditions-list">
+              {{#each moonConditions}}
+                <div class="moon-condition-tag">
+                  <span class="moon-name">{{moonName}}</span>
+                  <span class="phase-name">{{phaseName}}</span>
+                  <button type="button" class="remove-condition" data-action="removeMoonCondition"
+                    data-index="{{index}}" data-tooltip="Remove condition">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               {{/each}}
-            {{/each}}
-          </select>
-          <button type="button" class="add-condition-btn" data-action="addMoonCondition" data-tooltip="Add moon condition">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
-        <p class="hint">Event triggers on days matching ANY of the above moon conditions.</p>
-      {{else}}
-        <p class="hint no-moons">No moons configured in the calendar. Add moons to use moon-based events.</p>
-      {{/if}}
-    </fieldset>
-  </div>
+            </div>
+          {{/if}}
+          {{!-- Add new condition --}}
+          <div class="add-moon-condition">
+            <select name="newMoonCondition.moonIndex">
+              <option value="">Select Moon...</option>
+              {{#each moons}}
+                <option value="{{index}}">{{name}}</option>
+              {{/each}}
+            </select>
+            <select name="newMoonCondition.phase">
+              <option value="">Select Phase...</option>
+              {{#each moons}}
+                {{#each phases}}
+                  <option value="{{start}}-{{end}}" data-moon="{{@../index}}">{{name}}</option>
+                {{/each}}
+              {{/each}}
+            </select>
+            <button type="button" class="add-condition-btn" data-action="addMoonCondition"
+              data-tooltip="Add moon condition">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <p class="hint">Event triggers on days matching ANY of the above moon conditions.</p>
+        {{else}}
+          <p class="hint no-moons">No moons configured in the calendar. Add moons to use moon-based events.</p>
+        {{/if}}
+      </fieldset>
+    </div>
   {{/if}}
 
   {{!-- Random Configuration (shown when repeat is 'random') --}}
   {{#if showRandomConfig}}
-  <div class="form-row-random">
-    <fieldset class="random-config-fieldset">
-      <legend>Random Event Settings</legend>
-      <div class="random-config-inputs">
-        <div class="form-group">
-          <label data-tooltip="CALENDARIA.UI.RandomProbabilityTooltip">Probability (%)</label>
-          <input type="number" name="system.randomConfig.probability" value="{{randomConfig.probability}}" min="0" max="100" step="1" />
-        </div>
-        <div class="form-group">
-          <label data-tooltip="CALENDARIA.UI.RandomIntervalTooltip">Check Every</label>
-          <select name="system.randomConfig.checkInterval">
-            {{#each randomIntervalOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="form-group">
-          <label data-tooltip="CALENDARIA.UI.RandomSeedTooltip">Seed</label>
-          <div class="seed-input-group">
-            <input type="number" name="system.randomConfig.seed" value="{{randomConfig.seed}}" />
-            <button type="button" data-action="regenerateSeed" data-tooltip="CALENDARIA.UI.RegenerateSeedTooltip">
-              <i class="fas fa-dice"></i>
-            </button>
+    <div class="form-row-random">
+      <fieldset class="random-config-fieldset">
+        <legend>Random Event Settings</legend>
+        <div class="random-config-inputs">
+          <div class="form-group">
+            <label data-tooltip="CALENDARIA.UI.RandomProbabilityTooltip">Probability (%)</label>
+            <input type="number" name="system.randomConfig.probability" value="{{randomConfig.probability}}" min="0"
+              max="100" step="1" />
+          </div>
+          <div class="form-group">
+            <label data-tooltip="CALENDARIA.UI.RandomIntervalTooltip">Check Every</label>
+            <select name="system.randomConfig.checkInterval">
+              {{#each randomIntervalOptions}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-tooltip="CALENDARIA.UI.RandomSeedTooltip">Seed</label>
+            <div class="seed-input-group">
+              <input type="number" name="system.randomConfig.seed" value="{{randomConfig.seed}}" />
+              <button type="button" data-action="regenerateSeed" data-tooltip="CALENDARIA.UI.RegenerateSeedTooltip">
+                <i class="fas fa-dice"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <p class="hint">Event has {{randomConfig.probability}}% chance to occur each {{randomConfig.checkIntervalLabel}}. Same seed = same occurrences.</p>
-    </fieldset>
-  </div>
+        <p class="hint">Event has {{randomConfig.probability}}% chance to occur each
+          {{randomConfig.checkIntervalLabel}}. Same seed = same occurrences.</p>
+      </fieldset>
+    </div>
   {{/if}}
 
   {{!-- Linked Event Configuration (shown when repeat is 'linked') --}}
   {{#if showLinkedConfig}}
-  <div class="form-row-linked">
-    <fieldset class="linked-config-fieldset">
-      <legend>Linked Event Settings</legend>
-      <div class="linked-config-inputs">
-        <div class="form-group">
-          <label data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">Reference Event</label>
-          <div class="linked-note-select">
-            <select name="system.linkedEvent.noteId">
-              <option value="">Select an event...</option>
-              {{#each availableNotes}}
-                <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-              {{/each}}
-            </select>
-            {{#if linkedEvent.noteId}}
-            <button type="button" data-action="clearLinkedEvent" data-tooltip="Clear linked event">
-              <i class="fas fa-times"></i>
-            </button>
-            {{/if}}
+    <div class="form-row-linked">
+      <fieldset class="linked-config-fieldset">
+        <legend>Linked Event Settings</legend>
+        <div class="linked-config-inputs">
+          <div class="form-group">
+            <label data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">Reference Event</label>
+            <div class="linked-note-select">
+              <select name="system.linkedEvent.noteId">
+                <option value="">Select an event...</option>
+                {{#each availableNotes}}
+                  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+                {{/each}}
+              </select>
+              {{#if linkedEvent.noteId}}
+                <button type="button" data-action="clearLinkedEvent" data-tooltip="Clear linked event">
+                  <i class="fas fa-times"></i>
+                </button>
+              {{/if}}
+            </div>
+          </div>
+          <div class="form-group">
+            <label data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip">Day Offset</label>
+            <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1" />
           </div>
         </div>
-        <div class="form-group">
-          <label data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip">Day Offset</label>
-          <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1" />
-        </div>
-      </div>
-      <p class="hint">
-        {{#if linkedEvent.noteId}}
-          Linked to "{{linkedNoteName}}" with offset of {{linkedEvent.offset}} days.
-        {{else}}
-          Select another event to link to. Positive offset = days after, negative = days before.
-        {{/if}}
-      </p>
-    </fieldset>
-  </div>
+        <p class="hint">
+          {{#if linkedEvent.noteId}}
+            Linked to "{{linkedNoteName}}" with offset of {{linkedEvent.offset}} days.
+          {{else}}
+            Select another event to link to. Positive offset = days after, negative = days before.
+          {{/if}}
+        </p>
+      </fieldset>
+    </div>
   {{/if}}
 
   {{!-- Row 3: Categories --}}
@@ -247,7 +252,7 @@
         <div class="custom-category-input">
           <input type="text" class="new-category-input" placeholder="New category..." />
           <button type="button" class="add-category-btn" data-action="addCategory" data-tooltip="Add custom category">
-            <i class="fa-solid fa-plus"></i>
+            <i class="fas fa-plus"></i>
           </button>
         </div>
       </div>

@@ -199,6 +199,22 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     // Weather badge data
     context.weather = this._getWeatherContext();
 
+    // Get cycle values for display in header (based on viewed date, not world time)
+    if (calendar && calendar.cycles?.length) {
+      const yearZeroOffset = calendar.years?.yearZero ?? 0;
+      const viewedComponents = {
+        year: viewedDate.year - yearZeroOffset,
+        month: viewedDate.month,
+        dayOfMonth: (viewedDate.day ?? 1) - 1,
+        hour: 12,
+        minute: 0,
+        second: 0
+      };
+      const cycleResult = calendar.getCycleValues(viewedComponents);
+      context.cycleText = cycleResult.text;
+      context.cycleValues = cycleResult.values;
+    }
+
     return context;
   }
 
@@ -283,18 +299,18 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if (currentWeek.length > 0) weeks.push(currentWeek);
 
-    // Get season for the viewed month (use mid-month day for accuracy)
-    let season = null;
+    // Get season and era for the viewed month (use mid-month day for accuracy)
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
-    const currentSeason = calendar.getCurrentSeason?.(viewedComponents);
-    if (currentSeason) season = game.i18n.localize(currentSeason.name);
+    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentEra = calendar.getCurrentEra?.();
 
     return {
       year,
       month,
       monthName: game.i18n.localize(monthData.name),
       yearDisplay: calendar.formatYearWithEra?.(year) ?? String(year),
-      season,
+      currentSeason,
+      currentEra,
       weeks,
       daysInWeek,
       weekdays:

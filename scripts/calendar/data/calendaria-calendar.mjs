@@ -40,9 +40,28 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       { required: true, nullable: true, initial: null }
     );
 
+    const extendedSeasonSchema = new SchemaField(
+      {
+        values: new ArrayField(
+          new SchemaField({
+            name: new StringField({ required: true, blank: false }),
+            abbreviation: new StringField({ required: false }),
+            icon: new StringField({ required: false, initial: '' }), // Font Awesome class (e.g., 'fas fa-leaf')
+            color: new StringField({ required: false, initial: '' }), // Hex color (e.g., '#d2691e')
+            dayStart: new NumberField({ required: false, integer: true, min: 0, nullable: true }),
+            dayEnd: new NumberField({ required: false, integer: true, min: 0, nullable: true }),
+            monthStart: new NumberField({ required: false, integer: true, min: 1, nullable: true }),
+            monthEnd: new NumberField({ required: false, integer: true, min: 1, nullable: true })
+          })
+        )
+      },
+      { required: false, nullable: true, initial: null }
+    );
+
     return {
       ...schema,
       months: extendedMonthSchema,
+      seasons: extendedSeasonSchema,
 
       /**
        * Advanced leap year configuration (Fantasy-Calendar compatible).
@@ -581,13 +600,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const displayYear = components.year + (this.years?.yearZero ?? 0);
     const isLeap = this.isLeapYear(displayYear);
 
-    return this.festivals?.find((f) => {
-      // Check date match
-      if (f.month !== components.month + 1 || f.day !== components.dayOfMonth + 1) return false;
-      // If leap-year-only festival, only show in leap years
-      if (f.leapYearOnly && !isLeap) return false;
-      return true;
-    }) ?? null;
+    return (
+      this.festivals?.find((f) => {
+        // Check date match
+        if (f.month !== components.month + 1 || f.day !== components.dayOfMonth + 1) return false;
+        // If leap-year-only festival, only show in leap years
+        if (f.leapYearOnly && !isLeap) return false;
+        return true;
+      }) ?? null
+    );
   }
 
   /**
@@ -1214,7 +1235,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const isPM = hour24 >= midday;
     const hour12 = hour24 === 0 ? midday : hour24 > midday ? hour24 - midday : hour24;
     const amPm = calendar.amPmNotation ?? {};
-    const period = isPM ? (amPm.pm || 'PM') : (amPm.am || 'AM');
+    const period = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
 
     // Canonical hour lookup
     const canonicalHour = calendar.getCanonicalHour?.(components);

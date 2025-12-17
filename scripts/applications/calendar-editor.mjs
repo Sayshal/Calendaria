@@ -104,7 +104,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'eras', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Editor.Tab.Eras' },
         { id: 'festivals', icon: 'fas fa-star', label: 'CALENDARIA.Editor.Tab.Festivals' },
         { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Editor.Tab.Moons' },
-        { id: 'cycles', icon: 'fas fa-redo', label: 'CALENDARIA.Editor.Tab.Cycles' },
+        { id: 'cycles', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Editor.Tab.Cycles' },
         { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Editor.Tab.Weather' }
       ],
       initial: 'basic'
@@ -819,46 +819,48 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let presetIndex = 0;
     let totalChance = 0;
 
-    context.weatherCategories = Object.values(WEATHER_CATEGORIES).map((cat) => {
-      const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
-      let categoryChance = 0;
-      let enabledCount = 0;
+    context.weatherCategories = Object.values(WEATHER_CATEGORIES)
+      .map((cat) => {
+        const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
+        let categoryChance = 0;
+        let enabledCount = 0;
 
-      const presetsWithData = categoryPresets.map((preset) => {
-        // Find saved config for this preset
-        const saved = savedPresets.find((s) => s.id === preset.id) || {};
+        const presetsWithData = categoryPresets.map((preset) => {
+          // Find saved config for this preset
+          const saved = savedPresets.find((s) => s.id === preset.id) || {};
 
-        // Use saved values or fall back to preset defaults
-        const chance = saved.chance ?? 0;
-        const enabled = saved.enabled ?? false;
-        if (enabled) {
-          totalChance += chance;
-          categoryChance += chance;
-          enabledCount++;
-        }
+          // Use saved values or fall back to preset defaults
+          const chance = saved.chance ?? 0;
+          const enabled = saved.enabled ?? false;
+          if (enabled) {
+            totalChance += chance;
+            categoryChance += chance;
+            enabledCount++;
+          }
 
-        const presetData = {
-          ...preset,
-          index: presetIndex++,
-          enabled,
-          chance: chance.toFixed(2),
-          tempMin: saved.tempMin ?? '',
-          tempMax: saved.tempMax ?? '',
-          customDescription: saved.description || ''
+          const presetData = {
+            ...preset,
+            index: presetIndex++,
+            enabled,
+            chance: chance.toFixed(2),
+            tempMin: saved.tempMin ?? '',
+            tempMax: saved.tempMax ?? '',
+            customDescription: saved.description || ''
+          };
+
+          return presetData;
+        });
+
+        return {
+          id: cat.id,
+          label: cat.label,
+          presets: presetsWithData,
+          totalChance: categoryChance.toFixed(1),
+          enabledCount,
+          allEnabled: enabledCount === presetsWithData.length && presetsWithData.length > 0
         };
-
-        return presetData;
-      });
-
-      return {
-        id: cat.id,
-        label: cat.label,
-        presets: presetsWithData,
-        totalChance: categoryChance.toFixed(1),
-        enabledCount,
-        allEnabled: enabledCount === presetsWithData.length && presetsWithData.length > 0
-      };
-    }).filter((cat) => cat.presets.length > 0);
+      })
+      .filter((cat) => cat.presets.length > 0);
 
     context.totalChance = totalChance.toFixed(2);
     context.chancesValid = Math.abs(totalChance - 100) < 0.1;
@@ -1888,9 +1890,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onAddZone(event, target) {
     const templateOptions = getClimateTemplateOptions();
-    const selectHtml = templateOptions
-      .map((opt) => `<option value="${opt.value}">${game.i18n.localize(opt.label)}</option>`)
-      .join('');
+    const selectHtml = templateOptions.map((opt) => `<option value="${opt.value}">${game.i18n.localize(opt.label)}</option>`).join('');
 
     const content = `
       <form>
@@ -1969,9 +1969,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['Spring', 'Summer', 'Autumn', 'Winter'];
 
     // Build temperature fields for each season
-    const tempRows = seasonNames.map((season) => {
-      const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
-      return `
+    const tempRows = seasonNames
+      .map((season) => {
+        const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
+        return `
         <div class="form-group temperature-row">
           <label>${season}</label>
           <input type="number" name="temp_${season}_min" value="${temp.min}" placeholder="${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.TempMin')}">
@@ -1979,7 +1980,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           <input type="number" name="temp_${season}_max" value="${temp.max}" placeholder="${game.i18n.localize('CALENDARIA.Editor.Weather.Zone.TempMax')}">
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     const content = `
       <form>
@@ -2323,7 +2325,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           label: game.i18n.localize('CALENDARIA.Editor.Button.Save'),
           icon: 'fas fa-save',
           callback: (event, button, dialog) => {
-            const setActive = isGM ? button.form.elements.setActive?.checked ?? false : false;
+            const setActive = isGM ? (button.form.elements.setActive?.checked ?? false) : false;
             this.#setActiveOnSave = setActive; // Remember for next save
             resolve(setActive);
           }

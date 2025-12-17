@@ -23,8 +23,8 @@
   {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather editable)}}
     <div class="calendar-indicators">
       {{#if weather}}
-        <span class="weather-indicator{{#if editable}} clickable{{/if}}" data-action="{{#if editable}}openWeatherPicker{{else}}{{/if}}"
-          style="--weather-color: {{weather.color}}"
+        <span class="weather-indicator{{#if editable}} clickable{{/if}}"
+          data-action="{{#if editable}}openWeatherPicker{{else}}{{/if}}" style="--weather-color: {{weather.color}}"
           data-tooltip="{{weather.tooltip}}">
           <i class="fas {{weather.icon}}"></i>
           {{weather.label}}
@@ -40,8 +40,9 @@
         </span>
       {{/if}}
       {{#if calendarData.currentSeason}}
-        <span class="season-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentSeason'}}">
-          <i class="fas fa-leaf"></i>
+        <span class="season-indicator" style="--season-color: {{calendarData.currentSeason.color}}"
+          data-tooltip="{{localize 'CALENDARIA.UI.CurrentSeason'}}">
+          <i class="{{calendarData.currentSeason.icon}}"></i>
           {{localize calendarData.currentSeason.name}}
         </span>
       {{/if}} {{#if calendarData.currentEra}}
@@ -51,7 +52,7 @@
         </span>
       {{/if}} {{#if cycleText}}
         <span class="cycle-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentCycle'}}">
-          <i class="fas fa-redo"></i>
+          <i class="fas fa-arrows-rotate"></i>
           {{{cycleText}}}
         </span>
       {{/if}}

@@ -377,7 +377,7 @@
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: -0.7rem;
+  margin-top: -0.2rem;
   font-size: 0.75rem;
   color: var(--calendaria-text-dim);
 }
@@ -431,6 +431,15 @@
   margin-left: 0.25rem;
   font-size: 0.7rem;
   opacity: 0.8;
+}
+
+/* Season indicator styling */
+.season-indicator {
+  color: var(--season-color, var(--calendaria-text-dim));
+
+  i {
+    color: var(--season-color, var(--calendaria-text-dim));
+  }
 }
 
 /* Header - action buttons */
@@ -489,6 +498,8 @@
 
 /* Grid - Month View (Fixed Dimensions) */
 .calendar-grid {
+  padding-top: 0.25rem;
+  margin-top: 0.25rem;
   display: flex;
   flex-direction: column;
   width: fit-content;
@@ -765,9 +776,8 @@
 
 .week-grid {
   display: grid;
-  /* Fixed column widths: day header + 24 hour columns */
   grid-template-columns: var(--calendaria-week-day-width) repeat(24, var(--calendaria-week-hour-width));
-  /* Row heights set via inline style (varies by daysInWeek) */
+  margin-top: 0.5rem;
   gap: 1px;
   background: var(--calendaria-border-light);
   border: 1px solid var(--calendaria-border);
@@ -941,6 +951,8 @@
 }
 
 .year-grid {
+  padding-top: 0.25rem;
+  margin-top: 0.25rem;
   display: flex;
   flex-direction: column;
   gap: var(--calendaria-year-gap);
@@ -2001,39 +2013,66 @@
     padding: 0.25rem 0.5rem;
   }
 
-  /* Season columns */
+  /* Season columns - two-row layout */
   .seasons-list {
-    .col-name {
-      flex: 1.5;
-      min-width: 80px;
+    .season-item {
+      display: block;
+      padding: 0.25rem 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
-    .col-abbr {
-      flex: 0.75;
-      min-width: 60px;
+    /* Top row: Name | Abbr | Icon | Color | + */
+    .season-row-top {
+      gap: 0.5rem;
+
+      .col-name {
+        flex: 0 0 30%;
+      }
+
+      .col-abbr {
+        flex: 0 0 15%;
+      }
+
+      .col-icon {
+        flex: 0 0 30%;
+      }
+
+      .col-color {
+        flex: 0 0 15%;
+      }
+
+      .col-controls {
+        width: fit-content;
+        margin-left: auto;
+      }
     }
 
-    .col-start-month,
-    .col-end-month {
-      width: 110px;
-      flex: none;
-    }
+    /* Bottom row: Start Month | Day | End Month | Day | - */
+    .season-row-bottom {
+      gap: 0.5rem;
+      margin-top: 0.25rem;
 
-    .col-start-day,
-    .col-end-day {
-      width: 50px;
-      flex: none;
-    }
+      .col-start-month {
+        flex: 0 0 30%;
+      }
 
-    .col-controls {
-      width: 50px;
-      flex: none;
-    }
-  }
+      .col-start-day {
+        flex: 0 0 15%;
+      }
 
-  /* Season Item - compact inline layout */
-  .season-item {
-    padding: 0.25rem 0.5rem;
+      .col-end-month {
+        flex: 0 0 30%;
+      }
+
+      .col-end-day {
+        flex: 0 0 15%;
+      }
+
+      .col-controls {
+        width: fit-content;
+        margin-left: auto;
+      }
+    }
   }
 
   /* Festival columns */
@@ -2485,8 +2524,20 @@
     border-top: 1px solid var(--color-cool-4);
 
     button {
+      border: 1px solid var(--button-border-color);
       flex: unset;
       width: fit-content;
+
+      &:hover {
+        background: var(--button-hover-background-color);
+        color: var(--button-hover-text-color);
+        border-color: var(--button-hover-border-color);
+      }
+
+      &:focus {
+        outline: 1px solid var(--button-focus-outline-color);
+        box-shadow: 0 0 4px var(--button-focus-outline-color);
+      }
     }
   }
 
@@ -3157,23 +3208,34 @@
     }
   }
 
-  /* Top Row: Action Buttons + Close */
+  /* Top Row: Month Navigation */
   .compact-top-row {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     padding: 6px 8px;
     background: var(--calendaria-bg-lighter);
     border-bottom: 1px solid var(--calendaria-border-light);
     border-radius: 14px 14px 0 0;
     cursor: pointer;
 
-    .spacer {
+    .compact-title-group {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-width: 0;
     }
 
-    .action-btn,
-    .close-btn {
+    .compact-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--calendaria-title-text);
+      white-space: nowrap;
+    }
+
+    .nav-btn {
       width: 24px;
       height: 24px;
       padding: 0;
@@ -3185,22 +3247,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition:
-        background 0.15s,
-        color 0.15s;
+      transition: background 0.15s;
       flex-shrink: 0;
 
       &:hover {
         background: var(--calendaria-bg-hover);
       }
-    }
-
-    .pin-btn.has-sticky {
-      color: var(--calendaria-primary);
-    }
-
-    .pin-btn.sticky-position {
-      color: var(--calendaria-error);
     }
 
     &.position-locked {
@@ -3437,100 +3489,86 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    transition:
+      background 0.15s,
+      color 0.15s;
 
     &:hover {
       background: var(--calendaria-bg-hover);
     }
-  }
 
-  /* Month Navigation Row */
-  .compact-month-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    background: var(--calendaria-bg);
-
-    .compact-title-group {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-      min-width: 0;
+    &.pin-btn.has-sticky {
+      color: var(--calendaria-primary);
     }
 
-    .compact-title {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--calendaria-title-text);
-      white-space: nowrap;
-    }
-
-    .compact-season {
-      font-size: 0.7rem;
-      color: var(--calendaria-text-dim);
-      white-space: nowrap;
-    }
-
-    .nav-btn {
-      width: 24px;
-      height: 24px;
-      padding: 0;
-      background: transparent;
-      border: none;
-      color: var(--calendaria-text);
-      cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-      flex-shrink: 0;
-
-      &:hover {
-        background: var(--calendaria-bg-hover);
-      }
+    &.pin-btn.sticky-position {
+      color: var(--calendaria-error);
     }
   }
 
-  /* Weather Badge */
-  .compact-weather-badge {
+  /* Calendar Indicators */
+  .calendar-indicators {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 4px 10px;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     margin: 0 8px 4px;
-    background: var(--calendaria-bg-lighter);
-    border-radius: 12px;
-    font-size: 0.8rem;
-    color: var(--calendaria-text);
-    transition: all 0.15s;
+    padding: 4px 0;
+    font-size: 0.7rem;
+    color: var(--calendaria-text-dim);
+  }
+
+  .weather-indicator,
+  .season-indicator,
+  .era-indicator,
+  .cycle-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 
     i {
-      color: var(--weather-color, var(--calendaria-primary));
-      font-size: 0.9rem;
+      font-size: 0.65rem;
     }
+  }
 
-    .weather-label {
-      font-weight: 500;
-    }
-
-    .weather-temp {
-      font-size: 0.75rem;
-      color: var(--calendaria-text-dim);
-      padding-left: 4px;
-      border-left: 1px solid var(--calendaria-border-light);
-    }
+  .weather-indicator {
+    color: var(--weather-color, var(--calendaria-text-dim));
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
 
     &.clickable {
       cursor: pointer;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
 
       &:hover {
-        background: var(--calendaria-bg-hover);
+        background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+        border-color: var(--weather-color, var(--calendaria-text-dim));
       }
+    }
+
+    &.no-weather {
+      color: var(--calendaria-text-dim);
+      border-style: dashed;
+    }
+
+    .weather-temp {
+      font-size: 0.65rem;
+      margin-left: 0.15rem;
+      padding-left: 0.25rem;
+      border-left: 1px solid currentcolor;
+      opacity: 0.8;
+    }
+  }
+
+  .season-indicator {
+    color: var(--season-color, var(--calendaria-text-dim));
+
+    i {
+      color: var(--season-color, var(--calendaria-text-dim));
     }
   }
 

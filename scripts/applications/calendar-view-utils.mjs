@@ -36,6 +36,43 @@ function hexToHue(hex) {
 }
 
 /**
+ * Enrich season data with icon and color based on season name.
+ * @param {object|null} season - Season object with name property
+ * @returns {object|null} Season with icon and color added
+ */
+export function enrichSeasonData(season) {
+  if (!season) return null;
+
+  // Return as-is if already has icon and color
+  if (season.icon && season.color) return season;
+
+  // Map season names to icons and colors
+  const seasonName = game.i18n.localize(season.name).toLowerCase();
+  const enriched = { ...season };
+
+  // Match common season names (English and localized variants)
+  if (seasonName.includes('autumn') || seasonName.includes('fall')) {
+    enriched.icon = enriched.icon || 'fas fa-leaf';
+    enriched.color = enriched.color || '#d2691e';
+  } else if (seasonName.includes('winter')) {
+    enriched.icon = enriched.icon || 'fas fa-snowflake';
+    enriched.color = enriched.color || '#87ceeb';
+  } else if (seasonName.includes('spring')) {
+    enriched.icon = enriched.icon || 'fas fa-seedling';
+    enriched.color = enriched.color || '#90ee90';
+  } else if (seasonName.includes('summer')) {
+    enriched.icon = enriched.icon || 'fas fa-sun';
+    enriched.color = enriched.color || '#ffd700';
+  } else {
+    // Default fallback
+    enriched.icon = enriched.icon || 'fas fa-leaf';
+    enriched.color = enriched.color || '#666666';
+  }
+
+  return enriched;
+}
+
+/**
  * Get all calendar note pages from journal entries for the active calendar.
  * @returns {JournalEntryPage[]}
  */
@@ -542,11 +579,7 @@ export async function handleDayClick(event, calendar, options = {}) {
   const now = Date.now();
 
   // Check if this is a double-click (same day, within threshold)
-  const isDoubleClick =
-    now - clickState.time < DOUBLE_CLICK_THRESHOLD &&
-    clickState.year === year &&
-    clickState.month === month &&
-    clickState.day === day;
+  const isDoubleClick = now - clickState.time < DOUBLE_CLICK_THRESHOLD && clickState.year === year && clickState.month === month && clickState.day === day;
 
   // Update click state
   clickState.time = now;

@@ -25,7 +25,8 @@
                     <i class="fas fa-star festival-icon" data-tooltip="{{festivalName}}"></i>
                   {{/if}}
                   {{#each moonPhases}}
-                    <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}"{{/if}}>
+                    <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip="{{moonName}}: {{phaseName}}"
+                      {{#if color}}style="--moon-color: {{color}}" {{/if}}>
                       <img src="{{icon}}" alt="{{phaseName}}" />
                     </span>
                   {{/each}}
@@ -59,7 +60,7 @@
               style="left: {{left}}%; width: {{width}}%; top: calc(26px + {{row}} * 26px); background-color: {{color}};"
               data-tooltip="{{name}}" data-action="editNote" data-note-id="{{id}}">
               {{#if isContinuation}}
-                <i class="fa-solid fa-angles-right event-bar-continuation"></i>
+                <i class="fas fa-angles-right event-bar-continuation"></i>
               {{else}}
                 {{#if (eq iconType "fontawesome")}}
                   <i class="{{icon}} event-bar-icon"></i>

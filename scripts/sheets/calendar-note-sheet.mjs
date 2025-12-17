@@ -196,7 +196,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (this.document.isOwner) {
       const modeBtn = document.createElement('button');
       modeBtn.type = 'button';
-      modeBtn.className = `header-control icon fa-solid ${this.isViewMode ? 'fa-pen' : 'fa-eye'}`;
+      modeBtn.className = `header-control icon fas ${this.isViewMode ? 'fa-pen' : 'fa-eye'}`;
       modeBtn.dataset.action = 'toggleMode';
       modeBtn.dataset.tooltip = this.isViewMode ? 'Edit Note' : 'View Note';
       modeBtn.setAttribute('aria-label', this.isViewMode ? 'Edit Note' : 'View Note');
@@ -208,7 +208,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       // Save button
       const saveBtn = document.createElement('button');
       saveBtn.type = 'button';
-      saveBtn.className = 'header-control icon fa-solid fa-save';
+      saveBtn.className = 'header-control icon fas fa-save';
       saveBtn.dataset.action = 'saveAndClose';
       saveBtn.dataset.tooltip = 'Save & Close';
       saveBtn.setAttribute('aria-label', 'Save & Close');
@@ -217,7 +217,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       // Reset button
       const resetBtn = document.createElement('button');
       resetBtn.type = 'button';
-      resetBtn.className = 'header-control icon fa-solid fa-undo';
+      resetBtn.className = 'header-control icon fas fa-undo';
       resetBtn.dataset.action = 'reset';
       resetBtn.dataset.tooltip = 'Reset Form';
       resetBtn.setAttribute('aria-label', 'Reset Form');
@@ -227,7 +227,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       if (this.document.isOwner && this.document.id) {
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
-        deleteBtn.className = 'header-control icon fa-solid fa-trash';
+        deleteBtn.className = 'header-control icon fas fa-trash';
         deleteBtn.dataset.action = 'deleteNote';
         deleteBtn.dataset.tooltip = 'Delete Note';
         deleteBtn.setAttribute('aria-label', 'Delete Note');
@@ -296,15 +296,17 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.showRepeatOptions = repeatType !== 'never' || hasLinkedEvent;
 
     // Prepare moon data for moon conditions UI
-    context.moons = calendar?.moons?.map((moon, index) => ({
-      index,
-      name: game.i18n.localize(moon.name),
-      phases: moon.phases?.map((phase) => ({
-        name: game.i18n.localize(phase.name),
-        start: phase.start,
-        end: phase.end
-      })) || []
-    })) || [];
+    context.moons =
+      calendar?.moons?.map((moon, index) => ({
+        index,
+        name: game.i18n.localize(moon.name),
+        phases:
+          moon.phases?.map((phase) => ({
+            name: game.i18n.localize(phase.name),
+            start: phase.start,
+            end: phase.end
+          })) || []
+      })) || [];
     context.hasMoons = context.moons.length > 0;
 
     // Prepare existing moon conditions for display
@@ -320,7 +322,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         phaseName: matchingPhase?.name || 'Custom Range'
       };
     });
-    context.showMoonConditions = this.document.system.repeat === 'moon' || (this.document.system.moonConditions?.length > 0);
+    context.showMoonConditions = this.document.system.repeat === 'moon' || this.document.system.moonConditions?.length > 0;
 
     // Prepare random config context
     context.showRandomConfig = this.document.system.repeat === 'random';
