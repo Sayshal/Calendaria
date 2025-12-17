@@ -165,8 +165,8 @@ Hooks.once('ready', async () => {
     TimeKeeperHUD.show();
   }
 
-  // Show Compact Calendar if it was open previously
-  if (game.settings.get(MODULE.ID, SETTINGS.COMPACT_CALENDAR_OPEN)) {
+  // Show Compact Calendar if auto-show is enabled
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR)) {
     CompactCalendar.show();
   }
 

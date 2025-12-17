@@ -91,14 +91,14 @@ export const SETTINGS = {
   /** @type {string} Whether to show TimeKeeper HUD on world load */
   SHOW_TIME_KEEPER: 'showTimeKeeper',
 
+  /** @type {string} Whether to show Compact Calendar on world load */
+  SHOW_COMPACT_CALENDAR: 'showCompactCalendar',
+
   /** @type {string} Whether to advance time when combat rounds change */
   ADVANCE_TIME_ON_COMBAT: 'advanceTimeOnCombat',
 
   /** @type {string} Saved position of the compact calendar */
   COMPACT_CALENDAR_POSITION: 'compactCalendarPosition',
-
-  /** @type {string} Whether the compact calendar is open */
-  COMPACT_CALENDAR_OPEN: 'compactCalendarOpen',
 
   /** @type {string} Delay in seconds before auto-hiding compact calendar controls */
   COMPACT_CONTROLS_DELAY: 'compactControlsDelay',

@@ -716,6 +716,8 @@
   "CALENDARIA.Settings.ShowMoonPhases.Name": "Show Moon Phases",
   "CALENDARIA.Settings.ShowTimeKeeper.Hint": "Display the TimeKeeper HUD on world load for quick time control access.",
   "CALENDARIA.Settings.ShowTimeKeeper.Name": "Show TimeKeeper on Load",
+  "CALENDARIA.Settings.ShowCompactCalendar.Hint": "Display the Compact Calendar on world load.",
+  "CALENDARIA.Settings.ShowCompactCalendar.Name": "Show Compact Calendar on Load",
   "CALENDARIA.Settings.TemperatureUnit.Celsius": "Celsius (°C)",
   "CALENDARIA.Settings.TemperatureUnit.Fahrenheit": "Fahrenheit (°F)",
   "CALENDARIA.Settings.TemperatureUnit.Hint": "Display temperatures in Celsius or Fahrenheit.",

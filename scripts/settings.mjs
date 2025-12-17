@@ -49,15 +49,6 @@ export function registerSettings() {
     default: null
   });
 
-  /** Whether the compact calendar is open */
-  game.settings.register(MODULE.ID, SETTINGS.COMPACT_CALENDAR_OPEN, {
-    name: 'Compact Calendar Open',
-    scope: 'client',
-    config: false,
-    type: Boolean,
-    default: false
-  });
-
   /** Delay before auto-hiding compact calendar controls */
   game.settings.register(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY, {
     name: 'CALENDARIA.Settings.CompactControlsDelay.Name',
@@ -111,6 +102,16 @@ export function registerSettings() {
       if (value) TimeKeeperHUD.show();
       else TimeKeeperHUD.hide();
     }
+  });
+
+  /** Show Compact Calendar on world load */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR, {
+    name: 'CALENDARIA.Settings.ShowCompactCalendar.Name',
+    hint: 'CALENDARIA.Settings.ShowCompactCalendar.Hint',
+    scope: 'client',
+    config: true,
+    type: Boolean,
+    default: true
   });
 
   /** User-customized theme color overrides */

@@ -563,9 +563,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async _onClose(options) {
-    // Save open state
-    await game.settings.set(MODULE.ID, SETTINGS.COMPACT_CALENDAR_OPEN, false);
-
     // Cleanup hooks
     if (this.#timeHookId) {
       Hooks.off('updateWorldTime', this.#timeHookId);
@@ -1169,7 +1166,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   static show() {
     if (!this._instance) this._instance = new CompactCalendar();
     this._instance.render(true);
-    game.settings.set(MODULE.ID, SETTINGS.COMPACT_CALENDAR_OPEN, true);
     return this._instance;
   }
 
