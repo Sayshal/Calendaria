@@ -423,11 +423,7 @@ export class CalendariaSocket {
     // Check for manual override setting
     const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
 
-    if (primaryGMOverride) {
-      const isPrimary = primaryGMOverride === game.user.id;
-      log(3, `Primary GM check (override): ${isPrimary} (override: ${primaryGMOverride}, current: ${game.user.id})`);
-      return isPrimary;
-    }
+    if (primaryGMOverride) return primaryGMOverride === game.user.id;
 
     // Fallback to automatic election: lowest user ID among active GMs
     const activeGMs = game.users.filter((u) => u.isGM && u.active);

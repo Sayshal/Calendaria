@@ -289,7 +289,6 @@ export default class TimeKeeper {
 
       const advanceAmount = this.#gameTimeRatio * this.#updateFrequency;
       await game.time.advance(advanceAmount);
-      log(3, `TimeKeeper tick: +${advanceAmount}s (ratio: ${this.#gameTimeRatio})`);
     }, this.#updateFrequency * 1000);
   }
 
