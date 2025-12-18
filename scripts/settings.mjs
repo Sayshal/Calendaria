@@ -141,6 +141,15 @@ export function registerSettings() {
     default: {}
   });
 
+  /** User overrides for default/built-in calendars */
+  game.settings.register(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, {
+    name: 'Default Calendar Overrides',
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: {}
+  });
+
   /** User-created custom note categories */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, {
     name: 'Custom Categories',

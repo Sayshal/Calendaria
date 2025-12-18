@@ -65,6 +65,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       loadCalendar: CalendarEditor.#onLoadCalendar,
       saveCalendar: CalendarEditor.#onSaveCalendar,
       resetCalendar: CalendarEditor.#onResetCalendar,
+      resetToDefault: CalendarEditor.#onResetToDefault,
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       toggleCategory: CalendarEditor.#onToggleCategory,
       resetWeatherPreset: CalendarEditor.#onResetWeatherPreset,
@@ -607,8 +608,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Editor.Button.Reset' }
     ];
 
-    // Add delete button if editing an existing calendar
-    if (this.#calendarId) context.buttons.push({ type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Editor.Button.Delete', cssClass: 'delete-button' });
+    // Add Reset to Default button if editing a default calendar with an override
+    if (this.#calendarId && CalendarManager.hasDefaultOverride(this.#calendarId)) {
+      context.buttons.push({ type: 'button', action: 'resetToDefault', icon: 'fas fa-history', label: 'CALENDARIA.Editor.Button.ResetToDefault' });
+    }
+
+    // Add delete button only for custom calendars (not default calendars)
+    if (this.#calendarId && CalendarManager.isCustomCalendar(this.#calendarId)) {
+      context.buttons.push({ type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Editor.Button.Delete', cssClass: 'delete-button' });
+    }
 
     return context;
   }
@@ -2241,8 +2249,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       let calendarId;
 
       if (this.#isEditing && this.#calendarId) {
-        // Update existing
-        calendar = await CalendarManager.updateCustomCalendar(this.#calendarId, this.#calendarData);
+        // Check if this is a default calendar (needs override) or custom calendar
+        if (CalendarManager.isDefaultCalendar(this.#calendarId) || CalendarManager.hasDefaultOverride(this.#calendarId)) {
+          // Save as override for default calendar
+          calendar = await CalendarManager.saveDefaultOverride(this.#calendarId, this.#calendarData);
+        } else {
+          // Update existing custom calendar
+          calendar = await CalendarManager.updateCustomCalendar(this.#calendarId, this.#calendarData);
+        }
         calendarId = this.#calendarId;
       } else {
         // Create new - use suggested ID from importer if available
@@ -2358,6 +2372,31 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Reset a default calendar to its original state (remove override).
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onResetToDefault(event, target) {
+    if (!this.#calendarId || !CalendarManager.hasDefaultOverride(this.#calendarId)) return;
+
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize('CALENDARIA.Editor.Button.ResetToDefault') },
+      content: `<p>${game.i18n.localize('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
+      yes: { label: game.i18n.localize('CALENDARIA.Editor.Button.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
+      no: { label: game.i18n.localize('CALENDARIA.UI.Cancel'), icon: 'fas fa-times' }
+    });
+
+    if (!confirmed) return;
+
+    const reset = await CalendarManager.resetDefaultCalendar(this.#calendarId);
+    if (reset) {
+      // Reload the calendar data from the registry
+      this.#loadExistingCalendar(this.#calendarId);
+      this.render();
+    }
+  }
+
+  /**
    * Delete the calendar.
    * @param {Event} event - Click event
    * @param {HTMLElement} target - Target element
@@ -2375,7 +2414,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!confirmed) return;
 
     const deleted = await CalendarManager.deleteCustomCalendar(this.#calendarId);
-    if (deleted) this.close();
+    if (deleted) {
+      // Switch to editing the active calendar
+      const activeCalendar = CalendarManager.getActiveCalendar();
+      if (activeCalendar?.metadata?.id) {
+        this.#calendarId = activeCalendar.metadata.id;
+        this.#isEditing = true;
+        this.#loadExistingCalendar(this.#calendarId);
+      } else {
+        // No calendars left, switch to create new mode
+        this.#calendarId = null;
+        this.#isEditing = false;
+        this.#initializeBlankCalendar();
+      }
+      this.render();
+    }
   }
 
   /**

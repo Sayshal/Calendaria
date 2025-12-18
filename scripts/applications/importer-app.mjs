@@ -28,9 +28,9 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     window: {
       icon: 'fas fa-file-import',
       title: 'CALENDARIA.Importer.Title',
-      resizable: true
+      resizable: false
     },
-    position: { width: 500, height: 'auto' },
+    position: { width: 700, height: 'auto' },
     form: {
       handler: ImporterApp.#onSubmit,
       submitOnChange: false,
@@ -77,6 +77,12 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {object[]|null} Extracted notes for selection UI */
   #extractedNotes = null;
 
+  /** @type {string|null} Name of loaded file */
+  #loadedFileName = null;
+
+  /** @type {boolean} Whether data was loaded from module */
+  #loadedFromModule = false;
+
   /* -------------------------------------------- */
   /*  Rendering                                   */
   /* -------------------------------------------- */
@@ -99,6 +105,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     context.errorMessage = this.#errorMessage;
     context.importing = this.#importing;
     context.extractedNotes = this.#extractedNotes || [];
+    context.loadedFileName = this.#loadedFileName;
+    context.loadedFromModule = this.#loadedFromModule;
 
     // Determine available actions
     if (context.selectedImporter) {
@@ -176,8 +184,26 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#previewData = importer.getPreviewData(this.#rawData, this.#transformedData);
       this.#suggestedId = this.#generateId(this.#transformedData.name);
 
-      // Extract notes for selection UI
+      // Add current date to preview if available
+      const currentTime = this.#transformedData.time?.current;
+      if (currentTime) {
+        const month = (currentTime.month ?? 0) + 1;
+        const day = (currentTime.day ?? 0) + 1;
+        const year = currentTime.year ?? 1;
+        this.#previewData.currentDate = `${month}/${day}/${year}`;
+      } else {
+        this.#previewData.currentDate = '—';
+      }
+
+      // Extract notes for selection UI and add display date
       this.#extractedNotes = await importer.extractNotes(this.#rawData);
+      if (this.#extractedNotes) {
+        this.#extractedNotes.forEach((note) => {
+          const month = (note.startDate?.month ?? 0) + 1;
+          const day = (note.startDate?.day ?? 0) + 1;
+          note.displayDate = `${month}/${day}`;
+        });
+      }
 
       log(3, 'Data processed successfully:', this.#previewData);
     } catch (error) {
@@ -214,6 +240,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#suggestedId = null;
     this.#errorMessage = null;
     this.#extractedNotes = null;
+    this.#loadedFileName = null;
+    this.#loadedFromModule = false;
   }
 
   /* -------------------------------------------- */
@@ -284,6 +312,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     try {
       const data = await importer.parseFile(file);
+      this.#loadedFileName = file.name;
+      this.#loadedFromModule = false;
       await this.#processData(data);
     } catch (error) {
       log(2, 'Error parsing file:', error);
@@ -317,6 +347,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     try {
       const data = await importer.loadFromModule();
+      this.#loadedFromModule = true;
+      this.#loadedFileName = null;
       await this.#processData(data);
     } catch (error) {
       log(2, 'Error loading from module:', error);
@@ -342,8 +374,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #onSetAllNoteTypes(event, target) {
     const type = target.dataset.type;
-    const selects = this.element.querySelectorAll('.note-type-select');
-    selects.forEach((select) => (select.value = type));
+    const radios = this.element.querySelectorAll(`input[type="radio"][value="${type}"]`);
+    radios.forEach((radio) => (radio.checked = true));
   }
 
   /**

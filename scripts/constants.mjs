@@ -73,6 +73,9 @@ export const SETTINGS = {
   /** @type {string} User-created custom calendar definitions */
   CUSTOM_CALENDARS: 'customCalendars',
 
+  /** @type {string} User overrides for default/built-in calendars */
+  DEFAULT_OVERRIDES: 'defaultOverrides',
+
   /** @type {string} Whether the calendar HUD position is locked */
   POSITION_LOCKED: 'positionLocked',
 
