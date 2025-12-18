@@ -60,6 +60,16 @@ class WeatherManager {
   }
 
   /**
+   * Get temperature for current weather, generating if missing.
+   * @returns {number|null} Temperature or null if no weather/zone
+   */
+  getTemperature() {
+    if (!this.#currentWeather) return null;
+    if (this.#currentWeather.temperature != null) return this.#currentWeather.temperature;
+    return this.#generateTemperatureForPreset(this.#currentWeather.id);
+  }
+
+  /**
    * Set the current weather by preset ID.
    * @param {string} presetId - Weather preset ID
    * @param {object} [options={}] - Additional options
@@ -83,6 +93,9 @@ class WeatherManager {
       return this.#currentWeather;
     }
 
+    // Generate temperature from zone config if not provided
+    const temperature = options.temperature ?? this.#generateTemperatureForPreset(presetId);
+
     const weather = {
       id: preset.id,
       label: preset.label,
@@ -90,7 +103,7 @@ class WeatherManager {
       icon: preset.icon,
       color: preset.color,
       category: preset.category,
-      temperature: options.temperature ?? null,
+      temperature,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
@@ -290,6 +303,35 @@ class WeatherManager {
 
     const season = calendar.getCurrentSeason(game.time.components);
     return season ? game.i18n.localize(season.name) : null;
+  }
+
+  /**
+   * Generate temperature for a preset based on active zone and season.
+   * @param {string} presetId - Weather preset ID
+   * @returns {number|null} Generated temperature or null if no zone configured
+   * @private
+   */
+  #generateTemperatureForPreset(presetId) {
+    const zoneConfig = this.getActiveZone();
+    if (!zoneConfig?.temperatures) return null;
+
+    const season = this.#getCurrentSeasonName();
+    const temps = zoneConfig.temperatures;
+
+    // Get base temperature range from season or default
+    let tempRange = { min: 10, max: 22 };
+    if (season && temps[season]) {
+      tempRange = temps[season];
+    } else if (temps._default) {
+      tempRange = temps._default;
+    }
+
+    // Apply preset-specific overrides if configured
+    const presetConfig = zoneConfig.presets?.find((p) => p.id === presetId);
+    if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
+    if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
+
+    return Math.round(tempRange.min + Math.random() * (tempRange.max - tempRange.min));
   }
 
   /* -------------------------------------------- */

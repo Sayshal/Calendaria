@@ -1239,7 +1239,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       label: game.i18n.localize(weather.label),
       icon: weather.icon,
       color: weather.color,
-      temperature: WeatherManager.formatTemperature(weather.temperature),
+      temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
       tooltip: weather.description ? game.i18n.localize(weather.description) : game.i18n.localize(weather.label)
     };
   }

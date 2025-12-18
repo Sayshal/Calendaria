@@ -65,11 +65,22 @@ export function daysBetween(startDate, endDate) {
   if (!calendar) return 0;
 
   try {
-    // Convert dates to time components - normalize to midnight for day comparison
+    const monthDays = calendar.months?.values || [];
+
+    // Convert day-of-month to day-of-year (componentsToTime expects day-of-year)
+    let startDayOfYear = (startDate.day ?? 1) - 1;
+    for (let i = 0; i < startDate.month && i < monthDays.length; i++) {
+      startDayOfYear += monthDays[i]?.days || 30;
+    }
+
+    let endDayOfYear = (endDate.day ?? 1) - 1;
+    for (let i = 0; i < endDate.month && i < monthDays.length; i++) {
+      endDayOfYear += monthDays[i]?.days || 30;
+    }
+
     const startComponents = {
       year: startDate.year,
-      month: startDate.month,
-      day: startDate.day,
+      day: startDayOfYear,
       hour: 0,
       minute: 0,
       second: 0
@@ -77,8 +88,7 @@ export function daysBetween(startDate, endDate) {
 
     const endComponents = {
       year: endDate.year,
-      month: endDate.month,
-      day: endDate.day,
+      day: endDayOfYear,
       hour: 0,
       minute: 0,
       second: 0
@@ -89,8 +99,10 @@ export function daysBetween(startDate, endDate) {
     const endTime = calendar.componentsToTime(endComponents);
 
     // Convert seconds difference to days
-    const hoursPerDay = calendar.hours ?? 24;
-    const secondsPerDay = hoursPerDay * 60 * 60;
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
     return Math.floor((endTime - startTime) / secondsPerDay);
   } catch (error) {
     console.warn('Error calculating days between dates:', error);
@@ -110,8 +122,9 @@ export function monthsBetween(startDate, endDate) {
 
   const yearDiff = endDate.year - startDate.year;
   const monthDiff = endDate.month - startDate.month;
+  const monthsPerYear = calendar.months?.values?.length || 12;
 
-  return yearDiff * calendar.months.length + monthDiff;
+  return yearDiff * monthsPerYear + monthDiff;
 }
 
 /**

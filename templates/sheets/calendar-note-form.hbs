@@ -1,4 +1,5 @@
 <div class="calendar-note-form">
+  {{log 'DEBUG' this}}
   {{!-- Row 1: Title | Emblem | Visibility --}}
   <div class="form-row-1">
     <fieldset class="title-fieldset">
@@ -195,7 +196,8 @@
           </div>
         </div>
         <p class="hint">Event has {{randomConfig.probability}}% chance to occur each
-          {{randomConfig.checkIntervalLabel}}. Same seed = same occurrences.</p>
+          {{randomConfig.checkIntervalLabel}}. Same seed = same occurrences.
+        </p>
       </fieldset>
     </div>
   {{/if}}
@@ -206,32 +208,26 @@
       <fieldset class="linked-config-fieldset">
         <legend>Linked Event Settings</legend>
         <div class="linked-config-inputs">
-          <div class="form-group">
-            <label data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">Reference Event</label>
-            <div class="linked-note-select">
-              <select name="system.linkedEvent.noteId">
-                <option value="">Select an event...</option>
-                {{#each availableNotes}}
-                  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-                {{/each}}
-              </select>
-              {{#if linkedEvent.noteId}}
-                <button type="button" data-action="clearLinkedEvent" data-tooltip="Clear linked event">
-                  <i class="fas fa-times"></i>
-                </button>
-              {{/if}}
-            </div>
-          </div>
-          <div class="form-group">
-            <label data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip">Day Offset</label>
-            <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1" />
-          </div>
+          <select name="system.linkedEvent.noteId" data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">
+            <option value="">Select an event...</option>
+            {{#each availableNotes}}
+              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+            {{/each}}
+          </select>
+          <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1"
+            placeholder="Offset" data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip" />
+          {{#if linkedEvent.noteId}}
+            <button type="button" class="clear-linked-btn" data-action="clearLinkedEvent"
+              data-tooltip="Clear linked event">
+              <i class="fas fa-times"></i>
+            </button>
+          {{/if}}
         </div>
         <p class="hint">
           {{#if linkedEvent.noteId}}
             Linked to "{{linkedNoteName}}" with offset of {{linkedEvent.offset}} days.
           {{else}}
-            Select another event to link to. Positive offset = days after, negative = days before.
+            Select event to link. Offset: positive = days after, negative = days before.
           {{/if}}
         </p>
       </fieldset>
@@ -310,11 +306,14 @@
               </select>
               <div class="range-value-inputs">
                 {{#if rangeDayExact}}
-                  <input type="number" name="rangeDay" value="{{rangeDayValue}}" placeholder="Day" min="1" max="31" step="1" />
+                  <input type="number" name="rangeDay" value="{{rangeDayValue}}" placeholder="Day" min="1" max="31"
+                    step="1" />
                 {{else if rangeDayRange}}
-                  <input type="number" name="rangeDayMin" value="{{rangeDayMin}}" placeholder="Min" min="1" max="31" step="1" />
+                  <input type="number" name="rangeDayMin" value="{{rangeDayMin}}" placeholder="Min" min="1" max="31"
+                    step="1" />
                   <span>to</span>
-                  <input type="number" name="rangeDayMax" value="{{rangeDayMax}}" placeholder="Max" min="1" max="31" step="1" />
+                  <input type="number" name="rangeDayMax" value="{{rangeDayMax}}" placeholder="Max" min="1" max="31"
+                    step="1" />
                 {{/if}}
               </div>
             </div>

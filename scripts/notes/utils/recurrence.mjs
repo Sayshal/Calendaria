@@ -6,6 +6,16 @@
  * @author Tyler
  */
 
+// TODO: Implement 'weekOfMonth' repeat type
+// - Should repeat on the same week of the month (e.g., 2nd Tuesday of every month)
+// - Needs logic to calculate which week of month the start date falls in
+// - Handle edge cases where target month doesn't have that week
+
+// TODO: Implement 'seasonal' repeat type
+// - Define season boundaries (which months = which season)
+// - Decide behavior: same date within matching season? start of season? every day?
+// - Consider calendar-specific season definitions
+
 import { compareDates, compareDays, daysBetween, monthsBetween, dayOfWeek, isSameDay, addDays, addMonths, addYears } from './date-utils.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import NoteManager from '../note-manager.mjs';
@@ -285,7 +295,7 @@ function matchesLinkedEvent(linkedEvent, targetDate, startDate, repeatEndDate) {
   if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
 
   // Get the linked note's data
-  const linkedNote = NoteManager.getNoteById(noteId);
+  const linkedNote = NoteManager.getNote(noteId);
   if (!linkedNote?.flagData) return false;
 
   // Calculate the source date (what date of the linked event would produce this target date)
@@ -314,7 +324,7 @@ function getLinkedEventOccurrences(linkedEvent, rangeStart, rangeEnd, noteStartD
   const occurrences = [];
 
   // Get linked note
-  const linkedNote = NoteManager.getNoteById(noteId);
+  const linkedNote = NoteManager.getNote(noteId);
   if (!linkedNote?.flagData) return occurrences;
 
   // Calculate adjusted range for querying linked note
@@ -727,7 +737,7 @@ export function getRecurrenceDescription(noteData) {
 
   // Handle linked event
   if (linkedEvent?.noteId) {
-    const linkedNote = NoteManager.getNoteById(linkedEvent.noteId);
+    const linkedNote = NoteManager.getNote(linkedEvent.noteId);
     const linkedName = linkedNote?.name || 'Unknown Event';
     const offset = linkedEvent.offset || 0;
 
