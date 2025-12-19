@@ -758,7 +758,7 @@
   "CALENDARIA.Settings.AdvanceTimeOnRest.Hint": "Avanço automático do tempo do mundo quando os personagens fizerem descansos curtos ou longos (somente para D&D 5e).",
   "CALENDARIA.Settings.AdvanceTimeOnRest.Name": "Avançar Tempo no Descanso",
   "CALENDARIA.Settings.CalendarEditor.Hint": "Crie e edite calendários personalizados para o seu mundo.",
-  "CALENDARIA.Settings.CalendarEditor.Label": "Abra Editor de Calendário",
+  "CALENDARIA.Settings.CalendarEditor.Label": "Abrir Editor de Calendário",
   "CALENDARIA.Settings.CalendarEditor.Name": "Editor de Calendário",
   "CALENDARIA.Settings.CompactControlsDelay.Hint": "Quanto tempo (em segundos) leva para a barra lateral e os controles de tempo do calendário compacto se ocultarem automaticamente após o cursor do mouse sair do local.",
   "CALENDARIA.Settings.CompactControlsDelay.Name": "Controles de Ocultação Automática e Atraso",
