@@ -3,9 +3,10 @@
     <div class="time-display-row">
       <span class="time-display-time">{{currentTime}}</span>
       {{#if isGM}}
-      <button type="button" class="time-btn toggle {{#if running}}active{{/if}}" data-action="toggle" data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
-        <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
-      </button>
+        <button type="button" class="time-btn toggle {{#if running}}active{{/if}}" data-action="toggle"
+          data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
+          <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
+        </button>
       {{/if}}
     </div>
     <span class="time-display-date">{{currentDate}}</span>
@@ -13,32 +14,36 @@
 
   <div class="time-keeper-controls">
     {{#if isGM}}
-    <button type="button" class="time-btn reverse-5x" data-action="reverse5x" data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse5x'}}">
-      <i class="fas fa-angle-double-left"></i>
-    </button>
+      <button type="button" class="time-btn reverse-5x" data-action="reverse5x"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse5x'}}">
+        <i class="fas fa-angle-double-left"></i>
+      </button>
 
-    <button type="button" class="time-btn reverse" data-action="reverse" data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse'}}">
-      <i class="fas fa-angle-left"></i>
-    </button>
+      <button type="button" class="time-btn reverse" data-action="reverse"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse'}}">
+        <i class="fas fa-angle-left"></i>
+      </button>
 
-    <select class="increment-select" data-action="increment">
-      {{#each increments}}
-      <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-      {{/each}}
-    </select>
+      <select class="increment-select" data-action="increment">
+        {{#each increments}}
+          <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
 
-    <button type="button" class="time-btn forward" data-action="forward" data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward'}}">
-      <i class="fas fa-angle-right"></i>
-    </button>
+      <button type="button" class="time-btn forward" data-action="forward"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward'}}">
+        <i class="fas fa-angle-right"></i>
+      </button>
 
-    <button type="button" class="time-btn forward-5x" data-action="forward5x" data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward5x'}}">
-      <i class="fas fa-angle-double-right"></i>
-    </button>
+      <button type="button" class="time-btn forward-5x" data-action="forward5x"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward5x'}}">
+        <i class="fas fa-angle-double-right"></i>
+      </button>
     {{else}}
-    <span class="time-keeper-readonly">
-      <i class="fas fa-clock"></i>
-      {{localize "CALENDARIA.TimeKeeper.ReadOnly"}}
-    </span>
+      <span class="time-keeper-readonly">
+        <i class="fas fa-clock"></i>
+        {{localize "CALENDARIA.TimeKeeper.ReadOnly"}}
+      </span>
     {{/if}}
   </div>
 </div>

@@ -36,16 +36,7 @@ export function preLocalizeCalendar(calendarData) {
  */
 export function conformTo5eModel(calendariaDefinition) {
   const { festivals, moons, metadata, seasons, ...baseCalendar } = calendariaDefinition;
-
-  // Return only the base CalendarData fields that D&D 5e understands
-  return {
-    name: baseCalendar.name,
-    years: baseCalendar.years,
-    months: baseCalendar.months,
-    days: baseCalendar.days,
-    // Include seasons if they exist and are in 5e format
-    ...(seasons && { seasons })
-  };
+  return { name: baseCalendar.name, years: baseCalendar.years, months: baseCalendar.months, days: baseCalendar.days, ...(seasons && { seasons }) };
 }
 
 /**
@@ -58,7 +49,6 @@ export function conformTo5eModel(calendariaDefinition) {
  */
 export function findFestivalDay(calendar, time = game.time.worldTime) {
   if (!calendar.festivals || calendar.festivals.length === 0) return null;
-
   const components = typeof time === 'number' ? calendar.timeToComponents(time) : time;
   return calendar.festivals.find((f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1) ?? null;
 }
@@ -85,20 +75,11 @@ export function getMonthAbbreviation(month) {
  */
 export function formatMonthDay(calendar, components, options = {}) {
   const festivalDay = findFestivalDay(calendar, components);
-  if (festivalDay) {
-    return game.i18n.localize(festivalDay.name);
-  }
-
-  // Use standard formatting if no festival
-  // This calls the calendar's default formatter or constructs a basic format
+  if (festivalDay) return game.i18n.localize(festivalDay.name);
   const day = components.dayOfMonth + 1;
   const month = calendar.months.values[components.month];
   const monthName = options.abbreviated ? getMonthAbbreviation(month) : month.name;
-
-  return game.i18n.format('CALENDARIA.Formatters.DayMonth', {
-    day,
-    month: game.i18n.localize(monthName)
-  });
+  return game.i18n.format('CALENDARIA.Formatters.DayMonth', { day, month: game.i18n.localize(monthName) });
 }
 
 /**
@@ -114,10 +95,7 @@ export function formatMonthDayYear(calendar, components, options = {}) {
   const festivalDay = findFestivalDay(calendar, components);
   if (festivalDay) {
     const year = components.year + (calendar.years?.yearZero ?? 0);
-    return game.i18n.format('CALENDARIA.Formatters.FestivalDayYear', {
-      day: game.i18n.localize(festivalDay.name),
-      yyyy: year
-    });
+    return game.i18n.format('CALENDARIA.Formatters.FestivalDayYear', { day: game.i18n.localize(festivalDay.name), yyyy: year });
   }
 
   // Use standard formatting if no festival
@@ -125,12 +103,7 @@ export function formatMonthDayYear(calendar, components, options = {}) {
   const month = calendar.months.values[components.month];
   const monthName = options.abbreviated ? getMonthAbbreviation(month) : month.name;
   const year = components.year + (calendar.years?.yearZero ?? 0);
-
-  return game.i18n.format('CALENDARIA.Formatters.DayMonthYear', {
-    day,
-    month: game.i18n.localize(monthName),
-    yyyy: year
-  });
+  return game.i18n.format('CALENDARIA.Formatters.DayMonthYear', { day, month: game.i18n.localize(monthName), yyyy: year });
 }
 
 /**
@@ -147,13 +120,6 @@ export function formatMonthDayYear(calendar, components, options = {}) {
  * @returns {string} Formatted string with variables replaced
  */
 export function formatEraTemplate(template, context) {
-  // Add aliases
-  const ctx = {
-    ...context,
-    era: context.era ?? context.name,
-    name: context.era ?? context.name,
-    short: context.short ?? context.abbreviation,
-    abbreviation: context.short ?? context.abbreviation
-  };
+  const ctx = { ...context, era: context.era ?? context.name, name: context.era ?? context.name, short: context.short ?? context.abbreviation, abbreviation: context.short ?? context.abbreviation };
   return template.replace(/\{\{(\w+)\}\}/g, (match, key) => ctx[key] ?? match);
 }

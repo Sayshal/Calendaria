@@ -13,6 +13,12 @@ import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
+/** @type {number} Double-click detection threshold in milliseconds */
+const DOUBLE_CLICK_THRESHOLD = 400;
+
+/** @type {{time: number, year: number|null, month: number|null, day: number|null}} Click state for double-click detection */
+const clickState = { time: 0, year: null, month: null, day: null };
+
 /**
  * Convert hex color to hue angle for CSS filter.
  * @param {string} hex - Hex color (e.g., '#ff0000')
@@ -131,11 +137,7 @@ export function getCurrentViewedDate(calendar = null) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
 
-  return {
-    ...components,
-    year: components.year + yearZero,
-    day: dayOfMonth
-  };
+  return { ...components, year: components.year + yearZero, day: dayOfMonth };
 }
 
 /**
@@ -209,31 +211,15 @@ export function getFirstMoonPhase(calendar, year, month, day) {
 
   // Calculate day of year
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) {
-    dayOfYear += calendar.months.values[idx].days;
-  }
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
 
-  const dayComponents = {
-    year: year - (calendar.years?.yearZero ?? 0),
-    month,
-    day: dayOfYear,
-    hour: 12,
-    minute: 0,
-    second: 0
-  };
-
+  const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   const phase = calendar.getMoonPhase(0, dayWorldTime);
-
   if (!phase) return null;
 
   const color = calendar.moons[0].color || null;
-  return {
-    icon: phase.icon,
-    color,
-    hue: color ? hexToHue(color) : null,
-    tooltip: `${game.i18n.localize(calendar.moons[0].name)}: ${game.i18n.localize(phase.name)}`
-  };
+  return { icon: phase.icon, color, hue: color ? hexToHue(color) : null, tooltip: `${game.i18n.localize(calendar.moons[0].name)}: ${game.i18n.localize(phase.name)}` };
 }
 
 /**
@@ -250,19 +236,9 @@ export function getAllMoonPhases(calendar, year, month, day) {
 
   // Calculate day of year
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) {
-    dayOfYear += calendar.months.values[idx].days;
-  }
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
 
-  const dayComponents = {
-    year: year - (calendar.years?.yearZero ?? 0),
-    month,
-    day: dayOfYear,
-    hour: 12,
-    minute: 0,
-    second: 0
-  };
-
+  const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
 
   return calendar.moons
@@ -270,13 +246,7 @@ export function getAllMoonPhases(calendar, year, month, day) {
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;
       const color = moon.color || null;
-      return {
-        moonName: game.i18n.localize(moon.name),
-        phaseName: game.i18n.localize(phase.name),
-        icon: phase.icon,
-        color,
-        hue: color ? hexToHue(color) : null
-      };
+      return { moonName: game.i18n.localize(moon.name), phaseName: game.i18n.localize(phase.name), icon: phase.icon, color, hue: color ? hexToHue(color) : null };
     })
     .filter(Boolean);
 }
@@ -327,21 +297,11 @@ export async function setDateTo(year, month, day, calendar = null) {
 
   // Calculate day of year
   let dayOfYear = day - 1;
-  for (let i = 0; i < month; i++) {
-    dayOfYear += calendar.months.values[i].days;
-  }
+  for (let i = 0; i < month; i++) dayOfYear += calendar.months.values[i].days;
 
   // Keep current time of day
   const currentComponents = game.time.components;
-  const newComponents = {
-    year: year - yearZero,
-    month,
-    day: dayOfYear,
-    hour: currentComponents.hour,
-    minute: currentComponents.minute,
-    second: currentComponents.second
-  };
-
+  const newComponents = { year: year - yearZero, month, day: dayOfYear, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
   const newWorldTime = calendar.componentsToTime(newComponents);
   await game.time.advance(newWorldTime - game.time.worldTime);
 }
@@ -355,11 +315,8 @@ export async function setDateTo(year, month, day, calendar = null) {
  */
 export async function createNoteOnDate(year, month, day) {
   const page = await NoteManager.createNote({
-    name: 'New Note',
-    noteData: {
-      startDate: { year, month, day, hour: 12, minute: 0 },
-      endDate: { year, month, day, hour: 13, minute: 0 }
-    }
+    name: game.i18n.localize('CALENDARIA.Note.NewNote'),
+    noteData: { startDate: { year, month, day, hour: 12, minute: 0 }, endDate: { year, month, day, hour: 13, minute: 0 } }
   });
   if (page) page.sheet.render(true, { mode: 'edit' });
   return page;
@@ -548,16 +505,6 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
     }
   });
 }
-
-// Track last click for manual double-click detection
-const clickState = {
-  time: 0,
-  year: null,
-  month: null,
-  day: null
-};
-
-const DOUBLE_CLICK_THRESHOLD = 400; // ms
 
 /**
  * Handle click on a day cell, detecting double-clicks manually.

@@ -10,6 +10,7 @@ import BaseImporter from './base-importer.mjs';
 import { log } from '../utils/logger.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { ASSETS } from '../constants.mjs';
 
 /**
  * Importer for Simple Calendar module data.
@@ -59,11 +60,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       }
     }
 
-    return {
-      calendars,
-      notes,
-      exportVersion: 2
-    };
+    return { calendars, notes, exportVersion: 2 };
   }
 
   /* -------------------------------------------- */
@@ -105,9 +102,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
 
       // Months
-      months: {
-        values: months
-      },
+      months: { values: months },
 
       // Years and leap year (Foundry format)
       years: this.#transformYears(calendar.year, calendar.leapYear),
@@ -116,9 +111,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       leapYearConfig: this.#transformLeapYearConfig(calendar.leapYear),
 
       // Seasons (needs months to calculate day of year)
-      seasons: {
-        values: this.#transformSeasons(calendar.seasons, months, calendar.months)
-      },
+      seasons: { values: this.#transformSeasons(calendar.seasons, months, calendar.months) },
 
       // Moons
       moons: this.#transformMoons(calendar.moons),
@@ -133,12 +126,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       daylight: this.#transformDaylight(calendar.seasons, calendar.time),
 
       // Metadata
-      metadata: {
-        description: `Imported from Simple Calendar`,
-        system: calendar.name || 'Unknown',
-        importedFrom: 'simple-calendar',
-        originalId: calendar.id
-      }
+      metadata: { description: `Imported from Simple Calendar`, system: calendar.name || 'Unknown', importedFrom: 'simple-calendar', originalId: calendar.id }
     };
   }
 
@@ -220,20 +208,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
     };
 
     // Transform leap year rule to Foundry format (leapStart, leapInterval)
-    if (leapYear.rule === 'gregorian') {
-      // Gregorian approximation: every 4 years
-      result.leapYear = {
-        leapStart: 0,
-        leapInterval: 4
-      };
-    } else if (leapYear.rule === 'custom' && leapYear.customMod > 0) {
-      result.leapYear = {
-        leapStart: 0,
-        leapInterval: leapYear.customMod
-      };
-    }
-    // 'none' means no leap year rule (leapYear stays null)
-
+    if (leapYear.rule === 'gregorian') result.leapYear = { leapStart: 0, leapInterval: 4 };
+    else if (leapYear.rule === 'custom' && leapYear.customMod > 0) result.leapYear = { leapStart: 0, leapInterval: leapYear.customMod };
     return result;
   }
 
@@ -243,19 +219,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object|null} Calendaria leapYearConfig
    */
   #transformLeapYearConfig(leapYear = {}) {
-    if (leapYear.rule === 'gregorian') {
-      return {
-        rule: 'gregorian',
-        start: 0
-      };
-    } else if (leapYear.rule === 'custom' && leapYear.customMod > 0) {
-      return {
-        rule: 'simple',
-        interval: leapYear.customMod,
-        start: 0
-      };
-    }
-    // 'none' means no leap year config
+    if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: 0 };
+    else if (leapYear.rule === 'custom' && leapYear.customMod > 0) return { rule: 'simple', interval: leapYear.customMod, start: 0 };
     return null;
   }
 
@@ -269,9 +234,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   #transformSeasons(seasons = [], transformedMonths = [], scMonths = []) {
     if (!seasons.length) return [];
-
-    // Build day-of-year lookup from SC months (includes intercalary)
-    // Use 0-indexed to match getCurrentSeason calculation
     const monthDayStarts = [];
     let dayCount = 0;
     for (const month of scMonths) {
@@ -297,11 +259,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       if (dayEnd < dayStart) dayEnd += totalDays; // Wrap around year
       if (dayEnd < 0) dayEnd = totalDays - 1;
 
-      return {
-        name: season.name,
-        dayStart,
-        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd
-      };
+      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd };
     });
   }
 
@@ -335,14 +293,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       const length = phase.length || 1;
       const start = currentPosition / cycleLength;
       const end = (currentPosition + length) / cycleLength;
-
-      result.push({
-        name: phase.name,
-        icon: this.#mapMoonPhaseIcon(phase.icon),
-        start: Math.min(start, 0.999),
-        end: Math.min(end, 1)
-      });
-
+      result.push({ name: phase.name, icon: this.#mapMoonPhaseIcon(phase.icon), start: Math.min(start, 0.999), end: Math.min(end, 1) });
       currentPosition += length;
     }
 
@@ -355,18 +306,17 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {string} Calendaria SVG path
    */
   #mapMoonPhaseIcon(icon) {
-    const basePath = 'modules/calendaria/assets/moon-phases';
     const iconMap = {
-      new: `${basePath}/01_newmoon.svg`,
-      'waxing-crescent': `${basePath}/02_waxingcrescent.svg`,
-      'first-quarter': `${basePath}/03_firstquarter.svg`,
-      'waxing-gibbous': `${basePath}/04_waxinggibbous.svg`,
-      full: `${basePath}/05_fullmoon.svg`,
-      'waning-gibbous': `${basePath}/06_waninggibbous.svg`,
-      'last-quarter': `${basePath}/07_lastquarter.svg`,
-      'waning-crescent': `${basePath}/08_waningcrescent.svg`
+      new: `${ASSETS.MOON_ICONS}/01_newmoon.svg`,
+      'waxing-crescent': `${ASSETS.MOON_ICONS}/02_waxingcrescent.svg`,
+      'first-quarter': `${ASSETS.MOON_ICONS}/03_firstquarter.svg`,
+      'waxing-gibbous': `${ASSETS.MOON_ICONS}/04_waxinggibbous.svg`,
+      full: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`,
+      'waning-gibbous': `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`,
+      'last-quarter': `${ASSETS.MOON_ICONS}/07_lastquarter.svg`,
+      'waning-crescent': `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`
     };
-    return iconMap[icon] || `${basePath}/01_newmoon.svg`;
+    return iconMap[icon] || `${ASSETS.MOON_ICONS}/01_newmoon.svg`;
   }
 
   /**
@@ -375,11 +325,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria reference date
    */
   #transformMoonReference(firstNewMoon = {}) {
-    return {
-      year: firstNewMoon.year ?? 0,
-      month: firstNewMoon.month ?? 0,
-      day: firstNewMoon.day ?? 0
-    };
+    return { year: firstNewMoon.year ?? 0, month: firstNewMoon.month ?? 0, day: firstNewMoon.day ?? 0 };
   }
 
   /**
@@ -390,14 +336,9 @@ export default class SimpleCalendarImporter extends BaseImporter {
   #extractFestivals(months = []) {
     const festivals = [];
     let regularMonthIndex = 0;
-
     for (const month of months) {
       if (month.intercalary) {
-        // Intercalary months become festivals
-        // Place them after the previous regular month
-        for (let day = 1; day <= month.numberOfDays; day++) {
-          festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, month: regularMonthIndex, day: day });
-        }
+        for (let day = 1; day <= month.numberOfDays; day++) festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, month: regularMonthIndex, day: day });
       } else {
         regularMonthIndex++;
       }
@@ -414,18 +355,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
   #transformEras(year = {}) {
     const prefix = year.prefix?.trim();
     const postfix = year.postfix?.trim();
-
     if (!prefix && !postfix) return [];
-
-    return [
-      {
-        name: postfix || prefix || 'Era',
-        abbreviation: postfix || prefix || '',
-        startYear: -999999,
-        endYear: null,
-        format: prefix ? 'prefix' : 'suffix'
-      }
-    ];
+    return [{ name: postfix || prefix || 'Era', abbreviation: postfix || prefix || '', startYear: -999999, endYear: null, format: prefix ? 'prefix' : 'suffix' }];
   }
 
   /**
@@ -455,11 +386,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       return { enabled: false };
     }
 
-    return {
-      enabled: true,
-      shortestDay: Math.round(shortestDaylight),
-      longestDay: Math.round(longestDaylight)
-    };
+    return { enabled: true, shortestDay: Math.round(shortestDaylight), longestDay: Math.round(longestDaylight) };
   }
 
   /* -------------------------------------------- */
@@ -540,24 +467,11 @@ export default class SimpleCalendarImporter extends BaseImporter {
         // SC internal 795 + yearZero 1970 = display 2765
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
-
-        const noteData = {
-          startDate,
-          endDate,
-          allDay: note.allDay,
-          repeat: note.repeat,
-          categories: note.categories
-        };
-
+        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
         log(3, `Note data prepared:`, noteData);
 
         // Create note via NoteManager
-        const page = await NoteManager.createNote({
-          name: note.name,
-          content: note.content || '',
-          noteData,
-          calendarId
-        });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
 
         if (page) {
           count++;
@@ -636,14 +550,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria date object
    */
   #transformNoteDate(date = {}) {
-    return {
-      year: date.year ?? 0,
-      month: date.month ?? 0,
-      day: date.day ?? 0,
-      hour: date.hour ?? 0,
-      minute: date.minute ?? 0,
-      second: date.seconds ?? 0
-    };
+    return { year: date.year ?? 0, month: date.month ?? 0, day: date.day ?? 0, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 };
   }
 
   /**

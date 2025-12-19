@@ -18,8 +18,8 @@
               <span class="col-controls list-header"></span>
             {{/if}}
             <input type="text" name="moons.{{this.index}}.name" value="{{this.name}}" class="col-name">
-            <input type="number" name="moons.{{this.index}}.cycleLength" value="{{this.cycleLength}}" min="1"
-              step="1" class="col-cycle">
+            <input type="number" name="moons.{{this.index}}.cycleLength" value="{{this.cycleLength}}" min="1" step="1"
+              class="col-cycle">
             <div class="col-color color-input-wrapper">
               <input type="color" name="moons.{{this.index}}.color"
                 value="{{#if this.color}}{{this.color}}{{else}}#b8b8b8{{/if}}">
@@ -104,10 +104,12 @@
                     </div>
                     <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.name" value="{{this.name}}"
                       class="col-phase-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.PhaseName'}}">
-                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.risingName" value="{{this.risingName}}"
-                      class="col-rising" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.RisingName'}}">
-                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.fadingName" value="{{this.fadingName}}"
-                      class="col-fading" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.FadingName'}}">
+                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.rising"
+                      value="{{this.rising}}" class="col-rising"
+                      placeholder="{{localize 'CALENDARIA.Editor.Placeholder.RisingName'}}">
+                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.fading"
+                      value="{{this.fading}}" class="col-fading"
+                      placeholder="{{localize 'CALENDARIA.Editor.Placeholder.FadingName'}}">
                     <input type="number" name="moons.{{this.moonIndex}}.phases.{{this.index}}.startPercent"
                       value="{{this.startPercent}}" min="0" max="100" step="0.1" class="col-start">
                     <input type="number" name="moons.{{this.moonIndex}}.phases.{{this.index}}.endPercent"

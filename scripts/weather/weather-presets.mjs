@@ -342,26 +342,11 @@ export const ALL_PRESETS = [...STANDARD_WEATHER, ...SEVERE_WEATHER, ...ENVIRONME
  * @type {object}
  */
 export const WEATHER_CATEGORIES = {
-  standard: {
-    id: 'standard',
-    label: 'CALENDARIA.Weather.Category.Standard'
-  },
-  severe: {
-    id: 'severe',
-    label: 'CALENDARIA.Weather.Category.Severe'
-  },
-  environmental: {
-    id: 'environmental',
-    label: 'CALENDARIA.Weather.Category.Environmental'
-  },
-  fantasy: {
-    id: 'fantasy',
-    label: 'CALENDARIA.Weather.Category.Fantasy'
-  },
-  custom: {
-    id: 'custom',
-    label: 'CALENDARIA.Weather.Category.Custom'
-  }
+  standard: { id: 'standard', label: 'CALENDARIA.Weather.Category.Standard' },
+  severe: { id: 'severe', label: 'CALENDARIA.Weather.Category.Severe' },
+  environmental: { id: 'environmental', label: 'CALENDARIA.Weather.Category.Environmental' },
+  fantasy: { id: 'fantasy', label: 'CALENDARIA.Weather.Category.Fantasy' },
+  custom: { id: 'custom', label: 'CALENDARIA.Weather.Category.Custom' }
 };
 
 /**

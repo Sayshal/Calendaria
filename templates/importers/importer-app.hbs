@@ -43,7 +43,8 @@
                 {{#if loadedFileName}}
                   <i class="fas fa-file"></i>
                   <span class="file-name">{{loadedFileName}}</span>
-                  <button type="button" class="clear-file" data-action="clearData" data-tooltip="{{localize 'CALENDARIA.Importer.ClearFile'}}">
+                  <button type="button" class="clear-file" data-action="clearData"
+                    data-tooltip="{{localize 'CALENDARIA.Importer.ClearFile'}}">
                     <i class="fas fa-times"></i>
                   </button>
                 {{else}}
@@ -60,7 +61,8 @@
                 <div class="module-loaded">
                   <i class="fas fa-plug"></i>
                   <span>{{localize "CALENDARIA.Importer.LoadedFromModule"}}</span>
-                  <button type="button" class="clear-module" data-action="clearData" data-tooltip="{{localize 'CALENDARIA.Importer.Preview.ClearData'}}">
+                  <button type="button" class="clear-module" data-action="clearData"
+                    data-tooltip="{{localize 'CALENDARIA.Importer.Preview.ClearData'}}">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -137,7 +139,8 @@
             <div class="form-group slim">
               <label>{{localize "CALENDARIA.Importer.Options.CalendarName"}}</label>
               <div class="form-fields">
-                <input type="text" name="calendarName" value="{{previewData.name}}" placeholder="{{previewData.name}}" />
+                <input type="text" name="calendarName" value="{{previewData.name}}"
+                  placeholder="{{previewData.name}}" />
               </div>
             </div>
           </fieldset>
@@ -216,7 +219,7 @@
     {{#if hasData}}
       <footer class="form-footer">
         {{#each buttons}}
-          <button type="{{this.type}}" {{#if this.action}}data-action="{{this.action}}"{{/if}}
+          <button type="{{this.type}}" {{#if this.action}}data-action="{{this.action}}" {{/if}}
             {{#if this.disabled}}disabled{{/if}}>
             {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
             {{localize this.label}}

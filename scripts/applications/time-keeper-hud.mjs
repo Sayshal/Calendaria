@@ -22,46 +22,33 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: 'time-keeper-hud',
     classes: ['time-keeper-hud'],
-    position: {
-      width: 'auto',
-      height: 'auto',
-      top: 80,
-      left: 120,
-      zIndex: 100
-    },
-    window: {
-      frame: false,
-      positioned: true
-    }
+    position: { width: 'auto', height: 'auto', top: 80, left: 120, zIndex: 100 },
+    window: { frame: false, positioned: true }
   };
 
   /** @override */
-  static PARTS = {
-    main: {
-      template: TEMPLATES.TIME_KEEPER_HUD
-    }
-  };
+  static PARTS = { main: { template: TEMPLATES.TIME_KEEPER_HUD } };
 
   /* -------------------------------------------- */
   /*  Rendering                                   */
   /* -------------------------------------------- */
 
   /** @override */
-  async _prepareContext() {
-    const increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+
+    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
       key,
       label: this.#formatIncrement(key),
       seconds,
       selected: key === TimeKeeper.incrementKey
     }));
+    context.running = TimeKeeper.running;
+    context.isGM = game.user.isGM;
+    context.currentTime = TimeKeeper.getFormattedTime();
+    context.currentDate = TimeKeeper.getFormattedDate();
 
-    return {
-      increments,
-      running: TimeKeeper.running,
-      isGM: game.user.isGM,
-      currentTime: TimeKeeper.getFormattedTime(),
-      currentDate: TimeKeeper.getFormattedDate()
-    };
+    return context;
   }
 
   /** @override */
@@ -75,9 +62,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
 
     // Listen for world time changes to update clock display
-    if (!this.#timeHookId) {
-      this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
-    }
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
   }
 
   /** @override */
@@ -165,6 +150,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Format increment key for display.
    * @param {string} key - Increment key
    * @returns {string} Formatted label
+   * @todo Can we use global keys from foundry?
    * @private
    */
   #formatIncrement(key) {
@@ -191,9 +177,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {TimeKeeperHUD} The HUD instance
    */
   static show() {
-    if (!this._instance) {
-      this._instance = new TimeKeeperHUD();
-    }
+    if (!this._instance) this._instance = new TimeKeeperHUD();
     this._instance.render(true);
     return this._instance;
   }
@@ -209,11 +193,8 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Toggle the TimeKeeper HUD visibility.
    */
   static toggle() {
-    if (this._instance?.rendered) {
-      this.hide();
-    } else {
-      this.show();
-    }
+    if (this._instance?.rendered) this.hide();
+    else this.show();
   }
 
   /** @type {TimeKeeperHUD|null} Singleton instance */

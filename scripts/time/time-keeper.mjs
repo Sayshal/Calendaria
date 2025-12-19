@@ -40,31 +40,8 @@ export function getTimeIncrements() {
 
   const secondsPerYear = secondsPerDay * daysPerYear;
 
-  return {
-    second: 1,
-    round: 6,
-    minute: secondsPerMinute,
-    hour: secondsPerHour,
-    day: secondsPerDay,
-    week: secondsPerDay * 7,
-    month: secondsPerMonth,
-    season: secondsPerSeason,
-    year: secondsPerYear
-  };
+  return { second: 1, round: 6, minute: secondsPerMinute, hour: secondsPerHour, day: secondsPerDay, week: secondsPerDay * 7, month: secondsPerMonth, season: secondsPerSeason, year: secondsPerYear };
 }
-
-// Legacy export for backwards compatibility
-export const TIME_INCREMENTS = {
-  second: 1,
-  round: 6,
-  minute: 60,
-  hour: 3600,
-  day: 86400,
-  week: 604800,
-  month: 2419200,
-  season: 7884000,
-  year: 31536000
-};
 
 /**
  * Real-time clock controller for advancing game time automatically.
@@ -77,7 +54,7 @@ export default class TimeKeeper {
   static #running = false;
 
   /** @type {number} Time increment in seconds per tick */
-  static #increment = TIME_INCREMENTS.minute;
+  static #increment = 60;
 
   /** @type {number} Real-time interval in seconds between ticks */
   static #updateFrequency = 1;
@@ -157,9 +134,7 @@ export default class TimeKeeper {
 
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
 
-    if (broadcast && CalendariaSocket.isPrimaryGM()) {
-      CalendariaSocket.emitClockUpdate(true, this.#increment);
-    }
+    if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(true, this.#increment);
   }
 
   /**
@@ -177,9 +152,7 @@ export default class TimeKeeper {
 
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: false, increment: this.#increment });
 
-    if (broadcast && CalendariaSocket.isPrimaryGM()) {
-      CalendariaSocket.emitClockUpdate(false, this.#increment);
-    }
+    if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(false, this.#increment);
   }
 
   /**

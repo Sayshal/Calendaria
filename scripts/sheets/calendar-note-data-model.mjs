@@ -37,32 +37,17 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       allDay: new fields.BooleanField({ initial: false }),
 
       // Recurrence
-      repeat: new fields.StringField({
-        choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range'],
-        initial: 'never'
-      }),
+      repeat: new fields.StringField({ choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range'], initial: 'never' }),
 
-      repeatInterval: new fields.NumberField({
-        integer: true,
-        min: 1,
-        initial: 1
-      }),
+      repeatInterval: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
 
       repeatEndDate: new fields.SchemaField(
-        {
-          year: new fields.NumberField({ integer: true }),
-          month: new fields.NumberField({ integer: true, min: 0 }),
-          day: new fields.NumberField({ integer: true, min: 1 })
-        },
+        { year: new fields.NumberField({ integer: true }), month: new fields.NumberField({ integer: true, min: 0 }), day: new fields.NumberField({ integer: true, min: 1 }) },
         { nullable: true }
       ),
 
       // Max number of times the event repeats (0 = unlimited)
-      maxOccurrences: new fields.NumberField({
-        integer: true,
-        min: 0,
-        initial: 0
-      }),
+      maxOccurrences: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
 
       // Moon conditions - array of { moonIndex, phaseStart, phaseEnd }
       moonConditions: new fields.ArrayField(
@@ -79,30 +64,17 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         {
           seed: new fields.NumberField({ integer: true, initial: 0 }),
           probability: new fields.NumberField({ min: 0, max: 100, initial: 10 }),
-          checkInterval: new fields.StringField({
-            choices: ['daily', 'weekly', 'monthly'],
-            initial: 'daily'
-          })
+          checkInterval: new fields.StringField({ choices: ['daily', 'weekly', 'monthly'], initial: 'daily' })
         },
         { nullable: true }
       ),
 
       // Linked event configuration (for repeat: 'linked')
-      linkedEvent: new fields.SchemaField(
-        {
-          noteId: new fields.StringField({ required: true, blank: false }),
-          offset: new fields.NumberField({ integer: true, initial: 0 })
-        },
-        { nullable: true }
-      ),
+      linkedEvent: new fields.SchemaField({ noteId: new fields.StringField({ required: true, blank: false }), offset: new fields.NumberField({ integer: true, initial: 0 }) }, { nullable: true }),
 
       // Range pattern configuration (for repeat: 'range')
       rangePattern: new fields.SchemaField(
-        {
-          year: new fields.JSONField({ nullable: true }), // number | [min, max] | null
-          month: new fields.JSONField({ nullable: true }), // number | [min, max] | null
-          day: new fields.JSONField({ nullable: true }) // number | [min, max] | null
-        },
+        { year: new fields.JSONField({ nullable: true }), month: new fields.JSONField({ nullable: true }), day: new fields.JSONField({ nullable: true }) },
         { nullable: true }
       ),
 
@@ -121,11 +93,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       // Reminders
       remindUsers: new fields.ArrayField(new fields.StringField(), { initial: [] }),
 
-      reminderOffset: new fields.NumberField({
-        integer: true,
-        min: 0,
-        initial: 0
-      }),
+      reminderOffset: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
 
       // Integration
       macro: new fields.StringField({ nullable: true, blank: true }),

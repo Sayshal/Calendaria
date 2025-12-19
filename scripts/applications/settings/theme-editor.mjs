@@ -98,7 +98,7 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static PARTS = {
     form: { template: TEMPLATES.SETTINGS.THEME_EDITOR, scrollable: [''] },
-    footer: { template: 'templates/generic/form-footer.hbs' }
+    footer: { template: TEMPLATES.FORM_FOOTER }
   };
 
   /**
@@ -145,13 +145,7 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const def of COLOR_DEFINITIONS) {
       const value = this.#colorValues[def.key] || DEFAULT_COLORS[def.key];
       const isCustom = customColors[def.key] !== undefined;
-      categories[def.category].colors.push({
-        key: def.key,
-        label: def.label,
-        value,
-        defaultValue: DEFAULT_COLORS[def.key],
-        isCustom
-      });
+      categories[def.category].colors.push({ key: def.key, label: def.label, value, defaultValue: DEFAULT_COLORS[def.key], isCustom });
     }
 
     context.categories = Object.values(categories);
@@ -178,9 +172,7 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Add color input listeners for live preview
     const colorInputs = this.element.querySelectorAll('input[type="color"]');
-    for (const input of colorInputs) {
-      input.addEventListener('input', this.#onColorInputChange.bind(this));
-    }
+    for (const input of colorInputs) input.addEventListener('input', this.#onColorInputChange.bind(this));
   }
 
   /**
@@ -330,17 +322,11 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const text = await file.text();
         const importData = JSON.parse(text);
 
-        if (!importData.colors) {
-          throw new Error('Invalid theme file format');
-        }
+        if (!importData.colors) throw new Error('Invalid theme file format');
 
         // Calculate which colors differ from defaults
         const customColors = {};
-        for (const [key, value] of Object.entries(importData.colors)) {
-          if (DEFAULT_COLORS[key] !== value) {
-            customColors[key] = value;
-          }
-        }
+        for (const [key, value] of Object.entries(importData.colors)) if (DEFAULT_COLORS[key] !== value) customColors[key] = value;
 
         await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
         this.#colorValues = { ...DEFAULT_COLORS, ...customColors };
@@ -396,11 +382,7 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       festivalText: '--calendaria-festival-text'
     };
 
-    for (const [key, cssVar] of Object.entries(varMap)) {
-      if (colors[key]) {
-        cssVars.push(`${cssVar}: ${colors[key]};`);
-      }
-    }
+    for (const [key, cssVar] of Object.entries(varMap)) if (colors[key]) cssVars.push(`${cssVar}: ${colors[key]};`);
 
     // Derive semi-transparent variants from base colors
     const hexToRgb = (hex) => {
@@ -429,16 +411,10 @@ export class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Apply to .calendaria elements
-    styleEl.textContent = `
-      .calendaria {
-        ${cssVars.join('\n        ')}
-      }
-    `;
+    styleEl.textContent = `.calendaria {${cssVars.join('\n        ')}}`;
 
     // Re-render open calendar windows
-    for (const app of Object.values(ui.windows)) {
-      if (app.constructor.name.includes('Calendar')) app.render();
-    }
+    for (const app of foundry.applications.instances.values()) if (app.constructor.name.includes('Calendar')) app.render();
   }
 
   /**

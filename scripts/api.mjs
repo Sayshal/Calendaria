@@ -39,10 +39,7 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
 
-    return {
-      ...components,
-      year: components.year + yearZero
-    };
+    return { ...components, year: components.year + yearZero };
   },
 
   /**
@@ -55,7 +52,6 @@ export const CalendariaAPI = {
    */
   async advanceTime(delta) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can advance time');
       ui.notifications.error('Only GMs can advance time');
       return game.time.worldTime;
     }
@@ -72,7 +68,6 @@ export const CalendariaAPI = {
    */
   async setDateTime(components) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can set date/time');
       ui.notifications.error('Only GMs can set date/time');
       return game.time.worldTime;
     }
@@ -100,14 +95,12 @@ export const CalendariaAPI = {
    */
   async jumpToDate({ year, month, day }) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can jump to date');
       ui.notifications.error('Only GMs can jump to date');
       return;
     }
 
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
-      log(2, 'No active calendar available');
       ui.notifications.warn('No active calendar available');
       return;
     }
@@ -174,7 +167,6 @@ export const CalendariaAPI = {
    */
   async switchCalendar(id) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can switch calendars');
       ui.notifications.error('Only GMs can switch calendars');
       return false;
     }
@@ -223,7 +215,6 @@ export const CalendariaAPI = {
   getCurrentSeason() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || !calendar.seasons) return null;
-
     const components = game.time.components;
     const seasonIndex = components.season ?? 0;
     return calendar.seasons.values?.[seasonIndex] ?? null;
@@ -240,7 +231,6 @@ export const CalendariaAPI = {
   getCycleValues() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.getCycleValues !== 'function') return null;
-
     return calendar.getCycleValues();
   },
 
@@ -254,7 +244,6 @@ export const CalendariaAPI = {
   getSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunrise !== 'function') return null;
-
     return calendar.sunrise();
   },
 
@@ -268,7 +257,6 @@ export const CalendariaAPI = {
   getSunset() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunset !== 'function') return null;
-
     return calendar.sunset();
   },
 
@@ -282,7 +270,6 @@ export const CalendariaAPI = {
   getDaylightHours() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.daylightHours !== 'function') return null;
-
     return calendar.daylightHours();
   },
 
@@ -296,7 +283,6 @@ export const CalendariaAPI = {
   getProgressDay() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.progressDay !== 'function') return null;
-
     return calendar.progressDay();
   },
 
@@ -310,7 +296,6 @@ export const CalendariaAPI = {
   getProgressNight() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.progressNight !== 'function') return null;
-
     return calendar.progressNight();
   },
 
@@ -324,19 +309,15 @@ export const CalendariaAPI = {
   getTimeUntilSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunrise !== 'function') return null;
-
     const targetHour = calendar.sunrise();
     if (targetHour === null) return null;
-
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -350,19 +331,15 @@ export const CalendariaAPI = {
   getTimeUntilSunset() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunset !== 'function') return null;
-
     const targetHour = calendar.sunset();
     if (targetHour === null) return null;
-
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -376,17 +353,14 @@ export const CalendariaAPI = {
   getTimeUntilMidnight() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-
     const targetHour = 0;
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -400,17 +374,14 @@ export const CalendariaAPI = {
   getTimeUntilMidday() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-
     const targetHour = 12;
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -440,7 +411,6 @@ export const CalendariaAPI = {
   isFestivalDay() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.isFestivalDay !== 'function') return false;
-
     return calendar.isFestivalDay();
   },
 
@@ -466,9 +436,7 @@ export const CalendariaAPI = {
     components = components || game.time.components;
 
     // Use calendar's format method if available
-    if (typeof calendar.format === 'function') {
-      return calendar.format(components, formatter);
-    }
+    if (typeof calendar.format === 'function') return calendar.format(components, formatter);
 
     // Fallback to basic formatting
     // Only add yearZero if components are internal (from game.time.components)
@@ -561,24 +529,9 @@ export const CalendariaAPI = {
     // Convert display year to internal year
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
-
     const noteData = {
-      startDate: {
-        year: startDate.year - yearZero,
-        month: startDate.month,
-        day: startDate.day,
-        hour: startDate.hour ?? 0,
-        minute: startDate.minute ?? 0
-      },
-      endDate: endDate
-        ? {
-            year: endDate.year - yearZero,
-            month: endDate.month,
-            day: endDate.day,
-            hour: endDate.hour ?? 23,
-            minute: endDate.minute ?? 59
-          }
-        : null,
+      startDate: { year: startDate.year - yearZero, month: startDate.month, day: startDate.day, hour: startDate.hour ?? 0, minute: startDate.minute ?? 0 },
+      endDate: endDate ? { year: endDate.year - yearZero, month: endDate.month, day: endDate.day, hour: endDate.hour ?? 23, minute: endDate.minute ?? 59 } : null,
       allDay,
       repeat,
       categories,
@@ -616,29 +569,15 @@ export const CalendariaAPI = {
     const yearZero = calendar?.years?.yearZero ?? 0;
 
     const noteData = {};
-    if (updates.startDate) {
-      noteData.startDate = {
-        ...updates.startDate,
-        year: updates.startDate.year - yearZero
-      };
-    }
-    if (updates.endDate) {
-      noteData.endDate = {
-        ...updates.endDate,
-        year: updates.endDate.year - yearZero
-      };
-    }
+    if (updates.startDate) noteData.startDate = { ...updates.startDate, year: updates.startDate.year - yearZero };
+    if (updates.endDate) noteData.endDate = { ...updates.endDate, year: updates.endDate.year - yearZero };
     if (updates.allDay !== undefined) noteData.allDay = updates.allDay;
     if (updates.repeat !== undefined) noteData.repeat = updates.repeat;
     if (updates.categories !== undefined) noteData.categories = updates.categories;
     if (updates.icon !== undefined) noteData.icon = updates.icon;
     if (updates.color !== undefined) noteData.color = updates.color;
     if (updates.gmOnly !== undefined) noteData.gmOnly = updates.gmOnly;
-
-    return await NoteManager.updateNote(pageId, {
-      name: updates.name,
-      noteData: Object.keys(noteData).length > 0 ? noteData : undefined
-    });
+    return await NoteManager.updateNote(pageId, { name: updates.name, noteData: Object.keys(noteData).length > 0 ? noteData : undefined });
   },
 
   /**
@@ -859,10 +798,7 @@ export const CalendariaAPI = {
     const components = calendar.timeToComponents(timestamp);
     const yearZero = calendar.years?.yearZero ?? 0;
 
-    return {
-      ...components,
-      year: components.year + yearZero
-    };
+    return { ...components, year: components.year + yearZero };
   },
 
   /**

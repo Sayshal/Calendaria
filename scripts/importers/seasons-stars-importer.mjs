@@ -10,6 +10,7 @@ import BaseImporter from './base-importer.mjs';
 import { log } from '../utils/logger.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { ASSETS } from '../constants.mjs';
 
 /**
  * Importer for Seasons & Stars module data.
@@ -94,11 +95,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       name: label,
 
       // Days configuration (weekdays + time)
-      days: {
-        values: weekdays,
-        ...this.#transformTime(calendar.time),
-        daysPerYear
-      },
+      days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
 
       // Months
       months: { values: months },
@@ -140,12 +137,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       dateFormats: this.#transformDateFormats(calendar.dateFormats),
 
       // Metadata
-      metadata: {
-        id: calendar.id,
-        description: calendar.translations?.en?.description || '',
-        system: calendar.translations?.en?.setting || 'Unknown',
-        importedFrom: 'seasons-stars'
-      }
+      metadata: { id: calendar.id, description: calendar.translations?.en?.description || '', system: calendar.translations?.en?.setting || 'Unknown', importedFrom: 'seasons-stars' }
     };
   }
 
@@ -171,11 +163,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       ];
     }
 
-    return weekdays.map((day, index) => ({
-      name: day.name,
-      abbreviation: day.abbreviation || day.name.substring(0, 2),
-      ordinal: index + 1
-    }));
+    return weekdays.map((day, index) => ({ name: day.name, abbreviation: day.abbreviation || day.name.substring(0, 2), ordinal: index + 1 }));
   }
 
   /**
@@ -184,12 +172,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {object[]} Calendaria months array
    */
   #transformMonths(months = []) {
-    return months.map((month, index) => ({
-      name: month.name,
-      abbreviation: month.abbreviation || month.name.substring(0, 3),
-      days: month.length ?? month.days ?? 30,
-      ordinal: index + 1
-    }));
+    return months.map((month, index) => ({ name: month.name, abbreviation: month.abbreviation || month.name.substring(0, 3), days: month.length ?? month.days ?? 30, ordinal: index + 1 }));
   }
 
   /**
@@ -198,11 +181,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {object} Calendaria time config
    */
   #transformTime(time = {}) {
-    return {
-      hoursPerDay: time.hoursInDay ?? 24,
-      minutesPerHour: time.minutesInHour ?? 60,
-      secondsPerMinute: time.secondsInMinute ?? 60
-    };
+    return { hoursPerDay: time.hoursInDay ?? 24, minutesPerHour: time.minutesInHour ?? 60, secondsPerMinute: time.secondsInMinute ?? 60 };
   }
 
   /**
@@ -211,10 +190,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {object} Calendaria years config
    */
   #transformYears(year = {}) {
-    return {
-      yearZero: year.epoch ?? 0,
-      firstWeekday: year.startDay ?? 0
-    };
+    return { yearZero: year.epoch ?? 0, firstWeekday: year.startDay ?? 0 };
   }
 
   /**
@@ -225,22 +201,8 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   #transformLeapYear(leapYear = {}, months = []) {
     if (!leapYear.rule || leapYear.rule === 'none') return null;
-
-    if (leapYear.rule === 'gregorian') {
-      return {
-        rule: 'gregorian',
-        start: leapYear.offset ?? 0
-      };
-    }
-
-    if (leapYear.rule === 'custom') {
-      return {
-        rule: 'simple',
-        interval: leapYear.interval ?? 4,
-        start: leapYear.offset ?? 0
-      };
-    }
-
+    if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: leapYear.offset ?? 0 };
+    if (leapYear.rule === 'custom') return { rule: 'simple', interval: leapYear.interval ?? 4, start: leapYear.offset ?? 0 };
     return null;
   }
 
@@ -270,12 +232,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const dayStart = (monthStartDays[startMonthIdx] ?? 0) + ((season.startDay ?? 1) - 1);
       const dayEnd = (monthStartDays[endMonthIdx] ?? 0) + ((season.endDay ?? months[endMonthIdx]?.days ?? 1) - 1);
 
-      return {
-        name: season.name,
-        dayStart: dayStart % daysInYear,
-        dayEnd: dayEnd % daysInYear,
-        color: this.#mapSeasonColor(season.icon)
-      };
+      return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon) };
     });
   }
 
@@ -285,13 +242,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {string} Hex color
    */
   #mapSeasonColor(icon) {
-    const colorMap = {
-      winter: '#87CEEB',
-      spring: '#90EE90',
-      summer: '#FFD700',
-      fall: '#DEB887',
-      autumn: '#DEB887'
-    };
+    const colorMap = { winter: '#87CEEB', spring: '#90EE90', summer: '#FFD700', fall: '#DEB887', autumn: '#DEB887' };
     return colorMap[icon] || '#888888';
   }
 
@@ -308,11 +259,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       color: moon.color || '',
       hidden: false,
       phases: this.#convertPhasesToPercentages(moon.phases || [], moon.cycleLength),
-      referenceDate: {
-        year: moon.firstNewMoon?.year ?? 1,
-        month: (moon.firstNewMoon?.month ?? 1) - 1, // S&S is 1-indexed, Calendaria is 0-indexed
-        day: moon.firstNewMoon?.day ?? 1
-      }
+      referenceDate: { year: moon.firstNewMoon?.year ?? 1, month: (moon.firstNewMoon?.month ?? 1) - 1, day: moon.firstNewMoon?.day ?? 1 }
     }));
   }
 
@@ -331,12 +278,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       currentPosition += phase.length ?? 0;
       const end = currentPosition / totalLength;
 
-      return {
-        name: phase.name,
-        icon: this.#mapPhaseIcon(phase.icon),
-        start,
-        end: Math.min(end, 1)
-      };
+      return { name: phase.name, icon: this.#mapPhaseIcon(phase.icon), start, end: Math.min(end, 1) };
     });
   }
 
@@ -346,18 +288,17 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {string} Calendaria SVG path
    */
   #mapPhaseIcon(ssIcon) {
-    const basePath = 'modules/calendaria/assets/moon-phases';
     const iconMap = {
-      new: `${basePath}/01_newmoon.svg`,
-      'waxing-crescent': `${basePath}/02_waxingcrescent.svg`,
-      'first-quarter': `${basePath}/03_firstquarter.svg`,
-      'waxing-gibbous': `${basePath}/04_waxinggibbous.svg`,
-      full: `${basePath}/05_fullmoon.svg`,
-      'waning-gibbous': `${basePath}/06_waninggibbous.svg`,
-      'last-quarter': `${basePath}/07_lastquarter.svg`,
-      'waning-crescent': `${basePath}/08_waningcrescent.svg`
+      new: `${ASSETS.MOON_ICONS}/01_newmoon.svg`,
+      'waxing-crescent': `${ASSETS.MOON_ICONS}/02_waxingcrescent.svg`,
+      'first-quarter': `${ASSETS.MOON_ICONS}/03_firstquarter.svg`,
+      'waxing-gibbous': `${ASSETS.MOON_ICONS}/04_waxinggibbous.svg`,
+      full: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`,
+      'waning-gibbous': `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`,
+      'last-quarter': `${ASSETS.MOON_ICONS}/07_lastquarter.svg`,
+      'waning-crescent': `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`
     };
-    return iconMap[ssIcon] || `${basePath}/01_newmoon.svg`;
+    return iconMap[ssIcon] || `${ASSETS.MOON_ICONS}/01_newmoon.svg`;
   }
 
   /**
@@ -368,18 +309,8 @@ export default class SeasonsStarsImporter extends BaseImporter {
   #transformEras(year = {}) {
     const prefix = year.prefix?.trim();
     const suffix = year.suffix?.trim();
-
     if (!prefix && !suffix) return [];
-
-    return [
-      {
-        name: suffix || prefix || 'Era',
-        abbreviation: suffix || prefix || '',
-        startYear: -999999,
-        endYear: null,
-        format: prefix ? 'prefix' : 'suffix'
-      }
-    ];
+    return [{ name: suffix || prefix || 'Era', abbreviation: suffix || prefix || '', startYear: -999999, endYear: null, format: prefix ? 'prefix' : 'suffix' }];
   }
 
   /**
@@ -467,24 +398,9 @@ export default class SeasonsStarsImporter extends BaseImporter {
       dayIndex += m.days || 0;
       return start;
     });
-
-    const winterDay =
-      winterSolstice.month && winterSolstice.day
-        ? (monthStartDays[winterSolstice.month - 1] ?? 0) + (winterSolstice.day - 1)
-        : 355;
-
-    const summerDay =
-      summerSolstice.month && summerSolstice.day
-        ? (monthStartDays[summerSolstice.month - 1] ?? 0) + (summerSolstice.day - 1)
-        : 172;
-
-    return {
-      enabled: true,
-      shortestDay: Math.round(winterDaylight),
-      longestDay: Math.round(summerDaylight),
-      winterSolstice: winterDay,
-      summerSolstice: summerDay
-    };
+    const winterDay = winterSolstice.month && winterSolstice.day ? (monthStartDays[winterSolstice.month - 1] ?? 0) + (winterSolstice.day - 1) : 355;
+    const summerDay = summerSolstice.month && summerSolstice.day ? (monthStartDays[summerSolstice.month - 1] ?? 0) + (summerSolstice.day - 1) : 172;
+    return { enabled: true, shortestDay: Math.round(winterDaylight), longestDay: Math.round(summerDaylight), winterSolstice: winterDay, summerSolstice: summerDay };
   }
 
   /**
@@ -493,9 +409,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {object} Calendaria current date
    */
   #transformCurrentDate(year = {}) {
-    return {
-      year: year.currentYear ?? 1
-    };
+    return { year: year.currentYear ?? 1 };
   }
 
   /**
@@ -505,10 +419,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   #transformAmPmNotation(time = {}) {
     if (!time.amPmNotation) return null;
-    return {
-      am: time.amPmNotation.am ?? 'AM',
-      pm: time.amPmNotation.pm ?? 'PM'
-    };
+    return { am: time.amPmNotation.am ?? 'AM', pm: time.amPmNotation.pm ?? 'PM' };
   }
 
   /**
@@ -553,11 +464,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   #transformDateFormats(dateFormats = {}) {
     if (!dateFormats.short && !dateFormats.long) return null;
-
-    return {
-      short: dateFormats.short || null,
-      long: dateFormats.long || null
-    };
+    return { short: dateFormats.short || null, long: dateFormats.long || null };
   }
 
   /* -------------------------------------------- */
@@ -668,22 +575,9 @@ export default class SeasonsStarsImporter extends BaseImporter {
 
     for (const note of notes) {
       try {
-        const startDate = note.startDate
-          ? { ...note.startDate, year: note.startDate.year + yearZero }
-          : { year: yearZero, month: 0, day: 1 };
-
-        const noteData = {
-          startDate,
-          allDay: true,
-          repeat: note.repeat || 'never'
-        };
-
-        const page = await NoteManager.createNote({
-          name: note.name,
-          content: note.content || '',
-          noteData,
-          calendarId
-        });
+        const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, day: 1 };
+        const noteData = { startDate, allDay: true, repeat: note.repeat || 'never' };
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
 
         if (page) {
           count++;

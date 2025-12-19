@@ -17,24 +17,18 @@ export function getDefaultNoteData() {
   const currentDate = game.time.components;
 
   return {
-    startDate: {
-      year: currentDate.year,
-      month: currentDate.month,
-      day: currentDate.dayOfMonth,
-      hour: currentDate.hour,
-      minute: currentDate.minute
-    },
+    startDate: { year: currentDate.year, month: currentDate.month, day: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
     endDate: null,
     allDay: false,
     repeat: 'never',
     repeatInterval: 1,
     repeatEndDate: null,
-    weekday: null, // For weekly recurrence: 0-indexed day of week (0 = first weekday)
-    seasonIndex: null, // For seasonal recurrence: 0-indexed season
-    weekNumber: null, // For weekOfMonth recurrence: 1-indexed week number
-    moonConditions: [], // Array of { moonIndex, phaseStart, phaseEnd } (0-1 values)
-    linkedEvent: null, // { noteId: string, offset: number } - occurs X days from linked event
-    rangePattern: null, // { year, month, day } - each can be number | [min, max] | null
+    weekday: null,
+    seasonIndex: null,
+    weekNumber: null,
+    moonConditions: [],
+    linkedEvent: null,
+    rangePattern: null,
     categories: [],
     color: '#4a9eff',
     icon: 'fas fa-calendar',
@@ -122,12 +116,8 @@ export function validateNoteData(noteData) {
     if (typeof noteData.linkedEvent !== 'object') {
       errors.push('linkedEvent must be an object or null');
     } else {
-      if (typeof noteData.linkedEvent.noteId !== 'string' || !noteData.linkedEvent.noteId) {
-        errors.push('linkedEvent.noteId must be a non-empty string');
-      }
-      if (typeof noteData.linkedEvent.offset !== 'number') {
-        errors.push('linkedEvent.offset must be a number');
-      }
+      if (typeof noteData.linkedEvent.noteId !== 'string' || !noteData.linkedEvent.noteId) errors.push('linkedEvent.noteId must be a non-empty string');
+      if (typeof noteData.linkedEvent.offset !== 'number') errors.push('linkedEvent.offset must be a number');
     }
   }
 
@@ -146,12 +136,8 @@ export function validateNoteData(noteData) {
           } else if (Array.isArray(bit) && bit.length === 2) {
             // Array [min, max] where each can be number or null
             const [min, max] = bit;
-            if (min !== null && typeof min !== 'number') {
-              errors.push(`rangePattern.${field}[0] must be number or null`);
-            }
-            if (max !== null && typeof max !== 'number') {
-              errors.push(`rangePattern.${field}[1] must be number or null`);
-            }
+            if (min !== null && typeof min !== 'number') errors.push(`rangePattern.${field}[0] must be number or null`);
+            if (max !== null && typeof max !== 'number') errors.push(`rangePattern.${field}[1] must be number or null`);
           } else {
             errors.push(`rangePattern.${field} must be number, [min, max], or null`);
           }
@@ -190,10 +176,7 @@ export function validateNoteData(noteData) {
   // Validate scene ID
   if (noteData.sceneId !== undefined && noteData.sceneId !== null) if (typeof noteData.sceneId !== 'string') errors.push('sceneId must be a string (scene ID) or null');
 
-  return {
-    valid: errors.length === 0,
-    errors
-  };
+  return { valid: errors.length === 0, errors };
 }
 
 /**
@@ -247,9 +230,7 @@ export function createNoteStub(page) {
 
   // Include cached random occurrences if present (for random repeat type)
   const randomOccurrences = page.getFlag(MODULE.ID, 'randomOccurrences');
-  const enrichedFlagData = randomOccurrences?.occurrences
-    ? { ...flagData, cachedRandomOccurrences: randomOccurrences.occurrences }
-    : flagData;
+  const enrichedFlagData = randomOccurrences?.occurrences ? { ...flagData, cachedRandomOccurrences: randomOccurrences.occurrences } : flagData;
 
   return {
     id: page.id,
@@ -263,21 +244,32 @@ export function createNoteStub(page) {
 }
 
 /**
+ * Get repeat options from the data model with localized labels.
+ * @param {string} [selected]  Currently selected repeat value
+ * @returns {object[]}  Array of { value, label, selected }
+ */
+export function getRepeatOptions(selected = 'never') {
+  const schema = foundry.documents.JournalEntryPage.TYPES['calendaria.calendarnote']?.schema;
+  const choices = schema?.getField('repeat')?.choices;
+  return choices.map((value) => ({ value, label: game.i18n.localize(`CALENDARIA.Repeat.${value}`), selected: value === selected }));
+}
+
+/**
  * Get predefined note categories.
  * @returns {object[]}  Array of category definitions
  */
 export function getPredefinedCategories() {
   return [
-    { id: 'holiday', label: 'Holiday', color: '#ff6b6b', icon: 'fa-gift' },
-    { id: 'festival', label: 'Festival', color: '#f0a500', icon: 'fa-masks-theater' },
-    { id: 'quest', label: 'Quest', color: '#4a9eff', icon: 'fa-scroll' },
-    { id: 'session', label: 'Session', color: '#51cf66', icon: 'fa-users' },
-    { id: 'combat', label: 'Combat', color: '#ff6b6b', icon: 'fa-swords' },
-    { id: 'meeting', label: 'Meeting', color: '#845ef7', icon: 'fa-handshake' },
-    { id: 'birthday', label: 'Birthday', color: '#ff6b6b', icon: 'fa-cake-candles' },
-    { id: 'deadline', label: 'Deadline', color: '#f03e3e', icon: 'fa-hourglass-end' },
-    { id: 'reminder', label: 'Reminder', color: '#fcc419', icon: 'fa-bell' },
-    { id: 'other', label: 'Other', color: '#868e96', icon: 'fa-circle' }
+    { id: 'holiday', label: game.i18n.localize('CALENDARIA.Category.Holiday'), color: '#ff6b6b', icon: 'fa-gift' },
+    { id: 'festival', label: game.i18n.localize('CALENDARIA.Category.Festival'), color: '#f0a500', icon: 'fa-masks-theater' },
+    { id: 'quest', label: game.i18n.localize('CALENDARIA.Category.Quest'), color: '#4a9eff', icon: 'fa-scroll' },
+    { id: 'session', label: game.i18n.localize('CALENDARIA.Category.Session'), color: '#51cf66', icon: 'fa-users' },
+    { id: 'combat', label: game.i18n.localize('CALENDARIA.Category.Combat'), color: '#ff6b6b', icon: 'fa-swords' },
+    { id: 'meeting', label: game.i18n.localize('CALENDARIA.Category.Meeting'), color: '#845ef7', icon: 'fa-handshake' },
+    { id: 'birthday', label: game.i18n.localize('CALENDARIA.Category.Birthday'), color: '#ff6b6b', icon: 'fa-cake-candles' },
+    { id: 'deadline', label: game.i18n.localize('CALENDARIA.Category.Deadline'), color: '#f03e3e', icon: 'fa-hourglass-end' },
+    { id: 'reminder', label: game.i18n.localize('CALENDARIA.Category.Reminder'), color: '#fcc419', icon: 'fa-bell' },
+    { id: 'other', label: game.i18n.localize('CALENDARIA.Category.Other'), color: '#868e96', icon: 'fa-circle' }
   ];
 }
 
@@ -307,7 +299,10 @@ export function getAllCategories() {
  * @returns {Promise<object>}  The created category
  */
 export async function addCustomCategory(label, color = '#868e96', icon = 'fa-tag') {
-  const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const id = label
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
 
   // Check if category already exists
   const existing = getAllCategories().find((c) => c.id === id);

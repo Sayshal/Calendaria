@@ -165,11 +165,16 @@ export const SCENE_FLAGS = {
  * @type {TemplateKeys}
  */
 export const TEMPLATES = {
+  /** @type {string} Foundry generic form footer template */
+  FORM_FOOTER: 'templates/generic/form-footer.hbs',
+
   SETTINGS: {
     /** @type {string} Reset position dialog template */
     RESET_POSITION: `modules/${MODULE.ID}/templates/settings/reset-position.hbs`,
     /** @type {string} Theme editor template */
-    THEME_EDITOR: `modules/${MODULE.ID}/templates/settings/theme-editor.hbs`
+    THEME_EDITOR: `modules/${MODULE.ID}/templates/settings/theme-editor.hbs`,
+    /** @type {string} Macro trigger configuration template */
+    MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`
   },
 
   /** @type {string} Time rotation dial template */
@@ -193,7 +198,9 @@ export const TEMPLATES = {
     /** @type {string} Calendar year view template */
     CALENDAR_YEAR: `modules/${MODULE.ID}/templates/sheets/calendar-year.hbs`,
     /** @type {string} Calendar note form template */
-    CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`
+    CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`,
+    /** @type {string} Calendar note view template */
+    CALENDAR_NOTE_VIEW: `modules/${MODULE.ID}/templates/sheets/calendar-note-view.hbs`
   },
 
   EDITOR: {
@@ -224,7 +231,21 @@ export const TEMPLATES = {
   IMPORTER: {
     /** @type {string} Main importer application template */
     APP: `modules/${MODULE.ID}/templates/importers/importer-app.hbs`
+  },
+
+  WEATHER: {
+    /** @type {string} Weather picker template */
+    PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`
   }
+};
+
+/**
+ * Asset paths used by the module.
+ * @type {Object}
+ */
+export const ASSETS = {
+  /** @type {string} Base path for moon phase icons */
+  MOON_ICONS: `modules/${MODULE.ID}/assets/moon-phases`
 };
 
 /**

@@ -10,6 +10,7 @@ import BaseImporter from './base-importer.mjs';
 import { log } from '../utils/logger.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { ASSETS } from '../constants.mjs';
 
 /**
  * Moon phase names for standard 8 phases.
@@ -24,11 +25,6 @@ const PHASE_NAMES_8 = [
   'CALENDARIA.MoonPhase.LastQuarter',
   'CALENDARIA.MoonPhase.WaningCrescent'
 ];
-
-/**
- * Moon phase icons base path.
- */
-const MOON_ICON_PATH = 'modules/calendaria/assets/moon-phases';
 
 /**
  * Season preset weather data.
@@ -77,12 +73,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {boolean}
    */
   static isCalendariumExport(data) {
-    return !!(
-      data.calendars &&
-      Array.isArray(data.calendars) &&
-      data.calendars[0]?.static?.months &&
-      data.calendars[0]?.static?.weekdays
-    );
+    return !!(data.calendars && Array.isArray(data.calendars) && data.calendars[0]?.static?.months && data.calendars[0]?.static?.weekdays);
   }
 
   /* -------------------------------------------- */
@@ -133,21 +124,11 @@ export default class CalendariumImporter extends BaseImporter {
     return {
       name: calendar.name || 'Imported Calendar',
 
-      days: {
-        values: weekdays,
-        hoursPerDay: 24,
-        minutesPerHour: 60,
-        secondsPerMinute: 60,
-        daysPerYear
-      },
+      days: { values: weekdays, hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60, daysPerYear },
 
       months: { values: months },
 
-      years: {
-        yearZero: 0,
-        firstWeekday: calendar.static.firstWeekDay || 0,
-        leapYear: null
-      },
+      years: { yearZero: 0, firstWeekday: calendar.static.firstWeekDay || 0, leapYear: null },
 
       leapYearConfig,
 
@@ -162,12 +143,7 @@ export default class CalendariumImporter extends BaseImporter {
       cycles,
       cycleFormat,
 
-      metadata: {
-        id: calendar.id || 'imported-calendarium',
-        description: calendar.description || 'Imported from Calendarium',
-        system: calendar.name || 'Unknown',
-        importedFrom: 'calendarium'
-      },
+      metadata: { id: calendar.id || 'imported-calendarium', description: calendar.description || 'Imported from Calendarium', system: calendar.name || 'Unknown', importedFrom: 'calendarium' },
 
       currentDate: this.#transformCurrentDate(calendar.current),
 
@@ -228,11 +204,7 @@ export default class CalendariumImporter extends BaseImporter {
       warnings.push(game.i18n.format('CALENDARIA.Importer.Calendarium.Warning.CustomWeekdays', { details }));
     }
 
-    return weekdays.map((wd, idx) => ({
-      name: wd.name,
-      abbreviation: wd.name.substring(0, 2),
-      ordinal: idx + 1
-    }));
+    return weekdays.map((wd, idx) => ({ name: wd.name, abbreviation: wd.name.substring(0, 2), ordinal: idx + 1 }));
   }
 
   /**
@@ -273,21 +245,10 @@ export default class CalendariumImporter extends BaseImporter {
       }
 
       // Intercalary leap days become festivals
-      if (ld.intercalary && ld.name) {
-        festivals.push({
-          name: ld.name,
-          month: (ld.timespan || 0) + 1,
-          day: (ld.after || 0) + 1,
-          leapYearOnly: true,
-          countsForWeekday: !ld.numbered
-        });
-      }
+      if (ld.intercalary && ld.name) festivals.push({ name: ld.name, month: (ld.timespan || 0) + 1, day: (ld.after || 0) + 1, leapYearOnly: true, countsForWeekday: !ld.numbered });
     }
 
-    if (leapDays.length > 1 && !leapDays.some((ld) => ld.intercalary)) {
-      warnings.push(game.i18n.localize('CALENDARIA.Importer.Calendarium.Warning.MultipleLeapDays'));
-    }
-
+    if (leapDays.length > 1 && !leapDays.some((ld) => ld.intercalary)) warnings.push(game.i18n.localize('CALENDARIA.Importer.Calendarium.Warning.MultipleLeapDays'));
     return { config: leapYearConfig, festivals };
   }
 
@@ -298,14 +259,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #isGregorianPattern(intervals) {
     if (intervals.length !== 3) return false;
-    return (
-      intervals[0].interval === 400 &&
-      !intervals[0].ignore &&
-      intervals[1].interval === 100 &&
-      intervals[1].ignore &&
-      intervals[2].interval === 4 &&
-      !intervals[2].ignore
-    );
+    return intervals[0].interval === 400 && !intervals[0].ignore && intervals[1].interval === 100 && intervals[1].ignore && intervals[2].interval === 4 && !intervals[2].ignore;
   }
 
   /**
@@ -342,14 +296,7 @@ export default class CalendariumImporter extends BaseImporter {
   #generateMoonPhases() {
     const iconNames = ['01_newmoon', '02_waxingcrescent', '03_firstquarter', '04_waxinggibbous', '05_fullmoon', '06_waninggibbous', '07_lastquarter', '08_waningcrescent'];
 
-    return PHASE_NAMES_8.map((name, i) => ({
-      name,
-      risingName: '',
-      fadingName: '',
-      icon: `${MOON_ICON_PATH}/${iconNames[i]}.svg`,
-      start: i / 8,
-      end: (i + 1) / 8
-    }));
+    return PHASE_NAMES_8.map((name, i) => ({ name, rising: '', fading: '', icon: `${ASSETS.MOON_ICONS}/${iconNames[i]}.svg`, start: i / 8, end: (i + 1) / 8 }));
   }
 
   /**
@@ -365,9 +312,7 @@ export default class CalendariumImporter extends BaseImporter {
     if (!seasons.length) return [];
 
     // Check for procedural weather
-    if (seasonal.weather?.enabled) {
-      warnings.push(game.i18n.localize('CALENDARIA.Importer.Calendarium.Warning.ProceduralWeather'));
-    }
+    if (seasonal.weather?.enabled) warnings.push(game.i18n.localize('CALENDARIA.Importer.Calendarium.Warning.ProceduralWeather'));
 
     // Build day-of-year starts for each month
     const monthDayStarts = [];
@@ -379,12 +324,8 @@ export default class CalendariumImporter extends BaseImporter {
 
     // Determine if seasons are dated or periodic
     const isDated = seasons[0]?.date != null;
-
-    if (isDated) {
-      return this.#transformDatedSeasons(seasons, monthDayStarts, daysPerYear);
-    } else {
-      return this.#transformPeriodicSeasons(seasons, seasonal.offset || 0, daysPerYear);
-    }
+    if (isDated) return this.#transformDatedSeasons(seasons, monthDayStarts, daysPerYear);
+    else return this.#transformPeriodicSeasons(seasons, seasonal.offset || 0, daysPerYear);
   }
 
   /**
@@ -411,13 +352,7 @@ export default class CalendariumImporter extends BaseImporter {
       if (dayEnd < 0) dayEnd = totalDays - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
 
-      return {
-        name: season.name,
-        dayStart,
-        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
-        color: season.color || null,
-        icon: this.#mapSeasonIcon(season.kind)
-      };
+      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd, color: season.color || null, icon: this.#mapSeasonIcon(season.kind) };
     });
   }
 
@@ -433,14 +368,7 @@ export default class CalendariumImporter extends BaseImporter {
 
     return seasons.map((season) => {
       const dayEnd = (dayStart + (season.duration || 91) - 1) % totalDays;
-      const result = {
-        name: season.name,
-        dayStart,
-        dayEnd,
-        color: season.color || null,
-        icon: this.#mapSeasonIcon(season.kind)
-      };
-
+      const result = { name: season.name, dayStart, dayEnd, color: season.color || null, icon: this.#mapSeasonIcon(season.kind) };
       dayStart = (dayEnd + 1) % totalDays;
       return result;
     });
@@ -452,12 +380,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {string|null}
    */
   #mapSeasonIcon(kind) {
-    const icons = {
-      Winter: 'fas fa-snowflake',
-      Spring: 'fas fa-seedling',
-      Summer: 'fas fa-sun',
-      Autumn: 'fas fa-leaf'
-    };
+    const icons = { Winter: 'fas fa-snowflake', Spring: 'fas fa-seedling', Summer: 'fas fa-sun', Autumn: 'fas fa-leaf' };
     return icons[kind] || null;
   }
 
@@ -496,9 +419,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {{cycles: object[], cycleFormat: string|null}}
    */
   #transformCustomYears(staticData) {
-    if (!staticData.useCustomYears || !staticData.years?.length) {
-      return { cycles: [], cycleFormat: null };
-    }
+    if (!staticData.useCustomYears || !staticData.years?.length) return { cycles: [], cycleFormat: null };
 
     return {
       cycles: [
@@ -507,9 +428,7 @@ export default class CalendariumImporter extends BaseImporter {
           length: staticData.years.length,
           offset: 0,
           basedOn: 'year',
-          entries: staticData.years.map((year) => ({
-            name: year.name || year.id
-          }))
+          entries: staticData.years.map((year) => ({ name: year.name || year.id }))
         }
       ],
       cycleFormat: 'Year of {{1}}'
@@ -524,13 +443,7 @@ export default class CalendariumImporter extends BaseImporter {
   #transformCurrentDate(current = {}) {
     if (!current.year && current.year !== 0) return null;
 
-    return {
-      year: current.year,
-      month: current.month ?? 0,
-      day: current.day ?? 1,
-      hour: 0,
-      minute: 0
-    };
+    return { year: current.year, month: current.month ?? 0, day: current.day ?? 1, hour: 0, minute: 0 };
   }
 
   /* -------------------------------------------- */
@@ -578,11 +491,7 @@ export default class CalendariumImporter extends BaseImporter {
 
     // Handle undated events - migrate to journals later
     if (type === 'Undated' || (!date?.year && date?.year !== 0)) {
-      this._undatedJournals.push({
-        name,
-        content: description || '',
-        category: categoryData?.name || 'default'
-      });
+      this._undatedJournals.push({ name, content: description || '', category: categoryData?.name || 'default' });
       return null;
     }
 
@@ -591,11 +500,7 @@ export default class CalendariumImporter extends BaseImporter {
       return {
         name,
         content: description || '',
-        startDate: {
-          year: date.year,
-          month: date.month ?? 0,
-          day: date.day ?? 1
-        },
+        startDate: { year: date.year, month: date.month ?? 0, day: date.day ?? 1 },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -609,16 +514,8 @@ export default class CalendariumImporter extends BaseImporter {
       return {
         name,
         content: description || '',
-        startDate: {
-          year: date.start?.year ?? date.year ?? 0,
-          month: date.start?.month ?? date.month ?? 0,
-          day: date.start?.day ?? date.day ?? 1
-        },
-        endDate: {
-          year: date.end?.year ?? date.year ?? 0,
-          month: date.end?.month ?? date.month ?? 0,
-          day: date.end?.day ?? date.day ?? 1
-        },
+        startDate: { year: date.start?.year ?? date.year ?? 0, month: date.start?.month ?? date.month ?? 0, day: date.start?.day ?? date.day ?? 1 },
+        endDate: { year: date.end?.year ?? date.year ?? 0, month: date.end?.month ?? date.month ?? 0, day: date.end?.day ?? date.day ?? 1 },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -650,11 +547,7 @@ export default class CalendariumImporter extends BaseImporter {
     return {
       name,
       content: description || '',
-      startDate: {
-        year: date?.year ?? 0,
-        month: date?.month ?? 0,
-        day: date?.day ?? 1
-      },
+      startDate: { year: date?.year ?? 0, month: date?.month ?? 0, day: date?.day ?? 1 },
       repeat: 'never',
       gmOnly: false,
       category: categoryData?.name || 'default',
@@ -678,50 +571,17 @@ export default class CalendariumImporter extends BaseImporter {
     // Check for simple yearly pattern: any year, specific month/day
     // { year: [null, null], month: 0, day: 15 }
     if (yearIsRange && year[0] === null && year[1] === null && !monthIsRange && !dayIsRange) {
-      return {
-        repeat: 'yearly',
-        startDate: { year: 1, month: month ?? 0, day: day ?? 1 }
-      };
+      return { repeat: 'yearly', startDate: { year: 1, month: month ?? 0, day: day ?? 1 } };
     }
 
     // Check for simple monthly pattern: any year/month, specific day
     // { year: [null, null], month: [null, null], day: 15 }
     if (yearIsRange && monthIsRange && !dayIsRange && year[0] === null && month[0] === null) {
-      return {
-        repeat: 'monthly',
-        startDate: { year: 1, month: 0, day: day ?? 1 }
-      };
+      return { repeat: 'monthly', startDate: { year: 1, month: 0, day: day ?? 1 } };
     }
 
     // Complex pattern - use range repeat type
-    return {
-      repeat: 'range',
-      rangePattern: {
-        year: this.#normalizeRangeBit(year),
-        month: this.#normalizeRangeBit(month),
-        day: this.#normalizeRangeBit(day)
-      },
-      startDate: {
-        year: this.#extractFirst(year),
-        month: this.#extractFirst(month),
-        day: this.#extractFirst(day)
-      }
-    };
-  }
-
-  /**
-   * Normalize a range bit for Calendaria format.
-   * @param {number|Array|null} bit - Calendarium range bit
-   * @returns {number|Array|null}
-   */
-  #normalizeRangeBit(bit) {
-    if (Array.isArray(bit)) {
-      // [null, null] = any
-      // [min, max] = range
-      return bit;
-    }
-    // Single number = exact match
-    return bit;
+    return { repeat: 'range', rangePattern: { year, month, day }, startDate: { year: this.#extractFirst(year), month: this.#extractFirst(month), day: this.#extractFirst(day) } };
   }
 
   /**
@@ -730,9 +590,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {number}
    */
   #extractFirst(value) {
-    if (Array.isArray(value)) {
-      return value[0] !== null ? value[0] : value[1] !== null ? value[1] : 1;
-    }
+    if (Array.isArray(value)) return value[0] !== null ? value[0] : value[1] !== null ? value[1] : 1;
     return value ?? 1;
   }
 
@@ -761,12 +619,7 @@ export default class CalendariumImporter extends BaseImporter {
           gmOnly: note.gmOnly
         };
 
-        const page = await NoteManager.createNote({
-          name: note.name,
-          content: note.content || '',
-          noteData,
-          calendarId
-        });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
 
         if (page) {
           count++;
@@ -781,10 +634,7 @@ export default class CalendariumImporter extends BaseImporter {
     }
 
     // Migrate undated events to journal entries
-    if (this._undatedJournals.length > 0) {
-      await this.#migrateUndatedEvents(options.calendarName || 'Calendarium Import');
-    }
-
+    if (this._undatedJournals.length > 0) await this.#migrateUndatedEvents(options.calendarName || 'Calendarium Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
@@ -803,32 +653,15 @@ export default class CalendariumImporter extends BaseImporter {
 
     for (const part of parts) {
       let existing = game.folders.find((f) => f.name === part && f.folder?.id === parentId && f.type === 'JournalEntry');
-      if (!existing) {
-        existing = await Folder.create({ name: part, type: 'JournalEntry', folder: parentId });
-      }
+      if (!existing) existing = await Folder.create({ name: part, type: 'JournalEntry', folder: parentId });
+
       parentId = existing.id;
     }
 
     // Create journal entries
-    const journalData = this._undatedJournals.map((event) => ({
-      name: event.name,
-      folder: parentId,
-      pages: [
-        {
-          name: event.name,
-          type: 'text',
-          text: { content: event.content || '' }
-        }
-      ]
-    }));
-
+    const journalData = this._undatedJournals.map((event) => ({ name: event.name, folder: parentId, pages: [{ name: event.name, type: 'text', text: { content: event.content || '' } }] }));
     await JournalEntry.createDocuments(journalData);
-
-    ui.notifications.info(
-      game.i18n.format('CALENDARIA.Importer.Calendarium.Warning.UndatedEvents', {
-        count: this._undatedJournals.length
-      })
-    );
+    ui.notifications.info(game.i18n.format('CALENDARIA.Importer.Calendarium.Warning.UndatedEvents', { count: this._undatedJournals.length }));
   }
 
   /* -------------------------------------------- */
@@ -839,13 +672,11 @@ export default class CalendariumImporter extends BaseImporter {
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     const calendar = rawData.calendars?.[0] || {};
-
     preview.noteCount = calendar.events?.length ?? 0;
     preview.categoryCount = calendar.categories?.length ?? 0;
     preview.intercalaryMonths = calendar.static?.months?.filter((m) => m.type === 'intercalary').length || 0;
     preview.hasCustomWeeks = calendar.static?.months?.some((m) => m.week) || false;
     preview.warnings = transformedData._warnings || [];
-
     return preview;
   }
 }

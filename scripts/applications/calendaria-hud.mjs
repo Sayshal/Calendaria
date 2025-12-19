@@ -266,9 +266,7 @@ export class CalendariaHUD extends BaseClass {
 
       // Update cursor on drag handle
       const dragHandle = this.element.querySelector('.calendar-core');
-      if (dragHandle) {
-        dragHandle.style.cursor = newLock ? 'default' : 'move';
-      }
+      if (dragHandle) dragHandle.style.cursor = newLock ? 'default' : 'move';
     });
   }
 
@@ -322,26 +320,15 @@ export class CalendariaHUD extends BaseClass {
     const spaceBelow = window.innerHeight - hudRect.bottom;
     const spaceAbove = hudRect.top;
 
-    if (spaceBelow >= dialRect.height + 20) {
-      // Position below
-      top = hudRect.bottom + 20;
-    } else if (spaceAbove >= dialRect.height + 20) {
-      // Position above
-      top = hudRect.top - dialRect.height - 20;
-    } else {
-      // Not enough space either way, position below and let it overflow
-      top = hudRect.bottom + 20;
-    }
+    if (spaceBelow >= dialRect.height + 20) top = hudRect.bottom + 20;
+    else if (spaceAbove >= dialRect.height + 20) top = hudRect.top - dialRect.height - 20;
+    else top = hudRect.bottom + 20;
 
     dial.style.left = `${left}px`;
     dial.style.top = `${top}px`;
 
     // Store initial values
-    this._dialState = {
-      currentHours: hours,
-      currentMinutes: minutes,
-      initialTime: currentTime
-    };
+    this._dialState = { currentHours: hours, currentMinutes: minutes, initialTime: currentTime };
 
     // Set initial rotation
     const initialAngle = this.#timeToAngle(hours, minutes);
@@ -360,7 +347,7 @@ export class CalendariaHUD extends BaseClass {
   #generateHourMarkers() {
     const markers = [];
     for (let hour = 0; hour < 24; hour++) {
-      const angle = hour * 15 + 90; // 15 degrees per hour, noon at top
+      const angle = hour * 15 + 90;
       const radians = (angle * Math.PI) / 180;
       const x1 = 100 + Math.cos(radians) * 80;
       const y1 = 100 + Math.sin(radians) * 80;
@@ -498,9 +485,7 @@ export class CalendariaHUD extends BaseClass {
     // Update time display (only if input not focused)
     const time = this.#angleToTime(angle);
     const timeDisplay = dial.querySelector('.dial-time');
-    if (timeDisplay && document.activeElement !== timeDisplay) {
-      timeDisplay.value = this.#formatTime(time.hours, time.minutes);
-    }
+    if (timeDisplay && document.activeElement !== timeDisplay) timeDisplay.value = this.#formatTime(time.hours, time.minutes);
 
     // Normalize angle to 0-360
     const normalizedAngle = ((angle % 360) + 360) % 360;
@@ -594,7 +579,7 @@ export class CalendariaHUD extends BaseClass {
     };
 
     const onMouseDown = (event) => {
-      if (event.button !== 0) return; // Only left click
+      if (event.button !== 0) return;
       isDragging = true;
 
       // Store the current dial angle and mouse angle at click time
@@ -707,14 +692,9 @@ export class CalendariaHUD extends BaseClass {
     const timeDiff = newWorldTime - initialTime;
 
     if (timeDiff !== 0) {
-      try {
-        // Advance or rewind game time
-        await game.time.advance(timeDiff);
-        log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatTime(currentHours, currentMinutes)}`);
-      } catch (error) {
-        log(2, 'Error applying time change:', error);
-        ui.notifications.error('Failed to update calendar time');
-      }
+      // Advance or rewind game time
+      await game.time.advance(timeDiff);
+      log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatTime(currentHours, currentMinutes)}`);
     }
 
     // Update state with the new current time as the baseline for next adjustment

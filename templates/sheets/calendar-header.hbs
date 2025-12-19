@@ -1,6 +1,7 @@
 <header class="calendar-header">
   <div class="calendar-actions">
-    <button type="button" data-action="toggleCompact" data-tooltip="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
+    <button type="button" data-action="toggleCompact" data-tooltip="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}"
+      class="toggle-compact-btn">
       <i class="fas fa-compress"></i>
     </button>
 
@@ -9,15 +10,16 @@
     </button>
 
     {{#if editable}}
-      <button type="button" data-action="addNoteToday" data-tooltip="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}" class="add-note-today-btn">
+      <button type="button" data-action="addNoteToday" data-tooltip="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}"
+        class="add-note-today-btn">
         <i class="fas fa-plus"></i> Add Note
       </button>
     {{/if}}
 
     {{#if editable}}
       <button type="button" data-action="setAsCurrentDate"
-        data-tooltip="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDate'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}" class="set-current-date-btn"
-        {{#if isToday}}disabled{{/if}}>
+        data-tooltip="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDate'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
+        class="set-current-date-btn" {{#if isToday}}disabled{{/if}}>
         <i class="fas fa-clock"></i>
         {{#if isToday}}Current Date{{else}}Set as Current{{/if}}
       </button>

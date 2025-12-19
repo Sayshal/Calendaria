@@ -23,20 +23,13 @@ export default class CalendarManager {
    * Called during module initialization.
    */
   static async initialize() {
-    log(3, 'Initializing Calendar Manager...');
-
-    // Load custom calendars first
     await this.#loadCustomCalendars();
-
-    // Check if we're in a dnd5e game
-    if (SYSTEM.isDnd5e) await this.#initializeDnd5e();
-    else {
-      // For non-dnd5e systems, load from our own settings
-
+    if (SYSTEM.isDnd5e) {
+      await this.#initializeDnd5e();
+    } else {
       await this.loadCalendars();
       if (CalendarRegistry.size === 0) await this.loadDefaultCalendars();
     }
-
     log(3, 'Calendar Manager initialized');
   }
 
@@ -172,7 +165,6 @@ export default class CalendarManager {
     }
 
     // Sync game.time.calendar with our active calendar
-    // 5e may have already set this during init, so we override it
     const activeCalendar = CalendarRegistry.getActive();
     if (activeCalendar) {
       CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
@@ -474,7 +466,6 @@ export default class CalendarManager {
   static getCurrentMoonPhase(moonIndex = 0) {
     const calendar = this.getActiveCalendar();
     if (!calendar || !(calendar instanceof CalendariaCalendar)) return null;
-
     return calendar.getMoonPhase(moonIndex);
   }
 
@@ -485,7 +476,6 @@ export default class CalendarManager {
   static getAllCurrentMoonPhases() {
     const calendar = this.getActiveCalendar();
     if (!calendar || !(calendar instanceof CalendariaCalendar)) return [];
-
     return calendar.getAllMoonPhases();
   }
 
@@ -496,7 +486,6 @@ export default class CalendarManager {
   static getCurrentFestival() {
     const calendar = this.getActiveCalendar();
     if (!calendar || !(calendar instanceof CalendariaCalendar)) return null;
-
     return calendar.findFestivalDay();
   }
 
@@ -506,20 +495,10 @@ export default class CalendarManager {
    * @returns {object}  Current date/time object with year, month, day, hour, minute
    */
   static getCurrentDateTime() {
-    // Get time components from game time
     const components = game.time.components;
-
-    // Get active calendar for year offset
     const calendar = this.getActiveCalendar();
     const yearOffset = calendar?.yearZero ?? 0;
-
-    return {
-      year: components.year + yearOffset,
-      month: components.month,
-      day: components.dayOfMonth,
-      hour: components.hour,
-      minute: components.minute
-    };
+    return { year: components.year + yearOffset, month: components.month, day: components.dayOfMonth, hour: components.hour, minute: components.minute };
   }
 
   /* -------------------------------------------- */

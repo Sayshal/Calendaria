@@ -25,11 +25,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-importer',
     classes: ['calendaria', 'importer-app'],
     tag: 'form',
-    window: {
-      icon: 'fas fa-file-import',
-      title: 'CALENDARIA.Importer.Title',
-      resizable: false
-    },
+    window: { icon: 'fas fa-file-import', title: 'CALENDARIA.Importer.Title', resizable: false },
     position: { width: 700, height: 'auto' },
     form: {
       handler: ImporterApp.#onSubmit,

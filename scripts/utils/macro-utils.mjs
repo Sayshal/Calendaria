@@ -17,16 +17,9 @@ import { log } from './logger.mjs';
  */
 export async function executeMacroById(macroId, context = {}) {
   if (!macroId) return;
-
   const macro = game.macros.get(macroId);
-  if (!macro) {
-    log(2, `Macro not found: ${macroId}`);
-    return;
-  }
-
+  if (!macro) return;
   log(3, `Executing macro: ${macro.name}`, context);
-
-  // Execute the macro with context available as scope
   return macro.execute(context);
 }
 
@@ -36,9 +29,5 @@ export async function executeMacroById(macroId, context = {}) {
  * @returns {Array<{id: string, name: string, type: string}>} Array of macro options
  */
 export function getAvailableMacros() {
-  return game.macros.contents.map((m) => ({
-    id: m.id,
-    name: m.name,
-    type: m.type
-  }));
+  return game.macros.contents.map((m) => ({ id: m.id, name: m.name, type: m.type }));
 }

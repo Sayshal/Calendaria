@@ -21,11 +21,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'weather-picker',
     classes: ['calendaria', 'weather-picker-app'],
     tag: 'div',
-    window: {
-      title: 'CALENDARIA.Weather.Picker.Title',
-      icon: 'fas fa-cloud-sun',
-      resizable: false
-    },
+    window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },
     position: { width: 550, height: 'auto' },
     actions: {
       selectWeather: WeatherPickerApp._onSelectWeather,
@@ -35,7 +31,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    content: { template: 'modules/calendaria/templates/weather/weather-picker.hbs' }
+    content: { template: TEMPLATES.WEATHER.PICKER }
   };
 
   /** @override */
@@ -110,7 +106,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
  * @returns {Promise<void>}
  */
 export async function openWeatherPicker() {
-  const existing = Object.values(ui.windows).find((w) => w.id === 'weather-picker');
+  const existing = foundry.applications.instances.get('weather-picker');
   if (existing) {
     existing.render(true, { focus: true });
     return;

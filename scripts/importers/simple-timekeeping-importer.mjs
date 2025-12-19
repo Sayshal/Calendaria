@@ -13,6 +13,7 @@ import NoteManager from '../notes/note-manager.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
+import { getDefaultMoonPhases } from '../calendar/data/calendar-defaults.mjs';
 
 /**
  * Importer for Simple Timekeeping module data.
@@ -34,162 +35,50 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   static fileExtensions = [];
 
   /* -------------------------------------------- */
-  /*  STK Calendar Presets                        */
+  /*  STK Calendar Data Access                    */
   /* -------------------------------------------- */
 
+  /** @type {object[]|null} Cached STK calendars after dynamic import. */
+  static #stkCalendarsCache = null;
+
   /**
-   * Built-in STK calendar preset definitions.
-   * These are hardcoded as STK doesn't export preset data.
-   * @type {object}
+   * Dynamically import STK's calendar definitions.
+   * @returns {Promise<object[]|null>} Array of STK calendar configs or null.
    */
-  static STK_PRESETS = {
-    harptos: {
-      name: 'Harptos (Forgotten Realms)',
-      months: [
-        { name: 'Hammer', days: 30 },
-        { name: 'Midwinter', days: 1, intercalary: true },
-        { name: 'Alturiak', days: 30 },
-        { name: 'Ches', days: 30 },
-        { name: 'Tarsakh', days: 30 },
-        { name: 'Greengrass', days: 1, intercalary: true },
-        { name: 'Mirtul', days: 30 },
-        { name: 'Kythorn', days: 30 },
-        { name: 'Flamerule', days: 30 },
-        { name: 'Midsummer', days: 1, intercalary: true },
-        { name: 'Shieldmeet', days: 1, intercalary: true, leapYearOnly: true },
-        { name: 'Eleasis', days: 30 },
-        { name: 'Eleint', days: 30 },
-        { name: 'Highharvestide', days: 1, intercalary: true },
-        { name: 'Marpenoth', days: 30 },
-        { name: 'Uktar', days: 30 },
-        { name: 'Feast of the Moon', days: 1, intercalary: true },
-        { name: 'Nightal', days: 30 }
-      ],
-      weekdays: ['First-day', 'Second-day', 'Third-day', 'Fourth-day', 'Fifth-day', 'Sixth-day', 'Seventh-day', 'Eighth-day', 'Ninth-day', 'Tenth-day'],
-      moons: [{ name: 'Selûne', cycleLength: 30.4375, offset: 0 }],
-      leapYear: { rule: 'custom', interval: 4 },
-      yearZero: 0
-    },
-    barovian: {
-      name: 'Barovian Calendar (Curse of Strahd)',
-      months: [
-        { name: 'Month 1', days: 28 },
-        { name: 'Month 2', days: 28 },
-        { name: 'Month 3', days: 28 },
-        { name: 'Month 4', days: 28 },
-        { name: 'Month 5', days: 28 },
-        { name: 'Month 6', days: 28 },
-        { name: 'Month 7', days: 28 },
-        { name: 'Month 8', days: 28 },
-        { name: 'Month 9', days: 28 },
-        { name: 'Month 10', days: 28 },
-        { name: 'Month 11', days: 28 },
-        { name: 'Month 12', days: 28 },
-        { name: 'Last Day', days: 1, intercalary: true }
-      ],
-      weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      moons: [{ name: 'Moon', cycleLength: 28, offset: 0 }],
-      leapYear: null,
-      yearZero: 0
-    },
-    galifar: {
-      name: 'Galifar Calendar (Eberron)',
-      months: [
-        { name: 'Zarantyr', days: 28 },
-        { name: 'Olarune', days: 28 },
-        { name: 'Therendor', days: 28 },
-        { name: 'Eyre', days: 28 },
-        { name: 'Dravago', days: 28 },
-        { name: 'Nymm', days: 28 },
-        { name: 'Lharvion', days: 28 },
-        { name: 'Barrakas', days: 28 },
-        { name: 'Rhaan', days: 28 },
-        { name: 'Sypheros', days: 28 },
-        { name: 'Aryth', days: 28 },
-        { name: 'Vult', days: 28 }
-      ],
-      weekdays: ['Sul', 'Mol', 'Zol', 'Wir', 'Zor', 'Far', 'Sar'],
-      moons: [
-        { name: 'Nymm', cycleLength: 28, offset: 0 },
-        { name: 'Sypheros', cycleLength: 35, offset: 0 },
-        { name: 'Therendor', cycleLength: 42, offset: 0 },
-        { name: 'Rhaan', cycleLength: 49, offset: 0 },
-        { name: 'Olarune', cycleLength: 56, offset: 0 },
-        { name: 'Eyre', cycleLength: 63, offset: 0 },
-        { name: 'Lharvion', cycleLength: 70, offset: 0 },
-        { name: 'Barrakas', cycleLength: 77, offset: 0 },
-        { name: 'Zarantyr', cycleLength: 84, offset: 0 },
-        { name: 'Aryth', cycleLength: 91, offset: 0 },
-        { name: 'Vult', cycleLength: 98, offset: 0 },
-        { name: 'Dravago', cycleLength: 105, offset: 0 }
-      ],
-      leapYear: null,
-      yearZero: 0
-    },
-    gregorian: {
-      name: 'Gregorian Calendar',
-      months: [
-        { name: 'January', days: 31 },
-        { name: 'February', days: 28, leapDays: 29 },
-        { name: 'March', days: 31 },
-        { name: 'April', days: 30 },
-        { name: 'May', days: 31 },
-        { name: 'June', days: 30 },
-        { name: 'July', days: 31 },
-        { name: 'August', days: 31 },
-        { name: 'September', days: 30 },
-        { name: 'October', days: 31 },
-        { name: 'November', days: 30 },
-        { name: 'December', days: 31 }
-      ],
-      weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      moons: [{ name: 'Luna', cycleLength: 29.53059, offset: 0 }],
-      leapYear: { rule: 'gregorian' },
-      yearZero: 0
-    },
-    golarion: {
-      name: 'Golarion Calendar (Pathfinder)',
-      months: [
-        { name: 'Abadius', days: 31 },
-        { name: 'Calistril', days: 28 },
-        { name: 'Pharast', days: 31 },
-        { name: 'Gozran', days: 30 },
-        { name: 'Desnus', days: 31 },
-        { name: 'Sarenith', days: 30 },
-        { name: 'Erastus', days: 31 },
-        { name: 'Arodus', days: 31 },
-        { name: 'Rova', days: 30 },
-        { name: 'Lamashan', days: 31 },
-        { name: 'Neth', days: 30 },
-        { name: 'Kuthona', days: 31 }
-      ],
-      weekdays: ['Moonday', 'Toilday', 'Wealday', 'Oathday', 'Fireday', 'Starday', 'Sunday'],
-      moons: [{ name: 'Somal', cycleLength: 29.5, offset: 0 }],
-      leapYear: { rule: 'custom', interval: 8 },
-      yearZero: 0
-    },
-    exandrian: {
-      name: 'Exandrian Calendar (Critical Role)',
-      months: [
-        { name: 'Horisal', days: 29 },
-        { name: 'Misuthar', days: 30 },
-        { name: 'Dualahei', days: 30 },
-        { name: 'Thunsheer', days: 31 },
-        { name: 'Unndilar', days: 28 },
-        { name: 'Brussendar', days: 31 },
-        { name: 'Sydenstar', days: 32 },
-        { name: 'Fessuran', days: 29 },
-        { name: 'Quen\'pillar', days: 27 },
-        { name: 'Cuersaar', days: 29 },
-        { name: 'Duscar', days: 32 }
-      ],
-      weekdays: ['Miresen', 'Grissen', 'Whelsen', 'Conthsen', 'Folsen', 'Yulisen', 'Da\'leysen'],
-      moons: [{ name: 'Catha', cycleLength: 33, offset: 0 }, { name: 'Ruidus', cycleLength: 328, offset: 0 }],
-      leapYear: null,
-      yearZero: 0
+  static async importSTKCalendars() {
+    // Return cached result if already loaded
+    if (this.#stkCalendarsCache) return this.#stkCalendarsCache;
+
+    try {
+      // Get the module's script path and import calendars.js
+      const module = game.modules.get('simple-timekeeping');
+      if (!module?.active) return null;
+
+      const modulePath = `modules/simple-timekeeping/scripts/calendars.js`;
+      const { CALENDARS } = await import(`/${modulePath}`);
+
+      if (CALENDARS?.length) {
+        log(3, `Imported ${CALENDARS.length} calendars from Simple Timekeeping module`);
+        this.#stkCalendarsCache = CALENDARS;
+        return CALENDARS;
+      }
+    } catch (error) {
+      log(2, 'Failed to import STK calendars:', error.message);
     }
-    // Additional presets can be added as needed
-  };
+
+    return null;
+  }
+
+  /**
+   * Find a specific STK calendar preset by ID.
+   * @param {string} calendarId - The calendar ID to find.
+   * @returns {Promise<object|null>} The calendar config or null.
+   */
+  static async findSTKCalendar(calendarId) {
+    const calendars = await this.importSTKCalendars();
+    if (!calendars) return null;
+    return calendars.find((c) => c.id === calendarId) || null;
+  }
 
   /* -------------------------------------------- */
   /*  Data Loading                                */
@@ -200,34 +89,35 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {Promise<object>} Raw STK calendar data
    */
   async loadFromModule() {
-    if (!this.constructor.detect()) {
-      throw new Error(game.i18n.localize('CALENDARIA.Importer.SimpleTimekeeping.NotInstalled'));
-    }
+    if (!this.constructor.detect()) throw new Error(game.i18n.localize('CALENDARIA.Importer.SimpleTimekeeping.NotInstalled'));
 
     // Get STK configuration
     const config = game.settings.get('simple-timekeeping', 'configuration');
-    if (!config) {
-      throw new Error(game.i18n.localize('CALENDARIA.Importer.SimpleTimekeeping.NoConfig'));
-    }
+    if (!config) throw new Error(game.i18n.localize('CALENDARIA.Importer.SimpleTimekeeping.NoConfig'));
 
     // Resolve calendar data
     let calendarData;
+    let isNativeFormat = false;
+
     if (config.calendar === 'custom' && config.customCalendar) {
+      // Custom calendar JSON from settings
       calendarData = JSON.parse(config.customCalendar);
       calendarData._isCustom = true;
+      isNativeFormat = true;
     } else {
-      calendarData = this.constructor.STK_PRESETS[config.calendar];
-      if (!calendarData) {
-        log(2, `Unknown STK preset: ${config.calendar}, using generic data`);
-        calendarData = this.#buildGenericCalendar(config);
+      // Try to dynamically import preset from STK module
+      calendarData = await this.constructor.findSTKCalendar(config.calendar);
+      if (calendarData) {
+        isNativeFormat = true;
+        log(3, `Loaded calendar "${calendarData.name}" from Simple Timekeeping module`);
+      } else {
+        log(1, `Could not find STK preset: ${config.calendar}`);
       }
     }
 
-    // Resolve moon data
-    let moons = calendarData.moons || [];
-    if (config.useCustomMoons && config.customMoons) {
-      moons = JSON.parse(config.customMoons);
-    }
+    // Resolve moon data - STK native format uses moons.values
+    let moons = isNativeFormat ? calendarData.moons?.values || [] : calendarData.moons || [];
+    if (config.useCustomMoons && config.customMoons) moons = JSON.parse(config.customMoons);
 
     // Get events from journal entries with STK flags
     const events = await this.#loadEvents(config);
@@ -238,14 +128,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     // Get current weather if set
     const weather = this.#loadWeatherState();
 
-    return {
-      config,
-      calendar: calendarData,
-      moons,
-      events,
-      sceneDarkness,
-      weather
-    };
+    return { config, calendar: calendarData, moons, events, sceneDarkness, weather, isNativeFormat };
   }
 
   /**
@@ -295,13 +178,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
     for (const scene of game.scenes.contents) {
       const darknessSync = scene.getFlag('simple-timekeeping', 'darknessSync');
-      if (darknessSync && darknessSync !== 'default') {
-        sceneFlags.push({
-          sceneId: scene.id,
-          sceneName: scene.name,
-          darknessSync
-        });
-      }
+      if (darknessSync && darknessSync !== 'default') sceneFlags.push({ sceneId: scene.id, sceneName: scene.name, darknessSync });
     }
 
     return sceneFlags;
@@ -326,35 +203,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     return null;
   }
 
-  /**
-   * Build a generic calendar from STK config when preset not found.
-   * @param {object} config - STK configuration
-   * @returns {object} Generic calendar data
-   */
-  #buildGenericCalendar(config) {
-    return {
-      name: config.calendar || 'Imported Calendar',
-      months: [
-        { name: 'Month 1', days: 30 },
-        { name: 'Month 2', days: 30 },
-        { name: 'Month 3', days: 30 },
-        { name: 'Month 4', days: 30 },
-        { name: 'Month 5', days: 30 },
-        { name: 'Month 6', days: 30 },
-        { name: 'Month 7', days: 30 },
-        { name: 'Month 8', days: 30 },
-        { name: 'Month 9', days: 30 },
-        { name: 'Month 10', days: 30 },
-        { name: 'Month 11', days: 30 },
-        { name: 'Month 12', days: 30 }
-      ],
-      weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      moons: [],
-      leapYear: null,
-      yearZero: 0
-    };
-  }
-
   /* -------------------------------------------- */
   /*  Transformation                              */
   /* -------------------------------------------- */
@@ -365,56 +213,59 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data) {
-    const { calendar, moons, config } = data;
+    const { calendar, moons, config, isNativeFormat } = data;
 
     log(3, 'Transforming Simple Timekeeping data:', calendar.name);
 
-    const weekdays = this.#transformWeekdays(calendar.weekdays);
-    const months = this.#transformMonths(calendar.months);
-    const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
+    // Handle native STK format vs legacy format
+    const rawWeekdays = isNativeFormat ? calendar.days?.values : calendar.weekdays;
+    const rawMonths = isNativeFormat ? calendar.months?.values : calendar.months;
+
+    const weekdays = this.#transformWeekdays(rawWeekdays, isNativeFormat);
+    const months = this.#transformMonths(rawMonths, isNativeFormat);
+
+    // Get time config from native format or use defaults
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const daysPerYear = calendar.days?.daysPerYear ?? months.reduce((sum, m) => sum + (m.days || 0), 0);
+
+    // Get seasons from native format
+    const seasons = isNativeFormat ? this.#transformSeasons(calendar.seasons?.values) : [];
 
     return {
       name: calendar.name || 'Imported Calendar',
 
       // Days configuration
-      days: {
-        values: weekdays,
-        hoursPerDay: 24,
-        minutesPerHour: 60,
-        secondsPerMinute: 60,
-        daysPerYear
-      },
+      days: { values: weekdays, hoursPerDay, minutesPerHour, secondsPerMinute, daysPerYear },
 
       // Months
       months: { values: months },
 
       // Years configuration
-      years: this.#transformYears(calendar),
+      years: this.#transformYears(calendar, isNativeFormat),
 
       // Leap year configuration
-      leapYearConfig: this.#transformLeapYear(calendar.leapYear),
+      leapYearConfig: this.#transformLeapYear(calendar.leapYear ?? calendar.years?.leapYear, isNativeFormat),
 
       // Moons
       moons: this.#transformMoons(moons),
 
+      // Seasons
+      seasons: { values: seasons },
+
       // Festivals from intercalary months
-      festivals: this.#extractFestivals(calendar.months),
+      festivals: this.#extractFestivals(rawMonths),
 
       // Metadata
       metadata: {
-        description: calendar._isCustom
-          ? 'Custom calendar imported from Simple Timekeeping'
-          : `Imported from Simple Timekeeping: ${config.calendar}`,
-        system: calendar.name || config.calendar,
+        description: calendar.description || (calendar._isCustom ? 'Custom calendar imported from Simple Timekeeping' : `Imported from Simple Timekeeping: ${config.calendar}`),
+        system: calendar.system || calendar.name || config.calendar,
         importedFrom: 'simple-timekeeping'
       },
 
       // Weather - default temperate zone
-      weather: {
-        activeZone: 'temperate',
-        autoGenerate: false,
-        zones: [getDefaultZoneConfig('temperate')]
-      }
+      weather: { activeZone: 'temperate', autoGenerate: false, zones: [getDefaultZoneConfig('temperate')] }
     };
   }
 
@@ -424,10 +275,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
   /**
    * Transform STK weekdays to Calendaria format.
-   * @param {string[]} weekdays - STK weekday names
-   * @returns {object[]} Calendaria weekdays array
+   * @param {string[]|object[]} weekdays - STK weekday names or objects.
+   * @param {boolean} isNativeFormat - Whether data is in native STK format.
+   * @returns {object[]} Calendaria weekdays array.
    */
-  #transformWeekdays(weekdays = []) {
+  #transformWeekdays(weekdays = [], isNativeFormat = false) {
     if (!weekdays?.length) {
       return [
         { name: 'Sunday', abbreviation: 'Su', ordinal: 1 },
@@ -440,110 +292,133 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       ];
     }
 
-    return weekdays.map((name, index) => ({
-      name,
-      abbreviation: name.substring(0, 2),
-      ordinal: index + 1
-    }));
+    // Native STK format already has objects with name, abbreviation, ordinal
+    if (isNativeFormat && typeof weekdays[0] === 'object') {
+      return weekdays.map((day, index) => ({
+        name: this.#localizeString(day.name),
+        abbreviation: this.#localizeString(day.abbreviation) || this.#localizeString(day.name).substring(0, 2),
+        ordinal: day.ordinal ?? index + 1,
+        isRestDay: day.isRestDay || false
+      }));
+    }
+
+    // Legacy format - array of strings
+    return weekdays.map((name, index) => ({ name, abbreviation: name.substring(0, 2), ordinal: index + 1 }));
   }
 
   /**
    * Transform STK months to Calendaria format.
    * Filters out intercalary months (they become festivals).
-   * @param {object[]} months - STK months array
-   * @returns {object[]} Calendaria months array
+   * @param {object[]} months - STK months array.
+   * @param {boolean} isNativeFormat - Whether data is in native STK format.
+   * @returns {object[]} Calendaria months array.
    */
-  #transformMonths(months = []) {
+  #transformMonths(months = [], isNativeFormat = false) {
     return months
       .filter((m) => !m.intercalary)
       .map((month, index) => ({
-        name: month.name,
-        abbreviation: month.name.substring(0, 3),
+        name: this.#localizeString(month.name),
+        abbreviation: this.#localizeString(month.abbreviation) || this.#localizeString(month.name).substring(0, 3),
         days: month.days,
         leapDays: month.leapDays !== month.days ? month.leapDays : undefined,
-        ordinal: index + 1
+        ordinal: month.ordinal ?? index + 1,
+        startingWeekday: month.startingWeekday
       }));
   }
 
   /**
-   * Transform STK years configuration.
-   * @param {object} calendar - STK calendar data
-   * @returns {object} Calendaria years config
+   * Transform STK seasons to Calendaria format.
+   * @param {object[]} seasons - STK seasons array.
+   * @returns {object[]} Calendaria seasons array.
    */
-  #transformYears(calendar) {
+  #transformSeasons(seasons = []) {
+    if (!seasons?.length) return [];
+
+    return seasons.map((season, index) => ({
+      name: this.#localizeString(season.name),
+      abbreviation: this.#localizeString(season.abbreviation) || this.#localizeString(season.name).substring(0, 3),
+      monthStart: season.monthStart,
+      monthEnd: season.monthEnd,
+      dayStart: season.dayStart,
+      dayEnd: season.dayEnd,
+      ordinal: index + 1
+    }));
+  }
+
+  /**
+   * Localize a string if it's a localization key.
+   * @param {string} str - String that may be a localization key.
+   * @returns {string} Localized string or original string.
+   */
+  #localizeString(str) {
+    if (!str) return '';
+    // Check if it's a localization key (contains dots like "CALENDAR.GREGORIAN.January")
+    if (str.includes('.') && !str.includes(' ')) {
+      const localized = game.i18n.localize(str);
+      // If localization failed (returned the key), use the last part of the key
+      if (localized === str) {
+        const parts = str.split('.');
+        return parts[parts.length - 1];
+      }
+      return localized;
+    }
+    return str;
+  }
+
+  /**
+   * Transform STK years configuration.
+   * @param {object} calendar - STK calendar data.
+   * @param {boolean} isNativeFormat - Whether data is in native STK format.
+   * @returns {object} Calendaria years config.
+   */
+  #transformYears(calendar, isNativeFormat = false) {
+    const years = isNativeFormat ? calendar.years : calendar;
     return {
-      yearZero: calendar.yearZero ?? 0,
-      firstWeekday: 0
+      yearZero: years?.yearZero ?? 0,
+      firstWeekday: years?.firstWeekday ?? 0
     };
   }
 
   /**
    * Transform STK leap year config.
-   * @param {object} leapYear - STK leap year config
-   * @returns {object|null} Calendaria leapYearConfig
+   * @param {object} leapYear - STK leap year config.
+   * @param {boolean} isNativeFormat - Whether data is in native STK format.
+   * @returns {object|null} Calendaria leapYearConfig.
    */
-  #transformLeapYear(leapYear) {
+  #transformLeapYear(leapYear, isNativeFormat = false) {
     if (!leapYear) return null;
 
-    if (leapYear.rule === 'gregorian') {
-      return { rule: 'gregorian', start: 0 };
+    // Native STK format uses leapStart and leapInterval
+    if (isNativeFormat || leapYear.leapInterval) {
+      if (leapYear.leapInterval > 0) {
+        return { rule: 'simple', interval: leapYear.leapInterval, start: leapYear.leapStart ?? 0 };
+      }
+      return null;
     }
-
-    if (leapYear.rule === 'custom' && leapYear.interval > 0) {
-      return {
-        rule: 'simple',
-        interval: leapYear.interval,
-        start: 0
-      };
-    }
-
+    if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: 0 };
+    if (leapYear.rule === 'custom' && leapYear.interval > 0) return { rule: 'simple', interval: leapYear.interval, start: 0 };
     return null;
   }
 
   /**
    * Transform STK moons to Calendaria format.
-   * @param {object[]} moons - STK moons array
-   * @returns {object[]} Calendaria moons array
+   * @param {object[]} moons - STK moons array.
+   * @returns {object[]} Calendaria moons array.
    */
   #transformMoons(moons = []) {
     return moons.map((moon) => ({
-      name: moon.name,
+      name: this.#localizeString(moon.name),
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.offset ?? 0,
-      phases: this.#getDefaultMoonPhases(moon.cycleLength),
+      phases: getDefaultMoonPhases(),
       referenceDate: { year: 0, month: 0, day: 0 }
     }));
   }
 
   /**
-   * Generate default 8-phase moon configuration.
-   * @param {number} cycleLength - Moon cycle length
-   * @returns {object[]} Moon phases array
-   */
-  #getDefaultMoonPhases(cycleLength) {
-    const basePath = 'modules/calendaria/assets/moon-phases';
-    const phases = [
-      { name: 'New Moon', icon: `${basePath}/01_newmoon.svg` },
-      { name: 'Waxing Crescent', icon: `${basePath}/02_waxingcrescent.svg` },
-      { name: 'First Quarter', icon: `${basePath}/03_firstquarter.svg` },
-      { name: 'Waxing Gibbous', icon: `${basePath}/04_waxinggibbous.svg` },
-      { name: 'Full Moon', icon: `${basePath}/05_fullmoon.svg` },
-      { name: 'Waning Gibbous', icon: `${basePath}/06_waninggibbous.svg` },
-      { name: 'Last Quarter', icon: `${basePath}/07_lastquarter.svg` },
-      { name: 'Waning Crescent', icon: `${basePath}/08_waningcrescent.svg` }
-    ];
-
-    return phases.map((phase, index) => ({
-      ...phase,
-      start: index / 8,
-      end: (index + 1) / 8
-    }));
-  }
-
-  /**
    * Extract festivals from intercalary months.
-   * @param {object[]} months - STK months array
-   * @returns {object[]} Calendaria festivals array
+   * @param {object[]} months - STK months array.
+   * @returns {object[]} Calendaria festivals array.
    */
   #extractFestivals(months = []) {
     const festivals = [];
@@ -551,14 +426,19 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
     for (const month of months) {
       if (month.intercalary) {
+        const monthName = this.#localizeString(month.name);
         for (let day = 1; day <= month.days; day++) {
-          const festival = {
-            name: month.days === 1 ? month.name : `${month.name} (Day ${day})`,
-            month: regularMonthIndex + 1,
-            day
-          };
-          if (month.leapYearOnly) festival.leapYearOnly = true;
+          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day };
+          // Handle leap-year-only intercalary days (days: 0, leapDays: 1)
+          if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
+        }
+        // Handle leap-year-only festivals that have 0 days normally
+        if (month.days === 0 && month.leapDays > 0) {
+          const monthName = this.#localizeString(month.name);
+          for (let day = 1; day <= month.leapDays; day++) {
+            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day, leapYearOnly: true });
+          }
         }
       } else {
         regularMonthIndex++;
@@ -574,24 +454,25 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
   /**
    * Extract notes/events from STK data.
-   * @param {object} data - Raw STK data
-   * @returns {Promise<object[]>} Array of note data objects
+   * @param {object} data - Raw STK data.
+   * @returns {Promise<object[]>} Array of note data objects.
    */
   async extractNotes(data) {
-    const { events, calendar } = data;
+    const { events, calendar, isNativeFormat } = data;
     const notes = [];
 
     log(3, `Extracting ${events.length} events from Simple Timekeeping data`);
 
     // Calculate seconds per day for timestamp conversion
-    const secondsPerDay = 24 * 60 * 60;
+    const secondsPerDay = (calendar.days?.hoursPerDay ?? 24) * (calendar.days?.minutesPerHour ?? 60) * (calendar.days?.secondsPerMinute ?? 60);
 
-    // Get days per year from calendar
-    const daysPerYear = calendar.months.reduce((sum, m) => sum + (m.days || 0), 0);
+    // Get days per year from calendar - handle both native and legacy format
+    const months = isNativeFormat ? calendar.months?.values : calendar.months;
+    const daysPerYear = calendar.days?.daysPerYear ?? months?.reduce((sum, m) => sum + (m.days || 0), 0) ?? 365;
 
     for (const event of events) {
-      const startDate = this.#timestampToDate(event.eventTime, calendar, secondsPerDay, daysPerYear);
-      const endDate = event.eventEnd ? this.#timestampToDate(event.eventEnd, calendar, secondsPerDay, daysPerYear) : null;
+      const startDate = this.#timestampToDate(event.eventTime, calendar, secondsPerDay, daysPerYear, isNativeFormat);
+      const endDate = event.eventEnd ? this.#timestampToDate(event.eventEnd, calendar, secondsPerDay, daysPerYear, isNativeFormat) : null;
 
       notes.push({
         name: event.name,
@@ -610,13 +491,14 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
   /**
    * Convert STK Unix timestamp to date components.
-   * @param {number} timestamp - Unix timestamp in seconds
-   * @param {object} calendar - Calendar data
-   * @param {number} secondsPerDay - Seconds per day
-   * @param {number} daysPerYear - Days per year
-   * @returns {object} Date components
+   * @param {number} timestamp - Unix timestamp in seconds.
+   * @param {object} calendar - Calendar data.
+   * @param {number} secondsPerDay - Seconds per day.
+   * @param {number} daysPerYear - Days per year.
+   * @param {boolean} isNativeFormat - Whether data is in native STK format.
+   * @returns {object} Date components.
    */
-  #timestampToDate(timestamp, calendar, secondsPerDay, daysPerYear) {
+  #timestampToDate(timestamp, calendar, secondsPerDay, daysPerYear, isNativeFormat = false) {
     const totalDays = Math.floor(timestamp / secondsPerDay);
     const timeOfDay = timestamp % secondsPerDay;
 
@@ -630,10 +512,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
 
-    // Find month and day
+    // Find month and day - handle both native and legacy format
     let month = 0;
     let remainingDays = dayOfYear;
-    const regularMonths = calendar.months.filter((m) => !m.intercalary);
+    const months = isNativeFormat ? calendar.months?.values : calendar.months;
+    const regularMonths = (months || []).filter((m) => !m.intercalary);
 
     for (let i = 0; i < regularMonths.length; i++) {
       if (remainingDays < regularMonths[i].days) {
@@ -645,16 +528,13 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     }
 
     // Calculate time
-    const hour = Math.floor(timeOfDay / 3600);
-    const minute = Math.floor((timeOfDay % 3600) / 60);
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const secondsPerHour = minutesPerHour * secondsPerMinute;
+    const hour = Math.floor(timeOfDay / secondsPerHour);
+    const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
 
-    return {
-      year,
-      month,
-      day: remainingDays,
-      hour,
-      minute
-    };
+    return { year, month, day: remainingDays, hour, minute };
   }
 
   /**
@@ -663,13 +543,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {string} Calendaria repeat rule
    */
   #transformRepeatRule(repeat) {
-    const rules = {
-      '': 'never',
-      day: 'daily',
-      week: 'weekly',
-      month: 'monthly',
-      year: 'yearly'
-    };
+    const rules = { '': 'never', day: 'daily', week: 'weekly', month: 'monthly', year: 'yearly' };
     return rules[repeat] || 'never';
   }
 
@@ -695,20 +569,8 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       try {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
-
-        const noteData = {
-          startDate,
-          endDate,
-          allDay: note.allDay,
-          repeat: note.repeat
-        };
-
-        const page = await NoteManager.createNote({
-          name: note.name,
-          content: note.content || '',
-          noteData,
-          calendarId
-        });
+        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat };
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
 
         if (page) {
           count++;
@@ -745,13 +607,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         if (!scene) continue;
 
         // Map STK sync modes to Calendaria
-        const syncMap = {
-          sync: 'enabled',
-          noSync: 'disabled',
-          weatherOnly: 'disabled',
-          darknessOnly: 'enabled'
-        };
-
+        const syncMap = { sync: 'enabled', noSync: 'disabled', weatherOnly: 'disabled', darknessOnly: 'enabled' };
         const calendariaSyncMode = syncMap[darknessSync] || 'default';
         await scene.setFlag('calendaria', 'darknessSync', calendariaSyncMode);
         count++;
@@ -773,11 +629,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     if (!weather?.label) return false;
 
     try {
-      await WeatherManager.setCustomWeather({
-        label: weather.label,
-        color: weather.color,
-        description: 'Imported from Simple Timekeeping'
-      });
+      await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: 'Imported from Simple Timekeeping' });
       return true;
     } catch (error) {
       log(2, 'Error importing weather:', error);

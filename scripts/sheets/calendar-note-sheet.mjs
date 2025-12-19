@@ -8,10 +8,10 @@
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
-import { MODULE, SETTINGS } from '../constants.mjs';
+import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { getAllCategories, addCustomCategory, deleteCustomCategory, isCustomCategory } from '../notes/note-data.mjs';
+import { getAllCategories, addCustomCategory, deleteCustomCategory, isCustomCategory, getRepeatOptions } from '../notes/note-data.mjs';
 import { getRecurrenceDescription, generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 
@@ -41,9 +41,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     form: { submitOnChange: true, closeOnSubmit: false }
   };
 
-  static VIEW_PARTS = { view: { template: 'modules/calendaria/templates/sheets/calendar-note-view.hbs' } };
+  static VIEW_PARTS = { view: { template: TEMPLATES.SHEETS.CALENDAR_NOTE_VIEW } };
 
-  static EDIT_PARTS = { form: { template: 'modules/calendaria/templates/sheets/calendar-note-form.hbs' } };
+  static EDIT_PARTS = { form: { template: TEMPLATES.SHEETS.CALENDAR_NOTE_FORM } };
 
   /** @returns {boolean} Whether currently in view mode. */
   get isViewMode() {
@@ -55,34 +55,28 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     return this._mode === CalendarNoteSheet.MODES.EDIT;
   }
 
-  /** @override - Set mode BEFORE _configureRenderParts is called. */
+  /** @inheritdoc - Set mode BEFORE _configureRenderParts is called. */
   _configureRenderOptions(options) {
-    // Determine mode based on options and permissions
-    // Must happen before super() which calls _configureRenderParts
     if (options.isFirstRender) {
-      if (options.mode === 'view') {
-        this._mode = CalendarNoteSheet.MODES.VIEW;
-      } else if (options.mode === 'edit' && this.document.isOwner) {
-        this._mode = CalendarNoteSheet.MODES.EDIT;
-      } else if (this.document.isOwner) {
-        this._mode = CalendarNoteSheet.MODES.EDIT;
-      } else {
-        this._mode = CalendarNoteSheet.MODES.VIEW;
-      }
+      if (options.mode === 'view') this._mode = CalendarNoteSheet.MODES.VIEW;
+      else if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
+      else if (this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
+      else this._mode = CalendarNoteSheet.MODES.VIEW;
     }
     super._configureRenderOptions(options);
   }
 
-  /** @override */
+  /** @inheritdoc */
   _configureRenderParts(options) {
     return this.isViewMode ? { ...this.constructor.VIEW_PARTS } : { ...this.constructor.EDIT_PARTS };
   }
 
-  /** @override */
+  /** @inheritdoc */
   get title() {
     return this.document.name;
   }
 
+  /** @inheritdoc */
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
 
@@ -179,12 +173,13 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
   }
 
+  /** @inheritdoc */
   _onFirstRender(context, options) {
     super._onFirstRender(context, options);
     this.#renderHeaderControls();
   }
 
-  /** @override */
+  /** @inheritdoc */
   _onRender(context, options) {
     super._onRender(context, options);
     this.#renderHeaderControls();
@@ -254,6 +249,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
   }
 
+  /** @inheritdoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.system = this.document.system;
@@ -298,16 +294,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     // Prepare repeat options with selected state
     const repeatType = this.document.system.repeat;
     const hasLinkedEvent = !!this.document.system.linkedEvent?.noteId;
-    context.repeatOptions = [
-      { value: 'never', label: 'Never', selected: repeatType === 'never' },
-      { value: 'daily', label: 'Daily', selected: repeatType === 'daily' },
-      { value: 'weekly', label: 'Weekly', selected: repeatType === 'weekly' },
-      { value: 'monthly', label: 'Monthly', selected: repeatType === 'monthly' },
-      { value: 'yearly', label: 'Yearly', selected: repeatType === 'yearly' },
-      { value: 'moon', label: 'Moon Phase', selected: repeatType === 'moon' },
-      { value: 'random', label: 'Random', selected: repeatType === 'random' },
-      { value: 'linked', label: 'Linked to Event', selected: repeatType === 'linked' }
-    ];
+    context.repeatOptions = getRepeatOptions(repeatType);
 
     // Show repeat options (maxOccurrences) when repeat is not 'never'
     context.showRepeatOptions = repeatType !== 'never';
@@ -317,12 +304,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       calendar?.moons?.map((moon, index) => ({
         index,
         name: game.i18n.localize(moon.name),
-        phases:
-          moon.phases?.map((phase) => ({
-            name: game.i18n.localize(phase.name),
-            start: phase.start,
-            end: phase.end
-          })) || []
+        phases: moon.phases?.map((phase) => ({ name: game.i18n.localize(phase.name), start: phase.start, end: phase.end })) || []
       })) || [];
     context.hasMoons = context.moons.length > 0;
 
@@ -366,13 +348,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // Get available notes for linking (exclude self)
     const allNotes = NoteManager.getAllNotes() || [];
-    context.availableNotes = allNotes
-      .filter((note) => note.id !== this.document.id)
-      .map((note) => ({
-        id: note.id,
-        name: note.name,
-        selected: note.id === linkedEvent.noteId
-      }));
+    context.availableNotes = allNotes.filter((note) => note.id !== this.document.id).map((note) => ({ id: note.id, name: note.name, selected: note.id === linkedEvent.noteId }));
 
     // Get linked note name for display
     if (linkedEvent.noteId) {
@@ -431,18 +407,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // Prepare category options with selected state
     const selectedCategories = this.document.system.categories || [];
-    context.categoryOptions = getAllCategories().map((cat) => ({
-      ...cat,
-      selected: selectedCategories.includes(cat.id)
-    }));
+    context.categoryOptions = getAllCategories().map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));
 
     // Prepare available macros for selection
     const currentMacro = this.document.system.macro || '';
-    context.availableMacros = game.macros.contents.map((m) => ({
-      id: m.id,
-      name: m.name,
-      selected: m.id === currentMacro
-    }));
+    context.availableMacros = game.macros.contents.map((m) => ({ id: m.id, name: m.name, selected: m.id === currentMacro }));
 
     // View mode specific context
     context.isViewMode = this.isViewMode;
@@ -470,9 +439,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.repeatLabel = repeatLabels[this.document.system.repeat] || null;
 
       // Moon conditions display for view mode
-      if (this.document.system.moonConditions?.length > 0) {
-        context.moonConditionsDisplay = getRecurrenceDescription(this.document.system);
-      }
+      if (this.document.system.moonConditions?.length > 0) context.moonConditionsDisplay = getRecurrenceDescription(this.document.system);
     }
 
     return context;
@@ -517,7 +484,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {Event} event - Form submission event
    * @param {HTMLFormElement} form - The form element
    * @param {FormDataExtended} formData - Extended form data
-   * @override
+   * @inheritdoc
    */
   _processFormData(event, form, formData) {
     const data = super._processFormData(event, form, formData);
@@ -525,22 +492,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // Clear type-specific config when switching repeat types
     // linkedEvent - null when not 'linked', or null if noteId is empty
-    if (repeatType !== 'linked') {
-      data.system.linkedEvent = null;
-    } else if (data.system.linkedEvent && !data.system.linkedEvent.noteId) {
-      // If linked but no noteId selected, keep it null to avoid validation error
-      data.system.linkedEvent = null;
-    }
+    if (repeatType !== 'linked') data.system.linkedEvent = null;
+    else if (data.system.linkedEvent && !data.system.linkedEvent.noteId) data.system.linkedEvent = null;
 
     // randomConfig - null when not 'random'
-    if (repeatType !== 'random') {
-      data.system.randomConfig = null;
-    }
+    if (repeatType !== 'random') data.system.randomConfig = null;
 
     // moonConditions - clear when not 'moon' (preserve existing if switching to moon)
-    if (repeatType !== 'moon' && data.system.moonConditions === undefined) {
-      data.system.moonConditions = [];
-    }
+    if (repeatType !== 'moon' && data.system.moonConditions === undefined) data.system.moonConditions = [];
 
     // rangePattern - build from form fields or clear
     if (repeatType === 'range') {
@@ -617,9 +576,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
       if (newIcon) {
         const iconElement = target.querySelector('i.icon-preview');
-        if (iconElement) {
-          iconElement.className = `${newIcon} icon-preview`;
-        }
+        if (iconElement) iconElement.className = `${newIcon} icon-preview`;
         const hiddenInput = target.querySelector('input[name="system.icon"]');
         if (hiddenInput) hiddenInput.value = newIcon;
       }
@@ -681,7 +638,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         img.src = 'icons/svg/book.svg';
         img.alt = 'Note Icon';
         img.className = 'icon-preview';
-        // Apply color filter for SVG colorization
         img.style.filter = `drop-shadow(0px 1000px 0 ${color})`;
         img.style.transform = 'translateY(-1000px)';
         icon.replaceWith(img);
@@ -702,7 +658,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   _formatDateDisplay(calendar, year, month, day) {
     if (!calendar || !calendar.months?.values) return `${day} / ${month + 1} / ${year}`;
-
     const monthData = calendar.months.values[month];
     const monthName = monthData?.name ? game.i18n.localize(monthData.name) : `Month ${month + 1}`;
     return `${day} ${monthName}, ${year}`;
@@ -714,29 +669,21 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {HTMLElement} target - The capturing HTML element
    */
   static async _onSelectDate(event, target) {
-    const dateField = target.dataset.dateField; // 'startDate' or 'endDate'
+    const dateField = target.dataset.dateField;
     const form = target.closest('form');
     if (!form) return;
-
-    // Get calendar
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) {
-      ui.notifications.error('No active calendar found');
-      return;
-    }
-
-    // Get current game time as fallback
+    if (!calendar) return;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const fallbackYear = components.year + yearZero;
     const fallbackMonth = components.month ?? 0;
-    const fallbackDay = (components.dayOfMonth ?? 0) + 1; // Convert 0-indexed to 1-indexed
+    const fallbackDay = (components.dayOfMonth ?? 0) + 1;
 
     // Get current date values from form (or use calendar's current date as fallback)
     const yearInput = form.querySelector(`input[name="system.${dateField}.year"]`);
     const monthInput = form.querySelector(`input[name="system.${dateField}.month"]`);
     const dayInput = form.querySelector(`input[name="system.${dateField}.day"]`);
-
     const currentYear = parseInt(yearInput?.value) || fallbackYear;
     const parsedMonth = parseInt(monthInput?.value);
     const currentMonth = !isNaN(parsedMonth) ? parsedMonth : fallbackMonth;
@@ -803,11 +750,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       content,
       ok: {
         callback: (event, button) => {
-          return {
-            year: parseInt(button.form.elements.year.value),
-            month: parseInt(button.form.elements.month.value),
-            day: parseInt(button.form.elements.day.value)
-          };
+          return { year: parseInt(button.form.elements.year.value), month: parseInt(button.form.elements.month.value), day: parseInt(button.form.elements.day.value) };
         }
       },
       render: (event, dialog) => {
@@ -855,8 +798,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (!this.document.isOwner) return;
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: 'Delete Note' },
-      content: `<p>Delete note "${this.document.name}"?</p>`,
+      window: { title: game.i18n.localize('CALENDARIA.ContextMenu.DeleteNote') },
+      content: `<p>${game.i18n.format('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
       rejectClose: false,
       modal: true
     });
@@ -891,7 +834,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // Reset title
     const titleInput = form.querySelector('input[name="name"]');
-    if (titleInput) titleInput.value = 'New Note';
+    if (titleInput) titleInput.value = game.i18n.localize('CALENDARIA.Note.NewNote');
 
     // Reset emblem
     const iconInput = form.querySelector('input[name="system.icon"]');
@@ -1128,33 +1071,23 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const targetYear = generateNextYear ? currentYear + 1 : currentYear;
 
     // Build note data for generation
-    const noteData = {
-      startDate: this.document.system.startDate,
-      randomConfig: this.document.system.randomConfig,
-      repeatEndDate: this.document.system.repeatEndDate
-    };
+    const noteData = { startDate: this.document.system.startDate, randomConfig: this.document.system.randomConfig, repeatEndDate: this.document.system.repeatEndDate };
 
     // Generate occurrences
     const occurrences = generateRandomOccurrences(noteData, targetYear);
 
     // Store in flag
-    await this.document.setFlag(MODULE.ID, 'randomOccurrences', {
-      year: targetYear,
-      generatedAt: Date.now(),
-      occurrences
-    });
+    await this.document.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
 
     log(2, `Generated ${occurrences.length} random occurrences for ${this.document.name} until year ${targetYear}`);
   }
 
-  /** @override */
+  /** @inheritdoc */
   async _processSubmitData(event, form, submitData, options = {}) {
     await super._processSubmitData(event, form, submitData, options);
 
     // After update, regenerate random occurrences if needed
-    if (submitData.system?.repeat === 'random') {
-      setTimeout(() => this.#regenerateRandomOccurrences(), 100);
-    }
+    if (submitData.system?.repeat === 'random') setTimeout(() => this.#regenerateRandomOccurrences(), 100);
   }
 
   /**

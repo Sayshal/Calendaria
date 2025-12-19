@@ -248,9 +248,7 @@ export default class EventScheduler {
     const categories = note.flagData.categories || [];
 
     // Use warning for important categories
-    if (categories.includes('deadline') || categories.includes('combat')) {
-      return 'warn';
-    }
+    if (categories.includes('deadline') || categories.includes('combat')) return 'warn';
 
     return 'info';
   }
@@ -301,14 +299,7 @@ export default class EventScheduler {
     log(3, `Executing macro for event ${note.name}: ${macro.name}`);
 
     // Build scope object with event data and context
-    const scope = {
-      event: {
-        id: note.id,
-        name: note.name,
-        flagData: note.flagData
-      },
-      ...context
-    };
+    const scope = { event: { id: note.id, name: note.name, flagData: note.flagData }, ...context };
 
     macro.execute(scope);
   }
@@ -455,21 +446,13 @@ export default class EventScheduler {
       const targetYear = cachedData?.year >= currentYear ? currentYear + 1 : currentYear;
 
       // Build note data for generation
-      const noteData = {
-        startDate: fullNote.system.startDate,
-        randomConfig: fullNote.system.randomConfig,
-        repeatEndDate: fullNote.system.repeatEndDate
-      };
+      const noteData = { startDate: fullNote.system.startDate, randomConfig: fullNote.system.randomConfig, repeatEndDate: fullNote.system.repeatEndDate };
 
       // Generate occurrences
       const occurrences = generateRandomOccurrences(noteData, targetYear);
 
       // Store in flag
-      await fullNote.setFlag(MODULE.ID, 'randomOccurrences', {
-        year: targetYear,
-        generatedAt: Date.now(),
-        occurrences
-      });
+      await fullNote.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
 
       log(2, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
     }
@@ -542,13 +525,7 @@ export default class EventScheduler {
 
     if (totalDays <= 1) return null; // Not multi-day
 
-    return {
-      currentDay,
-      totalDays,
-      percentage: Math.round((currentDay / totalDays) * 100),
-      isFirstDay: currentDay === 1,
-      isLastDay: currentDay === totalDays
-    };
+    return { currentDay, totalDays, percentage: Math.round((currentDay / totalDays) * 100), isFirstDay: currentDay === 1, isLastDay: currentDay === totalDays };
   }
 
   /**
@@ -564,24 +541,8 @@ export default class EventScheduler {
     if (!calendar) return 0;
 
     // Convert to total days from epoch for each date
-    const startSeconds = calendar.componentsToTime({
-      year: start.year,
-      month: start.month,
-      dayOfMonth: start.day - 1, // 0-indexed
-      hour: 0,
-      minute: 0,
-      second: 0
-    });
-
-    const endSeconds = calendar.componentsToTime({
-      year: end.year,
-      month: end.month,
-      dayOfMonth: end.day - 1, // 0-indexed
-      hour: 0,
-      minute: 0,
-      second: 0
-    });
-
+    const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.day - 1, hour: 0, minute: 0, second: 0 });
+    const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.day - 1, hour: 0, minute: 0, second: 0 });
     const secondsPerDay = 24 * 60 * 60;
     return Math.floor((endSeconds - startSeconds) / secondsPerDay);
   }
@@ -608,9 +569,6 @@ export default class EventScheduler {
     Hooks.callAll(HOOKS.EVENT_DAY_CHANGED, { id: note.id, name: note.name, progress });
 
     // Execute macro for multi-day events (fires daily)
-    this.#executeMacro(note, {
-      trigger: 'multiDayProgress',
-      progress
-    });
+    this.#executeMacro(note, { trigger: 'multiDayProgress', progress });
   }
 }

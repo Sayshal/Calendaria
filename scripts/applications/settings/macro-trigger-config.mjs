@@ -6,7 +6,7 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS } from '../../constants.mjs';
+import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { log } from '../../utils/logger.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 
@@ -56,8 +56,8 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
 
   /** @override */
   static PARTS = {
-    form: { template: 'modules/calendaria/templates/settings/macro-trigger-config.hbs', scrollable: [''] },
-    footer: { template: 'templates/generic/form-footer.hbs' }
+    form: { template: TEMPLATES.SETTINGS.MACRO_TRIGGER_CONFIG, scrollable: [''] },
+    footer: { template: TEMPLATES.FORM_FOOTER }
   };
 
   /** @override */
@@ -158,47 +158,26 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     const data = foundry.utils.expandObject(formData.object);
 
     // Build config object
-    const config = {
-      global: {},
-      season: [],
-      moonPhase: []
-    };
+    const config = { global: {}, season: [], moonPhase: [] };
 
     // Process global triggers
-    for (const trigger of GLOBAL_TRIGGERS) {
-      config.global[trigger.key] = data.global?.[trigger.key] || '';
-    }
+    for (const trigger of GLOBAL_TRIGGERS) config.global[trigger.key] = data.global?.[trigger.key] || '';
 
     // Process season triggers from existing entries
     if (data.seasonTrigger) {
       const triggers = Array.isArray(data.seasonTrigger) ? data.seasonTrigger : [data.seasonTrigger];
-      for (const trigger of triggers) {
-        if (trigger?.macroId) {
-          config.season.push({
-            seasonIndex: parseInt(trigger.seasonIndex),
-            macroId: trigger.macroId
-          });
-        }
-      }
+      for (const trigger of triggers) if (trigger?.macroId) config.season.push({ seasonIndex: parseInt(trigger.seasonIndex), macroId: trigger.macroId });
     }
 
     // Process moon phase triggers from existing entries
     if (data.moonTrigger) {
       const triggers = Array.isArray(data.moonTrigger) ? data.moonTrigger : [data.moonTrigger];
-      for (const trigger of triggers) {
-        if (trigger?.macroId) {
-          config.moonPhase.push({
-            moonIndex: parseInt(trigger.moonIndex),
-            phaseIndex: parseInt(trigger.phaseIndex),
-            macroId: trigger.macroId
-          });
-        }
-      }
+      for (const trigger of triggers) if (trigger?.macroId) config.moonPhase.push({ moonIndex: parseInt(trigger.moonIndex), phaseIndex: parseInt(trigger.phaseIndex), macroId: trigger.macroId });
     }
 
     // Save config
     await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
-    log(2, 'Macro trigger config saved', config);
+    log(3, 'Macro trigger config saved', config);
     ui.notifications.info(game.i18n.localize('CALENDARIA.MacroTrigger.Saved'));
   }
 
@@ -313,12 +292,7 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     this.render();
   }
 
-  /**
-   * Attach event listeners after render.
-   * @param {string} partId - The part ID
-   * @param {HTMLElement} htmlElement - The rendered HTML
-   * @param {Object} options - Render options
-   */
+  /** @inheritdoc */
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
 
@@ -332,19 +306,10 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
         const phaseOptions = phaseSelect.querySelectorAll('option[data-moon]');
 
         phaseOptions.forEach((opt) => {
-          if (selectedMoon === '-1') {
-            // "All Moons" selected - only show "All Phases" option
-            opt.hidden = opt.dataset.moon !== '-1';
-          } else if (selectedMoon === '') {
-            // Nothing selected - show all
-            opt.hidden = false;
-          } else {
-            // Specific moon - show "All Phases" and that moon's phases
-            opt.hidden = opt.dataset.moon !== '-1' && opt.dataset.moon !== selectedMoon;
-          }
+          if (selectedMoon === '-1') opt.hidden = opt.dataset.moon !== '-1';
+          else if (selectedMoon === '') opt.hidden = false;
+          else opt.hidden = opt.dataset.moon !== '-1' && opt.dataset.moon !== selectedMoon;
         });
-
-        // Reset phase selection if hidden
         if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
       });
     }

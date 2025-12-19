@@ -11,7 +11,7 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
-import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
+import { MODULE, SETTINGS, HOOKS, TEMPLATES } from '../constants.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
@@ -31,11 +31,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   static DEFAULT_OPTIONS = {
     classes: ['calendaria', 'calendar-application'],
     tag: 'div',
-    window: {
-      contentClasses: ['calendar-application'],
-      icon: 'fas fa-calendar',
-      resizable: false
-    },
+    window: { contentClasses: ['calendar-application'], icon: 'fas fa-calendar', resizable: false },
     actions: {
       navigate: CalendarApplication._onNavigate,
       today: CalendarApplication._onToday,
@@ -55,8 +51,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   };
 
   static PARTS = {
-    header: { template: 'modules/calendaria/templates/sheets/calendar-header.hbs' },
-    content: { template: 'modules/calendaria/templates/sheets/calendar-content.hbs' }
+    header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER },
+    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT }
   };
 
   get title() {
@@ -88,17 +84,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     // Use dayOfMonth (0-indexed) converted to 1-indexed day
     const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
 
-    return {
-      ...components,
-      year: components.year + yearZero,
-      day: dayOfMonth
-    };
+    return { ...components, year: components.year + yearZero, day: dayOfMonth };
   }
 
   set viewedDate(date) {
     this._viewedDate = date;
   }
-
 
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
@@ -157,14 +148,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     // Get cycle values for display in header (based on viewed date, not world time)
     if (calendar.cycles?.length) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
-      const viewedComponents = {
-        year: viewedDate.year - yearZeroOffset,
-        month: viewedDate.month,
-        dayOfMonth: (viewedDate.day ?? 1) - 1,
-        hour: 12,
-        minute: 0,
-        second: 0
-      };
+      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
       const cycleResult = calendar.getCycleValues(viewedComponents);
       context.cycleText = cycleResult.text;
       context.cycleValues = cycleResult.values;
@@ -242,14 +226,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         }
 
         // Build complete time components for this day
-        const dayComponents = {
-          year: year - (calendar.years?.yearZero ?? 0),
-          month,
-          day: dayOfYear,
-          hour: 12,
-          minute: 0,
-          second: 0
-        };
+        const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moons
           .map((moon, index) => {
@@ -397,12 +374,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Generate time slots (1-hour increments for 24-hour view)
     const timeSlots = [];
-    for (let hour = 0; hour < 24; hour++) {
-      timeSlots.push({
-        label: hour.toString(),
-        hour: hour
-      });
-    }
+    for (let hour = 0; hour < 24; hour++) timeSlots.push({ label: hour.toString(), hour: hour });
 
     // Create event blocks for week view
     const eventBlocks = this._createEventBlocks(notes, days);
@@ -414,9 +386,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Calculate week number (approximate: day of year / days per week)
     let dayOfYear = day;
-    for (let m = 0; m < month; m++) {
-      dayOfYear += calendar.months?.values?.[m]?.days || 0;
-    }
+    for (let m = 0; m < month; m++) dayOfYear += calendar.months?.values?.[m]?.days || 0;
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
 
     // Get season and era for the viewed week (use mid-week day)
@@ -546,9 +516,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
 
       // Exclude multi-day events (they're shown as event bars instead)
-      if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) {
-        return false;
-      }
+      if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) return false;
 
       // Build noteData for recurrence check
       const noteData = {
@@ -582,9 +550,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       const repeat = page.system.repeat;
 
       // Non-repeating notes: only include if they start in this month
-      if (!repeat || repeat === 'never') {
-        return start.year === year && start.month === month;
-      }
+      if (!repeat || repeat === 'never') return start.year === year && start.month === month;
 
       // Recurring notes: include if they could occur in this month
       // (start date is before or during this month, and no end date or end date is after this month)
@@ -993,22 +959,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Create note using NoteManager (which creates it as a page in the calendar journal)
     const page = await NoteManager.createNote({
-      name: 'New Note',
+      name: game.i18n.localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: parseInt(day),
-          hour: parseInt(hour),
-          minute: 0
-        },
-        endDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: endDay,
-          hour: endHour,
-          minute: 0
-        }
+        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: 0 },
+        endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: 0 }
       }
     });
 
@@ -1050,22 +1004,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Create note using NoteManager (which creates it as a page in the calendar journal)
     const page = await NoteManager.createNote({
-      name: 'New Note',
+      name: game.i18n.localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: parseInt(day),
-          hour: parseInt(hour),
-          minute: parseInt(minute)
-        },
-        endDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: endDay,
-          hour: endHour,
-          minute: parseInt(minute)
-        }
+        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: parseInt(minute) },
+        endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: parseInt(minute) }
       }
     });
 
@@ -1093,8 +1035,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: 'Delete Note' },
-        content: `<p>Delete note "${page.name}"?</p>`,
+        window: { title: game.i18n.localize('CALENDARIA.ContextMenu.DeleteNote') },
+        content: `<p>${game.i18n.format('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
         rejectClose: false,
         modal: true
       });
@@ -1152,40 +1094,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   static async _onSetAsCurrentDate(event, target) {
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
-
-    // Use selected date or viewed date
     const dateToSet = this._selectedDate || this.viewedDate;
-
-    // Use the calendar's jumpToDate method if available
-    if (calendar && typeof calendar.jumpToDate === 'function') {
-      // calendar.jumpToDate expects display year and 1-indexed day
-      await calendar.jumpToDate({
-        year: dateToSet.year, // Display year
-        month: dateToSet.month,
-        day: dateToSet.day // 1-indexed day (jumpToDate subtracts 1 internally)
-      });
-    } else {
-      // Fallback: construct time components and set world time
-      // For internal components, we need to subtract yearZero and convert day to 0-indexed dayOfMonth
-      const internalYear = dateToSet.year - yearZero;
-      const dayOfMonth = dateToSet.day - 1; // Convert 1-indexed day to 0-indexed dayOfMonth
-      const components = {
-        year: internalYear,
-        month: dateToSet.month,
-        dayOfMonth: dayOfMonth,
-        hour: game.time.components.hour ?? 12,
-        minute: game.time.components.minute ?? 0,
-        second: 0
-      };
-
-      // Convert to world time and update
-      if (calendar) {
-        const worldTime = calendar.componentsToTime(components);
-        await game.time.set(worldTime);
-      }
-    }
-
-    // Clear selection and refresh
+    await calendar.jumpToDate({ year: dateToSet.year, month: dateToSet.month, day: dateToSet.day });
     this._selectedDate = null;
     await this.render();
   }
@@ -1213,7 +1123,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Open or focus the compact calendar
     const { CompactCalendar } = await import('./compact-calendar.mjs');
-    const existing = Object.values(ui.windows).find((w) => w instanceof CompactCalendar);
+    const existing = foundry.applications.instances.get('compact-calendar');
     if (existing) existing.render(true, { focus: true });
     else new CompactCalendar().render(true);
   }
@@ -1242,27 +1152,5 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
       tooltip: weather.description ? game.i18n.localize(weather.description) : game.i18n.localize(weather.label)
     };
-  }
-
-  /**
-   * Convert hex color to hue angle for CSS filter.
-   * @param {string} hex - Hex color (e.g., '#ff0000')
-   * @returns {number} Hue angle in degrees (0-360)
-   */
-  #hexToHue(hex) {
-    if (!hex) return 0;
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const d = max - min;
-    if (d === 0) return 0;
-    let h;
-    if (max === r) h = ((g - b) / d) % 6;
-    else if (max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h = Math.round(h * 60);
-    return h < 0 ? h + 360 : h;
   }
 }

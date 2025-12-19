@@ -64,26 +64,16 @@ export function isRecurringMatch(noteData, targetDate) {
   const { startDate, endDate, repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, cachedRandomOccurrences, linkedEvent, maxOccurrences } = noteData;
 
   // Handle linked event type - occurs relative to another event
-  if (linkedEvent?.noteId) {
-    return matchesLinkedEvent(linkedEvent, targetDate, startDate, repeatEndDate);
-  }
+  if (linkedEvent?.noteId) return matchesLinkedEvent(linkedEvent, targetDate, startDate, repeatEndDate);
 
   // Handle random repeat type
   if (repeat === 'random') {
     if (!randomConfig) return false;
     if (compareDays(targetDate, startDate) < 0) return false;
     if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
-
     let matches = false;
-    // Use cached occurrences if available
-    if (cachedRandomOccurrences?.length) {
-      matches = matchesCachedOccurrence(cachedRandomOccurrences, targetDate);
-    } else {
-      // Fall back to lazy evaluation
-      matches = matchesRandom(randomConfig, targetDate, startDate);
-    }
-
-    // Check maxOccurrences limit
+    if (cachedRandomOccurrences?.length) matches = matchesCachedOccurrence(cachedRandomOccurrences, targetDate);
+    else matches = matchesRandom(randomConfig, targetDate, startDate);
     if (matches && maxOccurrences > 0) {
       const occurrenceNum = countOccurrencesUpTo(noteData, targetDate);
       if (occurrenceNum > maxOccurrences) return false;
@@ -113,14 +103,10 @@ export function isRecurringMatch(noteData, targetDate) {
 
   // Check moon conditions as filter for other repeat types (if any)
   // Moon conditions act as additional filters - if defined, at least one must match
-  if (moonConditions?.length > 0) {
-    if (!matchesMoonConditions(moonConditions, targetDate)) return false;
-  }
+  if (moonConditions?.length > 0) if (!matchesMoonConditions(moonConditions, targetDate)) return false;
 
   // If no recurrence, only matches exact start date
-  if (repeat === 'never' || !repeat) {
-    return isSameDay(startDate, targetDate);
-  }
+  if (repeat === 'never' || !repeat) return isSameDay(startDate, targetDate);
 
   // Check if target is before start date (day-level comparison, ignoring time)
   if (compareDays(targetDate, startDate) < 0) return false;
@@ -212,9 +198,7 @@ function countOccurrencesUpTo(noteData, targetDate) {
       // Use cached occurrences if available
       if (cachedRandomOccurrences?.length) {
         let count = 0;
-        for (const occ of cachedRandomOccurrences) {
-          if (compareDays(occ, targetDate) <= 0) count++;
-        }
+        for (const occ of cachedRandomOccurrences) if (compareDays(occ, targetDate) <= 0) count++;
         return count;
       }
       // Fall through to iteration
@@ -228,12 +212,7 @@ function countOccurrencesUpTo(noteData, targetDate) {
   }
 
   // For moon/random without cache/linked, iterate and count
-  const occurrences = getOccurrencesInRange(
-    { ...noteData, maxOccurrences: 0 }, // Disable max check to avoid recursion
-    startDate,
-    targetDate,
-    10000
-  );
+  const occurrences = getOccurrencesInRange({ ...noteData, maxOccurrences: 0 }, startDate, targetDate, 10000);
   return occurrences.length;
 }
 
@@ -248,23 +227,13 @@ function matchesMoonConditions(moonConditions, targetDate) {
   if (!calendar?.moons?.length) return false;
 
   // Convert targetDate to time components format for getMoonPhase
-  const components = {
-    year: targetDate.year,
-    month: targetDate.month,
-    dayOfMonth: targetDate.day - 1, // getMoonPhase expects 0-indexed day
-    hour: 12, // Check at midday for consistency
-    minute: 0,
-    second: 0
-  };
+  const components = { year: targetDate.year, month: targetDate.month, dayOfMonth: targetDate.day - 1, hour: 12, minute: 0, second: 0 };
 
   // Check each moon condition - any match is sufficient
   for (const cond of moonConditions) {
     const moonPhase = calendar.getMoonPhase(cond.moonIndex, components);
     if (!moonPhase) continue;
-
     const position = moonPhase.position;
-
-    // Handle wrapping ranges (e.g., phaseStart: 0.9, phaseEnd: 0.1)
     if (cond.phaseStart <= cond.phaseEnd) {
       // Normal range
       if (position >= cond.phaseStart && position <= cond.phaseEnd) return true;
@@ -483,7 +452,6 @@ function matchesYearly(startDate, targetDate, interval) {
 function getLastDayOfMonth(date) {
   const calendar = game.time?.calendar;
   if (!calendar) return 30;
-
   const monthData = calendar.months?.[date.month];
   return monthData?.days ?? 30;
 }
@@ -535,9 +503,7 @@ function matchesRangeBit(rangeBit, value) {
   if (rangeBit == null) return true;
 
   // Single number = exact match
-  if (typeof rangeBit === 'number') {
-    return value === rangeBit;
-  }
+  if (typeof rangeBit === 'number') return value === rangeBit;
 
   // Array [min, max]
   if (Array.isArray(rangeBit) && rangeBit.length === 2) {
@@ -572,9 +538,7 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
   const { startDate, repeat, repeatInterval, linkedEvent, repeatEndDate } = noteData;
 
   // Handle linked events - derive occurrences from linked note
-  if (linkedEvent?.noteId) {
-    return getLinkedEventOccurrences(linkedEvent, rangeStart, rangeEnd, startDate, repeatEndDate, maxOccurrences);
-  }
+  if (linkedEvent?.noteId) return getLinkedEventOccurrences(linkedEvent, rangeStart, rangeEnd, startDate, repeatEndDate, maxOccurrences);
 
   // If no recurrence, check if single occurrence is in range
   if (repeat === 'never' || !repeat) {
@@ -729,9 +693,7 @@ export function getRecurrenceDescription(noteData) {
 
   // Helper to append occurrence limit text
   const appendMaxOccurrences = (desc) => {
-    if (maxOccurrences > 0) {
-      desc += `, ${maxOccurrences} time${maxOccurrences === 1 ? '' : 's'}`;
-    }
+    if (maxOccurrences > 0) desc += `, ${maxOccurrences} time${maxOccurrences === 1 ? '' : 's'}`;
     return desc;
   };
 
@@ -740,16 +702,10 @@ export function getRecurrenceDescription(noteData) {
     const linkedNote = NoteManager.getNote(linkedEvent.noteId);
     const linkedName = linkedNote?.name || 'Unknown Event';
     const offset = linkedEvent.offset || 0;
-
     let description;
-    if (offset === 0) {
-      description = `Same day as "${linkedName}"`;
-    } else if (offset > 0) {
-      description = `${offset} day${offset === 1 ? '' : 's'} after "${linkedName}"`;
-    } else {
-      description = `${Math.abs(offset)} day${Math.abs(offset) === 1 ? '' : 's'} before "${linkedName}"`;
-    }
-
+    if (offset === 0) description = `Same day as "${linkedName}"`;
+    else if (offset > 0) description = `${offset} day${offset === 1 ? '' : 's'} after "${linkedName}"`;
+    else description = `${Math.abs(offset)} day${Math.abs(offset) === 1 ? '' : 's'} before "${linkedName}"`;
     description = appendMaxOccurrences(description);
     if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
     return description;
@@ -786,16 +742,13 @@ export function getRecurrenceDescription(noteData) {
 
   const interval = repeatInterval || 1;
   const unit = repeat === 'daily' ? 'day' : repeat === 'weekly' ? 'week' : repeat === 'monthly' ? 'month' : repeat === 'yearly' ? 'year' : '';
-
   const pluralUnit = interval === 1 ? unit : `${unit}s`;
   const prefix = interval === 1 ? 'Every' : `Every ${interval}`;
 
   let description = `${prefix} ${pluralUnit}`;
 
   // Add moon condition info if present with regular repeat
-  if (moonConditions?.length > 0) {
-    description += ` (${getMoonConditionsDescription(moonConditions)})`;
-  }
+  if (moonConditions?.length > 0) description += ` (${getMoonConditionsDescription(moonConditions)})`;
 
   description = appendMaxOccurrences(description);
   if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
@@ -834,9 +787,7 @@ export function generateRandomOccurrences(noteData, targetYear) {
 
   // Determine iteration end (earlier of yearEnd or repeatEndDate)
   let rangeEnd = yearEnd;
-  if (repeatEndDate && compareDays(repeatEndDate, yearEnd) < 0) {
-    rangeEnd = repeatEndDate;
-  }
+  if (repeatEndDate && compareDays(repeatEndDate, yearEnd) < 0) rangeEnd = repeatEndDate;
 
   const { checkInterval } = randomConfig;
   let iterations = 0;
@@ -892,9 +843,7 @@ export function needsRandomRegeneration(cachedData) {
   if (cachedData.year < currentYear) return true;
 
   // If in last month and last week, regenerate for next year
-  if (currentMonth === lastMonthIndex && currentDay > lastMonthDays - daysInWeek) {
-    return cachedData.year <= currentYear;
-  }
+  if (currentMonth === lastMonthIndex && currentDay > lastMonthDays - daysInWeek) return cachedData.year <= currentYear;
 
   return false;
 }

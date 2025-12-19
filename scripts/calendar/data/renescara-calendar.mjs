@@ -16,6 +16,7 @@
  */
 
 import CalendariaCalendar from './calendaria-calendar.mjs';
+import { ASSETS } from '../../constants.mjs';
 
 /**
  * Generate moon phases with custom names for Aela (Silver Sister).
@@ -24,70 +25,14 @@ import CalendariaCalendar from './calendaria-calendar.mjs';
 function generateAelaPhases() {
   const prefix = 'CALENDARIA.Calendar.RENESCARA.Moon.Aela.Phase';
   return [
-    {
-      name: `${prefix}.DarkSister.Name`,
-      risingName: `${prefix}.DarkSister.Rising`,
-      fadingName: `${prefix}.DarkSister.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg',
-      start: 0,
-      end: 0.125
-    },
-    {
-      name: `${prefix}.Growing.Name`,
-      risingName: `${prefix}.Growing.Rising`,
-      fadingName: `${prefix}.Growing.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg',
-      start: 0.125,
-      end: 0.25
-    },
-    {
-      name: `${prefix}.Growing.Name`,
-      risingName: `${prefix}.Growing.Rising`,
-      fadingName: `${prefix}.Growing.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg',
-      start: 0.25,
-      end: 0.375
-    },
-    {
-      name: `${prefix}.Growing.Name`,
-      risingName: `${prefix}.Growing.Rising`,
-      fadingName: `${prefix}.Growing.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg',
-      start: 0.375,
-      end: 0.5
-    },
-    {
-      name: `${prefix}.SilverCrown.Name`,
-      risingName: `${prefix}.SilverCrown.Rising`,
-      fadingName: `${prefix}.SilverCrown.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg',
-      start: 0.5,
-      end: 0.625
-    },
-    {
-      name: `${prefix}.Fading.Name`,
-      risingName: `${prefix}.Fading.Rising`,
-      fadingName: `${prefix}.Fading.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg',
-      start: 0.625,
-      end: 0.75
-    },
-    {
-      name: `${prefix}.Fading.Name`,
-      risingName: `${prefix}.Fading.Rising`,
-      fadingName: `${prefix}.Fading.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg',
-      start: 0.75,
-      end: 0.875
-    },
-    {
-      name: `${prefix}.Fading.Name`,
-      risingName: `${prefix}.Fading.Rising`,
-      fadingName: `${prefix}.Fading.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg',
-      start: 0.875,
-      end: 1
-    }
+    { name: `${prefix}.DarkSister.Name`, rising: `${prefix}.DarkSister.Rising`, fading: `${prefix}.DarkSister.Fading`, icon: `${ASSETS.MOON_ICONS}/01_newmoon.svg`, start: 0, end: 0.125 },
+    { name: `${prefix}.Growing.Name`, rising: `${prefix}.Growing.Rising`, fading: `${prefix}.Growing.Fading`, icon: `${ASSETS.MOON_ICONS}/02_waxingcrescent.svg`, start: 0.125, end: 0.25 },
+    { name: `${prefix}.Growing.Name`, rising: `${prefix}.Growing.Rising`, fading: `${prefix}.Growing.Fading`, icon: `${ASSETS.MOON_ICONS}/03_firstquarter.svg`, start: 0.25, end: 0.375 },
+    { name: `${prefix}.Growing.Name`, rising: `${prefix}.Growing.Rising`, fading: `${prefix}.Growing.Fading`, icon: `${ASSETS.MOON_ICONS}/04_waxinggibbous.svg`, start: 0.375, end: 0.5 },
+    { name: `${prefix}.SilverCrown.Name`, rising: `${prefix}.SilverCrown.Rising`, fading: `${prefix}.SilverCrown.Fading`, icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`, start: 0.5, end: 0.625 },
+    { name: `${prefix}.Fading.Name`, rising: `${prefix}.Fading.Rising`, fading: `${prefix}.Fading.Fading`, icon: `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`, start: 0.625, end: 0.75 },
+    { name: `${prefix}.Fading.Name`, rising: `${prefix}.Fading.Rising`, fading: `${prefix}.Fading.Fading`, icon: `${ASSETS.MOON_ICONS}/07_lastquarter.svg`, start: 0.75, end: 0.875 },
+    { name: `${prefix}.Fading.Name`, rising: `${prefix}.Fading.Rising`, fading: `${prefix}.Fading.Fading`, icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`, start: 0.875, end: 1 }
   ];
 }
 
@@ -98,70 +43,14 @@ function generateAelaPhases() {
 function generateRuanPhases() {
   const prefix = 'CALENDARIA.Calendar.RENESCARA.Moon.Ruan.Phase';
   return [
-    {
-      name: `${prefix}.HiddenEye.Name`,
-      risingName: `${prefix}.HiddenEye.Rising`,
-      fadingName: `${prefix}.HiddenEye.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg',
-      start: 0,
-      end: 0.125
-    },
-    {
-      name: `${prefix}.Awakening.Name`,
-      risingName: `${prefix}.Awakening.Rising`,
-      fadingName: `${prefix}.Awakening.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg',
-      start: 0.125,
-      end: 0.25
-    },
-    {
-      name: `${prefix}.Awakening.Name`,
-      risingName: `${prefix}.Awakening.Rising`,
-      fadingName: `${prefix}.Awakening.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg',
-      start: 0.25,
-      end: 0.375
-    },
-    {
-      name: `${prefix}.Awakening.Name`,
-      risingName: `${prefix}.Awakening.Rising`,
-      fadingName: `${prefix}.Awakening.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg',
-      start: 0.375,
-      end: 0.5
-    },
-    {
-      name: `${prefix}.BloodMoon.Name`,
-      risingName: `${prefix}.BloodMoon.Rising`,
-      fadingName: `${prefix}.BloodMoon.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg',
-      start: 0.5,
-      end: 0.625
-    },
-    {
-      name: `${prefix}.Closing.Name`,
-      risingName: `${prefix}.Closing.Rising`,
-      fadingName: `${prefix}.Closing.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg',
-      start: 0.625,
-      end: 0.75
-    },
-    {
-      name: `${prefix}.Closing.Name`,
-      risingName: `${prefix}.Closing.Rising`,
-      fadingName: `${prefix}.Closing.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg',
-      start: 0.75,
-      end: 0.875
-    },
-    {
-      name: `${prefix}.Closing.Name`,
-      risingName: `${prefix}.Closing.Rising`,
-      fadingName: `${prefix}.Closing.Fading`,
-      icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg',
-      start: 0.875,
-      end: 1
-    }
+    { name: `${prefix}.HiddenEye.Name`, rising: `${prefix}.HiddenEye.Rising`, fading: `${prefix}.HiddenEye.Fading`, icon: `${ASSETS.MOON_ICONS}/01_newmoon.svg`, start: 0, end: 0.125 },
+    { name: `${prefix}.Awakening.Name`, rising: `${prefix}.Awakening.Rising`, fading: `${prefix}.Awakening.Fading`, icon: `${ASSETS.MOON_ICONS}/02_waxingcrescent.svg`, start: 0.125, end: 0.25 },
+    { name: `${prefix}.Awakening.Name`, rising: `${prefix}.Awakening.Rising`, fading: `${prefix}.Awakening.Fading`, icon: `${ASSETS.MOON_ICONS}/03_firstquarter.svg`, start: 0.25, end: 0.375 },
+    { name: `${prefix}.Awakening.Name`, rising: `${prefix}.Awakening.Rising`, fading: `${prefix}.Awakening.Fading`, icon: `${ASSETS.MOON_ICONS}/04_waxinggibbous.svg`, start: 0.375, end: 0.5 },
+    { name: `${prefix}.BloodMoon.Name`, rising: `${prefix}.BloodMoon.Rising`, fading: `${prefix}.BloodMoon.Fading`, icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`, start: 0.5, end: 0.625 },
+    { name: `${prefix}.Closing.Name`, rising: `${prefix}.Closing.Rising`, fading: `${prefix}.Closing.Fading`, icon: `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`, start: 0.625, end: 0.75 },
+    { name: `${prefix}.Closing.Name`, rising: `${prefix}.Closing.Rising`, fading: `${prefix}.Closing.Fading`, icon: `${ASSETS.MOON_ICONS}/07_lastquarter.svg`, start: 0.75, end: 0.875 },
+    { name: `${prefix}.Closing.Name`, rising: `${prefix}.Closing.Rising`, fading: `${prefix}.Closing.Fading`, icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`, start: 0.875, end: 1 }
   ];
 }
 
@@ -213,7 +102,7 @@ export const RENESCARA_CALENDAR = {
       { name: 'CALENDARIA.Calendar.RENESCARA.Day.Shadeday', ordinal: 6 },
       { name: 'CALENDARIA.Calendar.RENESCARA.Day.Tideday', ordinal: 7 }
     ],
-    daysPerYear: 365, // 13 × 28 + 1 = 365
+    daysPerYear: 365,
     hoursPerDay: 24,
     minutesPerHour: 60,
     secondsPerMinute: 60
@@ -242,36 +131,28 @@ export const RENESCARA_CALENDAR = {
     {
       name: 'CALENDARIA.Calendar.RENESCARA.Moon.Aela.Name',
       cycleLength: 28,
-      color: '#C0C0C0', // Silver
+      color: '#C0C0C0',
       hidden: false,
       phases: generateAelaPhases(),
-      referenceDate: {
-        year: 3247,
-        month: 0,
-        day: 1
-      }
+      referenceDate: { year: 3247, month: 0, day: 1 }
     },
     {
       name: 'CALENDARIA.Calendar.RENESCARA.Moon.Ruan.Name',
       cycleLength: 73,
-      color: '#B44622', // Rust-red
+      color: '#B44622',
       hidden: false,
       phases: generateRuanPhases(),
-      referenceDate: {
-        year: 3247,
-        month: 0,
-        day: 19
-      }
+      referenceDate: { year: 3247, month: 0, day: 19 }
     }
   ],
 
   // Seasons (evenly divided across the year)
   seasons: {
     values: [
-      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Spring', icon: 'fas fa-seedling', color: '#90ee90', dayStart: 0, dayEnd: 83 }, // Thawmoon through Blossmoon (months 1-3)
-      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Summer', icon: 'fas fa-sun', color: '#ffd700', dayStart: 84, dayEnd: 167 }, // Greenmoon through Goldmoon (months 4-6)
-      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Autumn', icon: 'fas fa-leaf', color: '#d2691e', dayStart: 168, dayEnd: 251 }, // Harvestmoon through Fadingmoon (months 7-9)
-      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Winter', icon: 'fas fa-snowflake', color: '#87ceeb', dayStart: 252, dayEnd: 364 } // Frostmoon through Day of Threshold (months 10-14)
+      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Spring', icon: 'fas fa-seedling', color: '#90ee90', dayStart: 0, dayEnd: 83 },
+      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Summer', icon: 'fas fa-sun', color: '#ffd700', dayStart: 84, dayEnd: 167 },
+      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Autumn', icon: 'fas fa-leaf', color: '#d2691e', dayStart: 168, dayEnd: 251 },
+      { name: 'CALENDARIA.Calendar.RENESCARA.Season.Winter', icon: 'fas fa-snowflake', color: '#87ceeb', dayStart: 252, dayEnd: 364 }
     ]
   },
 
@@ -279,12 +160,7 @@ export const RENESCARA_CALENDAR = {
   daylight: { enabled: true, shortestDay: 8, longestDay: 16, winterSolstice: 281, summerSolstice: 126 },
 
   // Calendar metadata
-  metadata: {
-    id: 'renescara',
-    description: 'CALENDARIA.Calendar.RENESCARA.Description',
-    author: 'calendaria',
-    system: 'Renescara'
-  },
+  metadata: { id: 'renescara', description: 'CALENDARIA.Calendar.RENESCARA.Description', author: 'calendaria', system: 'Renescara' },
 
   // Weather zones - 4 regional climates with Gyre-influenced fantasy weather
   weather: {
@@ -293,13 +169,7 @@ export const RENESCARA_CALENDAR = {
         id: 'valdris',
         name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Valdris.Name',
         description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Valdris.Description',
-        temperatures: {
-          Spring: { min: -18, max: 10 },
-          Summer: { min: 10, max: 41 },
-          Autumn: { min: -3, max: 19 },
-          Winter: { min: -35, max: -4 },
-          _default: { min: -10, max: 15 }
-        },
+        temperatures: { Spring: { min: -18, max: 10 }, Summer: { min: 10, max: 41 }, Autumn: { min: -3, max: 19 }, Winter: { min: -35, max: -4 }, _default: { min: -10, max: 15 } },
         presets: [
           { id: 'clear', enabled: true, chance: 5 },
           { id: 'partly-cloudy', enabled: true, chance: 4 },
@@ -321,13 +191,7 @@ export const RENESCARA_CALENDAR = {
         id: 'lys',
         name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Lys.Name',
         description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Lys.Description',
-        temperatures: {
-          Spring: { min: 5, max: 25 },
-          Summer: { min: 18, max: 38 },
-          Autumn: { min: 8, max: 28 },
-          Winter: { min: -5, max: 18 },
-          _default: { min: 8, max: 25 }
-        },
+        temperatures: { Spring: { min: 5, max: 25 }, Summer: { min: 18, max: 38 }, Autumn: { min: 8, max: 28 }, Winter: { min: -5, max: 18 }, _default: { min: 8, max: 25 } },
         presets: [
           { id: 'clear', enabled: true, chance: 6 },
           { id: 'partly-cloudy', enabled: true, chance: 5 },
@@ -349,13 +213,7 @@ export const RENESCARA_CALENDAR = {
         id: 'sanctus',
         name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Sanctus.Name',
         description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Sanctus.Description',
-        temperatures: {
-          Spring: { min: -25, max: 5 },
-          Summer: { min: -5, max: 22 },
-          Autumn: { min: -20, max: 8 },
-          Winter: { min: -50, max: -20 },
-          _default: { min: -20, max: 5 }
-        },
+        temperatures: { Spring: { min: -25, max: 5 }, Summer: { min: -5, max: 22 }, Autumn: { min: -20, max: 8 }, Winter: { min: -50, max: -20 }, _default: { min: -20, max: 5 } },
         presets: [
           { id: 'clear', enabled: true, chance: 4 },
           { id: 'partly-cloudy', enabled: true, chance: 3 },
@@ -377,13 +235,7 @@ export const RENESCARA_CALENDAR = {
         id: 'thornwood',
         name: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Thornwood.Name',
         description: 'CALENDARIA.Calendar.RENESCARA.Weather.Zone.Thornwood.Description',
-        temperatures: {
-          Spring: { min: -8, max: 22 },
-          Summer: { min: 12, max: 35 },
-          Autumn: { min: -2, max: 25 },
-          Winter: { min: -25, max: 5 },
-          _default: { min: 0, max: 20 }
-        },
+        temperatures: { Spring: { min: -8, max: 22 }, Summer: { min: 12, max: 35 }, Autumn: { min: -2, max: 25 }, Winter: { min: -25, max: 5 }, _default: { min: 0, max: 20 } },
         presets: [
           { id: 'clear', enabled: true, chance: 4 },
           { id: 'partly-cloudy', enabled: true, chance: 4 },

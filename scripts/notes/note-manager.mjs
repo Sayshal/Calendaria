@@ -11,7 +11,7 @@ import { MODULE, SETTINGS, SYSTEM, HOOKS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { getDefaultNoteData, validateNoteData, sanitizeNoteData, createNoteStub, getPredefinedCategories, getCategoryDefinition } from './note-data.mjs';
-import { compareDates, getCurrentDate, isValidDate } from './utils/date-utils.mjs';
+import { compareDates, isValidDate } from './utils/date-utils.mjs';
 import { isRecurringMatch, getOccurrencesInRange, getRecurrenceDescription } from './utils/recurrence.mjs';
 
 export default class NoteManager {
@@ -232,12 +232,7 @@ export default class NoteManager {
   static async createNote({ name, content = '', noteData, calendarId, journalData = {} }) {
     // Validate note data
     const validation = validateNoteData(noteData);
-    if (!validation.valid) {
-      const errorMsg = `Invalid note data: ${validation.errors.join(', ')}`;
-      log(2, errorMsg);
-      ui.notifications.error(errorMsg);
-      throw new Error(errorMsg);
-    }
+    if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
 
     // Sanitize note data
     const sanitized = sanitizeNoteData(noteData);
@@ -245,35 +240,26 @@ export default class NoteManager {
     // Get calendar ID (use active calendar if not specified)
     if (!calendarId) {
       const activeCalendar = CalendarManager.getActiveCalendar();
-      if (!activeCalendar || !activeCalendar.metadata?.id) {
-        throw new Error('No active calendar found');
-      }
+      if (!activeCalendar || !activeCalendar.metadata?.id) throw new Error('No active calendar found');
+
       calendarId = activeCalendar.metadata.id;
     }
 
     // Get calendar
     const calendar = CalendarManager.getCalendar(calendarId);
-    if (!calendar) {
-      throw new Error(`Calendar not found: ${calendarId}`);
-    }
+    if (!calendar) throw new Error(`Calendar not found: ${calendarId}`);
 
     // Get or create calendar journal
     const journal = await this.getCalendarJournal(calendarId, calendar);
-    if (!journal) {
-      throw new Error('Failed to get or create calendar journal');
-    }
+    if (!journal) throw new Error('Failed to get or create calendar journal');
 
     // Get month index from note data
     const monthIndex = sanitized.startDate.month;
-    if (monthIndex === undefined || monthIndex < 0 || monthIndex >= calendar.months.values.length) {
-      throw new Error(`Invalid month index: ${monthIndex}`);
-    }
+    if (monthIndex === undefined || monthIndex < 0 || monthIndex >= calendar.months.values.length) throw new Error(`Invalid month index: ${monthIndex}`);
 
     // Get month page
     const monthPage = this.getMonthPage(journal, monthIndex);
-    if (!monthPage) {
-      throw new Error(`Month page not found for index: ${monthIndex}`);
-    }
+    if (!monthPage) throw new Error(`Month page not found for index: ${monthIndex}`);
 
     // Create journal entry page as sub-page of month
     try {
@@ -284,21 +270,7 @@ export default class NoteManager {
       const sort = monthPage.sort + dayOfMonth;
 
       const page = await JournalEntryPage.create(
-        {
-          name,
-          type: 'calendaria.calendarnote',
-          system: sanitized,
-          text: { content },
-          title: { level: 2, show: true },
-          flags: {
-            [MODULE.ID]: {
-              monthIndex,
-              calendarId
-            }
-          },
-          sort,
-          ...journalData
-        },
+        { name, type: 'calendaria.calendarnote', system: sanitized, text: { content }, title: { level: 2, show: true }, flags: { [MODULE.ID]: { monthIndex, calendarId } }, sort, ...journalData },
         { parent: journal }
       );
 
@@ -341,12 +313,7 @@ export default class NoteManager {
 
       // Validate merged data
       const validation = validateNoteData(mergedNoteData);
-      if (!validation.valid) {
-        const errorMsg = `Invalid note data: ${validation.errors.join(', ')}`;
-        log(2, errorMsg);
-        ui.notifications.error(errorMsg);
-        throw new Error(errorMsg);
-      }
+      if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
 
       updateData.system = sanitizeNoteData(mergedNoteData);
     }
@@ -522,11 +489,8 @@ export default class NoteManager {
       // Check if note's start or end date falls within range
       const noteStart = stub.flagData.startDate;
       const noteEnd = stub.flagData.endDate;
-
       const startsInRange = compareDates(noteStart, startDate) >= 0 && compareDates(noteStart, endDate) <= 0;
-
       const endsInRange = noteEnd && compareDates(noteEnd, startDate) >= 0 && compareDates(noteEnd, endDate) <= 0;
-
       const spansRange = noteEnd && compareDates(noteStart, startDate) < 0 && compareDates(noteEnd, endDate) > 0;
 
       if (startsInRange || endsInRange || spansRange) matchingNotes.push(stub);
@@ -572,9 +536,7 @@ export default class NoteManager {
    */
   static getAllCategories() {
     const categories = new Set();
-
     for (const stub of this.#noteIndex.values()) if (stub.flagData.categories) stub.flagData.categories.forEach((cat) => categories.add(cat));
-
     return Array.from(categories);
   }
 
@@ -639,16 +601,7 @@ export default class NoteManager {
           calendarName = game.i18n.localize(calendarName);
         }
 
-        const journal = await JournalEntry.create({
-          name: calendarName,
-          folder: folder?.id,
-          flags: {
-            [MODULE.ID]: {
-              calendarId,
-              isCalendarJournal: true
-            }
-          }
-        });
+        const journal = await JournalEntry.create({ name: calendarName, folder: folder?.id, flags: { [MODULE.ID]: { calendarId, isCalendarJournal: true } } });
 
         log(3, `Created calendar journal: ${journal.name}`);
 
@@ -682,9 +635,7 @@ export default class NoteManager {
     if (existing) {
       // Update if content differs
       if (existing.text?.content !== description) {
-        await existing.update({
-          'text.content': description
-        });
+        await existing.update({ 'text.content': description });
         log(3, `Updated description page for ${journal.name}`);
       }
       return existing;
@@ -698,11 +649,7 @@ export default class NoteManager {
           type: 'text',
           text: { content: description },
           title: { level: 1, show: true },
-          flags: {
-            [MODULE.ID]: {
-              isDescriptionPage: true
-            }
-          },
+          flags: { [MODULE.ID]: { isDescriptionPage: true } },
           sort: 0
         },
         { parent: journal }
@@ -751,12 +698,7 @@ export default class NoteManager {
               type: 'text',
               text: { content: `<p>Events for this month will appear below.</p>` },
               title: { level: 1, show: true },
-              flags: {
-                [MODULE.ID]: {
-                  isMonthPage: true,
-                  monthIndex: i
-                }
-              },
+              flags: { [MODULE.ID]: { isMonthPage: true, monthIndex: i } },
               sort: (i + 1) * 1000 // Leave room for description page at 0
             },
             { parent: journal }
@@ -812,18 +754,13 @@ export default class NoteManager {
     // Note: For dnd5e calendars, these are stored in CONFIG, not in settings
     // We can update the in-memory calendar, but it won't persist across reloads
     // unless saved to the appropriate location
-    if (calendar.metadata) {
-      calendar.metadata.description = newDescription;
-    } else {
-      calendar.description = newDescription;
-    }
+    if (calendar.metadata) calendar.metadata.description = newDescription;
+    else calendar.description = newDescription;
 
     log(3, `Synced description from journal to calendar ${calendarId}`);
 
     // If this is a custom (non-dnd5e) calendar, save to settings
-    if (!SYSTEM.isDnd5e && game.user.isGM) {
-      await CalendarManager.saveCalendars();
-    }
+    if (!SYSTEM.isDnd5e && game.user.isGM) await CalendarManager.saveCalendars();
   }
 
   /* -------------------------------------------- */
@@ -855,17 +792,7 @@ export default class NoteManager {
     // Create new folder if GM
     if (game.user.isGM) {
       try {
-        const folder = await Folder.create({
-          name: 'Calendar Notes',
-          type: 'JournalEntry',
-          color: '#4a9eff',
-          flags: {
-            [MODULE.ID]: {
-              isCalendarNotesFolder: true
-            }
-          }
-        });
-
+        const folder = await Folder.create({ name: 'Calendar Notes', type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
         this.#notesFolderId = folder.id;
         log(3, 'Created Calendar Notes folder');
         return folder;
@@ -889,9 +816,7 @@ export default class NoteManager {
    */
   static getDefaultNoteDataForDate(year, month, day, hour, minute) {
     const defaults = getDefaultNoteData();
-
     defaults.startDate = { year, month, day, hour: hour ?? 0, minute: minute ?? 0 };
-
     return defaults;
   }
 
@@ -903,7 +828,6 @@ export default class NoteManager {
   static getRecurrenceDescription(journalId) {
     const stub = this.getNote(journalId);
     if (!stub) return 'Unknown';
-
     return getRecurrenceDescription(stub.flagData);
   }
 
@@ -913,13 +837,5 @@ export default class NoteManager {
    */
   static isInitialized() {
     return this.#initialized;
-  }
-
-  /**
-   * Get current date from game time.
-   * @returns {object}  Current date
-   */
-  static getCurrentDate() {
-    return getCurrentDate();
   }
 }

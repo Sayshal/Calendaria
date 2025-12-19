@@ -6,11 +6,12 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { MODULE, SETTINGS, TEMPLATES, ASSETS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { createImporter } from '../importers/index.mjs';
 import { formatEraTemplate } from '../calendar/calendar-utils.mjs';
+import { createBlankCalendar, getDefaultMoonPhases } from '../calendar/data/calendar-defaults.mjs';
 import { ALL_PRESETS, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getDefaultZoneConfig, getClimateTemplateOptions } from '../weather/climate-data.mjs';
 
@@ -90,7 +91,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     moons: { template: TEMPLATES.EDITOR.TAB_MOONS, scrollable: [''] },
     cycles: { template: TEMPLATES.EDITOR.TAB_CYCLES, scrollable: [''] },
     weather: { template: TEMPLATES.EDITOR.TAB_WEATHER, scrollable: [''] },
-    footer: { template: 'templates/generic/form-footer.hbs' }
+    footer: { template: TEMPLATES.FORM_FOOTER }
   };
 
   /** @override */
@@ -129,8 +130,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @type {boolean}
    */
   #isEditing = false;
-
-  /* -------------------------------------------- */
 
   /**
    * Whether to set this calendar as active after saving
@@ -186,74 +185,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #initializeBlankCalendar() {
-    this.#calendarData = {
-      name: '',
-      leapYearConfig: null, // Advanced leap year config (rule, interval, start, pattern)
-      years: {
-        yearZero: 0,
-        firstWeekday: 0,
-        leapYear: null // Standard Foundry leap year config (leapStart, leapInterval)
-      },
-      months: {
-        values: [
-          {
-            name: game.i18n.format('CALENDARIA.Editor.Default.MonthName', { num: 1 }),
-            abbreviation: game.i18n.format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }),
-            ordinal: 1,
-            days: 30
-          }
-        ]
-      },
-      days: {
-        values: [
-          {
-            name: game.i18n.format('CALENDARIA.Editor.Default.DayName', { num: 1 }),
-            abbreviation: game.i18n.format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }),
-            ordinal: 1
-          }
-        ],
-        daysPerYear: 365,
-        hoursPerDay: 24,
-        minutesPerHour: 60,
-        secondsPerMinute: 60
-      },
-      seasons: {
-        values: []
-      },
-      eras: [],
-      festivals: [],
-      moons: [],
-      cycles: [],
-      cycleFormat: '',
-      canonicalHours: [],
-      weeks: {
-        enabled: false,
-        type: 'year-based',
-        names: []
-      },
-      amPmNotation: {
-        am: 'AM',
-        pm: 'PM'
-      },
-      dateFormats: {
-        short: '{{d}} {{b}}',
-        long: '{{d}} {{B}}, {{y}}',
-        full: '{{B}} {{d}}, {{y}}',
-        time: '{{H}}:{{M}}',
-        time12: '{{h}}:{{M}} {{p}}'
-      },
-      metadata: {
-        id: '',
-        description: '',
-        author: game.user.name,
-        system: ''
-      },
-      weather: {
-        defaultClimate: 'temperate',
-        autoGenerate: false,
-        presets: []
-      }
-    };
+    this.#calendarData = createBlankCalendar();
   }
 
   /**
@@ -263,20 +195,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #loadExistingCalendar(calendarId) {
     const calendar = CalendarManager.getCalendar(calendarId);
-    if (calendar) {
-      this.#calendarData = calendar.toObject();
-      if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: [] };
-      if (!this.#calendarData.eras) this.#calendarData.eras = [];
-      if (!this.#calendarData.festivals) this.#calendarData.festivals = [];
-      if (!this.#calendarData.moons) this.#calendarData.moons = [];
-      if (!this.#calendarData.cycles) this.#calendarData.cycles = [];
-      if (!this.#calendarData.cycleFormat) this.#calendarData.cycleFormat = '';
-      if (!this.#calendarData.metadata) this.#calendarData.metadata = {};
-      if (!this.#calendarData.weather) this.#calendarData.weather = { defaultClimate: 'temperate', autoGenerate: false, presets: [] };
-    } else {
-      log(2, `Calendar ${calendarId} not found, initializing blank`);
-      this.#initializeBlankCalendar();
-    }
+    if (calendar) this.#calendarData = foundry.utils.mergeObject(createBlankCalendar(), calendar.toObject());
+    else this.#initializeBlankCalendar();
   }
 
   /**
@@ -286,22 +206,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #loadInitialData(data, suggestedId) {
-    this.#calendarData = foundry.utils.deepClone(data);
-
-    // Debug: log incoming years config
-    log(3, `Initial data years config:`, data.years);
-    log(3, `Cloned data years config:`, this.#calendarData.years);
-
-    // Ensure all required structures exist
-    if (!this.#calendarData.years) this.#calendarData.years = { yearZero: 0, firstWeekday: 0, leapYear: null };
-    if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: [] };
-    if (!this.#calendarData.eras) this.#calendarData.eras = [];
-    if (!this.#calendarData.festivals) this.#calendarData.festivals = [];
-    if (!this.#calendarData.moons) this.#calendarData.moons = [];
-    if (!this.#calendarData.cycles) this.#calendarData.cycles = [];
-    if (!this.#calendarData.cycleFormat) this.#calendarData.cycleFormat = '';
-    if (!this.#calendarData.metadata) this.#calendarData.metadata = {};
-    if (!this.#calendarData.weather) this.#calendarData.weather = { defaultClimate: 'temperate', autoGenerate: false, presets: [] };
+    // Merge imported data with blank calendar to ensure all required fields exist
+    this.#calendarData = foundry.utils.mergeObject(createBlankCalendar(), data);
 
     // Store suggested ID for later use
     if (suggestedId) this.#calendarData.metadata.suggestedId = suggestedId;
@@ -421,13 +327,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const leapYearConfig = this.#calendarData.leapYearConfig;
     const legacyLeapYear = this.#calendarData.years?.leapYear;
 
-    // Determine current rule (handle both new and legacy format)
+    // Determine current rule
     let currentRule = 'none';
-    if (leapYearConfig?.rule && leapYearConfig.rule !== 'none') {
-      currentRule = leapYearConfig.rule;
-    } else if (legacyLeapYear?.leapInterval > 0) {
-      currentRule = 'simple'; // Legacy format
-    }
+    if (leapYearConfig?.rule && leapYearConfig.rule !== 'none') currentRule = leapYearConfig.rule;
+    else if (legacyLeapYear?.leapInterval > 0) currentRule = 'simple';
 
     context.leapRuleOptions = [
       { value: 'none', label: 'CALENDARIA.Editor.LeapRule.None', selected: currentRule === 'none' },
@@ -441,7 +344,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showLeapGregorian = currentRule === 'gregorian';
     context.showLeapCustom = currentRule === 'custom';
 
-    // Get values (handle both new and legacy format)
+    // Get values
     context.leapInterval = leapYearConfig?.interval ?? legacyLeapYear?.leapInterval ?? 4;
     context.leapStart = leapYearConfig?.start ?? legacyLeapYear?.leapStart ?? 0;
     context.leapPattern = leapYearConfig?.pattern ?? '';
@@ -461,7 +364,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         ...opt,
         selected: opt.value === moon.referenceDate?.month
       })),
-      phasesWithIndex: (moon.phases || this.#getDefaultMoonPhases()).map((phase, pIdx) => ({
+      phasesWithIndex: (moon.phases || getDefaultMoonPhases()).map((phase, pIdx) => ({
         ...phase,
         index: pIdx,
         moonIndex: idx,
@@ -683,13 +586,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
         if (!previewEl) return;
-
         const sampleYear = 1492;
-        if (template) {
-          previewEl.textContent = formatEraTemplate(template, { year: sampleYear, abbreviation: abbr, era: eraName, yearInEra: 1 });
-        } else {
-          previewEl.textContent = game.i18n.localize('CALENDARIA.Editor.Era.PreviewEmpty');
-        }
+        if (template) previewEl.textContent = formatEraTemplate(template, { year: sampleYear, abbreviation: abbr, era: eraName, yearInEra: 1 });
+        else previewEl.textContent = game.i18n.localize('CALENDARIA.Editor.Era.PreviewEmpty');
       };
 
       // Initial state
@@ -724,14 +623,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     // Listen to chance inputs
-    for (const input of this.element.querySelectorAll('.preset-chance input')) {
-      input.addEventListener('input', updateTotal);
-    }
+    for (const input of this.element.querySelectorAll('.preset-chance input')) input.addEventListener('input', updateTotal);
 
     // Listen to enabled checkboxes
-    for (const checkbox of this.element.querySelectorAll('.preset-enabled')) {
-      checkbox.addEventListener('change', updateTotal);
-    }
+    for (const checkbox of this.element.querySelectorAll('.preset-enabled')) checkbox.addEventListener('change', updateTotal);
   }
 
   /**
@@ -783,9 +678,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let dayOfYear = 0;
 
     // Sum days of all months before the target month
-    for (let i = 0; i < month - 1 && i < months.length; i++) {
-      dayOfYear += months[i].days || 0;
-    }
+    for (let i = 0; i < month - 1 && i < months.length; i++) dayOfYear += months[i].days || 0;
 
     // Add the day within the month (convert to 0-indexed)
     dayOfYear += (day || 1) - 1;
@@ -811,9 +704,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }));
 
     // If no zones, add a default placeholder
-    if (context.zoneOptions.length === 0) {
-      context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
-    }
+    if (context.zoneOptions.length === 0) context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
 
     // Get the active zone's presets
     const activeZone = zones.find((z) => z.id === activeZoneId) || zones[0] || null;
@@ -915,27 +806,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#calendarData.leapYearConfig = null;
       this.#calendarData.years.leapYear = null;
     } else {
-      const leapConfig = {
-        rule: leapRule,
-        start: parseInt(data['leapYearConfig.start']) || 0
-      };
+      const leapConfig = { rule: leapRule, start: parseInt(data['leapYearConfig.start']) || 0 };
 
       if (leapRule === 'simple') {
         leapConfig.interval = parseInt(data['leapYearConfig.interval']) || 4;
         // Also set Foundry standard format for compatibility
-        this.#calendarData.years.leapYear = {
-          leapStart: leapConfig.start,
-          leapInterval: leapConfig.interval
-        };
+        this.#calendarData.years.leapYear = { leapStart: leapConfig.start, leapInterval: leapConfig.interval };
       } else if (leapRule === 'custom') {
         leapConfig.pattern = data['leapYearConfig.pattern'] || '';
         this.#calendarData.years.leapYear = null; // Complex patterns not supported by Foundry
       } else if (leapRule === 'gregorian') {
         // Gregorian uses interval 4 as approximation for Foundry
-        this.#calendarData.years.leapYear = {
-          leapStart: leapConfig.start,
-          leapInterval: 4
-        };
+        this.#calendarData.years.leapYear = { leapStart: leapConfig.start, leapInterval: 4 };
       }
 
       this.#calendarData.leapYearConfig = leapConfig;
@@ -1130,7 +1012,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const moonIdx of sortedMoonIndices) {
       // Get existing phases to preserve icon paths set via filepicker
       const existingMoon = this.#calendarData.moons[moonIdx];
-      const existingPhases = existingMoon?.phases || this.#getDefaultMoonPhases();
+      const existingPhases = existingMoon?.phases || getDefaultMoonPhases();
 
       // Detect phase indices from form data (supports dynamic phase counts)
       const phaseIndices = new Set();
@@ -1145,8 +1027,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const phases = [];
       for (const pIdx of sortedPhaseIndices) {
         const phaseName = data[`moons.${moonIdx}.phases.${pIdx}.name`];
-        const phaseRisingName = data[`moons.${moonIdx}.phases.${pIdx}.risingName`];
-        const phaseFadingName = data[`moons.${moonIdx}.phases.${pIdx}.fadingName`];
+        const phaseRisingName = data[`moons.${moonIdx}.phases.${pIdx}.rising`];
+        const phaseFadingName = data[`moons.${moonIdx}.phases.${pIdx}.fading`];
         const phaseIcon = data[`moons.${moonIdx}.phases.${pIdx}.icon`];
         const phaseStartPercent = data[`moons.${moonIdx}.phases.${pIdx}.startPercent`];
         const phaseEndPercent = data[`moons.${moonIdx}.phases.${pIdx}.endPercent`];
@@ -1154,8 +1036,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         // Use form data if available, otherwise fall back to existing (convert % to decimal)
         phases.push({
           name: phaseName ?? existingPhases[pIdx]?.name ?? '',
-          risingName: phaseRisingName ?? existingPhases[pIdx]?.risingName ?? '',
-          fadingName: phaseFadingName ?? existingPhases[pIdx]?.fadingName ?? '',
+          rising: phaseRisingName ?? existingPhases[pIdx]?.rising ?? '',
+          fading: phaseFadingName ?? existingPhases[pIdx]?.fading ?? '',
           icon: phaseIcon ?? existingPhases[pIdx]?.icon ?? '',
           start: phaseStartPercent != null ? parseFloat(phaseStartPercent) / 100 : (existingPhases[pIdx]?.start ?? pIdx * 0.125),
           end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhases[pIdx]?.end ?? (pIdx + 1) * 0.125)
@@ -1181,24 +1063,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#calendarData.moons = newMoons;
-  }
-
-  /**
-   * Get default moon phases.
-   * @returns {Array} Default 8-phase moon cycle
-   * @private
-   */
-  #getDefaultMoonPhases() {
-    return [
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.NewMoon'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg', start: 0, end: 0.125 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.WaxingCrescent'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg', start: 0.125, end: 0.25 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.FirstQuarter'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg', start: 0.25, end: 0.375 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.WaxingGibbous'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg', start: 0.375, end: 0.5 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.FullMoon'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg', start: 0.5, end: 0.625 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.WaningGibbous'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg', start: 0.625, end: 0.75 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.LastQuarter'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg', start: 0.75, end: 0.875 },
-      { name: game.i18n.localize('CALENDARIA.MoonPhase.WaningCrescent'), risingName: '', fadingName: '', icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg', start: 0.875, end: 1 }
-    ];
   }
 
   /**
@@ -1232,11 +1096,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
       // Build entries array
       const entries = [];
-      for (const eIdx of sortedEntryIndices) {
-        entries.push({
-          name: data[`cycles.${cycleIdx}.entries.${eIdx}.name`] || ''
-        });
-      }
+      for (const eIdx of sortedEntryIndices) entries.push({ name: data[`cycles.${cycleIdx}.entries.${eIdx}.name`] || '' });
 
       const cycle = {
         name: data[`cycles.${cycleIdx}.name`] || '',
@@ -1299,12 +1159,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const sortedIndices = [...indices].sort((a, b) => a - b);
     const newNames = [];
 
-    for (const idx of sortedIndices) {
-      newNames.push({
-        name: data[`weeks.names.${idx}.name`] || '',
-        abbreviation: data[`weeks.names.${idx}.abbreviation`] || ''
-      });
-    }
+    for (const idx of sortedIndices) newNames.push({ name: data[`weeks.names.${idx}.name`] || '', abbreviation: data[`weeks.names.${idx}.abbreviation`] || '' });
 
     this.#calendarData.weeks.names = newNames;
   }
@@ -1336,11 +1191,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const id = data[`weather.presets.${idx}.id`];
       if (!id) continue;
 
-      const preset = {
-        id,
-        enabled: !!data[`weather.presets.${idx}.enabled`],
-        chance: parseFloat(data[`weather.presets.${idx}.chance`]) || 0
-      };
+      const preset = { id, enabled: !!data[`weather.presets.${idx}.enabled`], chance: parseFloat(data[`weather.presets.${idx}.chance`]) || 0 };
 
       // Only store temp values if they're set
       const tempMin = data[`weather.presets.${idx}.tempMin`];
@@ -1360,9 +1211,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const zones = this.#calendarData.weather.zones || [];
     const activeZone = zones.find((z) => z.id === activeZoneId);
 
-    if (activeZone) {
-      activeZone.presets = newPresets;
-    }
+    if (activeZone) activeZone.presets = newPresets;
   }
 
   /* -------------------------------------------- */
@@ -1569,17 +1418,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #generateEraPreview(era) {
     if (!era.template) return game.i18n.localize('CALENDARIA.Editor.Era.PreviewEmpty');
-
     const sampleYear = 1492;
     const abbr = era.abbreviation ? game.i18n.localize(era.abbreviation) : '';
     const eraName = era.name ? game.i18n.localize(era.name) : '';
-
-    return formatEraTemplate(era.template, {
-      year: sampleYear,
-      abbreviation: abbr,
-      era: eraName,
-      yearInEra: 1
-    });
+    return formatEraTemplate(era.template, { year: sampleYear, abbreviation: abbr, era: eraName, yearInEra: 1 });
   }
 
   /**
@@ -1591,11 +1433,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.festivals.length - 1;
     const insertIdx = afterIdx + 1;
     const totalFestivals = this.#calendarData.festivals.length + 1;
-    this.#calendarData.festivals.splice(insertIdx, 0, {
-      name: game.i18n.format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }),
-      month: 1,
-      day: 1
-    });
+    this.#calendarData.festivals.splice(insertIdx, 0, { name: game.i18n.format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 1, day: 1 });
     this.render();
   }
 
@@ -1616,12 +1454,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddMoon(event, target) {
-    this.#calendarData.moons.push({
-      name: game.i18n.localize('CALENDARIA.Editor.Default.MoonName'),
-      cycleLength: 28,
-      phases: this.#getDefaultMoonPhases(),
-      referenceDate: { year: 0, month: 0, day: 1 }
-    });
+    this.#calendarData.moons.push({ name: game.i18n.localize('CALENDARIA.Editor.Default.MoonName'), cycleLength: 28, phases: getDefaultMoonPhases(), referenceDate: { year: 0, month: 0, day: 1 } });
     this.render();
   }
 
@@ -1646,7 +1479,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const moon = this.#calendarData.moons[moonIdx];
     if (!moon) return;
 
-    if (!moon.phases) moon.phases = this.#getDefaultMoonPhases();
+    if (!moon.phases) moon.phases = getDefaultMoonPhases();
 
     const phaseCount = moon.phases.length;
     const interval = 1 / (phaseCount + 1);
@@ -1654,9 +1487,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     // Add new phase at end
     moon.phases.push({
       name: game.i18n.format('CALENDARIA.Editor.Default.PhaseName', { num: phaseCount + 1 }),
-      risingName: '',
-      fadingName: '',
-      icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg',
+      rising: '',
+      fading: '',
+      icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`,
       start: phaseCount * interval,
       end: 1
     });
@@ -1714,7 +1547,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       type: 'image',
       current: currentIcon.startsWith('icons/') ? currentIcon : '',
       callback: (path) => {
-        if (!moon.phases) moon.phases = this.#getDefaultMoonPhases();
+        if (!moon.phases) moon.phases = getDefaultMoonPhases();
         moon.phases[phaseIdx].icon = path;
         this.render();
       }
@@ -1763,9 +1596,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if (!cycle.entries) cycle.entries = [];
     const entryCount = cycle.entries.length + 1;
-    cycle.entries.push({
-      name: game.i18n.format('CALENDARIA.Editor.Default.CycleEntry', { num: entryCount })
-    });
+    cycle.entries.push({ name: game.i18n.format('CALENDARIA.Editor.Default.CycleEntry', { num: entryCount }) });
     this.render();
   }
 
@@ -1919,10 +1750,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       ok: {
         callback: (event, button, dialog) => {
           const form = button.form;
-          return {
-            template: form.elements.template.value,
-            name: form.elements.name.value
-          };
+          return { template: form.elements.template.value, name: form.elements.name.value };
         }
       }
     });
@@ -1941,17 +1769,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let zoneId = baseId;
     let counter = 1;
     const existingIds = (this.#calendarData.weather?.zones || []).map((z) => z.id);
-    while (existingIds.includes(zoneId)) {
-      zoneId = `${baseId}-${counter++}`;
-    }
-
+    while (existingIds.includes(zoneId)) zoneId = `${baseId}-${counter++}`;
     zoneConfig.id = zoneId;
     zoneConfig.name = result.name || game.i18n.localize(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
 
     // Add to calendar
     if (!this.#calendarData.weather) this.#calendarData.weather = { zones: [], activeZone: null, autoGenerate: false };
     if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = [];
-
     this.#calendarData.weather.zones.push(zoneConfig);
     this.#calendarData.weather.activeZone = zoneConfig.id;
 
@@ -2064,11 +1888,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     zones.splice(zoneIdx, 1);
 
     // Select another zone if available
-    if (zones.length > 0) {
-      this.#calendarData.weather.activeZone = zones[0].id;
-    } else {
-      this.#calendarData.weather.activeZone = null;
-    }
+    if (zones.length > 0) this.#calendarData.weather.activeZone = zones[0].id;
+    else this.#calendarData.weather.activeZone = null;
 
     this.render();
   }
@@ -2194,11 +2015,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Localize festivals
-    if (data.festivals) {
-      for (const festival of data.festivals) {
-        if (festival.name) festival.name = game.i18n.localize(festival.name);
-      }
-    }
+    if (data.festivals) for (const festival of data.festivals) if (festival.name) festival.name = game.i18n.localize(festival.name);
 
     // Localize eras
     if (data.eras) {
@@ -2284,12 +2101,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           if (importer) {
             log(3, `Importing ${this.#pendingNotes.length} pending notes to calendar ${calendarId}`);
             const result = await importer.importNotes(this.#pendingNotes, { calendarId });
-            if (result.count > 0) {
-              ui.notifications.info(game.i18n.format('CALENDARIA.Editor.NotesImported', { count: result.count }));
-            }
-            if (result.errors?.length > 0) {
-              log(2, 'Note import errors:', result.errors);
-            }
+            if (result.count > 0) ui.notifications.info(game.i18n.format('CALENDARIA.Editor.NotesImported', { count: result.count }));
+            if (result.errors?.length > 0) log(1, 'Note import errors:', result.errors);
+
             // Clear pending notes after import
             this.#pendingNotes = null;
             this.#pendingImporterId = null;

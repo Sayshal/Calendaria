@@ -1,5 +1,5 @@
 /**
- * Default configurations for D&D 5e calendars.
+ * Default configurations for calendars.
  * Provides moons, seasons, eras, and weather for calendars loaded from CONFIG.DND5E.calendar.calendars.
  *
  * @module Calendar/Data/CalendarDefaults
@@ -7,20 +7,76 @@
  */
 
 import { getDefaultZoneConfig } from '../../weather/climate-data.mjs';
+import { ASSETS } from '../../constants.mjs';
+
+/* -------------------------------------------- */
+/*  Blank Calendar Factory                       */
+/* -------------------------------------------- */
 
 /**
- * Standard 8-phase moon cycle used by most calendars.
+ * Create a blank calendar structure with all required fields initialized.
+ * Use this as the single source of truth for calendar schema defaults.
+ * @returns {object} A new blank calendar object
+ */
+export function createBlankCalendar() {
+  return {
+    name: '',
+    leapYearConfig: null,
+    years: { yearZero: 0, firstWeekday: 0, leapYear: null },
+    months: {
+      values: [{ name: game.i18n.format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: game.i18n.format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }]
+    },
+    days: {
+      values: [{ name: game.i18n.format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: game.i18n.format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 }],
+      daysPerYear: 365,
+      hoursPerDay: 24,
+      minutesPerHour: 60,
+      secondsPerMinute: 60
+    },
+    seasons: { values: [] },
+    eras: [],
+    festivals: [],
+    moons: [],
+    cycles: [],
+    cycleFormat: '',
+    canonicalHours: [],
+    weeks: { enabled: false, type: 'year-based', names: [] },
+    amPmNotation: { am: 'AM', pm: 'PM' },
+    dateFormats: { short: '{{d}} {{b}}', long: '{{d}} {{B}}, {{y}}', full: '{{B}} {{d}}, {{y}}', time: '{{H}}:{{M}}', time12: '{{h}}:{{M}} {{p}}' },
+    metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
+    weather: { defaultClimate: 'temperate', autoGenerate: false, presets: [] }
+  };
+}
+
+/* -------------------------------------------- */
+/*  Moon Phases                                  */
+/* -------------------------------------------- */
+
+/**
+ * Standard 8-phase moon cycle definition.
+ * Names use localization keys - run through preLocalize if needed.
+ * Each phase covers exactly 1/8 of the cycle.
+ * @type {Array<{name: string, icon: string}>}
  */
 const STANDARD_PHASES = [
-  { name: 'CALENDARIA.MoonPhase.NewMoon', icon: 'modules/calendaria/assets/moon-phases/01_newmoon.svg', start: 0, end: 0.0625 },
-  { name: 'CALENDARIA.MoonPhase.WaxingCrescent', icon: 'modules/calendaria/assets/moon-phases/02_waxingcrescent.svg', start: 0.0625, end: 0.1875 },
-  { name: 'CALENDARIA.MoonPhase.FirstQuarter', icon: 'modules/calendaria/assets/moon-phases/03_firstquarter.svg', start: 0.1875, end: 0.3125 },
-  { name: 'CALENDARIA.MoonPhase.WaxingGibbous', icon: 'modules/calendaria/assets/moon-phases/04_waxinggibbous.svg', start: 0.3125, end: 0.4375 },
-  { name: 'CALENDARIA.MoonPhase.FullMoon', icon: 'modules/calendaria/assets/moon-phases/05_fullmoon.svg', start: 0.4375, end: 0.5625 },
-  { name: 'CALENDARIA.MoonPhase.WaningGibbous', icon: 'modules/calendaria/assets/moon-phases/06_waninggibbous.svg', start: 0.5625, end: 0.6875 },
-  { name: 'CALENDARIA.MoonPhase.LastQuarter', icon: 'modules/calendaria/assets/moon-phases/07_lastquarter.svg', start: 0.6875, end: 0.8125 },
-  { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: 'modules/calendaria/assets/moon-phases/08_waningcrescent.svg', start: 0.8125, end: 1 }
+  { name: 'CALENDARIA.MoonPhase.NewMoon', icon: `${ASSETS.MOON_ICONS}/01_newmoon.svg` },
+  { name: 'CALENDARIA.MoonPhase.WaxingCrescent', icon: `${ASSETS.MOON_ICONS}/02_waxingcrescent.svg` },
+  { name: 'CALENDARIA.MoonPhase.FirstQuarter', icon: `${ASSETS.MOON_ICONS}/03_firstquarter.svg` },
+  { name: 'CALENDARIA.MoonPhase.WaxingGibbous', icon: `${ASSETS.MOON_ICONS}/04_waxinggibbous.svg` },
+  { name: 'CALENDARIA.MoonPhase.FullMoon', icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg` },
+  { name: 'CALENDARIA.MoonPhase.WaningGibbous', icon: `${ASSETS.MOON_ICONS}/06_waninggibbous.svg` },
+  { name: 'CALENDARIA.MoonPhase.LastQuarter', icon: `${ASSETS.MOON_ICONS}/07_lastquarter.svg` },
+  { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg` }
 ];
+
+/**
+ * Get standard 8-phase moon cycle with all required properties.
+ * Names are localization keys - use preLocalize if localized strings needed.
+ * @returns {Array<{name: string, rising: string, fading: string, icon: string, start: number, end: number}>}
+ */
+export function getDefaultMoonPhases() {
+  return STANDARD_PHASES.map((phase, index) => ({ name: phase.name, rising: '', fading: '', icon: phase.icon, start: index / 8, end: (index + 1) / 8 }));
+}
 
 /* -------------------------------------------- */
 /*  Calendar Definitions                        */
@@ -33,11 +89,7 @@ const STANDARD_PHASES = [
  */
 function createDefaultWeather(seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']) {
   const zone = getDefaultZoneConfig('temperate', seasonNames);
-  return {
-    activeZone: 'temperate',
-    autoGenerate: false,
-    zones: zone ? [zone] : []
-  };
+  return { activeZone: 'temperate', autoGenerate: false, zones: zone ? [zone] : [] };
 }
 
 /**
@@ -135,12 +187,7 @@ export const KHORVAIRE = {
 /**
  * Map of calendar IDs to their default configurations.
  */
-export const CALENDAR_DEFAULTS = {
-  gregorian: GREGORIAN,
-  harptos: HARPTOS,
-  greyhawk: GREYHAWK,
-  khorvaire: KHORVAIRE
-};
+export const CALENDAR_DEFAULTS = { gregorian: GREGORIAN, harptos: HARPTOS, greyhawk: GREYHAWK, khorvaire: KHORVAIRE };
 
 /**
  * Get default configuration for a calendar ID.

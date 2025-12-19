@@ -33,8 +33,6 @@ export function getMoonPhasePosition(moon, date, calendar = null) {
  */
 export function isMoonFull(moon, date, calendar = null) {
   const position = getMoonPhasePosition(moon, date, calendar);
-  // Full moon is typically at 0.5 position (50% through cycle)
-  // Check if position falls within full moon phase range (0.5 to 0.625)
   return position >= 0.5 && position < 0.625;
 }
 
@@ -54,9 +52,7 @@ export function getNextConvergence(moons, startDate, options = {}) {
   if (!calendar || !moons || moons.length === 0) return null;
 
   // Single moon - just find next full moon
-  if (moons.length === 1) {
-    return getNextFullMoon(moons[0], startDate, { maxDays, calendar });
-  }
+  if (moons.length === 1) return getNextFullMoon(moons[0], startDate, { maxDays, calendar });
 
   // Multiple moons - find when all are full simultaneously
   let currentDate = { ...startDate };
@@ -114,9 +110,7 @@ export function getConvergencesInRange(moons, startDate, endDate, options = {}) 
     if (allFull) {
       convergences.push({ ...currentDate });
       // Skip ahead past the full moon phase to avoid duplicates
-      for (let skip = 0; skip < 5; skip++) {
-        currentDate = addOneDay(currentDate, calendar);
-      }
+      for (let skip = 0; skip < 5; skip++) currentDate = addOneDay(currentDate, calendar);
     } else {
       currentDate = addOneDay(currentDate, calendar);
     }
@@ -151,9 +145,7 @@ function dateToDayNumber(date, calendar) {
   let dayNumber = date.year * daysPerYear;
 
   // Add days for completed months
-  for (let m = 0; m < date.month && m < months.length; m++) {
-    dayNumber += months[m]?.days ?? 30;
-  }
+  for (let m = 0; m < date.month && m < months.length; m++) dayNumber += months[m]?.days ?? 30;
 
   // Add day within month (convert from 1-indexed to 0-indexed)
   dayNumber += (date.day ?? 1) - 1;

@@ -34,8 +34,6 @@ export default class TimeTracker {
    * Called during module initialization.
    */
   static initialize() {
-    log(3, 'Initializing Time Tracker...');
-
     // Store current time as baseline
     this.#lastWorldTime = game.time.worldTime;
     this.#lastComponents = foundry.utils.deepClone(game.time.components);
@@ -56,11 +54,7 @@ export default class TimeTracker {
   static onUpdateWorldTime(worldTime, delta) {
     // Only process if we have a calendar
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) {
-      log(3, 'No active calendar, skipping time tracking');
-      return;
-    }
-
+    if (!calendar) return;
     const currentComponents = game.time.components;
 
     // If this is the first update, just store the time
@@ -104,14 +98,8 @@ export default class TimeTracker {
     const yearZero = calendar?.years?.yearZero ?? 0;
 
     const hookData = {
-      previous: {
-        ...previousComponents,
-        year: previousComponents.year + yearZero
-      },
-      current: {
-        ...currentComponents,
-        year: currentComponents.year + yearZero
-      },
+      previous: { ...previousComponents, year: previousComponents.year + yearZero },
+      current: { ...currentComponents, year: currentComponents.year + yearZero },
       diff: delta,
       calendar: calendar,
       worldTime: game.time.worldTime
@@ -133,14 +121,8 @@ export default class TimeTracker {
 
     // Create hook data with display years
     const hookData = {
-      previous: {
-        ...previousComponents,
-        year: previousComponents.year + yearZero
-      },
-      current: {
-        ...currentComponents,
-        year: currentComponents.year + yearZero
-      },
+      previous: { ...previousComponents, year: previousComponents.year + yearZero },
+      current: { ...currentComponents, year: currentComponents.year + yearZero },
       calendar: calendar
     };
 
@@ -157,9 +139,7 @@ export default class TimeTracker {
     }
 
     // Check for day change
-    if (previousComponents.dayOfMonth !== currentComponents.dayOfMonth ||
-        previousComponents.month !== currentComponents.month ||
-        previousComponents.year !== currentComponents.year) {
+    if (previousComponents.dayOfMonth !== currentComponents.dayOfMonth || previousComponents.month !== currentComponents.month || previousComponents.year !== currentComponents.year) {
       log(3, `Day changed`);
       Hooks.callAll(HOOKS.DAY_CHANGE, hookData);
       this.#executePeriodMacro('day', hookData);
@@ -245,10 +225,7 @@ export default class TimeTracker {
 
       for (const [name, hour] of Object.entries(dayThresholds)) {
         if (hour !== null && startHour < hour && endHour >= hour) {
-          thresholds.push({
-            name,
-            data: this.#createThresholdData(endComponents, calendar)
-          });
+          thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
         }
       }
     } else {
@@ -258,10 +235,7 @@ export default class TimeTracker {
       // First, complete thresholds remaining in the starting day
       for (const [name, hour] of Object.entries(dayThresholds)) {
         if (hour !== null && startHour < hour) {
-          thresholds.push({
-            name,
-            data: this.#createThresholdData(startComponents, calendar)
-          });
+          thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
         }
       }
 
@@ -270,24 +244,14 @@ export default class TimeTracker {
       const intermediateDays = totalDays - 1;
       for (let day = 0; day < intermediateDays; day++) {
         for (const [name, hour] of Object.entries(dayThresholds)) {
-          if (hour !== null) {
-            thresholds.push({
-              name,
-              data: this.#createThresholdData(endComponents, calendar)
-            });
-          }
+          if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
         }
       }
 
       // Finally, check thresholds in the ending day up to current hour
       const endDayThresholds = this.#getThresholdsForDay(endComponents, calendar);
       for (const [name, hour] of Object.entries(endDayThresholds)) {
-        if (hour !== null && endHour >= hour) {
-          thresholds.push({
-            name,
-            data: this.#createThresholdData(endComponents, calendar)
-          });
-        }
+        if (hour !== null && endHour >= hour) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }
     }
 
@@ -308,13 +272,11 @@ export default class TimeTracker {
     const endDayOfYear = this.#getDayOfYear(endComponents, calendar);
     const yearDiff = endComponents.year - startComponents.year;
 
-    if (yearDiff === 0) {
-      return endDayOfYear - startDayOfYear;
-    }
+    if (yearDiff === 0) return endDayOfYear - startDayOfYear;
 
     // Calculate days remaining in start year + days in end year
     const daysInYear = this.#getDaysInYear(calendar);
-    return (daysInYear - startDayOfYear) + endDayOfYear + ((yearDiff - 1) * daysInYear);
+    return daysInYear - startDayOfYear + endDayOfYear + (yearDiff - 1) * daysInYear;
   }
 
   /**
@@ -327,9 +289,7 @@ export default class TimeTracker {
   static #getDaysInYear(calendar) {
     let total = 0;
     const months = calendar.months?.values || calendar.months || [];
-    for (const month of months) {
-      total += month?.days || 30;
-    }
+    for (const month of months) total += month?.days || 30;
     return total || 365;
   }
 
@@ -342,16 +302,9 @@ export default class TimeTracker {
    * @private
    */
   static #getThresholdsForDay(components, calendar) {
-    // Get sunrise and sunset times for this day
     const sunrise = typeof calendar.sunrise === 'function' ? calendar.sunrise() : null;
     const sunset = typeof calendar.sunset === 'function' ? calendar.sunset() : null;
-
-    return {
-      midnight: 0,      // Midnight is always at hour 0
-      sunrise: sunrise, // Sunrise varies by calendar/season
-      midday: 12,       // Midday is always at hour 12
-      sunset: sunset    // Sunset varies by calendar/season
-    };
+    return { midnight: 0, sunrise: sunrise, midday: 12, sunset: sunset };
   }
 
   /**
@@ -363,11 +316,7 @@ export default class TimeTracker {
    * @private
    */
   static #createThresholdData(components, calendar) {
-    return {
-      worldTime: game.time.worldTime,
-      components: components,
-      calendar: calendar
-    };
+    return { worldTime: game.time.worldTime, components: components, calendar: calendar };
   }
 
   /**
@@ -399,8 +348,8 @@ export default class TimeTracker {
    * @private
    */
   static #getComponentsForTime(worldTime) {
-    // This is a simplified version - ideally we'd use the calendar's method
-    // For now, we'll use the stored last components if available
+    const calendar = CalendarManager.getActiveCalendar();
+    if (calendar) return calendar.timeToComponents(worldTime);
     return this.#lastComponents || game.time.components;
   }
 
@@ -417,7 +366,7 @@ export default class TimeTracker {
     let dayOfYear = 0;
     for (let i = 0; i < components.month; i++) {
       const month = calendar.months?.values?.[i];
-      dayOfYear += month?.days || 30; // Default to 30 if not specified
+      dayOfYear += month?.days || 30;
     }
     // Add days in current month
     dayOfYear += components.dayOfMonth;
@@ -442,9 +391,7 @@ export default class TimeTracker {
     for (let i = 0; i < calendar.moons.length; i++) {
       const moon = calendar.moons[i];
       const phaseData = calendar.getMoonPhase?.(i);
-      if (phaseData?.phaseIndex !== undefined) {
-        phases.set(i, phaseData.phaseIndex);
-      }
+      if (phaseData?.phaseIndex !== undefined) phases.set(i, phaseData.phaseIndex);
     }
     return phases.size > 0 ? phases : null;
   }
@@ -486,11 +433,7 @@ export default class TimeTracker {
       log(3, `Moon phase changed for ${changedMoons.length} moon(s)`);
 
       // Fire hook with all changed moons
-      Hooks.callAll(HOOKS.MOON_PHASE_CHANGE, {
-        moons: changedMoons,
-        calendar,
-        worldTime: game.time.worldTime
-      });
+      Hooks.callAll(HOOKS.MOON_PHASE_CHANGE, { moons: changedMoons, calendar, worldTime: game.time.worldTime });
 
       // Execute moon phase macros from config
       this.#executeMoonPhaseMacros(changedMoons);
@@ -538,20 +481,10 @@ export default class TimeTracker {
    */
   static #executeThresholdMacro(thresholdName, data) {
     // Map threshold names to config keys
-    const keyMap = {
-      midnight: 'midnight',
-      sunrise: 'dawn',
-      midday: 'midday',
-      sunset: 'dusk'
-    };
-
+    const keyMap = { midnight: 'midnight', sunrise: 'dawn', midday: 'midday', sunset: 'dusk' };
     const triggerKey = keyMap[thresholdName];
     if (!triggerKey) return;
-
-    this.#executeGlobalTrigger(triggerKey, {
-      trigger: thresholdName,
-      ...data
-    });
+    this.#executeGlobalTrigger(triggerKey, { trigger: thresholdName, ...data });
   }
 
   /**
@@ -562,12 +495,8 @@ export default class TimeTracker {
    * @private
    */
   static #executePeriodMacro(periodName, data) {
-    if (periodName === 'day') {
-      this.#executeGlobalTrigger('newDay', { trigger: 'newDay', ...data });
-    } else if (periodName === 'season') {
-      // Execute per-season macros based on the new season
-      this.#executeSeasonMacros(data);
-    }
+    if (periodName === 'day') this.#executeGlobalTrigger('newDay', { trigger: 'newDay', ...data });
+    else if (periodName === 'season') this.#executeSeasonMacros(data);
   }
 
   /**
@@ -590,16 +519,9 @@ export default class TimeTracker {
     if (currentSeasonIndex === undefined) return;
 
     // Find matching triggers: -1 means "all seasons", otherwise match specific
-    const matchingTriggers = seasonTriggers.filter(
-      (t) => t.seasonIndex === -1 || t.seasonIndex === currentSeasonIndex
-    );
+    const matchingTriggers = seasonTriggers.filter((t) => t.seasonIndex === -1 || t.seasonIndex === currentSeasonIndex);
 
-    for (const trigger of matchingTriggers) {
-      executeMacroById(trigger.macroId, {
-        trigger: 'seasonChange',
-        ...data
-      });
-    }
+    for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'seasonChange', ...data });
   }
 
   /**
@@ -626,12 +548,7 @@ export default class TimeTracker {
         return moonMatches && phaseMatches;
       });
 
-      for (const trigger of matchingTriggers) {
-        executeMacroById(trigger.macroId, {
-          trigger: 'moonPhaseChange',
-          moon: changed
-        });
-      }
+      for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'moonPhaseChange', moon: changed });
     }
   }
 }

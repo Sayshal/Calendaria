@@ -84,11 +84,12 @@
       </div>
 
       {{!-- Simple interval fields --}}
-      <div class="leap-simple-fields" {{#unless showLeapSimple}}style="display: none;"{{/unless}}>
+      <div class="leap-simple-fields" {{#unless showLeapSimple}}style="display: none;" {{/unless}}>
         <div class="form-group">
           <label>{{localize "CALENDARIA.Editor.Field.LeapInterval"}}</label>
           <div class="form-fields fit-content">
-            <input type="number" name="leapYearConfig.interval" value="{{leapInterval}}" step="1" min="1" class="year-input">
+            <input type="number" name="leapYearConfig.interval" value="{{leapInterval}}" step="1" min="1"
+              class="year-input">
           </div>
           <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapInterval"}}</p>
         </div>
@@ -103,11 +104,12 @@
       </div>
 
       {{!-- Custom pattern field --}}
-      <div class="leap-custom-fields" {{#unless showLeapCustom}}style="display: none;"{{/unless}}>
+      <div class="leap-custom-fields" {{#unless showLeapCustom}}style="display: none;" {{/unless}}>
         <div class="form-group">
           <label>{{localize "CALENDARIA.Editor.Field.LeapPattern"}}</label>
           <div class="form-fields fit-content">
-            <input type="text" name="leapYearConfig.pattern" value="{{leapPattern}}" placeholder="400,!100,4" class="pattern-input">
+            <input type="text" name="leapYearConfig.pattern" value="{{leapPattern}}" placeholder="400,!100,4"
+              class="pattern-input">
           </div>
           <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapPattern"}}</p>
         </div>
@@ -122,7 +124,7 @@
       </div>
 
       {{!-- Gregorian info --}}
-      <div class="leap-gregorian-info" {{#unless showLeapGregorian}}style="display: none;"{{/unless}}>
+      <div class="leap-gregorian-info" {{#unless showLeapGregorian}}style="display: none;" {{/unless}}>
         <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
       </div>
     </fieldset>

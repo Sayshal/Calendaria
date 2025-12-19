@@ -71,16 +71,10 @@ export function generateWeather({ zoneConfig, season, seed, customPresets = [] }
 
   // Build probability map from enabled presets
   const probabilities = {};
-  for (const preset of zoneConfig?.presets ?? []) {
-    if (preset.enabled && preset.chance > 0) {
-      probabilities[preset.id] = preset.chance;
-    }
-  }
+  for (const preset of zoneConfig?.presets ?? []) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
 
   // If no presets enabled, default to clear
-  if (Object.keys(probabilities).length === 0) {
-    probabilities.clear = 1;
-  }
+  if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
 
   // Select weather type
   const weatherId = weightedSelect(probabilities, randomFn);
@@ -91,11 +85,8 @@ export function generateWeather({ zoneConfig, season, seed, customPresets = [] }
   if (zoneConfig?.temperatures) {
     const temps = zoneConfig.temperatures;
     // Try season, then _default
-    if (season && temps[season]) {
-      tempRange = temps[season];
-    } else if (temps._default) {
-      tempRange = temps._default;
-    }
+    if (season && temps[season]) tempRange = temps[season];
+    else if (temps._default) tempRange = temps._default;
   }
 
   // Check for preset-specific temperature overrides
@@ -105,10 +96,7 @@ export function generateWeather({ zoneConfig, season, seed, customPresets = [] }
 
   const temperature = Math.round(tempRange.min + randomFn() * (tempRange.max - tempRange.min));
 
-  return {
-    preset: preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' },
-    temperature
-  };
+  return { preset: preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' }, temperature };
 }
 
 /**
@@ -141,16 +129,7 @@ export function generateWeatherForDate({ zoneConfig, season, year, month, day, c
  * @param {function} [options.getSeasonForDate] - Function to get season for a date
  * @returns {object[]} Array of weather forecasts
  */
-export function generateForecast({
-  zoneConfig,
-  season,
-  startYear,
-  startMonth,
-  startDay,
-  days = 7,
-  customPresets = [],
-  getSeasonForDate
-}) {
+export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate }) {
   const forecast = [];
   let year = startYear;
   let month = startMonth;
@@ -158,25 +137,10 @@ export function generateForecast({
 
   for (let i = 0; i < days; i++) {
     const currentSeason = getSeasonForDate ? getSeasonForDate(year, month, day) : season;
-    const weather = generateWeatherForDate({
-      zoneConfig,
-      season: currentSeason,
-      year,
-      month,
-      day,
-      customPresets
-    });
-
-    forecast.push({
-      year,
-      month,
-      day,
-      ...weather
-    });
-
+    const weather = generateWeatherForDate({ zoneConfig, season: currentSeason, year, month, day, customPresets });
+    forecast.push({ year, month, day, ...weather });
     day++;
   }
-
   return forecast;
 }
 
@@ -199,12 +163,7 @@ export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0
   if (totalOther > 0) {
     const boost = totalOther * inertia;
     adjusted[currentWeatherId] = currentWeight + boost;
-
-    for (const id of Object.keys(adjusted)) {
-      if (id !== currentWeatherId) {
-        adjusted[id] *= 1 - inertia;
-      }
-    }
+    for (const id of Object.keys(adjusted)) if (id !== currentWeatherId) adjusted[id] *= 1 - inertia;
   }
 
   return adjusted;

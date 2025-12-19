@@ -75,22 +75,14 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: 'compact-calendar',
     classes: ['calendaria', 'compact-calendar'],
-    position: {
-      width: 'auto',
-      height: 'auto',
-      zIndex: 250
-    },
-    window: {
-      frame: false,
-      positioned: true
-    },
+    position: { width: 'auto', height: 'auto', zIndex: 250 },
+    window: { frame: false, positioned: true },
     actions: {
       navigate: CompactCalendar._onNavigate,
       today: CompactCalendar._onToday,
       selectDay: CompactCalendar._onSelectDay,
       addNote: CompactCalendar._onAddNote,
       openFull: CompactCalendar._onOpenFull,
-      close: CompactCalendar._onClose,
       toggle: CompactCalendar._onToggleClock,
       forward: CompactCalendar._onForward,
       forward5x: CompactCalendar._onForward5x,
@@ -202,14 +194,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     // Get cycle values for display in header (based on viewed date, not world time)
     if (calendar && calendar.cycles?.length) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
-      const viewedComponents = {
-        year: viewedDate.year - yearZeroOffset,
-        month: viewedDate.month,
-        dayOfMonth: (viewedDate.day ?? 1) - 1,
-        hour: 12,
-        minute: 0,
-        second: 0
-      };
+      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
       const cycleResult = calendar.getCycleValues(viewedComponents);
       context.cycleText = cycleResult.text;
       context.cycleValues = cycleResult.values;
@@ -245,9 +230,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   _generateMiniCalendarData(calendar, date) {
     const { year, month } = date;
     const monthData = calendar.months?.values?.[month];
-
     if (!monthData) return null;
-
     const daysInMonth = monthData.days;
     const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
@@ -803,7 +786,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     const page = await NoteManager.createNote({
-      name: 'New Note',
+      name: game.i18n.localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 12, minute: 0 },
         endDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 13, minute: 0 }
@@ -819,10 +802,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Open the full calendar
     new CalendarApplication().render(true);
-  }
-
-  static async _onClose(event, target) {
-    await this.close();
   }
 
   static _onToggleClock(event, target) {
@@ -884,24 +863,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const togglePosition = this._toggleStickyPosition.bind(this);
 
     const menuItems = [
-      {
-        name: 'CALENDARIA.CompactCalendar.StickyTimeControls',
-        icon: `<i class="fas fa-clock"></i>`,
-        callback: toggleTime,
-        classes: this.#stickyTimeControls ? ['sticky-active'] : []
-      },
-      {
-        name: 'CALENDARIA.CompactCalendar.StickySidebar',
-        icon: `<i class="fas fa-bars"></i>`,
-        callback: toggleSidebar,
-        classes: this.#stickySidebar ? ['sticky-active'] : []
-      },
-      {
-        name: 'CALENDARIA.CompactCalendar.StickyPosition',
-        icon: `<i class="fas fa-lock"></i>`,
-        callback: togglePosition,
-        classes: this.#stickyPosition ? ['sticky-active'] : []
-      }
+      { name: 'CALENDARIA.CompactCalendar.StickyTimeControls', icon: `<i class="fas fa-clock"></i>`, callback: toggleTime, classes: this.#stickyTimeControls ? ['sticky-active'] : [] },
+      { name: 'CALENDARIA.CompactCalendar.StickySidebar', icon: `<i class="fas fa-bars"></i>`, callback: toggleSidebar, classes: this.#stickySidebar ? ['sticky-active'] : [] },
+      { name: 'CALENDARIA.CompactCalendar.StickyPosition', icon: `<i class="fas fa-lock"></i>`, callback: togglePosition, classes: this.#stickyPosition ? ['sticky-active'] : [] }
     ];
 
     // Create and render context menu at button position
@@ -990,9 +954,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Update cursor on drag handle when position is locked
-    if (topRow) {
-      topRow.classList.toggle('position-locked', this.#stickyPosition);
-    }
+    if (topRow) topRow.classList.toggle('position-locked', this.#stickyPosition);
   }
 
   /**
@@ -1110,13 +1072,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentHour = components.hour + components.minute / minutesPerHour + components.second / secondsPerHour;
 
     let hoursUntil;
-    if (nextDay || currentHour >= targetHour) {
-      // Advance to target hour tomorrow
-      hoursUntil = hoursPerDay - currentHour + targetHour;
-    } else {
-      // Advance to target hour today
-      hoursUntil = targetHour - currentHour;
-    }
+    if (nextDay || currentHour >= targetHour) hoursUntil = hoursPerDay - currentHour + targetHour;
+    else hoursUntil = targetHour - currentHour;
 
     const secondsToAdvance = Math.round(hoursUntil * secondsPerHour);
     if (secondsToAdvance > 0) await game.time.advance(secondsToAdvance);

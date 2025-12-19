@@ -153,7 +153,6 @@ export default class CalendarRegistry {
   static toObject() {
     const calendars = {};
     for (const [id, calendar] of this.#calendars.entries()) calendars[id] = calendar.toObject();
-
     return { calendars, activeId: this.#activeId };
   }
 
@@ -163,9 +162,7 @@ export default class CalendarRegistry {
    */
   static fromObject(data) {
     this.clear();
-
     if (data.calendars) for (const [id, calendarData] of Object.entries(data.calendars)) this.register(id, calendarData);
-
     if (data.activeId && this.has(data.activeId)) this.setActive(data.activeId);
   }
 }

@@ -290,9 +290,7 @@ export class CalendariaSocket {
     log(3, 'Handling remote date change', data);
 
     // Re-render the calendar HUD if it exists (dnd5e only)
-    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) {
-      dnd5e.ui.calendar.render();
-    }
+    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) dnd5e.ui.calendar.render();
 
     // Emit hook for other systems to respond
     Hooks.callAll(HOOKS.REMOTE_DATE_CHANGE, data);
@@ -327,16 +325,10 @@ export class CalendariaSocket {
     // 2. Future use cases where we need to sync data not stored in documents
 
     // Re-render any open calendar applications
-    for (const app of Object.values(ui.windows)) {
-      if (app.constructor.name === 'CalendarApplication') {
-        app.render();
-      }
-    }
+    for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'CalendarApplication') app.render();
 
     // Re-render dnd5e calendar HUD if present
-    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) {
-      dnd5e.ui.calendar.render();
-    }
+    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) dnd5e.ui.calendar.render();
 
     // Emit appropriate hook based on action
     switch (action) {
@@ -455,9 +447,7 @@ export class CalendariaSocket {
   static getPrimaryGM() {
     // Check for manual override
     const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-    if (primaryGMOverride) {
-      return game.users.get(primaryGMOverride) ?? null;
-    }
+    if (primaryGMOverride) return game.users.get(primaryGMOverride) ?? null;
 
     // Automatic election
     const activeGMs = game.users.filter((u) => u.isGM && u.active);

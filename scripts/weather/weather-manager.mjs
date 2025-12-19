@@ -176,9 +176,7 @@ class WeatherManager {
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous, current: weather });
 
     // Broadcast to other clients
-    if (broadcast) {
-      CalendariaSocket.emit('weatherChange', { weather });
-    }
+    if (broadcast) CalendariaSocket.emit('weatherChange', { weather });
 
     log(3, 'Weather changed:', weather?.id ?? 'cleared');
   }
@@ -320,11 +318,8 @@ class WeatherManager {
 
     // Get base temperature range from season or default
     let tempRange = { min: 10, max: 22 };
-    if (season && temps[season]) {
-      tempRange = temps[season];
-    } else if (temps._default) {
-      tempRange = temps._default;
-    }
+    if (season && temps[season]) tempRange = temps[season];
+    else if (temps._default) tempRange = temps._default;
 
     // Apply preset-specific overrides if configured
     const presetConfig = zoneConfig.presets?.find((p) => p.id === presetId);
@@ -435,18 +430,9 @@ class WeatherManager {
       return null;
     }
 
-    const newPreset = {
-      id: preset.id,
-      label: preset.label,
-      description: preset.description || '',
-      icon: preset.icon || 'fa-question',
-      color: preset.color || '#888888',
-      category: 'custom'
-    };
-
+    const newPreset = { id: preset.id, label: preset.label, description: preset.description || '', icon: preset.icon || 'fa-question', color: preset.color || '#888888', category: 'custom' };
     customPresets.push(newPreset);
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-
     log(3, `Added custom weather preset: ${preset.id}`);
     return newPreset;
   }
@@ -499,7 +485,7 @@ class WeatherManager {
 
     const preset = customPresets[index];
     Object.assign(preset, updates);
-    preset.category = 'custom'; // Ensure category stays custom
+    preset.category = 'custom';
 
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
 
@@ -535,11 +521,7 @@ class WeatherManager {
   getPresetsByCategory() {
     const all = this.getAllPresets();
     const grouped = {};
-
-    for (const category of Object.keys(WEATHER_CATEGORIES)) {
-      grouped[category] = all.filter((p) => p.category === category);
-    }
-
+    for (const category of Object.keys(WEATHER_CATEGORIES)) grouped[category] = all.filter((p) => p.category === category);
     return grouped;
   }
 
@@ -564,12 +546,11 @@ class WeatherManager {
     if (celsius == null) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
     if (unit === 'fahrenheit') {
-      const fahrenheit = Math.round(celsius * 9 / 5 + 32);
+      const fahrenheit = Math.round((celsius * 9) / 5 + 32);
       return `${fahrenheit}°F`;
     }
     return `${Math.round(celsius)}°C`;
   }
 }
 
-// Export singleton instance
 export default new WeatherManager();
