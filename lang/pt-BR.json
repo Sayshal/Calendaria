@@ -754,7 +754,7 @@
   "CALENDARIA.Season.Summer": "Verão",
   "CALENDARIA.Season.Winter": "Inverno",
   "CALENDARIA.Settings.AdvanceTimeOnCombat.Hint": "Avança automaticamente o tempo do mundo em 6 segundos por rodada de combate (padrão D&D 5e).",
-  "CALENDARIA.Settings.AdvanceTimeOnCombat.Name": "Avançar o Tempo no Combate",
+  "CALENDARIA.Settings.AdvanceTimeOnCombat.Name": "Avançar Tempo no Combate",
   "CALENDARIA.Settings.AdvanceTimeOnRest.Hint": "Avanço automático do tempo do mundo quando os personagens fizerem descansos curtos ou longos (somente para D&D 5e).",
   "CALENDARIA.Settings.AdvanceTimeOnRest.Name": "Avançar Tempo no Descanso",
   "CALENDARIA.Settings.CalendarEditor.Hint": "Crie e edite calendários personalizados para o seu mundo.",
