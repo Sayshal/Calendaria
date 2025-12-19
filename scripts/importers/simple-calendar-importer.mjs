@@ -338,7 +338,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     let regularMonthIndex = 0;
     for (const month of months) {
       if (month.intercalary) {
-        for (let day = 1; day <= month.numberOfDays; day++) festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, month: regularMonthIndex, day: day });
+        for (let day = 1; day <= month.numberOfDays; day++) festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, startDate: { month: regularMonthIndex, day: day } });
       } else {
         regularMonthIndex++;
       }
