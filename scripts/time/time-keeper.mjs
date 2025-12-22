@@ -57,9 +57,6 @@ export default class TimeKeeper {
   /** @type {number} Time increment in seconds per tick */
   static #increment = 60;
 
-  /** @type {number} Real-time interval in seconds between ticks */
-  static #updateFrequency = 1;
-
   /** @type {number} Game-time to real-time ratio (game seconds per real second) */
   static #gameTimeRatio = 1;
 
@@ -86,11 +83,6 @@ export default class TimeKeeper {
   /** @returns {string} Current increment key */
   static get incrementKey() {
     return this.#incrementKey;
-  }
-
-  /** @returns {number} Update frequency in seconds */
-  static get updateFrequency() {
-    return this.#updateFrequency;
   }
 
   /** @returns {number} Game-time to real-time ratio */
@@ -141,8 +133,6 @@ export default class TimeKeeper {
 
     this.#running = true;
     this.#startInterval();
-
-    log(3, `TimeKeeper started: ${this.#incrementKey} (ratio: ${this.#gameTimeRatio}x, every ${this.#updateFrequency}s)`);
 
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
 
@@ -198,22 +188,6 @@ export default class TimeKeeper {
     log(3, `TimeKeeper increment set to: ${key} (ratio: ${this.#gameTimeRatio})`);
 
     // Restart interval if running to apply new ratio
-    if (this.#running) {
-      this.#stopInterval();
-      this.#startInterval();
-    }
-  }
-
-  /**
-   * Set the update frequency (real-time seconds between advances).
-   * @param {number} seconds - Interval in seconds (min 1)
-   */
-  static setUpdateFrequency(seconds) {
-    this.#updateFrequency = Math.max(1, seconds);
-
-    log(3, `TimeKeeper update frequency set to: ${this.#updateFrequency}s`);
-
-    // Restart interval if running
     if (this.#running) {
       this.#stopInterval();
       this.#startInterval();
@@ -277,20 +251,63 @@ export default class TimeKeeper {
   /* -------------------------------------------- */
 
   /**
+   * Get the smooth animation unit based on current increment.
+   * Smaller increments use seconds, larger use hours/days/months.
+   * @returns {number} Smooth unit in seconds
+   * @private
+   */
+  static #getSmoothUnit() {
+    const increments = getTimeIncrements();
+    switch (this.#incrementKey) {
+      case 'second':
+      case 'round':
+      case 'minute':
+        return 1; // 1 second
+      case 'hour':
+        return increments.minute; // 1 minute
+      case 'day':
+        return increments.hour; // 1 hour
+      case 'week':
+      case 'month':
+        return increments.day; // 1 day
+      case 'season':
+      case 'year':
+        return increments.month; // 1 month
+      default:
+        return 1;
+    }
+  }
+
+  /**
    * Start the clock interval.
+   * Uses smooth units for animation while maintaining correct time rate.
    * @private
    */
   static #startInterval() {
     if (this.#intervalId) return;
 
-    // Interval runs every updateFrequency seconds, advances by gameTimeRatio * updateFrequency * multiplier
+    const MIN_INTERVAL = 50; // 20 updates/sec max
+    const MAX_INTERVAL = 1000; // 1 update/sec min
+
+    const smoothUnit = this.#getSmoothUnit();
+    const targetRate = this.#gameTimeRatio * this.#multiplier; // game seconds per real second
+
+    // Calculate ideal interval for smooth animation
+    const idealUpdatesPerSec = targetRate / smoothUnit;
+    const idealInterval = 1000 / idealUpdatesPerSec;
+
+    // Clamp to reasonable bounds
+    const intervalMs = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, idealInterval));
+    const actualUpdatesPerSec = 1000 / intervalMs;
+    const advanceAmount = targetRate / actualUpdatesPerSec;
+
+    log(3, `TimeKeeper interval: ${intervalMs.toFixed(0)}ms, advance: ${advanceAmount.toFixed(1)}s`);
+
     this.#intervalId = setInterval(async () => {
       if (!this.#running) return;
       if (!game.user.isGM) return;
-
-      const advanceAmount = this.#gameTimeRatio * this.#updateFrequency * this.#multiplier;
       await game.time.advance(advanceAmount);
-    }, this.#updateFrequency * 1000);
+    }, intervalMs);
   }
 
   /**

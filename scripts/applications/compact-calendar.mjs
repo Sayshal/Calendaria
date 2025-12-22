@@ -450,8 +450,13 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     // Set up time update hook
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
 
-    // Clock state hook
-    Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
+    // Clock state hook (only register once)
+    if (!this.#hooks.some((h) => h.name === HOOKS.CLOCK_START_STOP)) {
+      this.#hooks.push({
+        name: HOOKS.CLOCK_START_STOP,
+        id: Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this))
+      });
+    }
 
     // Sidebar auto-hide (respects lock state and sticky sidebar)
     const container = this.element.querySelector('.compact-calendar-container');

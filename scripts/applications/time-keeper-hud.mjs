@@ -19,6 +19,9 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {number|null} Hook ID for updateWorldTime */
   #timeHookId = null;
 
+  /** @type {number|null} Hook ID for clock state changes */
+  #clockHookId = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'time-keeper-hud',
@@ -66,7 +69,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#activateListeners();
 
     // Listen for clock state changes to update UI
-    Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
+    if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
 
     // Listen for world time changes to update clock display
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
@@ -146,10 +149,14 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     super._onClose(options);
 
-    // Clean up time hook
+    // Clean up hooks
     if (this.#timeHookId) {
       Hooks.off('updateWorldTime', this.#timeHookId);
       this.#timeHookId = null;
+    }
+    if (this.#clockHookId) {
+      Hooks.off(HOOKS.CLOCK_START_STOP, this.#clockHookId);
+      this.#clockHookId = null;
     }
   }
 

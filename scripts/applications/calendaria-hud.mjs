@@ -121,7 +121,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   /** @override */
-  static PARTS = { hud: { template: TEMPLATES.CALENDAR_HUD } };
+  static PARTS = {
+    container: { template: TEMPLATES.CALENDAR_HUD },
+    dome: { template: TEMPLATES.CALENDAR_HUD_DOME, container: '.calendaria-hud' },
+    bar: { template: TEMPLATES.CALENDAR_HUD_BAR, container: '.calendaria-hud' }
+  };
 
   /* -------------------------------------------- */
   /*  Properties                                  */
@@ -173,6 +177,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#multiplier = stickyStates.multiplier ?? 1;
     context.stickyTray = this.#stickyTray;
 
+    // Restore TimeKeeper states if saved (must happen before building dropdowns)
+    if (stickyStates.increment && stickyStates.increment !== TimeKeeper.incrementKey) {
+      TimeKeeper.setIncrement(stickyStates.increment);
+    }
+    if (this.#multiplier !== TimeKeeper.multiplier) {
+      TimeKeeper.setMultiplier(this.#multiplier);
+    }
+
     // Time display
     context.time = this.#formatTime(components);
 
@@ -181,17 +193,21 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Season (with color and icon)
     const season = calendar?.getCurrentSeason?.();
-    context.currentSeason = season ? {
-      name: localize(season.name),
-      color: season.color || '#888',
-      icon: season.icon || 'fas fa-sun'
-    } : null;
+    context.currentSeason = season
+      ? {
+          name: localize(season.name),
+          color: season.color || '#888',
+          icon: season.icon || 'fas fa-sun'
+        }
+      : null;
 
     // Era
     const era = calendar?.getCurrentEra?.();
-    context.currentEra = era ? {
-      name: localize(era.abbreviation || era.name)
-    } : null;
+    context.currentEra = era
+      ? {
+          name: localize(era.abbreviation || era.name)
+        }
+      : null;
 
     // Cycle (uses getCycleValues which returns { text, values })
     const cycleData = calendar?.getCycleValues?.();
@@ -205,9 +221,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hasEvents = this.#liveEvents.length > 0;
     context.firstEventColor = this.#liveEvents[0]?.color || null;
     // Always provide currentEvent data when events exist (visibility controlled by CSS)
-    context.currentEvent = this.#liveEvents.length > 0
-      ? this.#liveEvents[this.#currentEventIndex % this.#liveEvents.length]
-      : null;
+    context.currentEvent = this.#liveEvents.length > 0 ? this.#liveEvents[this.#currentEventIndex % this.#liveEvents.length] : null;
 
     // Time increments for dropdown
     context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
@@ -231,22 +245,28 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
 
+    // Check if this is a partial re-render of just the bar
+    const isBarOnlyRender = options.parts?.length === 1 && options.parts[0] === 'bar';
+
     // Apply compact mode class
     this.element.classList.toggle('compact', this.isCompact);
 
-    // Restore position
-    this.#restorePosition();
+    // Skip position/dome setup for bar-only renders to prevent flicker
+    if (!isBarOnlyRender) {
+      // Restore position
+      this.#restorePosition();
 
-    // Enable dragging (respects sticky position)
-    this.#enableDragging();
+      // Enable dragging (respects sticky position)
+      this.#enableDragging();
 
-    // Update celestial visuals
-    this.#updateCelestialDisplay();
+      // Update celestial visuals
+      this.#updateCelestialDisplay();
 
-    // Update dome visibility based on viewport position
-    this.#updateDomeVisibility();
+      // Update dome visibility based on viewport position
+      this.#updateDomeVisibility();
+    }
 
-    // Setup event listeners
+    // Setup event listeners (always needed for bar controls)
     this.#setupEventListeners();
 
     // Set up time update hook
@@ -331,6 +351,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     // Increment selector
     this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]')?.addEventListener('change', (event) => {
       TimeKeeper.setIncrement(event.target.value);
+      this.#saveStickyStates();
     });
 
     // Multiplier selector
@@ -379,8 +400,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyPosition = states.position ?? false;
     this.#multiplier = states.multiplier ?? 1;
 
-    // Set TimeKeeper multiplier
+    // Set TimeKeeper multiplier and increment
     TimeKeeper.setMultiplier(this.#multiplier);
+    if (states.increment) TimeKeeper.setIncrement(states.increment);
 
     // Apply tray visibility
     if (this.#stickyTray) {
@@ -396,7 +418,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
       tray: this.#stickyTray,
       position: this.#stickyPosition,
-      multiplier: this.#multiplier
+      multiplier: this.#multiplier,
+      increment: TimeKeeper.incrementKey
     });
   }
 
@@ -736,10 +759,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const components = game.time.components;
 
-    // Check if day changed - trigger full re-render
+    // Check if day changed - only re-render bar part to preserve dome/celestial
     if (this.#lastDay !== null && this.#lastDay !== components.dayOfMonth) {
       this.#lastDay = components.dayOfMonth;
-      this.render();
+      this.render({ parts: ['bar'] });
       return;
     }
 

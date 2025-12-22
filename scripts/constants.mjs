@@ -213,6 +213,12 @@ export const TEMPLATES = {
   /** @type {string} Calendar HUD template */
   CALENDAR_HUD: `modules/${MODULE.ID}/templates/calendaria-hud.hbs`,
 
+  /** @type {string} Calendar HUD dome partial */
+  CALENDAR_HUD_DOME: `modules/${MODULE.ID}/templates/calendaria-hud-dome.hbs`,
+
+  /** @type {string} Calendar HUD bar partial */
+  CALENDAR_HUD_BAR: `modules/${MODULE.ID}/templates/calendaria-hud-bar.hbs`,
+
   SHEETS: {
     /** @type {string} Calendar sheet header template */
     CALENDAR_HEADER: `modules/${MODULE.ID}/templates/sheets/calendar-header.hbs`,
