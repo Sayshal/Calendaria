@@ -1,23 +1,13 @@
 /**
  * Rest Time Integration
  * Hooks into dnd5e rest system to advance world time based on rest duration.
- *
- * ## Features
- *
- * - Hooks into `dnd5e.preShortRest` and `dnd5e.preLongRest`
- * - Sets `config.advanceTime = true` when the setting is enabled
- * - For long rests with "New Day" enabled, advances to 8:00 AM next day
- * - For other rests, uses dnd5e's built-in duration based on rest variant
- *
- * ## Usage
- *
- * Enable via module settings: "Advance Time on Rest"
+ * @todo Make this system agnostic-lite: Add hooks for as many systems as we can that support a short/long rest-type integration.
  *
  * @module Integrations/RestTime
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SYSTEM } from '../constants.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { getCurrentDate } from '../notes/utils/date-utils.mjs';
@@ -27,15 +17,11 @@ const NEW_DAY_HOUR = 8;
 
 /**
  * Register rest time integration hooks.
- * Only registers if running on dnd5e system.
  *
  * @returns {void}
  */
 export function registerRestTimeHooks() {
-  if (!SYSTEM.isDnd5e) {
-    log(3, 'Rest time integration skipped - not dnd5e system');
-    return;
-  }
+  if (!game.system.id === 'dnd5e') return;
 
   // Use pre-hooks to enable time advancement (before dialog)
   Hooks.on('dnd5e.preShortRest', onPreRest);
@@ -97,7 +83,7 @@ function onLongRest(actor, config) {
   }
 
   const currentDate = getCurrentDate();
-  const currentMinutes = (currentDate.hour * 60) + currentDate.minute;
+  const currentMinutes = currentDate.hour * 60 + currentDate.minute;
   const targetMinutes = NEW_DAY_HOUR * 60;
   const minutesInDay = (calendar.hours ?? 24) * 60;
 
@@ -107,7 +93,7 @@ function onLongRest(actor, config) {
 
   // Calculate minutes to reach 8:00 AM on target day
   // Formula: (days * minutesInDay) - currentMinutes + targetMinutes
-  const minutesUntilTarget = (daysToAdvance * minutesInDay) - currentMinutes + targetMinutes;
+  const minutesUntilTarget = daysToAdvance * minutesInDay - currentMinutes + targetMinutes;
   config.duration = minutesUntilTarget;
 
   log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${NEW_DAY_HOUR}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);

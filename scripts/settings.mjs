@@ -7,13 +7,14 @@
 import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { ImporterApp } from './applications/importer-app.mjs';
-import { localize, format } from './utils/localization.mjs';
-import { log } from './utils/logger.mjs';
 import { MacroTriggerConfig } from './applications/settings/macro-trigger-config.mjs';
-import { MODULE, SETTINGS } from './constants.mjs';
 import { ResetPositionDialog } from './applications/settings/reset-position.mjs';
 import { ThemeEditor } from './applications/settings/theme-editor.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
+import { BUNDLED_CALENDARS } from './calendar/calendar-loader.mjs';
+import { MODULE, SETTINGS } from './constants.mjs';
+import { localize } from './utils/localization.mjs';
+import { log } from './utils/logger.mjs';
 
 /**
  * Register all module settings with Foundry VTT.
@@ -131,8 +132,8 @@ export function registerSettings() {
 
   /** Show Calendar HUD on world load */
   game.settings.register(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, {
-    name: 'CALENDARIA.Settings.ShowCalendarHud.Name',
-    hint: 'CALENDARIA.Settings.ShowCalendarHud.Hint',
+    name: 'CALENDARIA.Settings.ShowCalendarHUD.Name',
+    hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
     scope: 'client',
     config: true,
     type: Boolean,
@@ -145,14 +146,14 @@ export function registerSettings() {
 
   /** Calendar HUD display mode (fullsize or compact) */
   game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, {
-    name: 'CALENDARIA.Settings.CalendarHudMode.Name',
-    hint: 'CALENDARIA.Settings.CalendarHudMode.Hint',
+    name: 'CALENDARIA.Settings.CalendarHUDMode.Name',
+    hint: 'CALENDARIA.Settings.CalendarHUDMode.Hint',
     scope: 'client',
     config: true,
     type: new foundry.data.fields.StringField({
       choices: {
-        fullsize: 'CALENDARIA.Settings.CalendarHudMode.Fullsize',
-        compact: 'CALENDARIA.Settings.CalendarHudMode.Compact'
+        fullsize: 'CALENDARIA.Settings.CalendarHUDMode.Fullsize',
+        compact: 'CALENDARIA.Settings.CalendarHUDMode.Compact'
       },
       initial: 'fullsize'
     }),
@@ -213,6 +214,32 @@ export function registerSettings() {
     default: {}
   });
 
+  // Build calendar choices from bundled + custom calendars
+  const calendarChoices = BUNDLED_CALENDARS.reduce((acc, id) => {
+    const key = id.charAt(0).toUpperCase() + id.slice(1);
+    acc[id] = `CALENDARIA.Calendar.${key}.Name`;
+    return acc;
+  }, {});
+
+  // Add custom calendars from stored setting
+  const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
+  for (const [id, data] of Object.entries(customCalendars)) {
+    calendarChoices[id] = data.name || id;
+  }
+
+  /** Active calendar ID - which calendar is currently being used */
+  game.settings.register(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, {
+    name: 'CALENDARIA.Settings.ActiveCalendar.Name',
+    hint: 'CALENDARIA.Settings.ActiveCalendar.Hint',
+    scope: 'world',
+    config: true,
+    type: new foundry.data.fields.StringField({
+      choices: calendarChoices,
+      initial: 'gregorian'
+    }),
+    requiresReload: true
+  });
+
   /** User overrides for default/built-in calendars */
   game.settings.register(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, {
     name: 'Default Calendar Overrides',
@@ -232,7 +259,7 @@ export function registerSettings() {
   });
 
   // ========================================//
-  //  Time Integration (dnd5e)               //
+  //  Time Integration                       //
   // ========================================//
 
   /** Whether to advance world time during short/long rests */

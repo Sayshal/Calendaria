@@ -45,10 +45,15 @@ export class ResetPositionDialog extends HandlebarsApplicationMixin(ApplicationV
     log(3, 'Reset button clicked');
 
     await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_POSITION, null);
+    await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, null);
     ui.notifications.info(localize('CALENDARIA.Settings.ResetPosition.Success'));
 
-    // Refresh calendar if it's open
-    CONFIG.DND5E.calendar.application?.resetPosition();
+    // Reset position on the HUD instance if open
+    const hud = foundry.applications.instances.get('calendaria-hud');
+    if (hud) {
+      hud.setPosition({ left: null, top: null });
+      hud.render();
+    }
 
     log(3, 'Calendar position reset successfully');
     await this.close();

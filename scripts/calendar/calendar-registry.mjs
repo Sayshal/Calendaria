@@ -153,16 +153,16 @@ export default class CalendarRegistry {
   static toObject() {
     const calendars = {};
     for (const [id, calendar] of this.#calendars.entries()) calendars[id] = calendar.toObject();
-    return { calendars, activeId: this.#activeId };
+    return { calendars };
   }
 
   /**
    * Restore registry from a plain object.
+   * Active calendar is controlled by SETTINGS.ACTIVE_CALENDAR, not stored here.
    * @param {object} data  Serialized registry data
    */
   static fromObject(data) {
     this.clear();
     if (data.calendars) for (const [id, calendarData] of Object.entries(data.calendars)) this.register(id, calendarData);
-    if (data.activeId && this.has(data.activeId)) this.setActive(data.activeId);
   }
 }

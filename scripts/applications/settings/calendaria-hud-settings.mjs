@@ -9,6 +9,7 @@
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
+import CalendarManager from '../../calendar/calendar-manager.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -51,6 +52,19 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
 
+    // GM check for calendar selection
+    context.isGM = game.user.isGM;
+
+    // Calendar options (GM only)
+    if (context.isGM) {
+      const activeId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
+      context.calendars = CalendarManager.getAllCalendarMetadata().map((meta) => ({
+        id: meta.id,
+        name: localize(meta.name) || meta.id,
+        isActive: meta.id === activeId
+      }));
+    }
+
     // Current mode
     const mode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.modeFullsize = mode === 'fullsize';
@@ -82,6 +96,16 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
    */
   static async #onSubmit(event, form, formData) {
     const data = formData.object;
+    let requiresReload = false;
+
+    // Update active calendar (GM only)
+    if (game.user.isGM && data.activeCalendar) {
+      const currentCalendar = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
+      if (data.activeCalendar !== currentCalendar) {
+        await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, data.activeCalendar);
+        requiresReload = true;
+      }
+    }
 
     // Update mode
     await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, data.mode);
@@ -103,6 +127,11 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
 
     ui.notifications.info(localize('CALENDARIA.HUD.Settings.Saved'));
     log(3, 'HUD settings saved');
+
+    // Trigger reload if calendar changed
+    if (requiresReload) {
+      foundry.utils.debouncedReload();
+    }
   }
 
   /* -------------------------------------------- */

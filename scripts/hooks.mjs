@@ -7,9 +7,9 @@
 
 import { CalendarApplication } from './applications/calendar-application.mjs';
 import { initializeImporters } from './importers/index.mjs';
-import { localize, format } from './utils/localization.mjs';
+import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
-import { MODULE, SETTINGS, SYSTEM } from './constants.mjs';
+import { MODULE, SETTINGS } from './constants.mjs';
 import { onRenderSceneConfig, onUpdateWorldTime } from './darkness.mjs';
 import { registerRestTimeHooks } from './integrations/rest-time.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
@@ -33,8 +33,8 @@ export function registerHooks() {
   Hooks.on('updateWorldTime', EventScheduler.onUpdateWorldTime.bind(EventScheduler));
 
   // Calendar Manager hooks
-  if (SYSTEM.isDnd5e) Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
-  if (!SYSTEM.isDnd5e) Hooks.on('closeGame', CalendarManager.onCloseGame.bind(CalendarManager));
+  Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
+  Hooks.on('closeGame', CalendarManager.onCloseGame.bind(CalendarManager));
 
   // Note Manager hooks
   Hooks.on('createJournalEntryPage', NoteManager.onCreateJournalEntryPage.bind(NoteManager));
@@ -67,11 +67,9 @@ export function registerHooks() {
 /**
  * Add Calendar button to journal sidebar footer.
  * @param {Application} app - The journal sidebar application
- * @todo move this to correct utility file.
  * @returns {void}
  */
 function addJournalCalendarButton(app) {
-  if (SYSTEM.isDnd5e) return;
   const footer = app.element.querySelector('.directory-footer');
   if (!footer) return;
 
@@ -128,7 +126,6 @@ function onRenderChatMessage(message, html, context) {
 
 /**
  * Handle combat round changes to advance world time.
- * Advances time by 6 seconds per round (D&D 5e standard).
  * @param {Combat} combat - The combat document
  * @param {object} changes - The changes made to the combat
  * @param {object} options - Update options
@@ -150,7 +147,8 @@ function onUpdateCombat(combat, changes, options, userId) {
 
   // Calculate rounds advanced (usually 1, but could be more if skipped)
   const roundsAdvanced = changes.round - previousRound;
-  const secondsPerRound = 6; // D&D 5e standard
+  const calendar = CalendarManager.getActiveCalendar();
+  const secondsPerRound = calendar?.secondsPerRound ?? 6;
   const totalSeconds = roundsAdvanced * secondsPerRound;
 
   log(3, `Combat round ${previousRound} -> ${changes.round}: advancing time by ${totalSeconds} seconds`);

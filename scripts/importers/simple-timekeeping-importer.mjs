@@ -7,7 +7,7 @@
  * @author Tyler
  */
 
-import { getDefaultMoonPhases } from '../calendar/data/calendar-defaults.mjs';
+import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
 import { localize, format } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -411,7 +411,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       name: this.#localizeString(moon.name),
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.offset ?? 0,
-      phases: getDefaultMoonPhases(),
+      phases: DEFAULT_MOON_PHASES,
       referenceDate: { year: 0, month: 0, day: 0 }
     }));
   }

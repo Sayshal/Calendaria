@@ -1,14 +1,29 @@
 <section class="hud-settings-content standard-form">
-  {{!-- Display Mode --}}
+  {{!-- Active Calendar (GM only) --}}
+  {{#if isGM}}
   <div class="form-group">
-    <label>{{localize "CALENDARIA.Settings.CalendarHudMode.Name"}}</label>
+    <label>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
     <div class="form-fields">
-      <select name="mode">
-        <option value="fullsize"{{#if modeFullsize}} selected{{/if}}>{{localize "CALENDARIA.Settings.CalendarHudMode.Fullsize"}}</option>
-        <option value="compact"{{#if modeCompact}} selected{{/if}}>{{localize "CALENDARIA.Settings.CalendarHudMode.Compact"}}</option>
+      <select name="activeCalendar">
+        {{#each calendars}}
+        <option value="{{this.id}}"{{#if this.isActive}} selected{{/if}}>{{this.name}}</option>
+        {{/each}}
       </select>
     </div>
-    <p class="hint">{{localize "CALENDARIA.Settings.CalendarHudMode.Hint"}}</p>
+    <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
+  </div>
+  {{/if}}
+
+  {{!-- Display Mode --}}
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.Settings.CalendarHUDMode.Name"}}</label>
+    <div class="form-fields">
+      <select name="mode">
+        <option value="fullsize"{{#if modeFullsize}} selected{{/if}}>{{localize "CALENDARIA.Settings.CalendarHUDMode.Fullsize"}}</option>
+        <option value="compact"{{#if modeCompact}} selected{{/if}}>{{localize "CALENDARIA.Settings.CalendarHUDMode.Compact"}}</option>
+      </select>
+    </div>
+    <p class="hint">{{localize "CALENDARIA.Settings.CalendarHUDMode.Hint"}}</p>
   </div>
 
   {{!-- Sticky Options --}}

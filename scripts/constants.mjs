@@ -67,6 +67,9 @@ export const SETTINGS = {
   /** @type {string} Stored calendar configurations and active calendar */
   CALENDARS: 'calendars',
 
+  /** @type {string} The active calendar ID */
+  ACTIVE_CALENDAR: 'activeCalendar',
+
   /** @type {string} Override for which user ID is the primary GM for sync operations */
   PRIMARY_GM: 'primaryGM',
 
@@ -85,7 +88,7 @@ export const SETTINGS = {
   /** @type {string} Whether to show moon phases on the calendar UI */
   SHOW_MOON_PHASES: 'showMoonPhases',
 
-  /** @type {string} Whether to advance time during short/long rests (dnd5e only) */
+  /** @type {string} Whether to advance time during short/long rests */
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
 
   /** @type {string} User-customized theme color overrides */
@@ -140,19 +143,19 @@ export const SETTINGS = {
   /* -------------------------------------------- */
 
   /** @type {string} Whether to show the Calendar HUD on world load */
-  SHOW_CALENDAR_HUD: 'showCalendarHud',
+  SHOW_CALENDAR_HUD: 'showCalendarHUD',
 
   /** @type {string} Calendar HUD display mode (fullsize or compact) */
-  CALENDAR_HUD_MODE: 'calendarHudMode',
+  CALENDAR_HUD_MODE: 'calendarHUDMode',
 
   /** @type {string} Whether the Calendar HUD position is locked */
-  CALENDAR_HUD_LOCKED: 'calendarHudLocked',
+  CALENDAR_HUD_LOCKED: 'calendarHUDLocked',
 
   /** @type {string} Sticky states for Calendar HUD (tray, position) */
   HUD_STICKY_STATES: 'hudStickyStates',
 
   /** @type {string} Saved position of the Calendar HUD */
-  CALENDAR_HUD_POSITION: 'calendarHudPosition'
+  CALENDAR_HUD_POSITION: 'calendarHUDPosition'
 };
 
 /**
@@ -282,28 +285,20 @@ export const ASSETS = {
 };
 
 /**
- * System utilities and helpers.
- * Provides convenient access to system-specific checks and integrations.
- *
- * @type {Object}
+ * Standard 8-phase moon cycle definition.
+ * Each phase covers exactly 1/8 of the cycle (start/end are 0-1 range).
+ * @type {Array<{name: string, icon: string, start: number, end: number}>}
  */
-export const SYSTEM = {
-  /**
-   * Get the current game system.
-   * @returns {System} The current Foundry VTT system
-   */
-  get current() {
-    return game.system;
-  },
-
-  /**
-   * Check if the current system is D&D 5e.
-   * @returns {boolean} True if running on dnd5e system
-   */
-  get isDnd5e() {
-    return game.system?.id === 'dnd5e';
-  }
-};
+export const DEFAULT_MOON_PHASES = [
+  { name: 'CALENDARIA.MoonPhase.NewMoon', icon: `${ASSETS.MOON_ICONS}/01_newmoon.svg`, start: 0, end: 0.125 },
+  { name: 'CALENDARIA.MoonPhase.WaxingCrescent', icon: `${ASSETS.MOON_ICONS}/02_waxingcrescent.svg`, start: 0.125, end: 0.25 },
+  { name: 'CALENDARIA.MoonPhase.FirstQuarter', icon: `${ASSETS.MOON_ICONS}/03_firstquarter.svg`, start: 0.25, end: 0.375 },
+  { name: 'CALENDARIA.MoonPhase.WaxingGibbous', icon: `${ASSETS.MOON_ICONS}/04_waxinggibbous.svg`, start: 0.375, end: 0.5 },
+  { name: 'CALENDARIA.MoonPhase.FullMoon', icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`, start: 0.5, end: 0.625 },
+  { name: 'CALENDARIA.MoonPhase.WaningGibbous', icon: `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`, start: 0.625, end: 0.75 },
+  { name: 'CALENDARIA.MoonPhase.LastQuarter', icon: `${ASSETS.MOON_ICONS}/07_lastquarter.svg`, start: 0.75, end: 0.875 },
+  { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`, start: 0.875, end: 1 }
+];
 
 /**
  * Custom Calendaria hook names fired by the module.

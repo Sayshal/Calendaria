@@ -6,15 +6,14 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, TEMPLATES, ASSETS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
-import { localize, format, preLocalizeCalendar } from '../utils/localization.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { createImporter } from '../importers/index.mjs';
 import { formatEraTemplate } from '../calendar/calendar-utils.mjs';
-import { createBlankCalendar, getDefaultMoonPhases } from '../calendar/data/calendar-defaults.mjs';
+import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { createImporter } from '../importers/index.mjs';
+import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
+import { CLIMATE_ZONE_TEMPLATES, getClimateTemplateOptions, getDefaultZoneConfig } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
-import { CLIMATE_ZONE_TEMPLATES, getDefaultZoneConfig, getClimateTemplateOptions } from '../weather/climate-data.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -183,11 +182,45 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /* -------------------------------------------- */
 
   /**
+   * Create a blank calendar structure with minimum required data.
+   * @returns {object} Blank calendar object
+   * @private
+   */
+  static #createBlankCalendar() {
+    return {
+      name: '',
+      years: { yearZero: 0, firstWeekday: 0, leapYear: null },
+      months: {
+        values: [{ name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }]
+      },
+      days: {
+        values: [{ name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 }],
+        daysPerYear: 365,
+        hoursPerDay: 24,
+        minutesPerHour: 60,
+        secondsPerMinute: 60
+      },
+      secondsPerRound: 6,
+      seasons: { values: [] },
+      eras: [],
+      festivals: [],
+      moons: [],
+      cycles: [],
+      canonicalHours: [],
+      weeks: { enabled: false, type: 'year-based', names: [] },
+      amPmNotation: { am: 'AM', pm: 'PM' },
+      dateFormats: { short: '{{d}} {{b}}', long: '{{d}} {{B}}, {{y}}', full: '{{B}} {{d}}, {{y}}', time: '{{H}}:{{M}}', time12: '{{h}}:{{M}} {{p}}' },
+      metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
+      weather: { defaultClimate: 'temperate', autoGenerate: false, presets: [] }
+    };
+  }
+
+  /**
    * Initialize a blank calendar structure.
    * @private
    */
   #initializeBlankCalendar() {
-    this.#calendarData = createBlankCalendar();
+    this.#calendarData = CalendarEditor.#createBlankCalendar();
   }
 
   /**
@@ -198,10 +231,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #loadExistingCalendar(calendarId) {
     const calendar = CalendarManager.getCalendar(calendarId);
     if (calendar) {
-      this.#calendarData = foundry.utils.mergeObject(createBlankCalendar(), calendar.toObject());
+      this.#calendarData = foundry.utils.mergeObject(CalendarEditor.#createBlankCalendar(), calendar.toObject());
       preLocalizeCalendar(this.#calendarData);
-    }
-    else {
+    } else {
       this.#initializeBlankCalendar();
     }
   }
@@ -214,7 +246,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #loadInitialData(data, suggestedId) {
     // Merge imported data with blank calendar to ensure all required fields exist
-    this.#calendarData = foundry.utils.mergeObject(createBlankCalendar(), data);
+    this.#calendarData = foundry.utils.mergeObject(CalendarEditor.#createBlankCalendar(), data);
 
     // Store suggested ID for later use
     if (suggestedId) this.#calendarData.metadata.suggestedId = suggestedId;
@@ -371,7 +403,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         ...opt,
         selected: opt.value === moon.referenceDate?.month
       })),
-      phasesWithIndex: (moon.phases || getDefaultMoonPhases()).map((phase, pIdx) => ({
+      phasesWithIndex: (moon.phases || DEFAULT_MOON_PHASES).map((phase, pIdx) => ({
         ...phase,
         index: pIdx,
         moonIndex: idx,
@@ -1021,7 +1053,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const moonIdx of sortedMoonIndices) {
       // Get existing phases to preserve icon paths set via filepicker
       const existingMoon = this.#calendarData.moons[moonIdx];
-      const existingPhases = existingMoon?.phases || getDefaultMoonPhases();
+      const existingPhases = existingMoon?.phases || DEFAULT_MOON_PHASES;
 
       // Detect phase indices from form data (supports dynamic phase counts)
       const phaseIndices = new Set();
@@ -1465,7 +1497,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddMoon(event, target) {
-    this.#calendarData.moons.push({ name: localize('CALENDARIA.Editor.Default.MoonName'), cycleLength: 28, cycleDayAdjust: 0, hidden: false, phases: getDefaultMoonPhases(), referenceDate: { year: 0, month: 0, day: 1 } });
+    this.#calendarData.moons.push({
+      name: localize('CALENDARIA.Editor.Default.MoonName'),
+      cycleLength: 28,
+      cycleDayAdjust: 0,
+      hidden: false,
+      phases: DEFAULT_MOON_PHASES,
+      referenceDate: { year: 0, month: 0, day: 1 }
+    });
     this.render();
   }
 
@@ -1490,7 +1529,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const moon = this.#calendarData.moons[moonIdx];
     if (!moon) return;
 
-    if (!moon.phases) moon.phases = getDefaultMoonPhases();
+    if (!moon.phases) moon.phases = DEFAULT_MOON_PHASES;
 
     const phaseCount = moon.phases.length;
     const interval = 1 / (phaseCount + 1);
@@ -1558,7 +1597,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       type: 'image',
       current: currentIcon.startsWith('icons/') ? currentIcon : '',
       callback: (path) => {
-        if (!moon.phases) moon.phases = getDefaultMoonPhases();
+        if (!moon.phases) moon.phases = DEFAULT_MOON_PHASES;
         moon.phases[phaseIdx].icon = path;
         this.render();
       }
@@ -2009,7 +2048,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-
   /**
    * Save the calendar.
    * @param {Event} event - Click event
@@ -2035,7 +2073,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
       if (this.#isEditing && this.#calendarId) {
         // Check if this is a default calendar (needs override) or custom calendar
-        if (CalendarManager.isDefaultCalendar(this.#calendarId) || CalendarManager.hasDefaultOverride(this.#calendarId)) {
+        if (CalendarManager.isBundledCalendar(this.#calendarId) || CalendarManager.hasDefaultOverride(this.#calendarId)) {
           // Save as override for default calendar
           calendar = await CalendarManager.saveDefaultOverride(this.#calendarId, this.#calendarData);
         } else {
@@ -2060,8 +2098,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
 
       if (calendar) {
-        ui.notifications.info(format('CALENDARIA.Editor.SaveSuccess', { name: this.#calendarData.name }));
-
         // Import pending notes from importer if any (using instance variables)
         log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {

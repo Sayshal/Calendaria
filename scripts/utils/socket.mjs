@@ -42,7 +42,7 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SYSTEM, SOCKET_TYPES, HOOKS } from '../constants.mjs';
+import { MODULE, SETTINGS, SOCKET_TYPES, HOOKS } from '../constants.mjs';
 import { log } from './logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
@@ -289,10 +289,7 @@ export class CalendariaSocket {
   static #handleDateChange(data) {
     log(3, 'Handling remote date change', data);
 
-    // Re-render the calendar HUD if it exists (dnd5e only)
-    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) dnd5e.ui.calendar.render();
-
-    // Emit hook for other systems to respond
+    // Emit hook for other modules to respond
     Hooks.callAll(HOOKS.REMOTE_DATE_CHANGE, data);
   }
 
@@ -326,9 +323,6 @@ export class CalendariaSocket {
 
     // Re-render any open calendar applications
     for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'CalendarApplication') app.render();
-
-    // Re-render dnd5e calendar HUD if present
-    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) dnd5e.ui.calendar.render();
 
     // Emit appropriate hook based on action
     switch (action) {

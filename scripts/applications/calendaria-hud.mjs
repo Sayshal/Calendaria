@@ -1,7 +1,6 @@
 /**
  * Calendaria HUD - System-agnostic calendar widget.
  * Displays a sundial dome with sun/moon, time controls, date/weather info.
- * Fully independent of dnd5e or any other game system.
  *
  * @module Applications/CalendariaHUD
  * @author Tyler
@@ -653,7 +652,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
       if (partialClouds) {
         // Fade in/out during dawn/dusk
-        const cloudOpacity = hour < 12 ? (hour - 6) : 1 - (hour - 18);
+        const cloudOpacity = hour < 12 ? hour - 6 : 1 - (hour - 18);
         clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
       } else {
         clouds.style.opacity = '';

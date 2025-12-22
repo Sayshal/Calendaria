@@ -12,7 +12,7 @@ import { getDefaultNoteData, validateNoteData, sanitizeNoteData, createNoteStub,
 import { isRecurringMatch, getOccurrencesInRange, getRecurrenceDescription } from './utils/recurrence.mjs';
 import { localize, format } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { MODULE, SETTINGS, SYSTEM, HOOKS } from '../constants.mjs';
+import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 
 export default class NoteManager {
@@ -751,17 +751,14 @@ export default class NoteManager {
     const currentDescription = calendar.metadata?.description || calendar.description || '';
     if (newDescription === currentDescription) return;
 
-    // Update calendar description
-    // Note: For dnd5e calendars, these are stored in CONFIG, not in settings
-    // We can update the in-memory calendar, but it won't persist across reloads
-    // unless saved to the appropriate location
+    // Update calendar description in memory
     if (calendar.metadata) calendar.metadata.description = newDescription;
     else calendar.description = newDescription;
 
     log(3, `Synced description from journal to calendar ${calendarId}`);
 
-    // If this is a custom (non-dnd5e) calendar, save to settings
-    if (!SYSTEM.isDnd5e && game.user.isGM) await CalendarManager.saveCalendars();
+    // Persist to settings
+    if (game.user.isGM) await CalendarManager.saveCalendars();
   }
 
   /* -------------------------------------------- */

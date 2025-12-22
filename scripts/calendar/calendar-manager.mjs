@@ -7,13 +7,12 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SYSTEM, HOOKS } from '../constants.mjs';
+import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
 import { localize, format } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
-import { RENESCARA_CALENDAR } from './data/renescara-calendar.mjs';
-import { getCalendarDefaults } from './data/calendar-defaults.mjs';
+import { loadBundledCalendars, DEFAULT_CALENDAR, isBundledCalendar } from './calendar-loader.mjs';
 
 export default class CalendarManager {
   /** Flag to prevent responding to our own calendar changes */
@@ -24,13 +23,35 @@ export default class CalendarManager {
    * Called during module initialization.
    */
   static async initialize() {
+    // Load bundled calendars from JSON files
+    await loadBundledCalendars();
+
+    // Load any custom calendars from settings
     await this.#loadCustomCalendars();
-    if (SYSTEM.isDnd5e) {
-      await this.#initializeDnd5e();
-    } else {
-      await this.loadCalendars();
-      if (CalendarRegistry.size === 0) await this.loadDefaultCalendars();
+
+    // Load any saved calendar state
+    await this.loadCalendars();
+
+    // Set active calendar from our setting
+    const activeId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR) || DEFAULT_CALENDAR;
+    if (CalendarRegistry.has(activeId)) {
+      CalendarRegistry.setActive(activeId);
+    } else if (CalendarRegistry.size > 0) {
+      // Fallback to first available calendar
+      const firstId = CalendarRegistry.getAllIds()[0];
+      CalendarRegistry.setActive(firstId);
+      log(2, `Active calendar "${activeId}" not found, using "${firstId}"`);
     }
+
+    // Sync game.time.calendar with our active calendar
+    const activeCalendar = CalendarRegistry.getActive();
+    if (activeCalendar) {
+      CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
+      CONFIG.time.worldCalendarClass = CalendariaCalendar;
+      game.time.initializeCalendar();
+      log(3, `Synced game.time.calendar to: ${activeCalendar.name}`);
+    }
+
     log(3, 'Calendar Manager initialized');
   }
 
@@ -95,13 +116,6 @@ export default class CalendarManager {
         try {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
-
-          // Add to dnd5e calendar list if applicable
-          if (SYSTEM.isDnd5e && CONFIG.DND5E?.calendar?.calendars) {
-            const exists = CONFIG.DND5E.calendar.calendars.some((c) => c.value === id);
-            if (!exists) CONFIG.DND5E.calendar.calendars.push({ value: id, label: data.name || id, config: calendar, class: CalendariaCalendar });
-          }
-
           log(3, `Loaded custom calendar: ${id}`);
         } catch (error) {
           log(2, `Error loading custom calendar ${id}:`, error);
@@ -112,113 +126,6 @@ export default class CalendarManager {
     } catch (error) {
       log(2, 'Error loading custom calendars:', error);
     }
-  }
-
-  /**
-   * Initialize for dnd5e system.
-   * Loads calendars from CONFIG.DND5E.calendar.calendars
-   * @private
-   */
-  static async #initializeDnd5e() {
-    log(3, 'Initializing for D&D 5e system...');
-
-    // Load any saved overrides for default calendars
-    const defaultOverrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
-
-    // Load calendars from CONFIG.DND5E.calendar.calendars
-    const dnd5eCalendars = CONFIG.DND5E?.calendar?.calendars ?? [];
-
-    for (const calendarDef of dnd5eCalendars) {
-      try {
-        // Extract the calendar ID and config
-        const id = calendarDef.value;
-        const config = calendarDef.config;
-
-        // Check if user has an override for this calendar
-        if (defaultOverrides[id]) {
-          // Use the override data instead of the default
-          const calendar = new CalendariaCalendar(defaultOverrides[id]);
-          CalendarRegistry.register(id, calendar);
-          log(3, `Loaded calendar ${id} from user override`);
-          continue;
-        }
-
-        // If the config is already a CalendarData instance, convert to plain object
-        const calendarData = config instanceof foundry.data.CalendarData ? config.toObject() : config;
-
-        // Add default metadata for dnd5e calendars
-        if (!calendarData.metadata) calendarData.metadata = {};
-
-        calendarData.metadata.id = calendarData.metadata.id || id;
-        calendarData.metadata.description = calendarData.metadata.description || calendarData.description || '5e default calendar';
-        calendarData.metadata.author = calendarData.metadata.author || 'dnd5e-system';
-
-        // Extract festivals if they exist in the dnd5e calendar config
-        // Festivals may be in the original config object
-        if (config.festivals && !calendarData.festivals) calendarData.festivals = config.festivals;
-
-        // Extract moons if they exist in the dnd5e calendar config
-        if (config.moons && !calendarData.moons) calendarData.moons = config.moons;
-
-        // Apply defaults (moons, seasons, eras) for known calendars
-        const defaults = getCalendarDefaults(id);
-        if (defaults) {
-          if (defaults.moons && !calendarData.moons?.length) calendarData.moons = defaults.moons;
-          if (defaults.seasons && !calendarData.seasons?.values?.length) calendarData.seasons = defaults.seasons;
-          if (defaults.eras && !calendarData.eras?.length) calendarData.eras = defaults.eras;
-        }
-
-        // Convert dnd5e calendar definition to CalendariaCalendar
-        const calendar = new CalendariaCalendar(calendarData);
-        CalendarRegistry.register(id, calendar);
-
-        log(3, `Loaded calendar ${id} with ${calendar.festivals?.length} festivals, ${calendar.moons?.length} moons, ${calendar.seasons?.values?.length} seasons, ${calendar.eras?.length} eras`);
-      } catch (error) {
-        log(2, `Error loading dnd5e calendar:`, error);
-      }
-    }
-
-    // Get active calendar from dnd5e settings
-    const activeCalendarId = game.settings.get('dnd5e', 'calendar');
-    if (activeCalendarId) {
-      CalendarRegistry.setActive(activeCalendarId);
-      log(3, `Active calendar from dnd5e: ${activeCalendarId}`);
-    } else if (CalendarRegistry.size > 0) {
-      // Set first calendar as active
-      const firstId = CalendarRegistry.getAllIds()[0];
-      CalendarRegistry.setActive(firstId);
-      log(3, `Set default active calendar: ${firstId}`);
-    }
-
-    // Sync game.time.calendar with our active calendar
-    const activeCalendar = CalendarRegistry.getActive();
-    if (activeCalendar) {
-      CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
-      CONFIG.time.worldCalendarClass = CalendariaCalendar;
-      game.time.initializeCalendar();
-      log(3, `Synced game.time.calendar to: ${activeCalendar.name}`);
-    }
-  }
-
-  /**
-   * Load default calendar definitions.
-   * @private
-   */
-  static async loadDefaultCalendars() {
-    log(3, 'Loading default calendars...');
-
-    // Load Renescarran Calendar as the default for non-dnd5e systems
-    try {
-      const calendar = new CalendariaCalendar(RENESCARA_CALENDAR);
-      CalendarRegistry.register('renescara', calendar);
-      CalendarRegistry.setActive('renescara');
-      log(3, 'Loaded Renescarran Calendar as default');
-    } catch (error) {
-      log(2, 'Error loading Renescarran Calendar:', error);
-    }
-
-    // Save state
-    await this.saveCalendars();
   }
 
   /**
@@ -291,32 +198,45 @@ export default class CalendarManager {
     // Reinitialize the calendar system - no reload needed!
     game.time.initializeCalendar();
 
-    // For dnd5e, update the system's calendar setting for persistence
-    if (SYSTEM.isDnd5e && game.user.isGM) {
+    // Save to our settings
+    if (game.user.isGM) {
       try {
         this.#isSwitchingCalendar = true;
-        await game.settings.set('dnd5e', 'calendar', id);
-        log(3, `Updated dnd5e calendar setting to: ${id}`);
+        await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, id);
+        log(3, `Updated active calendar setting to: ${id}`);
       } catch (error) {
-        log(2, `Error updating dnd5e calendar setting:`, error);
+        log(2, `Error updating active calendar setting:`, error);
       } finally {
         this.#isSwitchingCalendar = false;
       }
     }
 
-    // Save to our own settings for non-dnd5e systems
     await this.saveCalendars();
-
-    // Re-render calendar UI
-    if (SYSTEM.isDnd5e && dnd5e?.ui?.calendar) dnd5e.ui.calendar.render();
 
     // Emit hook for calendar switch
     Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
+
+    // Re-render all calendar-related UIs
+    this.#rerenderCalendarUIs();
 
     ui.notifications.info(`Switched to ${calendarName} calendar`);
     log(3, `Switched to calendar: ${id}`);
 
     return true;
+  }
+
+  /**
+   * Re-render all calendar-related UI applications.
+   * @private
+   */
+  static #rerenderCalendarUIs() {
+    // Re-render all open calendar applications
+    for (const app of foundry.applications.instances.values()) {
+      const name = app.constructor.name;
+      if (['CalendariaHUD', 'TimeKeeperHUD', 'CompactCalendar', 'CalendarApplication'].includes(name)) {
+        app.render();
+      }
+    }
   }
 
   /**
@@ -351,8 +271,8 @@ export default class CalendarManager {
     // Emit hook
     Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
 
-    // Re-render calendar HUD if available
-    if (SYSTEM.isDnd5e && dnd5e?.ui?.calendar) dnd5e.ui.calendar.render();
+    // Re-render all calendar-related UIs
+    this.#rerenderCalendarUIs();
   }
 
   /**
@@ -426,7 +346,7 @@ export default class CalendarManager {
 
     return {
       id: calendar.metadata?.id ?? id,
-      name: calendar.metadata?.id ? localize(`CALENDARIA.Calendar.${calendar.metadata.id}.Name`) : id,
+      name: calendar.name ? localize(calendar.name) : id,
       description: calendar.metadata?.description ?? '',
       system: calendar.metadata?.system ?? '',
       author: calendar.metadata?.author ?? '',
@@ -448,27 +368,30 @@ export default class CalendarManager {
   /* -------------------------------------------- */
 
   /**
-   * Handle updateSetting hook for dnd5e calendar changes.
+   * Handle updateSetting hook for active calendar changes.
    * @param {object} setting - The setting that was updated
    * @param {object} changes - The changes to the setting
    * @internal
    */
   static onUpdateSetting(setting, changes) {
-    if (setting.key === 'dnd5e.calendar') {
+    if (setting.key === `${MODULE.ID}.${SETTINGS.ACTIVE_CALENDAR}`) {
       const newCalendarId = changes.value;
 
-      // If we triggered this change, skip (we're handling the reload)
+      // If we triggered this change, skip
       if (this.#isSwitchingCalendar) {
-        log(3, 'D&D 5e calendar updated (by Calendaria) - reload pending');
+        log(3, 'Active calendar updated (by Calendaria)');
         return;
       }
 
       // External change - update registry to match
-      log(3, 'D&D 5e calendar updated (externally)');
-      if (newCalendarId) CalendarRegistry.setActive(newCalendarId);
-
-      // Notify user that a reload is recommended for full UI update
-      ui.notifications.warn('Calendar changed. Please reload for full effect.');
+      log(3, 'Active calendar updated (externally)');
+      if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
+        CalendarRegistry.setActive(newCalendarId);
+        const calendar = CalendarRegistry.get(newCalendarId);
+        CONFIG.time.worldCalendarConfig = calendar.toObject();
+        CONFIG.time.worldCalendarClass = CalendariaCalendar;
+        game.time.initializeCalendar();
+      }
     }
   }
 
@@ -574,11 +497,6 @@ export default class CalendarManager {
       // Register in CalendarRegistry
       CalendarRegistry.register(calendarId, calendar);
 
-      // Add to dnd5e calendar list if applicable
-      if (SYSTEM.isDnd5e && CONFIG.DND5E?.calendar?.calendars) {
-        CONFIG.DND5E.calendar.calendars.push({ value: calendarId, label: definition.name || calendarId, config: calendar, class: CalendariaCalendar });
-      }
-
       Hooks.callAll(HOOKS.CALENDAR_ADDED, calendarId, calendar);
       log(3, `Created custom calendar: ${calendarId}`);
       ui.notifications.info(`Created calendar "${definition.name || calendarId}"`);
@@ -629,20 +547,10 @@ export default class CalendarManager {
       // Update in registry
       CalendarRegistry.register(id, updatedCalendar);
 
-      // Update in dnd5e calendar list if applicable
-      if (SYSTEM.isDnd5e && CONFIG.DND5E?.calendar?.calendars) {
-        const entry = CONFIG.DND5E.calendar.calendars.find((c) => c.value === id);
-        if (entry) {
-          entry.config = updatedCalendar;
-          entry.label = updatedData.name || id;
-        }
-      }
-
       // If this is the active calendar, reinitialize
       if (CalendarRegistry.getActiveId() === id) {
         CONFIG.time.worldCalendarConfig = updatedCalendar.toObject();
         game.time.initializeCalendar();
-        if (SYSTEM.isDnd5e && dnd5e?.ui?.calendar) dnd5e.ui.calendar.render();
       }
 
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, updatedCalendar);
@@ -686,12 +594,6 @@ export default class CalendarManager {
 
       // Remove from registry
       CalendarRegistry.unregister(id);
-
-      // Remove from dnd5e calendar list if applicable
-      if (SYSTEM.isDnd5e && CONFIG.DND5E?.calendar?.calendars) {
-        const index = CONFIG.DND5E.calendar.calendars.findIndex((c) => c.value === id);
-        if (index !== -1) CONFIG.DND5E.calendar.calendars.splice(index, 1);
-      }
 
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
       log(3, `Deleted custom calendar: ${id}`);
@@ -762,23 +664,21 @@ export default class CalendarManager {
   }
 
   /* -------------------------------------------- */
-  /*  Default Calendar Override Management        */
+  /*  Bundled Calendar Override Management        */
   /* -------------------------------------------- */
 
   /**
-   * Check if a calendar is a default (built-in) calendar from dnd5e.
+   * Check if a calendar is a bundled (built-in) calendar.
    *
    * @param {string} id - Calendar ID to check
-   * @returns {boolean} True if the calendar is a default calendar
+   * @returns {boolean} True if the calendar is a bundled calendar
    */
-  static isDefaultCalendar(id) {
-    if (!SYSTEM.isDnd5e) return false;
-    const dnd5eCalendars = CONFIG.DND5E?.calendar?.calendars ?? [];
-    return dnd5eCalendars.some((c) => c.value === id) && !this.isCustomCalendar(id);
+  static isBundledCalendar(id) {
+    return isBundledCalendar(id) && !this.isCustomCalendar(id);
   }
 
   /**
-   * Check if a default calendar has a user override.
+   * Check if a bundled calendar has a user override.
    *
    * @param {string} id - Calendar ID to check
    * @returns {boolean} True if the calendar has an override
@@ -789,15 +689,15 @@ export default class CalendarManager {
   }
 
   /**
-   * Save a user override for a default calendar.
+   * Save a user override for a bundled calendar.
    *
    * @param {string} id - Calendar ID to override
    * @param {object} data - Full calendar data to save as override
    * @returns {Promise<CalendariaCalendar|null>} The updated calendar or null on error
    */
   static async saveDefaultOverride(id, data) {
-    if (!this.isDefaultCalendar(id) && !this.hasDefaultOverride(id)) {
-      log(2, `Cannot save override: ${id} is not a default calendar`);
+    if (!this.isBundledCalendar(id) && !this.hasDefaultOverride(id)) {
+      log(2, `Cannot save override: ${id} is not a bundled calendar`);
       return null;
     }
 
@@ -825,19 +725,19 @@ export default class CalendarManager {
       }
 
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
-      log(3, `Saved override for default calendar: ${id}`);
+      log(3, `Saved override for bundled calendar: ${id}`);
       ui.notifications.info(format('CALENDARIA.Editor.SaveSuccess', { name: data.name || id }));
 
       return calendar;
     } catch (error) {
-      log(2, `Error saving default override for ${id}:`, error);
+      log(2, `Error saving override for ${id}:`, error);
       ui.notifications.error(`Error saving calendar: ${error.message}`);
       return null;
     }
   }
 
   /**
-   * Reset a default calendar to its original state by removing the override.
+   * Reset a bundled calendar to its original state by removing the override.
    *
    * @param {string} id - Calendar ID to reset
    * @returns {Promise<boolean>} True if reset successfully
@@ -854,28 +754,11 @@ export default class CalendarManager {
       delete overrides[id];
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
 
-      // Reload the calendar from dnd5e defaults
-      const dnd5eCalendars = CONFIG.DND5E?.calendar?.calendars ?? [];
-      const calendarDef = dnd5eCalendars.find((c) => c.value === id);
-
-      if (calendarDef) {
-        const config = calendarDef.config;
-        const calendarData = config instanceof foundry.data.CalendarData ? config.toObject() : config;
-
-        // Add metadata
-        if (!calendarData.metadata) calendarData.metadata = {};
-        calendarData.metadata.id = id;
-        calendarData.metadata.description = calendarData.description || '5e default calendar';
-        calendarData.metadata.author = 'dnd5e-system';
-
-        // Apply defaults
-        const defaults = getCalendarDefaults(id);
-        if (defaults) {
-          if (defaults.moons && !calendarData.moons?.length) calendarData.moons = defaults.moons;
-          if (defaults.seasons && !calendarData.seasons?.values?.length) calendarData.seasons = defaults.seasons;
-          if (defaults.eras && !calendarData.eras?.length) calendarData.eras = defaults.eras;
-        }
-
+      // Reload the calendar from bundled JSON
+      const path = `modules/${MODULE.ID}/calendars/${id}.json`;
+      const response = await fetch(path);
+      if (response.ok) {
+        const calendarData = await response.json();
         const calendar = new CalendariaCalendar(calendarData);
         CalendarRegistry.register(id, calendar);
 
@@ -888,11 +771,11 @@ export default class CalendarManager {
         Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       }
 
-      log(3, `Reset default calendar: ${id}`);
+      log(3, `Reset bundled calendar: ${id}`);
       ui.notifications.info(localize('CALENDARIA.Editor.ResetComplete'));
       return true;
     } catch (error) {
-      log(2, `Error resetting default calendar ${id}:`, error);
+      log(2, `Error resetting bundled calendar ${id}:`, error);
       return false;
     }
   }

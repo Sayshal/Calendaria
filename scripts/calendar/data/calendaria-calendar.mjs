@@ -58,6 +58,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       seasons: extendedSeasonSchema,
 
       /**
+       * Seconds per combat round (default 6 for D&D-style systems).
+       * @type {number}
+       */
+      secondsPerRound: new NumberField({ required: false, integer: true, min: 1, initial: 6 }),
+
+      /**
        * Advanced leap year configuration
        * Supports complex patterns like "400,!100,4" for true Gregorian rules.
        * When set, this overrides the standard years.leapYear config.

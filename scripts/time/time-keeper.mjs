@@ -41,7 +41,9 @@ export function getTimeIncrements() {
 
   const secondsPerYear = secondsPerDay * daysPerYear;
 
-  return { second: 1, round: 6, minute: secondsPerMinute, hour: secondsPerHour, day: secondsPerDay, week: secondsPerDay * 7, month: secondsPerMonth, season: secondsPerSeason, year: secondsPerYear };
+  const secondsPerRound = cal?.secondsPerRound ?? 6;
+
+  return { second: 1, round: secondsPerRound, minute: secondsPerMinute, hour: secondsPerHour, day: secondsPerDay, week: secondsPerDay * 7, month: secondsPerMonth, season: secondsPerSeason, year: secondsPerYear };
 }
 
 /**

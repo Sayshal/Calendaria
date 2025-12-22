@@ -202,31 +202,6 @@
 }
 
 /* ======================================== */
-/* Draggable Calendar & Widget Styles       */
-/* ======================================== */
-
-#calendar-hud {
-  .calendar-core {
-    user-select: none;
-  }
-
-  /* Reverse Calendar Widget Animation */
-  .calendar-widget.reverse-animation {
-    .calendar-stars {
-      rotate: calc(var(--calendar-night-progress) * 0.5turn);
-    }
-
-    .calendar-sun {
-      rotate: calc(var(--_sun-progress) * 0.5turn);
-
-      &::before {
-        rotate: calc(var(--_sun-progress) * -0.5turn);
-      }
-    }
-  }
-}
-
-/* ======================================== */
 /* Time Rotation Dial Styles                */
 /* ======================================== */
 

@@ -29,19 +29,6 @@ export function preLocalizeCalendar(calendarData) {
 }
 
 /**
- * Convert Calendaria calendar definition to D&D 5e-compatible format.
- * This strips out Calendaria-specific features (festivals, moons, metadata)
- * and creates a base CalendarData-compatible object.
- *
- * @param {object} calendariaDefinition - Calendar definition with Calendaria extensions
- * @returns {object} - Base CalendarData-compatible definition
- */
-export function conformTo5eModel(calendariaDefinition) {
-  const { festivals, moons, metadata, seasons, ...baseCalendar } = calendariaDefinition;
-  return { name: baseCalendar.name, years: baseCalendar.years, months: baseCalendar.months, days: baseCalendar.days, ...(seasons && { seasons }) };
-}
-
-/**
  * Find festival day for a given date.
  * Works with any calendar that has a festivals array.
  *
