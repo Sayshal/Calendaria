@@ -611,7 +611,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   getMoonPhase(moonIndex = 0, time = game.time.worldTime) {
     const moon = this.moons?.[moonIndex];
     if (!moon) return null;
-    if (!this.months?.values) return null;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
 
     // Calculate days since reference date

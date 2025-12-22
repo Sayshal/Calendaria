@@ -133,7 +133,20 @@ export const SETTINGS = {
   /* -------------------------------------------- */
 
   /** @type {string} Macro trigger configuration object */
-  MACRO_TRIGGERS: 'macroTriggers'
+  MACRO_TRIGGERS: 'macroTriggers',
+
+  /* -------------------------------------------- */
+  /*  Calendar HUD                                */
+  /* -------------------------------------------- */
+
+  /** @type {string} Whether to show the Calendar HUD on world load */
+  SHOW_CALENDAR_HUD: 'showCalendarHud',
+
+  /** @type {string} Calendar HUD display mode (fullsize or compact) */
+  CALENDAR_HUD_MODE: 'calendarHudMode',
+
+  /** @type {string} Whether the Calendar HUD position is locked */
+  CALENDAR_HUD_LOCKED: 'calendarHudLocked'
 };
 
 /**
@@ -188,6 +201,9 @@ export const TEMPLATES = {
 
   /** @type {string} Compact calendar template */
   COMPACT_CALENDAR: `modules/${MODULE.ID}/templates/compact-calendar.hbs`,
+
+  /** @type {string} Calendar HUD template */
+  CALENDAR_HUD: `modules/${MODULE.ID}/templates/calendaria-hud.hbs`,
 
   SHEETS: {
     /** @type {string} Calendar sheet header template */

@@ -11,6 +11,7 @@ import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import { CalendariaHUD } from './scripts/applications/calendaria-hud.mjs';
+import { CalendariaHUDDnd5e } from './scripts/applications/calendaria-hud-dnd5e.mjs';
 import { MODULE, SETTINGS, TEMPLATES, JOURNAL_TYPES, SHEET_IDS, HOOKS } from './scripts/constants.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
@@ -170,6 +171,25 @@ Hooks.once('ready', async () => {
     CompactCalendar.show();
   }
 
+  // Migrate from dnd5e calendar setting to our HUD
+  if (game.system.id === 'dnd5e') {
+    try {
+      const dnd5eShowCalendar = game.settings.get('dnd5e', 'showCalendar');
+      if (dnd5eShowCalendar) {
+        await game.settings.set('dnd5e', 'showCalendar', false);
+        await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
+        log(3, 'Migrated dnd5e calendar visibility to CalendariaHUD');
+      }
+    } catch (e) {
+      // Setting may not exist
+    }
+  }
+
+  // Show Calendar HUD if auto-show is enabled
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) {
+    CalendariaHUD.show();
+  }
+
   // Fire calendaria.ready hook - module is fully initialized
   Hooks.callAll(HOOKS.READY, {
     api: CalendariaAPI,
@@ -195,13 +215,14 @@ Hooks.once('setup', () => {
   }
 
   if (CONFIG.DND5E?.calendar) {
-    log(3, 'Replacing D&D 5e calendar with CalendariaHUD');
-    CONFIG.DND5E.calendar.application = CalendariaHUD;
+    log(3, 'Replacing D&D 5e calendar with CalendariaHUDDnd5e');
+    CONFIG.DND5E.calendar.application = CalendariaHUDDnd5e;
   }
 });
 
 globalThis['CALENDARIA'] = {
   CalendariaHUD,
+  CalendariaHUDDnd5e,
   CalendariaCalendar,
   CalendarManager,
   CalendariaSocket,

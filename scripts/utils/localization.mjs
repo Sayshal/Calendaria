@@ -83,6 +83,13 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize named weeks
-  if (calendarData.weeks?.names) calendarData.weeks.names = calendarData.weeks.names.map((n) => localize(n));
+  // Localize named weeks (can be strings or {name, abbreviation} objects)
+  if (calendarData.weeks?.names) {
+    calendarData.weeks.names = calendarData.weeks.names.map((n) => {
+      if (typeof n === 'string') return localize(n);
+      if (n?.name) n.name = localize(n.name);
+      if (n?.abbreviation) n.abbreviation = localize(n.abbreviation);
+      return n;
+    });
+  }
 }

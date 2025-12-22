@@ -5,6 +5,7 @@
  */
 
 import { CalendarEditor } from './applications/calendar-editor.mjs';
+import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { ImporterApp } from './applications/importer-app.mjs';
 import { localize, format } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
@@ -122,6 +123,49 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+
+  // ========================================//
+  //  Calendar HUD                            //
+  // ========================================//
+
+  /** Show Calendar HUD on world load */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, {
+    name: 'CALENDARIA.Settings.ShowCalendarHud.Name',
+    hint: 'CALENDARIA.Settings.ShowCalendarHud.Hint',
+    scope: 'client',
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: (value) => {
+      if (value) CalendariaHUD.show();
+      else CalendariaHUD.hide();
+    }
+  });
+
+  /** Calendar HUD display mode (fullsize or compact) */
+  game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, {
+    name: 'CALENDARIA.Settings.CalendarHudMode.Name',
+    hint: 'CALENDARIA.Settings.CalendarHudMode.Hint',
+    scope: 'client',
+    config: true,
+    type: new foundry.data.fields.StringField({
+      choices: {
+        fullsize: 'CALENDARIA.Settings.CalendarHudMode.Fullsize',
+        compact: 'CALENDARIA.Settings.CalendarHudMode.Compact'
+      },
+      initial: 'fullsize'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
+  });
+
+  /** Calendar HUD position lock */
+  game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, {
+    name: 'Calendar HUD Locked',
+    scope: 'client',
+    config: false,
+    type: Boolean,
+    default: false
   });
 
   /** User-customized theme color overrides */

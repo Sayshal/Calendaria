@@ -46,11 +46,35 @@ export default class CalendarManager {
     try {
       const savedData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
       if (savedData) {
+        // Migrate saved calendar data to ensure required fields exist
+        if (savedData.calendars) {
+          for (const calendarData of Object.values(savedData.calendars)) {
+            this.#migrateCalendarData(calendarData);
+          }
+        }
         CalendarRegistry.fromObject(savedData);
         log(3, `Loaded ${CalendarRegistry.size} calendars from settings`);
       }
     } catch (error) {
       log(2, 'Error loading calendars from settings:', error);
+    }
+  }
+
+  /**
+   * Migrate calendar data to ensure required fields exist.
+   * @param {object} data - Calendar data to migrate
+   * @private
+   */
+  static #migrateCalendarData(data) {
+    // Ensure seasons exists with empty values array (required by Foundry's timeToComponents)
+    if (!data.seasons) {
+      data.seasons = { values: [] };
+      log(3, `Migrated calendar "${data.name}": added missing seasons field`);
+    }
+    // Ensure months exists
+    if (!data.months) {
+      data.months = { values: [] };
+      log(3, `Migrated calendar "${data.name}": added missing months field`);
     }
   }
 
@@ -67,6 +91,7 @@ export default class CalendarManager {
 
       for (const id of ids) {
         const data = customCalendars[id];
+        this.#migrateCalendarData(data);
         try {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
