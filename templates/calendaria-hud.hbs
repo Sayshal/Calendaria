@@ -3,159 +3,182 @@
   System-agnostic calendar HUD with sundial dome, time controls, and info panels.
   Supports fullsize and compact display modes.
 --}}
-<div class="calendaria-hud">
+<div class="calendaria-hud{{#if isPlaying}} time-flowing{{/if}}">
 
-{{!-- SUNDIAL DOME --}}
-<div class="calendaria-hud-dome" data-action="openTimeDial" data-tooltip="{{localize 'CALENDARIA.HUD.OpenTimeDial'}}">
-  {{!-- Sky gradient - color set dynamically --}}
-  <div class="calendaria-hud-sky"></div>
+  {{!-- SUNDIAL DOME --}}
+  <div class="calendaria-hud-dome{{#if hasEvents}} has-events{{/if}}" role="button" tabindex="0" data-action="openTimeDial"
+    data-tooltip="{{localize 'CALENDARIA.HUD.ClickToSetTime'}}"
+    {{#if hasEvents}}style="--event-glow: {{firstEventColor}};"{{/if}}>
+    {{!-- Sky gradient - color set dynamically --}}
+    <div class="calendaria-hud-sky"></div>
 
-  {{!-- Stars - visible during night hours --}}
-  <div class="calendaria-hud-stars">
-    <div class="calendaria-hud-star twinkle" style="left: 10%; top: 15%;"></div>
-    <div class="calendaria-hud-star large" style="left: 22%; top: 35%;"></div>
-    <div class="calendaria-hud-star twinkle" style="left: 35%; top: 12%; animation-delay: 0.7s;"></div>
-    <div class="calendaria-hud-star" style="left: 48%; top: 28%;"></div>
-    <div class="calendaria-hud-star large twinkle" style="left: 62%; top: 10%; animation-delay: 1.2s;"></div>
-    <div class="calendaria-hud-star" style="left: 75%; top: 32%;"></div>
-    <div class="calendaria-hud-star twinkle" style="left: 88%; top: 18%; animation-delay: 0.3s;"></div>
-    <div class="calendaria-hud-star large" style="left: 30%; top: 55%;"></div>
-    <div class="calendaria-hud-star" style="left: 55%; top: 50%;"></div>
-    <div class="calendaria-hud-star twinkle" style="left: 80%; top: 48%; animation-delay: 0.9s;"></div>
-  </div>
+    {{!-- Stars container - stars generated via CSS pseudo-elements --}}
+    <div class="calendaria-hud-stars"></div>
 
-  {{!-- Celestial track - sun/moon travel along this arc --}}
-  <div class="calendaria-hud-track">
-    <div class="calendaria-hud-body calendaria-hud-sun"></div>
-    <div class="calendaria-hud-body calendaria-hud-moon" style="opacity: 0;"></div>
-  </div>
-</div>
-
-{{!-- MAIN BAR --}}
-<div class="calendaria-hud-bar{{#if locked}} locked{{/if}}">
-
-  {{!-- LEFT BUTTON GROUP: Search Notes, Add Note --}}
-  <div class="calendaria-hud-btn-group">
-    <button type="button" class="calendaria-hud-btn" data-action="searchNotes" data-tooltip="{{localize 'CALENDARIA.HUD.SearchNotes'}}">
-      <i class="fa-solid fa-magnifying-glass"></i>
-    </button>
-    <button type="button" class="calendaria-hud-btn" data-action="addNote" data-tooltip="{{localize 'CALENDARIA.HUD.AddNote'}}">
-      <i class="fa-solid fa-calendar-plus"></i>
-    </button>
-  </div>
-
-  <div class="calendaria-hud-divider"></div>
-
-  {{!-- LEFT INFO PANEL: Live Event + Date/Year --}}
-  <div class="calendaria-hud-info-panel left">
-    {{#if liveEvent}}
-    <div class="calendaria-hud-live-event" data-action="openEvent" data-event-id="{{liveEvent.id}}" data-tooltip="{{liveEvent.name}}">
-      <i class="{{liveEvent.icon}} calendaria-hud-live-event-icon" style="color: {{liveEvent.color}};"></i>
-      <span class="calendaria-hud-live-event-text">{{liveEvent.shortName}}</span>
-    </div>
-    {{/if}}
-
-    <div class="calendaria-hud-info-group left">
-      <span class="calendaria-hud-info-primary">{{date}}</span>
-      <span class="calendaria-hud-info-secondary">{{year}}</span>
+    {{!-- Celestial track - sun/moon travel along this arc --}}
+    <div class="calendaria-hud-track">
+      <div class="calendaria-hud-body calendaria-hud-sun"></div>
+      <div class="calendaria-hud-body calendaria-hud-moon"></div>
     </div>
   </div>
 
-  {{!-- CENTER SECTION: Time Display with Play/Pause --}}
-  <div class="calendaria-hud-center">
-    <div class="calendaria-hud-time-wrapper">
-      <span class="calendaria-hud-time">{{time}}</span>
-      {{#if isGM}}
-      <button type="button" class="calendaria-hud-play-btn{{#if isPlaying}} playing{{/if}}" data-action="toggleTimeFlow" data-tooltip="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.HUD.StartTime'}}{{/if}}">
-        <i class="fa-solid {{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}"></i>
+  {{!-- MAIN BAR --}}
+  <div class="calendaria-hud-bar{{#if locked}} locked{{/if}}{{#if hasEvents}} has-events{{/if}}"
+    {{#if hasEvents}}style="--event-glow: {{firstEventColor}};"{{/if}}>
+
+    {{!-- LEFT BUTTON GROUP: Search, Add Note --}}
+    <div class="calendaria-hud-btn-group left" role="group" aria-label="{{localize 'CALENDARIA.HUD.NoteActions'}}">
+      <button type="button" class="calendaria-hud-btn" data-action="searchNotes"
+        data-tooltip="{{localize 'CALENDARIA.HUD.SearchNotes'}}">
+        <i class="fa-solid fa-magnifying-glass"></i>
       </button>
+      <button type="button" class="calendaria-hud-btn" data-action="addNote"
+        data-tooltip="{{localize 'CALENDARIA.HUD.AddNote'}}">
+        <i class="fa-solid fa-calendar-plus"></i>
+      </button>
+    </div>
+
+    <div class="calendaria-hud-divider"></div>
+
+    {{!-- LEFT INFO PANEL: Date (or Event, rotates every 30s) --}}
+    <div class="calendaria-hud-info-panel left">
+      {{!-- Date display (shown by default, hidden when event is shown) --}}
+      <span class="calendaria-hud-date">{{dateDisplay}}</span>
+      {{!-- Event display (rotates in) --}}
+      {{#if hasEvents}}
+        <div class="calendaria-hud-event hidden" data-action="openEvent"
+          data-event-id="{{currentEvent.id}}" data-parent-id="{{currentEvent.parentId}}"
+          data-tooltip="{{currentEvent.tooltip}}" style="--event-color: {{currentEvent.color}};">
+          <i class="{{currentEvent.icon}} calendaria-hud-event-icon"></i>
+          <span class="calendaria-hud-event-name">{{currentEvent.name}}</span>
+        </div>
+      {{/if}}
+    </div>
+
+    {{!-- CENTER SECTION: Time with hover play/pause --}}
+    <div class="calendaria-hud-center">
+      <div class="calendaria-hud-time-wrapper">
+        <span class="calendaria-hud-time">{{time}}</span>
+        {{#if isGM}}
+          <button type="button" class="calendaria-hud-play-btn"
+            data-action="toggleTimeFlow" aria-pressed="{{isPlaying}}"
+            data-tooltip="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.HUD.StartTime'}}{{/if}}">
+            <i class="fa-solid {{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}"></i>
+          </button>
+        {{/if}}
+      </div>
+    </div>
+
+    {{!-- RIGHT INFO PANEL: Indicators --}}
+    <div class="calendaria-hud-indicators">
+      {{#if weather}}
+        <span class="weather-indicator{{#if isGM}} clickable{{/if}}"
+          {{#if isGM}}data-action="openWeatherPicker"{{/if}}
+          style="--weather-color: {{weather.color}}"
+          data-tooltip="{{weather.tooltip}}">
+          <i class="{{weather.icon}}"></i>
+          <span class="weather-label">{{weather.label}}</span>
+          <span class="weather-temp">{{weather.temp}}</span>
+        </span>
+      {{else if isGM}}
+        <span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+          data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
+          <i class="fas fa-cloud"></i>
+        </span>
+      {{/if}}
+      {{#if currentSeason}}
+        <span class="season-indicator" style="--season-color: {{currentSeason.color}}"
+          data-tooltip="{{currentSeason.name}}">
+          <i class="{{currentSeason.icon}}"></i>
+          <span class="season-label">{{currentSeason.name}}</span>
+        </span>
+      {{/if}}
+      {{#if currentEra}}
+        <span class="era-indicator" data-tooltip="{{currentEra.name}}">
+          <i class="fas fa-hourglass-half"></i>
+        </span>
+      {{/if}}
+      {{#if cycleText}}
+        <span class="cycle-indicator" data-tooltip="{{{cycleText}}}">
+          <i class="fas fa-arrows-rotate"></i>
+        </span>
+      {{/if}}
+    </div>
+
+    <div class="calendaria-hud-divider"></div>
+
+    {{!-- RIGHT BUTTON GROUP: Calendar, Settings --}}
+    <div class="calendaria-hud-btn-group right" role="group" aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">
+      <button type="button" class="calendaria-hud-btn" data-action="openCalendar"
+        data-tooltip="{{localize 'CALENDARIA.HUD.OpenCalendar'}}">
+        <i class="fa-solid fa-calendar-days"></i>
+      </button>
+      {{#if isGM}}
+        <button type="button" class="calendaria-hud-btn" data-action="openSettings"
+          data-tooltip="{{localize 'CALENDARIA.HUD.Settings.Name'}}">
+          <i class="fa-solid fa-gear"></i>
+        </button>
       {{/if}}
     </div>
   </div>
 
-  {{!-- RIGHT INFO PANEL: Season/Era + Weather --}}
-  <div class="calendaria-hud-info-panel right">
-    <div class="calendaria-hud-info-group right">
-      <span class="calendaria-hud-info-primary">{{season}}</span>
-      {{#if era}}<span class="calendaria-hud-info-secondary">{{era}}</span>{{/if}}
+  {{!-- HOVER TRAY --}}
+  {{#if isGM}}
+    <div class="calendaria-hud-tray{{#if stickyTray}} visible{{/if}}">
+      {{!-- Time shortcut: Jump to Sunrise --}}
+      <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunrise"
+        data-tooltip="{{localize 'CALENDARIA.HUD.Sunrise'}}">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      {{!-- Time shortcut: Jump to Midday --}}
+      <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toMidday"
+        data-tooltip="{{localize 'CALENDARIA.HUD.Midday'}}">
+        <i class="fa-solid fa-cloud-sun"></i>
+      </button>
+
+      <div class="calendaria-hud-tray-divider"></div>
+
+      {{!-- Reverse time --}}
+      <button type="button" class="calendaria-hud-time-btn" data-action="reverse"
+        data-tooltip="{{localize 'CALENDARIA.HUD.Reverse'}}">
+        <i class="fa-solid fa-backward"></i>
+      </button>
+
+      {{!-- Multiplier selector --}}
+      <select class="calendaria-hud-select" data-action="setMultiplier"
+        aria-label="{{localize 'CALENDARIA.HUD.Multiplier'}}">
+        {{#each multipliers}}
+          <option value="{{value}}" {{#if selected}} selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+
+      {{!-- Time increment selector --}}
+      <select class="calendaria-hud-select" data-action="setIncrement"
+        aria-label="{{localize 'CALENDARIA.HUD.TimeIncrement'}}">
+        {{#each increments}}
+          <option value="{{key}}" {{#if selected}} selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+
+      {{!-- Forward time --}}
+      <button type="button" class="calendaria-hud-time-btn" data-action="forward"
+        data-tooltip="{{localize 'CALENDARIA.HUD.Forward'}}">
+        <i class="fa-solid fa-forward"></i>
+      </button>
+
+      <div class="calendaria-hud-tray-divider"></div>
+
+      {{!-- Time shortcut: Jump to Sunset --}}
+      <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunset"
+        data-tooltip="{{localize 'CALENDARIA.HUD.Sunset'}}">
+        <i class="fa-solid fa-cloud-moon"></i>
+      </button>
+      {{!-- Time shortcut: Jump to Midnight --}}
+      <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toMidnight"
+        data-tooltip="{{localize 'CALENDARIA.HUD.Midnight'}}">
+        <i class="fa-solid fa-moon"></i>
+      </button>
     </div>
-    {{#if weather}}
-    <div class="calendaria-hud-info-divider"></div>
-    <div class="calendaria-hud-info-row" data-action="openWeatherPicker" data-tooltip="{{weather.tooltip}}">
-      <i class="{{weather.icon}} calendaria-hud-weather-icon"></i>
-      <span>{{weather.temp}} {{weather.label}}</span>
-    </div>
-    {{/if}}
-  </div>
-
-  <div class="calendaria-hud-divider"></div>
-
-  {{!-- RIGHT BUTTON GROUP: Open Calendar, Lock, Settings --}}
-  <div class="calendaria-hud-btn-group">
-    <button type="button" class="calendaria-hud-btn" data-action="openCalendar" data-tooltip="{{localize 'CALENDARIA.HUD.OpenCalendar'}}">
-      <i class="fa-solid fa-calendar-days"></i>
-    </button>
-    <button type="button" class="calendaria-hud-btn" data-action="toggleLock" data-tooltip="{{#if locked}}{{localize 'CALENDARIA.HUD.UnlockPosition'}}{{else}}{{localize 'CALENDARIA.HUD.LockPosition'}}{{/if}}">
-      <i class="fa-solid {{#if locked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
-    </button>
-    {{#if isGM}}
-    <button type="button" class="calendaria-hud-btn" data-action="openSettings" data-tooltip="{{localize 'CALENDARIA.HUD.Settings'}}">
-      <i class="fa-solid fa-screwdriver-wrench"></i>
-    </button>
-    {{/if}}
-  </div>
-</div>
-
-{{!-- HOVER TRAY --}}
-{{#if isGM}}
-<div class="calendaria-hud-tray">
-  {{!-- Time shortcut: Jump to Sunrise --}}
-  <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunrise" data-tooltip="{{localize 'CALENDARIA.HUD.Sunrise'}}">
-    <i class="fa-solid fa-sun"></i>
-  </button>
-  {{!-- Time shortcut: Jump to Midday --}}
-  <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toMidday" data-tooltip="{{localize 'CALENDARIA.HUD.Midday'}}">
-    <i class="fa-solid fa-cloud-sun"></i>
-  </button>
-
-  <div class="calendaria-hud-tray-divider"></div>
-
-  {{!-- Reverse time: 5x speed --}}
-  <button type="button" class="calendaria-hud-time-btn" data-action="reverse5x" data-tooltip="{{localize 'CALENDARIA.HUD.Reverse5x'}}">
-    <i class="fa-solid fa-angle-double-left"></i>
-  </button>
-  {{!-- Reverse time: 1x speed --}}
-  <button type="button" class="calendaria-hud-time-btn" data-action="reverse" data-tooltip="{{localize 'CALENDARIA.HUD.Reverse'}}">
-    <i class="fa-solid fa-angle-left"></i>
-  </button>
-
-  {{!-- Time increment selector --}}
-  <select class="calendaria-hud-increment-select" data-action="setIncrement">
-    {{#each increments}}
-    <option value="{{key}}"{{#if selected}} selected{{/if}}>{{label}}</option>
-    {{/each}}
-  </select>
-
-  {{!-- Forward time: 1x speed --}}
-  <button type="button" class="calendaria-hud-time-btn" data-action="forward" data-tooltip="{{localize 'CALENDARIA.HUD.Forward'}}">
-    <i class="fa-solid fa-angle-right"></i>
-  </button>
-  {{!-- Forward time: 5x speed --}}
-  <button type="button" class="calendaria-hud-time-btn" data-action="forward5x" data-tooltip="{{localize 'CALENDARIA.HUD.Forward5x'}}">
-    <i class="fa-solid fa-angle-double-right"></i>
-  </button>
-
-  <div class="calendaria-hud-tray-divider"></div>
-
-  {{!-- Time shortcut: Jump to Sunset --}}
-  <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunset" data-tooltip="{{localize 'CALENDARIA.HUD.Sunset'}}">
-    <i class="fa-solid fa-cloud-moon"></i>
-  </button>
-  {{!-- Time shortcut: Jump to Midnight --}}
-  <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toMidnight" data-tooltip="{{localize 'CALENDARIA.HUD.Midnight'}}">
-    <i class="fa-solid fa-moon"></i>
-  </button>
-</div>
-{{/if}}
+  {{/if}}
 
 </div>

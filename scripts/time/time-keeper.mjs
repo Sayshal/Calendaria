@@ -66,6 +66,9 @@ export default class TimeKeeper {
   /** @type {string} Current increment key */
   static #incrementKey = 'minute';
 
+  /** @type {number} Multiplier for time advancement */
+  static #multiplier = 1;
+
   /* -------------------------------------------- */
   /*  Getters                                     */
   /* -------------------------------------------- */
@@ -95,6 +98,11 @@ export default class TimeKeeper {
     return this.#gameTimeRatio;
   }
 
+  /** @returns {number} Current multiplier */
+  static get multiplier() {
+    return this.#multiplier;
+  }
+
   /* -------------------------------------------- */
   /*  Initialization                              */
   /* -------------------------------------------- */
@@ -104,6 +112,9 @@ export default class TimeKeeper {
    */
   static initialize() {
     log(3, 'Initializing TimeKeeper...');
+
+    // Set default increment to ensure gameTimeRatio is properly initialized
+    this.setIncrement('minute');
 
     // Listen for remote clock updates
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
@@ -209,6 +220,22 @@ export default class TimeKeeper {
     }
   }
 
+  /**
+   * Set the time multiplier.
+   * @param {number} multiplier - Multiplier value (0.25 to 10)
+   */
+  static setMultiplier(multiplier) {
+    this.#multiplier = Math.max(0.25, Math.min(10, multiplier));
+
+    log(3, `TimeKeeper multiplier set to: ${this.#multiplier}x`);
+
+    // Restart interval if running to apply new multiplier
+    if (this.#running) {
+      this.#stopInterval();
+      this.#startInterval();
+    }
+  }
+
   /* -------------------------------------------- */
   /*  Manual Time Control                         */
   /* -------------------------------------------- */
@@ -256,12 +283,12 @@ export default class TimeKeeper {
   static #startInterval() {
     if (this.#intervalId) return;
 
-    // Interval runs every updateFrequency seconds, advances by gameTimeRatio * updateFrequency
+    // Interval runs every updateFrequency seconds, advances by gameTimeRatio * updateFrequency * multiplier
     this.#intervalId = setInterval(async () => {
       if (!this.#running) return;
       if (!game.user.isGM) return;
 
-      const advanceAmount = this.#gameTimeRatio * this.#updateFrequency;
+      const advanceAmount = this.#gameTimeRatio * this.#updateFrequency * this.#multiplier;
       await game.time.advance(advanceAmount);
     }, this.#updateFrequency * 1000);
   }

@@ -1,0 +1,46 @@
+<section class="hud-settings-content standard-form">
+  {{!-- Display Mode --}}
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.Settings.CalendarHudMode.Name"}}</label>
+    <div class="form-fields">
+      <select name="mode">
+        <option value="fullsize"{{#if modeFullsize}} selected{{/if}}>{{localize "CALENDARIA.Settings.CalendarHudMode.Fullsize"}}</option>
+        <option value="compact"{{#if modeCompact}} selected{{/if}}>{{localize "CALENDARIA.Settings.CalendarHudMode.Compact"}}</option>
+      </select>
+    </div>
+    <p class="hint">{{localize "CALENDARIA.Settings.CalendarHudMode.Hint"}}</p>
+  </div>
+
+  {{!-- Sticky Options --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.HUD.Settings.StickyOptions"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.HUD.StickyTray"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="stickyTray"{{#if stickyTray}} checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.HUD.Settings.StickyTrayHint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.HUD.StickyPosition"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="stickyPosition"{{#if stickyPosition}} checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.HUD.Settings.StickyPositionHint"}}</p>
+    </div>
+  </fieldset>
+
+  {{!-- Position Reset --}}
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.HUD.Settings.ResetPosition"}}</label>
+    <div class="form-fields">
+      <button type="button" data-action="resetPosition">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Settings.ResetPosition.Label"}}
+      </button>
+    </div>
+    <p class="hint">{{localize "CALENDARIA.HUD.Settings.ResetPositionHint"}}</p>
+  </div>
+</section>

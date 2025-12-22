@@ -146,7 +146,13 @@ export const SETTINGS = {
   CALENDAR_HUD_MODE: 'calendarHudMode',
 
   /** @type {string} Whether the Calendar HUD position is locked */
-  CALENDAR_HUD_LOCKED: 'calendarHudLocked'
+  CALENDAR_HUD_LOCKED: 'calendarHudLocked',
+
+  /** @type {string} Sticky states for Calendar HUD (tray, position) */
+  HUD_STICKY_STATES: 'hudStickyStates',
+
+  /** @type {string} Saved position of the Calendar HUD */
+  CALENDAR_HUD_POSITION: 'calendarHudPosition'
 };
 
 /**
@@ -190,7 +196,9 @@ export const TEMPLATES = {
     /** @type {string} Theme editor template */
     THEME_EDITOR: `modules/${MODULE.ID}/templates/settings/theme-editor.hbs`,
     /** @type {string} Macro trigger configuration template */
-    MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`
+    MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`,
+    /** @type {string} Calendar HUD settings template */
+    HUD_SETTINGS: `modules/${MODULE.ID}/templates/settings/calendaria-hud-settings.hbs`
   },
 
   /** @type {string} Time rotation dial template */

@@ -168,6 +168,24 @@ export function registerSettings() {
     default: false
   });
 
+  /** Calendar HUD sticky states */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
+    name: 'Calendar HUD Sticky States',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: { tray: false, position: false }
+  });
+
+  /** Calendar HUD position */
+  game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, {
+    name: 'Calendar HUD Position',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: null
+  });
+
   /** User-customized theme color overrides */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {
     name: 'Custom Theme Colors',
