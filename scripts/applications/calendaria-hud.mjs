@@ -177,11 +177,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#multiplier = stickyStates.multiplier ?? 1;
     context.stickyTray = this.#stickyTray;
 
-    // Restore TimeKeeper states if saved (must happen before building dropdowns)
-    if (stickyStates.increment && stickyStates.increment !== TimeKeeper.incrementKey) {
+    // Restore per-app and global TimeKeeper settings
+    const appSettings = TimeKeeper.getAppSettings('calendaria-hud');
+    if (stickyStates.increment && stickyStates.increment !== appSettings.incrementKey) {
+      TimeKeeper.setAppIncrement('calendaria-hud', stickyStates.increment);
       TimeKeeper.setIncrement(stickyStates.increment);
     }
-    if (this.#multiplier !== TimeKeeper.multiplier) {
+    if (this.#multiplier !== appSettings.multiplier) {
+      TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
       TimeKeeper.setMultiplier(this.#multiplier);
     }
 
@@ -205,7 +208,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const era = calendar?.getCurrentEra?.();
     context.currentEra = era
       ? {
-          name: localize(era.abbreviation || era.name)
+          name: localize(era.name),
+          abbreviation: localize(era.abbreviation || era.name)
         }
       : null;
 
@@ -228,7 +232,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       key,
       label: this.#formatIncrementLabel(key),
       seconds,
-      selected: key === TimeKeeper.incrementKey
+      selected: key === appSettings.incrementKey
     }));
 
     // Multipliers for dropdown
@@ -245,26 +249,20 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
 
-    // Check if this is a partial re-render of just the bar
-    const isBarOnlyRender = options.parts?.length === 1 && options.parts[0] === 'bar';
-
     // Apply compact mode class
     this.element.classList.toggle('compact', this.isCompact);
 
-    // Skip position/dome setup for bar-only renders to prevent flicker
-    if (!isBarOnlyRender) {
-      // Restore position
-      this.#restorePosition();
+    // Restore position
+    this.#restorePosition();
 
-      // Enable dragging (respects sticky position)
-      this.#enableDragging();
+    // Enable dragging (respects sticky position)
+    this.#enableDragging();
 
-      // Update celestial visuals
-      this.#updateCelestialDisplay();
+    // Update celestial visuals
+    this.#updateCelestialDisplay();
 
-      // Update dome visibility based on viewport position
-      this.#updateDomeVisibility();
-    }
+    // Update dome visibility based on viewport position
+    this.#updateDomeVisibility();
 
     // Setup event listeners (always needed for bar controls)
     this.#setupEventListeners();
@@ -294,14 +292,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       id: Hooks.on(HOOKS.CLOCK_START_STOP, () => this.#onClockStateChange())
     });
 
-    // Weather change hook
+    // Weather change hook - only re-render bar (weather is in bar, not dome)
     this.#hooks.push({
       name: HOOKS.WEATHER_CHANGE,
-      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render())
+      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['bar'] }))
     });
 
-    // Note changes
-    const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    // Note changes - only re-render bar (events are in bar, not dome)
+    const debouncedRender = foundry.utils.debounce(() => this.render({ parts: ['bar'] }), 100);
     this.#hooks.push({
       name: 'updateJournalEntryPage',
       id: Hooks.on('updateJournalEntryPage', (page) => {
@@ -348,15 +346,17 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Setup event listeners for the HUD.
    */
   #setupEventListeners() {
-    // Increment selector
+    // Increment selector (per-app + global for real-time clock)
     this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]')?.addEventListener('change', (event) => {
+      TimeKeeper.setAppIncrement('calendaria-hud', event.target.value);
       TimeKeeper.setIncrement(event.target.value);
       this.#saveStickyStates();
     });
 
-    // Multiplier selector
+    // Multiplier selector (per-app + global for real-time clock)
     this.element.querySelector('.calendaria-hud-select[data-action="setMultiplier"]')?.addEventListener('change', (event) => {
       this.#multiplier = parseFloat(event.target.value);
+      TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
       TimeKeeper.setMultiplier(this.#multiplier);
       this.#saveStickyStates();
     });
@@ -400,9 +400,13 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyPosition = states.position ?? false;
     this.#multiplier = states.multiplier ?? 1;
 
-    // Set TimeKeeper multiplier and increment
+    // Set per-app and global TimeKeeper settings
+    TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
     TimeKeeper.setMultiplier(this.#multiplier);
-    if (states.increment) TimeKeeper.setIncrement(states.increment);
+    if (states.increment) {
+      TimeKeeper.setAppIncrement('calendaria-hud', states.increment);
+      TimeKeeper.setIncrement(states.increment);
+    }
 
     // Apply tray visibility
     if (this.#stickyTray) {
@@ -419,7 +423,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       tray: this.#stickyTray,
       position: this.#stickyPosition,
       multiplier: this.#multiplier,
-      increment: TimeKeeper.incrementKey
+      increment: TimeKeeper.getAppSettings('calendaria-hud').incrementKey
     });
   }
 
@@ -637,6 +641,22 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       } else {
         // Clear inline opacity so CSS class controls visibility
         stars.style.opacity = '';
+      }
+    }
+
+    // Update clouds visibility (daytime only, 7am-6pm)
+    const clouds = this.element.querySelector('.calendaria-hud-clouds');
+    if (clouds) {
+      const showClouds = hour >= 7 && hour < 18;
+      const partialClouds = (hour >= 6 && hour < 7) || (hour >= 18 && hour < 19);
+      clouds.classList.toggle('visible', showClouds || partialClouds);
+
+      if (partialClouds) {
+        // Fade in/out during dawn/dusk
+        const cloudOpacity = hour < 12 ? (hour - 6) : 1 - (hour - 18);
+        clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
+      } else {
+        clouds.style.opacity = '';
       }
     }
 
@@ -1516,11 +1536,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static #onReverse(event, target) {
-    TimeKeeper.reverse(this.#multiplier);
+    TimeKeeper.reverseFor('calendaria-hud');
   }
 
   static #onForward(event, target) {
-    TimeKeeper.forward(this.#multiplier);
+    TimeKeeper.forwardFor('calendaria-hud');
   }
 
   /* -------------------------------------------- */

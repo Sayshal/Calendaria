@@ -25,7 +25,7 @@
     {{!-- LEFT INFO PANEL: Date (or Event, rotates every 30s) --}}
     <div class="calendaria-hud-info-panel left">
       {{!-- Date display (shown by default, hidden when event is shown) --}}
-      <span class="calendaria-hud-date">{{dateDisplay}}</span>
+      <span class="calendaria-hud-date" data-tooltip="{{dateDisplay}}">{{dateDisplay}}</span>
       {{!-- Event display (rotates in) --}}
       {{#if hasEvents}}
         <div class="calendaria-hud-event hidden" data-action="openEvent"

@@ -54,17 +54,20 @@ export default class TimeKeeper {
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
 
-  /** @type {number} Time increment in seconds per tick */
+  /** @type {number} Time increment in seconds per tick (for real-time clock) */
   static #increment = 60;
 
   /** @type {number} Game-time to real-time ratio (game seconds per real second) */
   static #gameTimeRatio = 1;
 
-  /** @type {string} Current increment key */
+  /** @type {string} Current increment key (for real-time clock) */
   static #incrementKey = 'minute';
 
-  /** @type {number} Multiplier for time advancement */
+  /** @type {number} Multiplier for time advancement (for real-time clock) */
   static #multiplier = 1;
+
+  /** @type {Map<string, {incrementKey: string, multiplier: number}>} Per-app settings */
+  static #appSettings = new Map();
 
   /* -------------------------------------------- */
   /*  Getters                                     */
@@ -208,6 +211,77 @@ export default class TimeKeeper {
       this.#stopInterval();
       this.#startInterval();
     }
+  }
+
+  /* -------------------------------------------- */
+  /*  Per-App Settings                            */
+  /* -------------------------------------------- */
+
+  /**
+   * Get settings for a specific application.
+   * @param {string} appId - Application identifier
+   * @returns {{incrementKey: string, multiplier: number}}
+   */
+  static getAppSettings(appId) {
+    if (!this.#appSettings.has(appId)) {
+      this.#appSettings.set(appId, { incrementKey: 'minute', multiplier: 1 });
+    }
+    return this.#appSettings.get(appId);
+  }
+
+  /**
+   * Set increment for a specific application.
+   * @param {string} appId - Application identifier
+   * @param {string} key - Increment key from getTimeIncrements()
+   */
+  static setAppIncrement(appId, key) {
+    const increments = getTimeIncrements();
+    if (!increments[key]) {
+      log(2, `Invalid increment key: ${key}`);
+      return;
+    }
+    const settings = this.getAppSettings(appId);
+    settings.incrementKey = key;
+    log(3, `TimeKeeper[${appId}] increment set to: ${key}`);
+  }
+
+  /**
+   * Set multiplier for a specific application.
+   * @param {string} appId - Application identifier
+   * @param {number} multiplier - Multiplier value (0.25 to 10)
+   */
+  static setAppMultiplier(appId, multiplier) {
+    const settings = this.getAppSettings(appId);
+    settings.multiplier = Math.max(0.25, Math.min(10, multiplier));
+    log(3, `TimeKeeper[${appId}] multiplier set to: ${settings.multiplier}x`);
+  }
+
+  /**
+   * Advance time using a specific application's settings.
+   * @param {string} appId - Application identifier
+   */
+  static async forwardFor(appId) {
+    if (!game.user.isGM) return;
+    const settings = this.getAppSettings(appId);
+    const increments = getTimeIncrements();
+    const increment = increments[settings.incrementKey] ?? 60;
+    const amount = increment * settings.multiplier;
+    await game.time.advance(amount);
+    log(3, `Time advanced by ${amount}s for ${appId}`);
+  }
+
+  /**
+   * Reverse time using a specific application's settings.
+   * @param {string} appId - Application identifier
+   */
+  static async reverseFor(appId) {
+    if (!game.user.isGM) return;
+    const settings = this.getAppSettings(appId);
+    const increments = getTimeIncrements();
+    const increment = increments[settings.incrementKey] ?? 60;
+    const amount = increment * settings.multiplier;
+    await game.time.advance(-amount);
+    log(3, `Time reversed by ${amount}s for ${appId}`);
   }
 
   /* -------------------------------------------- */
