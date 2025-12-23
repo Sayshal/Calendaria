@@ -82,6 +82,21 @@
   --calendaria-note-bg: var(--calendaria-bg);
   --calendaria-note-header-bg: var(--calendaria-bg-lighter);
 
+  /* Fallback colors for non-dnd5e systems */
+  --calendaria-input-bg: rgb(48 48 48);
+  --calendaria-input-border: rgb(74 74 74);
+  --calendaria-cool-3: rgb(65 65 65);
+  --calendaria-cool-4: rgb(55 55 55);
+  --calendaria-cool-5: rgb(45 45 45);
+  --calendaria-cool-5-50: rgb(45 45 45 / 50%);
+  --calendaria-cool-5-75: rgb(45 45 45 / 75%);
+  --calendaria-text-secondary: rgb(170 170 170);
+  --calendaria-text-heading: rgb(238 238 238);
+  --calendaria-text-highlight: rgb(255 255 255);
+  --calendaria-link: rgb(74 144 226);
+  --calendaria-positive-bg: rgb(76 175 80 / 20%);
+  --calendaria-positive-fg: rgb(76 175 80);
+
   /* ======================================== */
   /* Layout Dimensions (Content-Aware Sizing) */
   /* ======================================== */
@@ -174,6 +189,21 @@
   /* Note sheet colors */
   --calendaria-note-bg: var(--calendaria-bg);
   --calendaria-note-header-bg: var(--calendaria-bg-lighter);
+
+  /* Fallback colors for non-dnd5e systems (light) */
+  --calendaria-input-bg: rgb(248 248 248);
+  --calendaria-input-border: rgb(200 200 200);
+  --calendaria-cool-3: rgb(210 210 210);
+  --calendaria-cool-4: rgb(200 200 200);
+  --calendaria-cool-5: rgb(240 240 240);
+  --calendaria-cool-5-50: rgb(240 240 240 / 50%);
+  --calendaria-cool-5-75: rgb(240 240 240 / 75%);
+  --calendaria-text-secondary: rgb(80 80 80);
+  --calendaria-text-heading: rgb(32 32 32);
+  --calendaria-text-highlight: rgb(0 0 0);
+  --calendaria-link: rgb(59 130 206);
+  --calendaria-positive-bg: rgb(56 142 60 / 20%);
+  --calendaria-positive-fg: rgb(56 142 60);
 
   /* Foundry color variable overrides for light mode */
   --color-cool-3: rgb(210 210 210);
@@ -513,8 +543,8 @@
 }
 
 .weather-indicator.no-weather:hover {
-  background: color-mix(in srgb, var(--color-positive-bg) 20%, transparent);
-  border-color: var(--color-positive-fg);
+  background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
+  border-color: var(--color-positive-fg, var(--calendaria-positive-fg));
 }
 
 .weather-indicator .weather-temp {
@@ -1162,7 +1192,7 @@
     align-items: center;
     gap: 0.75rem;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--color-border-light);
+    border-bottom: 2px solid var(--color-border-light, var(--calendaria-border));
   }
 
   .note-icon {
@@ -1189,7 +1219,7 @@
 
   .gm-only-badge {
     padding: 0.25rem 0.5rem;
-    background: var(--color-level-warning);
+    background: var(--color-level-warning, var(--calendaria-warning));
     border-radius: 3px;
     font-size: 0.75rem;
     color: var(--calendaria-text-on-color);
@@ -1200,7 +1230,7 @@
     flex-wrap: wrap;
     gap: 1rem;
     padding: 0.5rem 0.75rem;
-    background: var(--color-cool-5-50);
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
     border-radius: 4px;
     font-size: 0.9rem;
 
@@ -1221,8 +1251,8 @@
 
     .category-tag {
       padding: 0.25rem 0.75rem;
-      background: var(--color-cool-4);
-      border: 1px solid var(--color-cool-3);
+      background: var(--color-cool-4, var(--calendaria-cool-4));
+      border: 1px solid var(--color-cool-3, var(--calendaria-cool-3));
       border-radius: 1rem;
       font-size: 0.85rem;
     }
@@ -1235,7 +1265,7 @@
 
     &:empty::before {
       content: 'No content';
-      color: var(--color-text-light-6);
+      color: var(--color-text-light-6, var(--calendaria-text-dim));
       font-style: italic;
     }
   }
@@ -1251,24 +1281,41 @@
   gap: 0.5rem;
   height: 100%;
 
+  /* ===== Layout Rows ===== */
   .form-row-1 {
     display: grid;
     grid-template-columns: 1fr auto auto;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
   }
 
   .form-row-2 {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
   }
 
   .form-row-3 {
-    margin-bottom: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+
+    fieldset {
+      min-width: 0;
+    }
+
+    .inline-form {
+      min-width: 0;
+
+      select,
+      input,
+      multi-select {
+        min-width: 0;
+        flex: 1 1 0;
+      }
+    }
   }
 
+  /* ===== Base Fieldset ===== */
   fieldset {
     padding: 0.5rem;
     margin: 0;
@@ -1277,269 +1324,429 @@
     justify-content: center;
   }
 
-  .title-fieldset {
-    input[type='text'] {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid var(--color-border-light);
-      border-radius: 3px;
-      font-family: inherit;
-      font-size: inherit;
+  /* ===== Editor Fieldset (grows to fill space) ===== */
+  .editor-fieldset {
+    flex: 1;
+    min-height: 150px;
 
-      &:focus {
-        outline: none;
-        border-color: var(--color-border-dark);
-        box-shadow: 0 0 8px var(--calendaria-shadow-light);
-      }
-    }
-  }
-
-  .date-fieldset {
-    .date-inputs {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .date-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      label {
-        font-size: 0.9em;
-        font-weight: 600;
-        min-width: 3rem;
-        flex-shrink: 0;
-      }
-    }
-
-    .date-picker-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    prose-mirror {
       flex: 1;
-      padding: 0;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border-light);
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      font-size: inherit;
-      text-align: left;
+      display: flex;
+      flex-direction: column;
 
-      &:hover {
-        background: var(--color-bg-option);
-        border-color: var(--color-border-dark);
-        box-shadow: 0 0 8px var(--calendaria-shadow-light);
-      }
-
-      i {
-        flex-shrink: 0;
-      }
-
-      .date-display {
+      .editor-container {
         flex: 1;
+        overflow-y: auto;
       }
     }
   }
 
-  .time-fieldset {
-    .time-inputs {
-      display: flex;
-      flex-direction: column;
+  /* ===== Date Picker Button ===== */
+  .date-picker-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex: 1;
+    padding: 0.125rem 0.375rem;
+    font-size: var(--font-size-11);
+            border-radius: 3px;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    min-width: 0;
+
+    &:hover {
+      background: var(--color-cool-4, var(--calendaria-cool-4));
     }
 
-    .time-row {
+    i {
+      flex-shrink: 0;
+      font-size: var(--font-size-10);
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  /* ===== Emblem Controls ===== */
+  .emblem-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .icon-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    cursor: pointer;
+
+    &:hover .icon-preview {
+      opacity: 0.8;
+    }
+  }
+
+  .icon-preview {
+    height: 24px;
+    width: auto;
+    font-size: 24px;
+    object-fit: contain;
+  }
+
+  .color-input {
+    width: 60px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+            border-radius: 3px;
+    }
+
+    &::-moz-color-swatch {
+            border-radius: 3px;
+    }
+  }
+
+  /* ===== Visibility Checkboxes ===== */
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    label {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.375rem;
+      font-size: var(--font-size-11);
+      cursor: pointer;
+    }
+  }
+
+  /* ===== Date Fieldset Grid ===== */
+  .date-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .form-group {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.375rem;
+      align-items: center;
 
       > label {
-        font-size: 0.9em;
+        font-size: var(--font-size-11);
         font-weight: 600;
-        min-width: 3rem;
-        flex-shrink: 0;
       }
+    }
+  }
 
-      input[type='time'] {
-        width: 6rem;
-        height: 22px;
-        padding: 4px 0;
-        flex-shrink: 0;
-      }
+  /* ===== Time Fieldset Grid ===== */
+  .time-fieldset .time-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.25rem 0.375rem;
+    align-items: center;
+
+    > label {
+      font-size: var(--font-size-11);
+      font-weight: 600;
+    }
+
+    input[type='time'] {
+      font-size: var(--font-size-11);
+      padding: 0.125rem 0.375rem;
+      border-radius: 3px;
+      width: 100%;
+      height: auto;
+      line-height: 1.2;
     }
 
     .all-day-label {
+      grid-column: 3;
+      grid-row: 1 / 3;
       display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      white-space: nowrap;
-      margin-left: auto;
-      font-size: 0.9em;
-      font-weight: normal;
-    }
-  }
-
-  .emblem-fieldset {
-    .emblem-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .icon-picker {
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0.25rem;
+      gap: 0.125rem;
+      font-size: var(--font-size-10);
+      font-weight: normal;
       cursor: pointer;
-      transition: transform 0.1s ease;
+      padding-left: 0.5rem;
 
-      &:hover {
-        transform: scale(1.05);
-
-        .icon-preview {
-          opacity: 0.8;
-        }
-      }
-
-      &:active {
-        transform: scale(0.98);
-      }
-    }
-
-    .icon-preview {
-      height: 26px;
-      width: auto;
-      font-size: 26px;
-      object-fit: contain;
-      transition: opacity 0.1s ease;
-    }
-
-    .color-input {
-      width: 75px;
-      height: 26px;
-      padding: 0;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      background: transparent;
-      appearance: none;
-
-      &::-webkit-color-swatch-wrapper {
-        padding: 0;
-      }
-
-      &::-webkit-color-swatch {
-        border: 1px solid var(--color-border-light);
-        border-radius: 3px;
-      }
-
-      &::-moz-color-swatch {
-        border: 1px solid var(--color-border-light);
-        border-radius: 3px;
+      input[type='checkbox'] {
+        margin: 0;
       }
     }
   }
 
-  /* Moon Conditions UI */
-  .form-row-moon {
+  /* ===== Repeat Fieldset ===== */
+  .repeat-fieldset .repeat-controls {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    > select {
+      font-size: var(--font-size-11);
+      padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            line-height: 1.4;
+    }
+
+    .max-occurrences {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.125rem;
+
+      input {
+        width: 60px;
+        font-size: var(--font-size-11);
+        padding: 0.125rem 0.375rem;
+                border-radius: 3px;
+                text-align: center;
+        line-height: 1.4;
+      }
+
+      label {
+        font-size: var(--font-size-10);
+        color: var(--color-text-light-6, var(--calendaria-text-dim));
+        text-align: center;
+      }
+    }
+  }
+
+  /* ===== Shared Note Form Styles ===== */
+
+  /* Hint text - used across all fieldsets */
+  .hint {
+    margin-bottom: 0.375rem;
+    font-size: var(--font-size-10);
+    color: var(--color-text-light-6, var(--calendaria-text-dim));
+    font-style: italic;
+
+    &.no-moons,
+    &.warning {
+      color: var(--color-level-warning, var(--calendaria-warning));
+    }
+  }
+
+  /* Pill/tag styling for conditions and moon phases */
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
     margin-bottom: 0.5rem;
   }
 
-  .moon-conditions-fieldset {
-    .moon-conditions-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.375rem;
-      margin-bottom: 0.5rem;
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--color-cool-4, var(--calendaria-cool-4));
+    border: 1px solid var(--color-cool-3, var(--calendaria-cool-3));
+    border-radius: 1rem;
+    font-size: var(--font-size-11);
+    max-width: 100%;
+
+    .tag-label {
+      font-weight: 600;
+      color: var(--color-text-light-heading, var(--calendaria-text-heading));
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .moon-condition-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-      padding: 0.25rem 0.5rem;
-      background: var(--color-cool-4);
-      border: 1px solid var(--color-cool-3);
-      border-radius: 1rem;
-      font-size: var(--font-size-11);
+    .tag-value {
+      color: var(--color-text-light-primary, var(--calendaria-text));
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 
-      .moon-name {
-        font-weight: 600;
-        color: var(--color-text-light-heading);
-      }
+  /* Remove button (X) on tags */
+  .remove-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: var(--color-text-light-6, var(--calendaria-text-dim));
+    line-height: 1;
 
-      .phase-name {
-        color: var(--color-text-light-primary);
-      }
-
-      .remove-condition {
-        background: none;
-        border: none;
-        padding: 0;
-        margin: 0;
-        cursor: pointer;
-        color: var(--color-text-light-6);
-        line-height: 1;
-
-        &:hover {
-          color: var(--color-level-error);
-        }
-
-        i {
-          font-size: var(--font-size-10);
-        }
-      }
+    &:hover {
+      color: var(--color-level-error, var(--calendaria-error));
     }
 
-    .add-moon-condition {
-      display: flex;
-      gap: 0.375rem;
-      align-items: center;
-
-      select {
-        flex: 1;
-        min-width: 120px;
-        font-size: var(--font-size-11);
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-      }
-
-      .add-condition-btn {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-        cursor: pointer;
-        color: var(--color-text-light-heading);
-
-        &:hover {
-          background: var(--color-cool-4);
-        }
-
-        i {
-          font-size: var(--font-size-10);
-        }
-      }
-    }
-
-    .hint {
-      margin-top: 0.375rem;
+    i {
       font-size: var(--font-size-10);
-      color: var(--color-text-light-6);
-      font-style: italic;
+    }
+  }
 
-      &.no-moons {
-        color: var(--color-level-warning);
+  /* Inline form row for adding items */
+  .inline-form {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+
+    select,
+    input {
+      font-size: var(--font-size-11);
+      padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            line-height: 1.4;
+    }
+
+    select {
+      flex: 1;
+      min-width: 100px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    input[type='number'] {
+      width: 70px;
+    }
+  }
+
+  /* Add button */
+  .add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+        border-radius: 3px;
+        cursor: pointer;
+    color: var(--color-text-light-heading, var(--calendaria-text-heading));
+    font-size: var(--font-size-11);
+    white-space: nowrap;
+    line-height: 1.4;
+
+    &:hover {
+      background: var(--color-cool-4, var(--calendaria-cool-4));
+    }
+
+    i {
+      font-size: var(--font-size-11);
+    }
+  }
+
+  /* Inline form group (label + input side by side) */
+  .form-group {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    label {
+      font-size: var(--font-size-11);
+      font-weight: 600;
+      min-width: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    select,
+    input {
+      font-size: var(--font-size-11);
+      padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            line-height: 1.4;
+    }
+
+    select {
+      min-width: 100px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    input[type='number'] {
+      width: 80px;
+    }
+  }
+
+  /* Stacked form group (label above input) */
+  .form-group-stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+
+    label {
+      font-size: var(--font-size-11);
+      font-weight: 500;
+      text-align: center;
+    }
+
+    select,
+    input {
+      font-size: var(--font-size-11);
+      padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            line-height: 1.4;
+    }
+
+    input[type='number'] {
+      width: 80px;
+    }
+
+    /* Nested inline-form for seed input + button */
+    .inline-form {
+      align-items: stretch;
+    }
+  }
+
+  /* ===== Repeat Config Grid ===== */
+  .repeat-config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .repeat-config-primary,
+  .repeat-config-secondary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+
+    fieldset {
+      min-height: 96px;
+      min-width: 0;
+    }
+
+    .inline-form {
+      min-width: 0;
+
+      select,
+      input {
+        min-width: 0;
+        flex: 1 1 0;
+      }
+
+      input[type='number'] {
+        flex: 0 0 auto;
+        width: 60px;
       }
     }
   }
 
-  /* Repeat Options (maxOccurrences) */
+  /* ===== Repeat Options (maxOccurrences) ===== */
   .repeat-options {
     display: flex;
     align-items: center;
@@ -1556,142 +1763,64 @@
     input[type='number'] {
       width: 60px;
       padding: 0.125rem 0.375rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
+            border-radius: 3px;
       text-align: center;
     }
   }
 
-  /* Random Event Config UI */
-  .form-row-random {
-    margin-bottom: 0.5rem;
-  }
-
-  .random-config-inputs {
-    display: flex;
-    gap: 1rem;
+  /* ===== Stacked form groups in fieldsets ===== */
+  /* Align to end so items with labels align at the bottom */
+  fieldset:has(.form-group-stacked) > .inline-form {
     align-items: flex-end;
-    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .random-config-inputs .form-group {
+  /* ===== Range Config ===== */
+  .range-config-inputs {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-
-    label {
-      font-size: var(--font-size-11);
-      font-weight: 500;
-    }
-
-    input[type='number'] {
-      width: 80px;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-    }
-
-    select {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-    }
+    gap: 0.5rem;
   }
 
-  .seed-input-group {
+  .range-component {
     display: flex;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
 
-    input {
-      width: 100px;
-    }
-
-    button {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-      cursor: pointer;
-
-      &:hover {
-        background: var(--color-cool-4);
-      }
+    > label {
+      font-size: var(--font-size-11);
+      font-weight: 600;
+      min-width: 50px;
+      flex-shrink: 0;
     }
   }
 
-  .random-config-fieldset .hint {
-    margin-top: 0.5rem;
-    font-size: var(--font-size-10);
-    color: var(--color-text-light-6);
-    font-style: italic;
+  .range-controls {
+    display: flex;
+    flex: 1;
+    gap: 0.375rem;
+    align-items: center;
   }
 
-  /* Linked Event Config UI */
-  .form-row-linked {
-    margin-bottom: 0.5rem;
-  }
-
-  .linked-config-inputs {
+  .range-value-inputs {
     display: flex;
     gap: 0.375rem;
     align-items: center;
 
-    select {
-      flex: 1;
-      min-width: 120px;
+    span {
       font-size: var(--font-size-11);
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
+      color: var(--color-text-light-6, var(--calendaria-text-dim));
     }
-
-    input[type='number'] {
-      width: 70px;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      font-size: var(--font-size-11);
-    }
-
-    .clear-linked-btn {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-      cursor: pointer;
-      color: var(--color-text-light-6);
-      line-height: 1;
-
-      &:hover {
-        background: var(--color-cool-4);
-        color: var(--color-level-error);
-      }
-
-      i {
-        font-size: var(--font-size-10);
-      }
-    }
-  }
-
-  .linked-config-fieldset .hint {
-    margin-top: 0.375rem;
-    font-size: var(--font-size-10);
-    color: var(--color-text-light-6);
-    font-style: italic;
   }
 
   .categories-fieldset {
-    .categories-container {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 0.5rem;
+    .inline-form {
+      align-items: flex-end;
     }
 
     multi-select {
       flex: 1;
+      align-self: flex-end;
 
       .tags {
         display: flex;
@@ -1703,84 +1832,66 @@
         padding-right: 0.25rem;
       }
 
+      select {
+        font-size: var(--font-size-11) !important;
+        padding: 0.125rem 0.375rem !important;
+        line-height: 1.4 !important;
+        height: 26px !important;
+                border-radius: 3px;
+              }
+
+      /* Override .tag for multi-select's internal tags */
       .tag {
-        display: inline-flex;
-        align-items: center;
         padding: 0.125rem 0.375rem;
-        border-radius: 1rem;
         font-size: var(--font-size-10);
-        background: var(--color-cool-4);
-        border: 1px solid var(--color-cool-3);
         cursor: pointer;
 
         &:hover {
-          background: var(--color-cool-3);
+          background: var(--color-cool-3, var(--calendaria-cool-3));
         }
       }
     }
 
-    .custom-category-input {
-      display: flex;
-      gap: 0.25rem;
-      flex-shrink: 0;
+    .new-category-input {
+      width: 10rem;
       align-self: flex-end;
-
-      .new-category-input {
-        width: 10rem;
-        font-size: var(--font-size-11);
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-
-        &::placeholder {
-          color: var(--color-text-light-6);
-          font-style: italic;
-        }
+      font-size: var(--font-size-11);
+      padding: 0.125rem 0.375rem;
+      line-height: 1.4;
+            border-radius: 3px;
+      
+      &::placeholder {
+        color: var(--color-text-light-6, var(--calendaria-text-dim));
+        font-style: italic;
       }
+    }
 
-      .add-category-btn {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-        cursor: pointer;
-        color: var(--color-text-light-heading);
-
-        &:hover {
-          background: var(--color-cool-4);
-        }
-
-        i {
-          font-size: var(--font-size-10);
-        }
-      }
+    .add-btn {
+      align-self: flex-end;
     }
   }
 
-  .gm-only-fieldset {
-    display: flex;
-    flex-direction: column;
+}
 
-    .gm-only-control {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      margin: 0;
-      cursor: pointer;
-    }
+/* -------------------------------------------- */
+/*  Non-dnd5e System Overrides                   */
+/* -------------------------------------------- */
+
+.calendaria.calendar-note-sheet:not(.dnd5e2) .calendar-note-form {
+  input[type='text']:not(prose-mirror *),
+  input[type='number']:not(prose-mirror *),
+  select:not(prose-mirror *) {
+    border-radius: 3px;
   }
 
-  .editor-fieldset {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 300px;
+  button:not(prose-mirror *) {
+    border: 1px solid var(--calendaria-border);
+    border-radius: 3px;
+  }
 
-    prose-mirror {
-      flex: 1;
-      min-height: 300px;
-    }
+  fieldset {
+    border: 1px solid var(--calendaria-border);
+    border-radius: 4px;
   }
 }
 
@@ -1808,7 +1919,7 @@
       opacity 0.15s ease;
 
     &:hover {
-      background: var(--color-cool-5);
+      background: var(--color-cool-5, var(--calendaria-cool-5));
       border: none;
     }
 
@@ -1867,7 +1978,7 @@
 
   /* Warning text color */
   .warning {
-    color: var(--color-level-warning);
+    color: var(--color-level-warning, var(--calendaria-warning));
   }
 
   /* Template Selector */
@@ -1915,7 +2026,7 @@
   /* Validation Info */
   .validation-info {
     padding: 0.5rem 0.75rem;
-    background: var(--color-cool-5-50);
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
     border-radius: 4px;
     font-size: var(--font-size-14);
     display: flex;
@@ -1923,15 +2034,15 @@
     gap: 0.5rem;
 
     i {
-      color: var(--color-level-success);
+      color: var(--color-level-success, var(--calendaria-success));
     }
 
     &.warning i {
-      color: var(--color-level-warning);
+      color: var(--color-level-warning, var(--calendaria-warning));
     }
 
     .mismatch {
-      color: var(--color-level-warning);
+      color: var(--color-level-warning, var(--calendaria-warning));
     }
   }
 
@@ -1947,8 +2058,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem;
-    background: var(--color-cool-5-50);
-    border: 1px solid var(--color-cool-4);
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
+    border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
   }
 
@@ -1971,7 +2082,7 @@
       }
 
       &:hover:not(:disabled) {
-        --button-hover-text-color: var(--color-text-primary);
+        --button-hover-text-color: var(--color-text-primary, var(--calendaria-text));
       }
 
       &[data-action='removeMonth'],
@@ -1981,7 +2092,7 @@
       &[data-action='removeMoon'],
       &[data-action='removeEra'] {
         &:hover:not(:disabled) {
-          --button-hover-text-color: var(--color-level-error);
+          --button-hover-text-color: var(--color-level-error, var(--calendaria-error));
         }
       }
     }
@@ -2027,7 +2138,7 @@
 
       label {
         font-size: var(--font-size-12);
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-weight: normal;
       }
     }
@@ -2049,12 +2160,12 @@
   .computed-value {
     font-weight: 600;
     font-size: var(--font-size-16);
-    color: var(--color-text-primary);
+    color: var(--color-text-primary, var(--calendaria-text));
   }
 
   .leap-days-note {
     font-size: var(--font-size-13);
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
     white-space: nowrap;
   }
 
@@ -2075,8 +2186,8 @@
     }
 
     &.warning {
-      background: color-mix(in srgb, var(--color-level-warning) 15%, transparent);
-      border: 1px solid color-mix(in srgb, var(--color-level-warning) 40%, transparent);
+      background: color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 15%, transparent);
+      border: 1px solid color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 40%, transparent);
     }
   }
 
@@ -2088,7 +2199,7 @@
     padding: 0.25rem 0.5rem;
     font-weight: 600;
     font-size: var(--font-size-12);
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
     text-align: center;
     justify-content: center;
 
@@ -2353,7 +2464,7 @@
       .col-template-label {
         flex: 0.5;
         font-weight: 600;
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         white-space: nowrap;
       }
 
@@ -2364,10 +2475,10 @@
       .era-preview {
         flex: 3;
         padding: 0.25rem 0.5rem;
-        background: var(--color-cool-5);
+        background: var(--color-cool-5, var(--calendaria-cool-5));
         border-radius: 3px;
         font-style: italic;
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         white-space: nowrap;
       }
     }
@@ -2388,7 +2499,7 @@
       grid-template-rows: auto auto;
       row-gap: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     }
   }
 
@@ -2399,7 +2510,7 @@
     padding: 0.75rem 0.5rem;
 
     .moon-header {
-      border-bottom: 1px solid var(--color-cool-5);
+      border-bottom: 1px solid var(--color-cool-5, var(--calendaria-cool-5));
 
       .col-cycle {
         text-align: right;
@@ -2472,7 +2583,7 @@
           font-weight: bold;
           font-size: var(--font-size-12);
           padding: 0.25rem 0.5rem;
-          border-bottom: 1px solid var(--color-cool-4);
+          border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
         }
 
         .phase-item {
@@ -2481,7 +2592,7 @@
           align-items: center;
 
           &:nth-child(even) {
-            background: var(--color-cool-5-50);
+            background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
           }
         }
 
@@ -2521,14 +2632,14 @@
         width: 32px;
         height: 32px;
         padding: 2px;
-        border: 1px solid var(--color-cool-4);
+        border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
         border-radius: 4px;
-        background: var(--color-cool-5);
+        background: var(--color-cool-5, var(--calendaria-cool-5));
         cursor: pointer;
 
         &:hover {
-          border-color: var(--color-warm-1);
-          background: var(--color-cool-4);
+          border-color: var(--color-warm-1, var(--calendaria-primary));
+          background: var(--color-cool-4, var(--calendaria-cool-4));
         }
 
         img {
@@ -2554,7 +2665,7 @@
   .cycle-format-section {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-cool-4);
+    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
   }
 
   /* Cycle Item */
@@ -2568,7 +2679,7 @@
       align-items: flex-end;
       gap: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
 
       .form-group {
         label {
@@ -2620,13 +2731,13 @@
         padding: 0.25rem 0.5rem;
 
         &:nth-child(even) {
-          background: var(--color-cool-5-50);
+          background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
         }
 
         .entry-number {
           flex: 0 0 30px;
           font-weight: bold;
-          color: var(--color-text-secondary);
+          color: var(--color-text-secondary, var(--calendaria-text-secondary));
         }
 
         .col-entry-name {
@@ -2651,10 +2762,10 @@
     gap: 1rem;
     padding: 2rem;
     text-align: center;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
     font-style: italic;
-    background: var(--color-cool-5-50);
-    border: 1px dashed var(--color-cool-4);
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
+    border: 1px dashed var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
   }
 
@@ -2663,7 +2774,7 @@
     margin: 0;
     padding-left: 1.5rem;
     font-size: var(--font-size-14);
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
   }
 
   /* Footer Buttons - spans full width at bottom */
@@ -2672,8 +2783,8 @@
     grid-row: 2;
     padding: 0.75rem 1rem;
     justify-content: center;
-    background: var(--color-cool-5);
-    border-top: 1px solid var(--color-cool-4);
+    background: var(--color-cool-5, var(--calendaria-cool-5));
+    border-top: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
 
     button {
       border: 1px solid var(--button-border-color);
@@ -2710,7 +2821,7 @@
     width: max-content;
     padding: 0;
     border-top: none;
-    border-right: 1px solid var(--color-cool-4);
+    border-right: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-bottom: none;
     gap: 0.125rem;
     overflow: hidden auto;
@@ -2744,12 +2855,12 @@
 
       /* Active tab indicator on left */
       &.active {
-        border-left-color: var(--color-warm-1);
-        background: var(--color-cool-5);
+        border-left-color: var(--color-warm-1, var(--calendaria-primary));
+        background: var(--color-cool-5, var(--calendaria-cool-5));
       }
 
       &:hover:not(.active) {
-        background: var(--color-cool-5-50);
+        background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
       }
     }
   }
@@ -2766,7 +2877,7 @@
     gap: 1rem;
     padding-bottom: 0.75rem;
     margin-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-cool-4);
+    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
 
     .zone-controls {
       display: flex;
@@ -2797,15 +2908,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--color-cool-5);
-      border: 1px solid var(--color-cool-4);
+      background: var(--color-cool-5, var(--calendaria-cool-5));
+      border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
       border-radius: 3px;
       cursor: pointer;
-      color: var(--color-text-secondary);
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
 
       &:hover {
-        background: var(--color-cool-4);
-        color: var(--color-text-primary);
+        background: var(--color-cool-4, var(--calendaria-cool-4));
+        color: var(--color-text-primary, var(--calendaria-text));
       }
     }
 
@@ -2823,7 +2934,7 @@
 
   /* Weather category group */
   .weather-category {
-    border: 1px solid var(--color-cool-4);
+    border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
     overflow: hidden;
 
@@ -2832,7 +2943,7 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.5rem 0.75rem;
-      background: var(--color-cool-5);
+      background: var(--color-cool-5, var(--calendaria-cool-5));
       font-weight: 600;
       cursor: pointer;
       user-select: none;
@@ -2855,7 +2966,7 @@
         gap: 0.5rem;
         font-weight: 400;
         font-size: var(--font-size-12);
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
 
         .category-percent {
           min-width: 40px;
@@ -2868,7 +2979,7 @@
       }
 
       &:hover {
-        background: var(--color-cool-4);
+        background: var(--color-cool-4, var(--calendaria-cool-4));
       }
     }
 
@@ -2896,8 +3007,8 @@
   .weather-preset-header {
     font-size: var(--font-size-12);
     font-weight: 600;
-    color: var(--color-text-secondary);
-    border-bottom: 1px solid var(--color-cool-4);
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
+    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     padding-bottom: 0.5rem;
 
     > span {
@@ -2911,14 +3022,14 @@
 
   .weather-preset-item {
     position: relative;
-    border-bottom: 1px solid var(--color-cool-5);
+    border-bottom: 1px solid var(--color-cool-5, var(--calendaria-cool-5));
 
     &:last-child {
       border-bottom: none;
     }
 
     &:nth-child(odd) {
-      background: var(--color-cool-5-50);
+      background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
     }
 
     .preset-enabled {
@@ -2960,7 +3071,7 @@
 
       .temp-separator,
       .temp-unit {
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-size: var(--font-size-12);
       }
     }
@@ -2984,8 +3095,8 @@
       left: 0;
       right: 0;
       z-index: 10;
-      background: var(--color-cool-5);
-      border: 1px solid var(--color-cool-4);
+      background: var(--color-cool-5, var(--calendaria-cool-5));
+      border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
       border-radius: 4px;
       padding: 0.5rem;
       box-shadow: 0 2px 8px var(--calendaria-shadow-light);
@@ -3009,7 +3120,7 @@
     align-items: center;
     gap: 1rem;
     padding: 0.5rem 0.75rem;
-    background: var(--color-cool-5);
+    background: var(--color-cool-5, var(--calendaria-cool-5));
     border-radius: 4px;
     margin-top: 0.5rem;
 
@@ -3021,17 +3132,17 @@
       font-size: var(--font-size-16);
 
       &.warning {
-        color: var(--color-level-warning);
+        color: var(--color-level-warning, var(--calendaria-warning));
       }
 
       &.valid {
-        color: var(--color-level-success);
+        color: var(--color-level-success, var(--calendaria-success));
       }
     }
 
     .total-hint {
       font-size: var(--font-size-12);
-      color: var(--color-text-secondary);
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
       margin-left: auto;
     }
   }
@@ -3049,12 +3160,12 @@
   .announcement-date {
     font-size: 0.9em;
     font-weight: 500;
-    color: var(--color-text-dark-primary);
+    color: var(--color-text-dark-primary, var(--calendaria-text));
   }
 
   .announcement-content {
     font-size: 0.85em;
-    color: var(--color-text-dark-secondary);
+    color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
     line-height: 1.4;
   }
 
@@ -3063,7 +3174,7 @@
     align-items: center;
     gap: 0.35rem;
     font-size: 0.85em;
-    color: var(--color-text-hyperlink);
+    color: var(--color-text-hyperlink, var(--calendaria-link));
     cursor: pointer;
     text-decoration: none;
 
@@ -4129,14 +4240,14 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem;
-    border: 1px dashed var(--color-border-light-tertiary);
+    border: 1px dashed var(--color-border-light-tertiary, var(--calendaria-input-border));
     border-radius: 6px;
     cursor: pointer;
     transition: border-color 0.2s;
 
     &:hover,
     &.dragover {
-      border-color: var(--color-border-highlight);
+      border-color: var(--color-border-highlight, var(--calendaria-primary));
     }
 
     &.has-file {
@@ -4190,8 +4301,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-border-light-tertiary);
-    border-radius: 6px;
+        border-radius: 6px;
 
     span {
       flex: 1;
@@ -4223,7 +4333,7 @@
 
     i {
       flex-shrink: 0;
-      color: var(--color-level-error);
+      color: var(--color-level-error, var(--calendaria-error));
     }
 
     span {
@@ -4349,7 +4459,7 @@
       box-shadow: none;
 
       &:hover {
-        background: var(--color-cool-4);
+        background: var(--color-cool-4, var(--calendaria-cool-4));
       }
     }
   }
@@ -4361,8 +4471,7 @@
     flex: 1;
     overflow-y: auto;
     scrollbar-gutter: stable;
-    border: 1px solid var(--color-border-light-tertiary);
-    border-radius: 4px;
+        border-radius: 4px;
   }
 
   .note-row {
@@ -4371,7 +4480,7 @@
     gap: 0.35rem;
     align-items: center;
     padding: 0.3rem 0.5rem;
-    border-bottom: 1px solid var(--color-border-light-tertiary);
+    border-bottom: 1px solid var(--color-border-light-tertiary, var(--calendaria-input-border));
 
     &:last-child {
       border-bottom: none;
@@ -4382,7 +4491,7 @@
       font-size: 0.8rem;
       position: sticky;
       top: 0;
-      background: var(--color-cool-5);
+      background: var(--color-cool-5, var(--calendaria-cool-5));
       z-index: 1;
 
       .note-radios {
@@ -4397,7 +4506,7 @@
     }
 
     &:not(.header):hover {
-      background: var(--color-cool-5-75);
+      background: var(--color-cool-5-75, var(--calendaria-cool-5-75));
     }
   }
 
@@ -4454,7 +4563,7 @@
     display: flex;
     justify-content: center;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--color-border-light-tertiary);
+    border-top: 1px solid var(--color-border-light-tertiary, var(--calendaria-input-border));
 
     button[type='submit'] {
       padding: 0.5rem 1.5rem;

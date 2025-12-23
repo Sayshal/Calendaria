@@ -79,9 +79,50 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       ),
 
       // Week-based recurrence fields
-      weekday: new fields.NumberField({ integer: true, min: 0, nullable: true }), // For weekly: 0-indexed day of week
-      seasonIndex: new fields.NumberField({ integer: true, min: 0, nullable: true }), // For seasonal: 0-indexed season
-      weekNumber: new fields.NumberField({ integer: true, min: 1, nullable: true }), // For weekOfMonth: 1-indexed week
+      weekday: new fields.NumberField({ integer: true, min: 0, nullable: true }), // For weekly/weekOfMonth: 0-indexed day of week
+      weekNumber: new fields.NumberField({ integer: true, min: -5, max: 5, nullable: true }), // For weekOfMonth: 1-5 positive, -1 to -5 for inverse (last = -1)
+
+      // Seasonal recurrence config (for repeat: 'seasonal')
+      seasonalConfig: new fields.SchemaField(
+        {
+          seasonIndex: new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          trigger: new fields.StringField({ choices: ['entire', 'first_day', 'last_day'], initial: 'entire' })
+        },
+        { nullable: true }
+      ),
+
+      // Advanced conditions array - filters applied on top of repeat pattern
+      // Each condition: { field, op, value, value2?, offset? }
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          field: new fields.StringField({
+            required: true,
+            choices: [
+              // Date fields
+              'year', 'month', 'day', 'dayOfYear', 'daysBeforeMonthEnd',
+              // Weekday fields
+              'weekday', 'weekNumberInMonth', 'inverseWeekNumber',
+              // Week fields
+              'weekInMonth', 'weekInYear', 'totalWeek', 'weeksBeforeMonthEnd', 'weeksBeforeYearEnd',
+              // Season fields
+              'season', 'seasonPercent', 'seasonDay', 'isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox',
+              // Moon fields (moonIndex stored in value2)
+              'moonPhase', 'moonPhaseIndex', 'moonPhaseCountMonth', 'moonPhaseCountYear',
+              // Other
+              'cycle', 'era', 'eraYear', 'intercalary'
+            ]
+          }),
+          op: new fields.StringField({
+            required: true,
+            choices: ['==', '!=', '>=', '<=', '>', '<', '%'],
+            initial: '=='
+          }),
+          value: new fields.JSONField({ required: true }), // number, string, or boolean depending on field
+          value2: new fields.JSONField({ nullable: true }), // For moon index, cycle index, etc.
+          offset: new fields.NumberField({ integer: true, initial: 0 }) // For modulo operator
+        }),
+        { initial: [] }
+      ),
 
       // Organization
       categories: new fields.ArrayField(new fields.StringField(), { initial: [] }),

@@ -37,7 +37,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       addMoonCondition: this._onAddMoonCondition,
       removeMoonCondition: this._onRemoveMoonCondition,
       regenerateSeed: this._onRegenerateSeed,
-      clearLinkedEvent: this._onClearLinkedEvent
+      clearLinkedEvent: this._onClearLinkedEvent,
+      addCondition: this._onAddCondition,
+      removeCondition: this._onRemoveCondition
     },
     form: { submitOnChange: true, closeOnSubmit: false }
   };
@@ -59,9 +61,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** @inheritdoc - Set mode BEFORE _configureRenderParts is called. */
   _configureRenderOptions(options) {
     if (options.isFirstRender) {
-      if (options.mode === 'view') this._mode = CalendarNoteSheet.MODES.VIEW;
-      else if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
-      else if (this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
+      if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
       else this._mode = CalendarNoteSheet.MODES.VIEW;
     }
     super._configureRenderOptions(options);
@@ -406,6 +406,84 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.rangeDayMin = dayType === 'range' ? (rangePattern.day[0] ?? '') : '';
     context.rangeDayMax = dayType === 'range' ? (rangePattern.day[1] ?? '') : '';
 
+    // Prepare weekOfMonth config context
+    context.showWeekOfMonthConfig = this.document.system.repeat === 'weekOfMonth';
+    context.weekNumber = this.document.system.weekNumber ?? 1;
+
+    // Build weekday options
+    const weekdays = calendar?.days?.values || [];
+    const selectedWeekday = this.document.system.weekday ?? 0;
+    context.weekdayOptions = weekdays.map((wd, idx) => ({
+      index: idx,
+      name: localize(wd.name),
+      selected: idx === selectedWeekday
+    }));
+
+    // Build week number (occurrence) options
+    const selectedWeekNumber = this.document.system.weekNumber ?? 1;
+    context.weekNumberOptions = [
+      { value: 1, label: '1st', selected: selectedWeekNumber === 1 },
+      { value: 2, label: '2nd', selected: selectedWeekNumber === 2 },
+      { value: 3, label: '3rd', selected: selectedWeekNumber === 3 },
+      { value: 4, label: '4th', selected: selectedWeekNumber === 4 },
+      { value: 5, label: '5th', selected: selectedWeekNumber === 5 },
+      { value: -1, label: 'Last', selected: selectedWeekNumber === -1 },
+      { value: -2, label: '2nd-to-last', selected: selectedWeekNumber === -2 }
+    ];
+
+    // Generate weekOfMonth description
+    if (context.showWeekOfMonthConfig) {
+      const ordinals = context.weekNumber > 0 ? ['1st', '2nd', '3rd', '4th', '5th'] : ['Last', '2nd-to-last', '3rd-to-last'];
+      const ordinal = context.weekNumber > 0 ? (ordinals[context.weekNumber - 1] || `${context.weekNumber}th`) : (ordinals[Math.abs(context.weekNumber) - 1] || 'Last');
+      const weekdayName = context.weekdayOptions[selectedWeekday]?.name || 'day';
+      context.weekOfMonthDescription = `Repeats on the ${ordinal} ${weekdayName} of each month`;
+    }
+
+    // Prepare seasonal config context
+    context.showSeasonalConfig = this.document.system.repeat === 'seasonal';
+    const seasonalConfig = this.document.system.seasonalConfig || { seasonIndex: 0, trigger: 'entire' };
+    context.seasonalTrigger = seasonalConfig.trigger || 'entire';
+
+    // Build season options
+    const seasons = calendar?.seasons?.values || [];
+    context.seasonOptions = seasons.map((s, idx) => ({
+      index: idx,
+      name: localize(s.name),
+      selected: idx === seasonalConfig.seasonIndex
+    }));
+    context.hasSeasons = seasons.length > 0;
+
+    // Generate seasonal description
+    if (context.showSeasonalConfig && context.hasSeasons) {
+      const seasonName = context.seasonOptions[seasonalConfig.seasonIndex]?.name || 'season';
+      switch (seasonalConfig.trigger) {
+        case 'first_day':
+          context.seasonalDescription = `Occurs on the first day of ${seasonName}`;
+          break;
+        case 'last_day':
+          context.seasonalDescription = `Occurs on the last day of ${seasonName}`;
+          break;
+        default:
+          context.seasonalDescription = `Occurs every day during ${seasonName}`;
+      }
+    }
+
+    // Prepare advanced conditions context
+    context.showConditionsUI = repeatType !== 'never';
+    context.hasCycles = (calendar?.cycles?.length ?? 0) > 0;
+    context.hasEras = (calendar?.eras?.length ?? 0) > 0;
+
+    // Show repeat config grid when any repeat-specific settings or advanced conditions are visible
+    context.showRepeatConfigGrid = context.showMoonConditions || context.showRandomConfig || context.showLinkedConfig || context.showRangeConfig || context.showWeekOfMonthConfig || context.showSeasonalConfig || context.showConditionsUI;
+
+    // Build conditions list with descriptions
+    const rawConditions = this.document.system.conditions || [];
+    context.conditions = rawConditions.map((cond, idx) => ({
+      ...cond,
+      index: idx,
+      description: this.#getConditionDescription(cond, calendar)
+    }));
+
     // Prepare category options with selected state
     const selectedCategories = this.document.system.categories || [];
     context.categoryOptions = getAllCategories().map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));
@@ -501,6 +579,15 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // moonConditions - clear when not 'moon' (preserve existing if switching to moon)
     if (repeatType !== 'moon' && data.system.moonConditions === undefined) data.system.moonConditions = [];
+
+    // weekOfMonth - clear weekday/weekNumber when not weekOfMonth
+    if (repeatType !== 'weekOfMonth') {
+      data.system.weekday = null;
+      data.system.weekNumber = null;
+    }
+
+    // seasonalConfig - null when not seasonal
+    if (repeatType !== 'seasonal') data.system.seasonalConfig = null;
 
     // rangePattern - build from form fields or clear
     if (repeatType === 'range') {
@@ -1099,5 +1186,167 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static async _onClearLinkedEvent(event, target) {
     // Clear the linked event
     await this.document.update({ 'system.linkedEvent': null });
+  }
+
+  /**
+   * Handle add condition button click.
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   */
+  static async _onAddCondition(event, target) {
+    const form = target.closest('form');
+    const fieldSelect = form?.querySelector('select[name="newCondition.field"]');
+    const opSelect = form?.querySelector('select[name="newCondition.op"]');
+    const valueInput = form?.querySelector('input[name="newCondition.value"]');
+    const offsetInput = form?.querySelector('input[name="newCondition.offset"]');
+
+    if (!fieldSelect || !opSelect || !valueInput) return;
+
+    const field = fieldSelect.value;
+    const op = opSelect.value;
+    const rawValue = valueInput.value;
+    const offset = parseInt(offsetInput?.value) || 0;
+
+    if (!field || rawValue === '') {
+      ui.notifications.warn('Please select a field and enter a value');
+      return;
+    }
+
+    // Parse value based on field type
+    let value;
+    const booleanFields = ['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary'];
+    if (booleanFields.includes(field)) {
+      value = rawValue === 'true' || rawValue === '1';
+    } else {
+      value = parseFloat(rawValue);
+      if (isNaN(value)) value = parseInt(rawValue);
+    }
+
+    // Get current conditions
+    const currentConditions = foundry.utils.deepClone(this.document.system.conditions || []);
+
+    // Build new condition
+    const newCondition = { field, op, value };
+    if (op === '%' && offset !== 0) newCondition.offset = offset;
+
+    // Add new condition
+    currentConditions.push(newCondition);
+
+    // Update document
+    await this.document.update({ 'system.conditions': currentConditions });
+
+    // Clear inputs
+    valueInput.value = '';
+    if (offsetInput) offsetInput.value = '';
+  }
+
+  /**
+   * Handle remove condition button click.
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   */
+  static async _onRemoveCondition(event, target) {
+    const conditionIndex = parseInt(target.dataset.index);
+    if (isNaN(conditionIndex)) return;
+
+    // Get current conditions
+    const currentConditions = foundry.utils.deepClone(this.document.system.conditions || []);
+
+    // Remove the condition at index
+    currentConditions.splice(conditionIndex, 1);
+
+    // Update document
+    await this.document.update({ 'system.conditions': currentConditions });
+  }
+
+  /**
+   * Generate human-readable description for a condition.
+   * @param {object} condition - Condition object
+   * @param {object} calendar - Active calendar
+   * @returns {string}
+   */
+  #getConditionDescription(condition, calendar) {
+    const { field, op, value, value2, offset } = condition;
+
+    // Field labels
+    const fieldLabels = {
+      year: 'Year',
+      month: 'Month',
+      day: 'Day',
+      dayOfYear: 'Day of Year',
+      daysBeforeMonthEnd: 'Days Before Month End',
+      weekday: 'Weekday',
+      weekNumberInMonth: 'Weekday # in Month',
+      inverseWeekNumber: 'Weekday # from End',
+      weekInMonth: 'Week in Month',
+      weekInYear: 'Week in Year',
+      totalWeek: 'Total Week',
+      weeksBeforeMonthEnd: 'Weeks Before Month End',
+      weeksBeforeYearEnd: 'Weeks Before Year End',
+      season: 'Season',
+      seasonPercent: 'Season %',
+      seasonDay: 'Day in Season',
+      isLongestDay: 'Is Longest Day',
+      isShortestDay: 'Is Shortest Day',
+      isSpringEquinox: 'Is Spring Equinox',
+      isAutumnEquinox: 'Is Autumn Equinox',
+      moonPhaseIndex: 'Moon Phase',
+      moonPhaseCountMonth: 'Moon Phase # in Month',
+      moonPhaseCountYear: 'Moon Phase # in Year',
+      cycle: 'Cycle',
+      era: 'Era',
+      eraYear: 'Era Year',
+      intercalary: 'Is Intercalary'
+    };
+
+    // Operator labels
+    const opLabels = {
+      '==': '=',
+      '!=': '≠',
+      '>=': '≥',
+      '<=': '≤',
+      '>': '>',
+      '<': '<',
+      '%': 'every'
+    };
+
+    const fieldLabel = fieldLabels[field] || field;
+    const opLabel = opLabels[op] || op;
+
+    // Special formatting for certain fields
+    let valueStr = String(value);
+
+    // Month name
+    if (field === 'month' && calendar?.months?.values?.[value]) {
+      valueStr = localize(calendar.months.values[value].name);
+    }
+
+    // Weekday name
+    if (field === 'weekday' && calendar?.days?.values?.[value]) {
+      valueStr = localize(calendar.days.values[value].name);
+    }
+
+    // Season name
+    if (field === 'season' && calendar?.seasons?.values?.[value]) {
+      valueStr = localize(calendar.seasons.values[value].name);
+    }
+
+    // Era name
+    if (field === 'era' && calendar?.eras?.[value]) {
+      valueStr = localize(calendar.eras[value].name);
+    }
+
+    // Boolean fields
+    if (['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary'].includes(field)) {
+      return value ? fieldLabel : `Not ${fieldLabel}`;
+    }
+
+    // Modulo
+    if (op === '%') {
+      const offsetStr = offset ? ` (offset ${offset})` : '';
+      return `${fieldLabel} every ${value}${offsetStr}`;
+    }
+
+    return `${fieldLabel} ${opLabel} ${valueStr}`;
   }
 }

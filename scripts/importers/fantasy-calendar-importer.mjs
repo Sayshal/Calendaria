@@ -580,14 +580,19 @@ export default class FantasyCalendarImporter extends BaseImporter {
     // Add max occurrences if limited
     if (event.data?.limited_repeat && event.data?.limited_repeat_num > 0) noteData.maxOccurrences = event.data.limited_repeat_num;
 
-    // Add weekday for weekly recurrence
+    // Add weekday for weekly/weekOfMonth recurrence
     if (eventType.weekday != null) noteData.weekday = eventType.weekday;
-
-    // Add seasonIndex for seasonal recurrence
-    if (eventType.seasonIndex != null) noteData.seasonIndex = eventType.seasonIndex;
 
     // Add weekNumber for weekOfMonth recurrence
     if (eventType.weekNumber != null) noteData.weekNumber = eventType.weekNumber;
+
+    // Add seasonalConfig for seasonal recurrence
+    if (eventType.seasonalConfig) noteData.seasonalConfig = eventType.seasonalConfig;
+
+    // Extract advanced conditions from FC conditions
+    const flatConditions = this.#flattenConditions(conditions);
+    const extractedConditions = this.#extractConditions(flatConditions, data);
+    if (extractedConditions.length > 0) noteData.conditions = extractedConditions;
 
     // Add import warnings for reference
     if (eventType.warnings?.length) noteData.importWarnings = eventType.warnings;
@@ -648,17 +653,66 @@ export default class FantasyCalendarImporter extends BaseImporter {
     // Season-based event
     if (types.has('Season') && !types.has('Month') && !types.has('Day')) {
       const seasonCond = flatConditions.find((c) => c[0] === 'Season');
+      const conditionType = parseInt(seasonCond?.[1]) || 0;
+      const seasonIndex = parseInt(seasonCond?.[2]?.[0]) || 0;
+
       result.repeat = 'seasonal';
-      result.seasonIndex = parseInt(seasonCond?.[2]?.[0]) || 0;
+
+      // Determine trigger based on FC condition type
+      // Type 0-1: Season is exactly/not (entire season)
+      // Type 2-3: Season percentage
+      // Type 4-5: Season day
+      // Type 6-13: Solstices, equinoxes (map to first/last day)
+      let trigger = 'entire';
+      if (conditionType >= 6 && conditionType <= 9) {
+        // Longest/shortest day, spring/autumn equinox - treat as single day
+        trigger = 'first_day';
+      }
+
+      result.seasonalConfig = { seasonIndex, trigger };
       return result;
     }
 
-    // Week-based event (Nth week of month/year)
+    // Weekday in month ordinal (e.g., "2nd Tuesday", "Last Friday")
+    // FC uses "Weekday number in month is exactly" for positive ordinals
+    // and "Nth weekday number before end of month is exactly" for inverse
+    if (types.has('Weekday')) {
+      const weekdayCond = flatConditions.find((c) => c[0] === 'Weekday');
+      const conditionType = parseInt(weekdayCond?.[1]) || 0;
+
+      // Types 8-13: Weekday number in month (positive ordinal)
+      // Types 14-19: Nth weekday before end of month (inverse ordinal)
+      if (conditionType >= 8 && conditionType <= 13) {
+        const weekdayName = weekdayCond?.[2]?.[0];
+        const weekNumber = parseInt(weekdayCond?.[2]?.[1]) || 1;
+        const weekdays = data?.static_data?.year_data?.global_week || [];
+        const weekdayIndex = weekdays.findIndex((w) => w.toLowerCase() === weekdayName?.toLowerCase());
+
+        result.repeat = 'weekOfMonth';
+        result.weekNumber = weekNumber;
+        result.weekday = weekdayIndex >= 0 ? weekdayIndex : 0;
+        return result;
+      }
+
+      if (conditionType >= 14 && conditionType <= 19) {
+        const weekdayName = weekdayCond?.[2]?.[0];
+        const inverseNum = parseInt(weekdayCond?.[2]?.[1]) || 1;
+        const weekdays = data?.static_data?.year_data?.global_week || [];
+        const weekdayIndex = weekdays.findIndex((w) => w.toLowerCase() === weekdayName?.toLowerCase());
+
+        result.repeat = 'weekOfMonth';
+        result.weekNumber = -inverseNum; // Negative for inverse ordinals
+        result.weekday = weekdayIndex >= 0 ? weekdayIndex : 0;
+        return result;
+      }
+    }
+
+    // Week-based event (Nth week of month/year) - without weekday specificity
     if (types.has('Week') && !types.has('Day')) {
       const weekCond = flatConditions.find((c) => c[0] === 'Week');
       result.repeat = 'weekOfMonth';
       result.weekNumber = parseInt(weekCond?.[2]?.[0]) || 1;
-      // If there's also a Weekday condition, capture that too
+      // If there's also a Weekday condition (type 0-1), capture that too
       if (types.has('Weekday')) {
         const weekdayCond = flatConditions.find((c) => c[0] === 'Weekday');
         const weekdayName = weekdayCond?.[2]?.[0];
@@ -742,6 +796,284 @@ export default class FantasyCalendarImporter extends BaseImporter {
   }
 
   /**
+   * Extract advanced conditions from FC flat conditions.
+   * Converts FC condition format to Calendaria conditions array.
+   * @param {Array} flatConditions - Flattened FC conditions
+   * @param {object} data - Full FC data for context
+   * @returns {object[]} Array of condition objects
+   */
+  #extractConditions(flatConditions, data) {
+    const conditions = [];
+    const weekdays = data?.static_data?.year_data?.global_week || [];
+
+    for (const cond of flatConditions) {
+      if (!Array.isArray(cond) || cond.length < 3) continue;
+
+      const [type, typeIndex, values] = cond;
+      const ti = parseInt(typeIndex) || 0;
+
+      // Skip conditions that are handled by main repeat type detection
+      // (Date, Random handled separately)
+      if (type === 'Date' || type === 'Random') continue;
+
+      switch (type) {
+        case 'Year':
+          conditions.push(...this.#mapYearCondition(ti, values));
+          break;
+
+        case 'Month':
+          conditions.push(...this.#mapMonthCondition(ti, values));
+          break;
+
+        case 'Day':
+          conditions.push(...this.#mapDayCondition(ti, values));
+          break;
+
+        case 'Weekday':
+          conditions.push(...this.#mapWeekdayCondition(ti, values, weekdays));
+          break;
+
+        case 'Week':
+          conditions.push(...this.#mapWeekCondition(ti, values));
+          break;
+
+        case 'Season':
+          conditions.push(...this.#mapSeasonCondition(ti, values));
+          break;
+
+        case 'Moons':
+          conditions.push(...this.#mapMoonCondition(ti, values));
+          break;
+
+        case 'Cycle':
+          conditions.push(...this.#mapCycleCondition(ti, values));
+          break;
+
+        case 'Era':
+          conditions.push(...this.#mapEraCondition(ti, values));
+          break;
+
+        case 'Era Year':
+          conditions.push(...this.#mapEraYearCondition(ti, values));
+          break;
+      }
+    }
+
+    return conditions;
+  }
+
+  // Condition mapping helpers - each returns array of conditions
+  #mapYearCondition(ti, values) {
+    const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+    const op = ops[ti] || '==';
+    const value = parseInt(values?.[0]) || 0;
+    if (op === '%') return [{ field: 'year', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+    return [{ field: 'year', op, value }];
+  }
+
+  #mapMonthCondition(ti, values) {
+    // Types 0-6: month number comparisons
+    // Types 7-13: every nth month
+    // Types 14-15: month name
+    if (ti <= 6) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+      const op = ops[ti] || '==';
+      const value = parseInt(values?.[0]) || 0;
+      if (op === '%') return [{ field: 'month', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'month', op, value }];
+    }
+    return [];
+  }
+
+  #mapDayCondition(ti, values) {
+    // Types 0-6: day in month
+    // Types 7-13: day in year
+    // Types 14-19: days before end of month
+    // Types 20-21: intercalary
+    const value = parseInt(values?.[0]) || 0;
+
+    if (ti <= 6) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+      const op = ops[ti] || '==';
+      if (op === '%') return [{ field: 'day', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'day', op, value }];
+    }
+
+    if (ti >= 7 && ti <= 13) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+      const op = ops[ti - 7] || '==';
+      if (op === '%') return [{ field: 'dayOfYear', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'dayOfYear', op, value }];
+    }
+
+    if (ti >= 14 && ti <= 19) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<'];
+      const op = ops[ti - 14] || '==';
+      return [{ field: 'daysBeforeMonthEnd', op, value }];
+    }
+
+    if (ti === 20) return [{ field: 'intercalary', op: '==', value: true }];
+    if (ti === 21) return [{ field: 'intercalary', op: '==', value: false }];
+
+    return [];
+  }
+
+  #mapWeekdayCondition(ti, values, weekdays) {
+    // Types 0-1: weekday name
+    // Types 2-7: weekday number comparisons
+    // Types 8-13: weekday number in month
+    // Types 14-19: nth weekday before end of month
+    const weekdayName = values?.[0];
+    const weekdayIdx = weekdays.findIndex((w) => w.toLowerCase() === weekdayName?.toLowerCase());
+    const weekdayValue = weekdayIdx >= 0 ? weekdayIdx : parseInt(values?.[0]) || 0;
+
+    if (ti <= 1) {
+      const op = ti === 0 ? '==' : '!=';
+      return [{ field: 'weekday', op, value: weekdayValue }];
+    }
+
+    if (ti >= 2 && ti <= 7) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<'];
+      const op = ops[ti - 2] || '==';
+      return [{ field: 'weekday', op, value: parseInt(values?.[0]) || 0 }];
+    }
+
+    if (ti >= 8 && ti <= 13) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<'];
+      const op = ops[ti - 8] || '==';
+      return [{ field: 'weekNumberInMonth', op, value: parseInt(values?.[1]) || 1 }];
+    }
+
+    if (ti >= 14 && ti <= 19) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<'];
+      const op = ops[ti - 14] || '==';
+      return [{ field: 'inverseWeekNumber', op, value: parseInt(values?.[1]) || 1 }];
+    }
+
+    return [];
+  }
+
+  #mapWeekCondition(ti, values) {
+    // Types 0-6: week in month
+    // Types 7-13: week in year
+    // Types 14-19: week before end of month
+    // Types 20-25: week before end of year
+    // Types 26-31: total week number
+    const value = parseInt(values?.[0]) || 0;
+    const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+
+    if (ti <= 6) {
+      const op = ops[ti] || '==';
+      if (op === '%') return [{ field: 'weekInMonth', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'weekInMonth', op, value }];
+    }
+
+    if (ti >= 7 && ti <= 13) {
+      const op = ops[ti - 7] || '==';
+      if (op === '%') return [{ field: 'weekInYear', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'weekInYear', op, value }];
+    }
+
+    if (ti >= 14 && ti <= 19) {
+      const op = ops[ti - 14] || '==';
+      return [{ field: 'weeksBeforeMonthEnd', op, value }];
+    }
+
+    if (ti >= 20 && ti <= 25) {
+      const op = ops[ti - 20] || '==';
+      return [{ field: 'weeksBeforeYearEnd', op, value }];
+    }
+
+    if (ti >= 26 && ti <= 32) {
+      const op = ops[ti - 26] || '==';
+      if (op === '%') return [{ field: 'totalWeek', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'totalWeek', op, value }];
+    }
+
+    return [];
+  }
+
+  #mapSeasonCondition(ti, values) {
+    // Types 0-1: season is/not
+    // Types 2-7: season percent
+    // Types 8-14: season day
+    // Types 15+: solstices/equinoxes
+    const value = parseInt(values?.[0]) || 0;
+    const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+
+    if (ti <= 1) {
+      const op = ti === 0 ? '==' : '!=';
+      return [{ field: 'season', op, value }];
+    }
+
+    if (ti >= 2 && ti <= 7) {
+      const op = ops[ti - 2] || '==';
+      return [{ field: 'seasonPercent', op, value }];
+    }
+
+    if (ti >= 8 && ti <= 14) {
+      const op = ops[ti - 8] || '==';
+      if (op === '%') return [{ field: 'seasonDay', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'seasonDay', op, value }];
+    }
+
+    // Solstices and equinoxes
+    if (ti === 15) return [{ field: 'isLongestDay', op: '==', value: true }];
+    if (ti === 16) return [{ field: 'isShortestDay', op: '==', value: true }];
+    if (ti === 17) return [{ field: 'isSpringEquinox', op: '==', value: true }];
+    if (ti === 18) return [{ field: 'isAutumnEquinox', op: '==', value: true }];
+
+    return [];
+  }
+
+  #mapMoonCondition(ti, values) {
+    // Types 0-6: moon phase
+    // Types 7-13: moon month phase count
+    // Types 14-20: moon year phase count
+    const moonIdx = parseInt(values?.[0]) || 0;
+    const value = parseInt(values?.[1]) || 0;
+    const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+
+    if (ti <= 6) {
+      const op = ops[ti] || '==';
+      return [{ field: 'moonPhaseIndex', op, value, value2: moonIdx }];
+    }
+
+    if (ti >= 7 && ti <= 13) {
+      const op = ops[ti - 7] || '==';
+      return [{ field: 'moonPhaseCountMonth', op, value, value2: moonIdx }];
+    }
+
+    if (ti >= 14 && ti <= 20) {
+      const op = ops[ti - 14] || '==';
+      return [{ field: 'moonPhaseCountYear', op, value, value2: moonIdx }];
+    }
+
+    return [];
+  }
+
+  #mapCycleCondition(ti, values) {
+    const cycleIdx = parseInt(values?.[0]) || 0;
+    const value = parseInt(values?.[1]) || 0;
+    const op = ti === 0 ? '==' : '!=';
+    return [{ field: 'cycle', op, value, value2: cycleIdx }];
+  }
+
+  #mapEraCondition(ti, values) {
+    const value = parseInt(values?.[0]) || 0;
+    const op = ti === 0 ? '==' : '!=';
+    return [{ field: 'era', op, value }];
+  }
+
+  #mapEraYearCondition(ti, values) {
+    const value = parseInt(values?.[0]) || 0;
+    const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+    const op = ops[ti] || '==';
+    if (op === '%') return [{ field: 'eraYear', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+    return [{ field: 'eraYear', op, value }];
+  }
+
+  /**
    * Extract date from FC event data.
    * FC format: data.date = [year, month, day] where month is 0-indexed, day is 1-indexed
    * NoteManager format: { year, month, day } where month is 0-indexed, day is 1-indexed
@@ -811,10 +1143,14 @@ export default class FantasyCalendarImporter extends BaseImporter {
           endDate,
           allDay: true,
           repeat: note.repeat,
-          interval: note.interval,
+          repeatInterval: note.interval,
           moonConditions: note.moonConditions || [],
           randomConfig: note.randomConfig || null,
           maxOccurrences: note.maxOccurrences || 0,
+          weekday: note.weekday ?? null,
+          weekNumber: note.weekNumber ?? null,
+          seasonalConfig: note.seasonalConfig || null,
+          conditions: note.conditions || [],
           gmOnly: note.gmOnly
         };
 
