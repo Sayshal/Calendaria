@@ -1119,10 +1119,10 @@ function matchesSeasonal(seasonalConfig, targetDate, startDate) {
 
   // Apply trigger type
   switch (trigger) {
-    case 'first_day':
+    case 'firstDay':
       return targetDayOfYear === seasonStart || (seasonStart > seasonEnd && targetDayOfYear === seasonStart);
 
-    case 'last_day':
+    case 'lastDay':
       return targetDayOfYear === seasonEnd;
 
     case 'entire':
@@ -1578,10 +1578,10 @@ export function getRecurrenceDescription(noteData) {
 
     let description;
     switch (trigger) {
-      case 'first_day':
+      case 'firstDay':
         description = `First day of ${seasonName}`;
         break;
-      case 'last_day':
+      case 'lastDay':
         description = `Last day of ${seasonName}`;
         break;
       case 'entire':

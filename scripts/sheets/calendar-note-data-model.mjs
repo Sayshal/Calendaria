@@ -86,7 +86,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       seasonalConfig: new fields.SchemaField(
         {
           seasonIndex: new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
-          trigger: new fields.StringField({ choices: ['entire', 'first_day', 'last_day'], initial: 'entire' })
+          trigger: new fields.StringField({ choices: ['entire', 'firstDay', 'lastDay'], initial: 'entire' })
         },
         { nullable: true }
       ),

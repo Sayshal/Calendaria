@@ -336,7 +336,7 @@
             <legend>{{localize "CALENDARIA.Note.SeasonalSettings"}}</legend>
             <p class="hint">{{seasonalDescription}}</p>
             <div class="inline-form">
-              <div class="form-group">
+              <div class="form-group-stacked">
                 <label>{{localize "CALENDARIA.Note.Season"}}</label>
                 <select name="system.seasonalConfig.seasonIndex">
                   {{#each seasonOptions}}
@@ -344,7 +344,7 @@
                   {{/each}}
                 </select>
               </div>
-              <div class="form-group">
+              <div class="form-group-stacked">
                 <label>{{localize "CALENDARIA.Note.Trigger"}}</label>
                 <select name="system.seasonalConfig.trigger">
                   {{#each seasonalTriggerOptions}}

@@ -453,14 +453,23 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }));
     context.hasSeasons = seasons.length > 0;
 
+    // Build seasonal trigger options from schema choices
+    const triggerChoices = this.document.system.schema.fields.seasonalConfig?.fields?.trigger?.choices || ['entire', 'firstDay', 'lastDay'];
+    const triggerLabels = { entire: 'Entire Season', firstDay: 'First Day', lastDay: 'Last Day' };
+    context.seasonalTriggerOptions = triggerChoices.map((value) => ({
+      value,
+      label: triggerLabels[value] || value,
+      selected: seasonalConfig.trigger === value
+    }));
+
     // Generate seasonal description
     if (context.showSeasonalConfig && context.hasSeasons) {
       const seasonName = context.seasonOptions[seasonalConfig.seasonIndex]?.name || 'season';
       switch (seasonalConfig.trigger) {
-        case 'first_day':
+        case 'firstDay':
           context.seasonalDescription = `Occurs on the first day of ${seasonName}`;
           break;
-        case 'last_day':
+        case 'lastDay':
           context.seasonalDescription = `Occurs on the last day of ${seasonName}`;
           break;
         default:

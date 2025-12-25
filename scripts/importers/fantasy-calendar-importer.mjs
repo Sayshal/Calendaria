@@ -662,11 +662,11 @@ export default class FantasyCalendarImporter extends BaseImporter {
       // Type 0-1: Season is exactly/not (entire season)
       // Type 2-3: Season percentage
       // Type 4-5: Season day
-      // Type 6-13: Solstices, equinoxes (map to first/last day)
+      // Type 6-13: Solstices, equinoxes (map to firstDay/lastDay)
       let trigger = 'entire';
       if (conditionType >= 6 && conditionType <= 9) {
         // Longest/shortest day, spring/autumn equinox - treat as single day
-        trigger = 'first_day';
+        trigger = 'firstDay';
       }
 
       result.seasonalConfig = { seasonIndex, trigger };
