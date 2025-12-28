@@ -10,6 +10,7 @@
 
 import CalendarManager from './calendar/calendar-manager.mjs';
 import NoteManager from './notes/note-manager.mjs';
+import SearchManager from './search/search-manager.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import { log } from './utils/logger.mjs';
 import { HOOKS } from './constants.mjs';
@@ -533,6 +534,40 @@ export const CalendariaAPI = {
    */
   async deleteAllNotes() {
     return await NoteManager.deleteAllNotes();
+  },
+
+  /* -------------------------------------------- */
+  /*  Search                                      */
+  /* -------------------------------------------- */
+
+  /**
+   * Search all calendar entities for a term.
+   * @param {string} term - Search term (minimum 2 characters)
+   * @param {object} [options={}] - Search options
+   * @param {string[]} [options.types] - Entity types to search (defaults to all: notes, festivals, seasons, moons, eras, months)
+   * @param {boolean} [options.caseSensitive=false] - Case-sensitive search
+   * @param {number} [options.limit=50] - Max results per type
+   * @returns {object} Grouped search results with total count
+   * @example
+   * const results = CALENDARIA.api.search('festival');
+   * console.log(results.notes, results.festivals, results.total);
+   */
+  search(term, options = {}) {
+    return SearchManager.search(term, options);
+  },
+
+  /**
+   * Search notes by name and optionally content.
+   * @param {string} term - Search term
+   * @param {object} [options={}] - Search options
+   * @param {boolean} [options.searchContent=true] - Search note content
+   * @param {number} [options.limit=50] - Max results
+   * @returns {object[]} Array of matching note results
+   * @example
+   * const notes = CALENDARIA.api.searchNotes('dragon', { searchContent: true });
+   */
+  searchNotes(term, options = {}) {
+    return SearchManager.searchNotes(term, options);
   },
 
   /* -------------------------------------------- */

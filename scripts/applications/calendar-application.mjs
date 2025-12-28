@@ -15,6 +15,7 @@ import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import SearchManager from '../search/search-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -27,6 +28,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     this._displayMode = 'month';
     this._selectedDate = null;
     this._selectedTimeSlot = null;
+    this._searchTerm = '';
+    this._searchResults = null;
+    this._searchOpen = false;
   }
 
   static DEFAULT_OPTIONS = {
@@ -46,14 +50,17 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       setAsCurrentDate: CalendarApplication._onSetAsCurrentDate,
       selectTimeSlot: CalendarApplication._onSelectTimeSlot,
       toggleCompact: CalendarApplication._onToggleCompact,
-      openWeatherPicker: CalendarApplication._onOpenWeatherPicker
+      openWeatherPicker: CalendarApplication._onOpenWeatherPicker,
+      closeSearch: CalendarApplication._onCloseSearch,
+      openSearchResult: CalendarApplication._onOpenSearchResult
     },
     position: { width: 'auto', height: 'auto' }
   };
 
   static PARTS = {
     header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER },
-    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT }
+    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT },
+    search: { template: TEMPLATES.SEARCH.PANEL }
   };
 
   get title() {
@@ -154,6 +161,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       context.cycleText = cycleResult.text;
       context.cycleValues = cycleResult.values;
     }
+
+    // Search context
+    context.searchTerm = this._searchTerm;
+    context.isOpen = this._searchOpen;
+    context.results = this._searchResults;
+    context.hasResults = this._searchResults?.total > 0;
 
     return context;
   }
@@ -804,6 +817,33 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     // Update view class for CSS targeting
     this.element.classList.remove('view-month', 'view-week', 'view-year');
     this.element.classList.add(`view-${this._displayMode}`);
+
+    // Set up search input listener
+    const searchInput = this.element.querySelector('.search-input');
+    if (searchInput) {
+      const debouncedSearch = foundry.utils.debounce((term) => {
+        this._searchTerm = term;
+        if (term.length >= 2) {
+          this._searchResults = SearchManager.search(term, { searchContent: true });
+          this._searchOpen = true;
+        } else {
+          this._searchResults = null;
+          this._searchOpen = false;
+        }
+        this.render();
+      }, 300);
+
+      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this._searchTerm = '';
+          this._searchResults = null;
+          this._searchOpen = false;
+          searchInput.value = '';
+          this.render();
+        }
+      });
+    }
   }
 
   /**
@@ -1161,5 +1201,56 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
       tooltip: weather.description ? localize(weather.description) : localize(weather.label)
     };
+  }
+
+  /**
+   * Close the search panel.
+   */
+  static async _onCloseSearch(event, target) {
+    this._searchTerm = '';
+    this._searchResults = null;
+    this._searchOpen = false;
+    await this.render();
+  }
+
+  /**
+   * Open a search result.
+   */
+  static async _onOpenSearchResult(event, target) {
+    const type = target.dataset.type;
+    const id = target.dataset.id;
+
+    switch (type) {
+      case 'note': {
+        const journalId = target.dataset.journalId;
+        const page = NoteManager.getFullNote(id);
+        if (page) page.sheet.render(true, { mode: 'view' });
+        else if (journalId) {
+          const journal = game.journal.get(journalId);
+          if (journal) journal.sheet.render(true, { pageId: id });
+        }
+        break;
+      }
+      case 'month': {
+        const monthIndex = parseInt(target.dataset.monthIndex);
+        const calendar = this.calendar;
+        const yearZero = calendar?.years?.yearZero ?? 0;
+        const currentYear = game.time.components.year + yearZero;
+        this._displayMode = 'month';
+        this.viewedDate = { year: currentYear, month: monthIndex, day: 1 };
+        await this.render();
+        this._adjustSizeForView();
+        break;
+      }
+      default:
+        // For festivals, seasons, moons, eras - just show info toast
+        ui.notifications.info(`${localize('CALENDARIA.Search.' + type.charAt(0).toUpperCase() + type.slice(1) + 's')}: ${target.querySelector('.result-name')?.textContent || id}`);
+    }
+
+    // Close search after opening result
+    this._searchTerm = '';
+    this._searchResults = null;
+    this._searchOpen = false;
+    await this.render();
   }
 }

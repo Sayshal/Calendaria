@@ -282,6 +282,11 @@ export const TEMPLATES = {
   WEATHER: {
     /** @type {string} Weather picker template */
     PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`
+  },
+
+  SEARCH: {
+    /** @type {string} Search results panel template */
+    PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs`
   }
 };
 

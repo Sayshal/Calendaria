@@ -5,6 +5,12 @@
       <i class="fas fa-compress"></i>
     </button>
 
+    <div class="search-wrapper">
+      <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
+        value="{{searchTerm}}" data-action="search" autocomplete="off">
+      <i class="fas fa-search search-icon"></i>
+    </div>
+
     <button type="button" data-action="today" data-tooltip="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
       <i class="fas fa-calendar-day"></i> Today
     </button>
