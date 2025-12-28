@@ -430,6 +430,9 @@ export const HOOKS = {
   /** @type {string} Fired when any moon's phase changes */
   MOON_PHASE_CHANGE: 'calendaria.moonPhaseChange',
 
+  /** @type {string} Fired when transitioning to/from a rest day */
+  REST_DAY_CHANGE: 'calendaria.restDayChange',
+
   /* -------------------------------------------- */
   /*  Clock Hooks                                 */
   /* -------------------------------------------- */

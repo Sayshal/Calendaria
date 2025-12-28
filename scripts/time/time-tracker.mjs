@@ -30,6 +30,9 @@ export default class TimeTracker {
   /** @type {Map<number, number>|null} Last known moon phases (moonIndex -> phaseIndex) */
   static #lastMoonPhases = null;
 
+  /** @type {boolean|null} Last known rest day status */
+  static #lastRestDay = null;
+
   /**
    * Initialize the time tracker.
    * Called during module initialization.
@@ -40,6 +43,7 @@ export default class TimeTracker {
     this.#lastComponents = foundry.utils.deepClone(game.time.components);
     this.#lastSeason = game.time.components?.season ?? null;
     this.#lastMoonPhases = this.#getCurrentMoonPhases();
+    this.#lastRestDay = this.#isCurrentDayRestDay();
 
     log(3, 'Time Tracker initialized');
   }
@@ -78,11 +82,15 @@ export default class TimeTracker {
     // Check for moon phase changes
     this.#checkMoonPhaseChanges(calendar);
 
+    // Check for rest day changes
+    this.#checkRestDayChange(calendar);
+
     // Update last known time
     this.#lastWorldTime = worldTime;
     this.#lastComponents = foundry.utils.deepClone(currentComponents);
     this.#lastSeason = currentComponents?.season ?? null;
     this.#lastMoonPhases = this.#getCurrentMoonPhases();
+    this.#lastRestDay = this.#isCurrentDayRestDay();
   }
 
   /**
@@ -550,6 +558,53 @@ export default class TimeTracker {
       });
 
       for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'moonPhaseChange', moon: changed });
+    }
+  }
+
+  /* -------------------------------------------- */
+  /*  Rest Day Tracking                           */
+  /* -------------------------------------------- */
+
+  /**
+   * Check if the current day is a rest day.
+   * @returns {boolean} True if current day is a rest day
+   * @private
+   */
+  static #isCurrentDayRestDay() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.days?.values?.length) return false;
+
+    const components = game.time.components;
+    const weekdayIndex = components.dayOfWeek ?? 0;
+    const weekday = calendar.days.values[weekdayIndex];
+
+    return weekday?.isRestDay || false;
+  }
+
+  /**
+   * Check for rest day status change and fire hook if changed.
+   * @param {Object} calendar - The active calendar
+   * @private
+   */
+  static #checkRestDayChange(calendar) {
+    if (this.#lastRestDay === null) return;
+
+    const currentRestDay = this.#isCurrentDayRestDay();
+    if (this.#lastRestDay !== currentRestDay) {
+      const components = game.time.components;
+      const weekdayIndex = components.dayOfWeek ?? 0;
+      const weekday = calendar?.days?.values?.[weekdayIndex];
+
+      const hookData = {
+        isRestDay: currentRestDay,
+        wasRestDay: this.#lastRestDay,
+        weekday: weekday ? { index: weekdayIndex, name: weekday.name || '', abbreviation: weekday.abbreviation || '' } : null,
+        worldTime: game.time.worldTime,
+        calendar
+      };
+
+      log(3, `Rest day status changed: ${this.#lastRestDay} -> ${currentRestDay}`);
+      Hooks.callAll(HOOKS.REST_DAY_CHANGE, hookData);
     }
   }
 }

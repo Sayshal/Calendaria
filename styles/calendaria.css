@@ -735,6 +735,14 @@
       color: var(--calendaria-festival-text);
     }
   }
+
+  &.rest-day {
+    background: color-mix(in srgb, var(--calendaria-rest-day, #8b9dc3) 12%, var(--calendaria-bg));
+
+    .day-number {
+      color: var(--calendaria-rest-day-text, #6b7a99);
+    }
+  }
 }
 
 .day-number {
@@ -947,6 +955,11 @@
   &.today {
     background: var(--calendaria-today-bg);
     border-right: 3px solid var(--calendaria-today);
+  }
+
+  &.rest-day {
+    background: color-mix(in srgb, var(--calendaria-rest-day, #8b9dc3) 12%, var(--calendaria-bg));
+    color: var(--calendaria-rest-day-text, #6b7a99);
   }
 }
 

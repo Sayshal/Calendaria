@@ -386,6 +386,48 @@ export const CalendariaAPI = {
   },
 
   /* -------------------------------------------- */
+  /*  Weekdays & Rest Days                        */
+  /* -------------------------------------------- */
+
+  /**
+   * Get the current weekday information including rest day status.
+   * @returns {{index: number, name: string, abbreviation: string, isRestDay: boolean}|null}
+   * @example
+   * const weekday = CALENDARIA.api.getCurrentWeekday();
+   * console.log(weekday.name, weekday.isRestDay ? '(Rest Day)' : '');
+   */
+  getCurrentWeekday() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.days?.values?.length) return null;
+
+    const components = game.time.components;
+    const weekdayIndex = components.dayOfWeek ?? 0;
+    const weekday = calendar.days.values[weekdayIndex];
+
+    if (!weekday) return null;
+
+    return {
+      index: weekdayIndex,
+      name: weekday.name || '',
+      abbreviation: weekday.abbreviation || '',
+      isRestDay: weekday.isRestDay || false
+    };
+  },
+
+  /**
+   * Check if the current day is a rest day.
+   * @returns {boolean} True if current day is a rest day
+   * @example
+   * if (CALENDARIA.api.isRestDay()) {
+   *   console.log('Today is a rest day!');
+   * }
+   */
+  isRestDay() {
+    const weekday = this.getCurrentWeekday();
+    return weekday?.isRestDay ?? false;
+  },
+
+  /* -------------------------------------------- */
   /*  Festivals & Special Days                    */
   /* -------------------------------------------- */
 

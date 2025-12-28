@@ -13,7 +13,7 @@
       <!-- Day rows -->
       {{#each calendarData.days}}
         <!-- Day name cell -->
-        <div class="week-day-header {{#if isToday}}today{{/if}}">
+        <div class="week-day-header {{#if isToday}}today{{/if}}{{#if isRestDay}} rest-day{{/if}}">
           <span class="day-header-text"><strong>{{day}}</strong> - {{dayName}}</span>
         </div>
 

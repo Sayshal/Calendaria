@@ -243,6 +243,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           .filter(Boolean);
       }
 
+      // Get weekday data for rest day status
+      const weekdayData = calendar.days?.values?.[dayIndex % daysInWeek];
+
       currentWeek.push({
         day,
         year,
@@ -253,6 +256,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         isOddDay: dayIndex % 2 === 1,
         isFestival: !!festivalDay,
         festivalName: festivalDay ? localize(festivalDay.name) : null,
+        isRestDay: weekdayData?.isRestDay || false,
         moonPhases
       });
       dayIndex++;
@@ -349,6 +353,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       const selectedHour =
         this._selectedTimeSlot?.year === currentYear && this._selectedTimeSlot?.month === currentMonth && this._selectedTimeSlot?.day === currentDay ? this._selectedTimeSlot.hour : null;
 
+      // Get weekday data for rest day status
+      const weekdayData = calendar.days?.values?.[i];
+
       days.push({
         day: currentDay,
         year: currentYear,
@@ -358,6 +365,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         isToday: isToday,
         currentHour: isToday ? currentHour : null,
         selectedHour: selectedHour,
+        isRestDay: weekdayData?.isRestDay || false,
         notes: dayNotes
       });
 
