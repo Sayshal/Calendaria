@@ -201,7 +201,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         secondsPerMinute: 60
       },
       secondsPerRound: 6,
-      seasons: { values: [] },
+      seasons: { type: 'dated', offset: 0, values: [] },
       eras: [],
       festivals: [],
       moons: [],
@@ -413,6 +413,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }))
     }));
 
+    // Season type options
+    const seasonTypeOptions = [
+      { value: 'dated', label: 'CALENDARIA.Editor.Season.Type.Dated' },
+      { value: 'periodic', label: 'CALENDARIA.Editor.Season.Type.Periodic' }
+    ];
+
+    // Season container settings
+    context.seasonType = this.#calendarData.seasons.type || 'dated';
+    context.seasonOffset = this.#calendarData.seasons.offset ?? 0;
+    context.seasonTypeOptions = seasonTypeOptions.map((opt) => ({ ...opt, selected: opt.value === context.seasonType }));
+    context.isPeriodic = context.seasonType === 'periodic';
+
     // Prepare seasons with month options
     // Handle both formats: monthStart/monthEnd OR dayStart/dayEnd
     context.seasonsWithNav = this.#calendarData.seasons.values.map((season, idx) => {
@@ -443,6 +455,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return {
         ...season,
         index: idx,
+        duration: season.duration ?? null,
         displayStartMonth: startMonth,
         displayStartDay: startDay,
         displayEndMonth: endMonth,
@@ -490,25 +503,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cyclesWithNav = (this.#calendarData.cycles || []).map((cycle, idx) => ({
       ...cycle,
       index: idx,
-      basedOnOptions: basedOnOptions.map((opt) => ({
-        ...opt,
-        selected: opt.value === (cycle.basedOn || 'month')
-      })),
-      entriesWithIndex: (cycle.entries || []).map((entry, eIdx) => ({
-        ...entry,
-        index: eIdx,
-        displayNum: eIdx + 1,
-        cycleIndex: idx
-      }))
+      basedOnOptions: basedOnOptions.map((opt) => ({ ...opt, selected: opt.value === (cycle.basedOn || 'month') })),
+      entriesWithIndex: (cycle.entries || []).map((entry, eIdx) => ({ ...entry, index: eIdx, displayNum: eIdx + 1, cycleIndex: idx }))
     }));
     context.cycleFormat = this.#calendarData.cycleFormat || '';
     context.basedOnOptions = basedOnOptions;
 
     // Prepare canonical hours
-    context.canonicalHoursWithNav = (this.#calendarData.canonicalHours || []).map((ch, idx) => ({
-      ...ch,
-      index: idx
-    }));
+    context.canonicalHoursWithNav = (this.#calendarData.canonicalHours || []).map((ch, idx) => ({ ...ch, index: idx }));
 
     // Prepare named weeks
     const currentWeeksType = this.#calendarData.weeks?.type || 'year-based';
@@ -516,10 +518,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'year-based', label: 'CALENDARIA.Editor.WeeksType.YearBased', selected: currentWeeksType === 'year-based' },
       { value: 'month-based', label: 'CALENDARIA.Editor.WeeksType.MonthBased', selected: currentWeeksType === 'month-based' }
     ];
-    context.namedWeeksWithNav = (this.#calendarData.weeks?.names || []).map((week, idx) => ({
-      ...week,
-      index: idx
-    }));
+    context.namedWeeksWithNav = (this.#calendarData.weeks?.names || []).map((week, idx) => ({ ...week, index: idx }));
 
     // Prepare solstice month/day values from day-of-year
     const daylight = this.#calendarData.daylight || {};
@@ -532,14 +531,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.summerSolsticeDay = summerSolstice.day;
 
     // Month options for solstice dropdowns (1-indexed)
-    context.winterSolsticeMonthOptions = context.monthOptions.map((opt) => ({
-      ...opt,
-      selected: opt.value === winterSolstice.month
-    }));
-    context.summerSolsticeMonthOptions = context.monthOptions.map((opt) => ({
-      ...opt,
-      selected: opt.value === summerSolstice.month
-    }));
+    context.winterSolsticeMonthOptions = context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === winterSolstice.month }));
+    context.summerSolsticeMonthOptions = context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === summerSolstice.month }));
 
     // Weather context
     this.#prepareWeatherContext(context);
@@ -969,6 +962,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateSeasonsFromFormData(data) {
+    // Update container-level settings
+    this.#calendarData.seasons.type = data['seasons.type'] || 'dated';
+    this.#calendarData.seasons.offset = parseInt(data['seasons.offset']) || 0;
+
     const indices = new Set();
     for (const key of Object.keys(data)) {
       const match = key.match(/^seasons\.(\d+)\./);
@@ -976,6 +973,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     const sortedIndices = [...indices].sort((a, b) => a - b);
+    const isPeriodic = this.#calendarData.seasons.type === 'periodic';
     this.#calendarData.seasons.values.length = 0;
 
     for (const idx of sortedIndices) {
@@ -984,12 +982,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         abbreviation: data[`seasons.${idx}.abbreviation`] || '',
         icon: data[`seasons.${idx}.icon`] || '',
         color: data[`seasons.${idx}.color`] || '',
-        monthStart: parseInt(data[`seasons.${idx}.monthStart`]) || 1,
-        monthEnd: parseInt(data[`seasons.${idx}.monthEnd`]) || 1,
-        dayStart: this.#parseOptionalInt(data[`seasons.${idx}.dayStart`]),
-        dayEnd: this.#parseOptionalInt(data[`seasons.${idx}.dayEnd`]),
         ordinal: this.#calendarData.seasons.values.length + 1
       };
+
+      if (isPeriodic) {
+        season.duration = this.#parseOptionalInt(data[`seasons.${idx}.duration`]) ?? 91;
+      } else {
+        season.monthStart = parseInt(data[`seasons.${idx}.monthStart`]) || 1;
+        season.monthEnd = parseInt(data[`seasons.${idx}.monthEnd`]) || 1;
+        season.dayStart = this.#parseOptionalInt(data[`seasons.${idx}.dayStart`]);
+        season.dayEnd = this.#parseOptionalInt(data[`seasons.${idx}.dayEnd`]);
+      }
+
       this.#calendarData.seasons.values.push(season);
     }
   }
@@ -1398,15 +1402,24 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.seasons.values.length - 1;
     const insertIdx = afterIdx + 1;
     const totalSeasons = this.#calendarData.seasons.values.length + 1;
-    this.#calendarData.seasons.values.splice(insertIdx, 0, {
+    const isPeriodic = this.#calendarData.seasons.type === 'periodic';
+
+    const newSeason = {
       name: format('CALENDARIA.Editor.Default.SeasonName', { num: totalSeasons }),
       abbreviation: format('CALENDARIA.Editor.Default.SeasonAbbr', { num: totalSeasons }),
-      monthStart: 1,
-      monthEnd: 3,
-      dayStart: null,
-      dayEnd: null,
       ordinal: insertIdx + 1
-    });
+    };
+
+    if (isPeriodic) {
+      newSeason.duration = 91;
+    } else {
+      newSeason.monthStart = 1;
+      newSeason.monthEnd = 3;
+      newSeason.dayStart = null;
+      newSeason.dayEnd = null;
+    }
+
+    this.#calendarData.seasons.values.splice(insertIdx, 0, newSeason);
     this.#reindexArray(this.#calendarData.seasons.values);
     this.render();
   }

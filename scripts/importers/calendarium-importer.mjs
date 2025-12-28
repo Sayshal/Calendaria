@@ -7,10 +7,10 @@
  */
 
 import { ASSETS } from '../constants.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
-import NoteManager from '../notes/note-manager.mjs';
 
 /**
  * Moon phase names for standard 8 phases.
@@ -83,9 +83,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data) {
-    if (!CalendariumImporter.isCalendariumExport(data)) {
-      throw new Error(localize('CALENDARIA.Importer.Calendarium.InvalidFormat'));
-    }
+    if (!CalendariumImporter.isCalendariumExport(data)) throw new Error(localize('CALENDARIA.Importer.Calendarium.InvalidFormat'));
 
     // Use first calendar
     const calendar = data.calendars[0];
@@ -120,30 +118,18 @@ export default class CalendariumImporter extends BaseImporter {
 
     return {
       name: calendar.name || 'Imported Calendar',
-
       days: { values: weekdays, hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60, daysPerYear },
-
       months: { values: months },
-
       years: { yearZero: 0, firstWeekday: calendar.static.firstWeekDay || 0, leapYear: null },
-
       leapYearConfig,
-
       festivals: leapFestivals,
-
       moons,
-
-      seasons: { values: seasons },
-
+      seasons,
       eras,
-
       cycles,
       cycleFormat,
-
       metadata: { id: calendar.id || 'imported-calendarium', description: calendar.description || 'Imported from Calendarium', system: calendar.name || 'Unknown', importedFrom: 'calendarium' },
-
       currentDate: this.#transformCurrentDate(calendar.current),
-
       _warnings: warnings
     };
   }
@@ -159,12 +145,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #buildCategoryMap(categories = []) {
     const map = new Map();
-    for (const cat of categories) {
-      map.set(cat.id, {
-        name: cat.name,
-        color: cat.color || '#2196f3'
-      });
-    }
+    for (const cat of categories) map.set(cat.id, { name: cat.name, color: cat.color || '#2196f3' });
     return map;
   }
 
@@ -302,11 +283,11 @@ export default class CalendariumImporter extends BaseImporter {
    * @param {object[]} months - Transformed months array
    * @param {number} daysPerYear - Total days per year
    * @param {string[]} warnings - Warnings array to populate
-   * @returns {object[]}
+   * @returns {{type: string, offset: number, values: object[]}}
    */
   #transformSeasons(seasonal = {}, months, daysPerYear, warnings) {
     const seasons = seasonal.seasons || [];
-    if (!seasons.length) return [];
+    if (!seasons.length) return { type: 'dated', offset: 0, values: [] };
 
     // Check for procedural weather
     if (seasonal.weather?.enabled) warnings.push(localize('CALENDARIA.Importer.Calendarium.Warning.ProceduralWeather'));
@@ -321,8 +302,8 @@ export default class CalendariumImporter extends BaseImporter {
 
     // Determine if seasons are dated or periodic
     const isDated = seasons[0]?.date != null;
-    if (isDated) return this.#transformDatedSeasons(seasons, monthDayStarts, daysPerYear);
-    else return this.#transformPeriodicSeasons(seasons, seasonal.offset || 0, daysPerYear);
+    if (isDated) return { type: 'dated', offset: 0, values: this.#transformDatedSeasons(seasons, monthDayStarts, daysPerYear) };
+    else return { type: 'periodic', offset: seasonal.offset || 0, values: this.#transformPeriodicSeasons(seasons, daysPerYear) };
   }
 
   /**
@@ -355,20 +336,18 @@ export default class CalendariumImporter extends BaseImporter {
 
   /**
    * Transform periodic seasons (duration-based).
+   * Preserves duration on each season for periodic calculation.
    * @param {object[]} seasons - Calendarium seasons
-   * @param {number} offset - Starting day offset
    * @param {number} totalDays - Total days per year
    * @returns {object[]}
    */
-  #transformPeriodicSeasons(seasons, offset, totalDays) {
-    let dayStart = offset;
-
-    return seasons.map((season) => {
-      const dayEnd = (dayStart + (season.duration || 91) - 1) % totalDays;
-      const result = { name: season.name, dayStart, dayEnd, color: season.color || null, icon: this.#mapSeasonIcon(season.kind) };
-      dayStart = (dayEnd + 1) % totalDays;
-      return result;
-    });
+  #transformPeriodicSeasons(seasons, totalDays) {
+    return seasons.map((season) => ({
+      name: season.name,
+      duration: season.duration || Math.floor(totalDays / seasons.length),
+      color: season.color || null,
+      icon: this.#mapSeasonIcon(season.kind)
+    }));
   }
 
   /**
