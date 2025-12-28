@@ -27,7 +27,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             days: new NumberField({ required: true, nullable: false }),
             leapDays: new NumberField({ required: false, nullable: true }),
             type: new StringField({ required: false }),
-            startingWeekday: new NumberField({ required: false, integer: true, nullable: true, min: 0 })
+            startingWeekday: new NumberField({ required: false, integer: true, nullable: true, min: 0 }),
+            weekdays: new ArrayField(
+              new SchemaField({ name: new StringField({ required: true }), abbreviation: new StringField({ required: false }), isRestDay: new BooleanField({ required: false, initial: false }) }),
+              { required: false, nullable: true }
+            )
           })
         )
       },
@@ -781,6 +785,35 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   getAllSeasons() {
     return this.seasons?.values ?? [];
+  }
+
+  /* -------------------------------------------- */
+  /*  Weekday Methods                             */
+  /* -------------------------------------------- */
+
+  /**
+   * Get weekday data for a specific month, falling back to calendar-level weekdays.
+   * @param {number} monthIndex - 0-indexed month
+   * @returns {Array<{name: string, abbreviation?: string, isRestDay?: boolean}>}
+   */
+  getWeekdaysForMonth(monthIndex) {
+    const month = this.months?.values?.[monthIndex];
+    if (month?.weekdays?.length) return month.weekdays;
+    return this.days?.values ?? [];
+  }
+
+  /**
+   * Get weekday info for a specific date.
+   * @param {number|TimeComponents} [time] - Time to check, defaults to current world time
+   * @returns {{name: string, abbreviation?: string, isRestDay?: boolean, index: number}|null}
+   */
+  getWeekdayForDate(time = game.time.worldTime) {
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const weekdays = this.getWeekdaysForMonth(components.month);
+    const weekdayIndex = components.dayOfWeek ?? 0;
+    const weekday = weekdays[weekdayIndex];
+    if (!weekday) return null;
+    return { ...weekday, index: weekdayIndex };
   }
 
   /* -------------------------------------------- */

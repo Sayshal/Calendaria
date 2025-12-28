@@ -151,35 +151,49 @@ export default class CalendariumImporter extends BaseImporter {
 
   /**
    * Transform Calendarium months to Calendaria format.
+   * Includes per-month custom weekdays if present.
    * @param {object[]} months - Calendarium months array
    * @param {string[]} warnings - Warnings array to populate
    * @returns {object[]}
    */
   #transformMonths(months = [], warnings) {
-    return months.map((m, idx) => ({
-      name: m.name,
-      abbreviation: m.short || m.name.substring(0, 3),
-      days: m.length,
-      ordinal: idx + 1,
-      type: m.type === 'intercalary' ? 'intercalary' : null,
-      startingWeekday: null,
-      leapDays: null
-    }));
+    return months.map((m, idx) => {
+      const month = {
+        name: m.name,
+        abbreviation: m.short || m.name.substring(0, 3),
+        days: m.length,
+        ordinal: idx + 1,
+        type: m.type === 'intercalary' ? 'intercalary' : null,
+        startingWeekday: null,
+        leapDays: null
+      };
+
+      // Import per-month custom weekdays
+      if (m.week && Array.isArray(m.week) && m.week.length > 0) {
+        month.weekdays = m.week.map((wd) => ({
+          name: wd.name,
+          abbreviation: wd.name?.substring(0, 2) || '',
+          isRestDay: false
+        }));
+      }
+
+      return month;
+    });
   }
 
   /**
    * Transform Calendarium weekdays to Calendaria format.
    * @param {object[]} weekdays - Calendarium weekdays array
-   * @param {object[]} months - Calendarium months array (to check for custom weeks)
+   * @param {object[]} months - Calendarium months array (to log custom week info)
    * @param {string[]} warnings - Warnings array to populate
    * @returns {object[]}
    */
   #transformWeekdays(weekdays = [], months = [], warnings) {
-    // Check for per-month custom weekdays
+    // Log info about per-month custom weekdays (now supported)
     const monthsWithCustomWeeks = months.filter((m) => m.week && Array.isArray(m.week) && m.week.length > 0);
     if (monthsWithCustomWeeks.length > 0) {
       const details = monthsWithCustomWeeks.map((m) => m.name).join(', ');
-      warnings.push(format('CALENDARIA.Importer.Calendarium.Warning.CustomWeekdays', { details }));
+      log(3, `Imported custom weekdays for months: ${details}`);
     }
 
     return weekdays.map((wd, idx) => ({ name: wd.name, abbreviation: wd.name.substring(0, 2), ordinal: idx + 1 }));

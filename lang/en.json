@@ -387,6 +387,8 @@
   "CALENDARIA.Editor.Default.FestivalName": "Festival {num}",
   "CALENDARIA.Editor.Default.MonthAbbr": "M{num}",
   "CALENDARIA.Editor.Default.MonthName": "Month {num}",
+  "CALENDARIA.Editor.Month.CustomWeekdays": "Custom Weekdays",
+  "CALENDARIA.Editor.Month.EnableCustomWeekdays": "Use custom weekday names for this month",
   "CALENDARIA.Editor.Default.MoonName": "Moon",
   "CALENDARIA.Editor.Default.PhaseName": "Phase {num}",
   "CALENDARIA.Editor.Default.SeasonAbbr": "S{num}",

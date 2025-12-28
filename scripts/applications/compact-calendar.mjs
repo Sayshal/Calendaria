@@ -289,6 +289,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
 
+    // Get weekdays for this month (supports per-month custom weekdays)
+    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
+
     return {
       year,
       month,
@@ -298,11 +301,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays:
-        calendar.days?.values?.map((wd) => {
-          const name = localize(wd.name);
-          return name.substring(0, 2); // First 2 chars for compact view
-        }) || []
+      weekdays: monthWeekdays.map((wd) => {
+        const name = localize(wd.name);
+        return name.substring(0, 2); // First 2 chars for compact view
+      })
     };
   }
 

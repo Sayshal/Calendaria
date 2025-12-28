@@ -299,13 +299,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
 
+    // Get weekdays for this month (supports per-month custom weekdays)
+    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
+
     return {
       year,
       month,
       monthName: localize(monthData.name),
       yearDisplay: calendar.formatYearWithEra?.(year) ?? String(year),
       weeks,
-      weekdays: calendar.days?.values?.map((wd) => localize(wd.name)) || [],
+      weekdays: monthWeekdays.map((wd) => localize(wd.name)),
       daysInWeek,
       currentSeason,
       currentEra
@@ -357,7 +360,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       if (!monthData) break;
 
       const dayNotes = this._getNotesForDay(notes, currentYear, currentMonth, currentDay);
-      const dayName = calendar.days?.values?.[i]?.name ? localize(calendar.days.values[i].name) : '';
+      // Get weekday data from the current month (supports per-month custom weekdays)
+      const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.days?.values ?? [];
+      const weekdayData = monthWeekdays[i];
+      const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
       const monthName = calendar.months?.values?.[currentMonth]?.name ? localize(calendar.months.values[currentMonth].name) : '';
 
       const isToday = this._isToday(currentYear, currentMonth, currentDay);
@@ -365,9 +371,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       // Check if this day has a selected time slot
       const selectedHour =
         this._selectedTimeSlot?.year === currentYear && this._selectedTimeSlot?.month === currentMonth && this._selectedTimeSlot?.day === currentDay ? this._selectedTimeSlot.hour : null;
-
-      // Get weekday data for rest day status
-      const weekdayData = calendar.days?.values?.[i];
 
       days.push({
         day: currentDay,
@@ -417,6 +420,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
 
+    // Get weekdays for the week start month (supports per-month custom weekdays)
+    const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.days?.values ?? [];
+
     return {
       year: weekStartYear,
       month: weekStartMonth,
@@ -425,7 +431,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       weekNumber,
       days: days,
       timeSlots: timeSlots,
-      weekdays: calendar.days?.values?.map((wd) => localize(wd.name)) || [],
+      weekdays: weekWeekdays.map((wd) => localize(wd.name)),
       daysInWeek,
       currentHour,
       currentSeason,

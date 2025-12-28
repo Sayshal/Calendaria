@@ -572,13 +572,10 @@ export default class TimeTracker {
    */
   static #isCurrentDayRestDay() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.days?.values?.length) return false;
+    if (!calendar) return false;
 
-    const components = game.time.components;
-    const weekdayIndex = components.dayOfWeek ?? 0;
-    const weekday = calendar.days.values[weekdayIndex];
-
-    return weekday?.isRestDay || false;
+    const weekdayInfo = calendar.getWeekdayForDate?.();
+    return weekdayInfo?.isRestDay || false;
   }
 
   /**
@@ -591,14 +588,12 @@ export default class TimeTracker {
 
     const currentRestDay = this.#isCurrentDayRestDay();
     if (this.#lastRestDay !== currentRestDay) {
-      const components = game.time.components;
-      const weekdayIndex = components.dayOfWeek ?? 0;
-      const weekday = calendar?.days?.values?.[weekdayIndex];
+      const weekdayInfo = calendar?.getWeekdayForDate?.();
 
       const hookData = {
         isRestDay: currentRestDay,
         wasRestDay: this.#lastRestDay,
-        weekday: weekday ? { index: weekdayIndex, name: weekday.name || '', abbreviation: weekday.abbreviation || '' } : null,
+        weekday: weekdayInfo ? { index: weekdayInfo.index, name: weekdayInfo.name || '', abbreviation: weekdayInfo.abbreviation || '' } : null,
         worldTime: game.time.worldTime,
         calendar
       };

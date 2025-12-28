@@ -392,6 +392,7 @@ export const CalendariaAPI = {
 
   /**
    * Get the current weekday information including rest day status.
+   * Respects per-month custom weekdays if defined.
    * @returns {{index: number, name: string, abbreviation: string, isRestDay: boolean}|null}
    * @example
    * const weekday = CALENDARIA.api.getCurrentWeekday();
@@ -399,19 +400,16 @@ export const CalendariaAPI = {
    */
   getCurrentWeekday() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.days?.values?.length) return null;
+    if (!calendar) return null;
 
-    const components = game.time.components;
-    const weekdayIndex = components.dayOfWeek ?? 0;
-    const weekday = calendar.days.values[weekdayIndex];
-
-    if (!weekday) return null;
+    const weekdayInfo = calendar.getWeekdayForDate?.();
+    if (!weekdayInfo) return null;
 
     return {
-      index: weekdayIndex,
-      name: weekday.name || '',
-      abbreviation: weekday.abbreviation || '',
-      isRestDay: weekday.isRestDay || false
+      index: weekdayInfo.index,
+      name: weekdayInfo.name || '',
+      abbreviation: weekdayInfo.abbreviation || '',
+      isRestDay: weekdayInfo.isRestDay || false
     };
   },
 

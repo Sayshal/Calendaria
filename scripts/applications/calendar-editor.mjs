@@ -329,6 +329,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       isFirst: idx === 0,
       isLast: idx === monthCount - 1,
       hasStartingWeekday: month.startingWeekday != null,
+      hasCustomWeekdays: month.weekdays?.length > 0,
+      customWeekdays: month.weekdays ?? [],
       startingWeekdayOptions: startingWeekdayOptions.map((opt) => ({
         ...opt,
         selected: opt.value === month.startingWeekday
@@ -876,8 +878,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const summerDay = parseInt(data['daylight.summerSolsticeDay']) || 1;
     this.#calendarData.daylight.summerSolstice = this.#monthDayToDayOfYear(summerMonth, summerDay);
 
-    // Process months array
-    this.#updateArrayFromFormData(data, 'months', this.#calendarData.months.values, ['name', 'abbreviation', 'days', 'leapDays', 'startingWeekday']);
+    // Process months array (with custom weekdays support)
+    this.#updateMonthsFromFormData(data);
 
     // Process weekdays array
     this.#updateArrayFromFormData(data, 'weekdays', this.#calendarData.days.values, ['name', 'abbreviation', 'isRestDay']);
@@ -953,6 +955,53 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       }
       targetArray.push(item);
+    }
+  }
+
+  /**
+   * Update months array from form data, including custom weekdays.
+   * @param {object} data - Form data
+   * @private
+   */
+  #updateMonthsFromFormData(data) {
+    const indices = new Set();
+    for (const key of Object.keys(data)) {
+      const match = key.match(/^months\.(\d+)\./);
+      if (match) indices.add(parseInt(match[1]));
+    }
+
+    const sortedIndices = [...indices].sort((a, b) => a - b);
+    this.#calendarData.months.values.length = 0;
+
+    for (const idx of sortedIndices) {
+      const month = {
+        name: data[`months.${idx}.name`] || '',
+        abbreviation: data[`months.${idx}.abbreviation`] || '',
+        days: parseInt(data[`months.${idx}.days`]) || 30,
+        leapDays: this.#parseOptionalInt(data[`months.${idx}.leapDays`]),
+        startingWeekday: this.#parseOptionalInt(data[`months.${idx}.startingWeekday`]),
+        ordinal: this.#calendarData.months.values.length + 1
+      };
+
+      // Check for custom weekdays
+      const hasCustom = data[`months.${idx}.hasCustomWeekdays`] === 'true' || data[`months.${idx}.hasCustomWeekdays`] === true;
+      if (hasCustom) {
+        const weekdayIndices = new Set();
+        for (const key of Object.keys(data)) {
+          const wdMatch = key.match(new RegExp(`^months\\.${idx}\\.weekdays\\.(\\d+)\\.`));
+          if (wdMatch) weekdayIndices.add(parseInt(wdMatch[1]));
+        }
+
+        if (weekdayIndices.size > 0) {
+          month.weekdays = [...weekdayIndices].sort((a, b) => a - b).map((wdIdx) => ({
+            name: data[`months.${idx}.weekdays.${wdIdx}.name`] || '',
+            abbreviation: data[`months.${idx}.weekdays.${wdIdx}.abbreviation`] || '',
+            isRestDay: data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === 'true' || data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === true
+          }));
+        }
+      }
+
+      this.#calendarData.months.values.push(month);
     }
   }
 
