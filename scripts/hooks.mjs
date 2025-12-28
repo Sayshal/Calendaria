@@ -6,6 +6,7 @@
  */
 
 import { CalendarApplication } from './applications/calendar-application.mjs';
+import { onPreCreateChatMessage, onRenderChatMessageHTML } from './chat/chat-timestamp.mjs';
 import { initializeImporters } from './importers/index.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
@@ -53,6 +54,10 @@ export function registerHooks() {
 
   // Chat message hooks (for announcement click handlers)
   Hooks.on('renderChatMessageHTML', onRenderChatMessage);
+
+  // Chat timestamp hooks
+  Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
+  Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);
 
   // System integrations
   registerRestTimeHooks();

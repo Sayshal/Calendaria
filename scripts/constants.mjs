@@ -155,7 +155,17 @@ export const SETTINGS = {
   HUD_STICKY_STATES: 'hudStickyStates',
 
   /** @type {string} Saved position of the Calendar HUD */
-  CALENDAR_HUD_POSITION: 'calendarHUDPosition'
+  CALENDAR_HUD_POSITION: 'calendarHUDPosition',
+
+  /* -------------------------------------------- */
+  /*  Chat Timestamps                             */
+  /* -------------------------------------------- */
+
+  /** @type {string} Chat timestamp display mode (disabled, replace, augment) */
+  CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
+
+  /** @type {string} Whether to show time in chat timestamps */
+  CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime'
 };
 
 /**

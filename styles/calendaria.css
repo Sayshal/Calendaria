@@ -5782,3 +5782,27 @@
 .calendaria-hud-wrapper.compact .calendaria-hud-live-event-icon {
   font-size: var(--font-size-10, 0.625rem);
 }
+
+/* ======================================== */
+/* Chat Message Timestamps                   */
+/* ======================================== */
+
+.calendaria-timestamp {
+  color: var(--calendaria-primary);
+}
+
+.calendaria-timestamp-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.calendaria-timestamp-wrapper .calendaria-timestamp {
+  font-weight: 500;
+}
+
+.calendaria-timestamp-wrapper .calendaria-timestamp-real {
+  font-size: 0.85em;
+  opacity: 0.7;
+}

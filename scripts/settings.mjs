@@ -259,6 +259,36 @@ export function registerSettings() {
   });
 
   // ========================================//
+  //  Chat Timestamps                        //
+  // ========================================//
+
+  /** Chat timestamp display mode */
+  game.settings.register(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, {
+    name: 'CALENDARIA.Settings.ChatTimestampMode.Name',
+    hint: 'CALENDARIA.Settings.ChatTimestampMode.Hint',
+    scope: 'world',
+    config: true,
+    type: new foundry.data.fields.StringField({
+      choices: {
+        disabled: 'CALENDARIA.Settings.ChatTimestampMode.Disabled',
+        replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace',
+        augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment'
+      },
+      initial: 'disabled'
+    })
+  });
+
+  /** Whether to show time in chat timestamps */
+  game.settings.register(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, {
+    name: 'CALENDARIA.Settings.ChatTimestampShowTime.Name',
+    hint: 'CALENDARIA.Settings.ChatTimestampShowTime.Hint',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  // ========================================//
   //  Time Integration                       //
   // ========================================//
 
