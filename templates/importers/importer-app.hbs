@@ -119,6 +119,13 @@
                 <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.CurrentDate"}}</span>
               </div>
             </div>
+
+            {{#if previewData.undatedCount}}
+              <div class="undated-notice">
+                <i class="fas fa-book"></i>
+                <span>{{localize "CALENDARIA.Importer.Preview.UndatedEvents" count=previewData.undatedCount}}</span>
+              </div>
+            {{/if}}
           </fieldset>
 
           {{!-- Import Options --}}

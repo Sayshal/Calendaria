@@ -7,10 +7,9 @@
  */
 
 import { ASSETS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
+import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 
 /**
@@ -60,9 +59,6 @@ export default class CalendariumImporter extends BaseImporter {
 
   /** @type {Map<string, object>} Category map from Calendarium */
   _categories = new Map();
-
-  /** @type {object[]} Undated events to migrate to journals */
-  _undatedJournals = [];
 
   /* -------------------------------------------- */
   /*  Detection                                   */
@@ -461,7 +457,7 @@ export default class CalendariumImporter extends BaseImporter {
     const events = calendar.events || [];
     const notes = [];
 
-    this._undatedJournals = [];
+    this._undatedEvents = [];
 
     log(3, `Extracting ${events.length} events from Calendarium`);
 
@@ -492,7 +488,7 @@ export default class CalendariumImporter extends BaseImporter {
 
     // Handle undated events - migrate to journals later
     if (type === 'Undated' || (!date?.year && date?.year !== 0)) {
-      this._undatedJournals.push({ name, content: description || '', category: categoryData?.name || 'default' });
+      this._undatedEvents.push({ name, content: description || '', category: categoryData?.name || 'default' });
       return null;
     }
 
@@ -635,34 +631,9 @@ export default class CalendariumImporter extends BaseImporter {
     }
 
     // Migrate undated events to journal entries
-    if (this._undatedJournals.length > 0) await this.#migrateUndatedEvents(options.calendarName || 'Calendarium Import');
+    if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Calendarium Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
-  }
-
-  /**
-   * Migrate undated events to Foundry journal entries.
-   * @param {string} calendarName - Name for folder organization
-   */
-  async #migrateUndatedEvents(calendarName) {
-    if (!this._undatedJournals?.length) return;
-
-    // Create folder hierarchy
-    const folderName = `Calendaria Imports/${calendarName}/Undated Events`;
-    const parts = folderName.split('/');
-    let parentId = null;
-
-    for (const part of parts) {
-      let existing = game.folders.find((f) => f.name === part && f.folder?.id === parentId && f.type === 'JournalEntry');
-      if (!existing) existing = await Folder.create({ name: part, type: 'JournalEntry', folder: parentId });
-
-      parentId = existing.id;
-    }
-
-    // Create journal entries
-    const journalData = this._undatedJournals.map((event) => ({ name: event.name, folder: parentId, pages: [{ name: event.name, type: 'text', text: { content: event.content || '' } }] }));
-    await JournalEntry.createDocuments(journalData);
-    ui.notifications.info(format('CALENDARIA.Importer.Calendarium.Warning.UndatedEvents', { count: this._undatedJournals.length }));
   }
 
   /* -------------------------------------------- */

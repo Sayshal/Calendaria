@@ -432,6 +432,8 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const events = data.events || [];
     const notes = [];
 
+    this._undatedEvents = [];
+
     log(3, `Extracting ${events.length} events from Fantasy-Calendar`);
 
     for (const event of events) {
@@ -542,6 +544,20 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   #transformEvent(event, data) {
     const conditions = event.data?.conditions || [];
+
+    // Handle undated events - no date and no usable conditions
+    const hasDate = Array.isArray(event.data?.date) && event.data.date.length >= 3;
+    const hasConditions = conditions.length > 0;
+    if (!hasDate && !hasConditions) {
+      const category = this._categories?.get(event.event_category_id);
+      this._undatedEvents.push({
+        name: event.name,
+        content: event.description || '',
+        category: category?.name || 'default'
+      });
+      return null;
+    }
+
     const eventType = this.#detectEventType(conditions, data);
 
     // Log any import warnings
@@ -1167,6 +1183,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
         log(2, `Error importing note "${note.name}":`, error);
       }
     }
+
+    // Migrate undated events to journal entries
+    if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Fantasy-Calendar Import');
 
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };

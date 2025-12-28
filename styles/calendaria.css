@@ -4503,6 +4503,22 @@
     }
   }
 
+  .undated-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    background: var(--calendaria-primary-10, rgba(33, 150, 243, 0.1));
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--calendaria-primary, #2196f3);
+
+    i {
+      font-size: 1rem;
+    }
+  }
+
   /* Import Options */
   .import-options {
     padding: 0.5rem;

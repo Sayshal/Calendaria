@@ -9,6 +9,7 @@
 
 import { HOOKS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
+import { format } from '../utils/localization.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 
 /**
@@ -43,6 +44,13 @@ export default class BaseImporter {
 
   /** @type {string[]} Accepted file extensions */
   static fileExtensions = ['.json'];
+
+  /* -------------------------------------------- */
+  /*  Instance Properties                         */
+  /* -------------------------------------------- */
+
+  /** @type {object[]} Undated events to migrate to journal entries */
+  _undatedEvents = [];
 
   /* -------------------------------------------- */
   /*  Detection                                   */
@@ -210,6 +218,41 @@ export default class BaseImporter {
     return { success: true, count: 0, errors: [] };
   }
 
+  /**
+   * Migrate undated events to Foundry journal entries.
+   * Creates folder hierarchy: Calendaria Imports/[Calendar Name]/Undated Events
+   * @param {string} calendarName - Name of the calendar for folder organization
+   * @returns {Promise<{count: number}>}
+   */
+  async migrateUndatedEvents(calendarName) {
+    if (!this._undatedEvents?.length) return { count: 0 };
+
+    // Create folder hierarchy
+    const parts = ['Calendaria Imports', calendarName, 'Undated Events'];
+    let parentId = null;
+
+    for (const part of parts) {
+      let existing = game.folders.find((f) => f.name === part && f.folder?.id === parentId && f.type === 'JournalEntry');
+      if (!existing) existing = await Folder.create({ name: part, type: 'JournalEntry', folder: parentId });
+      parentId = existing.id;
+    }
+
+    // Create journal entries
+    const journalData = this._undatedEvents.map((event) => ({
+      name: event.name,
+      folder: parentId,
+      pages: [{ name: event.name, type: 'text', text: { content: event.content || '' } }]
+    }));
+
+    await JournalEntry.createDocuments(journalData);
+
+    const count = this._undatedEvents.length;
+    ui.notifications.info(format('CALENDARIA.Importer.UndatedEventsMigrated', { count }));
+    log(3, `Migrated ${count} undated events to journal entries`);
+
+    return { count };
+  }
+
   /* -------------------------------------------- */
   /*  Preview                                     */
   /* -------------------------------------------- */
@@ -232,6 +275,7 @@ export default class BaseImporter {
       eraCount: transformedData.eras?.length ?? 0,
       festivalCount: transformedData.festivals?.length ?? 0,
       noteCount: notes,
+      undatedCount: this._undatedEvents?.length ?? 0,
       hasLeapYear: !!transformedData.years?.leapYear?.rule,
       daysPerYear: this.#calculateDaysPerYear(transformedData)
     };
