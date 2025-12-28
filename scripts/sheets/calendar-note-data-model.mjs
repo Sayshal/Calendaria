@@ -132,9 +132,10 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       iconType: new fields.StringField({ choices: ['image', 'fontawesome'], initial: 'fontawesome' }),
 
       // Reminders
-      remindUsers: new fields.ArrayField(new fields.StringField(), { initial: [] }),
-
-      reminderOffset: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+      reminderOffset: new fields.NumberField({ integer: true, min: 0, initial: 0 }), // Minutes before event (0 = disabled)
+      reminderType: new fields.StringField({ choices: ['toast', 'chat', 'dialog'], initial: 'toast' }),
+      reminderTargets: new fields.StringField({ choices: ['all', 'gm', 'author', 'specific'], initial: 'all' }),
+      reminderUsers: new fields.ArrayField(new fields.StringField(), { initial: [] }), // For 'specific' target
 
       // Integration
       macro: new fields.StringField({ nullable: true, blank: true }),

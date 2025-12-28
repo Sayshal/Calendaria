@@ -493,6 +493,30 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       description: this.#getConditionDescription(cond, calendar)
     }));
 
+    // Prepare reminder options
+    const currentReminderType = this.document.system.reminderType || 'toast';
+    context.reminderTypeOptions = [
+      { value: 'toast', label: localize('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
+      { value: 'chat', label: localize('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
+      { value: 'dialog', label: localize('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }
+    ];
+
+    const currentReminderTargets = this.document.system.reminderTargets || 'all';
+    context.reminderTargetOptions = [
+      { value: 'all', label: localize('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
+      { value: 'gm', label: localize('CALENDARIA.Note.ReminderTargetGM'), selected: currentReminderTargets === 'gm' },
+      { value: 'author', label: localize('CALENDARIA.Note.ReminderTargetAuthor'), selected: currentReminderTargets === 'author' },
+      { value: 'specific', label: localize('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
+    ];
+
+    context.showReminderUsers = currentReminderTargets === 'specific';
+    const selectedReminderUsers = this.document.system.reminderUsers || [];
+    context.userOptions = game.users.contents.map((u) => ({
+      id: u.id,
+      name: u.name,
+      selected: selectedReminderUsers.includes(u.id)
+    }));
+
     // Prepare category options with selected state
     const selectedCategories = this.document.system.categories || [];
     context.categoryOptions = getAllCategories().map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));

@@ -15,6 +15,7 @@ import { registerRestTimeHooks } from './integrations/rest-time.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import EventScheduler from './time/event-scheduler.mjs';
 import NoteManager from './notes/note-manager.mjs';
+import ReminderScheduler from './time/reminder-scheduler.mjs';
 import TimeTracker from './time/time-tracker.mjs';
 
 /**
@@ -31,6 +32,9 @@ export function registerHooks() {
 
   // Event scheduler hooks (triggers notifications when time reaches note start dates)
   Hooks.on('updateWorldTime', EventScheduler.onUpdateWorldTime.bind(EventScheduler));
+
+  // Reminder scheduler hooks (triggers pre-event reminders based on offset)
+  Hooks.on('updateWorldTime', ReminderScheduler.onUpdateWorldTime.bind(ReminderScheduler));
 
   // Calendar Manager hooks
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));

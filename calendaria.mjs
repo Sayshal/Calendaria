@@ -18,6 +18,7 @@ import NoteManager from './scripts/notes/note-manager.mjs';
 import TimeTracker from './scripts/time/time-tracker.mjs';
 import TimeKeeper from './scripts/time/time-keeper.mjs';
 import EventScheduler from './scripts/time/event-scheduler.mjs';
+import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
 import { TimeKeeperHUD } from './scripts/applications/time-keeper-hud.mjs';
 import { CalendarApplication } from './scripts/applications/calendar-application.mjs';
 import { CompactCalendar } from './scripts/applications/compact-calendar.mjs';
@@ -83,6 +84,9 @@ Hooks.once('ready', async () => {
 
   // Initialize event scheduler
   EventScheduler.initialize();
+
+  // Initialize reminder scheduler
+  ReminderScheduler.initialize();
 
   // Initialize custom theme colors
   ThemeEditor.initialize();

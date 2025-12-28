@@ -1307,6 +1307,50 @@
   }
 
   .form-row-3 {
+    .reminder-fieldset {
+      .reminder-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+
+        .form-group-stacked {
+          flex: 1 1 auto;
+          min-width: 120px;
+
+          label {
+            font-size: var(--font-size-11);
+            margin-bottom: 0.25rem;
+          }
+
+          .inline-form {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+
+            input[type="number"] {
+              width: 60px;
+              flex: 0 0 auto;
+            }
+
+            .hint {
+              font-size: var(--font-size-10);
+              color: var(--color-text-dark-secondary);
+            }
+          }
+
+          select {
+            width: 100%;
+          }
+        }
+
+        .reminder-users {
+          flex: 1 1 100%;
+        }
+      }
+    }
+  }
+
+  .form-row-4 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
@@ -3221,6 +3265,35 @@
     img {
       width: 1em;
       height: 1em;
+    }
+  }
+}
+
+.calendaria-reminder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .reminder-message {
+    font-size: 0.9em;
+    color: var(--color-text-dark-primary, var(--calendaria-text));
+
+    strong {
+      color: var(--color-text-dark-heading, var(--calendaria-text));
+    }
+  }
+
+  .announcement-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85em;
+    color: var(--color-text-hyperlink, var(--calendaria-link));
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

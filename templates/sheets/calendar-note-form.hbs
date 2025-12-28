@@ -452,8 +452,51 @@
     </div>
   {{/if}}
 
-  {{!-- Row 3: Categories & Macro --}}
+  {{!-- Row 3: Reminders --}}
   <div class="form-row-3">
+    <fieldset class="reminder-fieldset">
+      <legend>{{localize "CALENDARIA.Note.Reminder"}}</legend>
+      <div class="reminder-controls">
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderOffset"}}</label>
+          <div class="inline-form">
+            <input type="number" name="system.reminderOffset" value="{{system.reminderOffset}}" min="0" step="1"
+              placeholder="0" data-tooltip="CALENDARIA.UI.ReminderOffsetTooltip" />
+            <span class="hint">{{localize "CALENDARIA.Note.MinutesBefore"}}</span>
+          </div>
+        </div>
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderType"}}</label>
+          <select name="system.reminderType" data-tooltip="CALENDARIA.UI.ReminderTypeTooltip">
+            {{#each reminderTypeOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderTargets"}}</label>
+          <select name="system.reminderTargets" data-tooltip="CALENDARIA.UI.ReminderTargetsTooltip">
+            {{#each reminderTargetOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        {{#if showReminderUsers}}
+          <div class="form-group-stacked reminder-users">
+            <label>{{localize "CALENDARIA.Note.ReminderUsers"}}</label>
+            <multi-select name="system.reminderUsers">
+              {{#each userOptions}}
+                <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+              {{/each}}
+            </multi-select>
+          </div>
+        {{/if}}
+      </div>
+    </fieldset>
+  </div>
+
+  {{!-- Row 4: Categories & Macro --}}
+  <div class="form-row-4">
     <fieldset class="categories-fieldset">
       <legend>{{localize "CALENDARIA.Note.Categories"}}</legend>
       <div class="inline-form">
