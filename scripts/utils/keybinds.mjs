@@ -14,7 +14,7 @@ export function registerKeybindings() {
   game.keybindings.register('calendaria', 'toggle-calendar', {
     name: 'CALENDARIA.Keybinds.ToggleCalendar.Name',
     hint: 'CALENDARIA.Keybinds.ToggleCalendar.Hint',
-    editable: [{ key: 'KeyC', modifiers: ['CONTROL'] }],
+    editable: [{ key: 'KeyC', modifiers: ['ALT'] }],
     onDown: () => {
       toggleCalendarVisibility();
       return true;
