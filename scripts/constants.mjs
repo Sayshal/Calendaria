@@ -222,7 +222,9 @@ export const TEMPLATES = {
     /** @type {string} Settings panel - Calendar HUD tab */
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     /** @type {string} Settings panel - TimeKeeper tab */
-    PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`
+    PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
+    /** @type {string} Settings panel - Full Calendar tab */
+    PANEL_FULLCAL: `modules/${MODULE.ID}/templates/settings/tab-fullcal.hbs`
   },
 
   /** @type {string} Time rotation dial template */

@@ -612,4 +612,41 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     input.click();
   }
+
+  /**
+   * Open the Calendar HUD.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The button element
+   */
+  static async #onOpenHUD(event, target) {
+    CalendariaHUD.show();
+  }
+
+  /**
+   * Open the Compact Calendar.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The button element
+   */
+  static async #onOpenCompact(event, target) {
+    CompactCalendar.show();
+  }
+
+  /**
+   * Open the TimeKeeper HUD.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The button element
+   */
+  static async #onOpenTimeKeeper(event, target) {
+    TimeKeeperHUD.show();
+  }
+
+  /**
+   * Open the Full Calendar Application.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The button element
+   */
+  static async #onOpenFullCal(event, target) {
+    new CalendarApplication().render(true);
+  }
+
 }
