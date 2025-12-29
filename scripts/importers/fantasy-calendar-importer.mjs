@@ -1,7 +1,6 @@
 /**
  * Fantasy-Calendar.com Importer
  * Imports calendar data from Fantasy-Calendar.com JSON exports.
- *
  * @module Importers/FantasyCalendarImporter
  * @author Tyler
  */
@@ -356,9 +355,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #transformEraTemplate(template) {
     if (!template) return null;
     return template
-      .replace(/\{\{era_name\}\}/g, '{{era}}')
-      .replace(/\{\{era_year\}\}/g, '{{yearInEra}}')
-      .replace(/\{\{short_era\}\}/g, '{{abbreviation}}');
+      .replace(/{{era_name}}/g, '{{era}}')
+      .replace(/{{era_year}}/g, '{{yearInEra}}')
+      .replace(/{{short_era}}/g, '{{abbreviation}}');
   }
 
   /**

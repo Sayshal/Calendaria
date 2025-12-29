@@ -19,10 +19,9 @@
  * ```javascript
  * // Listen for event triggers
  * Hooks.on('calendaria.eventTriggered', (event) => {
- *   console.log(`Event triggered: ${event.name}`);
+ * console.log(`Event triggered: ${event.name}`);
  * });
  * ```
- *
  * @module Time/EventScheduler
  * @author Tyler
  */
@@ -39,7 +38,7 @@ import NoteManager from '../notes/note-manager.mjs';
  * Event Scheduler class that monitors time changes and triggers event notifications.
  */
 export default class EventScheduler {
-  /** @type {Object|null} Last processed date components */
+  /** @type {object | null} Last processed date components */
   static #lastDate = null;
 
   /** @type {Set<string>} Set of event IDs that have been triggered today (prevents duplicate notifications) */
@@ -61,7 +60,6 @@ export default class EventScheduler {
   /**
    * Initialize the event scheduler.
    * Called during module initialization.
-   *
    * @returns {void}
    */
   static initialize() {
@@ -80,7 +78,6 @@ export default class EventScheduler {
   /**
    * Handle world time updates.
    * Called by the updateWorldTime hook.
-   *
    * @param {number} worldTime - The new world time in seconds
    * @param {number} delta - The time delta in seconds
    * @returns {void}
@@ -124,9 +121,8 @@ export default class EventScheduler {
 
   /**
    * Check if any events should trigger based on time change.
-   *
-   * @param {Object} previousDate - Previous date components
-   * @param {Object} currentDate - Current date components
+   * @param {object} previousDate - Previous date components
+   * @param {object} currentDate - Current date components
    * @param {number} delta - Time delta in seconds
    * @private
    */
@@ -150,10 +146,9 @@ export default class EventScheduler {
 
   /**
    * Determine if a note should trigger based on time crossing its start time.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} previousDate - Previous date components
-   * @param {Object} currentDate - Current date components
+   * @param {object} note - The note stub
+   * @param {object} previousDate - Previous date components
+   * @param {object} currentDate - Current date components
    * @returns {boolean} True if the note should trigger
    * @private
    */
@@ -184,9 +179,8 @@ export default class EventScheduler {
 
   /**
    * Compare two date-time objects.
-   *
-   * @param {Object} a - First date-time
-   * @param {Object} b - Second date-time
+   * @param {object} a - First date-time
+   * @param {object} b - Second date-time
    * @returns {number} -1 if a < b, 0 if equal, 1 if a > b
    * @private
    */
@@ -211,9 +205,8 @@ export default class EventScheduler {
 
   /**
    * Trigger an event and show notification.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} currentDate - Current date components
+   * @param {object} note - The note stub
+   * @param {object} currentDate - Current date components
    * @private
    */
   static #triggerEvent(note, currentDate) {
@@ -240,8 +233,7 @@ export default class EventScheduler {
 
   /**
    * Get notification type based on note category.
-   *
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @returns {'info'|'warn'|'error'} Notification type
    * @private
    */
@@ -256,9 +248,8 @@ export default class EventScheduler {
 
   /**
    * Format the event notification message.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} currentDate - Current date components
+   * @param {object} note - The note stub
+   * @param {object} currentDate - Current date components
    * @returns {string} Formatted message
    * @private
    */
@@ -285,9 +276,8 @@ export default class EventScheduler {
 
   /**
    * Execute the macro attached to a note.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} [context={}] - Additional context to pass to the macro
+   * @param {object} note - The note stub
+   * @param {object} [context] - Additional context to pass to the macro
    * @private
    */
   static #executeMacro(note, context = {}) {
@@ -312,9 +302,8 @@ export default class EventScheduler {
   /**
    * Send a chat announcement for an event.
    * Respects gmOnly visibility setting.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} currentDate - Current date components
+   * @param {object} note - The note stub
+   * @param {object} currentDate - Current date components
    * @private
    */
   static async #sendChatAnnouncement(note, currentDate) {
@@ -330,7 +319,7 @@ export default class EventScheduler {
     tempDiv.innerHTML = noteContent;
     let plainContent = tempDiv.textContent || tempDiv.innerText || '';
     plainContent = plainContent.trim();
-    if (plainContent.length > 140) plainContent = plainContent.substring(0, 140).trim() + '…';
+    if (plainContent.length > 140) plainContent = `${plainContent.substring(0, 140).trim()  }…`;
 
     // Build date range string
     let dateRange = this.#formatDateRange(calendar, flagData);
@@ -374,8 +363,8 @@ export default class EventScheduler {
 
   /**
    * Format date range for display.
-   * @param {Object} calendar - The active calendar
-   * @param {Object} flagData - Note flag data
+   * @param {object} calendar - The active calendar
+   * @param {object} flagData - Note flag data
    * @returns {string} Formatted date range
    * @private
    */
@@ -419,8 +408,7 @@ export default class EventScheduler {
   /**
    * Check and regenerate random event occurrences when approaching year end.
    * Regenerates occurrences for next year during the last week of the last month.
-   *
-   * @param {Object} currentDate - Current date components
+   * @param {object} currentDate - Current date components
    * @private
    */
   static async #checkRandomEventRegeneration(currentDate) {
@@ -465,9 +453,8 @@ export default class EventScheduler {
 
   /**
    * Check if the date has changed (day/month/year).
-   *
-   * @param {Object} previous - Previous date
-   * @param {Object} current - Current date
+   * @param {object} previous - Previous date
+   * @param {object} current - Current date
    * @returns {boolean} True if date changed
    * @private
    */
@@ -477,8 +464,7 @@ export default class EventScheduler {
 
   /**
    * Update progress for multi-day events.
-   *
-   * @param {Object} currentDate - Current date components
+   * @param {object} currentDate - Current date components
    * @private
    */
   static #updateMultiDayEventProgress(currentDate) {
@@ -499,10 +485,9 @@ export default class EventScheduler {
 
   /**
    * Calculate progress for a multi-day event.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} currentDate - Current date
-   * @returns {Object|null} Progress info or null if not a multi-day event in progress
+   * @param {object} note - The note stub
+   * @param {object} currentDate - Current date
+   * @returns {object | null} Progress info or null if not a multi-day event in progress
    * @private
    */
   static #getMultiDayProgress(note, currentDate) {
@@ -531,9 +516,8 @@ export default class EventScheduler {
 
   /**
    * Calculate days between two dates.
-   *
-   * @param {Object} start - Start date
-   * @param {Object} end - End date
+   * @param {object} start - Start date
+   * @param {object} end - End date
    * @returns {number} Number of days between
    * @private
    */
@@ -550,9 +534,8 @@ export default class EventScheduler {
 
   /**
    * Show or update a progress notification for a multi-day event.
-   *
-   * @param {Object} note - The note stub
-   * @param {Object} progress - Progress info
+   * @param {object} note - The note stub
+   * @param {object} progress - Progress info
    * @todo localize
    * @private
    */

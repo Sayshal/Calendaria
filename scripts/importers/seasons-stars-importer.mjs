@@ -1,7 +1,6 @@
 /**
  * Seasons & Stars Importer
  * Imports calendar data from the Seasons & Stars module.
- *
  * @module Importers/SeasonsStarsImporter
  * @author Tyler
  */
@@ -545,7 +544,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
 
     // Duration parsing
     if (event.duration) {
-      const match = event.duration.match(/^(\d+)([smhdw])$/);
+      const match = event.duration.match(/^(\d+)([dhmsw])$/);
       if (match) {
         const [, value, unit] = match;
         const durationMap = { s: 1, m: 60, h: 3600, d: 86400, w: 604800 };

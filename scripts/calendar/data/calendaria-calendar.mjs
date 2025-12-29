@@ -1,7 +1,6 @@
 /**
  * Extended calendar data model with Calendaria-specific features.
  * System-agnostic calendar that extends Foundry's base CalendarData.
- *
  * @extends {foundry.data.CalendarData}
  * @module Calendar/Data/CalendariaCalendar
  * @author Tyler
@@ -312,7 +311,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Check if a given year is a leap year.
    * Supports complex leap year patterns (e.g., "400,!100,4" for Gregorian).
-   *
    * @param {number} year - The display year to check (with yearZero applied)
    * @returns {boolean} True if the year is a leap year
    */
@@ -578,7 +576,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * Get the current phase of a moon using FC-style distribution.
    * Primary phases (new/full moon) get floor(cycleLength/8) days each,
    * remaining phases split the leftover days evenly.
-   * @param {number} [moonIndex=0]  Index of the moon (0 for primary moon).
+   * @param {number} [moonIndex]  Index of the moon (0 for primary moon).
    * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
    * @returns {{name: string, subPhaseName: string, icon: string, position: number}|null}
    */
@@ -1139,7 +1137,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {CalendariaCalendar} calendar  The calendar instance.
    * @param {TimeComponents} components    Time components.
    * @param {object} options               Formatting options.
-   * @param {boolean} [options.seconds=false]  Include seconds.
+   * @param {boolean} [options.seconds]  Include seconds.
    * @returns {string} Formatted time string (e.g., "3:45 PM").
    */
   static formatTime12Hour(calendar, components, options = {}) {
@@ -1167,7 +1165,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       template = defaults[format] ?? defaults.long;
     }
 
-    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return template.replace(/{{(\w+)}}/g, (match, key) => {
       return context[key] !== undefined ? context[key] : match;
     });
   }

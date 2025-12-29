@@ -1,7 +1,6 @@
 /**
  * Calendar Loader
  * Loads bundled JSON calendar files and registers them with the CalendarRegistry.
- *
  * @module Calendar/CalendarLoader
  * @author Tyler
  */

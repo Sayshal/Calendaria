@@ -8,6 +8,7 @@ import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { ImporterApp } from './applications/importer-app.mjs';
 import { MacroTriggerConfig } from './applications/settings/macro-trigger-config.mjs';
+import { SettingsPanel } from './applications/settings/settings-panel.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
 import { BUNDLED_CALENDARS } from './calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
@@ -409,6 +410,16 @@ export function registerSettings() {
     }
   });
 
+  /** Settings menu button to open unified settings panel */
+  game.settings.registerMenu(MODULE.ID, 'settingsPanel', {
+    name: 'CALENDARIA.SettingsPanel.Title',
+    hint: 'CALENDARIA.SettingsPanel.MenuHint',
+    label: 'CALENDARIA.SettingsPanel.Title',
+    icon: 'fas fa-cog',
+    type: SettingsPanel,
+    restricted: false
+  });
+
   /** Settings menu button to open calendar editor */
   game.settings.registerMenu(MODULE.ID, 'calendarEditor', {
     name: 'CALENDARIA.Settings.CalendarEditor.Name',
@@ -419,15 +430,6 @@ export function registerSettings() {
     restricted: true
   });
 
-  /** Settings menu button to open TimeKeeper HUD */
-  game.settings.registerMenu(MODULE.ID, 'timeKeeper', {
-    name: 'CALENDARIA.Settings.TimeKeeper.Name',
-    hint: 'CALENDARIA.Settings.TimeKeeper.Hint',
-    label: 'CALENDARIA.Settings.TimeKeeper.Label',
-    icon: 'fas fa-clock',
-    type: TimeKeeperHUD,
-    restricted: true
-  });
 
   /** Settings menu button to open calendar importer */
   game.settings.registerMenu(MODULE.ID, 'importer', {

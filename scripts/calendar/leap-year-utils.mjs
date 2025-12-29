@@ -1,7 +1,6 @@
 /**
  * Leap Year Pattern Utilities
  * Evaluates complex leap year patterns like "400,!100,4" (Gregorian rules).
- *
  * @module Calendar/LeapYearUtils
  * @author Tyler
  */
@@ -26,7 +25,7 @@ export function parseInterval(intervalStr, offset = 0) {
 /**
  * Parse a full pattern string into an array of interval objects.
  * @param {string} pattern - Pattern string like "400,!100,4"
- * @param {number} [offset=0] - Offset for modulo (typically leapStart)
+ * @param {number} [offset] - Offset for modulo (typically leapStart)
  * @returns {Array<{interval: number, subtracts: boolean, offset: number}>}
  */
 export function parsePattern(pattern, offset = 0) {
@@ -42,7 +41,7 @@ export function parsePattern(pattern, offset = 0) {
  * Get vote for a single interval on a given year.
  * @param {{interval: number, subtracts: boolean, offset: number}} intervalObj
  * @param {number} year - Year to check
- * @param {boolean} [yearZeroExists=true] - Whether year 0 exists in the calendar
+ * @param {boolean} [yearZeroExists] - Whether year 0 exists in the calendar
  * @returns {'allow'|'deny'|'abstain'}
  */
 export function voteOnYear(intervalObj, year, yearZeroExists = true) {
@@ -56,7 +55,7 @@ export function voteOnYear(intervalObj, year, yearZeroExists = true) {
  * Determine if a year is a leap year using interval pattern voting.
  * @param {Array<{interval: number, subtracts: boolean, offset: number}>} intervals
  * @param {number} year - Year to check
- * @param {boolean} [yearZeroExists=true] - Whether year 0 exists
+ * @param {boolean} [yearZeroExists] - Whether year 0 exists
  * @returns {boolean}
  */
 export function intersectsYear(intervals, year, yearZeroExists = true) {
@@ -73,12 +72,12 @@ export function intersectsYear(intervals, year, yearZeroExists = true) {
 /**
  * Check if a year is a leap year based on leap year configuration.
  * @param {object} leapYearConfig - Leap year configuration object
- * @param {string} [leapYearConfig.rule='none'] - Rule type
+ * @param {string} [leapYearConfig.rule] - Rule type
  * @param {number} [leapYearConfig.interval] - Simple interval (for 'simple' rule)
- * @param {number} [leapYearConfig.start=0] - First leap year (offset)
+ * @param {number} [leapYearConfig.start] - First leap year (offset)
  * @param {string} [leapYearConfig.pattern] - Custom pattern (for 'custom' rule)
  * @param {number} year - Year to check
- * @param {boolean} [yearZeroExists=true] - Whether year 0 exists
+ * @param {boolean} [yearZeroExists] - Whether year 0 exists
  * @returns {boolean}
  */
 export function isLeapYear(leapYearConfig, year, yearZeroExists = true) {

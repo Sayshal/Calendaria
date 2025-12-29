@@ -2,7 +2,6 @@
  * Weather Manager - Core state management and API for the weather system.
  * Handles current weather state, settings integration, and procedural generation.
  * Reads weather configuration from the active calendar's climate zones.
- *
  * @module Weather/WeatherManager
  * @author Tyler
  */
@@ -73,9 +72,9 @@ class WeatherManager {
   /**
    * Set the current weather by preset ID.
    * @param {string} presetId - Weather preset ID
-   * @param {object} [options={}] - Additional options
+   * @param {object} [options] - Additional options
    * @param {number} [options.temperature] - Optional temperature override
-   * @param {boolean} [options.broadcast=true] - Whether to broadcast to other clients
+   * @param {boolean} [options.broadcast] - Whether to broadcast to other clients
    * @returns {Promise<object>} The set weather
    */
   async setWeather(presetId, options = {}) {
@@ -117,11 +116,11 @@ class WeatherManager {
    * Set custom weather with arbitrary values.
    * @param {object} weatherData - Weather data
    * @param {string} weatherData.label - Display label
-   * @param {string} [weatherData.icon='fa-question'] - Icon class
-   * @param {string} [weatherData.color='#888888'] - Display color
+   * @param {string} [weatherData.icon] - Icon class
+   * @param {string} [weatherData.color] - Display color
    * @param {string} [weatherData.description] - Description
    * @param {number} [weatherData.temperature] - Temperature
-   * @param {boolean} [broadcast=true] - Whether to broadcast
+   * @param {boolean} [broadcast] - Whether to broadcast
    * @returns {Promise<object>} The set weather
    */
   async setCustomWeather(weatherData, broadcast = true) {
@@ -149,7 +148,7 @@ class WeatherManager {
 
   /**
    * Clear the current weather.
-   * @param {boolean} [broadcast=true] - Whether to broadcast
+   * @param {boolean} [broadcast] - Whether to broadcast
    * @returns {Promise<void>}
    */
   async clearWeather(broadcast = true) {
@@ -197,10 +196,10 @@ class WeatherManager {
 
   /**
    * Generate and set weather based on active calendar's climate zone.
-   * @param {object} [options={}] - Generation options
+   * @param {object} [options] - Generation options
    * @param {string} [options.zoneId] - Zone ID override (uses active if not provided)
    * @param {string} [options.season] - Season override (uses current if not provided)
-   * @param {boolean} [options.broadcast=true] - Whether to broadcast
+   * @param {boolean} [options.broadcast] - Whether to broadcast
    * @returns {Promise<object>} Generated weather
    */
   async generateAndSetWeather(options = {}) {
@@ -243,8 +242,8 @@ class WeatherManager {
 
   /**
    * Generate a weather forecast using active calendar's zone config.
-   * @param {object} [options={}] - Forecast options
-   * @param {number} [options.days=7] - Number of days
+   * @param {object} [options] - Forecast options
+   * @param {number} [options.days] - Number of days
    * @param {string} [options.zoneId] - Zone ID override
    * @returns {object[]} Forecast array
    */
@@ -411,8 +410,8 @@ class WeatherManager {
    * @param {object} preset - Preset to add
    * @param {string} preset.id - Unique ID
    * @param {string} preset.label - Display label
-   * @param {string} [preset.icon='fa-question'] - Icon class
-   * @param {string} [preset.color='#888888'] - Display color
+   * @param {string} [preset.icon] - Icon class
+   * @param {string} [preset.color] - Display color
    * @param {string} [preset.description] - Description
    * @returns {Promise<object>} The added preset
    */

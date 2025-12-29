@@ -2,7 +2,6 @@
  * Rest Time Integration
  * Hooks into dnd5e rest system to advance world time based on rest duration.
  * @todo Make this system agnostic-lite: Add hooks for as many systems as we can that support a short/long rest-type integration.
- *
  * @module Integrations/RestTime
  * @author Tyler
  */
@@ -17,7 +16,6 @@ const NEW_DAY_HOUR = 8;
 
 /**
  * Register rest time integration hooks.
- *
  * @returns {void}
  */
 export function registerRestTimeHooks() {
@@ -36,7 +34,6 @@ export function registerRestTimeHooks() {
 /**
  * Handle pre-rest hooks to enable time advancement.
  * Fires before dialog, just enables the advanceTime flag.
- *
  * @param {Actor5e} actor - The actor taking the rest
  * @param {RestConfiguration} config - Rest configuration
  * @returns {void}
@@ -57,7 +54,6 @@ function onPreRest(actor, config) {
  * - Normal: 8 hours, newDay checkbox available
  * - Gritty: 7 days, always advances to 8 AM on final day (no newDay checkbox)
  * - Epic: 1 hour, newDay checkbox available
- *
  * @param {Actor5e} actor - The actor taking the rest
  * @param {RestConfiguration} config - Rest configuration (with user's dialog choices)
  * @returns {void}

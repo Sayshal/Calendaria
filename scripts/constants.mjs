@@ -4,7 +4,6 @@
  * This module contains all central configuration constants including module identification,
  * settings keys, default configurations, and enums. It serves as the authoritative source
  * for all module-wide constants and default values.
- *
  * @module Constants
  * @author Tyler
  */
@@ -12,8 +11,7 @@
 /**
  * Module identification and configuration constants.
  * Contains all core module settings, identifiers, and default configurations.
- *
- * @typedef {Object} ModuleConfig
+ * @typedef {object} ModuleConfig
  * @property {string} ID - The module identifier for Foundry VTT
  * @property {string} TITLE - Human-readable module title
  * @property {number} LOG_LEVEL - Current logging level (0=off, 1=error, 2=warn, 3=debug)
@@ -22,7 +20,6 @@
 /**
  * Core module identification and configuration constants.
  * Contains all module-wide settings, identifiers, and default configurations.
- *
  * @type {ModuleConfig}
  */
 export const MODULE = {
@@ -39,8 +36,7 @@ export const MODULE = {
 /**
  * Settings keys used by the module for Foundry VTT game settings.
  * Each key corresponds to a registered setting that can be configured by users.
- *
- * @typedef {Object} SettingsKeys
+ * @typedef {object} SettingsKeys
  * @property {string} LOGGING_LEVEL - Module logging level for debugging
  * @property {string} CALENDAR_POSITION - Saved position of the draggable calendar
  * @property {string} DARKNESS_SYNC - Default setting for syncing scene darkness with sun position
@@ -51,7 +47,6 @@ export const MODULE = {
 /**
  * Settings keys used by the module for Foundry VTT game settings.
  * Each key corresponds to a registered setting that can be configured by users.
- *
  * @type {SettingsKeys}
  */
 export const SETTINGS = {
@@ -170,14 +165,12 @@ export const SETTINGS = {
 
 /**
  * Scene flags used by the module for scene-specific configuration.
- *
- * @typedef {Object} SceneFlags
+ * @typedef {object} SceneFlags
  * @property {string} DARKNESS_SYNC - Override for darkness sync behavior on this scene
  */
 
 /**
  * Scene flags used by the module for scene-specific configuration.
- *
  * @type {SceneFlags}
  */
 export const SCENE_FLAGS = {
@@ -187,16 +180,14 @@ export const SCENE_FLAGS = {
 
 /**
  * Template file paths used by the module for rendering UI components.
- *
- * @typedef {Object} TemplateKeys
- * @property {Object} SETTINGS - Settings-related templates
+ * @typedef {object} TemplateKeys
+ * @property {object} SETTINGS - Settings-related templates
  * @property {string} SETTINGS.RESET_POSITION - Reset position dialog template
  * @property {string} TIME_DIAL - Time rotation dial template
  */
 
 /**
  * Template file paths used by the module for rendering UI components.
- *
  * @type {TemplateKeys}
  */
 export const TEMPLATES = {
@@ -312,7 +303,7 @@ export const TEMPLATES = {
 
 /**
  * Asset paths used by the module.
- * @type {Object}
+ * @type {object}
  */
 export const ASSETS = {
   /** @type {string} Base path for moon phase icons */
@@ -369,7 +360,6 @@ export const DEFAULT_MOON_PHASES = [
  * - `calendaria.noteUpdated` - Fired when a calendar note is updated
  * - `calendaria.noteDeleted` - Fired when a calendar note is deleted
  * - `calendaria.eventTriggered` - Fired when an event's start time is reached
- *
  * @example
  * // Listen for any date/time change
  * Hooks.on('calendaria.dateTimeChange', (data) => {
@@ -530,15 +520,13 @@ export const HOOKS = {
 
 /**
  * Journal page type identifiers used by the module.
- *
- * @typedef {Object} JournalTypes
+ * @typedef {object} JournalTypes
  * @property {string} CALENDAR_NOTE - Calendar note journal page type
  */
 
 /**
  * Journal page type identifiers.
  * These are used for registering and identifying custom journal page types.
- *
  * @type {JournalTypes}
  */
 export const JOURNAL_TYPES = {
@@ -548,15 +536,13 @@ export const JOURNAL_TYPES = {
 
 /**
  * Sheet registration identifiers used by the module.
- *
- * @typedef {Object} SheetIds
+ * @typedef {object} SheetIds
  * @property {string} CALENDARIA - Main sheet registration ID
  */
 
 /**
  * Sheet registration identifiers.
  * These are used when registering custom document sheets with Foundry.
- *
  * @type {SheetIds}
  */
 export const SHEET_IDS = {
@@ -566,8 +552,7 @@ export const SHEET_IDS = {
 
 /**
  * Socket message types for multiplayer synchronization.
- *
- * @typedef {Object} SocketTypes
+ * @typedef {object} SocketTypes
  * @property {string} CLOCK_UPDATE - Clock/time update message
  * @property {string} DATE_CHANGE - Date change message
  * @property {string} NOTE_UPDATE - Note update message
@@ -577,7 +562,6 @@ export const SHEET_IDS = {
 /**
  * Socket message types for multiplayer synchronization.
  * These define the different types of messages sent over the socket for syncing.
- *
  * @type {SocketTypes}
  */
 export const SOCKET_TYPES = {

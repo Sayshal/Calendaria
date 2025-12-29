@@ -1,7 +1,6 @@
 /**
  * Recurring Event Logic
  * Handles pattern matching for repeating calendar notes.
- *
  * @module Notes/Utils/Recurrence
  * @author Tyler
  */

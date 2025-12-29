@@ -1,59 +1,78 @@
-<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+<section
+    class="tab {{tab.cssClass}}"
+    data-tab="{{tab.id}}"
+    data-group="{{tab.group}}"
+>
 
-  {{!-- Theme Colors --}}
-  <fieldset class="theme-colors-fieldset">
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Theme"}}</legend>
+    {{!-- Theme Colors --}}
+    <fieldset class="theme-colors-fieldset">
+        <legend>{{localize "CALENDARIA.SettingsPanel.Section.Theme"}}</legend>
 
-    {{#if hasCustomTheme}}
-      <p class="hint section-hint success">
-        <i class="fas fa-check-circle"></i>
-        {{localize "CALENDARIA.SettingsPanel.Theme.CustomActive"}}
-      </p>
-    {{else}}
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Theme.UsingDefault"}}</p>
-    {{/if}}
+        {{#if hasCustomTheme}}
+        <p class="hint section-hint success">
+            <i class="fas fa-check-circle"></i>
+            {{localize "CALENDARIA.SettingsPanel.Theme.CustomActive"}}
+        </p>
+        {{else}}
+        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Theme.UsingDefault"}}</p>
+        {{/if}}
 
-    <div class="color-categories-grid">
-      {{#each themeCategories}}
-        <div class="color-category">
-          <h4>{{localize this.label}}</h4>
-          {{#each this.colors}}
-            <div class="form-group color-row">
-              <label>{{localize this.label}}</label>
-              <div class="form-fields color-fields">
-                <input type="color" name="colors.{{this.key}}" value="{{this.value}}" data-key="{{this.key}}">
-                <input type="text" class="color-hex" value="{{this.value}}" readonly>
-                {{#if this.isCustom}}
-                  <button type="button" class="reset-color" data-action="resetColor" data-key="{{this.key}}"
-                    data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}">
-                    <i class="fas fa-undo"></i>
-                  </button>
-                {{else}}
-                  <span class="default-indicator" data-tooltip="{{localize 'CALENDARIA.ThemeEditor.UsingDefault'}}">
-                    <i class="fas fa-check"></i>
-                  </span>
-                {{/if}}
-              </div>
+        <div class="color-categories-grid">
+            {{#each themeCategories}}
+            <div class="color-category">
+                <h4>{{localize this.label}}</h4>
+                {{#each this.colors}}
+                <div class="form-group color-row">
+                    <label>{{localize this.label}}</label>
+                    <div class="form-fields color-fields">
+                        <input
+                            type="color"
+                            name="colors.{{this.key}}"
+                            value="{{this.value}}"
+                            data-key="{{this.key}}"
+                        >
+                        <input
+                            type="text"
+                            class="color-hex"
+                            value="{{this.value}}"
+                            readonly
+                        >
+                        {{#if this.isCustom}}
+                        <button
+                            type="button"
+                            class="reset-color"
+                            data-action="resetColor"
+                            data-key="{{this.key}}"
+                            data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}"
+                        >
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        {{else}}
+                        <span class="default-indicator" data-tooltip="{{localize 'CALENDARIA.ThemeEditor.UsingDefault'}}">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
             </div>
-          {{/each}}
+            {{/each}}
         </div>
-      {{/each}}
-    </div>
 
-    <div class="form-group stacked button-row theme-actions">
-      <button type="button" data-action="resetAllColors">
-        <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.ThemeEditor.ResetAll"}}
-      </button>
-      <button type="button" data-action="exportTheme">
-        <i class="fas fa-download"></i>
-        {{localize "CALENDARIA.ThemeEditor.Export"}}
-      </button>
-      <button type="button" data-action="importTheme">
-        <i class="fas fa-upload"></i>
-        {{localize "CALENDARIA.Importer.Import"}}
-      </button>
-    </div>
-  </fieldset>
+        <div class="form-group stacked button-row theme-actions">
+            <button type="button" data-action="resetAllColors">
+                <i class="fas fa-undo"></i>
+                {{localize "CALENDARIA.ThemeEditor.ResetAll"}}
+            </button>
+            <button type="button" data-action="exportTheme">
+                <i class="fas fa-download"></i>
+                {{localize "CALENDARIA.ThemeEditor.Export"}}
+            </button>
+            <button type="button" data-action="importTheme">
+                <i class="fas fa-upload"></i>
+                {{localize "CALENDARIA.Importer.Import"}}
+            </button>
+        </div>
+    </fieldset>
 
 </section>

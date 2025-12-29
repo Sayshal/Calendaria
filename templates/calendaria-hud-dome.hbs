@@ -1,21 +1,26 @@
 {{!--
-  Calendaria HUD Dome Template
-  Sundial dome with sky, stars, and celestial bodies.
+Calendaria HUD Dome Template
+Sundial dome with sky, stars, and celestial bodies.
 --}}
-<div class="calendaria-hud-dome" role="button" tabindex="0" data-action="openTimeDial"
-  data-tooltip="{{localize 'CALENDARIA.HUD.ClickToSetTime'}}">
-  {{!-- Sky gradient - color set dynamically --}}
-  <div class="calendaria-hud-sky"></div>
+<div
+    class="calendaria-hud-dome"
+    role="button"
+    tabindex="0"
+    data-action="openTimeDial"
+    data-tooltip="{{localize 'CALENDARIA.HUD.ClickToSetTime'}}"
+>
+    {{!-- Sky gradient - color set dynamically --}}
+    <div class="calendaria-hud-sky"></div>
 
-  {{!-- Stars container - stars generated via CSS pseudo-elements --}}
-  <div class="calendaria-hud-stars"></div>
+    {{!-- Stars container - stars generated via CSS pseudo-elements --}}
+    <div class="calendaria-hud-stars"></div>
 
-  {{!-- Clouds container - animated clouds for daytime --}}
-  <div class="calendaria-hud-clouds"></div>
+    {{!-- Clouds container - animated clouds for daytime --}}
+    <div class="calendaria-hud-clouds"></div>
 
-  {{!-- Celestial track - sun/moon travel along this arc --}}
-  <div class="calendaria-hud-track">
-    <div class="calendaria-hud-body calendaria-hud-sun"></div>
-    <div class="calendaria-hud-body calendaria-hud-moon"></div>
-  </div>
+    {{!-- Celestial track - sun/moon travel along this arc --}}
+    <div class="calendaria-hud-track">
+        <div class="calendaria-hud-body calendaria-hud-sun"></div>
+        <div class="calendaria-hud-body calendaria-hud-moon"></div>
+    </div>
 </div>

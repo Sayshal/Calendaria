@@ -2,7 +2,6 @@
  * Calendar Application
  * Standalone application for displaying the calendar UI.
  * This is NOT a sheet - it's an independent application.
- *
  * @module Applications/CalendarApplication
  * @author Tyler
  */
@@ -1242,6 +1241,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   /**
    * Toggle between full and compact calendar views.
    * Closes this window and opens the compact calendar.
+   * @param event
+   * @param target
    */
   static async _onToggleCompact(event, target) {
     // Close this full calendar
@@ -1256,6 +1257,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Cycle through weather presets or generate new weather.
+   * @param event
+   * @param target
    */
   static async _onOpenWeatherPicker(event, target) {
     if (!game.user.isGM) return;
@@ -1282,6 +1285,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Toggle the search input visibility.
+   * @param event
+   * @param target
    */
   static async _onToggleSearch(event, target) {
     this._searchOpen = !this._searchOpen;
@@ -1294,6 +1299,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Close the search panel.
+   * @param event
+   * @param target
    */
   static async _onCloseSearch(event, target) {
     this._searchTerm = '';
@@ -1304,6 +1311,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Open a search result (note).
+   * @param event
+   * @param target
    */
   static async _onOpenSearchResult(event, target) {
     const id = target.dataset.id;

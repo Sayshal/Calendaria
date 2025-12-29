@@ -1,7 +1,6 @@
 /**
  * Simple Calendar Importer
  * Imports calendar data from the Simple Calendar module.
- *
  * @module Importers/SimpleCalendarImporter
  * @author Tyler
  */
@@ -71,7 +70,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
   /**
    * Transform Simple Calendar data into CalendariaCalendar format.
    * @param {object} data - Raw SC export data
-   * @param {number} [calendarIndex=0] - Index of calendar to import (if multiple)
+   * @param {number} [calendarIndex] - Index of calendar to import (if multiple)
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data, calendarIndex = 0) {

@@ -23,9 +23,9 @@ export default class SearchManager {
   /**
    * Search notes by name and optionally content.
    * @param {string} term - Search term
-   * @param {object} [options={}] - Search options
-   * @param {boolean} [options.searchContent=true] - Search note content
-   * @param {number} [options.limit=50] - Max results
+   * @param {object} [options] - Search options
+   * @param {boolean} [options.searchContent] - Search note content
+   * @param {number} [options.limit] - Max results
    * @returns {SearchResult[]} Matching notes
    */
   static search(term, options = {}) {
@@ -140,14 +140,14 @@ export default class SearchManager {
     const searchText = text.toLowerCase();
     const index = searchText.indexOf(term);
 
-    if (index === -1) return text.slice(0, 60) + '...';
+    if (index === -1) return `${text.slice(0, 60)  }...`;
 
     const start = Math.max(0, index - 30);
     const end = Math.min(text.length, index + term.length + 30);
 
     let snippet = text.slice(start, end);
-    if (start > 0) snippet = '...' + snippet;
-    if (end < text.length) snippet = snippet + '...';
+    if (start > 0) snippet = `...${  snippet}`;
+    if (end < text.length) snippet = `${snippet  }...`;
 
     return snippet;
   }

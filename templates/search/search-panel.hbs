@@ -1,26 +1,35 @@
 <div class="calendaria-search-panel {{#if searchOpen}}open{{/if}}">
-  <div class="search-header">
-    <h3>{{localize "CALENDARIA.Search.Results"}}</h3>
-    <button type="button" class="close-search" data-action="closeSearch">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
+    <div class="search-header">
+        <h3>{{localize "CALENDARIA.Search.Results"}}</h3>
+        <button
+            type="button"
+            class="close-search"
+            data-action="closeSearch"
+        >
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
 
-  <div class="search-results">
-    {{#if searchResults.length}}
-      <ul class="result-list">
-        {{#each searchResults}}
-          <li class="result-item" data-action="openSearchResult" data-id="{{id}}" data-journal-id="{{data.journalId}}">
-            <span class="result-name">{{name}}</span>
-            {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-          </li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <div class="no-results">
-        <i class="fas fa-search"></i>
-        <p>{{localize "CALENDARIA.Search.NoResults"}}</p>
-      </div>
-    {{/if}}
-  </div>
+    <div class="search-results">
+        {{#if searchResults.length}}
+        <ul class="result-list">
+            {{#each searchResults}}
+            <li
+                class="result-item"
+                data-action="openSearchResult"
+                data-id="{{id}}"
+                data-journal-id="{{data.journalId}}"
+            >
+                <span class="result-name">{{name}}</span>
+                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+            </li>
+            {{/each}}
+        </ul>
+        {{else}}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <p>{{localize "CALENDARIA.Search.NoResults"}}</p>
+        </div>
+        {{/if}}
+    </div>
 </div>

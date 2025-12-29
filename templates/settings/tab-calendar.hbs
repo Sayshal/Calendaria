@@ -1,43 +1,51 @@
-<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+<section
+    class="tab {{tab.cssClass}}"
+    data-tab="{{tab.id}}"
+    data-group="{{tab.group}}"
+>
 
-  {{!-- Active Calendar --}}
-  {{#if isGM}}
+    {{!-- Active Calendar --}}
+    {{#if isGM}}
     <fieldset>
-      <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
+        <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
 
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
-        <div class="form-fields">
-          <select name="activeCalendar">
-            {{#each calendarOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
-                {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
-              </option>
-            {{/each}}
-          </select>
+        <div class="form-group">
+            <label>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
+            <div class="form-fields">
+                <select name="activeCalendar">
+                    {{#each calendarOptions}}
+                    <option
+                        value="{{this.value}}"
+                        {{#if
+                        this.selected}}selected{{
+                    /if}}>
+                        {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+            <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
-      </div>
 
-      <div class="form-group stacked button-row">
-        <button type="button" data-action="openCalendarEditor">
-          <i class="fas fa-calendar-plus"></i>
-          {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
-        </button>
-        <button type="button" data-action="openImporter">
-          <i class="fas fa-file-import"></i>
-          {{localize "CALENDARIA.Settings.Importer.Label"}}
-        </button>
-      </div>
+        <div class="form-group stacked button-row">
+            <button type="button" data-action="openCalendarEditor">
+                <i class="fas fa-calendar-plus"></i>
+                {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
+            </button>
+            <button type="button" data-action="openImporter">
+                <i class="fas fa-file-import"></i>
+                {{localize "CALENDARIA.Settings.Importer.Label"}}
+            </button>
+        </div>
     </fieldset>
-  {{/if}}
+    {{/if}}
 
-  {{!-- Player Message --}}
-  {{#unless isGM}}
+    {{!-- Player Message --}}
+    {{#unless isGM}}
     <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.CalendarTab.PlayerMessage"}}</p>
+        <i class="fas fa-info-circle"></i>
+        <p>{{localize "CALENDARIA.SettingsPanel.CalendarTab.PlayerMessage"}}</p>
     </div>
-  {{/unless}}
+    {{/unless}}
 
 </section>

@@ -14,7 +14,7 @@ const calendariaLogHistory = [];
 
 /**
  * Simple logging function with module ID prefix and colored styling.
- * @param {Number} level - Log level (1=error, 2=warning, 3=verbose)
+ * @param {number} level - Log level (1=error, 2=warning, 3=verbose)
  * @param {...*} args - Content to log to console (any number of arguments)
  */
 export function log(level, ...args) {

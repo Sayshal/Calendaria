@@ -1,7 +1,6 @@
 /**
  * Shared utilities for calendar view applications.
  * Provides common methods used by CalendarApplication and CompactCalendar.
- *
  * @module Applications/CalendarViewUtils
  * @author Tyler
  */

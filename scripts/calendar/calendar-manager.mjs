@@ -2,7 +2,6 @@
  * Calendar Manager
  * Main entry point for calendar system management.
  * Handles calendar initialization, switching, and persistence.
- *
  * @module Calendar/CalendarManager
  * @author Tyler
  */
@@ -173,7 +172,6 @@ export default class CalendarManager {
   /**
    * Switch to a different calendar.
    * Uses game.time.initializeCalendar() to switch without reload.
-   *
    * @param {string} id  Calendar ID to switch to
    * @returns {Promise<boolean>}  True if calendar was switched
    */
@@ -242,7 +240,6 @@ export default class CalendarManager {
   /**
    * Handle a remote calendar switch from another client.
    * Updates the local registry and reinitializes the calendar.
-   *
    * @param {string} id  Calendar ID to switch to
    */
   static handleRemoteSwitch(id) {
@@ -457,7 +454,6 @@ export default class CalendarManager {
   /**
    * Create a new custom calendar from a definition.
    * Saves to the CUSTOM_CALENDARS setting and registers in the system.
-   *
    * @param {string} id - Unique calendar ID (will be prefixed with 'custom-' if not already)
    * @param {object} definition - Calendar definition object
    * @returns {Promise<CalendariaCalendar|null>} The created calendar or null on error
@@ -511,7 +507,6 @@ export default class CalendarManager {
 
   /**
    * Update an existing custom calendar.
-   *
    * @param {string} id - Calendar ID to update
    * @param {object} changes - Partial definition with changes to apply
    * @returns {Promise<CalendariaCalendar|null>} The updated calendar or null on error
@@ -567,7 +562,6 @@ export default class CalendarManager {
 
   /**
    * Delete a custom calendar.
-   *
    * @param {string} id - Calendar ID to delete
    * @returns {Promise<boolean>} True if deleted successfully
    */
@@ -610,7 +604,6 @@ export default class CalendarManager {
   /**
    * Get available calendar templates for "Start from..." feature.
    * Returns all registered calendars that can be used as templates.
-   *
    * @returns {Array<{id: string, name: string, description: string}>}
    */
   static getCalendarTemplates() {
@@ -626,7 +619,6 @@ export default class CalendarManager {
 
   /**
    * Duplicate an existing calendar as a starting point for a new custom calendar.
-   *
    * @param {string} sourceId - ID of calendar to duplicate
    * @param {string} newId - ID for the new calendar
    * @param {string} [newName] - Name for the new calendar
@@ -654,7 +646,6 @@ export default class CalendarManager {
 
   /**
    * Check if a calendar is a custom calendar (user-created).
-   *
    * @param {string} id - Calendar ID to check
    * @returns {boolean} True if the calendar is custom
    */
@@ -669,7 +660,6 @@ export default class CalendarManager {
 
   /**
    * Check if a calendar is a bundled (built-in) calendar.
-   *
    * @param {string} id - Calendar ID to check
    * @returns {boolean} True if the calendar is a bundled calendar
    */
@@ -679,7 +669,6 @@ export default class CalendarManager {
 
   /**
    * Check if a bundled calendar has a user override.
-   *
    * @param {string} id - Calendar ID to check
    * @returns {boolean} True if the calendar has an override
    */
@@ -690,7 +679,6 @@ export default class CalendarManager {
 
   /**
    * Save a user override for a bundled calendar.
-   *
    * @param {string} id - Calendar ID to override
    * @param {object} data - Full calendar data to save as override
    * @returns {Promise<CalendariaCalendar|null>} The updated calendar or null on error
@@ -738,7 +726,6 @@ export default class CalendarManager {
 
   /**
    * Reset a bundled calendar to its original state by removing the override.
-   *
    * @param {string} id - Calendar ID to reset
    * @returns {Promise<boolean>} True if reset successfully
    */

@@ -1,7 +1,6 @@
 /**
  * Importer Application
  * AppV2 dialog for importing calendars from external sources.
- *
  * @module Applications/ImporterApp
  * @author Tyler
  */
@@ -222,7 +221,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!name) return `imported-${Date.now()}`;
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/[^\da-z]+/g, '-')
       .replace(/^-|-$/g, '')
       .substring(0, 32);
   }
@@ -395,7 +394,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     // Parse note type selections from form data
     const noteTypes = {};
     for (const [key, value] of Object.entries(data)) {
-      const match = key.match(/^noteType\[(\d+)\]$/);
+      const match = key.match(/^noteType\[(\d+)]$/);
       if (match) noteTypes[parseInt(match[1])] = value;
     }
 

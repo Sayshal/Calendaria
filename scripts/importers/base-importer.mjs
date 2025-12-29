@@ -2,7 +2,6 @@
  * Base Importer Class
  * Abstract foundation for all calendar importers.
  * Subclasses must implement transform() at minimum.
- *
  * @module Importers/BaseImporter
  * @author Tyler
  */
@@ -295,7 +294,7 @@ export default class BaseImporter {
     if (!name) return `imported-${Date.now()}`;
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/[^\da-z]+/g, '-')
       .replace(/^-|-$/g, '')
       .substring(0, 32);
   }

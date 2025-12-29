@@ -1,7 +1,6 @@
 /**
  * Importer Registry
  * Central registry for all calendar importers.
- *
  * @module Importers
  * @author Tyler
  */

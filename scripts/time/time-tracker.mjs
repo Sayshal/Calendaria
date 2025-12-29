@@ -3,7 +3,6 @@
  * Monitors world time changes and fires hooks when specific time thresholds are crossed.
  * Fires hooks for: dateTimeChange, dayChange, monthChange, yearChange, seasonChange,
  * and time-of-day thresholds (sunrise, sunset, midnight, midday).
- *
  * @module Time/TimeTracker
  * @author Tyler
  */
@@ -21,7 +20,7 @@ export default class TimeTracker {
   /** @type {number|null} Last known world time in seconds */
   static #lastWorldTime = null;
 
-  /** @type {Object|null} Last checked time components */
+  /** @type {object | null} Last checked time components */
   static #lastComponents = null;
 
   /** @type {number|null} Last known season index */
@@ -52,7 +51,6 @@ export default class TimeTracker {
    * Handle world time updates.
    * Called by the updateWorldTime hook.
    * Fires dateTimeChange hook and checks for period/threshold crossings.
-   *
    * @param {number} worldTime - The new world time in seconds
    * @param {number} delta - The time delta in seconds
    */
@@ -96,11 +94,10 @@ export default class TimeTracker {
   /**
    * Fire the dateTimeChange hook with comprehensive time change data.
    * This is the primary hook other modules should listen to for time changes.
-   *
-   * @param {Object} previousComponents - Previous time components
-   * @param {Object} currentComponents - Current time components
+   * @param {object} previousComponents - Previous time components
+   * @param {object} currentComponents - Current time components
    * @param {number} delta - Time delta in seconds
-   * @param {Object} calendar - Active calendar
+   * @param {object} calendar - Active calendar
    * @private
    */
   static #fireDateTimeChangeHook(previousComponents, currentComponents, delta, calendar) {
@@ -119,10 +116,9 @@ export default class TimeTracker {
 
   /**
    * Check for and fire period change hooks (day, month, year, season).
-   *
-   * @param {Object} previousComponents - Previous time components
-   * @param {Object} currentComponents - Current time components
-   * @param {Object} calendar - Active calendar
+   * @param {object} previousComponents - Previous time components
+   * @param {object} currentComponents - Current time components
+   * @param {object} calendar - Active calendar
    * @private
    */
   static #checkPeriodChanges(previousComponents, currentComponents, calendar) {
@@ -171,10 +167,9 @@ export default class TimeTracker {
 
   /**
    * Check if any thresholds were crossed between two times.
-   *
    * @param {number} previousTime - Previous world time in seconds
    * @param {number} currentTime - Current world time in seconds
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @private
    */
   static #checkThresholds(previousTime, currentTime, calendar) {
@@ -210,10 +205,9 @@ export default class TimeTracker {
 
   /**
    * Get all thresholds crossed between two time points.
-   *
-   * @param {Object} startComponents - Starting time components
-   * @param {Object} endComponents - Ending time components
-   * @param {Object} calendar - The active calendar
+   * @param {object} startComponents - Starting time components
+   * @param {object} endComponents - Ending time components
+   * @param {object} calendar - The active calendar
    * @returns {Array} Array of crossed thresholds with {name, data}
    * @private
    */
@@ -269,10 +263,9 @@ export default class TimeTracker {
 
   /**
    * Calculate the number of day boundaries crossed between two time points.
-   *
-   * @param {Object} startComponents - Starting time components
-   * @param {Object} endComponents - Ending time components
-   * @param {Object} calendar - The active calendar
+   * @param {object} startComponents - Starting time components
+   * @param {object} endComponents - Ending time components
+   * @param {object} calendar - The active calendar
    * @returns {number} Number of day boundaries crossed
    * @private
    */
@@ -290,8 +283,7 @@ export default class TimeTracker {
 
   /**
    * Get total days in a year for the calendar.
-   *
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @returns {number} Total days in year
    * @private
    */
@@ -304,10 +296,9 @@ export default class TimeTracker {
 
   /**
    * Get threshold times for a specific day.
-   *
-   * @param {Object} components - Time components for the day
-   * @param {Object} calendar - The active calendar
-   * @returns {Object} Object with threshold names and their times in hours
+   * @param {object} components - Time components for the day
+   * @param {object} calendar - The active calendar
+   * @returns {object} Object with threshold names and their times in hours
    * @private
    */
   static #getThresholdsForDay(components, calendar) {
@@ -318,10 +309,9 @@ export default class TimeTracker {
 
   /**
    * Create threshold event data.
-   *
-   * @param {Object} components - Time components
-   * @param {Object} calendar - The active calendar
-   * @returns {Object} Threshold event data
+   * @param {object} components - Time components
+   * @param {object} calendar - The active calendar
+   * @returns {object} Threshold event data
    * @private
    */
   static #createThresholdData(components, calendar) {
@@ -330,9 +320,8 @@ export default class TimeTracker {
 
   /**
    * Fire a threshold hook.
-   *
    * @param {string} thresholdName - Name of the threshold (midnight, sunrise, midday, sunset)
-   * @param {Object} data - Event data to pass to the hook
+   * @param {object} data - Event data to pass to the hook
    * @private
    */
   static #fireThresholdHook(thresholdName, data) {
@@ -351,9 +340,8 @@ export default class TimeTracker {
 
   /**
    * Get time components for a specific world time.
-   *
    * @param {number} worldTime - World time in seconds
-   * @returns {Object} Time components
+   * @returns {object} Time components
    * @private
    */
   static #getComponentsForTime(worldTime) {
@@ -364,9 +352,8 @@ export default class TimeTracker {
 
   /**
    * Calculate day of year from components.
-   *
-   * @param {Object} components - Time components
-   * @param {Object} calendar - The active calendar
+   * @param {object} components - Time components
+   * @param {object} calendar - The active calendar
    * @returns {number} Day of year (0-based)
    * @private
    */
@@ -388,7 +375,6 @@ export default class TimeTracker {
 
   /**
    * Get the current moon phase indices for all moons.
-   *
    * @returns {Map<number, number>|null} Map of moonIndex -> phaseIndex, or null if no calendar
    * @private
    */
@@ -407,8 +393,7 @@ export default class TimeTracker {
 
   /**
    * Check for moon phase changes and fire hooks/macros.
-   *
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @private
    */
   static #checkMoonPhaseChanges(calendar) {
@@ -455,8 +440,7 @@ export default class TimeTracker {
 
   /**
    * Get the macro trigger configuration.
-   *
-   * @returns {Object} The macro trigger config
+   * @returns {object} The macro trigger config
    * @private
    */
   static #getMacroConfig() {
@@ -465,9 +449,8 @@ export default class TimeTracker {
 
   /**
    * Execute a global trigger macro if configured.
-   *
    * @param {string} triggerKey - The trigger key (dawn, dusk, midday, midnight, newDay, seasonChange)
-   * @param {Object} context - Context data to pass to the macro
+   * @param {object} context - Context data to pass to the macro
    * @private
    */
   static #executeGlobalTrigger(triggerKey, context) {
@@ -483,9 +466,8 @@ export default class TimeTracker {
 
   /**
    * Execute the appropriate macro for a threshold crossing.
-   *
    * @param {string} thresholdName - Name of the threshold (midnight, sunrise, midday, sunset)
-   * @param {Object} data - Event data
+   * @param {object} data - Event data
    * @private
    */
   static #executeThresholdMacro(thresholdName, data) {
@@ -498,9 +480,8 @@ export default class TimeTracker {
 
   /**
    * Execute the appropriate macro for a period change.
-   *
    * @param {string} periodName - Name of the period (day, season)
-   * @param {Object} data - Event data
+   * @param {object} data - Event data
    * @private
    */
   static #executePeriodMacro(periodName, data) {
@@ -510,8 +491,7 @@ export default class TimeTracker {
 
   /**
    * Execute macros for season changes based on config.
-   *
-   * @param {Object} data - Season change event data
+   * @param {object} data - Season change event data
    * @private
    */
   static #executeSeasonMacros(data) {
@@ -535,7 +515,6 @@ export default class TimeTracker {
 
   /**
    * Execute macros for moon phase changes based on config.
-   *
    * @param {Array} changedMoons - Array of moon phase change data
    * @private
    */
@@ -580,7 +559,7 @@ export default class TimeTracker {
 
   /**
    * Check for rest day status change and fire hook if changed.
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @private
    */
   static #checkRestDayChange(calendar) {

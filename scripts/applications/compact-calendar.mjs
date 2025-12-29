@@ -1,7 +1,6 @@
 /**
  * Compact Calendar - All-in-one calendar widget with timekeeping.
  * Frameless, draggable, with persistent position and open state.
- *
  * @module Applications/CompactCalendar
  * @author Tyler
  */
@@ -1016,6 +1015,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open the notes panel for the selected date.
+   * @param event
+   * @param target
    */
   static async _onViewNotes(event, target) {
     if (!this._selectedDate) {
@@ -1031,6 +1032,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Close the notes panel.
+   * @param event
+   * @param target
    */
   static async _onCloseNotesPanel(event, target) {
     this.#notesPanelVisible = false;
@@ -1116,7 +1119,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Advance time to a specific hour of day.
    * @param {number} targetHour - Target hour (fractional, e.g. 6.5 = 6:30)
-   * @param {boolean} [nextDay=false] - If true, always advance to next day
+   * @param {boolean} [nextDay] - If true, always advance to next day
    */
   async #advanceToHour(targetHour, nextDay = false) {
     if (!game.user.isGM) return;
@@ -1159,6 +1162,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Toggle the search panel.
+   * @param event
+   * @param target
    */
   static async _onToggleSearch(event, target) {
     this.#searchOpen = !this.#searchOpen;
@@ -1171,6 +1176,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Close the search panel.
+   * @param event
+   * @param target
    */
   static async _onCloseSearch(event, target) {
     this.#closeSearch();
@@ -1178,6 +1185,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open a search result (note).
+   * @param event
+   * @param target
    */
   static async _onOpenSearchResult(event, target) {
     const id = target.dataset.id;

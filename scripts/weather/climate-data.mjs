@@ -2,7 +2,6 @@
  * Climate zone templates for procedural weather generation.
  * Each template defines default temperature ranges and weather probabilities by season.
  * Templates can be copied to create calendar-specific climate zones.
- *
  * @module Weather/ClimateData
  * @author Tyler
  */
@@ -13,7 +12,6 @@ import { ALL_PRESETS } from './weather-presets.mjs';
  * Climate zone template definitions.
  * Weather probabilities are relative weights (higher = more likely).
  * Temperatures are stored per-season with a _default fallback.
- *
  * @type {object}
  */
 export const CLIMATE_ZONE_TEMPLATES = {
@@ -121,7 +119,7 @@ export function getClimateZoneTemplateIds() {
  * Get a fully populated zone config object from a template.
  * Includes preset configurations based on the template's weather probabilities.
  * @param {string} templateId - Climate zone template ID
- * @param {string[]} [seasonNames=['Spring', 'Summer', 'Autumn', 'Winter']] - Season names for temperature keys
+ * @param {string[]} [seasonNames] - Season names for temperature keys
  * @returns {object|null} Populated zone config object
  */
 export function getDefaultZoneConfig(templateId, seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']) {

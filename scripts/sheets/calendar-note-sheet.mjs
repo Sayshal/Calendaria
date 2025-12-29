@@ -1,7 +1,6 @@
 /**
  * Calendar Note Sheet
  * Sheet for editing calendar note journal entry pages with ProseMirror editor.
- *
  * @module Sheets/CalendarNoteSheet
  * @author Tyler
  */
@@ -58,7 +57,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     return this._mode === CalendarNoteSheet.MODES.EDIT;
   }
 
-  /** @inheritdoc - Set mode BEFORE _configureRenderParts is called. */
+     * @inheritdoc
   _configureRenderOptions(options) {
     if (options.isFirstRender) {
       if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;

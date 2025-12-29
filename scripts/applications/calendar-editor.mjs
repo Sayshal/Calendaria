@@ -1,7 +1,6 @@
 /**
  * Calendar Editor Application
  * A comprehensive UI for creating and editing custom calendars.
- *
  * @module Applications/CalendarEditor
  * @author Tyler
  */
@@ -665,7 +664,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Calculate total days per year from month definitions.
-   * @param {boolean} [leapYear=false] - Whether to calculate for leap year
+   * @param {boolean} [leapYear] - Whether to calculate for leap year
    * @returns {number} Total days
    * @private
    */
@@ -2151,7 +2150,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           this.#calendarData.metadata?.suggestedId ||
           this.#calendarData.name
             .toLowerCase()
-            .replace(/[^a-z0-9]/g, '-')
+            .replace(/[^\da-z]/g, '-')
             .replace(/-+/g, '-');
         calendar = await CalendarManager.createCustomCalendar(id, this.#calendarData);
         if (calendar) {

@@ -1,7 +1,6 @@
 /**
  * Theme utilities for Calendaria custom color theming.
  * Handles application and initialization of user-customized theme colors.
- *
  * @module Utils/ThemeUtils
  * @author Tyler
  */

@@ -1,7 +1,6 @@
 /**
  * Macro Trigger Configuration Application
  * UI for configuring macros that execute on calendar events.
- *
  * @module Applications/Settings/MacroTriggerConfig
  * @author Tyler
  */

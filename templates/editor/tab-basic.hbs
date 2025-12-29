@@ -1,136 +1,204 @@
-<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  {{!-- Calendar Selector --}}
-  <div class="template-selector">
-    <select name="calendarSelect">
-      <option value="">{{localize "CALENDARIA.Editor.SelectCalendar"}}</option>
-      {{#each templates}}
-        <option value="{{this.id}}">{{this.name}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
-        </option>
-      {{/each}}
-    </select>
-    <button type="button" data-action="loadCalendar">
-      <i class="fas fa-file-import"></i>
-      {{localize "CALENDARIA.Editor.LoadCalendar"}}
-    </button>
-    <button type="button" data-action="createNew">
-      <i class="fas fa-file-circle-plus"></i>
-      {{localize "CALENDARIA.Editor.CreateNew"}}
-    </button>
-  </div>
-
-  {{!-- Calendar Identity --}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.CalendarIdentity"}}</legend>
-
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Common.Name"}}</label>
-      <div class="form-fields">
-        <input type="text" name="name" value="{{calendar.name}}"
-          placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Name'}}" required>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.System"}}</label>
-      <div class="form-fields">
-        <input type="text" name="metadata.system" value="{{calendar.metadata.system}}"
-          placeholder="{{localize 'CALENDARIA.Editor.Placeholder.System'}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.System"}}</p>
-    </div>
-
-    <div class="form-group stacked">
-      <label>{{localize "CALENDARIA.Common.Description"}}</label>
-      <textarea name="metadata.description" rows="2"
-        placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Description'}}">{{calendar.metadata.description}}</textarea>
-    </div>
-  </fieldset>
-
-  {{!-- Year Settings Row --}}
-  <div class="flexrow" style="gap: 1rem;">
-    <fieldset style="flex: 1;">
-      <legend>{{localize "CALENDARIA.Editor.Section.YearSettings"}}</legend>
-
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Field.YearZero"}}</label>
-        <div class="form-fields fit-content">
-          <input type="number" name="years.yearZero" value="{{calendar.years.yearZero}}" step="1" class="year-input">
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZero"}}</p>
-      </div>
-
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Field.YearZeroWeekday"}}</label>
-        <div class="form-fields fit-content">
-          <select name="years.firstWeekday" class="fit-content">
-            {{#each weekdayOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+<section
+    class="tab {{tab.cssClass}}"
+    data-tab="{{tab.id}}"
+    data-group="{{tab.group}}"
+>
+    {{!-- Calendar Selector --}}
+    <div class="template-selector">
+        <select name="calendarSelect">
+            <option value="">{{localize "CALENDARIA.Editor.SelectCalendar"}}</option>
+            {{#each templates}}
+            <option value="{{this.id}}">{{this.name}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+            </option>
             {{/each}}
-          </select>
+        </select>
+        <button type="button" data-action="loadCalendar">
+            <i class="fas fa-file-import"></i>
+            {{localize "CALENDARIA.Editor.LoadCalendar"}}
+        </button>
+        <button type="button" data-action="createNew">
+            <i class="fas fa-file-circle-plus"></i>
+            {{localize "CALENDARIA.Editor.CreateNew"}}
+        </button>
+    </div>
+
+    {{!-- Calendar Identity --}}
+    <fieldset>
+        <legend>{{localize "CALENDARIA.Editor.Section.CalendarIdentity"}}</legend>
+
+        <div class="form-group">
+            <label>{{localize "CALENDARIA.Common.Name"}}</label>
+            <div class="form-fields">
+                <input
+                    type="text"
+                    name="name"
+                    value="{{calendar.name}}"
+                    placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Name'}}"
+                    required
+                >
+            </div>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZeroWeekday"}}</p>
-      </div>
+
+        <div class="form-group">
+            <label>{{localize "CALENDARIA.Editor.Field.System"}}</label>
+            <div class="form-fields">
+                <input
+                    type="text"
+                    name="metadata.system"
+                    value="{{calendar.metadata.system}}"
+                    placeholder="{{localize 'CALENDARIA.Editor.Placeholder.System'}}"
+                >
+            </div>
+            <p class="hint">{{localize "CALENDARIA.Editor.Hint.System"}}</p>
+        </div>
+
+        <div class="form-group stacked">
+            <label>{{localize "CALENDARIA.Common.Description"}}</label>
+            <textarea
+                name="metadata.description"
+                rows="2"
+                placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Description'}}"
+            >{{calendar.metadata.description}}</textarea>
+        </div>
     </fieldset>
 
-    <fieldset style="flex: 1;">
-      <legend>{{localize "CALENDARIA.Editor.Section.LeapYear"}}</legend>
+    {{!-- Year Settings Row --}}
+    <div class="flexrow" style="gap: 1rem;">
+        <fieldset style="flex: 1;">
+            <legend>{{localize "CALENDARIA.Editor.Section.YearSettings"}}</legend>
 
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Field.LeapRule"}}</label>
-        <div class="form-fields fit-content">
-          <select name="leapYearConfig.rule" class="leap-rule-select">
-            {{#each leapRuleOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapRule"}}</p>
-      </div>
+            <div class="form-group">
+                <label>{{localize "CALENDARIA.Editor.Field.YearZero"}}</label>
+                <div class="form-fields fit-content">
+                    <input
+                        type="number"
+                        name="years.yearZero"
+                        value="{{calendar.years.yearZero}}"
+                        step="1"
+                        class="year-input"
+                    >
+                </div>
+                <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZero"}}</p>
+            </div>
 
-      {{!-- Simple interval fields --}}
-      <div class="leap-simple-fields" {{#unless showLeapSimple}}style="display: none;" {{/unless}}>
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Editor.Field.LeapInterval"}}</label>
-          <div class="form-fields fit-content">
-            <input type="number" name="leapYearConfig.interval" value="{{leapInterval}}" step="1" min="1"
-              class="year-input">
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapInterval"}}</p>
-        </div>
+            <div class="form-group">
+                <label>{{localize "CALENDARIA.Editor.Field.YearZeroWeekday"}}</label>
+                <div class="form-fields fit-content">
+                    <select name="years.firstWeekday" class="fit-content">
+                        {{#each weekdayOptions}}
+                        <option
+                            value="{{this.value}}"
+                            {{#if
+                            this.selected}}selected{{
+                        /if}}>{{this.label}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZeroWeekday"}}</p>
+            </div>
+        </fieldset>
 
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Editor.Field.LeapStart"}}</label>
-          <div class="form-fields fit-content">
-            <input type="number" name="leapYearConfig.start" value="{{leapStart}}" step="1" class="year-input">
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapStart"}}</p>
-        </div>
-      </div>
+        <fieldset style="flex: 1;">
+            <legend>{{localize "CALENDARIA.Editor.Section.LeapYear"}}</legend>
 
-      {{!-- Custom pattern field --}}
-      <div class="leap-custom-fields" {{#unless showLeapCustom}}style="display: none;" {{/unless}}>
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Editor.Field.LeapPattern"}}</label>
-          <div class="form-fields fit-content">
-            <input type="text" name="leapYearConfig.pattern" value="{{leapPattern}}" placeholder="400,!100,4"
-              class="pattern-input">
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapPattern"}}</p>
-        </div>
+            <div class="form-group">
+                <label>{{localize "CALENDARIA.Editor.Field.LeapRule"}}</label>
+                <div class="form-fields fit-content">
+                    <select name="leapYearConfig.rule" class="leap-rule-select">
+                        {{#each leapRuleOptions}}
+                        <option
+                            value="{{this.value}}"
+                            {{#if
+                            this.selected}}selected{{
+                        /if}}>{{localize this.label}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapRule"}}</p>
+            </div>
 
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Editor.Field.LeapStart"}}</label>
-          <div class="form-fields fit-content">
-            <input type="number" name="leapYearConfig.start" value="{{leapStart}}" step="1" class="year-input">
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapStart"}}</p>
-        </div>
-      </div>
+            {{!-- Simple interval fields --}}
+            <div
+                class="leap-simple-fields"
+                {{#unless
+                showLeapSimple}}style="display: none;"
+                {{
+            /unless}}>
+                <div class="form-group">
+                    <label>{{localize "CALENDARIA.Editor.Field.LeapInterval"}}</label>
+                    <div class="form-fields fit-content">
+                        <input
+                            type="number"
+                            name="leapYearConfig.interval"
+                            value="{{leapInterval}}"
+                            step="1"
+                            min="1"
+                            class="year-input"
+                        >
+                    </div>
+                    <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapInterval"}}</p>
+                </div>
 
-      {{!-- Gregorian info --}}
-      <div class="leap-gregorian-info" {{#unless showLeapGregorian}}style="display: none;" {{/unless}}>
-        <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
-      </div>
-    </fieldset>
-  </div>
+                <div class="form-group">
+                    <label>{{localize "CALENDARIA.Editor.Field.LeapStart"}}</label>
+                    <div class="form-fields fit-content">
+                        <input
+                            type="number"
+                            name="leapYearConfig.start"
+                            value="{{leapStart}}"
+                            step="1"
+                            class="year-input"
+                        >
+                    </div>
+                    <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapStart"}}</p>
+                </div>
+            </div>
+
+            {{!-- Custom pattern field --}}
+            <div
+                class="leap-custom-fields"
+                {{#unless
+                showLeapCustom}}style="display: none;"
+                {{
+            /unless}}>
+                <div class="form-group">
+                    <label>{{localize "CALENDARIA.Editor.Field.LeapPattern"}}</label>
+                    <div class="form-fields fit-content">
+                        <input
+                            type="text"
+                            name="leapYearConfig.pattern"
+                            value="{{leapPattern}}"
+                            placeholder="400,!100,4"
+                            class="pattern-input"
+                        >
+                    </div>
+                    <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapPattern"}}</p>
+                </div>
+
+                <div class="form-group">
+                    <label>{{localize "CALENDARIA.Editor.Field.LeapStart"}}</label>
+                    <div class="form-fields fit-content">
+                        <input
+                            type="number"
+                            name="leapYearConfig.start"
+                            value="{{leapStart}}"
+                            step="1"
+                            class="year-input"
+                        >
+                    </div>
+                    <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapStart"}}</p>
+                </div>
+            </div>
+
+            {{!-- Gregorian info --}}
+            <div
+                class="leap-gregorian-info"
+                {{#unless
+                showLeapGregorian}}style="display: none;"
+                {{
+            /unless}}>
+                <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
+            </div>
+        </fieldset>
+    </div>
 </section>

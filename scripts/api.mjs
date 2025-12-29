@@ -3,7 +3,6 @@
  * Provides a stable public API for macros and other modules to interact with Calendaria.
  *
  * Access via: game.modules.get('calendaria').api or window.CALENDARIA.api
- *
  * @module API
  * @author Tyler
  */
@@ -181,7 +180,7 @@ export const CalendariaAPI = {
 
   /**
    * Get the current phase of a specific moon.
-   * @param {number} [moonIndex=0] - Index of the moon (0 for primary moon)
+   * @param {number} [moonIndex] - Index of the moon (0 for primary moon)
    * @returns {object|null} Moon phase data with name, icon, position, and dayInCycle
    * @example
    * const selune = CALENDARIA.api.getMoonPhase(0);
@@ -302,7 +301,7 @@ export const CalendariaAPI = {
 
   /**
    * Get time until next sunrise.
-   * @returns {Object|null} Time delta {hours, minutes, seconds} or null
+   * @returns {object | null} Time delta {hours, minutes, seconds} or null
    * @example
    * const until = CALENDARIA.api.getTimeUntilSunrise();
    * if (until) console.log(`${until.hours}h ${until.minutes}m until sunrise`);
@@ -324,7 +323,7 @@ export const CalendariaAPI = {
 
   /**
    * Get time until next sunset.
-   * @returns {Object|null} Time delta {hours, minutes, seconds} or null
+   * @returns {object | null} Time delta {hours, minutes, seconds} or null
    * @example
    * const until = CALENDARIA.api.getTimeUntilSunset();
    * if (until) console.log(`${until.hours}h ${until.minutes}m until sunset`);
@@ -346,7 +345,7 @@ export const CalendariaAPI = {
 
   /**
    * Get time until next midnight.
-   * @returns {Object|null} Time delta {hours, minutes, seconds} or null
+   * @returns {object | null} Time delta {hours, minutes, seconds} or null
    * @example
    * const until = CALENDARIA.api.getTimeUntilMidnight();
    * if (until) console.log(`${until.hours}h ${until.minutes}m until midnight`);
@@ -367,7 +366,7 @@ export const CalendariaAPI = {
 
   /**
    * Get time until next midday.
-   * @returns {Object|null} Time delta {hours, minutes, seconds} or null
+   * @returns {object | null} Time delta {hours, minutes, seconds} or null
    * @example
    * const until = CALENDARIA.api.getTimeUntilMidday();
    * if (until) console.log(`${until.hours}h ${until.minutes}m until midday`);
@@ -541,9 +540,9 @@ export const CalendariaAPI = {
   /**
    * Search notes by name and optionally content.
    * @param {string} term - Search term (minimum 2 characters)
-   * @param {object} [options={}] - Search options
-   * @param {boolean} [options.searchContent=true] - Search note content
-   * @param {number} [options.limit=50] - Max results
+   * @param {object} [options] - Search options
+   * @param {boolean} [options.searchContent] - Search note content
+   * @param {number} [options.limit] - Max results
    * @returns {object[]} Array of matching note results
    * @example
    * const results = CALENDARIA.api.search('dragon');
@@ -557,9 +556,9 @@ export const CalendariaAPI = {
    * Search notes by name and optionally content.
    * Alias for search() method.
    * @param {string} term - Search term
-   * @param {object} [options={}] - Search options
-   * @param {boolean} [options.searchContent=true] - Search note content
-   * @param {number} [options.limit=50] - Max results
+   * @param {object} [options] - Search options
+   * @param {boolean} [options.searchContent] - Search note content
+   * @param {number} [options.limit] - Max results
    * @returns {object[]} Array of matching note results
    * @example
    * const notes = CALENDARIA.api.searchNotes('dragon', { searchContent: true });
@@ -576,15 +575,15 @@ export const CalendariaAPI = {
    * Create a new calendar note.
    * @param {object} options - Note creation options
    * @param {string} options.name - Note title
-   * @param {string} [options.content=''] - Note content (HTML)
+   * @param {string} [options.content] - Note content (HTML)
    * @param {object} options.startDate - Start date {year, month, day, hour?, minute?}
    * @param {object} [options.endDate] - End date {year, month, day, hour?, minute?}
-   * @param {boolean} [options.allDay=true] - Whether this is an all-day event
-   * @param {string} [options.repeat='never'] - Repeat pattern: 'never', 'daily', 'weekly', 'monthly', 'yearly'
-   * @param {string[]} [options.categories=[]] - Category IDs
+   * @param {boolean} [options.allDay] - Whether this is an all-day event
+   * @param {string} [options.repeat] - Repeat pattern: 'never', 'daily', 'weekly', 'monthly', 'yearly'
+   * @param {string[]} [options.categories] - Category IDs
    * @param {string} [options.icon] - Icon path or class
    * @param {string} [options.color] - Event color (hex)
-   * @param {boolean} [options.gmOnly=false] - Whether note is GM-only
+   * @param {boolean} [options.gmOnly] - Whether note is GM-only
    * @returns {Promise<JournalEntryPage>} Created note page
    * @example
    * const note = await CALENDARIA.api.createNote({
@@ -657,7 +656,7 @@ export const CalendariaAPI = {
    * Open a note in the UI.
    * @param {string} pageId - Journal entry page ID
    * @param {object} [options] - Render options
-   * @param {string} [options.mode='view'] - 'view' or 'edit'
+   * @param {string} [options.mode] - 'view' or 'edit'
    * @returns {Promise<void>}
    * @example
    * await CALENDARIA.api.openNote('abc123');
@@ -734,7 +733,7 @@ export const CalendariaAPI = {
    * Search notes by text in title or content.
    * @param {string} searchTerm - Text to search for
    * @param {object} [options] - Search options
-   * @param {boolean} [options.caseSensitive=false] - Case-sensitive search
+   * @param {boolean} [options.caseSensitive] - Case-sensitive search
    * @param {string[]} [options.categories] - Filter by categories
    * @returns {object[]} Array of matching note stubs
    * @example
@@ -1053,7 +1052,7 @@ export const CalendariaAPI = {
   /**
    * Set the current weather by preset ID.
    * @param {string} presetId - Weather preset ID (e.g., 'clear', 'rain', 'thunderstorm')
-   * @param {object} [options={}] - Additional options
+   * @param {object} [options] - Additional options
    * @param {number} [options.temperature] - Optional temperature value
    * @returns {Promise<object>} The set weather
    * @example
@@ -1068,8 +1067,8 @@ export const CalendariaAPI = {
    * Set custom weather with arbitrary values.
    * @param {object} weatherData - Weather data
    * @param {string} weatherData.label - Display label
-   * @param {string} [weatherData.icon='fa-question'] - Font Awesome icon class
-   * @param {string} [weatherData.color='#888888'] - Display color
+   * @param {string} [weatherData.icon] - Font Awesome icon class
+   * @param {string} [weatherData.color] - Display color
    * @param {string} [weatherData.description] - Description text
    * @param {number} [weatherData.temperature] - Temperature value
    * @returns {Promise<object>} The set weather
@@ -1097,7 +1096,7 @@ export const CalendariaAPI = {
 
   /**
    * Generate and set weather based on current climate and season.
-   * @param {object} [options={}] - Generation options
+   * @param {object} [options] - Generation options
    * @param {string} [options.climate] - Climate override (uses setting if not provided)
    * @param {string} [options.season] - Season override (uses current if not provided)
    * @returns {Promise<object>} Generated weather
@@ -1111,8 +1110,8 @@ export const CalendariaAPI = {
 
   /**
    * Get a weather forecast for upcoming days.
-   * @param {object} [options={}] - Forecast options
-   * @param {number} [options.days=7] - Number of days to forecast
+   * @param {object} [options] - Forecast options
+   * @param {number} [options.days] - Number of days to forecast
    * @param {string} [options.climate] - Climate override
    * @returns {Promise<object[]>} Array of forecast entries
    * @example
@@ -1172,8 +1171,8 @@ export const CalendariaAPI = {
    * @param {object} preset - Preset definition
    * @param {string} preset.id - Unique ID
    * @param {string} preset.label - Display label
-   * @param {string} [preset.icon='fa-question'] - Icon class
-   * @param {string} [preset.color='#888888'] - Display color
+   * @param {string} [preset.icon] - Icon class
+   * @param {string} [preset.color] - Display color
    * @param {string} [preset.description] - Description
    * @returns {Promise<object>} The added preset
    * @example

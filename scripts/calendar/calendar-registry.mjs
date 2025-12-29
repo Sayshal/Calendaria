@@ -1,7 +1,6 @@
 /**
  * Calendar Registry
  * Manages the storage and retrieval of calendar instances.
- *
  * @module Calendar/CalendarRegistry
  * @author Tyler
  */

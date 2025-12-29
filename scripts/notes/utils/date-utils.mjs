@@ -1,7 +1,6 @@
 /**
  * Date Utility Functions
  * Provides calendar-agnostic date comparison and manipulation utilities.
- *
  * @module Notes/Utils/DateUtils
  * @author Tyler
  */

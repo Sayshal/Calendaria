@@ -1,7 +1,6 @@
 /**
  * Moon Utility Functions
  * Provides calendar-agnostic moon phase calculations.
- *
  * @module Utils/MoonUtils
  * @author Tyler
  */

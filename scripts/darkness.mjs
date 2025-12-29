@@ -34,7 +34,6 @@ let animationFrameId = null;
  * - Noon (12:00): Minimum darkness (0.0 - brightest)
  * - Midnight (00:00): Maximum darkness (1.0 - darkest)
  * - Dawn/Dusk: Gradual transition
- *
  * @param {number} hours - Hours (0-23)
  * @param {number} minutes - Minutes (0-59)
  * @returns {number} Darkness level between 0.0 (brightest) and 1.0 (darkest)
@@ -58,7 +57,6 @@ export function calculateDarknessFromTime(hours, minutes) {
 
 /**
  * Get the current darkness level based on game world time.
- *
  * @returns {number} Darkness level between 0.0 (brightest) and 1.0 (darkest)
  */
 export function getCurrentDarkness() {
@@ -71,7 +69,6 @@ export function getCurrentDarkness() {
 
 /**
  * Update a scene's darkness level based on current time.
- *
  * @param {Scene} scene - The scene to update
  * @returns {Promise<void>}
  */
@@ -97,10 +94,9 @@ export async function updateSceneDarkness(scene) {
 
 /**
  * Inject the darkness sync override setting into the scene configuration sheet.
- *
  * @param {SceneConfig} app - The scene configuration application
  * @param {HTMLElement} html - The rendered HTML element
- * @param {Object} data - The scene data
+ * @param {object} data - The scene data
  */
 export function onRenderSceneConfig(app, html, data) {
   // Get the current flag value (can be null, boolean, or string)
@@ -134,7 +130,6 @@ export function onRenderSceneConfig(app, html, data) {
 /**
  * Update scene darkness when world time changes.
  * Only triggers transition when the hour changes.
- *
  * @param {number} worldTime - The new world time
  * @param {number} dt - The time delta
  */
@@ -169,7 +164,6 @@ export async function onUpdateWorldTime(worldTime, dt) {
 
 /**
  * Start a smooth darkness transition to the target value.
- *
  * @param {Scene} scene - The scene to update
  * @param {number} target - Target darkness value
  */
@@ -206,7 +200,6 @@ function startDarknessTransition(scene, target) {
 
 /**
  * Animate the darkness transition using requestAnimationFrame.
- *
  * @param {Scene} scene - The scene to update
  */
 function animateDarknessTransition(scene) {
@@ -247,7 +240,6 @@ export function resetDarknessState() {
 
 /**
  * Determine if a scene should have its darkness synced with time.
- *
  * @param {Scene} scene - The scene to check
  * @returns {boolean} True if darkness should be synced
  */

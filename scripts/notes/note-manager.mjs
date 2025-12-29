@@ -2,7 +2,6 @@
  * Note Manager
  * Main entry point for calendar notes system management.
  * Handles note creation, indexing, and retrieval with JournalEntry integration.
- *
  * @module Notes/NoteManager
  * @author Tyler
  */

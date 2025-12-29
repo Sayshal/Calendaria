@@ -1,7 +1,6 @@
 /**
  * Calendar Note Page Data Model
  * Defines the schema for individual calendar note journal entry pages.
- *
  * @module Sheets/CalendarNoteDataModel
  * @author Tyler
  */

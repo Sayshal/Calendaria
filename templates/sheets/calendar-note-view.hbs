@@ -1,63 +1,66 @@
 <div class="calendar-note-view">
-  {{!-- Header with icon and title --}}
-  <header class="note-header">
-    <div class="note-icon">
-      {{#if (eq iconType "fontawesome")}}
-        <i class="{{system.icon}}" style="color: {{system.color}}"></i>
-      {{else}}
-        <img src="{{system.icon}}" alt="Note Icon"
-          style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);" />
-      {{/if}}
-    </div>
-    <h1 class="note-title">{{name}}</h1>
-    {{#if system.gmOnly}}
-      <span class="gm-only-badge" data-tooltip="{{localize 'CALENDARIA.Common.GMOnlyTooltip'}}"><i
-          class="fas fa-eye-slash"></i></span>
-    {{/if}}
-  </header>
-
-  {{!-- Date and time info --}}
-  <div class="note-datetime">
-    <div class="date-info">
-      <i class="fas fa-calendar-alt"></i>
-      <span class="date-text">{{startDateDisplay}}</span>
-      {{#if hasEndDate}}
-        <i class="fas fa-arrow-right"></i>
-        <span class="date-text">{{endDateDisplay}}</span>
-      {{/if}}
-    </div>
-    {{#unless system.allDay}}
-      <div class="time-info">
-        <i class="fas fa-clock"></i>
-        <span class="time-text">{{startTimeDisplay}}</span>
-        {{#if hasEndTime}}
-          <span class="time-separator">-</span>
-          <span class="time-text">{{endTimeDisplay}}</span>
+    {{!-- Header with icon and title --}}
+    <header class="note-header">
+        <div class="note-icon">
+            {{#if (eq iconType "fontawesome")}}
+            <i class="{{system.icon}}" style="color: {{system.color}}"></i>
+            {{else}}
+            <img
+                src="{{system.icon}}"
+                alt="Note Icon"
+                style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);"
+            >
+            {{/if}}
+        </div>
+        <h1 class="note-title">{{name}}</h1>
+        {{#if system.gmOnly}}
+        <span class="gm-only-badge" data-tooltip="{{localize 'CALENDARIA.Common.GMOnlyTooltip'}}"><i
+                class="fas fa-eye-slash"></i></span>
         {{/if}}
-      </div>
-    {{/unless}}
-    {{#if repeatLabel}}
-      <div class="repeat-info">
-        <i class="fas fa-arrows-rotate"></i>
-        <span>{{repeatLabel}}</span>
-      </div>
-    {{/if}}
-    {{#if moonConditionsDisplay}}
-      <div class="moon-info">
-        <i class="fas fa-moon"></i>
-        <span>{{moonConditionsDisplay}}</span>
-      </div>
-    {{/if}}
-  </div>
+    </header>
 
-  {{!-- Categories --}}
-  {{#if displayCategories.length}}
-    <div class="note-categories">
-      {{#each displayCategories}}
-        <span class="category-tag">{{this}}</span>
-      {{/each}}
+    {{!-- Date and time info --}}
+    <div class="note-datetime">
+        <div class="date-info">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="date-text">{{startDateDisplay}}</span>
+            {{#if hasEndDate}}
+            <i class="fas fa-arrow-right"></i>
+            <span class="date-text">{{endDateDisplay}}</span>
+            {{/if}}
+        </div>
+        {{#unless system.allDay}}
+        <div class="time-info">
+            <i class="fas fa-clock"></i>
+            <span class="time-text">{{startTimeDisplay}}</span>
+            {{#if hasEndTime}}
+            <span class="time-separator">-</span>
+            <span class="time-text">{{endTimeDisplay}}</span>
+            {{/if}}
+        </div>
+        {{/unless}}
+        {{#if repeatLabel}}
+        <div class="repeat-info">
+            <i class="fas fa-arrows-rotate"></i>
+            <span>{{repeatLabel}}</span>
+        </div>
+        {{/if}}
+        {{#if moonConditionsDisplay}}
+        <div class="moon-info">
+            <i class="fas fa-moon"></i>
+            <span>{{moonConditionsDisplay}}</span>
+        </div>
+        {{/if}}
     </div>
-  {{/if}}
-  {{!-- Content --}}
-  <div class="note-content">{{{enrichedContent}}}</div>
+
+    {{!-- Categories --}}
+    {{#if displayCategories.length}}
+    <div class="note-categories">
+        {{#each displayCategories}}
+        <span class="category-tag">{{this}}</span>
+        {{/each}}
+    </div>
+    {{/if}}
+    {{!-- Content --}}
+    <div class="note-content">{{{enrichedContent}}}</div>
 </div>

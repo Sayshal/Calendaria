@@ -1,7 +1,6 @@
 /**
  * Weather Picker Application
  * Allows GMs to select or randomly generate weather.
- *
  * @module Weather/WeatherPicker
  * @author Tyler
  */

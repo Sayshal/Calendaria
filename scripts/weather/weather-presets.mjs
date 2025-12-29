@@ -1,7 +1,6 @@
 /**
  * Built-in weather presets for the Calendaria weather system.
  * GMs can add custom presets via settings.
- *
  * @module Weather/WeatherPresets
  * @author Tyler
  */
@@ -352,7 +351,7 @@ export const WEATHER_CATEGORIES = {
 /**
  * Get a weather preset by ID.
  * @param {string} id - Weather preset ID
- * @param {object[]} [customPresets=[]] - Custom presets to search
+ * @param {object[]} [customPresets] - Custom presets to search
  * @returns {object|null} Weather preset or null
  */
 export function getPreset(id, customPresets = []) {
@@ -361,7 +360,7 @@ export function getPreset(id, customPresets = []) {
 
 /**
  * Get all weather presets including custom ones.
- * @param {object[]} [customPresets=[]] - Custom presets to include
+ * @param {object[]} [customPresets] - Custom presets to include
  * @returns {object[]} All presets
  */
 export function getAllPresets(customPresets = []) {
@@ -371,7 +370,7 @@ export function getAllPresets(customPresets = []) {
 /**
  * Get presets by category.
  * @param {string} category - Category ID
- * @param {object[]} [customPresets=[]] - Custom presets to include
+ * @param {object[]} [customPresets] - Custom presets to include
  * @returns {object[]} Presets in category
  */
 export function getPresetsByCategory(category, customPresets = []) {

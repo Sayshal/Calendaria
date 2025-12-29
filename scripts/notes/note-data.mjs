@@ -1,7 +1,6 @@
 /**
  * Note Data Schema and Validation
  * Defines the structure and validation rules for calendar note flags.
- *
  * @module Notes/NoteData
  * @author Tyler
  */
@@ -154,7 +153,7 @@ export function validateNoteData(noteData) {
   // Validate color
   if (noteData.color !== undefined) {
     if (typeof noteData.color !== 'string') errors.push('color must be a string');
-    else if (!/^#[0-9A-Fa-f]{6}$/.test(noteData.color)) errors.push('color must be a valid hex color (e.g., #4a9eff)');
+    else if (!/^#[\dA-Fa-f]{6}$/.test(noteData.color)) errors.push('color must be a valid hex color (e.g., #4a9eff)');
   }
 
   // Validate icon
@@ -300,7 +299,7 @@ export async function addCustomCategory(label, color = '#868e96', icon = 'fa-tag
   const id = label
     .toLowerCase()
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+    .replace(/[^\da-z-]/g, '');
 
   // Check if category already exists
   const existing = getAllCategories().find((c) => c.id === id);

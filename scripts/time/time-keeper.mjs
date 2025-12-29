@@ -1,7 +1,6 @@
 /**
  * TimeKeeper - Real-time clock controller for Calendaria.
  * Manages automatic time advancement with configurable intervals and increments.
- *
  * @module Time/TimeKeeper
  * @author Tyler
  */
@@ -125,8 +124,8 @@ export default class TimeKeeper {
 
   /**
    * Start the real-time clock.
-   * @param {Object} [options] - Start options
-   * @param {boolean} [options.broadcast=true] - Whether to broadcast to other clients
+   * @param {object} [options] - Start options
+   * @param {boolean} [options.broadcast] - Whether to broadcast to other clients
    */
   static start({ broadcast = true } = {}) {
     if (this.#running) return;
@@ -146,8 +145,8 @@ export default class TimeKeeper {
 
   /**
    * Stop the real-time clock.
-   * @param {Object} [options] - Stop options
-   * @param {boolean} [options.broadcast=true] - Whether to broadcast to other clients
+   * @param {object} [options] - Stop options
+   * @param {boolean} [options.broadcast] - Whether to broadcast to other clients
    */
   static stop({ broadcast = true } = {}) {
     if (!this.#running) return;
@@ -292,7 +291,7 @@ export default class TimeKeeper {
 
   /**
    * Advance time by the current increment.
-   * @param {number} [multiplier=1] - Multiplier for the increment
+   * @param {number} [multiplier] - Multiplier for the increment
    */
   static async forward(multiplier = 1) {
     if (!game.user.isGM) return;
@@ -303,7 +302,7 @@ export default class TimeKeeper {
 
   /**
    * Reverse time by the current increment.
-   * @param {number} [multiplier=1] - Multiplier for the increment
+   * @param {number} [multiplier] - Multiplier for the increment
    */
   static async reverse(multiplier = 1) {
     if (!game.user.isGM) return;
@@ -399,7 +398,7 @@ export default class TimeKeeper {
 
   /**
    * Handle remote clock update from socket.
-   * @param {Object} data - Clock update data
+   * @param {object} data - Clock update data
    * @param {boolean} data.running - Whether clock is running
    * @param {number} data.ratio - Time increment
    * @private

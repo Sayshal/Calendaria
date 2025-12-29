@@ -2,7 +2,6 @@
  * Reminder Scheduler
  * Monitors world time changes and triggers reminders before note events occur.
  * Supports toast notifications, chat messages, and dialog popups with snooze.
- *
  * @module Time/ReminderScheduler
  * @author Tyler
  */
@@ -21,7 +20,7 @@ export default class ReminderScheduler {
   /** @type {Set<string>} Set of reminder keys that have fired today (noteId:offset) */
   static #firedToday = new Set();
 
-  /** @type {Object|null} Last processed date */
+  /** @type {object | null} Last processed date */
   static #lastDate = null;
 
   /** @type {number} Minimum interval between checks in game seconds (5 minutes) */
@@ -84,7 +83,7 @@ export default class ReminderScheduler {
   /**
    * Check all notes for pending reminders.
    * @param {number} worldTime - Current world time in seconds
-   * @param {Object} currentDate - Current date components
+   * @param {object} currentDate - Current date components
    * @private
    */
   static #checkReminders(worldTime, currentDate) {
@@ -113,9 +112,9 @@ export default class ReminderScheduler {
 
   /**
    * Determine if a reminder should fire based on current time and offset.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @param {number} worldTime - Current world time in seconds
-   * @param {Object} calendar - Active calendar
+   * @param {object} calendar - Active calendar
    * @returns {boolean}
    * @private
    */
@@ -148,8 +147,8 @@ export default class ReminderScheduler {
 
   /**
    * Fire a reminder notification.
-   * @param {Object} note - The note stub
-   * @param {Object} currentDate - Current date components
+   * @param {object} note - The note stub
+   * @param {object} currentDate - Current date components
    * @private
    */
   static #fireReminder(note, currentDate) {
@@ -187,7 +186,7 @@ export default class ReminderScheduler {
 
   /**
    * Get list of user IDs who should receive the reminder.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @returns {string[]} Array of user IDs
    * @private
    */
@@ -210,7 +209,7 @@ export default class ReminderScheduler {
 
   /**
    * Format the reminder message.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @returns {string}
    * @private
    */
@@ -235,7 +234,7 @@ export default class ReminderScheduler {
 
   /**
    * Show toast notification.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @param {string} message - Formatted message
    * @private
    */
@@ -246,7 +245,7 @@ export default class ReminderScheduler {
 
   /**
    * Send chat message reminder.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @param {string} message - Formatted message
    * @param {string[]} targets - Target user IDs
    * @private
@@ -284,7 +283,7 @@ export default class ReminderScheduler {
 
   /**
    * Show dialog with snooze option.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @param {string} message - Formatted message
    * @private
    */
@@ -335,8 +334,8 @@ export default class ReminderScheduler {
 
   /**
    * Check if date has changed.
-   * @param {Object} previous - Previous date
-   * @param {Object} current - Current date
+   * @param {object} previous - Previous date
+   * @param {object} current - Current date
    * @returns {boolean}
    * @private
    */
@@ -348,7 +347,7 @@ export default class ReminderScheduler {
 
   /**
    * Get icon HTML for a note.
-   * @param {Object} note - The note stub
+   * @param {object} note - The note stub
    * @returns {string}
    * @private
    */

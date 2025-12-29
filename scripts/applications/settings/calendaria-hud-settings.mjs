@@ -1,7 +1,6 @@
 /**
  * Calendar HUD Settings Application
  * Dedicated settings panel for the Calendar HUD.
- *
  * @module Applications/Settings/CalendariaHUDSettings
  * @author Tyler
  */

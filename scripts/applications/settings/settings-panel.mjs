@@ -1,7 +1,6 @@
 /**
  * Unified Settings Panel Application
  * A comprehensive UI for configuring all Calendaria module settings.
- *
  * @module Applications/SettingsPanel
  * @author Tyler
  */
@@ -14,6 +13,10 @@ import { COLOR_DEFINITIONS, DEFAULT_COLORS, applyCustomColors } from '../../util
 import { CalendarEditor } from '../calendar-editor.mjs';
 import { ImporterApp } from '../importer-app.mjs';
 import { MacroTriggerConfig } from './macro-trigger-config.mjs';
+import { CalendariaHUD } from '../calendaria-hud.mjs';
+import { CompactCalendar } from '../compact-calendar.mjs';
+import { TimeKeeperHUD } from '../time-keeper-hud.mjs';
+import { CalendarApplication } from '../calendar-application.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -49,7 +52,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       resetColor: SettingsPanel.#onResetColor,
       resetAllColors: SettingsPanel.#onResetAllColors,
       exportTheme: SettingsPanel.#onExportTheme,
-      importTheme: SettingsPanel.#onImportTheme
+      importTheme: SettingsPanel.#onImportTheme,
+      openHUD: SettingsPanel.#onOpenHUD,
+      openCompact: SettingsPanel.#onOpenCompact,
+      openTimeKeeper: SettingsPanel.#onOpenTimeKeeper,
+      openFullCal: SettingsPanel.#onOpenFullCal
     }
   };
 

@@ -1,7 +1,6 @@
 /**
  * Calendarium (Obsidian) Importer
  * Imports calendar data from Calendarium Obsidian plugin data.json exports.
- *
  * @module Importers/CalendariumImporter
  * @author Tyler
  */

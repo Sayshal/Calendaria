@@ -1,28 +1,41 @@
-<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+<section
+    class="tab {{tab.cssClass}}"
+    data-tab="{{tab.id}}"
+    data-group="{{tab.group}}"
+>
 
-  {{!-- Display Settings --}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
+    {{!-- Display Settings --}}
+    <fieldset>
+        <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.ShowTimeKeeper.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="showTimeKeeper" {{#if showTimeKeeper}}checked{{/if}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
-    </div>
-  </fieldset>
+        <div class="form-group">
+            <label>{{localize "CALENDARIA.Settings.ShowTimeKeeper.Name"}}</label>
+            <div class="form-fields">
+                <input
+                    type="checkbox"
+                    name="showTimeKeeper"
+                    {{#if
+                    showTimeKeeper}}checked{{
+                /if}}>
+            </div>
+            <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
+        </div>
+    </fieldset>
 
-  {{!-- Position Reset --}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
+    {{!-- Position Reset --}}
+    <fieldset>
+        <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
 
-    <div class="form-group stacked button-row">
-      <button type="button" data-action="resetPosition" data-target="timekeeper">
-        <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.Common.ResetPosition"}}
-      </button>
-    </div>
-  </fieldset>
+        <div class="form-group stacked button-row">
+            <button
+                type="button"
+                data-action="resetPosition"
+                data-target="timekeeper"
+            >
+                <i class="fas fa-undo"></i>
+                {{localize "CALENDARIA.Common.ResetPosition"}}
+            </button>
+        </div>
+    </fieldset>
 
 </section>

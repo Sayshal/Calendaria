@@ -1,7 +1,6 @@
 /**
  * Calendaria HUD - System-agnostic calendar widget.
  * Displays a sundial dome with sun/moon, time controls, date/weather info.
- *
  * @module Applications/CalendariaHUD
  * @author Tyler
  */
@@ -1065,7 +1064,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (desc) {
         const plainText = desc.replace(/<[^>]*>/g, '').trim();
         if (plainText) {
-          const truncated = plainText.length > 120 ? plainText.substring(0, 117) + '...' : plainText;
+          const truncated = plainText.length > 120 ? `${plainText.substring(0, 117)  }...` : plainText;
           tooltip += `\n${truncated}`;
         }
       }
@@ -1455,7 +1454,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Advance time to a specific hour of day.
    * @param {number} targetHour - Target hour (fractional)
-   * @param {boolean} [nextDay=false] - Always advance to next day
+   * @param {boolean} [nextDay] - Always advance to next day
    */
   async #advanceToHour(targetHour, nextDay = false) {
     if (!game.user.isGM) return;

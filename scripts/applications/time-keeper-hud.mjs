@@ -1,7 +1,6 @@
 /**
  * TimeKeeper HUD - Compact time control interface.
  * Provides forward/reverse buttons, increment selector, and current time display.
- *
  * @module Applications/TimeKeeperHUD
  * @author Tyler
  */
@@ -212,7 +211,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle clock state changes.
-   * @param {Object} data - Clock state data
+   * @param {object} data - Clock state data
    * @private
    */
   #onClockStateChange(data) {

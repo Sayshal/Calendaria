@@ -2,7 +2,6 @@
  * Simple Timekeeping Importer
  * Imports calendar data from the Simple Timekeeping module.
  * Live import only - STK does not export to files.
- *
  * @module Importers/SimpleTimekeepingImporter
  * @author Tyler
  */
