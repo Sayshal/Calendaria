@@ -26,7 +26,7 @@ import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model
 import { CalendarNoteSheet } from './scripts/sheets/calendar-note-sheet.mjs';
 import { CalendariaAPI } from './scripts/api.mjs';
 import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
-import { ThemeEditor } from './scripts/applications/settings/theme-editor.mjs';
+import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
 
 Hooks.once('init', async () => {
@@ -89,7 +89,7 @@ Hooks.once('ready', async () => {
   ReminderScheduler.initialize();
 
   // Initialize custom theme colors
-  ThemeEditor.initialize();
+  initializeTheme();
 
   // Initialize weather system
   await WeatherManager.initialize();
@@ -141,7 +141,6 @@ globalThis['CALENDARIA'] = {
   CalendarApplication,
   CalendarEditor,
   CompactCalendar,
-  ThemeEditor,
   TimeKeeper,
   TimeKeeperHUD,
   WeatherManager,

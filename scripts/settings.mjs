@@ -8,8 +8,6 @@ import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { ImporterApp } from './applications/importer-app.mjs';
 import { MacroTriggerConfig } from './applications/settings/macro-trigger-config.mjs';
-import { ResetPositionDialog } from './applications/settings/reset-position.mjs';
-import { ThemeEditor } from './applications/settings/theme-editor.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
 import { BUNDLED_CALENDARS } from './calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
@@ -66,7 +64,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.CompactControlsDelay.Name',
     hint: 'CALENDARIA.Settings.CompactControlsDelay.Hint',
     scope: 'client',
-    config: true,
+    config: false,
     type: Number,
     default: 3,
     range: { min: 1, max: 10, step: 1 }
@@ -86,7 +84,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.DarknessSync.Name',
     hint: 'CALENDARIA.Settings.DarknessSync.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: Boolean,
     default: true
   });
@@ -96,7 +94,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ShowMoonPhases.Name',
     hint: 'CALENDARIA.Settings.ShowMoonPhases.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: Boolean,
     default: true
   });
@@ -106,7 +104,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ShowTimeKeeper.Name',
     hint: 'CALENDARIA.Settings.ShowTimeKeeper.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: Boolean,
     default: false,
     requiresReload: false,
@@ -121,7 +119,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ShowCompactCalendar.Name',
     hint: 'CALENDARIA.Settings.ShowCompactCalendar.Hint',
     scope: 'client',
-    config: true,
+    config: false,
     type: Boolean,
     default: true
   });
@@ -135,7 +133,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ShowCalendarHUD.Name',
     hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
     scope: 'client',
-    config: true,
+    config: false,
     type: Boolean,
     default: false,
     onChange: (value) => {
@@ -149,7 +147,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.CalendarHUDMode.Name',
     hint: 'CALENDARIA.Settings.CalendarHUDMode.Hint',
     scope: 'client',
-    config: true,
+    config: false,
     type: new foundry.data.fields.StringField({
       choices: {
         fullsize: 'CALENDARIA.Settings.CalendarHUDMode.Fullsize',
@@ -232,7 +230,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ActiveCalendar.Name',
     hint: 'CALENDARIA.Settings.ActiveCalendar.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: new foundry.data.fields.StringField({
       choices: calendarChoices,
       initial: 'gregorian'
@@ -267,7 +265,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ChatTimestampMode.Name',
     hint: 'CALENDARIA.Settings.ChatTimestampMode.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: new foundry.data.fields.StringField({
       choices: {
         disabled: 'CALENDARIA.Settings.ChatTimestampMode.Disabled',
@@ -283,7 +281,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ChatTimestampShowTime.Name',
     hint: 'CALENDARIA.Settings.ChatTimestampShowTime.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: Boolean,
     default: true
   });
@@ -297,7 +295,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.AdvanceTimeOnRest.Name',
     hint: 'CALENDARIA.Settings.AdvanceTimeOnRest.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: Boolean,
     default: false
   });
@@ -307,7 +305,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Name',
     hint: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: Boolean,
     default: false
   });
@@ -336,7 +334,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.TemperatureUnit.Name',
     hint: 'CALENDARIA.Settings.TemperatureUnit.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: new foundry.data.fields.StringField({
       choices: {
         celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius',
@@ -396,7 +394,7 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.Logger.Name',
     hint: 'CALENDARIA.Settings.Logger.Hint',
     scope: 'client',
-    config: true,
+    config: false,
     type: new foundry.data.fields.StringField({
       choices: {
         0: 'CALENDARIA.Settings.Logger.Choices.Off',
@@ -419,26 +417,6 @@ export function registerSettings() {
     icon: 'fas fa-calendar-plus',
     type: CalendarEditor,
     restricted: true
-  });
-
-  /** Settings menu button to open theme editor */
-  game.settings.registerMenu(MODULE.ID, 'themeEditor', {
-    name: 'CALENDARIA.Settings.ThemeEditor.Name',
-    hint: 'CALENDARIA.Settings.ThemeEditor.Hint',
-    label: 'CALENDARIA.Settings.ThemeEditor.Label',
-    icon: 'fas fa-palette',
-    type: ThemeEditor,
-    restricted: false
-  });
-
-  /** Settings menu button to reset calendar position */
-  game.settings.registerMenu(MODULE.ID, 'resetPosition', {
-    name: 'CALENDARIA.Settings.ResetPosition.Name',
-    hint: 'CALENDARIA.Settings.ResetPosition.Hint',
-    label: 'CALENDARIA.Settings.ResetPosition.Label',
-    icon: 'fas fa-undo',
-    type: ResetPositionDialog,
-    restricted: false
   });
 
   /** Settings menu button to open TimeKeeper HUD */
@@ -496,7 +474,7 @@ export function registerReadySettings() {
     name: 'CALENDARIA.Settings.PrimaryGM.Name',
     hint: 'CALENDARIA.Settings.PrimaryGM.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: String,
     default: '',
     choices: gmChoices

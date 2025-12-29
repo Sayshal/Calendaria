@@ -204,16 +204,12 @@ export const TEMPLATES = {
   FORM_FOOTER: 'templates/generic/form-footer.hbs',
 
   SETTINGS: {
-    /** @type {string} Reset position dialog template */
-    RESET_POSITION: `modules/${MODULE.ID}/templates/settings/reset-position.hbs`,
-    /** @type {string} Theme editor template */
-    THEME_EDITOR: `modules/${MODULE.ID}/templates/settings/theme-editor.hbs`,
     /** @type {string} Macro trigger configuration template */
     MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`,
     /** @type {string} Calendar HUD settings template */
     HUD_SETTINGS: `modules/${MODULE.ID}/templates/settings/calendaria-hud-settings.hbs`,
-    /** @type {string} Settings panel - General tab */
-    PANEL_GENERAL: `modules/${MODULE.ID}/templates/settings/tab-general.hbs`,
+    /** @type {string} Settings panel - Moons tab */
+    PANEL_MOONS: `modules/${MODULE.ID}/templates/settings/tab-moons.hbs`,
     /** @type {string} Settings panel - Calendar tab */
     PANEL_CALENDAR: `modules/${MODULE.ID}/templates/settings/tab-calendar.hbs`,
     /** @type {string} Settings panel - Notes tab */
