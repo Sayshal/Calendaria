@@ -2,52 +2,52 @@
 
   {{!-- Macro Triggers --}}
   {{#if isGM}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.MacroTriggers"}}</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Settings.MacroTriggers.Name"}}</legend>
 
-    {{#if hasMacroTriggers}}
-      <p class="hint section-hint success">
-        <i class="fas fa-check-circle"></i>
-        {{localize "CALENDARIA.SettingsPanel.MacroTriggers.Active"}}
-      </p>
-    {{else}}
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.MacroTriggers.None"}}</p>
-    {{/if}}
+      {{#if hasMacroTriggers}}
+        <p class="hint section-hint success">
+          <i class="fas fa-check-circle"></i>
+          {{localize "CALENDARIA.SettingsPanel.MacroTriggers.Active"}}
+        </p>
+      {{else}}
+        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.MacroTriggers.None"}}</p>
+      {{/if}}
 
-    <p class="hint">{{localize "CALENDARIA.Settings.MacroTriggers.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.MacroTriggers.Hint"}}</p>
 
-    <div class="form-group stacked button-row">
-      <button type="button" data-action="openMacroTriggers">
-        <i class="fas fa-bolt"></i>
-        {{localize "CALENDARIA.Settings.MacroTriggers.Label"}}
-      </button>
-    </div>
-  </fieldset>
+      <div class="form-group stacked button-row">
+        <button type="button" data-action="openMacroTriggers">
+          <i class="fas fa-bolt"></i>
+          {{localize "CALENDARIA.Settings.MacroTriggers.Label"}}
+        </button>
+      </div>
+    </fieldset>
 
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.AutomationInfo"}}</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.AutomationInfo"}}</legend>
 
-    <div class="automation-info">
-      <h4>{{localize "CALENDARIA.SettingsPanel.Automation.AvailableTriggers"}}</h4>
-      <ul class="trigger-list">
-        <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dawn"}}</li>
-        <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Midday"}}</li>
-        <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dusk"}}</li>
-        <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Midnight"}}</li>
-        <li><i class="fas fa-calendar-day"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.NewDay"}}</li>
-        <li><i class="fas fa-leaf"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Season"}}</li>
-        <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.MoonPhase"}}</li>
-      </ul>
-    </div>
-  </fieldset>
+      <div class="automation-info">
+        <h4>{{localize "CALENDARIA.SettingsPanel.Automation.AvailableTriggers"}}</h4>
+        <ul class="trigger-list">
+          <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dawn"}}</li>
+          <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.Common.Midday"}}</li>
+          <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dusk"}}</li>
+          <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.Common.Midnight"}}</li>
+          <li><i class="fas fa-calendar-day"></i> {{localize "CALENDARIA.Common.NewDay"}}</li>
+          <li><i class="fas fa-leaf"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Season"}}</li>
+          <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.MoonPhase"}}</li>
+        </ul>
+      </div>
+    </fieldset>
   {{/if}}
 
   {{!-- Player Message --}}
   {{#unless isGM}}
-  <div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.MacrosTab.PlayerMessage"}}</p>
-  </div>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.MacrosTab.PlayerMessage"}}</p>
+    </div>
   {{/unless}}
 
 </section>

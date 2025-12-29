@@ -46,7 +46,7 @@
                 {{/if}}
                 {{#if ../../../editable}}
                   <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                    data-month="{{month}}" data-day="{{day}}" data-tooltip="CALENDARIA.UI.AddNote">
+                    data-month="{{month}}" data-day="{{day}}" data-tooltip="CALENDARIA.Common.AddNote">
                     <i class="fas fa-plus"></i>
                   </button>
                 {{/if}}
@@ -76,7 +76,7 @@
     </div>
   {{else}}
     <div class="no-calendar">
-      <p>No calendar configured. Select a calendar in the settings.</p>
+      <p>{{localize 'CALENDARIA.CalendarApp.NoCalendarConfigured'}}</p>
     </div>
   {{/if}}
 </div>

@@ -7,10 +7,10 @@
  * @author Tyler
  */
 
-import { HOOKS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
-import { format } from '../utils/localization.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS } from '../constants.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
 
 /**
  * Abstract base class for calendar importers.
@@ -127,23 +127,23 @@ export default class BaseImporter {
     const errors = [];
 
     // Required fields
-    if (!data.name) errors.push('Missing calendar name');
-    if (!data.months?.values?.length) errors.push('Calendar must have at least one month');
-    if (!data.days) errors.push('Missing time configuration');
+    if (!data.name) errors.push(localize('CALENDARIA.Importer.Error.MissingName'));
+    if (!data.months?.values?.length) errors.push(localize('CALENDARIA.Importer.Error.NoMonths'));
+    if (!data.days) errors.push(localize('CALENDARIA.Importer.Error.MissingTimeConfig'));
 
     // Time validation
     if (data.days) {
-      if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push('Invalid hours per day');
-      if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push('Invalid minutes per hour');
-      if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push('Invalid seconds per minute');
+      if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidHoursPerDay'));
+      if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidMinutesPerHour'));
+      if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidSecondsPerMinute'));
     }
 
     // Month validation
     if (data.months?.values) {
       for (let i = 0; i < data.months.values.length; i++) {
         const month = data.months.values[i];
-        if (!month.name) errors.push(`Month ${i + 1} missing name`);
-        if (!month.days || month.days < 1) errors.push(`Month ${i + 1} must have at least 1 day`);
+        if (!month.name) errors.push(format('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
+        if (!month.days || month.days < 1) errors.push(format('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
       }
     }
 

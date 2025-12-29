@@ -81,7 +81,7 @@ class WeatherManager {
   async setWeather(presetId, options = {}) {
     if (!game.user.isGM) {
       log(1, 'Only GMs can set weather');
-      ui.notifications.error(localize('CALENDARIA.Weather.Error.GMOnly'));
+      ui.notifications.error('CALENDARIA.Weather.Error.GMOnly', {localize: true});
       return this.#currentWeather;
     }
 
@@ -127,7 +127,7 @@ class WeatherManager {
   async setCustomWeather(weatherData, broadcast = true) {
     if (!game.user.isGM) {
       log(1, 'Only GMs can set weather');
-      ui.notifications.error(localize('CALENDARIA.Weather.Error.GMOnly'));
+      ui.notifications.error('CALENDARIA.Weather.Error.GMOnly', {localize: true});
       return this.#currentWeather;
     }
 

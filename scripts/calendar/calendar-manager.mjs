@@ -7,12 +7,12 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
+import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
+import { DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
-import { loadBundledCalendars, DEFAULT_CALENDAR, isBundledCalendar } from './calendar-loader.mjs';
 
 export default class CalendarManager {
   /** Flag to prevent responding to our own calendar changes */
@@ -772,7 +772,7 @@ export default class CalendarManager {
       }
 
       log(3, `Reset bundled calendar: ${id}`);
-      ui.notifications.info(localize('CALENDARIA.Editor.ResetComplete'));
+      ui.notifications.info('CALENDARIA.Editor.ResetComplete', { localize: true });
       return true;
     } catch (error) {
       log(2, `Error resetting bundled calendar ${id}:`, error);

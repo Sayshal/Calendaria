@@ -4,10 +4,10 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SCENE_FLAGS } from './constants.mjs';
-import { localize, format } from './utils/localization.mjs';
-import { log } from './utils/logger.mjs';
+import { MODULE, SCENE_FLAGS, SETTINGS } from './constants.mjs';
 import TimeKeeper from './time/time-keeper.mjs';
+import { localize } from './utils/localization.mjs';
+import { log } from './utils/logger.mjs';
 
 /** @type {number|null} Last hour we calculated darkness for */
 let lastHour = null;

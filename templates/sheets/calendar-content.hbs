@@ -1,21 +1,22 @@
 <div class="calendar-main-content">
   <div class="calendar-nav">
     <button type="button" data-action="navigate" data-direction="previous"
-      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.CalendarApp.PreviousMonth'}}{{/if}}">
+      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
 
     <h2 class="calendar-title">
-      {{#if calendarData}} {{#if (eq displayMode 'week')}} Week {{calendarData.weekNumber}}, {{calendarData.monthName}}
+      {{#if calendarData}} {{#if (eq displayMode 'week')}} {{localize 'CALENDARIA.Common.Week'}}
+          {{calendarData.weekNumber}}, {{calendarData.monthName}}
           {{calendarData.yearDisplay}}
         {{else if (eq displayMode 'year')}}
           {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
         {{else}} {{calendarData.monthName}} {{calendarData.yearDisplay}} {{/if}}
-      {{else}} Calendar {{/if}}
+      {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
     </h2>
 
     <button type="button" data-action="navigate" data-direction="next"
-      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.CalendarApp.NextMonth'}}{{/if}}">
+      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
@@ -57,8 +58,8 @@
         </span>
       {{/if}}
     </div>
-  {{/if}} {{#if (eq displayMode 'year')}} {{> "modules/calendaria/templates/sheets/calendar-year.hbs"}}
-  {{else if (eq displayMode 'week')}} {{>
-  "modules/calendaria/templates/sheets/calendar-week.hbs"}}
+  {{/if}}
+  {{#if (eq displayMode 'year')}} {{> "modules/calendaria/templates/sheets/calendar-year.hbs"}}
+  {{else if (eq displayMode 'week')}} {{> "modules/calendaria/templates/sheets/calendar-week.hbs"}}
   {{else}} {{> "modules/calendaria/templates/sheets/calendar-grid.hbs"}} {{/if}}
 </div>

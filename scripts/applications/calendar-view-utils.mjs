@@ -6,11 +6,11 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
+import { format, localize } from '../utils/localization.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -355,7 +355,7 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
     },
     // Add Note
     {
-      name: 'CALENDARIA.CompactCalendar.AddNote',
+      name: 'CALENDARIA.Common.AddNote',
       icon: '<i class="fas fa-plus"></i>',
       callback: async (target) => {
         const year = parseInt(target.dataset.year);
@@ -480,7 +480,8 @@ export function injectContextMenuInfo(target, calendar) {
   infoHeader.innerHTML = `
     <div class="info-row date"><strong>${fullDate}</strong></div>
     ${seasonName ? `<div class="info-row season">${seasonName}</div>` : ''}
-    <div class="info-row sun"><i class="fas fa-sun" data-tooltip="${localize('CALENDARIA.CompactCalendar.Sunrise')}"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon" data-tooltip="${localize('CALENDARIA.CompactCalendar.Sunset')}"></i> ${formatTime(sunsetHour)}</div>
+    <div class="info-row sun"><i class="fas fa-sun" data-tooltip="${localize('CALENDARIA.Common.Sunrise')}"></i> ${formatTime(sunriseHour)}
+    <i class="fas fa-moon" data-tooltip="${localize('CALENDARIA.Common.Sunset')}"></i> ${formatTime(sunsetHour)}</div>
   `;
 
   // Insert at beginning of menu

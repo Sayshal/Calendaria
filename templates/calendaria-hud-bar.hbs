@@ -10,14 +10,15 @@
       <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
         value="{{searchTerm}}" autocomplete="off">
       <button type="button" class="search-panel-close" data-action="closeSearch"
-        data-tooltip="{{localize 'CALENDARIA.Search.Close'}}">
+        data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
         <i class="fas fa-times"></i>
       </button>
     </div>
     <div class="search-panel-results">
       {{#if searchResults.length}}
         {{#each searchResults}}
-          <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}" data-journal-id="{{data.journalId}}">
+          <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}"
+            data-journal-id="{{data.journalId}}">
             <span class="result-name">{{name}}</span>
             {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
           </div>
@@ -33,16 +34,16 @@
 
   {{!-- MAIN BAR --}}
   <div class="calendaria-hud-bar{{#if locked}} locked{{/if}}{{#if hasEvents}} has-events{{/if}}"
-    {{#if hasEvents}}style="--event-glow: {{firstEventColor}};"{{/if}}>
+    {{#if hasEvents}}style="--event-glow: {{firstEventColor}};" {{/if}}>
 
     {{!-- LEFT BUTTON GROUP: Search, Add Note --}}
     <div class="calendaria-hud-btn-group left" role="group" aria-label="{{localize 'CALENDARIA.HUD.NoteActions'}}">
       <button type="button" class="calendaria-hud-btn" data-action="searchNotes"
-        data-tooltip="{{localize 'CALENDARIA.HUD.SearchNotes'}}">
+        data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
         <i class="fa-solid fa-magnifying-glass"></i>
       </button>
       <button type="button" class="calendaria-hud-btn" data-action="addNote"
-        data-tooltip="{{localize 'CALENDARIA.HUD.AddNote'}}">
+        data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}">
         <i class="fa-solid fa-calendar-plus"></i>
       </button>
     </div>
@@ -55,9 +56,9 @@
       <span class="calendaria-hud-date" data-tooltip="{{dateDisplay}}">{{dateDisplay}}</span>
       {{!-- Event display (rotates in) --}}
       {{#if hasEvents}}
-        <div class="calendaria-hud-event hidden" data-action="openEvent"
-          data-event-id="{{currentEvent.id}}" data-parent-id="{{currentEvent.parentId}}"
-          data-tooltip="{{currentEvent.tooltip}}" style="--event-color: {{currentEvent.color}};">
+        <div class="calendaria-hud-event hidden" data-action="openEvent" data-event-id="{{currentEvent.id}}"
+          data-parent-id="{{currentEvent.parentId}}" data-tooltip="{{currentEvent.tooltip}}"
+          style="--event-color: {{currentEvent.color}};">
           <i class="{{currentEvent.icon}} calendaria-hud-event-icon"></i>
           <span class="calendaria-hud-event-name">{{currentEvent.name}}</span>
         </div>
@@ -69,9 +70,9 @@
       <div class="calendaria-hud-time-wrapper">
         <span class="calendaria-hud-time">{{time}}</span>
         {{#if isGM}}
-          <button type="button" class="calendaria-hud-play-btn"
-            data-action="toggleTimeFlow" aria-pressed="{{isPlaying}}"
-            data-tooltip="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.HUD.StartTime'}}{{/if}}">
+          <button type="button" class="calendaria-hud-play-btn" data-action="toggleTimeFlow"
+            aria-pressed="{{isPlaying}}"
+            data-tooltip="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
             <i class="fa-solid {{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}"></i>
           </button>
         {{/if}}
@@ -81,10 +82,8 @@
     {{!-- RIGHT INFO PANEL: Indicators --}}
     <div class="calendaria-hud-indicators">
       {{#if weather}}
-        <span class="weather-indicator{{#if isGM}} clickable{{/if}}"
-          {{#if isGM}}data-action="openWeatherPicker"{{/if}}
-          style="--weather-color: {{weather.color}}"
-          data-tooltip="{{weather.tooltip}}">
+        <span class="weather-indicator{{#if isGM}} clickable{{/if}}" {{#if isGM}}data-action="openWeatherPicker" {{/if}}
+          style="--weather-color: {{weather.color}}" data-tooltip="{{weather.tooltip}}">
           <i class="{{weather.icon}}"></i>
           <span class="weather-label">{{weather.label}}</span>
           <span class="weather-temp">{{weather.temp}}</span>

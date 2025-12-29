@@ -2,41 +2,41 @@
 
   {{!-- Time Integration --}}
   {{#if isGM}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="darknessSync" {{#if darknessSync}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="darknessSync" {{#if darknessSync}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.DarknessSync.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.DarknessSync.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="advanceTimeOnRest" {{#if advanceTimeOnRest}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="advanceTimeOnRest" {{#if advanceTimeOnRest}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnCombat.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="advanceTimeOnCombat" {{#if advanceTimeOnCombat}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnCombat.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="advanceTimeOnCombat" {{#if advanceTimeOnCombat}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnCombat.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnCombat.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
   {{/if}}
 
   {{!-- Player Message --}}
   {{#unless isGM}}
-  <div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.PlayerMessage"}}</p>
-  </div>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.PlayerMessage"}}</p>
+    </div>
   {{/unless}}
 
 </section>

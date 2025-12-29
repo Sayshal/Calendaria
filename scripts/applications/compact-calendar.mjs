@@ -6,19 +6,19 @@
  * @author Tyler
  */
 
-import { CalendarApplication } from './calendar-application.mjs';
-import { SettingsPanel } from './settings/settings-panel.mjs';
+import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { MODULE, SETTINGS, TEMPLATES, HOOKS } from '../constants.mjs';
-import { openWeatherPicker } from '../weather/weather-picker.mjs';
-import * as ViewUtils from './calendar-view-utils.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { localize } from '../utils/localization.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { openWeatherPicker } from '../weather/weather-picker.mjs';
+import { CalendarApplication } from './calendar-application.mjs';
+import * as ViewUtils from './calendar-view-utils.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -397,7 +397,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
         // Get author name from author document
-        const authorName = page.system.author?.name || localize('CALENDARIA.CompactCalendar.Unknown');
+        const authorName = page.system.author?.name || localize('CALENDARIA.Common.Unknown');
 
         return {
           id: page.id,
@@ -1204,11 +1204,15 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!resultsContainer) return;
 
     if (this.#searchResults?.length) {
-      resultsContainer.innerHTML = this.#searchResults.map(r => `
+      resultsContainer.innerHTML = this.#searchResults
+        .map(
+          (r) => `
         <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
           <span class="result-name">${r.name}</span>
           ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-        </div>`).join('');
+        </div>`
+        )
+        .join('');
     } else if (this.#searchTerm?.length >= 2) {
       resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
     } else {
@@ -1273,15 +1277,15 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _formatIncrement(key) {
     const labels = {
-      second: localize('CALENDARIA.TimeKeeper.Second'),
-      round: localize('CALENDARIA.TimeKeeper.Round'),
-      minute: localize('CALENDARIA.TimeKeeper.Minute'),
-      hour: localize('CALENDARIA.TimeKeeper.Hour'),
-      day: localize('CALENDARIA.TimeKeeper.Day'),
-      week: localize('CALENDARIA.TimeKeeper.Week'),
-      month: localize('CALENDARIA.TimeKeeper.Month'),
-      season: localize('CALENDARIA.TimeKeeper.Season'),
-      year: localize('CALENDARIA.TimeKeeper.Year')
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }

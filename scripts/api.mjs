@@ -8,15 +8,15 @@
  * @author Tyler
  */
 
-import CalendarManager from './calendar/calendar-manager.mjs';
-import NoteManager from './notes/note-manager.mjs';
-import SearchManager from './search/search-manager.mjs';
-import { CalendariaSocket } from './utils/socket.mjs';
-import { log } from './utils/logger.mjs';
-import { HOOKS } from './constants.mjs';
 import { CalendarApplication } from './applications/calendar-application.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { CompactCalendar } from './applications/compact-calendar.mjs';
+import CalendarManager from './calendar/calendar-manager.mjs';
+import { HOOKS } from './constants.mjs';
+import NoteManager from './notes/note-manager.mjs';
+import SearchManager from './search/search-manager.mjs';
+import { log } from './utils/logger.mjs';
+import { CalendariaSocket } from './utils/socket.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
 
 /**
@@ -53,7 +53,7 @@ export const CalendariaAPI = {
    */
   async advanceTime(delta) {
     if (!game.user.isGM) {
-      ui.notifications.error('Only GMs can advance time');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.AdvanceTime', { localize: true });
       return game.time.worldTime;
     }
 
@@ -69,7 +69,7 @@ export const CalendariaAPI = {
    */
   async setDateTime(components) {
     if (!game.user.isGM) {
-      ui.notifications.error('Only GMs can set date/time');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.SetDateTime', { localize: true });
       return game.time.worldTime;
     }
 
@@ -96,13 +96,13 @@ export const CalendariaAPI = {
    */
   async jumpToDate({ year, month, day }) {
     if (!game.user.isGM) {
-      ui.notifications.error('Only GMs can jump to date');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.JumpToDate', { localize: true });
       return;
     }
 
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
-      ui.notifications.warn('No active calendar available');
+      ui.notifications.warn('CALENDARIA.Error.NoActiveCalendar', { localize: true });
       return;
     }
 
@@ -168,7 +168,7 @@ export const CalendariaAPI = {
    */
   async switchCalendar(id) {
     if (!game.user.isGM) {
-      ui.notifications.error('Only GMs can switch calendars');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.SwitchCalendar', { localize: true });
       return false;
     }
 
@@ -596,8 +596,7 @@ export const CalendariaAPI = {
    */
   async createNote({ name, content = '', startDate, endDate, allDay = true, repeat = 'never', categories = [], icon, color, gmOnly = false }) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can create notes');
-      ui.notifications.error('Only GMs can create notes');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.CreateNotes', { localize: true });
       return null;
     }
 
@@ -634,8 +633,7 @@ export const CalendariaAPI = {
    */
   async updateNote(pageId, updates) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can update notes');
-      ui.notifications.error('Only GMs can update notes');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.UpdateNotes', { localize: true });
       return null;
     }
 
@@ -667,8 +665,7 @@ export const CalendariaAPI = {
   async openNote(pageId, options = {}) {
     const page = NoteManager.getFullNote(pageId);
     if (!page) {
-      log(2, `Note not found: ${pageId}`);
-      ui.notifications.warn('Note not found');
+      ui.notifications.warn('CALENDARIA.Error.NoteNotFound', { localize: true });
       return;
     }
 
@@ -818,8 +815,7 @@ export const CalendariaAPI = {
    */
   async openCalendarEditor(calendarId) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can edit calendars');
-      ui.notifications.error('Only GMs can edit calendars');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.EditCalendars', { localize: true });
       return null;
     }
 
@@ -971,8 +967,7 @@ export const CalendariaAPI = {
    */
   async advanceTimeToPreset(preset) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can advance time');
-      ui.notifications.error('Only GMs can advance time');
+      ui.notifications.error('CALENDARIA.Error.GMOnly.AdvanceTime', { localize: true });
       return game.time.worldTime;
     }
 

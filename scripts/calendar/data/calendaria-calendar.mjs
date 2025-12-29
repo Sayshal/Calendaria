@@ -1053,7 +1053,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return {
       y: year,
       yyyy: String(year).padStart(4, '0'),
-      B: localize(month?.name ?? 'Unknown'),
+      B: localize(month?.name ?? 'CALENDARIA.Common.Unknown'),
       b: month?.abbreviation ?? '',
       m: month?.ordinal ?? components.month + 1,
       mm: String(month?.ordinal ?? components.month + 1).padStart(2, '0'),

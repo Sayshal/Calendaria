@@ -7,7 +7,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 
 /**
  * Hook handler for preCreateChatMessage.
@@ -82,7 +82,7 @@ function formatWorldTime(worldTime) {
 
   // Get month name
   const monthData = calendar.months?.values?.[components.month];
-  const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
+  const monthNameRaw = monthData?.name ?? format('CALENDARIA.Calendar.MonthFallback', { num: components.month + 1 });
   const monthName = localize(monthNameRaw);
 
   // Calculate display year

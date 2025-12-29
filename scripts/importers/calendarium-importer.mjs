@@ -117,7 +117,7 @@ export default class CalendariumImporter extends BaseImporter {
     const { cycles, cycleFormat } = this.#transformCustomYears(calendar.static);
 
     return {
-      name: calendar.name || 'Imported Calendar',
+      name: calendar.name || localize('CALENDARIA.Importer.Fallback.CalendarName'),
       days: { values: weekdays, hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60, daysPerYear },
       months: { values: months },
       years: { yearZero: 0, firstWeekday: calendar.static.firstWeekDay || 0, leapYear: null },
@@ -128,7 +128,12 @@ export default class CalendariumImporter extends BaseImporter {
       eras,
       cycles,
       cycleFormat,
-      metadata: { id: calendar.id || 'imported-calendarium', description: calendar.description || 'Imported from Calendarium', system: calendar.name || 'Unknown', importedFrom: 'calendarium' },
+      metadata: {
+        id: calendar.id || 'imported-calendarium',
+        description: calendar.description || localize('CALENDARIA.Common.ImportedFromCalendarium'),
+        system: calendar.name || localize('CALENDARIA.Common.Unknown'),
+        importedFrom: 'calendarium'
+      },
       currentDate: this.#transformCurrentDate(calendar.current),
       _warnings: warnings
     };
@@ -287,7 +292,6 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #generateMoonPhases() {
     const iconNames = ['01_newmoon', '02_waxingcrescent', '03_firstquarter', '04_waxinggibbous', '05_fullmoon', '06_waninggibbous', '07_lastquarter', '08_waningcrescent'];
-
     return PHASE_NAMES_8.map((name, i) => ({ name, rising: '', fading: '', icon: `${ASSETS.MOON_ICONS}/${iconNames[i]}.svg`, start: i / 8, end: (i + 1) / 8 }));
   }
 
@@ -381,7 +385,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #transformEras(eras = []) {
     return eras.map((era) => ({
-      name: era.name || 'Era',
+      name: era.name || localize('CALENDARIA.Common.Era'),
       abbreviation: era.name?.substring(0, 3) || 'E',
       startYear: era.date?.year ?? 0,
       endYear: era.end?.year ?? null,
@@ -414,14 +418,14 @@ export default class CalendariumImporter extends BaseImporter {
     return {
       cycles: [
         {
-          name: 'Custom Years',
+          name: localize('CALENDARIA.Importer.CustomYears'),
           length: staticData.years.length,
           offset: 0,
           basedOn: 'year',
           entries: staticData.years.map((year) => ({ name: year.name || year.id }))
         }
       ],
-      cycleFormat: 'Year of {{1}}'
+      cycleFormat: localize('CALENDARIA.Importer.CycleFormatYear')
     };
   }
 

@@ -2,21 +2,21 @@
 
   {{!-- Primary GM --}}
   {{#if isGM}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
-      <div class="form-fields">
-        <select name="primaryGM">
-          {{#each primaryGMOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-          {{/each}}
-        </select>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
+        <div class="form-fields">
+          <select name="primaryGM">
+            {{#each primaryGMOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
   {{/if}}
 
   {{!-- Logging --}}
@@ -36,13 +36,13 @@
     </div>
 
     {{#if isGM}}
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
-    </div>
     {{/if}}
   </fieldset>
 

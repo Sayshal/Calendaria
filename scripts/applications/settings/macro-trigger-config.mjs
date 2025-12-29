@@ -6,10 +6,10 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
-import { localize, format } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
+import { localize } from '../../utils/localization.mjs';
+import { log } from '../../utils/logger.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -179,7 +179,7 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     // Save config
     await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
     log(3, 'Macro trigger config saved', config);
-    ui.notifications.info(localize('CALENDARIA.MacroTrigger.Saved'));
+    ui.notifications.info('CALENDARIA.MacroTrigger.Saved', { localize: true });
   }
 
   /**
@@ -198,7 +198,7 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     const macroId = macroSelect?.value;
 
     if (isNaN(moonIndex) || isNaN(phaseIndex) || !macroId) {
-      ui.notifications.warn(localize('CALENDARIA.MacroTrigger.SelectAll'));
+      ui.notifications.warn('CALENDARIA.MacroTrigger.SelectAll', { localize: true });
       return;
     }
 
@@ -209,7 +209,7 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     // Check for duplicate
     const exists = config.moonPhase.some((t) => t.moonIndex === moonIndex && t.phaseIndex === phaseIndex);
     if (exists) {
-      ui.notifications.warn(localize('CALENDARIA.MacroTrigger.DuplicateMoon'));
+      ui.notifications.warn('CALENDARIA.MacroTrigger.DuplicateMoon', { localize: true });
       return;
     }
 
@@ -252,7 +252,7 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     const macroId = macroSelect?.value;
 
     if (isNaN(seasonIndex) || !macroId) {
-      ui.notifications.warn(localize('CALENDARIA.MacroTrigger.SelectSeasonAndMacro'));
+      ui.notifications.warn('CALENDARIA.MacroTrigger.SelectSeasonAndMacro', { localize: true });
       return;
     }
 
@@ -263,7 +263,7 @@ export class MacroTriggerConfig extends HandlebarsApplicationMixin(ApplicationV2
     // Check for duplicate
     const exists = config.season.some((t) => t.seasonIndex === seasonIndex);
     if (exists) {
-      ui.notifications.warn(localize('CALENDARIA.MacroTrigger.DuplicateSeason'));
+      ui.notifications.warn('CALENDARIA.MacroTrigger.DuplicateSeason', { localize: true });
       return;
     }
 

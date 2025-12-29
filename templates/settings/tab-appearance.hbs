@@ -25,7 +25,7 @@
                 <input type="text" class="color-hex" value="{{this.value}}" readonly>
                 {{#if this.isCustom}}
                   <button type="button" class="reset-color" data-action="resetColor" data-key="{{this.key}}"
-                    data-tooltip="{{localize 'CALENDARIA.ThemeEditor.ResetToDefault'}}">
+                    data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}">
                     <i class="fas fa-undo"></i>
                   </button>
                 {{else}}
@@ -51,7 +51,7 @@
       </button>
       <button type="button" data-action="importTheme">
         <i class="fas fa-upload"></i>
-        {{localize "CALENDARIA.ThemeEditor.Import"}}
+        {{localize "CALENDARIA.Importer.Import"}}
       </button>
     </div>
   </fieldset>

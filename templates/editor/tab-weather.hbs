@@ -3,7 +3,7 @@
   <div class="weather-header">
     <div class="zone-controls">
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Weather.Zone.Label"}}</label>
+        <label>{{localize "CALENDARIA.Common.ClimateZone"}}</label>
         <select name="weather.activeZone" class="zone-select">
           {{#each zoneOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
@@ -55,7 +55,7 @@
             <span class="col-enabled" data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Enabled'}}"></span>
             <span class="col-icon"></span>
             <span class="col-name"
-              data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Name'}}">{{localize "CALENDARIA.Editor.Weather.Name"}}</span>
+              data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Name'}}">{{localize "CALENDARIA.Common.Name"}}</span>
             <span class="col-chance"
               data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Chance'}}">{{localize "CALENDARIA.Editor.Weather.Chance"}}</span>
             <span class="col-temp"

@@ -6,10 +6,10 @@
  * @author Tyler
  */
 
-import { MODULE, HOOKS, TEMPLATES, SETTINGS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { SettingsPanel } from './settings/settings-panel.mjs';
+import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { localize } from '../utils/localization.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -241,20 +241,20 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Format increment key for display.
    * @param {string} key - Increment key
    * @returns {string} Formatted label
-   * @todo Can we use global keys from foundry?
+   * @todo All 3 huds have this method of a different name. Should be fixed.
    * @private
    */
   #formatIncrement(key) {
     const labels = {
-      second: localize('CALENDARIA.TimeKeeper.Second'),
-      round: localize('CALENDARIA.TimeKeeper.Round'),
-      minute: localize('CALENDARIA.TimeKeeper.Minute'),
-      hour: localize('CALENDARIA.TimeKeeper.Hour'),
-      day: localize('CALENDARIA.TimeKeeper.Day'),
-      week: localize('CALENDARIA.TimeKeeper.Week'),
-      month: localize('CALENDARIA.TimeKeeper.Month'),
-      season: localize('CALENDARIA.TimeKeeper.Season'),
-      year: localize('CALENDARIA.TimeKeeper.Year')
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }

@@ -74,18 +74,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static TABS = {
     primary: {
       tabs: [
-        { id: 'calendar', icon: 'fas fa-calendar-alt', label: 'CALENDARIA.SettingsPanel.Tab.Calendar' },
-        { id: 'notes', icon: 'fas fa-sticky-note', label: 'CALENDARIA.SettingsPanel.Tab.Notes' },
-        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.SettingsPanel.Tab.Time' },
-        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.SettingsPanel.Tab.Moons' },
-        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.SettingsPanel.Tab.Weather' },
+        { id: 'calendar', icon: 'fas fa-calendar-alt', label: 'CALENDARIA.Common.Calendar' },
+        { id: 'notes', icon: 'fas fa-sticky-note', label: 'CALENDARIA.Common.Notes' },
+        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time' },
+        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons' },
+        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather' },
         { id: 'appearance', icon: 'fas fa-palette', label: 'CALENDARIA.SettingsPanel.Tab.Appearance' },
         { id: 'macros', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
         { id: 'chat', icon: 'fas fa-comment', label: 'CALENDARIA.SettingsPanel.Tab.Chat' },
         { id: 'advanced', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Advanced' },
         { id: 'hud', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', cssClass: 'app-tab' },
         { id: 'compact', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.Compact', cssClass: 'app-tab' },
-        { id: 'timekeeper', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', cssClass: 'app-tab' }
+        { id: 'timekeeper', icon: 'fas fa-stopwatch', label: 'CALENDARIA.Common.TimeKeeper', cssClass: 'app-tab' }
       ],
       initial: 'calendar'
     }
@@ -289,7 +289,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       text: { label: 'CALENDARIA.ThemeEditor.Category.Text', colors: [] },
       buttons: { label: 'CALENDARIA.ThemeEditor.Category.Buttons', colors: [] },
       accents: { label: 'CALENDARIA.ThemeEditor.Category.Accents', colors: [] },
-      festivals: { label: 'CALENDARIA.ThemeEditor.Category.Festivals', colors: [] }
+      festivals: { label: 'CALENDARIA.Common.Festivals', colors: [] }
     };
 
     for (const def of COLOR_DEFINITIONS) {
@@ -483,7 +483,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       app.render();
     }
 
-    ui.notifications.info(localize('CALENDARIA.SettingsPanel.ResetPosition.Success'));
+    ui.notifications.info('CALENDARIA.SettingsPanel.ResetPosition.Success', { localize: true });
   }
 
   /**
@@ -543,13 +543,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.ThemeEditor.ResetAll') },
       content: `<p>${localize('CALENDARIA.ThemeEditor.ConfirmResetAll')}</p>`,
       yes: { label: localize('CALENDARIA.ThemeEditor.ResetAll'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.UI.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     });
 
     if (confirmed) {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {});
       applyCustomColors({ ...DEFAULT_COLORS });
-      ui.notifications.info(localize('CALENDARIA.ThemeEditor.ColorsReset'));
+      ui.notifications.info('CALENDARIA.ThemeEditor.ColorsReset', { localize: true });
       app?.render();
     }
   }
@@ -570,7 +570,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    ui.notifications.info(localize('CALENDARIA.ThemeEditor.ExportSuccess'));
+    ui.notifications.info('CALENDARIA.ThemeEditor.ExportSuccess', { localize: true });
   }
 
   /**
@@ -595,11 +595,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         for (const [key, value] of Object.entries(importData.colors)) if (DEFAULT_COLORS[key] !== value) customColors[key] = value;
         await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
         applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
-        ui.notifications.info(localize('CALENDARIA.ThemeEditor.ImportSuccess'));
+        ui.notifications.info('CALENDARIA.ThemeEditor.ImportSuccess', { localize: true });
         app?.render();
       } catch (err) {
         log(2, 'Theme import failed:', err);
-        ui.notifications.error(localize('CALENDARIA.ThemeEditor.ImportError'));
+        ui.notifications.error('CALENDARIA.ThemeEditor.ImportError', { localize: true });
       }
     });
 

@@ -51,14 +51,14 @@
       <div class="add-season-trigger">
         <div class="trigger-inputs">
           <select name="newSeasonTrigger.seasonIndex">
-            <option value="">{{localize "CALENDARIA.MacroTrigger.SelectSeason"}}</option>
+            <option value="">{{localize "CALENDARIA.Common.Season"}}</option>
             <option value="-1">{{localize "CALENDARIA.MacroTrigger.AllSeasons"}}</option>
             {{#each seasons}}
               <option value="{{index}}">{{name}}</option>
             {{/each}}
           </select>
           <select name="newSeasonTrigger.macroId">
-            <option value="">{{localize "CALENDARIA.MacroTrigger.SelectMacro"}}</option>
+            <option value="">{{localize "CALENDARIA.Common.Macro"}}</option>
             {{#each macros}}
               <option value="{{id}}">{{name}}</option>
             {{/each}}
@@ -112,14 +112,14 @@
       <div class="add-moon-trigger">
         <div class="trigger-inputs">
           <select name="newMoonTrigger.moonIndex">
-            <option value="">{{localize "CALENDARIA.MacroTrigger.SelectMoon"}}</option>
+            <option value="">{{localize "CALENDARIA.Common.Moon"}}</option>
             <option value="-1">{{localize "CALENDARIA.MacroTrigger.AllMoons"}}</option>
             {{#each moons}}
               <option value="{{index}}">{{name}}</option>
             {{/each}}
           </select>
           <select name="newMoonTrigger.phaseIndex">
-            <option value="">{{localize "CALENDARIA.MacroTrigger.SelectPhase"}}</option>
+            <option value="">{{localize "CALENDARIA.Common.Phase"}}</option>
             <option value="-1" data-moon="-1">{{localize "CALENDARIA.MacroTrigger.AllPhases"}}</option>
             {{#each moons}}
               {{#each (lookup ../moonPhases index)}}
@@ -128,7 +128,7 @@
             {{/each}}
           </select>
           <select name="newMoonTrigger.macroId">
-            <option value="">{{localize "CALENDARIA.MacroTrigger.SelectMacro"}}</option>
+            <option value="">{{localize "CALENDARIA.Common.Macro"}}</option>
             {{#each macros}}
               <option value="{{id}}">{{name}}</option>
             {{/each}}

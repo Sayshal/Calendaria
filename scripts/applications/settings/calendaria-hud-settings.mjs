@@ -6,10 +6,10 @@
  * @author Tyler
  */
 
+import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
-import CalendarManager from '../../calendar/calendar-manager.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -76,9 +76,7 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
     context.stickyPosition = stickyStates.position ?? false;
 
     // Footer buttons
-    context.buttons = [
-      { type: 'submit', icon: 'fas fa-save', label: 'CALENDARIA.UI.Save' }
-    ];
+    context.buttons = [{ type: 'submit', icon: 'fas fa-save', label: 'CALENDARIA.Common.Save' }];
 
     return context;
   }
@@ -125,7 +123,7 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
       hud.render({ force: true });
     }
 
-    ui.notifications.info(localize('CALENDARIA.HUD.Settings.Saved'));
+    ui.notifications.info('CALENDARIA.HUD.Settings.Saved', { localize: true });
     log(3, 'HUD settings saved');
 
     // Trigger reload if calendar changed
@@ -154,7 +152,7 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
       hud.render();
     }
 
-    ui.notifications.info(localize('CALENDARIA.Settings.ResetPosition.Success'));
+    ui.notifications.info('CALENDARIA.Settings.ResetPosition.Success', { localize: true });
     log(3, 'HUD position reset');
   }
 }

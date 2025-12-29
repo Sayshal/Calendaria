@@ -6,12 +6,12 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import { ASSETS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
+import NoteManager from '../notes/note-manager.mjs';
+import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
 
 /**
  * FC color names to hex mapping.
@@ -119,7 +119,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     log(3, `FC first_day: ${yearData.first_day}, converted firstWeekday: ${year0FirstWeekday}, yearZero: 1`);
 
     return {
-      name: data.name || 'Imported Calendar',
+      name: data.name || localize('CALENDARIA.Importer.Fallback.CalendarName'),
 
       // Days configuration
       days: { values: weekdays, ...this.#transformTime(staticData.clock), daysPerYear },
@@ -151,7 +151,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       daylight: this.#transformDaylight(staticData.seasons?.data, staticData.clock),
 
       // Metadata
-      metadata: { description: `Imported from Fantasy-Calendar.com`, system: data.name || 'Unknown', importedFrom: 'fantasy-calendar' },
+      metadata: { description: localize('CALENDARIA.Common.ImportedFromFantasyCalendar'), system: data.name || localize('CALENDARIA.Common.Unknown'), importedFrom: 'fantasy-calendar' },
 
       // Import current date/time from dynamic_data
       currentDate: this.#transformCurrentDate(data.dynamic_data)
@@ -337,7 +337,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   #transformEras(eras = []) {
     return eras.map((era) => ({
-      name: era.name || 'Era',
+      name: era.name || localize('CALENDARIA.Common.Era'),
       abbreviation: era.abbreviation || era.name?.substring(0, 2) || 'E',
       startYear: era.start ?? 0,
       endYear: era.end ?? null,
@@ -369,7 +369,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #transformCycles(cycles = []) {
     const basedOnMap = { year: 'year', era_year: 'eraYear', month: 'month', day: 'monthDay', epoch: 'day', year_day: 'yearDay' };
     return cycles.map((cycle) => ({
-      name: cycle.name || 'Cycle',
+      name: cycle.name || localize('CALENDARIA.Common.Cycle'),
       length: cycle.length || 12,
       offset: cycle.offset ?? 0,
       basedOn: basedOnMap[cycle.type] || 'year',

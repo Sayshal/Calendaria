@@ -1,15 +1,15 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.Weekdays"}}</legend>
+    <legend>{{localize "CALENDARIA.Common.Weekdays"}}</legend>
 
     <div class="items-list weekdays-list">
       <div class="list-header flexrow">
         <span class="col-name"
-          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekdayName'}}">{{localize "CALENDARIA.Editor.Column.Name"}}</span>
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekdayName'}}">{{localize "CALENDARIA.Common.Name"}}</span>
         <span class="col-abbr"
-          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekdayAbbr'}}">{{localize "CALENDARIA.Editor.Column.Abbreviation"}}</span>
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekdayAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
         <span class="col-rest"
-          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RestDay'}}">{{localize "CALENDARIA.Editor.Column.RestDay"}}</span>
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RestDay'}}">{{localize "CALENDARIA.Common.RestDay"}}</span>
         <span class="col-controls"></span>
       </div>
 
@@ -45,7 +45,7 @@
   </fieldset>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.NamedWeeks"}}</legend>
+    <legend>{{localize "CALENDARIA.Common.NamedWeeks"}}</legend>
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.NamedWeeks"}}</p>
 
     <div class="form-group">
@@ -73,7 +73,7 @@
           <span class="col-name"
             data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekName'}}">{{localize "CALENDARIA.Editor.Field.WeekName"}}</span>
           <span class="col-abbr"
-            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekAbbr'}}">{{localize "CALENDARIA.Editor.Field.WeekAbbr"}}</span>
+            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.WeekAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
           <span class="col-controls"></span>
         </div>
 
@@ -89,7 +89,7 @@
                 <i class="fas fa-plus"></i>
               </button>
               <button type="button" data-action="removeNamedWeek" data-index="{{this.index}}"
-                data-tooltip="{{localize 'CALENDARIA.Editor.RemoveWeek'}}">
+                data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
                 <i class="fas fa-minus"></i>
               </button>
             </div>

@@ -6,17 +6,17 @@
  * @author Tyler
  */
 
-import { CalendarApplication } from './calendar-application.mjs';
-import { SettingsPanel } from './settings/settings-panel.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { MODULE, SETTINGS, TEMPLATES, HOOKS } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { CalendarApplication } from './calendar-application.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -859,7 +859,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (playBtn) {
       playBtn.classList.toggle('playing', running);
       playBtn.setAttribute('aria-pressed', String(running));
-      playBtn.dataset.tooltip = running ? localize('CALENDARIA.HUD.PauseTime') : localize('CALENDARIA.HUD.StartTime');
+      playBtn.dataset.tooltip = running ? localize('CALENDARIA.HUD.PauseTime') : localize('CALENDARIA.TimeKeeper.Start');
 
       const icon = playBtn.querySelector('i');
       if (icon) {
@@ -977,7 +977,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const displayYear = components.year + yearZero;
     const yearWithEra = calendar.formatYearWithEra?.(displayYear) ?? String(displayYear);
 
-    return `${day}${this.#getOrdinalSuffix(day)} of ${monthName}, ${yearWithEra}`;
+    return format('CALENDARIA.Formatters.OrdinalDayOfMonth', { day, suffix: this.#getOrdinalSuffix(day), month: monthName, year: yearWithEra });
   }
 
   /**
@@ -998,15 +998,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #formatIncrementLabel(key) {
     const labels = {
-      second: localize('CALENDARIA.TimeKeeper.Second'),
-      round: localize('CALENDARIA.TimeKeeper.Round'),
-      minute: localize('CALENDARIA.TimeKeeper.Minute'),
-      hour: localize('CALENDARIA.TimeKeeper.Hour'),
-      day: localize('CALENDARIA.TimeKeeper.Day'),
-      week: localize('CALENDARIA.TimeKeeper.Week'),
-      month: localize('CALENDARIA.TimeKeeper.Month'),
-      season: localize('CALENDARIA.TimeKeeper.Season'),
-      year: localize('CALENDARIA.TimeKeeper.Year')
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }
@@ -1526,11 +1526,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!resultsContainer) return;
 
     if (this.#searchResults?.length) {
-      resultsContainer.innerHTML = this.#searchResults.map(r => `
+      resultsContainer.innerHTML = this.#searchResults
+        .map(
+          (r) => `
         <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
           <span class="result-name">${r.name}</span>
           ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-        </div>`).join('');
+        </div>`
+        )
+        .join('');
     } else if (this.#searchTerm?.length >= 2) {
       resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
     } else {

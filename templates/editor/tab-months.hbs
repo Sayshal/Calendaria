@@ -2,11 +2,11 @@
   <div class="items-list months-list">
     <div class="list-header flexrow">
       <span class="col-name"
-        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthName'}}">{{localize "CALENDARIA.Editor.Column.Name"}}</span>
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthName'}}">{{localize "CALENDARIA.Common.Name"}}</span>
       <span class="col-abbr"
-        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthAbbr'}}">{{localize "CALENDARIA.Editor.Column.Abbreviation"}}</span>
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
       <span class="col-days"
-        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthDays'}}">{{localize "CALENDARIA.Editor.Column.Days"}}</span>
+        data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthDays'}}">{{localize "CALENDARIA.Common.Days"}}</span>
       <span class="col-leap"
         data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.MonthLeap'}}">{{localize "CALENDARIA.Editor.Column.Leap"}}</span>
       <span class="col-start-weekday"
@@ -61,22 +61,22 @@
           </summary>
           <div class="custom-weekdays-content">
             <label class="custom-weekdays-toggle">
-              <input type="checkbox" name="months.{{this.index}}.hasCustomWeekdays"
-                value="true" {{#if this.hasCustomWeekdays}}checked{{/if}}>
+              <input type="checkbox" name="months.{{this.index}}.hasCustomWeekdays" value="true"
+                {{#if this.hasCustomWeekdays}}checked{{/if}}>
               {{localize "CALENDARIA.Editor.Month.EnableCustomWeekdays"}}
             </label>
             {{#if this.hasCustomWeekdays}}
               <div class="custom-weekdays-list">
                 {{#each this.customWeekdays}}
                   <div class="custom-weekday-row flexrow">
-                    <input type="text" name="months.{{../index}}.weekdays.{{@index}}.name"
-                      value="{{this.name}}" placeholder="{{localize 'CALENDARIA.Editor.Column.Name'}}">
+                    <input type="text" name="months.{{../index}}.weekdays.{{@index}}.name" value="{{this.name}}"
+                      placeholder="{{localize 'CALENDARIA.Common.Name'}}">
                     <input type="text" name="months.{{../index}}.weekdays.{{@index}}.abbreviation"
-                      value="{{this.abbreviation}}" placeholder="{{localize 'CALENDARIA.Editor.Column.Abbreviation'}}">
+                      value="{{this.abbreviation}}" placeholder="{{localize 'CALENDARIA.Common.Abbreviation'}}">
                     <label class="rest-day-toggle">
-                      <input type="checkbox" name="months.{{../index}}.weekdays.{{@index}}.isRestDay"
-                        value="true" {{#if this.isRestDay}}checked{{/if}}>
-                      {{localize "CALENDARIA.Editor.Column.RestDay"}}
+                      <input type="checkbox" name="months.{{../index}}.weekdays.{{@index}}.isRestDay" value="true"
+                        {{#if this.isRestDay}}checked{{/if}}>
+                      {{localize "CALENDARIA.Common.RestDay"}}
                     </label>
                   </div>
                 {{/each}}

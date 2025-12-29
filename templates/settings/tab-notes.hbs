@@ -2,38 +2,41 @@
 
   {{!-- Custom Categories --}}
   {{#if isGM}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Categories"}}</legend>
-    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Categories"}}</legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
 
-    <div class="categories-list">
-      {{#each categories}}
-        <div class="category-row" data-category-id="{{this.id}}">
-          <input type="color" name="categories.{{@index}}.color" value="{{this.color}}">
-          <input type="text" name="categories.{{@index}}.name" value="{{this.name}}" placeholder="{{localize 'CALENDARIA.SettingsPanel.Category.NamePlaceholder'}}">
-          <input type="text" name="categories.{{@index}}.icon" value="{{this.icon}}" placeholder="fas fa-bookmark" class="icon-input">
-          <button type="button" data-action="removeCategory" data-category-id="{{this.id}}" class="icon-button danger">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      {{else}}
-        <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.Category.None"}}</p>
-      {{/each}}
-    </div>
+      <div class="categories-list">
+        {{#each categories}}
+          <div class="category-row" data-category-id="{{this.id}}">
+            <input type="color" name="categories.{{@index}}.color" value="{{this.color}}">
+            <input type="text" name="categories.{{@index}}.name" value="{{this.name}}"
+              placeholder="{{localize 'CALENDARIA.SettingsPanel.Category.NamePlaceholder'}}">
+            <input type="text" name="categories.{{@index}}.icon" value="{{this.icon}}" placeholder="fas fa-bookmark"
+              class="icon-input">
+            <button type="button" data-action="removeCategory" data-category-id="{{this.id}}"
+              class="icon-button danger">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        {{else}}
+          <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.Category.None"}}</p>
+        {{/each}}
+      </div>
 
-    <button type="button" data-action="addCategory" class="add-button">
-      <i class="fas fa-plus"></i>
-      {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
-    </button>
-  </fieldset>
+      <button type="button" data-action="addCategory" class="add-button">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
+      </button>
+    </fieldset>
   {{/if}}
 
   {{!-- Player Message --}}
   {{#unless isGM}}
-  <div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.NotesTab.PlayerMessage"}}</p>
-  </div>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.NotesTab.PlayerMessage"}}</p>
+    </div>
   {{/unless}}
 
 </section>

@@ -8,13 +8,13 @@
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
-import { getAllCategories, addCustomCategory, deleteCustomCategory, isCustomCategory, getRepeatOptions } from '../notes/note-data.mjs';
-import { getRecurrenceDescription, generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { MODULE, TEMPLATES } from '../constants.mjs';
+import { addCustomCategory, deleteCustomCategory, getAllCategories, getRepeatOptions, isCustomCategory } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { generateRandomOccurrences, getRecurrenceDescription, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
 
 export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applications.sheets.journal.JournalEntryPageSheet) {
   /** View/Edit mode enum. */
@@ -434,7 +434,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     // Generate weekOfMonth description
     if (context.showWeekOfMonthConfig) {
       const ordinals = context.weekNumber > 0 ? ['1st', '2nd', '3rd', '4th', '5th'] : ['Last', '2nd-to-last', '3rd-to-last'];
-      const ordinal = context.weekNumber > 0 ? (ordinals[context.weekNumber - 1] || `${context.weekNumber}th`) : (ordinals[Math.abs(context.weekNumber) - 1] || 'Last');
+      const ordinal = context.weekNumber > 0 ? ordinals[context.weekNumber - 1] || `${context.weekNumber}th` : ordinals[Math.abs(context.weekNumber) - 1] || 'Last';
       const weekdayName = context.weekdayOptions[selectedWeekday]?.name || 'day';
       context.weekOfMonthDescription = `Repeats on the ${ordinal} ${weekdayName} of each month`;
     }
@@ -483,7 +483,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.hasEras = (calendar?.eras?.length ?? 0) > 0;
 
     // Show repeat config grid when any repeat-specific settings or advanced conditions are visible
-    context.showRepeatConfigGrid = context.showMoonConditions || context.showRandomConfig || context.showLinkedConfig || context.showRangeConfig || context.showWeekOfMonthConfig || context.showSeasonalConfig || context.showConditionsUI;
+    context.showRepeatConfigGrid =
+      context.showMoonConditions ||
+      context.showRandomConfig ||
+      context.showLinkedConfig ||
+      context.showRangeConfig ||
+      context.showWeekOfMonthConfig ||
+      context.showSeasonalConfig ||
+      context.showConditionsUI;
 
     // Build conditions list with descriptions
     const rawConditions = this.document.system.conditions || [];

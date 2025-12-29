@@ -7,7 +7,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 
 /**
@@ -121,7 +121,7 @@ export default class SearchManager {
     const displayYear = year + yearZero;
 
     const monthData = calendar?.months?.values?.[month];
-    const monthName = monthData ? localize(monthData.name) : `Month ${month + 1}`;
+    const monthName = monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
 
     return `${day} ${monthName}, ${displayYear}`;
   }
@@ -133,7 +133,10 @@ export default class SearchManager {
    * @returns {string}
    */
   static #extractSnippet(content, term) {
-    const text = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const text = content
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     const searchText = text.toLowerCase();
     const index = searchText.indexOf(term);
 

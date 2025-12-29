@@ -7,7 +7,7 @@
  */
 
 import { MODULE, SETTINGS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
+import { localize } from '../utils/localization.mjs';
 import { isValidDate } from './utils/date-utils.mjs';
 
 /**

@@ -100,15 +100,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     primary: {
       tabs: [
         { id: 'basic', icon: 'fas fa-info-circle', label: 'CALENDARIA.Editor.Tab.Basic' },
-        { id: 'months', icon: 'fas fa-calendar', label: 'CALENDARIA.Editor.Tab.Months' },
-        { id: 'weekdays', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Editor.Tab.Weekdays' },
-        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.Editor.Tab.Time' },
-        { id: 'seasons', icon: 'fas fa-sun', label: 'CALENDARIA.Editor.Tab.Seasons' },
-        { id: 'eras', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Editor.Tab.Eras' },
-        { id: 'festivals', icon: 'fas fa-star', label: 'CALENDARIA.Editor.Tab.Festivals' },
-        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Editor.Tab.Moons' },
-        { id: 'cycles', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Editor.Tab.Cycles' },
-        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Editor.Tab.Weather' }
+        { id: 'months', icon: 'fas fa-calendar', label: 'CALENDARIA.Common.Months' },
+        { id: 'weekdays', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weekdays' },
+        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time' },
+        { id: 'seasons', icon: 'fas fa-sun', label: 'CALENDARIA.Common.Seasons' },
+        { id: 'eras', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras' },
+        { id: 'festivals', icon: 'fas fa-star', label: 'CALENDARIA.Common.Festivals' },
+        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons' },
+        { id: 'cycles', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Common.Cycles' },
+        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather' }
       ],
       initial: 'basic'
     }
@@ -495,8 +495,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const basedOnOptions = [
       { value: 'year', label: 'CALENDARIA.Editor.Cycle.BasedOn.Year' },
       { value: 'eraYear', label: 'CALENDARIA.Editor.Cycle.BasedOn.EraYear' },
-      { value: 'month', label: 'CALENDARIA.Editor.Cycle.BasedOn.Month' },
-      { value: 'monthDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.MonthDay' },
+      { value: 'month', label: 'CALENDARIA.Common.Month' },
+      { value: 'monthDay', label: 'CALENDARIA.Common.MonthDay' },
       { value: 'day', label: 'CALENDARIA.Editor.Cycle.BasedOn.Day' },
       { value: 'yearDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.YearDay' }
     ];
@@ -541,18 +541,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Footer buttons
     context.buttons = [
-      { type: 'button', action: 'saveCalendar', icon: 'fas fa-save', label: 'CALENDARIA.Editor.Button.Save' },
-      { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Editor.Button.Reset' }
+      { type: 'button', action: 'saveCalendar', icon: 'fas fa-save', label: 'CALENDARIA.Common.Save' },
+      { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Common.Reset' }
     ];
 
     // Add Reset to Default button if editing a default calendar with an override
     if (this.#calendarId && CalendarManager.hasDefaultOverride(this.#calendarId)) {
-      context.buttons.push({ type: 'button', action: 'resetToDefault', icon: 'fas fa-history', label: 'CALENDARIA.Editor.Button.ResetToDefault' });
+      context.buttons.push({ type: 'button', action: 'resetToDefault', icon: 'fas fa-history', label: 'CALENDARIA.Common.Reset' });
     }
 
     // Add delete button only for custom calendars (not default calendars)
     if (this.#calendarId && CalendarManager.isCustomCalendar(this.#calendarId)) {
-      context.buttons.push({ type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Editor.Button.Delete', cssClass: 'delete-button' });
+      context.buttons.push({ type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Common.DeleteCalendar', cssClass: 'delete-button' });
     }
 
     return context;
@@ -993,11 +993,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
         if (weekdayIndices.size > 0) {
-          month.weekdays = [...weekdayIndices].sort((a, b) => a - b).map((wdIdx) => ({
-            name: data[`months.${idx}.weekdays.${wdIdx}.name`] || '',
-            abbreviation: data[`months.${idx}.weekdays.${wdIdx}.abbreviation`] || '',
-            isRestDay: data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === 'true' || data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === true
-          }));
+          month.weekdays = [...weekdayIndices]
+            .sort((a, b) => a - b)
+            .map((wdIdx) => ({
+              name: data[`months.${idx}.weekdays.${wdIdx}.name`] || '',
+              abbreviation: data[`months.${idx}.weekdays.${wdIdx}.abbreviation`] || '',
+              isRestDay: data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === 'true' || data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === true
+            }));
         }
       }
 
@@ -1344,7 +1346,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#reindexArray(this.#calendarData.months.values);
       this.render();
     } else {
-      ui.notifications.warn(localize('CALENDARIA.Editor.Error.MinOneMonth'));
+      ui.notifications.warn('CALENDARIA.Editor.Error.MinOneMonth', { localize: true });
     }
   }
 
@@ -1408,7 +1410,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#reindexArray(this.#calendarData.days.values);
       this.render();
     } else {
-      ui.notifications.warn(localize('CALENDARIA.Editor.Error.MinOneWeekday'));
+      ui.notifications.warn('CALENDARIA.Editor.Error.MinOneWeekday', { localize: true });
     }
   }
 
@@ -1560,7 +1562,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onAddMoon(event, target) {
     this.#calendarData.moons.push({
-      name: localize('CALENDARIA.Editor.Default.MoonName'),
+      name: localize('CALENDARIA.Common.Moon'),
       cycleLength: 28,
       cycleDayAdjust: 0,
       hidden: false,
@@ -1905,7 +1907,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const zone = zones.find((z) => z.id === activeZoneId);
 
     if (!zone) {
-      ui.notifications.warn(localize('CALENDARIA.Editor.Weather.Zone.NoZones'));
+      ui.notifications.warn('CALENDARIA.Editor.Weather.Zone.NoZones', { localize: true });
       return;
     }
 
@@ -1919,9 +1921,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         return `
         <div class="form-group temperature-row">
           <label>${season}</label>
-          <input type="number" name="temp_${season}_min" value="${temp.min}" placeholder="${localize('CALENDARIA.Editor.Weather.Zone.TempMin')}">
+          <input type="number" name="temp_${season}_min" value="${temp.min}" placeholder="${localize('CALENDARIA.Common.Min')}">
           <span>–</span>
-          <input type="number" name="temp_${season}_max" value="${temp.max}" placeholder="${localize('CALENDARIA.Editor.Weather.Zone.TempMax')}">
+          <input type="number" name="temp_${season}_max" value="${temp.max}" placeholder="${localize('CALENDARIA.Common.Max')}">
         </div>
       `;
       })
@@ -1934,7 +1936,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           <input type="text" name="name" value="${zone.name}">
         </div>
         <div class="form-group">
-          <label>${localize('CALENDARIA.Editor.Weather.Zone.Description')}</label>
+          <label>${localize('CALENDARIA.Common.Description')}</label>
           <textarea name="description">${zone.description || ''}</textarea>
         </div>
         <fieldset>
@@ -1985,7 +1987,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const zoneIdx = zones.findIndex((z) => z.id === activeZoneId);
 
     if (zoneIdx < 0) {
-      ui.notifications.warn(localize('CALENDARIA.Editor.Weather.Zone.NoZones'));
+      ui.notifications.warn('CALENDARIA.Editor.Weather.Zone.NoZones', { localize: true });
       return;
     }
 
@@ -2048,7 +2050,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendarId = dropdown?.value;
 
     if (!calendarId) {
-      ui.notifications.warn(localize('CALENDARIA.Editor.SelectCalendarFirst'));
+      ui.notifications.warn('CALENDARIA.Editor.SelectCalendarFirst', { localize: true });
       return;
     }
 
@@ -2071,7 +2073,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       // Default calendar - can't edit directly, offer to create copy
       buttons.push({ action: 'editCopy', label: localize('CALENDARIA.Editor.EditAsCopy'), icon: 'fas fa-copy', default: true });
     }
-    buttons.push({ action: 'cancel', label: localize('CALENDARIA.UI.Cancel'), icon: 'fas fa-times' });
+    buttons.push({ action: 'cancel', label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' });
 
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: localize('CALENDARIA.Editor.LoadCalendar') },
@@ -2118,7 +2120,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onSaveCalendar(event, target) {
     // Validate
     if (!this.#calendarData.name) {
-      ui.notifications.error(localize('CALENDARIA.Editor.Error.NameRequired'));
+      ui.notifications.error('CALENDARIA.Editor.Error.NameRequired', { localize: true });
       return;
     }
 
@@ -2213,10 +2215,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     return new Promise((resolve) => {
       foundry.applications.api.DialogV2.prompt({
-        window: { title: localize('CALENDARIA.Editor.Button.Save') },
+        window: { title: localize('CALENDARIA.Common.Save') },
         content,
         ok: {
-          label: localize('CALENDARIA.Editor.Button.Save'),
+          label: localize('CALENDARIA.Common.Save'),
           icon: 'fas fa-save',
           callback: (event, button, dialog) => {
             const setActive = isGM ? (button.form.elements.setActive?.checked ?? false) : false;
@@ -2238,15 +2240,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetCalendar(event, target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Editor.Reset') },
+      window: { title: localize('CALENDARIA.Common.Reset') },
       content: `<p>${localize('CALENDARIA.Editor.ConfirmReset')}</p>`,
-      yes: { label: localize('CALENDARIA.Editor.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.UI.Cancel'), icon: 'fas fa-times' }
+      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     });
 
     if (confirmed) {
       this.#initializeBlankCalendar();
-      ui.notifications.info(localize('CALENDARIA.Editor.ResetComplete'));
+      ui.notifications.info('CALENDARIA.Editor.ResetComplete', { localize: true });
       this.render();
     }
   }
@@ -2260,10 +2262,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#calendarId || !CalendarManager.hasDefaultOverride(this.#calendarId)) return;
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Editor.Button.ResetToDefault') },
+      window: { title: localize('CALENDARIA.Common.Reset') },
       content: `<p>${localize('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
-      yes: { label: localize('CALENDARIA.Editor.Button.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
-      no: { label: localize('CALENDARIA.UI.Cancel'), icon: 'fas fa-times' }
+      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-history', callback: () => true },
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     });
 
     if (!confirmed) return;
@@ -2285,10 +2287,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#calendarId || !this.#isEditing) return;
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Editor.Button.Delete') },
+      window: { title: localize('CALENDARIA.Common.DeleteCalendar') },
       content: `<p>${format('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
-      yes: { label: localize('CALENDARIA.Editor.Button.Delete'), icon: 'fas fa-trash', callback: () => true },
-      no: { label: localize('CALENDARIA.UI.Cancel'), icon: 'fas fa-times' }
+      yes: { label: localize('CALENDARIA.Common.DeleteCalendar'), icon: 'fas fa-trash', callback: () => true },
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     });
 
     if (!confirmed) return;

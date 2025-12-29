@@ -6,10 +6,10 @@
  * @author Tyler
  */
 
-import { MODULE, TEMPLATES } from '../constants.mjs';
+import { TEMPLATES } from '../constants.mjs';
+import { createImporter, getImporterOptions } from '../importers/index.mjs';
+import { format } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { getImporterOptions, createImporter } from '../importers/index.mjs';
 import { CalendarEditor } from './calendar-editor.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -303,7 +303,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
   async #handleFile(file) {
     const importer = this.#getSelectedImporter();
     if (!importer) {
-      ui.notifications.warn(localize('CALENDARIA.Importer.SelectSourceFirst'));
+      ui.notifications.warn('CALENDARIA.Importer.SelectSourceFirst', { localize: true });
       return;
     }
 
@@ -384,7 +384,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onSubmit(event, form, formData) {
     if (!this.#transformedData) {
-      ui.notifications.warn(localize('CALENDARIA.Importer.NoData'));
+      ui.notifications.warn('CALENDARIA.Importer.NoData', { localize: true });
       return;
     }
 
@@ -450,7 +450,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     await this.close();
     CalendarEditor.createFromData(this.#transformedData, { suggestedId: calendarId });
 
-    ui.notifications.info(localize('CALENDARIA.Importer.OpeningEditor'));
+    ui.notifications.info('CALENDARIA.Importer.OpeningEditor', { localize: true });
   }
 
   /* -------------------------------------------- */
