@@ -21,10 +21,8 @@
                 data-month="{{month}}"
                 data-day="{{day}}"
                 data-action="selectDay"
-                {{#if
-                festivalName}}data-tooltip="{{festivalName}}"
-                {{
-            /if}}>
+                {{#if festivalName}}data-tooltip="{{festivalName}}"
+                {{/if}}>
                 <div class="day-number">
                     {{day}}
                     {{#if isFestival}}
@@ -34,10 +32,8 @@
                     <span
                         class="moon-phase{{#if color}} tinted{{/if}}"
                         data-tooltip="{{moonName}}: {{phaseName}}"
-                        {{#if
-                        color}}style="--moon-color: {{color}}"
-                        {{
-                    /if}}>
+                        {{#if color}}style="--moon-color: {{color}}"
+                        {{/if}}>
                         <img src="{{icon}}" alt="{{phaseName}}">
                     </span>
                     {{/each}}

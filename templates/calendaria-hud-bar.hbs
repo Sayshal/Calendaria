@@ -49,10 +49,7 @@ Wrapped in single element for AppV2 PARTS compatibility.
     {{!-- MAIN BAR --}}
     <div
         class="calendaria-hud-bar{{#if locked}} locked{{/if}}{{#if hasEvents}} has-events{{/if}}"
-        {{#if
-        hasEvents}}style="--event-glow: {{firstEventColor}};"
-        {{
-    /if}}>
+        {{#if hasEvents}}style="--event-glow: {{firstEventColor}};"{{/if}}>
 
         {{!-- LEFT BUTTON GROUP: Search, Add Note --}}
         <div
@@ -123,10 +120,7 @@ Wrapped in single element for AppV2 PARTS compatibility.
             {{#if weather}}
             <span
                 class="weather-indicator{{#if isGM}} clickable{{/if}}"
-                {{#if
-                isGM}}data-action="openWeatherPicker"
-                {{
-            /if}}
+                {{#if isGM}}data-action="openWeatherPicker"{{/if}}
           style="--weather-color: {{weather.color}}" data-tooltip="{{weather.tooltip}}">
                 <i class="{{weather.icon}}"></i>
                 <span class="weather-label">{{weather.label}}</span>
@@ -233,12 +227,7 @@ Wrapped in single element for AppV2 PARTS compatibility.
             aria-label="{{localize 'CALENDARIA.HUD.Multiplier'}}"
         >
             {{#each multipliers}}
-            <option
-                value="{{value}}"
-                {{#if
-                selected}}
-                selected{{
-            /if}}>{{label}}</option>
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
         </select>
 
@@ -249,12 +238,7 @@ Wrapped in single element for AppV2 PARTS compatibility.
             aria-label="{{localize 'CALENDARIA.HUD.TimeIncrement'}}"
         >
             {{#each increments}}
-            <option
-                value="{{key}}"
-                {{#if
-                selected}}
-                selected{{
-            /if}}>{{label}}</option>
+            <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
         </select>
 

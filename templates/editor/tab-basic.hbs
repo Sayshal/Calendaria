@@ -88,9 +88,7 @@
                         {{#each weekdayOptions}}
                         <option
                             value="{{this.value}}"
-                            {{#if
-                            this.selected}}selected{{
-                        /if}}>{{this.label}}</option>
+                            {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                         {{/each}}
                     </select>
                 </div>
@@ -108,9 +106,7 @@
                         {{#each leapRuleOptions}}
                         <option
                             value="{{this.value}}"
-                            {{#if
-                            this.selected}}selected{{
-                        /if}}>{{localize this.label}}</option>
+                            {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
                         {{/each}}
                     </select>
                 </div>
@@ -120,10 +116,8 @@
             {{!-- Simple interval fields --}}
             <div
                 class="leap-simple-fields"
-                {{#unless
-                showLeapSimple}}style="display: none;"
-                {{
-            /unless}}>
+                {{#unless showLeapSimple}}style="display: none;"
+                {{/unless}}>
                 <div class="form-group">
                     <label>{{localize "CALENDARIA.Editor.Field.LeapInterval"}}</label>
                     <div class="form-fields fit-content">
@@ -157,10 +151,8 @@
             {{!-- Custom pattern field --}}
             <div
                 class="leap-custom-fields"
-                {{#unless
-                showLeapCustom}}style="display: none;"
-                {{
-            /unless}}>
+                {{#unless showLeapCustom}}style="display: none;"
+                {{/unless}}>
                 <div class="form-group">
                     <label>{{localize "CALENDARIA.Editor.Field.LeapPattern"}}</label>
                     <div class="form-fields fit-content">
@@ -193,10 +185,8 @@
             {{!-- Gregorian info --}}
             <div
                 class="leap-gregorian-info"
-                {{#unless
-                showLeapGregorian}}style="display: none;"
-                {{
-            /unless}}>
+                {{#unless showLeapGregorian}}style="display: none;"
+                {{/unless}}>
                 <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
             </div>
         </fieldset>

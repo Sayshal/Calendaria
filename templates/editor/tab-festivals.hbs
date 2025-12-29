@@ -32,9 +32,7 @@
                 {{#each this.monthOptions}}
                 <option
                     value="{{this.value}}"
-                    {{#if
-                    this.selected}}selected{{
-                /if}}>{{this.label}}</option>
+                    {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                 {{/each}}
             </select>
             <input
@@ -49,20 +47,16 @@
                 <input
                     type="checkbox"
                     name="festivals.{{this.index}}.leapYearOnly"
-                    {{#if
-                    this.leapYearOnly}}checked{{
-                /if}}>
+                    {{#if this.leapYearOnly}}checked{{/if}}>
             </label>
 
             <label class="col-weekday checkbox">
                 <input
                     type="checkbox"
                     name="festivals.{{this.index}}.countsForWeekday"
-                    {{#unless
-                    (eq
+                    {{#unless (eq
                     this.countsForWeekday
-                    false)}}checked{{
-                /unless}}>
+                    false)}}checked{{/unless}}>
             </label>
 
             <div class="item-controls col-controls">

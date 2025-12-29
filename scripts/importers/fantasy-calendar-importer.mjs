@@ -347,7 +347,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
 
   /**
    * Transform FC era template format to Calendaria format.
-   * FC uses: {{era_name}}, {{era_year}}, {{year}}
+   * FC uses: {{era_name}}, {{era_year}}, {{year}}, {{abs_year}}, {{short_era}}
    * Calendaria uses: {{era}}, {{yearInEra}}, {{year}}, {{abbreviation}}
    * @param {string|null} template - FC template string
    * @returns {string|null}
@@ -357,7 +357,8 @@ export default class FantasyCalendarImporter extends BaseImporter {
     return template
       .replace(/{{era_name}}/g, '{{era}}')
       .replace(/{{era_year}}/g, '{{yearInEra}}')
-      .replace(/{{short_era}}/g, '{{abbreviation}}');
+      .replace(/{{short_era}}/g, '{{abbreviation}}')
+      .replace(/{{abs_year}}/g, '{{year}}');
   }
 
   /**

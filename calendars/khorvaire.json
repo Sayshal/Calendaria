@@ -41,7 +41,7 @@
     "values": [
       { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 56, "dayEnd": 139 },
       { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 140, "dayEnd": 223 },
-      { "name": "CALENDARIA.Calendar.Khorvaire.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 224, "dayEnd": 307 },
+      { "name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 224, "dayEnd": 307 },
       { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 308, "dayEnd": 55 }
     ]
   },

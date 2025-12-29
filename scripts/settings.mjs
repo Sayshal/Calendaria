@@ -45,7 +45,7 @@ export function registerSettings() {
   /** Saved position for the compact calendar */
   game.settings.register(MODULE.ID, SETTINGS.COMPACT_CALENDAR_POSITION, {
     name: 'Compact Calendar Position',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Object,
     default: null
@@ -54,7 +54,7 @@ export function registerSettings() {
   /** Saved position for the TimeKeeper HUD */
   game.settings.register(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, {
     name: 'TimeKeeper Position',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Object,
     default: null
@@ -64,7 +64,7 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY, {
     name: 'CALENDARIA.Settings.CompactControlsDelay.Name',
     hint: 'CALENDARIA.Settings.CompactControlsDelay.Hint',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Number,
     default: 3,
@@ -74,7 +74,7 @@ export function registerSettings() {
   /** Sticky states for compact calendar */
   game.settings.register(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
     name: 'Compact Calendar Sticky States',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Object,
     default: { timeControls: false, sidebar: false, position: false }
@@ -119,7 +119,7 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR, {
     name: 'CALENDARIA.Settings.ShowCompactCalendar.Name',
     hint: 'CALENDARIA.Settings.ShowCompactCalendar.Hint',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Boolean,
     default: true
@@ -133,7 +133,7 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, {
     name: 'CALENDARIA.Settings.ShowCalendarHUD.Name',
     hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Boolean,
     default: false,
@@ -147,7 +147,7 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, {
     name: 'CALENDARIA.Settings.CalendarHUDMode.Name',
     hint: 'CALENDARIA.Settings.CalendarHUDMode.Hint',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: new foundry.data.fields.StringField({
       choices: {
@@ -162,7 +162,7 @@ export function registerSettings() {
   /** Calendar HUD position lock */
   game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, {
     name: 'Calendar HUD Locked',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Boolean,
     default: false
@@ -171,7 +171,7 @@ export function registerSettings() {
   /** Calendar HUD sticky states */
   game.settings.register(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
     name: 'Calendar HUD Sticky States',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Object,
     default: { tray: false, position: false }
@@ -180,7 +180,7 @@ export function registerSettings() {
   /** Calendar HUD position */
   game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, {
     name: 'Calendar HUD Position',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Object,
     default: null
@@ -189,7 +189,7 @@ export function registerSettings() {
   /** User-customized theme color overrides */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {
     name: 'Custom Theme Colors',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: Object,
     default: {}
@@ -312,12 +312,6 @@ export function registerSettings() {
   });
 
   // ========================================//
-  //  Sync & Multiplayer                     //
-  // ========================================//
-
-  // Primary GM setting registered in registerReadySettings() when users are available
-
-  // ========================================//
   //  Weather System                         //
   // ========================================//
 
@@ -364,17 +358,7 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: Object,
-    default: {
-      global: {
-        dawn: '',
-        dusk: '',
-        midday: '',
-        midnight: '',
-        newDay: ''
-      },
-      season: [],
-      moonPhase: []
-    }
+    default: { global: { dawn: '', dusk: '', midday: '', midnight: '', newDay: '' }, season: [], moonPhase: [] }
   });
 
   // ========================================//
@@ -394,7 +378,7 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.LOGGING_LEVEL, {
     name: 'CALENDARIA.Settings.Logger.Name',
     hint: 'CALENDARIA.Settings.Logger.Hint',
-    scope: 'client',
+    scope: 'user',
     config: false,
     type: new foundry.data.fields.StringField({
       choices: {
@@ -429,7 +413,6 @@ export function registerSettings() {
     type: CalendarEditor,
     restricted: true
   });
-
 
   /** Settings menu button to open calendar importer */
   game.settings.registerMenu(MODULE.ID, 'importer', {

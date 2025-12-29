@@ -3527,7 +3527,7 @@
   --compact-gap: 3px;
 
   position: fixed;
-  z-index: 250;
+  z-index: var(--z-index-ui);
 
   .compact-calendar-container {
     position: relative;

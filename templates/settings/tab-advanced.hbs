@@ -16,9 +16,7 @@
                     {{#each primaryGMOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
             </div>
@@ -38,9 +36,7 @@
                     {{#each loggingLevelOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
             </div>
@@ -54,9 +50,7 @@
                 <input
                     type="checkbox"
                     name="devMode"
-                    {{#if
-                    devMode}}checked{{
-                /if}}>
+                    {{#if devMode}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
         </div>

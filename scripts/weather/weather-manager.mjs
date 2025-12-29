@@ -209,19 +209,26 @@ class WeatherManager {
     }
 
     const zoneConfig = this.getActiveZone(options.zoneId);
-    if (!zoneConfig) {
-      log(2, 'No climate zone configured');
-      return this.#currentWeather;
-    }
-
     const season = options.season || this.#getCurrentSeasonName();
     const customPresets = this.getCustomPresets();
 
-    const result = generateWeather({
-      zoneConfig,
-      season,
-      customPresets
-    });
+    let result;
+    if (!zoneConfig) {
+      // No climate zone - pick random from all presets with equal probability
+      log(2, 'No climate zone configured, using random preset');
+      const allPresets = getAllPresets(customPresets);
+      const randomPreset = allPresets[Math.floor(Math.random() * allPresets.length)];
+      const min = randomPreset.tempMin ?? 10;
+      const max = randomPreset.tempMax ?? 25;
+      const temperature = Math.round(min + Math.random() * (max - min));
+      result = { preset: randomPreset, temperature };
+    } else {
+      result = generateWeather({
+        zoneConfig,
+        season,
+        customPresets
+      });
+    }
 
     const weather = {
       id: result.preset.id,
@@ -311,7 +318,15 @@ class WeatherManager {
    */
   #generateTemperatureForPreset(presetId) {
     const zoneConfig = this.getActiveZone();
-    if (!zoneConfig?.temperatures) return null;
+
+    // Fallback if no zone configured - use preset's temp range
+    if (!zoneConfig?.temperatures) {
+      const customPresets = this.getCustomPresets();
+      const preset = getPreset(presetId, customPresets);
+      const min = preset?.tempMin ?? 10;
+      const max = preset?.tempMax ?? 25;
+      return Math.round(min + Math.random() * (max - min));
+    }
 
     const season = this.#getCurrentSeasonName();
     const temps = zoneConfig.temperatures;

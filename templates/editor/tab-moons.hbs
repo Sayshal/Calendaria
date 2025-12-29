@@ -88,9 +88,7 @@
                                 {{#each this.refMonthOptions}}
                                 <option
                                     value="{{this.value}}"
-                                    {{#if
-                                    this.selected}}selected{{
-                                /if}}>{{this.label}}</option>
+                                    {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                                 {{/each}}
                             </select>
                         </div>
@@ -120,9 +118,7 @@
                                     type="checkbox"
                                     name="moons.{{this.index}}.hidden"
                                     value="true"
-                                    {{#if
-                                    this.hidden}}checked{{
-                                /if}}>
+                                    {{#if this.hidden}}checked{{/if}}>
                                 {{localize "CALENDARIA.Editor.Field.Hidden"}}
                             </label>
                         </div>

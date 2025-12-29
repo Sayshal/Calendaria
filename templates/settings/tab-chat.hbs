@@ -16,9 +16,7 @@
                     {{#each chatTimestampModeOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
             </div>
@@ -31,9 +29,7 @@
                 <input
                     type="checkbox"
                     name="chatTimestampShowTime"
-                    {{#if
-                    chatTimestampShowTime}}checked{{
-                /if}}>
+                    {{#if chatTimestampShowTime}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
         </div>

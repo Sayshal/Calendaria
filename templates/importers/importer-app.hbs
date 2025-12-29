@@ -26,8 +26,7 @@
                             {{#each importers}}
                             <option
                                 value="{{this.value}}"
-                                {{#if
-                                (eq
+                                {{#if (eq
                                 this.value
                                 ..
                             /selectedImporterId)}}selected{{/if}}>
@@ -246,28 +245,22 @@
                                 type="radio"
                                 name="noteType[{{@index}}]"
                                 value="skip"
-                                {{#unless
-                                this.suggestedType}}checked{{
-                            /unless}}
+                                {{#unless this.suggestedType}}checked{{/unless}}
                       {{#if (eq this.suggestedType "skip")}}checked{{/if}} />
                             <input
                                 type="radio"
                                 name="noteType[{{@index}}]"
                                 value="festival"
-                                {{#if
-                                (eq
+                                {{#if (eq
                                 this.suggestedType
-                                "festival")}}checked{{
-                            /if}} />
+                                "festival")}}checked{{/if}} />
                             <input
                                 type="radio"
                                 name="noteType[{{@index}}]"
                                 value="note"
-                                {{#if
-                                (eq
+                                {{#if (eq
                                 this.suggestedType
-                                "note")}}checked{{
-                            /if}} />
+                                "note")}}checked{{/if}} />
                         </span>
                     </div>
                     {{/each}}
@@ -293,10 +286,8 @@
         {{#each buttons}}
         <button
             type="{{this.type}}"
-            {{#if
-            this.action}}data-action="{{this.action}}"
-            {{
-        /if}}
+            {{#if this.action}}data-action="{{this.action}}"
+            {{/if}}
             {{#if this.disabled}}disabled{{/if}}>
             {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
             {{localize this.label}}

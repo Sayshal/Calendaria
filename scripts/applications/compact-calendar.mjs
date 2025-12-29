@@ -86,7 +86,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: 'compact-calendar',
     classes: ['calendaria', 'compact-calendar'],
-    position: { width: 'auto', height: 'auto', zIndex: 250 },
+    position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },
     actions: {
       navigate: CompactCalendar._onNavigate,
@@ -628,10 +628,12 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       // Use setPosition to properly update internal position state
       this.setPosition({ left: savedPos.left, top: savedPos.top });
     } else {
-      // Default position: top right (calculate from viewport)
+      // Default position: bottom left, 16px above #players
       const rect = this.element.getBoundingClientRect();
-      const left = window.innerWidth - rect.width - 310;
-      const top = 10;
+      const players = document.getElementById('players');
+      const playersTop = players?.getBoundingClientRect().top ?? (window.innerHeight - 100);
+      const left = 16;
+      const top = playersTop - rect.height - 16;
       this.setPosition({ left, top });
     }
   }

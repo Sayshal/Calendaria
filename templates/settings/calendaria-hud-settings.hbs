@@ -8,10 +8,8 @@
                 {{#each calendars}}
                 <option
                     value="{{this.id}}"
-                    {{#if
-                    this.isActive}}
-                    selected{{
-                /if}}>{{this.name}}</option>
+                    {{#if this.isActive}}
+                    selected{{/if}}>{{this.name}}</option>
                 {{/each}}
             </select>
         </div>
@@ -26,18 +24,14 @@
             <select name="mode">
                 <option
                     value="fullsize"
-                    {{#if
-                    modeFullsize}}
-                    selected{{
-                /if}}>
+                    {{#if modeFullsize}}
+                    selected{{/if}}>
                     {{localize "CALENDARIA.Settings.CalendarHUDMode.Fullsize"}}
                 </option>
                 <option
                     value="compact"
-                    {{#if
-                    modeCompact}}
-                    selected{{
-                /if}}>
+                    {{#if modeCompact}}
+                    selected{{/if}}>
                     {{localize "CALENDARIA.Settings.CalendarHUDMode.Compact"}}
                 </option>
             </select>
@@ -55,10 +49,8 @@
                 <input
                     type="checkbox"
                     name="stickyTray"
-                    {{#if
-                    stickyTray}}
-                    checked{{
-                /if}}>
+                    {{#if stickyTray}}
+                    checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.HUD.Settings.StickyTrayHint"}}</p>
         </div>
@@ -69,10 +61,8 @@
                 <input
                     type="checkbox"
                     name="stickyPosition"
-                    {{#if
-                    stickyPosition}}
-                    checked{{
-                /if}}>
+                    {{#if stickyPosition}}
+                    checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.HUD.Settings.StickyPositionHint"}}</p>
         </div>

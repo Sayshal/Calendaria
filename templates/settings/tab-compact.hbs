@@ -15,6 +15,7 @@
     {{!-- Compact Calendar Sticky States --}}
     <fieldset>
         <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
+        <input type="hidden" name="compactStickySection" value="1">
         <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
         <div class="form-group">
@@ -23,9 +24,7 @@
                 <input
                     type="checkbox"
                     name="compactStickyTimeControls"
-                    {{#if
-                    compactStickyTimeControls}}checked{{
-                /if}}>
+                    {{#if compactStickyTimeControls}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTimeControls"}}</p>
         </div>
@@ -36,9 +35,7 @@
                 <input
                     type="checkbox"
                     name="compactStickySidebar"
-                    {{#if
-                    compactStickySidebar}}checked{{
-                /if}}>
+                    {{#if compactStickySidebar}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickySidebar"}}</p>
         </div>
@@ -49,9 +46,7 @@
                 <input
                     type="checkbox"
                     name="compactStickyPosition"
-                    {{#if
-                    compactStickyPosition}}checked{{
-                /if}}>
+                    {{#if compactStickyPosition}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
         </div>
@@ -67,9 +62,7 @@
                 <input
                     type="checkbox"
                     name="showCompactCalendar"
-                    {{#if
-                    showCompactCalendar}}checked{{
-                /if}}>
+                    {{#if showCompactCalendar}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.Settings.ShowCompactCalendar.Hint"}}</p>
         </div>

@@ -57,7 +57,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     return this._mode === CalendarNoteSheet.MODES.EDIT;
   }
 
-     * @inheritdoc
+  /** @inheritdoc */
   _configureRenderOptions(options) {
     if (options.isFirstRender) {
       if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;

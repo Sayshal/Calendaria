@@ -74,9 +74,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Sticky position (locks position) */
   #stickyPosition = false;
 
-  /** @type {ContextMenu|null} Active sticky options menu */
-  #stickyMenu = null;
-
   /** @type {number} Current time multiplier */
   #multiplier = 1;
 
@@ -154,7 +151,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {boolean}
    */
   get isLocked() {
-    return this.#stickyPosition || game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
+    return game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
   }
 
   /**
@@ -513,15 +510,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Restore saved position from settings.
    */
   #restorePosition() {
-    const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_POSITION);
+    const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
 
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
       this.setPosition({ left: savedPos.left, top: savedPos.top });
     } else {
-      // Default: centered horizontally, near top
+      // Default position: centered horizontally, near top
       const rect = this.element.getBoundingClientRect();
       const left = (window.innerWidth - rect.width) / 2;
-      const top = 16;
+      const top = 75;
       this.setPosition({ left, top });
     }
 
@@ -611,7 +608,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       dragHandle.classList.remove('dragging');
 
       // Save position
-      await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_POSITION, {
+      await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, {
         left: this.position.left,
         top: this.position.top
       });
@@ -1064,7 +1061,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (desc) {
         const plainText = desc.replace(/<[^>]*>/g, '').trim();
         if (plainText) {
-          const truncated = plainText.length > 120 ? `${plainText.substring(0, 117)  }...` : plainText;
+          const truncated = plainText.length > 120 ? `${plainText.substring(0, 117)}...` : plainText;
           tooltip += `\n${truncated}`;
         }
       }
@@ -1720,7 +1717,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Reset position to default (centered).
    */
   static async resetPosition() {
-    await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_POSITION, null);
+    await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, null);
     if (foundry.applications.instances.get('calendaria-hud')?.rendered) {
       this.hide();
       this.show();

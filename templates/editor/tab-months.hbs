@@ -50,17 +50,13 @@
                 <select name="months.{{this.index}}.startingWeekday" class="col-start-weekday">
                     <option
                         value=""
-                        {{#unless
-                        this.hasStartingWeekday}}selected{{
-                    /unless}}>
+                        {{#unless this.hasStartingWeekday}}selected{{/unless}}>
                         {{localize "CALENDARIA.Editor.StartingWeekday.Auto"}}
                     </option>
                     {{#each this.startingWeekdayOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
 
@@ -77,18 +73,14 @@
                         type="button"
                         data-action="moveMonthUp"
                         data-index="{{this.index}}"
-                        {{#if
-                        this.isFirst}}disabled{{
-                    /if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
+                        {{#if this.isFirst}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
                         <i class="fas fa-chevron-up"></i>
                     </button>
                     <button
                         type="button"
                         data-action="moveMonthDown"
                         data-index="{{this.index}}"
-                        {{#if
-                        this.isLast}}disabled{{
-                    /if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
+                        {{#if this.isLast}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <button
@@ -105,9 +97,7 @@
             {{!-- Custom Weekdays Section --}}
             <details
                 class="month-custom-weekdays"
-                {{#if
-                this.hasCustomWeekdays}}open{{
-            /if}}>
+                {{#if this.hasCustomWeekdays}}open{{/if}}>
                 <summary>
                     <i class="fas fa-calendar-week"></i>
                     {{localize "CALENDARIA.Editor.Month.CustomWeekdays"}}
@@ -121,9 +111,7 @@
                             type="checkbox"
                             name="months.{{this.index}}.hasCustomWeekdays"
                             value="true"
-                            {{#if
-                            this.hasCustomWeekdays}}checked{{
-                        /if}}>
+                            {{#if this.hasCustomWeekdays}}checked{{/if}}>
                         {{localize "CALENDARIA.Editor.Month.EnableCustomWeekdays"}}
                     </label>
                     {{#if this.hasCustomWeekdays}}
@@ -147,9 +135,7 @@
                                     type="checkbox"
                                     name="months.{{../index}}.weekdays.{{@index}}.isRestDay"
                                     value="true"
-                                    {{#if
-                                    this.isRestDay}}checked{{
-                                /if}}>
+                                    {{#if this.isRestDay}}checked{{/if}}>
                                 {{localize "CALENDARIA.Common.RestDay"}}
                             </label>
                         </div>

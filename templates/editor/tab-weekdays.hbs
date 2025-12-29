@@ -35,9 +35,7 @@
                     <input
                         type="checkbox"
                         name="weekdays.{{this.index}}.isRestDay"
-                        {{#if
-                        this.isRestDay}}checked{{
-                    /if}}>
+                        {{#if this.isRestDay}}checked{{/if}}>
                 </label>
 
                 <div class="item-controls col-controls">
@@ -53,18 +51,14 @@
                         type="button"
                         data-action="moveWeekdayUp"
                         data-index="{{this.index}}"
-                        {{#if
-                        this.isFirst}}disabled{{
-                    /if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
+                        {{#if this.isFirst}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
                         <i class="fas fa-chevron-up"></i>
                     </button>
                     <button
                         type="button"
                         data-action="moveWeekdayDown"
                         data-index="{{this.index}}"
-                        {{#if
-                        this.isLast}}disabled{{
-                    /if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
+                        {{#if this.isLast}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <button
@@ -91,9 +85,7 @@
                 <input
                     type="checkbox"
                     name="weeks.enabled"
-                    {{#if
-                    calendar.weeks.enabled}}checked{{
-                /if}}>
+                    {{#if calendar.weeks.enabled}}checked{{/if}}>
             </div>
         </div>
 
@@ -104,9 +96,7 @@
                     {{#each weeksTypeOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{localize this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
                     {{/each}}
                 </select>
             </div>

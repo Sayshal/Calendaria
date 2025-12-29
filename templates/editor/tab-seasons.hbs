@@ -13,9 +13,7 @@
                 {{#each seasonTypeOptions}}
                 <option
                     value="{{this.value}}"
-                    {{#if
-                    this.selected}}selected{{
-                /if}}>{{localize this.label}}</option>
+                    {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
                 {{/each}}
             </select>
         </div>
@@ -113,9 +111,7 @@
                     {{#each this.startMonthOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
                 <input
@@ -130,9 +126,7 @@
                     {{#each this.endMonthOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
                 <input

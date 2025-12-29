@@ -10,13 +10,13 @@ import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { COLOR_DEFINITIONS, DEFAULT_COLORS, applyCustomColors } from '../../utils/theme-utils.mjs';
+import { CalendarApplication } from '../calendar-application.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
-import { ImporterApp } from '../importer-app.mjs';
-import { MacroTriggerConfig } from './macro-trigger-config.mjs';
 import { CalendariaHUD } from '../calendaria-hud.mjs';
 import { CompactCalendar } from '../compact-calendar.mjs';
+import { ImporterApp } from '../importer-app.mjs';
 import { TimeKeeperHUD } from '../time-keeper-hud.mjs';
-import { CalendarApplication } from '../calendar-application.mjs';
+import { MacroTriggerConfig } from './macro-trigger-config.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -92,7 +92,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'advanced', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Advanced' },
         { id: 'hud', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', cssClass: 'app-tab' },
         { id: 'compact', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.Compact', cssClass: 'app-tab' },
-        { id: 'timekeeper', icon: 'fas fa-stopwatch', label: 'CALENDARIA.Common.TimeKeeper', cssClass: 'app-tab' }
+        { id: 'timekeeper', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', cssClass: 'app-tab' }
       ],
       initial: 'calendar'
     }
@@ -397,21 +397,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
 
     // Appearance Tab Settings - Compact Calendar Sticky States
-    const compactStickyChanged = 'compactStickyTimeControls' in data || 'compactStickySidebar' in data || 'compactStickyPosition' in data;
-    if (compactStickyChanged) {
-      const current = game.settings.get(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES);
+    if ('compactStickySection' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
-        timeControls: data.compactStickyTimeControls ?? current.timeControls,
-        sidebar: data.compactStickySidebar ?? current.sidebar,
-        position: data.compactStickyPosition ?? current.position
+        timeControls: !!data.compactStickyTimeControls,
+        sidebar: !!data.compactStickySidebar,
+        position: !!data.compactStickyPosition
       });
     }
 
     // Appearance Tab Settings - HUD Sticky States
-    const hudStickyChanged = 'hudStickyTray' in data || 'hudStickyPosition' in data;
-    if (hudStickyChanged) {
-      const current = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES);
-      await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: data.hudStickyTray ?? current.tray, position: data.hudStickyPosition ?? current.position });
+    if ('hudStickySection' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
+        tray: !!data.hudStickyTray,
+        position: !!data.hudStickyPosition
+      });
     }
 
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
@@ -648,5 +647,4 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onOpenFullCal(event, target) {
     new CalendarApplication().render(true);
   }
-
 }

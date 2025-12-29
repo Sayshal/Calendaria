@@ -12,9 +12,7 @@
                     {{#each zoneOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{localize this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
                     {{/each}}
                 </select>
             </div>
@@ -50,9 +48,7 @@
                 <input
                     type="checkbox"
                     name="weather.autoGenerate"
-                    {{#if
-                    calendar.weather.autoGenerate}}checked{{
-                /if}}>
+                    {{#if calendar.weather.autoGenerate}}checked{{/if}}>
                 {{localize "CALENDARIA.Editor.Weather.AutoGenerate"}}
             </label>
         </div>
@@ -69,9 +65,7 @@
                         type="checkbox"
                         data-action="toggleCategorySelectAll"
                         data-category="{{category.id}}"
-                        {{#if
-                        category.allEnabled}}checked{{
-                    /if}}>
+                        {{#if category.allEnabled}}checked{{/if}}>
                 </label>
                 <span class="category-name">{{localize category.label}}</span>
                 <span class="category-stats">
@@ -103,9 +97,7 @@
                         type="checkbox"
                         class="preset-enabled"
                         name="weather.presets.{{preset.index}}.enabled"
-                        {{#if
-                        preset.enabled}}checked{{
-                    /if}}>
+                        {{#if preset.enabled}}checked{{/if}}>
                     <span class="preset-icon" style="color: {{preset.color}}">
                         <i class="fas {{preset.icon}}"></i>
                     </span>

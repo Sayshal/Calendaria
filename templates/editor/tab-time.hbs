@@ -93,9 +93,7 @@
                 <input
                     type="checkbox"
                     name="daylight.enabled"
-                    {{#if
-                    calendar.daylight.enabled}}checked{{
-                /if}}>
+                    {{#if calendar.daylight.enabled}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightEnabled"}}</p>
         </div>
@@ -139,9 +137,7 @@
                     {{#each winterSolsticeMonthOptions}}
                     <option
                         value="{{value}}"
-                        {{#if
-                        selected}}selected{{
-                    /if}}>{{label}}</option>
+                        {{#if selected}}selected{{/if}}>{{label}}</option>
                     {{/each}}
                 </select>
                 <input
@@ -163,9 +159,7 @@
                     {{#each summerSolsticeMonthOptions}}
                     <option
                         value="{{value}}"
-                        {{#if
-                        selected}}selected{{
-                    /if}}>{{label}}</option>
+                        {{#if selected}}selected{{/if}}>{{label}}</option>
                     {{/each}}
                 </select>
                 <input

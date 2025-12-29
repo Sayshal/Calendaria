@@ -270,10 +270,7 @@
                 data-year="{{year}}"
                 data-month="{{month}}"
                 data-day="{{day}}"
-                {{#if
-                festivalName}}data-tooltip="{{festivalName}}"
-                {{
-            /if}}>
+                {{#if festivalName}}data-tooltip="{{festivalName}}"{{/if}}>
                 <span class="day-num">{{day}}</span>
                 {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
                 {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint" style="--moon-color: {{moonColor}}">
@@ -301,10 +298,7 @@
     {{!-- Time Display Row --}}
     <div
         class="compact-time-display"
-        {{#if
-        isGM}}data-action="toggle"
-        {{
-    /if}}>
+        {{#if isGM}}data-action="toggle"{{/if}}>
         <span class="time-value">{{currentTime}}</span>
         <span class="date-value hidden">{{currentDate}}</span>
         {{#if isGM}}
@@ -353,11 +347,7 @@
             </button>
             <select class="increment-select" data-action="increment">
                 {{#each increments}}
-                <option
-                    value="{{key}}"
-                    {{#if
-                    selected}}selected{{
-                /if}}>{{label}}</option>
+                <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
                 {{/each}}
             </select>
             <button

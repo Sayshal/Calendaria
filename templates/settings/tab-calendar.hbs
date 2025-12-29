@@ -16,9 +16,7 @@
                     {{#each calendarOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>
+                        {{#if this.selected}}selected{{/if}}>
                         {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
                     </option>
                     {{/each}}

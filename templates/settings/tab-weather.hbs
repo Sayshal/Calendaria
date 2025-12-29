@@ -16,9 +16,7 @@
                     {{#each temperatureUnitOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
             </div>

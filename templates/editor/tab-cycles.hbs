@@ -64,9 +64,7 @@
                         {{#each this.basedOnOptions}}
                         <option
                             value="{{this.value}}"
-                            {{#if
-                            this.selected}}selected{{
-                        /if}}>{{localize this.label}}</option>
+                            {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
                         {{/each}}
                     </select>
                 </div>

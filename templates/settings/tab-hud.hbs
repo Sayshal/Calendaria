@@ -12,50 +12,6 @@
         </button>
     </div>
 
-    {{!-- Calendar HUD Sticky States --}}
-    <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
-
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.SettingsPanel.Sticky.Tray"}}</label>
-            <div class="form-fields">
-                <input
-                    type="checkbox"
-                    name="hudStickyTray"
-                    {{#if
-                    hudStickyTray}}checked{{
-                /if}}>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTray"}}</p>
-        </div>
-
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.SettingsPanel.Sticky.HUDPosition"}}</label>
-            <div class="form-fields">
-                <input
-                    type="checkbox"
-                    name="hudStickyPosition"
-                    {{#if
-                    hudStickyPosition}}checked{{
-                /if}}>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyHUDPosition"}}</p>
-        </div>
-
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.Common.LockPosition"}}</label>
-            <div class="form-fields">
-                <input
-                    type="checkbox"
-                    name="calendarHUDLocked"
-                    {{#if
-                    calendarHUDLocked}}checked{{
-                /if}}>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.LockHUDPosition"}}</p>
-        </div>
-    </fieldset>
-
     {{!-- Display Settings --}}
     <fieldset>
         <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
@@ -66,9 +22,7 @@
                 <input
                     type="checkbox"
                     name="showCalendarHUD"
-                    {{#if
-                    showCalendarHUD}}checked{{
-                /if}}>
+                    {{#if showCalendarHUD}}checked{{/if}}>
             </div>
             <p class="hint">{{localize "CALENDARIA.Settings.ShowCalendarHUD.Hint"}}</p>
         </div>
@@ -80,13 +34,39 @@
                     {{#each hudModeOptions}}
                     <option
                         value="{{this.value}}"
-                        {{#if
-                        this.selected}}selected{{
-                    /if}}>{{this.label}}</option>
+                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                     {{/each}}
                 </select>
             </div>
             <p class="hint">{{localize "CALENDARIA.Settings.CalendarHUDMode.Hint"}}</p>
+        </div>
+    </fieldset>
+
+    {{!-- Calendar HUD Sticky States --}}
+    <fieldset>
+        <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
+        <input type="hidden" name="hudStickySection" value="1">
+
+        <div class="form-group">
+            <label>{{localize "CALENDARIA.SettingsPanel.Sticky.Tray"}}</label>
+            <div class="form-fields">
+                <input
+                    type="checkbox"
+                    name="hudStickyTray"
+                    {{#if hudStickyTray}}checked{{/if}}>
+            </div>
+            <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTray"}}</p>
+        </div>
+
+        <div class="form-group">
+            <label>{{localize "CALENDARIA.Common.LockPosition"}}</label>
+            <div class="form-fields">
+                <input
+                    type="checkbox"
+                    name="calendarHUDLocked"
+                    {{#if calendarHUDLocked}}checked{{/if}}>
+            </div>
+            <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.LockHUDPosition"}}</p>
         </div>
     </fieldset>
 

@@ -1,0 +1,120 @@
+CALENDARIA PRESET CALENDARS - ATTRIBUTION AND LICENSING
+=========================================================
+
+These calendar presets are fan-created content for use with virtual tabletop
+software. All calendar systems, world details, and associated intellectual
+property remain the property of their respective owners.
+
+
+FORGOTTEN REALMS - Calendar of Harptos (harptos.json)
+------------------------------------------------------
+Forgotten Realms, the Calendar of Harptos, and all related content are
+trademarks of Wizards of the Coast LLC. This content is unofficial Fan
+Content permitted under Wizards of the Coast's Fan Content Policy.
+
+
+RAVENLOFT - Barovian Calendar (barovian.json)
+----------------------------------------------
+Ravenloft, Barovia, Curse of Strahd, and all related content are trademarks
+of Wizards of the Coast LLC. This content is unofficial Fan Content
+permitted under Wizards of the Coast's Fan Content Policy.
+
+
+DRAGONLANCE - Krynn Calendars (krynn-elven.json, krynn-solamnia.json)
+----------------------------------------------------------------------
+Dragonlance, Krynn, and all related content are trademarks of Wizards of
+the Coast LLC. This content is unofficial Fan Content permitted under
+Wizards of the Coast's Fan Content Policy.
+
+
+EBERRON - Galifar Calendar (galifar.json)
+------------------------------------------
+Eberron, Khorvaire, and all related content are trademarks of Wizards of
+the Coast LLC and Keith Baker. This content is unofficial Fan Content
+permitted under Wizards of the Coast's Fan Content Policy.
+
+
+DARK SUN - Athasian Calendar (athasian.json)
+---------------------------------------------
+Dark Sun, Athas, and all related content are trademarks of Wizards of the
+Coast LLC. This content is unofficial Fan Content permitted under Wizards
+of the Coast's Fan Content Policy.
+
+
+MYSTARA - Thyatian Calendar (thyatian.json)
+--------------------------------------------
+Mystara and all related content are trademarks of Wizards of the Coast LLC.
+This content is unofficial Fan Content permitted under Wizards of the
+Coast's Fan Content Policy.
+
+
+BIRTHRIGHT - Cerilian Calendar (cerilian.json)
+-----------------------------------------------
+Birthright, Cerilia, and all related content are trademarks of Wizards of
+the Coast LLC. This content is unofficial Fan Content permitted under
+Wizards of the Coast's Fan Content Policy.
+
+
+GREYHAWK - Common Year Calendar (greyhawk.json)
+------------------------------------------------
+Greyhawk, Oerth, and all related content are trademarks of Wizards of the
+Coast LLC. This content is unofficial Fan Content permitted under Wizards
+of the Coast's Fan Content Policy.
+
+
+GOLARION - Absalom Reckoning (golarion.json)
+---------------------------------------------
+Pathfinder, Golarion, and all related content are trademarks of Paizo Inc.
+This content is compatible with the Pathfinder Roleplaying Game and is
+created under the Community Use Policy. For more information, see
+https://paizo.com/community/communityuse
+
+
+EXANDRIA - Exandrian Calendar (exandrian.json)
+-----------------------------------------------
+Exandria, Critical Role, and all related content are trademarks of Critical
+Role Productions, LLC. This content is unofficial Fan Content and is not
+endorsed by Critical Role Productions, LLC.
+
+
+DRAKKENHEIM (drakkenheim.json)
+-------------------------------
+Drakkenheim and all related content are created by the Dungeon Dudes
+(Monty Martin & Kelly McLaughlin) and published by Ghostfire Gaming. This
+content is unofficial fan content created for use with virtual tabletop
+software.
+
+
+FORBIDDEN LANDS (forbidden-lands.json)
+---------------------------------------
+Forbidden Lands and all related content are trademarks of Fria Ligan AB
+(Free League Publishing). This content is unofficial fan content and is
+not endorsed by Free League Publishing.
+
+
+GREGORIAN CALENDAR (gregorian.json)
+------------------------------------
+The Gregorian calendar is a public domain calendar system.
+
+
+--------------------------------------------------------------------------------
+
+WIZARDS OF THE COAST FAN CONTENT POLICY
+----------------------------------------
+This content uses trademarks and/or copyrights owned by Wizards of the Coast
+LLC, which are used under Wizards of the Coast's Fan Content Policy. We are
+expressly prohibited from charging you to use or access this content. This
+content is not published, endorsed, or specifically approved by Wizards of
+the Coast.
+
+For more information: https://company.wizards.com/fancontentpolicy
+
+
+DISCLAIMER
+----------
+These calendar presets are provided as fan-created game aids for personal use.
+They are not official products and are not endorsed by any of the intellectual
+property holders listed above. If you are a rights holder and have concerns
+about this content, please contact the Calendaria development team.
+
+================================================================================

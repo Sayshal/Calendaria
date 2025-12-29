@@ -163,9 +163,7 @@
                     type="time"
                     name="system.startDate.time"
                     value="{{startTimeValue}}"
-                    {{#if
-                    system.allDay}}disabled{{
-                /if}}
+                    {{#if system.allDay}}disabled{{/if}}
           data-tooltip="CALENDARIA.UI.StartTimeTooltip" />
                 <input
                     type="hidden"
@@ -192,9 +190,7 @@
                     type="time"
                     name="system.endDate.time"
                     value="{{endTimeValue}}"
-                    {{#if
-                    system.allDay}}disabled{{
-                /if}}
+                    {{#if system.allDay}}disabled{{/if}}
           data-tooltip="CALENDARIA.UI.EndTimeTooltip" />
                 <input
                     type="hidden"
@@ -216,9 +212,7 @@
                     {{#each repeatOptions}}
                     <option
                         value="{{value}}"
-                        {{#if
-                        selected}}selected{{
-                    /if}}>{{label}}</option>
+                        {{#if selected}}selected{{/if}}>{{label}}</option>
                     {{/each}}
                 </select>
                 {{#if showRepeatOptions}}
@@ -323,9 +317,7 @@
                             {{#each randomIntervalOptions}}
                             <option
                                 value="{{value}}"
-                                {{#if
-                                selected}}selected{{
-                            /if}}>{{label}}</option>
+                                {{#if selected}}selected{{/if}}>{{label}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -362,9 +354,7 @@
                         {{#each availableNotes}}
                         <option
                             value="{{id}}"
-                            {{#if
-                            selected}}selected{{
-                        /if}}>{{name}}</option>
+                            {{#if selected}}selected{{/if}}>{{name}}</option>
                         {{/each}}
                     </select>
                     <input
@@ -402,9 +392,7 @@
                                 {{#each rangeYearOptions}}
                                 <option
                                     value="{{value}}"
-                                    {{#if
-                                    selected}}selected{{
-                                /if}}>{{label}}</option>
+                                    {{#if selected}}selected{{/if}}>{{label}}</option>
                                 {{/each}}
                             </select>
                             <div class="range-value-inputs">
@@ -443,9 +431,7 @@
                                 {{#each rangeMonthOptions}}
                                 <option
                                     value="{{value}}"
-                                    {{#if
-                                    selected}}selected{{
-                                /if}}>{{label}}</option>
+                                    {{#if selected}}selected{{/if}}>{{label}}</option>
                                 {{/each}}
                             </select>
                             <div class="range-value-inputs">
@@ -454,9 +440,7 @@
                                     {{#each monthOptions}}
                                     <option
                                         value="{{index}}"
-                                        {{#if
-                                        selected}}selected{{
-                                    /if}}>{{name}}</option>
+                                        {{#if selected}}selected{{/if}}>{{name}}</option>
                                     {{/each}}
                                 </select>
                                 {{else if rangeMonthRange}}
@@ -464,9 +448,7 @@
                                     {{#each monthOptions}}
                                     <option
                                         value="{{index}}"
-                                        {{#if
-                                        selectedMin}}selected{{
-                                    /if}}>{{name}}</option>
+                                        {{#if selectedMin}}selected{{/if}}>{{name}}</option>
                                     {{/each}}
                                 </select>
                                 <span>{{localize "CALENDARIA.Note.To"}}</span>
@@ -474,9 +456,7 @@
                                     {{#each monthOptions}}
                                     <option
                                         value="{{index}}"
-                                        {{#if
-                                        selectedMax}}selected{{
-                                    /if}}>{{name}}</option>
+                                        {{#if selectedMax}}selected{{/if}}>{{name}}</option>
                                     {{/each}}
                                 </select>
                                 {{/if}}
@@ -490,9 +470,7 @@
                                 {{#each rangeDayOptions}}
                                 <option
                                     value="{{value}}"
-                                    {{#if
-                                    selected}}selected{{
-                                /if}}>{{label}}</option>
+                                    {{#if selected}}selected{{/if}}>{{label}}</option>
                                 {{/each}}
                             </select>
                             <div class="range-value-inputs">
@@ -546,9 +524,7 @@
                             {{#each weekNumberOptions}}
                             <option
                                 value="{{value}}"
-                                {{#if
-                                selected}}selected{{
-                            /if}}>{{label}}</option>
+                                {{#if selected}}selected{{/if}}>{{label}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -558,9 +534,7 @@
                             {{#each weekdayOptions}}
                             <option
                                 value="{{index}}"
-                                {{#if
-                                selected}}selected{{
-                            /if}}>{{name}}</option>
+                                {{#if selected}}selected{{/if}}>{{name}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -580,9 +554,7 @@
                             {{#each seasonOptions}}
                             <option
                                 value="{{index}}"
-                                {{#if
-                                selected}}selected{{
-                            /if}}>{{name}}</option>
+                                {{#if selected}}selected{{/if}}>{{name}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -592,9 +564,7 @@
                             {{#each seasonalTriggerOptions}}
                             <option
                                 value="{{value}}"
-                                {{#if
-                                selected}}selected{{
-                            /if}}>{{label}}</option>
+                                {{#if selected}}selected{{/if}}>{{label}}</option>
                             {{/each}}
                         </select>
                     </div>
@@ -751,9 +721,7 @@
                                                 {{#each reminderTypeOptions}}
                                                 <option
                                                     value="{{value}}"
-                                                    {{#if
-                                                    selected}}selected{{
-                                                /if}}>{{label}}</option>
+                                                    {{#if selected}}selected{{/if}}>{{label}}</option>
                                                 {{/each}}
                                             </select>
                                         </div>
@@ -763,9 +731,7 @@
                                                 {{#each reminderTargetOptions}}
                                                 <option
                                                     value="{{value}}"
-                                                    {{#if
-                                                    selected}}selected{{
-                                                /if}}>{{label}}</option>
+                                                    {{#if selected}}selected{{/if}}>{{label}}</option>
                                                 {{/each}}
                                             </select>
                                         </div>
@@ -776,9 +742,7 @@
                                                 {{#each userOptions}}
                                                 <option
                                                     value="{{id}}"
-                                                    {{#if
-                                                    selected}}selected{{
-                                                /if}}>{{name}}</option>
+                                                    {{#if selected}}selected{{/if}}>{{name}}</option>
                                                 {{/each}}
                                             </multi-select>
                                         </div>
@@ -796,9 +760,7 @@
                                             {{#each categoryOptions}}
                                             <option
                                                 value="{{id}}"
-                                                {{#if
-                                                selected}}selected{{
-                                            /if}} {{#if custom}}data-custom="true" {{/if}}>{{label}}
+                                                {{#if selected}}selected{{/if}} {{#if custom}}data-custom="true" {{/if}}>{{label}}
                                             </option>
                                             {{/each}}
                                         </multi-select>
@@ -827,9 +789,7 @@
                                             {{#each availableMacros}}
                                             <option
                                                 value="{{id}}"
-                                                {{#if
-                                                selected}}selected{{
-                                            /if}}>{{name}}</option>
+                                                {{#if selected}}selected{{/if}}>{{name}}</option>
                                             {{/each}}
                                         </select>
                                     </div>
