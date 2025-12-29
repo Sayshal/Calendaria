@@ -4,6 +4,33 @@
   Wrapped in single element for AppV2 PARTS compatibility.
 --}}
 <div class="calendaria-hud-bar-wrapper">
+  {{!-- SEARCH PANEL (slides up from bar) --}}
+  <div class="calendaria-hud-search-panel{{#if searchOpen}} visible{{/if}}">
+    <div class="search-panel-header">
+      <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
+        value="{{searchTerm}}" autocomplete="off">
+      <button type="button" class="search-panel-close" data-action="closeSearch"
+        data-tooltip="{{localize 'CALENDARIA.Search.Close'}}">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-panel-results">
+      {{#if searchResults.length}}
+        {{#each searchResults}}
+          <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}" data-journal-id="{{data.journalId}}">
+            <span class="result-name">{{name}}</span>
+            {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+          </div>
+        {{/each}}
+      {{else if searchTerm}}
+        <div class="no-results">
+          <i class="fas fa-search"></i>
+          <span>{{localize "CALENDARIA.Search.NoResults"}}</span>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+
   {{!-- MAIN BAR --}}
   <div class="calendaria-hud-bar{{#if locked}} locked{{/if}}{{#if hasEvents}} has-events{{/if}}"
     {{#if hasEvents}}style="--event-glow: {{firstEventColor}};"{{/if}}>

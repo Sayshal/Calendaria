@@ -1,0 +1,76 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  {{!-- Primary GM --}}
+  {{#if isGM}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
+      <div class="form-fields">
+        <select name="primaryGM">
+          {{#each primaryGMOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
+    </div>
+  </fieldset>
+  {{/if}}
+
+  {{!-- Logging --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.Logger.Name"}}</label>
+      <div class="form-fields">
+        <select name="loggingLevel">
+          {{#each loggingLevelOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.Logger.Hint"}}</p>
+    </div>
+
+    {{#if isGM}}
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
+    </div>
+    {{/if}}
+  </fieldset>
+
+  {{!-- Module Info --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.About"}}</legend>
+
+    <div class="module-info">
+      <div class="info-row">
+        <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Version"}}</span>
+        <span class="info-value">{{moduleVersion}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Author"}}</span>
+        <span class="info-value">Tyler</span>
+      </div>
+    </div>
+
+    <div class="form-group stacked button-row">
+      <a href="https://github.com/your-repo/calendaria" target="_blank" class="link-button">
+        <i class="fab fa-github"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.GitHub"}}
+      </a>
+      <a href="https://github.com/your-repo/calendaria/wiki" target="_blank" class="link-button">
+        <i class="fas fa-book"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.Documentation"}}
+      </a>
+    </div>
+  </fieldset>
+
+</section>

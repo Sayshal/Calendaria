@@ -7,6 +7,7 @@
  */
 
 import { CalendarApplication } from './calendar-application.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { localize, format } from '../utils/localization.mjs';
@@ -15,6 +16,7 @@ import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
@@ -72,6 +74,15 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether sidebar is locked due to notes panel */
   #sidebarLocked = false;
 
+  /** @type {boolean} Search panel visibility state */
+  #searchOpen = false;
+
+  /** @type {string} Current search term */
+  #searchTerm = '';
+
+  /** @type {object[]|null} Current search results */
+  #searchResults = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'compact-calendar',
@@ -99,7 +110,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       toMidday: CompactCalendar._onToMidday,
       toSunset: CompactCalendar._onToSunset,
       toMidnight: CompactCalendar._onToMidnight,
-      openWeatherPicker: CompactCalendar._onOpenWeatherPicker
+      openWeatherPicker: CompactCalendar._onOpenWeatherPicker,
+      openSettings: CompactCalendar._onOpenSettings,
+      toggleSearch: CompactCalendar._onToggleSearch,
+      closeSearch: CompactCalendar._onCloseSearch,
+      openSearchResult: CompactCalendar._onOpenSearchResult
     }
   };
 
@@ -192,6 +207,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Weather badge data
     context.weather = this._getWeatherContext();
+
+    // Search context
+    context.searchOpen = this.#searchOpen;
+    context.searchTerm = this.#searchTerm;
+    context.searchResults = this.#searchResults || [];
 
     // Get cycle values for display in header (based on viewed date, not world time)
     if (calendar && calendar.cycles?.length) {
@@ -477,6 +497,34 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
           sidebar.classList.remove('visible');
         }, delay);
       });
+    }
+
+    // Search input listener
+    const searchInput = this.element.querySelector('.compact-search-panel .search-input');
+    if (searchInput) {
+      if (this.#searchOpen) searchInput.focus();
+
+      const debouncedSearch = foundry.utils.debounce((term) => {
+        this.#searchTerm = term;
+        if (term.length >= 2) {
+          this.#searchResults = SearchManager.search(term, { searchContent: true });
+        } else {
+          this.#searchResults = null;
+        }
+        this.#updateSearchResults();
+      }, 300);
+
+      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.#closeSearch();
+        }
+      });
+    }
+
+    // Position search panel if open
+    if (this.#searchOpen) {
+      this.#positionSearchPanel();
     }
 
     // Time controls auto-hide (GM only)
@@ -1100,6 +1148,118 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onOpenWeatherPicker() {
     if (!game.user.isGM) return;
     await openWeatherPicker();
+  }
+
+  /**
+   * Open the settings panel.
+   */
+  static _onOpenSettings() {
+    new SettingsPanel().render(true);
+  }
+
+  /**
+   * Toggle the search panel.
+   */
+  static async _onToggleSearch(event, target) {
+    this.#searchOpen = !this.#searchOpen;
+    if (!this.#searchOpen) {
+      this.#searchTerm = '';
+      this.#searchResults = null;
+    }
+    await this.render();
+  }
+
+  /**
+   * Close the search panel.
+   */
+  static async _onCloseSearch(event, target) {
+    this.#closeSearch();
+  }
+
+  /**
+   * Open a search result (note).
+   */
+  static async _onOpenSearchResult(event, target) {
+    const id = target.dataset.id;
+    const journalId = target.dataset.journalId;
+
+    const page = NoteManager.getFullNote(id);
+    if (page) page.sheet.render(true, { mode: 'view' });
+    else if (journalId) {
+      const journal = game.journal.get(journalId);
+      if (journal) journal.sheet.render(true, { pageId: id });
+    }
+
+    this.#closeSearch();
+  }
+
+  /**
+   * Update search results without full re-render.
+   */
+  #updateSearchResults() {
+    const panel = this.element.querySelector('.compact-search-panel');
+    if (!panel) return;
+
+    const resultsContainer = panel.querySelector('.search-panel-results');
+    if (!resultsContainer) return;
+
+    if (this.#searchResults?.length) {
+      resultsContainer.innerHTML = this.#searchResults.map(r => `
+        <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
+          <span class="result-name">${r.name}</span>
+          ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
+        </div>`).join('');
+    } else if (this.#searchTerm?.length >= 2) {
+      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
+    } else {
+      resultsContainer.innerHTML = '';
+    }
+  }
+
+  /**
+   * Position search panel with edge awareness.
+   */
+  #positionSearchPanel() {
+    const panel = this.element.querySelector('.compact-search-panel');
+    const button = this.element.querySelector('[data-action="toggleSearch"]');
+    if (!panel || !button) return;
+
+    const buttonRect = button.getBoundingClientRect();
+    const panelWidth = 280;
+    const panelMaxHeight = 300;
+
+    // Prefer left of button (sidebar is on right)
+    let left = buttonRect.left - panelWidth - 8;
+    let top = buttonRect.top;
+
+    // Edge awareness - check left edge, flip to right if needed
+    if (left < 10) {
+      left = buttonRect.right + 8;
+    }
+
+    // Edge awareness - check bottom edge
+    if (top + panelMaxHeight > window.innerHeight - 10) {
+      top = window.innerHeight - panelMaxHeight - 10;
+    }
+
+    // Ensure not off top edge
+    top = Math.max(10, top);
+
+    panel.style.position = 'fixed';
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+    panel.style.width = `${panelWidth}px`;
+    panel.style.maxHeight = `${panelMaxHeight}px`;
+  }
+
+  /**
+   * Close search and clean up.
+   */
+  #closeSearch() {
+    this.#searchTerm = '';
+    this.#searchResults = null;
+    this.#searchOpen = false;
+    this.render();
   }
 
   /* -------------------------------------------- */

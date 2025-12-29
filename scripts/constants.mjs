@@ -211,7 +211,31 @@ export const TEMPLATES = {
     /** @type {string} Macro trigger configuration template */
     MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`,
     /** @type {string} Calendar HUD settings template */
-    HUD_SETTINGS: `modules/${MODULE.ID}/templates/settings/calendaria-hud-settings.hbs`
+    HUD_SETTINGS: `modules/${MODULE.ID}/templates/settings/calendaria-hud-settings.hbs`,
+    /** @type {string} Settings panel - General tab */
+    PANEL_GENERAL: `modules/${MODULE.ID}/templates/settings/tab-general.hbs`,
+    /** @type {string} Settings panel - Calendar tab */
+    PANEL_CALENDAR: `modules/${MODULE.ID}/templates/settings/tab-calendar.hbs`,
+    /** @type {string} Settings panel - Notes tab */
+    PANEL_NOTES: `modules/${MODULE.ID}/templates/settings/tab-notes.hbs`,
+    /** @type {string} Settings panel - Time tab */
+    PANEL_TIME: `modules/${MODULE.ID}/templates/settings/tab-time.hbs`,
+    /** @type {string} Settings panel - Weather tab */
+    PANEL_WEATHER: `modules/${MODULE.ID}/templates/settings/tab-weather.hbs`,
+    /** @type {string} Settings panel - Appearance tab */
+    PANEL_APPEARANCE: `modules/${MODULE.ID}/templates/settings/tab-appearance.hbs`,
+    /** @type {string} Settings panel - Macros tab */
+    PANEL_MACROS: `modules/${MODULE.ID}/templates/settings/tab-macros.hbs`,
+    /** @type {string} Settings panel - Chat tab */
+    PANEL_CHAT: `modules/${MODULE.ID}/templates/settings/tab-chat.hbs`,
+    /** @type {string} Settings panel - Advanced tab */
+    PANEL_ADVANCED: `modules/${MODULE.ID}/templates/settings/tab-advanced.hbs`,
+    /** @type {string} Settings panel - Compact Calendar tab */
+    PANEL_COMPACT: `modules/${MODULE.ID}/templates/settings/tab-compact.hbs`,
+    /** @type {string} Settings panel - Calendar HUD tab */
+    PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
+    /** @type {string} Settings panel - TimeKeeper tab */
+    PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`
   },
 
   /** @type {string} Time rotation dial template */

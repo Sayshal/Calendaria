@@ -5,10 +5,12 @@
       <i class="fas fa-compress"></i>
     </button>
 
-    <div class="search-wrapper">
+    <div class="search-wrapper {{#if searchOpen}}open{{/if}}">
+      <button type="button" class="search-toggle" data-action="toggleSearch" data-tooltip="{{localize 'CALENDARIA.Search.SearchNotes'}}">
+        <i class="fas fa-search"></i>
+      </button>
       <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
-        value="{{searchTerm}}" data-action="search" autocomplete="off">
-      <i class="fas fa-search search-icon"></i>
+        value="{{searchTerm}}" autocomplete="off">
     </div>
 
     <button type="button" data-action="today" data-tooltip="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">

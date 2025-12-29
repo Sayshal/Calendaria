@@ -8,6 +8,7 @@
 
 import { MODULE, HOOKS, TEMPLATES, SETTINGS } from '../constants.mjs';
 import { localize, format } from '../utils/localization.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -27,7 +28,15 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'time-keeper-hud',
     classes: ['time-keeper-hud'],
     position: { width: 'auto', height: 'auto', zIndex: 100 },
-    window: { frame: false, positioned: true }
+    window: { frame: false, positioned: true },
+    actions: {
+      reverse5x: TimeKeeperHUD.#onReverse5x,
+      reverse: TimeKeeperHUD.#onReverse,
+      forward: TimeKeeperHUD.#onForward,
+      forward5x: TimeKeeperHUD.#onForward5x,
+      toggle: TimeKeeperHUD.#onToggle,
+      openSettings: TimeKeeperHUD.#onOpenSettings
+    }
   };
 
   /** @override */
@@ -65,8 +74,10 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     // Enable dragging
     this.#enableDragging();
 
-    // Set up event listeners
-    this.#activateListeners();
+    // Increment selector (change event, not handled by actions)
+    this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (e) => {
+      TimeKeeper.setIncrement(e.target.value);
+    });
 
     // Listen for clock state changes to update UI
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
@@ -161,47 +172,43 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /* -------------------------------------------- */
-  /*  Event Handlers                              */
+  /*  Action Handlers                             */
   /* -------------------------------------------- */
 
-  /**
-   * Activate HUD event listeners.
-   * @private
-   */
-  #activateListeners() {
-    const html = this.element;
-
-    // Reverse 5x button
-    html.querySelector('[data-action="reverse5x"]')?.addEventListener('click', () => {
-      TimeKeeper.reverse(5);
-    });
-
-    // Reverse 1x button
-    html.querySelector('[data-action="reverse"]')?.addEventListener('click', () => {
-      TimeKeeper.reverse();
-    });
-
-    // Forward 1x button
-    html.querySelector('[data-action="forward"]')?.addEventListener('click', () => {
-      TimeKeeper.forward();
-    });
-
-    // Forward 5x button
-    html.querySelector('[data-action="forward5x"]')?.addEventListener('click', () => {
-      TimeKeeper.forward(5);
-    });
-
-    // Play/Pause button
-    html.querySelector('[data-action="toggle"]')?.addEventListener('click', () => {
-      TimeKeeper.toggle();
-      this.render();
-    });
-
-    // Increment selector
-    html.querySelector('[data-action="increment"]')?.addEventListener('change', (event) => {
-      TimeKeeper.setIncrement(event.target.value);
-    });
+  /** Reverse time by 5x increment. */
+  static #onReverse5x() {
+    TimeKeeper.reverse(5);
   }
+
+  /** Reverse time by 1x increment. */
+  static #onReverse() {
+    TimeKeeper.reverse();
+  }
+
+  /** Advance time by 1x increment. */
+  static #onForward() {
+    TimeKeeper.forward();
+  }
+
+  /** Advance time by 5x increment. */
+  static #onForward5x() {
+    TimeKeeper.forward(5);
+  }
+
+  /** Toggle clock running state. */
+  static #onToggle() {
+    TimeKeeper.toggle();
+    this.render();
+  }
+
+  /** Open settings panel. */
+  static #onOpenSettings() {
+    new SettingsPanel().render(true);
+  }
+
+  /* -------------------------------------------- */
+  /*  Event Handlers                              */
+  /* -------------------------------------------- */
 
   /**
    * Handle clock state changes.

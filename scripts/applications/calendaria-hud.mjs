@@ -7,12 +7,13 @@
  */
 
 import { CalendarApplication } from './calendar-application.mjs';
-import { CalendariaHUDSettings } from './settings/calendaria-hud-settings.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { MODULE, SETTINGS, TEMPLATES, HOOKS } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
@@ -95,6 +96,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {Array} Cached live events */
   #liveEvents = [];
 
+  /** @type {boolean} Search panel visibility state */
+  #searchOpen = false;
+
+  /** @type {string} Current search term */
+  #searchTerm = '';
+
+  /** @type {object[]|null} Current search results */
+  #searchResults = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-hud',
@@ -115,7 +125,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       toSunset: CalendariaHUD.#onToSunset,
       toMidnight: CalendariaHUD.#onToMidnight,
       reverse: CalendariaHUD.#onReverse,
-      forward: CalendariaHUD.#onForward
+      forward: CalendariaHUD.#onForward,
+      closeSearch: CalendariaHUD.#onCloseSearch,
+      openSearchResult: CalendariaHUD.#onOpenSearchResult
     }
   };
 
@@ -241,6 +253,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       selected: m.value === this.#multiplier
     }));
 
+    // Search context
+    context.searchOpen = this.#searchOpen;
+    context.searchTerm = this.#searchTerm;
+    context.searchResults = this.#searchResults || [];
+
     return context;
   }
 
@@ -359,6 +376,34 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       TimeKeeper.setMultiplier(this.#multiplier);
       this.#saveStickyStates();
     });
+
+    // Search input listener
+    const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
+    if (searchInput) {
+      if (this.#searchOpen) searchInput.focus();
+
+      const debouncedSearch = foundry.utils.debounce((term) => {
+        this.#searchTerm = term;
+        if (term.length >= 2) {
+          this.#searchResults = SearchManager.search(term, { searchContent: true });
+        } else {
+          this.#searchResults = null;
+        }
+        this.#updateSearchResults();
+      }, 300);
+
+      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.#closeSearch();
+        }
+      });
+    }
+
+    // Position search panel if open
+    if (this.#searchOpen) {
+      this.#positionSearchPanel();
+    }
 
     // Dome keyboard handler
     const dome = this.element.querySelector('.calendaria-hud-dome');
@@ -1444,8 +1489,99 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static async #onSearchNotes(event, target) {
-    // TODO: Implement search dialog
-    ui.notifications.info('Search functionality coming soon');
+    this.#searchOpen = !this.#searchOpen;
+    if (!this.#searchOpen) {
+      this.#searchTerm = '';
+      this.#searchResults = null;
+    }
+    await this.render({ parts: ['bar'] });
+  }
+
+  static async #onCloseSearch(event, target) {
+    this.#closeSearch();
+  }
+
+  static async #onOpenSearchResult(event, target) {
+    const id = target.dataset.id;
+    const journalId = target.dataset.journalId;
+
+    const page = NoteManager.getFullNote(id);
+    if (page) page.sheet.render(true, { mode: 'view' });
+    else if (journalId) {
+      const journal = game.journal.get(journalId);
+      if (journal) journal.sheet.render(true, { pageId: id });
+    }
+
+    this.#closeSearch();
+  }
+
+  /**
+   * Update search results without full re-render.
+   */
+  #updateSearchResults() {
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    if (!panel) return;
+
+    const resultsContainer = panel.querySelector('.search-panel-results');
+    if (!resultsContainer) return;
+
+    if (this.#searchResults?.length) {
+      resultsContainer.innerHTML = this.#searchResults.map(r => `
+        <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
+          <span class="result-name">${r.name}</span>
+          ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
+        </div>`).join('');
+    } else if (this.#searchTerm?.length >= 2) {
+      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
+    } else {
+      resultsContainer.innerHTML = '';
+    }
+  }
+
+  /**
+   * Position search panel with edge awareness.
+   */
+  #positionSearchPanel() {
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const button = this.element.querySelector('[data-action="searchNotes"]');
+    if (!panel || !button) return;
+
+    const buttonRect = button.getBoundingClientRect();
+    const panelWidth = 280;
+    const panelMaxHeight = 300;
+
+    // Position above the button (HUD is at bottom)
+    let left = buttonRect.left;
+    let top = buttonRect.top - panelMaxHeight - 8;
+
+    // Edge awareness - check left edge
+    if (left + panelWidth > window.innerWidth - 10) {
+      left = window.innerWidth - panelWidth - 10;
+    }
+
+    // Edge awareness - check top edge, flip below if needed
+    if (top < 10) {
+      top = buttonRect.bottom + 8;
+    }
+
+    // Ensure not off left edge
+    left = Math.max(10, left);
+
+    panel.style.position = 'fixed';
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+    panel.style.width = `${panelWidth}px`;
+    panel.style.maxHeight = `${panelMaxHeight}px`;
+  }
+
+  /**
+   * Close search and clean up.
+   */
+  #closeSearch() {
+    this.#searchTerm = '';
+    this.#searchResults = null;
+    this.#searchOpen = false;
+    this.render({ parts: ['bar'] });
   }
 
   static async #onAddNote(event, target) {
@@ -1493,7 +1629,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static #onOpenSettings(event, target) {
-    new CalendariaHUDSettings().render(true);
+    new SettingsPanel().render(true);
   }
 
   static async #onOpenWeatherPicker(event, target) {

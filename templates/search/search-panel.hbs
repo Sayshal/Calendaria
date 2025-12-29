@@ -1,4 +1,4 @@
-<div class="calendaria-search-panel {{#if isOpen}}open{{/if}}">
+<div class="calendaria-search-panel {{#if searchOpen}}open{{/if}}">
   <div class="search-header">
     <h3>{{localize "CALENDARIA.Search.Results"}}</h3>
     <button type="button" class="close-search" data-action="closeSearch">
@@ -7,90 +7,15 @@
   </div>
 
   <div class="search-results">
-    {{#if hasResults}}
-      {{#if results.notes.length}}
-        <div class="result-group">
-          <h4><i class="fas fa-sticky-note"></i> {{localize "CALENDARIA.Search.Notes"}} ({{results.notes.length}})</h4>
-          <ul class="result-list">
-            {{#each results.notes}}
-              <li class="result-item" data-action="openSearchResult" data-type="{{type}}" data-id="{{id}}" data-journal-id="{{data.journalId}}">
-                <span class="result-name">{{name}}</span>
-                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-
-      {{#if results.festivals.length}}
-        <div class="result-group">
-          <h4><i class="fas fa-star"></i> {{localize "CALENDARIA.Search.Festivals"}} ({{results.festivals.length}})</h4>
-          <ul class="result-list">
-            {{#each results.festivals}}
-              <li class="result-item" data-action="openSearchResult" data-type="{{type}}" data-id="{{id}}">
-                <span class="result-name">{{name}}</span>
-                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-
-      {{#if results.seasons.length}}
-        <div class="result-group">
-          <h4><i class="fas fa-leaf"></i> {{localize "CALENDARIA.Search.Seasons"}} ({{results.seasons.length}})</h4>
-          <ul class="result-list">
-            {{#each results.seasons}}
-              <li class="result-item" data-action="openSearchResult" data-type="{{type}}" data-id="{{id}}">
-                <span class="result-name">{{name}}</span>
-                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-
-      {{#if results.moons.length}}
-        <div class="result-group">
-          <h4><i class="fas fa-moon"></i> {{localize "CALENDARIA.Search.Moons"}} ({{results.moons.length}})</h4>
-          <ul class="result-list">
-            {{#each results.moons}}
-              <li class="result-item" data-action="openSearchResult" data-type="{{type}}" data-id="{{id}}">
-                <span class="result-name">{{name}}</span>
-                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-
-      {{#if results.eras.length}}
-        <div class="result-group">
-          <h4><i class="fas fa-hourglass-half"></i> {{localize "CALENDARIA.Search.Eras"}} ({{results.eras.length}})</h4>
-          <ul class="result-list">
-            {{#each results.eras}}
-              <li class="result-item" data-action="openSearchResult" data-type="{{type}}" data-id="{{id}}">
-                <span class="result-name">{{name}}</span>
-                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-
-      {{#if results.months.length}}
-        <div class="result-group">
-          <h4><i class="fas fa-calendar"></i> {{localize "CALENDARIA.Search.Months"}} ({{results.months.length}})</h4>
-          <ul class="result-list">
-            {{#each results.months}}
-              <li class="result-item" data-action="openSearchResult" data-type="{{type}}" data-id="{{id}}" data-month-index="{{data.index}}">
-                <span class="result-name">{{name}}</span>
-                {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
+    {{#if searchResults.length}}
+      <ul class="result-list">
+        {{#each searchResults}}
+          <li class="result-item" data-action="openSearchResult" data-id="{{id}}" data-journal-id="{{data.journalId}}">
+            <span class="result-name">{{name}}</span>
+            {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+          </li>
+        {{/each}}
+      </ul>
     {{else}}
       <div class="no-results">
         <i class="fas fa-search"></i>

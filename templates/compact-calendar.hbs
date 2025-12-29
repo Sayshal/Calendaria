@@ -30,12 +30,20 @@
       data-tooltip="{{localize 'CALENDARIA.CompactCalendar.AddNote'}}">
       <i class="fas fa-plus"></i>
     </button>
+    <button type="button" class="sidebar-btn" data-action="toggleSearch"
+      data-tooltip="{{localize 'CALENDARIA.Search.SearchNotes'}}">
+      <i class="fas fa-search"></i>
+    </button>
     {{#if showViewNotes}}
       <button type="button" class="sidebar-btn" data-action="viewNotes"
         data-tooltip="{{localize 'CALENDARIA.CompactCalendar.ViewNotes'}}">
         <i class="fas fa-list"></i>
       </button>
     {{/if}}
+    <button type="button" class="sidebar-btn" data-action="openSettings"
+      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Settings'}}">
+      <i class="fas fa-cog"></i>
+    </button>
   </div>
 
   {{!-- Notes Panel (slides out from sidebar) --}}
@@ -72,6 +80,33 @@
           {{/if}}
         </div>
       {{/each}}
+    </div>
+  </div>
+
+  {{!-- Search Panel (slides out from sidebar) --}}
+  <div class="compact-search-panel{{#if searchOpen}} visible{{/if}}">
+    <div class="search-panel-header">
+      <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
+        value="{{searchTerm}}" autocomplete="off">
+      <button type="button" class="search-panel-close" data-action="closeSearch"
+        data-tooltip="{{localize 'CALENDARIA.Search.Close'}}">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-panel-results">
+      {{#if searchResults.length}}
+        {{#each searchResults}}
+          <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}" data-journal-id="{{data.journalId}}">
+            <span class="result-name">{{name}}</span>
+            {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+          </div>
+        {{/each}}
+      {{else if searchTerm}}
+        <div class="no-results">
+          <i class="fas fa-search"></i>
+          <span>{{localize "CALENDARIA.Search.NoResults"}}</span>
+        </div>
+      {{/if}}
     </div>
   </div>
 
