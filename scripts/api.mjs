@@ -538,32 +538,18 @@ export const CalendariaAPI = {
   /* -------------------------------------------- */
 
   /**
-   * Search notes by name and optionally content.
+   * Search all content including notes and dates.
+   * Returns results with type information for categorized display.
    * @param {string} term - Search term (minimum 2 characters)
    * @param {object} [options] - Search options
    * @param {boolean} [options.searchContent] - Search note content
    * @param {number} [options.limit] - Max results
-   * @returns {object[]} Array of matching note results
+   * @returns {object[]} Array of results with type field (e.g., 'note')
    * @example
    * const results = CALENDARIA.api.search('dragon');
-   * console.log(results); // Array of matching notes
+   * // Returns: [{ id, name, type: 'note', ... }, ...]
    */
   search(term, options = {}) {
-    return SearchManager.search(term, options);
-  },
-
-  /**
-   * Search notes by name and optionally content.
-   * Alias for search() method.
-   * @param {string} term - Search term
-   * @param {object} [options] - Search options
-   * @param {boolean} [options.searchContent] - Search note content
-   * @param {number} [options.limit] - Max results
-   * @returns {object[]} Array of matching note results
-   * @example
-   * const notes = CALENDARIA.api.searchNotes('dragon', { searchContent: true });
-   */
-  searchNotes(term, options = {}) {
     return SearchManager.search(term, options);
   },
 
@@ -730,14 +716,16 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Search notes by text in title or content.
+   * Search notes only, with simple filtering options.
+   * Unlike search(), this returns raw note stubs without type metadata.
    * @param {string} searchTerm - Text to search for
    * @param {object} [options] - Search options
-   * @param {boolean} [options.caseSensitive] - Case-sensitive search
-   * @param {string[]} [options.categories] - Filter by categories
-   * @returns {object[]} Array of matching note stubs
+   * @param {boolean} [options.caseSensitive] - Case-sensitive search (default: false)
+   * @param {string[]} [options.categories] - Filter by category IDs
+   * @returns {object[]} Array of note stubs (id, name, content, flagData)
    * @example
-   * const results = CALENDARIA.api.searchNotes('festival');
+   * const notes = CALENDARIA.api.searchNotes('festival');
+   * // Returns: [{ id, name, content, flagData }, ...]
    */
   searchNotes(searchTerm, options = {}) {
     const allNotes = NoteManager.getAllNotes();

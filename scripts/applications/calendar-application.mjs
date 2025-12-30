@@ -17,6 +17,7 @@ import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -54,7 +55,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       openWeatherPicker: CalendarApplication._onOpenWeatherPicker,
       toggleSearch: CalendarApplication._onToggleSearch,
       closeSearch: CalendarApplication._onCloseSearch,
-      openSearchResult: CalendarApplication._onOpenSearchResult
+      openSearchResult: CalendarApplication._onOpenSearchResult,
+      openSettings: CalendarApplication._onOpenSettings,
+      navigateToMonth: CalendarApplication._onNavigateToMonth
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -218,8 +221,42 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
 
-    // Add empty cells for days before month starts
-    for (let i = 0; i < startDayOfWeek; i++) currentWeek.push({ empty: true });
+    // Add days from previous months (bleeding into current view)
+    // Handle intercalary months by going back through multiple months if needed
+    if (startDayOfWeek > 0) {
+      const totalMonths = calendar.months?.values?.length ?? 12;
+      const prevDays = [];
+      let remainingSlots = startDayOfWeek;
+      let checkMonth = month;
+      let checkYear = year;
+
+      // Walk backwards through months to collect enough days
+      while (remainingSlots > 0) {
+        checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
+        if (checkMonth === totalMonths - 1) checkYear--;
+
+        const checkMonthData = calendar.months?.values?.[checkMonth];
+        const checkMonthDays = checkMonthData?.days ?? 30;
+
+        // Take days from this month (from end backwards)
+        const daysToTake = Math.min(remainingSlots, checkMonthDays);
+        for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) {
+          prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
+        }
+        remainingSlots -= daysToTake;
+      }
+
+      // Add the collected days to currentWeek
+      for (const pd of prevDays) {
+        currentWeek.push({
+          day: pd.day,
+          year: pd.year,
+          month: pd.month,
+          isFromOtherMonth: true,
+          isToday: this._isToday(pd.year, pd.month, pd.day)
+        });
+      }
+    }
 
     // Add days of the month
     let dayIndex = startDayOfWeek;
@@ -281,8 +318,40 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       }
     }
 
-    // Add remaining empty cells
-    while (currentWeek.length > 0 && currentWeek.length < daysInWeek) currentWeek.push({ empty: true });
+    // Fill remaining cells with days from next months
+    // Handle intercalary months by going forward through multiple months if needed
+    if (currentWeek.length > 0 && currentWeek.length < daysInWeek) {
+      const totalMonths = calendar.months?.values?.length ?? 12;
+      let remainingSlots = daysInWeek - currentWeek.length;
+      let checkMonth = month;
+      let checkYear = year;
+      let dayInMonth = 1;
+
+      while (remainingSlots > 0) {
+        // Move to next month if we've exhausted current
+        if (dayInMonth > (calendar.months?.values?.[checkMonth]?.days ?? 30) || checkMonth === month) {
+          checkMonth = checkMonth === totalMonths - 1 ? 0 : checkMonth + 1;
+          if (checkMonth === 0) checkYear++;
+          dayInMonth = 1;
+        }
+
+        const checkMonthDays = calendar.months?.values?.[checkMonth]?.days ?? 30;
+        const daysToTake = Math.min(remainingSlots, checkMonthDays - dayInMonth + 1);
+
+        for (let d = dayInMonth; d < dayInMonth + daysToTake; d++) {
+          currentWeek.push({
+            day: d,
+            year: checkYear,
+            month: checkMonth,
+            isFromOtherMonth: true,
+            isToday: this._isToday(checkYear, checkMonth, d)
+          });
+        }
+
+        dayInMonth += daysToTake;
+        remainingSlots -= daysToTake;
+      }
+    }
 
     if (currentWeek.length > 0) weeks.push(currentWeek);
 
@@ -1342,6 +1411,27 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     this._searchTerm = '';
     this._searchResults = null;
     this._searchOpen = false;
+    await this.render();
+  }
+
+  /**
+   * Open the settings panel.
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static _onOpenSettings(event, target) {
+    new SettingsPanel().render(true);
+  }
+
+  /**
+   * Navigate to a specific month (from clicking other-month day).
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static async _onNavigateToMonth(event, target) {
+    const month = parseInt(target.dataset.month);
+    const year = parseInt(target.dataset.year);
+    this.viewedDate = { year, month, day: 1 };
     await this.render();
   }
 }

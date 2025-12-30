@@ -81,14 +81,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static TABS = {
     primary: {
       tabs: [
-        { id: 'calendar', icon: 'fas fa-calendar-alt', label: 'CALENDARIA.Common.Calendar' },
-        { id: 'notes', icon: 'fas fa-sticky-note', label: 'CALENDARIA.Common.Notes' },
-        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time' },
-        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons' },
-        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather' },
+        { id: 'calendar', icon: 'fas fa-calendar-alt', label: 'CALENDARIA.Common.Calendar', gmOnly: true },
+        { id: 'notes', icon: 'fas fa-sticky-note', label: 'CALENDARIA.Common.Notes', gmOnly: true },
+        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', gmOnly: true },
+        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons', gmOnly: true },
+        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather', gmOnly: true },
         { id: 'appearance', icon: 'fas fa-palette', label: 'CALENDARIA.SettingsPanel.Tab.Appearance' },
-        { id: 'macros', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
-        { id: 'chat', icon: 'fas fa-comment', label: 'CALENDARIA.SettingsPanel.Tab.Chat' },
+        { id: 'macros', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros', gmOnly: true },
+        { id: 'chat', icon: 'fas fa-comment', label: 'CALENDARIA.SettingsPanel.Tab.Chat', gmOnly: true },
         { id: 'advanced', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Advanced' },
         { id: 'hud', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', cssClass: 'app-tab' },
         { id: 'compact', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.Compact', cssClass: 'app-tab' },
@@ -107,6 +107,39 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     context.isGM = game.user.isGM;
     return context;
+  }
+
+  /** @override */
+  _prepareTabs(group, options) {
+    const tabs = super._prepareTabs(group, options);
+
+    // Filter tabs for non-GM users
+    if (!game.user.isGM && tabs && typeof tabs === 'object') {
+      // tabs is an object with tab IDs as keys
+      const filtered = {};
+      for (const [id, tab] of Object.entries(tabs)) {
+        const tabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === id);
+        if (!tabDef?.gmOnly) {
+          filtered[id] = tab;
+        }
+      }
+
+      // Set initial tab to appearance for non-GMs if current tab is GM-only
+      const activeTab = this.tabGroups[group];
+      const activeTabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === activeTab);
+      if (activeTabDef?.gmOnly) {
+        this.tabGroups[group] = 'appearance';
+        // Update active state in filtered tabs
+        for (const tab of Object.values(filtered)) {
+          tab.active = tab.id === 'appearance';
+          tab.cssClass = tab.id === 'appearance' ? 'active' : tab.cssClass?.replace('active', '').trim() || undefined;
+        }
+      }
+
+      return filtered;
+    }
+
+    return tabs;
   }
 
   /** @override */
@@ -436,6 +469,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
       applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
     }
+
+    // Notes Tab - Custom Categories
+    if (data.categories) {
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, data.categories);
+    }
   }
 
   /* -------------------------------------------- */
@@ -541,7 +579,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     delete customColors[key];
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
     applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
-    app?.render();
+    app?.render({ force: true, parts: ['appearance'] });
   }
 
   /**
@@ -562,7 +600,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {});
       applyCustomColors({ ...DEFAULT_COLORS });
       ui.notifications.info('CALENDARIA.ThemeEditor.ColorsReset', { localize: true });
-      app?.render();
+      app?.render({ force: true, parts: ['appearance'] });
     }
   }
 

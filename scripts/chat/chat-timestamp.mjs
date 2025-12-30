@@ -9,9 +9,11 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 
+const ChatLog = foundry.applications.sidebar.tabs.ChatLog;
+
 /**
  * Hook handler for preCreateChatMessage.
- * Stores current world time in message flags.
+ * Stores current world time and formatted fantasy date in message flags.
  * @param {ChatMessage} message - The chat message being created
  * @param {object} data - The creation data
  * @param {object} options - Creation options
@@ -21,8 +23,14 @@ export function onPreCreateChatMessage(message, data, options, userId) {
   const mode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
   if (mode === 'disabled') return;
 
-  // Store world time in message flags
-  message.updateSource({ [`flags.${MODULE.ID}.worldTime`]: game.time.worldTime });
+  const worldTime = game.time.worldTime;
+  const fantasyDate = formatWorldTime(worldTime);
+
+  // Store both world time and pre-formatted date in message flags
+  message.updateSource({
+    [`flags.${MODULE.ID}.worldTime`]: worldTime,
+    [`flags.${MODULE.ID}.fantasyDate`]: fantasyDate
+  });
 }
 
 /**
@@ -36,26 +44,26 @@ export function onRenderChatMessageHTML(message, html, context) {
   const mode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
   if (mode === 'disabled') return;
 
-  const worldTime = message.flags?.[MODULE.ID]?.worldTime;
-  if (worldTime === undefined) return;
+  const flags = message.flags?.[MODULE.ID];
+  if (!flags?.worldTime && !flags?.fantasyDate) return;
 
   const timestampEl = html.querySelector('.message-timestamp');
   if (!timestampEl) return;
 
-  const formattedDate = formatWorldTime(worldTime);
+  // Use stored fantasyDate, fallback to computing from worldTime
+  const formattedDate = flags.fantasyDate || formatWorldTime(flags.worldTime);
   if (!formattedDate) return;
 
   if (mode === 'replace') {
     timestampEl.textContent = formattedDate;
-    timestampEl.classList.add('calendaria-timestamp');
   } else if (mode === 'augment') {
-    // Create wrapper for augmented display
+    // Create wrapper for inline display: "Fantasy Date (real time)"
     const wrapper = document.createElement('span');
     wrapper.className = 'calendaria-timestamp-wrapper';
 
     const gameDate = document.createElement('span');
     gameDate.className = 'calendaria-timestamp';
-    gameDate.textContent = formattedDate;
+    gameDate.textContent = formattedDate + ' ';
 
     const realDate = document.createElement('span');
     realDate.className = 'calendaria-timestamp-real';
@@ -66,6 +74,50 @@ export function onRenderChatMessageHTML(message, html, context) {
 
     timestampEl.replaceChildren(wrapper);
   }
+}
+
+/**
+ * Override ChatLog.prototype.updateTimestamps to prevent Foundry from
+ * overwriting our custom timestamps.
+ * Call this during the init hook.
+ */
+export function overrideChatLogTimestamps() {
+  const originalUpdateTimestamps = ChatLog.prototype.updateTimestamps;
+
+  ChatLog.prototype.updateTimestamps = function () {
+    const mode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
+    if (mode === 'disabled') return originalUpdateTimestamps.call(this);
+
+    for (const li of document.querySelectorAll('.chat-message[data-message-id]')) {
+      const message = game.messages.get(li.dataset.messageId);
+      if (!message?.timestamp) continue;
+      const stamp = li.querySelector('.message-timestamp');
+      if (!stamp) continue;
+
+      const flags = message.flags?.[MODULE.ID];
+      if (flags?.worldTime !== undefined || flags?.fantasyDate) {
+        // Use stored fantasyDate, fallback to computing from worldTime
+        const formattedDate = flags.fantasyDate || formatWorldTime(flags.worldTime);
+        if (formattedDate) {
+          // In replace mode: show in-game date, tooltip shows relative time
+          if (mode === 'replace') {
+            stamp.textContent = formattedDate;
+            stamp.dataset.tooltip = foundry.utils.timeSince(message.timestamp);
+          }
+          // In augment mode: update inline "Fantasy Date (real time)"
+          else if (mode === 'augment') {
+            const gameDate = stamp.querySelector('.calendaria-timestamp');
+            if (gameDate) gameDate.textContent = formattedDate + ' ';
+            const realDate = stamp.querySelector('.calendaria-timestamp-real');
+            if (realDate) realDate.textContent = foundry.utils.timeSince(message.timestamp);
+          }
+        }
+      } else {
+        // No calendaria flag, use default behavior
+        stamp.textContent = foundry.utils.timeSince(message.timestamp);
+      }
+    }
+  };
 }
 
 /**

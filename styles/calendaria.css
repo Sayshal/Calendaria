@@ -711,6 +711,17 @@
     opacity: 0.3;
   }
 
+  &.other-month {
+    opacity: 0.4;
+    background: transparent;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.6;
+      background: var(--calendaria-bg-hover);
+    }
+  }
+
   &.today {
     background: var(--calendaria-today-bg);
     border: 1px solid var(--calendaria-today);
@@ -3975,6 +3986,21 @@
       cursor: default;
     }
 
+    &.other-month {
+      opacity: 0.4;
+      background: transparent;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.6;
+        background: var(--calendaria-bg-hover);
+      }
+
+      .day-num {
+        color: var(--calendaria-day-number);
+      }
+    }
+
     &.today {
       background: var(--calendaria-today-bg);
       box-shadow: inset 0 0 0 2px var(--calendaria-today);
@@ -5789,24 +5815,40 @@
 /* Chat Message Timestamps                   */
 /* ======================================== */
 
-.calendaria-timestamp {
-  color: var(--calendaria-primary);
+/* Use absolute positioning so timestamp overlays without disrupting flex layout */
+.chat-message .message-header .message-metadata {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 44px); /* Leave room for avatar (~36px) + gap */
+}
+
+.chat-message .message-header .message-metadata .message-timestamp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .calendaria-timestamp-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  line-height: 1.2;
-}
-
-.calendaria-timestamp-wrapper .calendaria-timestamp {
-  font-weight: 500;
+  display: inline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .calendaria-timestamp-wrapper .calendaria-timestamp-real {
-  font-size: 0.85em;
   opacity: 0.7;
+
+  &::before {
+    content: '(';
+  }
+
+  &::after {
+    content: ')';
+  }
 }
 
 /* ======================================== */

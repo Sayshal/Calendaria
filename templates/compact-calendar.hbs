@@ -174,6 +174,11 @@
         {{#each this}}
           {{#if empty}}
             <div class="compact-day empty"></div>
+          {{else if isFromOtherMonth}}
+            <div class="compact-day other-month{{#if isToday}} today{{/if}}"
+              data-action="navigateToMonth" data-year="{{year}}" data-month="{{month}}">
+              <span class="day-num">{{day}}</span>
+            </div>
           {{else}}
             <div
               class="compact-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"

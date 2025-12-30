@@ -28,6 +28,7 @@ import { CalendariaAPI } from './scripts/api.mjs';
 import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
+import { overrideChatLogTimestamps } from './scripts/chat/chat-timestamp.mjs';
 
 Hooks.once('init', async () => {
   // Fire calendaria.init hook for other modules to prepare
@@ -36,6 +37,7 @@ Hooks.once('init', async () => {
   initializeLogger();
   registerKeybindings();
   registerHooks();
+  overrideChatLogTimestamps();
   CalendariaSocket.initialize();
 
   // Register CalendarNote document type
