@@ -1,7 +1,7 @@
 /**
  * Extended calendar data model with Calendaria-specific features.
  * System-agnostic calendar that extends Foundry's base CalendarData.
- * @extends {foundry.data.CalendarData}
+ * @extends foundry.data.CalendarData
  * @module Calendar/Data/CalendariaCalendar
  * @author Tyler
  */
@@ -12,6 +12,9 @@ import * as LeapYearUtils from '../leap-year-utils.mjs';
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField } = foundry.data.fields;
 
+/**
+ * Calendar data model with extended features for fantasy calendars.
+ */
 export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @override */
   static defineSchema() {
@@ -36,7 +39,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       },
       { required: true, nullable: true, initial: null }
     );
-
     const extendedSeasonSchema = new SchemaField(
       {
         type: new StringField({ required: false, initial: 'dated', choices: ['dated', 'periodic'] }),
@@ -57,8 +59,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       },
       { required: false, nullable: true, initial: null }
     );
-
-    // Extended days schema to include isRestDay for weekdays
     const extendedDaysSchema = new SchemaField(
       {
         values: new ArrayField(
@@ -76,25 +76,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       },
       { required: false, nullable: true }
     );
-
     return {
       ...schema,
       months: extendedMonthSchema,
       seasons: extendedSeasonSchema,
       days: extendedDaysSchema,
-
-      /**
-       * Seconds per combat round (default 6 for D&D-style systems).
-       * @type {number}
-       */
       secondsPerRound: new NumberField({ required: false, integer: true, min: 1, initial: 6 }),
-
-      /**
-       * Advanced leap year configuration
-       * Supports complex patterns like "400,!100,4" for true Gregorian rules.
-       * When set, this overrides the standard years.leapYear config.
-       * @type {object}
-       */
       leapYearConfig: new SchemaField(
         {
           rule: new StringField({ required: false, initial: 'none' }),
@@ -104,11 +91,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false, nullable: true }
       ),
-
-      /**
-       * Festival/intercalary days (days outside normal calendar structure)
-       * @type {Array<{name: string, month: number, day: number, leapYearOnly: boolean, countsForWeekday: boolean}>}
-       */
       festivals: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
@@ -118,11 +100,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           countsForWeekday: new BooleanField({ required: false, initial: true })
         })
       ),
-
-      /**
-       * Moon configurations for this calendar
-       * @type {Array<{name: string, cycleLength: number, phases: Array, referenceDate: object}>}
-       */
       moons: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
@@ -147,11 +124,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           })
         })
       ),
-
-      /**
-       * Era configurations for this calendar
-       * @type {Array<{name: string, abbreviation: string, startYear: number, endYear: number|null, format: string, template: string|null}>}
-       */
       eras: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
@@ -162,11 +134,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           template: new StringField({ required: false, nullable: true, initial: null })
         })
       ),
-
-      /**
-       * Named repeating cycles (e.g., zodiac signs, elemental weeks)
-       * @type {Array<{name: string, length: number, offset: number, basedOn: string, entries: Array<{name: string}>}>}
-       */
       cycles: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
@@ -176,31 +143,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           entries: new ArrayField(new SchemaField({ name: new StringField({ required: true }) }))
         })
       ),
-
-      /**
-       * Template for displaying cycle values (e.g., "{{1}} - Week of {{2}}")
-       * @type {string}
-       */
       cycleFormat: new StringField({ required: false, initial: '' }),
-
-      /**
-       * Calendar metadata
-       * @type {object}
-       */
       metadata: new SchemaField(
-        {
-          id: new StringField({ required: false }),
-          description: new StringField({ required: false }),
-          author: new StringField({ required: false }),
-          system: new StringField({ required: false })
-        },
+        { id: new StringField({ required: false }), description: new StringField({ required: false }), author: new StringField({ required: false }), system: new StringField({ required: false }) },
         { required: false }
       ),
-
-      /**
-       * Daylight configuration for dynamic sunrise/sunset
-       * @type {object}
-       */
       daylight: new SchemaField(
         {
           enabled: new foundry.data.fields.BooleanField({ required: false, initial: false }),
@@ -211,12 +158,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false }
       ),
-
-      /**
-       * Current/starting date from import (e.g., Fantasy-Calendar's dynamic_data)
-       * Can be used to set initial game time after import.
-       * @type {object|null}
-       */
       currentDate: new SchemaField(
         {
           year: new NumberField({ required: true, integer: true }),
@@ -227,17 +168,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false, nullable: true }
       ),
-
-      /**
-       * Custom AM/PM notation for 12-hour time display.
-       * @type {object}
-       */
       amPmNotation: new SchemaField({ am: new StringField({ required: false, initial: 'AM' }), pm: new StringField({ required: false, initial: 'PM' }) }, { required: false }),
-
-      /**
-       * Canonical hours - named time-of-day periods (e.g., Matins, Lauds, Prime).
-       * @type {Array<{name: string, abbreviation: string, startHour: number, endHour: number}>}
-       */
       canonicalHours: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
@@ -246,11 +177,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           endHour: new NumberField({ required: true, nullable: false, min: 0, integer: true })
         })
       ),
-
-      /**
-       * Named weeks configuration.
-       * @type {object}
-       */
       weeks: new SchemaField(
         {
           enabled: new BooleanField({ required: false, initial: false }),
@@ -260,11 +186,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false }
       ),
-
-      /**
-       * Custom date format templates.
-       * @type {object}
-       */
       dateFormats: new SchemaField(
         {
           short: new StringField({ required: false, initial: '{{d}} {{b}}' }),
@@ -275,11 +196,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false }
       ),
-
-      /**
-       * Weather configuration for this calendar.
-       * @type {object}
-       */
       weather: new SchemaField(
         {
           activeZone: new StringField({ required: false, initial: 'temperate' }),
@@ -308,25 +224,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     };
   }
 
-  /* -------------------------------------------- */
-  /*  Calendar Helper Methods                     */
-  /* -------------------------------------------- */
-
   /**
    * Calculate the decimal hours since the start of the day.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @param {CalendarData} [calendar]       Calendar to use, by default this calendar.
-   * @returns {number}                      Number of hours since the start of the day as a decimal.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [calendar] - Calendar to use, by default this calendar.
+   * @returns {number} - Number of hours since the start of the day as a decimal.
    */
   static hoursOfDay(time = game.time.components, calendar = game.time.calendar) {
     const components = typeof time === 'number' ? calendar.timeToComponents(time) : time;
     const minutes = components.minute + components.second / calendar.days.secondsPerMinute;
     return components.hour + minutes / calendar.days.minutesPerHour;
   }
-
-  /* -------------------------------------------- */
-  /*  Leap Year Methods                           */
-  /* -------------------------------------------- */
 
   /**
    * Check if a given year is a leap year.
@@ -347,7 +255,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Check if the current year is a leap year.
-   * @param {number|TimeComponents} [time] - Time to check, defaults to current world time
+   * @param {number|object} [time] - Time to check, defaults to current world time
    * @returns {boolean} True if the year is a leap year
    */
   isCurrentYearLeapYear(time = game.time.worldTime) {
@@ -372,7 +280,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Get total days in a year, accounting for leap years.
    * @param {number} year - The display year
-   * @returns {number} Total days in the year
+   * @returns {number} - Total days in the year
    */
   getDaysInYear(year) {
     const isLeap = this.isLeapYear(year);
@@ -384,7 +292,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get a description of the leap year rule.
-   * @returns {string} Human-readable description
+   * @returns {string} - Human-readable description
    */
   getLeapYearDescription() {
     const advancedConfig = this.leapYearConfig;
@@ -394,12 +302,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return LeapYearUtils.getLeapYearDescription({ rule: 'simple', interval: leapConfig.leapInterval, start: leapConfig.leapStart ?? 0 });
   }
 
-  /* -------------------------------------------- */
-
   /**
    * Get the number of hours in a given day.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Number of hours between sunrise and sunset.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Number of hours between sunrise and sunset.
    */
   daylightHours(time = game.time.components) {
     return this.sunset(time) - this.sunrise(time);
@@ -407,8 +313,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Progress between sunrise and sunset assuming it is daylight half the day duration.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Progress through day period, with 0 representing sunrise and 1 sunset.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Progress through day period, with 0 representing sunrise and 1 sunset.
    */
   progressDay(time = game.time.components) {
     return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time)) / this.daylightHours(time);
@@ -416,8 +322,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Progress between sunset and sunrise assuming it is night half the day duration.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Progress through night period, with 0 representing sunset and 1 sunrise.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Progress through night period, with 0 representing sunset and 1 sunrise.
    */
   progressNight(time = game.time.components) {
     const daylightHours = this.daylightHours(time);
@@ -429,8 +335,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Get the sunrise time for a given day.
    * Uses dynamic daylight calculation if enabled, otherwise static 25% of day.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Sunrise time in hours.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Sunrise time in hours.
    */
   sunrise(time = game.time.components) {
     const daylightHrs = this._getDaylightHoursForDay(time);
@@ -441,8 +347,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Get the sunset time for a given day.
    * Uses dynamic daylight calculation if enabled, otherwise static 75% of day.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Sunset time in hours.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Sunset time in hours.
    */
   sunset(time = game.time.components) {
     const daylightHrs = this._getDaylightHoursForDay(time);
@@ -453,8 +359,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Get solar midday - the midpoint between sunrise and sunset.
    * This varies throughout the year when dynamic daylight is enabled.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Solar midday time in hours.
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Solar midday time in hours.
    */
   solarMidday(time = game.time.components) {
     return (this.sunrise(time) + this.sunset(time)) / 2;
@@ -463,8 +369,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Get solar midnight - the midpoint of the night period.
    * This is halfway between sunset and the next sunrise.
-   * @param {number|TimeComponents} [time]  The time to use, by default the current world time.
-   * @returns {number}                      Solar midnight time in hours (may exceed hoursPerDay for next day).
+   * @param {number|object} [time] - The time to use, by default the current world time.
+   * @returns {number} - Solar midnight time in hours (may exceed hoursPerDay for next day).
    */
   solarMidnight(time = game.time.components) {
     const sunsetHour = this.sunset(time);
@@ -474,8 +380,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Calculate daylight hours for a specific day based on dynamic daylight settings.
-   * @param {number|TimeComponents} [time]  The time to use.
-   * @returns {number}                      Hours of daylight for this day.
+   * @param {number|object} [time] - The time to use.
+   * @returns {number} - Hours of daylight for this day.
    * @private
    */
   _getDaylightHoursForDay(time = game.time.components) {
@@ -501,10 +407,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Set the date to a specific year, month, or day. Any values not provided will remain the same.
-   * @param {object} components
-   * @param {number} [components.year]   Visible year (with `yearZero` added in).
-   * @param {number} [components.month]  Index of month.
-   * @param {number} [components.day]    Day within the month.
+   * @param {object} components - Date components to set
+   * @param {number} [components.year] - Visible year (with `yearZero` added in).
+   * @param {number} [components.month] - Index of month.
+   * @param {number} [components.day] - Day within the month.
    */
   async jumpToDate({ year, month, day }) {
     const components = { ...game.time.components };
@@ -523,14 +429,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     await game.time.set(components);
   }
 
-  /* -------------------------------------------- */
-  /*  Festival Day Methods                        */
-  /* -------------------------------------------- */
-
   /**
    * Find festival day for current day.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, month: number, day: number, leapYearOnly: boolean}|null}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {{name: string, month: number, day: number, leapYearOnly: boolean}|null} - Festival or null
    */
   findFestivalDay(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
@@ -547,8 +449,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Check if a date is a festival day.
-   * @param {number|TimeComponents} [time]  Time to check.
-   * @returns {boolean}
+   * @param {number|object} [time] - Time to check.
+   * @returns {boolean} - Is festival day?
    */
   isFestivalDay(time = game.time.worldTime) {
     return this.findFestivalDay(time) !== null;
@@ -557,7 +459,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Count festival days that don't count for weekday calculation before a given date in the same year.
    * Used to adjust weekday calculations for intercalary days.
-   * @param {number|TimeComponents} time  Time to check up to.
+   * @param {number|object} time  Time to check up to.
    * @returns {number} Number of non-counting festival days before this date in the year.
    */
   countNonWeekdayFestivalsBefore(time) {
@@ -580,7 +482,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Check if a specific date is a non-counting festival day.
-   * @param {number|TimeComponents} time  Time to check.
+   * @param {number|object} time  Time to check.
    * @returns {boolean} True if date is a festival that doesn't count for weekdays.
    */
   isNonWeekdayFestival(time) {
@@ -588,17 +490,13 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return festival?.countsForWeekday === false;
   }
 
-  /* -------------------------------------------- */
-  /*  Moon Phase Methods                          */
-  /* -------------------------------------------- */
-
   /**
    * Get the current phase of a moon using FC-style distribution.
    * Primary phases (new/full moon) get floor(cycleLength/8) days each,
    * remaining phases split the leftover days evenly.
    * @param {number} [moonIndex]  Index of the moon (0 for primary moon).
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, subPhaseName: string, icon: string, position: number}|null}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {{name: string, subPhaseName: string, icon: string, position: number}|null} - Moon phase data or null
    */
   getMoonPhase(moonIndex = 0, time = game.time.worldTime) {
     const moon = this.moons?.[moonIndex];
@@ -696,17 +594,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get all moon phases for the current time.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {Array<{name: string, icon: string, position: number}>}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {Array<{name: string, icon: string, position: number}>} - All moon phase data
    */
   getAllMoonPhases(time = game.time.worldTime) {
     if (!this.moons) return [];
-    return this.moons.map((moon, index) => this.getMoonPhase(index, time)).filter(Boolean);
+    return this.moons.map((_moon, index) => this.getMoonPhase(index, time)).filter(Boolean);
   }
 
   /**
    * Convert time components to total days (helper for moon calculations).
-   * @param {TimeComponents|object} components  Time components (can have 'day' or 'dayOfMonth').
+   * @param {object} components  Time components (can have 'day' or 'dayOfMonth').
    * @returns {number}  Total days since epoch.
    * @private
    */
@@ -723,10 +621,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const secondsPerDay = (this.days?.hoursPerDay || 24) * (this.days?.minutesPerHour || 60) * (this.days?.secondsPerMinute || 60);
     return Math.floor(worldTime / secondsPerDay);
   }
-
-  /* -------------------------------------------- */
-  /*  Season Methods                              */
-  /* -------------------------------------------- */
 
   /**
    * Calculate the day-of-year bounds for a periodic season.
@@ -749,8 +643,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get the current season for a given time.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, abbreviation?: string, icon?: string, color?: string}|null}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {object|null} Current season.
    */
   getCurrentSeason(time = game.time.worldTime) {
     if (!this.seasons?.values?.length) return null;
@@ -799,20 +693,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get all seasons for this calendar.
-   * @returns {Array<{name: string, abbreviation?: string}>}
+   * @returns {Array<object>} All seasons
    */
   getAllSeasons() {
     return this.seasons?.values ?? [];
   }
 
-  /* -------------------------------------------- */
-  /*  Weekday Methods                             */
-  /* -------------------------------------------- */
-
   /**
    * Get weekday data for a specific month, falling back to calendar-level weekdays.
    * @param {number} monthIndex - 0-indexed month
-   * @returns {Array<{name: string, abbreviation?: string, isRestDay?: boolean}>}
+   * @returns {Array<object>} Weekdays in month
    */
   getWeekdaysForMonth(monthIndex) {
     const month = this.months?.values?.[monthIndex];
@@ -822,8 +712,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get weekday info for a specific date.
-   * @param {number|TimeComponents} [time] - Time to check, defaults to current world time
-   * @returns {{name: string, abbreviation?: string, isRestDay?: boolean, index: number}|null}
+   * @param {number|object} [time] - Time to check, defaults to current world time
+   * @returns {object|null} Weekday for date
    */
   getWeekdayForDate(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
@@ -834,14 +724,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return { ...weekday, index: weekdayIndex };
   }
 
-  /* -------------------------------------------- */
-  /*  Era Methods                                 */
-  /* -------------------------------------------- */
-
   /**
    * Get the current era for a given year.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, abbreviation: string, format: string, template: string|null, yearInEra: number}|null}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {{name: string, abbreviation: string, format: string, template: string|null, yearInEra: number}|null} - Era data or null
    */
   getCurrentEra(time = game.time.worldTime) {
     if (!this.eras?.length) return null;
@@ -880,20 +766,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get all eras for this calendar.
-   * @returns {Array<{name: string, abbreviation: string, startYear: number, endYear?: number}>}
+   * @returns {Array<object>} All eras
    */
   getAllEras() {
     return this.eras ?? [];
   }
 
-  /* -------------------------------------------- */
-  /*  Canonical Hour Methods                      */
-  /* -------------------------------------------- */
-
   /**
    * Get the current canonical hour for a given time.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, abbreviation: string, startHour: number, endHour: number}|null}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {{name: string, abbreviation: string, startHour: number, endHour: number}|null} - Canonical hour or null
    */
   getCanonicalHour(time = game.time.worldTime) {
     if (!this.canonicalHours?.length) return null;
@@ -912,21 +794,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get all canonical hours for this calendar.
-   * @returns {Array<{name: string, abbreviation: string, startHour: number, endHour: number}>}
+   * @returns {Array<{name: string, abbreviation: string, startHour: number, endHour: number}>} - All canonical hours
    */
   getAllCanonicalHours() {
     return this.canonicalHours ?? [];
   }
 
-  /* -------------------------------------------- */
-  /*  Named Week Methods                          */
-  /* -------------------------------------------- */
-
   /**
    * Get the current week number and name for a given time.
    * Supports both month-based and year-based week counting.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{weekNumber: number, weekName: string, weekAbbr: string, type: string}|null}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {{weekNumber: number, weekName: string, weekAbbr: string, type: string}|null} - Week data or null
    */
   getCurrentWeek(time = game.time.worldTime) {
     if (!this.weeks?.enabled || !this.weeks?.names?.length) return null;
@@ -950,7 +828,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get week number within the year (1-indexed).
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
+   * @param {number|object} [time]  Time to use, by default the current world time.
    * @returns {number} Week number (1-indexed).
    */
   getWeekOfYear(time = game.time.worldTime) {
@@ -963,7 +841,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get week number within the month (1-indexed).
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
+   * @param {number|object} [time]  Time to use, by default the current world time.
    * @returns {number} Week number (1-indexed).
    */
   getWeekOfMonth(time = game.time.worldTime) {
@@ -974,20 +852,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get all named weeks for this calendar.
-   * @returns {Array<{name: string, abbreviation: string}>}
+   * @returns {Array<{name: string, abbreviation: string}>} - All named weeks
    */
   getAllNamedWeeks() {
     return this.weeks?.names ?? [];
   }
 
-  /* -------------------------------------------- */
-  /*  Cycle Methods                               */
-  /* -------------------------------------------- */
-
   /**
    * Get the current values for all cycles.
-   * @param {number|TimeComponents} [time]  Time to use, by default the current world time.
-   * @returns {{text: string, values: Array<{cycleName: string, entryName: string, index: number}>}}
+   * @param {number|object} [time]  Time to use, by default the current world time.
+   * @returns {{text: string, values: Array<{cycleName: string, entryName: string, index: number}>}} - Cycle values
    */
   getCycleValues(time = game.time.worldTime) {
     if (!this.cycles?.length) return { text: '', values: [] };
@@ -1017,9 +891,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Calculate epoch values for different cycle basedOn types.
-   * @param {TimeComponents} components  Time components.
-   * @param {number} displayYear         The display year (with yearZero applied).
-   * @returns {object}                   Epoch values keyed by basedOn type.
+   * @param {object} components - Time components.
+   * @param {number} displayYear - The display year (with yearZero applied).
+   * @returns {object} - Epoch values keyed by basedOn type.
    * @private
    */
   _getCycleEpochValues(components, displayYear) {
@@ -1034,20 +908,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get all cycles for this calendar.
-   * @returns {Array<{name: string, length: number, offset: number, basedOn: string, entries: Array}>}
+   * @returns {Array<{name: string, length: number, offset: number, basedOn: string, entries: Array}>} - All cycles
    */
   getAllCycles() {
     return this.cycles ?? [];
   }
 
-  /* -------------------------------------------- */
-  /*  Formatter Methods                           */
-  /* -------------------------------------------- */
-
   /**
    * Prepare formatting context from calendar and components.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
+   * @param {object} calendar  The calendar instance.
+   * @param {object} components    Time components.
    * @returns {object} Formatting context with year, month, day parts.
    */
   static dateFormattingParts(calendar, components) {
@@ -1098,12 +968,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Format month and day, accounting for festival days.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
-   * @param {object} options               Formatting options.
+   * @param {object} calendar - The calendar instance.
+   * @param {object} components - Time components.
+   * @param {object} _options - Formatting options.
    * @returns {string} Formatted date string.
    */
-  static formatMonthDay(calendar, components, options = {}) {
+  static formatMonthDay(calendar, components, _options = {}) {
     const festivalDay = calendar.findFestivalDay?.(components);
     if (festivalDay) return localize(festivalDay.name);
     const context = CalendariaCalendar.dateFormattingParts(calendar, components);
@@ -1112,12 +982,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Format full date with month, day, and year, accounting for festival days.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
-   * @param {object} options               Formatting options.
+   * @param {object} calendar - The calendar instance.
+   * @param {object} components - Time components.
+   * @param {object} _options - Formatting options.
    * @returns {string} Formatted date string.
    */
-  static formatMonthDayYear(calendar, components, options = {}) {
+  static formatMonthDayYear(calendar, components, _options = {}) {
     const festivalDay = calendar.findFestivalDay?.(components);
     if (festivalDay) {
       const context = CalendariaCalendar.dateFormattingParts(calendar, components);
@@ -1130,34 +1000,34 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Format hours and minutes.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
-   * @param {object} options               Formatting options.
+   * @param {object} calendar - The calendar instance.
+   * @param {object} components - Time components.
+   * @param {object} _options - Formatting options.
    * @returns {string} Formatted time string.
    */
-  static formatHoursMinutes(calendar, components, options = {}) {
+  static formatHoursMinutes(calendar, components, _options = {}) {
     const context = CalendariaCalendar.dateFormattingParts(calendar, components);
     return `${context.H}:${context.M}`;
   }
 
   /**
    * Format hours, minutes, and seconds.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
-   * @param {object} options               Formatting options.
+   * @param {object} calendar - The calendar instance.
+   * @param {object} components - Time components.
+   * @param {object} _options - Formatting options.
    * @returns {string} Formatted time string.
    */
-  static formatHoursMinutesSeconds(calendar, components, options = {}) {
+  static formatHoursMinutesSeconds(calendar, components, _options = {}) {
     const context = CalendariaCalendar.dateFormattingParts(calendar, components);
     return `${context.H}:${context.M}:${context.S}`;
   }
 
   /**
    * Format time in 12-hour format with AM/PM notation.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
-   * @param {object} options               Formatting options.
-   * @param {boolean} [options.seconds]  Include seconds.
+   * @param {object} calendar - The calendar instance.
+   * @param {object} components - Time components.
+   * @param {object} options - Formatting options.
+   * @param {boolean} [options.seconds] - Include seconds.
    * @returns {string} Formatted time string (e.g., "3:45 PM").
    */
   static formatTime12Hour(calendar, components, options = {}) {
@@ -1168,9 +1038,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Format a date using a custom template or predefined format.
-   * @param {CalendariaCalendar} calendar  The calendar instance.
-   * @param {TimeComponents} components    Time components.
-   * @param {string} format                Template key ('short', 'long', 'full', 'time', 'time12') or custom template.
+   * @param {object} calendar - The calendar instance.
+   * @param {object} components - Time components.
+   * @param {string} format - Template key ('short', 'long', 'full', 'time', 'time12') or custom template.
    * @returns {string} Formatted date string.
    */
   static formatDateWithTemplate(calendar, components, format = 'long') {
@@ -1221,10 +1091,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       Wn: localize('CALENDARIA.FormatVar.Wn')
     };
   }
-
-  /* -------------------------------------------- */
-  /*  Climate Zone Methods                        */
-  /* -------------------------------------------- */
 
   /**
    * Get the active climate zone configuration.

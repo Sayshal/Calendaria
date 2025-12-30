@@ -48,40 +48,24 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-
-    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
-      key,
-      label: this.#formatIncrement(key),
-      seconds,
-      selected: key === TimeKeeper.incrementKey
-    }));
+    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrement(key), seconds, selected: key === TimeKeeper.incrementKey }));
     context.running = TimeKeeper.running;
     context.isGM = game.user.isGM;
     context.currentTime = TimeKeeper.getFormattedTime();
     context.currentDate = TimeKeeper.getFormattedDate();
-
     return context;
   }
 
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
-
-    // Restore saved position
     this.#restorePosition();
-
-    // Enable dragging
     this.#enableDragging();
-
-    // Increment selector (change event, not handled by actions)
     this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (e) => {
       TimeKeeper.setIncrement(e.target.value);
     });
 
-    // Listen for clock state changes to update UI
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
-
-    // Listen for world time changes to update clock display
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
   }
 
@@ -102,14 +86,11 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #enableDragging() {
     const dragHandle = this.element.querySelector('.time-display');
     if (!dragHandle) return;
-
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
-
     let dragStartX = 0;
     let dragStartY = 0;
     let elementStartLeft = 0;
     let elementStartTop = 0;
-
     const originalMouseDown = drag._onDragMouseDown.bind(drag);
     drag._onDragMouseDown = (event) => {
       const rect = this.element.getBoundingClientRect();
@@ -126,18 +107,13 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!drag._moveTime) drag._moveTime = 0;
       if (now - drag._moveTime < 1000 / 60) return;
       drag._moveTime = now;
-
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
-
-      // Clamp to viewport
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
-
       this.setPosition({ left: newLeft, top: newTop });
     };
 
@@ -145,21 +121,15 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       window.removeEventListener(...drag.handlers.dragMove);
       window.removeEventListener(...drag.handlers.dragUp);
-
-      // Save position
       await game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { left: this.position.left, top: this.position.top });
     };
   }
 
   /** @override */
   _onClose(options) {
-    // Save position before closing
     const pos = this.position;
     if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { top: pos.top, left: pos.left });
-
     super._onClose(options);
-
-    // Clean up hooks
     if (this.#timeHookId) {
       Hooks.off('updateWorldTime', this.#timeHookId);
       this.#timeHookId = null;
@@ -211,10 +181,9 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle clock state changes.
-   * @param {object} data - Clock state data
    * @private
    */
-  #onClockStateChange(data) {
+  #onClockStateChange() {
     this.render();
   }
 
@@ -224,10 +193,8 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onUpdateWorldTime() {
     if (!this.rendered) return;
-
     const timeEl = this.element.querySelector('.time-display-time');
     const dateEl = this.element.querySelector('.time-display-date');
-
     if (timeEl) timeEl.textContent = TimeKeeper.getFormattedTime();
     if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
   }

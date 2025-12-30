@@ -1,5 +1,6 @@
 /**
  * Calendaria Module Settings Registration
+ * @todo Use foundry.data.fields for all `type` fields where possible for better validation.
  * @module Settings
  * @author Tyler
  */
@@ -463,6 +464,4 @@ export function registerReadySettings() {
     default: '',
     choices: gmChoices
   });
-
-  log(3, 'Ready settings registered.');
 }

@@ -8,6 +8,9 @@
 import { log } from '../utils/logger.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
 
+/**
+ * Registry for managing calendar instances.
+ */
 export default class CalendarRegistry {
   /**
    * Map of calendar ID to calendar instance
@@ -31,12 +34,10 @@ export default class CalendarRegistry {
    * Register a calendar instance.
    * @param {string} id  Calendar ID
    * @param {CalendariaCalendar|object} calendar  Calendar instance or config
-   * @returns {CalendariaCalendar}  The registered calendar instance
+   * @returns {object}  The registered calendar instance
    */
   static register(id, calendar) {
-    // If calendar is a plain config object, create a CalendariaCalendar instance
     if (!(calendar instanceof CalendariaCalendar)) calendar = new CalendariaCalendar(calendar);
-
     this.#calendars.set(id, calendar);
     log(3, `Registered calendar: ${id}`);
     return calendar;
@@ -56,7 +57,7 @@ export default class CalendarRegistry {
   /**
    * Check if a calendar is registered.
    * @param {string} id  Calendar ID
-   * @returns {boolean}
+   * @returns {boolean} - Is calendar registered?
    */
   static has(id) {
     return this.#calendars.has(id);
@@ -69,7 +70,7 @@ export default class CalendarRegistry {
   /**
    * Get a calendar by ID.
    * @param {string} id  Calendar ID
-   * @returns {CalendariaCalendar|null}  Calendar instance or null if not found
+   * @returns {object|null}  Calendar instance or null if not found
    */
   static get(id) {
     return this.#calendars.get(id) ?? null;
@@ -93,7 +94,7 @@ export default class CalendarRegistry {
 
   /**
    * Get the currently active calendar.
-   * @returns {CalendariaCalendar|null}  Active calendar instance or null
+   * @returns {object|null}  Active calendar instance or null
    */
   static getActive() {
     if (!this.#activeId) return null;
@@ -114,11 +115,7 @@ export default class CalendarRegistry {
    * @returns {boolean}  True if calendar was set as active
    */
   static setActive(id) {
-    if (!this.has(id)) {
-      log(2, `Cannot set active calendar: ${id} not found`);
-      return false;
-    }
-
+    if (!this.has(id)) return false;
     this.#activeId = id;
     log(3, `Active calendar set to: ${id}`);
     return true;
@@ -139,7 +136,7 @@ export default class CalendarRegistry {
 
   /**
    * Get the number of registered calendars.
-   * @returns {number}
+   * @returns {number} - Count of registered calendars
    */
   static get size() {
     return this.#calendars.size;

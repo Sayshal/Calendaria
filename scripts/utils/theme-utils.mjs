@@ -92,34 +92,24 @@ export function applyCustomColors(colors) {
   };
 
   for (const [key, cssVar] of Object.entries(varMap)) if (colors[key]) cssVars.push(`${cssVar}: ${colors[key]};`);
-
   const hexToRgb = (hex) => {
     const h = hex.replace('#', '');
-    return {
-      r: parseInt(h.substring(0, 2), 16),
-      g: parseInt(h.substring(2, 4), 16),
-      b: parseInt(h.substring(4, 6), 16)
-    };
+    return { r: parseInt(h.substring(0, 2), 16), g: parseInt(h.substring(2, 4), 16), b: parseInt(h.substring(4, 6), 16) };
   };
-
   if (colors.today) {
     const { r, g, b } = hexToRgb(colors.today);
     cssVars.push(`--calendaria-today-bg: rgb(${r} ${g} ${b} / 20%);`);
     cssVars.push(`--calendaria-current-hour: rgb(${r} ${g} ${b} / 12%);`);
   }
-
   if (colors.primary) {
     const { r, g, b } = hexToRgb(colors.primary);
     cssVars.push(`--calendaria-selected-bg: rgb(${r} ${g} ${b} / 15%);`);
   }
-
   if (colors.festivalBorder) {
     const { r, g, b } = hexToRgb(colors.festivalBorder);
     cssVars.push(`--calendaria-festival-bg: rgb(${r} ${g} ${b} / 15%);`);
   }
-
   styleEl.textContent = `.calendaria {${cssVars.join('\n        ')}}`;
-
   for (const app of foundry.applications.instances.values()) if (app.constructor.name.includes('Calendar')) app.render();
 }
 

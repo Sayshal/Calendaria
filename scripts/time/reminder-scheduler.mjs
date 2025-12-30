@@ -48,28 +48,19 @@ export default class ReminderScheduler {
   /**
    * Handle world time updates.
    * @param {number} worldTime - The new world time in seconds
-   * @param {number} delta - The time delta in seconds
+   * @param {number} _delta - The time delta in seconds
    * @returns {void}
    */
-  static onUpdateWorldTime(worldTime, delta) {
+  static onUpdateWorldTime(worldTime, _delta) {
     if (!game.user.isGM) return;
-
     const currentDate = getCurrentDate();
     if (!currentDate) return;
-
     if (!NoteManager.isInitialized()) return;
-
-    // Reset fired reminders on day change
-    if (this.#lastDate && this.#hasDateChanged(this.#lastDate, currentDate)) {
-      this.#firedToday.clear();
-    }
-
-    // Throttle checks
+    if (this.#lastDate && this.#hasDateChanged(this.#lastDate, currentDate)) this.#firedToday.clear();
     if (worldTime - this.#lastCheckTime >= this.CHECK_INTERVAL) {
       this.#checkReminders(worldTime, currentDate);
       this.#lastCheckTime = worldTime;
     }
-
     this.#lastDate = { ...currentDate };
   }
 
@@ -86,24 +77,14 @@ export default class ReminderScheduler {
   static #checkReminders(worldTime, currentDate) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return;
-
     const activeCalendarId = calendar.metadata?.id || CalendarRegistry.getActiveId() || 'unknown';
     const allNotes = NoteManager.getAllNotes();
-
     for (const note of allNotes) {
-      // Skip notes from other calendars
       if (note.flagData.calendarId && note.flagData.calendarId !== activeCalendarId) continue;
-
-      // Skip notes without reminder offset
       if (!note.flagData.reminderOffset || note.flagData.reminderOffset <= 0) continue;
-
-      // Skip silent notes
       if (note.flagData.silent) continue;
-
       const reminderKey = `${note.id}:${note.flagData.reminderOffset}`;
       if (this.#firedToday.has(reminderKey)) continue;
-
-      // Check if reminder should fire
       if (this.#shouldFireReminder(note, worldTime, calendar)) {
         this.#fireReminder(note, currentDate);
         this.#firedToday.add(reminderKey);
@@ -114,27 +95,20 @@ export default class ReminderScheduler {
   /**
    * Determine if a reminder should fire based on current time and offset.
    * @param {object} note - The note stub
-   * @param {number} worldTime - Current world time in seconds
+   * @param {number} _worldTime - Current world time in seconds
    * @param {object} calendar - Active calendar
-   * @returns {boolean}
+   * @returns {boolean} - Should reminder fire?
    * @private
    */
-  static #shouldFireReminder(note, worldTime, calendar) {
+  static #shouldFireReminder(note, _worldTime, calendar) {
     const startDate = note.flagData.startDate;
     if (!startDate) return false;
-
     const currentDate = getCurrentDate();
     if (!currentDate) return false;
-
-    // For recurring notes or notes with conditions, check occurrences
     const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
     const hasConditions = note.flagData.conditions?.length > 0;
-
     if (hasRecurrence || hasConditions) {
-      // Check if note occurs today OR tomorrow (for all-day event reminders that span midnight)
       const occursToday = isRecurringMatch(note.flagData, currentDate);
-
-      // For all-day events, also check tomorrow since reminder might fire today for tomorrow's event
       let occursTomorrow = false;
       if (note.flagData.allDay) {
         const tomorrow = this.#getNextDay(currentDate, calendar);
@@ -142,8 +116,6 @@ export default class ReminderScheduler {
       }
 
       if (!occursToday && !occursTomorrow) return false;
-
-      // For all-day events occurring tomorrow, check if reminder window spans into today
       if (!occursToday && occursTomorrow && note.flagData.allDay) {
         const components = game.time.components;
         const currentMinutes = components.hour * 60 + components.minute;
@@ -152,7 +124,6 @@ export default class ReminderScheduler {
         return currentMinutes >= reminderMinutes;
       }
 
-      // For events occurring today, compare time-of-day directly
       if (occursToday) {
         const components = game.time.components;
         const currentMinutes = components.hour * 60 + components.minute;
@@ -166,20 +137,14 @@ export default class ReminderScheduler {
       return false;
     }
 
-    // Non-recurring note: check if today matches startDate, then compare time-of-day
-    const isSameDate = currentDate.year === startDate.year &&
-                       currentDate.month === startDate.month &&
-                       currentDate.day === startDate.day;
-
+    const isSameDate = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.day === startDate.day;
     if (!isSameDate) return false;
-
     const components = game.time.components;
     const currentMinutes = components.hour * 60 + components.minute;
     const eventHour = note.flagData.allDay ? 0 : (startDate.hour ?? 0);
     const eventMinute = note.flagData.allDay ? 0 : (startDate.minute ?? 0);
     const eventMinutes = eventHour * 60 + eventMinute;
     const reminderMinutes = eventMinutes - (note.flagData.reminderOffset ?? 0);
-
     return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
   }
 
@@ -215,16 +180,13 @@ export default class ReminderScheduler {
   /**
    * Fire a reminder notification.
    * @param {object} note - The note stub
-   * @param {object} currentDate - Current date components
+   * @param {object} _currentDate - Current date components
    * @private
    */
-  static #fireReminder(note, currentDate) {
+  static #fireReminder(note, _currentDate) {
     const reminderType = note.flagData.reminderType || 'toast';
     const targets = this.#getTargetUsers(note);
-
-    // Only fire if current user is in targets
     if (!targets.includes(game.user.id)) return;
-
     const message = this.#formatReminderMessage(note);
 
     switch (reminderType) {
@@ -239,14 +201,7 @@ export default class ReminderScheduler {
         break;
     }
 
-    // Fire hook
-    Hooks.callAll(HOOKS.EVENT_TRIGGERED, {
-      id: note.id,
-      name: note.name,
-      flagData: note.flagData,
-      reminderType,
-      isReminder: true
-    });
+    Hooks.callAll(HOOKS.EVENT_TRIGGERED, { id: note.id, name: note.name, flagData: note.flagData, reminderType, isReminder: true });
   }
 
   /**
@@ -275,7 +230,8 @@ export default class ReminderScheduler {
   /**
    * Format the reminder message.
    * @param {object} note - The note stub
-   * @returns {string}
+   * @returns {string} - Formatted message
+   * @todo localize return statement
    * @private
    */
   static #formatReminderMessage(note) {
@@ -313,20 +269,15 @@ export default class ReminderScheduler {
    * @param {object} note - The note stub
    * @param {string} message - Formatted message
    * @param {string[]} targets - Target user IDs
+   * @todo localize the template and move to a template file
    * @private
    */
   static async #sendChatReminder(note, message, targets) {
     const icon = this.#getIconHtml(note);
     const color = note.flagData.color || '#4a9eff';
-
-    // Determine whisper recipients
     let whisper = [];
-    if (note.flagData.reminderTargets !== 'all') {
-      whisper = targets;
-    }
-    if (note.flagData.gmOnly) {
-      whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
-    }
+    if (note.flagData.reminderTargets !== 'all') whisper = targets;
+    if (note.flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
 
     const content = `
       <div class="calendaria-reminder">
@@ -350,28 +301,17 @@ export default class ReminderScheduler {
    * Show dialog popup.
    * @param {object} note - The note stub
    * @param {string} message - Formatted message
+   * @todo Localize
    * @private
    */
   static async #showDialog(note, message) {
     const icon = this.#getIconHtml(note);
-
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: 'Event Reminder', icon: 'fas fa-bell' },
       content: `<p>${icon} ${message}</p>`,
       buttons: [
-        {
-          action: 'open',
-          label: 'Open Note',
-          icon: 'fas fa-book-open',
-          callback: () => 'open'
-        },
-        {
-          action: 'dismiss',
-          label: 'Dismiss',
-          icon: 'fas fa-times',
-          default: true,
-          callback: () => 'dismiss'
-        }
+        { action: 'open', label: 'Open Note', icon: 'fas fa-book-open', callback: () => 'open' },
+        { action: 'dismiss', label: 'Dismiss', icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
       ],
       rejectClose: false
     });
@@ -390,7 +330,7 @@ export default class ReminderScheduler {
    * Check if date has changed.
    * @param {object} previous - Previous date
    * @param {object} current - Current date
-   * @returns {boolean}
+   * @returns {boolean} - Has the date changed?
    * @private
    */
   static #hasDateChanged(previous, current) {
@@ -400,19 +340,14 @@ export default class ReminderScheduler {
   /**
    * Get icon HTML for a note.
    * @param {object} note - The note stub
-   * @returns {string}
+   * @returns {string} - Icon HTML string
    * @private
    */
   static #getIconHtml(note) {
     const icon = note.flagData.icon;
     const color = note.flagData.color || '#4a9eff';
-
     if (!icon) return `<i class="fas fa-bell" style="color: ${color};"></i>`;
-
-    if (icon.startsWith('fa') || note.flagData.iconType === 'fontawesome') {
-      return `<i class="${icon}" style="color: ${color};"></i>`;
-    }
-
+    if (icon.startsWith('fa') || note.flagData.iconType === 'fontawesome') return `<i class="${icon}" style="color: ${color};"></i>`;
     return `<img src="${icon}" alt="" style="width: 16px; height: 16px; vertical-align: middle;" />`;
   }
 }

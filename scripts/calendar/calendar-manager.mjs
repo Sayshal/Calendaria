@@ -7,12 +7,15 @@
  */
 
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { format, localize } from '../utils/localization.mjs';
+import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
 
+/**
+ * Main entry point for calendar system management.
+ */
 export default class CalendarManager {
   /** Flag to prevent responding to our own calendar changes */
   static #isSwitchingCalendar = false;
@@ -22,30 +25,19 @@ export default class CalendarManager {
    * Called during module initialization.
    */
   static async initialize() {
-    // Load bundled calendars from JSON files
     await loadBundledCalendars();
-
-    // Apply any user overrides to bundled calendars
     await this.#loadDefaultOverrides();
-
-    // Load any custom calendars from settings
     await this.#loadCustomCalendars();
-
-    // Load any saved calendar state
     await this.loadCalendars();
-
-    // Set active calendar from our setting
     const activeId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR) || DEFAULT_CALENDAR;
     if (CalendarRegistry.has(activeId)) {
       CalendarRegistry.setActive(activeId);
     } else if (CalendarRegistry.size > 0) {
-      // Fallback to first available calendar
       const firstId = CalendarRegistry.getAllIds()[0];
       CalendarRegistry.setActive(firstId);
       log(2, `Active calendar "${activeId}" not found, using "${firstId}"`);
     }
 
-    // Sync game.time.calendar with our active calendar
     const activeCalendar = CalendarRegistry.getActive();
     if (activeCalendar) {
       CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
@@ -69,17 +61,13 @@ export default class CalendarManager {
   static async loadCalendars() {
     try {
       const savedData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
-      // Only restore from saved data if there are actual calendars saved
       if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
-        // Migrate saved calendar data to ensure required fields exist
-        for (const calendarData of Object.values(savedData.calendars)) {
-          this.#migrateCalendarData(calendarData);
-        }
+        for (const calendarData of Object.values(savedData.calendars)) this.#migrateCalendarData(calendarData);
         CalendarRegistry.fromObject(savedData);
         log(3, `Loaded ${CalendarRegistry.size} calendars from settings`);
       }
     } catch (error) {
-      log(2, 'Error loading calendars from settings:', error);
+      log(1, 'Error loading calendars from settings:', error);
     }
   }
 
@@ -89,16 +77,9 @@ export default class CalendarManager {
    * @private
    */
   static #migrateCalendarData(data) {
-    // Ensure seasons exists with empty values array (required by Foundry's timeToComponents)
-    if (!data.seasons) {
-      data.seasons = { values: [] };
-      log(3, `Migrated calendar "${data.name}": added missing seasons field`);
-    }
-    // Ensure months exists
-    if (!data.months) {
-      data.months = { values: [] };
-      log(3, `Migrated calendar "${data.name}": added missing months field`);
-    }
+    if (!data.seasons) data.seasons = { values: [] };
+    if (!data.months) data.months = { values: [] };
+    log(3, `Migrated calendar "${data.name}": added missing fields`);
   }
 
   /**
@@ -109,9 +90,7 @@ export default class CalendarManager {
     try {
       const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
       const ids = Object.keys(customCalendars);
-
       if (ids.length === 0) return;
-
       for (const id of ids) {
         const data = customCalendars[id];
         this.#migrateCalendarData(data);
@@ -120,13 +99,13 @@ export default class CalendarManager {
           CalendarRegistry.register(id, calendar);
           log(3, `Loaded custom calendar: ${id}`);
         } catch (error) {
-          log(2, `Error loading custom calendar ${id}:`, error);
+          log(1, `Error loading custom calendar ${id}:`, error);
         }
       }
 
       log(3, `Loaded ${ids.length} custom calendars`);
     } catch (error) {
-      log(2, 'Error loading custom calendars:', error);
+      log(1, 'Error loading custom calendars:', error);
     }
   }
 
@@ -138,9 +117,7 @@ export default class CalendarManager {
     try {
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       const ids = Object.keys(overrides);
-
       if (ids.length === 0) return;
-
       for (const id of ids) {
         const data = overrides[id];
         this.#migrateCalendarData(data);
@@ -149,13 +126,13 @@ export default class CalendarManager {
           CalendarRegistry.register(id, calendar);
           log(3, `Applied override for bundled calendar: ${id}`);
         } catch (error) {
-          log(2, `Error applying override for ${id}:`, error);
+          log(1, `Error applying override for ${id}:`, error);
         }
       }
 
       log(3, `Applied ${ids.length} default calendar overrides`);
     } catch (error) {
-      log(2, 'Error loading default overrides:', error);
+      log(1, 'Error loading default overrides:', error);
     }
   }
 
@@ -168,7 +145,7 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, data);
       log(3, 'Calendars saved to settings');
     } catch (error) {
-      log(2, 'Error saving calendars to settings:', error);
+      log(1, 'Error saving calendars to settings:', error);
     }
   }
 
@@ -179,7 +156,7 @@ export default class CalendarManager {
   /**
    * Get a calendar by ID.
    * @param {string} id  Calendar ID
-   * @returns {CalendariaCalendar|null}
+   * @returns {object|null} - Calendar instance or null
    */
   static getCalendar(id) {
     return CalendarRegistry.get(id);
@@ -187,7 +164,7 @@ export default class CalendarManager {
 
   /**
    * Get all calendars.
-   * @returns {Map<string, CalendariaCalendar>}
+   * @returns {Map<string, CalendariaCalendar>} - Map of calendar IDs to instances
    */
   static getAllCalendars() {
     return CalendarRegistry.getAll();
@@ -195,7 +172,7 @@ export default class CalendarManager {
 
   /**
    * Get the active calendar.
-   * @returns {CalendariaCalendar|null}
+   * @returns {object|null} - Active calendar instance or null
    */
   static getActiveCalendar() {
     return CalendarRegistry.getActive();
@@ -214,45 +191,28 @@ export default class CalendarManager {
       return false;
     }
 
-    // Get the calendar
     const calendar = CalendarRegistry.get(id);
-    const calendarName = calendar?.name || id;
-
-    // Set as active in registry
     CalendarRegistry.setActive(id);
-
-    // Update CONFIG.time with the new calendar
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
-
-    // Reinitialize the calendar system - no reload needed!
     game.time.initializeCalendar();
-
-    // Save to our settings
     if (game.user.isGM) {
       try {
         this.#isSwitchingCalendar = true;
         await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, id);
         log(3, `Updated active calendar setting to: ${id}`);
       } catch (error) {
-        log(2, `Error updating active calendar setting:`, error);
+        log(1, `Error updating active calendar setting:`, error);
       } finally {
         this.#isSwitchingCalendar = false;
       }
     }
 
     await this.saveCalendars();
-
-    // Emit hook for calendar switch
     Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
-
-    // Re-render all calendar-related UIs
     this.#rerenderCalendarUIs();
-
-    ui.notifications.info(`Switched to ${calendarName} calendar`);
     log(3, `Switched to calendar: ${id}`);
-
     return true;
   }
 
@@ -261,12 +221,9 @@ export default class CalendarManager {
    * @private
    */
   static #rerenderCalendarUIs() {
-    // Re-render all open calendar applications
     for (const app of foundry.applications.instances.values()) {
       const name = app.constructor.name;
-      if (['CalendariaHUD', 'TimeKeeperHUD', 'CompactCalendar', 'CalendarApplication'].includes(name)) {
-        app.render();
-      }
+      if (['CalendariaHUD', 'TimeKeeperHUD', 'CompactCalendar', 'CalendarApplication'].includes(name)) app.render();
     }
   }
 
@@ -282,27 +239,15 @@ export default class CalendarManager {
     }
 
     log(3, `Handling remote calendar switch to: ${id}`);
-
-    // Update local registry
     CalendarRegistry.setActive(id);
-
-    // Get the calendar and update CONFIG.time
     const calendar = CalendarRegistry.get(id);
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
-
-    // Reinitialize the calendar system
     game.time.initializeCalendar();
-
-    // Notify user
     const calendarName = calendar?.name || id;
     ui.notifications.info(`Calendar switched to ${calendarName} by GM`);
-
-    // Emit hook
     Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
-
-    // Re-render all calendar-related UIs
     this.#rerenderCalendarUIs();
   }
 
@@ -322,13 +267,12 @@ export default class CalendarManager {
     try {
       const calendar = CalendarRegistry.register(id, definition);
       await this.saveCalendars();
-
       Hooks.callAll(HOOKS.CALENDAR_ADDED, id, calendar);
       log(3, `Added calendar: ${id}`);
 
       return calendar;
     } catch (error) {
-      log(2, `Error adding calendar ${id}:`, error);
+      log(1, `Error adding calendar ${id}:`, error);
       ui.notifications.error(`Error adding calendar: ${error.message}`);
       return null;
     }
@@ -345,7 +289,6 @@ export default class CalendarManager {
       return false;
     }
 
-    // Don't allow removing the active calendar
     if (CalendarRegistry.getActiveId() === id) {
       log(2, `Cannot remove active calendar: ${id}`);
       ui.notifications.warn('Cannot remove the active calendar');
@@ -402,19 +345,17 @@ export default class CalendarManager {
    * Handle updateSetting hook for active calendar changes.
    * @param {object} setting - The setting that was updated
    * @param {object} changes - The changes to the setting
-   * @internal
+   * @private
    */
   static onUpdateSetting(setting, changes) {
     if (setting.key === `${MODULE.ID}.${SETTINGS.ACTIVE_CALENDAR}`) {
       const newCalendarId = changes.value;
 
-      // If we triggered this change, skip
       if (this.#isSwitchingCalendar) {
         log(3, 'Active calendar updated (by Calendaria)');
         return;
       }
 
-      // External change - update registry to match
       log(3, 'Active calendar updated (externally)');
       if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
         CalendarRegistry.setActive(newCalendarId);
@@ -429,7 +370,7 @@ export default class CalendarManager {
 
   /**
    * Handle closeGame hook to save calendars.
-   * @internal
+   * @private
    */
   static onCloseGame() {
     if (game.user.isGM) CalendarManager.saveCalendars();
@@ -494,48 +435,32 @@ export default class CalendarManager {
    * @returns {Promise<CalendariaCalendar|null>} The created calendar or null on error
    */
   static async createCustomCalendar(id, definition) {
-    // Ensure ID is prefixed
     const calendarId = id.startsWith('custom-') ? id : `custom-${id}`;
-
-    // Check if already exists in settings (authoritative source)
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (customCalendars[calendarId]) {
       log(2, `Cannot create calendar: ${calendarId} already exists`);
-      ui.notifications.error(`Calendar "${calendarId}" already exists`);
       return null;
     }
 
-    // Clean up stale registry entry if present
     if (CalendarRegistry.has(calendarId)) {
       log(3, `Cleaning up stale registry entry for: ${calendarId}`);
       CalendarRegistry.unregister(calendarId);
     }
 
     try {
-      // Add metadata if not present
       if (!definition.metadata) definition.metadata = {};
       definition.metadata.id = calendarId;
       definition.metadata.author = definition.metadata.author || game.user.name;
       definition.metadata.isCustom = true;
-
-      // Create calendar instance
       const calendar = new CalendariaCalendar(definition);
-
-      // Save to custom calendars setting (reuse customCalendars from above)
       customCalendars[calendarId] = calendar.toObject();
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
-
-      // Register in CalendarRegistry
       CalendarRegistry.register(calendarId, calendar);
-
       Hooks.callAll(HOOKS.CALENDAR_ADDED, calendarId, calendar);
       log(3, `Created custom calendar: ${calendarId}`);
-      ui.notifications.info(`Created calendar "${definition.name || calendarId}"`);
-
       return calendar;
     } catch (error) {
-      log(2, `Error creating custom calendar ${calendarId}:`, error);
-      ui.notifications.error(`Error creating calendar: ${error.message}`);
+      log(1, `Error creating custom calendar ${calendarId}:`, error);
       return null;
     }
   }
@@ -554,30 +479,19 @@ export default class CalendarManager {
       return null;
     }
 
-    // Check if this is a custom calendar
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (!customCalendars[id]) {
       log(2, `Cannot update calendar: ${id} is not a custom calendar`);
-      ui.notifications.error('Cannot modify built-in calendars');
       return null;
     }
 
     try {
-      // Merge changes with existing data
       const existingData = calendar.toObject();
       const updatedData = foundry.utils.mergeObject(existingData, changes, { inplace: false });
-
-      // Create new calendar instance
       const updatedCalendar = new CalendariaCalendar(updatedData);
-
-      // Update in settings
       customCalendars[id] = updatedCalendar.toObject();
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
-
-      // Update in registry
       CalendarRegistry.register(id, updatedCalendar);
-
-      // If this is the active calendar, reinitialize
       if (CalendarRegistry.getActiveId() === id) {
         CONFIG.time.worldCalendarConfig = updatedCalendar.toObject();
         CONFIG.time.roundTime = updatedCalendar.secondsPerRound ?? 6;
@@ -586,12 +500,9 @@ export default class CalendarManager {
 
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, updatedCalendar);
       log(3, `Updated custom calendar: ${id}`);
-      ui.notifications.info(`Updated calendar "${updatedData.name || id}"`);
-
       return updatedCalendar;
     } catch (error) {
-      log(2, `Error updating custom calendar ${id}:`, error);
-      ui.notifications.error(`Error updating calendar: ${error.message}`);
+      ui.notifications.error(`Error updating calendar:`, error);
       return null;
     }
   }
@@ -602,37 +513,26 @@ export default class CalendarManager {
    * @returns {Promise<boolean>} True if deleted successfully
    */
   static async deleteCustomCalendar(id) {
-    // Check if this is a custom calendar
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (!customCalendars[id]) {
       log(2, `Cannot delete calendar: ${id} is not a custom calendar`);
-      ui.notifications.error('Cannot delete built-in calendars');
       return false;
     }
 
-    // Don't allow deleting the active calendar
     if (CalendarRegistry.getActiveId() === id) {
       log(2, `Cannot delete active calendar: ${id}`);
-      ui.notifications.warn('Cannot delete the active calendar. Switch to a different calendar first.');
       return false;
     }
 
     try {
-      // Remove from settings
       delete customCalendars[id];
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
-
-      // Remove from registry
       CalendarRegistry.unregister(id);
-
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
       log(3, `Deleted custom calendar: ${id}`);
-      ui.notifications.info(`Deleted calendar "${id}"`);
-
       return true;
     } catch (error) {
-      log(2, `Error deleting custom calendar ${id}:`, error);
-      ui.notifications.error(`Error deleting calendar: ${error.message}`);
+      log(1, `Error deleting custom calendar ${id}:`, error);
       return false;
     }
   }
@@ -640,16 +540,13 @@ export default class CalendarManager {
   /**
    * Get available calendar templates for "Start from..." feature.
    * Returns all registered calendars that can be used as templates.
-   * @returns {Array<{id: string, name: string, description: string}>}
+   * @returns {Array<{id: string, name: string, description: string}>} - Template options
    */
   static getCalendarTemplates() {
     const templates = [];
-
-    // Add all registered calendars as templates
     for (const [id, calendar] of CalendarRegistry.getAll()) {
       templates.push({ id, name: calendar.name || id, description: calendar.metadata?.description || '', isCustom: calendar.metadata?.isCustom || false });
     }
-
     return templates;
   }
 
@@ -664,11 +561,9 @@ export default class CalendarManager {
     const sourceCalendar = CalendarRegistry.get(sourceId);
     if (!sourceCalendar) {
       log(2, `Cannot duplicate calendar: ${sourceId} not found`);
-      ui.notifications.error(`Calendar "${sourceId}" not found`);
       return null;
     }
 
-    // Get source data and modify for new calendar
     const newData = sourceCalendar.toObject();
     newData.name = newName || `Copy of ${sourceCalendar.name || sourceId}`;
     if (newData.metadata) {
@@ -726,37 +621,24 @@ export default class CalendarManager {
     }
 
     try {
-      // Ensure metadata is present
       if (!data.metadata) data.metadata = {};
       data.metadata.id = id;
       data.metadata.hasOverride = true;
-
-      // Create calendar instance
       const calendar = new CalendariaCalendar(data);
-
-      // Save to overrides setting
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       overrides[id] = calendar.toObject();
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-
-      // Update in registry
       CalendarRegistry.register(id, calendar);
-
-      // Update game.time.calendar if this is the active calendar
       if (CalendarRegistry.getActiveId() === id) {
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
       }
-
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       log(3, `Saved override for bundled calendar: ${id}`);
-      ui.notifications.info(format('CALENDARIA.Editor.SaveSuccess', { name: data.name || id }));
-
       return calendar;
     } catch (error) {
-      log(2, `Error saving override for ${id}:`, error);
-      ui.notifications.error(`Error saving calendar: ${error.message}`);
+      log(1, `Error saving override for ${id}:`, error);
       return null;
     }
   }
@@ -773,34 +655,26 @@ export default class CalendarManager {
     }
 
     try {
-      // Remove from overrides
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       delete overrides[id];
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-
-      // Reload the calendar from bundled JSON
       const path = `modules/${MODULE.ID}/calendars/${id}.json`;
       const response = await fetch(path);
       if (response.ok) {
         const calendarData = await response.json();
         const calendar = new CalendariaCalendar(calendarData);
         CalendarRegistry.register(id, calendar);
-
-        // Update game.time.calendar if this is the active calendar
         if (CalendarRegistry.getActiveId() === id) {
           CONFIG.time.worldCalendarConfig = calendar.toObject();
           CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
           game.time.initializeCalendar();
         }
-
         Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       }
-
       log(3, `Reset bundled calendar: ${id}`);
-      ui.notifications.info('CALENDARIA.Editor.ResetComplete', { localize: true });
       return true;
     } catch (error) {
-      log(2, `Error resetting bundled calendar ${id}:`, error);
+      log(1, `Error resetting bundled calendar ${id}:`, error);
       return false;
     }
   }

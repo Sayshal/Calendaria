@@ -5,7 +5,7 @@
  * @author Tyler
  */
 
-import { localize, format } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 
 /**
  * Prelocalize calendar configuration data.

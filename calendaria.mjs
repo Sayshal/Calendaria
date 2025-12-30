@@ -5,59 +5,45 @@
  * @author Tyler
  */
 
-import { registerSettings, registerReadySettings } from './scripts/settings.mjs';
-import { registerHooks } from './scripts/hooks.mjs';
-import { initializeLogger, log } from './scripts/utils/logger.mjs';
-import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
-import { CalendariaSocket } from './scripts/utils/socket.mjs';
+import { CalendariaAPI } from './scripts/api.mjs';
+import { CalendarApplication } from './scripts/applications/calendar-application.mjs';
+import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
 import { CalendariaHUD } from './scripts/applications/calendaria-hud.mjs';
-import { MODULE, SETTINGS, TEMPLATES, JOURNAL_TYPES, SHEET_IDS, HOOKS } from './scripts/constants.mjs';
+import { CompactCalendar } from './scripts/applications/compact-calendar.mjs';
+import { TimeKeeperHUD } from './scripts/applications/time-keeper-hud.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
+import { overrideChatLogTimestamps } from './scripts/chat/chat-timestamp.mjs';
+import { HOOKS, JOURNALS, MODULE, SETTINGS, SHEETS, TEMPLATES } from './scripts/constants.mjs';
+import { registerHooks } from './scripts/hooks.mjs';
+import { initializeImporters } from './scripts/importers/index.mjs';
 import NoteManager from './scripts/notes/note-manager.mjs';
-import TimeTracker from './scripts/time/time-tracker.mjs';
-import TimeKeeper from './scripts/time/time-keeper.mjs';
-import EventScheduler from './scripts/time/event-scheduler.mjs';
-import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
-import { TimeKeeperHUD } from './scripts/applications/time-keeper-hud.mjs';
-import { CalendarApplication } from './scripts/applications/calendar-application.mjs';
-import { CompactCalendar } from './scripts/applications/compact-calendar.mjs';
+import { registerReadySettings, registerSettings } from './scripts/settings.mjs';
 import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model.mjs';
 import { CalendarNoteSheet } from './scripts/sheets/calendar-note-sheet.mjs';
-import { CalendariaAPI } from './scripts/api.mjs';
-import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
+import EventScheduler from './scripts/time/event-scheduler.mjs';
+import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
+import TimeKeeper from './scripts/time/time-keeper.mjs';
+import TimeTracker from './scripts/time/time-tracker.mjs';
+import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
+import { initializeLogger, log } from './scripts/utils/logger.mjs';
+import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
-import { overrideChatLogTimestamps } from './scripts/chat/chat-timestamp.mjs';
 
 Hooks.once('init', async () => {
-  // Fire calendaria.init hook for other modules to prepare
   Hooks.callAll(HOOKS.INIT);
   registerSettings();
   initializeLogger();
   registerKeybindings();
   registerHooks();
+  initializeImporters();
   overrideChatLogTimestamps();
   CalendariaSocket.initialize();
-
-  // Register CalendarNote document type
-  Object.assign(CONFIG.JournalEntryPage.dataModels, { [JOURNAL_TYPES.CALENDAR_NOTE]: CalendarNoteDataModel });
-
-  // Initialize sheet classes
-  CONFIG.JournalEntryPage.sheetClasses[JOURNAL_TYPES.CALENDAR_NOTE] = {};
-
-  // Register CalendarNote sheet
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, SHEET_IDS.CALENDARIA, CalendarNoteSheet, {
-    types: [JOURNAL_TYPES.CALENDAR_NOTE],
-    makeDefault: true,
-    label: 'Calendar Note'
-  });
-
-  log(3, 'Calendar note type and sheet registered');
-
-  // Load templates
+  Object.assign(CONFIG.JournalEntryPage.dataModels, { [JOURNALS.CALENDAR_NOTE]: CalendarNoteDataModel });
+  CONFIG.JournalEntryPage.sheetClasses[JOURNALS.CALENDAR_NOTE] = {};
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, SHEETS.CALENDARIA, CalendarNoteSheet, { types: [JOURNALS.CALENDAR_NOTE], makeDefault: true, label: 'Calendar Note' });
   await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES).flatMap((v) => (typeof v === 'string' ? v : Object.values(v))));
-
   log(3, 'Calendaria module initialized.');
 });
 
@@ -69,43 +55,17 @@ Hooks.once('dnd5e.setupCalendar', () => {
 });
 
 Hooks.once('ready', async () => {
-  // Register settings that require game.users
   registerReadySettings();
-
-  // Initialize calendar system
   await CalendarManager.initialize();
-
-  // Initialize notes system
   await NoteManager.initialize();
-
-  // Initialize time tracking
   TimeTracker.initialize();
-
-  // Initialize real-time clock controller
   TimeKeeper.initialize();
-
-  // Initialize event scheduler
   EventScheduler.initialize();
-
-  // Initialize reminder scheduler
   ReminderScheduler.initialize();
-
-  // Initialize custom theme colors
   initializeTheme();
-
-  // Initialize weather system
   await WeatherManager.initialize();
-
-  // Show TimeKeeper HUD if setting is enabled
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) {
-    TimeKeeperHUD.show();
-  }
-
-  // Show Compact Calendar if auto-show is enabled
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR)) {
-    CompactCalendar.show();
-  }
-
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) TimeKeeperHUD.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR)) CompactCalendar.show();
   if (game.system.id === 'dnd5e') {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');
     if (calendarConfig?.enabled) {
@@ -113,25 +73,13 @@ Hooks.once('ready', async () => {
       await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
     }
   }
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) CalendariaHUD.show();
 
-  // Show Calendar HUD if auto-show is enabled
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) {
-    CalendariaHUD.show();
-  }
-
-  // Fire calendaria.ready hook - module is fully initialized
-  Hooks.callAll(HOOKS.READY, {
-    api: CalendariaAPI,
-    calendar: CalendarManager.getActiveCalendar(),
-    version: game.modules.get('calendaria')?.version
-  });
-
-  log(3, 'Calendaria ready.');
+  Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
 });
 
 Hooks.once('setup', () => {
   CONFIG.time.worldCalendarClass = CalendariaCalendar;
-  log(3, 'Calendaria calendar class registered');
 });
 
 globalThis['CALENDARIA'] = {

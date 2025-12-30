@@ -150,7 +150,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get the active calendar.
-   * @returns {CalendariaCalendar}
+   * @returns {object} The active calendar instance
    */
   get calendar() {
     return CalendarManager.getActiveCalendar();
@@ -158,7 +158,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Whether position is locked via settings or sticky.
-   * @returns {boolean}
+   * @returns {boolean} True if position is locked
    */
   get isLocked() {
     return game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
@@ -166,7 +166,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Whether compact mode is enabled.
-   * @returns {boolean}
+   * @returns {boolean} True if compact mode is enabled
    */
   get isCompact() {
     return game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE) === 'compact';
@@ -181,20 +181,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     const calendar = this.calendar;
     const components = game.time.components;
-
-    // Core state
     context.isGM = game.user.isGM;
     context.locked = this.isLocked;
     context.isPlaying = TimeKeeper.running;
-
-    // Sticky states (read from settings to ensure changes are reflected)
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
     this.#stickyTray = stickyStates.tray ?? false;
     this.#stickyPosition = stickyStates.position ?? false;
     this.#multiplier = stickyStates.multiplier ?? 1;
     context.stickyTray = this.#stickyTray;
-
-    // Restore per-app and global TimeKeeper settings
     const appSettings = TimeKeeper.getAppSettings('calendaria-hud');
     if (stickyStates.increment && stickyStates.increment !== appSettings.incrementKey) {
       TimeKeeper.setAppIncrement('calendaria-hud', stickyStates.increment);
@@ -205,123 +199,48 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       TimeKeeper.setMultiplier(this.#multiplier);
     }
 
-    // Time display
     context.time = this.#formatTime(components);
-
-    // Date display (inline format: "15th of Hammer, 1492 DR")
     context.dateDisplay = this.#formatDateDisplay(components);
-
-    // Season (with color and icon)
     const season = calendar?.getCurrentSeason?.();
-    context.currentSeason = season
-      ? {
-          name: localize(season.name),
-          color: season.color || '#888',
-          icon: season.icon || 'fas fa-sun'
-        }
-      : null;
-
-    // Era
+    context.currentSeason = season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
     const era = calendar?.getCurrentEra?.();
-    context.currentEra = era
-      ? {
-          name: localize(era.name),
-          abbreviation: localize(era.abbreviation || era.name)
-        }
-      : null;
-
-    // Cycle (uses getCycleValues which returns { text, values })
+    context.currentEra = era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) } : null;
     const cycleData = calendar?.getCycleValues?.();
     context.cycleText = cycleData?.text || null;
-
-    // Weather
     context.weather = this.#getWeatherContext();
-
-    // Live events - show all icons simultaneously
     this.#liveEvents = this.#getLiveEvents();
     context.hasEvents = this.#liveEvents.length > 0;
     context.liveEvents = this.#liveEvents;
     context.firstEventColor = this.#liveEvents[0]?.color || null;
-    // Keep currentEvent for backwards compatibility
     context.currentEvent = this.#liveEvents.length > 0 ? this.#liveEvents[0] : null;
-
-    // Time increments for dropdown
-    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
-      key,
-      label: this.#formatIncrementLabel(key),
-      seconds,
-      selected: key === appSettings.incrementKey
-    }));
-
-    // Multipliers for dropdown
-    context.multipliers = TIME_MULTIPLIERS.map((m) => ({
-      value: m.value,
-      label: m.label,
-      selected: m.value === this.#multiplier
-    }));
-
-    // Search context
+    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === appSettings.incrementKey }));
+    context.multipliers = TIME_MULTIPLIERS.map((m) => ({ value: m.value, label: m.label, selected: m.value === this.#multiplier }));
     context.searchOpen = this.#searchOpen;
     context.searchTerm = this.#searchTerm;
     context.searchResults = this.#searchResults || [];
-
     return context;
   }
 
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
-
-    // Apply compact mode class
     this.element.classList.toggle('compact', this.isCompact);
-
-    // Restore position
     this.#restorePosition();
-
-    // Enable dragging (respects sticky position)
     this.#enableDragging();
-
-    // Update celestial visuals
     this.#updateCelestialDisplay();
-
-    // Update dome visibility based on viewport position
     this.#updateDomeVisibility();
-
-    // Setup event listeners (always needed for bar controls)
     this.#setupEventListeners();
-
-    // Set up time update hook
-    if (!this.#timeHookId) {
-      this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
-    }
-
-    // Track current day for re-render detection
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
     this.#lastDay = game.time.components.dayOfMonth;
-
-    // Start event rotation timer if there are events
     this.#startEventRotation();
   }
 
   /** @override */
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
-
-    // Restore sticky states from settings
     this.#restoreStickyStates();
-
-    // Clock state hook
-    this.#hooks.push({
-      name: HOOKS.CLOCK_START_STOP,
-      id: Hooks.on(HOOKS.CLOCK_START_STOP, () => this.#onClockStateChange())
-    });
-
-    // Weather change hook - only re-render bar (weather is in bar, not dome)
-    this.#hooks.push({
-      name: HOOKS.WEATHER_CHANGE,
-      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['bar'] }))
-    });
-
-    // Note changes - only re-render bar (events are in bar, not dome)
+    this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, () => this.#onClockStateChange()) });
+    this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['bar'] })) });
     const debouncedRender = foundry.utils.debounce(() => this.render({ parts: ['bar'] }), 100);
     this.#hooks.push({
       name: 'updateJournalEntryPage',
@@ -329,8 +248,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         if (page.type === 'calendaria.calendarnote') debouncedRender();
       })
     });
-
-    // Sidebar collapse/expand hook for collision detection
     this.#hooks.push({
       name: 'collapseSidebar',
       id: Hooks.on('collapseSidebar', () => this.#clampToViewport())
@@ -343,19 +260,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       Hooks.off('updateWorldTime', this.#timeHookId);
       this.#timeHookId = null;
     }
-
-    // Clear event rotation timer
     if (this.#eventRotationTimer) {
       clearInterval(this.#eventRotationTimer);
       this.#eventRotationTimer = null;
     }
-
-    // Remove resize handler
-    if (this._resizeHandler) {
-      window.removeEventListener('resize', this._resizeHandler);
-    }
-
-    // Clean up search panel and click-outside handler
+    if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
     if (this.#clickOutsideHandler) {
       document.removeEventListener('mousedown', this.#clickOutsideHandler);
       this.#clickOutsideHandler = null;
@@ -364,10 +273,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#searchPanelEl.remove();
       this.#searchPanelEl = null;
     }
-
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
-
     await super._onClose(options);
   }
 
@@ -379,50 +286,32 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Setup event listeners for the HUD.
    */
   #setupEventListeners() {
-    // Increment selector (per-app + global for real-time clock)
     this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]')?.addEventListener('change', (event) => {
       TimeKeeper.setAppIncrement('calendaria-hud', event.target.value);
       TimeKeeper.setIncrement(event.target.value);
       this.#saveStickyStates();
     });
-
-    // Multiplier selector (per-app + global for real-time clock)
     this.element.querySelector('.calendaria-hud-select[data-action="setMultiplier"]')?.addEventListener('change', (event) => {
       this.#multiplier = parseFloat(event.target.value);
       TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
       TimeKeeper.setMultiplier(this.#multiplier);
       this.#saveStickyStates();
     });
-
-    // Search input listener
     const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
     if (searchInput) {
       if (this.#searchOpen) searchInput.focus();
-
       const debouncedSearch = foundry.utils.debounce((term) => {
         this.#searchTerm = term;
-        if (term.length >= 2) {
-          this.#searchResults = SearchManager.search(term, { searchContent: true });
-        } else {
-          this.#searchResults = null;
-        }
+        if (term.length >= 2) this.#searchResults = SearchManager.search(term, { searchContent: true });
+        else this.#searchResults = null;
         this.#updateSearchResults();
       }, 300);
-
       searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
       searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          this.#closeSearch();
-        }
+        if (e.key === 'Escape') this.#closeSearch();
       });
     }
-
-    // Position search panel if open (delayed to ensure DOM is painted)
-    if (this.#searchOpen) {
-      requestAnimationFrame(() => this.#positionSearchPanel());
-    }
-
-    // Dome keyboard handler
+    if (this.#searchOpen) requestAnimationFrame(() => this.#positionSearchPanel());
     const dome = this.element.querySelector('.calendaria-hud-dome');
     if (dome) {
       dome.addEventListener('keydown', (event) => {
@@ -433,7 +322,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
-    // Window resize handler for dome visibility
     this._resizeHandler = this.#onWindowResize.bind(this);
     window.addEventListener('resize', this._resizeHandler);
   }
@@ -456,12 +344,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #restoreStickyStates() {
     const states = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES);
     if (!states) return;
-
     this.#stickyTray = states.tray ?? false;
     this.#stickyPosition = states.position ?? false;
     this.#multiplier = states.multiplier ?? 1;
-
-    // Set per-app and global TimeKeeper settings
     TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
     TimeKeeper.setMultiplier(this.#multiplier);
     if (states.increment) {
@@ -469,7 +354,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       TimeKeeper.setIncrement(states.increment);
     }
 
-    // Apply tray visibility
     if (this.#stickyTray) {
       const tray = this.element.querySelector('.calendaria-hud-tray');
       tray?.classList.add('visible');
@@ -516,7 +400,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _updatePinButtonState() {
     const pinBtn = this.element.querySelector('.pin-btn');
     if (!pinBtn) return;
-
     const hasAnySticky = this.#stickyTray || this.#stickyPosition;
     pinBtn.classList.toggle('has-sticky', hasAnySticky);
     pinBtn.classList.toggle('sticky-tray', this.#stickyTray);
@@ -532,18 +415,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #restorePosition() {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
-
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
       this.setPosition({ left: savedPos.left, top: savedPos.top });
     } else {
-      // Default position: centered horizontally, near top
       const rect = this.element.getBoundingClientRect();
       const left = (window.innerWidth - rect.width) / 2;
       const top = 75;
       this.setPosition({ left, top });
     }
-
-    // Clamp after restore
     this.#clampToViewport();
   }
 
@@ -554,13 +433,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const rect = this.element.getBoundingClientRect();
     const sidebar = document.getElementById('sidebar');
     const sidebarWidth = sidebar && !sidebar.classList.contains('collapsed') ? sidebar.offsetWidth : 0;
-
     let { left, top } = this.position;
-
-    // Clamp to viewport bounds
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - sidebarWidth));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
-
     this.setPosition({ left, top });
   }
 
@@ -570,28 +445,20 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #enableDragging() {
     const dragHandle = this.element.querySelector('.calendaria-hud-bar');
     if (!dragHandle) return;
-
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
-
     let dragStartX = 0;
     let dragStartY = 0;
     let elementStartLeft = 0;
     let elementStartTop = 0;
-
     const originalMouseDown = drag._onDragMouseDown.bind(drag);
     drag._onDragMouseDown = (event) => {
-      // Prevent dragging when locked
       if (this.isLocked) return;
-
-      // Close search panel when starting to drag
       if (this.#searchOpen) this.#closeSearch();
-
       const rect = this.element.getBoundingClientRect();
       elementStartLeft = rect.left;
       elementStartTop = rect.top;
       dragStartX = event.clientX;
       dragStartY = event.clientY;
-
       dragHandle.classList.add('dragging');
       originalMouseDown(event);
     };
@@ -602,25 +469,16 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!drag._moveTime) drag._moveTime = 0;
       if (now - drag._moveTime < 1000 / 60) return;
       drag._moveTime = now;
-
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-
-      // Get sidebar width for right edge clamping
       const sidebar = document.getElementById('sidebar');
       const sidebarWidth = sidebar && !sidebar.classList.contains('collapsed') ? sidebar.offsetWidth : 0;
-
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
-
-      // Clamp to viewport with sidebar consideration
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - sidebarWidth));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
-
       this.setPosition({ left: newLeft, top: newTop });
-
-      // Update dome visibility during drag
       this.#updateDomeVisibility();
     };
 
@@ -628,14 +486,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       window.removeEventListener(...drag.handlers.dragMove);
       window.removeEventListener(...drag.handlers.dragUp);
-
       dragHandle.classList.remove('dragging');
-
-      // Save position
-      await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, {
-        left: this.position.left,
-        top: this.position.top
-      });
+      await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, { left: this.position.left, top: this.position.top });
     };
   }
 
@@ -650,24 +502,17 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #updateDomeVisibility() {
     const dome = this.element.querySelector('.calendaria-hud-dome');
     if (!dome) return;
-
     const domeHeight = this.isCompact ? 60 : 80;
-    const minVisibleHeight = 20; // Minimum pixels of dome that must be visible
-
-    // Calculate how much of the dome is visible above the viewport
+    const minVisibleHeight = 20;
     const hudTop = this.position.top;
-    const domeTop = hudTop - domeHeight + (this.isCompact ? 10 : 14); // Account for overlap
-
+    const domeTop = hudTop - domeHeight + (this.isCompact ? 10 : 14);
     if (domeTop < -domeHeight + minVisibleHeight) {
-      // Not enough space, hide completely
       dome.classList.add('hidden');
     } else if (domeTop < 0) {
-      // Partially visible, fade based on visibility
       dome.classList.remove('hidden');
       const visibility = 1 + domeTop / domeHeight;
       dome.style.opacity = Math.max(0, Math.min(1, visibility));
     } else {
-      // Fully visible
       dome.classList.remove('hidden');
       dome.style.opacity = '';
     }
@@ -683,40 +528,31 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #updateCelestialDisplay() {
     const components = game.time.components;
     const hour = this.#getDecimalHour(components);
-
-    // Update sky gradient
     const sky = this.element.querySelector('.calendaria-hud-sky');
     if (sky) {
       const colors = this.#getSkyColors(hour);
       sky.style.background = `linear-gradient(to bottom, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
     }
 
-    // Update stars visibility
     const stars = this.element.querySelector('.calendaria-hud-stars');
     if (stars) {
       const showStars = hour < 5.5 || hour > 19;
       const partialStars = (hour >= 5.5 && hour < 7) || (hour > 17.5 && hour <= 19);
       stars.classList.toggle('visible', showStars || partialStars);
-
       if (partialStars) {
-        // Fade in/out during dawn/dusk
         const starOpacity = hour < 12 ? 1 - (hour - 5.5) / 1.5 : (hour - 17.5) / 1.5;
         stars.style.opacity = Math.max(0, Math.min(1, starOpacity));
       } else {
-        // Clear inline opacity so CSS class controls visibility
         stars.style.opacity = '';
       }
     }
 
-    // Update clouds visibility (daytime only, 7am-6pm)
     const clouds = this.element.querySelector('.calendaria-hud-clouds');
     if (clouds) {
       const showClouds = hour >= 7 && hour < 18;
       const partialClouds = (hour >= 6 && hour < 7) || (hour >= 18 && hour < 19);
       clouds.classList.toggle('visible', showClouds || partialClouds);
-
       if (partialClouds) {
-        // Fade in/out during dawn/dusk
         const cloudOpacity = hour < 12 ? hour - 6 : 1 - (hour - 18);
         clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
       } else {
@@ -724,23 +560,18 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
-    // Update sun/moon positions
     const isCompact = this.isCompact;
     const trackWidth = isCompact ? 100 : 140;
     const trackHeight = isCompact ? 50 : 70;
     const sunSize = isCompact ? 16 : 20;
     const moonSize = isCompact ? 14 : 18;
-
     const isSunVisible = hour >= 6 && hour < 18;
-
     const sun = this.element.querySelector('.calendaria-hud-sun');
     const moon = this.element.querySelector('.calendaria-hud-moon');
-
     if (sun) {
       sun.style.opacity = isSunVisible ? '1' : '0';
       if (isSunVisible) this.#positionCelestialBody(sun, hour, trackWidth, trackHeight, sunSize, true);
     }
-
     if (moon) {
       moon.style.opacity = isSunVisible ? '0' : '1';
       if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false);
@@ -758,26 +589,19 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #positionCelestialBody(element, hour, trackWidth, trackHeight, bodySize, isSun) {
     let normalizedHour;
-
     if (isSun) {
-      // Sun: maps 6-18 to 0-12
       normalizedHour = hour - 6;
     } else {
-      // Moon: maps 18-6 (wrapping) to 0-12
       if (hour >= 18) normalizedHour = hour - 18;
       else normalizedHour = hour + 6;
     }
-
     normalizedHour = Math.max(0, Math.min(12, normalizedHour));
     const angle = (normalizedHour / 12) * Math.PI;
-
     const centerX = trackWidth / 2;
     const centerY = trackHeight;
     const radius = Math.min(trackWidth / 2, trackHeight) - bodySize / 2 - 4;
-
     const x = centerX - radius * Math.cos(angle) - bodySize / 2;
     const y = centerY - radius * Math.sin(angle) - bodySize / 2;
-
     element.style.left = `${x}px`;
     element.style.top = `${y}px`;
   }
@@ -785,14 +609,12 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get interpolated sky colors for a given hour.
    * @param {number} hour - Hour (0-24, decimal)
-   * @returns {{top: string, mid: string, bottom: string}}
+   * @returns {{top: string, mid: string, bottom: string}} Sky gradient colors
    */
   #getSkyColors(hour) {
     hour = ((hour % 24) + 24) % 24;
-
     let kf1 = SKY_KEYFRAMES[0];
     let kf2 = SKY_KEYFRAMES[1];
-
     for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
       if (hour >= SKY_KEYFRAMES[i].hour && hour < SKY_KEYFRAMES[i + 1].hour) {
         kf1 = SKY_KEYFRAMES[i];
@@ -803,12 +625,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const range = kf2.hour - kf1.hour;
     const t = range > 0 ? (hour - kf1.hour) / range : 0;
-
-    return {
-      top: this.#lerpColor(kf1.top, kf2.top, t),
-      mid: this.#lerpColor(kf1.mid, kf2.mid, t),
-      bottom: this.#lerpColor(kf1.bottom, kf2.bottom, t)
-    };
+    return { top: this.#lerpColor(kf1.top, kf2.top, t), mid: this.#lerpColor(kf1.mid, kf2.mid, t), bottom: this.#lerpColor(kf1.bottom, kf2.bottom, t) };
   }
 
   /**
@@ -840,32 +657,22 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onUpdateWorldTime() {
     if (!this.rendered) return;
-
     const components = game.time.components;
-
-    // Check if day changed - debounced re-render to avoid button flicker
     if (this.#lastDay !== null && this.#lastDay !== components.dayOfMonth) {
       this.#lastDay = components.dayOfMonth;
-      // Debounce bar render to allow rapid time advances to settle
       if (this.#barRenderDebounce) clearTimeout(this.#barRenderDebounce);
       this.#barRenderDebounce = setTimeout(() => {
         this.#barRenderDebounce = null;
         this.render({ parts: ['bar'] });
       }, 200);
-      // Update date inline while waiting for render
       const dateEl = this.element.querySelector('.calendaria-hud-date');
       if (dateEl) dateEl.textContent = this.#formatDateDisplay(components);
     }
 
-    // Update time display
     const timeEl = this.element.querySelector('.calendaria-hud-time');
     if (timeEl) timeEl.textContent = this.#formatTime(components);
-
-    // Update time-flowing class on root
     const hud = this.element.querySelector('.calendaria-hud');
     if (hud) hud.classList.toggle('time-flowing', TimeKeeper.running);
-
-    // Update celestial display
     this.#updateCelestialDisplay();
   }
 
@@ -874,20 +681,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onClockStateChange() {
     if (!this.rendered) return;
-
     const running = TimeKeeper.running;
-
-    // Update time-flowing class
     const hud = this.element.querySelector('.calendaria-hud');
     if (hud) hud.classList.toggle('time-flowing', running);
-
-    // Update play button
     const playBtn = this.element.querySelector('.calendaria-hud-play-btn');
     if (playBtn) {
       playBtn.classList.toggle('playing', running);
       playBtn.setAttribute('aria-pressed', String(running));
       playBtn.dataset.tooltip = running ? localize('CALENDARIA.HUD.PauseTime') : localize('CALENDARIA.TimeKeeper.Start');
-
       const icon = playBtn.querySelector('i');
       if (icon) {
         icon.classList.toggle('fa-play', !running);
@@ -898,21 +699,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /* -------------------------------------------- */
   /*  Event Rotation                              */
+  /*  @todo: Isnt this dead?                      */
   /* -------------------------------------------- */
 
   /**
    * Start the event rotation timer (30-second intervals).
    */
   #startEventRotation() {
-    // Clear existing timer
-    if (this.#eventRotationTimer) {
-      clearInterval(this.#eventRotationTimer);
-    }
-
-    // Only start if there are events
+    if (this.#eventRotationTimer) clearInterval(this.#eventRotationTimer);
     if (this.#liveEvents.length === 0) return;
-
-    // Toggle every 30 seconds
     this.#eventRotationTimer = setInterval(() => {
       this.#toggleEventDisplay();
     }, 30000);
@@ -923,21 +718,14 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #toggleEventDisplay() {
     if (!this.rendered || this.#liveEvents.length === 0) return;
-
     const panel = this.element.querySelector('.calendaria-hud-info-panel.left');
     const dateEl = panel?.querySelector('.calendaria-hud-date');
     const eventEl = panel?.querySelector('.calendaria-hud-event');
-
     if (!panel || !dateEl) return;
-
     this.#showEvent = !this.#showEvent;
-
     if (this.#showEvent && eventEl) {
-      // Show event, hide date
       dateEl.classList.add('hidden');
       eventEl.classList.remove('hidden');
-
-      // If multiple events, cycle through them
       if (this.#liveEvents.length > 1) {
         this.#currentEventIndex = (this.#currentEventIndex + 1) % this.#liveEvents.length;
         const event = this.#liveEvents[this.#currentEventIndex];
@@ -949,12 +737,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         eventEl.querySelector('.calendaria-hud-event-name').textContent = event.name;
       }
     } else {
-      // Show date, hide event
       dateEl.classList.remove('hidden');
       if (eventEl) eventEl.classList.add('hidden');
     }
-
-    // Add/remove showing-event class for panel glow
     panel.classList.toggle('showing-event', this.#showEvent);
   }
 
@@ -994,16 +779,12 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #formatDateDisplay(components) {
     const calendar = this.calendar;
     if (!calendar) return '';
-
     const day = (components.dayOfMonth ?? 0) + 1;
     const month = calendar.months?.values?.[components.month];
     const monthName = month?.name ? localize(month.name) : '';
-
-    // Year with era
     const yearZero = calendar.years?.yearZero ?? 0;
     const displayYear = components.year + yearZero;
     const yearWithEra = calendar.formatYearWithEra?.(displayYear) ?? String(displayYear);
-
     return format('CALENDARIA.Formatters.OrdinalDayOfMonth', { day, suffix: this.#getOrdinalSuffix(day), month: monthName, year: yearWithEra });
   }
 
@@ -1044,18 +825,13 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get weather context for template.
-   * @returns {object|null}
+   * @returns {object|null} Weather data object or null if no weather
    */
   #getWeatherContext() {
     const weather = WeatherManager.getCurrentWeather();
     if (!weather) return null;
-
-    // Ensure icon has a style prefix (fa-solid, fa-regular, etc.)
     let icon = weather.icon || 'fa-cloud';
-    if (icon && !icon.includes('fa-solid') && !icon.includes('fa-regular') && !icon.includes('fa-light') && !icon.includes('fas ') && !icon.includes('far ')) {
-      icon = `fa-solid ${icon}`;
-    }
-
+    if (icon && !icon.includes('fa-solid') && !icon.includes('fa-regular') && !icon.includes('fa-light') && !icon.includes('fas ') && !icon.includes('far ')) icon = `fa-solid ${icon}`;
     return {
       id: weather.id,
       label: localize(weather.label),
@@ -1069,24 +845,19 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get live events for the current day (up to 4).
    * Returns icon-only data with full tooltips.
-   * @returns {Array}
+   * @returns {Array} Array of event objects with id, name, icon, color, tooltip
    */
   #getLiveEvents() {
     const components = game.time.components;
     const calendar = this.calendar;
     if (!calendar) return [];
-
     const yearZero = calendar.years?.yearZero ?? 0;
     const year = components.year + yearZero;
     const month = components.month;
     const day = (components.dayOfMonth ?? 0) + 1;
-
     const notes = ViewUtils.getNotesOnDay(year, month, day);
     if (!notes.length) return [];
-
-    // Return up to 5 events
     return notes.slice(0, 5).map((note) => {
-      // Build tooltip: name + description (truncated to 120 chars)
       let tooltip = note.name;
       const desc = note.text?.content;
       if (desc) {
@@ -1096,15 +867,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
           tooltip += `\n${truncated}`;
         }
       }
-
-      return {
-        id: note.id,
-        parentId: note.parent.id,
-        name: note.name,
-        icon: note.system.icon || 'fas fa-star',
-        color: note.system.color || '#e88',
-        tooltip
-      };
+      return { id: note.id, parentId: note.parent.id, name: note.name, icon: note.system.icon || 'fas fa-star', color: note.system.color || '#e88', tooltip };
     });
   }
 
@@ -1117,68 +880,41 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #openTimeRotationDial() {
     log(3, 'Opening time rotation dial');
-
-    // Remove any existing dial
     const existingDial = document.getElementById('calendaria-time-dial');
     if (existingDial) existingDial.remove();
-
-    // Get current calendar time
     const currentTime = game.time.worldTime;
     const date = new Date(currentTime * 1000);
     const hours = date.getUTCHours();
     const minutes = date.getUTCMinutes();
-
-    // Prepare template data
-    const templateData = {
-      currentTime: this.#formatDialTime(hours, minutes),
-      hourMarkers: this.#generateHourMarkers()
-    };
-
-    // Render the template
+    const templateData = { currentTime: this.#formatDialTime(hours, minutes), hourMarkers: this.#generateHourMarkers() };
     const html = await foundry.applications.handlebars.renderTemplate(TEMPLATES.TIME_DIAL, templateData);
-
-    // Create the dial container
     const dial = document.createElement('div');
     dial.id = 'calendaria-time-dial';
     dial.className = 'calendaria-time-dial';
     dial.innerHTML = html;
-
-    // Position relative to HUD
     document.body.appendChild(dial);
     const dialContainer = dial.querySelector('.dial-container');
     const dialRect = dialContainer.getBoundingClientRect();
     const hudRect = this.element.getBoundingClientRect();
-
-    // Center on HUD horizontally
     let left = hudRect.left + hudRect.width / 2 - dialRect.width / 2;
     left = Math.min(Math.max(left, 0), window.innerWidth - dialRect.width);
-
-    // Position below HUD (or above if not enough room)
     let top;
     const spaceBelow = window.innerHeight - hudRect.bottom;
     const spaceAbove = hudRect.top;
-
     if (spaceBelow >= dialRect.height + 20) top = hudRect.bottom + 20;
     else if (spaceAbove >= dialRect.height + 20) top = hudRect.top - dialRect.height - 20;
     else top = hudRect.bottom + 20;
-
     dial.style.left = `${left}px`;
     dial.style.top = `${top}px`;
-
-    // Store initial values
     this._dialState = { currentHours: hours, currentMinutes: minutes, initialTime: currentTime };
-
-    // Set initial rotation
     const initialAngle = this.#timeToAngle(hours, minutes);
     this.#updateDialRotation(dial, initialAngle);
-
-    // Add interaction handlers
     this.#setupDialInteraction(dial);
   }
 
   /**
    * Generate hour marker data for the dial template.
-   * @returns {Array}
+   * @returns {Array} Array of hour marker objects with position data
    */
   #generateHourMarkers() {
     const markers = [];
@@ -1191,7 +927,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const y2 = 100 + Math.sin(radians) * 90;
       const textX = 100 + Math.cos(radians) * 70;
       const textY = 100 + Math.sin(radians) * 70;
-
       markers.push({
         hour,
         x1: x1.toFixed(2),
@@ -1209,9 +944,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Format time for dial display.
-   * @param {number} hours
-   * @param {number} minutes
-   * @returns {string}
+   * @param {number} hours - Hour value (0-23)
+   * @param {number} minutes - Minute value (0-59)
+   * @returns {string} Formatted time string (HH:MM)
    */
   #formatDialTime(hours, minutes) {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
@@ -1219,9 +954,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert time to angle in degrees.
-   * @param {number} hours
-   * @param {number} minutes
-   * @returns {number}
+   * @param {number} hours - Hour value (0-23)
+   * @param {number} minutes - Minute value (0-59)
+   * @returns {number} Angle in degrees (0-360)
    */
   #timeToAngle(hours, minutes) {
     const totalMinutes = hours * 60 + minutes;
@@ -1232,8 +967,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert angle to time.
-   * @param {number} angle
-   * @returns {{hours: number, minutes: number}}
+   * @param {number} angle - Angle in degrees (0-360)
+   * @returns {{hours: number, minutes: number}} Time object with hours and minutes
    */
   #angleToTime(angle) {
     angle = ((angle % 360) + 360) % 360;
@@ -1246,45 +981,34 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Update the dial's visual rotation.
-   * @param {HTMLElement} dial
-   * @param {number} angle
+   * @param {HTMLElement} dial - The dial container element
+   * @param {number} angle - Rotation angle in degrees
    */
   #updateDialRotation(dial, angle) {
     const handleContainer = dial.querySelector('.dial-handle-container');
     const sky = dial.querySelector('.dial-sky');
     const sunContainer = dial.querySelector('.dial-sun');
-
     if (!handleContainer || !sky || !sunContainer) return;
-
     const time = this.#angleToTime(angle);
     const timeDisplay = dial.querySelector('.dial-time');
-    if (timeDisplay && document.activeElement !== timeDisplay) {
-      timeDisplay.value = this.#formatDialTime(time.hours, time.minutes);
-    }
-
+    if (timeDisplay && document.activeElement !== timeDisplay) timeDisplay.value = this.#formatDialTime(time.hours, time.minutes);
     const normalizedAngle = ((angle % 360) + 360) % 360;
-
-    // Calculate sun opacity
     let sunOpacity;
     let adjustedAngle;
     if (normalizedAngle >= 270) adjustedAngle = normalizedAngle - 360;
     else if (normalizedAngle <= 90) adjustedAngle = normalizedAngle;
     else adjustedAngle = null;
-
     if (adjustedAngle !== null) {
       const radians = (adjustedAngle * Math.PI) / 180;
       sunOpacity = Math.max(0, Math.cos(radians));
     } else {
       sunOpacity = 0;
     }
-
-    // Calculate moon opacity
     const moonPosition = (normalizedAngle + 180) % 360;
     let moonAdjustedAngle;
     if (moonPosition >= 270) moonAdjustedAngle = moonPosition - 360;
     else if (moonPosition <= 90) moonAdjustedAngle = moonPosition;
     else moonAdjustedAngle = null;
-
     let moonOpacity;
     if (moonAdjustedAngle !== null) {
       const radians = (moonAdjustedAngle * Math.PI) / 180;
@@ -1292,26 +1016,17 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     } else {
       moonOpacity = 0;
     }
-
-    // Apply horizon blocker
     const sunPosition = normalizedAngle;
     if (sunPosition >= 91 && sunPosition <= 269) sunOpacity = 0;
     if (moonPosition >= 91 && moonPosition <= 269) moonOpacity = 0;
-
-    // Calculate day progress for sky
     const totalMinutes = time.hours * 60 + time.minutes;
     const dayProgress = ((totalMinutes / (24 * 60)) * 2 + 1.5) % 2;
-
-    // Update CSS custom properties
     sky.style.setProperty('--calendar-day-progress', dayProgress);
     sky.style.setProperty('--calendar-night-progress', dayProgress);
     sky.style.setProperty('--sun-opacity', sunOpacity);
     sky.style.setProperty('--moon-opacity', moonOpacity);
-
     sunContainer.style.transform = `rotate(${angle - 84}deg)`;
     handleContainer.style.transform = `rotate(${angle}deg)`;
-
-    // Store current time
     if (this._dialState) {
       this._dialState.currentHours = time.hours;
       this._dialState.currentMinutes = time.minutes;
@@ -1320,7 +1035,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Setup interaction handlers for the dial.
-   * @param {HTMLElement} dial
+   * @param {HTMLElement} dial - The dial container element
    */
   #setupDialInteraction(dial) {
     const sky = dial.querySelector('.dial-sky');
@@ -1370,7 +1085,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       dial.remove();
     };
 
-    // Time input handlers
     const timeInput = dial.querySelector('.dial-time');
     const applyTimeFromInput = async () => {
       const parsed = this.#parseTimeInput(timeInput.value);
@@ -1419,21 +1133,18 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Parse flexible time input string.
-   * @param {string} input
-   * @returns {{hours: number, minutes: number}|null}
+   * @param {string} input - Time input string (e.g., "14:30", "2:30pm")
+   * @returns {{hours: number, minutes: number}|null} Parsed time object or null if invalid
    */
   #parseTimeInput(input) {
     if (!input) return null;
     const str = input.trim().toLowerCase();
     if (!str) return null;
-
     const isPM = /p/.test(str);
     const isAM = /a/.test(str);
     const cleaned = str.replace(/[ap]\.?m?\.?/gi, '').trim();
-
     let hours = 0;
     let minutes = 0;
-
     if (cleaned.includes(':')) {
       const [h, m] = cleaned.split(':').map((s) => parseInt(s, 10));
       if (isNaN(h)) return null;
@@ -1445,13 +1156,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       hours = h;
       minutes = 0;
     }
-
     if (isPM && hours < 12) hours += 12;
     else if (isAM && hours === 12) hours = 0;
-
     if (hours < 0 || hours > 23) return null;
     if (minutes < 0 || minutes > 59) return null;
-
     return { hours, minutes };
   }
 
@@ -1460,18 +1168,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #applyTimeChange() {
     if (!this._dialState) return;
-
     const { currentHours, currentMinutes, initialTime } = this._dialState;
     const currentDate = new Date(initialTime * 1000);
     currentDate.setUTCHours(currentHours, currentMinutes, 0, 0);
     const newWorldTime = Math.floor(currentDate.getTime() / 1000);
     const timeDiff = newWorldTime - initialTime;
-
     if (timeDiff !== 0) {
       await game.time.advance(timeDiff);
       log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatDialTime(currentHours, currentMinutes)}`);
     }
-
     this._dialState.initialTime = newWorldTime;
   }
 
@@ -1486,23 +1191,18 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #advanceToHour(targetHour, nextDay = false) {
     if (!game.user.isGM) return;
-
     const cal = game.time.calendar;
     if (!cal) return;
-
     const days = cal.days ?? {};
     const secondsPerMinute = days.secondsPerMinute ?? 60;
     const minutesPerHour = days.minutesPerHour ?? 60;
     const hoursPerDay = days.hoursPerDay ?? 24;
     const secondsPerHour = secondsPerMinute * minutesPerHour;
-
     const components = game.time.components;
     const currentHour = components.hour + components.minute / minutesPerHour + components.second / secondsPerHour;
-
     let hoursUntil;
     if (nextDay || currentHour >= targetHour) hoursUntil = hoursPerDay - currentHour + targetHour;
     else hoursUntil = targetHour - currentHour;
-
     const secondsToAdvance = Math.round(hoursUntil * secondsPerHour);
     if (secondsToAdvance > 0) await game.time.advance(secondsToAdvance);
   }
@@ -1511,11 +1211,21 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /*  Action Handlers                             */
   /* -------------------------------------------- */
 
-  static async #onOpenTimeDial(event, target) {
+  /**
+   * Handle click on dome to open time dial.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onOpenTimeDial(_event, _target) {
     await this.#openTimeRotationDial();
   }
 
-  static async #onSearchNotes(event, target) {
+  /**
+   * Handle click on search button to toggle search panel.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onSearchNotes(_event, _target) {
     this.#searchOpen = !this.#searchOpen;
     if (!this.#searchOpen) {
       this.#searchTerm = '';
@@ -1524,30 +1234,38 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     await this.render({ parts: ['bar'] });
   }
 
-  static async #onCloseSearch(event, target) {
+  /**
+   * Handle click to close search panel.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onCloseSearch(_event, _target) {
     this.#closeSearch();
   }
 
-  static async #onOpenSearchResult(event, target) {
+  /**
+   * Handle click on search result to open the note.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element with data attributes
+   */
+  static async #onOpenSearchResult(_event, target) {
     const id = target.dataset.id;
     const journalId = target.dataset.journalId;
-
     const page = NoteManager.getFullNote(id);
     if (page) page.sheet.render(true, { mode: 'view' });
     else if (journalId) {
       const journal = game.journal.get(journalId);
       if (journal) journal.sheet.render(true, { pageId: id });
     }
-
     this.#closeSearch();
   }
 
   /**
    * Handle click on date to open date picker dialog.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
    */
-  static async #onSetDate(event, target) {
+  static async #onSetDate(_event, _target) {
     if (!game.user.isGM) {
       ui.notifications.warn('CALENDARIA.Common.GMOnly', { localize: true });
       return;
@@ -1556,17 +1274,12 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
-
-    // Build month options
     const monthOptions = calendar.months.values.map((m, i) => `<option value="${i}" ${i === components.month ? 'selected' : ''}>${localize(m.name)}</option>`).join('');
-
-    // Calculate days in current month
     const daysInMonth = calendar.months.values[components.month]?.days ?? 30;
     const currentDay = (components.dayOfMonth ?? 0) + 1;
     const dayOptions = Array.from({ length: daysInMonth }, (_, i) => i + 1)
       .map((d) => `<option value="${d}" ${d === currentDay ? 'selected' : ''}>${d}</option>`)
       .join('');
-
     const content = `
       <form class="set-date-form">
         <div class="form-group">
@@ -1590,20 +1303,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ok: {
         label: localize('CALENDARIA.Common.Set'),
         icon: 'fas fa-calendar-check',
-        callback: (event, button, dialog) => {
+        callback: (_event, button, _dialog) => {
           const form = button.form;
-          return {
-            year: parseInt(form.elements.year.value) - yearZero,
-            month: parseInt(form.elements.month.value),
-            day: parseInt(form.elements.day.value)
-          };
+          return { year: parseInt(form.elements.year.value) - yearZero, month: parseInt(form.elements.month.value), day: parseInt(form.elements.day.value) };
         }
       },
       rejectClose: false
     });
 
     if (result) {
-      // Calculate new world time
       const newTime = calendar.componentsToTime({
         year: result.year,
         month: result.month,
@@ -1621,13 +1329,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update search results without full re-render.
    */
   #updateSearchResults() {
-    // Use panel in body if available, otherwise find in element
     const panel = this.#searchPanelEl || this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
-
     const resultsContainer = panel.querySelector('.search-panel-results');
     if (!resultsContainer) return;
-
     if (this.#searchResults?.length) {
       resultsContainer.innerHTML = this.#searchResults
         .map(
@@ -1639,8 +1344,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         )
         .join('');
       resultsContainer.classList.add('has-results');
-
-      // Re-wire click handlers for new result items when panel is in body
       if (this.#searchPanelEl) {
         resultsContainer.querySelectorAll('[data-action="openSearchResult"]').forEach((el) => {
           el.addEventListener('click', () => {
@@ -1673,13 +1376,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const panel = this.element.querySelector('.calendaria-hud-search-panel');
     const bar = this.element.querySelector('.calendaria-hud-bar');
     if (!panel || !bar) return;
-
-    // Move panel to body for correct fixed positioning
     if (panel.parentElement !== document.body) {
       document.body.appendChild(panel);
       this.#searchPanelEl = panel;
-
-      // Re-wire event handlers since panel is now outside ApplicationV2
       panel.querySelectorAll('[data-action="openSearchResult"]').forEach((el) => {
         el.addEventListener('click', () => {
           const id = el.dataset.id;
@@ -1693,18 +1392,13 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
           this.#closeSearch();
         });
       });
-
-      // Wire up search input handlers
       const searchInput = panel.querySelector('.search-input');
       if (searchInput) {
         searchInput.focus();
         const debouncedSearch = foundry.utils.debounce((term) => {
           this.#searchTerm = term;
-          if (term.length >= 2) {
-            this.#searchResults = SearchManager.search(term, { searchContent: true });
-          } else {
-            this.#searchResults = null;
-          }
+          if (term.length >= 2) this.#searchResults = SearchManager.search(term, { searchContent: true });
+          else this.#searchResults = null;
           this.#updateSearchResults();
         }, 300);
 
@@ -1714,12 +1408,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       }
 
-      // Add click-outside handler (delayed to avoid immediate trigger)
       setTimeout(() => {
         this.#clickOutsideHandler = (event) => {
-          if (!panel.contains(event.target) && !this.element.contains(event.target)) {
-            this.#closeSearch();
-          }
+          if (!panel.contains(event.target) && !this.element.contains(event.target)) this.#closeSearch();
         };
         document.addEventListener('mousedown', this.#clickOutsideHandler);
       }, 100);
@@ -1727,20 +1418,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const barRect = bar.getBoundingClientRect();
     const panelWidth = 280;
-
-    // Position below the bar, aligned to left edge of bar
     let left = barRect.left;
     let top = barRect.bottom + 4;
-
-    // Edge awareness - check right edge
-    if (left + panelWidth > window.innerWidth - 10) {
-      left = window.innerWidth - panelWidth - 10;
-    }
-
-    // Ensure not off left edge
+    if (left + panelWidth > window.innerWidth - 10) left = window.innerWidth - panelWidth - 10;
     left = Math.max(10, left);
-
-    // Only set dynamic positioning (styling handled by CSS)
     panel.style.left = `${left}px`;
     panel.style.top = `${top}px`;
   }
@@ -1749,12 +1430,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Close search and clean up.
    */
   #closeSearch() {
-    // Remove click-outside handler
     if (this.#clickOutsideHandler) {
       document.removeEventListener('mousedown', this.#clickOutsideHandler);
       this.#clickOutsideHandler = null;
     }
-    // Remove panel from body if it was moved there
     if (this.#searchPanelEl?.parentElement === document.body) {
       this.#searchPanelEl.remove();
       this.#searchPanelEl = null;
@@ -1765,35 +1444,31 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.render({ parts: ['bar'] });
   }
 
-  static async #onAddNote(event, target) {
+  /**
+   * Handle click on add note button to create a new note.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onAddNote(_event, _target) {
     const today = game.time.components;
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
-
     const page = await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: {
-          year: today.year + yearZero,
-          month: today.month,
-          day: (today.dayOfMonth ?? 0) + 1,
-          hour: 12,
-          minute: 0
-        },
-        endDate: {
-          year: today.year + yearZero,
-          month: today.month,
-          day: (today.dayOfMonth ?? 0) + 1,
-          hour: 13,
-          minute: 0
-        }
+        startDate: { year: today.year + yearZero, month: today.month, day: (today.dayOfMonth ?? 0) + 1, hour: 12, minute: 0 },
+        endDate: { year: today.year + yearZero, month: today.month, day: (today.dayOfMonth ?? 0) + 1, hour: 13, minute: 0 }
       }
     });
-
     if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
-  static #onOpenEvent(event, target) {
+  /**
+   * Handle click on event icon to open the event note.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element with event data
+   */
+  static #onOpenEvent(_event, target) {
     const pageId = target.dataset.eventId;
     const journalId = target.dataset.parentId;
     const journal = game.journal.get(journalId);
@@ -1801,45 +1476,85 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (page) page.sheet.render(true, { mode: 'view' });
   }
 
-  static #onToggleTimeFlow(event, target) {
+  /**
+   * Handle click on play/pause button to toggle time flow.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onToggleTimeFlow(_event, _target) {
     TimeKeeper.toggle();
   }
 
-  static #onOpenCalendar(event, target) {
+  /**
+   * Handle click to open calendar application.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onOpenCalendar(_event, _target) {
     new CalendarApplication().render(true);
   }
 
-  static #onOpenSettings(event, target) {
+  /**
+   * Handle click to open settings panel.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onOpenSettings(_event, _target) {
     new SettingsPanel().render(true);
   }
 
-  static async #onOpenWeatherPicker(event, target) {
+  /**
+   * Handle click to open weather picker.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onOpenWeatherPicker(_event, _target) {
     if (!game.user.isGM) return;
     const { openWeatherPicker } = await import('../weather/weather-picker.mjs');
     await openWeatherPicker();
   }
 
-  static async #onToSunrise(event, target) {
+  /**
+   * Handle click to advance time to sunrise.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onToSunrise(_event, _target) {
     const calendar = this.calendar;
     if (!calendar?.sunrise) return;
     const targetHour = calendar.sunrise();
     if (targetHour !== null) await this.#advanceToHour(targetHour);
   }
 
-  static async #onToMidday(event, target) {
+  /**
+   * Handle click to advance time to midday.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onToMidday(_event, _target) {
     const calendar = this.calendar;
     const targetHour = calendar?.solarMidday?.() ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
     await this.#advanceToHour(targetHour);
   }
 
-  static async #onToSunset(event, target) {
+  /**
+   * Handle click to advance time to sunset.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onToSunset(_event, _target) {
     const calendar = this.calendar;
     if (!calendar?.sunset) return;
     const targetHour = calendar.sunset();
     if (targetHour !== null) await this.#advanceToHour(targetHour);
   }
 
-  static async #onToMidnight(event, target) {
+  /**
+   * Handle click to advance time to midnight.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static async #onToMidnight(_event, _target) {
     const calendar = this.calendar;
     if (calendar?.solarMidnight) {
       const targetHour = calendar.solarMidnight();
@@ -1851,11 +1566,21 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-  static #onReverse(event, target) {
+  /**
+   * Handle click on reverse time button.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onReverse(_event, _target) {
     TimeKeeper.reverseFor('calendaria-hud');
   }
 
-  static #onForward(event, target) {
+  /**
+   * Handle click on forward time button.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onForward(_event, _target) {
     TimeKeeper.forwardFor('calendaria-hud');
   }
 
@@ -1865,7 +1590,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the HUD.
-   * @returns {CalendariaHUD}
+   * @returns {CalendariaHUD} The HUD instance
    */
   static show() {
     const existing = foundry.applications.instances.get('calendaria-hud');

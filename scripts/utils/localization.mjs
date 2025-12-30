@@ -24,12 +24,8 @@ export function format(key, data) {
  */
 export function preLocalizeCalendar(calendarData) {
   if (!calendarData) return;
-
-  // Localize calendar name and description
   if (calendarData.name) calendarData.name = localize(calendarData.name);
   if (calendarData.metadata?.description) calendarData.metadata.description = localize(calendarData.metadata.description);
-
-  // Localize months
   if (calendarData.months?.values) {
     for (const month of calendarData.months.values) {
       if (month.name) month.name = localize(month.name);
@@ -37,7 +33,6 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize weekdays
   if (calendarData.days?.values) {
     for (const day of calendarData.days.values) {
       if (day.name) day.name = localize(day.name);
@@ -45,7 +40,6 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize seasons
   if (calendarData.seasons?.values) {
     for (const season of calendarData.seasons.values) {
       if (season.name) season.name = localize(season.name);
@@ -53,7 +47,6 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize eras
   if (calendarData.eras) {
     for (const era of calendarData.eras) {
       if (era.name) era.name = localize(era.name);
@@ -61,13 +54,8 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize festivals
   if (calendarData.festivals) for (const festival of calendarData.festivals) if (festival.name) festival.name = localize(festival.name);
-
-  // Localize moons
   if (calendarData.moons) for (const moon of calendarData.moons) if (moon.name) moon.name = localize(moon.name);
-
-  // Localize cycles
   if (calendarData.cycles) {
     for (const cycle of calendarData.cycles) {
       if (cycle.name) cycle.name = localize(cycle.name);
@@ -75,7 +63,6 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize canonical hours
   if (calendarData.canonicalHours) {
     for (const hour of calendarData.canonicalHours) {
       if (hour.name) hour.name = localize(hour.name);
@@ -83,7 +70,6 @@ export function preLocalizeCalendar(calendarData) {
     }
   }
 
-  // Localize named weeks (can be strings or {name, abbreviation} objects)
   if (calendarData.weeks?.names) {
     calendarData.weeks.names = calendarData.weeks.names.map((n) => {
       if (typeof n === 'string') return localize(n);

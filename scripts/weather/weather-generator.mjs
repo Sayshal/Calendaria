@@ -42,17 +42,13 @@ export function dateSeed(year, month, day) {
 function weightedSelect(weights, randomFn = Math.random) {
   const entries = Object.entries(weights);
   if (entries.length === 0) return null;
-
   const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
   if (totalWeight <= 0) return entries[0][0];
-
   let roll = randomFn() * totalWeight;
-
   for (const [id, weight] of entries) {
     roll -= weight;
     if (roll <= 0) return id;
   }
-
   return entries[entries.length - 1][0];
 }
 
@@ -67,34 +63,21 @@ function weightedSelect(weights, randomFn = Math.random) {
  */
 export function generateWeather({ zoneConfig, season, seed, customPresets = [] }) {
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
-
-  // Build probability map from enabled presets
   const probabilities = {};
   for (const preset of zoneConfig?.presets ?? []) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
-
-  // If no presets enabled, default to clear
   if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
-
-  // Select weather type
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
-
-  // Get temperature range from zone config
   let tempRange = { min: 10, max: 22 };
   if (zoneConfig?.temperatures) {
     const temps = zoneConfig.temperatures;
-    // Try season, then _default
     if (season && temps[season]) tempRange = temps[season];
     else if (temps._default) tempRange = temps._default;
   }
-
-  // Check for preset-specific temperature overrides
   const presetConfig = zoneConfig?.presets?.find((p) => p.id === weatherId);
   if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
   if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
-
   const temperature = Math.round(tempRange.min + randomFn() * (tempRange.max - tempRange.min));
-
   return { preset: preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' }, temperature };
 }
 
@@ -133,7 +116,6 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
   let year = startYear;
   let month = startMonth;
   let day = startDay;
-
   for (let i = 0; i < days; i++) {
     const currentSeason = getSeasonForDate ? getSeasonForDate(year, month, day) : season;
     const weather = generateWeatherForDate({ zoneConfig, season: currentSeason, year, month, day, customPresets });
@@ -153,17 +135,13 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
  */
 export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0.3) {
   if (!currentWeatherId || !probabilities[currentWeatherId]) return probabilities;
-
   const adjusted = { ...probabilities };
   const currentWeight = adjusted[currentWeatherId] || 0;
   const totalOther = Object.values(adjusted).reduce((sum, w) => sum + w, 0) - currentWeight;
-
-  // Boost current weather, reduce others proportionally
   if (totalOther > 0) {
     const boost = totalOther * inertia;
     adjusted[currentWeatherId] = currentWeight + boost;
     for (const id of Object.keys(adjusted)) if (id !== currentWeatherId) adjusted[id] *= 1 - inertia;
   }
-
   return adjusted;
 }

@@ -12,6 +12,7 @@ import { preLocalizeCalendar } from './calendar-utils.mjs';
 
 /**
  * List of bundled calendar IDs that ship with the module.
+ * @todo Update this list?
  * @type {string[]}
  */
 export const BUNDLED_CALENDARS = ['gregorian', 'greyhawk', 'harptos', 'khorvaire', 'renescara'];
@@ -40,7 +41,6 @@ async function loadCalendarFile(id) {
       return null;
     }
     const data = await response.json();
-    // Prelocalize all strings in the calendar data
     preLocalizeCalendar(data);
     log(3, `Loaded calendar file: ${id}`);
     return data;
@@ -56,7 +56,6 @@ async function loadCalendarFile(id) {
  */
 export async function loadBundledCalendars() {
   const loaded = [];
-
   for (const id of BUNDLED_CALENDARS) {
     const data = await loadCalendarFile(id);
     if (data) {
@@ -76,7 +75,6 @@ export async function loadBundledCalendars() {
  */
 export async function loadCalendar(id) {
   if (CalendarRegistry.has(id)) return true;
-
   const data = await loadCalendarFile(id);
   if (data) {
     CalendarRegistry.register(id, data);
@@ -88,7 +86,7 @@ export async function loadCalendar(id) {
 /**
  * Check if a calendar ID is a bundled calendar.
  * @param {string} id  Calendar ID
- * @returns {boolean}
+ * @returns {boolean} - If calendar is module-provided
  */
 export function isBundledCalendar(id) {
   return BUNDLED_CALENDARS.includes(id);

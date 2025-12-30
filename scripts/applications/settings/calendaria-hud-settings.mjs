@@ -2,6 +2,7 @@
  * Calendar HUD Settings Application
  * Dedicated settings panel for the Calendar HUD.
  * @module Applications/Settings/CalendariaHUDSettings
+ * @todo Is this needed anymore? Can we remove now that we have the inline settings version(s)?
  * @author Tyler
  */
 
@@ -23,11 +24,7 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
     id: 'calendaria-hud-settings',
     classes: ['calendaria', 'hud-settings', 'standard-form'],
     tag: 'form',
-    window: {
-      icon: 'fas fa-sliders',
-      title: 'CALENDARIA.HUD.Settings.Title',
-      resizable: false
-    },
+    window: { icon: 'fas fa-sliders', title: 'CALENDARIA.HUD.Settings.Title', resizable: false },
     position: { width: 400, height: 'auto' },
     form: {
       handler: CalendariaHUDSettings.#onSubmit,
@@ -50,33 +47,19 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-
-    // GM check for calendar selection
     context.isGM = game.user.isGM;
-
-    // Calendar options (GM only)
     if (context.isGM) {
       const activeId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
-      context.calendars = CalendarManager.getAllCalendarMetadata().map((meta) => ({
-        id: meta.id,
-        name: localize(meta.name) || meta.id,
-        isActive: meta.id === activeId
-      }));
+      context.calendars = CalendarManager.getAllCalendarMetadata().map((meta) => ({ id: meta.id, name: localize(meta.name) || meta.id, isActive: meta.id === activeId }));
     }
 
-    // Current mode
     const mode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.modeFullsize = mode === 'fullsize';
     context.modeCompact = mode === 'compact';
-
-    // Sticky states
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
     context.stickyTray = stickyStates.tray ?? false;
     context.stickyPosition = stickyStates.position ?? false;
-
-    // Footer buttons
     context.buttons = [{ type: 'submit', icon: 'fas fa-save', label: 'CALENDARIA.Common.Save' }];
-
     return context;
   }
 
@@ -86,16 +69,14 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
 
   /**
    * Handle form submission.
-   * @param {Event} event - Form submit event
-   * @param {HTMLFormElement} form - The form element
-   * @param {FormDataExtended} formData - Processed form data
+   * @param {Event} _event - Form submit event
+   * @param {HTMLFormElement} _form - The form element
+   * @param {object} formData - Processed form data
    * @this {CalendariaHUDSettings}
    */
-  static async #onSubmit(event, form, formData) {
+  static async #onSubmit(_event, _form, formData) {
     const data = formData.object;
     let requiresReload = false;
-
-    // Update active calendar (GM only)
     if (game.user.isGM && data.activeCalendar) {
       const currentCalendar = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
       if (data.activeCalendar !== currentCalendar) {
@@ -104,31 +85,15 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
       }
     }
 
-    // Update mode
     await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, data.mode);
-
-    // Update sticky states (preserve existing multiplier)
     const existingStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
-    const stickyStates = {
-      tray: data.stickyTray ?? false,
-      position: data.stickyPosition ?? false,
-      multiplier: existingStates.multiplier ?? 1
-    };
+    const stickyStates = { tray: data.stickyTray ?? false, position: data.stickyPosition ?? false, multiplier: existingStates.multiplier ?? 1 };
     await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, stickyStates);
-
-    // Re-render HUD to apply changes (force: true ensures full re-render)
     const hud = foundry.applications.instances.get('calendaria-hud');
-    if (hud) {
-      hud.render({ force: true });
-    }
-
+    if (hud) hud.render({ force: true });
     ui.notifications.info('CALENDARIA.HUD.Settings.Saved', { localize: true });
     log(3, 'HUD settings saved');
-
-    // Trigger reload if calendar changed
-    if (requiresReload) {
-      foundry.utils.debouncedReload();
-    }
+    if (requiresReload) foundry.utils.debouncedReload();
   }
 
   /* -------------------------------------------- */
@@ -137,20 +102,17 @@ export class CalendariaHUDSettings extends HandlebarsApplicationMixin(Applicatio
 
   /**
    * Reset the HUD position to default.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
    * @this {CalendariaHUDSettings}
    */
-  static async #onResetPosition(event, target) {
+  static async #onResetPosition(_event, _target) {
     await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, null);
-
-    // Reset position on the HUD instance
     const hud = foundry.applications.instances.get('calendaria-hud');
     if (hud) {
       hud.setPosition({ left: null, top: null });
       hud.render();
     }
-
     ui.notifications.info('CALENDARIA.Settings.ResetPosition.Success', { localize: true });
     log(3, 'HUD position reset');
   }

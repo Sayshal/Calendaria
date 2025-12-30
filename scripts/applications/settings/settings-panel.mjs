@@ -31,11 +31,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-settings-panel',
     classes: ['calendaria', 'settings-panel', 'standard-form'],
     tag: 'form',
-    window: {
-      icon: 'fas fa-cog',
-      resizable: false,
-      title: 'CALENDARIA.SettingsPanel.Title'
-    },
+    window: { icon: 'fas fa-cog', resizable: false, title: 'CALENDARIA.SettingsPanel.Title' },
     position: { width: 700, height: 650 },
     form: {
       handler: SettingsPanel.#onSubmit,
@@ -112,33 +108,23 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _prepareTabs(group, options) {
     const tabs = super._prepareTabs(group, options);
-
-    // Filter tabs for non-GM users
     if (!game.user.isGM && tabs && typeof tabs === 'object') {
-      // tabs is an object with tab IDs as keys
       const filtered = {};
       for (const [id, tab] of Object.entries(tabs)) {
         const tabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === id);
-        if (!tabDef?.gmOnly) {
-          filtered[id] = tab;
-        }
+        if (!tabDef?.gmOnly) filtered[id] = tab;
       }
-
-      // Set initial tab to appearance for non-GMs if current tab is GM-only
       const activeTab = this.tabGroups[group];
       const activeTabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === activeTab);
       if (activeTabDef?.gmOnly) {
         this.tabGroups[group] = 'appearance';
-        // Update active state in filtered tabs
         for (const tab of Object.values(filtered)) {
           tab.active = tab.id === 'appearance';
           tab.cssClass = tab.id === 'appearance' ? 'active' : tab.cssClass?.replace('active', '').trim() || undefined;
         }
       }
-
       return filtered;
     }
-
     return tabs;
   }
 
@@ -146,7 +132,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async _preparePartContext(partId, context, options) {
     context = await super._preparePartContext(partId, context, options);
     context.tab = context.tabs[partId];
-
     switch (partId) {
       case 'calendar':
         await this.#prepareCalendarContext(context);
@@ -185,7 +170,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         await this.#prepareHUDContext(context);
         break;
     }
-
     return context;
   }
 
@@ -206,27 +190,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareCalendarContext(context) {
     const activeCalendarId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-
     context.calendarOptions = [];
-
     for (const id of BUNDLED_CALENDARS) {
       const key = id.charAt(0).toUpperCase() + id.slice(1);
-      context.calendarOptions.push({
-        value: id,
-        label: localize(`CALENDARIA.Calendar.${key}.Name`),
-        selected: id === activeCalendarId,
-        isCustom: false
-      });
+      context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
     }
-
-    for (const [id, data] of Object.entries(customCalendars)) {
-      context.calendarOptions.push({
-        value: id,
-        label: data.name || id,
-        selected: id === activeCalendarId,
-        isCustom: true
-      });
-    }
+    for (const [id, data] of Object.entries(customCalendars)) context.calendarOptions.push({ value: id, label: data.name || id, selected: id === activeCalendarId, isCustom: true });
   }
 
   /**
@@ -235,10 +204,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareNotesContext(context) {
     const rawCategories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
-    // Filter out invalid categories and ensure color has valid hex value
-    context.categories = rawCategories
-      .filter((c) => c && c.id)
-      .map((c) => ({ ...c, color: c.color || '#4a90e2' }));
+    context.categories = rawCategories.filter((c) => c && c.id).map((c) => ({ ...c, color: c.color || '#4a90e2' }));
   }
 
   /**
@@ -288,7 +254,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hudStickyPosition = hudSticky?.position ?? false;
     context.calendarHUDLocked = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
     context.showCalendarHUD = game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD);
-
     const hudMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.hudModeOptions = [
       { value: 'fullsize', label: localize('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
@@ -314,7 +279,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'celsius', label: localize('CALENDARIA.Settings.TemperatureUnit.Celsius'), selected: tempUnit === 'celsius' },
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
-
     context.customWeatherPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
   }
 
@@ -325,8 +289,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareAppearanceContext(context) {
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
     context.hasCustomTheme = Object.keys(customColors).length > 0;
-
-    // Group colors by category
     const categories = {
       backgrounds: { label: 'CALENDARIA.ThemeEditor.Category.Backgrounds', colors: [] },
       borders: { label: 'CALENDARIA.ThemeEditor.Category.Borders', colors: [] },
@@ -335,19 +297,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       accents: { label: 'CALENDARIA.ThemeEditor.Category.Accents', colors: [] },
       festivals: { label: 'CALENDARIA.Common.Festivals', colors: [] }
     };
-
     for (const def of COLOR_DEFINITIONS) {
       const value = customColors[def.key] || DEFAULT_COLORS[def.key];
       const isCustom = customColors[def.key] !== undefined;
-      categories[def.category].colors.push({
-        key: def.key,
-        label: def.label,
-        value,
-        defaultValue: DEFAULT_COLORS[def.key],
-        isCustom
-      });
+      categories[def.category].colors.push({ key: def.key, label: def.label, value, defaultValue: DEFAULT_COLORS[def.key], isCustom });
     }
-
     context.themeCategories = Object.values(categories);
   }
 
@@ -365,14 +319,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareAdvancedContext(context) {
-    // Primary GM
     const primaryGM = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
     context.primaryGMOptions = [{ value: '', label: localize('CALENDARIA.Settings.PrimaryGM.Auto'), selected: !primaryGM }];
-    for (const user of game.users.filter((u) => u.isGM)) {
-      context.primaryGMOptions.push({ value: user.id, label: user.name, selected: user.id === primaryGM });
-    }
-
-    // Logging level
+    for (const user of game.users.filter((u) => u.isGM)) context.primaryGMOptions.push({ value: user.id, label: user.name, selected: user.id === primaryGM });
     const logLevel = game.settings.get(MODULE.ID, SETTINGS.LOGGING_LEVEL);
     context.loggingLevelOptions = [
       { value: '0', label: localize('CALENDARIA.Settings.Logger.Choices.Off'), selected: logLevel === '0' || logLevel === 0 },
@@ -380,18 +329,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: '2', label: localize('CALENDARIA.Settings.Logger.Choices.Warnings'), selected: logLevel === '2' || logLevel === 2 },
       { value: '3', label: localize('CALENDARIA.Settings.Logger.Choices.Verbose'), selected: logLevel === '3' || logLevel === 3 }
     ];
-
-    // Dev mode
     context.devMode = game.settings.get(MODULE.ID, SETTINGS.DEV_MODE);
-
-    // Module version
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
-
-    // Available translations
     const moduleData = game.data.modules?.find((m) => m.id === MODULE.ID);
-    if (moduleData?.languages?.length) {
-      context.translations = moduleData.languages.map((lang) => lang.name).join(', ');
-    }
+    if (moduleData?.languages?.length) context.translations = moduleData.languages.map((lang) => lang.name).join(', ');
   }
 
   /* -------------------------------------------- */
@@ -400,15 +341,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle form submission.
-   * @param {Event} event - The form submission event
-   * @param {HTMLFormElement} form - The form element
-   * @param {FormDataExtended} formData - The form data
+   * @param {Event} _event - The form submission event
+   * @param {HTMLFormElement} _form - The form element
+   * @param {object} formData - The form data
    */
-  static async #onSubmit(event, form, formData) {
+  static async #onSubmit(_event, _form, formData) {
     const data = foundry.utils.expandObject(formData.object);
     log(3, 'Settings panel form data:', data);
-
-    // General Tab Settings
     if ('showTimeKeeper' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, data.showTimeKeeper);
     if ('showCompactCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR, data.showCompactCalendar);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
@@ -420,8 +359,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('advanceTimeOnCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT, data.advanceTimeOnCombat);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
     if ('chatTimestampShowTime' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, data.chatTimestampShowTime);
-
-    // Calendar Tab Settings
     if ('activeCalendar' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
       if (data.activeCalendar !== current) {
@@ -436,10 +373,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
-    // Weather Tab Settings
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
-
-    // Appearance Tab Settings - Compact Calendar Sticky States
     if ('compactStickySection' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
         timeControls: !!data.compactStickyTimeControls,
@@ -448,22 +382,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
-    // Appearance Tab Settings - HUD Sticky States
-    if ('hudStickySection' in data) {
-      await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
-        tray: !!data.hudStickyTray,
-        position: !!data.hudStickyPosition
-      });
-    }
-
+    if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
-
-    // Advanced Tab Settings
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM);
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
-
-    // Theme Colors
     if (data.colors) {
       const customColors = {};
       for (const def of COLOR_DEFINITIONS) {
@@ -474,9 +397,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
     }
 
-    // Notes Tab - Custom Categories
     if (data.categories) {
-      // Filter out invalid categories (must have id and name)
       const validCategories = Object.values(data.categories).filter((c) => c && c.id && c.name?.trim());
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, validCategories);
     }
@@ -488,68 +409,61 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open the Calendar Editor.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenCalendarEditor(event, target) {
+  static async #onOpenCalendarEditor(_event, _target) {
     new CalendarEditor().render(true);
   }
 
   /**
    * Open the Importer.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenImporter(event, target) {
+  static async #onOpenImporter(_event, _target) {
     new ImporterApp().render(true);
   }
 
   /**
    * Open the Macro Trigger Configuration.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenMacroTriggers(event, target) {
+  static async #onOpenMacroTriggers(_event, _target) {
     new MacroTriggerConfig().render(true);
   }
 
   /**
    * Reset a specific UI position.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
-  static async #onResetPosition(event, target) {
+  static async #onResetPosition(_event, target) {
     const targetType = target.dataset.target;
-
     const config = {
       compact: { setting: SETTINGS.COMPACT_CALENDAR_POSITION, appId: 'compact-calendar' },
       hud: { setting: SETTINGS.CALENDAR_HUD_POSITION, appId: 'calendaria-hud' },
       timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'time-keeper-hud' }
     };
-
     const { setting, appId } = config[targetType] || {};
     if (!setting) return;
-
     await game.settings.set(MODULE.ID, setting, null);
-
-    // Update the live app position if it's open
     const app = foundry.applications.instances.get(appId);
     if (app?.rendered) {
       app.setPosition({ left: null, top: null });
       app.render();
     }
-
     ui.notifications.info('CALENDARIA.SettingsPanel.ResetPosition.Success', { localize: true });
   }
 
   /**
    * Add a custom category.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onAddCategory(event, target) {
-    // Read current form state to preserve unsaved changes
-    const form = this.element.querySelector('form');
+  static async #onAddCategory(_event, _target) {
+    const form = this.element;
     let currentCategories = [];
     if (form) {
       const formData = new foundry.applications.ux.FormDataExtended(form);
@@ -558,29 +472,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     } else {
       currentCategories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
     }
-
-    // Add new category
-    currentCategories.push({
-      id: foundry.utils.randomID(),
-      name: localize('CALENDARIA.SettingsPanel.Category.NewName'),
-      color: '#4a90e2',
-      icon: 'fas fa-bookmark'
-    });
-
+    currentCategories.push({ id: foundry.utils.randomID(), name: localize('CALENDARIA.SettingsPanel.Category.NewName'), color: '#4a90e2', icon: 'fas fa-bookmark' });
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, currentCategories);
     this.render();
   }
 
   /**
    * Remove a custom category.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
-  static async #onRemoveCategory(event, target) {
+  static async #onRemoveCategory(_event, target) {
     const categoryId = target.dataset.categoryId;
     if (!categoryId) return;
-
-    // Read current form state to preserve unsaved changes
     const form = this.element.querySelector('form');
     let currentCategories = [];
     if (form) {
@@ -591,17 +495,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const saved = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
       currentCategories = saved.filter((c) => c && c.id && c.id !== categoryId);
     }
-
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, currentCategories);
     this.render();
   }
 
   /**
    * Reset a single color to default.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
-  static async #onResetColor(event, target) {
+  static async #onResetColor(_event, target) {
     const app = foundry.applications.instances.get('calendaria-settings-panel');
     const key = target.dataset.key;
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
@@ -613,10 +516,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Reset all colors to defaults.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onResetAllColors(event, target) {
+  static async #onResetAllColors(_event, _target) {
     const app = foundry.applications.instances.get('calendaria-settings-panel');
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.ThemeEditor.ResetAll') },
@@ -635,10 +538,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Export current theme as JSON.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onExportTheme(event, target) {
+  static async #onExportTheme(_event, _target) {
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
     const exportData = { colors: { ...DEFAULT_COLORS, ...customColors }, version: game.modules.get(MODULE.ID)?.version || '1.0.0' };
     const filename = `calendaria-theme-${Date.now()}.json`;
@@ -654,10 +557,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Import theme from JSON file.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onImportTheme(event, target) {
+  static async #onImportTheme(_event, _target) {
     const app = foundry.applications.instances.get('calendaria-settings-panel');
     const input = document.createElement('input');
     input.type = 'file';
@@ -687,37 +590,37 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open the Calendar HUD.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenHUD(event, target) {
+  static async #onOpenHUD(_event, _target) {
     CalendariaHUD.show();
   }
 
   /**
    * Open the Compact Calendar.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenCompact(event, target) {
+  static async #onOpenCompact(_event, _target) {
     CompactCalendar.show();
   }
 
   /**
    * Open the TimeKeeper HUD.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenTimeKeeper(event, target) {
+  static async #onOpenTimeKeeper(_event, _target) {
     TimeKeeperHUD.show();
   }
 
   /**
    * Open the Full Calendar Application.
-   * @param {PointerEvent} event - The click event
-   * @param {HTMLElement} target - The button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onOpenFullCal(event, target) {
+  static async #onOpenFullCal(_event, _target) {
     new CalendarApplication().render(true);
   }
 }

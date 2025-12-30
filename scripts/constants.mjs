@@ -113,10 +113,6 @@ export const SETTINGS = {
   /** @type {string} Dev mode - allows deletion of calendar note journals */
   DEV_MODE: 'devMode',
 
-  /* -------------------------------------------- */
-  /*  Weather Settings                            */
-  /* -------------------------------------------- */
-
   /** @type {string} Current weather state */
   CURRENT_WEATHER: 'currentWeather',
 
@@ -126,16 +122,8 @@ export const SETTINGS = {
   /** @type {string} Temperature unit preference (celsius or fahrenheit) */
   TEMPERATURE_UNIT: 'temperatureUnit',
 
-  /* -------------------------------------------- */
-  /*  Macro Triggers                              */
-  /* -------------------------------------------- */
-
   /** @type {string} Macro trigger configuration object */
   MACRO_TRIGGERS: 'macroTriggers',
-
-  /* -------------------------------------------- */
-  /*  Calendar HUD                                */
-  /* -------------------------------------------- */
 
   /** @type {string} Whether to show the Calendar HUD on world load */
   SHOW_CALENDAR_HUD: 'showCalendarHUD',
@@ -151,10 +139,6 @@ export const SETTINGS = {
 
   /** @type {string} Saved position of the Calendar HUD */
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
-
-  /* -------------------------------------------- */
-  /*  Chat Timestamps                             */
-  /* -------------------------------------------- */
 
   /** @type {string} Chat timestamp display mode (disabled, replace, augment) */
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
@@ -365,17 +349,17 @@ export const DEFAULT_MOON_PHASES = [
  * @example
  * // Listen for any date/time change
  * Hooks.on('calendaria.dateTimeChange', (data) => {
- *   console.log('Time changed:', data.current, 'Delta:', data.diff);
+ *   log(3,'Time changed:', data.current, 'Delta:', data.diff);
  * });
  *
  * // Listen for day changes only
  * Hooks.on('calendaria.dayChange', (data) => {
- *   console.log('New day:', data.current.dayOfMonth);
+ *   log(3,'New day:', data.current.dayOfMonth);
  * });
  *
  * // Listen for note creation
  * Hooks.on('calendaria.noteCreated', (noteStub) => {
- *   console.log('Note created:', noteStub.name);
+ *   log(3,'Note created:', noteStub.name);
  * });
  */
 
@@ -384,19 +368,11 @@ export const DEFAULT_MOON_PHASES = [
  * These hooks are fired by the module and can be listened to by other modules and macros.
  */
 export const HOOKS = {
-  /* -------------------------------------------- */
-  /*  Lifecycle Hooks                             */
-  /* -------------------------------------------- */
-
   /** @type {string} Fired when Calendaria starts initializing (before ready) */
   INIT: 'calendaria.init',
 
   /** @type {string} Fired when Calendaria is fully initialized and ready to use */
   READY: 'calendaria.ready',
-
-  /* -------------------------------------------- */
-  /*  Calendar Hooks                              */
-  /* -------------------------------------------- */
 
   /** @type {string} Fired when the active calendar is switched locally */
   CALENDAR_SWITCHED: 'calendaria.calendarSwitched',
@@ -412,10 +388,6 @@ export const HOOKS = {
 
   /** @type {string} Fired when a calendar is removed from the registry */
   CALENDAR_REMOVED: 'calendaria.calendarRemoved',
-
-  /* -------------------------------------------- */
-  /*  Date/Time Change Hooks                      */
-  /* -------------------------------------------- */
 
   /**
    * Fired whenever the world time changes. This is the primary hook for tracking time.
@@ -438,10 +410,6 @@ export const HOOKS = {
   /** @type {string} Fired when a remote date/time change is received */
   REMOTE_DATE_CHANGE: 'calendaria.remoteDateChange',
 
-  /* -------------------------------------------- */
-  /*  Time-of-Day Hooks                           */
-  /* -------------------------------------------- */
-
   /** @type {string} Fired when sunrise occurs */
   SUNRISE: 'calendaria.sunrise',
 
@@ -460,19 +428,11 @@ export const HOOKS = {
   /** @type {string} Fired when transitioning to/from a rest day */
   REST_DAY_CHANGE: 'calendaria.restDayChange',
 
-  /* -------------------------------------------- */
-  /*  Clock Hooks                                 */
-  /* -------------------------------------------- */
-
   /** @type {string} Fired when real-time clock state changes (running/stopped) */
   CLOCK_START_STOP: 'calendaria.clockStartStop',
 
   /** @type {string} Fired on each real-time clock tick (if clock is running) */
   CLOCK_UPDATE: 'calendaria.clockUpdate',
-
-  /* -------------------------------------------- */
-  /*  Note/Event Hooks                            */
-  /* -------------------------------------------- */
 
   /** @type {string} Fired when a calendar note is created */
   NOTE_CREATED: 'calendaria.noteCreated',
@@ -489,19 +449,11 @@ export const HOOKS = {
   /** @type {string} Fired when a multi-day event starts a new day */
   EVENT_DAY_CHANGED: 'calendaria.eventDayChanged',
 
-  /* -------------------------------------------- */
-  /*  UI Hooks                                    */
-  /* -------------------------------------------- */
-
   /** @type {string} Fired before the calendar UI renders */
   PRE_RENDER_CALENDAR: 'calendaria.preRenderCalendar',
 
   /** @type {string} Fired after the calendar UI renders */
   RENDER_CALENDAR: 'calendaria.renderCalendar',
-
-  /* -------------------------------------------- */
-  /*  Importer Hooks                              */
-  /* -------------------------------------------- */
 
   /** @type {string} Fired when an import operation starts */
   IMPORT_STARTED: 'calendaria.importStarted',
@@ -511,10 +463,6 @@ export const HOOKS = {
 
   /** @type {string} Fired when an import operation fails */
   IMPORT_FAILED: 'calendaria.importFailed',
-
-  /* -------------------------------------------- */
-  /*  Weather Hooks                               */
-  /* -------------------------------------------- */
 
   /** @type {string} Fired when weather changes */
   WEATHER_CHANGE: 'calendaria.weatherChange'
@@ -531,7 +479,7 @@ export const HOOKS = {
  * These are used for registering and identifying custom journal page types.
  * @type {JournalTypes}
  */
-export const JOURNAL_TYPES = {
+export const JOURNALS = {
   /** @type {string} Calendar note journal page type */
   CALENDAR_NOTE: 'calendaria.calendarnote'
 };
@@ -547,7 +495,7 @@ export const JOURNAL_TYPES = {
  * These are used when registering custom document sheets with Foundry.
  * @type {SheetIds}
  */
-export const SHEET_IDS = {
+export const SHEETS = {
   /** @type {string} Main sheet registration ID for Calendaria sheets */
   CALENDARIA: 'calendaria'
 };

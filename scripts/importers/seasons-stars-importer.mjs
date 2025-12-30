@@ -5,12 +5,12 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import { ASSETS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
+import NoteManager from '../notes/note-manager.mjs';
+import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
 
 /**
  * Importer for Seasons & Stars module data.
@@ -54,16 +54,13 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   async loadFromModule() {
     if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NotInstalled'));
-
     const calendarData = game.settings.get('seasons-and-stars', 'activeCalendarData');
     if (!calendarData) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NoCalendar'));
-
-    // Also get world events if available
     let worldEvents = [];
     try {
       worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
     } catch (e) {
-      log(3, 'No world events found in S&S settings');
+      log(1, 'No world events found in S&S settings', e);
     }
 
     return { calendar: calendarData, worldEvents };
@@ -81,62 +78,28 @@ export default class SeasonsStarsImporter extends BaseImporter {
   async transform(data) {
     const calendar = data.calendar || data;
     const label = calendar.translations?.en?.label || calendar.id || 'Imported Calendar';
-
     log(3, 'Transforming Seasons & Stars data:', label);
-
-    // Log warning for unsupported features
     if (calendar.variants) log(2, localize('CALENDARIA.Importer.SeasonsStars.Warning.Variants'));
-
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const months = this.#transformMonths(calendar.months);
     const daysPerYear = months.reduce((sum, m) => sum + m.days, 0);
 
     return {
       name: label,
-
-      // Days configuration (weekdays + time)
       days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
-
-      // Months
       months: { values: months },
-
-      // Years configuration
       years: this.#transformYears(calendar.year),
-
-      // Leap year configuration
-      leapYearConfig: this.#transformLeapYear(calendar.leapYear, calendar.months),
-
-      // Seasons
+      leapYearConfig: this.#transformLeapYear(calendar.leapYear),
       seasons: { values: this.#transformSeasons(calendar.seasons, months) },
-
-      // Moons
       moons: this.#transformMoons(calendar.moons),
-
-      // Eras from year prefix/suffix
       eras: this.#transformEras(calendar.year),
-
-      // Festivals from intercalary days
       festivals: this.#transformIntercalary(calendar.intercalary, calendar.months),
-
-      // Daylight from solar anchors
-      daylight: this.#transformDaylight(calendar.solarAnchors, calendar.time, months),
-
-      // Current date
+      daylight: this.#transformDaylight(calendar.solarAnchors, months),
       currentDate: this.#transformCurrentDate(calendar.year),
-
-      // AM/PM notation
       amPmNotation: this.#transformAmPmNotation(calendar.time),
-
-      // Canonical hours
       canonicalHours: this.#transformCanonicalHours(calendar.canonicalHours),
-
-      // Named weeks
       weeks: this.#transformWeeks(calendar.weeks),
-
-      // Date formats
       dateFormats: this.#transformDateFormats(calendar.dateFormats),
-
-      // Metadata
       metadata: { id: calendar.id, description: calendar.translations?.en?.description || '', system: calendar.translations?.en?.setting || 'Unknown', importedFrom: 'seasons-stars' }
     };
   }
@@ -149,6 +112,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * Transform S&S weekdays to Calendaria format.
    * @param {object[]} weekdays - S&S weekdays array
    * @returns {object[]} Calendaria weekdays array
+   * @todo Localize and don't we have a fallback already
    */
   #transformWeekdays(weekdays = []) {
     if (!weekdays?.length) {
@@ -196,10 +160,9 @@ export default class SeasonsStarsImporter extends BaseImporter {
   /**
    * Transform S&S leap year config to Calendaria format.
    * @param {object} leapYear - S&S leap year config
-   * @param {object[]} months - S&S months array (for month index lookup)
    * @returns {object|null} Calendaria leapYearConfig
    */
-  #transformLeapYear(leapYear = {}, months = []) {
+  #transformLeapYear(leapYear = {}) {
     if (!leapYear.rule || leapYear.rule === 'none') return null;
     if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: leapYear.offset ?? 0 };
     if (leapYear.rule === 'custom') return { rule: 'simple', interval: leapYear.interval ?? 4, start: leapYear.offset ?? 0 };
@@ -214,8 +177,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   #transformSeasons(seasons = [], months = []) {
     if (!seasons.length) return [];
-
-    // Build month start day index for conversion
     let dayIndex = 0;
     const monthStartDays = months.map((m) => {
       const start = dayIndex;
@@ -223,15 +184,11 @@ export default class SeasonsStarsImporter extends BaseImporter {
       return start;
     });
     const daysInYear = dayIndex;
-
     return seasons.map((season) => {
-      // S&S uses 1-indexed months
       const startMonthIdx = (season.startMonth ?? 1) - 1;
       const endMonthIdx = (season.endMonth ?? season.startMonth ?? 1) - 1;
-
       const dayStart = (monthStartDays[startMonthIdx] ?? 0) + ((season.startDay ?? 1) - 1);
       const dayEnd = (monthStartDays[endMonthIdx] ?? 0) + ((season.endDay ?? months[endMonthIdx]?.days ?? 1) - 1);
-
       return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon) };
     });
   }
@@ -272,12 +229,10 @@ export default class SeasonsStarsImporter extends BaseImporter {
   #convertPhasesToPercentages(phases, cycleLength) {
     const totalLength = phases.reduce((sum, p) => sum + (p.length ?? 0), 0) || cycleLength;
     let currentPosition = 0;
-
     return phases.map((phase) => {
       const start = currentPosition / totalLength;
       currentPosition += phase.length ?? 0;
       const end = currentPosition / totalLength;
-
       return { name: phase.name, icon: this.#mapPhaseIcon(phase.icon), start, end: Math.min(end, 1) };
     });
   }
@@ -322,45 +277,29 @@ export default class SeasonsStarsImporter extends BaseImporter {
   #transformIntercalary(intercalary = [], months = []) {
     const festivals = [];
     const monthNames = months.map((m) => m.name);
-
     for (const item of intercalary) {
       let monthIndex, dayInMonth;
-
       if (item.after) {
-        // After month X → first day of month X+1
         monthIndex = monthNames.indexOf(item.after) + 1;
         dayInMonth = 1;
       } else if (item.before) {
-        // Before month X → last day of month X-1
         monthIndex = monthNames.indexOf(item.before);
         if (monthIndex > 0) {
           const prevMonth = months[monthIndex - 1];
           dayInMonth = prevMonth.days ?? prevMonth.length ?? 1;
         } else {
-          // Before first month = last day of last month
           monthIndex = months.length;
           dayInMonth = months[months.length - 1]?.days ?? 1;
         }
       } else {
-        // No positioning - skip
         continue;
       }
 
-      // Handle multi-day intercalary periods
       const dayCount = item.days ?? 1;
       for (let d = 0; d < dayCount; d++) {
-        const festival = {
-          name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name,
-          month: monthIndex + 1, // 1-indexed for Calendaria
-          day: dayInMonth + d
-        };
-
-        // Leap-year-only festivals
+        const festival = { name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name, month: monthIndex + 1, day: dayInMonth + d };
         if (item.leapYearOnly) festival.leapYearOnly = true;
-
-        // Non-weekday intercalary days
         if (item.countsForWeekdays === false) festival.countsForWeekday = false;
-
         festivals.push(festival);
       }
     }
@@ -371,18 +310,14 @@ export default class SeasonsStarsImporter extends BaseImporter {
   /**
    * Transform S&S solar anchors to Calendaria daylight config.
    * @param {object[]} solarAnchors - S&S solar anchors array
-   * @param {object} time - S&S time config
    * @param {object[]} months - Transformed months array
    * @returns {object|null} Calendaria daylight config
    */
-  #transformDaylight(solarAnchors = [], time = {}, months = []) {
+  #transformDaylight(solarAnchors = [], months = []) {
     if (!solarAnchors.length) return { enabled: false };
-
     const winterSolstice = solarAnchors.find((a) => a.subtype === 'winter' && a.type === 'solstice');
     const summerSolstice = solarAnchors.find((a) => a.subtype === 'summer' && a.type === 'solstice');
-
     if (!winterSolstice || !summerSolstice) return { enabled: false };
-
     const parseTime = (timeStr) => {
       const [h, m] = (timeStr || '0:0').split(':').map(Number);
       return h + m / 60;
@@ -390,8 +325,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
 
     const winterDaylight = parseTime(winterSolstice.sunset) - parseTime(winterSolstice.sunrise);
     const summerDaylight = parseTime(summerSolstice.sunset) - parseTime(summerSolstice.sunrise);
-
-    // Calculate day-of-year for solstices
     let dayIndex = 0;
     const monthStartDays = months.map((m) => {
       const start = dayIndex;
@@ -429,13 +362,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   #transformCanonicalHours(canonicalHours = []) {
     if (!canonicalHours?.length) return [];
-
-    return canonicalHours.map((hour) => ({
-      name: hour.name,
-      abbreviation: hour.abbreviation || hour.name.substring(0, 2),
-      startHour: hour.startHour ?? 0,
-      endHour: hour.endHour ?? 0
-    }));
+    return canonicalHours.map((hour) => ({ name: hour.name, abbreviation: hour.abbreviation || hour.name.substring(0, 2), startHour: hour.startHour ?? 0, endHour: hour.endHour ?? 0 }));
   }
 
   /**
@@ -445,7 +372,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
    */
   #transformWeeks(weeks = {}) {
     if (!weeks.names?.length) return null;
-
     return {
       enabled: true,
       type: weeks.type || 'month-based',
@@ -481,9 +407,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const events = Array.isArray(calendar.events) ? calendar.events : [];
     const worldEvents = Array.isArray(data.worldEvents) ? data.worldEvents : [];
     const allEvents = [...events, ...worldEvents];
-
     log(3, `Extracting ${allEvents.length} events from Seasons & Stars data`);
-
     return allEvents.map((event) => this.#transformEvent(event));
   }
 
@@ -502,47 +426,28 @@ export default class SeasonsStarsImporter extends BaseImporter {
       suggestedType: 'note'
     };
 
-    // Handle recurrence
     const rec = event.recurrence;
     if (rec) {
       if (rec.type === 'fixed') {
         note.repeat = 'yearly';
         note.startDate = {
           year: event.startYear ?? 1,
-          month: (rec.month ?? 1) - 1, // Convert to 0-indexed
-          day: rec.day ?? 1 // Days are 1-indexed
+          month: (rec.month ?? 1) - 1,
+          day: rec.day ?? 1
         };
       } else if (rec.type === 'ordinal') {
-        // Nth weekday of month - limited support, use first of month as placeholder
         note.repeat = 'yearly';
-        note.startDate = {
-          year: event.startYear ?? 1,
-          month: (rec.month ?? 1) - 1,
-          day: 1 // Placeholder - ordinal dates can't be accurately represented
-        };
+        note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, day: 1 };
         note.importWarnings = [`Ordinal recurrence (${rec.occurrence} ${rec.weekday} of month) imported as first of month`];
         log(2, localize('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
       } else if (rec.type === 'interval') {
         note.repeat = 'yearly';
         note.interval = rec.intervalYears;
-        note.startDate = {
-          year: rec.anchorYear ?? 1,
-          month: (rec.month ?? 1) - 1,
-          day: rec.day ?? 1 // Days are 1-indexed
-        };
+        note.startDate = { year: rec.anchorYear ?? 1, month: (rec.month ?? 1) - 1, day: rec.day ?? 1 };
       }
     }
 
-    // Ensure there's always a startDate for events without recurrence
-    if (!note.startDate && event.startDate) {
-      note.startDate = {
-        year: event.startDate.year ?? 1,
-        month: (event.startDate.month ?? 1) - 1,
-        day: event.startDate.day ?? 1
-      };
-    }
-
-    // Duration parsing
+    if (!note.startDate && event.startDate) note.startDate = { year: event.startDate.year ?? 1, month: (event.startDate.month ?? 1) - 1, day: event.startDate.day ?? 1 };
     if (event.duration) {
       const match = event.duration.match(/^(\d+)([dhmsw])$/);
       if (match) {
@@ -560,19 +465,16 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @param {object[]} notes - Extracted note data
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
+   * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Note data for import
    * @override
    */
   async importNotes(notes, options = {}) {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
-
     for (const note of notes) {
       try {
         const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, day: 1 };
@@ -587,7 +489,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
         }
       } catch (error) {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
-        log(2, `Error importing note "${note.name}":`, error);
+        log(1, `Error importing note "${note.name}":`, error);
       }
     }
 

@@ -13,7 +13,6 @@ import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
@@ -21,7 +20,14 @@ import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
+/**
+ * Calendar Application - displays the calendar UI.
+ * @extends ApplicationV2
+ */
 export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV2) {
+  /**
+   * @param {object} options - Application options
+   */
   constructor(options = {}) {
     super(options);
     this._viewedDate = null;
@@ -62,18 +68,19 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     position: { width: 'auto', height: 'auto' }
   };
 
-  static PARTS = {
-    header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER },
-    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT }
-  };
+  static PARTS = { header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER }, content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT } };
 
+  /**
+   * Get the application window title.
+   * @returns {string} The calendar name
+   */
   get title() {
     return this.calendar?.name || '';
   }
 
   /**
    * Get the calendar to display
-   * @returns {CalendariaCalendar}
+   * @returns {object} The active calendar or specified calendar
    */
   get calendar() {
     return this._calendarId ? CalendarManager.getCalendar(this._calendarId) : CalendarManager.getActiveCalendar();
@@ -81,59 +88,51 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Get the date being viewed/displayed in the calendar
-   * @returns {object}
+   * @returns {object} The currently viewed date with year, month, day
    */
   get viewedDate() {
     if (this._viewedDate) return this._viewedDate;
-
-    // Use current game time
     const components = game.time.components;
     const calendar = this.calendar;
-
-    // Adjust year for display (add yearZero offset)
     const yearZero = calendar?.years?.yearZero ?? 0;
-
-    // Use dayOfMonth (0-indexed) converted to 1-indexed day
     const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
-
     return { ...components, year: components.year + yearZero, day: dayOfMonth };
   }
 
+  /**
+   * Set the viewed date.
+   * @param {object} date - The date to view
+   */
   set viewedDate(date) {
     this._viewedDate = date;
   }
 
+  /**
+   * Prepare context data for rendering.
+   * @param {object} options - Render options
+   * @returns {Promise<object>} The prepared context
+   * @override
+   */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const calendar = this.calendar;
     const viewedDate = this.viewedDate;
-
-    // Basic context
     context.editable = game.user.isGM;
-
-    // Calendar data
     context.calendar = calendar;
     context.viewedDate = viewedDate;
     context.displayMode = this._displayMode;
     context.selectedDate = this._selectedDate;
     context.selectedTimeSlot = this._selectedTimeSlot;
-
-    // Check if selected date (or viewed date if none selected) matches game time
     const today = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const todayYear = today.year + yearZero;
     const todayMonth = today.month;
     const todayDay = (today.dayOfMonth ?? 0) + 1;
-
     if (this._selectedDate) context.isToday = this._selectedDate.year === todayYear && this._selectedDate.month === todayMonth && this._selectedDate.day === todayDay;
     else context.isToday = viewedDate.year === todayYear && viewedDate.month === todayMonth && viewedDate.day === todayDay;
-
-    // Get notes from journal pages (filtered by active calendar)
     const allNotes = ViewUtils.getCalendarNotes();
     context.notes = allNotes;
     context.visibleNotes = ViewUtils.getVisibleNotes(allNotes);
-
-    // Generate calendar data based on display mode
     if (calendar) {
       switch (this._displayMode) {
         case 'week':
@@ -142,22 +141,14 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         case 'year':
           context.calendarData = this._generateYearData(calendar, viewedDate);
           break;
-        default: // month
+        default:
           context.calendarData = this._generateCalendarData(calendar, viewedDate, context.visibleNotes);
           break;
       }
     }
-
-    // Filter notes for current view
     context.currentMonthNotes = this._getNotesForMonth(context.visibleNotes, viewedDate.year, viewedDate.month);
-
-    // Moon phases setting for use in calendar data generation
     context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES);
-
-    // Weather badge data
     context.weather = this._getWeatherContext();
-
-    // Get cycle values for display in header (based on viewed date, not world time)
     if (calendar.cycles?.length) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
       const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
@@ -166,11 +157,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       context.cycleValues = cycleResult.values;
     }
 
-    // Search context
     context.searchTerm = this._searchTerm;
     context.searchOpen = this._searchOpen;
     context.searchResults = this._searchResults || [];
-
     return context;
   }
 
@@ -178,124 +167,76 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    * Abbreviate month name if longer than 5 characters
    * Takes first letter of each word
    * @param {string} monthName - Full month name
-   * @returns {{full: string, abbrev: string, useAbbrev: boolean}}
+   * @returns {{full: string, abbrev: string, useAbbrev: boolean}} Abbreviation data
    */
   _abbreviateMonthName(monthName) {
     if (!monthName) return { full: '', abbrev: '', useAbbrev: false };
     const full = monthName;
     const useAbbrev = monthName.length > 5;
-
     if (!useAbbrev) return { full, abbrev: full, useAbbrev: false };
-
-    // Take first letter of each word
     const words = monthName.split(' ');
     const abbrev = words.map((word) => word.charAt(0).toUpperCase()).join('');
-
     return { full, abbrev, useAbbrev: true };
   }
 
   /**
    * Generate calendar grid data for month view
-   * @param {CalendariaCalendar} calendar
-   * @param {object} date
-   * @param {Array} notes
-   * @returns {object}
+   * @param {object} calendar - The calendar configuration
+   * @param {object} date - The date being viewed
+   * @param {Array} notes - Calendar notes to display
+   * @returns {object} Calendar grid data for rendering
    */
   _generateCalendarData(calendar, date, notes) {
     const { year, month } = date;
-
     const monthData = calendar.months?.values?.[month];
-
     if (!monthData) return null;
-
     const daysInMonth = monthData.days;
     const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
     let currentWeek = [];
-
-    // Check if moon phases should be shown
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES) && calendar.moons?.length;
-
-    // Calculate starting day of week for the first day of the month
-    // If month has startingWeekday set, use that; otherwise calculate normally
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
-
-    // Add days from previous months (bleeding into current view)
-    // Handle intercalary months by going back through multiple months if needed
     if (startDayOfWeek > 0) {
       const totalMonths = calendar.months?.values?.length ?? 12;
       const prevDays = [];
       let remainingSlots = startDayOfWeek;
       let checkMonth = month;
       let checkYear = year;
-
-      // Walk backwards through months to collect enough days
       while (remainingSlots > 0) {
         checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
         if (checkMonth === totalMonths - 1) checkYear--;
-
         const checkMonthData = calendar.months?.values?.[checkMonth];
         const checkMonthDays = checkMonthData?.days ?? 30;
-
-        // Take days from this month (from end backwards)
         const daysToTake = Math.min(remainingSlots, checkMonthDays);
-        for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) {
-          prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
-        }
+        for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
         remainingSlots -= daysToTake;
       }
-
-      // Add the collected days to currentWeek
-      for (const pd of prevDays) {
-        currentWeek.push({
-          day: pd.day,
-          year: pd.year,
-          month: pd.month,
-          isFromOtherMonth: true,
-          isToday: this._isToday(pd.year, pd.month, pd.day)
-        });
-      }
+      for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day) });
     }
 
-    // Add days of the month
     let dayIndex = startDayOfWeek;
     for (let day = 1; day <= daysInMonth; day++) {
       const dayNotes = this._getNotesForDay(notes, year, month, day);
-
-      // Check if this day is a festival day
       const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
-
-      // Get moon phases for this day
       let moonPhases = null;
       if (showMoons) {
-        // Calculate day of year (0-indexed) from month and day
         let dayOfYear = day - 1;
         for (let idx = 0; idx < month; idx++) {
           const m = calendar.months.values[idx];
           dayOfYear += m.days;
         }
-
-        // Build complete time components for this day
         const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moons
           .map((moon, index) => {
             const phase = calendar.getMoonPhase(index, dayWorldTime);
             if (!phase) return null;
-            return {
-              moonName: localize(moon.name),
-              phaseName: localize(phase.name),
-              icon: phase.icon,
-              color: moon.color || null
-            };
+            return { moonName: localize(moon.name), phaseName: localize(phase.name), icon: phase.icon, color: moon.color || null };
           })
           .filter(Boolean);
       }
-
-      // Get weekday data for rest day status (use currentWeek.length for correct weekday position)
       const weekdayData = calendar.days?.values?.[currentWeek.length];
-
       currentWeek.push({
         day,
         year,
@@ -310,25 +251,19 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         moonPhases
       });
       dayIndex++;
-
-      // Start new week when we reach the week length
       if (currentWeek.length === daysInWeek) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
     }
 
-    // Fill remaining cells with days from next months
-    // Handle intercalary months by going forward through multiple months if needed
     if (currentWeek.length > 0 && currentWeek.length < daysInWeek) {
       const totalMonths = calendar.months?.values?.length ?? 12;
       let remainingSlots = daysInWeek - currentWeek.length;
       let checkMonth = month;
       let checkYear = year;
       let dayInMonth = 1;
-
       while (remainingSlots > 0) {
-        // Move to next month if we've exhausted current
         if (dayInMonth > (calendar.months?.values?.[checkMonth]?.days ?? 30) || checkMonth === month) {
           checkMonth = checkMonth === totalMonths - 1 ? 0 : checkMonth + 1;
           if (checkMonth === 0) checkYear++;
@@ -337,41 +272,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
         const checkMonthDays = calendar.months?.values?.[checkMonth]?.days ?? 30;
         const daysToTake = Math.min(remainingSlots, checkMonthDays - dayInMonth + 1);
-
         for (let d = dayInMonth; d < dayInMonth + daysToTake; d++) {
-          currentWeek.push({
-            day: d,
-            year: checkYear,
-            month: checkMonth,
-            isFromOtherMonth: true,
-            isToday: this._isToday(checkYear, checkMonth, d)
-          });
+          currentWeek.push({ day: d, year: checkYear, month: checkMonth, isFromOtherMonth: true, isToday: this._isToday(checkYear, checkMonth, d) });
         }
-
         dayInMonth += daysToTake;
         remainingSlots -= daysToTake;
       }
     }
 
     if (currentWeek.length > 0) weeks.push(currentWeek);
-
-    // Find multi-day events and attach them to their respective weeks
     const allMultiDayEvents = this._findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth);
-
-    // Attach events to their weeks
     weeks.forEach((week, weekIndex) => {
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
     });
-
-    // Get season and era for the viewed month (use mid-month day for accuracy)
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-
-    // Get weekdays for this month (supports per-month custom weekdays)
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
-
     return {
       year,
       month,
@@ -387,23 +305,17 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Generate calendar grid data for week view
-   * @param {CalendariaCalendar} calendar
-   * @param {object} date
-   * @param {Array} notes
-   * @returns {object}
+   * @param {object} calendar - The calendar configuration
+   * @param {object} date - The date being viewed
+   * @param {Array} notes - Calendar notes to display
+   * @returns {object} Week view data for rendering
    */
   _generateWeekData(calendar, date, notes) {
     const { year, month, day } = date;
-
-    // Calculate which day of the week this is
     const currentDayOfWeek = dayOfWeek({ year, month, day });
-
-    // Calculate the start of the week
     let weekStartDay = day - currentDayOfWeek;
     let weekStartMonth = month;
     let weekStartYear = year;
-
-    // Handle month boundaries
     const monthsInYear = calendar.months?.values?.length ?? 12;
     if (weekStartDay < 1) {
       weekStartMonth--;
@@ -415,34 +327,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       weekStartDay = prevMonthData ? prevMonthData.days + weekStartDay : 1;
     }
 
-    // Get current time for highlighting
     const currentTime = game.time.components || {};
     const currentHour = currentTime.hour ?? 0;
-
-    // Generate days for the week
     const daysInWeek = calendar.days?.values?.length || 7;
     const days = [];
     let currentDay = weekStartDay;
     let currentMonth = weekStartMonth;
     let currentYear = weekStartYear;
-
     for (let i = 0; i < daysInWeek; i++) {
       const monthData = calendar.months?.values?.[currentMonth];
       if (!monthData) break;
-
       const dayNotes = this._getNotesForDay(notes, currentYear, currentMonth, currentDay);
-      // Get weekday data from the current month (supports per-month custom weekdays)
       const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.days?.values ?? [];
       const weekdayData = monthWeekdays[i];
       const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
       const monthName = calendar.months?.values?.[currentMonth]?.name ? localize(calendar.months.values[currentMonth].name) : '';
-
       const isToday = this._isToday(currentYear, currentMonth, currentDay);
-
-      // Check if this day has a selected time slot
       const selectedHour =
         this._selectedTimeSlot?.year === currentYear && this._selectedTimeSlot?.month === currentMonth && this._selectedTimeSlot?.day === currentDay ? this._selectedTimeSlot.hour : null;
-
       days.push({
         day: currentDay,
         year: currentYear,
@@ -456,7 +358,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         notes: dayNotes
       });
 
-      // Move to next day
       currentDay++;
       if (currentDay > monthData.days) {
         currentDay = 1;
@@ -467,33 +368,20 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         }
       }
     }
-
-    // Generate time slots (1-hour increments for 24-hour view)
     const timeSlots = [];
     for (let hour = 0; hour < 24; hour++) timeSlots.push({ label: hour.toString(), hour: hour });
-
-    // Create event blocks for week view
     const eventBlocks = this._createEventBlocks(notes, days);
-
-    // Attach event blocks to their respective days
     days.forEach((day) => {
       day.eventBlocks = eventBlocks.filter((block) => block.year === day.year && block.month === day.month && block.day === day.day);
     });
-
-    // Calculate week number (approximate: day of year / days per week)
     let dayOfYear = day;
     for (let m = 0; m < month; m++) dayOfYear += calendar.months?.values?.[m]?.days || 0;
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
-
-    // Get season and era for the viewed week (use mid-week day)
     const midWeekDay = days[Math.floor(days.length / 2)];
     const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: (midWeekDay?.day ?? day) - 1 };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-
-    // Get weekdays for the week start month (supports per-month custom weekdays)
     const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.days?.values ?? [];
-
     return {
       year: weekStartYear,
       month: weekStartMonth,
@@ -512,15 +400,14 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Generate calendar grid data for year view
-   * @param {CalendariaCalendar} calendar
-   * @param {object} date
-   * @returns {object}
+   * @param {object} calendar - The calendar configuration
+   * @param {object} date - The date being viewed
+   * @returns {object} Year view data for rendering
    */
   _generateYearData(calendar, date) {
     const { year } = date;
     const yearGrid = [];
     const startYear = year - 4;
-
     for (let row = 0; row < 3; row++) {
       const yearRow = [];
       for (let col = 0; col < 3; col++) {
@@ -533,25 +420,15 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
               const localizedName = localize(m.name);
               const localizedAbbrev = m.abbreviation ? localize(m.abbreviation) : localizedName;
               const abbrevData = this._abbreviateMonthName(localizedAbbrev);
-              return {
-                localizedName,
-                abbreviation: abbrevData.abbrev,
-                fullAbbreviation: localizedAbbrev,
-                tooltipText: `${localizedName} (${localizedAbbrev})`,
-                month: idx,
-                year: displayYear
-              };
+              return { localizedName, abbreviation: abbrevData.abbrev, fullAbbreviation: localizedAbbrev, tooltipText: `${localizedName} (${localizedAbbrev})`, month: idx, year: displayYear };
             }) || []
         });
       }
       yearGrid.push(yearRow);
     }
-
-    // Get season for the viewed year (use first month)
     const viewedComponents = { month: 0, dayOfMonth: 0 };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-
     return {
       year,
       startYear,
@@ -568,19 +445,15 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   /**
    * Check if a date is today
    * @param {number} year - Display year (with yearZero applied)
-   * @param {number} month
+   * @param {number} month - Month index (0-indexed)
    * @param {number} day - Day of month (1-indexed)
-   * @returns {boolean}
+   * @returns {boolean} True if the date matches today
    */
   _isToday(year, month, day) {
     const today = game.time.components;
     const calendar = this.calendar;
-
-    // Adjust today's year for comparison (add yearZero offset)
     const yearZero = calendar?.years?.yearZero ?? 0;
     const displayYear = today.year + yearZero;
-
-    // Compare using dayOfMonth (convert from 0-indexed to 1-indexed)
     const todayDayOfMonth = (today.dayOfMonth ?? 0) + 1;
     return displayYear === year && today.month === month && todayDayOfMonth === day;
   }
@@ -588,9 +461,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   /**
    * Check if a date is the selected date
    * @param {number} year - Display year (with yearZero applied)
-   * @param {number} month
+   * @param {number} month - Month index (0-indexed)
    * @param {number} day - Day of month (1-indexed)
-   * @returns {boolean}
+   * @returns {boolean} True if the date is selected
    */
   _isSelected(year, month, day) {
     if (!this._selectedDate) return false;
@@ -599,25 +472,19 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Get notes for a specific day
-   * @param {JournalEntryPage[]} notePages
-   * @param {number} year
-   * @param {number} month
-   * @param {number} day
-   * @returns {Array}
+   * @param {object[]} notePages - All note pages to filter
+   * @param {number} year - The year to match
+   * @param {number} month - The month to match
+   * @param {number} day - The day to match
+   * @returns {Array} Notes matching the specified date
    */
   _getNotesForDay(notePages, year, month, day) {
     const targetDate = { year, month, day };
     return notePages.filter((page) => {
       const start = page.system.startDate;
       const end = page.system.endDate;
-
-      // Check if end date has valid values (not null/undefined)
       const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
-
-      // Exclude multi-day events (they're shown as event bars instead)
       if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) return false;
-
-      // Build noteData for recurrence check
       const noteData = {
         startDate: start,
         endDate: end,
@@ -634,32 +501,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         seasonalConfig: page.system.seasonalConfig,
         conditions: page.system.conditions
       };
-
-      // Check if this event occurs on this day (handles recurring events)
       return isRecurringMatch(noteData, targetDate);
     });
   }
 
   /**
    * Get notes for a specific month
-   * @param {JournalEntryPage[]} notePages
-   * @param {number} year
-   * @param {number} month
-   * @returns {Array}
+   * @param {object[]} notePages - All note pages to filter
+   * @param {number} year - The year to match
+   * @param {number} month - The month to match
+   * @returns {Array} Notes occurring in the specified month
    */
   _getNotesForMonth(notePages, year, month) {
     return notePages.filter((page) => {
       const start = page.system.startDate;
       const repeat = page.system.repeat;
-
-      // Non-repeating notes: only include if they start in this month
       if (!repeat || repeat === 'never') return start.year === year && start.month === month;
-
-      // Recurring notes: include if they could occur in this month
-      // (start date is before or during this month, and no end date or end date is after this month)
       const startBeforeOrInMonth = start.year < year || (start.year === year && start.month <= month);
       if (!startBeforeOrInMonth) return false;
-
       const repeatEndDate = page.system.repeatEndDate;
       if (repeatEndDate) {
         const endAfterOrInMonth = repeatEndDate.year > year || (repeatEndDate.year === year && repeatEndDate.month >= month);
@@ -683,60 +542,38 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   _findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth) {
     const events = [];
-    const rows = []; // Track occupied spans for each row
-
-    // Filter and prepare events with priority (earlier start times = higher priority)
+    const rows = [];
     const multiDayEvents = notes
       .map((note) => {
         const start = note.system.startDate;
         const end = note.system.endDate;
-
-        // Check if end date has valid values (not just an empty object)
         const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
         if (!hasValidEndDate) return null;
-
-        // Check if end date is actually different from start date
         const isSameDay = end.year === start.year && end.month === start.month && end.day === start.day;
-        if (isSameDay) return null; // Not multi-day
-
-        // Check if this event is visible in the current month
+        if (isSameDay) return null;
         const startBeforeOrInMonth = start.year < year || (start.year === year && start.month <= month);
         const endInOrAfterMonth = end.year > year || (end.year === year && end.month >= month);
-
         if (!startBeforeOrInMonth || !endInOrAfterMonth) return null;
-
-        // Determine if this is a continuation from a previous month
         const isContinuation = start.year < year || (start.year === year && start.month < month);
-
-        // Calculate effective start/end days for this month
         const startDay = isContinuation ? 1 : start.day;
         const endDay = end.month === month && end.year === year ? end.day : daysInMonth;
-
-        if (endDay < startDay) return null; // Invalid range
-
-        // Calculate priority: all-day events appear first (priority -1), then by start hour
+        if (endDay < startDay) return null;
         const isAllDay = start.hour == null || note.system.allDay;
         const priority = isAllDay ? -1 : start.hour;
-
         return { note, start, end, startDay, endDay, priority, isContinuation };
       })
       .filter((e) => e !== null)
-      .sort((a, b) => a.priority - b.priority); // Sort by priority (earlier = higher)
+      .sort((a, b) => a.priority - b.priority);
 
-    multiDayEvents.forEach(({ note, start, end, startDay, endDay, isContinuation }) => {
-      // Calculate grid positions
-      const startPosition = startDay - 1 + startDayOfWeek; // 0-indexed
+    multiDayEvents.forEach(({ note, startDay, endDay, isContinuation }) => {
+      const startPosition = startDay - 1 + startDayOfWeek;
       const endPosition = endDay - 1 + startDayOfWeek;
-
       const startWeekIndex = Math.floor(startPosition / daysInWeek);
       const endWeekIndex = Math.floor(endPosition / daysInWeek);
-
-      // Find the first available row where this event doesn't overlap with existing events
-      let eventRow = rows.length; // Default to new row if no space found
+      let eventRow = rows.length;
       for (let r = 0; r < rows.length; r++) {
         const rowEvents = rows[r] || [];
         const hasOverlap = rowEvents.some((existing) => {
-          // Check if this event overlaps with any existing event in this row
           return !(endPosition < existing.start || startPosition > existing.end);
         });
         if (!hasOverlap) {
@@ -744,20 +581,13 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           break;
         }
       }
-      // If we need a new row (eventRow equals rows.length), create it
       if (eventRow >= rows.length) rows.push([]);
-
-      // Mark this span as occupied in the chosen row
       rows[eventRow].push({ start: startPosition, end: endPosition });
-
-      // Handle events that span multiple weeks
       if (startWeekIndex === endWeekIndex) {
-        // Event fits in one week
-        const startColumn = startPosition % daysInWeek; // 0-indexed for this week
-        const endColumn = endPosition % daysInWeek; // 0-indexed for this week
+        const startColumn = startPosition % daysInWeek;
+        const endColumn = endPosition % daysInWeek;
         const left = (startColumn / daysInWeek) * 100;
         const width = ((endColumn - startColumn + 1) / daysInWeek) * 100;
-
         events.push({
           id: note.id,
           name: note.name,
@@ -771,22 +601,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           isContinuation
         });
       } else {
-        // Event spans multiple weeks - create a bar for each week segment
         for (let weekIdx = startWeekIndex; weekIdx <= endWeekIndex; weekIdx++) {
           const weekStart = weekIdx * daysInWeek;
           const weekEnd = weekStart + daysInWeek - 1;
-
           const segmentStart = Math.max(startPosition, weekStart);
           const segmentEnd = Math.min(endPosition, weekEnd);
-
           const startColumn = segmentStart % daysInWeek;
           const endColumn = segmentEnd % daysInWeek;
           const left = (startColumn / daysInWeek) * 100;
           const width = ((endColumn - startColumn + 1) / daysInWeek) * 100;
-
-          // First week segment of a continuation shows the >> icon
           const showContinuationIcon = isContinuation && weekIdx === startWeekIndex;
-
           events.push({
             id: `${note.id}-week-${weekIdx}`,
             name: note.name,
@@ -816,32 +640,23 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   _createEventBlocks(notes, days) {
     const blocks = [];
-
     notes.forEach((note) => {
       const start = note.system.startDate;
       const end = note.system.endDate;
       const allDay = note.system.allDay;
-
-      // Find which day this event is on
       const dayMatch = days.find((d) => d.year === start.year && d.month === start.month && d.day === start.day);
       if (!dayMatch) return;
-
-      // Calculate hour span for the event
       const startHour = allDay ? 0 : (start.hour ?? 0);
-      let hourSpan = 1; // Default 1 hour
-
+      let hourSpan = 1;
       if (allDay) {
         hourSpan = 24;
       } else if (end && end.year === start.year && end.month === start.month && end.day === start.day) {
-        // Same-day event: calculate span from start to end hour
         const endHour = end.hour ?? startHour;
         hourSpan = Math.max(endHour - startHour, 1);
       }
 
-      // Format times
       const startTime = allDay ? 'All Day' : `${startHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
       const endTime = end && !allDay ? `${(end.hour ?? 0).toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}` : null;
-
       blocks.push({
         id: note.id,
         name: note.name,
@@ -874,56 +689,38 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const windowContent = this.element.querySelector('.window-content');
     const windowHeader = this.element.querySelector('.window-header');
     if (!windowContent) return;
-
-    // Measure actual content size
     const contentRect = windowContent.scrollWidth;
     const contentHeight = windowContent.scrollHeight;
     const headerHeight = windowHeader?.offsetHeight || 30;
-
-    this.setPosition({
-      width: contentRect + 2, // +2 for borders
-      height: contentHeight + headerHeight + 2
-    });
+    this.setPosition({ width: contentRect + 2, height: contentHeight + headerHeight + 2 });
   }
 
   /**
    * Update view class and handle post-render tasks
-   * @param {ApplicationRenderContext} context - Render context
+   * @param {object} context - Render context
    * @param {object} options - Render options
    * @override
    */
   _onRender(context, options) {
     super._onRender(context, options);
-
-    // Update view class for CSS targeting
     this.element.classList.remove('view-month', 'view-week', 'view-year');
     this.element.classList.add(`view-${this._displayMode}`);
-
-    // Set up search input listener
     const searchInput = this.element.querySelector('.search-input');
     if (searchInput) {
-      // Focus input if search is open
       if (this._searchOpen) searchInput.focus();
-
       const debouncedSearch = foundry.utils.debounce((term) => {
         this._searchTerm = term;
-        if (term.length >= 2) {
-          this._searchResults = SearchManager.search(term, { searchContent: true });
-        } else {
-          this._searchResults = null;
-        }
+        if (term.length >= 2) this._searchResults = SearchManager.search(term, { searchContent: true });
+        else this._searchResults = null;
         this._updateSearchResults();
       }, 300);
 
       searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
       searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          this._closeSearch();
-        }
+        if (e.key === 'Escape') this._closeSearch();
       });
     }
 
-    // Position search panel and add click-outside handler if open
     if (this._searchOpen) {
       this._positionSearchPanel();
       const panel = this.element.querySelector('.calendaria-hud-search-panel');
@@ -931,9 +728,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       if (panel && !this._clickOutsideHandler) {
         setTimeout(() => {
           this._clickOutsideHandler = (event) => {
-            if (!panel.contains(event.target) && !button?.contains(event.target)) {
-              this._closeSearch();
-            }
+            if (!panel.contains(event.target) && !button?.contains(event.target)) this._closeSearch();
           };
           document.addEventListener('mousedown', this._clickOutsideHandler);
         }, 100);
@@ -947,10 +742,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   _updateSearchResults() {
     const panel = this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
-
     const resultsContainer = panel.querySelector('.search-panel-results');
     if (!resultsContainer) return;
-
     if (this._searchResults?.length) {
       resultsContainer.innerHTML = this._searchResults
         .map(
@@ -977,9 +770,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   _positionSearchPanel() {
     const panel = this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
-
-    // CSS handles position (absolute, centered below header)
-    // Just set dimensions here
     panel.style.width = '280px';
     panel.style.maxHeight = '350px';
   }
@@ -1000,17 +790,13 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Set up hook listeners when the application is first rendered
-   * @param {ApplicationRenderContext} context - Render context
+   * @param {object} context - Render context
    * @param {object} options - Render options
    * @override
    */
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
-
-    // Set initial size based on view mode
     this._adjustSizeForView();
-
-    // Set up context menu for day cells
     ViewUtils.setupDayContextMenu(this.element, '.calendar-day:not(.empty)', this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
@@ -1018,42 +804,27 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       },
       onCreateNote: () => this.render()
     });
-
-    // Set up hook to re-render when journal entries are updated, created, or deleted
     this._hooks = [];
-
-    // Debounced render to avoid rapid consecutive renders
     const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
-
-    // Listen for journal entry page updates
     this._hooks.push({
       name: 'updateJournalEntryPage',
-      id: Hooks.on('updateJournalEntryPage', (page, changes, options, userId) => {
+      id: Hooks.on('updateJournalEntryPage', (page, _changes, _options, _userId) => {
         if (page.type === 'calendaria.calendarnote') debouncedRender();
       })
     });
-
-    // Listen for journal entry page creation
     this._hooks.push({
       name: 'createJournalEntryPage',
-      id: Hooks.on('createJournalEntryPage', (page, options, userId) => {
+      id: Hooks.on('createJournalEntryPage', (page, _options, _userId) => {
         if (page.type === 'calendaria.calendarnote') debouncedRender();
       })
     });
-
-    // Listen for journal entry page deletion
     this._hooks.push({
       name: 'deleteJournalEntryPage',
-      id: Hooks.on('deleteJournalEntryPage', (page, options, userId) => {
+      id: Hooks.on('deleteJournalEntryPage', (page, _options, _userId) => {
         if (page.type === 'calendaria.calendarnote') debouncedRender();
       })
     });
-
-    // Listen for weather changes
-    this._hooks.push({
-      name: HOOKS.WEATHER_CHANGE,
-      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender())
-    });
+    this._hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
   }
 
   /**
@@ -1062,18 +833,15 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    * @override
    */
   async _onClose(options) {
-    // Remove all hook listeners
     if (this._hooks) {
       this._hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
       this._hooks = [];
     }
 
-    // Remove click-outside handler
     if (this._clickOutsideHandler) {
       document.removeEventListener('mousedown', this._clickOutsideHandler);
       this._clickOutsideHandler = null;
     }
-
     await super._onClose(options);
   }
 
@@ -1081,20 +849,21 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   /*  Event Handlers                              */
   /* -------------------------------------------- */
 
-  static async _onNavigate(event, target) {
+  /**
+   * Navigate forward or backward in the calendar view.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with direction data
+   */
+  static async _onNavigate(_event, target) {
     const direction = target.dataset.direction === 'next' ? 1 : -1;
     const current = this.viewedDate;
     const calendar = this.calendar;
-
     switch (this._displayMode) {
       case 'week': {
-        // Navigate by one week
         const daysInWeek = calendar.days?.values?.length || 7;
         let newDay = current.day + direction * daysInWeek;
         let newMonth = current.month;
         let newYear = current.year;
-
-        // Handle month boundaries
         const monthData = calendar.months?.values?.[newMonth];
         if (newDay > monthData?.days) {
           newDay -= monthData.days;
@@ -1117,15 +886,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         break;
       }
       case 'year': {
-        // Navigate by 9 years (full grid)
         this.viewedDate = { ...current, year: current.year + direction * 9 };
         break;
       }
       default: {
-        // Month view - navigate by one month
         let newMonth = current.month + direction;
         let newYear = current.year;
-
         if (newMonth >= calendar.months.values.length) {
           newMonth = 0;
           newYear++;
@@ -1133,24 +899,30 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           newMonth = calendar.months.values.length - 1;
           newYear--;
         }
-
         this.viewedDate = { year: newYear, month: newMonth, day: 1 };
         break;
       }
     }
-
     await this.render();
   }
 
-  static async _onToday(event, target) {
-    this._viewedDate = null; // Reset to use live game time
+  /**
+   * Reset the view to today's date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onToday(_event, _target) {
+    this._viewedDate = null;
     await this.render();
   }
 
-  static async _onAddNote(event, target) {
-    // Use selected time slot if available, otherwise use target data
+  /**
+   * Add a new note at the selected or targeted date/time.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with date data
+   */
+  static async _onAddNote(_event, target) {
     let day, month, year, hour;
-
     if (this._selectedTimeSlot) {
       ({ day, month, year, hour } = this._selectedTimeSlot);
     } else {
@@ -1159,12 +931,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       year = target.dataset.year;
       hour = 12;
     }
-
-    // Calculate end time (default 1 hour duration)
     const endHour = (parseInt(hour) + 1) % 24;
-    const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day); // Handle day rollover
-
-    // Create note using NoteManager (which creates it as a page in the calendar journal)
+    const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
     const page = await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
@@ -1172,31 +940,27 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: 0 }
       }
     });
-
-    // Clear the selected time slot
     this._selectedTimeSlot = null;
-
-    // Open the note for editing (hook will handle calendar re-render)
     if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
-  static async _onAddNoteToday(event, target) {
-    // Priority: selected time slot > selected date > today
+  /**
+   * Add a new note for today or the selected date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onAddNoteToday(_event, _target) {
     let day, month, year, hour, minute;
-
     if (this._selectedTimeSlot) {
       ({ day, month, year, hour } = this._selectedTimeSlot);
       minute = 0;
     } else if (this._selectedDate) {
-      // Use the selected day in the calendar
       ({ day, month, year } = this._selectedDate);
       hour = 12;
       minute = 0;
     } else {
       const today = game.time.components;
       const calendar = this.calendar;
-
-      // Adjust year for display
       const yearZero = calendar?.years?.yearZero ?? 0;
       year = today.year + yearZero;
       month = today.month;
@@ -1205,11 +969,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       minute = today.minute ?? 0;
     }
 
-    // Calculate end time (default 1 hour duration)
     const endHour = (parseInt(hour) + 1) % 24;
-    const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day); // Handle day rollover
-
-    // Create note using NoteManager (which creates it as a page in the calendar journal)
+    const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
     const page = await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
@@ -1217,29 +978,31 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: parseInt(minute) }
       }
     });
-
-    // Clear the selected time slot
     this._selectedTimeSlot = null;
-
-    // Open the note for editing (hook will handle calendar re-render)
     if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
-  static async _onEditNote(event, target) {
+  /**
+   * Open a note for editing.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with note ID
+   */
+  static async _onEditNote(_event, target) {
     let pageId = target.dataset.noteId;
-
-    // Handle segmented event IDs (e.g., "abc123-week-1" -> "abc123")
     if (pageId.includes('-week-')) pageId = pageId.split('-week-')[0];
-
     const page = game.journal.find((j) => j.pages.get(pageId))?.pages.get(pageId);
     if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
-  static async _onDeleteNote(event, target) {
+  /**
+   * Delete a note after confirmation.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with note ID
+   */
+  static async _onDeleteNote(_event, target) {
     const pageId = target.dataset.noteId;
     const journal = game.journal.find((j) => j.pages.get(pageId));
     const page = journal?.pages.get(pageId);
-
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
@@ -1249,35 +1012,45 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       });
 
       if (confirmed) {
-        // If the journal only has this one page, delete the entire journal entry
         if (journal.pages.size === 1) await journal.delete();
         else await page.delete();
-
         await this.render();
       }
     }
   }
 
-  static async _onChangeView(event, target) {
+  /**
+   * Change the calendar display mode (month/week/year).
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with mode data
+   */
+  static async _onChangeView(_event, target) {
     const mode = target.dataset.mode;
     this._displayMode = mode;
     await this.render();
     this._adjustSizeForView();
   }
 
-  static async _onSelectMonth(event, target) {
+  /**
+   * Select a month from the year view.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with year/month data
+   */
+  static async _onSelectMonth(_event, target) {
     const year = parseInt(target.dataset.year);
     const month = parseInt(target.dataset.month);
-
-    // Switch to month view and navigate to the selected month
     this._displayMode = 'month';
     this.viewedDate = { year, month, day: 1 };
     await this.render();
     this._adjustSizeForView();
   }
 
+  /**
+   * Select a day in the calendar.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element with date data
+   */
   static async _onSelectDay(event, target) {
-    // Check for double-click first (manual detection since re-render breaks native dblclick)
     const wasDoubleClick = await ViewUtils.handleDayClick(event, this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
@@ -1286,51 +1059,51 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       onCreateNote: () => this.render()
     });
     if (wasDoubleClick) return;
-
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
-
-    // Toggle selection - if clicking the same day, deselect it
     if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.day === day) this._selectedDate = null;
     else this._selectedDate = { year, month, day };
-
     await this.render();
   }
 
-  static async _onSetAsCurrentDate(event, target) {
+  /**
+   * Set the selected or viewed date as the current world time.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onSetAsCurrentDate(_event, _target) {
     const calendar = this.calendar;
-    const yearZero = calendar?.years?.yearZero ?? 0;
     const dateToSet = this._selectedDate || this.viewedDate;
     await calendar.jumpToDate({ year: dateToSet.year, month: dateToSet.month, day: dateToSet.day });
     this._selectedDate = null;
     await this.render();
   }
 
-  static async _onSelectTimeSlot(event, target) {
+  /**
+   * Select a time slot in week view.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with time data
+   */
+  static async _onSelectTimeSlot(_event, target) {
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
     const hour = parseInt(target.dataset.hour);
-
-    // Toggle selection - if clicking the same slot, deselect it
     if (this._selectedTimeSlot?.year === year && this._selectedTimeSlot?.month === month && this._selectedTimeSlot?.day === day && this._selectedTimeSlot?.hour === hour) this._selectedTimeSlot = null;
     else this._selectedTimeSlot = { year, month, day, hour };
-
     await this.render();
   }
 
   /**
    * Toggle between full and compact calendar views.
    * Closes this window and opens the compact calendar.
-   * @param event
-   * @param target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   * @todo Do not do inline importing. top level only - validate this scripts-wide
    */
-  static async _onToggleCompact(event, target) {
-    // Close this full calendar
+  static async _onToggleCompact(_event, _target) {
     await this.close();
-
-    // Open or focus the compact calendar
     const { CompactCalendar } = await import('./compact-calendar.mjs');
     const existing = foundry.applications.instances.get('compact-calendar');
     if (existing) existing.render(true, { focus: true });
@@ -1339,10 +1112,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Cycle through weather presets or generate new weather.
-   * @param event
-   * @param target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onOpenWeatherPicker(event, target) {
+  static async _onOpenWeatherPicker(_event, _target) {
     if (!game.user.isGM) return;
     await openWeatherPicker();
   }
@@ -1354,7 +1127,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   _getWeatherContext() {
     const weather = WeatherManager.getCurrentWeather();
     if (!weather) return null;
-
     return {
       id: weather.id,
       label: localize(weather.label),
@@ -1367,10 +1139,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Toggle the search input visibility.
-   * @param event
-   * @param target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onToggleSearch(event, target) {
+  static async _onToggleSearch(_event, _target) {
     this._searchOpen = !this._searchOpen;
     if (!this._searchOpen) {
       this._searchTerm = '';
@@ -1381,10 +1153,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Close the search panel.
-   * @param event
-   * @param target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onCloseSearch(event, target) {
+  static async _onCloseSearch(_event, _target) {
     this._searchTerm = '';
     this._searchResults = null;
     this._searchOpen = false;
@@ -1393,21 +1165,18 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Open a search result (note).
-   * @param event
-   * @param target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with result data
    */
-  static async _onOpenSearchResult(event, target) {
+  static async _onOpenSearchResult(_event, target) {
     const id = target.dataset.id;
     const journalId = target.dataset.journalId;
-
     const page = NoteManager.getFullNote(id);
     if (page) page.sheet.render(true, { mode: 'view' });
     else if (journalId) {
       const journal = game.journal.get(journalId);
       if (journal) journal.sheet.render(true, { pageId: id });
     }
-
-    // Close search after opening result
     this._searchTerm = '';
     this._searchResults = null;
     this._searchOpen = false;
@@ -1416,19 +1185,19 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   /**
    * Open the settings panel.
-   * @param {PointerEvent} event
-   * @param {HTMLElement} target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static _onOpenSettings(event, target) {
+  static _onOpenSettings(_event, _target) {
     new SettingsPanel().render(true);
   }
 
   /**
    * Navigate to a specific month (from clicking other-month day).
-   * @param {PointerEvent} event
-   * @param {HTMLElement} target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element with month/year data
    */
-  static async _onNavigateToMonth(event, target) {
+  static async _onNavigateToMonth(_event, target) {
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
     this.viewedDate = { year, month, day: 1 };

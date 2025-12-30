@@ -1,65 +1,17 @@
 /**
  * Socket communication manager for Calendaria multiplayer synchronization.
- *
- * This module provides real-time synchronization between all connected clients for:
- * - Calendar switches (when GM changes the active calendar)
- * - Date/time changes (when world time advances)
- * - Note updates (when calendar notes are created/updated/deleted)
- * - Clock state changes (for real-time clock start/stop)
- *
- * ## Architecture
- *
- * The socket system uses a "Primary GM" pattern to prevent race conditions:
- * - Only the primary GM broadcasts authoritative updates
- * - Other clients receive and apply these updates locally
- * - Primary GM is determined by lowest user ID among active GMs (or manual override)
- *
- * ## Usage
- *
- * ```javascript
- * // Initialize during module setup (called automatically)
- * CalendariaSocket.initialize();
- *
- * // Emit a calendar switch to all clients
- * CalendariaSocket.emitCalendarSwitch('gregorian');
- *
- * // Emit a note update to all clients
- * CalendariaSocket.emitNoteUpdate('created', noteStub);
- *
- * // Check if current user should broadcast
- * if (CalendariaSocket.isPrimaryGM()) {
- * CalendariaSocket.emitDateChange(worldTime, delta);
- * }
- * ```
- *
- * ## Hooks Fired
- *
- * The socket system fires these hooks for other modules to respond:
- * - `calendaria.remoteDateChange` - When time changes from another client
- * - `calendaria.remoteCalendarSwitch` - When calendar switches from another client
  * @module Socket
  * @author Tyler
  */
 
-import { MODULE, SETTINGS, SOCKET_TYPES, HOOKS } from '../constants.mjs';
-import { log } from './logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
+import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { log } from './logger.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
  * Manages socket communication and determines the primary GM for authoritative updates.
- * @example
- * // Listen for remote date changes
- * Hooks.on('calendaria.remoteDateChange', (data) => {
- *   console.log(`Time changed to ${data.worldTime}`);
- * });
- * @example
- * // Broadcast a calendar switch (GM only)
- * if (game.user.isGM) {
- *   CalendariaSocket.emitCalendarSwitch('exandrian');
- * }
  */
 export class CalendariaSocket {
   /**
@@ -114,16 +66,9 @@ export class CalendariaSocket {
    * Should only be called by GM when switching the active calendar.
    * @param {string} calendarId - The ID of the calendar to switch to
    * @returns {void}
-   * @example
-   * // Switch all clients to the Exandrian calendar
-   * CalendariaSocket.emitCalendarSwitch('exandrian');
    */
   static emitCalendarSwitch(calendarId) {
-    if (!game.user.isGM) {
-      log(2, 'Only GM can emit calendar switch');
-      return;
-    }
-
+    if (!game.user.isGM) return;
     this.emit(SOCKET_TYPES.CALENDAR_SWITCH, { calendarId });
   }
 
@@ -133,18 +78,9 @@ export class CalendariaSocket {
    * @param {number} worldTime - The new world time in seconds
    * @param {number} delta - The time delta in seconds
    * @returns {void}
-   * @example
-   * // Broadcast time advancement
-   * if (CalendariaSocket.isPrimaryGM()) {
-   *   CalendariaSocket.emitDateChange(game.time.worldTime, 3600);
-   * }
    */
   static emitDateChange(worldTime, delta) {
-    if (!this.isPrimaryGM()) {
-      log(3, 'Skipping date change emit - not primary GM');
-      return;
-    }
-
+    if (!this.isPrimaryGM()) return;
     this.emit(SOCKET_TYPES.DATE_CHANGE, { worldTime, delta });
   }
 
@@ -157,23 +93,9 @@ export class CalendariaSocket {
    * @param {string} [noteData.name] - The note name (for created/updated)
    * @param {object} [noteData.flagData] - The note's calendar data (for created/updated)
    * @returns {void}
-   * @example
-   * // Broadcast a new note
-   * CalendariaSocket.emitNoteUpdate('created', {
-   *   id: page.id,
-   *   name: page.name,
-   *   flagData: page.system
-   * });
-   * @example
-   * // Broadcast a note deletion
-   * CalendariaSocket.emitNoteUpdate('deleted', { id: pageId });
    */
   static emitNoteUpdate(action, noteData) {
-    if (!game.user.isGM) {
-      log(2, 'Only GM can emit note updates');
-      return;
-    }
-
+    if (!game.user.isGM) return;
     this.emit(SOCKET_TYPES.NOTE_UPDATE, { action, ...noteData });
   }
 
@@ -183,16 +105,9 @@ export class CalendariaSocket {
    * @param {boolean} running - Whether the real-time clock is running
    * @param {number} [ratio] - The real-time to game-time ratio
    * @returns {void}
-   * @example
-   * // Start the clock for all clients
-   * CalendariaSocket.emitClockUpdate(true, 60); // 1 minute real = 1 hour game
    */
   static emitClockUpdate(running, ratio = 1) {
-    if (!this.isPrimaryGM()) {
-      log(3, 'Skipping clock update emit - not primary GM');
-      return;
-    }
-
+    if (!this.isPrimaryGM()) return;
     this.emit(SOCKET_TYPES.CLOCK_UPDATE, { running, ratio });
   }
 
@@ -251,11 +166,7 @@ export class CalendariaSocket {
    */
   static #handleCalendarSwitch(data) {
     const { calendarId } = data;
-    if (!calendarId) {
-      log(2, 'Invalid calendar switch data - missing calendarId');
-      return;
-    }
-
+    if (!calendarId) return;
     log(3, `Handling remote calendar switch to: ${calendarId}`);
     CalendarManager.handleRemoteSwitch(calendarId);
   }
@@ -271,8 +182,6 @@ export class CalendariaSocket {
    */
   static #handleDateChange(data) {
     log(3, 'Handling remote date change', data);
-
-    // Emit hook for other modules to respond
     Hooks.callAll(HOOKS.REMOTE_DATE_CHANGE, data);
   }
 
@@ -289,24 +198,10 @@ export class CalendariaSocket {
    */
   static #handleNoteUpdate(data) {
     const { action, id } = data;
-
-    if (!action || !id) {
-      log(2, 'Invalid note update data - missing action or id');
-      return;
-    }
-
+    if (!action || !id) return;
     log(3, `Handling remote note ${action}: ${id}`);
-
-    // The NoteManager already listens to Foundry's document hooks
-    // which fire for all clients when documents change.
-    // This socket message is primarily for:
-    // 1. Triggering immediate UI updates on remote clients
-    // 2. Future use cases where we need to sync data not stored in documents
-
-    // Re-render any open calendar applications
     for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'CalendarApplication') app.render();
 
-    // Emit appropriate hook based on action
     switch (action) {
       case 'created':
         Hooks.callAll(HOOKS.NOTE_CREATED, data);
@@ -331,10 +226,7 @@ export class CalendariaSocket {
    */
   static #handleClockUpdate(data) {
     const { running, ratio } = data;
-
     log(3, `Handling remote clock update: running=${running}, ratio=${ratio}`);
-
-    // Emit hook for TimeKeeper or other modules to respond
     Hooks.callAll('calendaria.clockUpdate', { running, ratio });
   }
 
@@ -368,60 +260,29 @@ export class CalendariaSocket {
    * 1. First checks the `primaryGM` setting for a manual override
    * 2. If not set, automatically selects the active GM with the lowest user ID
    * @returns {boolean} True if the current user is the primary GM
-   * @example
-   * // Only broadcast if we're the primary GM
-   * if (CalendariaSocket.isPrimaryGM()) {
-   *   CalendariaSocket.emitDateChange(worldTime, delta);
-   * }
-   * @example
-   * // Check primary GM status for UI display
-   * const statusText = CalendariaSocket.isPrimaryGM()
-   *   ? 'Primary GM (broadcasting)'
-   *   : 'Secondary GM (receiving)';
    */
   static isPrimaryGM() {
-    // Non-GMs are never primary
     if (!game.user.isGM) return false;
-
-    // Check for manual override setting
     const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-
     if (primaryGMOverride) return primaryGMOverride === game.user.id;
-
-    // Fallback to automatic election: lowest user ID among active GMs
     const activeGMs = game.users.filter((u) => u.isGM && u.active);
-
-    if (activeGMs.length === 0) {
-      log(2, 'No active GMs found for primary GM election');
-      return false;
-    }
-
+    if (activeGMs.length === 0) return false;
     const primaryGM = activeGMs.sort((a, b) => a.id.localeCompare(b.id))[0];
     const isPrimary = primaryGM.id === game.user.id;
-
     log(3, `Primary GM check (automatic): ${isPrimary} (primary: ${primaryGM.name}, current: ${game.user.name})`);
-
     return isPrimary;
   }
 
   /**
    * Get the current primary GM user.
    * Useful for displaying which GM is currently authoritative.
-   * @returns {User|null} The primary GM user, or null if none active
-   * @example
-   * // Display primary GM in settings
-   * const primary = CalendariaSocket.getPrimaryGM();
-   * console.log(`Primary GM: ${primary?.name ?? 'None'}`);
+   * @returns {object|null} The primary GM user, or null if none active
    */
   static getPrimaryGM() {
-    // Check for manual override
     const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
     if (primaryGMOverride) return game.users.get(primaryGMOverride) ?? null;
-
-    // Automatic election
     const activeGMs = game.users.filter((u) => u.isGM && u.active);
     if (activeGMs.length === 0) return null;
-
     return activeGMs.sort((a, b) => a.id.localeCompare(b.id))[0];
   }
 }

@@ -5,10 +5,10 @@
  * @author Tyler
  */
 
-import { MODULE, TEMPLATES, HOOKS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { WEATHER_CATEGORIES, getPresetsByCategory } from './weather-presets.mjs';
+import { HOOKS, TEMPLATES } from '../constants.mjs';
+import { localize } from '../utils/localization.mjs';
 import WeatherManager from './weather-manager.mjs';
+import { WEATHER_CATEGORIES, getPresetsByCategory } from './weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -30,38 +30,25 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   /** @override */
-  static PARTS = {
-    content: { template: TEMPLATES.WEATHER.PICKER }
-  };
+  static PARTS = { content: { template: TEMPLATES.WEATHER.PICKER } };
 
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const customPresets = WeatherManager.getCustomPresets();
-
-    // Build categories with presets
     context.categories = [];
     const categoryIds = ['standard', 'severe', 'environmental', 'fantasy'];
-
     for (const categoryId of categoryIds) {
       const category = WEATHER_CATEGORIES[categoryId];
       const presets = getPresetsByCategory(categoryId, customPresets);
       if (presets.length === 0) continue;
-
       context.categories.push({
         id: categoryId,
         label: localize(category.label),
-        presets: presets.map((p) => ({
-          id: p.id,
-          label: localize(p.label),
-          description: p.description ? localize(p.description) : localize(p.label),
-          icon: p.icon,
-          color: p.color
-        }))
+        presets: presets.map((p) => ({ id: p.id, label: localize(p.label), description: p.description ? localize(p.description) : localize(p.label), icon: p.icon, color: p.color }))
       });
     }
 
-    // Custom presets
     if (customPresets.length > 0) {
       context.categories.push({
         id: 'custom',
@@ -79,10 +66,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Select a specific weather preset.
-   * @param {PointerEvent} event
-   * @param {HTMLElement} target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
-  static async _onSelectWeather(event, target) {
+  static async _onSelectWeather(_event, target) {
     const presetId = target.dataset.presetId;
     await WeatherManager.setWeather(presetId);
     await this.close();
@@ -91,10 +78,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Generate random weather.
-   * @param {PointerEvent} event
-   * @param {HTMLElement} target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onRandomWeather(event, target) {
+  static async _onRandomWeather(_event, _target) {
     await WeatherManager.generateAndSetWeather();
     await this.close();
     Hooks.callAll(HOOKS.WEATHER_CHANGE);
@@ -113,5 +100,3 @@ export async function openWeatherPicker() {
   }
   new WeatherPickerApp().render(true);
 }
-
-export default { openWeatherPicker };

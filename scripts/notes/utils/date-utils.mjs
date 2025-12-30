@@ -17,16 +17,12 @@ export function compareDates(date1, date2) {
   if (date1.year !== date2.year) return date1.year < date2.year ? -1 : 1;
   if (date1.month !== date2.month) return date1.month < date2.month ? -1 : 1;
   if (date1.day !== date2.day) return date1.day < date2.day ? -1 : 1;
-
-  // Compare time if present
   const hour1 = date1.hour ?? 0;
   const hour2 = date2.hour ?? 0;
   if (hour1 !== hour2) return hour1 < hour2 ? -1 : 1;
-
   const minute1 = date1.minute ?? 0;
   const minute2 = date2.minute ?? 0;
   if (minute1 !== minute2) return minute1 < minute2 ? -1 : 1;
-
   return 0;
 }
 
@@ -62,31 +58,23 @@ export function compareDays(date1, date2) {
 export function daysBetween(startDate, endDate) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return 0;
-
   try {
     const monthDays = calendar.months?.values || [];
-
-    // Convert day-of-month to day-of-year (componentsToTime expects day-of-year)
     let startDayOfYear = (startDate.day ?? 1) - 1;
     for (let i = 0; i < startDate.month && i < monthDays.length; i++) startDayOfYear += monthDays[i]?.days || 30;
     let endDayOfYear = (endDate.day ?? 1) - 1;
     for (let i = 0; i < endDate.month && i < monthDays.length; i++) endDayOfYear += monthDays[i]?.days || 30;
-
     const startComponents = { year: startDate.year, day: startDayOfYear, hour: 0, minute: 0, second: 0 };
     const endComponents = { year: endDate.year, day: endDayOfYear, hour: 0, minute: 0, second: 0 };
-
-    // Convert to seconds using calendar's time system
     const startTime = calendar.componentsToTime(startComponents);
     const endTime = calendar.componentsToTime(endComponents);
-
-    // Convert seconds difference to days
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
     return Math.floor((endTime - startTime) / secondsPerDay);
   } catch (error) {
-    console.warn('Error calculating days between dates:', error);
+    log(1, 'Error calculating days between dates:', error);
     return 0;
   }
 }
@@ -118,40 +106,27 @@ export function dayOfWeek(date) {
   if (!calendar) return 0;
 
   try {
-    // Check if the month has a fixed startingWeekday
     const monthData = calendar.months?.values?.[date.month];
     if (monthData?.startingWeekday != null) {
       const daysInWeek = calendar.days?.values?.length || 7;
       const dayIndex = (date.day ?? 1) - 1;
-
-      // Adjust for non-counting festivals even within fixed-weekday months
       const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({ year: date.year - (calendar.years?.yearZero ?? 0), month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
       return (monthData.startingWeekday + dayIndex - nonCountingDays + daysInWeek * 100) % daysInWeek;
     }
 
-    // Convert display year to internal year (subtract yearZero)
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = date.year - yearZero;
-
-    // Convert day of month (1-indexed) to day of year (0-indexed)
-    // componentsToTime expects day as day-of-year, ignoring month
-    let dayOfYear = (date.day ?? 1) - 1; // Convert 1-indexed to 0-indexed
+    let dayOfYear = (date.day ?? 1) - 1;
     const monthDays = calendar.months?.values || [];
     for (let i = 0; i < date.month && i < monthDays.length; i++) dayOfYear += monthDays[i]?.days || 30;
-
-    // Count non-counting festival days before this date to adjust weekday calculation
     const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({ year: internalYear, month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
-
-    // Adjust dayOfYear by subtracting non-counting days
     const adjustedDayOfYear = dayOfYear - nonCountingDays;
-
     const components = { year: internalYear, day: adjustedDayOfYear, hour: 0, minute: 0, second: 0 };
     const time = calendar.componentsToTime(components);
     const timeComponents = calendar.timeToComponents(time);
-
     return timeComponents.dayOfWeek ?? 0;
   } catch (error) {
-    console.warn('Error calculating day of week:', error);
+    log(1, 'Error calculating day of week:', error);
     return 0;
   }
 }
@@ -167,8 +142,7 @@ export function addDays(date, days) {
   if (!calendar) return date;
 
   try {
-    // Convert day-of-month to day-of-year (componentsToTime expects day-of-year)
-    let dayOfYear = date.day - 1; // Convert 1-indexed to 0-indexed
+    let dayOfYear = date.day - 1;
     const monthDays = calendar.months?.values || [];
     for (let i = 0; i < date.month && i < monthDays.length; i++) dayOfYear += monthDays[i]?.days || 30;
     const components = { year: date.year, day: dayOfYear, hour: date.hour ?? 0, minute: date.minute ?? 0, second: 0 };
@@ -181,7 +155,7 @@ export function addDays(date, days) {
     const newComponents = calendar.timeToComponents(newTime);
     return { year: newComponents.year, month: newComponents.month, day: newComponents.dayOfMonth + 1, hour: newComponents.hour, minute: newComponents.minute };
   } catch (error) {
-    console.warn('Error adding days to date:', error);
+    log(1, 'Error adding days to date:', error);
     return date;
   }
 }
@@ -195,13 +169,9 @@ export function addDays(date, days) {
 export function addMonths(date, months) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return date;
-
   let newYear = date.year;
   let newMonth = date.month + months;
-
   const monthsPerYear = calendar.months?.values?.length || 12;
-
-  // Handle month overflow/underflow
   while (newMonth >= monthsPerYear) {
     newMonth -= monthsPerYear;
     newYear++;
@@ -212,11 +182,9 @@ export function addMonths(date, months) {
     newYear--;
   }
 
-  // Clamp day to valid range for new month
   const monthData = calendar.months?.values?.[newMonth];
   const maxDays = monthData?.days ?? 30;
   const newDay = Math.min(date.day, maxDays);
-
   return { year: newYear, month: newMonth, day: newDay, hour: date.hour, minute: date.minute };
 }
 
@@ -229,14 +197,10 @@ export function addMonths(date, months) {
 export function addYears(date, years) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return date;
-
   const newYear = date.year + years;
-
-  // Clamp day to valid range (handles Feb 29 in leap years)
   const monthData = calendar.months?.values?.[date.month];
   const maxDays = monthData?.days ?? 30;
   const newDay = Math.min(date.day, maxDays);
-
   return { year: newYear, month: date.month, day: newDay, hour: date.hour, minute: date.minute };
 }
 
@@ -261,25 +225,16 @@ export function isValidDate(date) {
   if (typeof date.year !== 'number') return false;
   if (typeof date.month !== 'number') return false;
   if (typeof date.day !== 'number') return false;
-
   const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return true; // Can't validate without calendar
-
-  // Check month range
+  if (!calendar) return true;
   if (date.month < 0 || date.month >= calendar.months.length) return false;
-
-  // Check day range
   const monthData = calendar.months[date.month];
   const maxDays = monthData?.days ?? 30;
   if (date.day < 1 || date.day > maxDays) return false;
-
-  // Check time if present
   if (date.hour !== undefined) {
     const hoursPerDay = calendar.hours ?? 24;
     if (date.hour < 0 || date.hour >= hoursPerDay) return false;
   }
-
   if (date.minute !== undefined) if (date.minute < 0 || date.minute >= 60) return false;
-
   return true;
 }
