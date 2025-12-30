@@ -1,47 +1,38 @@
-<section
-    class="tab {{tab.cssClass}}"
-    data-tab="{{tab.id}}"
-    data-group="{{tab.group}}"
->
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-    {{!-- Chat Timestamps --}}
-    {{#if isGM}}
+  {{!-- Chat Timestamps --}}
+  {{#if isGM}}
     <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}</legend>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}</legend>
 
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
-            <div class="form-fields">
-                <select name="chatTimestampMode">
-                    {{#each chatTimestampModeOptions}}
-                    <option
-                        value="{{this.value}}"
-                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                    {{/each}}
-                </select>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampMode.Hint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
+        <div class="form-fields">
+          <select name="chatTimestampMode">
+            {{#each chatTimestampModeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
         </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampMode.Hint"}}</p>
+      </div>
 
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
-            <div class="form-fields">
-                <input
-                    type="checkbox"
-                    name="chatTimestampShowTime"
-                    {{#if chatTimestampShowTime}}checked{{/if}}>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="chatTimestampShowTime" {{#if chatTimestampShowTime}}checked{{/if}}>
         </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
+      </div>
     </fieldset>
-    {{/if}}
+  {{/if}}
 
-    {{!-- Player Message --}}
-    {{#unless isGM}}
+  {{!-- Player Message --}}
+  {{#unless isGM}}
     <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>{{localize "CALENDARIA.SettingsPanel.ChatTab.PlayerMessage"}}</p>
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.ChatTab.PlayerMessage"}}</p>
     </div>
-    {{/unless}}
+  {{/unless}}
 
 </section>

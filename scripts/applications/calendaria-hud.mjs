@@ -1558,9 +1558,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
 
     // Build month options
-    const monthOptions = calendar.months.values
-      .map((m, i) => `<option value="${i}" ${i === components.month ? 'selected' : ''}>${game.i18n.localize(m.name)}</option>`)
-      .join('');
+    const monthOptions = calendar.months.values.map((m, i) => `<option value="${i}" ${i === components.month ? 'selected' : ''}>${localize(m.name)}</option>`).join('');
 
     // Calculate days in current month
     const daysInMonth = calendar.months.values[components.month]?.days ?? 30;
@@ -1572,25 +1570,25 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const content = `
       <form class="set-date-form">
         <div class="form-group">
-          <label>${game.i18n.localize('CALENDARIA.Common.Year')}</label>
+          <label>${localize('CALENDARIA.Common.Year')}</label>
           <input type="number" name="year" value="${components.year + yearZero}" step="1">
         </div>
         <div class="form-group">
-          <label>${game.i18n.localize('CALENDARIA.Common.Month')}</label>
+          <label>${localize('CALENDARIA.Common.Month')}</label>
           <select name="month">${monthOptions}</select>
         </div>
         <div class="form-group">
-          <label>${game.i18n.localize('CALENDARIA.Common.Day')}</label>
+          <label>${localize('CALENDARIA.Common.Day')}</label>
           <select name="day">${dayOptions}</select>
         </div>
       </form>
     `;
 
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: game.i18n.localize('CALENDARIA.HUD.SetDate') },
+      window: { title: localize('CALENDARIA.HUD.SetDate') },
       content,
       ok: {
-        label: game.i18n.localize('CALENDARIA.Common.Set'),
+        label: localize('CALENDARIA.Common.Set'),
         icon: 'fas fa-calendar-check',
         callback: (event, button, dialog) => {
           const form = button.form;

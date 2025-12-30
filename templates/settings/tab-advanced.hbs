@@ -1,95 +1,96 @@
-<section
-    class="tab {{tab.cssClass}}"
-    data-tab="{{tab.id}}"
-    data-group="{{tab.group}}"
->
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-    {{!-- Primary GM --}}
+  {{!-- Primary GM --}}
+  {{#if isGM}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
+
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
+        <div class="form-fields">
+          <select name="primaryGM">
+            {{#each primaryGMOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{!-- Logging --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.Logger.Name"}}</label>
+      <div class="form-fields">
+        <select name="loggingLevel">
+          {{#each loggingLevelOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.Logger.Hint"}}</p>
+    </div>
+
     {{#if isGM}}
-    <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
-
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
-            <div class="form-fields">
-                <select name="primaryGM">
-                    {{#each primaryGMOptions}}
-                    <option
-                        value="{{this.value}}"
-                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                    {{/each}}
-                </select>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
         </div>
-    </fieldset>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
+      </div>
     {{/if}}
+  </fieldset>
 
-    {{!-- Logging --}}
-    <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}</legend>
+  {{!-- Module Info --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.About"}}</legend>
 
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.Settings.Logger.Name"}}</label>
-            <div class="form-fields">
-                <select name="loggingLevel">
-                    {{#each loggingLevelOptions}}
-                    <option
-                        value="{{this.value}}"
-                        {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                    {{/each}}
-                </select>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.Settings.Logger.Hint"}}</p>
+    <div class="about-header">
+      <div class="module-info">
+        <div class="info-row">
+          <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Version"}}</span>
+          <span class="info-value">{{moduleVersion}}</span>
         </div>
-
-        {{#if isGM}}
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
-            <div class="form-fields">
-                <input
-                    type="checkbox"
-                    name="devMode"
-                    {{#if devMode}}checked{{/if}}>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
+        <div class="info-row">
+          <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Author"}}</span>
+          <span class="info-value">Tyler</span>
         </div>
+        {{#if translations}}
+          <div class="info-row">
+            <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Translations"}}</span>
+            <span class="info-value">{{translations}}</span>
+          </div>
         {{/if}}
-    </fieldset>
+      </div>
+      <a href="https://ko-fi.com/sayshal" target="_blank" class="kofi-button">
+        <i class="fas fa-mug-hot"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.Support"}}
+      </a>
+    </div>
 
-    {{!-- Module Info --}}
-    <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.About"}}</legend>
-
-        <div class="module-info">
-            <div class="info-row">
-                <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Version"}}</span>
-                <span class="info-value">{{moduleVersion}}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Author"}}</span>
-                <span class="info-value">Tyler</span>
-            </div>
-        </div>
-
-        <div class="form-group stacked button-row">
-            <a
-                href="https://github.com/your-repo/calendaria"
-                target="_blank"
-                class="link-button"
-            >
-                <i class="fab fa-github"></i>
-                {{localize "CALENDARIA.SettingsPanel.About.GitHub"}}
-            </a>
-            <a
-                href="https://github.com/your-repo/calendaria/wiki"
-                target="_blank"
-                class="link-button"
-            >
-                <i class="fas fa-book"></i>
-                {{localize "CALENDARIA.SettingsPanel.About.Documentation"}}
-            </a>
-        </div>
-    </fieldset>
+    <div class="form-group stacked button-row">
+      <a href="https://discord.gg/Sa4wBuc8Cu" target="_blank" class="link-button">
+        <i class="fab fa-discord"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.Discord"}}
+      </a>
+      <a href="https://github.com/Sayshal/calendaria" target="_blank" class="link-button">
+        <i class="fab fa-github"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.GitHub"}}
+      </a>
+      <a href="https://github.com/Sayshal/calendaria/wiki" target="_blank" class="link-button">
+        <i class="fas fa-book"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.Documentation"}}
+      </a>
+      <a href="https://github.com/Sayshal/calendaria/issues" target="_blank" class="link-button">
+        <i class="fas fa-bug"></i>
+        {{localize "CALENDARIA.SettingsPanel.About.ReportBug"}}
+      </a>
+    </div>
+  </fieldset>
 
 </section>

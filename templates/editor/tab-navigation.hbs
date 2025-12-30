@@ -1,17 +1,10 @@
-<nav
-    class="sheet-tabs tabs{{#if verticalTabs}} vertical{{/if}}"
-    aria-roledescription="{{localize "SHEETS.FormNavLabel"}}"
->
-    {{#each tabs as |tab|}}
-    <a
-        data-action="tab"
-        data-group="{{tab.group}}"
-        data-tab="{{tab.id}}"
-        {{#if tab.cssClass}}class="{{tab.cssClass}}"{{/if}}
-        data-tooltip="{{#if tab.tooltip}}{{tab.tooltip}}{{else}}{{localize tab.label}}{{/if}}"
-    >
-        {{#if tab.label}}<span>{{localize tab.label}}</span>{{/if}}
-        {{#if tab.icon}}<i class="{{tab.icon}}" inert></i>{{/if}}
+<nav class="sheet-tabs tabs{{#if verticalTabs}} vertical{{/if}}"
+  aria-roledescription="{{localize "SHEETS.FormNavLabel"}}">
+  {{#each tabs as |tab|}}
+    <a data-action="tab" data-group="{{tab.group}}" data-tab="{{tab.id}}" {{#if tab.cssClass}}class="{{tab.cssClass}}"
+      {{/if}} data-tooltip="{{#if tab.tooltip}}{{tab.tooltip}}{{else}}{{localize tab.label}}{{/if}}">
+      {{#if tab.label}}<span>{{localize tab.label}}</span>{{/if}}
+      {{#if tab.icon}}<i class="{{tab.icon}}" inert></i>{{/if}}
     </a>
-    {{/each}}
+  {{/each}}
 </nav>

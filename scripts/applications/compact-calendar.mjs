@@ -82,6 +82,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {object[]|null} Current search results */
   #searchResults = null;
 
+  /** @type {Function|null} Click-outside handler for search panel */
+  #clickOutsideHandler = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'compact-calendar',
@@ -503,7 +506,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Search input listener
-    const searchInput = this.element.querySelector('.compact-search-panel .search-input');
+    const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
     if (searchInput) {
       if (this.#searchOpen) searchInput.focus();
 
@@ -525,9 +528,20 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
-    // Position search panel if open
+    // Position search panel and add click-outside handler if open
     if (this.#searchOpen) {
       this.#positionSearchPanel();
+      const panel = this.element.querySelector('.calendaria-hud-search-panel');
+      if (panel && !this.#clickOutsideHandler) {
+        setTimeout(() => {
+          this.#clickOutsideHandler = (event) => {
+            if (!panel.contains(event.target) && !this.element.contains(event.target)) {
+              this.#closeSearch();
+            }
+          };
+          document.addEventListener('mousedown', this.#clickOutsideHandler);
+        }, 100);
+      }
     }
 
     // Time controls auto-hide (GM only)
@@ -614,6 +628,12 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
+
+    // Remove click-outside handler
+    if (this.#clickOutsideHandler) {
+      document.removeEventListener('mousedown', this.#clickOutsideHandler);
+      this.#clickOutsideHandler = null;
+    }
 
     await super._onClose(options);
   }
@@ -1212,7 +1232,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update search results without full re-render.
    */
   #updateSearchResults() {
-    const panel = this.element.querySelector('.compact-search-panel');
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
 
     const resultsContainer = panel.querySelector('.search-panel-results');
@@ -1239,7 +1259,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Position search panel with edge awareness.
    */
   #positionSearchPanel() {
-    const panel = this.element.querySelector('.compact-search-panel');
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
     const button = this.element.querySelector('[data-action="toggleSearch"]');
     if (!panel || !button) return;
 
@@ -1275,6 +1295,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Close search and clean up.
    */
   #closeSearch() {
+    if (this.#clickOutsideHandler) {
+      document.removeEventListener('mousedown', this.#clickOutsideHandler);
+      this.#clickOutsideHandler = null;
+    }
     this.#searchTerm = '';
     this.#searchResults = null;
     this.#searchOpen = false;

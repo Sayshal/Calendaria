@@ -1,57 +1,53 @@
-<section
-    class="tab {{tab.cssClass}}"
-    data-tab="{{tab.id}}"
-    data-group="{{tab.group}}"
->
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-    {{!-- Macro Triggers --}}
-    {{#if isGM}}
+  {{!-- Macro Triggers --}}
+  {{#if isGM}}
     <fieldset>
-        <legend>{{localize "CALENDARIA.Settings.MacroTriggers.Name"}}</legend>
+      <legend>{{localize "CALENDARIA.Settings.MacroTriggers.Name"}}</legend>
 
-        {{#if hasMacroTriggers}}
+      {{#if hasMacroTriggers}}
         <p class="hint section-hint success">
-            <i class="fas fa-check-circle"></i>
-            {{localize "CALENDARIA.SettingsPanel.MacroTriggers.Active"}}
+          <i class="fas fa-check-circle"></i>
+          {{localize "CALENDARIA.SettingsPanel.MacroTriggers.Active"}}
         </p>
-        {{else}}
+      {{else}}
         <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.MacroTriggers.None"}}</p>
-        {{/if}}
+      {{/if}}
 
-        <p class="hint">{{localize "CALENDARIA.Settings.MacroTriggers.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.MacroTriggers.Hint"}}</p>
 
-        <div class="form-group stacked button-row">
-            <button type="button" data-action="openMacroTriggers">
-                <i class="fas fa-bolt"></i>
-                {{localize "CALENDARIA.Settings.MacroTriggers.Label"}}
-            </button>
-        </div>
+      <div class="form-group stacked button-row">
+        <button type="button" data-action="openMacroTriggers">
+          <i class="fas fa-bolt"></i>
+          {{localize "CALENDARIA.Settings.MacroTriggers.Label"}}
+        </button>
+      </div>
     </fieldset>
 
     <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.AutomationInfo"}}</legend>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.AutomationInfo"}}</legend>
 
-        <div class="automation-info">
-            <h4>{{localize "CALENDARIA.SettingsPanel.Automation.AvailableTriggers"}}</h4>
-            <ul class="trigger-list">
-                <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dawn"}}</li>
-                <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.Common.Midday"}}</li>
-                <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dusk"}}</li>
-                <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.Common.Midnight"}}</li>
-                <li><i class="fas fa-calendar-day"></i> {{localize "CALENDARIA.Common.NewDay"}}</li>
-                <li><i class="fas fa-leaf"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Season"}}</li>
-                <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.MoonPhase"}}</li>
-            </ul>
-        </div>
+      <div class="automation-info">
+        <h4>{{localize "CALENDARIA.SettingsPanel.Automation.AvailableTriggers"}}</h4>
+        <ul class="trigger-list">
+          <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dawn"}}</li>
+          <li><i class="fas fa-sun"></i> {{localize "CALENDARIA.Common.Midday"}}</li>
+          <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Dusk"}}</li>
+          <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.Common.Midnight"}}</li>
+          <li><i class="fas fa-calendar-day"></i> {{localize "CALENDARIA.Common.NewDay"}}</li>
+          <li><i class="fas fa-leaf"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.Season"}}</li>
+          <li><i class="fas fa-moon"></i> {{localize "CALENDARIA.SettingsPanel.Automation.Trigger.MoonPhase"}}</li>
+        </ul>
+      </div>
     </fieldset>
-    {{/if}}
+  {{/if}}
 
-    {{!-- Player Message --}}
-    {{#unless isGM}}
+  {{!-- Player Message --}}
+  {{#unless isGM}}
     <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>{{localize "CALENDARIA.SettingsPanel.MacrosTab.PlayerMessage"}}</p>
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.MacrosTab.PlayerMessage"}}</p>
     </div>
-    {{/unless}}
+  {{/unless}}
 
 </section>

@@ -1417,21 +1417,23 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Build dialog content
     const rows = month.weekdays.map((wd, i) => `
-      <div class="custom-weekday-row flexrow">
+      <div class="custom-weekday-row">
         <input type="text" name="weekday-${i}-name" value="${wd.name}" placeholder="${localize('CALENDARIA.Common.Name')}">
         <input type="text" name="weekday-${i}-abbr" value="${wd.abbreviation}" placeholder="${localize('CALENDARIA.Common.Abbreviation')}">
-        <label class="rest-day-toggle">
-          <input type="checkbox" name="weekday-${i}-rest" ${wd.isRestDay ? 'checked' : ''}>
-          ${localize('CALENDARIA.Common.RestDay')}
-        </label>
+        <input type="checkbox" name="weekday-${i}-rest" ${wd.isRestDay ? 'checked' : ''}>
       </div>
     `).join('');
 
     const content = `
-      <form class="custom-weekdays-dialog">
-        <p class="hint">${localize('CALENDARIA.Editor.Month.CustomWeekdaysHint')}</p>
-        <div class="custom-weekdays-list">${rows}</div>
-      </form>
+      <p class="hint">${localize('CALENDARIA.Editor.Month.CustomWeekdaysHint')}</p>
+      <div class="custom-weekdays-list">
+        <div class="custom-weekday-header">
+          <span>${localize('CALENDARIA.Common.Weekday')}</span>
+          <span>${localize('CALENDARIA.Common.Abbreviation')}</span>
+          <span>${localize('CALENDARIA.Common.RestDay')}</span>
+        </div>
+        ${rows}
+      </div>
     `;
 
     const editor = this;

@@ -31,6 +31,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     this._searchTerm = '';
     this._searchResults = null;
     this._searchOpen = false;
+    this._clickOutsideHandler = null;
   }
 
   static DEFAULT_OPTIONS = {
@@ -60,8 +61,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
   static PARTS = {
     header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER },
-    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT },
-    search: { template: TEMPLATES.SEARCH.PANEL }
+    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT }
   };
 
   get title() {
@@ -854,9 +854,21 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       });
     }
 
-    // Position search panel if open
+    // Position search panel and add click-outside handler if open
     if (this._searchOpen) {
       this._positionSearchPanel();
+      const panel = this.element.querySelector('.calendaria-hud-search-panel');
+      const button = this.element.querySelector('.search-toggle');
+      if (panel && !this._clickOutsideHandler) {
+        setTimeout(() => {
+          this._clickOutsideHandler = (event) => {
+            if (!panel.contains(event.target) && !button?.contains(event.target)) {
+              this._closeSearch();
+            }
+          };
+          document.addEventListener('mousedown', this._clickOutsideHandler);
+        }, 100);
+      }
     }
   }
 
@@ -864,69 +876,53 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    * Update search results without full re-render.
    */
   _updateSearchResults() {
-    const panel = this.element.querySelector('.calendaria-search-panel');
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
 
-    const resultsContainer = panel.querySelector('.search-results');
+    const resultsContainer = panel.querySelector('.search-panel-results');
     if (!resultsContainer) return;
 
     if (this._searchResults?.length) {
-      resultsContainer.innerHTML = `<ul class="result-list">${this._searchResults
+      resultsContainer.innerHTML = this._searchResults
         .map(
           (r) => `
-        <li class="result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
+        <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
           <span class="result-name">${r.name}</span>
           ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-        </li>`
+        </div>`
         )
-        .join('')}</ul>`;
+        .join('');
+      resultsContainer.classList.add('has-results');
     } else if (this._searchTerm?.length >= 2) {
-      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>${localize('CALENDARIA.Search.NoResults')}</p></div>`;
+      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
+      resultsContainer.classList.remove('has-results');
     } else {
       resultsContainer.innerHTML = '';
+      resultsContainer.classList.remove('has-results');
     }
   }
 
   /**
-   * Position search panel relative to search button with edge awareness.
+   * Position search panel - CSS handles positioning, this just sets dimensions.
    */
   _positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-search-panel');
-    const button = this.element.querySelector('.search-toggle');
-    if (!panel || !button) return;
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    if (!panel) return;
 
-    const buttonRect = button.getBoundingClientRect();
-    const panelWidth = 280;
-    const panelMaxHeight = 350;
-
-    // Calculate position - prefer below button, align left
-    let left = buttonRect.left;
-    let top = buttonRect.bottom + 4;
-
-    // Edge awareness - check right edge
-    if (left + panelWidth > window.innerWidth - 10) {
-      left = window.innerWidth - panelWidth - 10;
-    }
-
-    // Edge awareness - check bottom edge, flip above if needed
-    if (top + panelMaxHeight > window.innerHeight - 10) {
-      top = buttonRect.top - panelMaxHeight - 4;
-    }
-
-    // Ensure not off left edge
-    left = Math.max(10, left);
-
-    panel.style.position = 'fixed';
-    panel.style.left = `${left}px`;
-    panel.style.top = `${top}px`;
-    panel.style.width = `${panelWidth}px`;
-    panel.style.maxHeight = `${panelMaxHeight}px`;
+    // CSS handles position (absolute, centered below header)
+    // Just set dimensions here
+    panel.style.width = '280px';
+    panel.style.maxHeight = '350px';
   }
 
   /**
    * Close search and clean up.
    */
   _closeSearch() {
+    if (this._clickOutsideHandler) {
+      document.removeEventListener('mousedown', this._clickOutsideHandler);
+      this._clickOutsideHandler = null;
+    }
     this._searchTerm = '';
     this._searchResults = null;
     this._searchOpen = false;
@@ -1001,6 +997,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     if (this._hooks) {
       this._hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
       this._hooks = [];
+    }
+
+    // Remove click-outside handler
+    if (this._clickOutsideHandler) {
+      document.removeEventListener('mousedown', this._clickOutsideHandler);
+      this._clickOutsideHandler = null;
     }
 
     await super._onClose(options);

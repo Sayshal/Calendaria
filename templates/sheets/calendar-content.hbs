@@ -1,82 +1,65 @@
 <div class="calendar-main-content">
-    <div class="calendar-nav">
-        <button
-            type="button"
-            data-action="navigate"
-            data-direction="previous"
-            data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}"
-        >
-            <i class="fas fa-chevron-left"></i>
-        </button>
+  <div class="calendar-nav">
+    <button type="button" data-action="navigate" data-direction="previous"
+      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
+      <i class="fas fa-chevron-left"></i>
+    </button>
 
-        <h2 class="calendar-title">
-            {{#if calendarData}} {{#if (eq displayMode 'week')}} {{localize 'CALENDARIA.Common.Week'}}
-            {{calendarData.weekNumber}}, {{calendarData.monthName}}
-            {{calendarData.yearDisplay}}
-            {{else if (eq displayMode 'year')}}
-            {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
-            {{else}} {{calendarData.monthName}} {{calendarData.yearDisplay}} {{/if}}
-            {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
-        </h2>
+    <h2 class="calendar-title">
+      {{#if calendarData}} {{#if (eq displayMode 'week')}} {{localize 'CALENDARIA.Common.Week'}}
+          {{calendarData.weekNumber}}, {{calendarData.monthName}}
+          {{calendarData.yearDisplay}}
+        {{else if (eq displayMode 'year')}}
+          {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
+        {{else}} {{calendarData.monthName}} {{calendarData.yearDisplay}} {{/if}}
+      {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
+    </h2>
 
-        <button
-            type="button"
-            data-action="navigate"
-            data-direction="next"
-            data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}"
-        >
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
+    <button type="button" data-action="navigate" data-direction="next"
+      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
 
-    {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather editable)}}
+  {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather editable)}}
     <div class="calendar-indicators">
-        {{#if weather}}
-        <span
-            class="weather-indicator{{#if editable}} clickable{{/if}}"
-            data-action="{{#if editable}}openWeatherPicker{{else}}{{/if}}"
-            style="--weather-color: {{weather.color}}"
-            data-tooltip="{{weather.tooltip}}"
-        >
-            <i class="fas {{weather.icon}}"></i>
-            {{weather.label}}
-            {{#if weather.temperature}}
+      {{#if weather}}
+        <span class="weather-indicator{{#if editable}} clickable{{/if}}"
+          data-action="{{#if editable}}openWeatherPicker{{else}}{{/if}}" style="--weather-color: {{weather.color}}"
+          data-tooltip="{{weather.tooltip}}">
+          <i class="fas {{weather.icon}}"></i>
+          {{weather.label}}
+          {{#if weather.temperature}}
             <span class="weather-temp">{{weather.temperature}}</span>
-            {{/if}}
+          {{/if}}
         </span>
-        {{else if editable}}
-        <span
-            class="weather-indicator clickable no-weather"
-            data-action="openWeatherPicker"
-            data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}"
-        >
-            <i class="fas fa-cloud"></i>
-            {{localize 'CALENDARIA.Weather.None'}}
+      {{else if editable}}
+        <span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+          data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
+          <i class="fas fa-cloud"></i>
+          {{localize 'CALENDARIA.Weather.None'}}
         </span>
-        {{/if}}
-        {{#if calendarData.currentSeason}}
-        <span
-            class="season-indicator"
-            style="--season-color: {{calendarData.currentSeason.color}}"
-            data-tooltip="{{localize 'CALENDARIA.UI.CurrentSeason'}}"
-        >
-            <i class="{{calendarData.currentSeason.icon}}"></i>
-            {{localize calendarData.currentSeason.name}}
+      {{/if}}
+      {{#if calendarData.currentSeason}}
+        <span class="season-indicator" style="--season-color: {{calendarData.currentSeason.color}}"
+          data-tooltip="{{localize 'CALENDARIA.UI.CurrentSeason'}}">
+          <i class="{{calendarData.currentSeason.icon}}"></i>
+          {{localize calendarData.currentSeason.name}}
         </span>
-        {{/if}} {{#if calendarData.currentEra}}
+      {{/if}} {{#if calendarData.currentEra}}
         <span class="era-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentEra'}}">
-            <i class="fas fa-hourglass-half"></i>
-            {{localize calendarData.currentEra.name}}
+          <i class="fas fa-hourglass-half"></i>
+          {{localize calendarData.currentEra.name}}
         </span>
-        {{/if}} {{#if cycleText}}
+      {{/if}} {{#if cycleText}}
         <span class="cycle-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentCycle'}}">
-            <i class="fas fa-arrows-rotate"></i>
-            {{{cycleText}}}
+          <i class="fas fa-arrows-rotate"></i>
+          {{{cycleText}}}
         </span>
-        {{/if}}
+      {{/if}}
     </div>
-    {{/if}}
-    {{#if (eq displayMode 'year')}} {{> "modules/calendaria/templates/sheets/calendar-year.hbs"}}
-    {{else if (eq displayMode 'week')}} {{> "modules/calendaria/templates/sheets/calendar-week.hbs"}}
-    {{else}} {{> "modules/calendaria/templates/sheets/calendar-grid.hbs"}} {{/if}}
+  {{/if}}
+  {{#if (eq displayMode 'year')}} {{> "modules/calendaria/templates/sheets/calendar-year.hbs"}}
+  {{else if (eq displayMode 'week')}} {{> "modules/calendaria/templates/sheets/calendar-week.hbs"}}
+  {{else}} {{> "modules/calendaria/templates/sheets/calendar-grid.hbs"}} {{/if}}
 </div>

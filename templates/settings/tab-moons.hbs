@@ -1,25 +1,18 @@
-<section
-    class="tab {{tab.cssClass}}"
-    data-tab="{{tab.id}}"
-    data-group="{{tab.group}}"
->
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-    {{!-- Moon Display Settings --}}
-    <fieldset>
-        <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
+  {{!-- Moon Display Settings --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
-        {{#if isGM}}
-        <div class="form-group">
-            <label>{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
-            <div class="form-fields">
-                <input
-                    type="checkbox"
-                    name="showMoonPhases"
-                    {{#if showMoonPhases}}checked{{/if}}>
-            </div>
-            <p class="hint">{{localize "CALENDARIA.Settings.ShowMoonPhases.Hint"}}</p>
+    {{#if isGM}}
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="showMoonPhases" {{#if showMoonPhases}}checked{{/if}}>
         </div>
-        {{/if}}
-    </fieldset>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowMoonPhases.Hint"}}</p>
+      </div>
+    {{/if}}
+  </fieldset>
 
 </section>

@@ -349,6 +349,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Module version
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
+
+    // Available translations
+    const moduleData = game.data.modules?.find((m) => m.id === MODULE.ID);
+    if (moduleData?.languages?.length) {
+      context.translations = moduleData.languages.map((lang) => lang.name).join(', ');
+    }
   }
 
   /* -------------------------------------------- */
