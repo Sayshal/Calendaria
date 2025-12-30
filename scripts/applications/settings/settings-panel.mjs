@@ -234,7 +234,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareNotesContext(context) {
-    context.categories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+    const rawCategories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+    // Filter out invalid categories and ensure color has valid hex value
+    context.categories = rawCategories
+      .filter((c) => c && c.id)
+      .map((c) => ({ ...c, color: c.color || '#4a90e2' }));
   }
 
   /**
@@ -472,7 +476,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Notes Tab - Custom Categories
     if (data.categories) {
-      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, data.categories);
+      // Filter out invalid categories (must have id and name)
+      const validCategories = Object.values(data.categories).filter((c) => c && c.id && c.name?.trim());
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, validCategories);
     }
   }
 
@@ -542,11 +548,27 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The button element
    */
   static async #onAddCategory(event, target) {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const categories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
-    categories.push({ id: foundry.utils.randomID(), name: localize('CALENDARIA.SettingsPanel.Category.NewName'), color: '#4a90e2', icon: 'fas fa-bookmark' });
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, categories);
-    app?.render();
+    // Read current form state to preserve unsaved changes
+    const form = this.element.querySelector('form');
+    let currentCategories = [];
+    if (form) {
+      const formData = new foundry.applications.ux.FormDataExtended(form);
+      const data = foundry.utils.expandObject(formData.object);
+      currentCategories = data.categories ? Object.values(data.categories).filter((c) => c && c.id) : [];
+    } else {
+      currentCategories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+    }
+
+    // Add new category
+    currentCategories.push({
+      id: foundry.utils.randomID(),
+      name: localize('CALENDARIA.SettingsPanel.Category.NewName'),
+      color: '#4a90e2',
+      icon: 'fas fa-bookmark'
+    });
+
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, currentCategories);
+    this.render();
   }
 
   /**
@@ -555,16 +577,23 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The button element
    */
   static async #onRemoveCategory(event, target) {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
     const categoryId = target.dataset.categoryId;
-    const categories = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
-    const index = categories.findIndex((c) => c.id === categoryId);
+    if (!categoryId) return;
 
-    if (index >= 0) {
-      categories.splice(index, 1);
-      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, categories);
-      app?.render();
+    // Read current form state to preserve unsaved changes
+    const form = this.element.querySelector('form');
+    let currentCategories = [];
+    if (form) {
+      const formData = new foundry.applications.ux.FormDataExtended(form);
+      const data = foundry.utils.expandObject(formData.object);
+      currentCategories = data.categories ? Object.values(data.categories).filter((c) => c && c.id && c.id !== categoryId) : [];
+    } else {
+      const saved = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+      currentCategories = saved.filter((c) => c && c.id && c.id !== categoryId);
     }
+
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, currentCategories);
+    this.render();
   }
 
   /**

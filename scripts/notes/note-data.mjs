@@ -275,7 +275,15 @@ export function getPredefinedCategories() {
  * @returns {object[]}  Array of custom category definitions
  */
 export function getCustomCategories() {
-  return game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+  // Normalize: settings panel uses 'name', note system expects 'label'
+  return raw.map((c) => ({
+    id: c.id,
+    label: c.label || c.name || '',
+    color: c.color || '#868e96',
+    icon: c.icon || 'fa-tag',
+    custom: true
+  }));
 }
 
 /**
