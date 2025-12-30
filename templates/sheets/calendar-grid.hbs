@@ -3,7 +3,7 @@
     <div class="calendar-weekdays"
         style="grid-template-columns: repeat({{calendarData.daysInWeek}}, var(--calendaria-day-size));">
         {{#each calendarData.weekdays}}
-        <div class="weekday-header">{{this}}</div>
+        <div class="weekday-header{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
         {{/each}}
     </div>
 
@@ -16,7 +16,7 @@
             <div class="calendar-day empty"></div>
             {{else}}
             <div
-                class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}{{#if isRestDay}} rest-day{{/if}}"
+                class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
                 data-year="{{year}}"
                 data-month="{{month}}"
                 data-day="{{day}}"

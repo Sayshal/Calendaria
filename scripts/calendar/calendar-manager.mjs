@@ -25,6 +25,9 @@ export default class CalendarManager {
     // Load bundled calendars from JSON files
     await loadBundledCalendars();
 
+    // Apply any user overrides to bundled calendars
+    await this.#loadDefaultOverrides();
+
     // Load any custom calendars from settings
     await this.#loadCustomCalendars();
 
@@ -47,8 +50,9 @@ export default class CalendarManager {
     if (activeCalendar) {
       CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
       CONFIG.time.worldCalendarClass = CalendariaCalendar;
+      CONFIG.time.roundTime = activeCalendar.secondsPerRound ?? 6;
       game.time.initializeCalendar();
-      log(3, `Synced game.time.calendar to: ${activeCalendar.name}`);
+      log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
 
     log(3, 'Calendar Manager initialized');
@@ -65,12 +69,11 @@ export default class CalendarManager {
   static async loadCalendars() {
     try {
       const savedData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
-      if (savedData) {
+      // Only restore from saved data if there are actual calendars saved
+      if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
         // Migrate saved calendar data to ensure required fields exist
-        if (savedData.calendars) {
-          for (const calendarData of Object.values(savedData.calendars)) {
-            this.#migrateCalendarData(calendarData);
-          }
+        for (const calendarData of Object.values(savedData.calendars)) {
+          this.#migrateCalendarData(calendarData);
         }
         CalendarRegistry.fromObject(savedData);
         log(3, `Loaded ${CalendarRegistry.size} calendars from settings`);
@@ -124,6 +127,35 @@ export default class CalendarManager {
       log(3, `Loaded ${ids.length} custom calendars`);
     } catch (error) {
       log(2, 'Error loading custom calendars:', error);
+    }
+  }
+
+  /**
+   * Load and apply user overrides for bundled calendars.
+   * @private
+   */
+  static async #loadDefaultOverrides() {
+    try {
+      const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
+      const ids = Object.keys(overrides);
+
+      if (ids.length === 0) return;
+
+      for (const id of ids) {
+        const data = overrides[id];
+        this.#migrateCalendarData(data);
+        try {
+          const calendar = new CalendariaCalendar(data);
+          CalendarRegistry.register(id, calendar);
+          log(3, `Applied override for bundled calendar: ${id}`);
+        } catch (error) {
+          log(2, `Error applying override for ${id}:`, error);
+        }
+      }
+
+      log(3, `Applied ${ids.length} default calendar overrides`);
+    } catch (error) {
+      log(2, 'Error loading default overrides:', error);
     }
   }
 
@@ -192,6 +224,7 @@ export default class CalendarManager {
     // Update CONFIG.time with the new calendar
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
+    CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
 
     // Reinitialize the calendar system - no reload needed!
     game.time.initializeCalendar();
@@ -257,6 +290,7 @@ export default class CalendarManager {
     const calendar = CalendarRegistry.get(id);
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
+    CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
 
     // Reinitialize the calendar system
     game.time.initializeCalendar();
@@ -387,6 +421,7 @@ export default class CalendarManager {
         const calendar = CalendarRegistry.get(newCalendarId);
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.worldCalendarClass = CalendariaCalendar;
+        CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
       }
     }
@@ -545,6 +580,7 @@ export default class CalendarManager {
       // If this is the active calendar, reinitialize
       if (CalendarRegistry.getActiveId() === id) {
         CONFIG.time.worldCalendarConfig = updatedCalendar.toObject();
+        CONFIG.time.roundTime = updatedCalendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
       }
 
@@ -709,6 +745,7 @@ export default class CalendarManager {
       // Update game.time.calendar if this is the active calendar
       if (CalendarRegistry.getActiveId() === id) {
         CONFIG.time.worldCalendarConfig = calendar.toObject();
+        CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
       }
 
@@ -752,6 +789,7 @@ export default class CalendarManager {
         // Update game.time.calendar if this is the active calendar
         if (CalendarRegistry.getActiveId() === id) {
           CONFIG.time.worldCalendarConfig = calendar.toObject();
+          CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
           game.time.initializeCalendar();
         }
 

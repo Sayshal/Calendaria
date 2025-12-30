@@ -6,16 +6,17 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { MODULE, SETTINGS, HOOKS, TEMPLATES } from '../constants.mjs';
+import SearchManager from '../search/search-manager.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import SearchManager from '../search/search-manager.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -255,8 +256,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           .filter(Boolean);
       }
 
-      // Get weekday data for rest day status
-      const weekdayData = calendar.days?.values?.[dayIndex % daysInWeek];
+      // Get weekday data for rest day status (use currentWeek.length for correct weekday position)
+      const weekdayData = calendar.days?.values?.[currentWeek.length];
 
       currentWeek.push({
         day,
@@ -300,6 +301,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Get weekdays for this month (supports per-month custom weekdays)
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
+    const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
 
     return {
       year,
@@ -307,7 +309,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       monthName: localize(monthData.name),
       yearDisplay: calendar.formatYearWithEra?.(year) ?? String(year),
       weeks,
-      weekdays: monthWeekdays.map((wd) => localize(wd.name)),
+      weekdays: weekdaysData,
       daysInWeek,
       currentSeason,
       currentEra
@@ -332,11 +334,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     let weekStartMonth = month;
     let weekStartYear = year;
 
-    // Handle month boundaries (simplified)
+    // Handle month boundaries
+    const monthsInYear = calendar.months?.values?.length ?? 12;
     if (weekStartDay < 1) {
       weekStartMonth--;
       if (weekStartMonth < 0) {
-        weekStartMonth = 11;
+        weekStartMonth = monthsInYear - 1;
         weekStartYear--;
       }
       const prevMonthData = calendar.months?.values?.[weekStartMonth];
@@ -430,7 +433,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       weekNumber,
       days: days,
       timeSlots: timeSlots,
-      weekdays: weekWeekdays.map((wd) => localize(wd.name)),
+      weekdays: weekWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false })),
       daysInWeek,
       currentHour,
       currentSeason,
@@ -556,7 +559,11 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         moonConditions: page.system.moonConditions,
         randomConfig: page.system.randomConfig,
         cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-        linkedEvent: page.system.linkedEvent
+        linkedEvent: page.system.linkedEvent,
+        weekday: page.system.weekday,
+        weekNumber: page.system.weekNumber,
+        seasonalConfig: page.system.seasonalConfig,
+        conditions: page.system.conditions
       };
 
       // Check if this event occurs on this day (handles recurring events)
@@ -864,11 +871,15 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     if (!resultsContainer) return;
 
     if (this._searchResults?.length) {
-      resultsContainer.innerHTML = `<ul class="result-list">${this._searchResults.map(r => `
+      resultsContainer.innerHTML = `<ul class="result-list">${this._searchResults
+        .map(
+          (r) => `
         <li class="result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
           <span class="result-name">${r.name}</span>
           ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-        </li>`).join('')}</ul>`;
+        </li>`
+        )
+        .join('')}</ul>`;
     } else if (this._searchTerm?.length >= 2) {
       resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>${localize('CALENDARIA.Search.NoResults')}</p></div>`;
     } else {

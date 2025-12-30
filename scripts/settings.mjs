@@ -231,11 +231,10 @@ export function registerSettings() {
     name: 'CALENDARIA.Settings.ActiveCalendar.Name',
     hint: 'CALENDARIA.Settings.ActiveCalendar.Hint',
     scope: 'world',
-    config: false,
-    type: new foundry.data.fields.StringField({
-      choices: calendarChoices,
-      initial: 'gregorian'
-    }),
+    config: true,
+    type: String,
+    choices: calendarChoices,
+    default: 'gregorian',
     requiresReload: true
   });
 

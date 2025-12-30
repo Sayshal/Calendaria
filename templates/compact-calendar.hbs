@@ -255,7 +255,7 @@
     <div class="compact-grid" style="--compact-weekday-count: {{calendarData.daysInWeek}}">
         <div class="compact-weekdays">
             {{#each calendarData.weekdays}}
-            <div class="weekday">{{this}}</div>
+            <div class="weekday{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
             {{/each}}
         </div>
         <div class="compact-days">

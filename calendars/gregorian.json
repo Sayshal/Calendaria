@@ -3,7 +3,7 @@
   "name": "CALENDARIA.Calendar.Gregorian.Name",
   "years": {
     "yearZero": 2024,
-    "firstWeekday": 0,
+    "firstWeekday": 2,
     "leapYear": {
       "leapStart": 0,
       "leapInterval": 4,
@@ -28,13 +28,13 @@
   },
   "days": {
     "values": [
-      { "name": "CALENDARIA.Weekday.Sunday", "abbreviation": "CALENDARIA.Weekday.SundayShort", "ordinal": 1 },
+      { "name": "CALENDARIA.Weekday.Sunday", "abbreviation": "CALENDARIA.Weekday.SundayShort", "ordinal": 1, "isRestDay": true },
       { "name": "CALENDARIA.Weekday.Monday", "abbreviation": "CALENDARIA.Weekday.MondayShort", "ordinal": 2 },
       { "name": "CALENDARIA.Weekday.Tuesday", "abbreviation": "CALENDARIA.Weekday.TuesdayShort", "ordinal": 3 },
       { "name": "CALENDARIA.Weekday.Wednesday", "abbreviation": "CALENDARIA.Weekday.WednesdayShort", "ordinal": 4 },
       { "name": "CALENDARIA.Weekday.Thursday", "abbreviation": "CALENDARIA.Weekday.ThursdayShort", "ordinal": 5 },
       { "name": "CALENDARIA.Weekday.Friday", "abbreviation": "CALENDARIA.Weekday.FridayShort", "ordinal": 6 },
-      { "name": "CALENDARIA.Weekday.Saturday", "abbreviation": "CALENDARIA.Weekday.SaturdayShort", "ordinal": 7 }
+      { "name": "CALENDARIA.Weekday.Saturday", "abbreviation": "CALENDARIA.Weekday.SaturdayShort", "ordinal": 7, "isRestDay": true }
     ],
     "daysPerYear": 365,
     "hoursPerDay": 24,

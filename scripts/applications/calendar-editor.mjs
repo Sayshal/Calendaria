@@ -6,6 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import CalendarRegistry from '../calendar/calendar-registry.mjs';
 import { formatEraTemplate } from '../calendar/calendar-utils.mjs';
 import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import { createImporter } from '../importers/index.mjs';
@@ -39,6 +40,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeMonth: CalendarEditor.#onRemoveMonth,
       moveMonthUp: CalendarEditor.#onMoveMonthUp,
       moveMonthDown: CalendarEditor.#onMoveMonthDown,
+      toggleCustomWeekdays: CalendarEditor.#onToggleCustomWeekdays,
       addWeekday: CalendarEditor.#onAddWeekday,
       removeWeekday: CalendarEditor.#onRemoveWeekday,
       moveWeekdayUp: CalendarEditor.#onMoveWeekdayUp,
@@ -809,7 +811,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {FormDataExtended} formData - Processed form data
    */
   static async #onSubmit(event, form, formData) {
+    const oldSeasonType = this.#calendarData.seasons?.type;
     this.#updateFromFormData(formData.object);
+
+    // Re-render if structural changes occurred (e.g., season type changed)
+    const newSeasonType = this.#calendarData.seasons?.type;
+    if (oldSeasonType !== newSeasonType) {
+      this.render({ parts: ['seasons'] });
+    }
   }
 
   /**
@@ -861,6 +870,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.days.hoursPerDay = parseInt(data['days.hoursPerDay']) || 24;
     this.#calendarData.days.minutesPerHour = parseInt(data['days.minutesPerHour']) || 60;
     this.#calendarData.days.secondsPerMinute = parseInt(data['days.secondsPerMinute']) || 60;
+    this.#calendarData.secondsPerRound = parseInt(data.secondsPerRound) || 6;
 
     // Daylight settings
     if (!this.#calendarData.daylight) this.#calendarData.daylight = {};
@@ -997,8 +1007,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             .map((wdIdx) => ({
               name: data[`months.${idx}.weekdays.${wdIdx}.name`] || '',
               abbreviation: data[`months.${idx}.weekdays.${wdIdx}.abbreviation`] || '',
-              isRestDay: data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === 'true' || data[`months.${idx}.weekdays.${wdIdx}.isRestDay`] === true
+              isRestDay: !!data[`months.${idx}.weekdays.${wdIdx}.isRestDay`]
             }));
+        } else {
+          // Initialize with global weekdays when first enabling custom weekdays
+          month.weekdays = (this.#calendarData.days?.values ?? []).map((wd) => ({
+            name: wd.name || '',
+            abbreviation: wd.abbreviation || '',
+            isRestDay: !!wd.isRestDay
+          }));
         }
       }
 
@@ -1377,6 +1394,78 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#reindexArray(months);
       this.render();
     }
+  }
+
+  /**
+   * Open custom weekdays dialog for a month.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onToggleCustomWeekdays(event, target) {
+    const idx = parseInt(target.dataset.index);
+    const month = this.#calendarData.months.values[idx];
+    if (!month) return;
+
+    // Initialize weekdays if not present
+    if (!month.weekdays?.length) {
+      month.weekdays = (this.#calendarData.days?.values ?? []).map((wd) => ({
+        name: wd.name || '',
+        abbreviation: wd.abbreviation || '',
+        isRestDay: !!wd.isRestDay
+      }));
+    }
+
+    // Build dialog content
+    const rows = month.weekdays.map((wd, i) => `
+      <div class="custom-weekday-row flexrow">
+        <input type="text" name="weekday-${i}-name" value="${wd.name}" placeholder="${localize('CALENDARIA.Common.Name')}">
+        <input type="text" name="weekday-${i}-abbr" value="${wd.abbreviation}" placeholder="${localize('CALENDARIA.Common.Abbreviation')}">
+        <label class="rest-day-toggle">
+          <input type="checkbox" name="weekday-${i}-rest" ${wd.isRestDay ? 'checked' : ''}>
+          ${localize('CALENDARIA.Common.RestDay')}
+        </label>
+      </div>
+    `).join('');
+
+    const content = `
+      <form class="custom-weekdays-dialog">
+        <p class="hint">${localize('CALENDARIA.Editor.Month.CustomWeekdaysHint')}</p>
+        <div class="custom-weekdays-list">${rows}</div>
+      </form>
+    `;
+
+    const editor = this;
+    new foundry.applications.api.DialogV2({
+      window: { title: format('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }) },
+      content,
+      buttons: [
+        {
+          action: 'disable',
+          label: localize('CALENDARIA.Editor.Month.DisableCustomWeekdays'),
+          icon: 'fas fa-times',
+          callback: () => {
+            delete month.weekdays;
+            editor.render();
+          }
+        },
+        {
+          action: 'save',
+          label: localize('CALENDARIA.Common.Save'),
+          icon: 'fas fa-save',
+          default: true,
+          callback: (event, button, dialog) => {
+            const form = dialog.element.querySelector('form');
+            month.weekdays.forEach((wd, i) => {
+              wd.name = form.querySelector(`[name="weekday-${i}-name"]`)?.value || '';
+              wd.abbreviation = form.querySelector(`[name="weekday-${i}-abbr"]`)?.value || '';
+              wd.isRestDay = form.querySelector(`[name="weekday-${i}-rest"]`)?.checked || false;
+            });
+            editor.render();
+          }
+        }
+      ],
+      position: { width: 400 }
+    }).render(true);
   }
 
   /**
@@ -2197,10 +2286,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #showSaveDialog() {
     const isGM = game.user.isGM;
+    const activeCalendarId = CalendarRegistry.getActiveId();
+    const isAlreadyActive = activeCalendarId === this.#calendarId;
+
+    // Don't show "set as active" option if already editing the active calendar
+    const showSetActiveOption = isGM && !isAlreadyActive;
+
     const content = `
       <p>${localize('CALENDARIA.Editor.ConfirmSave')}</p>
       ${
-        isGM
+        showSetActiveOption
           ? `<div class="form-group">
         <label class="checkbox">
           <input type="checkbox" name="setActive" ${this.#setActiveOnSave ? 'checked' : ''}>

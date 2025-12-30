@@ -64,10 +64,10 @@ function getFieldValue(field, date, value2 = null) {
       return date.year;
 
     case 'month':
-      return date.month;
+      return date.month + 1; // Convert 0-indexed to 1-indexed for user
 
     case 'day':
-      return date.day;
+      return date.day; // Already 1-indexed
 
     case 'dayOfYear':
       return getDayOfYear(date);
@@ -77,9 +77,9 @@ function getFieldValue(field, date, value2 = null) {
       return lastDay - date.day;
     }
 
-    // Weekday fields
+    // Weekday fields (1-indexed for user: 1=first weekday)
     case 'weekday':
-      return dayOfWeek(date);
+      return dayOfWeek(date) + 1; // Convert 0-indexed to 1-indexed
 
     case 'weekNumberInMonth': {
       const daysInWeek = calendar?.days?.values?.length || 7;
@@ -129,7 +129,7 @@ function getFieldValue(field, date, value2 = null) {
       const seasons = calendar?.seasons?.values || [];
       if (!seasons.length) return null;
       const dayOfYear = getDayOfYear(date);
-      return getSeasonIndex(dayOfYear, seasons, getTotalDaysInYear());
+      return getSeasonIndex(dayOfYear, seasons, getTotalDaysInYear()) + 1; // 1-indexed for user
     }
 
     case 'seasonPercent': {
@@ -215,7 +215,7 @@ function getFieldValue(field, date, value2 = null) {
     case 'era': {
       const eras = calendar?.eras || [];
       if (!eras.length) return null;
-      return getEraIndex(date.year, eras);
+      return getEraIndex(date.year, eras) + 1; // 1-indexed for user
     }
 
     case 'eraYear': {
@@ -250,28 +250,20 @@ function evaluateCondition(condition, date) {
   switch (op) {
     case '==':
       return fieldValue === value;
-
     case '!=':
       return fieldValue !== value;
-
     case '>=':
       return fieldValue >= value;
-
     case '<=':
       return fieldValue <= value;
-
     case '>':
       return fieldValue > value;
-
     case '<':
       return fieldValue < value;
-
     case '%':
       // Modulo: (fieldValue - offset) % value === 0
-      // "Every nth" pattern
       if (value === 0) return false;
       return ((fieldValue - offset) % value) === 0;
-
     default:
       return false;
   }
@@ -638,8 +630,15 @@ export function isRecurringMatch(noteData, targetDate) {
   // Moon conditions act as additional filters - if defined, at least one must match
   if (moonConditions?.length > 0) if (!matchesMoonConditions(moonConditions, targetDate)) return false;
 
-  // If no recurrence, only matches exact start date
-  if (repeat === 'never' || !repeat) return isSameDay(startDate, targetDate);
+  // If no recurrence, only matches exact start date (but still check conditions)
+  if (repeat === 'never' || !repeat) {
+    if (!isSameDay(startDate, targetDate)) return false;
+    // Apply conditions even for non-recurring events
+    if (noteData.conditions?.length > 0) {
+      if (!evaluateConditions(noteData.conditions, targetDate)) return false;
+    }
+    return true;
+  }
 
   // Check if target is before start date (day-level comparison, ignoring time)
   if (compareDays(targetDate, startDate) < 0) return false;

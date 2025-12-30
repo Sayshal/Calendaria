@@ -101,6 +101,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {object[]|null} Current search results */
   #searchResults = null;
 
+  /** @type {number|null} Debounce timer for bar re-render */
+  #barRenderDebounce = null;
+
+  /** @type {HTMLElement|null} Search panel element (moved to body for positioning) */
+  #searchPanelEl = null;
+
+  /** @type {Function|null} Click-outside handler for search panel */
+  #clickOutsideHandler = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-hud',
@@ -123,7 +132,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       reverse: CalendariaHUD.#onReverse,
       forward: CalendariaHUD.#onForward,
       closeSearch: CalendariaHUD.#onCloseSearch,
-      openSearchResult: CalendariaHUD.#onOpenSearchResult
+      openSearchResult: CalendariaHUD.#onOpenSearchResult,
+      setDate: CalendariaHUD.#onSetDate
     }
   };
 
@@ -227,12 +237,13 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     // Weather
     context.weather = this.#getWeatherContext();
 
-    // Live events with rotation
+    // Live events - show all icons simultaneously
     this.#liveEvents = this.#getLiveEvents();
     context.hasEvents = this.#liveEvents.length > 0;
+    context.liveEvents = this.#liveEvents;
     context.firstEventColor = this.#liveEvents[0]?.color || null;
-    // Always provide currentEvent data when events exist (visibility controlled by CSS)
-    context.currentEvent = this.#liveEvents.length > 0 ? this.#liveEvents[this.#currentEventIndex % this.#liveEvents.length] : null;
+    // Keep currentEvent for backwards compatibility
+    context.currentEvent = this.#liveEvents.length > 0 ? this.#liveEvents[0] : null;
 
     // Time increments for dropdown
     context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
@@ -344,6 +355,16 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       window.removeEventListener('resize', this._resizeHandler);
     }
 
+    // Clean up search panel and click-outside handler
+    if (this.#clickOutsideHandler) {
+      document.removeEventListener('mousedown', this.#clickOutsideHandler);
+      this.#clickOutsideHandler = null;
+    }
+    if (this.#searchPanelEl?.parentElement === document.body) {
+      this.#searchPanelEl.remove();
+      this.#searchPanelEl = null;
+    }
+
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
 
@@ -396,9 +417,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
-    // Position search panel if open
+    // Position search panel if open (delayed to ensure DOM is painted)
     if (this.#searchOpen) {
-      this.#positionSearchPanel();
+      requestAnimationFrame(() => this.#positionSearchPanel());
     }
 
     // Dome keyboard handler
@@ -561,6 +582,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     drag._onDragMouseDown = (event) => {
       // Prevent dragging when locked
       if (this.isLocked) return;
+
+      // Close search panel when starting to drag
+      if (this.#searchOpen) this.#closeSearch();
 
       const rect = this.element.getBoundingClientRect();
       elementStartLeft = rect.left;
@@ -819,11 +843,18 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const components = game.time.components;
 
-    // Check if day changed - only re-render bar part to preserve dome/celestial
+    // Check if day changed - debounced re-render to avoid button flicker
     if (this.#lastDay !== null && this.#lastDay !== components.dayOfMonth) {
       this.#lastDay = components.dayOfMonth;
-      this.render({ parts: ['bar'] });
-      return;
+      // Debounce bar render to allow rapid time advances to settle
+      if (this.#barRenderDebounce) clearTimeout(this.#barRenderDebounce);
+      this.#barRenderDebounce = setTimeout(() => {
+        this.#barRenderDebounce = null;
+        this.render({ parts: ['bar'] });
+      }, 200);
+      // Update date inline while waiting for render
+      const dateEl = this.element.querySelector('.calendaria-hud-date');
+      if (dateEl) dateEl.textContent = this.#formatDateDisplay(components);
     }
 
     // Update time display
@@ -1053,8 +1084,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const notes = ViewUtils.getNotesOnDay(year, month, day);
     if (!notes.length) return [];
 
-    // Return up to 4 events
-    return notes.slice(0, 4).map((note) => {
+    // Return up to 5 events
+    return notes.slice(0, 5).map((note) => {
       // Build tooltip: name + description (truncated to 120 chars)
       let tooltip = note.name;
       const desc = note.text?.content;
@@ -1512,10 +1543,88 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Handle click on date to open date picker dialog.
+   * @param {Event} event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onSetDate(event, target) {
+    if (!game.user.isGM) {
+      ui.notifications.warn('CALENDARIA.Common.GMOnly', { localize: true });
+      return;
+    }
+
+    const calendar = this.calendar;
+    const components = game.time.components;
+    const yearZero = calendar.years?.yearZero ?? 0;
+
+    // Build month options
+    const monthOptions = calendar.months.values
+      .map((m, i) => `<option value="${i}" ${i === components.month ? 'selected' : ''}>${game.i18n.localize(m.name)}</option>`)
+      .join('');
+
+    // Calculate days in current month
+    const daysInMonth = calendar.months.values[components.month]?.days ?? 30;
+    const currentDay = (components.dayOfMonth ?? 0) + 1;
+    const dayOptions = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+      .map((d) => `<option value="${d}" ${d === currentDay ? 'selected' : ''}>${d}</option>`)
+      .join('');
+
+    const content = `
+      <form class="set-date-form">
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Common.Year')}</label>
+          <input type="number" name="year" value="${components.year + yearZero}" step="1">
+        </div>
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Common.Month')}</label>
+          <select name="month">${monthOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>${game.i18n.localize('CALENDARIA.Common.Day')}</label>
+          <select name="day">${dayOptions}</select>
+        </div>
+      </form>
+    `;
+
+    const result = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize('CALENDARIA.HUD.SetDate') },
+      content,
+      ok: {
+        label: game.i18n.localize('CALENDARIA.Common.Set'),
+        icon: 'fas fa-calendar-check',
+        callback: (event, button, dialog) => {
+          const form = button.form;
+          return {
+            year: parseInt(form.elements.year.value) - yearZero,
+            month: parseInt(form.elements.month.value),
+            day: parseInt(form.elements.day.value)
+          };
+        }
+      },
+      rejectClose: false
+    });
+
+    if (result) {
+      // Calculate new world time
+      const newTime = calendar.componentsToTime({
+        year: result.year,
+        month: result.month,
+        dayOfMonth: result.day - 1,
+        hour: components.hour,
+        minute: components.minute,
+        second: components.second ?? 0
+      });
+
+      await game.time.advance(newTime - game.time.worldTime);
+    }
+  }
+
+  /**
    * Update search results without full re-render.
    */
   #updateSearchResults() {
-    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    // Use panel in body if available, otherwise find in element
+    const panel = this.#searchPanelEl || this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
 
     const resultsContainer = panel.querySelector('.search-panel-results');
@@ -1531,53 +1640,127 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         </div>`
         )
         .join('');
+      resultsContainer.classList.add('has-results');
+
+      // Re-wire click handlers for new result items when panel is in body
+      if (this.#searchPanelEl) {
+        resultsContainer.querySelectorAll('[data-action="openSearchResult"]').forEach((el) => {
+          el.addEventListener('click', () => {
+            const id = el.dataset.id;
+            const journalId = el.dataset.journalId;
+            const page = NoteManager.getFullNote(id);
+            if (page) page.sheet.render(true, { mode: 'view' });
+            else if (journalId) {
+              const journal = game.journal.get(journalId);
+              if (journal) journal.sheet.render(true, { pageId: id });
+            }
+            this.#closeSearch();
+          });
+        });
+      }
     } else if (this.#searchTerm?.length >= 2) {
       resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
+      resultsContainer.classList.add('has-results');
     } else {
       resultsContainer.innerHTML = '';
+      resultsContainer.classList.remove('has-results');
     }
   }
 
   /**
    * Position search panel with edge awareness.
+   * Moves panel to document.body to avoid ApplicationV2 positioning issues.
    */
   #positionSearchPanel() {
     const panel = this.element.querySelector('.calendaria-hud-search-panel');
-    const button = this.element.querySelector('[data-action="searchNotes"]');
-    if (!panel || !button) return;
+    const bar = this.element.querySelector('.calendaria-hud-bar');
+    if (!panel || !bar) return;
 
-    const buttonRect = button.getBoundingClientRect();
-    const panelWidth = 280;
-    const panelMaxHeight = 300;
+    // Move panel to body for correct fixed positioning
+    if (panel.parentElement !== document.body) {
+      document.body.appendChild(panel);
+      this.#searchPanelEl = panel;
 
-    // Position above the button (HUD is at bottom)
-    let left = buttonRect.left;
-    let top = buttonRect.top - panelMaxHeight - 8;
+      // Re-wire event handlers since panel is now outside ApplicationV2
+      panel.querySelectorAll('[data-action="openSearchResult"]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.id;
+          const journalId = el.dataset.journalId;
+          const page = NoteManager.getFullNote(id);
+          if (page) page.sheet.render(true, { mode: 'view' });
+          else if (journalId) {
+            const journal = game.journal.get(journalId);
+            if (journal) journal.sheet.render(true, { pageId: id });
+          }
+          this.#closeSearch();
+        });
+      });
 
-    // Edge awareness - check left edge
-    if (left + panelWidth > window.innerWidth - 10) {
-      left = window.innerWidth - panelWidth - 10;
+      // Wire up search input handlers
+      const searchInput = panel.querySelector('.search-input');
+      if (searchInput) {
+        searchInput.focus();
+        const debouncedSearch = foundry.utils.debounce((term) => {
+          this.#searchTerm = term;
+          if (term.length >= 2) {
+            this.#searchResults = SearchManager.search(term, { searchContent: true });
+          } else {
+            this.#searchResults = null;
+          }
+          this.#updateSearchResults();
+        }, 300);
+
+        searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') this.#closeSearch();
+        });
+      }
+
+      // Add click-outside handler (delayed to avoid immediate trigger)
+      setTimeout(() => {
+        this.#clickOutsideHandler = (event) => {
+          if (!panel.contains(event.target) && !this.element.contains(event.target)) {
+            this.#closeSearch();
+          }
+        };
+        document.addEventListener('mousedown', this.#clickOutsideHandler);
+      }, 100);
     }
 
-    // Edge awareness - check top edge, flip below if needed
-    if (top < 10) {
-      top = buttonRect.bottom + 8;
+    const barRect = bar.getBoundingClientRect();
+    const panelWidth = 280;
+
+    // Position below the bar, aligned to left edge of bar
+    let left = barRect.left;
+    let top = barRect.bottom + 4;
+
+    // Edge awareness - check right edge
+    if (left + panelWidth > window.innerWidth - 10) {
+      left = window.innerWidth - panelWidth - 10;
     }
 
     // Ensure not off left edge
     left = Math.max(10, left);
 
-    panel.style.position = 'fixed';
+    // Only set dynamic positioning (styling handled by CSS)
     panel.style.left = `${left}px`;
     panel.style.top = `${top}px`;
-    panel.style.width = `${panelWidth}px`;
-    panel.style.maxHeight = `${panelMaxHeight}px`;
   }
 
   /**
    * Close search and clean up.
    */
   #closeSearch() {
+    // Remove click-outside handler
+    if (this.#clickOutsideHandler) {
+      document.removeEventListener('mousedown', this.#clickOutsideHandler);
+      this.#clickOutsideHandler = null;
+    }
+    // Remove panel from body if it was moved there
+    if (this.#searchPanelEl?.parentElement === document.body) {
+      this.#searchPanelEl.remove();
+      this.#searchPanelEl = null;
+    }
     this.#searchTerm = '';
     this.#searchResults = null;
     this.#searchOpen = false;

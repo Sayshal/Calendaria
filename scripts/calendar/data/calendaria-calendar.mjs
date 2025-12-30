@@ -58,10 +58,30 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       { required: false, nullable: true, initial: null }
     );
 
+    // Extended days schema to include isRestDay for weekdays
+    const extendedDaysSchema = new SchemaField(
+      {
+        values: new ArrayField(
+          new SchemaField({
+            name: new StringField({ required: true, blank: false }),
+            abbreviation: new StringField({ required: false }),
+            ordinal: new NumberField({ required: true, nullable: false, min: 1, integer: true }),
+            isRestDay: new BooleanField({ required: false, initial: false })
+          })
+        ),
+        daysPerYear: new NumberField({ required: false, integer: true, min: 1 }),
+        hoursPerDay: new NumberField({ required: false, integer: true, min: 1 }),
+        minutesPerHour: new NumberField({ required: false, integer: true, min: 1 }),
+        secondsPerMinute: new NumberField({ required: false, integer: true, min: 1 })
+      },
+      { required: false, nullable: true }
+    );
+
     return {
       ...schema,
       months: extendedMonthSchema,
       seasons: extendedSeasonSchema,
+      days: extendedDaysSchema,
 
       /**
        * Seconds per combat round (default 6 for D&D-style systems).

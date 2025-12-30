@@ -320,10 +320,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays: monthWeekdays.map((wd) => {
-        const name = localize(wd.name);
-        return name.substring(0, 2); // First 2 chars for compact view
-      })
+      weekdays: monthWeekdays.map((wd) => ({
+        name: localize(wd.name).substring(0, 2), // First 2 chars for compact view
+        isRestDay: wd.isRestDay || false
+      }))
     };
   }
 
@@ -361,7 +361,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         moonConditions: page.system.moonConditions,
         randomConfig: page.system.randomConfig,
         cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-        linkedEvent: page.system.linkedEvent
+        linkedEvent: page.system.linkedEvent,
+        weekday: page.system.weekday,
+        weekNumber: page.system.weekNumber,
+        seasonalConfig: page.system.seasonalConfig,
+        conditions: page.system.conditions
       };
       return isRecurringMatch(noteData, targetDate);
     }).length;

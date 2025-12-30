@@ -3,7 +3,7 @@
   "name": "CALENDARIA.Calendar.Greyhawk.Name",
   "years": {
     "yearZero": 576,
-    "firstWeekday": 0
+    "firstWeekday": 2
   },
   "months": {
     "values": [
@@ -30,10 +30,10 @@
       { "name": "CALENDARIA.Calendar.Greyhawk.Day.Starday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.StardayShort", "ordinal": 1 },
       { "name": "CALENDARIA.Calendar.Greyhawk.Day.Sunday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.SundayShort", "ordinal": 2 },
       { "name": "CALENDARIA.Calendar.Greyhawk.Day.Moonday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.MoondayShort", "ordinal": 3 },
-      { "name": "CALENDARIA.Calendar.Greyhawk.Day.Godsday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.GodsdayShort", "ordinal": 4, "restDay": true },
+      { "name": "CALENDARIA.Calendar.Greyhawk.Day.Godsday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.GodsdayShort", "ordinal": 4, "isRestDay": true },
       { "name": "CALENDARIA.Calendar.Greyhawk.Day.Waterday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.WaterdayShort", "ordinal": 5 },
       { "name": "CALENDARIA.Calendar.Greyhawk.Day.Earthday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.EarthdayShort", "ordinal": 6 },
-      { "name": "CALENDARIA.Calendar.Greyhawk.Day.Freeday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.FreedayShort", "ordinal": 7, "restDay": true }
+      { "name": "CALENDARIA.Calendar.Greyhawk.Day.Freeday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.FreedayShort", "ordinal": 7, "isRestDay": true }
     ],
     "daysPerYear": 360,
     "hoursPerDay": 24,

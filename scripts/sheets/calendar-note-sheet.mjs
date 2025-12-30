@@ -1355,24 +1355,24 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     // Special formatting for certain fields
     let valueStr = String(value);
 
-    // Month name
-    if (field === 'month' && calendar?.months?.values?.[value]) {
-      valueStr = localize(calendar.months.values[value].name);
+    // Month name (user value is 1-indexed, array is 0-indexed)
+    if (field === 'month' && calendar?.months?.values?.[value - 1]) {
+      valueStr = localize(calendar.months.values[value - 1].name);
     }
 
-    // Weekday name
-    if (field === 'weekday' && calendar?.days?.values?.[value]) {
-      valueStr = localize(calendar.days.values[value].name);
+    // Weekday name (user value is 1-indexed, array is 0-indexed)
+    if (field === 'weekday' && calendar?.days?.values?.[value - 1]) {
+      valueStr = localize(calendar.days.values[value - 1].name);
     }
 
-    // Season name
-    if (field === 'season' && calendar?.seasons?.values?.[value]) {
-      valueStr = localize(calendar.seasons.values[value].name);
+    // Season name (user value is 1-indexed, array is 0-indexed)
+    if (field === 'season' && calendar?.seasons?.values?.[value - 1]) {
+      valueStr = localize(calendar.seasons.values[value - 1].name);
     }
 
-    // Era name
-    if (field === 'era' && calendar?.eras?.[value]) {
-      valueStr = localize(calendar.eras[value].name);
+    // Era name (user value is 1-indexed, array is 0-indexed)
+    if (field === 'era' && calendar?.eras?.[value - 1]) {
+      valueStr = localize(calendar.eras[value - 1].name);
     }
 
     // Boolean fields

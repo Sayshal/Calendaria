@@ -649,6 +649,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &.rest-day {
+    color: var(--calendaria-rest-day, #8b9dc3);
+  }
 }
 
 .calendar-days {
@@ -733,14 +737,6 @@
 
     .day-number {
       color: var(--calendaria-festival-text);
-    }
-  }
-
-  &.rest-day {
-    background: color-mix(in srgb, var(--calendaria-rest-day, #8b9dc3) 12%, var(--calendaria-bg));
-
-    .day-number {
-      color: var(--calendaria-rest-day-text, #6b7a99);
     }
   }
 }
@@ -958,8 +954,7 @@
   }
 
   &.rest-day {
-    background: color-mix(in srgb, var(--calendaria-rest-day, #8b9dc3) 12%, var(--calendaria-bg));
-    color: var(--calendaria-rest-day-text, #6b7a99);
+    color: var(--calendaria-rest-day, #8b9dc3);
   }
 }
 
@@ -2173,6 +2168,10 @@
         --button-hover-text-color: var(--color-text-primary, var(--calendaria-text));
       }
 
+      &.active {
+        color: var(--calendaria-primary);
+      }
+
       &[data-action='removeMonth'],
       &[data-action='removeWeekday'],
       &[data-action='removeSeason'],
@@ -2288,8 +2287,6 @@
     font-weight: 600;
     font-size: var(--font-size-12);
     color: var(--color-text-secondary, var(--calendaria-text-secondary));
-    text-align: center;
-    justify-content: center;
 
     > span {
       text-align: center;
@@ -2298,30 +2295,44 @@
 
   /* Month columns */
   .months-list {
+    .list-header,
+    .month-row-main {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .col-name {
-      flex: 2;
+      flex: 2 1 80px;
       min-width: 80px;
     }
 
     .col-abbr {
-      flex: 1;
-      min-width: 70px;
+      flex: 1 1 60px;
+      min-width: 60px;
     }
 
     .col-days,
     .col-leap {
-      width: 60px;
-      flex: none;
+      flex: 0 0 55px;
+      width: 55px;
+      text-align: center;
     }
 
     .col-start-weekday {
-      width: 110px;
-      flex: none;
+      flex: 0 0 100px;
+      width: 100px;
     }
 
     .col-controls {
-      width: 90px;
-      flex: none;
+      flex: 0 0 115px;
+      width: 115px;
+    }
+
+    /* Center all header labels */
+    .list-header > span {
+      text-align: center;
     }
   }
 
@@ -2333,60 +2344,6 @@
       gap: 0.5rem;
     }
 
-    /* Custom weekdays expandable section */
-    .month-custom-weekdays {
-      margin-top: 0.5rem;
-      padding: 0.25rem 0.5rem;
-      background: var(--color-dark-5);
-      border-radius: 4px;
-
-      summary {
-        cursor: pointer;
-        font-size: 0.85em;
-        color: var(--color-text-dark-secondary);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-
-        .weekday-count {
-          opacity: 0.7;
-        }
-      }
-
-      .custom-weekdays-content {
-        padding: 0.5rem 0;
-      }
-
-      .custom-weekdays-toggle {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        font-size: 0.9em;
-      }
-
-      .custom-weekdays-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-
-      .custom-weekday-row {
-        gap: 0.5rem;
-
-        input[type="text"] {
-          flex: 1;
-        }
-
-        .rest-day-toggle {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          font-size: 0.85em;
-          white-space: nowrap;
-        }
-      }
-    }
   }
 
   /* Weekday columns */
@@ -3387,6 +3344,39 @@
   }
 }
 
+/* Custom Weekdays Dialog */
+.custom-weekdays-dialog {
+  .hint {
+    font-size: 0.9em;
+    color: var(--color-text-dark-secondary);
+    margin-bottom: 0.75rem;
+  }
+
+  .custom-weekdays-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .custom-weekday-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input[type="text"] {
+      flex: 1;
+    }
+
+    .rest-day-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.85em;
+      white-space: nowrap;
+    }
+  }
+}
+
 /* ======================================== */
 /* TimeKeeper HUD Styles                    */
 /* ======================================== */
@@ -3947,6 +3937,10 @@
       color: var(--calendaria-weekday-header);
       text-transform: uppercase;
       padding: 2px 0;
+
+      &.rest-day {
+        color: var(--calendaria-rest-day, #8b9dc3);
+      }
     }
   }
 
@@ -5281,6 +5275,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.calendaria-hud-date:hover {
+  color: rgb(180 210 255);
 }
 
 .calendaria-hud-date.hidden {
@@ -5318,6 +5318,36 @@
   max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Event icons container - shows all icons simultaneously */
+.calendaria-hud-events {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+}
+
+.calendaria-hud-event-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 25%, transparent);
+  transition: all 0.15s ease;
+}
+
+.calendaria-hud-event-icon-wrapper:hover {
+  background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 45%, transparent);
+  transform: scale(1.1);
+}
+
+.calendaria-hud-event-icon-wrapper .calendaria-hud-event-icon {
+  font-size: var(--font-size-11, 0.6875rem);
+  color: var(--event-color, rgb(238 136 136));
 }
 
 /* ----------------------------------------
@@ -6056,74 +6086,85 @@
   color: var(--calendaria-text-dim);
 }
 
-/* CalendariaHUD Search Panel */
+/* CalendariaHUD Search Panel - Minimal style */
 .calendaria-hud-search-panel {
   position: fixed;
   width: 280px;
-  max-height: 300px;
-  background: var(--calendaria-bg);
-  border: 1px solid var(--calendaria-border);
-  border-radius: 6px;
-  box-shadow: 0 4px 16px var(--calendaria-shadow);
   z-index: 1000;
   display: none;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .calendaria-hud-search-panel.visible {
   display: flex;
 }
 
+/* Header - just input and floating X */
 .calendaria-hud-search-panel .search-panel-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  background: var(--calendaria-bg-lighter);
-  border-bottom: 1px solid var(--calendaria-border);
+  gap: 4px;
+  position: relative;
 }
 
 .calendaria-hud-search-panel .search-input {
   flex: 1;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid var(--calendaria-border);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--calendaria-bg);
   color: var(--calendaria-text);
-  font-size: var(--font-size-12, 0.75rem);
+  font-size: var(--font-size-13, 0.8125rem);
+  box-shadow: 0 2px 8px var(--calendaria-shadow);
 }
 
 .calendaria-hud-search-panel .search-input:focus {
   outline: none;
   border-color: var(--calendaria-primary);
+  box-shadow: 0 2px 12px var(--calendaria-shadow);
 }
 
-.calendaria-hud-search-panel .search-panel-close {
-  background: none;
-  border: none;
-  color: var(--calendaria-text-dim);
+/* Style native search clear button */
+.calendaria-hud-search-panel .search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='%23888' d='M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256l105.3-105.4z'/%3E%3C/svg%3E") center/contain no-repeat;
   cursor: pointer;
-  padding: 4px;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
 }
 
-.calendaria-hud-search-panel .search-panel-close:hover {
-  color: var(--calendaria-text);
+.calendaria-hud-search-panel .search-input::-webkit-search-cancel-button:hover {
+  opacity: 1;
 }
 
+/* Results - only visible when has content */
 .calendaria-hud-search-panel .search-panel-results {
-  flex: 1;
+  display: none;
+}
+
+.calendaria-hud-search-panel .search-panel-results.has-results {
+  display: block;
+  margin-top: 4px;
+  max-height: 250px;
   overflow-y: auto;
   padding: 8px;
+  background: var(--calendaria-bg);
+  border: 1px solid var(--calendaria-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px var(--calendaria-shadow);
 }
 
 .calendaria-hud-search-panel .search-result-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 6px 8px;
+  gap: 1px;
+  padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .calendaria-hud-search-panel .search-result-item:hover {
@@ -6131,7 +6172,7 @@
 }
 
 .calendaria-hud-search-panel .result-name {
-  font-size: var(--font-size-12, 0.75rem);
+  font-size: var(--font-size-14, 0.875rem);
   font-weight: 500;
   color: var(--calendaria-text);
 }
@@ -6149,8 +6190,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 16px;
+  padding: 12px;
   color: var(--calendaria-text-dim);
+  font-size: var(--font-size-11, 0.6875rem);
 }
 
 /* ======================================== */

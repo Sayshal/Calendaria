@@ -246,7 +246,9 @@ export function addYears(date, years) {
  */
 export function getCurrentDate() {
   const components = game.time.components;
-  return { year: components.year, month: components.month, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
+  const calendar = CalendarManager.getActiveCalendar();
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  return { year: components.year + yearZero, month: components.month, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
 }
 
 /**
