@@ -170,7 +170,7 @@ export const CalendariaAPI = {
    */
   getCurrentSeason() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || !calendar.seasons) return null;
+    if (!calendar?.seasons) return null;
     const components = game.time.components;
     const seasonIndex = components.season ?? 0;
     return calendar.seasons.values?.[seasonIndex] ?? null;
@@ -182,7 +182,7 @@ export const CalendariaAPI = {
    */
   getCycleValues() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.getCycleValues !== 'function') return null;
+    if (!calendar) return null;
     return calendar.getCycleValues();
   },
 
@@ -192,7 +192,7 @@ export const CalendariaAPI = {
    */
   getSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.sunrise !== 'function') return null;
+    if (!calendar) return null;
     return calendar.sunrise();
   },
 
@@ -202,7 +202,7 @@ export const CalendariaAPI = {
    */
   getSunset() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.sunset !== 'function') return null;
+    if (!calendar) return null;
     return calendar.sunset();
   },
 
@@ -212,7 +212,7 @@ export const CalendariaAPI = {
    */
   getDaylightHours() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.daylightHours !== 'function') return null;
+    if (!calendar) return null;
     return calendar.daylightHours();
   },
 
@@ -222,7 +222,7 @@ export const CalendariaAPI = {
    */
   getProgressDay() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.progressDay !== 'function') return null;
+    if (!calendar) return null;
     return calendar.progressDay();
   },
 
@@ -232,82 +232,47 @@ export const CalendariaAPI = {
    */
   getProgressNight() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.progressNight !== 'function') return null;
+    if (!calendar) return null;
     return calendar.progressNight();
   },
 
   /**
-   * Get time until next sunrise.
-   * @returns {object | null} Time delta {hours, minutes, seconds} or null
+   * @param {number} targetHour - Target hour (0-24)
+   * @returns {object|null} Time until target hour
    */
+  getTimeUntilTarget(targetHour) {
+    const components = game.time.components;
+    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
+    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
+    const hours = Math.floor(hoursUntil);
+    const remainingMinutes = (hoursUntil - hours) * 60;
+    const minutes = Math.floor(remainingMinutes);
+    const seconds = Math.floor((remainingMinutes - minutes) * 60);
+    return { hours, minutes, seconds };
+  },
+
+  /** @returns {object|null} Time until sunrise */
   getTimeUntilSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.sunrise !== 'function') return null;
-    const targetHour = calendar.sunrise();
-    if (targetHour === null) return null;
-    const components = game.time.components;
-    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
-    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-    const hours = Math.floor(hoursUntil);
-    const remainingMinutes = (hoursUntil - hours) * 60;
-    const minutes = Math.floor(remainingMinutes);
-    const seconds = Math.floor((remainingMinutes - minutes) * 60);
-    return { hours, minutes, seconds };
+    const targetHour = calendar?.sunrise?.();
+    return targetHour != null ? this.getTimeUntilTarget(targetHour) : null;
   },
 
-  /**
-   * Get time until next sunset.
-   * @returns {object | null} Time delta {hours, minutes, seconds} or null
-   */
+  /** @returns {object|null} Time until sunset */
   getTimeUntilSunset() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.sunset !== 'function') return null;
-    const targetHour = calendar.sunset();
-    if (targetHour === null) return null;
-    const components = game.time.components;
-    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
-    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-    const hours = Math.floor(hoursUntil);
-    const remainingMinutes = (hoursUntil - hours) * 60;
-    const minutes = Math.floor(remainingMinutes);
-    const seconds = Math.floor((remainingMinutes - minutes) * 60);
-    return { hours, minutes, seconds };
+    const targetHour = calendar?.sunset?.();
+    return targetHour != null ? this.getTimeUntilTarget(targetHour) : null;
   },
 
-  /**
-   * Get time until next midnight.
-   * @returns {object | null} Time delta {hours, minutes, seconds} or null
-   */
+  /** @returns {object|null} Time until midnight */
   getTimeUntilMidnight() {
-    const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return null;
-    const targetHour = 0;
-    const components = game.time.components;
-    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
-    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-    const hours = Math.floor(hoursUntil);
-    const remainingMinutes = (hoursUntil - hours) * 60;
-    const minutes = Math.floor(remainingMinutes);
-    const seconds = Math.floor((remainingMinutes - minutes) * 60);
-    return { hours, minutes, seconds };
+    return CalendarManager.getActiveCalendar() ? this.getTimeUntilTarget(0) : null;
   },
 
-  /**
-   * Get time until next midday.
-   * @returns {object | null} Time delta {hours, minutes, seconds} or null
-   */
+  /** @returns {object|null} Time until midday */
   getTimeUntilMidday() {
-    const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return null;
-    const targetHour = 12;
-    const components = game.time.components;
-    const currentHour = components.hour + components.minute / 60 + components.second / 3600;
-    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-    const hours = Math.floor(hoursUntil);
-    const remainingMinutes = (hoursUntil - hours) * 60;
-    const minutes = Math.floor(remainingMinutes);
-    const seconds = Math.floor((remainingMinutes - minutes) * 60);
-    return { hours, minutes, seconds };
+    return CalendarManager.getActiveCalendar() ? this.getTimeUntilTarget(12) : null;
   },
 
   /* -------------------------------------------- */
@@ -354,7 +319,7 @@ export const CalendariaAPI = {
    */
   isFestivalDay() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar || typeof calendar.isFestivalDay !== 'function') return false;
+    if (!calendar) return false;
     return calendar.isFestivalDay();
   },
 

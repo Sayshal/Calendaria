@@ -1,6 +1,5 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{!-- Open Button --}}
   <div class="form-group stacked button-row open-app-button">
     <button type="button" data-action="openHUD">
       <i class="fas fa-external-link-alt"></i>
@@ -8,7 +7,6 @@
     </button>
   </div>
 
-  {{!-- Display Settings --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
@@ -33,7 +31,6 @@
     </div>
   </fieldset>
 
-  {{!-- Calendar HUD Sticky States --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
     <input type="hidden" name="hudStickySection" value="1">
@@ -55,7 +52,6 @@
     </div>
   </fieldset>
 
-  {{!-- Position Reset --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
 

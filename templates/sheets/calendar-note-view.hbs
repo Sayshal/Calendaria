@@ -1,5 +1,4 @@
 <div class="calendar-note-view">
-  {{!-- Header with icon and title --}}
   <header class="note-header">
     <div class="note-icon">
       {{#if (eq iconType "fontawesome")}}
@@ -16,7 +15,6 @@
     {{/if}}
   </header>
 
-  {{!-- Date and time info --}}
   <div class="note-datetime">
     <div class="date-info">
       <i class="fas fa-calendar-alt"></i>
@@ -50,7 +48,6 @@
     {{/if}}
   </div>
 
-  {{!-- Categories --}}
   {{#if displayCategories.length}}
     <div class="note-categories">
       {{#each displayCategories}}
@@ -58,6 +55,5 @@
       {{/each}}
     </div>
   {{/if}}
-  {{!-- Content --}}
   <div class="note-content">{{{enrichedContent}}}</div>
 </div>

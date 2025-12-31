@@ -2,28 +2,21 @@
   {{#if calendarData}}
     <div class="week-grid"
       style="grid-template-rows: var(--calendaria-week-header-height) repeat({{calendarData.daysInWeek}}, var(--calendaria-week-hour-height));">
-      <!-- Empty corner cell -->
       <div class="week-corner-header"></div>
-
-      <!-- Hour labels row -->
       {{#each calendarData.timeSlots}}
         <div class="week-hour-label">{{label}}</div>
       {{/each}}
 
-      <!-- Day rows -->
       {{#each calendarData.days}}
-        <!-- Day name cell -->
         <div class="week-day-header {{#if isToday}}today{{/if}}{{#if isRestDay}} rest-day{{/if}}">
           <span class="day-header-text"><strong>{{day}}</strong> - {{dayName}}</span>
         </div>
 
-        <!-- Hour grid cells for this day -->
         {{#each ../calendarData.timeSlots}}
           <div
             class="week-time-cell {{#if (and ../isToday (eq hour ../currentHour))}}current-hour{{/if}}{{#if (eq hour ../selectedHour)}} selected{{/if}}"
             data-day="{{../day}}" data-month="{{../month}}" data-year="{{../year}}" data-hour="{{hour}}"
             data-action="selectTimeSlot">
-            <!-- Event blocks positioned within cells -->
             {{#each ../eventBlocks}}
               {{#if (eq ../hour startHour)}}
                 <div class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}}"

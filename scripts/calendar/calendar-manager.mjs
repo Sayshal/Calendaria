@@ -387,7 +387,7 @@ export default class CalendarManager {
    */
   static getCurrentMoonPhase(moonIndex = 0) {
     const calendar = this.getActiveCalendar();
-    if (!calendar || !(calendar instanceof CalendariaCalendar)) return null;
+    if (!calendar) return null;
     return calendar.getMoonPhase(moonIndex);
   }
 
@@ -397,7 +397,7 @@ export default class CalendarManager {
    */
   static getAllCurrentMoonPhases() {
     const calendar = this.getActiveCalendar();
-    if (!calendar || !(calendar instanceof CalendariaCalendar)) return [];
+    if (!calendar) return [];
     return calendar.getAllMoonPhases();
   }
 
@@ -407,7 +407,7 @@ export default class CalendarManager {
    */
   static getCurrentFestival() {
     const calendar = this.getActiveCalendar();
-    if (!calendar || !(calendar instanceof CalendariaCalendar)) return null;
+    if (!calendar) return null;
     return calendar.findFestivalDay();
   }
 

@@ -1,5 +1,4 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  {{! Weather header: zone selector and auto-generate }}
   <div class="weather-header">
     <div class="zone-controls">
       <div class="form-group">
@@ -34,7 +33,6 @@
     </div>
   </div>
 
-  {{! Weather presets by category }}
   <div class="weather-presets-list">
     {{#each weatherCategories as |category|}}
       <div class="weather-category" data-category="{{category.id}}">
@@ -51,7 +49,6 @@
           </span>
         </div>
         <div class="category-content">
-          {{! Column headers }}
           <div class="weather-preset-header list-header">
             <span class="col-enabled" data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Enabled'}}"></span>
             <span class="col-icon"></span>
@@ -95,7 +92,6 @@
                   <i class="fas fa-undo"></i>
                 </button>
               </div>
-              {{! Description popover }}
               <div class="description-popover">
                 <textarea name="weather.presets.{{preset.index}}.description"
                   placeholder="{{localize preset.description}}">{{preset.customDescription}}</textarea>
@@ -107,7 +103,6 @@
     {{/each}}
   </div>
 
-  {{! Total chance display }}
   <div class="weather-totals">
     <span class="total-label">{{localize "CALENDARIA.Editor.Weather.TotalChance"}}:</span>
     <span class="total-value {{#if chancesValid}}valid{{else}}warning{{/if}}">{{totalChance}}%</span>

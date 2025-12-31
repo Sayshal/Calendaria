@@ -1,5 +1,4 @@
 <div class="compact-calendar-container">
-  {{!-- Slim Right Sidebar --}}
   <div class="compact-sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
     <button type="button" class="sidebar-btn" data-action="close" data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>
@@ -44,7 +43,6 @@
     </button>
   </div>
 
-  {{!-- Notes Panel (slides out from sidebar) --}}
   <div class="compact-notes-panel{{#if notesPanelVisible}} visible{{/if}}">
     <div class="notes-panel-header">
       <span class="notes-panel-title">{{selectedDateLabel}}</span>
@@ -81,7 +79,6 @@
     </div>
   </div>
 
-  {{!-- Search Panel (slides out from sidebar) --}}
   <div class="calendaria-hud-search-panel{{#if searchOpen}} visible{{/if}}">
     <div class="search-panel-header">
       <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
@@ -105,7 +102,6 @@
     </div>
   </div>
 
-  {{!-- Month Navigation Row --}}
   <div class="compact-top-row{{#if stickyPosition}} position-locked{{/if}}">
     <button type="button" class="nav-btn" data-action="navigate" data-direction="prev"
       data-tooltip="{{localize 'CALENDARIA.Common.PreviousMonth'}}">
@@ -120,7 +116,6 @@
     </button>
   </div>
 
-  {{!-- Calendar Indicators --}}
   {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather isGM)}}
     <div class="calendar-indicators">
       {{#if weather}}
@@ -162,7 +157,6 @@
     </div>
   {{/if}}
 
-  {{!-- Mini Calendar Grid --}}
   <div class="compact-grid" style="--compact-weekday-count: {{calendarData.daysInWeek}}">
     <div class="compact-weekdays">
       {{#each calendarData.weekdays}}
@@ -199,7 +193,6 @@
     </div>
   </div>
 
-  {{!-- Time Display Row --}}
   <div class="compact-time-display" {{#if isGM}}data-action="toggle" {{/if}}>
     <span class="time-value">{{currentTime}}</span>
     <span class="date-value hidden">{{currentDate}}</span>
@@ -211,7 +204,6 @@
     {{/if}}
   </div>
 
-  {{!-- Time Controls Row (GM only) --}}
   {{#if isGM}}
     <div class="compact-time-controls{{#if controlsVisible}} visible{{/if}}">
       <div class="controls-group">

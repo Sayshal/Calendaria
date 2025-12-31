@@ -1,5 +1,4 @@
 <div class="calendar-note-form">
-  {{!-- Row 1: Title | Emblem | Visibility --}}
   <div class="form-row-1">
     <fieldset>
       <legend>{{localize "CALENDARIA.Note.Title"}}</legend>
@@ -45,14 +44,12 @@
     </fieldset>
   </div>
 
-  {{!-- Note Content (ProseMirror Editor) --}}
   <fieldset class="editor-fieldset">
     <legend>{{localize "CALENDARIA.Note.Content"}}</legend>
     <prose-mirror id="note-content" name="text.content" value="{{text.content}}"
       aria-label="{{localize 'CALENDARIA.Note.Content'}}"></prose-mirror>
   </fieldset>
 
-  {{!-- Row 2: Date | Time | Repeat --}}
   <div class="form-row-2">
     <fieldset class="date-fieldset">
       <legend>{{localize "CALENDARIA.Common.Date"}}</legend>
@@ -120,11 +117,9 @@
     </fieldset>
   </div>
 
-  {{!-- Repeat Config Grid (2-column layout for repeat type settings + advanced conditions) --}}
   {{#if showRepeatConfigGrid}}
     <div class="repeat-config-grid">
       <div class="repeat-config-primary">
-        {{!-- Moon Conditions (shown when repeat is 'moon' or conditions exist) --}}
         {{#if showMoonConditions}}
           <fieldset>
             <legend>{{localize "CALENDARIA.Note.MoonConditions"}}</legend>
@@ -171,7 +166,6 @@
           </fieldset>
         {{/if}}
 
-        {{!-- Random Configuration (shown when repeat is 'random') --}}
         {{#if showRandomConfig}}
           <fieldset>
             <legend>{{localize "CALENDARIA.Note.RandomSettings"}}</legend>
@@ -206,7 +200,6 @@
           </fieldset>
         {{/if}}
 
-        {{!-- Linked Event Configuration (shown when repeat is 'linked') --}}
         {{#if showLinkedConfig}}
           <fieldset>
             <legend>{{localize "CALENDARIA.Note.LinkedSettings"}}</legend>
@@ -230,7 +223,6 @@
           </fieldset>
         {{/if}}
 
-        {{!-- Range Pattern Configuration (shown when repeat is 'range') --}}
         {{#if showRangeConfig}}
           <fieldset>
             <legend>{{localize "CALENDARIA.Note.RangeSettings"}}</legend>
@@ -320,7 +312,6 @@
           </fieldset>
         {{/if}}
 
-        {{!-- Week of Month Configuration (shown when repeat is 'weekOfMonth') --}}
         {{#if showWeekOfMonthConfig}}
           <fieldset>
             <legend>{{localize "CALENDARIA.Note.OrdinalWeekdaySettings"}}</legend>
@@ -346,7 +337,6 @@
           </fieldset>
         {{/if}}
 
-        {{!-- Seasonal Configuration (shown when repeat is 'seasonal') --}}
         {{#if showSeasonalConfig}}
           <fieldset>
             <legend>{{localize "CALENDARIA.Note.SeasonalSettings"}}</legend>
@@ -373,7 +363,6 @@
         {{/if}}
       </div>
 
-      {{!-- Advanced Conditions (Column 2) --}}
       {{#if showConditionsUI}}
         <div class="repeat-config-secondary">
           <fieldset>
@@ -506,7 +495,6 @@
     </div>
   {{/if}}
 
-  {{!-- Row 3: Reminders --}}
   <div class="form-row-3">
     <fieldset class="reminder-fieldset">
       <legend>{{localize "CALENDARIA.Category.Reminder"}}</legend>
@@ -549,7 +537,6 @@
     </fieldset>
   </div>
 
-  {{!-- Row 4: Categories & Macro --}}
   <div class="form-row-4">
     <fieldset class="categories-fieldset">
       <legend>{{localize "CALENDARIA.Note.Categories"}}</legend>

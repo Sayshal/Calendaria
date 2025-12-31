@@ -1,6 +1,5 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{!-- Temperature Settings --}}
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}</legend>
@@ -19,7 +18,6 @@
     </fieldset>
   {{/if}}
 
-  {{!-- Climate Configuration --}}
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
@@ -39,7 +37,6 @@
     </fieldset>
   {{/if}}
 
-  {{!-- Custom Weather Presets Info --}}
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
@@ -59,7 +56,6 @@
     </fieldset>
   {{/if}}
 
-  {{!-- Player Message --}}
   {{#unless isGM}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>

@@ -100,7 +100,8 @@ export default class BaseImporter {
    * @throws {Error} If not implemented
    */
   async transform(data) {
-    throw new Error(`${this.constructor.name}.transform() not implemented`, { data });
+    log(1, `${this.constructor.name}.transform() not implemented`, { data });
+    return null;
   }
 
   /**
@@ -110,7 +111,8 @@ export default class BaseImporter {
    * @returns {Promise<object[]>} Array of note data objects
    */
   async extractNotes(data) {
-    throw new Error(`${this.constructor.name}.extractNotes() not implemented`, { data });
+    log(1, `${this.constructor.name}.extractNotes() not implemented`, { data });
+    return null;
   }
 
   /* -------------------------------------------- */
@@ -188,7 +190,8 @@ export default class BaseImporter {
    * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Import result
    */
   async importNotes(notes, options = {}) {
-    throw new Error(`${this.constructor.name}.importNotes() not implemented`, { notes, options });
+    log(1, `${this.constructor.name}.importNotes() not implemented`, { notes, options });
+    return null;
   }
 
   /**
@@ -200,7 +203,8 @@ export default class BaseImporter {
    * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Import result
    */
   async importFestivals(festivals, options = {}) {
-    throw new Error(`${this.constructor.name}.importFestivals() not implemented`, { festivals, options });
+    log(1, `${this.constructor.name}.importFestivals() not implemented`, { festivals, options });
+    return null;
   }
 
   /**

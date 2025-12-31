@@ -1,7 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    {{!-- Global Triggers Section --}}
     <fieldset>
       <legend>{{localize "CALENDARIA.MacroTrigger.GlobalTriggers"}}</legend>
       <p class="hint">{{localize "CALENDARIA.MacroTrigger.GlobalTriggersHint"}}</p>
@@ -19,13 +18,11 @@
       {{/each}}
     </fieldset>
 
-    {{!-- Season Triggers Section --}}
     {{#if hasSeasons}}
       <fieldset>
         <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
         <p class="hint">{{localize "CALENDARIA.MacroTrigger.SeasonTriggersHint"}}</p>
 
-        {{!-- Existing Season Triggers --}}
         {{#if seasonTriggers.length}}
           <div class="season-triggers-list">
             {{#each seasonTriggers}}
@@ -49,7 +46,6 @@
           </div>
         {{/if}}
 
-        {{!-- Add New Season Trigger --}}
         <div class="add-season-trigger">
           <div class="trigger-inputs">
             <select name="newSeasonTrigger.seasonIndex">
@@ -79,13 +75,11 @@
       </fieldset>
     {{/if}}
 
-    {{!-- Moon Phase Triggers Section --}}
     {{#if hasMoons}}
       <fieldset>
         <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
         <p class="hint">{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggersHint"}}</p>
 
-        {{!-- Existing Moon Phase Triggers --}}
         {{#if moonTriggers.length}}
           <div class="moon-triggers-list">
             {{#each moonTriggers}}
@@ -110,7 +104,6 @@
           </div>
         {{/if}}
 
-        {{!-- Add New Moon Phase Trigger --}}
         <div class="add-moon-trigger">
           <div class="trigger-inputs">
             <select name="newMoonTrigger.moonIndex">
@@ -150,7 +143,6 @@
     {{/if}}
   {{/if}}
 
-  {{!-- Player Message --}}
   {{#unless isGM}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>

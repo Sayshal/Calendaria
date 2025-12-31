@@ -1,7 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <p class="hint seasons-hint">{{localize "CALENDARIA.Editor.Hint.SeasonsFields"}}</p>
 
-  {{!-- Season Type Selection --}}
   <div class="form-group season-type-group">
     <label>{{localize "CALENDARIA.Editor.Season.TypeLabel"}}</label>
     <div class="form-fields">
@@ -14,7 +13,6 @@
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.SeasonType"}}</p>
   </div>
 
-  {{!-- Offset (for periodic seasons) --}}
   {{#if isPeriodic}}
     <div class="form-group season-offset-group">
       <label>{{localize "CALENDARIA.Editor.Season.OffsetLabel"}}</label>
@@ -45,7 +43,6 @@
             </div>
           </div>
           {{#if ../isPeriodic}}
-            {{!-- Periodic: show duration field --}}
             <div class="season-row-bottom flexrow periodic-row">
               <label class="col-duration-label">{{localize "CALENDARIA.Editor.Column.Duration"}}</label>
               <input type="number" name="seasons.{{this.index}}.duration" value="{{this.duration}}" min="1"
@@ -59,7 +56,6 @@
               </div>
             </div>
           {{else}}
-            {{!-- Dated: show month/day range --}}
             <div class="season-row-bottom flexrow">
               <select name="seasons.{{this.index}}.monthStart" class="col-start-month">
                 {{#each this.startMonthOptions}}

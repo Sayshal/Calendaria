@@ -56,7 +56,7 @@ export default class NoteManager {
   static async #initializeActiveCalendarJournal() {
     try {
       const activeCalendar = CalendarManager.getActiveCalendar();
-      if (!activeCalendar || !activeCalendar.metadata?.id) {
+      if (!activeCalendar?.metadata?.id) {
         log(2, 'No active calendar found during initialization');
         return;
       }
@@ -211,7 +211,7 @@ export default class NoteManager {
     const sanitized = sanitizeNoteData(noteData);
     if (!calendarId) {
       const activeCalendar = CalendarManager.getActiveCalendar();
-      if (!activeCalendar || !activeCalendar.metadata?.id) throw new Error('No active calendar found');
+      if (!activeCalendar?.metadata?.id) throw new Error('No active calendar found');
       calendarId = activeCalendar.metadata.id;
     }
 

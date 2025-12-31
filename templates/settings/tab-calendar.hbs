@@ -1,6 +1,5 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{!-- Active Calendar --}}
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
@@ -32,7 +31,6 @@
     </fieldset>
   {{/if}}
 
-  {{!-- Player Message --}}
   {{#unless isGM}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>

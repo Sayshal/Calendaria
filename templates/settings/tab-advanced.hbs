@@ -1,6 +1,5 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{!-- Primary GM --}}
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
@@ -19,7 +18,6 @@
     </fieldset>
   {{/if}}
 
-  {{!-- Logging --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}</legend>
 
@@ -46,7 +44,6 @@
     {{/if}}
   </fieldset>
 
-  {{!-- Module Info --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.About"}}</legend>
 

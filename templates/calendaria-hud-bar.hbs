@@ -1,10 +1,4 @@
-{{!--
-Calendaria HUD Bar Template
-Main bar with time controls, info panels, and hover tray.
-Wrapped in single element for AppV2 PARTS compatibility.
---}}
 <div class="calendaria-hud-bar-wrapper">
-  {{!-- SEARCH PANEL (slides up from bar) --}}
   <div class="calendaria-hud-search-panel{{#if searchOpen}} visible{{/if}}">
     <div class="search-panel-header">
       <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
@@ -28,11 +22,9 @@ Wrapped in single element for AppV2 PARTS compatibility.
     </div>
   </div>
 
-  {{!-- MAIN BAR --}}
   <div class="calendaria-hud-bar{{#if locked}} locked{{/if}}{{#if hasEvents}} has-events{{/if}}"
     {{#if hasEvents}}style="--event-glow: {{firstEventColor}};" {{/if}}>
 
-    {{!-- LEFT BUTTON GROUP: Search, Add Note --}}
     <div class="calendaria-hud-btn-group left" role="group" aria-label="{{localize 'CALENDARIA.HUD.NoteActions'}}">
       <button type="button" class="calendaria-hud-btn" data-action="searchNotes"
         data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
@@ -46,12 +38,9 @@ Wrapped in single element for AppV2 PARTS compatibility.
 
     <div class="calendaria-hud-divider"></div>
 
-    {{!-- LEFT INFO PANEL: Date + Event Icons --}}
     <div class="calendaria-hud-info-panel left">
-      {{!-- Date display - clickable to set date --}}
       <span class="calendaria-hud-date" data-action="setDate"
         data-tooltip="{{dateDisplay}} (Click to set date)">{{dateDisplay}}</span>
-      {{!-- Event icons - show all simultaneously --}}
       {{#if hasEvents}}
         <div class="calendaria-hud-events">
           {{#each liveEvents}}
@@ -64,7 +53,6 @@ Wrapped in single element for AppV2 PARTS compatibility.
       {{/if}}
     </div>
 
-    {{!-- CENTER SECTION: Time with hover play/pause --}}
     <div class="calendaria-hud-center">
       <div class="calendaria-hud-time-wrapper">
         <span class="calendaria-hud-time">{{time}}</span>
@@ -78,7 +66,6 @@ Wrapped in single element for AppV2 PARTS compatibility.
       </div>
     </div>
 
-    {{!-- RIGHT INFO PANEL: Indicators --}}
     <div class="calendaria-hud-indicators">
       {{#if weather}}
         <span class="weather-indicator{{#if isGM}} clickable{{/if}}" {{#if isGM}}data-action="openWeatherPicker" {{/if}}
@@ -114,7 +101,6 @@ Wrapped in single element for AppV2 PARTS compatibility.
 
     <div class="calendaria-hud-divider"></div>
 
-    {{!-- RIGHT BUTTON GROUP: Calendar, Settings --}}
     <div class="calendaria-hud-btn-group right" role="group" aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">
       <button type="button" class="calendaria-hud-btn" data-action="openCalendar"
         data-tooltip="{{localize 'CALENDARIA.HUD.OpenCalendar'}}">
@@ -127,58 +113,42 @@ Wrapped in single element for AppV2 PARTS compatibility.
     </div>
   </div>
 
-  {{!-- HOVER TRAY --}}
   {{#if isGM}}
     <div class="calendaria-hud-tray{{#if stickyTray}} visible{{/if}}">
-      {{!-- Time shortcut: Jump to Sunrise --}}
       <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunrise"
         data-tooltip="{{localize 'CALENDARIA.HUD.Sunrise'}}">
         <i class="fa-solid fa-sun"></i>
       </button>
-      {{!-- Time shortcut: Jump to Midday --}}
       <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toMidday"
         data-tooltip="{{localize 'CALENDARIA.HUD.Midday'}}">
         <i class="fa-solid fa-cloud-sun"></i>
       </button>
-
       <div class="calendaria-hud-tray-divider"></div>
-
-      {{!-- Reverse time --}}
       <button type="button" class="calendaria-hud-time-btn" data-action="reverse"
         data-tooltip="{{localize 'CALENDARIA.HUD.Reverse'}}">
         <i class="fa-solid fa-backward"></i>
       </button>
-
-      {{!-- Multiplier selector --}}
       <select class="calendaria-hud-select" data-action="setMultiplier"
         aria-label="{{localize 'CALENDARIA.HUD.Multiplier'}}">
         {{#each multipliers}}
           <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
-
-      {{!-- Time increment selector --}}
       <select class="calendaria-hud-select" data-action="setIncrement"
         aria-label="{{localize 'CALENDARIA.HUD.TimeIncrement'}}">
         {{#each increments}}
           <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
-
-      {{!-- Forward time --}}
       <button type="button" class="calendaria-hud-time-btn" data-action="forward"
         data-tooltip="{{localize 'CALENDARIA.HUD.Forward'}}">
         <i class="fa-solid fa-forward"></i>
       </button>
-
       <div class="calendaria-hud-tray-divider"></div>
-
-      {{!-- Time shortcut: Jump to Sunset --}}
       <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunset"
         data-tooltip="{{localize 'CALENDARIA.HUD.Sunset'}}">
         <i class="fa-solid fa-cloud-moon"></i>
       </button>
-      {{!-- Time shortcut: Jump to Midnight --}}
       <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toMidnight"
         data-tooltip="{{localize 'CALENDARIA.HUD.Midnight'}}">
         <i class="fa-solid fa-moon"></i>

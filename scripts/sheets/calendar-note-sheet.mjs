@@ -612,7 +612,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @private
    */
   _formatDateDisplay(calendar, year, month, day) {
-    if (!calendar || !calendar.months?.values) return `${day} / ${month + 1} / ${year}`;
+    if (!calendar?.months?.values) return `${day} / ${month + 1} / ${year}`;
     const monthData = calendar.months.values[month];
     const monthName = monthData?.name ? localize(monthData.name) : `Month ${month + 1}`;
     return `${day} ${monthName}, ${year}`;

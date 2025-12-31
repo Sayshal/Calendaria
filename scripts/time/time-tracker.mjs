@@ -232,8 +232,8 @@ export default class TimeTracker {
    * @private
    */
   static #getThresholdsForDay(_components, calendar) {
-    const sunrise = typeof calendar.sunrise === 'function' ? calendar.sunrise() : null;
-    const sunset = typeof calendar.sunset === 'function' ? calendar.sunset() : null;
+    const sunrise = calendar.sunrise();
+    const sunset = calendar.sunset();
     return { midnight: 0, sunrise: sunrise, midday: 12, sunset: sunset };
   }
 

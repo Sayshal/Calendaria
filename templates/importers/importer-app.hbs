@@ -1,6 +1,4 @@
-{{!-- Importer Application Template --}}
 <div class="importer-content">
-  {{!-- No Importers Available --}}
   {{#unless hasImporters}}
     <div class="no-importers">
       <i class="fas fa-exclamation-triangle"></i>
@@ -8,12 +6,9 @@
     </div>
   {{else}}
 
-    {{!-- Two-Column Layout --}}
     <div class="importer-grid">
 
-      {{!-- Left Column: Source & Preview --}}
       <div class="importer-left">
-        {{!-- Source Selection --}}
         <fieldset class="source-section">
           <legend>
             <i class="fas fa-database"></i>
@@ -40,7 +35,6 @@
               <p class="importer-description hint">{{localize selectedImporter.description}}</p>
             {{/if}}
 
-            {{!-- File Upload Zone --}}
             {{#if canUpload}}
               <div class="file-upload-zone {{#if loadedFileName}}has-file{{/if}}" data-action="uploadFile">
                 {{#if loadedFileName}}
@@ -58,7 +52,6 @@
               </div>
             {{/if}}
 
-            {{!-- Import From Module Button --}}
             {{#if canImportFromModule}}
               {{#if loadedFromModule}}
                 <div class="module-loaded">
@@ -79,7 +72,6 @@
           {{/if}}
         </fieldset>
 
-        {{!-- Error Message --}}
         {{#if errorMessage}}
           <div class="import-error">
             <i class="fas fa-exclamation-circle"></i>
@@ -87,7 +79,6 @@
           </div>
         {{/if}}
 
-        {{!-- Preview Section --}}
         {{#if hasData}}
           <fieldset class="preview-section">
             <legend>
@@ -131,7 +122,6 @@
             {{/if}}
           </fieldset>
 
-          {{!-- Import Options --}}
           <fieldset class="import-options">
             <legend>
               <i class="fas fa-cog"></i>
@@ -156,7 +146,6 @@
         {{/if}}
       </div>
 
-      {{!-- Right Column: Notes & Events --}}
       <div class="importer-right">
         {{#if extractedNotes.length}}
           <fieldset class="note-selection">
@@ -166,7 +155,6 @@
               <span class="note-count">({{extractedNotes.length}})</span>
             </legend>
 
-            {{!-- Bulk Actions --}}
             <div class="note-bulk-actions">
               <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="skip"
                 data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllSkip'}}">
@@ -182,7 +170,6 @@
               </button>
             </div>
 
-            {{!-- Note Table with Radio Buttons --}}
             <div class="note-selection-table">
               <div class="note-row header">
                 <span class="note-name">{{localize "CALENDARIA.Common.Name"}}</span>
@@ -226,7 +213,6 @@
       </div>
     </div>
 
-    {{!-- Import Button --}}
     {{#if hasData}}
       <footer class="form-footer">
         {{#each buttons}}

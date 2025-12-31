@@ -1,6 +1,5 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{!-- Chat Timestamps --}}
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}</legend>
@@ -27,7 +26,6 @@
     </fieldset>
   {{/if}}
 
-  {{!-- Player Message --}}
   {{#unless isGM}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>

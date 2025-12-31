@@ -1,5 +1,4 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  {{!-- Calendar Selector --}}
   <div class="template-selector">
     <select name="calendarSelect">
       <option value="">{{localize "CALENDARIA.Editor.SelectCalendar"}}</option>
@@ -18,7 +17,6 @@
     </button>
   </div>
 
-  {{!-- Calendar Identity --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.Editor.Section.CalendarIdentity"}}</legend>
 
@@ -46,7 +44,6 @@
     </div>
   </fieldset>
 
-  {{!-- Year Settings Row --}}
   <div class="flexrow" style="gap: 1rem;">
     <fieldset style="flex: 1;">
       <legend>{{localize "CALENDARIA.Editor.Section.YearSettings"}}</legend>
@@ -87,7 +84,6 @@
         <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapRule"}}</p>
       </div>
 
-      {{!-- Simple interval fields --}}
       <div class="leap-simple-fields" {{#unless showLeapSimple}}style="display: none;" {{/unless}}>
         <div class="form-group">
           <label>{{localize "CALENDARIA.Editor.Field.LeapInterval"}}</label>
@@ -107,7 +103,6 @@
         </div>
       </div>
 
-      {{!-- Custom pattern field --}}
       <div class="leap-custom-fields" {{#unless showLeapCustom}}style="display: none;" {{/unless}}>
         <div class="form-group">
           <label>{{localize "CALENDARIA.Editor.Field.LeapPattern"}}</label>
@@ -127,7 +122,6 @@
         </div>
       </div>
 
-      {{!-- Gregorian info --}}
       <div class="leap-gregorian-info" {{#unless showLeapGregorian}}style="display: none;" {{/unless}}>
         <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
       </div>
