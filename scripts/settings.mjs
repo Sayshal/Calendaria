@@ -1,6 +1,5 @@
 /**
  * Calendaria Module Settings Registration
- * @todo Use foundry.data.fields for all `type` fields where possible for better validation.
  * @module Settings
  * @author Tyler
  */
@@ -8,13 +7,29 @@
 import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { ImporterApp } from './applications/importer-app.mjs';
-import { MacroTriggerConfig } from './applications/settings/macro-trigger-config.mjs';
 import { SettingsPanel } from './applications/settings/settings-panel.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
 import { BUNDLED_CALENDARS } from './calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
+
+const { ArrayField, ObjectField, BooleanField, NumberField, StringField } = foundry.data.fields;
+
+/**
+ * Build calendar choices for the active calendar dropdown.
+ * @returns {Object<string, string>} Map of calendar ID to display name
+ */
+function buildCalendarChoices() {
+  const choices = BUNDLED_CALENDARS.reduce((acc, id) => {
+    const key = id.charAt(0).toUpperCase() + id.slice(1);
+    acc[id] = `CALENDARIA.Calendar.${key}.Name`;
+    return acc;
+  }, {});
+  const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
+  for (const [id, data] of Object.entries(customCalendars)) choices[id] = data.name || id;
+  return choices;
+}
 
 /**
  * Register all module settings with Foundry VTT.
@@ -30,8 +45,7 @@ export function registerSettings() {
     name: 'Calendar Position',
     scope: 'user',
     config: false,
-    type: Object,
-    default: null
+    type: new ObjectField({ nullable: true, initial: null })
   });
 
   /** Whether the calendar HUD position is locked */
@@ -39,8 +53,7 @@ export function registerSettings() {
     name: 'Position Locked',
     scope: 'user',
     config: false,
-    type: Boolean,
-    default: false
+    type: new BooleanField({ initial: false })
   });
 
   /** Saved position for the compact calendar */
@@ -48,8 +61,7 @@ export function registerSettings() {
     name: 'Compact Calendar Position',
     scope: 'user',
     config: false,
-    type: Object,
-    default: null
+    type: new ObjectField({ nullable: true, initial: null })
   });
 
   /** Saved position for the TimeKeeper HUD */
@@ -57,8 +69,7 @@ export function registerSettings() {
     name: 'TimeKeeper Position',
     scope: 'user',
     config: false,
-    type: Object,
-    default: null
+    type: new ObjectField({ nullable: true, initial: null })
   });
 
   /** Delay before auto-hiding compact calendar controls */
@@ -67,9 +78,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.CompactControlsDelay.Hint',
     scope: 'user',
     config: false,
-    type: Number,
-    default: 3,
-    range: { min: 1, max: 10, step: 1 }
+    type: new NumberField({ min: 1, max: 10, step: 1, integer: true, initial: 3 })
   });
 
   /** Sticky states for compact calendar */
@@ -77,8 +86,7 @@ export function registerSettings() {
     name: 'Compact Calendar Sticky States',
     scope: 'user',
     config: false,
-    type: Object,
-    default: { timeControls: false, sidebar: false, position: false }
+    type: new ObjectField({ initial: { timeControls: false, sidebar: false, position: false } })
   });
 
   /** Default setting for syncing scene darkness with sun position */
@@ -87,8 +95,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.DarknessSync.Hint',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: true
+    type: new BooleanField({ initial: true })
   });
 
   /** Show moon phases on the calendar UI */
@@ -97,8 +104,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ShowMoonPhases.Hint',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: true
+    type: new BooleanField({ initial: true })
   });
 
   /** Show TimeKeeper HUD on world load */
@@ -107,8 +113,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ShowTimeKeeper.Hint',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: false,
+    type: new BooleanField({ initial: false }),
     requiresReload: false,
     onChange: (value) => {
       if (value) TimeKeeperHUD.show();
@@ -122,8 +127,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ShowCompactCalendar.Hint',
     scope: 'user',
     config: false,
-    type: Boolean,
-    default: true
+    type: new BooleanField({ initial: true })
   });
 
   // ========================================//
@@ -136,8 +140,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
     scope: 'user',
     config: false,
-    type: Boolean,
-    default: false,
+    type: new BooleanField({ initial: false }),
     onChange: (value) => {
       if (value) CalendariaHUD.show();
       else CalendariaHUD.hide();
@@ -150,13 +153,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.CalendarHUDMode.Hint',
     scope: 'user',
     config: false,
-    type: new foundry.data.fields.StringField({
-      choices: {
-        fullsize: 'CALENDARIA.Settings.CalendarHUDMode.Fullsize',
-        compact: 'CALENDARIA.Settings.CalendarHUDMode.Compact'
-      },
-      initial: 'fullsize'
-    }),
+    type: new StringField({ choices: { fullsize: 'CALENDARIA.Settings.CalendarHUDMode.Fullsize', compact: 'CALENDARIA.Settings.CalendarHUDMode.Compact' }, initial: 'fullsize' }),
     onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
   });
 
@@ -165,8 +162,7 @@ export function registerSettings() {
     name: 'Calendar HUD Locked',
     scope: 'user',
     config: false,
-    type: Boolean,
-    default: false
+    type: new BooleanField({ initial: false })
   });
 
   /** Calendar HUD sticky states */
@@ -174,8 +170,7 @@ export function registerSettings() {
     name: 'Calendar HUD Sticky States',
     scope: 'user',
     config: false,
-    type: Object,
-    default: { tray: false, position: false }
+    type: new ObjectField({ initial: { tray: false, position: false } })
   });
 
   /** Calendar HUD position */
@@ -183,8 +178,7 @@ export function registerSettings() {
     name: 'Calendar HUD Position',
     scope: 'user',
     config: false,
-    type: Object,
-    default: null
+    type: new ObjectField({ nullable: true, initial: null })
   });
 
   /** User-customized theme color overrides */
@@ -192,8 +186,7 @@ export function registerSettings() {
     name: 'Custom Theme Colors',
     scope: 'user',
     config: false,
-    type: Object,
-    default: {}
+    type: new ObjectField({ initial: {} })
   });
 
   /** Stored calendar configurations and active calendar state */
@@ -201,8 +194,7 @@ export function registerSettings() {
     name: 'Calendar Configurations',
     scope: 'world',
     config: false,
-    type: Object,
-    default: null
+    type: new ObjectField({ nullable: true, initial: null })
   });
 
   /** User-created custom calendar definitions */
@@ -210,22 +202,8 @@ export function registerSettings() {
     name: 'Custom Calendars',
     scope: 'world',
     config: false,
-    type: Object,
-    default: {}
+    type: new ObjectField({ initial: {} })
   });
-
-  // Build calendar choices from bundled + custom calendars
-  const calendarChoices = BUNDLED_CALENDARS.reduce((acc, id) => {
-    const key = id.charAt(0).toUpperCase() + id.slice(1);
-    acc[id] = `CALENDARIA.Calendar.${key}.Name`;
-    return acc;
-  }, {});
-
-  // Add custom calendars from stored setting
-  const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-  for (const [id, data] of Object.entries(customCalendars)) {
-    calendarChoices[id] = data.name || id;
-  }
 
   /** Active calendar ID - which calendar is currently being used */
   game.settings.register(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, {
@@ -233,9 +211,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ActiveCalendar.Hint',
     scope: 'world',
     config: true,
-    type: String,
-    choices: calendarChoices,
-    default: 'gregorian',
+    type: new StringField({ choices: buildCalendarChoices(), initial: 'gregorian' }),
     requiresReload: true
   });
 
@@ -244,8 +220,7 @@ export function registerSettings() {
     name: 'Default Calendar Overrides',
     scope: 'world',
     config: false,
-    type: Object,
-    default: {}
+    type: new ObjectField({ initial: {} })
   });
 
   /** User-created custom note categories */
@@ -253,8 +228,7 @@ export function registerSettings() {
     name: 'Custom Categories',
     scope: 'world',
     config: false,
-    type: Array,
-    default: []
+    type: new ArrayField(new ObjectField())
   });
 
   // ========================================//
@@ -267,7 +241,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ChatTimestampMode.Hint',
     scope: 'world',
     config: false,
-    type: new foundry.data.fields.StringField({
+    type: new StringField({
       choices: {
         disabled: 'CALENDARIA.Settings.ChatTimestampMode.Disabled',
         replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace',
@@ -283,8 +257,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ChatTimestampShowTime.Hint',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: true
+    type: new BooleanField({ initial: true })
   });
 
   // ========================================//
@@ -297,8 +270,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.AdvanceTimeOnRest.Hint',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: false
+    type: new BooleanField({ initial: false })
   });
 
   /** Whether to advance world time when combat rounds change */
@@ -307,8 +279,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Hint',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: false
+    type: new BooleanField({ initial: false })
   });
 
   // ========================================//
@@ -320,8 +291,7 @@ export function registerSettings() {
     name: 'Current Weather',
     scope: 'world',
     config: false,
-    type: Object,
-    default: null
+    type: new ObjectField({ nullable: true, initial: null })
   });
 
   /** Temperature unit (Celsius or Fahrenheit) */
@@ -330,7 +300,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.TemperatureUnit.Hint',
     scope: 'world',
     config: false,
-    type: new foundry.data.fields.StringField({
+    type: new StringField({
       choices: {
         celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius',
         fahrenheit: 'CALENDARIA.Settings.TemperatureUnit.Fahrenheit'
@@ -344,8 +314,7 @@ export function registerSettings() {
     name: 'Custom Weather Presets',
     scope: 'world',
     config: false,
-    type: Array,
-    default: []
+    type: new ArrayField(new ObjectField())
   });
 
   // ========================================//
@@ -357,8 +326,7 @@ export function registerSettings() {
     name: 'Macro Triggers',
     scope: 'world',
     config: false,
-    type: Object,
-    default: { global: { dawn: '', dusk: '', midday: '', midnight: '', newDay: '' }, season: [], moonPhase: [] }
+    type: new ObjectField({ initial: { global: { dawn: '', dusk: '', midday: '', midnight: '', newDay: '' }, season: [], moonPhase: [] } })
   });
 
   // ========================================//
@@ -370,8 +338,7 @@ export function registerSettings() {
     name: 'Dev Mode',
     scope: 'world',
     config: false,
-    type: Boolean,
-    default: false
+    type: new BooleanField({ initial: false })
   });
 
   /** Logging level configuration for debug output */
@@ -380,7 +347,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.Logger.Hint',
     scope: 'user',
     config: false,
-    type: new foundry.data.fields.StringField({
+    type: new StringField({
       choices: {
         0: 'CALENDARIA.Settings.Logger.Choices.Off',
         1: 'CALENDARIA.Settings.Logger.Choices.Errors',
@@ -424,16 +391,6 @@ export function registerSettings() {
     restricted: true
   });
 
-  /** Settings menu button to open macro trigger config */
-  game.settings.registerMenu(MODULE.ID, 'macroTriggers', {
-    name: 'CALENDARIA.Settings.MacroTriggers.Name',
-    hint: 'CALENDARIA.Settings.MacroTriggers.Hint',
-    label: 'CALENDARIA.Settings.MacroTriggers.Label',
-    icon: 'fas fa-bolt',
-    type: MacroTriggerConfig,
-    restricted: true
-  });
-
   log(3, 'Module settings registered.');
 }
 
@@ -443,25 +400,23 @@ export function registerSettings() {
  * @returns {void}
  */
 export function registerReadySettings() {
-  // Build GM user choices dropdown
-  const gmChoices = game.users
-    .filter((user) => user.isGM)
-    .reduce(
-      (acc, user) => {
-        acc[user.id] = user.name;
-        return acc;
-      },
-      { '': localize('CALENDARIA.Settings.PrimaryGM.Auto') }
-    );
-
   /** Primary GM user ID override for sync operations */
   game.settings.register(MODULE.ID, SETTINGS.PRIMARY_GM, {
     name: 'CALENDARIA.Settings.PrimaryGM.Name',
     hint: 'CALENDARIA.Settings.PrimaryGM.Hint',
     scope: 'world',
     config: false,
-    type: String,
-    default: '',
-    choices: gmChoices
+    type: new StringField({
+      choices: game.users
+        .filter((user) => user.isGM)
+        .reduce(
+          (acc, user) => {
+            acc[user.id] = user.name;
+            return acc;
+          },
+          { '': localize('CALENDARIA.Settings.PrimaryGM.Auto') }
+        ),
+      initial: ''
+    })
   });
 }

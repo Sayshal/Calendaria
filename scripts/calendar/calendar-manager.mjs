@@ -7,7 +7,7 @@
  */
 
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
@@ -186,8 +186,8 @@ export default class CalendarManager {
    */
   static async switchCalendar(id) {
     if (!CalendarRegistry.has(id)) {
-      log(2, `Cannot switch to calendar: ${id} not found`);
-      ui.notifications.error(`Calendar "${id}" not found`);
+      log(1, `Cannot switch to calendar: ${id} not found`);
+      ui.notifications.error(format('CALENDARIA.Error.CalendarNotFound', { id }));
       return false;
     }
 
@@ -246,7 +246,7 @@ export default class CalendarManager {
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
     game.time.initializeCalendar();
     const calendarName = calendar?.name || id;
-    ui.notifications.info(`Calendar switched to ${calendarName} by GM`);
+    ui.notifications.info(format('CALENDARIA.Info.CalendarSwitched', { name: calendarName }));
     Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
     this.#rerenderCalendarUIs();
   }
@@ -260,7 +260,7 @@ export default class CalendarManager {
   static async addCalendar(id, definition) {
     if (CalendarRegistry.has(id)) {
       log(2, `Cannot add calendar: ${id} already exists`);
-      ui.notifications.error(`Calendar "${id}" already exists`);
+      ui.notifications.error(format('CALENDARIA.Error.CalendarAlreadyExists', { id }));
       return null;
     }
 
@@ -273,7 +273,7 @@ export default class CalendarManager {
       return calendar;
     } catch (error) {
       log(1, `Error adding calendar ${id}:`, error);
-      ui.notifications.error(`Error adding calendar: ${error.message}`);
+      ui.notifications.error(format('CALENDARIA.Error.CalendarAddFailed', { message: error.message }));
       return null;
     }
   }
@@ -290,8 +290,8 @@ export default class CalendarManager {
     }
 
     if (CalendarRegistry.getActiveId() === id) {
-      log(2, `Cannot remove active calendar: ${id}`);
-      ui.notifications.warn('Cannot remove the active calendar');
+      log(1, `Cannot remove active calendar: ${id}`);
+      ui.notifications.warn('CALENDARIA.Error.CannotRemoveActiveCalendar', { localize: true });
       return false;
     }
 
@@ -474,8 +474,8 @@ export default class CalendarManager {
   static async updateCustomCalendar(id, changes) {
     const calendar = CalendarRegistry.get(id);
     if (!calendar) {
-      log(2, `Cannot update calendar: ${id} not found`);
-      ui.notifications.error(`Calendar "${id}" not found`);
+      log(1, `Cannot update calendar: ${id} not found`);
+      ui.notifications.error(format('CALENDARIA.Error.CalendarNotFound', { id }));
       return null;
     }
 
@@ -502,7 +502,7 @@ export default class CalendarManager {
       log(3, `Updated custom calendar: ${id}`);
       return updatedCalendar;
     } catch (error) {
-      ui.notifications.error(`Error updating calendar:`, error);
+      ui.notifications.error(format('CALENDARIA.Error.CalendarUpdateFailed', { message: error.message }));
       return null;
     }
   }

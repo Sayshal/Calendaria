@@ -4706,41 +4706,10 @@
 }
 
 /* ======================================== */
-/* Macro Trigger Configuration              */
+/* Macro Trigger Styles (Settings Panel)    */
 /* ======================================== */
 
-.calendaria.macro-trigger-config {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-
-  .trigger-content {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 1rem;
-    padding: 0.5rem;
-  }
-
-  .form-footer {
-    margin-top: auto;
-  }
-
-  fieldset {
-    padding: 0.75rem;
-
-    .hint {
-      font-size: 0.85rem;
-      font-style: italic;
-
-      &.no-moons,
-      &.no-seasons {
-        text-align: center;
-        padding: 1rem;
-      }
-    }
-  }
-
+.calendaria.settings-panel {
   .season-triggers-list,
   .moon-triggers-list {
     display: flex;

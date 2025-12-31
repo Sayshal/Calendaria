@@ -138,12 +138,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {MouseEvent} _event - The context menu event
    * @param {string} categoryId - The category ID
    * @param {string} categoryLabel - The category label for display
-   * @todo Localize
    */
   async #showDeleteCategoryMenu(_event, categoryId, categoryLabel) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: 'Delete Category' },
-      content: `<p>Delete custom category "${categoryLabel}"?</p><p class="hint">This will remove it from the list but won't affect notes already using it.</p>`,
+      window: { title: localize('CALENDARIA.Note.DeleteCategoryTitle') },
+      content: `<p>${format('CALENDARIA.Note.DeleteCategoryConfirm', { label: categoryLabel })}</p><p class="hint">${localize('CALENDARIA.Note.DeleteCategoryHint')}</p>`,
       rejectClose: false,
       modal: true
     });
@@ -151,7 +150,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (confirmed) {
       const deleted = await deleteCustomCategory(categoryId);
       if (deleted) {
-        ui.notifications.info(`Category "${categoryLabel}" deleted`);
+        ui.notifications.info(format('CALENDARIA.Info.CategoryDeleted', { label: categoryLabel }));
         this.render();
       }
     }
@@ -276,11 +275,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       checkInterval: randomConfig.checkInterval ?? 'daily',
       checkIntervalLabel: randomConfig.checkInterval === 'weekly' ? 'week' : randomConfig.checkInterval === 'monthly' ? 'month' : 'day'
     };
-    /** @todo Localize */
     context.randomIntervalOptions = [
-      { value: 'daily', label: 'Day', selected: context.randomConfig.checkInterval === 'daily' },
-      { value: 'weekly', label: 'Week', selected: context.randomConfig.checkInterval === 'weekly' },
-      { value: 'monthly', label: 'Month', selected: context.randomConfig.checkInterval === 'monthly' }
+      { value: 'daily', label: localize('CALENDARIA.Note.IntervalDaily'), selected: context.randomConfig.checkInterval === 'daily' },
+      { value: 'weekly', label: localize('CALENDARIA.Note.IntervalWeekly'), selected: context.randomConfig.checkInterval === 'weekly' },
+      { value: 'monthly', label: localize('CALENDARIA.Note.IntervalMonthly'), selected: context.randomConfig.checkInterval === 'monthly' }
     ];
 
     context.showLinkedConfig = hasLinkedEvent || this.document.system.repeat === 'linked';
@@ -291,7 +289,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     if (linkedEvent.noteId) {
       const linkedNote = NoteManager.getNote(linkedEvent.noteId);
-      context.linkedNoteName = linkedNote?.name || 'Unknown Event';
+      context.linkedNoteName = linkedNote?.name || localize('CALENDARIA.Note.UnknownEvent');
     }
 
     context.showRangeConfig = this.document.system.repeat === 'range';
@@ -332,22 +330,31 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const selectedWeekday = this.document.system.weekday ?? 0;
     context.weekdayOptions = weekdays.map((wd, idx) => ({ index: idx, name: localize(wd.name), selected: idx === selectedWeekday }));
     const selectedWeekNumber = this.document.system.weekNumber ?? 1;
-    /** @todo Localize */
     context.weekNumberOptions = [
-      { value: 1, label: '1st', selected: selectedWeekNumber === 1 },
-      { value: 2, label: '2nd', selected: selectedWeekNumber === 2 },
-      { value: 3, label: '3rd', selected: selectedWeekNumber === 3 },
-      { value: 4, label: '4th', selected: selectedWeekNumber === 4 },
-      { value: 5, label: '5th', selected: selectedWeekNumber === 5 },
-      { value: -1, label: 'Last', selected: selectedWeekNumber === -1 },
-      { value: -2, label: '2nd-to-last', selected: selectedWeekNumber === -2 }
+      { value: 1, label: localize('CALENDARIA.Note.WeekOrdinal1st'), selected: selectedWeekNumber === 1 },
+      { value: 2, label: localize('CALENDARIA.Note.WeekOrdinal2nd'), selected: selectedWeekNumber === 2 },
+      { value: 3, label: localize('CALENDARIA.Note.WeekOrdinal3rd'), selected: selectedWeekNumber === 3 },
+      { value: 4, label: localize('CALENDARIA.Note.WeekOrdinal4th'), selected: selectedWeekNumber === 4 },
+      { value: 5, label: localize('CALENDARIA.Note.WeekOrdinal5th'), selected: selectedWeekNumber === 5 },
+      { value: -1, label: localize('CALENDARIA.Note.WeekOrdinalLast'), selected: selectedWeekNumber === -1 },
+      { value: -2, label: localize('CALENDARIA.Note.WeekOrdinal2ndLast'), selected: selectedWeekNumber === -2 }
     ];
 
     if (context.showWeekOfMonthConfig) {
-      const ordinals = context.weekNumber > 0 ? ['1st', '2nd', '3rd', '4th', '5th'] : ['Last', '2nd-to-last', '3rd-to-last'];
-      const ordinal = context.weekNumber > 0 ? ordinals[context.weekNumber - 1] || `${context.weekNumber}th` : ordinals[Math.abs(context.weekNumber) - 1] || 'Last';
-      const weekdayName = context.weekdayOptions[selectedWeekday]?.name || 'day';
-      context.weekOfMonthDescription = `Repeats on the ${ordinal} ${weekdayName} of each month`;
+      const ordinals =
+        context.weekNumber > 0
+          ? [
+              localize('CALENDARIA.Note.WeekOrdinal1st'),
+              localize('CALENDARIA.Note.WeekOrdinal2nd'),
+              localize('CALENDARIA.Note.WeekOrdinal3rd'),
+              localize('CALENDARIA.Note.WeekOrdinal4th'),
+              localize('CALENDARIA.Note.WeekOrdinal5th')
+            ]
+          : [localize('CALENDARIA.Note.WeekOrdinalLast'), localize('CALENDARIA.Note.WeekOrdinal2ndLast')];
+      const ordinal =
+        context.weekNumber > 0 ? ordinals[context.weekNumber - 1] || `${context.weekNumber}th` : ordinals[Math.abs(context.weekNumber) - 1] || localize('CALENDARIA.Note.WeekOrdinalLast');
+      const weekdayName = context.weekdayOptions[selectedWeekday]?.name || localize('CALENDARIA.Common.Day');
+      context.weekOfMonthDescription = format('CALENDARIA.Note.WeekOfMonthDescription', { ordinal, weekday: weekdayName });
     }
 
     context.showSeasonalConfig = this.document.system.repeat === 'seasonal';
@@ -516,7 +523,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * Handle icon selection (left-click)
    * @param {PointerEvent} event - The click event
    * @param {HTMLElement} target - The clicked element
-   * @todo Localize
    */
   static async _onSelectIcon(event, target) {
     event.preventDefault();
@@ -524,8 +530,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (iconType === 'fontawesome') {
       const currentIcon = target.querySelector('i')?.className.replace('icon-preview', '').trim() || '';
       const newIcon = await foundry.applications.api.DialogV2.prompt({
-        window: { title: 'Font Awesome Icon' },
-        content: `<div class="form-group"><label>Font Awesome Classes</label><input type="text" name="icon-class" value="${currentIcon}" placeholder="fas fa-calendar" /></div>`,
+        window: { title: localize('CALENDARIA.Note.FontAwesomeIconTitle') },
+        content: `<div class="form-group"><label>${localize('CALENDARIA.Note.FontAwesomeClasses')}</label><input type="text" name="icon-class" value="${currentIcon}" placeholder="fas fa-calendar" /></div>`,
         ok: {
           callback: (_event, button) => {
             return button.form.elements['icon-class'].value;
@@ -658,32 +664,20 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {number} currentMonth - Current month (0-based)
    * @param {number} currentDay - Current day
    * @returns {Promise<{year: number, month: number, day: number}|null>} - Dialog
-   * @todo Localize
    * @private
    */
   static async _showDatePickerDialog(calendar, currentYear, currentMonth, currentDay) {
-    const monthOptions = calendar.months.values.map((m, i) => `<option value="${i}" ${i === currentMonth ? 'selected' : ''}>${localize(m.name)}</option>`).join('');
     const daysInMonth = calendar.months.values[currentMonth]?.days || 30;
-    const dayOptions = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-      .map((d) => `<option value="${d}" ${d === currentDay ? 'selected' : ''}>${d}</option>`)
-      .join('');
-    const content = `
-      <div class="form-group">
-        <label>Year</label>
-        <input type="number" name="year" value="${currentYear}" />
-      </div>
-      <div class="form-group">
-        <label>Month</label>
-        <select name="month" id="month-select">${monthOptions}</select>
-      </div>
-      <div class="form-group">
-        <label>Day</label>
-        <select name="day" id="day-select">${dayOptions}</select>
-      </div>
-    `;
+    const content = await renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
+      formClass: '',
+      year: currentYear,
+      months: calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === currentMonth })),
+      days: Array.from({ length: daysInMonth }, (_, i) => i + 1),
+      currentDay
+    });
 
     return foundry.applications.api.DialogV2.prompt({
-      window: { title: 'Select Date' },
+      window: { title: localize('CALENDARIA.Note.SelectDateTitle') },
       content,
       ok: {
         callback: (_event, button) => {
@@ -832,7 +826,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * Handle add custom category button click
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
-   * @todo Localize
    */
   static async _onAddCategory(_event, target) {
     const form = target.closest('form');
@@ -842,7 +835,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const newCategory = await addCustomCategory(label);
     input.value = '';
     this.render();
-    ui.notifications.info(`Category "${newCategory.label}" added`);
+    ui.notifications.info(format('CALENDARIA.Info.CategoryAdded', { label: newCategory.label }));
   }
 
   /**
@@ -968,7 +961,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     const currentConditions = foundry.utils.deepClone(this.document.system.conditions || []);
     const newCondition = { field, op, value };
-    /** @todo Does '%' exist as a valid op anymore? */
     if (op === '%' && offset !== 0) newCondition.offset = offset;
     currentConditions.push(newCondition);
     await this.document.update({ 'system.conditions': currentConditions });
@@ -998,39 +990,45 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   #getConditionDescription(condition, calendar) {
     const { field, op, value, offset } = condition;
 
-    /** @todo Localize */
     const fieldLabels = {
-      year: 'Year',
-      month: 'Month',
-      day: 'Day',
-      dayOfYear: 'Day of Year',
-      daysBeforeMonthEnd: 'Days Before Month End',
-      weekday: 'Weekday',
-      weekNumberInMonth: 'Weekday # in Month',
-      inverseWeekNumber: 'Weekday # from End',
-      weekInMonth: 'Week in Month',
-      weekInYear: 'Week in Year',
-      totalWeek: 'Total Week',
-      weeksBeforeMonthEnd: 'Weeks Before Month End',
-      weeksBeforeYearEnd: 'Weeks Before Year End',
-      season: 'Season',
-      seasonPercent: 'Season %',
-      seasonDay: 'Day in Season',
-      isLongestDay: 'Is Longest Day',
-      isShortestDay: 'Is Shortest Day',
-      isSpringEquinox: 'Is Spring Equinox',
-      isAutumnEquinox: 'Is Autumn Equinox',
-      moonPhaseIndex: 'Moon Phase',
-      moonPhaseCountMonth: 'Moon Phase # in Month',
-      moonPhaseCountYear: 'Moon Phase # in Year',
-      cycle: 'Cycle',
-      era: 'Era',
-      eraYear: 'Era Year',
-      intercalary: 'Is Intercalary'
+      year: localize('CALENDARIA.Note.Condition.Year'),
+      month: localize('CALENDARIA.Note.Condition.Month'),
+      day: localize('CALENDARIA.Note.Condition.Day'),
+      dayOfYear: localize('CALENDARIA.Note.Condition.DayInYear'),
+      daysBeforeMonthEnd: localize('CALENDARIA.Note.Condition.DaysBeforeMonthEnd'),
+      weekday: localize('CALENDARIA.Note.Condition.Weekday'),
+      weekNumberInMonth: localize('CALENDARIA.Note.Condition.WeekdayNumInMonth'),
+      inverseWeekNumber: localize('CALENDARIA.Note.Condition.InverseWeekNumber'),
+      weekInMonth: localize('CALENDARIA.Note.Condition.WeekInMonth'),
+      weekInYear: localize('CALENDARIA.Note.Condition.WeekInYear'),
+      totalWeek: localize('CALENDARIA.Note.Condition.TotalWeek'),
+      weeksBeforeMonthEnd: localize('CALENDARIA.Note.Condition.WeeksBeforeMonthEnd'),
+      weeksBeforeYearEnd: localize('CALENDARIA.Note.Condition.WeeksBeforeYearEnd'),
+      season: localize('CALENDARIA.Note.Condition.Season'),
+      seasonPercent: localize('CALENDARIA.Note.Condition.SeasonPercent'),
+      seasonDay: localize('CALENDARIA.Note.Condition.DayInSeason'),
+      isLongestDay: localize('CALENDARIA.Note.Condition.IsLongestDay'),
+      isShortestDay: localize('CALENDARIA.Note.Condition.IsShortestDay'),
+      isSpringEquinox: localize('CALENDARIA.Note.Condition.IsSpringEquinox'),
+      isAutumnEquinox: localize('CALENDARIA.Note.Condition.IsAutumnEquinox'),
+      moonPhaseIndex: localize('CALENDARIA.Note.Condition.MoonPhase'),
+      moonPhaseCountMonth: localize('CALENDARIA.Note.Condition.MoonPhaseCountMonth'),
+      moonPhaseCountYear: localize('CALENDARIA.Note.Condition.MoonPhaseCountYear'),
+      cycle: localize('CALENDARIA.Note.Condition.Cycle'),
+      era: localize('CALENDARIA.Note.Condition.Era'),
+      eraYear: localize('CALENDARIA.Note.Condition.EraYear'),
+      intercalary: localize('CALENDARIA.Note.Condition.IsIntercalaryDay')
     };
 
-    /** @todo localize + I think we already have this elsewhere? */
-    const opLabels = { '==': '=', '!=': '≠', '>=': '≥', '<=': '≤', '>': '>', '<': '<', '%': 'every' };
+    const opLabels = {
+      '==': localize('CALENDARIA.Note.Op.Equals'),
+      '!=': localize('CALENDARIA.Note.Op.NotEquals'),
+      '>=': localize('CALENDARIA.Note.Op.GreaterEquals'),
+      '<=': localize('CALENDARIA.Note.Op.LessEquals'),
+      '>': localize('CALENDARIA.Note.Op.Greater'),
+      '<': localize('CALENDARIA.Note.Op.Less'),
+      '%': localize('CALENDARIA.Note.Op.Every')
+    };
     const fieldLabel = fieldLabels[field] || field;
     const opLabel = opLabels[op] || op;
     let valueStr = String(value);
@@ -1038,10 +1036,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (field === 'weekday' && calendar?.days?.values?.[value - 1]) valueStr = localize(calendar.days.values[value - 1].name);
     if (field === 'season' && calendar?.seasons?.values?.[value - 1]) valueStr = localize(calendar.seasons.values[value - 1].name);
     if (field === 'era' && calendar?.eras?.[value - 1]) valueStr = localize(calendar.eras[value - 1].name);
-    if (['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary'].includes(field)) return value ? fieldLabel : `Not ${fieldLabel}`;
+    if (['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary'].includes(field)) {
+      return value ? fieldLabel : format('CALENDARIA.Note.Condition.Not', { field: fieldLabel });
+    }
     if (op === '%') {
-      const offsetStr = offset ? ` (offset ${offset})` : '';
-      return `${fieldLabel} every ${value}${offsetStr}`;
+      return offset ? format('CALENDARIA.Note.Condition.EveryWithOffset', { field: fieldLabel, value, offset }) : format('CALENDARIA.Note.Condition.Every', { field: fieldLabel, value });
     }
     return `${fieldLabel} ${opLabel} ${valueStr}`;
   }

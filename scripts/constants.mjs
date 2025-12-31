@@ -179,10 +179,6 @@ export const TEMPLATES = {
   FORM_FOOTER: 'templates/generic/form-footer.hbs',
 
   SETTINGS: {
-    /** @type {string} Macro trigger configuration template */
-    MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`,
-    /** @type {string} Calendar HUD settings template */
-    HUD_SETTINGS: `modules/${MODULE.ID}/templates/settings/calendaria-hud-settings.hbs`,
     /** @type {string} Settings panel - Moons tab */
     PANEL_MOONS: `modules/${MODULE.ID}/templates/settings/tab-moons.hbs`,
     /** @type {string} Settings panel - Calendar tab */
@@ -209,6 +205,15 @@ export const TEMPLATES = {
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
     /** @type {string} Settings panel - Full Calendar tab */
     PANEL_FULLCAL: `modules/${MODULE.ID}/templates/settings/tab-fullcal.hbs`
+  },
+
+  PARTIALS: {
+    /** @type {string} Scene darkness sync form group */
+    SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,
+    /** @type {string} Date picker dialog content */
+    DATE_PICKER: `modules/${MODULE.ID}/templates/partials/dialog-date-picker.hbs`,
+    /** @type {string} Chat announcement block */
+    CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`
   },
 
   /** @type {string} Time rotation dial template */

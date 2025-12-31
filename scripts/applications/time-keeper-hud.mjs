@@ -48,7 +48,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrement(key), seconds, selected: key === TimeKeeper.incrementKey }));
+    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeKeeper.incrementKey }));
     context.running = TimeKeeper.running;
     context.isGM = game.user.isGM;
     context.currentTime = TimeKeeper.getFormattedTime();
@@ -207,10 +207,9 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Format increment key for display.
    * @param {string} key - Increment key
    * @returns {string} Formatted label
-   * @todo All 3 huds have this method of a different name. Should be fixed.
    * @private
    */
-  #formatIncrement(key) {
+  #formatIncrementLabel(key) {
     const labels = {
       second: localize('CALENDARIA.Common.Second'),
       round: localize('CALENDARIA.Common.Round'),

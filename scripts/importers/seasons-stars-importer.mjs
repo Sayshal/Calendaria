@@ -112,18 +112,17 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * Transform S&S weekdays to Calendaria format.
    * @param {object[]} weekdays - S&S weekdays array
    * @returns {object[]} Calendaria weekdays array
-   * @todo Localize and don't we have a fallback already
    */
   #transformWeekdays(weekdays = []) {
     if (!weekdays?.length) {
       return [
-        { name: 'Sunday', abbreviation: 'Su', ordinal: 1 },
-        { name: 'Monday', abbreviation: 'Mo', ordinal: 2 },
-        { name: 'Tuesday', abbreviation: 'Tu', ordinal: 3 },
-        { name: 'Wednesday', abbreviation: 'We', ordinal: 4 },
-        { name: 'Thursday', abbreviation: 'Th', ordinal: 5 },
-        { name: 'Friday', abbreviation: 'Fr', ordinal: 6 },
-        { name: 'Saturday', abbreviation: 'Sa', ordinal: 7 }
+        { name: 'CALENDARIA.Weekday.Sunday', abbreviation: 'CALENDARIA.Weekday.SundayShort', ordinal: 1 },
+        { name: 'CALENDARIA.Weekday.Monday', abbreviation: 'CALENDARIA.Weekday.MondayShort', ordinal: 2 },
+        { name: 'CALENDARIA.Weekday.Tuesday', abbreviation: 'CALENDARIA.Weekday.TuesdayShort', ordinal: 3 },
+        { name: 'CALENDARIA.Weekday.Wednesday', abbreviation: 'CALENDARIA.Weekday.WednesdayShort', ordinal: 4 },
+        { name: 'CALENDARIA.Weekday.Thursday', abbreviation: 'CALENDARIA.Weekday.ThursdayShort', ordinal: 5 },
+        { name: 'CALENDARIA.Weekday.Friday', abbreviation: 'CALENDARIA.Weekday.FridayShort', ordinal: 6 },
+        { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
 

@@ -1655,7 +1655,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     if (!result) return;
-    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['Spring', 'Summer', 'Autumn', 'Winter'];
+    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
     const zoneConfig = getDefaultZoneConfig(result.template, seasonNames);
     if (!zoneConfig) return;
     const baseId = result.name?.toLowerCase().replace(/\s+/g, '-') || result.template;
@@ -1686,13 +1686,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
 
-    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['Spring', 'Summer', 'Autumn', 'Winter'];
+    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
     const tempRows = seasonNames
       .map((season) => {
         const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
         return `
         <div class="form-group temperature-row">
-          <label>${season}</label>
+          <label>${localize(season)}</label>
           <input type="number" name="temp_${season}_min" value="${temp.min}" placeholder="${localize('CALENDARIA.Common.Min')}">
           <span>–</span>
           <input type="number" name="temp_${season}_max" value="${temp.max}" placeholder="${localize('CALENDARIA.Common.Max')}">

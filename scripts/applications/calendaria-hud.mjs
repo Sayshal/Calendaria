@@ -13,6 +13,7 @@ import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { CalendarApplication } from './calendar-application.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
@@ -79,15 +80,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {number|null} Last tracked day for re-render */
   #lastDay = null;
-
-  /** @type {number|null} Event rotation timer ID */
-  #eventRotationTimer = null;
-
-  /** @type {number} Current event index for rotation */
-  #currentEventIndex = 0;
-
-  /** @type {boolean} Show event (true) or date (false) */
-  #showEvent = false;
 
   /** @type {Array} Cached live events */
   #liveEvents = [];
@@ -232,7 +224,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#setupEventListeners();
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
     this.#lastDay = game.time.components.dayOfMonth;
-    this.#startEventRotation();
   }
 
   /** @override */
@@ -259,10 +250,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#timeHookId) {
       Hooks.off('updateWorldTime', this.#timeHookId);
       this.#timeHookId = null;
-    }
-    if (this.#eventRotationTimer) {
-      clearInterval(this.#eventRotationTimer);
-      this.#eventRotationTimer = null;
     }
     if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
     if (this.#clickOutsideHandler) {
@@ -695,52 +682,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         icon.classList.toggle('fa-pause', running);
       }
     }
-  }
-
-  /* -------------------------------------------- */
-  /*  Event Rotation                              */
-  /*  @todo: Isnt this dead?                      */
-  /* -------------------------------------------- */
-
-  /**
-   * Start the event rotation timer (30-second intervals).
-   */
-  #startEventRotation() {
-    if (this.#eventRotationTimer) clearInterval(this.#eventRotationTimer);
-    if (this.#liveEvents.length === 0) return;
-    this.#eventRotationTimer = setInterval(() => {
-      this.#toggleEventDisplay();
-    }, 30000);
-  }
-
-  /**
-   * Toggle between showing date and event in the left info panel.
-   */
-  #toggleEventDisplay() {
-    if (!this.rendered || this.#liveEvents.length === 0) return;
-    const panel = this.element.querySelector('.calendaria-hud-info-panel.left');
-    const dateEl = panel?.querySelector('.calendaria-hud-date');
-    const eventEl = panel?.querySelector('.calendaria-hud-event');
-    if (!panel || !dateEl) return;
-    this.#showEvent = !this.#showEvent;
-    if (this.#showEvent && eventEl) {
-      dateEl.classList.add('hidden');
-      eventEl.classList.remove('hidden');
-      if (this.#liveEvents.length > 1) {
-        this.#currentEventIndex = (this.#currentEventIndex + 1) % this.#liveEvents.length;
-        const event = this.#liveEvents[this.#currentEventIndex];
-        eventEl.dataset.eventId = event.id;
-        eventEl.dataset.parentId = event.parentId;
-        eventEl.dataset.tooltip = event.tooltip;
-        eventEl.style.setProperty('--event-color', event.color);
-        eventEl.querySelector('.calendaria-hud-event-icon').className = `${event.icon} calendaria-hud-event-icon`;
-        eventEl.querySelector('.calendaria-hud-event-name').textContent = event.name;
-      }
-    } else {
-      dateEl.classList.remove('hidden');
-      if (eventEl) eventEl.classList.add('hidden');
-    }
-    panel.classList.toggle('showing-event', this.#showEvent);
   }
 
   /* -------------------------------------------- */
@@ -1274,28 +1215,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const monthOptions = calendar.months.values.map((m, i) => `<option value="${i}" ${i === components.month ? 'selected' : ''}>${localize(m.name)}</option>`).join('');
     const daysInMonth = calendar.months.values[components.month]?.days ?? 30;
     const currentDay = (components.dayOfMonth ?? 0) + 1;
-    const dayOptions = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-      .map((d) => `<option value="${d}" ${d === currentDay ? 'selected' : ''}>${d}</option>`)
-      .join('');
-    const content = `
-      <form class="set-date-form">
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Common.Year')}</label>
-          <input type="number" name="year" value="${components.year + yearZero}" step="1">
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Common.Month')}</label>
-          <select name="month">${monthOptions}</select>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Common.Day')}</label>
-          <select name="day">${dayOptions}</select>
-        </div>
-      </form>
-    `;
+    const content = await renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
+      formClass: 'set-date-form',
+      year: components.year + yearZero,
+      months: calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month })),
+      days: Array.from({ length: daysInMonth }, (_, i) => i + 1),
+      currentDay
+    });
 
     const result = await foundry.applications.api.DialogV2.prompt({
       window: { title: localize('CALENDARIA.HUD.SetDate') },
@@ -1510,7 +1438,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenWeatherPicker(_event, _target) {
     if (!game.user.isGM) return;
-    const { openWeatherPicker } = await import('../weather/weather-picker.mjs');
     await openWeatherPicker();
   }
 

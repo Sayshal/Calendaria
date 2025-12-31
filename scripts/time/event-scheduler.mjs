@@ -7,11 +7,11 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE } from '../constants.mjs';
+import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { compareDates, getCurrentDate } from '../notes/utils/date-utils.mjs';
 import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
-import { localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 
 /**
@@ -213,7 +213,6 @@ export default class EventScheduler {
    * Send a chat announcement for an event.
    * Respects gmOnly visibility setting.
    * @param {object} note - The note stub
-   * @todo Localize
    * @private
    */
   static async #sendChatAnnouncement(note) {
@@ -226,25 +225,23 @@ export default class EventScheduler {
     let plainContent = tempDiv.textContent || tempDiv.innerText || '';
     plainContent = plainContent.trim();
     if (plainContent.length > 140) plainContent = `${plainContent.substring(0, 140).trim()}…`;
-    let dateRange = this.#formatDateRange(calendar, flagData);
+    const dateRange = this.#formatDateRange(calendar, flagData);
     const color = flagData.color || '#4a9eff';
-    let iconHtml = '';
+    let iconHtml;
     if (flagData.icon) {
       if (flagData.icon.startsWith('fa') || flagData.iconType === 'fontawesome') iconHtml = `<i class="${flagData.icon}"></i>`;
       else iconHtml = `<img src="${flagData.icon}" alt="" style="width: 24px; height: 24px; object-fit: contain;" />`;
     } else {
-      iconHtml = `<i class="fas fa-calendar"></i>`;
+      iconHtml = '<i class="fas fa-calendar"></i>';
     }
 
-    const content = `
-      <div class="calendaria-announcement">
-        <div class="announcement-date">${dateRange}</div>
-        ${plainContent ? `<div class="announcement-content">${plainContent}</div>` : ''}
-        <a class="announcement-open" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
-          ${iconHtml} Open Note
-        </a>
-      </div>
-    `.trim();
+    const content = await renderTemplate(TEMPLATES.PARTIALS.CHAT_ANNOUNCEMENT, {
+      dateRange,
+      content: plainContent,
+      noteId: note.id,
+      journalId: note.journalId,
+      iconHtml
+    });
 
     let whisper = [];
     if (flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
@@ -252,7 +249,7 @@ export default class EventScheduler {
       content,
       whisper,
       speaker: { alias: note.name },
-      flavor: `<span style="color: ${color};">${iconHtml}</span> Calendar Event`,
+      flavor: `<span style="color: ${color};">${iconHtml}</span> ${localize('CALENDARIA.Event.CalendarEvent')}`,
       flags: { [MODULE.ID]: { isAnnouncement: true, noteId: note.id, journalId: note.journalId } }
     });
 
@@ -277,7 +274,7 @@ export default class EventScheduler {
       if (flagData.allDay) return '';
       const hour = String(date.hour ?? 0).padStart(2, '0');
       const minute = String(date.minute ?? 0).padStart(2, '0');
-      return ` at ${hour}:${minute}`;
+      return ` ${format('CALENDARIA.Event.AtTime', { time: `${hour}:${minute}` })}`;
     };
     let result = formatDate(flagData.startDate) + formatTime(flagData.startDate);
     if (flagData.endDate && flagData.endDate.year) {
@@ -288,7 +285,7 @@ export default class EventScheduler {
         if (!flagData.allDay && flagData.endDate.hour !== undefined) result += formatTime(flagData.endDate);
       }
     }
-    if (flagData.allDay) result += ' (All Day)';
+    if (flagData.allDay) result += ` ${localize('CALENDARIA.Event.AllDay')}`;
     return result;
   }
 
@@ -391,14 +388,13 @@ export default class EventScheduler {
    * Show or update a progress notification for a multi-day event.
    * @param {object} note - The note stub
    * @param {object} progress - Progress info
-   * @todo localize
    * @private
    */
   static #showProgressNotification(note, progress) {
-    const message = `<strong>${note.name}</strong> - Day ${progress.currentDay} of ${progress.totalDays}`;
-    if (progress.isFirstDay) ui.notifications.info(`${message} (starting today)`, { permanent: false });
-    else if (progress.isLastDay) ui.notifications.info(`${message} (final day)`, { permanent: false });
-    else ui.notifications.info(`${message} (${progress.percentage}% complete)`, { permanent: false });
+    const message = format('CALENDARIA.Event.DayProgress', { name: note.name, currentDay: progress.currentDay, totalDays: progress.totalDays });
+    if (progress.isFirstDay) ui.notifications.info(format('CALENDARIA.Event.StartingToday', { message }), { permanent: false });
+    else if (progress.isLastDay) ui.notifications.info(format('CALENDARIA.Event.FinalDay', { message }), { permanent: false });
+    else ui.notifications.info(format('CALENDARIA.Event.PercentComplete', { message, percentage: progress.percentage }), { permanent: false });
     Hooks.callAll(HOOKS.EVENT_DAY_CHANGED, { id: note.id, name: note.name, progress });
     this.#executeMacro(note, { trigger: 'multiDayProgress', progress });
   }

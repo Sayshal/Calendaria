@@ -1,0 +1,9 @@
+<div class="form-group slim">
+  <label>{{localize "CALENDARIA.Scene.DarknessSync.Name"}}</label>
+  <select name="flags.{{moduleId}}.{{flagName}}">
+    <option value="default" {{#if (eq value "default")}}selected{{/if}}>{{localize "CALENDARIA.Scene.DarknessSync.Choices.Default"}}</option>
+    <option value="enabled" {{#if (eq value "enabled")}}selected{{/if}}>{{localize "CALENDARIA.Scene.DarknessSync.Choices.Enabled"}}</option>
+    <option value="disabled" {{#if (eq value "disabled")}}selected{{/if}}>{{localize "CALENDARIA.Scene.DarknessSync.Choices.Disabled"}}</option>
+  </select>
+  <p class="hint">{{localize "CALENDARIA.Scene.DarknessSync.Hint"}}</p>
+</div>

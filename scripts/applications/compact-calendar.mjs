@@ -166,7 +166,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     context.running = TimeKeeper.running;
     context.currentTime = TimeKeeper.getFormattedTime();
     context.currentDate = TimeKeeper.getFormattedDate();
-    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this._formatIncrement(key), seconds, selected: key === TimeKeeper.incrementKey }));
+    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeKeeper.incrementKey }));
     if (calendar) context.calendarData = this._generateMiniCalendarData(calendar, viewedDate);
     context.showSetCurrentDate = false;
     if (game.user.isGM && this._selectedDate) {
@@ -1255,7 +1255,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} key - Increment key
    * @returns {string} Formatted label
    */
-  _formatIncrement(key) {
+  #formatIncrementLabel(key) {
     const labels = {
       second: localize('CALENDARIA.Common.Second'),
       round: localize('CALENDARIA.Common.Round'),

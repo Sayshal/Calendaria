@@ -8,7 +8,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { createNoteStub, getCategoryDefinition, getDefaultNoteData, getPredefinedCategories, sanitizeNoteData, validateNoteData } from './note-data.mjs';
 import { compareDates } from './utils/date-utils.mjs';
@@ -163,13 +163,12 @@ export default class NoteManager {
    * @param {object} _options - Deletion options
    * @param {string} _userId - User ID attempting deletion
    * @returns {boolean|void} False to prevent deletion
-   * @todo Localize
    */
   static onPreDeleteJournalEntry(journal, _options, _userId) {
     if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) return;
     const isCalendarJournal = journal.getFlag(MODULE.ID, 'isCalendarJournal');
     if (isCalendarJournal) {
-      ui.notifications.warn('Cannot delete calendar journal. This journal contains the calendar structure and all events.');
+      ui.notifications.warn('CALENDARIA.Warning.CannotDeleteCalendarJournal', { localize: true });
       log(2, `Prevented deletion of calendar journal: ${journal.name}`);
       return false;
     }
@@ -181,13 +180,12 @@ export default class NoteManager {
    * @param {object} _options - Deletion options
    * @param {string} _userId - User ID attempting deletion
    * @returns {boolean|void} False to prevent deletion
-   * @todo Localize
    */
   static onPreDeleteFolder(folder, _options, _userId) {
     if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) return;
     const isCalendarNotesFolder = folder.getFlag(MODULE.ID, 'isCalendarNotesFolder');
     if (isCalendarNotesFolder) {
-      ui.notifications.warn('Cannot delete Calendar Notes folder. This folder contains all calendar journals and events.');
+      ui.notifications.warn('CALENDARIA.Warning.CannotDeleteNotesFolder', { localize: true });
       log(2, `Prevented deletion of Calendar Notes folder: ${folder.name}`);
       return false;
     }
@@ -296,7 +294,7 @@ export default class NoteManager {
       return true;
     } catch (error) {
       log(1, `Error deleting calendar note:`, error);
-      ui.notifications.error(`Error deleting note: ${error.message}`);
+      ui.notifications.error(format('CALENDARIA.Error.NoteDeleteFailed', { message: error.message }));
       throw error;
     }
   }
@@ -333,29 +331,25 @@ export default class NoteManager {
 
   /**
    * Delete all calendar notes.
-   * @param {object} [_options] - Options
-   * @param {string} [_options.calendarId] - Only delete notes for this calendar (not yet implemented)
+   * @param {object} [options] - Options
+   * @param {string} [options.calendarId] - Only delete notes for this calendar
    * @returns {Promise<number>} Number of notes deleted
-   * @todo Implement options.calendarId feature
    */
-  static async deleteAllNotes(_options = {}) {
+  static async deleteAllNotes(options = {}) {
     if (!game.user.isGM) return 0;
-    const allNotes = this.getAllNotes();
-    if (allNotes.length === 0) return 0;
+    let notes = this.getAllNotes();
+    if (notes.length === 0) return 0;
+    if (options.calendarId) notes = notes.filter((note) => note.calendarId === options.calendarId);
     const pagesToDelete = [];
-    for (const note of allNotes) {
+    for (const note of notes) {
       const page = this.getFullNote(note.id);
       if (page) pagesToDelete.push(page);
     }
 
     let deletedCount = 0;
     for (const page of pagesToDelete) {
-      try {
-        await page.delete();
-        deletedCount++;
-      } catch (error) {
-        log(1, `Error deleting note ${page.name}:`, error);
-      }
+      await page.delete();
+      deletedCount++;
     }
 
     log(3, `Deleted ${deletedCount} calendar notes`);
@@ -526,7 +520,6 @@ export default class NoteManager {
    * @param {JournalEntry} journal  Calendar journal
    * @param {object} calendar  Calendar data
    * @returns {Promise<object|null>}  Description page
-   * @todo Localize
    * @private
    */
   static async #ensureDescriptionPage(journal, calendar) {
@@ -543,7 +536,14 @@ export default class NoteManager {
 
     try {
       const page = await JournalEntryPage.create(
-        { name: 'Calendar Description', type: 'text', text: { content: description }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { isDescriptionPage: true } }, sort: 0 },
+        {
+          name: localize('CALENDARIA.Note.CalendarDescription'),
+          type: 'text',
+          text: { content: description },
+          title: { level: 1, show: true },
+          flags: { [MODULE.ID]: { isDescriptionPage: true } },
+          sort: 0
+        },
         { parent: journal }
       );
       log(3, `Created description page for ${journal.name}`);
@@ -639,7 +639,6 @@ export default class NoteManager {
   /**
    * Get or create the Calendar Notes folder.
    * @returns {Promise<Folder|null>}  Folder document or null
-   * @todo Localize
    */
   static async getCalendarNotesFolder() {
     if (this.#notesFolderId) {
@@ -659,7 +658,7 @@ export default class NoteManager {
 
     if (game.user.isGM) {
       try {
-        const folder = await Folder.create({ name: 'Calendar Notes', type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
+        const folder = await Folder.create({ name: localize('CALENDARIA.Note.CalendarNotesFolder'), type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
         this.#notesFolderId = folder.id;
         log(3, 'Created Calendar Notes folder');
         return folder;

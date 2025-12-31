@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { localize } from '../../utils/localization.mjs';
+import { format, localize } from '../../utils/localization.mjs';
 import NoteManager from '../note-manager.mjs';
 import { addDays, addMonths, addYears, compareDays, dayOfWeek, daysBetween, isSameDay, monthsBetween } from './date-utils.mjs';
 
@@ -100,7 +100,7 @@ function getFieldValue(field, date, value2 = null) {
     }
     case 'weeksBeforeYearEnd': {
       const daysInWeek = calendar?.days?.values?.length || 7;
-      const totalDaysInYear = getTotalDaysInYear();
+      const totalDaysInYear = getTotalDaysInYear(date.year);
       const dayOfYear = getDayOfYear(date);
       return Math.floor((totalDaysInYear - dayOfYear) / daysInWeek);
     }
@@ -114,13 +114,13 @@ function getFieldValue(field, date, value2 = null) {
       const seasons = calendar?.seasons?.values || [];
       if (!seasons.length) return null;
       const dayOfYear = getDayOfYear(date);
-      return getSeasonPercent(dayOfYear, seasons, getTotalDaysInYear());
+      return getSeasonPercent(dayOfYear, seasons, getTotalDaysInYear(date.year));
     }
     case 'seasonDay': {
       const seasons = calendar?.seasons?.values || [];
       if (!seasons.length) return null;
       const dayOfYear = getDayOfYear(date);
-      return getSeasonDay(dayOfYear, seasons, getTotalDaysInYear());
+      return getSeasonDay(dayOfYear, seasons, getTotalDaysInYear(date.year));
     }
     case 'isLongestDay': {
       const seasons = calendar?.seasons?.values || [];
@@ -247,7 +247,7 @@ function evaluateConditions(conditions, date) {
  */
 function getTotalDaysSinceEpoch(date) {
   const calendar = CalendarManager.getActiveCalendar();
-  const daysPerYear = getTotalDaysInYear();
+  const daysPerYear = getTotalDaysInYear(date.year);
   const yearZero = calendar?.years?.yearZero ?? 0;
   const yearsFromEpoch = date.year - yearZero;
   const dayOfYear = getDayOfYear(date);
@@ -316,7 +316,7 @@ function getSeasonDay(dayOfYear, seasons, totalDays) {
  * @returns {boolean} Is date solstice/equinox?
  */
 function checkSolsticeOrEquinox(date, seasons, type) {
-  const totalDays = getTotalDaysInYear();
+  const totalDays = getTotalDaysInYear(date.year);
   const dayOfYear = getDayOfYear(date);
   let summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
   let winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
@@ -904,13 +904,12 @@ function isInSeasonRange(dayOfYear, start, end) {
 }
 
 /**
- * Get total days in year from calendar.
- * @todo Need to account for leap year daysPerLeapYear
- * @returns {number} - Total days in a year
+ * Get total days in year from calendar, accounting for leap years.
+ * @param {number} [year] - The year to check (defaults to current year)
+ * @returns {number} - Total days in the year
  */
-function getTotalDaysInYear() {
-  const calendar = CalendarManager.getActiveCalendar();
-  return calendar.days.daysPerYear;
+function getTotalDaysInYear(year) {
+  return CalendarManager.getActiveCalendar().getDaysInYear(year);
 }
 
 /**
@@ -1166,53 +1165,43 @@ function advanceDate(date, repeat, interval) {
  * Get human-readable description of recurrence pattern.
  * @param {object} noteData  Note flag data
  * @returns {string}  Description like "Every 2 weeks"
- * @todo Localize description
  */
 export function getRecurrenceDescription(noteData) {
   const { repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, linkedEvent, maxOccurrences } = noteData;
+  const formatDate = (d) => `${d.month + 1}/${d.day}/${d.year}`;
+  const appendUntil = (desc) => (repeatEndDate ? `${desc} ${format('CALENDARIA.Recurrence.Until', { date: formatDate(repeatEndDate) })}` : desc);
   const appendMaxOccurrences = (desc) => {
-    if (maxOccurrences > 0) desc += `, ${maxOccurrences} time${maxOccurrences === 1 ? '' : 's'}`;
+    if (maxOccurrences > 0) {
+      const suffix = maxOccurrences === 1 ? localize('CALENDARIA.Recurrence.TimesOnce') : format('CALENDARIA.Recurrence.Times', { count: maxOccurrences });
+      return `${desc}, ${suffix}`;
+    }
     return desc;
   };
-
   if (linkedEvent?.noteId) {
     const linkedNote = NoteManager.getNote(linkedEvent.noteId);
-    const linkedName = linkedNote?.name || 'Unknown Event';
+    const linkedName = linkedNote?.name || localize('CALENDARIA.Note.UnknownEvent');
     const offset = linkedEvent.offset || 0;
     let description;
-    if (offset === 0) description = `Same day as "${linkedName}"`;
-    else if (offset > 0) description = `${offset} day${offset === 1 ? '' : 's'} after "${linkedName}"`;
-    else description = `${Math.abs(offset)} day${Math.abs(offset) === 1 ? '' : 's'} before "${linkedName}"`;
-    description = appendMaxOccurrences(description);
-    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-    return description;
+    if (offset === 0) description = format('CALENDARIA.Recurrence.SameDayAs', { name: linkedName });
+    else if (offset > 0) {
+      description = offset === 1 ? format('CALENDARIA.Recurrence.DayAfter', { count: offset, name: linkedName }) : format('CALENDARIA.Recurrence.DaysAfter', { count: offset, name: linkedName });
+    } else {
+      const absOffset = Math.abs(offset);
+      description =
+        absOffset === 1 ? format('CALENDARIA.Recurrence.DayBefore', { count: absOffset, name: linkedName }) : format('CALENDARIA.Recurrence.DaysBefore', { count: absOffset, name: linkedName });
+    }
+    return appendUntil(appendMaxOccurrences(description));
   }
-
-  if (repeat === 'never' || !repeat) return 'Does not repeat';
-  if (repeat === 'moon') {
-    let description = getMoonConditionsDescription(moonConditions);
-    description = appendMaxOccurrences(description);
-    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-    return description;
-  }
-
+  if (repeat === 'never' || !repeat) return localize('CALENDARIA.Recurrence.DoesNotRepeat');
+  if (repeat === 'moon') return appendUntil(appendMaxOccurrences(getMoonConditionsDescription(moonConditions)));
   if (repeat === 'random') {
     const probability = randomConfig?.probability ?? 10;
     const checkInterval = randomConfig?.checkInterval ?? 'daily';
-    const intervalLabel = checkInterval === 'weekly' ? 'week' : checkInterval === 'monthly' ? 'month' : 'day';
-    let description = `${probability}% chance each ${intervalLabel}`;
-    description = appendMaxOccurrences(description);
-    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-    return description;
+    const intervalKey = checkInterval === 'weekly' ? 'IntervalWeekly' : checkInterval === 'monthly' ? 'IntervalMonthly' : 'IntervalDaily';
+    const description = format('CALENDARIA.Recurrence.ChanceEach', { probability, interval: localize(`CALENDARIA.Recurrence.${intervalKey}`) });
+    return appendUntil(appendMaxOccurrences(description));
   }
-
-  if (repeat === 'range') {
-    let description = describeRangePattern(noteData.rangePattern);
-    description = appendMaxOccurrences(description);
-    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-    return description;
-  }
-
+  if (repeat === 'range') return appendUntil(appendMaxOccurrences(describeRangePattern(noteData.rangePattern)));
   if (repeat === 'weekOfMonth') {
     const calendar = CalendarManager.getActiveCalendar();
     const weekdays = calendar?.days?.values || [];
@@ -1222,18 +1211,19 @@ export function getRecurrenceDescription(noteData) {
     let ordinal;
 
     if (weekNumber > 0) {
-      const ordinals = ['1st', '2nd', '3rd', '4th', '5th'];
-      ordinal = ordinals[weekNumber - 1] || `${weekNumber}th`;
+      const ordinalKeys = ['WeekOrdinal1st', 'WeekOrdinal2nd', 'WeekOrdinal3rd', 'WeekOrdinal4th', 'WeekOrdinal5th'];
+      ordinal = localize(`CALENDARIA.Note.${ordinalKeys[weekNumber - 1]}`) || `${weekNumber}th`;
     } else {
-      const inverseOrdinals = ['Last', '2nd-to-last', '3rd-to-last', '4th-to-last', '5th-to-last'];
-      ordinal = inverseOrdinals[Math.abs(weekNumber) - 1] || 'Last';
+      const inverseKeys = ['WeekOrdinalLast', 'WeekOrdinal2ndLast'];
+      ordinal = localize(`CALENDARIA.Note.${inverseKeys[Math.abs(weekNumber) - 1]}`) || localize('CALENDARIA.Note.WeekOrdinalLast');
     }
 
     const interval = repeatInterval || 1;
-    let description = interval === 1 ? `${ordinal} ${weekdayName} of every month` : `${ordinal} ${weekdayName} every ${interval} months`;
-    description = appendMaxOccurrences(description);
-    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-    return description;
+    const description =
+      interval === 1
+        ? format('CALENDARIA.Recurrence.OrdinalEveryMonth', { ordinal, weekday: weekdayName })
+        : format('CALENDARIA.Recurrence.OrdinalEveryXMonths', { ordinal, weekday: weekdayName, count: interval });
+    return appendUntil(appendMaxOccurrences(description));
   }
 
   if (repeat === 'seasonal') {
@@ -1245,31 +1235,26 @@ export function getRecurrenceDescription(noteData) {
     let description;
     switch (trigger) {
       case 'firstDay':
-        description = `First day of ${seasonName}`;
+        description = format('CALENDARIA.Recurrence.FirstDayOf', { season: seasonName });
         break;
       case 'lastDay':
-        description = `Last day of ${seasonName}`;
+        description = format('CALENDARIA.Recurrence.LastDayOf', { season: seasonName });
         break;
       case 'entire':
       default:
-        description = `Every day during ${seasonName}`;
+        description = format('CALENDARIA.Recurrence.EveryDayDuring', { season: seasonName });
         break;
     }
-
-    description = appendMaxOccurrences(description);
-    if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-    return description;
+    return appendUntil(appendMaxOccurrences(description));
   }
 
   const interval = repeatInterval || 1;
-  const unit = repeat === 'daily' ? 'day' : repeat === 'weekly' ? 'week' : repeat === 'monthly' ? 'month' : repeat === 'yearly' ? 'year' : '';
-  const pluralUnit = interval === 1 ? unit : `${unit}s`;
-  const prefix = interval === 1 ? 'Every' : `Every ${interval}`;
-  let description = `${prefix} ${pluralUnit}`;
+  const unitKey = repeat === 'daily' ? 'Day' : repeat === 'weekly' ? 'Week' : repeat === 'monthly' ? 'Month' : repeat === 'yearly' ? 'Year' : '';
+  let description;
+  if (interval === 1) description = format('CALENDARIA.Recurrence.EveryUnit', { unit: localize(`CALENDARIA.Recurrence.Unit.${unitKey}`) });
+  else description = format('CALENDARIA.Recurrence.EveryXUnits', { count: interval, units: localize(`CALENDARIA.Recurrence.Unit.${unitKey}s`) });
   if (moonConditions?.length > 0) description += ` (${getMoonConditionsDescription(moonConditions)})`;
-  description = appendMaxOccurrences(description);
-  if (repeatEndDate) description += ` until ${repeatEndDate.month + 1}/${repeatEndDate.day}/${repeatEndDate.year}`;
-  return description;
+  return appendUntil(appendMaxOccurrences(description));
 }
 
 /**

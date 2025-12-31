@@ -122,7 +122,7 @@ export function getClimateZoneTemplateIds() {
  * @param {string[]} [seasonNames] - Season names for temperature keys
  * @returns {object|null} Populated zone config object
  */
-export function getDefaultZoneConfig(templateId, seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']) {
+export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter']) {
   const template = getClimateZoneTemplate(templateId);
   if (!template) return null;
   const temperatures = { _default: template.temperatures._default ?? { min: 10, max: 22 } };

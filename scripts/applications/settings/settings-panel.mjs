@@ -5,6 +5,7 @@
  * @author Tyler
  */
 
+import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
@@ -16,7 +17,6 @@ import { CalendariaHUD } from '../calendaria-hud.mjs';
 import { CompactCalendar } from '../compact-calendar.mjs';
 import { ImporterApp } from '../importer-app.mjs';
 import { TimeKeeperHUD } from '../time-keeper-hud.mjs';
-import { MacroTriggerConfig } from './macro-trigger-config.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -41,7 +41,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     actions: {
       openCalendarEditor: SettingsPanel.#onOpenCalendarEditor,
       openImporter: SettingsPanel.#onOpenImporter,
-      openMacroTriggers: SettingsPanel.#onOpenMacroTriggers,
       resetPosition: SettingsPanel.#onResetPosition,
       addCategory: SettingsPanel.#onAddCategory,
       removeCategory: SettingsPanel.#onRemoveCategory,
@@ -52,7 +51,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openHUD: SettingsPanel.#onOpenHUD,
       openCompact: SettingsPanel.#onOpenCompact,
       openTimeKeeper: SettingsPanel.#onOpenTimeKeeper,
-      openFullCal: SettingsPanel.#onOpenFullCal
+      openFullCal: SettingsPanel.#onOpenFullCal,
+      addMoonTrigger: SettingsPanel.#onAddMoonTrigger,
+      removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
+      addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
+      removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger
     }
   };
 
@@ -310,8 +313,65 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareMacrosContext(context) {
-    const triggers = game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS);
-    context.hasMacroTriggers = (triggers?.global && Object.values(triggers.global).some((v) => v)) || triggers?.season?.length > 0 || triggers?.moonPhase?.length > 0;
+    const config = game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS);
+    context.macros = game.macros.contents.map((m) => ({ id: m.id, name: m.name }));
+
+    // Global triggers
+    const globalTriggers = [
+      { key: 'dawn', label: 'CALENDARIA.MacroTrigger.Dawn', hint: 'CALENDARIA.MacroTrigger.DawnHint' },
+      { key: 'dusk', label: 'CALENDARIA.MacroTrigger.Dusk', hint: 'CALENDARIA.MacroTrigger.DuskHint' },
+      { key: 'midday', label: 'CALENDARIA.MacroTrigger.Midday', hint: 'CALENDARIA.MacroTrigger.MiddayHint' },
+      { key: 'midnight', label: 'CALENDARIA.MacroTrigger.Midnight', hint: 'CALENDARIA.MacroTrigger.MidnightHint' },
+      { key: 'newDay', label: 'CALENDARIA.MacroTrigger.NewDay', hint: 'CALENDARIA.MacroTrigger.NewDayHint' }
+    ];
+    context.globalTriggers = globalTriggers.map((trigger) => ({
+      ...trigger,
+      label: localize(trigger.label),
+      hint: localize(trigger.hint),
+      macroId: config.global?.[trigger.key] || ''
+    }));
+
+    // Season triggers
+    const calendar = CalendarManager.getActiveCalendar();
+    context.hasSeasons = calendar?.seasons?.values?.length > 0;
+    if (context.hasSeasons) {
+      context.seasons = calendar.seasons.values.map((season, index) => ({ index, name: localize(season.name) }));
+      context.seasonTriggers = (config.season || []).map((trigger, index) => {
+        const isAll = trigger.seasonIndex === -1;
+        const season = isAll ? null : calendar.seasons.values[trigger.seasonIndex];
+        return {
+          index,
+          seasonIndex: trigger.seasonIndex,
+          seasonName: isAll ? localize('CALENDARIA.MacroTrigger.AllSeasons') : season ? localize(season.name) : `Season ${trigger.seasonIndex}`,
+          macroId: trigger.macroId
+        };
+      });
+    }
+
+    // Moon phase triggers
+    context.hasMoons = calendar?.moons?.length > 0;
+    if (context.hasMoons) {
+      context.moons = calendar.moons.map((moon, index) => ({ index, name: localize(moon.name) }));
+      context.moonPhases = {};
+      calendar.moons.forEach((moon, moonIndex) => {
+        context.moonPhases[moonIndex] = moon.phases?.map((phase, phaseIndex) => ({ index: phaseIndex, name: localize(phase.name) })) || [];
+      });
+
+      context.moonTriggers = (config.moonPhase || []).map((trigger, index) => {
+        const isAllMoons = trigger.moonIndex === -1;
+        const isAllPhases = trigger.phaseIndex === -1;
+        const moon = isAllMoons ? null : calendar.moons[trigger.moonIndex];
+        const phase = isAllMoons || isAllPhases ? null : moon?.phases?.[trigger.phaseIndex];
+        return {
+          index,
+          moonIndex: trigger.moonIndex,
+          moonName: isAllMoons ? localize('CALENDARIA.MacroTrigger.AllMoons') : moon ? localize(moon.name) : `Moon ${trigger.moonIndex}`,
+          phaseIndex: trigger.phaseIndex,
+          phaseName: isAllPhases ? localize('CALENDARIA.MacroTrigger.AllPhases') : phase ? localize(phase.name) : `Phase ${trigger.phaseIndex}`,
+          macroId: trigger.macroId
+        };
+      });
+    }
   }
 
   /**
@@ -401,6 +461,22 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const validCategories = Object.values(data.categories).filter((c) => c && c.id && c.name?.trim());
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, validCategories);
     }
+
+    // Macro triggers
+    if (data.macroTriggers) {
+      const globalTriggerKeys = ['dawn', 'dusk', 'midday', 'midnight', 'newDay'];
+      const config = { global: {}, season: [], moonPhase: [] };
+      for (const key of globalTriggerKeys) config.global[key] = data.macroTriggers.global?.[key] || '';
+      if (data.macroTriggers.seasonTrigger) {
+        const triggers = Array.isArray(data.macroTriggers.seasonTrigger) ? data.macroTriggers.seasonTrigger : [data.macroTriggers.seasonTrigger];
+        for (const trigger of triggers) if (trigger?.macroId) config.season.push({ seasonIndex: parseInt(trigger.seasonIndex), macroId: trigger.macroId });
+      }
+      if (data.macroTriggers.moonTrigger) {
+        const triggers = Array.isArray(data.macroTriggers.moonTrigger) ? data.macroTriggers.moonTrigger : [data.macroTriggers.moonTrigger];
+        for (const trigger of triggers) if (trigger?.macroId) config.moonPhase.push({ moonIndex: parseInt(trigger.moonIndex), phaseIndex: parseInt(trigger.phaseIndex), macroId: trigger.macroId });
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
+    }
   }
 
   /* -------------------------------------------- */
@@ -423,15 +499,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenImporter(_event, _target) {
     new ImporterApp().render(true);
-  }
-
-  /**
-   * Open the Macro Trigger Configuration.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async #onOpenMacroTriggers(_event, _target) {
-    new MacroTriggerConfig().render(true);
   }
 
   /**
@@ -622,5 +689,110 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenFullCal(_event, _target) {
     new CalendarApplication().render(true);
+  }
+
+  /**
+   * Add a new moon phase trigger.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onAddMoonTrigger(_event, _target) {
+    const moonSelect = this.element.querySelector('select[name="newMoonTrigger.moonIndex"]');
+    const phaseSelect = this.element.querySelector('select[name="newMoonTrigger.phaseIndex"]');
+    const macroSelect = this.element.querySelector('select[name="newMoonTrigger.macroId"]');
+    const moonIndex = parseInt(moonSelect?.value);
+    const phaseIndex = parseInt(phaseSelect?.value);
+    const macroId = macroSelect?.value;
+    if (isNaN(moonIndex) || isNaN(phaseIndex) || !macroId) {
+      ui.notifications.warn('CALENDARIA.MacroTrigger.SelectAll', { localize: true });
+      return;
+    }
+    const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
+    if (!config.moonPhase) config.moonPhase = [];
+    const exists = config.moonPhase.some((t) => t.moonIndex === moonIndex && t.phaseIndex === phaseIndex);
+    if (exists) {
+      ui.notifications.warn('CALENDARIA.MacroTrigger.DuplicateMoon', { localize: true });
+      return;
+    }
+    config.moonPhase.push({ moonIndex, phaseIndex, macroId });
+    await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
+    this.render({ parts: ['macros'] });
+  }
+
+  /**
+   * Remove a moon phase trigger.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async #onRemoveMoonTrigger(_event, target) {
+    const index = parseInt(target.dataset.index);
+    if (isNaN(index)) return;
+    const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
+    if (!config.moonPhase) return;
+    config.moonPhase.splice(index, 1);
+    await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
+    this.render({ parts: ['macros'] });
+  }
+
+  /**
+   * Add a new season trigger.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onAddSeasonTrigger(_event, _target) {
+    const seasonSelect = this.element.querySelector('select[name="newSeasonTrigger.seasonIndex"]');
+    const macroSelect = this.element.querySelector('select[name="newSeasonTrigger.macroId"]');
+    const seasonIndex = parseInt(seasonSelect?.value);
+    const macroId = macroSelect?.value;
+    if (isNaN(seasonIndex) || !macroId) {
+      ui.notifications.warn('CALENDARIA.MacroTrigger.SelectSeasonAndMacro', { localize: true });
+      return;
+    }
+    const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
+    if (!config.season) config.season = [];
+    const exists = config.season.some((t) => t.seasonIndex === seasonIndex);
+    if (exists) {
+      ui.notifications.warn('CALENDARIA.MacroTrigger.DuplicateSeason', { localize: true });
+      return;
+    }
+    config.season.push({ seasonIndex, macroId });
+    await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
+    this.render({ parts: ['macros'] });
+  }
+
+  /**
+   * Remove a season trigger.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async #onRemoveSeasonTrigger(_event, target) {
+    const index = parseInt(target.dataset.index);
+    if (isNaN(index)) return;
+    const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
+    if (!config.season) return;
+    config.season.splice(index, 1);
+    await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
+    this.render({ parts: ['macros'] });
+  }
+
+  /** @inheritdoc */
+  _attachPartListeners(partId, htmlElement, options) {
+    super._attachPartListeners(partId, htmlElement, options);
+    if (partId === 'macros') {
+      const moonSelect = htmlElement.querySelector('select[name="newMoonTrigger.moonIndex"]');
+      const phaseSelect = htmlElement.querySelector('select[name="newMoonTrigger.phaseIndex"]');
+      if (moonSelect && phaseSelect) {
+        moonSelect.addEventListener('change', () => {
+          const selectedMoon = moonSelect.value;
+          const phaseOptions = phaseSelect.querySelectorAll('option[data-moon]');
+          phaseOptions.forEach((opt) => {
+            if (selectedMoon === '-1') opt.hidden = opt.dataset.moon !== '-1';
+            else if (selectedMoon === '') opt.hidden = false;
+            else opt.hidden = opt.dataset.moon !== '-1' && opt.dataset.moon !== selectedMoon;
+          });
+          if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
+        });
+      }
+    }
   }
 }

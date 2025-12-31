@@ -4,9 +4,8 @@
  * @author Tyler
  */
 
-import { MODULE, SCENE_FLAGS, SETTINGS } from './constants.mjs';
+import { MODULE, SCENE_FLAGS, SETTINGS, TEMPLATES } from './constants.mjs';
 import TimeKeeper from './time/time-keeper.mjs';
-import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 
 /** @type {number|null} Last hour we calculated darkness for */
@@ -80,27 +79,12 @@ export async function updateSceneDarkness(scene) {
  * @param {HTMLElement} html - The rendered HTML element
  * @param {object} _data - The scene data
  */
-export function onRenderSceneConfig(app, html, _data) {
+export async function onRenderSceneConfig(app, html, _data) {
   const flagValue = app.document.getFlag(MODULE.ID, SCENE_FLAGS.DARKNESS_SYNC);
-  let selectValue = 'default';
-  if (flagValue === true || flagValue === 'enabled') selectValue = 'enabled';
-  else if (flagValue === false || flagValue === 'disabled') selectValue = 'disabled';
-  else if (flagValue === 'default') selectValue = 'default';
-
-  /** @todo move this to template file */
-  const formGroup = `
-    <div class="form-group slim">
-      <label>${localize('CALENDARIA.Scene.DarknessSync.Name')}</label>
-      <select name="flags.${MODULE.ID}.${SCENE_FLAGS.DARKNESS_SYNC}">
-        <option value="default" ${selectValue === 'default' ? 'selected' : ''}>${localize('CALENDARIA.Scene.DarknessSync.Choices.Default')}</option>
-        <option value="enabled" ${selectValue === 'enabled' ? 'selected' : ''}>${localize('CALENDARIA.Scene.DarknessSync.Choices.Enabled')}</option>
-        <option value="disabled" ${selectValue === 'disabled' ? 'selected' : ''}>${localize('CALENDARIA.Scene.DarknessSync.Choices.Disabled')}</option>
-      </select>
-      <p class="hint">${localize('CALENDARIA.Scene.DarknessSync.Hint')}</p>
-    </div>
-  `;
-
-  // Find the ambiance tab or environment section to insert after
+  let value = 'default';
+  if (flagValue === true || flagValue === 'enabled') value = 'enabled';
+  else if (flagValue === false || flagValue === 'disabled') value = 'disabled';
+  const formGroup = await renderTemplate(TEMPLATES.PARTIALS.SCENE_DARKNESS_SYNC, { moduleId: MODULE.ID, flagName: SCENE_FLAGS.DARKNESS_SYNC, value });
   const ambientLightField = html.querySelector('[name="environment.globalLight.enabled"]')?.closest('.form-group');
   if (ambientLightField) ambientLightField.insertAdjacentHTML('afterend', formGroup);
   else log(2, 'Could not find ambiance section to inject darkness sync setting');

@@ -12,6 +12,7 @@ import { HOOKS, MODULE } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { getCurrentDate } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
+import { format, localize } from '../utils/localization.mjs';
 
 /**
  * Reminder Scheduler class that monitors time and triggers pre-event reminders.
@@ -212,7 +213,6 @@ export default class ReminderScheduler {
    */
   static #getTargetUsers(note) {
     const targets = note.flagData.reminderTargets || 'all';
-
     switch (targets) {
       case 'all':
         return game.users.map((u) => u.id);
@@ -231,22 +231,18 @@ export default class ReminderScheduler {
    * Format the reminder message.
    * @param {object} note - The note stub
    * @returns {string} - Formatted message
-   * @todo localize return statement
    * @private
    */
   static #formatReminderMessage(note) {
     const offset = note.flagData.reminderOffset;
     let timeStr;
-
     if (offset >= 60) {
       const hours = Math.floor(offset / 60);
       const mins = offset % 60;
-      timeStr = mins > 0 ? `${hours}h ${mins}m` : `${hours} hour${hours > 1 ? 's' : ''}`;
-    } else {
-      timeStr = `${offset} minute${offset > 1 ? 's' : ''}`;
-    }
-
-    return `<strong>${note.name}</strong> starts in ${timeStr}`;
+      if (mins > 0) timeStr = format('CALENDARIA.Reminder.HoursMinutes', { hours, mins });
+      else timeStr = hours > 1 ? format('CALENDARIA.Reminder.HoursPlural', { hours }) : format('CALENDARIA.Reminder.Hours', { hours });
+    } else timeStr = offset > 1 ? format('CALENDARIA.Reminder.MinutesPlural', { mins: offset }) : format('CALENDARIA.Reminder.Minutes', { mins: offset });
+    return format('CALENDARIA.Reminder.StartsIn', { name: note.name, time: timeStr });
   }
 
   /* -------------------------------------------- */
@@ -269,7 +265,6 @@ export default class ReminderScheduler {
    * @param {object} note - The note stub
    * @param {string} message - Formatted message
    * @param {string[]} targets - Target user IDs
-   * @todo localize the template and move to a template file
    * @private
    */
   static async #sendChatReminder(note, message, targets) {
@@ -283,7 +278,7 @@ export default class ReminderScheduler {
       <div class="calendaria-reminder">
         <div class="reminder-message">${message}</div>
         <a class="announcement-open" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
-          ${icon} Open Note
+          ${icon} ${localize('CALENDARIA.Reminder.OpenNote')}
         </a>
       </div>
     `.trim();
@@ -292,7 +287,7 @@ export default class ReminderScheduler {
       content,
       whisper,
       speaker: { alias: 'Calendaria' },
-      flavor: `<span style="color: ${color};">${icon}</span> Reminder`,
+      flavor: `<span style="color: ${color};">${icon}</span> ${localize('CALENDARIA.Reminder.Label')}`,
       flags: { [MODULE.ID]: { isReminder: true, noteId: note.id } }
     });
   }
@@ -301,17 +296,16 @@ export default class ReminderScheduler {
    * Show dialog popup.
    * @param {object} note - The note stub
    * @param {string} message - Formatted message
-   * @todo Localize
    * @private
    */
   static async #showDialog(note, message) {
     const icon = this.#getIconHtml(note);
     const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: 'Event Reminder', icon: 'fas fa-bell' },
+      window: { title: localize('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
       content: `<p>${icon} ${message}</p>`,
       buttons: [
-        { action: 'open', label: 'Open Note', icon: 'fas fa-book-open', callback: () => 'open' },
-        { action: 'dismiss', label: 'Dismiss', icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
+        { action: 'open', label: localize('CALENDARIA.Reminder.OpenNote'), icon: 'fas fa-book-open', callback: () => 'open' },
+        { action: 'dismiss', label: localize('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
       ],
       rejectClose: false
     });
