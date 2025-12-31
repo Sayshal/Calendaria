@@ -1,6 +1,4 @@
-{{!-- Importer Application Template --}}
 <div class="importer-content">
-  {{!-- No Importers Available --}}
   {{#unless hasImporters}}
     <div class="no-importers">
       <i class="fas fa-exclamation-triangle"></i>
@@ -8,12 +6,9 @@
     </div>
   {{else}}
 
-    {{!-- Two-Column Layout --}}
     <div class="importer-grid">
 
-      {{!-- Left Column: Source & Preview --}}
       <div class="importer-left">
-        {{!-- Source Selection --}}
         <fieldset class="source-section">
           <legend>
             <i class="fas fa-database"></i>
@@ -24,7 +19,10 @@
               <select name="importerId">
                 <option value="">{{localize "CALENDARIA.Importer.ChooseSource"}}</option>
                 {{#each importers}}
-                  <option value="{{this.value}}" {{#if (eq this.value ../selectedImporterId)}}selected{{/if}}>
+                  <option value="{{this.value}}" {{#if (eq
+                                this.value
+                                ..
+                            /selectedImporterId)}}selected{{/if}}>
                     {{localize this.label}}{{#if this.detected}} ✓{{/if}}
                   </option>
                 {{/each}}
@@ -37,7 +35,6 @@
               <p class="importer-description hint">{{localize selectedImporter.description}}</p>
             {{/if}}
 
-            {{!-- File Upload Zone --}}
             {{#if canUpload}}
               <div class="file-upload-zone {{#if loadedFileName}}has-file{{/if}}" data-action="uploadFile">
                 {{#if loadedFileName}}
@@ -51,11 +48,10 @@
                   <i class="fas fa-cloud-upload-alt"></i>
                   <span>{{localize "CALENDARIA.Importer.DropFileHere"}}</span>
                 {{/if}}
-                <input type="file" accept="{{fileExtensions}}" style="display: none;" />
+                <input type="file" accept="{{fileExtensions}}" style="display: none;">
               </div>
             {{/if}}
 
-            {{!-- Import From Module Button --}}
             {{#if canImportFromModule}}
               {{#if loadedFromModule}}
                 <div class="module-loaded">
@@ -76,7 +72,6 @@
           {{/if}}
         </fieldset>
 
-        {{!-- Error Message --}}
         {{#if errorMessage}}
           <div class="import-error">
             <i class="fas fa-exclamation-circle"></i>
@@ -84,31 +79,30 @@
           </div>
         {{/if}}
 
-        {{!-- Preview Section --}}
         {{#if hasData}}
           <fieldset class="preview-section">
             <legend>
               <i class="fas fa-eye"></i>
-              {{localize "CALENDARIA.Importer.Preview.Title"}}
+              {{localize "CALENDARIA.Common.Preview"}}
             </legend>
 
             <div class="preview-header">{{previewData.name}}</div>
             <div class="preview-grid">
               <div class="preview-item">
                 <span class="preview-value">{{previewData.weekdayCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.Weekdays"}}</span>
+                <span class="preview-label">{{localize "CALENDARIA.Common.Weekdays"}}</span>
               </div>
               <div class="preview-item">
                 <span class="preview-value">{{previewData.monthCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.Months"}}</span>
+                <span class="preview-label">{{localize "CALENDARIA.Common.Months"}}</span>
               </div>
               <div class="preview-item">
                 <span class="preview-value">{{previewData.moonCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.Moons"}}</span>
+                <span class="preview-label">{{localize "CALENDARIA.Common.Moons"}}</span>
               </div>
               <div class="preview-item">
                 <span class="preview-value">{{previewData.seasonCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.Seasons"}}</span>
+                <span class="preview-label">{{localize "CALENDARIA.Common.Seasons"}}</span>
               </div>
               <div class="preview-item">
                 <span class="preview-value">{{previewData.daysPerYear}}</span>
@@ -119,9 +113,15 @@
                 <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.CurrentDate"}}</span>
               </div>
             </div>
+
+            {{#if previewData.undatedCount}}
+              <div class="undated-notice">
+                <i class="fas fa-book"></i>
+                <span>{{localize "CALENDARIA.Importer.Preview.UndatedEvents" count=previewData.undatedCount}}</span>
+              </div>
+            {{/if}}
           </fieldset>
 
-          {{!-- Import Options --}}
           <fieldset class="import-options">
             <legend>
               <i class="fas fa-cog"></i>
@@ -131,23 +131,21 @@
             <div class="form-group slim">
               <label>{{localize "CALENDARIA.Importer.Options.CalendarId"}}</label>
               <div class="form-fields">
-                <span class="id-prefix">custom-</span>
-                <input type="text" name="calendarId" value="{{suggestedId}}" placeholder="{{suggestedId}}" />
+                <span class="id-prefix">{{localize 'CALENDARIA.Importer.Options.IdPrefix'}}</span>
+                <input type="text" name="calendarId" value="{{suggestedId}}" placeholder="{{suggestedId}}">
               </div>
             </div>
 
             <div class="form-group slim">
               <label>{{localize "CALENDARIA.Importer.Options.CalendarName"}}</label>
               <div class="form-fields">
-                <input type="text" name="calendarName" value="{{previewData.name}}"
-                  placeholder="{{previewData.name}}" />
+                <input type="text" name="calendarName" value="{{previewData.name}}" placeholder="{{previewData.name}}">
               </div>
             </div>
           </fieldset>
         {{/if}}
       </div>
 
-      {{!-- Right Column: Notes & Events --}}
       <div class="importer-right">
         {{#if extractedNotes.length}}
           <fieldset class="note-selection">
@@ -157,7 +155,6 @@
               <span class="note-count">({{extractedNotes.length}})</span>
             </legend>
 
-            {{!-- Bulk Actions --}}
             <div class="note-bulk-actions">
               <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="skip"
                 data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllSkip'}}">
@@ -173,14 +170,13 @@
               </button>
             </div>
 
-            {{!-- Note Table with Radio Buttons --}}
             <div class="note-selection-table">
               <div class="note-row header">
-                <span class="note-name">{{localize "CALENDARIA.Importer.Notes.Name"}}</span>
-                <span class="note-date">{{localize "CALENDARIA.Importer.Notes.Date"}}</span>
+                <span class="note-name">{{localize "CALENDARIA.Common.Name"}}</span>
+                <span class="note-date">{{localize "CALENDARIA.Common.Date"}}</span>
                 <span class="note-radios">
                   <i class="fas fa-ban" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Skip'}}"></i>
-                  <i class="fas fa-star" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Festival'}}"></i>
+                  <i class="fas fa-star" data-tooltip="{{localize 'CALENDARIA.Common.Festival'}}"></i>
                   <i class="fas fa-sticky-note" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Note'}}"></i>
                 </span>
               </div>
@@ -192,10 +188,12 @@
                     <input type="radio" name="noteType[{{@index}}]" value="skip"
                       {{#unless this.suggestedType}}checked{{/unless}}
                       {{#if (eq this.suggestedType "skip")}}checked{{/if}} />
-                    <input type="radio" name="noteType[{{@index}}]" value="festival"
-                      {{#if (eq this.suggestedType "festival")}}checked{{/if}} />
-                    <input type="radio" name="noteType[{{@index}}]" value="note"
-                      {{#if (eq this.suggestedType "note")}}checked{{/if}} />
+                    <input type="radio" name="noteType[{{@index}}]" value="festival" {{#if (eq
+                                this.suggestedType
+                                "festival")}}checked{{/if}} />
+                    <input type="radio" name="noteType[{{@index}}]" value="note" {{#if (eq
+                                this.suggestedType
+                                "note")}}checked{{/if}} />
                   </span>
                 </div>
               {{/each}}
@@ -215,7 +213,6 @@
       </div>
     </div>
 
-    {{!-- Import Button --}}
     {{#if hasData}}
       <footer class="form-footer">
         {{#each buttons}}

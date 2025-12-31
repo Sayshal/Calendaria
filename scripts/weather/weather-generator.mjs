@@ -2,7 +2,6 @@
  * Procedural weather generation based on climate zones and seasons.
  * Uses weighted random selection with optional seeded randomness.
  * Uses zone-based config from calendar for generation.
- *
  * @module Weather/WeatherGenerator
  * @author Tyler
  */
@@ -12,7 +11,7 @@ import { getPreset } from './weather-presets.mjs';
 /**
  * Seeded random number generator (mulberry32).
  * @param {number} seed - Seed value
- * @returns {function} Random function returning 0-1
+ * @returns {Function} Random function returning 0-1
  */
 function seededRandom(seed) {
   return function () {
@@ -37,23 +36,19 @@ export function dateSeed(year, month, day) {
 /**
  * Select a random item from weighted options.
  * @param {object} weights - Object mapping IDs to weights
- * @param {function} [randomFn=Math.random] - Random function
+ * @param {Function} [randomFn] - Random function
  * @returns {string} Selected ID
  */
 function weightedSelect(weights, randomFn = Math.random) {
   const entries = Object.entries(weights);
   if (entries.length === 0) return null;
-
   const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
   if (totalWeight <= 0) return entries[0][0];
-
   let roll = randomFn() * totalWeight;
-
   for (const [id, weight] of entries) {
     roll -= weight;
     if (roll <= 0) return id;
   }
-
   return entries[entries.length - 1][0];
 }
 
@@ -63,39 +58,26 @@ function weightedSelect(weights, randomFn = Math.random) {
  * @param {object} options.zoneConfig - Climate zone config object from calendar
  * @param {string} [options.season] - Season name for temperature lookup
  * @param {number} [options.seed] - Random seed for deterministic generation
- * @param {object[]} [options.customPresets=[]] - Custom weather presets
+ * @param {object[]} [options.customPresets] - Custom weather presets
  * @returns {object} Generated weather { preset, temperature }
  */
 export function generateWeather({ zoneConfig, season, seed, customPresets = [] }) {
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
-
-  // Build probability map from enabled presets
   const probabilities = {};
   for (const preset of zoneConfig?.presets ?? []) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
-
-  // If no presets enabled, default to clear
   if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
-
-  // Select weather type
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
-
-  // Get temperature range from zone config
   let tempRange = { min: 10, max: 22 };
   if (zoneConfig?.temperatures) {
     const temps = zoneConfig.temperatures;
-    // Try season, then _default
     if (season && temps[season]) tempRange = temps[season];
     else if (temps._default) tempRange = temps._default;
   }
-
-  // Check for preset-specific temperature overrides
   const presetConfig = zoneConfig?.presets?.find((p) => p.id === weatherId);
   if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
   if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
-
   const temperature = Math.round(tempRange.min + randomFn() * (tempRange.max - tempRange.min));
-
   return { preset: preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' }, temperature };
 }
 
@@ -108,7 +90,7 @@ export function generateWeather({ zoneConfig, season, seed, customPresets = [] }
  * @param {number} options.year - Year
  * @param {number} options.month - Month (0-indexed)
  * @param {number} options.day - Day of month
- * @param {object[]} [options.customPresets=[]] - Custom weather presets
+ * @param {object[]} [options.customPresets] - Custom weather presets
  * @returns {object} Generated weather
  */
 export function generateWeatherForDate({ zoneConfig, season, year, month, day, customPresets = [] }) {
@@ -124,9 +106,9 @@ export function generateWeatherForDate({ zoneConfig, season, year, month, day, c
  * @param {number} options.startYear - Starting year
  * @param {number} options.startMonth - Starting month (0-indexed)
  * @param {number} options.startDay - Starting day
- * @param {number} [options.days=7] - Number of days to forecast
- * @param {object[]} [options.customPresets=[]] - Custom weather presets
- * @param {function} [options.getSeasonForDate] - Function to get season for a date
+ * @param {number} [options.days] - Number of days to forecast
+ * @param {object[]} [options.customPresets] - Custom weather presets
+ * @param {Function} [options.getSeasonForDate] - Function to get season for a date
  * @returns {object[]} Array of weather forecasts
  */
 export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate }) {
@@ -134,7 +116,6 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
   let year = startYear;
   let month = startMonth;
   let day = startDay;
-
   for (let i = 0; i < days; i++) {
     const currentSeason = getSeasonForDate ? getSeasonForDate(year, month, day) : season;
     const weather = generateWeatherForDate({ zoneConfig, season: currentSeason, year, month, day, customPresets });
@@ -149,22 +130,18 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
  * Reduces jarring weather changes by considering previous weather.
  * @param {string} currentWeatherId - Current weather ID
  * @param {object} probabilities - Base probabilities
- * @param {number} [inertia=0.3] - How much to favor current weather (0-1)
+ * @param {number} [inertia] - How much to favor current weather (0-1)
  * @returns {object} Adjusted probabilities
  */
 export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0.3) {
   if (!currentWeatherId || !probabilities[currentWeatherId]) return probabilities;
-
   const adjusted = { ...probabilities };
   const currentWeight = adjusted[currentWeatherId] || 0;
   const totalOther = Object.values(adjusted).reduce((sum, w) => sum + w, 0) - currentWeight;
-
-  // Boost current weather, reduce others proportionally
   if (totalOther > 0) {
     const boost = totalOther * inertia;
     adjusted[currentWeatherId] = currentWeight + boost;
     for (const id of Object.keys(adjusted)) if (id !== currentWeatherId) adjusted[id] *= 1 - inertia;
   }
-
   return adjusted;
 }

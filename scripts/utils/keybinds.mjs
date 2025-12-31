@@ -4,7 +4,7 @@
  * @author Tyler
  */
 
-import { SYSTEM } from '../constants.mjs';
+import { CalendariaHUD } from '../applications/calendaria-hud.mjs';
 import { log } from './logger.mjs';
 
 /**
@@ -14,8 +14,9 @@ export function registerKeybindings() {
   game.keybindings.register('calendaria', 'toggle-calendar', {
     name: 'CALENDARIA.Keybinds.ToggleCalendar.Name',
     hint: 'CALENDARIA.Keybinds.ToggleCalendar.Hint',
-    editable: [{ key: 'KeyC', modifiers: ['CONTROL'] }],
+    editable: [{ key: 'KeyC', modifiers: ['Alt'] }],
     onDown: () => {
+      log(3, 'Toggle calendar keybinding triggered');
       toggleCalendarVisibility();
       return true;
     },
@@ -26,14 +27,8 @@ export function registerKeybindings() {
 }
 
 /**
- * Toggle calendar visibility.
- * Only works when on dnd5e system which provides the calendar HUD.
+ * Toggle calendar HUD visibility.
  */
 export function toggleCalendarVisibility() {
-  // Only toggle visibility for dnd5e system
-  if (!SYSTEM.isDnd5e) return;
-
-  const prefs = game.settings.get('dnd5e', 'calendarPreferences');
-  const newVisibility = !prefs.visible;
-  game.settings.set('dnd5e', 'calendarPreferences', { ...prefs, visible: newVisibility });
+  CalendariaHUD.toggle();
 }

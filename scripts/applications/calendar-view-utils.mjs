@@ -1,16 +1,15 @@
 /**
  * Shared utilities for calendar view applications.
  * Provides common methods used by CalendarApplication and CompactCalendar.
- *
  * @module Applications/CalendarViewUtils
  * @author Tyler
  */
 
-import { MODULE, SETTINGS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
+import { format, localize } from '../utils/localization.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -49,52 +48,32 @@ function hexToHue(hex) {
  */
 export function enrichSeasonData(season) {
   if (!season) return null;
-
-  // Return as-is if already has icon and color
   if (season.icon && season.color) return season;
-
-  // Map season names to icons and colors
   const seasonName = localize(season.name).toLowerCase();
-  const enriched = { ...season };
-
-  // Match common season names (English and localized variants)
-  if (seasonName.includes('autumn') || seasonName.includes('fall')) {
-    enriched.icon = enriched.icon || 'fas fa-leaf';
-    enriched.color = enriched.color || '#d2691e';
-  } else if (seasonName.includes('winter')) {
-    enriched.icon = enriched.icon || 'fas fa-snowflake';
-    enriched.color = enriched.color || '#87ceeb';
-  } else if (seasonName.includes('spring')) {
-    enriched.icon = enriched.icon || 'fas fa-seedling';
-    enriched.color = enriched.color || '#90ee90';
-  } else if (seasonName.includes('summer')) {
-    enriched.icon = enriched.icon || 'fas fa-sun';
-    enriched.color = enriched.color || '#ffd700';
-  } else {
-    // Default fallback
-    enriched.icon = enriched.icon || 'fas fa-leaf';
-    enriched.color = enriched.color || '#666666';
-  }
-
-  return enriched;
+  const SEASON_DEFAULTS = {
+    autumn: { icon: 'fas fa-leaf', color: '#d2691e' },
+    fall: { icon: 'fas fa-leaf', color: '#d2691e' },
+    winter: { icon: 'fas fa-snowflake', color: '#87ceeb' },
+    spring: { icon: 'fas fa-seedling', color: '#90ee90' },
+    summer: { icon: 'fas fa-sun', color: '#ffd700' }
+  };
+  const match = Object.keys(SEASON_DEFAULTS).find((key) => seasonName.includes(key));
+  const defaults = match ? SEASON_DEFAULTS[match] : { icon: 'fas fa-leaf', color: '#666666' };
+  return { ...season, icon: season.icon || defaults.icon, color: season.color || defaults.color };
 }
 
 /**
  * Get all calendar note pages from journal entries for the active calendar.
- * @returns {JournalEntryPage[]}
+ * @returns {object[]} Array of calendar note pages
  */
 export function getCalendarNotes() {
   const notes = [];
   const activeCalendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
-
   for (const journal of game.journal) {
     for (const page of journal.pages) {
       if (page.type !== 'calendaria.calendarnote') continue;
-
-      // Filter by calendar ID - check page flags first, then parent journal
       const noteCalendarId = page.getFlag(MODULE.ID, 'calendarId') || page.parent?.getFlag(MODULE.ID, 'calendarId');
       if (activeCalendarId && noteCalendarId !== activeCalendarId) continue;
-
       notes.push(page);
     }
   }
@@ -103,8 +82,8 @@ export function getCalendarNotes() {
 
 /**
  * Filter notes to only those visible to the current user.
- * @param {JournalEntryPage[]} notes - All notes
- * @returns {JournalEntryPage[]}
+ * @param {object[]} notes - All notes
+ * @returns {object[]} Notes visible to the current user
  */
 export function getVisibleNotes(notes) {
   return notes.filter((page) => !page.system.gmOnly || game.user.isGM);
@@ -115,8 +94,8 @@ export function getVisibleNotes(notes) {
  * @param {number} year - Display year (with yearZero applied)
  * @param {number} month - Month (0-indexed)
  * @param {number} day - Day of month (1-indexed)
- * @param {CalendariaCalendar} [calendar] - Calendar to use (defaults to active)
- * @returns {boolean}
+ * @param {object} [calendar] - Calendar to use (defaults to active)
+ * @returns {boolean} True if the given date matches today's date
  */
 export function isToday(year, month, day, calendar = null) {
   const today = game.time.components;
@@ -129,7 +108,7 @@ export function isToday(year, month, day, calendar = null) {
 
 /**
  * Get the current viewed date based on game time.
- * @param {CalendariaCalendar} [calendar] - Calendar to use
+ * @param {object} [calendar] - Calendar to use
  * @returns {object} Date object with year, month, day
  */
 export function getCurrentViewedDate(calendar = null) {
@@ -137,22 +116,20 @@ export function getCurrentViewedDate(calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
   const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
-
   return { ...components, year: components.year + yearZero, day: dayOfMonth };
 }
 
 /**
  * Check if a day has any notes.
- * @param {JournalEntryPage[]} notes - Notes to check
+ * @param {object[]} notes - Notes to check
  * @param {number} year - Year
  * @param {number} month - Month
  * @param {number} day - Day (1-indexed)
- * @returns {boolean}
+ * @returns {boolean} True if at least one note exists on the specified day
  */
 export function hasNotesOnDay(notes, year, month, day) {
   const targetDate = { year, month, day };
   return notes.some((page) => {
-    // Build noteData from page.system for recurrence check
     const noteData = {
       startDate: page.system.startDate,
       endDate: page.system.endDate,
@@ -163,7 +140,11 @@ export function hasNotesOnDay(notes, year, month, day) {
       moonConditions: page.system.moonConditions,
       randomConfig: page.system.randomConfig,
       cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-      linkedEvent: page.system.linkedEvent
+      linkedEvent: page.system.linkedEvent,
+      weekday: page.system.weekday,
+      weekNumber: page.system.weekNumber,
+      seasonalConfig: page.system.seasonalConfig,
+      conditions: page.system.conditions
     };
     return isRecurringMatch(noteData, targetDate);
   });
@@ -171,36 +152,27 @@ export function hasNotesOnDay(notes, year, month, day) {
 
 /**
  * Get notes that start on a specific day.
- * @param {JournalEntryPage[]} notes - Notes to filter
+ * @param {object[]} notes - Notes to filter
  * @param {number} year - Year
  * @param {number} month - Month
  * @param {number} day - Day (1-indexed)
- * @returns {JournalEntryPage[]}
+ * @returns {object[]} Notes that start on the specified day
  */
 export function getNotesForDay(notes, year, month, day) {
   return notes.filter((page) => {
     const start = page.system.startDate;
     const end = page.system.endDate;
-
-    // Only include events that start on this day
     if (start.year !== year || start.month !== month || start.day !== day) return false;
-
-    // Check if end date has valid values
     const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
-
-    // If no valid end date, treat as single-day event
     if (!hasValidEndDate) return true;
-
-    // Exclude multi-day events (shown as bars)
     if (end.year !== start.year || end.month !== start.month || end.day !== start.day) return false;
-
     return true;
   });
 }
 
 /**
  * Get the first moon's phase for a specific day.
- * @param {CalendariaCalendar} calendar - The calendar
+ * @param {object} calendar - The calendar
  * @param {number} year - Display year
  * @param {number} month - Month
  * @param {number} day - Day (1-indexed)
@@ -209,23 +181,19 @@ export function getNotesForDay(notes, year, month, day) {
 export function getFirstMoonPhase(calendar, year, month, day) {
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.[0]) return null;
-
-  // Calculate day of year
   let dayOfYear = day - 1;
   for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
-
   const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   const phase = calendar.getMoonPhase(0, dayWorldTime);
   if (!phase) return null;
-
   const color = calendar.moons[0].color || null;
   return { icon: phase.icon, color, hue: color ? hexToHue(color) : null, tooltip: `${localize(calendar.moons[0].name)}: ${localize(phase.name)}` };
 }
 
 /**
  * Get all moon phases for a specific day.
- * @param {CalendariaCalendar} calendar - The calendar
+ * @param {object} calendar - The calendar
  * @param {number} year - Display year
  * @param {number} month - Month
  * @param {number} day - Day (1-indexed)
@@ -234,14 +202,10 @@ export function getFirstMoonPhase(calendar, year, month, day) {
 export function getAllMoonPhases(calendar, year, month, day) {
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.length) return null;
-
-  // Calculate day of year
   let dayOfYear = day - 1;
   for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
-
   const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
-
   return calendar.moons
     .map((moon, index) => {
       const phase = calendar.getMoonPhase(index, dayWorldTime);
@@ -261,27 +225,30 @@ export function getAllMoonPhases(calendar, year, month, day) {
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
  * @param {number} day - Day (1-indexed)
- * @returns {JournalEntryPage[]} Notes on this day
+ * @returns {object[]} Notes on this day
  */
 export function getNotesOnDay(year, month, day) {
   const allNotes = getCalendarNotes();
   const visibleNotes = getVisibleNotes(allNotes);
+  const targetDate = { year, month, day };
   return visibleNotes.filter((page) => {
-    const start = page.system.startDate;
-    const end = page.system.endDate;
-
-    // Check if this day is the start date
-    if (start.year === year && start.month === month && start.day === day) return true;
-
-    // Check multi-day events
-    if (end?.year != null && end?.month != null && end?.day != null) {
-      const startDate = new Date(start.year, start.month, start.day);
-      const endDate = new Date(end.year, end.month, end.day);
-      const checkDate = new Date(year, month, day);
-      if (checkDate >= startDate && checkDate <= endDate) return true;
-    }
-
-    return false;
+    const noteData = {
+      startDate: page.system.startDate,
+      endDate: page.system.endDate,
+      repeat: page.system.repeat,
+      repeatInterval: page.system.repeatInterval,
+      repeatEndDate: page.system.repeatEndDate,
+      maxOccurrences: page.system.maxOccurrences,
+      moonConditions: page.system.moonConditions,
+      randomConfig: page.system.randomConfig,
+      cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
+      linkedEvent: page.system.linkedEvent,
+      weekday: page.system.weekday,
+      weekNumber: page.system.weekNumber,
+      seasonalConfig: page.system.seasonalConfig,
+      conditions: page.system.conditions
+    };
+    return isRecurringMatch(noteData, targetDate);
   });
 }
 
@@ -290,17 +257,13 @@ export function getNotesOnDay(year, month, day) {
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
  * @param {number} day - Day (1-indexed)
- * @param {CalendariaCalendar} [calendar] - Calendar to use
+ * @param {object} [calendar] - Calendar to use
  */
 export async function setDateTo(year, month, day, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
-
-  // Calculate day of year
   let dayOfYear = day - 1;
   for (let i = 0; i < month; i++) dayOfYear += calendar.months.values[i].days;
-
-  // Keep current time of day
   const currentComponents = game.time.components;
   const newComponents = { year: year - yearZero, month, day: dayOfYear, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
   const newWorldTime = calendar.componentsToTime(newComponents);
@@ -312,7 +275,7 @@ export async function setDateTo(year, month, day, calendar = null) {
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
  * @param {number} day - Day (1-indexed)
- * @returns {Promise<JournalEntryPage|null>}
+ * @returns {Promise<object|null>} The created note page, or null if creation failed
  */
 export async function createNoteOnDate(year, month, day) {
   const page = await NoteManager.createNote({
@@ -326,14 +289,13 @@ export async function createNoteOnDate(year, month, day) {
 /**
  * Build context menu items for a day cell.
  * @param {object} options - Options
- * @param {CalendariaCalendar} options.calendar - The calendar
+ * @param {object} options.calendar - The calendar
  * @param {Function} [options.onSetDate] - Callback after setting date
  * @param {Function} [options.onCreateNote] - Callback after creating note
  * @returns {Array<object>} Context menu items
  */
 export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {}) {
   return [
-    // Set Current Date (GM only, not on current day)
     {
       name: 'CALENDARIA.CompactCalendar.SetCurrentDate',
       icon: '<i class="fas fa-calendar-plus"></i>',
@@ -353,9 +315,8 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
         onSetDate?.();
       }
     },
-    // Add Note
     {
-      name: 'CALENDARIA.CompactCalendar.AddNote',
+      name: 'CALENDARIA.Common.AddNote',
       icon: '<i class="fas fa-plus"></i>',
       callback: async (target) => {
         const year = parseInt(target.dataset.year);
@@ -365,7 +326,6 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
         onCreateNote?.();
       }
     },
-    // Edit Note (if day has exactly one note the user owns)
     {
       name: 'CALENDARIA.ContextMenu.EditNote',
       icon: '<i class="fas fa-edit"></i>',
@@ -385,7 +345,6 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
         if (notes.length === 1) notes[0].sheet.render(true, { mode: 'edit' });
       }
     },
-    // View Note (if day has exactly one note)
     {
       name: 'CALENDARIA.ContextMenu.ViewNote',
       icon: '<i class="fas fa-eye"></i>',
@@ -405,7 +364,6 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
         if (notes.length === 1) notes[0].sheet.render(true, { mode: 'view' });
       }
     },
-    // Delete Note (if day has exactly one note the user owns)
     {
       name: 'CALENDARIA.ContextMenu.DeleteNote',
       icon: '<i class="fas fa-trash"></i>',
@@ -445,27 +403,20 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
 /**
  * Inject date info header into context menu.
  * @param {HTMLElement} target - The day cell element
- * @param {CalendariaCalendar} calendar - The calendar
+ * @param {object} calendar - The calendar
  */
 export function injectContextMenuInfo(target, calendar) {
   const menu = document.getElementById('context-menu');
   if (!menu) return;
-
   const year = parseInt(target.dataset.year);
   const month = parseInt(target.dataset.month);
   const day = parseInt(target.dataset.day);
-
-  // Build date string
   const monthData = calendar.months?.values?.[month];
   const monthName = monthData ? localize(monthData.name) : '';
   const yearDisplay = calendar.formatYearWithEra?.(year) ?? String(year);
   const fullDate = `${monthName} ${day}, ${yearDisplay}`;
-
-  // Get season
   const season = calendar.getCurrentSeason?.();
   const seasonName = season ? localize(season.name) : null;
-
-  // Get sunrise/sunset
   const sunriseHour = calendar.sunrise?.() ?? 6;
   const sunsetHour = calendar.sunset?.() ?? 18;
   const formatTime = (hours) => {
@@ -473,17 +424,14 @@ export function injectContextMenuInfo(target, calendar) {
     const m = Math.round((hours - h) * 60);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   };
-
-  // Create info header element
   const infoHeader = document.createElement('div');
   infoHeader.className = 'context-info-header';
   infoHeader.innerHTML = `
     <div class="info-row date"><strong>${fullDate}</strong></div>
     ${seasonName ? `<div class="info-row season">${seasonName}</div>` : ''}
-    <div class="info-row sun"><i class="fas fa-sun" data-tooltip="${localize('CALENDARIA.CompactCalendar.Sunrise')}"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon" data-tooltip="${localize('CALENDARIA.CompactCalendar.Sunset')}"></i> ${formatTime(sunsetHour)}</div>
+    <div class="info-row sun"><i class="fas fa-sun" data-tooltip="${localize('CALENDARIA.Common.Sunrise')}"></i> ${formatTime(sunriseHour)}
+    <i class="fas fa-moon" data-tooltip="${localize('CALENDARIA.Common.Sunset')}"></i> ${formatTime(sunsetHour)}</div>
   `;
-
-  // Insert at beginning of menu
   menu.insertBefore(infoHeader, menu.firstChild);
 }
 
@@ -491,7 +439,7 @@ export function injectContextMenuInfo(target, calendar) {
  * Set up a context menu for day cells.
  * @param {HTMLElement} container - The container element
  * @param {string} selector - CSS selector for day cells
- * @param {CalendariaCalendar} calendar - The calendar
+ * @param {object} calendar - The calendar
  * @param {object} [options] - Additional options
  * @param {Function} [options.onSetDate] - Callback after setting date
  * @param {Function} [options.onCreateNote] - Callback after creating note
@@ -511,7 +459,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
  * Handle click on a day cell, detecting double-clicks manually.
  * Native dblclick doesn't work because re-render destroys the element between clicks.
  * @param {MouseEvent} event - The click event
- * @param {CalendariaCalendar} calendar - The calendar
+ * @param {object} calendar - The calendar
  * @param {object} [options] - Additional options
  * @param {Function} [options.onSetDate] - Callback after setting date
  * @param {Function} [options.onCreateNote] - Callback after creating note
@@ -520,39 +468,25 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
 export async function handleDayClick(event, calendar, options = {}) {
   const dayCell = event.target.closest('[data-year][data-month][data-day]');
   if (!dayCell || dayCell.classList.contains('empty')) return false;
-
   const year = parseInt(dayCell.dataset.year);
   const month = parseInt(dayCell.dataset.month);
   const day = parseInt(dayCell.dataset.day);
   const now = Date.now();
-
-  // Check if this is a double-click (same day, within threshold)
   const isDoubleClick = now - clickState.time < DOUBLE_CLICK_THRESHOLD && clickState.year === year && clickState.month === month && clickState.day === day;
-
-  // Update click state
   clickState.time = now;
   clickState.year = year;
   clickState.month = month;
   clickState.day = day;
-
   if (!isDoubleClick) return false;
-
-  // Reset state to prevent triple-click
   clickState.time = 0;
-
-  // Handle double-click
   const today = getCurrentViewedDate(calendar);
   const isTodayCell = year === today.year && month === today.month && day === today.day;
-
   if (isTodayCell) {
-    // Double-click on today: create new note
     await createNoteOnDate(year, month, day);
     options.onCreateNote?.();
   } else if (game.user.isGM) {
-    // Double-click on other day (GM only): set as current date
     await setDateTo(year, month, day, calendar);
     options.onSetDate?.();
   }
-
   return true;
 }

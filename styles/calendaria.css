@@ -1,102 +1,77 @@
+/* stylelint-disable max-nesting-depth */
+/* stylelint-disable selector-max-compound-selectors */
+/* stylelint-disable property-no-vendor-prefix */
 /* stylelint-disable comment-empty-line-before */
 /* stylelint-disable custom-property-pattern */
-
-/**
- * Calendaria Module Styles
- * @author Tyler
- */
 
 /* ======================================== */
 /* Theme System - CSS Custom Properties     */
 /* ======================================== */
 
-/**
- * Default theme variables
- * These can be overridden via the Theme Editor
- */
 :root {
-  /* Background colors */
   --calendaria-bg: rgb(31 31 31);
   --calendaria-bg-lighter: rgb(42 42 42);
   --calendaria-bg-hover: rgb(53 53 53);
-
-  /* Border colors */
   --calendaria-border: rgb(74 74 74);
   --calendaria-border-light: rgb(58 58 58);
-
-  /* Text colors */
   --calendaria-text: rgb(224 224 224);
   --calendaria-text-dim: rgb(153 153 153);
   --calendaria-title-text: rgb(255 255 255);
   --calendaria-weekday-header: rgb(224 224 224);
   --calendaria-day-number: rgb(224 224 224);
-
-  /* Button colors */
   --calendaria-button-bg: rgb(58 58 58);
   --calendaria-button-text: rgb(224 224 224);
   --calendaria-button-border: rgb(74 74 74);
-
-  /* Accent colors */
   --calendaria-primary: rgb(74 144 226);
   --calendaria-today: rgb(255 100 0);
   --calendaria-today-bg: rgb(255 100 0 / 20%);
   --calendaria-current-hour: rgb(255 100 0 / 12%);
-
-  /* Semantic colors */
   --calendaria-success: rgb(76 175 80);
   --calendaria-warning: rgb(255 193 7);
   --calendaria-error: rgb(244 67 54);
-
-  /* Festival/special day colors */
   --calendaria-festival-border: rgb(212 175 55);
   --calendaria-festival-text: rgb(255 215 0);
   --calendaria-festival-bg: rgb(212 175 55 / 15%);
-
-  /* Selection colors */
   --calendaria-selected-bg: rgb(74 144 226 / 15%);
-
-  /* Note badge colors */
   --calendaria-note-badge-bg: rgb(225 180 56);
   --calendaria-note-badge-text: rgb(0 0 0);
-
-  /* Event bar colors */
   --calendaria-event-shadow: rgb(0 0 0 / 20%);
-
-  /* Shadow/overlay colors */
   --calendaria-shadow: rgb(0 0 0 / 40%);
   --calendaria-shadow-light: rgb(0 0 0 / 20%);
   --calendaria-overlay: rgb(0 0 0 / 50%);
   --calendaria-highlight: rgb(255 255 255 / 20%);
-
-  /* Button hover state */
   --calendaria-button-hover: rgb(74 74 74);
   --calendaria-button-active: rgb(255 100 0);
   --calendaria-button-active-text: rgb(255 255 255);
-
-  /* Text on colored backgrounds (high contrast) */
   --calendaria-text-on-color: rgb(255 255 255);
   --calendaria-text-shadow-on-color: rgb(0 0 0 / 50%);
-
-  /* Note sheet colors */
   --calendaria-note-bg: var(--calendaria-bg);
   --calendaria-note-header-bg: var(--calendaria-bg-lighter);
+  --calendaria-input-bg: rgb(48 48 48);
+  --calendaria-input-border: rgb(74 74 74);
+  --calendaria-cool-3: rgb(65 65 65);
+  --calendaria-cool-4: rgb(55 55 55);
+  --calendaria-cool-5: rgb(45 45 45);
+  --calendaria-cool-5-50: rgb(45 45 45 / 50%);
+  --calendaria-cool-5-75: rgb(45 45 45 / 75%);
+  --calendaria-text-secondary: rgb(170 170 170);
+  --calendaria-text-heading: rgb(238 238 238);
+  --calendaria-text-highlight: rgb(255 255 255);
+  --calendaria-link: rgb(74 144 226);
+  --calendaria-positive-bg: rgb(76 175 80 / 20%);
+  --calendaria-positive-fg: rgb(76 175 80);
 
   /* ======================================== */
   /* Layout Dimensions (Content-Aware Sizing) */
   /* ======================================== */
 
-  /* Month View */
   --calendaria-day-size: 90px;
   --calendaria-day-gap: 2px;
   --calendaria-weekday-height: 28px;
-
-  /* Week View */
   --calendaria-week-day-width: 100px;
   --calendaria-week-hour-width: 25px;
   --calendaria-week-hour-height: 24px;
   --calendaria-week-header-height: 24px;
-
-  /* Year View */
   --calendaria-year-month-width: 50px;
   --calendaria-year-month-height: 24px;
   --calendaria-year-month-gap: 4px;
@@ -110,119 +85,57 @@
 /* ======================================== */
 
 .theme-light {
-  /* Background colors */
   --calendaria-bg: rgb(245 245 245);
   --calendaria-bg-lighter: rgb(255 255 255);
   --calendaria-bg-hover: rgb(235 235 235);
-
-  /* Border colors */
   --calendaria-border: rgb(200 200 200);
   --calendaria-border-light: rgb(220 220 220);
-
-  /* Text colors */
   --calendaria-text: rgb(32 32 32);
   --calendaria-text-dim: rgb(100 100 100);
   --calendaria-title-text: rgb(0 0 0);
   --calendaria-weekday-header: rgb(64 64 64);
   --calendaria-day-number: rgb(32 32 32);
-
-  /* Button colors */
   --calendaria-button-bg: rgb(230 230 230);
   --calendaria-button-text: rgb(32 32 32);
   --calendaria-button-border: rgb(200 200 200);
   --calendaria-button-hover: rgb(215 215 215);
   --calendaria-button-active: rgb(230 80 0);
   --calendaria-button-active-text: rgb(255 255 255);
-
-  /* Accent colors */
   --calendaria-primary: rgb(59 130 206);
   --calendaria-today: rgb(230 80 0);
   --calendaria-today-bg: rgb(230 80 0 / 15%);
   --calendaria-current-hour: rgb(230 80 0 / 10%);
-
-  /* Semantic colors */
   --calendaria-success: rgb(56 142 60);
   --calendaria-warning: rgb(245 180 0);
   --calendaria-error: rgb(211 47 47);
-
-  /* Festival/special day colors */
   --calendaria-festival-border: rgb(180 145 25);
   --calendaria-festival-text: rgb(140 110 0);
   --calendaria-festival-bg: rgb(212 175 55 / 12%);
-
-  /* Selection colors */
   --calendaria-selected-bg: rgb(59 130 206 / 12%);
-
-  /* Note badge colors */
   --calendaria-note-badge-bg: rgb(225 180 56);
   --calendaria-note-badge-text: rgb(0 0 0);
-
-  /* Event bar colors */
   --calendaria-event-shadow: rgb(0 0 0 / 10%);
-
-  /* Shadow/overlay colors */
   --calendaria-shadow: rgb(0 0 0 / 25%);
   --calendaria-shadow-light: rgb(0 0 0 / 12%);
   --calendaria-overlay: rgb(0 0 0 / 40%);
   --calendaria-highlight: rgb(255 255 255 / 40%);
-
-  /* Text on colored backgrounds (high contrast) */
   --calendaria-text-on-color: rgb(255 255 255);
   --calendaria-text-shadow-on-color: rgb(0 0 0 / 40%);
-
-  /* Note sheet colors */
   --calendaria-note-bg: var(--calendaria-bg);
   --calendaria-note-header-bg: var(--calendaria-bg-lighter);
-
-  /* Foundry color variable overrides for light mode */
-  --color-cool-3: rgb(210 210 210);
-  --color-cool-4: rgb(200 200 200);
-  --color-cool-5: rgb(240 240 240);
-  --color-cool-5-50: rgb(240 240 240 / 50%);
-  --color-cool-5-75: rgb(240 240 240 / 75%);
-  --color-bg: rgb(255 255 255);
-  --color-bg-option: rgb(248 248 248);
-  --color-border-light: rgb(200 200 200);
-  --color-border-dark: rgb(160 160 160);
-  --color-border-light-tertiary: rgb(220 220 220);
-  --color-border-highlight: rgb(59 130 206);
-  --color-text-primary: rgb(32 32 32);
-  --color-text-secondary: rgb(80 80 80);
-  --color-text-light-6: rgb(100 100 100);
-  --color-text-light-heading: rgb(32 32 32);
-  --color-text-light-primary: rgb(32 32 32);
-  --color-text-light-highlight: rgb(0 0 0);
-  --color-text-dark-primary: rgb(32 32 32);
-  --color-text-dark-secondary: rgb(80 80 80);
-  --color-text-hyperlink: rgb(59 130 206);
-  --color-positive-bg: rgb(200 230 200);
-  --color-positive-fg: rgb(40 120 40);
-  --color-level-warning: rgb(200 150 50);
-}
-
-/* ======================================== */
-/* Draggable Calendar & Widget Styles       */
-/* ======================================== */
-
-#calendar-hud {
-  .calendar-core {
-    user-select: none;
-  }
-
-  /* Reverse Calendar Widget Animation */
-  .calendar-widget.reverse-animation {
-    .calendar-stars {
-      rotate: calc(var(--calendar-night-progress) * 0.5turn);
-    }
-
-    .calendar-sun {
-      rotate: calc(var(--_sun-progress) * 0.5turn);
-
-      &::before {
-        rotate: calc(var(--_sun-progress) * -0.5turn);
-      }
-    }
-  }
+  --calendaria-input-bg: rgb(248 248 248);
+  --calendaria-input-border: rgb(200 200 200);
+  --calendaria-cool-3: rgb(210 210 210);
+  --calendaria-cool-4: rgb(200 200 200);
+  --calendaria-cool-5: rgb(240 240 240);
+  --calendaria-cool-5-50: rgb(240 240 240 / 50%);
+  --calendaria-cool-5-75: rgb(240 240 240 / 75%);
+  --calendaria-text-secondary: rgb(80 80 80);
+  --calendaria-text-heading: rgb(32 32 32);
+  --calendaria-text-highlight: rgb(0 0 0);
+  --calendaria-link: rgb(59 130 206);
+  --calendaria-positive-bg: rgb(56 142 60 / 20%);
+  --calendaria-positive-fg: rgb(56 142 60);
 }
 
 /* ======================================== */
@@ -230,20 +143,20 @@
 /* ======================================== */
 
 .calendaria-time-dial {
-  --sky-top-color: rgb(0 115 188);
-  --sky-bottom-color: rgb(161 176 209);
   --dial-sun-size: 15px;
+  --sky-bottom-color: rgb(161 176 209);
+  --sky-top-color: rgb(0 115 188);
 
-  position: fixed;
   z-index: 10000;
+  position: fixed;
   pointer-events: none;
 
   .dial-backdrop {
-    position: fixed;
     inset: 0;
-    background: rgb(0 0 0 / 50%);
-    pointer-events: all;
     z-index: -1;
+    position: fixed;
+    pointer-events: all;
+    background: rgb(0 0 0 / 50%);
   }
 
   .dial-container {
@@ -254,101 +167,94 @@
   }
 
   .dial-sky {
+    isolation: isolate;
     position: relative;
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     border: 3px solid rgb(201 170 113);
+    border-radius: 50%;
+    overflow: hidden;
     box-shadow:
       0 0 40px rgb(0 0 0 / 90%),
       0 0 20px rgb(201 170 113 / 40%);
-    overflow: hidden;
-    isolation: isolate;
 
-    /* Sky gradient background */
     &::after {
-      content: '';
-      position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, var(--sky-top-color), var(--sky-bottom-color));
-      z-index: -1;
       opacity: calc(0.75 + sin((var(--calendar-day-progress, 0) * pi)));
+      z-index: -1;
+      position: absolute;
+      content: '';
+      background: linear-gradient(to bottom, var(--sky-top-color), var(--sky-bottom-color));
     }
   }
 
-  /* Stars layer */
   .dial-stars {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    top: -15px;
-    left: -15px;
-    border-radius: 50%;
     rotate: calc(var(--calendar-night-progress, 0) * -0.5turn);
     z-index: -2;
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
 
     &::before {
-      content: '';
-      position: absolute;
       inset: -30px;
+      position: absolute;
       border-radius: 50%;
+      content: '';
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='filter'%3E%3CfeTurbulence baseFrequency='0.3'/%3E%3CfeColorMatrix values='0 0 0 9 -4 0 0 0 9 -4 0 0 0 9 -4 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23filter)'/%3E%3C/svg%3E%0A");
     }
   }
 
-  /* Sun/Moon layer */
   .dial-sun {
     position: absolute;
-    width: 300px;
-    height: 300px;
     top: -15px;
     left: -15px;
+    width: 300px;
+    height: 300px;
     border-radius: 50%;
 
-    /* Sun glow */
     &::before {
-      content: '';
+      opacity: var(--sun-opacity, 0);
       position: absolute;
+      left: 50%;
       width: 100%;
       height: 100%;
-      left: 50%;
+      content: '';
       background:
         radial-gradient(30px 15px, rgb(252 249 214 / 70%), transparent), radial-gradient(45px 30px, rgb(248 243 161 / 50%), transparent),
         radial-gradient(52px 38px, rgb(250 188 90 / 30%), transparent), radial-gradient(60px 45px, rgb(234 158 111 / 20%), transparent);
-      opacity: var(--sun-opacity, 0);
     }
 
-    /* Sun orb */
     &::after {
-      content: '';
+      opacity: var(--sun-opacity, 0);
       position: absolute;
+      right: 20%;
+      bottom: calc(var(--dial-sun-size) * -0.5 + 50%);
       width: var(--dial-sun-size);
       height: var(--dial-sun-size);
-      bottom: calc(var(--dial-sun-size) * -0.5 + 50%);
-      right: 20%;
-      background: rgb(255 255 0);
       border-radius: 50%;
+      content: '';
+      background: rgb(255 255 0);
       box-shadow: 0 0 10px rgb(255 255 0 / 80%);
-      opacity: var(--sun-opacity, 0);
     }
   }
 
-  /* Moon orb */
   .dial-moon-orb {
+    opacity: var(--moon-opacity, 0);
     position: absolute;
-    width: var(--dial-sun-size);
-    height: var(--dial-sun-size);
     bottom: calc(var(--dial-sun-size) * -0.5 + 50%);
     left: 20%;
-    background: rgb(230 230 240);
+    width: var(--dial-sun-size);
+    height: var(--dial-sun-size);
     border-radius: 50%;
+    background: rgb(230 230 240);
     box-shadow:
       0 0 15px rgb(200 200 220 / 90%),
       0 0 8px rgb(255 255 255 / 60%);
-    opacity: var(--moon-opacity, 0);
   }
 
-  /* Hour markers SVG overlay */
   .dial-markers {
     position: absolute;
     top: 0;
@@ -358,31 +264,29 @@
     pointer-events: none;
   }
 
-  /* Draggable handle container */
   .dial-handle-container {
     position: absolute;
     top: 0;
     left: 50%;
     width: 0;
     height: 50%;
-    transform-origin: bottom center;
     pointer-events: none;
+    transform-origin: bottom center;
   }
 
-  /* Draggable handle - pointer style */
   .dial-handle {
+    clip-path: polygon(50% 100%, 0% 0%, 50% 15%, 100% 0%);
     position: absolute;
     top: -10px;
     left: -12px;
     width: 24px;
     height: 30px;
+    cursor: grab;
+    pointer-events: all;
     background: rgb(255 100 0);
-    clip-path: polygon(50% 100%, 0% 0%, 50% 15%, 100% 0%);
     box-shadow:
       0 0 10px rgb(0 0 0 / 50%),
       0 0 5px rgb(255 100 0 / 50%);
-    cursor: grab;
-    pointer-events: all;
     filter: drop-shadow(0 0 2px rgb(255 255 255));
 
     &:hover {
@@ -399,29 +303,28 @@
     }
   }
 
-  /* Center time display */
   .dial-time-display {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     text-align: center;
+    transform: translate(-50%, -50%);
   }
 
   .dial-time {
-    font-size: 36px;
-    font-weight: bold;
-    color: rgb(255 100 0);
-    text-shadow: 0 0 10px rgb(255 100 0 / 80%);
-    font-family: 'Modesto Condensed', 'Palatino Linotype', serif;
-    line-height: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    text-align: center;
     width: 6ch;
     padding: 0;
+    border: none;
+    outline: none;
+    color: rgb(255 100 0);
+    font-weight: bold;
+    font-size: 36px;
+    line-height: 1;
+    font-family: 'Modesto Condensed', 'Palatino Linotype', serif;
+    text-align: center;
+    text-shadow: 0 0 10px rgb(255 100 0 / 80%);
     cursor: text;
+    background: transparent;
 
     &:focus {
       text-shadow: 0 0 15px rgb(255 100 0);
@@ -434,24 +337,22 @@
 /* ======================================== */
 
 .calendar-application {
-  /* Theme variables inherited from :root or theme class */
   display: flex;
   flex-direction: column;
-  background: var(--calendaria-bg);
   color: var(--calendaria-text);
+  background: var(--calendaria-bg);
 
   .window-content {
+    gap: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.5rem;
     overflow: hidden;
     background: var(--calendaria-bg);
   }
 }
 
-/* Main content wrapper - centers content, sizes to fit */
 .calendar-main-content {
   display: flex;
   flex-direction: column;
@@ -460,7 +361,6 @@
   height: fit-content;
 }
 
-/* Navigation bar above calendar grid */
 .calendar-nav {
   display: flex;
   justify-content: space-between;
@@ -477,41 +377,39 @@
 
 .calendar-title {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: bold;
   color: var(--calendaria-title-text);
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
-/* Season/Era indicators below title */
 .calendar-indicators {
+  gap: 1rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
   margin-top: -0.2rem;
-  font-size: 0.75rem;
   color: var(--calendaria-text-dim);
+  font-size: 0.75rem;
 }
 
 .weather-indicator,
 .season-indicator,
 .era-indicator,
 .cycle-indicator {
+  gap: 0.25rem;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
 
   i {
     font-size: 0.65rem;
   }
 }
 
-/* Weather indicator styling */
 .weather-indicator {
-  color: var(--calendaria-text);
   padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+  border-radius: 4px;
+  color: var(--calendaria-text);
+  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
 
   i {
     color: var(--weather-color, var(--calendaria-text-dim));
@@ -526,28 +424,27 @@
 }
 
 .weather-indicator.clickable:hover {
-  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
   border-color: var(--weather-color, var(--calendaria-text-dim));
+  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
 }
 
 .weather-indicator.no-weather {
+  border: 1px dashed var(--calendaria-border);
   color: var(--calendaria-text-dim);
   background: transparent;
-  border: 1px dashed var(--calendaria-border);
 }
 
 .weather-indicator.no-weather:hover {
-  background: color-mix(in srgb, var(--color-positive-bg) 20%, transparent);
-  border-color: var(--color-positive-fg);
+  border-color: var(--color-positive-fg, var(--calendaria-positive-fg));
+  background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
 }
 
 .weather-indicator .weather-temp {
+  opacity: 0.8;
   margin-left: 0.25rem;
   font-size: 0.7rem;
-  opacity: 0.8;
 }
 
-/* Season indicator styling */
 .season-indicator {
   color: var(--season-color, var(--calendaria-text-dim));
 
@@ -556,38 +453,44 @@
   }
 }
 
-/* Header - action buttons */
 .calendar-header {
+  gap: 0.5rem;
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
   padding-bottom: 0.25rem;
   border-bottom: 2px solid var(--calendaria-border);
 }
 
-/* Button styling for calendar application */
-.calendar-application button:not(.view-selector button.active) {
-  background: var(--calendaria-button-bg);
-  color: var(--calendaria-button-text);
-  border-color: var(--calendaria-button-border);
+.calendar-application .calendaria-hud-search-panel {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 4px;
+  transform: translateX(-50%);
 }
 
-/* Moon Phase Display (inline with day number) */
+.calendar-application button:not(.view-selector button.active) {
+  border-color: var(--calendaria-button-border);
+  color: var(--calendaria-button-text);
+  background: var(--calendaria-button-bg);
+}
+
 .moon-phase {
   display: inline-flex;
   align-items: center;
   height: 1em;
 
   img {
-    height: 100%;
     width: auto;
+    height: 100%;
   }
 
   &.tinted {
-    background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
     border-radius: 50%;
     overflow: hidden;
+    background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
 
     img {
       mix-blend-mode: multiply;
@@ -596,81 +499,82 @@
 }
 
 .calendar-actions {
-  display: flex;
   gap: 0.5rem;
+  display: flex;
   align-items: center;
 }
 
 .view-selector {
-  display: flex;
   gap: 0.25rem;
+  display: flex;
 
   button.active {
     background: var(--calendaria-primary);
   }
 }
 
-/* Grid - Month View (Fixed Dimensions) */
 .calendar-grid {
-  padding-top: 0.25rem;
-  margin-top: 0.25rem;
   display: flex;
   flex-direction: column;
   width: fit-content;
   height: fit-content;
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
 }
 
 .calendar-weekdays {
-  display: grid;
   gap: var(--calendaria-day-gap);
+  display: grid;
   margin-bottom: 0.5rem;
   font-weight: bold;
   text-align: center;
-  /* Column count set via inline style from template */
 }
 
 .weekday-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: var(--calendaria-day-size);
   height: var(--calendaria-weekday-height);
   padding: 0.25rem;
-  background: var(--calendaria-bg-lighter);
+  overflow: hidden;
   color: var(--calendaria-weekday-header);
   font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: var(--calendaria-bg-lighter);
+
+  &.rest-day {
+    color: var(--calendaria-rest-day, rgb(139 157 195));
+  }
 }
 
 .calendar-days {
+  gap: var(--calendaria-day-gap);
   display: flex;
   flex-direction: column;
-  gap: var(--calendaria-day-gap);
 }
 
 .calendar-week {
-  position: relative;
-  display: grid;
   gap: var(--calendaria-day-gap);
-  /* Column count set via inline style from template */
+  display: grid;
+  position: relative;
 }
 
 .calendar-day {
+  display: flex;
   position: relative;
-  border: 1px solid var(--calendaria-border-light);
-  background: var(--calendaria-bg);
-  padding: 0.25rem;
+  flex-direction: column;
+  box-sizing: border-box;
   width: var(--calendaria-day-size);
   height: var(--calendaria-day-size);
-  display: flex;
-  flex-direction: column;
+  padding: 0.25rem;
+  border: 1px solid var(--calendaria-border-light);
   cursor: pointer;
+  background: var(--calendaria-bg);
   transition:
     background 0.2s ease,
     transform 0.1s ease;
-  box-sizing: border-box;
 
   &:not(.empty):hover {
     background: var(--calendaria-bg-hover);
@@ -686,21 +590,32 @@
   }
 
   &.empty {
-    background: var(--calendaria-bg-lighter);
     opacity: 0.3;
+    background: var(--calendaria-bg-lighter);
+  }
+
+  &.other-month {
+    opacity: 0.4;
+    cursor: pointer;
+    background: transparent;
+
+    &:hover {
+      opacity: 0.6;
+      background: var(--calendaria-bg-hover);
+    }
   }
 
   &.today {
-    background: var(--calendaria-today-bg);
-    border: 1px solid var(--calendaria-today);
-    position: relative;
     z-index: 1;
+    position: relative;
+    border: 1px solid var(--calendaria-today);
+    background: var(--calendaria-today-bg);
   }
 
   &.selected {
-    border: 1px solid var(--calendaria-primary);
-    position: relative;
     z-index: 1;
+    position: relative;
+    border: 1px solid var(--calendaria-primary);
     cursor: pointer;
   }
 
@@ -709,19 +624,19 @@
   }
 
   &.festival-day {
-    background: color-mix(in srgb, var(--calendaria-festival-border) 15%, var(--calendaria-bg));
-    border-color: var(--calendaria-festival-border);
     position: relative;
+    border-color: var(--calendaria-festival-border);
+    background: color-mix(in srgb, var(--calendaria-festival-border) 15%, var(--calendaria-bg));
 
     &::after {
-      content: '';
+      opacity: 0.6;
       position: absolute;
       top: 0;
-      left: 0;
       right: 0;
+      left: 0;
       height: 3px;
+      content: '';
       background: linear-gradient(90deg, transparent, var(--calendaria-festival-text) 50%, transparent);
-      opacity: 0.6;
     }
 
     .day-number {
@@ -731,12 +646,12 @@
 }
 
 .day-number {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
+  gap: 0.25rem;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  margin-bottom: 0.25rem;
   color: var(--calendaria-day-number);
+  font-weight: bold;
 }
 
 .festival-icon {
@@ -757,16 +672,16 @@
 }
 
 .day-notes {
+  gap: 0.25rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
   margin-top: auto;
 }
 
 .note-indicator {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition: transform 0.1s ease;
 
@@ -775,9 +690,9 @@
   }
 
   img {
+    object-fit: contain;
     width: 16px;
     height: 16px;
-    object-fit: contain;
   }
 
   &:hover {
@@ -786,30 +701,30 @@
 }
 
 .add-note-btn {
+  display: flex;
+  opacity: 0;
   position: absolute;
   top: 2px;
   right: 2px;
+  justify-content: center;
+  align-items: center;
   width: 24px;
   height: 24px;
   padding: 0;
-  font-size: 14px;
-  opacity: 0;
-  transition: all 0.2s;
-  background: var(--calendaria-primary);
   border: 1px solid var(--calendaria-border);
   border-radius: 3px;
   color: var(--calendaria-text-on-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 14px;
+  background: var(--calendaria-primary);
+  transition: all 0.2s;
 
   i {
     margin: 0;
   }
 
   &:hover {
-    transform: scale(1.1);
     box-shadow: 0 2px 4px var(--calendaria-shadow-light);
+    transform: scale(1.1);
   }
 }
 
@@ -818,44 +733,44 @@
 /* ======================================== */
 
 .event-bar {
-  position: absolute;
-  height: 24px;
-  border-radius: 12px;
-  padding: 2px 10px;
+  -webkit-text-stroke: 0.5px var(--calendaria-shadow-light);
   display: flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--calendaria-text-on-color);
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 2px 4px var(--calendaria-shadow-light);
-  transition: all 0.15s ease;
   z-index: 10;
+  position: absolute;
+  align-items: center;
+  height: 24px;
+  padding: 2px 10px;
   border: 1px solid var(--calendaria-shadow-light);
+  border-radius: 12px;
+  overflow: hidden;
+  color: var(--calendaria-text-on-color);
+  font-weight: 600;
+  font-size: 12px;
+  text-overflow: ellipsis;
   text-shadow:
     -1px -1px 0 var(--calendaria-text-shadow-on-color),
     1px -1px 0 var(--calendaria-text-shadow-on-color),
     -1px 1px 0 var(--calendaria-text-shadow-on-color),
     1px 1px 0 var(--calendaria-text-shadow-on-color),
     0 2px 4px var(--calendaria-text-shadow-on-color);
-  -webkit-text-stroke: 0.5px var(--calendaria-shadow-light);
+  white-space: nowrap;
+  cursor: pointer;
   pointer-events: auto;
+  box-shadow: 0 2px 4px var(--calendaria-shadow-light);
+  transition: all 0.15s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--calendaria-shadow);
     z-index: 20;
+    box-shadow: 0 4px 8px var(--calendaria-shadow);
     filter: brightness(1.1);
+    transform: translateY(-2px);
   }
 
   .event-bar-icon {
+    flex-shrink: 0;
     margin-right: 6px;
     color: var(--calendaria-text-on-color);
     filter: drop-shadow(0 1px 2px var(--calendaria-text-shadow-on-color));
-    flex-shrink: 0;
 
     &:is(img) {
       width: 14px;
@@ -870,11 +785,11 @@
   }
 
   .event-bar-continuation {
+    flex-shrink: 0;
     margin-right: 6px;
     color: var(--calendaria-text-on-color);
-    filter: drop-shadow(0 1px 2px var(--calendaria-text-shadow-on-color));
-    flex-shrink: 0;
     font-size: 0.75rem;
+    filter: drop-shadow(0 1px 2px var(--calendaria-text-shadow-on-color));
   }
 }
 
@@ -883,159 +798,162 @@
 /* ======================================== */
 
 .calendar-week-view {
-  background: var(--calendaria-bg);
   width: fit-content;
   height: fit-content;
+  background: var(--calendaria-bg);
 }
 
 .week-grid {
-  display: grid;
-  grid-template-columns: var(--calendaria-week-day-width) repeat(24, var(--calendaria-week-hour-width));
-  margin-top: 0.5rem;
   gap: 1px;
-  background: var(--calendaria-border-light);
-  border: 1px solid var(--calendaria-border);
-  border-radius: 4px;
+  grid-template-columns: var(--calendaria-week-day-width) repeat(24, var(--calendaria-week-hour-width));
+  display: grid;
   width: fit-content;
   height: fit-content;
+  margin-top: 0.5rem;
+  border: 1px solid var(--calendaria-border);
+  border-radius: 4px;
+  background: var(--calendaria-border-light);
 }
 
 .week-corner-header {
-  background: var(--calendaria-bg-lighter);
-  border-bottom: 2px solid var(--calendaria-border);
   border-right: 2px solid var(--calendaria-border);
+  border-bottom: 2px solid var(--calendaria-border);
+  background: var(--calendaria-bg-lighter);
 }
 
 .week-hour-label {
-  padding: 0;
-  margin: 0;
   gap: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--calendaria-text-dim);
-  text-align: center;
-  background: var(--calendaria-bg-lighter);
-  border-bottom: 2px solid var(--calendaria-border);
   display: flex;
-  align-items: center;
   justify-content: center;
-  white-space: nowrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid var(--calendaria-border);
   overflow: hidden;
+  color: var(--calendaria-text-dim);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-align: center;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--calendaria-bg-lighter);
 }
 
 .week-day-header {
-  padding: 0.25rem 0.5rem;
-  background: var(--calendaria-bg);
-  border-right: 2px solid var(--calendaria-border);
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  z-index: 5;
   position: sticky;
   left: 0;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-right: 2px solid var(--calendaria-border);
   font-size: 0.85rem;
   white-space: nowrap;
-  z-index: 5;
+  background: var(--calendaria-bg);
 
   &.today {
-    background: var(--calendaria-today-bg);
     border-right: 3px solid var(--calendaria-today);
+    background: var(--calendaria-today-bg);
+  }
+
+  &.rest-day {
+    color: var(--calendaria-rest-day, rgb(139 157 195));
   }
 }
 
 .week-time-cell {
-  background: var(--calendaria-bg);
-  border-right: 1px solid var(--calendaria-border-light);
-  cursor: pointer;
-  transition: background 0.15s ease;
   position: relative;
+  border-right: 1px solid var(--calendaria-border-light);
   overflow: visible;
+  cursor: pointer;
+  background: var(--calendaria-bg);
+  transition: background 0.15s ease;
 
   &:hover {
     background: var(--calendaria-bg-hover);
   }
 
   &.current-hour {
-    background: var(--calendaria-current-hour);
     border-top: 3px solid var(--calendaria-today);
+    background: var(--calendaria-current-hour);
   }
 
   &.selected {
-    background: color-mix(in srgb, var(--calendaria-primary) 30%, transparent);
     border: 2px solid var(--calendaria-primary);
+    background: color-mix(in srgb, var(--calendaria-primary) 30%, transparent);
   }
 }
 
 .week-event-block {
   --hour-span: 1;
 
+  gap: 4px;
+  display: flex;
+  z-index: 10;
   position: absolute;
   top: 2px;
-  left: 2px;
   bottom: 2px;
+  left: 2px;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   width: calc(var(--hour-span) * 100% + (var(--hour-span) - 1) * 1px - 4px);
   padding: 4px 6px;
-  border-radius: 4px;
   border-top: 3px solid var(--calendaria-shadow);
-  font-size: 11px;
-  color: var(--calendaria-text-on-color);
+  border-radius: 4px;
   overflow: hidden;
+  color: var(--calendaria-text-on-color);
+  font-size: 11px;
+  text-shadow: 0 1px 2px var(--calendaria-text-shadow-on-color);
   cursor: pointer;
-  z-index: 10;
   box-shadow:
     0 2px 4px var(--calendaria-shadow-light),
     inset 0 1px 0 var(--calendaria-highlight);
   transition: all 0.15s ease;
-  text-shadow: 0 1px 2px var(--calendaria-text-shadow-on-color);
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  align-items: center;
-  justify-content: flex-start;
 
   &:hover {
-    filter: brightness(1.15);
+    z-index: 20;
     box-shadow:
       0 4px 8px var(--calendaria-shadow),
       inset 0 1px 0 var(--calendaria-highlight);
-    z-index: 20;
+    filter: brightness(1.15);
     transform: translateY(-2px);
   }
 
   .event-icon {
-    flex-shrink: 0;
     display: flex;
-    align-items: center;
+    flex-shrink: 0;
     justify-content: center;
+    align-items: center;
 
     i {
       font-size: 12px;
     }
 
     img {
+      object-fit: contain;
       width: 14px;
       height: 14px;
-      object-fit: contain;
     }
   }
 
   .event-name {
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
     min-width: 0;
+    overflow: hidden;
+    font-weight: 600;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  /* Compact layout for 1-hour events */
   &.compact {
+    gap: 2px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
     padding: 2px 4px;
-    gap: 2px;
+    text-align: center;
 
     .event-icon {
       i {
@@ -1049,8 +967,8 @@
     }
 
     .event-name {
-      font-size: 9px;
       max-width: 100%;
+      font-size: 9px;
     }
   }
 }
@@ -1065,33 +983,33 @@
 }
 
 .year-grid {
-  padding-top: 0.25rem;
-  margin-top: 0.25rem;
+  gap: var(--calendaria-year-gap);
   display: flex;
   flex-direction: column;
-  gap: var(--calendaria-year-gap);
   width: fit-content;
   height: fit-content;
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
 }
 
 .year-row {
-  display: grid;
-  grid-template-columns: repeat(3, auto);
   gap: var(--calendaria-year-gap);
+  grid-template-columns: repeat(3, auto);
+  display: grid;
 }
 
 .year-cell {
-  border: 2px solid var(--calendaria-border-light);
-  border-radius: 4px;
-  padding: var(--calendaria-year-cell-padding);
-  background: var(--calendaria-bg);
   display: flex;
   flex-direction: column;
-  cursor: pointer;
-  transition: all 0.2s;
   box-sizing: border-box;
   width: fit-content;
   height: fit-content;
+  padding: var(--calendaria-year-cell-padding);
+  border: 2px solid var(--calendaria-border-light);
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--calendaria-bg);
+  transition: all 0.2s;
 
   &:hover {
     border-color: var(--calendaria-border);
@@ -1105,40 +1023,40 @@
 }
 
 .year-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: var(--calendaria-year-header-height);
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-align: center;
   padding-bottom: 0.25rem;
   border-bottom: 1px solid var(--calendaria-border-light);
   color: var(--calendaria-title-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: center;
 }
 
 .year-months {
-  display: grid;
-  grid-template-columns: repeat(3, var(--calendaria-year-month-width));
   gap: var(--calendaria-year-month-gap);
+  grid-template-columns: repeat(3, var(--calendaria-year-month-width));
+  display: grid;
   margin-top: var(--calendaria-year-month-gap);
 }
 
 .month-mini {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: var(--calendaria-year-month-width);
   height: var(--calendaria-year-month-height);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--calendaria-bg-lighter);
   border-radius: 2px;
   font-size: 0.8rem;
   cursor: pointer;
+  background: var(--calendaria-bg-lighter);
   transition: background 0.2s;
 
   &:hover {
-    background: var(--calendaria-primary);
     color: var(--calendaria-text-on-color);
+    background: var(--calendaria-primary);
   }
 }
 
@@ -1148,15 +1066,15 @@
 
 .calendar-note-sheet {
   .window-content {
-    padding: 0.5rem;
     gap: 0.5rem;
+    padding: 0.5rem;
   }
 
   .window-header {
     .header-controls {
+      gap: 0.25rem;
       display: flex;
       align-items: center;
-      gap: 0.25rem;
       margin-right: auto;
       margin-left: 0;
     }
@@ -1174,19 +1092,19 @@
 /* -------------------------------------------- */
 
 .calendar-note-view {
+  gap: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
   height: 100%;
+  padding: 1rem;
   overflow-y: auto;
 
   .note-header {
+    gap: 0.75rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--color-border-light);
+    border-bottom: 2px solid var(--color-border-light, var(--calendaria-border));
   }
 
   .note-icon {
@@ -1197,58 +1115,58 @@
     }
 
     img {
+      object-fit: contain;
       width: 32px;
       height: 32px;
-      object-fit: contain;
     }
   }
 
   .note-title {
     flex: 1;
     margin: 0;
-    font-size: 1.5rem;
     font-weight: bold;
+    font-size: 1.5rem;
     line-height: 1.2;
   }
 
   .gm-only-badge {
     padding: 0.25rem 0.5rem;
-    background: var(--color-level-warning);
     border-radius: 3px;
-    font-size: 0.75rem;
     color: var(--calendaria-text-on-color);
+    font-size: 0.75rem;
+    background: var(--color-level-warning, var(--calendaria-warning));
   }
 
   .note-datetime {
+    gap: 1rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
     padding: 0.5rem 0.75rem;
-    background: var(--color-cool-5-50);
     border-radius: 4px;
     font-size: 0.9rem;
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
 
     .date-info,
     .time-info,
     .repeat-info,
     .moon-info {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
     }
   }
 
   .note-categories {
+    gap: 0.5rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
 
     .category-tag {
       padding: 0.25rem 0.75rem;
-      background: var(--color-cool-4);
-      border: 1px solid var(--color-cool-3);
+      border: 1px solid var(--color-cool-3, var(--calendaria-cool-3));
       border-radius: 1rem;
       font-size: 0.85rem;
+      background: var(--color-cool-4, var(--calendaria-cool-4));
     }
   }
 
@@ -1258,9 +1176,9 @@
     line-height: 1.6;
 
     &:empty::before {
-      content: 'No content';
-      color: var(--color-text-light-6);
+      color: var(--color-text-light-6, var(--calendaria-text-dim));
       font-style: italic;
+      content: 'No content';
     }
   }
 }
@@ -1269,542 +1187,670 @@
   padding: 0;
 }
 
-.calendar-note-form {
+.calendaria .calendar-note-form {
+  gap: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   height: 100%;
 
+  select,
+  input[type='text'],
+  input[type='number'],
+  input[type='time'],
+  button:not(.header-control),
+  .date-picker-btn {
+    box-sizing: border-box;
+    height: 2rem;
+  }
+
   .form-row-1 {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    grid-template-columns: 1fr auto auto;
+    display: grid;
   }
 
   .form-row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    grid-template-columns: 1fr 1fr auto;
+    display: grid;
   }
 
   .form-row-3 {
-    margin-bottom: 0.5rem;
+    .reminder-fieldset {
+      .reminder-controls {
+        gap: 0.75rem;
+        display: flex;
+        flex-wrap: wrap;
+
+        .form-group-stacked {
+          flex: 1 1 auto;
+          min-width: 120px;
+
+          label {
+            margin-bottom: 0.25rem;
+            font-size: var(--font-size-11);
+          }
+
+          .inline-form {
+            gap: 0.25rem;
+            display: flex;
+            align-items: center;
+
+            input[type='number'] {
+              flex: 0 0 auto;
+              width: 60px;
+            }
+
+            .hint {
+              color: var(--color-text-dark-secondary);
+              font-size: var(--font-size-10);
+            }
+          }
+
+          select {
+            width: 100%;
+          }
+        }
+
+        .reminder-users {
+          flex: 1 1 100%;
+        }
+      }
+    }
+  }
+
+  .form-row-4 {
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+
+    fieldset {
+      min-width: 0;
+    }
+
+    .inline-form {
+      min-width: 0;
+
+      select,
+      input,
+      multi-select {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+    }
   }
 
   fieldset {
-    padding: 0.5rem;
-    margin: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    margin: 0;
+    padding: 0.5rem;
+
+    > .inline-form {
+      margin-top: auto;
+    }
   }
 
-  .title-fieldset {
-    input[type='text'] {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid var(--color-border-light);
-      border-radius: 3px;
-      font-family: inherit;
-      font-size: inherit;
+  .editor-fieldset {
+    flex: 1;
+    min-height: 150px;
 
-      &:focus {
-        outline: none;
-        border-color: var(--color-border-dark);
-        box-shadow: 0 0 8px var(--calendaria-shadow-light);
+    prose-mirror {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+
+      .editor-container {
+        flex: 1;
+        overflow-y: auto;
       }
+    }
+  }
+
+  .date-picker-btn {
+    gap: 0.375rem;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    min-width: 0;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: var(--font-size-11);
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-cool-4, var(--calendaria-cool-4));
+    }
+
+    i {
+      flex-shrink: 0;
+      font-size: var(--font-size-10);
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .emblem-controls {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .icon-picker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem;
+    cursor: pointer;
+
+    &:hover .icon-preview {
+      opacity: 0.8;
+    }
+  }
+
+  .icon-preview {
+    object-fit: contain;
+    width: auto;
+    height: 24px;
+    font-size: 24px;
+  }
+
+  .color-input {
+    width: 60px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+      border-radius: 3px;
+    }
+
+    &::-moz-color-swatch {
+      border-radius: 3px;
+    }
+  }
+
+  .checkbox-group {
+    gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
+
+    label {
+      gap: 0.375rem;
+      display: flex;
+      align-items: center;
+      font-size: var(--font-size-11);
+      cursor: pointer;
     }
   }
 
   .date-fieldset {
-    .date-inputs {
-      display: flex;
-      flex-direction: column;
-    }
+    gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
 
-    .date-row {
-      display: flex;
+    .form-group {
+      gap: 0.375rem;
+      grid-template-columns: auto 1fr;
+      display: grid;
       align-items: center;
-      gap: 0.5rem;
 
-      label {
-        font-size: 0.9em;
+      > label {
         font-weight: 600;
-        min-width: 3rem;
-        flex-shrink: 0;
-      }
-    }
-
-    .date-picker-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex: 1;
-      padding: 0;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border-light);
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      font-size: inherit;
-      text-align: left;
-
-      &:hover {
-        background: var(--color-bg-option);
-        border-color: var(--color-border-dark);
-        box-shadow: 0 0 8px var(--calendaria-shadow-light);
-      }
-
-      i {
-        flex-shrink: 0;
-      }
-
-      .date-display {
-        flex: 1;
+        font-size: var(--font-size-11);
       }
     }
   }
 
-  .time-fieldset {
-    .time-inputs {
-      display: flex;
-      flex-direction: column;
+  .time-fieldset .time-grid {
+    gap: 0.25rem 0.375rem;
+    grid-template-columns: auto 1fr auto;
+    display: grid;
+    align-items: center;
+
+    > label {
+      font-weight: 600;
+      font-size: var(--font-size-11);
     }
 
-    .time-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      > label {
-        font-size: 0.9em;
-        font-weight: 600;
-        min-width: 3rem;
-        flex-shrink: 0;
-      }
-
-      input[type='time'] {
-        width: 6rem;
-        height: 22px;
-        padding: 4px 0;
-        flex-shrink: 0;
-      }
+    input[type='time'] {
+      width: 100%;
+      padding: 0.125rem 0.375rem;
+      border-radius: 3px;
+      font-size: var(--font-size-11);
     }
 
     .all-day-label {
+      gap: 0.125rem;
+      grid-column: 3;
+      grid-row: 1 / 3;
       display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      white-space: nowrap;
-      margin-left: auto;
-      font-size: 0.9em;
-      font-weight: normal;
-    }
-  }
-
-  .emblem-fieldset {
-    .emblem-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .icon-picker {
-      display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
-      padding: 0.25rem;
+      align-items: center;
+      padding-left: 0.5rem;
+      font-weight: normal;
+      font-size: var(--font-size-10);
       cursor: pointer;
-      transition: transform 0.1s ease;
 
-      &:hover {
-        transform: scale(1.05);
-
-        .icon-preview {
-          opacity: 0.8;
-        }
-      }
-
-      &:active {
-        transform: scale(0.98);
-      }
-    }
-
-    .icon-preview {
-      height: 26px;
-      width: auto;
-      font-size: 26px;
-      object-fit: contain;
-      transition: opacity 0.1s ease;
-    }
-
-    .color-input {
-      width: 75px;
-      height: 26px;
-      padding: 0;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      background: transparent;
-      appearance: none;
-
-      &::-webkit-color-swatch-wrapper {
-        padding: 0;
-      }
-
-      &::-webkit-color-swatch {
-        border: 1px solid var(--color-border-light);
-        border-radius: 3px;
-      }
-
-      &::-moz-color-swatch {
-        border: 1px solid var(--color-border-light);
-        border-radius: 3px;
+      input[type='checkbox'] {
+        margin: 0;
       }
     }
   }
 
-  /* Moon Conditions UI */
-  .form-row-moon {
+  .repeat-fieldset .repeat-controls {
+    gap: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+
+    > select {
+      padding: 0.125rem 0.375rem;
+      border-radius: 3px;
+      font-size: var(--font-size-11);
+      line-height: 1.4;
+    }
+
+    .max-occurrences {
+      gap: 0.125rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      input {
+        width: 60px;
+        padding: 0.125rem 0.375rem;
+        border-radius: 3px;
+        font-size: var(--font-size-11);
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      label {
+        color: var(--color-text-light-6, var(--calendaria-text-dim));
+        font-size: var(--font-size-10);
+        text-align: center;
+      }
+    }
+  }
+
+  .hint {
+    margin: 0 0 0.375rem;
+    color: var(--color-text-light-6, var(--calendaria-text-dim));
+    font-style: italic;
+    font-size: var(--font-size-10);
+
+    &.no-moons,
+    &.warning {
+      color: var(--color-level-warning, var(--calendaria-warning));
+    }
+  }
+
+  .tag-list {
+    gap: 0.375rem;
+    display: flex;
+    flex-wrap: wrap;
     margin-bottom: 0.5rem;
   }
 
-  .moon-conditions-fieldset {
-    .moon-conditions-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.375rem;
-      margin-bottom: 0.5rem;
+  .tag {
+    gap: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--color-cool-3, var(--calendaria-cool-3));
+    border-radius: 1rem;
+    font-size: var(--font-size-11);
+    background: var(--color-cool-4, var(--calendaria-cool-4));
+
+    .tag-label {
+      overflow: hidden;
+      color: var(--color-text-light-heading, var(--calendaria-text-heading));
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .moon-condition-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-      padding: 0.25rem 0.5rem;
-      background: var(--color-cool-4);
-      border: 1px solid var(--color-cool-3);
-      border-radius: 1rem;
-      font-size: var(--font-size-11);
+    .tag-value {
+      overflow: hidden;
+      color: var(--color-text-light-primary, var(--calendaria-text));
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 
-      .moon-name {
-        font-weight: 600;
-        color: var(--color-text-light-heading);
-      }
+  .remove-btn {
+    margin: 0;
+    padding: 0;
+    border: none;
+    color: var(--color-text-light-6, var(--calendaria-text-dim));
+    line-height: 1;
+    cursor: pointer;
+    background: none;
 
-      .phase-name {
-        color: var(--color-text-light-primary);
-      }
-
-      .remove-condition {
-        background: none;
-        border: none;
-        padding: 0;
-        margin: 0;
-        cursor: pointer;
-        color: var(--color-text-light-6);
-        line-height: 1;
-
-        &:hover {
-          color: var(--color-level-error);
-        }
-
-        i {
-          font-size: var(--font-size-10);
-        }
-      }
+    &:hover {
+      color: var(--color-level-error, var(--calendaria-error));
     }
 
-    .add-moon-condition {
-      display: flex;
-      gap: 0.375rem;
-      align-items: center;
-
-      select {
-        flex: 1;
-        min-width: 120px;
-        font-size: var(--font-size-11);
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-      }
-
-      .add-condition-btn {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-        cursor: pointer;
-        color: var(--color-text-light-heading);
-
-        &:hover {
-          background: var(--color-cool-4);
-        }
-
-        i {
-          font-size: var(--font-size-10);
-        }
-      }
-    }
-
-    .hint {
-      margin-top: 0.375rem;
+    i {
       font-size: var(--font-size-10);
-      color: var(--color-text-light-6);
-      font-style: italic;
+    }
+  }
 
-      &.no-moons {
-        color: var(--color-level-warning);
+  .inline-form {
+    gap: 0.375rem;
+    display: flex;
+    align-items: center;
+
+    select,
+    input {
+      box-sizing: border-box;
+      height: 2rem;
+      min-height: 2rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      font-size: var(--font-size-11);
+      line-height: 1;
+    }
+
+    select {
+      flex: 1;
+      min-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    input[type='number'] {
+      width: 70px;
+    }
+  }
+
+  .add-btn {
+    gap: 0.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 3px;
+    color: var(--color-text-light-heading, var(--calendaria-text-heading));
+    font-size: var(--font-size-11);
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-cool-4, var(--calendaria-cool-4));
+    }
+
+    i {
+      font-size: var(--font-size-11);
+    }
+  }
+
+  .form-group {
+    gap: 0.375rem;
+    display: flex;
+    align-items: center;
+
+    label {
+      flex-shrink: 0;
+      min-width: 2.5rem;
+      font-weight: 600;
+      font-size: var(--font-size-11);
+    }
+
+    select,
+    input {
+      padding: 0.125rem 0.375rem;
+      border-radius: 3px;
+      font-size: var(--font-size-11);
+      line-height: 1.4;
+    }
+
+    select {
+      min-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    input[type='number'] {
+      width: 80px;
+    }
+  }
+
+  .form-group-stacked {
+    gap: 0.125rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    label {
+      font-weight: 500;
+      font-size: var(--font-size-11);
+      text-align: center;
+    }
+
+    select,
+    input {
+      box-sizing: border-box;
+      height: 2rem;
+      min-height: 2rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      font-size: var(--font-size-11);
+      line-height: 1;
+    }
+
+    input[type='number'] {
+      width: 80px;
+    }
+
+    .inline-form {
+      align-items: stretch;
+    }
+  }
+
+  .repeat-config-grid {
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+  }
+
+  .repeat-config-primary,
+  .repeat-config-secondary {
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    fieldset {
+      grid-template-rows: auto auto 1fr;
+      display: grid;
+      flex: 1;
+      align-content: start;
+      min-width: 0;
+      min-height: 112px;
+
+      > .inline-form {
+        align-self: end;
+      }
+    }
+
+    .inline-form {
+      min-width: 0;
+
+      select,
+      input {
+        flex: 1 1 0;
+        box-sizing: border-box;
+        min-width: 0;
+        height: 2rem;
+        min-height: 2rem;
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+      }
+
+      input[type='number'] {
+        flex: 0 0 auto;
+        width: 60px;
       }
     }
   }
 
-  /* Repeat Options (maxOccurrences) */
   .repeat-options {
     display: flex;
     align-items: center;
     margin-top: 0.375rem;
 
     label {
+      gap: 0.375rem;
       display: flex;
       align-items: center;
-      gap: 0.375rem;
-      font-size: var(--font-size-11);
       font-weight: 500;
+      font-size: var(--font-size-11);
     }
 
     input[type='number'] {
       width: 60px;
       padding: 0.125rem 0.375rem;
-      border: 1px solid var(--color-border-light-tertiary);
       border-radius: 3px;
       text-align: center;
     }
   }
 
-  /* Random Event Config UI */
-  .form-row-random {
-    margin-bottom: 0.5rem;
-  }
-
-  .random-config-inputs {
-    display: flex;
-    gap: 1rem;
+  fieldset:has(.form-group-stacked) > .inline-form {
+    justify-content: center;
     align-items: flex-end;
-    flex-wrap: wrap;
   }
 
-  .random-config-inputs .form-group {
+  .range-config-inputs {
+    gap: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-
-    label {
-      font-size: var(--font-size-11);
-      font-weight: 500;
-    }
-
-    input[type='number'] {
-      width: 80px;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-    }
-
-    select {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-    }
   }
 
-  .seed-input-group {
+  .range-component {
+    gap: 0.5rem;
     display: flex;
-    gap: 0.25rem;
-
-    input {
-      width: 100px;
-    }
-
-    button {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-      cursor: pointer;
-
-      &:hover {
-        background: var(--color-cool-4);
-      }
-    }
-  }
-
-  .random-config-fieldset .hint {
-    margin-top: 0.5rem;
-    font-size: var(--font-size-10);
-    color: var(--color-text-light-6);
-    font-style: italic;
-  }
-
-  /* Linked Event Config UI */
-  .form-row-linked {
-    margin-bottom: 0.5rem;
-  }
-
-  .linked-config-inputs {
-    display: flex;
-    gap: 0.375rem;
     align-items: center;
 
-    select {
-      flex: 1;
-      min-width: 120px;
+    > label {
+      flex-shrink: 0;
+      min-width: 50px;
+      font-weight: 600;
       font-size: var(--font-size-11);
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-    }
-
-    input[type='number'] {
-      width: 70px;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      font-size: var(--font-size-11);
-    }
-
-    .clear-linked-btn {
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
-      background: var(--color-bg-option);
-      cursor: pointer;
-      color: var(--color-text-light-6);
-      line-height: 1;
-
-      &:hover {
-        background: var(--color-cool-4);
-        color: var(--color-level-error);
-      }
-
-      i {
-        font-size: var(--font-size-10);
-      }
     }
   }
 
-  .linked-config-fieldset .hint {
-    margin-top: 0.375rem;
-    font-size: var(--font-size-10);
-    color: var(--color-text-light-6);
-    font-style: italic;
+  .range-controls {
+    gap: 0.375rem;
+    display: flex;
+    flex: 1;
+    align-items: center;
+  }
+
+  .range-value-inputs {
+    gap: 0.375rem;
+    display: flex;
+    align-items: center;
+
+    span {
+      color: var(--color-text-light-6, var(--calendaria-text-dim));
+      font-size: var(--font-size-11);
+    }
   }
 
   .categories-fieldset {
-    .categories-container {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 0.5rem;
+    .inline-form {
+      align-items: flex-end;
     }
 
     multi-select {
       flex: 1;
+      align-self: flex-end;
 
       .tags {
+        gap: 0.25rem;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
         min-height: 24px;
         max-height: 24px;
-        overflow-y: auto;
         padding-right: 0.25rem;
+        overflow-y: auto;
+      }
+
+      select {
+        height: 26px !important;
+        padding: 0.125rem 0.375rem !important;
+        border-radius: 3px;
+        font-size: var(--font-size-11) !important;
+        line-height: 1.4 !important;
       }
 
       .tag {
-        display: inline-flex;
-        align-items: center;
         padding: 0.125rem 0.375rem;
-        border-radius: 1rem;
         font-size: var(--font-size-10);
-        background: var(--color-cool-4);
-        border: 1px solid var(--color-cool-3);
         cursor: pointer;
 
         &:hover {
-          background: var(--color-cool-3);
+          background: var(--color-cool-3, var(--calendaria-cool-3));
         }
       }
     }
 
-    .custom-category-input {
-      display: flex;
-      gap: 0.25rem;
-      flex-shrink: 0;
+    .new-category-input {
       align-self: flex-end;
+      width: 10rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 3px;
+      font-size: var(--font-size-11);
+      line-height: 1.4;
 
-      .new-category-input {
-        width: 10rem;
-        font-size: var(--font-size-11);
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-
-        &::placeholder {
-          color: var(--color-text-light-6);
-          font-style: italic;
-        }
-      }
-
-      .add-category-btn {
-        padding: 0.25rem 0.5rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
-        background: var(--color-bg-option);
-        cursor: pointer;
-        color: var(--color-text-light-heading);
-
-        &:hover {
-          background: var(--color-cool-4);
-        }
-
-        i {
-          font-size: var(--font-size-10);
-        }
+      &::placeholder {
+        color: var(--color-text-light-6, var(--calendaria-text-dim));
+        font-style: italic;
       }
     }
-  }
 
-  .gm-only-fieldset {
-    display: flex;
-    flex-direction: column;
-
-    .gm-only-control {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      margin: 0;
-      cursor: pointer;
+    .add-btn {
+      align-self: flex-end;
     }
   }
+}
 
-  .editor-fieldset {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 300px;
+/* -------------------------------------------- */
+/*  Non-dnd5e System Overrides                   */
+/* -------------------------------------------- */
 
-    prose-mirror {
-      flex: 1;
-      min-height: 300px;
-    }
+.calendaria.calendar-note-sheet:not(.dnd5e2) .calendar-note-form {
+  input[type='text']:not(prose-mirror *),
+  input[type='number']:not(prose-mirror *),
+  select:not(prose-mirror *) {
+    border-radius: 3px;
+  }
+
+  button:not(prose-mirror *) {
+    border: 1px solid var(--calendaria-border);
+    border-radius: 3px;
+  }
+
+  fieldset {
+    border: 1px solid var(--calendaria-border);
+    border-radius: 4px;
   }
 }
 
@@ -1813,16 +1859,14 @@
 /* ======================================== */
 
 .calendar-editor {
-  --editor-sidebar-min-width: 100px;
-  --editor-sidebar-max-width: 160px;
   --editor-footer-height: 3.5rem;
+  --editor-sidebar-max-width: 160px;
+  --editor-sidebar-min-width: 100px;
 
-  /* Override standard-form gap */
   &.standard-form {
     gap: 0;
   }
 
-  /* Button overrides - cleaner, borderless look */
   button,
   a.button {
     border: none;
@@ -1832,8 +1876,8 @@
       opacity 0.15s ease;
 
     &:hover {
-      background: var(--color-cool-5);
       border: none;
+      background: var(--color-cool-5, var(--calendaria-cool-5));
     }
 
     &:focus {
@@ -1846,85 +1890,78 @@
     }
   }
 
-  /* Primary action buttons (Save, Submit) keep background */
   button[type='submit'],
   button.primary {
-    background: var(--button-background-color);
     border: 1px solid var(--button-border-color);
+    background: var(--button-background-color);
 
     &:hover {
-      background: var(--button-hover-background-color);
       border-color: var(--button-hover-border-color);
+      background: var(--button-hover-background-color);
     }
   }
 
-  /* Window content uses grid for reactive sidebar width */
   .window-content {
-    display: grid;
+    gap: 0;
     grid-template-columns: auto 1fr;
     grid-template-rows: 1fr var(--editor-footer-height);
+    display: grid;
     height: 100%;
-    padding: 0; /* Override Foundry's default padding */
-    gap: 0; /* Override Foundry's default gap */
+    padding: 0;
     overflow: hidden;
   }
 
-  /* Flex rows should align items to top */
   .flexrow {
     align-items: flex-start;
   }
 
-  /* Tab content - fills the main content area */
   section.tab {
-    display: none;
     grid-column: 2;
     grid-row: 1;
+    display: none;
     padding: 1rem;
     overflow-y: auto;
 
     &.active {
+      gap: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
     }
   }
 
-  /* Warning text color */
   .warning {
-    color: var(--color-level-warning);
+    color: var(--color-level-warning, var(--calendaria-warning));
   }
 
-  /* Template Selector */
   .template-selector {
+    gap: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
 
     select {
-      width: fit-content;
       flex: none;
+      width: fit-content;
     }
   }
 
-  /* Year/Leap Inputs (~8 chars wide) */
-  .year-input {
-    width: 6em;
-    flex: none !important;
-  }
-
-  /* Fit-content elements */
-  .form-fields.fit-content {
-    width: auto;
+  .form-fields .year-input,
+  input.year-input {
     flex: none;
+    width: 6em;
   }
 
+  .form-fields.fit-content {
+    flex: none;
+    width: auto;
+  }
+
+  .form-fields select.fit-content,
   select.fit-content {
+    flex: none;
     width: fit-content;
-    flex: none !important;
   }
 
-  /* Header Row (title + add button) */
   .header-row {
     display: flex;
     justify-content: space-between;
@@ -1936,52 +1973,49 @@
     }
   }
 
-  /* Validation Info */
   .validation-info {
-    padding: 0.5rem 0.75rem;
-    background: var(--color-cool-5-50);
-    border-radius: 4px;
-    font-size: var(--font-size-14);
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: var(--font-size-14);
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
 
     i {
-      color: var(--color-level-success);
+      color: var(--color-level-success, var(--calendaria-success));
     }
 
     &.warning i {
-      color: var(--color-level-warning);
+      color: var(--color-level-warning, var(--calendaria-warning));
     }
 
     .mismatch {
-      color: var(--color-level-warning);
+      color: var(--color-level-warning, var(--calendaria-warning));
     }
   }
 
-  /* Items List (months, weekdays, seasons, festivals) */
   .items-list {
+    gap: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
   }
 
   .item {
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.5rem;
-    background: var(--color-cool-5-50);
-    border: 1px solid var(--color-cool-4);
+    border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
   }
 
-  /* Item Controls (inline add/reorder/remove buttons) */
   .item-controls {
-    display: flex;
-    align-items: center;
     gap: 0.125rem;
+    display: flex;
     flex: none;
+    align-items: center;
 
     button {
       --button-background-color: transparent;
@@ -1995,7 +2029,11 @@
       }
 
       &:hover:not(:disabled) {
-        --button-hover-text-color: var(--color-text-primary);
+        --button-hover-text-color: var(--color-text-primary, var(--calendaria-text));
+      }
+
+      &.active {
+        color: var(--calendaria-primary);
       }
 
       &[data-action='removeMonth'],
@@ -2005,16 +2043,16 @@
       &[data-action='removeMoon'],
       &[data-action='removeEra'] {
         &:hover:not(:disabled) {
-          --button-hover-text-color: var(--color-level-error);
+          --button-hover-text-color: var(--color-level-error, var(--calendaria-error));
         }
       }
     }
   }
 
   .item-fields {
-    flex: 1;
-    display: flex;
     gap: 0.5rem;
+    display: flex;
+    flex: 1;
     flex-wrap: wrap;
     align-items: center;
 
@@ -2024,44 +2062,44 @@
     }
 
     .abbr-field {
-      width: 55px;
       flex: none;
+      width: 55px;
     }
 
     .days-field {
-      width: 55px;
       flex: none;
+      width: 55px;
     }
 
     .day-field {
-      width: 60px;
       flex: none;
+      width: 60px;
     }
 
     .type-field {
-      width: 95px;
       flex: none;
+      width: 95px;
     }
 
     .range-fields,
     .date-fields {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
 
       label {
-        font-size: var(--font-size-12);
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-weight: normal;
+        font-size: var(--font-size-12);
       }
     }
 
     .rest-day {
+      gap: 0.25rem;
       display: flex;
       align-items: center;
-      gap: 0.25rem;
-      white-space: nowrap;
       font-size: var(--font-size-14);
+      white-space: nowrap;
 
       label {
         font-weight: normal;
@@ -2069,27 +2107,25 @@
     }
   }
 
-  /* Computed/display values */
   .computed-value {
+    color: var(--color-text-primary, var(--calendaria-text));
     font-weight: 600;
     font-size: var(--font-size-16);
-    color: var(--color-text-primary);
   }
 
   .leap-days-note {
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
     font-size: var(--font-size-13);
-    color: var(--color-text-secondary);
     white-space: nowrap;
   }
 
-  /* Notice boxes */
   .notice {
+    gap: 0.5rem;
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
+    margin-bottom: 0.75rem;
     padding: 0.5rem 0.75rem;
     border-radius: 4px;
-    margin-bottom: 0.75rem;
     font-size: var(--font-size-13);
     line-height: 1.4;
 
@@ -2099,63 +2135,74 @@
     }
 
     &.warning {
-      background: color-mix(in srgb, var(--color-level-warning) 15%, transparent);
-      border: 1px solid color-mix(in srgb, var(--color-level-warning) 40%, transparent);
+      border: 1px solid color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 40%, transparent);
+      background: color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 15%, transparent);
     }
   }
 
-  /* List Header (column labels) */
   .list-header {
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.25rem 0.5rem;
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
     font-weight: 600;
     font-size: var(--font-size-12);
-    color: var(--color-text-secondary);
-    text-align: center;
-    justify-content: center;
 
     > span {
       text-align: center;
     }
   }
 
-  /* Month columns */
   .months-list {
+    .list-header,
+    .month-row-main {
+      gap: 0.5rem;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
     .col-name {
-      flex: 2;
+      flex: 2 1 80px;
       min-width: 80px;
     }
 
     .col-abbr {
-      flex: 1;
-      min-width: 70px;
+      flex: 1 1 60px;
+      min-width: 60px;
     }
 
     .col-days,
     .col-leap {
-      width: 60px;
-      flex: none;
+      flex: 0 0 55px;
+      width: 55px;
+      text-align: center;
     }
 
     .col-start-weekday {
-      width: 110px;
-      flex: none;
+      flex: 0 0 100px;
+      width: 100px;
     }
 
     .col-controls {
-      width: 90px;
-      flex: none;
+      flex: 0 0 115px;
+      width: 115px;
+    }
+
+    .list-header > span {
+      text-align: center;
     }
   }
 
-  /* Month Item - compact inline layout */
   .month-item {
     padding: 0.25rem 0.5rem;
+
+    .month-row-main {
+      gap: 0.5rem;
+    }
   }
 
-  /* Weekday columns */
   .weekdays-list {
     .col-name {
       flex: 1;
@@ -2168,19 +2215,18 @@
     }
 
     .col-rest {
-      width: 60px;
-      flex: 0.2;
       display: flex;
+      flex: 0.2;
       justify-content: center;
+      width: 60px;
     }
 
     .col-controls {
-      width: 90px;
       flex: none;
+      width: 90px;
     }
   }
 
-  /* Weekday Item - compact inline layout */
   .weekday-item {
     padding: 0.25rem 0.5rem;
   }
@@ -2189,15 +2235,13 @@
     margin-bottom: 0.75rem;
   }
 
-  /* Season columns - two-row layout */
   .seasons-list {
     .season-item {
       display: block;
-      padding: 0.25rem 0.5rem;
       margin-bottom: 0.5rem;
+      padding: 0.25rem 0.5rem;
     }
 
-    /* Top row: Name | Abbr | Icon | Color | + */
     .season-row-top {
       gap: 0.5rem;
 
@@ -2223,7 +2267,6 @@
       }
     }
 
-    /* Bottom row: Start Month | Day | End Month | Day | - */
     .season-row-bottom {
       gap: 0.5rem;
       margin-top: 0.25rem;
@@ -2248,10 +2291,25 @@
         width: fit-content;
         margin-left: auto;
       }
+
+      &.periodic-row {
+        .col-duration-label {
+          flex: 0 0 auto;
+          font-weight: 500;
+        }
+
+        .col-duration {
+          flex: 0 0 80px;
+        }
+
+        .duration-unit {
+          flex: 0 0 auto;
+          color: var(--color-text-dark-secondary);
+        }
+      }
     }
   }
 
-  /* Festival columns */
   .festivals-list {
     .col-name {
       flex: 2;
@@ -2259,29 +2317,28 @@
     }
 
     .col-month {
-      width: 110px;
       flex: none;
+      width: 110px;
     }
 
     .col-day {
-      width: 50px;
       flex: none;
+      width: 50px;
     }
 
     .col-leap,
     .col-weekday {
-      width: 70px;
       flex: none;
+      width: 70px;
       text-align: center;
     }
 
     .col-controls {
-      width: 50px;
       flex: none;
+      width: 50px;
     }
   }
 
-  /* Canonical hours columns */
   .canonical-hours-list {
     .col-name {
       flex: 2;
@@ -2289,23 +2346,22 @@
     }
 
     .col-abbr {
-      width: 80px;
       flex: none;
+      width: 80px;
     }
 
     .col-start,
     .col-end {
-      width: 60px;
       flex: none;
+      width: 60px;
     }
 
     .col-controls {
-      width: 50px;
       flex: none;
+      width: 50px;
     }
   }
 
-  /* Named weeks columns */
   .named-weeks-list {
     .col-name {
       flex: 2;
@@ -2313,22 +2369,20 @@
     }
 
     .col-abbr {
-      width: 100px;
       flex: none;
+      width: 100px;
     }
 
     .col-controls {
-      width: 50px;
       flex: none;
+      width: 50px;
     }
   }
 
-  /* Festival Item - compact inline layout */
   .festival-item {
     padding: 0.25rem 0.5rem;
   }
 
-  /* Era columns */
   .eras-list {
     .col-name {
       flex: 1;
@@ -2336,48 +2390,47 @@
     }
 
     .col-abbr {
-      width: 85px;
       flex: none;
+      width: 85px;
     }
 
     .col-start-year,
     .col-end-year {
-      width: 70px;
       flex: none;
+      width: 70px;
     }
 
     .col-format {
-      width: 135px;
       flex: none;
+      width: 135px;
     }
 
     .col-controls {
-      width: 50px;
       flex: none;
+      width: 50px;
     }
   }
 
-  /* Era Item - two-row layout */
   .era-item {
+    gap: 0.25rem;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.25rem;
 
     .era-main {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
     }
 
     .era-template {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
 
       .col-template-label {
         flex: 0.5;
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-weight: 600;
-        color: var(--color-text-secondary);
         white-space: nowrap;
       }
 
@@ -2388,51 +2441,48 @@
       .era-preview {
         flex: 3;
         padding: 0.25rem 0.5rem;
-        background: var(--color-cool-5);
         border-radius: 3px;
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-style: italic;
-        color: var(--color-text-secondary);
         white-space: nowrap;
+        background: var(--color-cool-5, var(--calendaria-cool-5));
       }
     }
   }
 
-  /* Moon list - shared grid for header and rows */
   .moons-list {
     .moon-header {
-      display: grid;
-      grid-template-columns: 1fr 100px 90px 50px;
-      align-items: center;
       gap: 0.5rem;
+      grid-template-columns: 1fr 100px 90px 50px;
+      display: grid;
+      align-items: center;
       padding: 0.25rem 0.5rem;
     }
 
-    /* First moon-item has header row - add bottom border after headers */
     .moon-item:first-child .moon-header {
       grid-template-rows: auto auto;
       row-gap: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     }
   }
 
-  /* Moon Item */
   .moon-item {
     flex-direction: column;
     align-items: stretch;
     padding: 0.75rem 0.5rem;
 
     .moon-header {
-      border-bottom: 1px solid var(--color-cool-5);
+      border-bottom: 1px solid var(--color-cool-5, var(--calendaria-cool-5));
 
       .col-cycle {
         text-align: right;
       }
 
       .color-input-wrapper {
+        gap: 6px;
         display: flex;
         align-items: center;
-        gap: 6px;
       }
 
       input[type='color'] {
@@ -2443,11 +2493,11 @@
       }
 
       .moon-color-preview {
+        flex-shrink: 0;
         width: 24px;
         height: 24px;
         border-radius: 50%;
         overflow: hidden;
-        flex-shrink: 0;
 
         img {
           width: 100%;
@@ -2464,17 +2514,17 @@
       }
 
       .item-controls {
-        display: flex;
         gap: 0.5rem;
+        display: flex;
         justify-content: flex-end;
         padding-bottom: 2px;
       }
     }
 
     .moon-fields {
+      gap: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
       padding-top: 0.75rem;
     }
 
@@ -2493,25 +2543,25 @@
 
       .phases-list {
         .list-header {
+          padding: 0.25rem 0.5rem;
+          border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
           font-weight: bold;
           font-size: var(--font-size-12);
-          padding: 0.25rem 0.5rem;
-          border-bottom: 1px solid var(--color-cool-4);
         }
 
         .phase-item {
-          padding: 0.25rem 0.5rem;
           gap: 0.5rem;
           align-items: center;
+          padding: 0.25rem 0.5rem;
 
           &:nth-child(even) {
-            background: var(--color-cool-5-50);
+            background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
           }
         }
 
         .col-icon {
-          width: 40px;
           flex: none;
+          width: 40px;
           text-align: center;
         }
 
@@ -2528,16 +2578,16 @@
 
         .col-start,
         .col-end {
-          width: 55px;
           flex: none;
+          width: 55px;
         }
 
         .col-controls {
-          width: 50px;
-          flex: none;
-          display: flex;
           gap: 0.25rem;
+          display: flex;
+          flex: none;
           justify-content: flex-end;
+          width: 50px;
         }
       }
 
@@ -2545,20 +2595,20 @@
         width: 32px;
         height: 32px;
         padding: 2px;
-        border: 1px solid var(--color-cool-4);
+        border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
         border-radius: 4px;
-        background: var(--color-cool-5);
         cursor: pointer;
+        background: var(--color-cool-5, var(--calendaria-cool-5));
 
         &:hover {
-          border-color: var(--color-warm-1);
-          background: var(--color-cool-4);
+          border-color: var(--color-warm-1, var(--calendaria-primary));
+          background: var(--color-cool-4, var(--calendaria-cool-4));
         }
 
         img {
+          object-fit: contain;
           width: 100%;
           height: 100%;
-          object-fit: contain;
         }
 
         .phase-emoji {
@@ -2574,25 +2624,23 @@
     }
   }
 
-  /* Cycle format section */
   .cycle-format-section {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-cool-4);
+    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
   }
 
-  /* Cycle Item */
   .cycle-item {
     flex-direction: column;
     align-items: stretch;
     padding: 0.75rem;
 
     .cycle-header {
+      gap: 1rem;
       display: flex;
       align-items: flex-end;
-      gap: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
 
       .form-group {
         label {
@@ -2630,27 +2678,27 @@
       }
 
       .entries-list {
+        gap: 0.25rem;
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
         max-height: 200px;
         overflow-y: auto;
       }
 
       .entry-item {
+        gap: 0.5rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
         padding: 0.25rem 0.5rem;
 
         &:nth-child(even) {
-          background: var(--color-cool-5-50);
+          background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
         }
 
         .entry-number {
           flex: 0 0 30px;
+          color: var(--color-text-secondary, var(--calendaria-text-secondary));
           font-weight: bold;
-          color: var(--color-text-secondary);
         }
 
         .col-entry-name {
@@ -2659,55 +2707,52 @@
         }
 
         .item-controls {
-          flex: none;
-          display: flex;
           gap: 0.25rem;
+          display: flex;
+          flex: none;
         }
       }
     }
   }
 
-  /* Empty List */
   .empty-list {
+    gap: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
     padding: 2rem;
-    text-align: center;
-    color: var(--color-text-secondary);
-    font-style: italic;
-    background: var(--color-cool-5-50);
-    border: 1px dashed var(--color-cool-4);
+    border: 1px dashed var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
+    font-style: italic;
+    text-align: center;
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
   }
 
-  /* Time Summary */
   .time-summary ul {
     margin: 0;
     padding-left: 1.5rem;
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
     font-size: var(--font-size-14);
-    color: var(--color-text-secondary);
   }
 
-  /* Footer Buttons - spans full width at bottom */
   footer.form-footer {
     grid-column: 1 / -1;
     grid-row: 2;
-    padding: 0.75rem 1rem;
     justify-content: center;
-    background: var(--color-cool-5);
-    border-top: 1px solid var(--color-cool-4);
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+    background: var(--color-cool-5, var(--calendaria-cool-5));
 
     button {
-      border: 1px solid var(--button-border-color);
       flex: unset;
       width: fit-content;
+      border: 1px solid var(--button-border-color);
 
       &:hover {
-        background: var(--button-hover-background-color);
-        color: var(--button-hover-text-color);
         border-color: var(--button-hover-border-color);
+        color: var(--button-hover-text-color);
+        background: var(--button-hover-background-color);
       }
 
       &:focus {
@@ -2721,39 +2766,36 @@
   /*  Vertical Tab Sidebar Layout                 */
   /* -------------------------------------------- */
 
-  /* Vertical tab navigation sidebar */
   nav.sheet-tabs {
+    gap: 0.125rem;
     grid-column: 1;
     grid-row: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Override Foundry's space-evenly */
+    justify-content: flex-start;
     align-items: stretch;
+    width: max-content;
     min-width: var(--editor-sidebar-min-width);
     max-width: var(--editor-sidebar-max-width);
-    width: max-content;
     padding: 0;
     border-top: none;
-    border-right: 1px solid var(--color-cool-4);
+    border-right: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-bottom: none;
-    gap: 0.125rem;
     overflow: hidden auto;
 
-    /* Tab buttons - text then icon, aligned right */
     [data-tab] {
+      gap: 0.5rem;
       display: flex;
       flex-direction: row;
       justify-content: flex-end;
       align-items: center;
-      gap: 0.5rem;
-      padding-right: 0.5rem;
-      border-radius: 0;
-      border-left: 3px solid transparent;
-      border-bottom: none;
-      text-align: right;
       max-width: 100%;
+      padding-right: 0.5rem;
+      border-bottom: none;
+      border-left: 3px solid transparent;
+      border-radius: 0;
+      text-align: right;
 
-      /* Text label gets ellipsis */
       > span:not(.notification-pip) {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -2762,18 +2804,17 @@
 
       i {
         width: 1.25em;
-        text-align: center;
         margin: 0;
+        text-align: center;
       }
 
-      /* Active tab indicator on left */
       &.active {
-        border-left-color: var(--color-warm-1);
-        background: var(--color-cool-5);
+        border-left-color: var(--color-warm-1, var(--calendaria-primary));
+        background: var(--color-cool-5, var(--calendaria-cool-5));
       }
 
       &:hover:not(.active) {
-        background: var(--color-cool-5-50);
+        background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
       }
     }
   }
@@ -2782,25 +2823,24 @@
   /*  Weather Tab Styles                          */
   /* -------------------------------------------- */
 
-  /* Zone selector and auto-generate header row */
   .weather-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 1rem;
-    padding-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-cool-4);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
 
     .zone-controls {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
 
       .form-group {
+        gap: 0.5rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
         margin: 0;
       }
 
@@ -2810,26 +2850,26 @@
     }
 
     .zone-actions {
-      display: flex;
       gap: 0.25rem;
+      display: flex;
     }
 
     .zone-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       width: 28px;
       height: 28px;
       padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--color-cool-5);
-      border: 1px solid var(--color-cool-4);
+      border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
       border-radius: 3px;
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
       cursor: pointer;
-      color: var(--color-text-secondary);
+      background: var(--color-cool-5, var(--calendaria-cool-5));
 
       &:hover {
-        background: var(--color-cool-4);
-        color: var(--color-text-primary);
+        color: var(--color-text-primary, var(--calendaria-text));
+        background: var(--color-cool-4, var(--calendaria-cool-4));
       }
     }
 
@@ -2838,28 +2878,26 @@
     }
   }
 
-  /* Weather presets list */
   .weather-presets-list {
+    gap: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
   }
 
-  /* Weather category group */
   .weather-category {
-    border: 1px solid var(--color-cool-4);
+    border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
     overflow: hidden;
 
     .category-header {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       padding: 0.5rem 0.75rem;
-      background: var(--color-cool-5);
       font-weight: 600;
       cursor: pointer;
       user-select: none;
+      background: var(--color-cool-5, var(--calendaria-cool-5));
 
       i.toggle-icon {
         transition: transform 0.2s;
@@ -2875,11 +2913,11 @@
       }
 
       .category-stats {
-        display: flex;
         gap: 0.5rem;
+        display: flex;
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-weight: 400;
         font-size: var(--font-size-12);
-        color: var(--color-text-secondary);
 
         .category-percent {
           min-width: 40px;
@@ -2892,7 +2930,7 @@
       }
 
       &:hover {
-        background: var(--color-cool-4);
+        background: var(--color-cool-4, var(--calendaria-cool-4));
       }
     }
 
@@ -2907,22 +2945,21 @@
     }
   }
 
-  /* Weather preset header and items - compact row grid */
   .weather-preset-header,
   .weather-preset-item {
-    display: grid;
-    grid-template-columns: 24px 28px 1fr 90px 130px 50px;
-    align-items: center;
     gap: 0.5rem;
+    grid-template-columns: 24px 28px 1fr 90px 130px 50px;
+    display: grid;
+    align-items: center;
     padding: 0.25rem 0.5rem;
   }
 
   .weather-preset-header {
-    font-size: var(--font-size-12);
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    border-bottom: 1px solid var(--color-cool-4);
     padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
+    font-weight: 600;
+    font-size: var(--font-size-12);
 
     > span {
       text-align: center;
@@ -2935,14 +2972,14 @@
 
   .weather-preset-item {
     position: relative;
-    border-bottom: 1px solid var(--color-cool-5);
+    border-bottom: 1px solid var(--color-cool-5, var(--calendaria-cool-5));
 
     &:last-child {
       border-bottom: none;
     }
 
     &:nth-child(odd) {
-      background: var(--color-cool-5-50);
+      background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
     }
 
     .preset-enabled {
@@ -2950,21 +2987,21 @@
     }
 
     .preset-icon {
-      text-align: center;
       font-size: 1.1em;
+      text-align: center;
     }
 
     .preset-name {
-      font-weight: 500;
       overflow: hidden;
+      font-weight: 500;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .preset-chance {
+      gap: 0.25rem;
       display: flex;
       align-items: center;
-      gap: 0.25rem;
 
       input {
         width: 60px;
@@ -2973,9 +3010,9 @@
     }
 
     .preset-temp {
+      gap: 0.25rem;
       display: flex;
       align-items: center;
-      gap: 0.25rem;
 
       input {
         width: 45px;
@@ -2984,34 +3021,33 @@
 
       .temp-separator,
       .temp-unit {
-        color: var(--color-text-secondary);
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
         font-size: var(--font-size-12);
       }
     }
 
     .preset-actions {
-      display: flex;
       gap: 0.25rem;
+      display: flex;
 
       button {
-        padding: 0.25rem;
         width: 24px;
         height: 24px;
+        padding: 0.25rem;
       }
     }
 
-    /* Description popover */
     .description-popover {
       display: none;
+      z-index: 10;
       position: absolute;
       top: 100%;
-      left: 0;
       right: 0;
-      z-index: 10;
-      background: var(--color-cool-5);
-      border: 1px solid var(--color-cool-4);
-      border-radius: 4px;
+      left: 0;
       padding: 0.5rem;
+      border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+      border-radius: 4px;
+      background: var(--color-cool-5, var(--calendaria-cool-5));
       box-shadow: 0 2px 8px var(--calendaria-shadow-light);
 
       &.show {
@@ -3021,21 +3057,20 @@
       textarea {
         width: 100%;
         min-height: 60px;
-        resize: vertical;
         font-size: var(--font-size-13);
+        resize: vertical;
       }
     }
   }
 
-  /* Weather totals row */
   .weather-totals {
+    gap: 1rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.5rem 0.75rem;
-    background: var(--color-cool-5);
-    border-radius: 4px;
     margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    background: var(--color-cool-5, var(--calendaria-cool-5));
 
     .total-label {
       font-weight: 600;
@@ -3045,18 +3080,18 @@
       font-size: var(--font-size-16);
 
       &.warning {
-        color: var(--color-level-warning);
+        color: var(--color-level-warning, var(--calendaria-warning));
       }
 
       &.valid {
-        color: var(--color-level-success);
+        color: var(--color-level-success, var(--calendaria-success));
       }
     }
 
     .total-hint {
-      font-size: var(--font-size-12);
-      color: var(--color-text-secondary);
       margin-left: auto;
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      font-size: var(--font-size-12);
     }
   }
 }
@@ -3066,30 +3101,30 @@
 /* -------------------------------------------- */
 
 .calendaria-announcement {
+  gap: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 
   .announcement-date {
-    font-size: 0.9em;
+    color: var(--color-text-dark-primary, var(--calendaria-text));
     font-weight: 500;
-    color: var(--color-text-dark-primary);
+    font-size: 0.9em;
   }
 
   .announcement-content {
+    color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
     font-size: 0.85em;
-    color: var(--color-text-dark-secondary);
     line-height: 1.4;
   }
 
   .announcement-open {
+    gap: 0.35rem;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    color: var(--color-text-hyperlink, var(--calendaria-link));
     font-size: 0.85em;
-    color: var(--color-text-hyperlink);
-    cursor: pointer;
     text-decoration: none;
+    cursor: pointer;
 
     &:hover {
       text-decoration: underline;
@@ -3107,35 +3142,91 @@
   }
 }
 
+.calendaria-reminder {
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+
+  .reminder-message {
+    color: var(--color-text-dark-primary, var(--calendaria-text));
+    font-size: 0.9em;
+
+    strong {
+      color: var(--color-text-dark-heading, var(--calendaria-text));
+    }
+  }
+
+  .announcement-open {
+    gap: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-text-hyperlink, var(--calendaria-link));
+    font-size: 0.85em;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.custom-weekdays-list {
+  gap: 0.375rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-weekday-header,
+.custom-weekday-row {
+  gap: 0.5rem;
+  grid-template-columns: 1fr 5rem 4rem;
+  display: grid;
+  align-items: center;
+}
+
+.custom-weekday-header span {
+  color: var(--color-text-dark-secondary);
+  font-weight: 600;
+  font-size: 0.85em;
+  text-align: center;
+}
+
+.custom-weekday-row input[type='checkbox'] {
+  justify-self: center;
+  width: 1rem;
+  height: 1rem;
+}
+
 /* ======================================== */
 /* TimeKeeper HUD Styles                    */
 /* ======================================== */
 
 .time-keeper-hud {
   position: fixed;
-  background: color-mix(in srgb, var(--calendaria-bg) 95%, transparent);
+  padding: 6px;
   border: 1px solid var(--calendaria-border);
   border-radius: 6px;
-  box-shadow: 0 2px 8px var(--calendaria-shadow);
-  padding: 6px;
   pointer-events: auto;
+  background: color-mix(in srgb, var(--calendaria-bg) 95%, transparent);
+  box-shadow: 0 2px 8px var(--calendaria-shadow);
 }
 
 .time-keeper-hud .time-display {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 6px;
   margin-bottom: 6px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--calendaria-border);
   cursor: move;
 }
 
 .time-keeper-hud .time-display-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  justify-content: center;
+  align-items: center;
   width: 100%;
 }
 
@@ -3151,37 +3242,37 @@
 }
 
 .time-keeper-hud .time-display-time {
-  font-size: 20px;
-  font-weight: bold;
-  font-family: monospace;
   color: var(--calendaria-text);
+  font-weight: bold;
+  font-size: 20px;
+  font-family: monospace;
   letter-spacing: 1px;
 }
 
 .time-keeper-hud .time-display-date {
-  font-size: 11px;
   color: var(--calendaria-text-dim);
+  font-size: 11px;
 }
 
 .time-keeper-controls {
+  gap: 4px;
   display: flex;
   align-items: center;
-  gap: 4px;
 }
 
 .time-keeper-hud .time-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 32px;
   height: 32px;
   padding: 0;
   border: 1px solid var(--calendaria-button-border);
   border-radius: 4px;
-  background: var(--calendaria-button-bg);
   color: var(--calendaria-button-text);
   cursor: pointer;
+  background: var(--calendaria-button-bg);
   transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   &:hover {
     background: var(--calendaria-button-hover);
@@ -3193,9 +3284,9 @@
   }
 
   &.active {
-    background: var(--calendaria-button-active);
     border-color: var(--calendaria-button-active);
     color: var(--calendaria-button-active-text);
+    background: var(--calendaria-button-active);
     box-shadow: 0 0 8px color-mix(in srgb, var(--calendaria-button-active) 50%, transparent);
   }
 
@@ -3205,144 +3296,36 @@
 }
 
 .time-keeper-hud .increment-select {
+  min-width: 80px;
   height: 32px;
   padding: 0 8px;
   border: 1px solid var(--calendaria-button-border);
   border-radius: 4px;
-  background: var(--calendaria-button-bg);
   color: var(--calendaria-button-text);
   font-size: 12px;
   cursor: pointer;
-  min-width: 80px;
+  background: var(--calendaria-button-bg);
 
   &:hover {
     background: var(--calendaria-button-hover);
   }
 
   &:focus {
-    outline: none;
     border-color: var(--calendaria-button-active);
+    outline: none;
   }
 }
 
 .time-keeper-readonly {
+  gap: 6px;
   display: flex;
   align-items: center;
-  gap: 6px;
   padding: 6px 12px;
   color: var(--calendaria-text-dim);
   font-size: 12px;
 
   i {
     font-size: 14px;
-  }
-}
-
-/* ======================================== */
-/* Theme Editor Styles                      */
-/* ======================================== */
-
-.theme-editor {
-  .theme-editor-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .base-theme-selector {
-    width: 100%;
-  }
-
-  .color-categories-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-height: 60vh;
-    overflow-y: auto;
-    scrollbar-gutter: stable;
-  }
-
-  .color-category {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .color-row {
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0.25rem 0;
-
-    > label {
-      flex: 1;
-      white-space: nowrap;
-    }
-  }
-
-  .color-fields {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    input[type='color'] {
-      width: 40px;
-      height: 28px;
-      padding: 0;
-      border-radius: 4px;
-      cursor: pointer;
-
-      &::-webkit-color-swatch-wrapper {
-        padding: 2px;
-      }
-
-      &::-webkit-color-swatch {
-        border: none;
-        border-radius: 2px;
-      }
-
-      &::-moz-color-swatch {
-        border: none;
-        border-radius: 2px;
-      }
-    }
-
-    .color-hex {
-      width: 80px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      text-align: center;
-    }
-
-    .reset-color {
-      width: 28px;
-      height: 28px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .default-indicator {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      opacity: 0.5;
-    }
-  }
-
-  footer.form-footer {
-    justify-content: center;
-    gap: 1rem;
-    padding: 1rem 0;
-
-    button {
-      flex: unset;
-      width: auto;
-    }
   }
 }
 
@@ -3354,21 +3337,20 @@
   --compact-day-size: 52px;
   --compact-gap: 3px;
 
+  z-index: var(--z-index-ui);
   position: fixed;
-  z-index: 250;
 
   .compact-calendar-container {
+    display: flex;
     position: relative;
-    background: var(--calendaria-bg);
+    flex-direction: column;
     border: 1px solid var(--calendaria-border);
     border-radius: 14px;
-    box-shadow: 0 4px 12px var(--calendaria-shadow);
     overflow: visible;
-    display: flex;
-    flex-direction: column;
+    background: var(--calendaria-bg);
+    box-shadow: 0 4px 12px var(--calendaria-shadow);
     transition: border-radius 0.2s ease;
 
-    /* Unround right corners when sidebar is visible or locked */
     &:has(.compact-sidebar:is(.visible, .locked)) {
       border-radius: 14px 0 0 14px;
 
@@ -3386,47 +3368,46 @@
     }
   }
 
-  /* Top Row: Month Navigation */
   .compact-top-row {
+    gap: 6px;
     display: flex;
     align-items: center;
-    gap: 6px;
     padding: 6px 8px;
-    background: var(--calendaria-bg-lighter);
     border-bottom: 1px solid var(--calendaria-border-light);
     border-radius: 14px 14px 0 0;
     cursor: pointer;
+    background: var(--calendaria-bg-lighter);
 
     .compact-title-group {
-      flex: 1;
+      gap: 0;
       display: flex;
+      flex: 1;
       flex-direction: column;
       align-items: center;
-      gap: 0;
       min-width: 0;
     }
 
     .compact-title {
+      color: var(--calendaria-title-text);
       font-weight: 600;
       font-size: 0.95rem;
-      color: var(--calendaria-title-text);
       white-space: nowrap;
     }
 
     .nav-btn {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
       width: 24px;
       height: 24px;
       padding: 0;
-      background: transparent;
       border: none;
+      border-radius: 4px;
       color: var(--calendaria-text);
       cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: transparent;
       transition: background 0.15s;
-      flex-shrink: 0;
 
       &:hover {
         background: var(--calendaria-bg-hover);
@@ -3438,24 +3419,23 @@
     }
   }
 
-  /* Slim Right Sidebar */
   .compact-sidebar {
+    gap: 4px;
+    display: flex;
+    z-index: -1;
     position: absolute;
-    left: 100%;
     top: -1px;
     bottom: -1px;
-    width: 30px;
-    z-index: -1;
-    display: flex;
+    left: 100%;
     flex-direction: column;
     align-items: center;
+    width: 30px;
     padding: 6px 0;
-    gap: 4px;
-    background: var(--calendaria-bg-lighter);
     border-left: 1px solid var(--calendaria-border-light);
     border-radius: 0 14px 14px 0;
-    transform: translateX(-100%);
+    background: var(--calendaria-bg-lighter);
     transition: transform 0.2s ease;
+    transform: translateX(-100%);
   }
 
   .compact-sidebar.visible {
@@ -3466,100 +3446,98 @@
     transform: translateX(0);
   }
 
-  /* Unround sidebar right corners when notes panel is visible */
   .compact-calendar-container:has(.compact-notes-panel.visible) .compact-sidebar {
     border-radius: 0;
   }
 
-  /* Notes Panel - slides out from sidebar */
   .compact-notes-panel {
+    display: flex;
+    opacity: 0;
+    z-index: -2;
     position: absolute;
-    left: calc(100% + 30px);
     top: -1px;
     bottom: -1px;
-    width: 220px;
-    z-index: -2;
-    display: flex;
+    left: calc(100% + 30px);
     flex-direction: column;
-    background: var(--calendaria-bg);
+    width: 220px;
     border: 1px solid var(--calendaria-border);
     border-left: none;
     border-radius: 0 14px 14px 0;
+    pointer-events: none;
+    background: var(--calendaria-bg);
     box-shadow: 4px 0 12px var(--calendaria-shadow);
-    transform: translateX(-100%);
-    opacity: 0;
     transition:
       transform 0.25s ease,
       opacity 0.25s ease;
-    pointer-events: none;
+    transform: translateX(-100%);
   }
 
   .compact-notes-panel.visible {
-    transform: translateX(0);
     opacity: 1;
     pointer-events: auto;
+    transform: translateX(0);
   }
 
   .notes-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 6px 8px;
-    background: var(--calendaria-bg-lighter);
     border-bottom: 1px solid var(--calendaria-border-light);
     border-radius: 0 14px 0 0;
+    background: var(--calendaria-bg-lighter);
   }
 
   .notes-panel-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--calendaria-title-text);
-    white-space: nowrap;
     overflow: hidden;
+    color: var(--calendaria-title-text);
+    font-weight: 600;
+    font-size: 0.85rem;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .notes-panel-close {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
     width: 24px;
     height: 24px;
     padding: 0;
-    background: transparent;
     border: none;
+    border-radius: 4px;
     color: var(--calendaria-text);
     cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    background: transparent;
     transition:
       background 0.15s,
       color 0.15s;
 
     &:hover {
-      background: var(--calendaria-bg-hover);
       color: var(--calendaria-error);
+      background: var(--calendaria-bg-hover);
     }
   }
 
   .notes-panel-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
     gap: 4px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 6px;
+    overflow-y: auto;
   }
 
   .notes-panel-item {
+    gap: 8px;
     display: flex;
     align-items: center;
-    gap: 8px;
     padding: 6px 8px;
-    background: var(--calendaria-bg-lighter);
     border-radius: 4px;
     cursor: pointer;
+    background: var(--calendaria-bg-lighter);
     transition: background 0.15s;
 
     &:hover {
@@ -3568,47 +3546,47 @@
   }
 
   .note-item-icon {
+    display: flex;
     flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
     width: 20px;
     height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
     i {
       font-size: 14px;
     }
 
     img {
+      object-fit: contain;
       width: 18px;
       height: 18px;
-      object-fit: contain;
     }
   }
 
   .note-item-content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
     gap: 1px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .note-item-title {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--calendaria-text);
-    white-space: nowrap;
     overflow: hidden;
+    color: var(--calendaria-text);
+    font-weight: 500;
+    font-size: 0.8rem;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .note-item-meta {
+    gap: 6px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.65rem;
     color: var(--calendaria-text-dim);
+    font-size: 0.65rem;
   }
 
   .note-item-time {
@@ -3616,38 +3594,38 @@
   }
 
   .note-item-author {
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 
     &::before {
-      content: '•';
       margin-right: 6px;
+      content: '•';
     }
   }
 
   .note-item-edit {
+    display: flex;
+    opacity: 0;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
     width: 22px;
     height: 22px;
     padding: 0;
-    background: transparent;
     border: none;
+    border-radius: 3px;
     color: var(--calendaria-text-dim);
     cursor: pointer;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    opacity: 0;
+    background: transparent;
     transition:
       opacity 0.15s,
       background 0.15s,
       color 0.15s;
 
     &:hover {
-      background: var(--calendaria-bg-hover);
       color: var(--calendaria-primary);
+      background: var(--calendaria-bg-hover);
     }
   }
 
@@ -3656,17 +3634,17 @@
   }
 
   .sidebar-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 24px;
     height: 24px;
     padding: 0;
-    background: transparent;
     border: none;
+    border-radius: 4px;
     color: var(--calendaria-text);
     cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: transparent;
     transition:
       background 0.15s,
       color 0.15s;
@@ -3684,25 +3662,24 @@
     }
   }
 
-  /* Calendar Indicators */
   .calendar-indicators {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
     gap: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     margin: 0 8px 4px;
     padding: 4px 0;
-    font-size: 0.7rem;
     color: var(--calendaria-text-dim);
+    font-size: 0.7rem;
   }
 
   .weather-indicator,
   .season-indicator,
   .era-indicator,
   .cycle-indicator {
+    gap: 0.25rem;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
 
     i {
       font-size: 0.65rem;
@@ -3710,11 +3687,11 @@
   }
 
   .weather-indicator {
-    color: var(--calendaria-text);
     padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
     border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+    border-radius: 4px;
+    color: var(--calendaria-text);
+    background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
 
     i {
       color: var(--weather-color, var(--calendaria-text-dim));
@@ -3727,22 +3704,22 @@
         border-color 0.15s ease;
 
       &:hover {
-        background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
         border-color: var(--weather-color, var(--calendaria-text-dim));
+        background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
       }
     }
 
     &.no-weather {
-      color: var(--calendaria-text-dim);
       border-style: dashed;
+      color: var(--calendaria-text-dim);
     }
 
     .weather-temp {
-      font-size: 0.65rem;
+      opacity: 0.8;
       margin-left: 0.15rem;
       padding-left: 0.25rem;
       border-left: 1px solid var(--calendaria-border);
-      opacity: 0.8;
+      font-size: 0.65rem;
     }
   }
 
@@ -3754,46 +3731,49 @@
     }
   }
 
-  /* Calendar Grid */
   .compact-grid {
-    position: relative;
     z-index: 1;
+    position: relative;
     padding: 8px;
     background: var(--calendaria-bg);
   }
 
   .compact-weekdays {
-    display: grid;
-    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
     gap: var(--compact-gap);
+    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
+    display: grid;
     margin-bottom: 4px;
 
     .weekday {
-      text-align: center;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--calendaria-weekday-header);
-      text-transform: uppercase;
       padding: 2px 0;
+      color: var(--calendaria-weekday-header);
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-align: center;
+      text-transform: uppercase;
+
+      &.rest-day {
+        color: var(--calendaria-rest-day, rgb(139 157 195));
+      }
     }
   }
 
   .compact-days {
-    display: grid;
-    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
     gap: var(--compact-gap);
+    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
+    display: grid;
   }
 
   .compact-day {
+    display: flex;
     position: relative;
+    justify-content: center;
+    align-items: center;
     width: var(--compact-day-size);
     height: var(--compact-day-size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--calendaria-bg-lighter);
     border-radius: 4px;
     cursor: pointer;
+    background: var(--calendaria-bg-lighter);
     transition: all 0.15s;
 
     &:hover {
@@ -3801,8 +3781,23 @@
     }
 
     &.empty {
-      background: transparent;
       cursor: default;
+      background: transparent;
+    }
+
+    &.other-month {
+      opacity: 0.4;
+      cursor: pointer;
+      background: transparent;
+
+      &:hover {
+        opacity: 0.6;
+        background: var(--calendaria-bg-hover);
+      }
+
+      .day-num {
+        color: var(--calendaria-day-number);
+      }
     }
 
     &.today {
@@ -3816,8 +3811,8 @@
     }
 
     &.selected {
-      box-shadow: inset 0 0 0 2px var(--calendaria-primary);
       background: var(--calendaria-selected-bg);
+      box-shadow: inset 0 0 0 2px var(--calendaria-primary);
     }
 
     &.festival {
@@ -3829,26 +3824,26 @@
     }
 
     .day-num {
-      font-size: 0.9rem;
-      font-weight: 500;
       color: var(--calendaria-day-number);
+      font-weight: 500;
+      font-size: 0.9rem;
     }
 
     .note-badge {
+      display: flex;
       position: absolute;
       bottom: 2.5px;
       left: 2.4px;
+      justify-content: center;
+      align-items: center;
       width: 15px;
       height: 15px;
       padding: 0 2px;
-      background: var(--calendaria-note-badge-bg);
       border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 700;
       color: var(--calendaria-note-badge-text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      background: var(--calendaria-note-badge-bg);
     }
 
     .moon-tint {
@@ -3857,9 +3852,9 @@
       right: 2px;
       width: 12px;
       height: 12px;
-      background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
       border-radius: 50%;
       overflow: hidden;
+      background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
     }
 
     .moon-tiny {
@@ -3870,60 +3865,58 @@
       height: 12px;
 
       &.tinted {
+        mix-blend-mode: multiply;
         position: static;
         width: 100%;
         height: 100%;
-        mix-blend-mode: multiply;
       }
     }
   }
 
-  /* Time Display */
   .compact-time-display {
-    position: relative;
-    z-index: 1;
     display: flex;
-    align-items: center;
+    z-index: 1;
+    position: relative;
     justify-content: center;
+    align-items: center;
     padding: 8px 10px;
-    background: var(--calendaria-bg-lighter);
     border-top: 1px solid var(--calendaria-border-light);
     border-radius: 0 0 14px 14px;
     cursor: pointer;
+    background: var(--calendaria-bg-lighter);
 
     .time-value {
-      font-size: 1.1rem;
-      font-weight: 600;
       color: var(--calendaria-title-text);
+      font-weight: 600;
+      font-size: 1.1rem;
       font-family: monospace;
       letter-spacing: 1px;
       transition: opacity 0.15s;
     }
 
     .date-value {
-      font-size: 0.85rem;
       color: var(--calendaria-text-dim);
+      font-size: 0.85rem;
     }
 
     .hidden {
       display: none;
     }
 
-    /* Play/Pause overlay on hover */
     .time-toggle {
-      position: absolute;
       inset: 0;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--calendaria-bg-lighter);
       opacity: 0;
-      transition: opacity 0.15s;
+      position: absolute;
+      justify-content: center;
+      align-items: center;
       pointer-events: none;
+      background: var(--calendaria-bg-lighter);
+      transition: opacity 0.15s;
 
       i {
-        font-size: 1.2rem;
         color: var(--calendaria-text);
+        font-size: 1.2rem;
       }
 
       &.active i {
@@ -3941,22 +3934,21 @@
     }
   }
 
-  /* Time Controls - Auto-hide */
   .compact-time-controls {
-    position: relative;
     display: flex;
-    align-items: center;
+    position: relative;
     justify-content: center;
+    align-items: center;
     height: 44px;
     margin-bottom: -44px;
     padding: 8px 10px;
-    background: var(--calendaria-bg-lighter);
     border-top: 1px solid var(--calendaria-border-light);
     border-radius: 0 0 14px 14px;
-    transform: translateY(-100%);
+    background: var(--calendaria-bg-lighter);
     transition:
       transform 0.25s ease,
       margin-bottom 0.25s ease;
+    transform: translateY(-100%);
 
     &.visible {
       margin-bottom: 0;
@@ -3964,55 +3956,54 @@
     }
 
     .controls-group {
+      gap: 2px;
       display: flex;
       align-items: center;
-      gap: 2px;
     }
 
     .time-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       width: 28px;
       height: 28px;
       padding: 0;
-      background: var(--calendaria-button-bg);
       border: 1px solid var(--calendaria-button-border);
+      border-radius: 4px;
       color: var(--calendaria-button-text);
       cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: var(--calendaria-button-bg);
       transition: all 0.15s;
 
       &:hover {
-        background: var(--calendaria-bg-hover);
         border-color: var(--calendaria-primary);
+        background: var(--calendaria-bg-hover);
       }
     }
 
     .increment-select {
+      width: fit-content;
       height: 28px;
       padding: 0 6px;
-      background: var(--calendaria-button-bg);
       border: 1px solid var(--calendaria-button-border);
-      color: var(--calendaria-button-text);
       border-radius: 4px;
+      color: var(--calendaria-button-text);
       font-size: 0.75rem;
       cursor: pointer;
-      width: fit-content;
+      background: var(--calendaria-button-bg);
 
       &:hover {
         border-color: var(--calendaria-primary);
       }
 
       &:focus {
-        outline: none;
         border-color: var(--calendaria-primary);
+        outline: none;
       }
     }
   }
 }
 
-/* Context Menu Info Header */
 #context-menu:has(.context-info-header) {
   height: auto !important;
   max-height: none !important;
@@ -4020,18 +4011,18 @@
 }
 
 #context-menu .context-info-header {
+  margin-bottom: 4px;
   padding: 6px 10px;
   border-bottom: 1px solid var(--color-border-light, rgb(68 68 68));
-  margin-bottom: 4px;
   text-align: center;
 
   .info-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     gap: 6px;
-    font-size: 0.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
     line-height: 1.4;
 
     i {
@@ -4048,17 +4039,15 @@
   }
 }
 
-/* Context menu sticky option active indicator */
 #context-menu .context-item.sticky-active {
-  background: var(--calendaria-primary);
   color: var(--color-text-light-highlight, rgb(255 255 255));
+  background: var(--calendaria-primary);
 
   &:hover {
     background: var(--calendaria-primary);
   }
 }
 
-/* Utility classes */
 .hidden {
   display: none !important;
 }
@@ -4072,45 +4061,43 @@
   overflow: hidden;
 
   .importer-content {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
     gap: 0.75rem;
-    padding: 0.5rem;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     min-height: 0;
+    padding: 0.5rem;
     overflow: hidden;
   }
 
   .no-importers {
-    text-align: center;
     padding: 2rem;
+    text-align: center;
 
     i {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
       display: block;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
     }
   }
 
-  /* Fieldsets - rounded corners */
   fieldset {
     border-radius: 5px;
   }
 
-  /* Two-Column Grid Layout */
   .importer-grid {
-    display: grid;
-    grid-template-columns: 280px 1fr;
     gap: 0.75rem;
+    grid-template-columns: 280px 1fr;
+    display: grid;
     flex: 1;
     min-height: 0;
     overflow: hidden;
   }
 
   .importer-left {
+    gap: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
     overflow-y: auto;
   }
 
@@ -4121,14 +4108,13 @@
     overflow: hidden;
   }
 
-  /* Source Section */
   .source-section {
     padding: 0.5rem;
 
     legend {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       padding: 0 0.5rem;
       font-weight: 600;
     }
@@ -4145,28 +4131,27 @@
     line-height: 1.3;
   }
 
-  /* File Upload Zone */
   .file-upload-zone {
+    gap: 0.5rem;
     display: flex;
     flex-direction: row;
-    align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    align-items: center;
     padding: 0.75rem;
-    border: 1px dashed var(--color-border-light-tertiary);
+    border: 1px dashed var(--color-border-light-tertiary, var(--calendaria-input-border));
     border-radius: 6px;
     cursor: pointer;
     transition: border-color 0.2s;
 
     &:hover,
     &.dragover {
-      border-color: var(--color-border-highlight);
+      border-color: var(--color-border-highlight, var(--calendaria-primary));
     }
 
     &.has-file {
+      justify-content: space-between;
       border-style: solid;
       cursor: default;
-      justify-content: space-between;
 
       .file-name {
         flex: 1;
@@ -4177,17 +4162,17 @@
 
       .clear-file {
         padding: 0.15rem 0.35rem;
+        border: none;
         font-size: 0.8rem;
         cursor: pointer;
         background: none;
-        border: none;
         box-shadow: none;
       }
     }
 
     i {
-      font-size: 1.25rem;
       opacity: 0.7;
+      font-size: 1.25rem;
     }
 
     span {
@@ -4195,12 +4180,11 @@
     }
   }
 
-  /* Import From Module Button */
   .import-from-module {
     width: 100%;
     padding: 0.5rem;
-    background: none;
     border: none;
+    background: none;
     box-shadow: none;
 
     i {
@@ -4208,13 +4192,11 @@
     }
   }
 
-  /* Module Loaded State */
   .module-loaded {
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-border-light-tertiary);
     border-radius: 6px;
 
     span {
@@ -4224,10 +4206,10 @@
 
     .clear-module {
       padding: 0.15rem 0.35rem;
+      border: none;
       font-size: 0.8rem;
       cursor: pointer;
       background: none;
-      border: none;
       box-shadow: none;
     }
 
@@ -4236,50 +4218,48 @@
     }
   }
 
-  /* Error Message */
   .import-error {
+    gap: 0.5rem;
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
     padding: 0.5rem;
-    background: rgb(255 0 0 / 10%);
     border-radius: 4px;
+    background: rgb(255 0 0 / 10%);
 
     i {
       flex-shrink: 0;
-      color: var(--color-level-error);
+      color: var(--color-level-error, var(--calendaria-error));
     }
 
     span {
-      white-space: pre-wrap;
       font-size: 0.85rem;
+      white-space: pre-wrap;
     }
   }
 
-  /* Preview Section */
   .preview-section {
     padding: 0.5rem;
 
     legend {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       padding: 0 0.5rem;
       font-weight: 600;
     }
   }
 
   .preview-header {
-    font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
     padding: 0.25rem 0 0.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
   }
 
   .preview-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 0.25rem;
+    grid-template-columns: 1fr 1fr;
+    display: grid;
   }
 
   .preview-item {
@@ -4300,14 +4280,29 @@
     }
   }
 
-  /* Import Options */
+  .undated-notice {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    color: var(--calendaria-primary, rgb(33 150 243));
+    font-size: 0.85rem;
+    background: var(--calendaria-primary-10, rgb(33 150 243 / 10%));
+
+    i {
+      font-size: 1rem;
+    }
+  }
+
   .import-options {
     padding: 0.5rem;
 
     legend {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       padding: 0 0.5rem;
       font-weight: 600;
     }
@@ -4316,8 +4311,8 @@
       margin-bottom: 0.35rem;
 
       label {
-        font-size: 0.85rem;
         margin-bottom: 0.15rem;
+        font-size: 0.85rem;
       }
 
       input {
@@ -4327,115 +4322,111 @@
     }
 
     .id-prefix {
+      opacity: 0.7;
       padding-right: 0.25rem;
       font-size: 0.85rem;
-      opacity: 0.7;
     }
   }
 
-  /* Note Selection - Full Height Right Column */
   .note-selection {
     display: flex;
-    flex-direction: column;
     flex: 1;
-    padding: 0.5rem;
+    flex-direction: column;
     min-height: 0;
+    padding: 0.5rem;
 
     legend {
-      display: flex;
-      align-items: center;
       gap: 0.5rem;
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
       padding: 0 0.5rem;
       font-weight: 600;
-      flex-shrink: 0;
 
       .note-count {
+        opacity: 0.7;
         font-weight: normal;
         font-size: 0.85rem;
-        opacity: 0.7;
       }
     }
   }
 
-  /* Bulk Actions - Icon Buttons */
   .note-bulk-actions {
-    display: flex;
-    justify-content: flex-end;
     gap: 0.35rem;
-    margin-bottom: 0.5rem;
+    display: flex;
     flex-shrink: 0;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
 
     .bulk-btn {
       padding: 0.35rem 0.65rem;
+      border: none;
       font-size: 0.9rem;
       background: none;
-      border: none;
       box-shadow: none;
 
       &:hover {
-        background: var(--color-cool-4);
+        background: var(--color-cool-4, var(--calendaria-cool-4));
       }
     }
   }
 
-  /* Note Table with Radio Buttons */
   .note-selection-table {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow-y: auto;
     scrollbar-gutter: stable;
-    border: 1px solid var(--color-border-light-tertiary);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     border-radius: 4px;
+    overflow-y: auto;
   }
 
   .note-row {
-    display: grid;
-    grid-template-columns: 1fr 50px 72px;
     gap: 0.35rem;
+    grid-template-columns: 1fr 50px 72px;
+    display: grid;
     align-items: center;
     padding: 0.3rem 0.5rem;
-    border-bottom: 1px solid var(--color-border-light-tertiary);
+    border-bottom: 1px solid var(--color-border-light-tertiary, var(--calendaria-input-border));
 
     &:last-child {
       border-bottom: none;
     }
 
     &.header {
-      font-weight: 600;
-      font-size: 0.8rem;
+      z-index: 1;
       position: sticky;
       top: 0;
-      background: var(--color-cool-5);
-      z-index: 1;
+      font-weight: 600;
+      font-size: 0.8rem;
+      background: var(--color-cool-5, var(--calendaria-cool-5));
 
       .note-radios {
         display: flex;
         justify-content: space-around;
 
         i {
-          font-size: 0.75rem;
           opacity: 0.8;
+          font-size: 0.75rem;
         }
       }
     }
 
     &:not(.header):hover {
-      background: var(--color-cool-5-75);
+      background: var(--color-cool-5-75, var(--calendaria-cool-5-75));
     }
   }
 
   .note-name {
     overflow: hidden;
+    font-size: 0.85rem;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.85rem;
   }
 
   .note-date {
+    opacity: 0.8;
     font-size: 0.8rem;
     text-align: center;
-    opacity: 0.8;
   }
 
   .note-radios {
@@ -4451,20 +4442,19 @@
     }
   }
 
-  /* No Notes Placeholder */
   .no-notes {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    padding: 2rem;
     opacity: 0.6;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
     text-align: center;
 
     i {
-      font-size: 2rem;
       margin-bottom: 0.75rem;
+      font-size: 2rem;
     }
 
     p {
@@ -4473,12 +4463,11 @@
     }
   }
 
-  /* Form Footer */
   .form-footer {
     display: flex;
     justify-content: center;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--color-border-light-tertiary);
+    border-top: 1px solid var(--color-border-light-tertiary, var(--calendaria-input-border));
 
     button[type='submit'] {
       padding: 0.5rem 1.5rem;
@@ -4496,86 +4485,55 @@
 }
 
 /* ======================================== */
-/* Macro Trigger Configuration              */
+/* Macro Trigger Styles (Settings Panel)    */
 /* ======================================== */
 
-.calendaria.macro-trigger-config {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-
-  .trigger-content {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 1rem;
-    padding: 0.5rem;
-  }
-
-  .form-footer {
-    margin-top: auto;
-  }
-
-  fieldset {
-    padding: 0.75rem;
-
-    .hint {
-      font-size: 0.85rem;
-      font-style: italic;
-
-      &.no-moons,
-      &.no-seasons {
-        text-align: center;
-        padding: 1rem;
-      }
-    }
-  }
-
+.calendaria.settings-panel {
   .season-triggers-list,
   .moon-triggers-list {
+    gap: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
     margin-bottom: 1rem;
   }
 
   .season-trigger-row,
   .moon-trigger-row {
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.5rem;
-    background: var(--calendaria-bg-lighter, rgb(42 42 42));
     border-radius: 4px;
+    background: var(--calendaria-bg-lighter, rgb(42 42 42));
 
     .trigger-label {
       flex: 0 0 160px;
-      font-size: 0.85rem;
-      white-space: nowrap;
       overflow: hidden;
+      font-size: 0.85rem;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .remove-trigger {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
       width: 28px;
       height: 28px;
       padding: 0;
-      background: transparent;
       border: none;
+      border-radius: 4px;
       color: var(--calendaria-text-dim, rgb(153 153 153));
       cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      background: transparent;
       transition:
         background 0.15s,
         color 0.15s;
 
       &:hover {
-        background: var(--calendaria-bg-hover, rgb(53 53 53));
         color: var(--calendaria-error, rgb(220 53 69));
+        background: var(--calendaria-bg-hover, rgb(53 53 53));
       }
     }
   }
@@ -4583,23 +4541,23 @@
   .add-season-trigger,
   .add-moon-trigger {
     .trigger-inputs {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
 
       .add-trigger-btn {
+        display: flex;
+        flex-shrink: 0;
+        justify-content: center;
+        align-items: center;
         width: 32px;
         height: 32px;
         padding: 0;
-        background: var(--calendaria-primary);
         border: none;
+        border-radius: 4px;
         color: var(--calendaria-text-on-color);
         cursor: pointer;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
+        background: var(--calendaria-primary);
         transition: opacity 0.15s;
 
         &:hover {
@@ -4621,9 +4579,9 @@
   }
 
   .weather-picker-content {
+    gap: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
   }
 
   .weather-category {
@@ -4631,34 +4589,34 @@
       margin: 0 0 0.5rem;
       padding-bottom: 0.25rem;
       border-bottom: 1px solid var(--calendaria-border);
-      font-size: 0.85rem;
       color: var(--calendaria-text-dim);
       font-weight: 600;
+      font-size: 0.85rem;
     }
 
     .weather-buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 0.4rem;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      display: grid;
     }
   }
 
   .weather-btn {
+    gap: 0.4rem;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
     padding: 0.4rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--weather-color) 50%, transparent);
     border-radius: 4px;
+    color: var(--calendaria-text);
+    text-align: left;
     cursor: pointer;
     background: color-mix(in srgb, var(--weather-color) 20%, var(--calendaria-bg-lighter));
-    border: 1px solid color-mix(in srgb, var(--weather-color) 50%, transparent);
-    color: var(--calendaria-text);
     transition: all 0.15s ease;
-    text-align: left;
 
     &:hover {
-      background: color-mix(in srgb, var(--weather-color) 35%, var(--calendaria-bg-lighter));
       border-color: var(--weather-color);
+      background: color-mix(in srgb, var(--weather-color) 35%, var(--calendaria-bg-lighter));
       transform: translateY(-1px);
     }
 
@@ -4667,18 +4625,18 @@
     }
 
     i {
+      flex-shrink: 0;
+      width: 1rem;
       color: var(--weather-color);
       font-size: 0.9rem;
-      width: 1rem;
       text-align: center;
-      flex-shrink: 0;
     }
 
     .weather-label {
-      font-size: 0.8rem;
-      white-space: nowrap;
       overflow: hidden;
+      font-size: 0.8rem;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -4689,17 +4647,17 @@
     border-top: 1px solid var(--calendaria-border);
 
     .random-btn {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       padding: 0.5rem 1.5rem;
-      background: var(--calendaria-primary);
       border: none;
       border-radius: 4px;
       color: var(--calendaria-text-on-color);
-      font-size: 0.9rem;
       font-weight: 500;
+      font-size: 0.9rem;
       cursor: pointer;
+      background: var(--calendaria-primary);
       transition: opacity 0.15s ease;
 
       &:hover {
@@ -4710,5 +4668,1466 @@
         font-size: 1rem;
       }
     }
+  }
+}
+
+/* ======================================== */
+/* CalendariaHUD - Sundial Widget           */
+/* ======================================== */
+
+.calendaria-hud-wrapper {
+  display: inline-flex;
+  z-index: 100;
+  position: fixed;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-text-primary, rgb(240 240 224));
+  font-family: var(--font-primary, 'Signika', 'Palatino Linotype', serif);
+}
+
+.calendaria-hud {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ======================================== */
+/* Sundial Dome                             */
+/* ======================================== */
+.calendaria-hud-dome {
+  z-index: 1;
+  position: absolute;
+  bottom: calc(100% - 14px);
+  left: 50%;
+  width: 160px;
+  height: 80px;
+  border: 2px solid rgb(26 26 26);
+  border-bottom: none;
+  border-radius: 80px 80px 0 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    opacity 0.3s ease,
+    border-color 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.calendaria-hud-dome:focus {
+  outline: 2px solid rgb(100 180 255 / 60%);
+  outline-offset: 2px;
+}
+
+.calendaria-hud-dome::before {
+  inset: 0;
+  z-index: 10;
+  position: absolute;
+  border: 2px solid rgb(20 20 20 / 90%);
+  border-bottom: none;
+  border-radius: 80px 80px 0 0;
+  pointer-events: none;
+  content: '';
+  box-shadow: inset 0 0 20px rgb(0 0 0 / 40%);
+}
+
+.calendaria-hud-dome.hidden {
+  display: none;
+}
+
+.calendaria-hud-sky {
+  inset: 0;
+  position: absolute;
+  transition: background 0.5s ease;
+}
+
+/* ======================================== */
+/* Stars                                    */
+/* ======================================== */
+.calendaria-hud-stars {
+  inset: 0;
+  opacity: 0;
+  z-index: 2;
+  position: absolute;
+  transition: opacity 1.5s ease;
+}
+
+.calendaria-hud-stars.visible {
+  opacity: 1;
+}
+
+.calendaria-hud-stars::before,
+.calendaria-hud-stars::after {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  content: '';
+  background: rgb(255 255 255);
+  box-shadow:
+    16px 12px 0 0 rgb(255 255 255 / 80%),
+    56px 22px 0 0 rgb(255 255 255 / 60%),
+    77px 26px 0 0 rgb(255 255 255 / 70%),
+    120px 14px 0 0 rgb(255 255 255 / 65%),
+    140px 38px 0 0 rgb(255 255 255 / 75%),
+    35px 28px 0 1px rgb(255 255 255 / 90%),
+    99px 8px 0 1px rgb(255 255 255 / 85%),
+    48px 44px 0 1px rgb(255 255 255 / 80%),
+    88px 40px 0 0 rgb(255 255 255 / 70%),
+    128px 30px 0 0 rgb(255 255 255 / 75%);
+  animation: calendaria-twinkle 3s ease-in-out infinite;
+}
+
+.calendaria-hud-stars::after {
+  box-shadow:
+    25px 18px 0 0 rgb(255 255 255 / 70%),
+    65px 35px 0 0 rgb(255 255 255 / 80%),
+    105px 20px 0 0 rgb(255 255 255 / 65%),
+    45px 10px 0 1px rgb(255 255 255 / 90%),
+    115px 48px 0 0 rgb(255 255 255 / 75%);
+  animation-delay: 1.5s;
+}
+
+@keyframes calendaria-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ======================================== */
+/* Clouds                                   */
+/* ======================================== */
+.calendaria-hud-clouds {
+  inset: 0;
+  opacity: 0;
+  z-index: 2;
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+.calendaria-hud-clouds.visible {
+  opacity: 1;
+}
+
+.calendaria-hud-clouds::before,
+.calendaria-hud-clouds::after {
+  position: absolute;
+  border-radius: 50%;
+  content: '';
+  background: rgb(255 255 255 / 35%);
+  filter: blur(2px);
+}
+
+.calendaria-hud-clouds::before {
+  top: 25px;
+  left: -40px;
+  width: 35px;
+  height: 14px;
+  box-shadow:
+    8px -4px 0 -2px rgb(255 255 255 / 30%),
+    16px 0 0 -1px rgb(255 255 255 / 25%);
+  animation: calendaria-clouds-drift 25s linear infinite;
+}
+
+.calendaria-hud-clouds::after {
+  top: 45px;
+  left: -30px;
+  width: 28px;
+  height: 11px;
+  box-shadow:
+    6px -3px 0 -1px rgb(255 255 255 / 28%),
+    12px 0 0 0 rgb(255 255 255 / 22%);
+  animation: calendaria-clouds-drift 35s linear infinite;
+  animation-delay: 8s;
+}
+
+@keyframes calendaria-clouds-drift {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(220px);
+  }
+}
+
+/* ======================================== */
+/* Celestial Track & Bodies                 */
+/* ======================================== */
+.calendaria-hud-track {
+  z-index: 3;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 140px;
+  height: 70px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.calendaria-hud-body {
+  position: absolute;
+  border-radius: 50%;
+  transition: opacity 0.8s ease;
+}
+
+.calendaria-hud-sun {
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle at 35% 35%, rgb(255 245 170) 0%, rgb(255 229 92) 30%, rgb(255 217 61) 60%, rgb(255 165 0) 100%);
+  box-shadow:
+    0 0 15px rgb(255 217 61),
+    0 0 30px rgb(255 217 61 / 50%),
+    0 0 50px rgb(255 165 0 / 30%);
+}
+
+.calendaria-hud-moon {
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle at 35% 35%, rgb(255 255 248) 0%, rgb(232 232 224) 40%, rgb(200 200 184) 100%);
+  box-shadow:
+    0 0 10px rgb(255 255 255 / 50%),
+    0 0 20px rgb(255 255 255 / 20%);
+}
+
+/* ======================================== */
+/* Bar Wrapper                              */
+/* ======================================== */
+.calendaria-hud-bar-wrapper {
+  display: contents;
+}
+
+/* ======================================== */
+/* Main Bar                                 */
+/* ======================================== */
+.calendaria-hud-bar {
+  gap: 10px;
+  display: inline-flex;
+  z-index: 10;
+  position: relative;
+  align-items: center;
+  height: 36px;
+  padding: 5px 10px;
+  border: 1px solid rgb(26 26 26);
+  border-radius: 6px;
+  cursor: grab;
+  background: linear-gradient(to bottom, rgb(61 61 61) 0%, rgb(42 42 42) 100%);
+  box-shadow:
+    0 0 10px rgb(0 0 0 / 50%),
+    inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.calendaria-hud-bar.dragging {
+  cursor: grabbing;
+}
+
+.calendaria-hud-bar.locked {
+  cursor: default;
+}
+
+.calendaria-hud-bar.has-events {
+  border-color: var(--event-glow, rgb(238 136 136));
+}
+
+/* ======================================== */
+/* HUD Buttons                              */
+/* ======================================== */
+.calendaria-hud-btn {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 4px;
+  color: rgb(181 179 164);
+  cursor: pointer;
+  background: rgb(0 0 0 / 30%);
+  transition: all 0.15s ease;
+}
+
+.calendaria-hud-btn:hover {
+  color: rgb(240 240 224);
+  background: rgb(255 255 255 / 10%);
+}
+
+.calendaria-hud-btn:focus-visible {
+  outline: 2px solid rgb(100 180 255 / 60%);
+  outline-offset: 1px;
+}
+
+.calendaria-hud-btn i {
+  font-size: var(--font-size-13, 0.8125rem);
+}
+
+.calendaria-hud-btn.pin-btn {
+  transition:
+    all 0.15s ease,
+    transform 0.2s ease;
+}
+
+.calendaria-hud-btn.pin-btn.has-sticky {
+  color: rgb(168 144 96);
+}
+
+.calendaria-hud-btn.pin-btn.has-sticky i {
+  transform: rotate(-45deg);
+}
+
+.calendaria-hud-btn.pin-btn.sticky-position {
+  color: rgb(136 204 136);
+}
+
+.calendaria-hud-btn-group {
+  gap: 4px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.calendaria-hud-btn-group.left,
+.calendaria-hud-btn-group.right {
+  min-width: 60px;
+}
+
+.calendaria-hud-btn-group.left {
+  justify-content: flex-start;
+}
+
+.calendaria-hud-btn-group.right {
+  justify-content: flex-end;
+}
+
+.calendaria-hud-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 20px;
+  background: rgb(255 255 255 / 10%);
+}
+
+/* ======================================== */
+/* Left Info Panel                          */
+/* ======================================== */
+.calendaria-hud-info-panel {
+  gap: 8px;
+  display: flex;
+  position: relative;
+  align-items: center;
+  width: 225px;
+  overflow: hidden;
+  cursor: default;
+}
+
+.calendaria-hud-info-panel.left {
+  justify-content: flex-start;
+}
+
+.calendaria-hud-date {
+  overflow: hidden;
+  color: rgb(240 240 224);
+  font-weight: 500;
+  font-size: var(--font-size-11, 0.6875rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.calendaria-hud-date:hover {
+  color: rgb(180 210 255);
+}
+
+.calendaria-hud-date.hidden {
+  display: none;
+}
+
+.calendaria-hud-event {
+  gap: 6px;
+  display: flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 20%, transparent);
+  transition: all 0.15s ease;
+}
+
+.calendaria-hud-event.hidden {
+  display: none;
+}
+
+.calendaria-hud-event:hover {
+  background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 35%, transparent);
+}
+
+.calendaria-hud-event-icon {
+  color: var(--event-color, rgb(238 136 136));
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+.calendaria-hud-event-name {
+  max-width: 140px;
+  overflow: hidden;
+  color: rgb(240 240 224);
+  font-size: var(--font-size-11, 0.6875rem);
+  text-overflow: ellipsis;
+}
+
+.calendaria-hud-events {
+  gap: 4px;
+  display: flex;
+  align-items: center;
+  margin-left: 6px;
+}
+
+.calendaria-hud-event-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 25%, transparent);
+  transition: all 0.15s ease;
+}
+
+.calendaria-hud-event-icon-wrapper:hover {
+  background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 45%, transparent);
+  transform: scale(1.1);
+}
+
+.calendaria-hud-event-icon-wrapper .calendaria-hud-event-icon {
+  color: var(--event-color, rgb(238 136 136));
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+/* ======================================== */
+/* Center Section                           */
+/* ======================================== */
+.calendaria-hud-center {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  width: 160px;
+}
+
+.calendaria-hud-time-wrapper {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+}
+
+.calendaria-hud-time {
+  padding: 0 8px;
+  color: rgb(240 240 224);
+  font-size: var(--font-size-14, 0.875rem);
+  font-family: Consolas, Monaco, monospace;
+  letter-spacing: 0.5px;
+}
+
+.calendaria-hud-play-btn {
+  display: flex;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  border: none;
+  color: rgb(181 179 164);
+  cursor: pointer;
+  pointer-events: none;
+  background: transparent;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
+  transform: translate(-50%, -50%);
+}
+
+.calendaria-hud-play-btn i {
+  font-size: 1.25rem;
+}
+
+.calendaria-hud-time-wrapper:hover .calendaria-hud-play-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.calendaria-hud-time-wrapper:hover .calendaria-hud-time {
+  opacity: 0.3;
+}
+
+.calendaria-hud-play-btn:hover {
+  color: rgb(240 240 224);
+}
+
+.calendaria-hud.time-flowing .calendaria-hud-time {
+  animation: calendaria-time-pulse 2s ease-in-out infinite;
+}
+
+@keyframes calendaria-time-pulse {
+  0%,
+  100% {
+    color: rgb(240 240 224);
+  }
+
+  50% {
+    color: rgb(136 204 136);
+  }
+}
+
+/* ======================================== */
+/* Right Section                            */
+/* ======================================== */
+.calendaria-hud-indicators {
+  gap: 8px;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  align-items: center;
+  width: 225px;
+  overflow: hidden;
+}
+
+.calendaria-hud-indicators .weather-indicator,
+.calendaria-hud-indicators .season-indicator,
+.calendaria-hud-indicators .era-indicator,
+.calendaria-hud-indicators .cycle-indicator {
+  gap: 0.25rem;
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-11, 0.6875rem);
+  cursor: default;
+}
+
+.calendaria-hud-indicators .weather-indicator i,
+.calendaria-hud-indicators .season-indicator i,
+.calendaria-hud-indicators .era-indicator i,
+.calendaria-hud-indicators .cycle-indicator i {
+  font-size: 0.65rem;
+}
+
+.calendaria-hud-indicators .weather-indicator {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--weather-color, rgb(181 179 164)) 30%, transparent);
+  border-radius: 4px;
+  color: rgb(240 240 224);
+  background: color-mix(in srgb, var(--weather-color, rgb(181 179 164)) 15%, transparent);
+}
+
+.calendaria-hud-indicators .weather-indicator i {
+  color: var(--weather-color, rgb(181 179 164));
+}
+
+.calendaria-hud-indicators .weather-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendaria-hud-indicators .weather-indicator.clickable {
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.calendaria-hud-indicators .weather-indicator.clickable:hover {
+  border-color: var(--weather-color, rgb(181 179 164));
+  background: color-mix(in srgb, var(--weather-color, rgb(181 179 164)) 30%, transparent);
+}
+
+.calendaria-hud-indicators .weather-indicator.no-weather {
+  border: 1px dashed rgb(255 255 255 / 15%);
+  color: rgb(160 160 160);
+  background: transparent;
+}
+
+.calendaria-hud-indicators .weather-indicator.no-weather:hover {
+  border-color: rgb(100 180 100);
+  background: color-mix(in srgb, rgb(100 180 100) 20%, transparent);
+}
+
+.calendaria-hud-indicators .weather-temp {
+  opacity: 0.8;
+  margin-left: 0.25rem;
+  font-size: 0.7rem;
+}
+
+.calendaria-hud-indicators .season-indicator {
+  overflow: hidden;
+  color: var(--season-color, rgb(160 160 160));
+}
+
+.calendaria-hud-indicators .season-indicator i {
+  color: var(--season-color, rgb(160 160 160));
+}
+
+.calendaria-hud-indicators .season-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendaria-hud-indicators .era-indicator,
+.calendaria-hud-indicators .cycle-indicator {
+  color: rgb(160 160 160);
+}
+
+/* ======================================== */
+/* Hover Tray                               */
+/* ======================================== */
+.calendaria-hud-tray {
+  gap: 6px;
+  display: flex;
+  opacity: 0;
+  z-index: 5;
+  justify-content: center;
+  align-items: center;
+  max-height: 0;
+  margin-top: -1px;
+  padding: 0 10px;
+  border: 1px solid rgb(26 26 26);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, rgb(42 42 42) 0%, rgb(34 34 34) 100%);
+  transition: all 0.25s ease;
+}
+
+.calendaria-hud-wrapper:hover .calendaria-hud-tray,
+.calendaria-hud-tray.visible {
+  opacity: 1;
+  max-height: 42px;
+  padding: 6px 10px;
+}
+
+/* ======================================== */
+/* Tray Buttons                             */
+/* ======================================== */
+.calendaria-hud-time-btn {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 4px;
+  color: rgb(181 179 164);
+  cursor: pointer;
+  background: rgb(0 0 0 / 30%);
+  transition: all 0.15s ease;
+}
+
+.calendaria-hud-time-btn:hover {
+  color: rgb(240 240 224);
+  background: rgb(255 255 255 / 10%);
+}
+
+.calendaria-hud-time-btn:focus-visible {
+  outline: 2px solid rgb(100 180 255 / 60%);
+  outline-offset: 1px;
+}
+
+.calendaria-hud-time-btn i {
+  font-size: var(--font-size-12, 0.75rem);
+}
+
+.calendaria-hud-time-btn.time-shortcut {
+  color: rgb(168 144 96);
+}
+
+.calendaria-hud-time-btn.time-shortcut:hover {
+  color: rgb(212 176 112);
+  background: rgb(168 144 96 / 15%);
+}
+
+/* ======================================== */
+/* Tray Dropdown                            */
+/* ======================================== */
+.calendaria-hud-select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 50px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 4px;
+  color: rgb(200 200 190);
+  font-size: var(--font-size-11, 0.6875rem);
+  line-height: 24px;
+  text-align: center;
+  cursor: pointer;
+  background: rgb(30 30 30);
+  transition: all 0.15s ease;
+}
+
+.calendaria-hud-select option {
+  color: rgb(200 200 190);
+  background: rgb(30 30 30);
+}
+
+.calendaria-hud-select:hover {
+  border-color: rgb(255 255 255 / 25%);
+  color: rgb(240 240 224);
+  background: rgb(40 40 40);
+}
+
+.calendaria-hud-select:focus {
+  border-color: rgb(100 180 255 / 50%);
+  outline: none;
+}
+
+.calendaria-hud-select[data-action='setMultiplier'] {
+  width: 45px;
+  min-width: 45px;
+  text-align: center;
+}
+
+.calendaria-hud-select[data-action='setIncrement'] {
+  width: 70px;
+  min-width: 70px;
+}
+
+.calendaria-hud-tray-divider {
+  width: 1px;
+  height: 18px;
+  background: rgb(255 255 255 / 10%);
+}
+
+/* ======================================== */
+/* Compact Mode                             */
+/* ======================================== */
+.calendaria-hud-wrapper.compact .calendaria-hud-dome {
+  bottom: calc(100% - 10px);
+  width: 120px;
+  height: 60px;
+  border-radius: 60px 60px 0 0;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-dome::before {
+  border-radius: 60px 60px 0 0;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-stars::before,
+.calendaria-hud-wrapper.compact .calendaria-hud-stars::after {
+  box-shadow:
+    12px 10px 0 0 rgb(255 255 255 / 75%),
+    40px 18px 0 0 rgb(255 255 255 / 60%),
+    60px 12px 0 0 rgb(255 255 255 / 70%),
+    85px 22px 0 0 rgb(255 255 255 / 65%),
+    100px 15px 0 0 rgb(255 255 255 / 80%),
+    28px 35px 0 1px rgb(255 255 255 / 85%),
+    72px 8px 0 1px rgb(255 255 255 / 75%);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-stars::after {
+  box-shadow:
+    20px 14px 0 0 rgb(255 255 255 / 70%),
+    50px 25px 0 0 rgb(255 255 255 / 65%),
+    80px 18px 0 0 rgb(255 255 255 / 75%),
+    95px 35px 0 0 rgb(255 255 255 / 60%);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-track {
+  width: 100px;
+  height: 50px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-sun {
+  width: 16px;
+  height: 16px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-moon {
+  width: 14px;
+  height: 14px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-center {
+  flex-shrink: 0;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-btn-group.left,
+.calendaria-hud-wrapper.compact .calendaria-hud-btn-group.right {
+  min-width: 50px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-info-panel,
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators {
+  width: 160px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators {
+  gap: 4px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-bar {
+  gap: 8px;
+  height: 30px;
+  padding: 4px 8px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-btn {
+  width: 22px;
+  height: 22px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-btn i {
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-btn-group {
+  gap: 3px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-date,
+.calendaria-hud-wrapper.compact .calendaria-hud-event-name {
+  font-size: var(--font-size-10, 0.625rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-time {
+  padding: 0 6px;
+  font-size: var(--font-size-12, 0.75rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .weather-indicator,
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .season-indicator,
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .era-indicator,
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .cycle-indicator {
+  font-size: var(--font-size-10, 0.625rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-select {
+  min-width: 40px;
+  height: 22px;
+  padding: 1px 4px;
+  font-size: var(--font-size-10, 0.625rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-divider {
+  height: 16px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-live-event {
+  width: 22px;
+  height: 22px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-live-event-icon {
+  font-size: var(--font-size-10, 0.625rem);
+}
+
+/* ======================================== */
+/* Chat Message Timestamps                  */
+/* ======================================== */
+.chat-message .message-header .message-metadata {
+  gap: 4px;
+  display: flex;
+  position: absolute;
+  top: 0;
+  right: 0;
+  align-items: center;
+  max-width: calc(100% - 44px);
+}
+
+.chat-message .message-header .message-metadata .message-timestamp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendaria-timestamp-wrapper {
+  display: inline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendaria-timestamp-wrapper .calendaria-timestamp-real {
+  opacity: 0.7;
+
+  &::before {
+    content: '(';
+  }
+
+  &::after {
+    content: ')';
+  }
+}
+
+/* ======================================== */
+/* Search Functionality                     */
+/* ======================================== */
+.calendaria-hud-search-panel {
+  display: none;
+  z-index: 100000;
+  position: fixed;
+  flex-direction: column;
+  width: 280px;
+  padding: 8px;
+  border: 1px solid var(--calendaria-border, rgb(58 58 94));
+  border-radius: 8px;
+  background: var(--calendaria-bg, rgb(26 26 46));
+  box-shadow: 0 4px 20px rgb(0 0 0 / 50%);
+}
+
+.calendaria-hud-search-panel.visible {
+  display: flex;
+}
+
+.calendaria-hud-search-panel .search-panel-header {
+  gap: 4px;
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.calendaria-hud-search-panel .search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--calendaria-border);
+  border-radius: 6px;
+  color: var(--calendaria-text);
+  font-size: var(--font-size-13, 0.8125rem);
+  background: var(--calendaria-bg);
+  box-shadow: 0 2px 8px var(--calendaria-shadow);
+}
+
+.calendaria-hud-search-panel .search-input:focus {
+  border-color: var(--calendaria-primary);
+  outline: none;
+  box-shadow: 0 2px 12px var(--calendaria-shadow);
+}
+
+.calendaria-hud-search-panel .search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  opacity: 0.5;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='%23888' d='M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256l105.3-105.4z'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  transition: opacity 0.15s ease;
+}
+
+.calendaria-hud-search-panel .search-input::-webkit-search-cancel-button:hover {
+  opacity: 1;
+}
+
+.calendaria-hud-search-panel .search-panel-results {
+  display: none;
+}
+
+.calendaria-hud-search-panel .search-panel-results.has-results {
+  display: block;
+  max-height: 250px;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid var(--calendaria-border);
+  border-radius: 6px;
+  overflow-y: auto;
+  background: var(--calendaria-bg);
+  box-shadow: 0 4px 16px var(--calendaria-shadow);
+}
+
+.calendaria-hud-search-panel .search-result-item {
+  gap: 1px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.calendaria-hud-search-panel .search-result-item:hover {
+  background: var(--calendaria-bg-hover);
+}
+
+.calendaria-hud-search-panel .result-name {
+  color: var(--calendaria-text);
+  font-weight: 500;
+  font-size: var(--font-size-14, 0.875rem);
+}
+
+.calendaria-hud-search-panel .result-description {
+  overflow: hidden;
+  color: var(--calendaria-text-dim);
+  font-size: var(--font-size-10, 0.625rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendaria-hud-search-panel .no-results {
+  gap: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  color: var(--calendaria-text-dim);
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+/* ======================================== */
+/* Settings Panel                           */
+/* ======================================== */
+.settings-panel {
+  --panel-sidebar-max-width: 180px;
+  --panel-sidebar-min-width: 120px;
+
+  &.standard-form {
+    gap: 0;
+
+    .form-group > label {
+      flex: 2;
+    }
+  }
+
+  nav.sheet-tabs {
+    gap: 0.125rem;
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: max-content;
+    min-width: var(--panel-sidebar-min-width);
+    max-width: var(--panel-sidebar-max-width);
+    padding: 0;
+    border-top: none;
+    border-right: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+    border-bottom: none;
+    overflow: hidden auto;
+
+    [data-tab] {
+      gap: 0.5rem;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      max-width: 100%;
+      padding-right: 0.5rem;
+      border-bottom: none;
+      border-left: 3px solid transparent;
+      border-radius: 0;
+      text-align: right;
+
+      > span:not(.notification-pip) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      i {
+        width: 1.25em;
+        margin: 0;
+        text-align: center;
+      }
+
+      &.active {
+        border-left-color: var(--color-warm-1, var(--calendaria-primary));
+        background: var(--color-cool-5, var(--calendaria-cool-5));
+      }
+
+      &:hover:not(.active) {
+        background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
+      }
+    }
+  }
+
+  button,
+  a.button,
+  a.link-button {
+    border: none;
+    background: transparent;
+    transition:
+      background 0.15s ease,
+      opacity 0.15s ease;
+
+    &:hover {
+      border: none;
+      background: var(--color-cool-5, var(--calendaria-cool-5));
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+
+  button[type='submit'],
+  button.primary {
+    border: 1px solid var(--button-border-color);
+    background: var(--button-background-color);
+
+    &:hover {
+      border-color: var(--button-hover-border-color);
+      background: var(--button-hover-background-color);
+    }
+  }
+
+  .window-content {
+    gap: 0;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr;
+    display: grid;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  section.tab {
+    grid-column: 2;
+    grid-row: 1;
+    display: none;
+    padding: 1rem;
+    overflow-y: auto;
+
+    &.active {
+      gap: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .section-hint {
+    margin-top: -0.25rem;
+    margin-bottom: 0.5rem;
+
+    &.success {
+      color: var(--color-level-success, var(--calendaria-success));
+
+      i {
+        margin-right: 0.25rem;
+      }
+    }
+  }
+
+  .info-box {
+    gap: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--calendaria-primary);
+    border-radius: 4px;
+    background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
+
+    i {
+      margin-top: 2px;
+      color: var(--calendaria-primary);
+      font-size: var(--font-size-14);
+    }
+
+    p {
+      margin: 0;
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      font-size: var(--font-size-12);
+    }
+  }
+
+  .button-row {
+    gap: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+
+    button,
+    a.link-button {
+      gap: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--button-border-color);
+      border-radius: 4px;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      background: var(--button-background-color);
+
+      &:hover {
+        background: var(--button-hover-background-color);
+      }
+
+      i {
+        width: 1rem;
+        font-size: var(--font-size-14);
+        text-align: center;
+      }
+    }
+  }
+
+  .form-group .form-fields:has(input[type='range']) {
+    gap: 0.75rem;
+    display: flex;
+    align-items: center;
+
+    input[type='range'] {
+      flex: 1;
+    }
+
+    .range-value {
+      min-width: 2.5em;
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      font-size: var(--font-size-12);
+      text-align: center;
+    }
+  }
+
+  .categories-list {
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+  }
+
+  .category-row {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0;
+
+    input[type='color'] {
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid var(--calendaria-border);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    input[type='text'] {
+      flex: 1;
+    }
+
+    .icon-input {
+      flex: none;
+      width: 10em;
+    }
+
+    .icon-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+
+      &.danger:hover {
+        color: rgb(255 255 255);
+        background: var(--color-level-error, var(--calendaria-error));
+      }
+    }
+  }
+
+  .empty-message {
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
+    font-style: italic;
+    font-size: var(--font-size-12);
+  }
+
+  .add-button {
+    gap: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--button-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--button-background-color);
+
+    &:hover {
+      background: var(--button-hover-background-color);
+    }
+  }
+
+  .automation-info {
+    h4 {
+      margin: 0 0 0.5rem;
+      font-size: var(--font-size-14);
+    }
+
+    .trigger-list {
+      gap: 0.25rem 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      display: grid;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      li {
+        gap: 0.5rem;
+        display: flex;
+        align-items: center;
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
+        font-size: var(--font-size-12);
+
+        i {
+          width: 1.25em;
+          color: var(--calendaria-primary);
+          text-align: center;
+        }
+      }
+    }
+  }
+
+  .about-header {
+    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .module-info {
+    gap: 0.375rem;
+    display: flex;
+    flex-direction: column;
+
+    .info-row {
+      gap: 0.5rem;
+      display: flex;
+      font-size: var(--font-size-14);
+
+      .info-label {
+        font-weight: 500;
+      }
+
+      .info-value {
+        color: var(--calendaria-text);
+      }
+    }
+  }
+
+  .kofi-button {
+    gap: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    color: rgb(255 255 255);
+    font-weight: 500;
+    font-size: var(--font-size-14);
+    text-decoration: none;
+    white-space: nowrap;
+    background: rgb(255 94 91);
+    transition: background 0.15s ease;
+
+    &:hover {
+      color: rgb(255 255 255);
+      background: rgb(229 69 66);
+    }
+
+    i {
+      font-size: var(--font-size-14);
+    }
+  }
+
+  .sheet-tabs [data-tab='hud'].app-tab {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+  }
+
+  section.tab[data-tab='timekeeper'],
+  section.tab[data-tab='compact'],
+  section.tab[data-tab='hud'] {
+    background: linear-gradient(135deg, var(--color-cool-5-50, rgb(30 30 30 / 50%)) 0%, transparent 100%);
+  }
+
+  .color-categories-grid {
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: grid;
+  }
+
+  .color-category {
+    h4 {
+      margin: 0 0 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+      font-weight: 500;
+      font-size: var(--font-size-13);
+    }
+
+    .form-group.color-row {
+      margin-bottom: 0.25rem;
+
+      label {
+        min-width: 120px;
+        font-size: var(--font-size-12);
+      }
+    }
+  }
+
+  .color-fields {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    input[type='color'] {
+      width: 2.5rem;
+      height: 1.75rem;
+      padding: 0;
+      border: 1px solid var(--calendaria-border);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .color-hex {
+      width: 6em;
+      font-size: var(--font-size-11);
+      font-family: var(--font-mono);
+      text-align: center;
+    }
+
+    .reset-color {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
+      border: 1px solid var(--button-border-color);
+      border-radius: 4px;
+      background: var(--button-background-color);
+
+      &:hover {
+        background: var(--button-hover-background-color);
+      }
+    }
+
+    .default-indicator {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      color: var(--color-level-success, var(--calendaria-success));
+      font-size: var(--font-size-11);
+    }
+  }
+
+  .theme-actions {
+    margin-top: 0.5rem;
   }
 }

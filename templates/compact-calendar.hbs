@@ -1,8 +1,6 @@
 <div class="compact-calendar-container">
-  {{!-- Slim Right Sidebar --}}
   <div class="compact-sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
-    <button type="button" class="sidebar-btn" data-action="close"
-      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Close'}}">
+    <button type="button" class="sidebar-btn" data-action="close" data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>
     </button>
     <button type="button" class="sidebar-btn" data-action="openFull"
@@ -16,8 +14,7 @@
         <i class="fas fa-thumbtack"></i>
       </button>
     {{/if}}
-    <button type="button" class="sidebar-btn" data-action="today"
-      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Today'}}">
+    <button type="button" class="sidebar-btn" data-action="today" data-tooltip="{{localize 'CALENDARIA.Common.Today'}}">
       <i class="fas fa-calendar-day"></i>
     </button>
     {{#if showSetCurrentDate}}
@@ -27,8 +24,12 @@
       </button>
     {{/if}}
     <button type="button" class="sidebar-btn" data-action="addNote"
-      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.AddNote'}}">
+      data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}">
       <i class="fas fa-plus"></i>
+    </button>
+    <button type="button" class="sidebar-btn" data-action="toggleSearch"
+      data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
+      <i class="fas fa-search"></i>
     </button>
     {{#if showViewNotes}}
       <button type="button" class="sidebar-btn" data-action="viewNotes"
@@ -36,14 +37,17 @@
         <i class="fas fa-list"></i>
       </button>
     {{/if}}
+    <button type="button" class="sidebar-btn" data-action="openSettings"
+      data-tooltip="{{localize 'CALENDARIA.Common.Settings'}}">
+      <i class="fas fa-cog"></i>
+    </button>
   </div>
 
-  {{!-- Notes Panel (slides out from sidebar) --}}
   <div class="compact-notes-panel{{#if notesPanelVisible}} visible{{/if}}">
     <div class="notes-panel-header">
       <span class="notes-panel-title">{{selectedDateLabel}}</span>
       <button type="button" class="notes-panel-close" data-action="closeNotesPanel"
-        data-tooltip="{{localize 'CALENDARIA.CompactCalendar.CloseNotesPanel'}}">
+        data-tooltip="{{localize 'CALENDARIA.Common.CloseNotesPanel'}}">
         <i class="fas fa-times"></i>
       </button>
     </div>
@@ -52,7 +56,7 @@
         <div class="notes-panel-item" data-action="openNote" data-page-id="{{id}}" data-journal-id="{{parentId}}">
           <div class="note-item-icon" style="color: {{color}}">
             {{#if isImageIcon}}
-              <img src="{{icon}}" alt="" />
+              <img src="{{icon}}" alt="">
             {{else}}
               <i class="{{icon}}"></i>
             {{/if}}
@@ -75,22 +79,43 @@
     </div>
   </div>
 
-  {{!-- Month Navigation Row --}}
+  <div class="calendaria-hud-search-panel{{#if searchOpen}} visible{{/if}}">
+    <div class="search-panel-header">
+      <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
+        value="{{searchTerm}}" autocomplete="off">
+    </div>
+    <div class="search-panel-results">
+      {{#if searchResults.length}}
+        {{#each searchResults}}
+          <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}"
+            data-journal-id="{{data.journalId}}">
+            <span class="result-name">{{name}}</span>
+            {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+          </div>
+        {{/each}}
+      {{else if searchTerm}}
+        <div class="no-results">
+          <i class="fas fa-search"></i>
+          <span>{{localize "CALENDARIA.Search.NoResults"}}</span>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+
   <div class="compact-top-row{{#if stickyPosition}} position-locked{{/if}}">
     <button type="button" class="nav-btn" data-action="navigate" data-direction="prev"
-      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.PrevMonth'}}">
+      data-tooltip="{{localize 'CALENDARIA.Common.PreviousMonth'}}">
       <i class="fas fa-chevron-left"></i>
     </button>
     <div class="compact-title-group">
       <span class="compact-title">{{calendarData.monthName}} {{calendarData.yearDisplay}}</span>
     </div>
     <button type="button" class="nav-btn" data-action="navigate" data-direction="next"
-      data-tooltip="{{localize 'CALENDARIA.CompactCalendar.NextMonth'}}">
+      data-tooltip="{{localize 'CALENDARIA.Common.NextMonth'}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
 
-  {{!-- Calendar Indicators --}}
   {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather isGM)}}
     <div class="calendar-indicators">
       {{#if weather}}
@@ -132,11 +157,10 @@
     </div>
   {{/if}}
 
-  {{!-- Mini Calendar Grid --}}
   <div class="compact-grid" style="--compact-weekday-count: {{calendarData.daysInWeek}}">
     <div class="compact-weekdays">
       {{#each calendarData.weekdays}}
-        <div class="weekday">{{this}}</div>
+        <div class="weekday{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
       {{/each}}
     </div>
     <div class="compact-days">
@@ -144,6 +168,11 @@
         {{#each this}}
           {{#if empty}}
             <div class="compact-day empty"></div>
+          {{else if isFromOtherMonth}}
+            <div class="compact-day other-month{{#if isToday}} today{{/if}}"
+              data-action="navigateToMonth" data-year="{{year}}" data-month="{{month}}">
+              <span class="day-num">{{day}}</span>
+            </div>
           {{else}}
             <div
               class="compact-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
@@ -151,11 +180,12 @@
               {{#if festivalName}}data-tooltip="{{festivalName}}" {{/if}}>
               <span class="day-num">{{day}}</span>
               {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
-              {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint" style="--moon-color: {{moonColor}}"><img
-                      class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}"
-                      data-tooltip="{{moonPhase}}" /></span>
-                {{else}}<img class="moon-tiny" src="{{moonIcon}}" alt="{{moonPhase}}"
-                    data-tooltip="{{moonPhase}}" />{{/if}}{{/if}}
+              {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint" style="--moon-color: {{moonColor}}">
+                    <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}"
+                      data-tooltip="{{moonPhase}}"></span>
+                {{else}}
+                  <img class="moon-tiny" src="{{moonIcon}}" alt="{{moonPhase}}" data-tooltip="{{moonPhase}}">
+                {{/if}}{{/if}}
             </div>
           {{/if}}
         {{/each}}
@@ -163,7 +193,6 @@
     </div>
   </div>
 
-  {{!-- Time Display Row --}}
   <div class="compact-time-display" {{#if isGM}}data-action="toggle" {{/if}}>
     <span class="time-value">{{currentTime}}</span>
     <span class="date-value hidden">{{currentDate}}</span>
@@ -175,16 +204,15 @@
     {{/if}}
   </div>
 
-  {{!-- Time Controls Row (GM only) --}}
   {{#if isGM}}
     <div class="compact-time-controls{{#if controlsVisible}} visible{{/if}}">
       <div class="controls-group">
         <button type="button" class="time-btn time-shortcut" data-action="toSunrise"
-          data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Sunrise'}}">
+          data-tooltip="{{localize 'CALENDARIA.Common.Sunrise'}}">
           <i class="fas fa-sun"></i>
         </button>
         <button type="button" class="time-btn time-shortcut" data-action="toMidday"
-          data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Midday'}}">
+          data-tooltip="{{localize 'CALENDARIA.Common.Midday'}}">
           <i class="fas fa-cloud-sun"></i>
         </button>
         <button type="button" class="time-btn" data-action="reverse5x"
@@ -209,11 +237,11 @@
           <i class="fas fa-angle-double-right"></i>
         </button>
         <button type="button" class="time-btn time-shortcut" data-action="toSunset"
-          data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Sunset'}}">
+          data-tooltip="{{localize 'CALENDARIA.Common.Sunset'}}">
           <i class="fas fa-cloud-moon"></i>
         </button>
         <button type="button" class="time-btn time-shortcut" data-action="toMidnight"
-          data-tooltip="{{localize 'CALENDARIA.CompactCalendar.Midnight'}}">
+          data-tooltip="{{localize 'CALENDARIA.Common.Midnight'}}">
           <i class="fas fa-moon"></i>
         </button>
       </div>

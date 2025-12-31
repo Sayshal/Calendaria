@@ -2,30 +2,29 @@
  * Weather Manager - Core state management and API for the weather system.
  * Handles current weather state, settings integration, and procedural generation.
  * Reads weather configuration from the active calendar's climate zones.
- *
  * @module Weather/WeatherManager
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './climate-data.mjs';
-import { generateWeather, generateForecast } from './weather-generator.mjs';
-import { getPreset, getAllPresets, ALL_PRESETS, WEATHER_CATEGORIES } from './weather-presets.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { MODULE, SETTINGS, HOOKS } from '../constants.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { generateForecast, generateWeather } from './weather-generator.mjs';
+import { ALL_PRESETS, getAllPresets, getPreset, WEATHER_CATEGORIES } from './weather-presets.mjs';
 
 /**
- * Weather Manager singleton.
+ * Weather Manager.
  * Manages weather state and provides the main weather API.
  */
-class WeatherManager {
+export default class WeatherManager {
   /** @type {object|null} Current weather state */
-  #currentWeather = null;
+  static #currentWeather = null;
 
   /** @type {boolean} Whether the manager is initialized */
-  #initialized = false;
+  static #initialized = false;
 
   /* -------------------------------------------- */
   /*  Initialization                              */
@@ -35,15 +34,10 @@ class WeatherManager {
    * Initialize the weather manager.
    * Called during module ready hook.
    */
-  async initialize() {
+  static async initialize() {
     if (this.#initialized) return;
-
-    // Load current weather from settings
     this.#currentWeather = game.settings.get(MODULE.ID, SETTINGS.CURRENT_WEATHER) || null;
-
-    // Set up day change hook for auto-generation
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
-
     this.#initialized = true;
     log(3, 'WeatherManager initialized');
   }
@@ -56,7 +50,7 @@ class WeatherManager {
    * Get the current weather.
    * @returns {object|null} Current weather state
    */
-  getCurrentWeather() {
+  static getCurrentWeather() {
     return this.#currentWeather;
   }
 
@@ -64,7 +58,7 @@ class WeatherManager {
    * Get temperature for current weather, generating if missing.
    * @returns {number|null} Temperature or null if no weather/zone
    */
-  getTemperature() {
+  static getTemperature() {
     if (!this.#currentWeather) return null;
     if (this.#currentWeather.temperature != null) return this.#currentWeather.temperature;
     return this.#generateTemperatureForPreset(this.#currentWeather.id);
@@ -73,15 +67,15 @@ class WeatherManager {
   /**
    * Set the current weather by preset ID.
    * @param {string} presetId - Weather preset ID
-   * @param {object} [options={}] - Additional options
+   * @param {object} [options] - Additional options
    * @param {number} [options.temperature] - Optional temperature override
-   * @param {boolean} [options.broadcast=true] - Whether to broadcast to other clients
+   * @param {boolean} [options.broadcast] - Whether to broadcast to other clients
    * @returns {Promise<object>} The set weather
    */
-  async setWeather(presetId, options = {}) {
+  static async setWeather(presetId, options = {}) {
     if (!game.user.isGM) {
       log(1, 'Only GMs can set weather');
-      ui.notifications.error(localize('CALENDARIA.Weather.Error.GMOnly'));
+      ui.notifications.error('CALENDARIA.Weather.Error.GMOnly', { localize: true });
       return this.#currentWeather;
     }
 
@@ -94,7 +88,6 @@ class WeatherManager {
       return this.#currentWeather;
     }
 
-    // Generate temperature from zone config if not provided
     const temperature = options.temperature ?? this.#generateTemperatureForPreset(presetId);
 
     const weather = {
@@ -117,17 +110,16 @@ class WeatherManager {
    * Set custom weather with arbitrary values.
    * @param {object} weatherData - Weather data
    * @param {string} weatherData.label - Display label
-   * @param {string} [weatherData.icon='fa-question'] - Icon class
-   * @param {string} [weatherData.color='#888888'] - Display color
+   * @param {string} [weatherData.icon] - Icon class
+   * @param {string} [weatherData.color] - Display color
    * @param {string} [weatherData.description] - Description
    * @param {number} [weatherData.temperature] - Temperature
-   * @param {boolean} [broadcast=true] - Whether to broadcast
+   * @param {boolean} [broadcast] - Whether to broadcast
    * @returns {Promise<object>} The set weather
    */
-  async setCustomWeather(weatherData, broadcast = true) {
+  static async setCustomWeather(weatherData, broadcast = true) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can set weather');
-      ui.notifications.error(localize('CALENDARIA.Weather.Error.GMOnly'));
+      ui.notifications.error('CALENDARIA.Weather.Error.GMOnly', { localize: true });
       return this.#currentWeather;
     }
 
@@ -149,15 +141,11 @@ class WeatherManager {
 
   /**
    * Clear the current weather.
-   * @param {boolean} [broadcast=true] - Whether to broadcast
+   * @param {boolean} [broadcast] - Whether to broadcast
    * @returns {Promise<void>}
    */
-  async clearWeather(broadcast = true) {
-    if (!game.user.isGM) {
-      log(1, 'Only GMs can clear weather');
-      return;
-    }
-
+  static async clearWeather(broadcast = true) {
+    if (!game.user.isGM) return;
     await this.#saveWeather(null, broadcast);
   }
 
@@ -167,18 +155,12 @@ class WeatherManager {
    * @param {boolean} broadcast - Whether to broadcast
    * @private
    */
-  async #saveWeather(weather, broadcast) {
+  static async #saveWeather(weather, broadcast) {
     const previous = this.#currentWeather;
     this.#currentWeather = weather;
-
     await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, weather);
-
-    // Fire hook
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous, current: weather });
-
-    // Broadcast to other clients
     if (broadcast) CalendariaSocket.emit('weatherChange', { weather });
-
     log(3, 'Weather changed:', weather?.id ?? 'cleared');
   }
 
@@ -186,7 +168,7 @@ class WeatherManager {
    * Handle remote weather change.
    * @param {object} data - Socket data
    */
-  handleRemoteWeatherChange(data) {
+  static handleRemoteWeatherChange(data) {
     this.#currentWeather = data.weather;
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous: null, current: data.weather, remote: true });
   }
@@ -197,32 +179,34 @@ class WeatherManager {
 
   /**
    * Generate and set weather based on active calendar's climate zone.
-   * @param {object} [options={}] - Generation options
+   * @param {object} [options] - Generation options
    * @param {string} [options.zoneId] - Zone ID override (uses active if not provided)
    * @param {string} [options.season] - Season override (uses current if not provided)
-   * @param {boolean} [options.broadcast=true] - Whether to broadcast
+   * @param {boolean} [options.broadcast] - Whether to broadcast
    * @returns {Promise<object>} Generated weather
    */
-  async generateAndSetWeather(options = {}) {
+  static async generateAndSetWeather(options = {}) {
     if (!game.user.isGM) {
       log(1, 'Only GMs can generate weather');
       return this.#currentWeather;
     }
 
     const zoneConfig = this.getActiveZone(options.zoneId);
-    if (!zoneConfig) {
-      log(2, 'No climate zone configured');
-      return this.#currentWeather;
-    }
-
     const season = options.season || this.#getCurrentSeasonName();
     const customPresets = this.getCustomPresets();
 
-    const result = generateWeather({
-      zoneConfig,
-      season,
-      customPresets
-    });
+    let result;
+    if (!zoneConfig) {
+      log(2, 'No climate zone configured, using random preset');
+      const allPresets = getAllPresets(customPresets);
+      const randomPreset = allPresets[Math.floor(Math.random() * allPresets.length)];
+      const min = randomPreset.tempMin ?? 10;
+      const max = randomPreset.tempMax ?? 25;
+      const temperature = Math.round(min + Math.random() * (max - min));
+      result = { preset: randomPreset, temperature };
+    } else {
+      result = generateWeather({ zoneConfig, season, customPresets });
+    }
 
     const weather = {
       id: result.preset.id,
@@ -243,18 +227,16 @@ class WeatherManager {
 
   /**
    * Generate a weather forecast using active calendar's zone config.
-   * @param {object} [options={}] - Forecast options
-   * @param {number} [options.days=7] - Number of days
+   * @param {object} [options] - Forecast options
+   * @param {number} [options.days] - Number of days
    * @param {string} [options.zoneId] - Zone ID override
    * @returns {object[]} Forecast array
    */
-  getForecast(options = {}) {
+  static getForecast(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
-
     const zoneConfig = this.getActiveZone(options.zoneId);
     if (!zoneConfig) return [];
-
     const days = options.days || 7;
     const customPresets = this.getCustomPresets();
     const components = game.time.components;
@@ -268,7 +250,7 @@ class WeatherManager {
       days,
       customPresets,
       getSeasonForDate: (year, month, day) => {
-        const season = calendar.getCurrentSeason?.({ month, dayOfMonth: day - 1 });
+        const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
         return season ? localize(season.name) : null;
       }
     });
@@ -278,16 +260,11 @@ class WeatherManager {
    * Handle day change for auto-generation.
    * @private
    */
-  async #onDayChange() {
-    // Check calendar's weather.autoGenerate flag
+  static async #onDayChange() {
     const calendar = CalendarManager.getActiveCalendar();
     const autoGenerate = calendar?.weather?.autoGenerate ?? false;
-
     if (!autoGenerate || !game.user.isGM) return;
-
-    // Only primary GM generates
     if (!CalendariaSocket.isPrimaryGM()) return;
-
     await this.generateAndSetWeather();
   }
 
@@ -296,10 +273,9 @@ class WeatherManager {
    * @returns {string|null} Season name
    * @private
    */
-  #getCurrentSeasonName() {
+  static #getCurrentSeasonName() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.getCurrentSeason) return null;
-
     const season = calendar.getCurrentSeason(game.time.components);
     return season ? localize(season.name) : null;
   }
@@ -310,23 +286,24 @@ class WeatherManager {
    * @returns {number|null} Generated temperature or null if no zone configured
    * @private
    */
-  #generateTemperatureForPreset(presetId) {
+  static #generateTemperatureForPreset(presetId) {
     const zoneConfig = this.getActiveZone();
-    if (!zoneConfig?.temperatures) return null;
+    if (!zoneConfig?.temperatures) {
+      const customPresets = this.getCustomPresets();
+      const preset = getPreset(presetId, customPresets);
+      const min = preset?.tempMin ?? 10;
+      const max = preset?.tempMax ?? 25;
+      return Math.round(min + Math.random() * (max - min));
+    }
 
     const season = this.#getCurrentSeasonName();
     const temps = zoneConfig.temperatures;
-
-    // Get base temperature range from season or default
     let tempRange = { min: 10, max: 22 };
     if (season && temps[season]) tempRange = temps[season];
     else if (temps._default) tempRange = temps._default;
-
-    // Apply preset-specific overrides if configured
     const presetConfig = zoneConfig.presets?.find((p) => p.id === presetId);
     if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
     if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
-
     return Math.round(tempRange.min + Math.random() * (tempRange.max - tempRange.min));
   }
 
@@ -339,10 +316,9 @@ class WeatherManager {
    * @param {string} [zoneId] - Optional zone ID override
    * @returns {object|null} Zone config object
    */
-  getActiveZone(zoneId) {
+  static getActiveZone(zoneId) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.weather?.zones?.length) return null;
-
     const targetId = zoneId ?? calendar.weather.activeZone ?? 'temperate';
     return calendar.weather.zones.find((z) => z.id === targetId) ?? calendar.weather.zones[0] ?? null;
   }
@@ -352,28 +328,16 @@ class WeatherManager {
    * @param {string} zoneId - Zone ID to set as active
    * @returns {Promise<void>}
    */
-  async setActiveZone(zoneId) {
-    if (!game.user.isGM) {
-      log(1, 'Only GMs can set active zone');
-      return;
-    }
-
+  static async setActiveZone(zoneId) {
+    if (!game.user.isGM) return;
     const calendarId = CalendarManager.getActiveCalendarId();
     if (!calendarId) return;
-
     const calendarData = CalendarManager.getCalendarData(calendarId);
     if (!calendarData?.weather) return;
-
-    // Validate zone exists
     const zone = calendarData.weather.zones?.find((z) => z.id === zoneId);
-    if (!zone) {
-      log(2, `Climate zone not found: ${zoneId}`);
-      return;
-    }
-
+    if (!zone) return;
     calendarData.weather.activeZone = zoneId;
     await CalendarManager.updateCalendar(calendarId, calendarData);
-
     log(3, `Active climate zone set to: ${zoneId}`);
   }
 
@@ -381,7 +345,7 @@ class WeatherManager {
    * Get all climate zones for the active calendar.
    * @returns {object[]} Array of zone config objects
    */
-  getCalendarZones() {
+  static getCalendarZones() {
     const calendar = CalendarManager.getActiveCalendar();
     return calendar?.weather?.zones ?? [];
   }
@@ -390,7 +354,7 @@ class WeatherManager {
    * Get all available climate zone templates.
    * @returns {object[]} Climate zone template objects
    */
-  getClimateZoneTemplates() {
+  static getClimateZoneTemplates() {
     return Object.values(CLIMATE_ZONE_TEMPLATES);
   }
 
@@ -402,7 +366,7 @@ class WeatherManager {
    * Get custom weather presets.
    * @returns {object[]} Custom presets
    */
-  getCustomPresets() {
+  static getCustomPresets() {
     return game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
   }
 
@@ -411,20 +375,15 @@ class WeatherManager {
    * @param {object} preset - Preset to add
    * @param {string} preset.id - Unique ID
    * @param {string} preset.label - Display label
-   * @param {string} [preset.icon='fa-question'] - Icon class
-   * @param {string} [preset.color='#888888'] - Display color
+   * @param {string} [preset.icon] - Icon class
+   * @param {string} [preset.color] - Display color
    * @param {string} [preset.description] - Description
    * @returns {Promise<object>} The added preset
    */
-  async addCustomPreset(preset) {
-    if (!game.user.isGM) {
-      log(1, 'Only GMs can add custom presets');
-      return null;
-    }
-
+  static async addCustomPreset(preset) {
+    if (!game.user.isGM) return null;
     const customPresets = this.getCustomPresets();
 
-    // Check for duplicate ID
     if (customPresets.some((p) => p.id === preset.id) || ALL_PRESETS.some((p) => p.id === preset.id)) {
       log(2, `Weather preset ID already exists: ${preset.id}`);
       ui.notifications.warn(format('CALENDARIA.Weather.Error.DuplicateId', { id: preset.id }));
@@ -443,23 +402,13 @@ class WeatherManager {
    * @param {string} presetId - Preset ID to remove
    * @returns {Promise<boolean>} True if removed
    */
-  async removeCustomPreset(presetId) {
-    if (!game.user.isGM) {
-      log(1, 'Only GMs can remove custom presets');
-      return false;
-    }
-
+  static async removeCustomPreset(presetId) {
+    if (!game.user.isGM) return false;
     const customPresets = this.getCustomPresets();
     const index = customPresets.findIndex((p) => p.id === presetId);
-
-    if (index === -1) {
-      log(2, `Custom preset not found: ${presetId}`);
-      return false;
-    }
-
+    if (index === -1) return false;
     customPresets.splice(index, 1);
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-
     log(3, `Removed custom weather preset: ${presetId}`);
     return true;
   }
@@ -470,26 +419,15 @@ class WeatherManager {
    * @param {object} updates - Updates to apply
    * @returns {Promise<object|null>} Updated preset or null
    */
-  async updateCustomPreset(presetId, updates) {
-    if (!game.user.isGM) {
-      log(1, 'Only GMs can update custom presets');
-      return null;
-    }
-
+  static async updateCustomPreset(presetId, updates) {
+    if (!game.user.isGM) return null;
     const customPresets = this.getCustomPresets();
     const index = customPresets.findIndex((p) => p.id === presetId);
-
-    if (index === -1) {
-      log(2, `Custom preset not found: ${presetId}`);
-      return null;
-    }
-
+    if (index === -1) return null;
     const preset = customPresets[index];
     Object.assign(preset, updates);
     preset.category = 'custom';
-
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-
     log(3, `Updated custom weather preset: ${presetId}`);
     return preset;
   }
@@ -502,7 +440,7 @@ class WeatherManager {
    * Get all weather presets (built-in + custom).
    * @returns {object[]} All presets
    */
-  getAllPresets() {
+  static getAllPresets() {
     return getAllPresets(this.getCustomPresets());
   }
 
@@ -511,7 +449,7 @@ class WeatherManager {
    * @param {string} presetId - Preset ID
    * @returns {object|null} Preset or null
    */
-  getPreset(presetId) {
+  static getPreset(presetId) {
     return getPreset(presetId, this.getCustomPresets());
   }
 
@@ -519,7 +457,7 @@ class WeatherManager {
    * Get presets grouped by category.
    * @returns {object} Presets by category
    */
-  getPresetsByCategory() {
+  static getPresetsByCategory() {
     const all = this.getAllPresets();
     const grouped = {};
     for (const category of Object.keys(WEATHER_CATEGORIES)) grouped[category] = all.filter((p) => p.category === category);
@@ -530,7 +468,7 @@ class WeatherManager {
    * Get weather categories.
    * @returns {object} Category definitions
    */
-  getCategories() {
+  static getCategories() {
     return WEATHER_CATEGORIES;
   }
 
@@ -543,15 +481,10 @@ class WeatherManager {
    * @param {number} celsius - Temperature in Celsius
    * @returns {string} Formatted temperature with unit symbol
    */
-  formatTemperature(celsius) {
+  static formatTemperature(celsius) {
     if (celsius == null) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
-    if (unit === 'fahrenheit') {
-      const fahrenheit = Math.round((celsius * 9) / 5 + 32);
-      return `${fahrenheit}°F`;
-    }
+    if (unit === 'fahrenheit') return `${Math.round((celsius * 9) / 5 + 32)}°F`;
     return `${Math.round(celsius)}°C`;
   }
 }
-
-export default new WeatherManager();

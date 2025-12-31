@@ -36,11 +36,19 @@ body:
   - type: input
     id: system-version
     attributes:
-      label: D&D Version
-      description: What version of the system?
-      placeholder: '5.1.2'
+      label: Game System
+      description: What game system and version? (e.g., dnd5e 5.2.4, pf2e 6.1.0)
+      placeholder: 'dnd5e 4.3.0'
     validations:
       required: true
+  - type: input
+    id: active-calendar
+    attributes:
+      label: Active Calendar
+      description: Which calendar are you using?
+      placeholder: 'Gregorian, Harptos, Custom, etc.'
+    validations:
+      required: false
   - type: textarea
     id: logs
     attributes:

@@ -1,38 +1,31 @@
 /**
  * Importer Registry
  * Central registry for all calendar importers.
- *
  * @module Importers
  * @author Tyler
  */
 
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
-import SimpleCalendarImporter from './simple-calendar-importer.mjs';
+import CalendariumImporter from './calendarium-importer.mjs';
 import FantasyCalendarImporter from './fantasy-calendar-importer.mjs';
 import SeasonsStarsImporter from './seasons-stars-importer.mjs';
+import SimpleCalendarImporter from './simple-calendar-importer.mjs';
 import SimpleTimekeepingImporter from './simple-timekeeping-importer.mjs';
-import CalendariumImporter from './calendarium-importer.mjs';
 
 /**
  * Registry of all available importers.
- * @type {Map<string, typeof BaseImporter>}
  */
 const IMPORTERS = new Map();
 
 /**
  * Register an importer class.
- * @param {typeof BaseImporter} ImporterClass - The importer class to register
+ * @param {object} ImporterClass - The importer class to register
  * @throws {Error} If importer is invalid or already registered
  */
 export function registerImporter(ImporterClass) {
   if (!ImporterClass?.id) throw new Error('Importer class must have a static id property');
-
-  if (IMPORTERS.has(ImporterClass.id)) {
-    log(2, `Importer ${ImporterClass.id} is already registered, skipping`);
-    return;
-  }
-
+  if (IMPORTERS.has(ImporterClass.id)) return;
   IMPORTERS.set(ImporterClass.id, ImporterClass);
   log(3, `Registered importer: ${ImporterClass.id}`);
 }
@@ -40,7 +33,7 @@ export function registerImporter(ImporterClass) {
 /**
  * Get an importer class by ID.
  * @param {string} id - Importer ID
- * @returns {typeof BaseImporter|undefined}
+ * @returns {object|undefined} - Importer object
  */
 export function getImporter(id) {
   return IMPORTERS.get(id);
@@ -48,7 +41,7 @@ export function getImporter(id) {
 
 /**
  * Get all registered importers.
- * @returns {Array<typeof BaseImporter>}
+ * @returns {Array<object>} - All importer objects
  */
 export function getAvailableImporters() {
   return [...IMPORTERS.values()];
@@ -56,7 +49,7 @@ export function getAvailableImporters() {
 
 /**
  * Get importers that have detected their source module as installed.
- * @returns {Array<typeof BaseImporter>}
+ * @returns {Array<object>} - Active importers
  */
 export function getDetectedImporters() {
   return getAvailableImporters().filter((importer) => importer.supportsLiveImport && importer.detect());
@@ -64,7 +57,7 @@ export function getDetectedImporters() {
 
 /**
  * Get importer options for UI dropdowns.
- * @returns {Array<{value: string, label: string, icon: string, detected: boolean}>}
+ * @returns {Array<{value: string, label: string, icon: string, detected: boolean}>} - Importer options
  */
 export function getImporterOptions() {
   return getAvailableImporters().map((importer) => ({
@@ -81,14 +74,11 @@ export function getImporterOptions() {
 /**
  * Create an instance of an importer.
  * @param {string} id - Importer ID
- * @returns {BaseImporter|null}
+ * @returns {BaseImporter|null} - New Importer
  */
 export function createImporter(id) {
   const ImporterClass = IMPORTERS.get(id);
-  if (!ImporterClass) {
-    log(2, `Unknown importer: ${id}`);
-    return null;
-  }
+  if (!ImporterClass) return null;
   return new ImporterClass();
 }
 
@@ -97,17 +87,10 @@ export function createImporter(id) {
  * Registers all built-in importers.
  */
 export function initializeImporters() {
-  log(3, 'Initializing importer registry...');
-
-  // Register built-in importers
   registerImporter(SimpleCalendarImporter);
   registerImporter(FantasyCalendarImporter);
   registerImporter(SeasonsStarsImporter);
   registerImporter(SimpleTimekeepingImporter);
   registerImporter(CalendariumImporter);
-
   log(3, `Importer registry initialized with ${IMPORTERS.size} importers`);
 }
-
-// Re-export base class for subclassing
-export { default as BaseImporter } from './base-importer.mjs';

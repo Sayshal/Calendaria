@@ -1,16 +1,10 @@
-{{!-- Time Rotation Dial Template --}}
 <div class="dial-backdrop"></div>
 <div class="dial-container">
   <div class="dial-sky">
-    {{!-- Stars layer --}}
     <div class="dial-stars"></div>
-
-    {{!-- Sun/Moon layer --}}
     <div class="dial-sun">
       <div class="dial-moon-orb"></div>
     </div>
-
-    {{!-- Hour markers SVG overlay --}}
     <svg class="dial-markers" viewBox="0 0 200 200">
       {{#each hourMarkers}}
         <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" stroke="rgba(255, 255, 255, 0.5)"
@@ -21,15 +15,11 @@
         {{/if}}
       {{/each}}
     </svg>
-
-    {{!-- Draggable handle --}}
     <div class="dial-handle-container">
       <div class="dial-handle"></div>
     </div>
   </div>
-
-  {{!-- Center time display --}}
   <div class="dial-time-display">
-    <input type="text" class="dial-time" value="{{currentTime}}" />
+    <input type="text" class="dial-time" value="{{currentTime}}">
   </div>
 </div>

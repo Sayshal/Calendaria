@@ -1,17 +1,16 @@
 /**
  * Simple Calendar Importer
  * Imports calendar data from the Simple Calendar module.
- *
  * @module Importers/SimpleCalendarImporter
  * @author Tyler
  */
 
-import BaseImporter from './base-importer.mjs';
-import { ASSETS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { ASSETS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
+import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Simple Calendar module data.
@@ -42,12 +41,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   async loadFromModule() {
     if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.SimpleCalendar.NotInstalled'));
-
-    // SC stores calendar data in settings
     const calendars = game.settings.get('foundryvtt-simple-calendar', 'calendar-configuration') || [];
     if (!calendars.length) throw new Error(localize('CALENDARIA.Importer.SimpleCalendar.NoCalendars'));
-
-    // Get notes from the SC notes folder
     const notesFolder = game.folders.find((f) => f.getFlag('foundryvtt-simple-calendar', 'root') === true);
     const notes = {};
     if (notesFolder) {
@@ -71,62 +66,33 @@ export default class SimpleCalendarImporter extends BaseImporter {
   /**
    * Transform Simple Calendar data into CalendariaCalendar format.
    * @param {object} data - Raw SC export data
-   * @param {number} [calendarIndex=0] - Index of calendar to import (if multiple)
+   * @param {number} [calendarIndex] - Index of calendar to import (if multiple)
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data, calendarIndex = 0) {
-    // Handle both export format and direct calendar array
     const calendars = data.calendars || data;
     const calendar = Array.isArray(calendars) ? calendars[calendarIndex] : calendars;
-
     if (!calendar) throw new Error('No calendar found in import data');
-
     log(3, 'Transforming Simple Calendar data:', calendar.name || calendar.id);
-
-    // Transform weekdays first (needed for startingWeekday mapping)
     const weekdays = this.#transformWeekdays(calendar.weekdays);
-
-    // Build map from SC numericRepresentation to our array index
     const weekdayNumericToIndex = new Map();
     (calendar.weekdays || []).forEach((wd, idx) => {
       weekdayNumericToIndex.set(wd.numericRepresentation, idx);
     });
 
-    // Transform months (needs weekday map for startingWeekday)
     const months = this.#transformMonths(calendar.months, weekdayNumericToIndex);
     const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
-
     return {
       name: calendar.name || 'Imported Calendar',
-
-      // Days configuration (weekdays + time)
       days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
-
-      // Months
       months: { values: months },
-
-      // Years and leap year (Foundry format)
       years: this.#transformYears(calendar.year, calendar.leapYear),
-
-      // Advanced leap year config (Calendaria format)
       leapYearConfig: this.#transformLeapYearConfig(calendar.leapYear),
-
-      // Seasons (needs months to calculate day of year)
-      seasons: { values: this.#transformSeasons(calendar.seasons, months, calendar.months) },
-
-      // Moons
+      seasons: { values: this.#transformSeasons(calendar.seasons, calendar.months) },
       moons: this.#transformMoons(calendar.moons),
-
-      // Festivals (from intercalary months)
       festivals: this.#extractFestivals(calendar.months),
-
-      // Eras (from year prefix/postfix)
       eras: this.#transformEras(calendar.year),
-
-      // Daylight configuration from seasons
-      daylight: this.#transformDaylight(calendar.seasons, calendar.time),
-
-      // Metadata
+      daylight: this.#transformDaylight(calendar.seasons),
       metadata: { description: `Imported from Simple Calendar`, system: calendar.name || 'Unknown', importedFrom: 'simple-calendar', originalId: calendar.id }
     };
   }
@@ -141,11 +107,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria days config
    */
   #transformTime(time = {}) {
-    return {
-      hoursPerDay: time.hoursInDay ?? 24,
-      minutesPerHour: time.minutesInHour ?? 60,
-      secondsPerMinute: time.secondsInMinute ?? 60
-    };
+    return { hoursPerDay: time.hoursInDay ?? 24, minutesPerHour: time.minutesInHour ?? 60, secondsPerMinute: time.secondsInMinute ?? 60 };
   }
 
   /**
@@ -156,14 +118,13 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   #transformMonths(months = [], weekdayNumericToIndex = new Map()) {
     return months
-      .filter((m) => !m.intercalary) // Filter out intercalary months (become festivals)
+      .filter((m) => !m.intercalary)
       .map((month, index) => ({
         name: month.name,
         abbreviation: month.abbreviation || month.name.substring(0, 3),
         days: month.numberOfDays,
         leapDays: month.numberOfLeapYearDays !== month.numberOfDays ? month.numberOfLeapYearDays : undefined,
         ordinal: month.numericRepresentation || index + 1,
-        // Convert SC's numericRepresentation-based startingWeekday to our array index
         startingWeekday: month.startingWeekday != null ? (weekdayNumericToIndex.get(month.startingWeekday) ?? null) : null
       }));
   }
@@ -175,24 +136,19 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object[]} Calendaria weekdays array
    */
   #transformWeekdays(weekdays = []) {
-    // Default to standard 7-day week if no weekdays defined
     if (!weekdays?.length) {
       return [
-        { name: 'Sunday', abbreviation: 'Su', ordinal: 1 },
-        { name: 'Monday', abbreviation: 'Mo', ordinal: 2 },
-        { name: 'Tuesday', abbreviation: 'Tu', ordinal: 3 },
-        { name: 'Wednesday', abbreviation: 'We', ordinal: 4 },
-        { name: 'Thursday', abbreviation: 'Th', ordinal: 5 },
-        { name: 'Friday', abbreviation: 'Fr', ordinal: 6 },
-        { name: 'Saturday', abbreviation: 'Sa', ordinal: 7 }
+        { name: 'CALENDARIA.Weekday.Sunday', abbreviation: 'CALENDARIA.Weekday.SundayShort', ordinal: 1 },
+        { name: 'CALENDARIA.Weekday.Monday', abbreviation: 'CALENDARIA.Weekday.MondayShort', ordinal: 2 },
+        { name: 'CALENDARIA.Weekday.Tuesday', abbreviation: 'CALENDARIA.Weekday.TuesdayShort', ordinal: 3 },
+        { name: 'CALENDARIA.Weekday.Wednesday', abbreviation: 'CALENDARIA.Weekday.WednesdayShort', ordinal: 4 },
+        { name: 'CALENDARIA.Weekday.Thursday', abbreviation: 'CALENDARIA.Weekday.ThursdayShort', ordinal: 5 },
+        { name: 'CALENDARIA.Weekday.Friday', abbreviation: 'CALENDARIA.Weekday.FridayShort', ordinal: 6 },
+        { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
 
-    return weekdays.map((day, index) => ({
-      name: day.name,
-      abbreviation: day.abbreviation || day.name.substring(0, 2),
-      ordinal: day.numericRepresentation || index + 1
-    }));
+    return weekdays.map((day, index) => ({ name: day.name, abbreviation: day.abbreviation || day.name.substring(0, 2), ordinal: day.numericRepresentation || index + 1 }));
   }
 
   /**
@@ -202,13 +158,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria years config (Foundry format)
    */
   #transformYears(year = {}, leapYear = {}) {
-    const result = {
-      yearZero: year.yearZero ?? 0,
-      firstWeekday: year.firstWeekday ?? 0,
-      leapYear: null // Default to no leap year
-    };
-
-    // Transform leap year rule to Foundry format (leapStart, leapInterval)
+    const result = { yearZero: year.yearZero ?? 0, firstWeekday: year.firstWeekday ?? 0, leapYear: null };
     if (leapYear.rule === 'gregorian') result.leapYear = { leapStart: 0, leapInterval: 4 };
     else if (leapYear.rule === 'custom' && leapYear.customMod > 0) result.leapYear = { leapStart: 0, leapInterval: leapYear.customMod };
     return result;
@@ -229,11 +179,10 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * Transform SC seasons to Calendaria format.
    * Calculates dayStart/dayEnd from month positions.
    * @param {object[]} seasons - SC seasons array
-   * @param {object[]} transformedMonths - Already transformed months array
    * @param {object[]} scMonths - Original SC months array (for day calculations)
    * @returns {object[]} Calendaria seasons array
    */
-  #transformSeasons(seasons = [], transformedMonths = [], scMonths = []) {
+  #transformSeasons(seasons = [], scMonths = []) {
     if (!seasons.length) return [];
     const monthDayStarts = [];
     let dayCount = 0;
@@ -242,8 +191,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
       dayCount += month.numberOfDays || 0;
     }
     const totalDays = dayCount;
-
-    // Sort seasons by start date to calculate end dates
     const sortedSeasons = [...seasons].sort((a, b) => {
       const aDay = monthDayStarts[a.startingMonth] + (a.startingDay ?? 0);
       const bDay = monthDayStarts[b.startingMonth] + (b.startingDay ?? 0);
@@ -251,15 +198,11 @@ export default class SimpleCalendarImporter extends BaseImporter {
     });
 
     return sortedSeasons.map((season, index) => {
-      // Calculate dayStart (0-indexed day of year)
       const dayStart = monthDayStarts[season.startingMonth] + (season.startingDay ?? 0);
-
-      // dayEnd is the day before the next season starts (wrapping around)
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
       let dayEnd = monthDayStarts[nextSeason.startingMonth] + (nextSeason.startingDay ?? 0) - 1;
-      if (dayEnd < dayStart) dayEnd += totalDays; // Wrap around year
+      if (dayEnd < dayStart) dayEnd += totalDays;
       if (dayEnd < 0) dayEnd = totalDays - 1;
-
       return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd };
     });
   }
@@ -289,7 +232,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
   #transformMoonPhases(phases = [], cycleLength = 29.5) {
     const result = [];
     let currentPosition = 0;
-
     for (const phase of phases) {
       const length = phase.length || 1;
       const start = currentPosition / cycleLength;
@@ -297,7 +239,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
       result.push({ name: phase.name, icon: this.#mapMoonPhaseIcon(phase.icon), start: Math.min(start, 0.999), end: Math.min(end, 1) });
       currentPosition += length;
     }
-
     return result;
   }
 
@@ -339,8 +280,9 @@ export default class SimpleCalendarImporter extends BaseImporter {
     let regularMonthIndex = 0;
     for (const month of months) {
       if (month.intercalary) {
-        for (let day = 1; day <= month.numberOfDays; day++)
+        for (let day = 1; day <= month.numberOfDays; day++) {
           festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, startDate: { month: regularMonthIndex, day: day } });
+        }
       } else {
         regularMonthIndex++;
       }
@@ -364,30 +306,21 @@ export default class SimpleCalendarImporter extends BaseImporter {
   /**
    * Transform season sunrise/sunset into daylight configuration.
    * @param {object[]} seasons - SC seasons array
-   * @param {object} time - SC time config
    * @returns {object} Calendaria daylight config
    */
-  #transformDaylight(seasons = [], time = {}) {
+  #transformDaylight(seasons = []) {
     if (!seasons.length) return { enabled: false };
-
-    const secondsPerDay = (time.hoursInDay ?? 24) * (time.minutesInHour ?? 60) * (time.secondsInMinute ?? 60);
-
-    // Find shortest and longest day from season sunrise/sunset
     let shortestDaylight = Infinity;
     let longestDaylight = 0;
-
     for (const season of seasons) {
       if (season.sunriseTime != null && season.sunsetTime != null) {
-        const daylight = (season.sunsetTime - season.sunriseTime) / 3600; // Convert to hours
+        const daylight = (season.sunsetTime - season.sunriseTime) / 3600;
         if (daylight < shortestDaylight) shortestDaylight = daylight;
         if (daylight > longestDaylight) longestDaylight = daylight;
       }
     }
 
-    if (shortestDaylight === Infinity || longestDaylight === 0) {
-      return { enabled: false };
-    }
-
+    if (shortestDaylight === Infinity || longestDaylight === 0) return { enabled: false };
     return { enabled: true, shortestDay: Math.round(shortestDaylight), longestDay: Math.round(longestDaylight) };
   }
 
@@ -404,25 +337,18 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const notes = data.notes || {};
     log(3, `extractNotes - Available note calendars in data:`, Object.keys(notes));
 
-    // Iterate over all calendar note arrays (extract from all SC calendars)
     const allNotes = [];
     for (const [calId, calendarNotes] of Object.entries(notes)) {
       log(3, `Processing notes from SC calendar: ${calId} (${calendarNotes?.length || 0} notes)`);
-
       for (const note of calendarNotes) {
         const noteData = note.flags?.['foundryvtt-simple-calendar']?.noteData;
         if (!noteData) {
           log(3, `Skipping note without noteData flag: ${note.name}`);
           continue;
         }
-
-        // Extract content from first page
         const content = note.pages?.[0]?.text?.content || '';
-
-        // Determine suggested type: festival if no meaningful content, note otherwise
         const hasContent = content && content.trim().length > 0;
         const suggestedType = hasContent ? 'note' : 'festival';
-
         allNotes.push({
           name: note.name,
           content,
@@ -441,50 +367,33 @@ export default class SimpleCalendarImporter extends BaseImporter {
     return allNotes;
   }
 
-  /**
-   * Import notes into Calendaria.
-   * @param {object[]} notes - Extracted note data
-   * @param {object} options - Import options
-   * @param {string} options.calendarId - Target calendar ID
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
-   * @override
-   */
+  /** @override */
   async importNotes(notes, options = {}) {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-
-    // Get calendar's yearZero to convert SC internal years to display years
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     log(3, `Calendar yearZero: ${yearZero}`);
-
     for (const note of notes) {
       try {
         log(3, `Importing note: ${note.name}`, note);
-
-        // Convert SC internal years to display years (add yearZero)
-        // SC internal 795 + yearZero 1970 = display 2765
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
         log(3, `Note data prepared:`, noteData);
-
-        // Create note via NoteManager
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
           log(3, `Successfully created note: ${note.name} (${page.id})`);
         } else {
           errors.push(`Failed to create note: ${note.name}`);
-          log(2, `Failed to create note: ${note.name}`);
+          log(1, `Failed to create note: ${note.name}`);
         }
       } catch (error) {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
-        log(2, `Error importing note "${note.name}":`, error);
+        log(1, `Error importing note "${note.name}":`, error);
       }
     }
 
@@ -492,46 +401,26 @@ export default class SimpleCalendarImporter extends BaseImporter {
     return { success: errors.length === 0, count, errors };
   }
 
-  /**
-   * Import festivals (fixed calendar events) into the calendar definition.
-   * @param {object[]} festivals - Extracted festival data
-   * @param {object} options - Import options
-   * @param {string} options.calendarId - Target calendar ID
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
-   * @override
-   */
+  /** @override */
   async importFestivals(festivals, options = {}) {
     const { calendarId } = options;
     const errors = [];
-
     log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
-
-    // Get current calendar
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
-
-    // Build new festivals array
     const existingFestivals = calendar.festivals || [];
     const newFestivals = [];
-
     for (const festival of festivals) {
       try {
-        // Festival format: { name, month (1-indexed), day }
-        const festivalData = {
-          name: festival.name,
-          month: (festival.startDate.month ?? 0) + 1, // Convert 0-indexed to 1-indexed
-          day: (festival.startDate.day ?? 0) + 1 // Convert 0-indexed to 1-indexed
-        };
-
+        const festivalData = { name: festival.name, month: (festival.startDate.month ?? 0) + 1, day: (festival.startDate.day ?? 0) + 1 };
         log(3, `Adding festival: ${festivalData.name} on ${festivalData.month}/${festivalData.day}`);
         newFestivals.push(festivalData);
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);
-        log(2, `Error processing festival "${festival.name}":`, error);
+        log(1, `Error processing festival "${festival.name}":`, error);
       }
     }
 
-    // Update calendar with merged festivals
     if (newFestivals.length > 0) {
       try {
         const mergedFestivals = [...existingFestivals, ...newFestivals];
@@ -539,7 +428,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         log(3, `Festival import complete: ${newFestivals.length} festivals added`);
       } catch (error) {
         errors.push(`Error saving festivals: ${error.message}`);
-        log(2, 'Error saving festivals:', error);
+        log(1, 'Error saving festivals:', error);
       }
     }
 

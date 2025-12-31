@@ -1,0 +1,33 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <div class="form-group stacked button-row open-app-button">
+    <button type="button" data-action="openTimeKeeper">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.Common.Open"}}
+    </button>
+  </div>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.ShowTimeKeeper.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="showTimeKeeper" {{#if showTimeKeeper}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
+
+    <div class="form-group stacked button-row">
+      <button type="button" data-action="resetPosition" data-target="timekeeper">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
+      </button>
+    </div>
+  </fieldset>
+
+</section>

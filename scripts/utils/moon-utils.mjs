@@ -1,7 +1,6 @@
 /**
  * Moon Utility Functions
  * Provides calendar-agnostic moon phase calculations.
- *
  * @module Utils/MoonUtils
  * @author Tyler
  */
@@ -18,7 +17,6 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 export function getMoonPhasePosition(moon, date, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   if (!calendar || !moon) return 0;
-
   const daysBetween = calculateDaysBetween(moon.referenceDate, date, calendar);
   const cyclePosition = ((daysBetween % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
   return cyclePosition / moon.cycleLength;
@@ -48,15 +46,9 @@ export function isMoonFull(moon, date, calendar = null) {
 export function getNextConvergence(moons, startDate, options = {}) {
   const { maxDays = 1000, calendar: providedCalendar } = options;
   const calendar = providedCalendar || CalendarManager.getActiveCalendar();
-
   if (!calendar || !moons || moons.length === 0) return null;
-
-  // Single moon - just find next full moon
   if (moons.length === 1) return getNextFullMoon(moons[0], startDate, { maxDays, calendar });
-
-  // Multiple moons - find when all are full simultaneously
   let currentDate = { ...startDate };
-
   for (let i = 0; i < maxDays; i++) {
     const allFull = moons.every((moon) => isMoonFull(moon, currentDate, calendar));
     if (allFull) return currentDate;
@@ -76,11 +68,8 @@ export function getNextConvergence(moons, startDate, options = {}) {
 export function getNextFullMoon(moon, startDate, options = {}) {
   const { maxDays = 1000, calendar: providedCalendar } = options;
   const calendar = providedCalendar || CalendarManager.getActiveCalendar();
-
   if (!calendar || !moon) return null;
-
   let currentDate = { ...startDate };
-
   for (let i = 0; i < maxDays; i++) {
     if (isMoonFull(moon, currentDate, calendar)) return currentDate;
     currentDate = addOneDay(currentDate, calendar);
@@ -100,16 +89,13 @@ export function getNextFullMoon(moon, startDate, options = {}) {
 export function getConvergencesInRange(moons, startDate, endDate, options = {}) {
   const calendar = options.calendar || CalendarManager.getActiveCalendar();
   if (!calendar || !moons || moons.length === 0) return [];
-
   const convergences = [];
   let currentDate = { ...startDate };
-  let maxIterations = 10000; // Safety limit
-
+  let maxIterations = 10000;
   while (compareDates(currentDate, endDate) <= 0 && maxIterations-- > 0) {
     const allFull = moons.every((moon) => isMoonFull(moon, currentDate, calendar));
     if (allFull) {
       convergences.push({ ...currentDate });
-      // Skip ahead past the full moon phase to avoid duplicates
       for (let skip = 0; skip < 5; skip++) currentDate = addOneDay(currentDate, calendar);
     } else {
       currentDate = addOneDay(currentDate, calendar);
@@ -141,15 +127,9 @@ function calculateDaysBetween(date1, date2, calendar) {
 function dateToDayNumber(date, calendar) {
   const daysPerYear = calendar.days?.daysPerYear ?? 365;
   const months = calendar.months?.values ?? [];
-
   let dayNumber = date.year * daysPerYear;
-
-  // Add days for completed months
   for (let m = 0; m < date.month && m < months.length; m++) dayNumber += months[m]?.days ?? 30;
-
-  // Add day within month (convert from 1-indexed to 0-indexed)
   dayNumber += (date.day ?? 1) - 1;
-
   return dayNumber;
 }
 
@@ -162,16 +142,11 @@ function dateToDayNumber(date, calendar) {
 function addOneDay(date, calendar) {
   const months = calendar.months?.values ?? [];
   let { year, month, day } = date;
-
   day++;
-
-  // Check if we've exceeded the days in this month
   const daysInMonth = months[month]?.days ?? 30;
   if (day > daysInMonth) {
     day = 1;
     month++;
-
-    // Check if we've exceeded the months in this year
     if (month >= months.length) {
       month = 0;
       year++;

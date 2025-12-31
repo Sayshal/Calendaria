@@ -2,7 +2,6 @@
  * Climate zone templates for procedural weather generation.
  * Each template defines default temperature ranges and weather probabilities by season.
  * Templates can be copied to create calendar-specific climate zones.
- *
  * @module Weather/ClimateData
  * @author Tyler
  */
@@ -13,7 +12,6 @@ import { ALL_PRESETS } from './weather-presets.mjs';
  * Climate zone template definitions.
  * Weather probabilities are relative weights (higher = more likely).
  * Temperatures are stored per-season with a _default fallback.
- *
  * @type {object}
  */
 export const CLIMATE_ZONE_TEMPLATES = {
@@ -121,32 +119,26 @@ export function getClimateZoneTemplateIds() {
  * Get a fully populated zone config object from a template.
  * Includes preset configurations based on the template's weather probabilities.
  * @param {string} templateId - Climate zone template ID
- * @param {string[]} [seasonNames=['Spring', 'Summer', 'Autumn', 'Winter']] - Season names for temperature keys
+ * @param {string[]} [seasonNames] - Season names for temperature keys
  * @returns {object|null} Populated zone config object
  */
-export function getDefaultZoneConfig(templateId, seasonNames = ['Spring', 'Summer', 'Autumn', 'Winter']) {
+export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter']) {
   const template = getClimateZoneTemplate(templateId);
   if (!template) return null;
-
-  // Build temperatures object using provided season names
   const temperatures = { _default: template.temperatures._default ?? { min: 10, max: 22 } };
   for (const season of seasonNames) {
-    // Try to match season name to template temperatures
     const templateTemp = template.temperatures[season] ?? template.temperatures[season.toLowerCase()] ?? template.temperatures._default;
     if (templateTemp) temperatures[season] = { ...templateTemp };
   }
 
-  // Build preset configurations from weather probabilities
   const presets = [];
   const defaultWeather = template.weather?.default ?? {};
   const totalWeight = Object.values(defaultWeather).reduce((sum, w) => sum + w, 0);
-
   for (const preset of ALL_PRESETS) {
     const weight = defaultWeather[preset.id] ?? 0;
     const chance = totalWeight > 0 ? Math.round((weight / totalWeight) * 100 * 100) / 100 : 0;
     presets.push({ id: preset.id, enabled: weight > 0, chance, tempMin: preset.tempMin ?? null, tempMax: preset.tempMax ?? null });
   }
-
   return { id: template.id, name: template.name, description: template.description ?? '', temperatures, presets };
 }
 
@@ -157,15 +149,11 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['Spring', 'Summe
  */
 export function normalizeSeasonName(seasonName) {
   if (!seasonName) return 'default';
-
   const lower = seasonName.toLowerCase();
-
-  // Common mappings
   if (lower.includes('spring') || lower.includes('vernal')) return 'spring';
   if (lower.includes('summer') || lower.includes('estival')) return 'summer';
   if (lower.includes('autumn') || lower.includes('fall') || lower.includes('autumnal')) return 'autumn';
   if (lower.includes('winter') || lower.includes('hibernal')) return 'winter';
-
   return 'default';
 }
 

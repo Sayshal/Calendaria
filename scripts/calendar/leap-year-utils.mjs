@@ -1,18 +1,17 @@
 /**
  * Leap Year Pattern Utilities
  * Evaluates complex leap year patterns like "400,!100,4" (Gregorian rules).
- *
  * @module Calendar/LeapYearUtils
  * @author Tyler
  */
 
-import { localize, format } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 
 /**
  * Parse a single interval string into an interval object.
  * @param {string|number} intervalStr - Interval string like "4", "!100", or "+400"
  * @param {number} offset - Offset for modulo calculation (typically leapStart)
- * @returns {{interval: number, subtracts: boolean, offset: number}}
+ * @returns {{interval: number, subtracts: boolean, offset: number}} - Parsed interval object
  */
 export function parseInterval(intervalStr, offset = 0) {
   const str = String(intervalStr).trim();
@@ -26,8 +25,8 @@ export function parseInterval(intervalStr, offset = 0) {
 /**
  * Parse a full pattern string into an array of interval objects.
  * @param {string} pattern - Pattern string like "400,!100,4"
- * @param {number} [offset=0] - Offset for modulo (typically leapStart)
- * @returns {Array<{interval: number, subtracts: boolean, offset: number}>}
+ * @param {number} [offset] - Offset for modulo (typically leapStart)
+ * @returns {Array<{interval: number, subtracts: boolean, offset: number}>} - Array of interval objects
  */
 export function parsePattern(pattern, offset = 0) {
   if (!pattern || typeof pattern !== 'string') return [];
@@ -40,10 +39,10 @@ export function parsePattern(pattern, offset = 0) {
 
 /**
  * Get vote for a single interval on a given year.
- * @param {{interval: number, subtracts: boolean, offset: number}} intervalObj
+ * @param {{interval: number, subtracts: boolean, offset: number}} intervalObj - Interval config object
  * @param {number} year - Year to check
- * @param {boolean} [yearZeroExists=true] - Whether year 0 exists in the calendar
- * @returns {'allow'|'deny'|'abstain'}
+ * @param {boolean} [yearZeroExists] - Whether year 0 exists in the calendar
+ * @returns {'allow'|'deny'|'abstain'} - Vote result
  */
 export function voteOnYear(intervalObj, year, yearZeroExists = true) {
   let mod = year - intervalObj.offset;
@@ -54,10 +53,10 @@ export function voteOnYear(intervalObj, year, yearZeroExists = true) {
 
 /**
  * Determine if a year is a leap year using interval pattern voting.
- * @param {Array<{interval: number, subtracts: boolean, offset: number}>} intervals
+ * @param {Array<{interval: number, subtracts: boolean, offset: number}>} intervals - Parsed intervals
  * @param {number} year - Year to check
- * @param {boolean} [yearZeroExists=true] - Whether year 0 exists
- * @returns {boolean}
+ * @param {boolean} [yearZeroExists] - Whether year 0 exists
+ * @returns {boolean} - Is leap year?
  */
 export function intersectsYear(intervals, year, yearZeroExists = true) {
   if (!intervals || intervals.length === 0) return false;
@@ -73,20 +72,18 @@ export function intersectsYear(intervals, year, yearZeroExists = true) {
 /**
  * Check if a year is a leap year based on leap year configuration.
  * @param {object} leapYearConfig - Leap year configuration object
- * @param {string} [leapYearConfig.rule='none'] - Rule type
+ * @param {string} [leapYearConfig.rule] - Rule type
  * @param {number} [leapYearConfig.interval] - Simple interval (for 'simple' rule)
- * @param {number} [leapYearConfig.start=0] - First leap year (offset)
+ * @param {number} [leapYearConfig.start] - First leap year (offset)
  * @param {string} [leapYearConfig.pattern] - Custom pattern (for 'custom' rule)
  * @param {number} year - Year to check
- * @param {boolean} [yearZeroExists=true] - Whether year 0 exists
- * @returns {boolean}
+ * @param {boolean} [yearZeroExists] - Whether year 0 exists
+ * @returns {boolean} - Is leap year?
  */
 export function isLeapYear(leapYearConfig, year, yearZeroExists = true) {
   if (!leapYearConfig) return false;
-
   const rule = leapYearConfig.rule || 'none';
   const start = leapYearConfig.start ?? leapYearConfig.leapStart ?? 0;
-
   switch (rule) {
     case 'none':
       return false;
@@ -114,13 +111,11 @@ export function isLeapYear(leapYearConfig, year, yearZeroExists = true) {
 /**
  * Get a human-readable description of a leap year rule.
  * @param {object} leapYearConfig - Leap year configuration
- * @returns {string}
+ * @returns {string} - Human-readable description
  */
 export function getLeapYearDescription(leapYearConfig) {
   if (!leapYearConfig) return localize('CALENDARIA.LeapYear.None');
-
   const rule = leapYearConfig.rule || 'none';
-
   switch (rule) {
     case 'none':
       return localize('CALENDARIA.LeapYear.None');

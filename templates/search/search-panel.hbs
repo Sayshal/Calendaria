@@ -1,0 +1,22 @@
+<div class="calendaria-hud-search-panel{{#if searchOpen}} visible{{/if}}">
+  <div class="search-panel-header">
+    <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
+      value="{{searchTerm}}" autocomplete="off">
+  </div>
+  <div class="search-panel-results">
+    {{#if searchResults.length}}
+      {{#each searchResults}}
+        <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}"
+          data-journal-id="{{data.journalId}}">
+          <span class="result-name">{{name}}</span>
+          {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+        </div>
+      {{/each}}
+    {{else if searchTerm}}
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <span>{{localize "CALENDARIA.Search.NoResults"}}</span>
+      </div>
+    {{/if}}
+  </div>
+</div>

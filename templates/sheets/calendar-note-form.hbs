@@ -1,14 +1,15 @@
 <div class="calendar-note-form">
-  {{log 'DEBUG' this}}
-  {{!-- Row 1: Title | Emblem | Visibility --}}
   <div class="form-row-1">
-    <fieldset class="title-fieldset">
-      <legend>Title</legend>
-      <input type="text" id="note-name" name="name" value="{{name}}" placeholder="{{localize 'CALENDARIA.Note.NewNote'}}" />
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Note.Title"}}</legend>
+      <div class="inline-form">
+        <input type="text" id="note-name" name="name" value="{{name}}"
+          placeholder="{{localize 'CALENDARIA.Note.NewNote'}}" style="flex: 1;">
+      </div>
     </fieldset>
 
-    <fieldset class="emblem-fieldset">
-      <legend>Emblem</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Note.Emblem"}}</legend>
       <div class="emblem-controls">
         <div class="icon-picker" data-action="selectIcon" data-icon-type="{{iconType}}"
           data-tooltip="CALENDARIA.UI.IconPickerTooltip">
@@ -16,357 +17,555 @@
             <i class="{{system.icon}} icon-preview" style="color: {{system.color}}"></i>
           {{else}}
             <img src="{{system.icon}}" alt="Note Icon" class="icon-preview"
-              style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);" />
+              style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);">
           {{/if}}
-          <input type="hidden" name="system.icon" value="{{system.icon}}" />
-          <input type="hidden" name="system.iconType" value="{{iconType}}" />
+          <input type="hidden" name="system.icon" value="{{system.icon}}">
+          <input type="hidden" name="system.iconType" value="{{iconType}}">
         </div>
         <input type="color" name="system.color" value="{{system.color}}" class="color-input"
-          data-tooltip="CALENDARIA.UI.ColorTooltip" />
+          data-tooltip="CALENDARIA.UI.ColorTooltip">
       </div>
     </fieldset>
 
-    <fieldset class="visibility-fieldset">
-      <legend>Visibility</legend>
-      <label class="visibility-control">
-        <input type="checkbox" name="system.gmOnly" {{checked system.gmOnly}}
-          data-tooltip="CALENDARIA.UI.GmOnlyTooltip" />
-        GM Only
-      </label>
-      <label class="visibility-control">
-        <input type="checkbox" name="system.silent" {{checked system.silent}}
-          data-tooltip="CALENDARIA.UI.SilentTooltip" />
-        Don't Announce
-      </label>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Note.Visibility"}}</legend>
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" name="system.gmOnly" {{checked
+                        system.gmOnly}} data-tooltip="CALENDARIA.UI.GmOnlyTooltip">
+          {{localize "CALENDARIA.Common.GMOnly"}}
+        </label>
+        <label>
+          <input type="checkbox" name="system.silent" {{checked
+                        system.silent}} data-tooltip="CALENDARIA.UI.SilentTooltip">
+          {{localize "CALENDARIA.Note.Silent"}}
+        </label>
+      </div>
     </fieldset>
   </div>
 
-  {{!-- Row 2: Date | Time | Repeat --}}
+  <fieldset class="editor-fieldset">
+    <legend>{{localize "CALENDARIA.Note.Content"}}</legend>
+    <prose-mirror id="note-content" name="text.content" value="{{text.content}}"
+      aria-label="{{localize 'CALENDARIA.Note.Content'}}"></prose-mirror>
+  </fieldset>
+
   <div class="form-row-2">
     <fieldset class="date-fieldset">
-      <legend>Date</legend>
-      <div class="date-inputs">
-        <div class="date-row">
-          <label>Start</label>
-          <button type="button" class="date-picker-button" data-action="selectDate" data-date-field="startDate"
-            data-tooltip="CALENDARIA.UI.StartDateTooltip">
-            <i class="fas fa-calendar-alt"></i>
-            <span class="date-display">{{startDateDisplay}}</span>
-          </button>
-          <input type="hidden" name="system.startDate.year" value="{{system.startDate.year}}" />
-          <input type="hidden" name="system.startDate.month" value="{{system.startDate.month}}" />
-          <input type="hidden" name="system.startDate.day" value="{{system.startDate.day}}" />
-        </div>
-
-        <div class="date-row">
-          <label>End</label>
-          <button type="button" class="date-picker-button" data-action="selectDate" data-date-field="endDate"
-            data-tooltip="CALENDARIA.UI.EndDateTooltip">
-            <i class="fas fa-calendar-alt"></i>
-            <span class="date-display">{{endDateDisplay}}</span>
-          </button>
-          <input type="hidden" name="system.endDate.year" value="{{system.endDate.year}}" />
-          <input type="hidden" name="system.endDate.month" value="{{system.endDate.month}}" />
-          <input type="hidden" name="system.endDate.day" value="{{system.endDate.day}}" />
-        </div>
+      <legend>{{localize "CALENDARIA.Common.Date"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Common.Start"}}</label>
+        <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="startDate"
+          data-tooltip="CALENDARIA.UI.StartDateTooltip">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{startDateDisplay}}</span>
+        </button>
+        <input type="hidden" name="system.startDate.year" value="{{system.startDate.year}}">
+        <input type="hidden" name="system.startDate.month" value="{{system.startDate.month}}">
+        <input type="hidden" name="system.startDate.day" value="{{system.startDate.day}}">
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Common.End"}}</label>
+        <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="endDate"
+          data-tooltip="CALENDARIA.UI.EndDateTooltip">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{endDateDisplay}}</span>
+        </button>
+        <input type="hidden" name="system.endDate.year" value="{{system.endDate.year}}">
+        <input type="hidden" name="system.endDate.month" value="{{system.endDate.month}}">
+        <input type="hidden" name="system.endDate.day" value="{{system.endDate.day}}">
       </div>
     </fieldset>
 
     <fieldset class="time-fieldset">
-      <legend>Time</legend>
-      <div class="time-inputs">
-        <div class="time-row">
-          <label>Start</label>
-          <input type="time" name="system.startDate.time" value="{{startTimeValue}}"
-            {{#if system.allDay}}disabled{{/if}} data-tooltip="CALENDARIA.UI.StartTimeTooltip" />
-          <input type="hidden" name="system.startDate.hour" value="{{system.startDate.hour}}" />
-          <input type="hidden" name="system.startDate.minute" value="{{system.startDate.minute}}" />
-          <label class="all-day-label">
-            <input type="checkbox" name="system.allDay" {{checked system.allDay}}
-              data-tooltip="CALENDARIA.UI.AllDayTooltip" />
-            All Day
-          </label>
-        </div>
-        <div class="time-row">
-          <label>End</label>
-          <input type="time" name="system.endDate.time" value="{{endTimeValue}}" {{#if system.allDay}}disabled{{/if}}
-            data-tooltip="CALENDARIA.UI.EndTimeTooltip" />
-          <input type="hidden" name="system.endDate.hour" value="{{system.endDate.hour}}" />
-          <input type="hidden" name="system.endDate.minute" value="{{system.endDate.minute}}" />
-        </div>
+      <legend>{{localize "CALENDARIA.Common.Time"}}</legend>
+      <div class="time-grid">
+        <label>{{localize "CALENDARIA.Common.Start"}}</label>
+        <input type="time" name="system.startDate.time" value="{{startTimeValue}}" {{#if system.allDay}}disabled{{/if}}
+          data-tooltip="CALENDARIA.UI.StartTimeTooltip" />
+        <input type="hidden" name="system.startDate.hour" value="{{system.startDate.hour}}">
+        <input type="hidden" name="system.startDate.minute" value="{{system.startDate.minute}}">
+        <label class="all-day-label">
+          <input type="checkbox" name="system.allDay" {{checked
+                        system.allDay}} data-tooltip="CALENDARIA.UI.AllDayTooltip">
+          {{localize "CALENDARIA.CompactCalendar.AllDay"}}
+        </label>
+        <label>{{localize "CALENDARIA.Common.End"}}</label>
+        <input type="time" name="system.endDate.time" value="{{endTimeValue}}" {{#if system.allDay}}disabled{{/if}}
+          data-tooltip="CALENDARIA.UI.EndTimeTooltip" />
+        <input type="hidden" name="system.endDate.hour" value="{{system.endDate.hour}}">
+        <input type="hidden" name="system.endDate.minute" value="{{system.endDate.minute}}">
       </div>
     </fieldset>
 
     <fieldset class="repeat-fieldset">
-      <legend>Repeat</legend>
-      <select name="system.repeat" data-tooltip="CALENDARIA.UI.RepeatTooltip">
-        {{#each repeatOptions}}
-          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-        {{/each}}
-      </select>
-      {{#if showRepeatOptions}}
-        <div class="repeat-options">
-          <label data-tooltip="CALENDARIA.UI.MaxOccurrencesTooltip">
-            Max
-            <input type="number" name="system.maxOccurrences" value="{{system.maxOccurrences}}" min="0" step="1"
-              placeholder="∞" />
-          </label>
-        </div>
-      {{/if}}
-    </fieldset>
-  </div>
-
-  {{!-- Moon Conditions (shown when repeat is 'moon' or conditions exist) --}}
-  {{#if showMoonConditions}}
-    <div class="form-row-moon">
-      <fieldset class="moon-conditions-fieldset">
-        <legend>Moon Conditions</legend>
-        {{#if hasMoons}}
-          {{!-- Existing conditions --}}
-          {{#if moonConditions.length}}
-            <div class="moon-conditions-list">
-              {{#each moonConditions}}
-                <div class="moon-condition-tag">
-                  <span class="moon-name">{{moonName}}</span>
-                  <span class="phase-name">{{phaseName}}</span>
-                  <button type="button" class="remove-condition" data-action="removeMoonCondition"
-                    data-index="{{index}}" data-tooltip="Remove condition">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              {{/each}}
-            </div>
-          {{/if}}
-          {{!-- Add new condition --}}
-          <div class="add-moon-condition">
-            <select name="newMoonCondition.moonIndex">
-              <option value="">Select Moon...</option>
-              {{#each moons}}
-                <option value="{{index}}">{{name}}</option>
-              {{/each}}
-            </select>
-            <select name="newMoonCondition.phase">
-              <option value="">Select Phase...</option>
-              {{#each moons}}
-                {{#each phases}}
-                  <option value="{{start}}-{{end}}" data-moon="{{@../index}}">{{name}}</option>
-                {{/each}}
-              {{/each}}
-            </select>
-            <button type="button" class="add-condition-btn" data-action="addMoonCondition"
-              data-tooltip="Add moon condition">
-              <i class="fas fa-plus"></i>
-            </button>
-          </div>
-          <p class="hint">Event triggers on days matching ANY of the above moon conditions.</p>
-        {{else}}
-          <p class="hint no-moons">No moons configured in the calendar. Add moons to use moon-based events.</p>
-        {{/if}}
-      </fieldset>
-    </div>
-  {{/if}}
-
-  {{!-- Random Configuration (shown when repeat is 'random') --}}
-  {{#if showRandomConfig}}
-    <div class="form-row-random">
-      <fieldset class="random-config-fieldset">
-        <legend>Random Event Settings</legend>
-        <div class="random-config-inputs">
-          <div class="form-group">
-            <label data-tooltip="CALENDARIA.UI.RandomProbabilityTooltip">Probability (%)</label>
-            <input type="number" name="system.randomConfig.probability" value="{{randomConfig.probability}}" min="0"
-              max="100" step="1" />
-          </div>
-          <div class="form-group">
-            <label data-tooltip="CALENDARIA.UI.RandomIntervalTooltip">Check Every</label>
-            <select name="system.randomConfig.checkInterval">
-              {{#each randomIntervalOptions}}
-                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-              {{/each}}
-            </select>
-          </div>
-          <div class="form-group">
-            <label data-tooltip="CALENDARIA.UI.RandomSeedTooltip">Seed</label>
-            <div class="seed-input-group">
-              <input type="number" name="system.randomConfig.seed" value="{{randomConfig.seed}}" />
-              <button type="button" data-action="regenerateSeed" data-tooltip="CALENDARIA.UI.RegenerateSeedTooltip">
-                <i class="fas fa-dice"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        <p class="hint">Event has {{randomConfig.probability}}% chance to occur each
-          {{randomConfig.checkIntervalLabel}}. Same seed = same occurrences.
-        </p>
-      </fieldset>
-    </div>
-  {{/if}}
-
-  {{!-- Linked Event Configuration (shown when repeat is 'linked') --}}
-  {{#if showLinkedConfig}}
-    <div class="form-row-linked">
-      <fieldset class="linked-config-fieldset">
-        <legend>Linked Event Settings</legend>
-        <div class="linked-config-inputs">
-          <select name="system.linkedEvent.noteId" data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">
-            <option value="">Select an event...</option>
-            {{#each availableNotes}}
-              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-            {{/each}}
-          </select>
-          <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1"
-            placeholder="Offset" data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip" />
-          {{#if linkedEvent.noteId}}
-            <button type="button" class="clear-linked-btn" data-action="clearLinkedEvent"
-              data-tooltip="Clear linked event">
-              <i class="fas fa-times"></i>
-            </button>
-          {{/if}}
-        </div>
-        <p class="hint">
-          {{#if linkedEvent.noteId}}
-            Linked to "{{linkedNoteName}}" with offset of {{linkedEvent.offset}} days.
-          {{else}}
-            Select event to link. Offset: positive = days after, negative = days before.
-          {{/if}}
-        </p>
-      </fieldset>
-    </div>
-  {{/if}}
-
-  {{!-- Range Pattern Configuration (shown when repeat is 'range') --}}
-  {{#if showRangeConfig}}
-    <div class="form-row-range">
-      <fieldset class="range-config-fieldset">
-        <legend>Range Pattern Settings</legend>
-        <div class="range-config-inputs">
-
-          {{!-- Year Configuration --}}
-          <div class="range-component">
-            <label>Year</label>
-            <div class="range-controls">
-              <select data-range-type="year" class="range-type-select">
-                <option value="any" {{#if rangeYearAny}}selected{{/if}}>Any Year</option>
-                <option value="exact" {{#if rangeYearExact}}selected{{/if}}>Exact Year</option>
-                <option value="range" {{#if rangeYearRange}}selected{{/if}}>Year Range</option>
-              </select>
-              <div class="range-value-inputs">
-                {{#if rangeYearExact}}
-                  <input type="number" name="rangeYear" value="{{rangeYearValue}}" placeholder="Year" step="1" />
-                {{else if rangeYearRange}}
-                  <input type="number" name="rangeYearMin" value="{{rangeYearMin}}" placeholder="Min" step="1" />
-                  <span>to</span>
-                  <input type="number" name="rangeYearMax" value="{{rangeYearMax}}" placeholder="Max" step="1" />
-                {{/if}}
-              </div>
-            </div>
-          </div>
-
-          {{!-- Month Configuration --}}
-          <div class="range-component">
-            <label>Month</label>
-            <div class="range-controls">
-              <select data-range-type="month" class="range-type-select">
-                <option value="any" {{#if rangeMonthAny}}selected{{/if}}>Any Month</option>
-                <option value="exact" {{#if rangeMonthExact}}selected{{/if}}>Exact Month</option>
-                <option value="range" {{#if rangeMonthRange}}selected{{/if}}>Month Range</option>
-              </select>
-              <div class="range-value-inputs">
-                {{#if rangeMonthExact}}
-                  <select name="rangeMonth">
-                    {{#each monthOptions}}
-                      <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-                    {{/each}}
-                  </select>
-                {{else if rangeMonthRange}}
-                  <select name="rangeMonthMin">
-                    {{#each monthOptions}}
-                      <option value="{{index}}" {{#if selectedMin}}selected{{/if}}>{{name}}</option>
-                    {{/each}}
-                  </select>
-                  <span>to</span>
-                  <select name="rangeMonthMax">
-                    {{#each monthOptions}}
-                      <option value="{{index}}" {{#if selectedMax}}selected{{/if}}>{{name}}</option>
-                    {{/each}}
-                  </select>
-                {{/if}}
-              </div>
-            </div>
-          </div>
-
-          {{!-- Day Configuration --}}
-          <div class="range-component">
-            <label>Day</label>
-            <div class="range-controls">
-              <select data-range-type="day" class="range-type-select">
-                <option value="any" {{#if rangeDayAny}}selected{{/if}}>Any Day</option>
-                <option value="exact" {{#if rangeDayExact}}selected{{/if}}>Exact Day</option>
-                <option value="range" {{#if rangeDayRange}}selected{{/if}}>Day Range</option>
-              </select>
-              <div class="range-value-inputs">
-                {{#if rangeDayExact}}
-                  <input type="number" name="rangeDay" value="{{rangeDayValue}}" placeholder="Day" min="1" max="31"
-                    step="1" />
-                {{else if rangeDayRange}}
-                  <input type="number" name="rangeDayMin" value="{{rangeDayMin}}" placeholder="Min" min="1" max="31"
-                    step="1" />
-                  <span>to</span>
-                  <input type="number" name="rangeDayMax" value="{{rangeDayMax}}" placeholder="Max" min="1" max="31"
-                    step="1" />
-                {{/if}}
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <p class="hint">
-          Define a pattern matching specific years, months, and days. Use ranges for events spanning multiple periods.
-          Example: Year 2020-2025, Month January, Day 15th = "Every January 15 from 2020 to 2025"
-        </p>
-      </fieldset>
-    </div>
-  {{/if}}
-
-  {{!-- Row 3: Categories --}}
-  <div class="form-row-3">
-    <fieldset class="categories-fieldset">
-      <legend>Categories</legend>
-      <div class="categories-container">
-        <multi-select name="system.categories">
-          {{#each categoryOptions}}
-            <option value="{{id}}" {{#if selected}}selected{{/if}} {{#if custom}}data-custom="true" {{/if}}>{{label}}
-            </option>
+      <legend>{{localize "CALENDARIA.Note.Repeat"}}</legend>
+      <div class="repeat-controls">
+        <select name="system.repeat" data-tooltip="CALENDARIA.UI.RepeatTooltip">
+          {{#each repeatOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
-        </multi-select>
-        <div class="custom-category-input">
-          <input type="text" class="new-category-input" placeholder="New category..." />
-          <button type="button" class="add-category-btn" data-action="addCategory" data-tooltip="Add custom category">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
+        </select>
+        {{#if showRepeatOptions}}
+          <div class="max-occurrences">
+            <input type="number" name="system.maxOccurrences" value="{{system.maxOccurrences}}" min="0" step="1"
+              placeholder="∞" data-tooltip="CALENDARIA.UI.MaxOccurrencesTooltip">
+            <label>{{localize "CALENDARIA.Note.MaxOccurrences"}}</label>
+          </div>
+        {{/if}}
       </div>
     </fieldset>
   </div>
 
-  {{!-- Row 4: Macro --}}
-  <div class="form-row-4">
-    <fieldset class="macro-fieldset">
-      <legend>Macro</legend>
-      <select name="system.macro" data-tooltip="CALENDARIA.UI.MacroTooltip">
-        <option value="">None</option>
-        {{#each availableMacros}}
-          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-        {{/each}}
-      </select>
-      <p class="hint">Execute when this event triggers or each day of multi-day events.</p>
+  {{#if showRepeatConfigGrid}}
+    <div class="repeat-config-grid">
+      <div class="repeat-config-primary">
+        {{#if showMoonConditions}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.MoonConditions"}}</legend>
+            {{#if hasMoons}}
+              <p class="hint">{{localize "CALENDARIA.Note.MoonConditionsHint"}}</p>
+              {{#if moonConditions.length}}
+                <div class="tag-list">
+                  {{#each moonConditions}}
+                    <div class="tag">
+                      <span class="tag-label">{{moonName}}</span>
+                      <span class="tag-value">{{phaseName}}</span>
+                      <button type="button" class="remove-btn" data-action="removeMoonCondition" data-index="{{index}}"
+                        data-tooltip="CALENDARIA.Note.Condition.RemoveCondition">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  {{/each}}
+                </div>
+              {{/if}}
+              <div class="inline-form">
+                <select name="newMoonCondition.moonIndex">
+                  <option value="">{{localize "CALENDARIA.Common.Moon"}}</option>
+                  {{#each moons}}
+                    <option value="{{index}}">{{name}}</option>
+                  {{/each}}
+                </select>
+                <select name="newMoonCondition.phase">
+                  <option value="">{{localize "CALENDARIA.Common.Phase"}}</option>
+                  {{#each moons}}
+                    {{#each phases}}
+                      <option value="{{start}}-{{end}}" data-moon="{{@../index}}">{{name}}
+                      </option>
+                    {{/each}}
+                  {{/each}}
+                </select>
+                <button type="button" class="add-btn" data-action="addMoonCondition"
+                  data-tooltip="CALENDARIA.UI.AddMoonCondition">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            {{else}}
+              <p class="hint warning">{{localize "CALENDARIA.Note.NoMoonsConfigured"}}</p>
+            {{/if}}
+          </fieldset>
+        {{/if}}
+
+        {{#if showRandomConfig}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.RandomSettings"}}</legend>
+            <p class="hint">{{randomDescription}}</p>
+            <div class="inline-form">
+              <div class="form-group-stacked">
+                <label
+                  data-tooltip="CALENDARIA.UI.RandomProbabilityTooltip">{{localize "CALENDARIA.Note.Probability"}}</label>
+                <input type="number" name="system.randomConfig.probability" value="{{randomConfig.probability}}" min="0"
+                  max="100" step="1">
+              </div>
+              <div class="form-group-stacked">
+                <label
+                  data-tooltip="CALENDARIA.UI.RandomIntervalTooltip">{{localize "CALENDARIA.Note.CheckEvery"}}</label>
+                <select name="system.randomConfig.checkInterval">
+                  {{#each randomIntervalOptions}}
+                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="form-group-stacked">
+                <label data-tooltip="CALENDARIA.UI.RandomSeedTooltip">{{localize "CALENDARIA.Note.Seed"}}</label>
+                <div class="inline-form">
+                  <input type="number" name="system.randomConfig.seed" value="{{randomConfig.seed}}">
+                  <button type="button" class="add-btn" data-action="regenerateSeed"
+                    data-tooltip="CALENDARIA.UI.RegenerateSeedTooltip">
+                    <i class="fas fa-dice"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        {{/if}}
+
+        {{#if showLinkedConfig}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.LinkedSettings"}}</legend>
+            <p class="hint">{{linkedDescription}}</p>
+            <div class="inline-form">
+              <select name="system.linkedEvent.noteId" data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">
+                <option value="">{{localize "CALENDARIA.Note.SelectEvent"}}</option>
+                {{#each availableNotes}}
+                  <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+                {{/each}}
+              </select>
+              <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1"
+                placeholder="{{localize 'CALENDARIA.Note.Offset'}}" data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip">
+              {{#if linkedEvent.noteId}}
+                <button type="button" class="remove-btn" data-action="clearLinkedEvent"
+                  data-tooltip="CALENDARIA.UI.ClearLinkedEvent">
+                  <i class="fas fa-times"></i>
+                </button>
+              {{/if}}
+            </div>
+          </fieldset>
+        {{/if}}
+
+        {{#if showRangeConfig}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.RangeSettings"}}</legend>
+            <p class="hint">{{localize "CALENDARIA.Note.RangeSettingsHint"}}</p>
+            <div class="range-config-inputs">
+              <div class="range-component">
+                <label>{{localize "CALENDARIA.Common.Year"}}</label>
+                <div class="range-controls inline-form">
+                  <select data-range-type="year">
+                    {{#each rangeYearOptions}}
+                      <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                    {{/each}}
+                  </select>
+                  <div class="range-value-inputs">
+                    {{#if rangeYearExact}}
+                      <input type="number" name="rangeYear" value="{{rangeYearValue}}"
+                        placeholder="{{localize 'CALENDARIA.Common.Year'}}" step="1">
+                    {{else if rangeYearRange}}
+                      <input type="number" name="rangeYearMin" value="{{rangeYearMin}}"
+                        placeholder="{{localize 'CALENDARIA.Common.Min'}}" step="1">
+                      <span>{{localize "CALENDARIA.Note.To"}}</span>
+                      <input type="number" name="rangeYearMax" value="{{rangeYearMax}}"
+                        placeholder="{{localize 'CALENDARIA.Common.Max'}}" step="1">
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+              <div class="range-component">
+                <label>{{localize "CALENDARIA.Common.Month"}}</label>
+                <div class="range-controls inline-form">
+                  <select data-range-type="month">
+                    {{#each rangeMonthOptions}}
+                      <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                    {{/each}}
+                  </select>
+                  <div class="range-value-inputs">
+                    {{#if rangeMonthExact}}
+                      <select name="rangeMonth">
+                        {{#each monthOptions}}
+                          <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}
+                          </option>
+                        {{/each}}
+                      </select>
+                    {{else if rangeMonthRange}}
+                      <select name="rangeMonthMin">
+                        {{#each monthOptions}}
+                          <option value="{{index}}" {{#if selectedMin}}selected{{/if}}>
+                            {{name}}
+                          </option>
+                        {{/each}}
+                      </select>
+                      <span>{{localize "CALENDARIA.Note.To"}}</span>
+                      <select name="rangeMonthMax">
+                        {{#each monthOptions}}
+                          <option value="{{index}}" {{#if selectedMax}}selected{{/if}}>
+                            {{name}}
+                          </option>
+                        {{/each}}
+                      </select>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+              <div class="range-component">
+                <label>{{localize "CALENDARIA.Common.Day"}}</label>
+                <div class="range-controls inline-form">
+                  <select data-range-type="day">
+                    {{#each rangeDayOptions}}
+                      <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                    {{/each}}
+                  </select>
+                  <div class="range-value-inputs">
+                    {{#if rangeDayExact}}
+                      <input type="number" name="rangeDay" value="{{rangeDayValue}}"
+                        placeholder="{{localize 'CALENDARIA.Common.Day'}}" min="1" max="31" step="1">
+                    {{else if rangeDayRange}}
+                      <input type="number" name="rangeDayMin" value="{{rangeDayMin}}"
+                        placeholder="{{localize 'CALENDARIA.Common.Min'}}" min="1" max="31" step="1">
+                      <span>{{localize "CALENDARIA.Note.To"}}</span>
+                      <input type="number" name="rangeDayMax" value="{{rangeDayMax}}"
+                        placeholder="{{localize 'CALENDARIA.Common.Max'}}" min="1" max="31" step="1">
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        {{/if}}
+
+        {{#if showWeekOfMonthConfig}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.OrdinalWeekdaySettings"}}</legend>
+            <p class="hint">{{weekOfMonthDescription}}</p>
+            <div class="inline-form">
+              <div class="form-group-stacked">
+                <label>{{localize "CALENDARIA.Note.Occurrence"}}</label>
+                <select name="system.weekNumber">
+                  {{#each weekNumberOptions}}
+                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="form-group-stacked">
+                <label>{{localize "CALENDARIA.Common.Weekday"}}</label>
+                <select name="system.weekday">
+                  {{#each weekdayOptions}}
+                    <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        {{/if}}
+
+        {{#if showSeasonalConfig}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.SeasonalSettings"}}</legend>
+            <p class="hint">{{seasonalDescription}}</p>
+            <div class="inline-form">
+              <div class="form-group-stacked">
+                <label>{{localize "CALENDARIA.Common.Season"}}</label>
+                <select name="system.seasonalConfig.seasonIndex">
+                  {{#each seasonOptions}}
+                    <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="form-group-stacked">
+                <label>{{localize "CALENDARIA.Note.Trigger"}}</label>
+                <select name="system.seasonalConfig.trigger">
+                  {{#each seasonalTriggerOptions}}
+                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                  {{/each}}
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        {{/if}}
+      </div>
+
+      {{#if showConditionsUI}}
+        <div class="repeat-config-secondary">
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.AdvancedConditions"}}</legend>
+            <p class="hint">{{localize "CALENDARIA.Note.AdvancedConditionsHint"}}</p>
+
+            {{#if conditions.length}}
+              <div class="tag-list">
+                {{#each conditions}}
+                  <div class="tag" data-index="{{@index}}">
+                    <span class="tag-value">{{description}}</span>
+                    <button type="button" class="remove-btn" data-action="removeCondition" data-index="{{@index}}"
+                      data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                {{/each}}
+              </div>
+            {{/if}}
+
+            <div class="inline-form">
+              <select name="newCondition.field">
+                <optgroup label="{{localize 'CALENDARIA.Common.Date'}}">
+                  <option value="year">{{localize 'CALENDARIA.Common.Year'}}</option>
+                  <option value="month">{{localize 'CALENDARIA.Common.Month'}}</option>
+                  <option value="day">{{localize 'CALENDARIA.Note.Condition.DayInMonth'}}</option>
+                  <option value="dayOfYear">{{localize 'CALENDARIA.Note.Condition.DayInYear'}}
+                  </option>
+                  <option value="daysBeforeMonthEnd">
+                    {{localize 'CALENDARIA.Note.Condition.DaysBeforeMonthEnd'}}
+                  </option>
+                </optgroup>
+                <optgroup label="{{localize 'CALENDARIA.Common.Weekday'}}">
+                  <option value="weekday">{{localize 'CALENDARIA.Common.Weekday'}}</option>
+                  <option value="weekNumberInMonth">
+                    {{localize 'CALENDARIA.Note.Condition.WeekdayNumInMonth'}}
+                  </option>
+                  <option value="inverseWeekNumber">
+                    {{localize 'CALENDARIA.Note.Condition.WeekdayNumBeforeEnd'}}
+                  </option>
+                </optgroup>
+                <optgroup label="{{localize 'CALENDARIA.Common.Week'}}">
+                  <option value="weekInMonth">{{localize 'CALENDARIA.Note.Condition.WeekInMonth'}}
+                  </option>
+                  <option value="weekInYear">{{localize 'CALENDARIA.Note.Condition.WeekInYear'}}
+                  </option>
+                  <option value="totalWeek">{{localize 'CALENDARIA.Note.Condition.TotalWeek'}}
+                  </option>
+                  <option value="weeksBeforeMonthEnd">
+                    {{localize 'CALENDARIA.Note.Condition.WeeksBeforeMonthEnd'}}
+                  </option>
+                  <option value="weeksBeforeYearEnd">
+                    {{localize 'CALENDARIA.Note.Condition.WeeksBeforeYearEnd'}}
+                  </option>
+                </optgroup>
+                {{#if hasSeasons}}
+                  <optgroup label="{{localize 'CALENDARIA.Common.Season'}}">
+                    <option value="season">{{localize 'CALENDARIA.Common.Season'}}</option>
+                    <option value="seasonPercent">
+                      {{localize 'CALENDARIA.Note.Condition.SeasonPercent'}}
+                    </option>
+                    <option value="seasonDay">{{localize 'CALENDARIA.Note.Condition.DayInSeason'}}
+                    </option>
+                    <option value="isLongestDay">
+                      {{localize 'CALENDARIA.Note.Condition.IsLongestDay'}}
+                    </option>
+                    <option value="isShortestDay">
+                      {{localize 'CALENDARIA.Note.Condition.IsShortestDay'}}
+                    </option>
+                    <option value="isSpringEquinox">
+                      {{localize 'CALENDARIA.Note.Condition.IsSpringEquinox'}}
+                    </option>
+                    <option value="isAutumnEquinox">
+                      {{localize 'CALENDARIA.Note.Condition.IsAutumnEquinox'}}
+                    </option>
+                  </optgroup>
+                {{/if}}
+                {{#if hasMoons}}
+                  <optgroup label="{{localize 'CALENDARIA.Common.Moon'}}">
+                    <option value="moonPhaseIndex">{{localize 'CALENDARIA.Common.MoonPhase'}}
+                    </option>
+                    <option value="moonPhaseCountMonth">
+                      {{localize 'CALENDARIA.Note.Condition.MoonPhaseCountMonth'}}
+                    </option>
+                    <option value="moonPhaseCountYear">
+                      {{localize 'CALENDARIA.Note.Condition.MoonPhaseCountYear'}}
+                    </option>
+                  </optgroup>
+                {{/if}}
+                {{#if hasCycles}}
+                  <optgroup label="{{localize 'CALENDARIA.Common.Cycle'}}">
+                    <option value="cycle">{{localize 'CALENDARIA.Note.Condition.CycleValue'}}
+                    </option>
+                  </optgroup>
+                {{/if}}
+                {{#if hasEras}}
+                  <optgroup label="{{localize 'CALENDARIA.Common.Era'}}">
+                    <option value="era">{{localize 'CALENDARIA.Common.Era'}}</option>
+                    <option value="eraYear">{{localize 'CALENDARIA.Note.Condition.YearInEra'}}
+                    </option>
+                  </optgroup>
+                {{/if}}
+                <optgroup label="{{localize 'CALENDARIA.Category.Other'}}">
+                  <option value="intercalary">
+                    {{localize 'CALENDARIA.Note.Condition.IsIntercalaryDay'}}
+                  </option>
+                </optgroup>
+              </select>
+              <select name="newCondition.op">
+                <option value="==">{{localize 'CALENDARIA.Note.Operator.Equals'}}</option>
+                <option value="!=">{{localize 'CALENDARIA.Note.Operator.NotEquals'}}</option>
+                <option value=">=">{{localize 'CALENDARIA.Note.Operator.GreaterEquals'}}</option>
+                <option value="<=">{{localize 'CALENDARIA.Note.Operator.LessEquals'}}</option>
+                <option value=">">{{localize 'CALENDARIA.Note.Operator.GreaterThan'}}</option>
+                <option value="<">{{localize 'CALENDARIA.Note.Operator.LessThan'}}</option>
+                <option value="%">{{localize 'CALENDARIA.Note.Operator.EveryNth'}}</option>
+              </select>
+              <input type="number" name="newCondition.value"
+                placeholder="{{localize 'CALENDARIA.Note.Placeholder.Value'}}">
+              <input type="number" name="newCondition.offset" placeholder="{{localize 'CALENDARIA.Common.Offset'}}"
+                style="display: none;">
+              <button type="button" class="add-btn" data-action="addCondition"
+                data-tooltip="{{localize 'CALENDARIA.Note.AddCondition'}}">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </fieldset>
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  <div class="form-row-3">
+    <fieldset class="reminder-fieldset">
+      <legend>{{localize "CALENDARIA.Category.Reminder"}}</legend>
+      <div class="reminder-controls">
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderOffset"}}</label>
+          <div class="inline-form">
+            <input type="number" name="system.reminderOffset" value="{{system.reminderOffset}}" min="0" step="1"
+              placeholder="0" data-tooltip="CALENDARIA.Note.ReminderOffsetTooltip">
+            <span class="hint">{{localize "CALENDARIA.Note.MinutesBefore"}}</span>
+          </div>
+        </div>
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderType"}}</label>
+          <select name="system.reminderType" data-tooltip="CALENDARIA.UI.ReminderTypeTooltip">
+            {{#each reminderTypeOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderTargets"}}</label>
+          <select name="system.reminderTargets" data-tooltip="CALENDARIA.UI.ReminderTargetsTooltip">
+            {{#each reminderTargetOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        {{#if showReminderUsers}}
+          <div class="form-group-stacked reminder-users">
+            <label>{{localize "CALENDARIA.Note.ReminderUsers"}}</label>
+            <multi-select name="system.reminderUsers">
+              {{#each userOptions}}
+                <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+              {{/each}}
+            </multi-select>
+          </div>
+        {{/if}}
+      </div>
     </fieldset>
   </div>
 
-  {{!-- Bottom row: ProseMirror Editor --}}
-  <fieldset class="editor-fieldset">
-    <legend>Note Content</legend>
-    <prose-mirror id="note-content" name="text.content" value="{{text.content}}" aria-label="Note Content">
-    </prose-mirror>
-  </fieldset>
+  <div class="form-row-4">
+    <fieldset class="categories-fieldset">
+      <legend>{{localize "CALENDARIA.Note.Categories"}}</legend>
+      <div class="inline-form">
+        <multi-select name="system.categories">
+          {{#each categoryOptions}}
+            <option value="{{id}}" {{#if selected}}selected{{/if}} {{#if custom}}data-custom="true" {{/if}}>
+              {{label}}
+            </option>
+          {{/each}}
+        </multi-select>
+        <input type="text" class="new-category-input" placeholder="{{localize 'CALENDARIA.Note.NewCategory'}}">
+        <button type="button" class="add-btn" data-action="addCategory" data-tooltip="CALENDARIA.UI.AddCategory">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Common.Macro"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Note.MacroHint"}}</p>
+      <div class="inline-form">
+        <select name="system.macro" data-tooltip="CALENDARIA.UI.MacroTooltip">
+          <option value="">{{localize "CALENDARIA.Note.None"}}</option>
+          {{#each availableMacros}}
+            <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </fieldset>
+  </div>
 </div>

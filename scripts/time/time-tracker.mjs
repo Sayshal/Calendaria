@@ -3,16 +3,15 @@
  * Monitors world time changes and fires hooks when specific time thresholds are crossed.
  * Fires hooks for: dateTimeChange, dayChange, monthChange, yearChange, seasonChange,
  * and time-of-day thresholds (sunrise, sunset, midnight, midday).
- *
  * @module Time/TimeTracker
  * @author Tyler
  */
 
-import { executeMacroById } from '../utils/macro-utils.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { MODULE, HOOKS, SETTINGS } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
+import { executeMacroById } from '../utils/macro-utils.mjs';
 
 /**
  * Static class that tracks world time changes and fires threshold hooks.
@@ -21,7 +20,7 @@ export default class TimeTracker {
   /** @type {number|null} Last known world time in seconds */
   static #lastWorldTime = null;
 
-  /** @type {Object|null} Last checked time components */
+  /** @type {object | null} Last checked time components */
   static #lastComponents = null;
 
   /** @type {number|null} Last known season index */
@@ -30,17 +29,19 @@ export default class TimeTracker {
   /** @type {Map<number, number>|null} Last known moon phases (moonIndex -> phaseIndex) */
   static #lastMoonPhases = null;
 
+  /** @type {boolean|null} Last known rest day status */
+  static #lastRestDay = null;
+
   /**
    * Initialize the time tracker.
    * Called during module initialization.
    */
   static initialize() {
-    // Store current time as baseline
     this.#lastWorldTime = game.time.worldTime;
     this.#lastComponents = foundry.utils.deepClone(game.time.components);
     this.#lastSeason = game.time.components?.season ?? null;
     this.#lastMoonPhases = this.#getCurrentMoonPhases();
-
+    this.#lastRestDay = this.#isCurrentDayRestDay();
     log(3, 'Time Tracker initialized');
   }
 
@@ -48,17 +49,13 @@ export default class TimeTracker {
    * Handle world time updates.
    * Called by the updateWorldTime hook.
    * Fires dateTimeChange hook and checks for period/threshold crossings.
-   *
    * @param {number} worldTime - The new world time in seconds
    * @param {number} delta - The time delta in seconds
    */
   static onUpdateWorldTime(worldTime, delta) {
-    // Only process if we have a calendar
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return;
     const currentComponents = game.time.components;
-
-    // If this is the first update, just store the time
     if (this.#lastWorldTime === null || this.#lastComponents === null) {
       this.#lastWorldTime = worldTime;
       this.#lastComponents = foundry.utils.deepClone(currentComponents);
@@ -66,38 +63,29 @@ export default class TimeTracker {
       return;
     }
 
-    // Always fire dateTimeChange hook for any time update
     this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
-
-    // Check for period changes (day, month, year, season)
     this.#checkPeriodChanges(this.#lastComponents, currentComponents, calendar);
-
-    // Check for threshold crossings (sunrise, sunset, midnight, midday)
     this.#checkThresholds(this.#lastWorldTime, worldTime, calendar);
-
-    // Check for moon phase changes
     this.#checkMoonPhaseChanges(calendar);
-
-    // Update last known time
+    this.#checkRestDayChange(calendar);
     this.#lastWorldTime = worldTime;
     this.#lastComponents = foundry.utils.deepClone(currentComponents);
     this.#lastSeason = currentComponents?.season ?? null;
     this.#lastMoonPhases = this.#getCurrentMoonPhases();
+    this.#lastRestDay = this.#isCurrentDayRestDay();
   }
 
   /**
    * Fire the dateTimeChange hook with comprehensive time change data.
    * This is the primary hook other modules should listen to for time changes.
-   *
-   * @param {Object} previousComponents - Previous time components
-   * @param {Object} currentComponents - Current time components
+   * @param {object} previousComponents - Previous time components
+   * @param {object} currentComponents - Current time components
    * @param {number} delta - Time delta in seconds
-   * @param {Object} calendar - Active calendar
+   * @param {object} calendar - Active calendar
    * @private
    */
   static #fireDateTimeChangeHook(previousComponents, currentComponents, delta, calendar) {
     const yearZero = calendar?.years?.yearZero ?? 0;
-
     const hookData = {
       previous: { ...previousComponents, year: previousComponents.year + yearZero },
       current: { ...currentComponents, year: currentComponents.year + yearZero },
@@ -111,50 +99,39 @@ export default class TimeTracker {
 
   /**
    * Check for and fire period change hooks (day, month, year, season).
-   *
-   * @param {Object} previousComponents - Previous time components
-   * @param {Object} currentComponents - Current time components
-   * @param {Object} calendar - Active calendar
+   * @param {object} previousComponents - Previous time components
+   * @param {object} currentComponents - Current time components
+   * @param {object} calendar - Active calendar
    * @private
    */
   static #checkPeriodChanges(previousComponents, currentComponents, calendar) {
     const yearZero = calendar?.years?.yearZero ?? 0;
-
-    // Create hook data with display years
     const hookData = {
       previous: { ...previousComponents, year: previousComponents.year + yearZero },
       current: { ...currentComponents, year: currentComponents.year + yearZero },
       calendar: calendar
     };
 
-    // Check for year change
     if (previousComponents.year !== currentComponents.year) {
       log(3, `Year changed: ${previousComponents.year + yearZero} -> ${currentComponents.year + yearZero}`);
       Hooks.callAll(HOOKS.YEAR_CHANGE, hookData);
     }
 
-    // Check for month change
     if (previousComponents.month !== currentComponents.month) {
       log(3, `Month changed: ${previousComponents.month} -> ${currentComponents.month}`);
       Hooks.callAll(HOOKS.MONTH_CHANGE, hookData);
     }
 
-    // Check for day change
     if (previousComponents.dayOfMonth !== currentComponents.dayOfMonth || previousComponents.month !== currentComponents.month || previousComponents.year !== currentComponents.year) {
       log(3, `Day changed`);
       Hooks.callAll(HOOKS.DAY_CHANGE, hookData);
       this.#executePeriodMacro('day', hookData);
     }
 
-    // Check for season change
     const previousSeason = previousComponents.season ?? this.#lastSeason;
     const currentSeason = currentComponents.season;
     if (previousSeason !== null && currentSeason !== null && previousSeason !== currentSeason) {
-      const seasonData = {
-        ...hookData,
-        previousSeason: calendar.seasons?.values?.[previousSeason] ?? null,
-        currentSeason: calendar.seasons?.values?.[currentSeason] ?? null
-      };
+      const seasonData = { ...hookData, previousSeason: calendar.seasons?.values?.[previousSeason] ?? null, currentSeason: calendar.seasons?.values?.[currentSeason] ?? null };
       log(3, `Season changed: ${previousSeason} -> ${currentSeason}`);
       Hooks.callAll(HOOKS.SEASON_CHANGE, seasonData);
       this.#executePeriodMacro('season', seasonData);
@@ -163,97 +140,55 @@ export default class TimeTracker {
 
   /**
    * Check if any thresholds were crossed between two times.
-   *
    * @param {number} previousTime - Previous world time in seconds
    * @param {number} currentTime - Current world time in seconds
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @private
    */
   static #checkThresholds(previousTime, currentTime, calendar) {
-    // If time went backwards, don't process
     if (currentTime <= previousTime) {
       log(3, 'Time went backwards, skipping threshold checks');
       return;
     }
 
-    const crossedThresholds = [];
-
-    // Convert times to Date objects for easier manipulation
-    const startTime = previousTime;
-    const endTime = currentTime;
-
-    // Calculate the time difference
-    const deltaSeconds = endTime - startTime;
-
-    // For each second in the range, check if we crossed a threshold
-    // For performance, we check at day boundaries and specific hours
-    // Convert to hours for comparison
     const previousComponents = this.#getComponentsForTime(previousTime);
     const currentComponents = game.time.components;
-
-    // Determine all thresholds in chronological order
     const thresholds = this.#getAllThresholdsCrossed(previousComponents, currentComponents, calendar);
-
-    // Fire hooks for each threshold in order
-    for (const threshold of thresholds) {
-      this.#fireThresholdHook(threshold.name, threshold.data);
-    }
+    for (const threshold of thresholds) this.#fireThresholdHook(threshold.name, threshold.data);
   }
 
   /**
    * Get all thresholds crossed between two time points.
-   *
-   * @param {Object} startComponents - Starting time components
-   * @param {Object} endComponents - Ending time components
-   * @param {Object} calendar - The active calendar
+   * @param {object} startComponents - Starting time components
+   * @param {object} endComponents - Ending time components
+   * @param {object} calendar - The active calendar
    * @returns {Array} Array of crossed thresholds with {name, data}
    * @private
    */
   static #getAllThresholdsCrossed(startComponents, endComponents, calendar) {
     const thresholds = [];
-
-    // Get start and end time in hours (as decimal)
     const startHour = startComponents.hour + startComponents.minute / 60 + (startComponents.second || 0) / 3600;
     const endHour = endComponents.hour + endComponents.minute / 60 + (endComponents.second || 0) / 3600;
-
-    // Calculate total days between start and end
     const totalDays = this.#calculateDaysBetween(startComponents, endComponents, calendar);
 
-    // If we're in the same day
     if (totalDays === 0) {
-      // Check thresholds within the same day
       const dayThresholds = this.#getThresholdsForDay(endComponents, calendar);
-
       for (const [name, hour] of Object.entries(dayThresholds)) {
-        if (hour !== null && startHour < hour && endHour >= hour) {
-          thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
-        }
+        if (hour !== null && startHour < hour && endHour >= hour) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }
     } else {
-      // We crossed at least one day boundary
       const dayThresholds = this.#getThresholdsForDay(startComponents, calendar);
-
-      // First, complete thresholds remaining in the starting day
       for (const [name, hour] of Object.entries(dayThresholds)) {
-        if (hour !== null && startHour < hour) {
-          thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
-        }
+        if (hour !== null && startHour < hour) thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
       }
 
-      // For each complete day in between, add all 4 thresholds
-      // (totalDays - 1 because we handle start and end days separately)
       const intermediateDays = totalDays - 1;
       for (let day = 0; day < intermediateDays; day++) {
-        for (const [name, hour] of Object.entries(dayThresholds)) {
-          if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
-        }
+        for (const [name, hour] of Object.entries(dayThresholds)) if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }
 
-      // Finally, check thresholds in the ending day up to current hour
       const endDayThresholds = this.#getThresholdsForDay(endComponents, calendar);
-      for (const [name, hour] of Object.entries(endDayThresholds)) {
-        if (hour !== null && endHour >= hour) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
-      }
+      for (const [name, hour] of Object.entries(endDayThresholds)) if (hour !== null && endHour >= hour) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
     }
 
     return thresholds;
@@ -261,10 +196,9 @@ export default class TimeTracker {
 
   /**
    * Calculate the number of day boundaries crossed between two time points.
-   *
-   * @param {Object} startComponents - Starting time components
-   * @param {Object} endComponents - Ending time components
-   * @param {Object} calendar - The active calendar
+   * @param {object} startComponents - Starting time components
+   * @param {object} endComponents - Ending time components
+   * @param {object} calendar - The active calendar
    * @returns {number} Number of day boundaries crossed
    * @private
    */
@@ -272,18 +206,14 @@ export default class TimeTracker {
     const startDayOfYear = this.#getDayOfYear(startComponents, calendar);
     const endDayOfYear = this.#getDayOfYear(endComponents, calendar);
     const yearDiff = endComponents.year - startComponents.year;
-
     if (yearDiff === 0) return endDayOfYear - startDayOfYear;
-
-    // Calculate days remaining in start year + days in end year
     const daysInYear = this.#getDaysInYear(calendar);
     return daysInYear - startDayOfYear + endDayOfYear + (yearDiff - 1) * daysInYear;
   }
 
   /**
    * Get total days in a year for the calendar.
-   *
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @returns {number} Total days in year
    * @private
    */
@@ -296,24 +226,22 @@ export default class TimeTracker {
 
   /**
    * Get threshold times for a specific day.
-   *
-   * @param {Object} components - Time components for the day
-   * @param {Object} calendar - The active calendar
-   * @returns {Object} Object with threshold names and their times in hours
+   * @param {object} _components - Time components for the day
+   * @param {object} calendar - The active calendar
+   * @returns {object} Object with threshold names and their times in hours
    * @private
    */
-  static #getThresholdsForDay(components, calendar) {
-    const sunrise = typeof calendar.sunrise === 'function' ? calendar.sunrise() : null;
-    const sunset = typeof calendar.sunset === 'function' ? calendar.sunset() : null;
+  static #getThresholdsForDay(_components, calendar) {
+    const sunrise = calendar.sunrise();
+    const sunset = calendar.sunset();
     return { midnight: 0, sunrise: sunrise, midday: 12, sunset: sunset };
   }
 
   /**
    * Create threshold event data.
-   *
-   * @param {Object} components - Time components
-   * @param {Object} calendar - The active calendar
-   * @returns {Object} Threshold event data
+   * @param {object} components - Time components
+   * @param {object} calendar - The active calendar
+   * @returns {object} Threshold event data
    * @private
    */
   static #createThresholdData(components, calendar) {
@@ -322,30 +250,22 @@ export default class TimeTracker {
 
   /**
    * Fire a threshold hook.
-   *
    * @param {string} thresholdName - Name of the threshold (midnight, sunrise, midday, sunset)
-   * @param {Object} data - Event data to pass to the hook
+   * @param {object} data - Event data to pass to the hook
    * @private
    */
   static #fireThresholdHook(thresholdName, data) {
     const hookName = HOOKS[thresholdName.toUpperCase()];
-    if (!hookName) {
-      log(2, `Unknown threshold name: ${thresholdName}`);
-      return;
-    }
-
+    if (!hookName) return;
     log(3, `Threshold crossed: ${thresholdName}`);
     Hooks.callAll(hookName, data);
-
-    // Execute global macro for this threshold
     this.#executeThresholdMacro(thresholdName, data);
   }
 
   /**
    * Get time components for a specific world time.
-   *
    * @param {number} worldTime - World time in seconds
-   * @returns {Object} Time components
+   * @returns {object} Time components
    * @private
    */
   static #getComponentsForTime(worldTime) {
@@ -356,20 +276,17 @@ export default class TimeTracker {
 
   /**
    * Calculate day of year from components.
-   *
-   * @param {Object} components - Time components
-   * @param {Object} calendar - The active calendar
+   * @param {object} components - Time components
+   * @param {object} calendar - The active calendar
    * @returns {number} Day of year (0-based)
    * @private
    */
   static #getDayOfYear(components, calendar) {
-    // Sum up days in previous months
     let dayOfYear = 0;
     for (let i = 0; i < components.month; i++) {
       const month = calendar.months?.values?.[i];
       dayOfYear += month?.days || 30;
     }
-    // Add days in current month
     dayOfYear += components.dayOfMonth;
     return dayOfYear;
   }
@@ -380,17 +297,14 @@ export default class TimeTracker {
 
   /**
    * Get the current moon phase indices for all moons.
-   *
    * @returns {Map<number, number>|null} Map of moonIndex -> phaseIndex, or null if no calendar
    * @private
    */
   static #getCurrentMoonPhases() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.moons?.length) return null;
-
     const phases = new Map();
     for (let i = 0; i < calendar.moons.length; i++) {
-      const moon = calendar.moons[i];
       const phaseData = calendar.getMoonPhase?.(i);
       if (phaseData?.phaseIndex !== undefined) phases.set(i, phaseData.phaseIndex);
     }
@@ -399,17 +313,14 @@ export default class TimeTracker {
 
   /**
    * Check for moon phase changes and fire hooks/macros.
-   *
-   * @param {Object} calendar - The active calendar
+   * @param {object} calendar - The active calendar
    * @private
    */
   static #checkMoonPhaseChanges(calendar) {
     if (!calendar?.moons?.length) return;
     if (!this.#lastMoonPhases) return;
-
     const currentPhases = this.#getCurrentMoonPhases();
     if (!currentPhases) return;
-
     const changedMoons = [];
 
     for (const [moonIndex, currentPhaseIndex] of currentPhases) {
@@ -418,10 +329,9 @@ export default class TimeTracker {
         const moon = calendar.moons[moonIndex];
         const previousPhase = moon.phases?.[lastPhaseIndex];
         const currentPhase = moon.phases?.[currentPhaseIndex];
-
         changedMoons.push({
           moonIndex,
-          moonName: moon.name ? localize(moon.name) : `Moon ${moonIndex + 1}`,
+          moonName: moon.name ? localize(moon.name) : format('CALENDARIA.Calendar.MoonFallback', { num: moonIndex + 1 }),
           previousPhaseIndex: lastPhaseIndex,
           previousPhaseName: previousPhase?.name ? localize(previousPhase.name) : null,
           currentPhaseIndex,
@@ -432,11 +342,7 @@ export default class TimeTracker {
 
     if (changedMoons.length > 0) {
       log(3, `Moon phase changed for ${changedMoons.length} moon(s)`);
-
-      // Fire hook with all changed moons
       Hooks.callAll(HOOKS.MOON_PHASE_CHANGE, { moons: changedMoons, calendar, worldTime: game.time.worldTime });
-
-      // Execute moon phase macros from config
       this.#executeMoonPhaseMacros(changedMoons);
     }
   }
@@ -447,8 +353,7 @@ export default class TimeTracker {
 
   /**
    * Get the macro trigger configuration.
-   *
-   * @returns {Object} The macro trigger config
+   * @returns {object} The macro trigger config
    * @private
    */
   static #getMacroConfig() {
@@ -457,31 +362,25 @@ export default class TimeTracker {
 
   /**
    * Execute a global trigger macro if configured.
-   *
    * @param {string} triggerKey - The trigger key (dawn, dusk, midday, midnight, newDay, seasonChange)
-   * @param {Object} context - Context data to pass to the macro
+   * @param {object} context - Context data to pass to the macro
    * @private
    */
   static #executeGlobalTrigger(triggerKey, context) {
-    // Only GM should execute macros
     if (!game.user.isGM) return;
-
     const config = this.#getMacroConfig();
     const macroId = config.global?.[triggerKey];
     if (!macroId) return;
-
     executeMacroById(macroId, context);
   }
 
   /**
    * Execute the appropriate macro for a threshold crossing.
-   *
    * @param {string} thresholdName - Name of the threshold (midnight, sunrise, midday, sunset)
-   * @param {Object} data - Event data
+   * @param {object} data - Event data
    * @private
    */
   static #executeThresholdMacro(thresholdName, data) {
-    // Map threshold names to config keys
     const keyMap = { midnight: 'midnight', sunrise: 'dawn', midday: 'midday', sunset: 'dusk' };
     const triggerKey = keyMap[thresholdName];
     if (!triggerKey) return;
@@ -490,9 +389,8 @@ export default class TimeTracker {
 
   /**
    * Execute the appropriate macro for a period change.
-   *
    * @param {string} periodName - Name of the period (day, season)
-   * @param {Object} data - Event data
+   * @param {object} data - Event data
    * @private
    */
   static #executePeriodMacro(periodName, data) {
@@ -502,47 +400,31 @@ export default class TimeTracker {
 
   /**
    * Execute macros for season changes based on config.
-   *
-   * @param {Object} data - Season change event data
+   * @param {object} data - Season change event data
    * @private
    */
   static #executeSeasonMacros(data) {
-    // Only GM should execute macros
     if (!game.user.isGM) return;
-
     const config = this.#getMacroConfig();
     const seasonTriggers = config.season || [];
-
     if (!seasonTriggers.length) return;
-
-    // Get the new season index from the data
     const currentSeasonIndex = data.currentComponents?.season;
     if (currentSeasonIndex === undefined) return;
-
-    // Find matching triggers: -1 means "all seasons", otherwise match specific
     const matchingTriggers = seasonTriggers.filter((t) => t.seasonIndex === -1 || t.seasonIndex === currentSeasonIndex);
-
     for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'seasonChange', ...data });
   }
 
   /**
    * Execute macros for moon phase changes based on config.
-   *
    * @param {Array} changedMoons - Array of moon phase change data
    * @private
    */
   static #executeMoonPhaseMacros(changedMoons) {
-    // Only GM should execute macros
     if (!game.user.isGM) return;
-
     const config = this.#getMacroConfig();
     const moonTriggers = config.moonPhase || [];
-
     if (!moonTriggers.length) return;
-
     for (const changed of changedMoons) {
-      // Find matching triggers:
-      // -1 moonIndex means "all moons", -1 phaseIndex means "all phases"
       const matchingTriggers = moonTriggers.filter((t) => {
         const moonMatches = t.moonIndex === -1 || t.moonIndex === changed.moonIndex;
         const phaseMatches = t.phaseIndex === -1 || t.phaseIndex === changed.currentPhaseIndex;
@@ -550,6 +432,46 @@ export default class TimeTracker {
       });
 
       for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'moonPhaseChange', moon: changed });
+    }
+  }
+
+  /* -------------------------------------------- */
+  /*  Rest Day Tracking                           */
+  /* -------------------------------------------- */
+
+  /**
+   * Check if the current day is a rest day.
+   * @returns {boolean} True if current day is a rest day
+   * @private
+   */
+  static #isCurrentDayRestDay() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return false;
+    const weekdayInfo = calendar.getWeekdayForDate?.();
+    return weekdayInfo?.isRestDay || false;
+  }
+
+  /**
+   * Check for rest day status change and fire hook if changed.
+   * @param {object} calendar - The active calendar
+   * @private
+   */
+  static #checkRestDayChange(calendar) {
+    if (this.#lastRestDay === null) return;
+    const currentRestDay = this.#isCurrentDayRestDay();
+    if (this.#lastRestDay !== currentRestDay) {
+      const weekdayInfo = calendar?.getWeekdayForDate?.();
+
+      const hookData = {
+        isRestDay: currentRestDay,
+        wasRestDay: this.#lastRestDay,
+        weekday: weekdayInfo ? { index: weekdayInfo.index, name: weekdayInfo.name || '', abbreviation: weekdayInfo.abbreviation || '' } : null,
+        worldTime: game.time.worldTime,
+        calendar
+      };
+
+      log(3, `Rest day status changed: ${this.#lastRestDay} -> ${currentRestDay}`);
+      Hooks.callAll(HOOKS.REST_DAY_CHANGE, hookData);
     }
   }
 }

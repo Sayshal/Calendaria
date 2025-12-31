@@ -1,0 +1,98 @@
+{
+  "id": "gregorian",
+  "name": "CALENDARIA.Calendar.Gregorian.Name",
+  "years": {
+    "yearZero": 2024,
+    "firstWeekday": 2,
+    "leapYear": {
+      "leapStart": 0,
+      "leapInterval": 4,
+      "leapPattern": "400,!100,4"
+    }
+  },
+  "months": {
+    "values": [
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.January", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JanuaryShort", "ordinal": 1, "days": 31 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.February", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.FebruaryShort", "ordinal": 2, "days": 28, "leapDays": 29 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.March", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.MarchShort", "ordinal": 3, "days": 31 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.April", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.AprilShort", "ordinal": 4, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.May", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.MayShort", "ordinal": 5, "days": 31 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.June", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JuneShort", "ordinal": 6, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.July", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JulyShort", "ordinal": 7, "days": 31 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.August", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.AugustShort", "ordinal": 8, "days": 31 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.September", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.SeptemberShort", "ordinal": 9, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.October", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.OctoberShort", "ordinal": 10, "days": 31 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.November", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.NovemberShort", "ordinal": 11, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Gregorian.Month.December", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.DecemberShort", "ordinal": 12, "days": 31 }
+    ]
+  },
+  "days": {
+    "values": [
+      { "name": "CALENDARIA.Weekday.Sunday", "abbreviation": "CALENDARIA.Weekday.SundayShort", "ordinal": 1, "isRestDay": true },
+      { "name": "CALENDARIA.Weekday.Monday", "abbreviation": "CALENDARIA.Weekday.MondayShort", "ordinal": 2 },
+      { "name": "CALENDARIA.Weekday.Tuesday", "abbreviation": "CALENDARIA.Weekday.TuesdayShort", "ordinal": 3 },
+      { "name": "CALENDARIA.Weekday.Wednesday", "abbreviation": "CALENDARIA.Weekday.WednesdayShort", "ordinal": 4 },
+      { "name": "CALENDARIA.Weekday.Thursday", "abbreviation": "CALENDARIA.Weekday.ThursdayShort", "ordinal": 5 },
+      { "name": "CALENDARIA.Weekday.Friday", "abbreviation": "CALENDARIA.Weekday.FridayShort", "ordinal": 6 },
+      { "name": "CALENDARIA.Weekday.Saturday", "abbreviation": "CALENDARIA.Weekday.SaturdayShort", "ordinal": 7, "isRestDay": true }
+    ],
+    "daysPerYear": 365,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "seasons": {
+    "values": [
+      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 79, "dayEnd": 171 },
+      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 172, "dayEnd": 265 },
+      { "name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 266, "dayEnd": 354 },
+      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 355, "dayEnd": 78 }
+    ]
+  },
+  "eras": [
+    { "name": "CALENDARIA.Era.CommonEra", "abbreviation": "CALENDARIA.Era.CE", "startYear": 1, "endYear": null, "format": "suffix", "template": null }
+  ],
+  "moons": [
+    {
+      "name": "CALENDARIA.Moon.Gregorian.Luna",
+      "cycleLength": 30,
+      "color": "#C0C0C0",
+      "phases": [
+        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
+        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
+        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
+        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
+        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
+        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
+        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+      ],
+      "referenceDate": { "year": 2025, "month": 0, "day": 29 }
+    }
+  ],
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 355,
+    "summerSolstice": 172
+  },
+  "festivals": [],
+  "cycles": [],
+  "canonicalHours": [],
+  "weeks": { "enabled": false, "type": "year-based", "names": [] },
+  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "dateFormats": {
+    "short": "{{d}} {{b}}",
+    "long": "{{d}} {{B}}, {{y}}",
+    "full": "{{B}} {{d}}, {{y}}",
+    "time": "{{H}}:{{M}}",
+    "time12": "{{h}}:{{M}} {{p}}"
+  },
+  "metadata": {
+    "id": "gregorian",
+    "description": "CALENDARIA.Calendar.Gregorian.Description",
+    "author": "calendaria",
+    "system": "Real World"
+  }
+}

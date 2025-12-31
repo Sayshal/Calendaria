@@ -2,19 +2,18 @@
  * Simple Timekeeping Importer
  * Imports calendar data from the Simple Timekeeping module.
  * Live import only - STK does not export to files.
- *
  * @module Importers/SimpleTimekeepingImporter
  * @author Tyler
  */
 
-import { getDefaultMoonPhases } from '../calendar/data/calendar-defaults.mjs';
-import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import BaseImporter from './base-importer.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
+import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Simple Timekeeping module data.
@@ -51,13 +50,10 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     if (this.#stkCalendarsCache) return this.#stkCalendarsCache;
 
     try {
-      // Get the module's script path and import calendars.js
       const module = game.modules.get('simple-timekeeping');
       if (!module?.active) return null;
-
       const modulePath = `modules/simple-timekeeping/scripts/calendars.js`;
       const { CALENDARS } = await import(`/${modulePath}`);
-
       if (CALENDARS?.length) {
         log(3, `Imported ${CALENDARS.length} calendars from Simple Timekeeping module`);
         this.#stkCalendarsCache = CALENDARS;
@@ -91,22 +87,15 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   async loadFromModule() {
     if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.SimpleTimekeeping.NotInstalled'));
-
-    // Get STK configuration
     const config = game.settings.get('simple-timekeeping', 'configuration');
     if (!config) throw new Error(localize('CALENDARIA.Importer.SimpleTimekeeping.NoConfig'));
-
-    // Resolve calendar data
     let calendarData;
     let isNativeFormat = false;
-
     if (config.calendar === 'custom' && config.customCalendar) {
-      // Custom calendar JSON from settings
       calendarData = JSON.parse(config.customCalendar);
       calendarData._isCustom = true;
       isNativeFormat = true;
     } else {
-      // Try to dynamically import preset from STK module
       calendarData = await this.constructor.findSTKCalendar(config.calendar);
       if (calendarData) {
         isNativeFormat = true;
@@ -116,39 +105,20 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       }
     }
 
-    // Resolve moon data - STK native format uses moons.values
     let moons = isNativeFormat ? calendarData.moons?.values || [] : calendarData.moons || [];
     if (config.useCustomMoons && config.customMoons) moons = JSON.parse(config.customMoons);
-
-    // Get events from journal entries with STK flags
-    const events = await this.#loadEvents(config);
-
-    // Get scene darkness sync settings
+    const events = await this.#loadEvents();
     const sceneDarkness = this.#loadSceneDarknessFlags();
-
-    // Get current weather if set
     const weather = this.#loadWeatherState();
-
     return { config, calendar: calendarData, moons, events, sceneDarkness, weather, isNativeFormat };
   }
 
   /**
    * Load events from journal entries with STK flags.
-   * @param {object} config - STK configuration
    * @returns {Promise<object[]>} Array of event objects
    */
-  async #loadEvents(config) {
+  async #loadEvents() {
     const events = [];
-
-    // STK stores event folder ID in journalEntryEvents setting
-    let folderId;
-    try {
-      folderId = game.settings.get('simple-timekeeping', 'journalEntryEvents');
-    } catch {
-      log(3, 'No STK events folder setting found');
-    }
-
-    // Search all journal entry pages for STK event flags
     for (const journal of game.journal.contents) {
       for (const page of journal.pages.contents) {
         const eventTime = page.getFlag('simple-timekeeping', 'eventTime');
@@ -176,7 +146,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #loadSceneDarknessFlags() {
     const sceneFlags = [];
-
     for (const scene of game.scenes.contents) {
       const darknessSync = scene.getFlag('simple-timekeeping', 'darknessSync');
       if (darknessSync && darknessSync !== 'default') sceneFlags.push({ sceneId: scene.id, sceneName: scene.name, darknessSync });
@@ -192,14 +161,9 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   #loadWeatherState() {
     try {
       const config = game.settings.get('simple-timekeeping', 'configuration');
-      if (config.weatherLabel && config.weatherLabel !== 'Click Me') {
-        return {
-          label: config.weatherLabel,
-          color: config.weatherColor || '#ffffff'
-        };
-      }
+      if (config.weatherLabel && config.weatherLabel !== 'Click Me') return { label: config.weatherLabel, color: config.weatherColor || '#ffffff' };
     } catch {
-      log(3, 'No STK weather state found');
+      log(2, 'No STK weather state found');
     }
     return null;
   }
@@ -215,57 +179,30 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   async transform(data) {
     const { calendar, moons, config, isNativeFormat } = data;
-
     log(3, 'Transforming Simple Timekeeping data:', calendar.name);
-
-    // Handle native STK format vs legacy format
     const rawWeekdays = isNativeFormat ? calendar.days?.values : calendar.weekdays;
     const rawMonths = isNativeFormat ? calendar.months?.values : calendar.months;
-
     const weekdays = this.#transformWeekdays(rawWeekdays, isNativeFormat);
-    const months = this.#transformMonths(rawMonths, isNativeFormat);
-
-    // Get time config from native format or use defaults
+    const months = this.#transformMonths(rawMonths);
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const daysPerYear = calendar.days?.daysPerYear ?? months.reduce((sum, m) => sum + (m.days || 0), 0);
-
-    // Get seasons from native format
     const seasons = isNativeFormat ? this.#transformSeasons(calendar.seasons?.values) : [];
-
     return {
       name: calendar.name || 'Imported Calendar',
-
-      // Days configuration
       days: { values: weekdays, hoursPerDay, minutesPerHour, secondsPerMinute, daysPerYear },
-
-      // Months
       months: { values: months },
-
-      // Years configuration
       years: this.#transformYears(calendar, isNativeFormat),
-
-      // Leap year configuration
       leapYearConfig: this.#transformLeapYear(calendar.leapYear ?? calendar.years?.leapYear, isNativeFormat),
-
-      // Moons
       moons: this.#transformMoons(moons),
-
-      // Seasons
       seasons: { values: seasons },
-
-      // Festivals from intercalary months
       festivals: this.#extractFestivals(rawMonths),
-
-      // Metadata
       metadata: {
         description: calendar.description || (calendar._isCustom ? 'Custom calendar imported from Simple Timekeeping' : `Imported from Simple Timekeeping: ${config.calendar}`),
         system: calendar.system || calendar.name || config.calendar,
         importedFrom: 'simple-timekeeping'
       },
-
-      // Weather - default temperate zone
       weather: { activeZone: 'temperate', autoGenerate: false, zones: [getDefaultZoneConfig('temperate')] }
     };
   }
@@ -283,17 +220,16 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   #transformWeekdays(weekdays = [], isNativeFormat = false) {
     if (!weekdays?.length) {
       return [
-        { name: 'Sunday', abbreviation: 'Su', ordinal: 1 },
-        { name: 'Monday', abbreviation: 'Mo', ordinal: 2 },
-        { name: 'Tuesday', abbreviation: 'Tu', ordinal: 3 },
-        { name: 'Wednesday', abbreviation: 'We', ordinal: 4 },
-        { name: 'Thursday', abbreviation: 'Th', ordinal: 5 },
-        { name: 'Friday', abbreviation: 'Fr', ordinal: 6 },
-        { name: 'Saturday', abbreviation: 'Sa', ordinal: 7 }
+        { name: 'CALENDARIA.Weekday.Sunday', abbreviation: 'CALENDARIA.Weekday.SundayShort', ordinal: 1 },
+        { name: 'CALENDARIA.Weekday.Monday', abbreviation: 'CALENDARIA.Weekday.MondayShort', ordinal: 2 },
+        { name: 'CALENDARIA.Weekday.Tuesday', abbreviation: 'CALENDARIA.Weekday.TuesdayShort', ordinal: 3 },
+        { name: 'CALENDARIA.Weekday.Wednesday', abbreviation: 'CALENDARIA.Weekday.WednesdayShort', ordinal: 4 },
+        { name: 'CALENDARIA.Weekday.Thursday', abbreviation: 'CALENDARIA.Weekday.ThursdayShort', ordinal: 5 },
+        { name: 'CALENDARIA.Weekday.Friday', abbreviation: 'CALENDARIA.Weekday.FridayShort', ordinal: 6 },
+        { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
 
-    // Native STK format already has objects with name, abbreviation, ordinal
     if (isNativeFormat && typeof weekdays[0] === 'object') {
       return weekdays.map((day, index) => ({
         name: this.#localizeString(day.name),
@@ -303,7 +239,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       }));
     }
 
-    // Legacy format - array of strings
     return weekdays.map((name, index) => ({ name, abbreviation: name.substring(0, 2), ordinal: index + 1 }));
   }
 
@@ -311,10 +246,9 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * Transform STK months to Calendaria format.
    * Filters out intercalary months (they become festivals).
    * @param {object[]} months - STK months array.
-   * @param {boolean} isNativeFormat - Whether data is in native STK format.
    * @returns {object[]} Calendaria months array.
    */
-  #transformMonths(months = [], isNativeFormat = false) {
+  #transformMonths(months = []) {
     return months
       .filter((m) => !m.intercalary)
       .map((month, index) => ({
@@ -334,7 +268,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #transformSeasons(seasons = []) {
     if (!seasons?.length) return [];
-
     return seasons.map((season, index) => ({
       name: this.#localizeString(season.name),
       abbreviation: this.#localizeString(season.abbreviation) || this.#localizeString(season.name).substring(0, 3),
@@ -353,10 +286,8 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #localizeString(str) {
     if (!str) return '';
-    // Check if it's a localization key (contains dots like "CALENDAR.GREGORIAN.January")
     if (str.includes('.') && !str.includes(' ')) {
       const localized = localize(str);
-      // If localization failed (returned the key), use the last part of the key
       if (localized === str) {
         const parts = str.split('.');
         return parts[parts.length - 1];
@@ -374,10 +305,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #transformYears(calendar, isNativeFormat = false) {
     const years = isNativeFormat ? calendar.years : calendar;
-    return {
-      yearZero: years?.yearZero ?? 0,
-      firstWeekday: years?.firstWeekday ?? 0
-    };
+    return { yearZero: years?.yearZero ?? 0, firstWeekday: years?.firstWeekday ?? 0 };
   }
 
   /**
@@ -388,12 +316,8 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #transformLeapYear(leapYear, isNativeFormat = false) {
     if (!leapYear) return null;
-
-    // Native STK format uses leapStart and leapInterval
     if (isNativeFormat || leapYear.leapInterval) {
-      if (leapYear.leapInterval > 0) {
-        return { rule: 'simple', interval: leapYear.leapInterval, start: leapYear.leapStart ?? 0 };
-      }
+      if (leapYear.leapInterval > 0) return { rule: 'simple', interval: leapYear.leapInterval, start: leapYear.leapStart ?? 0 };
       return null;
     }
     if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: 0 };
@@ -411,7 +335,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       name: this.#localizeString(moon.name),
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.offset ?? 0,
-      phases: getDefaultMoonPhases(),
+      phases: DEFAULT_MOON_PHASES,
       referenceDate: { year: 0, month: 0, day: 0 }
     }));
   }
@@ -424,17 +348,14 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   #extractFestivals(months = []) {
     const festivals = [];
     let regularMonthIndex = 0;
-
     for (const month of months) {
       if (month.intercalary) {
         const monthName = this.#localizeString(month.name);
         for (let day = 1; day <= month.days; day++) {
           const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day };
-          // Handle leap-year-only intercalary days (days: 0, leapDays: 1)
           if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
         }
-        // Handle leap-year-only festivals that have 0 days normally
         if (month.days === 0 && month.leapDays > 0) {
           const monthName = this.#localizeString(month.name);
           for (let day = 1; day <= month.leapDays; day++) {
@@ -461,20 +382,13 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   async extractNotes(data) {
     const { events, calendar, isNativeFormat } = data;
     const notes = [];
-
     log(3, `Extracting ${events.length} events from Simple Timekeeping data`);
-
-    // Calculate seconds per day for timestamp conversion
     const secondsPerDay = (calendar.days?.hoursPerDay ?? 24) * (calendar.days?.minutesPerHour ?? 60) * (calendar.days?.secondsPerMinute ?? 60);
-
-    // Get days per year from calendar - handle both native and legacy format
     const months = isNativeFormat ? calendar.months?.values : calendar.months;
     const daysPerYear = calendar.days?.daysPerYear ?? months?.reduce((sum, m) => sum + (m.days || 0), 0) ?? 365;
-
     for (const event of events) {
       const startDate = this.#timestampToDate(event.eventTime, calendar, secondsPerDay, daysPerYear, isNativeFormat);
       const endDate = event.eventEnd ? this.#timestampToDate(event.eventEnd, calendar, secondsPerDay, daysPerYear, isNativeFormat) : null;
-
       notes.push({
         name: event.name,
         content: event.content,
@@ -502,23 +416,17 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   #timestampToDate(timestamp, calendar, secondsPerDay, daysPerYear, isNativeFormat = false) {
     const totalDays = Math.floor(timestamp / secondsPerDay);
     const timeOfDay = timestamp % secondsPerDay;
-
-    // Calculate year
     let year = Math.floor(totalDays / daysPerYear);
     let dayOfYear = totalDays % daysPerYear;
-
-    // Adjust for negative timestamps
     if (totalDays < 0) {
       year = Math.floor(totalDays / daysPerYear);
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
 
-    // Find month and day - handle both native and legacy format
     let month = 0;
     let remainingDays = dayOfYear;
     const months = isNativeFormat ? calendar.months?.values : calendar.months;
     const regularMonths = (months || []).filter((m) => !m.intercalary);
-
     for (let i = 0; i < regularMonths.length; i++) {
       if (remainingDays < regularMonths[i].days) {
         month = i;
@@ -528,13 +436,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       month = i + 1;
     }
 
-    // Calculate time
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-
     return { year, month, day: remainingDays, hour, minute };
   }
 
@@ -553,26 +459,22 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @param {object[]} notes - Extracted note data
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
+   * @returns {Promise<{success: boolean, count: number, errors: string[]}>} Imported notes object
    * @override
    */
   async importNotes(notes, options = {}) {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
-
     for (const note of notes) {
       try {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
           log(3, `Successfully created note: ${note.name}`);
@@ -581,7 +483,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         }
       } catch (error) {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
-        log(2, `Error importing note "${note.name}":`, error);
+        log(1, `Error importing note "${note.name}":`, error);
       }
     }
 
@@ -596,7 +498,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   /**
    * Import scene darkness sync settings.
    * @param {object[]} sceneFlags - Scene flag data from extraction
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
+   * @returns {Promise<{success: boolean, count: number, errors: string[]}>} Scene darkness settings
    */
   async importSceneDarkness(sceneFlags) {
     const errors = [];
@@ -606,15 +508,13 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       try {
         const scene = game.scenes.get(sceneId);
         if (!scene) continue;
-
-        // Map STK sync modes to Calendaria
         const syncMap = { sync: 'enabled', noSync: 'disabled', weatherOnly: 'disabled', darknessOnly: 'enabled' };
         const calendariaSyncMode = syncMap[darknessSync] || 'default';
         await scene.setFlag('calendaria', 'darknessSync', calendariaSyncMode);
         count++;
       } catch (error) {
         errors.push(`Error setting darkness sync for scene: ${error.message}`);
-        log(2, `Error importing scene darkness:`, error);
+        log(1, `Error importing scene darkness:`, error);
       }
     }
 
@@ -628,12 +528,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   async importWeather(weather) {
     if (!weather?.label) return false;
-
     try {
       await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: 'Imported from Simple Timekeeping' });
       return true;
     } catch (error) {
-      log(2, 'Error importing weather:', error);
+      log(1, 'Error importing weather:', error);
       return false;
     }
   }

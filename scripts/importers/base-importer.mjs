@@ -2,14 +2,14 @@
  * Base Importer Class
  * Abstract foundation for all calendar importers.
  * Subclasses must implement transform() at minimum.
- *
  * @module Importers/BaseImporter
  * @author Tyler
  */
 
-import { HOOKS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS } from '../constants.mjs';
+import { format, localize } from '../utils/localization.mjs';
+import { log } from '../utils/logger.mjs';
 
 /**
  * Abstract base class for calendar importers.
@@ -43,6 +43,13 @@ export default class BaseImporter {
 
   /** @type {string[]} Accepted file extensions */
   static fileExtensions = ['.json'];
+
+  /* -------------------------------------------- */
+  /*  Instance Properties                         */
+  /* -------------------------------------------- */
+
+  /** @type {object[]} Undated events to migrate to journal entries */
+  _undatedEvents = [];
 
   /* -------------------------------------------- */
   /*  Detection                                   */
@@ -93,7 +100,8 @@ export default class BaseImporter {
    * @throws {Error} If not implemented
    */
   async transform(data) {
-    throw new Error(`${this.constructor.name}.transform() not implemented`);
+    log(1, `${this.constructor.name}.transform() not implemented`, { data });
+    return null;
   }
 
   /**
@@ -103,7 +111,8 @@ export default class BaseImporter {
    * @returns {Promise<object[]>} Array of note data objects
    */
   async extractNotes(data) {
-    return [];
+    log(1, `${this.constructor.name}.extractNotes() not implemented`, { data });
+    return null;
   }
 
   /* -------------------------------------------- */
@@ -117,25 +126,19 @@ export default class BaseImporter {
    */
   validate(data) {
     const errors = [];
-
-    // Required fields
-    if (!data.name) errors.push('Missing calendar name');
-    if (!data.months?.values?.length) errors.push('Calendar must have at least one month');
-    if (!data.days) errors.push('Missing time configuration');
-
-    // Time validation
+    if (!data.name) errors.push(localize('CALENDARIA.Importer.Error.MissingName'));
+    if (!data.months?.values?.length) errors.push(localize('CALENDARIA.Importer.Error.NoMonths'));
+    if (!data.days) errors.push(localize('CALENDARIA.Importer.Error.MissingTimeConfig'));
     if (data.days) {
-      if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push('Invalid hours per day');
-      if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push('Invalid minutes per hour');
-      if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push('Invalid seconds per minute');
+      if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidHoursPerDay'));
+      if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidMinutesPerHour'));
+      if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidSecondsPerMinute'));
     }
-
-    // Month validation
     if (data.months?.values) {
       for (let i = 0; i < data.months.values.length; i++) {
         const month = data.months.values[i];
-        if (!month.name) errors.push(`Month ${i + 1} missing name`);
-        if (!month.days || month.days < 1) errors.push(`Month ${i + 1} must have at least 1 day`);
+        if (!month.name) errors.push(format('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
+        if (!month.days || month.days < 1) errors.push(format('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
       }
     }
 
@@ -152,26 +155,18 @@ export default class BaseImporter {
    * @param {object} options - Import options
    * @param {string} options.id - Calendar ID (will be prefixed with 'custom-')
    * @param {string} [options.name] - Override calendar name
-   * @returns {Promise<{success: boolean, calendar?: object, error?: string}>}
+   * @returns {Promise<object>} imported calendar data
    */
   async importCalendar(data, options = {}) {
     const calendarId = options.id || this.#generateId(data.name);
-
-    // Apply name override if provided
     if (options.name) data.name = options.name;
-
-    // Add import metadata
     if (!data.metadata) data.metadata = {};
     data.metadata.importedFrom = this.constructor.id;
     data.metadata.importedAt = Date.now();
-
     Hooks.callAll(HOOKS.IMPORT_STARTED, { importerId: this.constructor.id, calendarId });
-
     try {
       const calendar = await CalendarManager.createCustomCalendar(calendarId, data);
-
       if (calendar) {
-        // Get the actual calendar ID (with custom- prefix) from metadata
         const actualCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
         log(3, `Successfully imported calendar: ${actualCalendarId}`);
         Hooks.callAll(HOOKS.IMPORT_COMPLETE, { importerId: this.constructor.id, calendarId: actualCalendarId, calendar });
@@ -192,10 +187,11 @@ export default class BaseImporter {
    * @param {object[]} notes - Extracted note data
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
+   * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Import result
    */
   async importNotes(notes, options = {}) {
-    return { success: true, count: 0, errors: [] };
+    log(1, `${this.constructor.name}.importNotes() not implemented`, { notes, options });
+    return null;
   }
 
   /**
@@ -204,10 +200,34 @@ export default class BaseImporter {
    * @param {object[]} festivals - Extracted festival data
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
-   * @returns {Promise<{success: boolean, count: number, errors: string[]}>}
+   * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Import result
    */
   async importFestivals(festivals, options = {}) {
-    return { success: true, count: 0, errors: [] };
+    log(1, `${this.constructor.name}.importFestivals() not implemented`, { festivals, options });
+    return null;
+  }
+
+  /**
+   * Migrate undated events to Foundry journal entries.
+   * Creates folder hierarchy: Calendaria Imports/[Calendar Name]/Undated Events
+   * @param {string} calendarName - Name of the calendar for folder organization
+   * @returns {Promise<{count: number}>} - Migration result with count
+   */
+  async migrateUndatedEvents(calendarName) {
+    if (!this._undatedEvents?.length) return { count: 0 };
+    const parts = ['Calendaria Imports', calendarName, 'Undated Events'];
+    let parentId = null;
+    for (const part of parts) {
+      let existing = game.folders.find((f) => f.name === part && f.folder?.id === parentId && f.type === 'JournalEntry');
+      if (!existing) existing = await Folder.create({ name: part, type: 'JournalEntry', folder: parentId });
+      parentId = existing.id;
+    }
+    const journalData = this._undatedEvents.map((event) => ({ name: event.name, folder: parentId, pages: [{ name: event.name, type: 'text', text: { content: event.content || '' } }] }));
+    await JournalEntry.createDocuments(journalData);
+    const count = this._undatedEvents.length;
+    ui.notifications.info(format('CALENDARIA.Importer.UndatedEventsMigrated', { count }));
+    log(3, `Migrated ${count} undated events to journal entries`);
+    return { count };
   }
 
   /* -------------------------------------------- */
@@ -222,7 +242,6 @@ export default class BaseImporter {
    */
   getPreviewData(rawData, transformedData) {
     const notes = this.#countNotes(rawData);
-
     return {
       name: transformedData.name || 'Unknown',
       monthCount: transformedData.months?.values?.length ?? 0,
@@ -232,6 +251,7 @@ export default class BaseImporter {
       eraCount: transformedData.eras?.length ?? 0,
       festivalCount: transformedData.festivals?.length ?? 0,
       noteCount: notes,
+      undatedCount: this._undatedEvents?.length ?? 0,
       hasLeapYear: !!transformedData.years?.leapYear?.rule,
       daysPerYear: this.#calculateDaysPerYear(transformedData)
     };
@@ -251,7 +271,7 @@ export default class BaseImporter {
     if (!name) return `imported-${Date.now()}`;
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/[^\da-z]+/g, '-')
       .replace(/^-|-$/g, '')
       .substring(0, 32);
   }
@@ -259,11 +279,11 @@ export default class BaseImporter {
   /**
    * Count notes in raw data.
    * Override in subclasses for accurate counts.
-   * @param {object} data - Raw source data
+   * @param {object} _data - Raw source data
    * @returns {number} Note count
    * @private
    */
-  #countNotes(data) {
+  #countNotes(_data) {
     return 0;
   }
 

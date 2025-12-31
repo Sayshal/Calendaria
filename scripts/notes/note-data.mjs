@@ -1,13 +1,12 @@
 /**
  * Note Data Schema and Validation
  * Defines the structure and validation rules for calendar note flags.
- *
  * @module Notes/NoteData
  * @author Tyler
  */
 
 import { MODULE, SETTINGS } from '../constants.mjs';
-import { localize, format } from '../utils/localization.mjs';
+import { localize } from '../utils/localization.mjs';
 import { isValidDate } from './utils/date-utils.mjs';
 
 /**
@@ -51,49 +50,28 @@ export function getDefaultNoteData() {
  */
 export function validateNoteData(noteData) {
   const errors = [];
-
-  // Check required fields
   if (!noteData) {
     errors.push('Note data is required');
     return { valid: false, errors };
   }
 
-  // Validate start date
   if (!noteData.startDate) errors.push('Start date is required');
   else if (!isValidDate(noteData.startDate)) errors.push('Start date is invalid');
-
-  // Validate end date if present
   if (noteData.endDate && !isValidDate(noteData.endDate)) errors.push('End date is invalid');
-
-  // Validate allDay
   if (noteData.allDay !== undefined && typeof noteData.allDay !== 'boolean') errors.push('allDay must be a boolean');
-
-  // Validate repeat - get choices from data model
   const validRepeatValues = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote']._schema.fields.repeat.choices;
   if (noteData.repeat && !validRepeatValues.includes(noteData.repeat)) errors.push(`repeat must be one of: ${validRepeatValues.join(', ')}`);
-
-  // Validate weekday (for weekly recurrence)
   if (noteData.weekday !== undefined && noteData.weekday !== null) {
     if (typeof noteData.weekday !== 'number' || noteData.weekday < 0) errors.push('weekday must be a non-negative number (0-indexed day of week)');
   }
-
-  // Validate seasonIndex (for seasonal recurrence)
   if (noteData.seasonIndex !== undefined && noteData.seasonIndex !== null) {
     if (typeof noteData.seasonIndex !== 'number' || noteData.seasonIndex < 0) errors.push('seasonIndex must be a non-negative number');
   }
-
-  // Validate weekNumber (for weekOfMonth recurrence)
   if (noteData.weekNumber !== undefined && noteData.weekNumber !== null) {
     if (typeof noteData.weekNumber !== 'number' || noteData.weekNumber < 1) errors.push('weekNumber must be a positive number (1-indexed week of month)');
   }
-
-  // Validate repeat interval
   if (noteData.repeatInterval !== undefined) if (typeof noteData.repeatInterval !== 'number' || noteData.repeatInterval < 1) errors.push('repeatInterval must be a positive number');
-
-  // Validate repeat end date if present
   if (noteData.repeatEndDate && !isValidDate(noteData.repeatEndDate)) errors.push('Repeat end date is invalid');
-
-  // Validate moon conditions
   if (noteData.moonConditions !== undefined) {
     if (!Array.isArray(noteData.moonConditions)) errors.push('moonConditions must be an array');
     else {
@@ -109,8 +87,6 @@ export function validateNoteData(noteData) {
       }
     }
   }
-
-  // Validate linked event
   if (noteData.linkedEvent !== undefined && noteData.linkedEvent !== null) {
     if (typeof noteData.linkedEvent !== 'object') {
       errors.push('linkedEvent must be an object or null');
@@ -119,21 +95,16 @@ export function validateNoteData(noteData) {
       if (typeof noteData.linkedEvent.offset !== 'number') errors.push('linkedEvent.offset must be a number');
     }
   }
-
-  // Validate range pattern
   if (noteData.rangePattern !== undefined && noteData.rangePattern !== null) {
     if (typeof noteData.rangePattern !== 'object') {
       errors.push('rangePattern must be an object or null');
     } else {
-      // Validate each range bit (year, month, day)
       for (const field of ['year', 'month', 'day']) {
         const bit = noteData.rangePattern[field];
         if (bit !== undefined && bit !== null) {
           if (typeof bit === 'number') {
-            // Single number is valid
             continue;
           } else if (Array.isArray(bit) && bit.length === 2) {
-            // Array [min, max] where each can be number or null
             const [min, max] = bit;
             if (min !== null && typeof min !== 'number') errors.push(`rangePattern.${field}[0] must be number or null`);
             if (max !== null && typeof max !== 'number') errors.push(`rangePattern.${field}[1] must be number or null`);
@@ -144,37 +115,22 @@ export function validateNoteData(noteData) {
       }
     }
   }
-
-  // Validate categories
   if (noteData.categories !== undefined) {
     if (!Array.isArray(noteData.categories)) errors.push('categories must be an array');
     else if (noteData.categories.some((c) => typeof c !== 'string')) errors.push('categories must be an array of strings');
   }
-
-  // Validate color
   if (noteData.color !== undefined) {
     if (typeof noteData.color !== 'string') errors.push('color must be a string');
-    else if (!/^#[0-9A-Fa-f]{6}$/.test(noteData.color)) errors.push('color must be a valid hex color (e.g., #4a9eff)');
+    else if (!/^#[\dA-Fa-f]{6}$/.test(noteData.color)) errors.push('color must be a valid hex color (e.g., #4a9eff)');
   }
-
-  // Validate icon
   if (noteData.icon !== undefined && typeof noteData.icon !== 'string') errors.push('icon must be a string');
-
-  // Validate remind users
   if (noteData.remindUsers !== undefined) {
     if (!Array.isArray(noteData.remindUsers)) errors.push('remindUsers must be an array');
     else if (noteData.remindUsers.some((id) => typeof id !== 'string')) errors.push('remindUsers must be an array of user IDs (strings)');
   }
-
-  // Validate reminder offset
   if (noteData.reminderOffset !== undefined) if (typeof noteData.reminderOffset !== 'number') errors.push('reminderOffset must be a number');
-
-  // Validate macro
   if (noteData.macro !== undefined && noteData.macro !== null) if (typeof noteData.macro !== 'string') errors.push('macro must be a string (macro ID) or null');
-
-  // Validate scene ID
   if (noteData.sceneId !== undefined && noteData.sceneId !== null) if (typeof noteData.sceneId !== 'string') errors.push('sceneId must be a string (scene ID) or null');
-
   return { valid: errors.length === 0, errors };
 }
 
@@ -185,7 +141,6 @@ export function validateNoteData(noteData) {
  */
 export function sanitizeNoteData(noteData) {
   const defaults = getDefaultNoteData();
-
   return {
     startDate: noteData.startDate || defaults.startDate,
     endDate: noteData.endDate || null,
@@ -214,23 +169,16 @@ export function sanitizeNoteData(noteData) {
 
 /**
  * Create a note stub for indexing (lightweight reference).
- * @param {JournalEntryPage} page  Journal entry page document
+ * @param {object} page  Journal entry page document
  * @returns {object|null}  Note stub or null if not a calendar note
  */
 export function createNoteStub(page) {
-  // Only process calendaria.calendarnote pages
   if (page.type !== 'calendaria.calendarnote') return null;
-
   const flagData = page.system;
   if (!flagData) return null;
-
-  // Get calendarId from page flags first, then fall back to parent journal flags
   const calendarId = page.getFlag(MODULE.ID, 'calendarId') || page.parent?.getFlag(MODULE.ID, 'calendarId') || null;
-
-  // Include cached random occurrences if present (for random repeat type)
   const randomOccurrences = page.getFlag(MODULE.ID, 'randomOccurrences');
   const enrichedFlagData = randomOccurrences?.occurrences ? { ...flagData, cachedRandomOccurrences: randomOccurrences.occurrences } : flagData;
-
   return {
     id: page.id,
     name: page.name,
@@ -276,7 +224,8 @@ export function getPredefinedCategories() {
  * @returns {object[]}  Array of custom category definitions
  */
 export function getCustomCategories() {
-  return game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
+  return raw.map((c) => ({ id: c.id, label: c.label || c.name, color: c.color, icon: c.icon || 'fa-tag', custom: true }));
 }
 
 /**
@@ -300,16 +249,12 @@ export async function addCustomCategory(label, color = '#868e96', icon = 'fa-tag
   const id = label
     .toLowerCase()
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
-
-  // Check if category already exists
+    .replace(/[^\da-z-]/g, '');
   const existing = getAllCategories().find((c) => c.id === id);
   if (existing) return existing;
-
   const newCategory = { id, label, color, icon, custom: true };
   const customCategories = getCustomCategories();
   customCategories.push(newCategory);
-
   await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, customCategories);
   return newCategory;
 }
@@ -320,15 +265,11 @@ export async function addCustomCategory(label, color = '#868e96', icon = 'fa-tag
  * @returns {Promise<boolean>}  True if deleted, false if not found or predefined
  */
 export async function deleteCustomCategory(categoryId) {
-  // Check if it's a predefined category (can't delete those)
   const predefined = getPredefinedCategories().find((c) => c.id === categoryId);
   if (predefined) return false;
-
   const customCategories = getCustomCategories();
   const index = customCategories.findIndex((c) => c.id === categoryId);
-
   if (index === -1) return false;
-
   customCategories.splice(index, 1);
   await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, customCategories);
   return true;

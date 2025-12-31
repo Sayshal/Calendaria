@@ -1,22 +1,23 @@
 /**
  * Compact Calendar - All-in-one calendar widget with timekeeping.
  * Frameless, draggable, with persistent position and open state.
- *
  * @module Applications/CompactCalendar
  * @author Tyler
  */
 
-import { CalendarApplication } from './calendar-application.mjs';
+import CalendarManager from '../calendar/calendar-manager.mjs';
+import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
-import { localize, format } from '../utils/localization.mjs';
-import { MODULE, SETTINGS, TEMPLATES, HOOKS } from '../constants.mjs';
-import { openWeatherPicker } from '../weather/weather-picker.mjs';
-import * as ViewUtils from './calendar-view-utils.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
+import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { localize } from '../utils/localization.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
+import { openWeatherPicker } from '../weather/weather-picker.mjs';
+import { CalendarApplication } from './calendar-application.mjs';
+import * as ViewUtils from './calendar-view-utils.mjs';
+import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -48,7 +49,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Sticky position (immovable) */
   #stickyPosition = false;
 
-  /** @type {ContextMenu|null} Active sticky options menu */
+  /** @type {object|null} Active sticky options menu */
   #stickyMenu = null;
 
   /** @type {number|null} Timeout ID for hiding controls */
@@ -72,16 +73,29 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether sidebar is locked due to notes panel */
   #sidebarLocked = false;
 
+  /** @type {boolean} Search panel visibility state */
+  #searchOpen = false;
+
+  /** @type {string} Current search term */
+  #searchTerm = '';
+
+  /** @type {object[]|null} Current search results */
+  #searchResults = null;
+
+  /** @type {Function|null} Click-outside handler for search panel */
+  #clickOutsideHandler = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'compact-calendar',
     classes: ['calendaria', 'compact-calendar'],
-    position: { width: 'auto', height: 'auto', zIndex: 250 },
+    position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },
     actions: {
       navigate: CompactCalendar._onNavigate,
       today: CompactCalendar._onToday,
       selectDay: CompactCalendar._onSelectDay,
+      navigateToMonth: CompactCalendar._onNavigateToMonth,
       addNote: CompactCalendar._onAddNote,
       openFull: CompactCalendar._onOpenFull,
       toggle: CompactCalendar._onToggleClock,
@@ -99,7 +113,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       toMidday: CompactCalendar._onToMidday,
       toSunset: CompactCalendar._onToSunset,
       toMidnight: CompactCalendar._onToMidnight,
-      openWeatherPicker: CompactCalendar._onOpenWeatherPicker
+      openWeatherPicker: CompactCalendar._onOpenWeatherPicker,
+      openSettings: CompactCalendar._onOpenSettings,
+      toggleSearch: CompactCalendar._onToggleSearch,
+      closeSearch: CompactCalendar._onCloseSearch,
+      openSearchResult: CompactCalendar._onOpenSearchResult
     }
   };
 
@@ -112,7 +130,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get the active calendar.
-   * @returns {CalendariaCalendar}
+   * @returns {object} The active calendar instance
    */
   get calendar() {
     return CalendarManager.getActiveCalendar();
@@ -120,13 +138,17 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get the date being viewed (month/year).
-   * @returns {object}
+   * @returns {object} The viewed date with year, month, day
    */
   get viewedDate() {
     if (this._viewedDate) return this._viewedDate;
     return ViewUtils.getCurrentViewedDate(this.calendar);
   }
 
+  /**
+   * Set the date being viewed.
+   * @param {object} date - The date to view
+   */
   set viewedDate(date) {
     this._viewedDate = date;
   }
@@ -140,30 +162,18 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     const calendar = this.calendar;
     const viewedDate = this.viewedDate;
-
     context.isGM = game.user.isGM;
     context.running = TimeKeeper.running;
     context.currentTime = TimeKeeper.getFormattedTime();
     context.currentDate = TimeKeeper.getFormattedDate();
-
-    // Time increment dropdown
-    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({
-      key,
-      label: this._formatIncrement(key),
-      seconds,
-      selected: key === TimeKeeper.incrementKey
-    }));
-
+    context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeKeeper.incrementKey }));
     if (calendar) context.calendarData = this._generateMiniCalendarData(calendar, viewedDate);
-
-    // Show "Set Current Date" button if selected date differs from today (GM only)
     context.showSetCurrentDate = false;
     if (game.user.isGM && this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(calendar);
       context.showSetCurrentDate = this._selectedDate.year !== today.year || this._selectedDate.month !== today.month || this._selectedDate.day !== today.day;
     }
 
-    // Pass visibility states to template to prevent flicker on re-render
     context.sidebarVisible = this.#sidebarVisible || this.#sidebarLocked || this.#stickySidebar;
     context.controlsVisible = this.#controlsVisible || this.#stickyTimeControls;
     context.controlsLocked = this.#stickyTimeControls;
@@ -173,14 +183,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     context.stickySidebar = this.#stickySidebar;
     context.stickyPosition = this.#stickyPosition;
     context.hasAnyStickyMode = this.#stickyTimeControls || this.#stickySidebar || this.#stickyPosition;
-
-    // Get notes for selected date if notes panel is visible
     if (this.#notesPanelVisible && this._selectedDate) {
       context.selectedDateNotes = this._getSelectedDateNotes();
       context.selectedDateLabel = this._formatSelectedDate();
     }
 
-    // Show view notes button if selected date (or current day) has notes
     context.showViewNotes = false;
     const checkDate = this._selectedDate || ViewUtils.getCurrentViewedDate(calendar);
     if (checkDate) {
@@ -190,10 +197,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       context.showViewNotes = noteCount > 0;
     }
 
-    // Weather badge data
     context.weather = this._getWeatherContext();
-
-    // Get cycle values for display in header (based on viewed date, not world time)
+    context.searchOpen = this.#searchOpen;
+    context.searchTerm = this.#searchTerm;
+    context.searchResults = this.#searchResults || [];
     if (calendar && calendar.cycles?.length) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
       const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
@@ -225,7 +232,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Generate simplified calendar data for the mini month grid.
-   * @param {CalendariaCalendar} calendar - The calendar
+   * @param {object} calendar - The calendar
    * @param {object} date - The viewed date
    * @returns {object} Calendar grid data
    */
@@ -237,25 +244,32 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
     let currentWeek = [];
-
-    // Get visible notes using shared utility
     const allNotes = ViewUtils.getCalendarNotes();
     const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
-
-    // Calculate starting day of week
-    // If month has startingWeekday set, use that; otherwise calculate normally
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
+    if (startDayOfWeek > 0) {
+      const totalMonths = calendar.months?.values?.length ?? 12;
+      const prevDays = [];
+      let remainingSlots = startDayOfWeek;
+      let checkMonth = month;
+      let checkYear = year;
+      while (remainingSlots > 0) {
+        checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
+        if (checkMonth === totalMonths - 1) checkYear--;
+        const checkMonthData = calendar.months?.values?.[checkMonth];
+        const checkMonthDays = checkMonthData?.days ?? 30;
+        const daysToTake = Math.min(remainingSlots, checkMonthDays);
+        for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
+        remainingSlots -= daysToTake;
+      }
 
-    // Add empty cells before month starts
-    for (let i = 0; i < startDayOfWeek; i++) currentWeek.push({ empty: true });
+      for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: ViewUtils.isToday(pd.year, pd.month, pd.day, calendar) });
+    }
 
-    // Add days
     for (let day = 1; day <= daysInMonth; day++) {
       const noteCount = this._countNotesOnDay(visibleNotes, year, month, day);
       const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
-
-      // Get first moon phase only using shared utility
       const moonData = ViewUtils.getFirstMoonPhase(calendar, year, month, day);
 
       currentWeek.push({
@@ -279,15 +293,35 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
-    // Fill remaining empty cells
-    while (currentWeek.length > 0 && currentWeek.length < daysInWeek) currentWeek.push({ empty: true });
+    if (currentWeek.length > 0 && currentWeek.length < daysInWeek) {
+      const totalMonths = calendar.months?.values?.length ?? 12;
+      let remainingSlots = daysInWeek - currentWeek.length;
+      let checkMonth = month;
+      let checkYear = year;
+      let dayInMonth = 1;
+
+      while (remainingSlots > 0) {
+        if (dayInMonth > (calendar.months?.values?.[checkMonth]?.days ?? 30) || checkMonth === month) {
+          checkMonth = checkMonth === totalMonths - 1 ? 0 : checkMonth + 1;
+          if (checkMonth === 0) checkYear++;
+          dayInMonth = 1;
+        }
+
+        const checkMonthDays = calendar.months?.values?.[checkMonth]?.days ?? 30;
+        const daysToTake = Math.min(remainingSlots, checkMonthDays - dayInMonth + 1);
+        for (let d = dayInMonth; d < dayInMonth + daysToTake; d++) {
+          currentWeek.push({ day: d, year: checkYear, month: checkMonth, isFromOtherMonth: true, isToday: ViewUtils.isToday(checkYear, checkMonth, d, calendar) });
+        }
+        dayInMonth += daysToTake;
+        remainingSlots -= daysToTake;
+      }
+    }
 
     if (currentWeek.length > 0) weeks.push(currentWeek);
-
-    // Get season and era for the viewed month (use mid-month day for accuracy)
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
+    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
 
     return {
       year,
@@ -298,11 +332,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays:
-        calendar.days?.values?.map((wd) => {
-          const name = localize(wd.name);
-          return name.substring(0, 2); // First 2 chars for compact view
-        }) || []
+      weekdays: monthWeekdays.map((wd) => ({ name: localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }))
     };
   }
 
@@ -311,7 +341,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} year - Display year
    * @param {number} month - Month
    * @param {number} day - Day (1-indexed)
-   * @returns {boolean}
+   * @returns {boolean} True if the date matches the selected date
    */
   _isSelected(year, month, day) {
     if (!this._selectedDate) return false;
@@ -320,16 +350,15 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Count notes on a specific day.
-   * @param {JournalEntryPage[]} notes - Visible notes
+   * @param {object[]} notes - Visible notes
    * @param {number} year - Year
    * @param {number} month - Month
    * @param {number} day - Day (1-indexed)
-   * @returns {number}
+   * @returns {number} Number of notes on the specified day
    */
   _countNotesOnDay(notes, year, month, day) {
     const targetDate = { year, month, day };
     return notes.filter((page) => {
-      // Build noteData from page.system for recurrence check
       const noteData = {
         startDate: page.system.startDate,
         endDate: page.system.endDate,
@@ -340,7 +369,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         moonConditions: page.system.moonConditions,
         randomConfig: page.system.randomConfig,
         cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-        linkedEvent: page.system.linkedEvent
+        linkedEvent: page.system.linkedEvent,
+        weekday: page.system.weekday,
+        weekNumber: page.system.weekNumber,
+        seasonalConfig: page.system.seasonalConfig,
+        conditions: page.system.conditions
       };
       return isRecurringMatch(noteData, targetDate);
     }).length;
@@ -348,14 +381,12 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get notes for the selected date, sorted by time (all-day first, then by start time).
-   * @returns {object[]}
+   * @returns {object[]} Array of note objects for the selected date
    */
   _getSelectedDateNotes() {
     if (!this._selectedDate) return [];
-
     const { year, month, day } = this._selectedDate;
     const notes = ViewUtils.getNotesOnDay(year, month, day);
-
     return notes
       .map((page) => {
         const start = page.system.startDate;
@@ -363,8 +394,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         const isAllDay = page.system.allDay;
         const icon = page.system.icon || 'fas fa-sticky-note';
         const color = page.system.color || '#4a90e2';
-
-        // Format time range
         let timeLabel = '';
         if (isAllDay) {
           timeLabel = localize('CALENDARIA.CompactCalendar.AllDay');
@@ -374,9 +403,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
           timeLabel = `${startTime} - ${endTime}`;
         }
 
-        // Get author name from author document
-        const authorName = page.system.author?.name || localize('CALENDARIA.CompactCalendar.Unknown');
-
+        const authorName = page.system.author?.name || localize('CALENDARIA.Common.Unknown');
         return {
           id: page.id,
           parentId: page.parent.id,
@@ -393,10 +420,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       })
       .sort((a, b) => {
-        // All-day events first
         if (a.isAllDay && !b.isAllDay) return -1;
         if (!a.isAllDay && b.isAllDay) return 1;
-        // Then by start time
         if (a.startHour !== b.startHour) return a.startHour - b.startHour;
         return a.startMinute - b.startMinute;
       });
@@ -404,7 +429,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Format the selected date as a label.
-   * @returns {string}
+   * @returns {string} Formatted date string (e.g., "January 15, 1492")
    */
   _formatSelectedDate() {
     if (!this._selectedDate) return '';
@@ -420,7 +445,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Format hour and minute as time string.
    * @param {number} hour - Hour (0-23)
    * @param {number} minute - Minute (0-59)
-   * @returns {string}
+   * @returns {string} Formatted time string (e.g., "14:30")
    */
   _formatTime(hour, minute) {
     const h = (hour ?? 0).toString().padStart(2, '0');
@@ -435,25 +460,13 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
-
-    // Restore position
     this.#restorePosition();
-
-    // Enable dragging
     this.#enableDragging();
-
-    // Increment selector listener
     this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (event) => {
       TimeKeeper.setIncrement(event.target.value);
     });
-
-    // Set up time update hook
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
-
-    // Clock state hook
-    Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
-
-    // Sidebar auto-hide (respects lock state and sticky sidebar)
+    if (!this.#hooks.some((h) => h.name === HOOKS.CLOCK_START_STOP)) this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this)) });
     const container = this.element.querySelector('.compact-calendar-container');
     const sidebar = this.element.querySelector('.compact-sidebar');
     if (container && sidebar) {
@@ -472,7 +485,35 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
-    // Time controls auto-hide (GM only)
+    const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
+    if (searchInput) {
+      if (this.#searchOpen) searchInput.focus();
+      const debouncedSearch = foundry.utils.debounce((term) => {
+        this.#searchTerm = term;
+        if (term.length >= 2) this.#searchResults = SearchManager.search(term, { searchContent: true });
+        else this.#searchResults = null;
+        this.#updateSearchResults();
+      }, 300);
+
+      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this.#closeSearch();
+      });
+    }
+
+    if (this.#searchOpen) {
+      this.#positionSearchPanel();
+      const panel = this.element.querySelector('.calendaria-hud-search-panel');
+      if (panel && !this.#clickOutsideHandler) {
+        setTimeout(() => {
+          this.#clickOutsideHandler = (event) => {
+            if (!panel.contains(event.target) && !this.element.contains(event.target)) this.#closeSearch();
+          };
+          document.addEventListener('mousedown', this.#clickOutsideHandler);
+        }, 100);
+      }
+    }
+
     const timeDisplay = this.element.querySelector('.compact-time-display');
     const timeControls = this.element.querySelector('.compact-time-controls');
     if (timeDisplay && timeControls) {
@@ -499,14 +540,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
-
-    // Restore sticky states from settings
     this.#restoreStickyStates();
-
-    // Initialize day tracking for re-render optimization
     this.#lastDay = ViewUtils.getCurrentViewedDate(this.calendar)?.day;
-
-    // Set up context menu for day cells
     ViewUtils.setupDayContextMenu(this.element, '.compact-day:not(.empty)', this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
@@ -514,8 +549,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       },
       onCreateNote: () => this.render()
     });
-
-    // Debounced render for note changes
     const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
 
     this.#hooks.push({
@@ -539,24 +572,21 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       })
     });
 
-    // Weather change hook
-    this.#hooks.push({
-      name: HOOKS.WEATHER_CHANGE,
-      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender())
-    });
+    this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
   }
 
   /** @override */
   async _onClose(options) {
-    // Cleanup hooks
     if (this.#timeHookId) {
       Hooks.off('updateWorldTime', this.#timeHookId);
       this.#timeHookId = null;
     }
-
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
-
+    if (this.#clickOutsideHandler) {
+      document.removeEventListener('mousedown', this.#clickOutsideHandler);
+      this.#clickOutsideHandler = null;
+    }
     await super._onClose(options);
   }
 
@@ -569,15 +599,14 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #restorePosition() {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.COMPACT_CALENDAR_POSITION);
-
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
-      // Use setPosition to properly update internal position state
       this.setPosition({ left: savedPos.left, top: savedPos.top });
     } else {
-      // Default position: top right (calculate from viewport)
       const rect = this.element.getBoundingClientRect();
-      const left = window.innerWidth - rect.width - 310;
-      const top = 10;
+      const players = document.getElementById('players');
+      const playersTop = players?.getBoundingClientRect().top ?? window.innerHeight - 100;
+      const left = 16;
+      const top = playersTop - rect.height - 16;
       this.setPosition({ left, top });
     }
   }
@@ -588,24 +617,19 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   #restoreStickyStates() {
     const states = game.settings.get(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES);
     if (!states) return;
-
     this.#stickyTimeControls = states.timeControls ?? false;
     this.#stickySidebar = states.sidebar ?? false;
     this.#stickyPosition = states.position ?? false;
-
-    // Apply restored states
     if (this.#stickyTimeControls) {
       const timeControls = this.element.querySelector('.compact-time-controls');
       timeControls?.classList.add('visible');
       this.#controlsVisible = true;
     }
-
     if (this.#stickySidebar) {
       const sidebar = this.element.querySelector('.compact-sidebar');
       sidebar?.classList.add('visible');
       this.#sidebarVisible = true;
     }
-
     this._updatePinButtonState();
   }
 
@@ -622,19 +646,14 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   #enableDragging() {
     const dragHandle = this.element.querySelector('.compact-top-row');
     if (!dragHandle) return;
-
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
-
     let dragStartX = 0;
     let dragStartY = 0;
     let elementStartLeft = 0;
     let elementStartTop = 0;
-
     const originalMouseDown = drag._onDragMouseDown.bind(drag);
     drag._onDragMouseDown = (event) => {
-      // Prevent dragging when position is locked
       if (this.#stickyPosition) return;
-
       const rect = this.element.getBoundingClientRect();
       elementStartLeft = rect.left;
       elementStartTop = rect.top;
@@ -649,19 +668,13 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!drag._moveTime) drag._moveTime = 0;
       if (now - drag._moveTime < 1000 / 60) return;
       drag._moveTime = now;
-
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
-
-      // Clamp to viewport
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
-
-      // Use setPosition to properly update internal position state
       this.setPosition({ left: newLeft, top: newTop });
     };
 
@@ -669,8 +682,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       window.removeEventListener(...drag.handlers.dragMove);
       window.removeEventListener(...drag.handlers.dragUp);
-
-      // Save position from internal state
       await game.settings.set(MODULE.ID, SETTINGS.COMPACT_CALENDAR_POSITION, { left: this.position.left, top: this.position.top });
     };
   }
@@ -684,14 +695,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onUpdateWorldTime() {
     if (!this.rendered) return;
-
     const timeEl = this.element.querySelector('.time-value');
     const dateEl = this.element.querySelector('.date-value');
-
     if (timeEl) timeEl.textContent = TimeKeeper.getFormattedTime();
     if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
-
-    // Only re-render if day changed (to update today highlight)
     const currentDay = ViewUtils.getCurrentViewedDate(this.calendar)?.day;
     if (currentDay !== this.#lastDay) {
       this.#lastDay = currentDay;
@@ -706,8 +713,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.rendered) return;
     const running = TimeKeeper.running;
     const tooltip = running ? localize('CALENDARIA.TimeKeeper.Stop') : localize('CALENDARIA.TimeKeeper.Start');
-
-    // Update time-toggle in time-display
     const timeToggle = this.element.querySelector('.time-toggle');
     if (timeToggle) {
       timeToggle.classList.toggle('active', running);
@@ -724,14 +729,17 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /*  Event Handlers                              */
   /* -------------------------------------------- */
 
-  static async _onNavigate(event, target) {
+  /**
+   * Navigate to the next or previous month.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onNavigate(_event, target) {
     const direction = target.dataset.direction === 'next' ? 1 : -1;
     const current = this.viewedDate;
     const calendar = this.calendar;
-
     let newMonth = current.month + direction;
     let newYear = current.year;
-
     if (newMonth >= calendar.months.values.length) {
       newMonth = 0;
       newYear++;
@@ -739,19 +747,39 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       newMonth = calendar.months.values.length - 1;
       newYear--;
     }
-
     this.viewedDate = { year: newYear, month: newMonth, day: 1 };
     await this.render();
   }
 
-  static async _onToday(event, target) {
+  /**
+   * Navigate to a specific month (from clicking other-month day).
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onNavigateToMonth(_event, target) {
+    const month = parseInt(target.dataset.month);
+    const year = parseInt(target.dataset.year);
+    this.viewedDate = { year, month, day: 1 };
+    await this.render();
+  }
+
+  /**
+   * Reset view to today's date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onToday(_event, _target) {
     this._viewedDate = null;
     this._selectedDate = null;
     await this.render();
   }
 
+  /**
+   * Select a day on the calendar.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
   static async _onSelectDay(event, target) {
-    // Check for double-click first (manual detection since re-render breaks native dblclick)
     const wasDoubleClick = await ViewUtils.handleDayClick(event, this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
@@ -760,22 +788,21 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       onCreateNote: () => this.render()
     });
     if (wasDoubleClick) return;
-
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
-
-    // Toggle selection
     if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.day === day) this._selectedDate = null;
     else this._selectedDate = { year, month, day };
-
     await this.render();
   }
 
-  static async _onAddNote(event, target) {
-    // Use selected date or today
+  /**
+   * Add a new note on the selected or current date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onAddNote(_event, _target) {
     let day, month, year;
-
     if (this._selectedDate) {
       ({ day, month, year } = this._selectedDate);
     } else {
@@ -794,21 +821,26 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         endDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 13, minute: 0 }
       }
     });
-
     if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
-  static async _onOpenFull(event, target) {
-    // Close this compact calendar
+  /**
+   * Open the full calendar application.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onOpenFull(_event, _target) {
     await this.close();
-
-    // Open the full calendar
     new CalendarApplication().render(true);
   }
 
-  static _onToggleClock(event, target) {
+  /**
+   * Toggle the clock running state.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static _onToggleClock(_event, _target) {
     TimeKeeper.toggle();
-    // Update time-toggle state directly without re-render
     const timeToggle = this.element.querySelector('.time-toggle');
     if (timeToggle) {
       timeToggle.classList.toggle('active', TimeKeeper.running);
@@ -821,23 +853,48 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-  static _onForward(event, target) {
+  /**
+   * Advance time forward by one increment.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static _onForward(_event, _target) {
     TimeKeeper.forward();
   }
 
-  static _onForward5x(event, target) {
+  /**
+   * Advance time forward by five increments.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static _onForward5x(_event, _target) {
     TimeKeeper.forward(5);
   }
 
-  static _onReverse(event, target) {
+  /**
+   * Reverse time by one increment.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static _onReverse(_event, _target) {
     TimeKeeper.reverse();
   }
 
-  static _onReverse5x(event, target) {
+  /**
+   * Reverse time by five increments.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static _onReverse5x(_event, _target) {
     TimeKeeper.reverse(5);
   }
 
-  static async _onSetCurrentDate(event, target) {
+  /**
+   * Set the current world date to the selected date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onSetCurrentDate(_event, _target) {
     if (!this._selectedDate) return;
     await ViewUtils.setDateTo(this._selectedDate.year, this._selectedDate.month, this._selectedDate.day, this.calendar);
     this._selectedDate = null;
@@ -846,11 +903,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show sticky options context menu.
-   * @param {PointerEvent} event - Click event
-   * @param {HTMLElement} target - Button element
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
-  static _onToggleLock(event, target) {
-    // Close menu if already open
+  static _onToggleLock(_event, target) {
     if (this.#stickyMenu) {
       this.#stickyMenu.close();
       this.#stickyMenu = null;
@@ -858,19 +914,15 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
-
-    // Bind toggle methods to preserve instance context
     const toggleTime = this._toggleStickyTimeControls.bind(this);
     const toggleSidebar = this._toggleStickySidebar.bind(this);
     const togglePosition = this._toggleStickyPosition.bind(this);
-
     const menuItems = [
       { name: 'CALENDARIA.CompactCalendar.StickyTimeControls', icon: `<i class="fas fa-clock"></i>`, callback: toggleTime, classes: this.#stickyTimeControls ? ['sticky-active'] : [] },
       { name: 'CALENDARIA.CompactCalendar.StickySidebar', icon: `<i class="fas fa-bars"></i>`, callback: toggleSidebar, classes: this.#stickySidebar ? ['sticky-active'] : [] },
       { name: 'CALENDARIA.CompactCalendar.StickyPosition', icon: `<i class="fas fa-lock"></i>`, callback: togglePosition, classes: this.#stickyPosition ? ['sticky-active'] : [] }
     ];
 
-    // Create and render context menu at button position
     this.#stickyMenu = new ContextMenu(this.element, '.pin-btn', menuItems, {
       fixed: true,
       jQuery: false,
@@ -887,7 +939,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   _toggleStickyTimeControls() {
     this.#stickyTimeControls = !this.#stickyTimeControls;
     const timeControls = this.element.querySelector('.compact-time-controls');
-
     if (this.#stickyTimeControls) {
       clearTimeout(this.#hideTimeout);
       timeControls?.classList.add('visible');
@@ -910,11 +961,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   _toggleStickySidebar() {
     this.#stickySidebar = !this.#stickySidebar;
     const sidebar = this.element.querySelector('.compact-sidebar');
-
-    // Update locked class based on combined state
     const shouldBeLocked = this.#stickySidebar || this.#sidebarLocked;
     sidebar?.classList.toggle('locked', shouldBeLocked);
-
     if (this.#stickySidebar) {
       clearTimeout(this.#sidebarTimeout);
       sidebar?.classList.add('visible');
@@ -946,7 +994,6 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   _updatePinButtonState() {
     const pinBtn = this.element.querySelector('.pin-btn');
     const topRow = this.element.querySelector('.compact-top-row');
-
     if (pinBtn) {
       const hasAnySticky = this.#stickyTimeControls || this.#stickySidebar || this.#stickyPosition;
       pinBtn.classList.toggle('has-sticky', hasAnySticky);
@@ -954,15 +1001,15 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       pinBtn.classList.toggle('sticky-sidebar', this.#stickySidebar);
       pinBtn.classList.toggle('sticky-position', this.#stickyPosition);
     }
-
-    // Update cursor on drag handle when position is locked
     if (topRow) topRow.classList.toggle('position-locked', this.#stickyPosition);
   }
 
   /**
    * Open the notes panel for the selected date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onViewNotes(event, target) {
+  static async _onViewNotes(_event, _target) {
     if (!this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(this.calendar);
       if (today) this._selectedDate = { year: today.year, month: today.month, day: today.day };
@@ -976,8 +1023,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Close the notes panel.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onCloseNotesPanel(event, target) {
+  static async _onCloseNotesPanel(_event, _target) {
     this.#notesPanelVisible = false;
     this.#sidebarLocked = false;
     await this.render();
@@ -985,10 +1034,10 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open a note in view mode.
-   * @param {PointerEvent} event - Click event
-   * @param {HTMLElement} target - Element with data-page-id and data-journal-id
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
-  static _onOpenNote(event, target) {
+  static _onOpenNote(_event, target) {
     const pageId = target.dataset.pageId;
     const journalId = target.dataset.journalId;
     const journal = game.journal.get(journalId);
@@ -998,8 +1047,8 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open a note in edit mode.
-   * @param {PointerEvent} event - Click event
-   * @param {HTMLElement} target - Element with data-page-id and data-journal-id
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element
    */
   static _onEditNote(event, target) {
     event.stopPropagation();
@@ -1049,11 +1098,9 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     if (calendar?.solarMidnight) {
       const targetHour = calendar.solarMidnight();
       const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
-      // Solar midnight may exceed hoursPerDay, meaning it's technically tomorrow
       if (targetHour >= hoursPerDay) await this.#advanceToHour(targetHour - hoursPerDay, true);
       else await this.#advanceToHour(targetHour);
     } else {
-      // Fallback: midnight = 0:00 next day
       await this.#advanceToHour(0, true);
     }
   }
@@ -1061,27 +1108,22 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Advance time to a specific hour of day.
    * @param {number} targetHour - Target hour (fractional, e.g. 6.5 = 6:30)
-   * @param {boolean} [nextDay=false] - If true, always advance to next day
+   * @param {boolean} [nextDay] - If true, always advance to next day
    */
   async #advanceToHour(targetHour, nextDay = false) {
     if (!game.user.isGM) return;
-
     const cal = game.time.calendar;
     if (!cal) return;
-
     const days = cal.days ?? {};
     const secondsPerMinute = days.secondsPerMinute ?? 60;
     const minutesPerHour = days.minutesPerHour ?? 60;
     const hoursPerDay = days.hoursPerDay ?? 24;
     const secondsPerHour = secondsPerMinute * minutesPerHour;
-
     const components = game.time.components;
     const currentHour = components.hour + components.minute / minutesPerHour + components.second / secondsPerHour;
-
     let hoursUntil;
     if (nextDay || currentHour >= targetHour) hoursUntil = hoursPerDay - currentHour + targetHour;
     else hoursUntil = targetHour - currentHour;
-
     const secondsToAdvance = Math.round(hoursUntil * secondsPerHour);
     if (secondsToAdvance > 0) await game.time.advance(secondsToAdvance);
   }
@@ -1095,6 +1137,115 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     await openWeatherPicker();
   }
 
+  /**
+   * Open the settings panel.
+   */
+  static _onOpenSettings() {
+    new SettingsPanel().render(true);
+  }
+
+  /**
+   * Toggle the search panel.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onToggleSearch(_event, _target) {
+    this.#searchOpen = !this.#searchOpen;
+    if (!this.#searchOpen) {
+      this.#searchTerm = '';
+      this.#searchResults = null;
+    }
+    await this.render();
+  }
+
+  /**
+   * Close the search panel.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onCloseSearch(_event, _target) {
+    this.#closeSearch();
+  }
+
+  /**
+   * Open a search result (note).
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onOpenSearchResult(_event, target) {
+    const id = target.dataset.id;
+    const journalId = target.dataset.journalId;
+    const page = NoteManager.getFullNote(id);
+    if (page) page.sheet.render(true, { mode: 'view' });
+    else if (journalId) {
+      const journal = game.journal.get(journalId);
+      if (journal) journal.sheet.render(true, { pageId: id });
+    }
+
+    this.#closeSearch();
+  }
+
+  /**
+   * Update search results without full re-render.
+   */
+  #updateSearchResults() {
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    if (!panel) return;
+    const resultsContainer = panel.querySelector('.search-panel-results');
+    if (!resultsContainer) return;
+    if (this.#searchResults?.length) {
+      resultsContainer.innerHTML = this.#searchResults
+        .map(
+          (r) => `
+        <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
+          <span class="result-name">${r.name}</span>
+          ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
+        </div>`
+        )
+        .join('');
+    } else if (this.#searchTerm?.length >= 2) {
+      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
+    } else {
+      resultsContainer.innerHTML = '';
+    }
+  }
+
+  /**
+   * Position search panel with edge awareness.
+   */
+  #positionSearchPanel() {
+    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const button = this.element.querySelector('[data-action="toggleSearch"]');
+    if (!panel || !button) return;
+    const buttonRect = button.getBoundingClientRect();
+    const panelWidth = 280;
+    const panelMaxHeight = 300;
+    let left = buttonRect.left - panelWidth - 8;
+    let top = buttonRect.top;
+    if (left < 10) left = buttonRect.right + 8;
+    if (top + panelMaxHeight > window.innerHeight - 10) top = window.innerHeight - panelMaxHeight - 10;
+    top = Math.max(10, top);
+    panel.style.position = 'fixed';
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+    panel.style.width = `${panelWidth}px`;
+    panel.style.maxHeight = `${panelMaxHeight}px`;
+  }
+
+  /**
+   * Close search and clean up.
+   */
+  #closeSearch() {
+    if (this.#clickOutsideHandler) {
+      document.removeEventListener('mousedown', this.#clickOutsideHandler);
+      this.#clickOutsideHandler = null;
+    }
+    this.#searchTerm = '';
+    this.#searchResults = null;
+    this.#searchOpen = false;
+    this.render();
+  }
+
   /* -------------------------------------------- */
   /*  Helper Methods                              */
   /* -------------------------------------------- */
@@ -1104,17 +1255,17 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} key - Increment key
    * @returns {string} Formatted label
    */
-  _formatIncrement(key) {
+  #formatIncrementLabel(key) {
     const labels = {
-      second: localize('CALENDARIA.TimeKeeper.Second'),
-      round: localize('CALENDARIA.TimeKeeper.Round'),
-      minute: localize('CALENDARIA.TimeKeeper.Minute'),
-      hour: localize('CALENDARIA.TimeKeeper.Hour'),
-      day: localize('CALENDARIA.TimeKeeper.Day'),
-      week: localize('CALENDARIA.TimeKeeper.Week'),
-      month: localize('CALENDARIA.TimeKeeper.Month'),
-      season: localize('CALENDARIA.TimeKeeper.Season'),
-      year: localize('CALENDARIA.TimeKeeper.Year')
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }
@@ -1125,7 +1276,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the compact calendar singleton.
-   * @returns {CompactCalendar}
+   * @returns {CompactCalendar} The singleton instance
    */
   static show() {
     if (!this._instance) this._instance = new CompactCalendar();
@@ -1150,7 +1301,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get the singleton instance.
-   * @returns {CompactCalendar|null}
+   * @returns {CompactCalendar|null} The singleton instance or null if not created
    */
   static get instance() {
     return this._instance;

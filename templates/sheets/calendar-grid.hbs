@@ -3,7 +3,7 @@
     <div class="calendar-weekdays"
       style="grid-template-columns: repeat({{calendarData.daysInWeek}}, var(--calendaria-day-size));">
       {{#each calendarData.weekdays}}
-        <div class="weekday-header">{{this}}</div>
+        <div class="weekday-header{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
       {{/each}}
     </div>
 
@@ -14,6 +14,11 @@
           {{#each this}}
             {{#if empty}}
               <div class="calendar-day empty"></div>
+            {{else if isFromOtherMonth}}
+              <div class="calendar-day other-month{{#if isToday}} today{{/if}}"
+                data-action="navigateToMonth" data-year="{{year}}" data-month="{{month}}">
+                <div class="day-number">{{day}}</div>
+              </div>
             {{else}}
               <div
                 class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
@@ -27,7 +32,7 @@
                   {{#each moonPhases}}
                     <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip="{{moonName}}: {{phaseName}}"
                       {{#if color}}style="--moon-color: {{color}}" {{/if}}>
-                      <img src="{{icon}}" alt="{{phaseName}}" />
+                      <img src="{{icon}}" alt="{{phaseName}}">
                     </span>
                   {{/each}}
                 </div>
@@ -38,7 +43,7 @@
                         {{#if (eq system.iconType "fontawesome")}}
                           <i class="{{system.icon}}" style="color: {{system.color}}"></i>
                         {{else}}
-                          <img src="{{system.icon}}" alt="{{name}}" style="width: 16px; height: 16px;" />
+                          <img src="{{system.icon}}" alt="{{name}}" style="width: 16px; height: 16px;">
                         {{/if}}
                       </div>
                     {{/each}}
@@ -46,7 +51,7 @@
                 {{/if}}
                 {{#if ../../../editable}}
                   <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                    data-month="{{month}}" data-day="{{day}}" data-tooltip="CALENDARIA.UI.AddNote">
+                    data-month="{{month}}" data-day="{{day}}" data-tooltip="CALENDARIA.Common.AddNote">
                     <i class="fas fa-plus"></i>
                   </button>
                 {{/if}}
@@ -54,7 +59,6 @@
             {{/if}}
           {{/each}}
 
-          <!-- Multi-day event bars -->
           {{#each multiDayEvents}}
             <div class="event-bar{{#if isContinuation}} continuation{{/if}}"
               style="left: {{left}}%; width: {{width}}%; top: calc(26px + {{row}} * 26px); background-color: {{color}};"
@@ -65,7 +69,7 @@
                 {{#if (eq iconType "fontawesome")}}
                   <i class="{{icon}} event-bar-icon"></i>
                 {{else if icon}}
-                  <img src="{{icon}}" alt="{{name}}" class="event-bar-icon" />
+                  <img src="{{icon}}" alt="{{name}}" class="event-bar-icon">
                 {{/if}}
               {{/if}}
               <span class="event-bar-text">{{name}}</span>
@@ -76,7 +80,7 @@
     </div>
   {{else}}
     <div class="no-calendar">
-      <p>No calendar configured. Select a calendar in the settings.</p>
+      <p>{{localize 'CALENDARIA.CalendarApp.NoCalendarConfigured'}}</p>
     </div>
   {{/if}}
 </div>

@@ -1,0 +1,103 @@
+{
+  "id": "thyatian",
+  "name": "CALENDARIA.Calendar.Thyatian.Name",
+  "years": {
+    "yearZero": 1000,
+    "firstWeekday": 0
+  },
+  "months": {
+    "values": [
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Nuwmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.NuwmontShort", "ordinal": 1, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Vatermont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.VatermontShort", "ordinal": 2, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Thaumont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.ThaumontShort", "ordinal": 3, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Flaurmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.FlaurmontShort", "ordinal": 4, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Yarthmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.YarthmontShort", "ordinal": 5, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Klarmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.KlarmontShort", "ordinal": 6, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Felmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.FelmontShort", "ordinal": 7, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Fyrmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.FyrmontShort", "ordinal": 8, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Ambyrmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.AmbyrmontShort", "ordinal": 9, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Sviftmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.SviftmontShort", "ordinal": 10, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Eirmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.EirmontShort", "ordinal": 11, "days": 28 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Month.Kaldmont", "abbreviation": "CALENDARIA.Calendar.Thyatian.Month.KaldmontShort", "ordinal": 12, "days": 28 }
+    ]
+  },
+  "days": {
+    "values": [
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Lunadain", "ordinal": 1 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Gromdain", "ordinal": 2 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Tserdain", "ordinal": 3 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Moldain", "ordinal": 4 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Nytdain", "ordinal": 5 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Loshdain", "ordinal": 6 },
+      { "name": "CALENDARIA.Calendar.Thyatian.Day.Soladain", "ordinal": 7, "isRestDay": true }
+    ],
+    "daysPerYear": 336,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "festivals": [
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.NewYear", "month": 1, "day": 1 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.VaternasFeast", "month": 2, "day": 14 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.SpringRevel", "month": 3, "day": 28 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.MidYear", "month": 6, "day": 28 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.Harvest", "month": 9, "day": 14 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.DayOfTheDead", "month": 10, "day": 28 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.Coronation", "month": 11, "day": 1 },
+    { "name": "CALENDARIA.Calendar.Thyatian.Festival.WinterSolstice", "month": 12, "day": 21 }
+  ],
+  "seasons": {
+    "values": [
+      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 309, "dayEnd": 55 },
+      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 56, "dayEnd": 139 },
+      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 140, "dayEnd": 223 },
+      { "name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 224, "dayEnd": 308 }
+    ]
+  },
+  "eras": [
+    { "name": "CALENDARIA.Era.AfterCrowning", "abbreviation": "CALENDARIA.Era.AC", "startYear": 1, "endYear": null, "format": "suffix", "template": null },
+    { "name": "CALENDARIA.Era.BeforeCrowning", "abbreviation": "CALENDARIA.Era.BCMystara", "startYear": -9999, "endYear": 0, "format": "suffix", "template": null }
+  ],
+  "moons": [
+    {
+      "name": "CALENDARIA.Moon.Thyatian.Matera",
+      "cycleLength": 28,
+      "color": "#E8E8E8",
+      "phases": [
+        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
+        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
+        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
+        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
+        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
+        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
+        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+      ],
+      "referenceDate": { "year": 0, "month": 0, "day": 14 }
+    }
+  ],
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 322,
+    "summerSolstice": 154
+  },
+  "cycles": [],
+  "canonicalHours": [],
+  "weeks": { "enabled": false, "type": "year-based", "names": [] },
+  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "dateFormats": {
+    "short": "{{d}} {{b}}",
+    "long": "{{d}} {{B}}, {{y}}",
+    "full": "{{B}} {{d}}, {{y}}",
+    "time": "{{H}}:{{M}}",
+    "time12": "{{h}}:{{M}} {{p}}"
+  },
+  "metadata": {
+    "id": "thyatian",
+    "description": "CALENDARIA.Calendar.Thyatian.Description",
+    "author": "calendaria",
+    "system": "Mystara"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "id": "athasian",
+  "name": "CALENDARIA.Calendar.Athasian.Name",
+  "years": {
+    "yearZero": 1,
+    "firstWeekday": 0
+  },
+  "months": {
+    "values": [
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Dominary", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.DominaryShort", "ordinal": 1, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Sedulous", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.SedulousShort", "ordinal": 2, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Fortuary", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.FortuaryShort", "ordinal": 3, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Macro", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.MacroShort", "ordinal": 4, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Zenalia", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.ZenaliaShort", "ordinal": 5, "days": 5, "type": "intercalary" },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Fifthover", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.FifthoverShort", "ordinal": 6, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Hexameron", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.HexameronShort", "ordinal": 7, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Morrow", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.MorrowShort", "ordinal": 8, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Octavus", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.OctavusShort", "ordinal": 9, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Dessalia", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.DessaliaShort", "ordinal": 10, "days": 5, "type": "intercalary" },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Thaumast", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.ThaumastShort", "ordinal": 11, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Anabasis", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.AnabasisShort", "ordinal": 12, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Hoard", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.HoardShort", "ordinal": 13, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Flagstaad", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.FlagstaadShort", "ordinal": 14, "days": 30 },
+      { "name": "CALENDARIA.Calendar.Athasian.Month.Assalia", "abbreviation": "CALENDARIA.Calendar.Athasian.Month.AssaliaShort", "ordinal": 15, "days": 5, "type": "intercalary" }
+    ]
+  },
+  "days": {
+    "values": [
+      { "name": "CALENDARIA.Calendar.Athasian.Day.Oneday", "ordinal": 1 },
+      { "name": "CALENDARIA.Calendar.Athasian.Day.Twosday", "ordinal": 2 },
+      { "name": "CALENDARIA.Calendar.Athasian.Day.Threesday", "ordinal": 3 },
+      { "name": "CALENDARIA.Calendar.Athasian.Day.Foursday", "ordinal": 4 },
+      { "name": "CALENDARIA.Calendar.Athasian.Day.Fiveday", "ordinal": 5 },
+      { "name": "CALENDARIA.Calendar.Athasian.Day.Sixday", "ordinal": 6, "isRestDay": true }
+    ],
+    "daysPerYear": 375,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "festivals": [
+    { "name": "CALENDARIA.Calendar.Athasian.Festival.Zenalia", "month": 5, "day": 1 },
+    { "name": "CALENDARIA.Calendar.Athasian.Festival.Dessalia", "month": 10, "day": 1 },
+    { "name": "CALENDARIA.Calendar.Athasian.Festival.Assalia", "month": 15, "day": 1 }
+  ],
+  "seasons": {
+    "values": [
+      { "name": "CALENDARIA.Calendar.Athasian.Season.HighSun", "icon": "fas fa-fire", "color": "#ff0000", "dayStart": 0, "dayEnd": 124 },
+      { "name": "CALENDARIA.Calendar.Athasian.Season.SunDescending", "icon": "fas fa-cloud-sun", "color": "#ff6600", "dayStart": 125, "dayEnd": 249 },
+      { "name": "CALENDARIA.Calendar.Athasian.Season.SunAscending", "icon": "fas fa-sun", "color": "#ffcc00", "dayStart": 250, "dayEnd": 374 }
+    ]
+  },
+  "eras": [
+    { "name": "CALENDARIA.Era.FreeYear", "abbreviation": "CALENDARIA.Era.FY", "startYear": 1, "endYear": null, "format": "suffix", "template": null }
+  ],
+  "moons": [
+    {
+      "name": "CALENDARIA.Moon.Athasian.Ral",
+      "color": "#228B22",
+      "cycleLength": 34,
+      "cycleDayAdjust": 0
+    },
+    {
+      "name": "CALENDARIA.Moon.Athasian.Guthay",
+      "color": "#DAA520",
+      "cycleLength": 125,
+      "cycleDayAdjust": 0
+    }
+  ],
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 11,
+    "longestDay": 14,
+    "winterSolstice": 310,
+    "summerSolstice": 60
+  },
+  "cycles": [
+    {
+      "name": "CALENDARIA.Calendar.Athasian.Cycle.Endlean",
+      "length": 11,
+      "offset": 3,
+      "basedOn": "year",
+      "entries": [
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Ral" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Friend" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Desert" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Priest" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Wind" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Dragon" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Mountain" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.King" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Silt" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Enemy" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Guthay" }
+      ]
+    },
+    {
+      "name": "CALENDARIA.Calendar.Athasian.Cycle.Seofean",
+      "length": 7,
+      "offset": 4,
+      "basedOn": "year",
+      "entries": [
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Fury" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Contemplation" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Vengeance" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Slumber" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Defiance" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Reverence" },
+        { "name": "CALENDARIA.Calendar.Athasian.Cycle.Agitation" }
+      ]
+    }
+  ],
+  "cycleFormat": "{{1}}'s {{2}}",
+  "canonicalHours": [],
+  "weeks": { "enabled": false, "type": "year-based", "names": [] },
+  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "dateFormats": {
+    "short": "{{d}} {{b}}",
+    "long": "{{d}} {{B}}, {{y}}",
+    "full": "{{A}}, {{B}} {{d}}, {{y}}",
+    "time": "{{H}}:{{M}}",
+    "time12": "{{h}}:{{M}} {{p}}"
+  },
+  "metadata": {
+    "id": "athasian",
+    "description": "CALENDARIA.Calendar.Athasian.Description",
+    "author": "calendaria",
+    "system": "Dark Sun"
+  }
+}
