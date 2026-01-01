@@ -2,183 +2,243 @@
 
 Common issues and solutions for Calendaria.
 
-## Calendar Not Appearing
+---
 
-### HUD Not Visible
+## Verifying Module Status
 
-1. Check if the HUD is enabled: **Settings** → **Module Settings** → **Calendaria** → **Show Calendar HUD**
-2. Try the keyboard shortcut: **Ctrl+C**
-3. Reset position: **Settings** → **Module Settings** → **Calendaria** → **Reset HUD Position**
-4. Check if it's off-screen (resize your browser window)
+### Check if Module is Working
+
+1. Open **Settings** > **Module Settings** > **Calendaria**
+2. Verify the active calendar dropdown shows your calendar
+3. Open the browser console (F12) - look for `CALENDARIA |` log entries
+4. If no logs appear, verify the module is enabled in **Manage Modules**
+
+### Enable Debug Logging
+
+1. **Settings** > **Module Settings** > **Calendaria** > **Settings Panel**
+2. Navigate to **Advanced** tab
+3. Set **Logging Level** to **Verbose**
+4. Console will show detailed `CALENDARIA |` prefixed messages
+
+---
+
+## Permission Errors
+
+These errors appear when a non-GM user attempts GM-only actions:
+
+| Error Message | Cause |
+|---------------|-------|
+| `Only GMs can advance time` | Player tried to use time controls |
+| `Only GMs can set date/time` | Player tried to set specific date/time |
+| `Only GMs can jump to date` | Player tried to navigate to a date |
+| `Only GMs can switch calendars` | Player tried to change active calendar |
+| `Only GMs can create notes` | Player tried to create a calendar note |
+| `Only GMs can update notes` | Player tried to modify a note |
+| `Only GMs can edit calendars` | Player tried to access Calendar Editor |
+
+**Solution:** Only GM users can modify time and calendar data.
+
+---
+
+## Calendar Issues
+
+### "Calendar not found" / "No active calendar"
+
+- The configured calendar ID doesn't exist in the registry
+- **Solution:** Switch to a valid calendar in **Settings** > **Calendaria** > **Active Calendar**
+
+### "Cannot remove the active calendar"
+
+- Cannot delete the currently active calendar
+- **Solution:** Switch to a different calendar first, then delete
 
 ### Calendar Stuck Loading
 
 1. Refresh the page (F5)
-2. Disable and re-enable the module
-3. Check the console (F12) for errors
+2. Check console for specific errors
+3. Disable conflicting calendar modules (Simple Calendar, etc.)
+4. Clear browser cache
+
+### Calendar Not Appearing
+
+1. Check **Settings** > **Calendaria** > **Settings Panel** > **Compact Calendar** tab
+2. Enable **Show Compact Calendar**
+3. Try resetting position: **Settings Panel** > **Compact Calendar** > **Reset Position**
+4. Check if UI is off-screen (resize browser window)
 
 ---
 
-## Time Not Advancing
+## Time Control Issues
 
 ### Time Controls Not Working
 
 1. Verify you have GM permissions
-2. Check if another GM is designated as Primary GM
-3. Ensure the clock isn't paused
+2. Check **Settings Panel** > **Time** tab > **Primary GM** setting
+3. In multi-GM sessions, only the Primary GM can control time
 
 ### Real-Time Clock Not Running
 
-1. Click the play button in the time controls
-2. Check if time multiplier is set to 0
-
-### Time Jumps Unexpectedly
-
-1. Check for other modules that modify world time
-2. Verify no macros are advancing time automatically
-3. Check the Primary GM setting for multi-GM games
+1. Verify the clock is started (play button active)
+2. Check that increment/multiplier isn't set to zero
+3. Confirm you're the Primary GM
 
 ---
 
-## Notes and Events
+## Calendar Editor Issues
 
-### Notes Not Showing
+### "Calendar must have a name"
 
-1. Verify the note is assigned to the active calendar
-2. Check the date is correct
-3. Ensure the note isn't GM-only (if you're a player)
+- Calendar name field is empty
+- **Solution:** Enter a valid name before saving
 
-### Recurrence Not Working
+### "Calendar must have at least one month"
 
-1. Verify the repeat pattern is set correctly
-2. Check that the start date is in the past or present
-3. Ensure the end date (if set) hasn't passed
+- All months were deleted from the calendar
+- **Solution:** Add at least one month in the Months tab
 
-### Reminders Not Firing
+### "Calendar must have at least one weekday"
 
-1. Check that world time is advancing
-2. Verify reminder is enabled on the note
-3. Ensure you're in the target audience
+- All weekdays were deleted
+- **Solution:** Add at least one weekday in the Weekdays tab
 
 ---
 
-## Darkness Sync
-
-### Scene Not Getting Darker
-
-1. Enable: **Settings** → **Calendaria** → **Sync Scene Darkness**
-2. Check scene override in **Scene Config** → **Ambiance**
-3. Verify time is actually changing
-
-### Darkness Too Bright/Dark
-
-1. Check sunrise/sunset in your calendar config
-2. Adjust daylight settings in **Calendar Editor** → **Seasons**
-3. Verify solstice dates are configured
-
----
-
-## Weather
-
-### Weather Not Generating
-
-1. Check that a climate zone is configured
-2. Verify weather chances total 100%
-3. Try manual generation: click the weather badge
-
-### Temperature Seems Wrong
-
-1. Check temperature unit setting (C vs F)
-2. Verify seasonal temperature ranges in climate zone
-3. Ensure the correct climate zone is active
-
----
-
-## Importing
+## Import Issues
 
 ### Import Fails
 
-1. Verify the file is valid JSON
-2. Check it's from a supported source
-3. Try re-exporting from the original module
-4. Check console for specific errors
+Common import errors and solutions:
+
+| Error | Solution |
+|-------|----------|
+| `Invalid Calendarium export format` | File must contain `calendars` array with `static.months` and `static.weekdays` |
+| `Invalid Fantasy-Calendar export format` | File must contain `static_data` and `dynamic_data` fields |
+| `Simple Calendar module is not installed or active` | Install and enable the Simple Calendar module first |
+| `No calendars found in Simple Calendar module settings` | Configure a calendar in Simple Calendar before importing |
+| `No calendars found` | Source module has no calendar data configured |
+
+### "No data loaded"
+
+- No file uploaded or module data loaded
+- **Solution:** Upload a valid JSON file or click "Import from Installed Module"
 
 ### Data Missing After Import
 
-1. Some features may not have direct equivalents
-2. Review imported data in the calendar editor
-3. Manually add missing information
+- Some features may not have direct equivalents between systems
+- Review imported calendar in the Calendar Editor
+- Manually configure missing elements
 
 ---
 
-## Performance
+## Weather Issues
 
-### Calendar Slow to Load
+### Weather Not Generating
 
-1. Reduce the number of notes
-2. Disable unused features
-3. Check for conflicting modules
+1. Verify a climate zone is configured in Calendar Editor > Weather tab
+2. Check that the calendar has seasons defined
+3. Try manual weather generation via the weather badge
 
-### Lag When Advancing Time
+### "Only GMs can change weather"
 
-1. Reduce real-time multiplier
-2. Minimize open applications
-3. Check for many triggered events
+- Non-GM user attempted to modify weather
+- **Solution:** Only GMs can set/modify weather
+
+### "Weather preset not found"
+
+- Referenced preset ID doesn't exist
+- **Solution:** Select a valid preset from the weather picker
 
 ---
 
-## Multi-GM Issues
+## Note Issues
+
+### "Note not found"
+
+- Referenced note ID doesn't exist or was deleted
+- **Solution:** Verify note exists in the calendar journal
+
+### "Cannot delete calendar journal"
+
+- The journal contains the calendar structure and events
+- **Solution:** This journal is protected; delete individual notes instead
+
+### "Cannot delete Calendar Notes folder"
+
+- The folder contains all calendar journals
+- **Solution:** This folder is protected by design
+
+---
+
+## Resetting Settings
+
+### Reset UI Positions
+
+1. Open **Settings** > **Module Settings** > **Calendaria** > **Settings Panel**
+2. Navigate to the relevant tab (Compact Calendar, HUD, or TimeKeeper)
+3. Click **Reset Position**
+
+### Reset Theme Colors
+
+1. **Settings Panel** > **Appearance** tab
+2. Click **Reset All** to restore default colors
+
+### Full Settings Reset
+
+To completely reset Calendaria:
+
+1. Close Foundry VTT
+2. Delete the module settings from your world's database
+3. Restart Foundry
+
+---
+
+## Console Debugging
+
+### Log Level Reference
+
+| Level | Output |
+|-------|--------|
+| Off | No logging |
+| Errors | Only errors (red) |
+| Warnings | Errors + warnings (orange) |
+| Verbose | All debug output (purple) |
+
+### Common Console Patterns
+
+```
+CALENDARIA | Error initializing logger: [error details]
+CALENDARIA | Active calendar "X" not found, using "Y"
+CALENDARIA | Loaded X calendars from settings
+CALENDARIA | Migrated calendar "X": added missing fields
+```
+
+---
+
+## Multi-GM Sessions
 
 ### Time Desync Between GMs
 
-1. Designate a single Primary GM
-2. Ensure all GMs have the same module version
-3. Use the socket sync features
+1. Designate a single Primary GM in **Settings Panel** > **Time**
+2. Verify all GMs have the same module version
+3. Refresh all clients if issues persist
 
 ### Calendar Changes Not Syncing
 
-1. Check that both GMs are on the same calendar
-2. Refresh pages for all GMs
-3. Verify socket connections
+1. Check socket connection (no Foundry connection warnings)
+2. Verify both GMs are viewing the same calendar
+3. Refresh pages for all GMs
 
 ---
 
-## Console Errors
+## Reporting Bugs
 
-### Common Errors
+If you cannot resolve an issue:
 
-**"Calendar not found"**
-- The active calendar ID doesn't match an installed calendar
-- Solution: Switch to a valid calendar in settings
-
-**"Permission denied"**
-- Non-GM trying to modify time
-- Solution: Only GMs can advance time
-
-**"Invalid date"**
-- Date components are out of range
-- Solution: Check month/day values match your calendar
-
-### Debug Mode
-
-Enable verbose logging to diagnose issues:
-
-1. **Settings** → **Calendaria** → **Logging Level** → **Debug**
-2. Open browser console (F12)
-3. Reproduce the issue
-4. Check for error messages
-
----
-
-## Getting Help
-
-If you can't resolve an issue:
-
-1. Check the [GitHub Issues](https://github.com/Sayshal/calendaria/issues)
-2. Join the [Discord](https://discord.gg/PzzUwU9gdz)
-3. Provide:
-   - Foundry version
+1. Check existing issues: [GitHub Issues](https://github.com/Sayshal/Calendaria/issues)
+2. When reporting, include:
+   - Foundry VTT version
    - Calendaria version
    - Other active modules
-   - Console errors
+   - Console errors (F12 > Console)
    - Steps to reproduce
+3. Enable **Verbose** logging and capture relevant console output

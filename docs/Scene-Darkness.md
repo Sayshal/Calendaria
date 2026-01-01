@@ -1,148 +1,126 @@
 # Scene Darkness
 
-Calendaria can automatically adjust scene darkness based on the time of day. As in-game time passes, scenes transition from bright daylight to dark night.
+Calendaria can automatically sync scene darkness levels with the time of day.
 
 ## How It Works
 
-Scene darkness follows a cosine curve tied to the sun's position:
+The `calculateDarknessFromTime` function uses a cosine curve based on total minutes in the day:
 
-- **Noon (12:00)** — Brightest (0.0 darkness)
-- **Midnight (00:00)** — Darkest (1.0 darkness)
-- **Dawn/Dusk** — Gradual transitions
+```javascript
+const totalMinutes = hours * 60 + minutes;
+const dayProgress = totalMinutes / (24 * 60);
+const darkness = (Math.cos(dayProgress * 2 * Math.PI) + 1) / 2;
+```
 
-The calculation uses your calendar's sunrise and sunset times, which can vary by season.
+- **Midnight (00:00)**: Maximum darkness (1.0)
+- **Noon (12:00)**: Minimum darkness (0.0)
+- **Dawn/Dusk**: Gradual cosine transitions
+
+Darkness updates trigger only when the hour changes. The transition uses eased animation via `requestAnimationFrame` over 500-3000ms depending on game time speed.
 
 ---
 
-## Enabling Darkness Sync
+## Settings
 
 ### Global Setting
 
-1. Go to **Settings** → **Module Settings** → **Calendaria**
-2. Find **Sync Scene Darkness**
-3. Enable it
+Located in **Settings Panel > Time Integration > Sync Scene Darkness with Time**.
 
-This applies to all scenes by default.
+Registered as `calendaria.darknessSync` (boolean, default `true`).
 
 ### Per-Scene Override
 
-Override the global setting for individual scenes:
+A dropdown is injected into the Scene Configuration sheet (Ambiance tab):
 
-1. Open **Scene Configuration**
-2. Go to the **Ambiance** tab
-3. Find **Darkness Sync**
-4. Choose:
-   - **Use Global Setting** — Follow the module setting
-   - **Enabled** — Always sync this scene
-   - **Disabled** — Never sync this scene
+| Value | Behavior |
+|-------|----------|
+| Use Global Setting | Follows the module setting |
+| Enabled | Always sync this scene |
+| Disabled | Never sync this scene |
 
----
-
-## Seasonal Variation
-
-If your calendar has daylight configuration (summer/winter solstice settings), sunrise and sunset times vary throughout the year:
-
-- **Summer** — Longer days, shorter nights
-- **Winter** — Shorter days, longer nights
-- **Equinoxes** — Equal day and night
-
-Configure this in the **Calendar Editor** → **Seasons** tab → **Daylight Configuration**.
+Stored as scene flag `calendaria.darknessSync` with values: `"default"`, `"enabled"`, or `"disabled"`.
 
 ---
 
-## Smooth Transitions
+## Sunrise/Sunset Calculation
 
-Darkness changes use smooth interpolation with `requestAnimationFrame`. When time advances, darkness doesn't jump instantly but transitions smoothly over a brief period.
+The calendar provides sunrise and sunset times via dynamic daylight calculations. These are used by the API but **not** by the darkness sync itself.
 
----
-
-## API Access
-
-### Get Current Daylight Info
+If `calendar.daylight.enabled` is true, daylight hours vary throughout the year using solstice configuration:
 
 ```javascript
-// Sunrise time today
-const sunrise = CALENDARIA.api.getSunrise();
-// Returns: { hour: 6, minute: 30 }
-
-// Sunset time today
-const sunset = CALENDARIA.api.getSunset();
-// Returns: { hour: 19, minute: 45 }
-
-// Hours of daylight
-const daylight = CALENDARIA.api.getDaylightHours();
-// Returns: 13.25
+// Cosine interpolation between winter and summer solstices
+const cosineProgress = (1 - Math.cos(progress * Math.PI)) / 2;
+return shortestDay + (longestDay - shortestDay) * cosineProgress;
 ```
 
-### Day Progress
+Sunrise and sunset are calculated symmetrically around midday:
 
 ```javascript
-// How far through daylight hours (0-1)
-const dayProgress = CALENDARIA.api.getProgressDay();
+sunrise = midday - daylightHours / 2;
+sunset = midday + daylightHours / 2;
+```
 
-// How far through night hours (0-1)
-const nightProgress = CALENDARIA.api.getProgressNight();
+---
+
+## API
+
+### Sunrise and Sunset
+
+```javascript
+// Sunrise time in hours (e.g., 6.5 = 6:30)
+CALENDARIA.api.getSunrise();
+
+// Sunset time in hours (e.g., 18.5 = 18:30)
+CALENDARIA.api.getSunset();
+
+// Hours of daylight
+CALENDARIA.api.getDaylightHours();
+```
+
+### Day/Night Progress
+
+```javascript
+// Progress through daylight period (0 = sunrise, 1 = sunset)
+CALENDARIA.api.getProgressDay();
+
+// Progress through night period (0 = sunset, 1 = sunrise)
+CALENDARIA.api.getProgressNight();
 ```
 
 ### Time Until Events
 
+Returns `{ hours, minutes, seconds }`:
+
 ```javascript
-// Seconds until sunrise
-const untilSunrise = CALENDARIA.api.getTimeUntilSunrise();
+CALENDARIA.api.getTimeUntilSunrise();
+CALENDARIA.api.getTimeUntilSunset();
+CALENDARIA.api.getTimeUntilMidnight();
+CALENDARIA.api.getTimeUntilMidday();
+```
 
-// Seconds until sunset
-const untilSunset = CALENDARIA.api.getTimeUntilSunset();
+### Day/Night Checks
 
-// Seconds until midnight
-const untilMidnight = CALENDARIA.api.getTimeUntilMidnight();
+```javascript
+// True if between sunrise and sunset
+CALENDARIA.api.isDaytime();
 
-// Seconds until midday
-const untilMidday = CALENDARIA.api.getTimeUntilMidday();
+// True if before sunrise or after sunset
+CALENDARIA.api.isNighttime();
 ```
 
 ---
 
-## Use Cases
+## Hooks
 
-### Vampire Campaigns
-
-Track when it's safe for vampires to emerge. Use the API to check if it's currently night:
-
-```javascript
-const now = CALENDARIA.api.getCurrentDateTime();
-const sunrise = CALENDARIA.api.getSunrise();
-const sunset = CALENDARIA.api.getSunset();
-
-const isNight = now.hour < sunrise.hour || now.hour >= sunset.hour;
-```
-
-### Travel Encounters
-
-Adjust encounter difficulty based on time of day. Night encounters might be more dangerous.
-
-### Stealth Missions
-
-Plan heists for the darkest hours. Check darkness level before proceeding.
+Darkness updates are triggered by the `updateWorldTime` hook. The module listens for hour changes and initiates smooth transitions when detected.
 
 ---
 
-## Troubleshooting
+## Source Files
 
-### Darkness Not Changing
-
-1. Verify **Sync Scene Darkness** is enabled
-2. Check the scene override isn't set to Disabled
-3. Ensure world time is advancing
-4. Confirm you're viewing the active scene
-
-### Darkness Too Dark/Bright
-
-The darkness calculation uses calendar sunrise/sunset. If times seem wrong:
-
-1. Open **Calendar Editor** → **Seasons** tab
-2. Check **Daylight Configuration**
-3. Adjust solstice dates and times
-
-### Jumpy Transitions
-
-If darkness jumps instead of transitioning smoothly, time might be advancing in large increments. Smaller time steps produce smoother transitions.
+- `scripts/darkness.mjs` - Core darkness calculation and scene updates
+- `scripts/constants.mjs` - `SETTINGS.DARKNESS_SYNC` and `SCENE_FLAGS.DARKNESS_SYNC`
+- `scripts/settings.mjs` - Setting registration
+- `scripts/calendar/data/calendaria-calendar.mjs` - Sunrise/sunset/daylight methods
+- `templates/partials/scene-darkness-sync.hbs` - Scene config dropdown

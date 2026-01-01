@@ -1,165 +1,176 @@
 # Moon Phases
 
-Calendaria tracks lunar cycles with support for multiple moons, custom phases, and moon-triggered events.
-
-## Viewing Moon Phases
-
-### In the HUD
-
-The current moon phase displays in the dome:
-
-- The moon icon shows the current phase visually
-- Position changes based on time of night
-- Moon color reflects your calendar's configuration
-
-### Via API
-
-```javascript
-// Get the first moon's current phase
-const phase = CALENDARIA.api.getMoonPhase(0);
-console.log(phase.name); // e.g., "Full Moon"
-
-// Get all moons
-const allMoons = CALENDARIA.api.getAllMoonPhases();
-```
+Calendaria supports multiple moons with configurable cycle lengths, phases, and colors.
 
 ---
 
-## How Phases Work
+## Moon Configuration
 
-Moon phases are calculated from a reference date (a known new moon) and the cycle length:
+Each moon is defined with the following properties:
 
-1. **Cycle Length** — Days for one complete lunar cycle
-2. **Reference Date** — A date when the moon was new
-3. **Phase Percentages** — How the cycle divides into phases
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | string | Display name |
+| `cycleLength` | number | Days per complete lunar cycle |
+| `cycleDayAdjust` | number | Offset to shift phase timing (default: 0) |
+| `color` | string | Hex color for display tinting |
+| `hidden` | boolean | Hide moon from display |
+| `referenceDate` | object | Known new moon date `{ year, month, day }` |
+| `phases` | array | Phase definitions (see below) |
 
-Calendaria calculates the current day within the cycle and determines which phase applies.
+### Phase Definition
 
----
+Each phase entry:
 
-## Default Phases
-
-Standard lunar phases:
-
-| Phase | Cycle Position |
-|-------|----------------|
-| New Moon | 0% |
-| Waxing Crescent | 1-24% |
-| First Quarter | 25% |
-| Waxing Gibbous | 26-49% |
-| Full Moon | 50% |
-| Waning Gibbous | 51-74% |
-| Last Quarter | 75% |
-| Waning Crescent | 76-99% |
-
----
-
-## Multiple Moons
-
-Many fantasy settings have multiple moons. Each moon can have:
-
-- Its own cycle length
-- Unique phase names
-- Different colors
-- Independent reference dates
-
-### Example: Eberron
-
-Eberron has 12 moons, each with different cycles and associations. Configure each in the Calendar Editor.
-
-### Example: Krynn
-
-Krynn has three moons (Solinari, Lunitari, Nuitari) with their own colors and cycles affecting magic.
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | string | Phase name (e.g., "Full Moon") |
+| `rising` | string | Optional sub-phase name for early portion |
+| `fading` | string | Optional sub-phase name for late portion |
+| `icon` | string | SVG path or emoji for display |
+| `start` | number | Cycle position start (0-1) |
+| `end` | number | Cycle position end (0-1) |
 
 ---
 
-## Configuring Moons
+## Calendar Editor (Moons Tab)
 
-### In the Calendar Editor
+Configure moons via **Calendar Editor > Moons**:
 
-1. Open **Calendar Editor** → **Moons** tab
-2. Click **Add Moon**
-3. Configure:
-   - **Name** — Display name
-   - **Cycle Length** — Days per cycle
-   - **Reference Date** — A known new moon date
-   - **Color** — Visual color in the HUD
-
-### Custom Phase Names
-
-Replace default phase names with setting-appropriate ones:
-
-1. In the moon configuration, expand **Phases**
-2. Edit each phase name
-3. Optionally add **Rising** and **Fading** sub-phases
-
-Example for a "Blood Moon":
-- New Blood
-- Rising Crimson
-- Half Blood
-- Waxing Crimson
-- Full Blood
-- Waning Crimson
-- Half Shadow
-- Fading Crimson
+- **Name**: Moon display name
+- **Cycle Length**: Days for one complete cycle
+- **Color**: Tint color (affects icon display)
+- **Reference Date**: A date when the moon was new (year, month, day)
+- **Cycle Day Adjust**: Fine-tune phase alignment
+- **Hidden**: Exclude from UI display
+- **Phases**: Configure each phase with name, rising/fading names, icon, and start/end percentages
 
 ---
 
-## Moon-Triggered Events
+## Phase Calculation
 
-Create events that occur on specific moon phases:
+Phase calculation uses FC-style distribution for 8-phase moons:
 
-1. Create a note
-2. Set **Repeat** to **Moon Phase**
-3. Select the moon (if multiple)
-4. Select the phase(s)
+1. Primary phases (New Moon at index 0, Full Moon at index 4) each get `floor(cycleLength / 8)` days
+2. Remaining 6 phases split the leftover days evenly
+3. Extra days are distributed to earlier phases first
 
-Use cases:
-- Werewolf transformations on full moons
-- Ritual timing
-- Tidal effects
-- Religious observances
+The algorithm (`getMoonPhase` in `calendaria-calendar.mjs`):
+
+1. Calculate days since reference date
+2. Apply `cycleDayAdjust` offset
+3. Compute `daysIntoCycle = daysSinceReference % cycleLength`
+4. Determine which phase index contains that day
+5. Compute sub-phase (rising/fading) based on position within the phase
+
+### Sub-Phases
+
+When a phase spans multiple days, sub-phase names are generated:
+- **First third**: Uses `rising` name if defined, otherwise "Rising [Phase]"
+- **Middle third**: Uses the main phase name
+- **Last third**: Uses `fading` name if defined, otherwise "Fading [Phase]"
 
 ---
 
-## Moon Convergence
+## Phase Icons
 
-When multiple moons align, you might want special effects. Use the API to check for convergences:
+Default phase icons are SVG files in `assets/moon-phases/`:
 
-```javascript
-const moons = CALENDARIA.api.getAllMoonPhases();
-const allFull = moons.every(m => m.name === "Full Moon");
-if (allFull) {
-  console.log("Lunar convergence!");
-}
-```
+| File | Phase |
+|------|-------|
+| `01_newmoon.svg` | New Moon |
+| `02_waxingcrescent.svg` | Waxing Crescent |
+| `03_firstquarter.svg` | First Quarter |
+| `04_waxinggibbous.svg` | Waxing Gibbous |
+| `05_fullmoon.svg` | Full Moon |
+| `06_waninggibbous.svg` | Waning Gibbous |
+| `07_lastquarter.svg` | Last Quarter |
+| `08_waningcrescent.svg` | Waning Crescent |
+
+Custom icons can be paths to image files or emoji characters.
+
+---
+
+## Display
+
+### Calendar View
+
+Moon phases display on calendar day cells when the **Show Moon Phases** setting is enabled (Settings Panel > Moons tab). Each day shows the primary moon's phase icon, tinted with the moon's configured color.
+
+### HUD Dome
+
+The HUD dome displays a generic moon body that appears during nighttime hours (sun hidden). This is purely visual and does not reflect the actual lunar phase.
 
 ---
 
 ## API Reference
 
-### getMoonPhase(moonIndex)
+### `CALENDARIA.api.getMoonPhase(moonIndex)`
 
 Get the current phase of a specific moon.
 
 ```javascript
 const phase = CALENDARIA.api.getMoonPhase(0);
-// Returns: { name: "Full Moon", index: 4, moon: "Luna", ... }
+// Returns:
+// {
+//   name: "Full Moon",
+//   subPhaseName: "Full Moon",
+//   icon: "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+//   position: 0.5,
+//   dayInCycle: 14,
+//   phaseIndex: 4,
+//   dayWithinPhase: 1,
+//   phaseDuration: 3
+// }
 ```
 
-### getAllMoonPhases()
+### `CALENDARIA.api.getAllMoonPhases()`
 
-Get phases for all moons.
+Get phases for all moons at current time.
 
 ```javascript
 const moons = CALENDARIA.api.getAllMoonPhases();
-// Returns: [{ name: "Full Moon", moon: "Luna" }, { name: "New Moon", moon: "Celene" }]
+// Returns array of phase objects for each moon
 ```
 
 ---
 
-## Tips
+## Moon Utilities (`moon-utils.mjs`)
 
-- Set reference dates to historical events in your setting (eclipses, prophecies)
-- Use moon colors that match your setting's lore
-- Consider how moon phases affect magic, creatures, or tides in your world
+Additional utility functions:
+
+| Function | Description |
+|----------|-------------|
+| `getMoonPhasePosition(moon, date, calendar)` | Returns phase position (0-1) for a date |
+| `isMoonFull(moon, date, calendar)` | Returns true if position is 0.5-0.625 |
+| `getNextFullMoon(moon, startDate, options)` | Finds next full moon date |
+| `getNextConvergence(moons, startDate, options)` | Finds next date when all moons are full |
+| `getConvergencesInRange(moons, startDate, endDate, options)` | All convergences in a date range |
+
+### Convergence Example
+
+```javascript
+import { getNextConvergence } from './scripts/utils/moon-utils.mjs';
+
+const calendar = CALENDARIA.api.getActiveCalendar();
+const moons = calendar.moons;
+const today = { year: 1492, month: 0, day: 1 };
+
+const convergence = getNextConvergence(moons, today, { maxDays: 1000 });
+if (convergence) {
+  console.log(`Next convergence: ${convergence.year}/${convergence.month}/${convergence.day}`);
+}
+```
+
+---
+
+## Note Recurrence
+
+Notes can repeat on moon phases using the recurrence system. Conditions supported:
+
+- `moonPhase`: Phase position (0-1) of a specific moon
+- `moonPhaseIndex`: Discrete phase index
+- `moonPhaseCountMonth`: Nth occurrence of a phase in the month
+- `moonPhaseCountYear`: Nth occurrence of a phase in the year
+
+These are evaluated in `scripts/notes/utils/recurrence.mjs`.

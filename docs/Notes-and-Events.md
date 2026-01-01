@@ -1,222 +1,260 @@
 # Notes and Events
 
-Calendar notes let you schedule events, track important dates, and add annotations to your calendar. Notes are stored as journal entries and can include rich text, images, and links.
+Calendar notes are journal entry pages that attach to specific dates. Notes support rich text content, custom icons, recurrence patterns, categories, and macro triggers.
+
+## Note Storage
+
+Notes are stored as `JournalEntryPage` documents with type `calendaria.calendarnote`. Each calendar has a dedicated journal entry with month separator pages. Notes are organized under their respective month pages by sort order.
 
 ## Creating a Note
 
-### From the Calendar
+### From the Calendar UI
 
 1. Click a date on the calendar grid
-2. Click **Add Note** (or the + icon)
-3. Fill in the note details
-4. Click **Save**
+2. Click **Add Note** to open the note editor
+3. Configure title, icon, dates, times, and content
+4. Click **Save & Close**
 
 ### From the API
 
 ```javascript
 await CALENDARIA.api.createNote({
-  title: "Council Meeting",
-  year: 1492,
-  month: 5,
-  day: 15,
-  hour: 14,
-  minute: 0,
-  content: "Meeting with the Lords' Alliance"
+  name: "Council Meeting",
+  content: "<p>Meeting with the Lords' Alliance</p>",
+  startDate: { year: 1492, month: 5, day: 15, hour: 14, minute: 0 },
+  allDay: false,
+  categories: ["meeting"]
 });
 ```
 
----
+## Note Properties
 
-## Note Types
-
-### All-Day Events
-
-Leave the time fields empty to create an all-day event. These appear at the top of the date's event list.
-
-### Timed Events
-
-Set specific start hours and minutes for events that occur at a particular time.
-
-### Multi-Day Events
-
-Set a start date and end date to span multiple days. The event appears on each day in the range.
-
----
-
-## Recurrence
-
-Notes can repeat on a schedule. Set the **Repeat** option when creating or editing a note.
-
-### Basic Patterns
-
-| Pattern | Description |
-|---------|-------------|
-| Never | One-time event |
-| Daily | Every day |
-| Weekly | Same day each week |
-| Monthly | Same day each month |
-| Yearly | Same date each year |
-
-### Advanced Patterns
-
-#### Week of Month
-
-Schedule events like "Second Tuesday of each month" or "Last Friday":
-
-1. Set Repeat to **Week of Month**
-2. Choose the ordinal (First, Second, Third, Fourth, Last)
-3. Choose the weekday
-
-#### Seasonal
-
-Trigger events based on seasons:
-
-- First day of the season
-- Last day of the season
-- Every day during the season
-
-#### Moon Phase
-
-Events that occur on specific moon phases:
-
-1. Set Repeat to **Moon Phase**
-2. Select the moon (if multiple)
-3. Select the phase(s)
-
-#### Range Pattern
-
-For complex patterns, use range matching with wildcards:
-
-- Exact values: "Day 15"
-- Ranges: "Days 1-7"
-- Any: "Any month"
-
----
-
-## Repeat Options
-
-### Interval
-
-Set how often the pattern repeats:
-
-- Every 1 week = weekly
-- Every 2 weeks = biweekly
-- Every 3 months = quarterly
-
-### End Date
-
-Optionally set when the recurrence stops. Leave empty for indefinite repeating.
-
----
-
-## Categories
-
-Organize notes with categories:
-
-1. Open a note for editing
-2. In the **Categories** field, add tags
-3. Use the same categories across notes for filtering
-
-Filter notes by category in the calendar view or via API:
-
-```javascript
-const meetings = await CALENDARIA.api.getNotesByCategory("meeting");
-```
-
----
-
-## Linked Events
-
-Create events that automatically spawn relative to another event:
-
-1. Create the primary event
-2. Create a linked event with Repeat set to **Linked**
-3. Select the parent note
-4. Set the offset (e.g., "-3 days" for 3 days before)
-
-Use this for reminders or preparation time before major events.
-
----
-
-## Viewing Notes
-
-### On the Calendar
-
-- Dates with notes show indicator dots
-- Click a date to see the notes panel
-- Note count badges show how many events exist
-
-### In the HUD
-
-- Active events appear as icons in the info bar
-- Hover for event details
-- Click to open the note
-
-### Via Search
-
-Use the search function to find notes by name or content.
-
----
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | String | Note title |
+| `text.content` | HTML | Rich text content (ProseMirror) |
+| `startDate` | Object | `{year, month, day, hour, minute}` |
+| `endDate` | Object | Optional end date/time |
+| `allDay` | Boolean | Ignores time fields when true |
+| `repeat` | String | Recurrence pattern |
+| `maxOccurrences` | Number | Limit total recurrences (0 = unlimited) |
+| `categories` | String[] | Category IDs |
+| `color` | Hex | Display color |
+| `icon` | String | FontAwesome class or image path |
+| `iconType` | String | `fontawesome` or `image` |
+| `gmOnly` | Boolean | Visible only to GMs |
+| `silent` | Boolean | Suppresses reminders and announcements |
+| `macro` | String | Macro ID to execute on trigger |
 
 ## Editing and Deleting
 
 ### Edit a Note
 
-1. Click the note to open it
-2. Click **Edit**
+1. Click the note to open it in view mode
+2. Click the pencil icon in the header to switch to edit mode
 3. Make changes
-4. Click **Save**
+4. Click the save icon or close the window
 
 ### Delete a Note
 
-1. Open the note
-2. Click **Delete** in the header
+1. Open the note in edit mode
+2. Click the trash icon in the header
 3. Confirm deletion
 
-Or right-click a note indicator on the calendar and select **Delete**.
+## Recurrence Patterns
 
----
+Set the **Repeat** dropdown to enable recurrence. Available patterns:
 
-## Chat Announcements
+| Pattern | Description |
+|---------|-------------|
+| `never` | One-time event (default) |
+| `daily` | Every N days |
+| `weekly` | Same weekday every N weeks |
+| `monthly` | Same day of month every N months |
+| `yearly` | Same month/day every N years |
+| `weekOfMonth` | Ordinal weekday (e.g., "2nd Tuesday") |
+| `seasonal` | Based on season boundaries |
+| `moon` | Based on moon phase conditions |
+| `random` | Probability-based with seeded randomness |
+| `range` | Pattern matching on year/month/day values |
+| `linked` | Relative to another note's occurrences |
+| `computed` | Complex moveable feast calculations |
 
-Configure notes to announce in chat when they occur:
+### Repeat Options
 
-1. Open the note settings
-2. Enable **Announce in Chat**
-3. Optionally set visibility (everyone, GM only, etc.)
+- **Max Occurrences**: Limits total recurrences (0 = unlimited)
+- **Repeat End Date**: Stop repeating after this date
 
----
+### Week of Month
+
+Schedule events like "Second Tuesday of each month":
+
+1. Set Repeat to **weekOfMonth**
+2. Choose the occurrence (1st through 5th, or Last / 2nd Last)
+3. Choose the weekday
+
+### Seasonal
+
+Events tied to seasons:
+
+1. Set Repeat to **seasonal**
+2. Select the season
+3. Choose trigger: **Entire Season**, **First Day**, or **Last Day**
+
+### Moon Phase
+
+Events triggered by moon phases:
+
+1. Set Repeat to **moon**
+2. Add moon conditions by selecting a moon and phase
+3. Multiple conditions can be added (any match triggers)
+
+Moon conditions specify a phase range (0-1 position in cycle).
+
+### Random Events
+
+Probability-based occurrence:
+
+1. Set Repeat to **random**
+2. Configure probability (0-100%)
+3. Set check interval: daily, weekly, or monthly
+4. Seed value ensures deterministic randomness across clients
+
+Random occurrences are pre-generated and cached to ensure consistency.
+
+### Linked Events
+
+Events relative to another note:
+
+1. Set Repeat to **linked**
+2. Select the parent note
+3. Set offset in days (negative = before, positive = after)
+
+Example: "-3" offset creates an event 3 days before each occurrence of the linked event.
+
+### Range Pattern
+
+Match dates using exact values, ranges, or wildcards:
+
+1. Set Repeat to **range**
+2. For each component (year, month, day), choose:
+   - **Any**: Matches all values
+   - **Exact**: Matches a specific value
+   - **Range**: Matches a min-max range
+
+### Advanced Conditions
+
+Additional filters applied on top of recurrence patterns. All conditions must pass (AND logic).
+
+Available condition fields:
+
+| Category | Fields |
+|----------|--------|
+| Date | year, month, day, dayOfYear, daysBeforeMonthEnd |
+| Weekday | weekday, weekNumberInMonth, inverseWeekNumber |
+| Week | weekInMonth, weekInYear, totalWeek, weeksBeforeMonthEnd, weeksBeforeYearEnd |
+| Season | season, seasonPercent, seasonDay, isLongestDay, isShortestDay, isSpringEquinox, isAutumnEquinox |
+| Moon | moonPhaseIndex, moonPhaseCountMonth, moonPhaseCountYear |
+| Cycle | cycle (if calendar has cycles) |
+| Era | era, eraYear (if calendar has eras) |
+| Other | intercalary (for intercalary days) |
+
+Operators: `==`, `!=`, `>=`, `<=`, `>`, `<`, `%` (modulo)
+
+## Categories
+
+Predefined categories:
+
+| ID | Label |
+|----|-------|
+| `holiday` | Holiday |
+| `festival` | Festival |
+| `quest` | Quest |
+| `session` | Session |
+| `combat` | Combat |
+| `meeting` | Meeting |
+| `birthday` | Birthday |
+| `deadline` | Deadline |
+| `reminder` | Reminder |
+| `other` | Other |
+
+### Custom Categories
+
+1. Type a category name in the input field next to the multi-select
+2. Click the + button to create
+3. Right-click a custom category tag to delete it
+
+Custom categories are stored in world settings and available to all notes.
+
+## Icons
+
+Notes support two icon types:
+
+- **FontAwesome**: Enter a class like `fas fa-dragon`
+- **Image**: Select an image file via file picker
+
+Right-click the icon picker to switch between modes. The icon color is controlled by the color picker.
+
+## Visibility
+
+- **GM Only**: Note is only visible to GMs
+- **Silent**: Suppresses reminders and event announcements
 
 ## Macro Triggers
 
-Run a macro when an event occurs:
-
-1. Edit the note
-2. In the **Macro** field, select a macro from your collection
-3. The macro executes when the event triggers
-
----
+Select a macro from the dropdown to execute when the event triggers. Macros run when the event scheduler detects the event has started.
 
 ## API Examples
 
-### Get Today's Notes
+### Get Notes for a Date
 
 ```javascript
-const now = CALENDARIA.api.getCurrentDateTime();
-const notes = await CALENDARIA.api.getNotesForDate(now.year, now.month, now.day);
+const notes = CALENDARIA.api.getNotesForDate(1492, 5, 15);
 ```
 
 ### Get Notes in a Range
 
 ```javascript
-const notes = await CALENDARIA.api.getNotesInRange(
+const notes = CALENDARIA.api.getNotesInRange(
   { year: 1492, month: 5, day: 1 },
   { year: 1492, month: 5, day: 31 }
 );
 ```
 
+### Get Notes by Category
+
+```javascript
+const meetings = CALENDARIA.api.getNotesByCategory("meeting");
+```
+
+### Update a Note
+
+```javascript
+await CALENDARIA.api.updateNote(pageId, {
+  name: "Updated Title",
+  categories: ["quest", "deadline"]
+});
+```
+
+### Delete a Note
+
+```javascript
+await CALENDARIA.api.deleteNote(pageId);
+```
+
 ### Search Notes
 
 ```javascript
-const results = await CALENDARIA.api.searchNotes("dragon");
+const results = CALENDARIA.api.searchNotes("dragon", {
+  categories: ["quest"]
+});
 ```
+
+## Relevant Files
+
+- `scripts/notes/note-manager.mjs` - CRUD operations and indexing
+- `scripts/notes/note-data.mjs` - Data validation and categories
+- `scripts/notes/utils/recurrence.mjs` - Recurrence pattern matching
+- `scripts/sheets/calendar-note-sheet.mjs` - Note editor UI
+- `scripts/sheets/calendar-note-data-model.mjs` - Data schema
+- `templates/sheets/calendar-note-form.hbs` - Editor form template

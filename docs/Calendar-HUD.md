@@ -1,65 +1,152 @@
 # Calendar HUD
 
-The Calendar HUD is the main interface for viewing and controlling time in Calendaria. It displays as an animated dome widget on your screen.
+The Calendar HUD (`CalendariaHUD`) displays date, time, weather, and events in a draggable widget. Two display modes are available: the full HUD with an animated dome, or a compact calendar view.
+
+---
 
 ## Opening the HUD
 
-- Click the **calendar icon** in the token controls (left sidebar)
-- Press **Ctrl+C** to toggle visibility
-- The HUD appears automatically when you load a world (configurable)
+- Press **Alt+C** to toggle visibility
+- Automatically opens on world load (if enabled in settings)
 
 ---
 
-## The Dome Display
+## HUD Mode
+
+Configured via Settings > HUD tab:
+
+| Mode | Description |
+|------|-------------|
+| `full` | Animated dome with sky gradient, sun/moon arc, and info bar |
+| `compact` | Mini month grid with time controls |
+
+---
+
+## Full HUD
+
+### Dome Display
 
 The dome shows a dynamic sky that changes based on time of day:
 
-- **Daytime** — Blue sky with sun, animated clouds
-- **Dawn/Dusk** — Gradient transitions with color shifts
-- **Nighttime** — Dark sky with moon and stars
+- Sky gradient interpolates between 15 keyframes (0:00-24:00)
+- Sun visible between hours 6-18; moon visible outside this range
+- Stars fade in/out during twilight (5:30-7:00 and 17:30-19:00)
+- Clouds visible during daylight (7:00-18:00)
 
-The sun and moon positions reflect the actual time. Moon phase is accurate to your calendar's lunar cycle.
+Click the dome or press **Enter/Space** (when focused) to open the Time Dial.
+
+### Time Dial
+
+A circular dial for setting the time:
+
+- Drag the handle around the 24-hour dial
+- Type directly in the time input field (accepts formats like "14:30", "2:30pm")
+- The dial shows sun/moon position and sky gradient preview
+- Click outside the dial to close
+
+### Info Bar
+
+The bar displays (left to right):
+
+- **Search button** - Opens note search panel
+- **Add Note button** - Creates a new note for today
+- **Date** - Click to open date picker (GM only)
+- **Events** - Icons for today's notes (up to 5); click to open note
+- **Time** - Current time with play/pause button (GM only)
+- **Weather** - Current weather; click to open weather picker (GM only)
+- **Season** - Current season name and icon
+- **Era** - Current era indicator
+- **Cycle** - Current cycle value (if configured)
+- **Open Calendar** - Opens the full calendar application
+- **Settings** - Opens the settings panel
+
+### Time Controls Tray (GM Only)
+
+Hover over the bar or enable sticky tray to reveal:
+
+| Button | Action |
+|--------|--------|
+| Sunrise | Advance to sunrise |
+| Midday | Advance to solar noon |
+| Reverse | Step backward by increment |
+| Multiplier dropdown | Set time multiplier (0.25x to 10x) |
+| Increment dropdown | Set step size (second, round, minute, hour, day, week, month, season, year) |
+| Forward | Step forward by increment |
+| Sunset | Advance to sunset |
+| Midnight | Advance to midnight (next day) |
 
 ---
 
-## The Info Bar
+## Compact Calendar
 
-Below the dome, the bar displays:
+A mini month view with integrated time controls.
 
-- **Current Date** — Formatted according to your calendar
-- **Current Time** — Hours and minutes
-- **Era** — If configured
-- **Active Events** — Icons for today's events (hover for details)
-- **Weather Badge** — Current weather condition (click to regenerate)
+### Navigation
 
-The date and active events rotate every 30 seconds.
+- **Arrow buttons** - Previous/next month
+- **Today button** - Return to current date
+- Click a day to select it
+- Click a grayed-out day to navigate to that month
+- Double-click a day to set it as current date (GM) or view notes
+
+### Day Cells
+
+Each day cell may show:
+
+- Note count badge (if notes exist)
+- Festival highlight
+- Moon phase icon
+- Today indicator
+- Selected indicator
+
+### Sidebar
+
+Appears on hover (or sticky):
+
+- Close
+- Open Full Calendar
+- Pin Controls (opens sticky options menu)
+- Today
+- Set Current Date (when a date is selected)
+- Add Note
+- Search Notes
+- View Notes (when notes exist on selected date)
+- Settings
+
+### Notes Panel
+
+Click "View Notes" to see all notes for the selected date:
+
+- Notes sorted by time (all-day first)
+- Click a note to open in view mode
+- Click edit icon to open in edit mode (if owner)
+
+### Time Display
+
+Shows current time. GM can:
+
+- Click to toggle time flow (play/pause)
+- Hover to reveal time controls
+
+### Time Controls (GM Only)
+
+Revealed on hover:
+
+- Sunrise, Midday shortcuts
+- Reverse 5x, Reverse
+- Increment selector
+- Forward, Forward 5x
+- Sunset, Midnight shortcuts
 
 ---
 
-## Time Controls
+## Search
 
-### Opening the Controls Tray
+Both HUD modes include a search panel:
 
-Click the **clock icon** or the time display to expand the controls tray.
-
-### Advancing Time
-
-Use the increment buttons to advance time:
-
-- **Minute** / **Hour** / **Day** / **Week** / **Month**
-- Click the increment selector to change the step size
-
-### Time Multiplier
-
-Set how fast time passes during real-time mode:
-
-- **0.25x** — Quarter speed
-- **1x** — Real-time (1 second = 1 second)
-- **10x** — Ten times faster
-
-### Play/Pause
-
-Click the **play button** to start real-time progression. Click again to pause.
+- Type at least 2 characters to search note names and content
+- Click a result to open the note
+- Press **Escape** to close
 
 ---
 
@@ -67,61 +154,68 @@ Click the **play button** to start real-time progression. Click again to pause.
 
 ### Dragging
 
-Click and drag the HUD to move it anywhere on screen. Position is saved per-client.
+- **Full HUD**: Drag the info bar
+- **Compact**: Drag the top row (month/year header)
+
+Position is saved per-client.
+
+### Dome Visibility (Full HUD)
+
+The dome automatically fades when approaching the top of the viewport and hides entirely if insufficient space.
 
 ### Locking Position
 
-Right-click the HUD and select **Lock Position** to prevent accidental movement.
+Enable "Lock Position" in settings or via the pin button context menu.
 
 ### Resetting Position
 
-If the HUD goes off-screen:
-
-1. Go to **Settings** → **Module Settings** → **Calendaria**
-2. Click **Reset HUD Position**
+Settings > HUD tab (or Compact tab) > Reset Position
 
 ---
 
 ## Sticky Options
 
-Right-click the HUD to access sticky options:
+Access via the pin button. Options persist across sessions.
 
-- **Always Show Controls** — Keep the time controls tray open
-- **Lock Position** — Prevent dragging
-- **Collapse to Bar** — Minimize to just the info bar
+### Full HUD
 
-These preferences persist across sessions.
+| Option | Effect |
+|--------|--------|
+| Sticky Tray | Keep time controls tray visible |
+| Lock Position | Prevent dragging |
 
----
+### Compact Calendar
 
-## The Time Dial
-
-Right-click the HUD (on the dome area) to open the **Time Dial**:
-
-- Drag the pointer around the dial to change the hour
-- The dial shows 24 hours with the current time highlighted
-- Release to set the new time
-
----
-
-## Search
-
-Click the **search icon** in the bar to search notes:
-
-- Type a query to search note names and content
-- Click a result to open the note or navigate to its date
-- Press **Escape** to clear the search
+| Option | Effect |
+|--------|--------|
+| Sticky Time Controls | Keep time controls visible |
+| Sticky Sidebar | Keep sidebar visible |
+| Lock Position | Prevent dragging |
 
 ---
 
-## Compact Calendar
+## Settings
 
-For a smaller footprint, use the **Compact Calendar** instead:
+### HUD Tab
 
-1. Go to **Settings** → **Module Settings** → **Calendaria**
-2. Enable **Show Compact Calendar**
+| Setting | Description |
+|---------|-------------|
+| Show Calendar HUD | Enable/disable HUD on world load |
+| HUD Mode | `full` or `compact` |
+| Sticky Tray | Keep tray open (Full HUD) |
+| Lock Position | Prevent dragging |
+| Reset Position | Reset to default position |
 
-The compact view shows a minimal calendar grid with date navigation.
+### Compact Tab
+
+| Setting | Description |
+|---------|-------------|
+| Show Compact Calendar | Enable/disable on world load |
+| Controls Delay | Seconds before controls auto-hide (1-10s) |
+| Sticky Time Controls | Keep time controls visible |
+| Sticky Sidebar | Keep sidebar visible |
+| Lock Position | Prevent dragging |
+| Reset Position | Reset to default position |
 
 ---
 
@@ -129,6 +223,6 @@ The compact view shows a minimal calendar grid with date navigation.
 
 | Shortcut | Action |
 |----------|--------|
-| Ctrl+C | Toggle HUD visibility |
-| Enter/Space | Open time dial (when HUD focused) |
+| Alt+C | Toggle HUD visibility |
+| Enter/Space | Open time dial (when dome focused) |
 | Escape | Close search panel |
