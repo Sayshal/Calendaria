@@ -10,7 +10,7 @@ import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
-import { COLOR_DEFINITIONS, DEFAULT_COLORS, applyCustomColors } from '../../utils/theme-utils.mjs';
+import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, applyCustomColors } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { CalendarApplication } from '../calendar-application.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
@@ -405,16 +405,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Global triggers
     const globalTriggers = [
-      { key: 'dawn', label: 'CALENDARIA.MacroTrigger.Dawn', hint: 'CALENDARIA.MacroTrigger.DawnHint' },
-      { key: 'dusk', label: 'CALENDARIA.MacroTrigger.Dusk', hint: 'CALENDARIA.MacroTrigger.DuskHint' },
-      { key: 'midday', label: 'CALENDARIA.MacroTrigger.Midday', hint: 'CALENDARIA.MacroTrigger.MiddayHint' },
-      { key: 'midnight', label: 'CALENDARIA.MacroTrigger.Midnight', hint: 'CALENDARIA.MacroTrigger.MidnightHint' },
-      { key: 'newDay', label: 'CALENDARIA.MacroTrigger.NewDay', hint: 'CALENDARIA.MacroTrigger.NewDayHint' }
+      { key: 'dawn', label: 'CALENDARIA.MacroTrigger.Dawn' },
+      { key: 'dusk', label: 'CALENDARIA.MacroTrigger.Dusk' },
+      { key: 'midday', label: 'CALENDARIA.MacroTrigger.Midday' },
+      { key: 'midnight', label: 'CALENDARIA.MacroTrigger.Midnight' },
+      { key: 'newDay', label: 'CALENDARIA.MacroTrigger.NewDay' }
     ];
     context.globalTriggers = globalTriggers.map((trigger) => ({
       ...trigger,
       label: localize(trigger.label),
-      hint: localize(trigger.hint),
       macroId: config.global?.[trigger.key] || ''
     }));
 

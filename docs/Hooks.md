@@ -1,12 +1,14 @@
 # Hooks
 
-Calendaria fires hooks at key events for module integration and custom automation.
+Calendaria fires hooks for module integration and automation.
+
+---
 
 ## Lifecycle Hooks
 
 ### calendaria.init
 
-Fired during module initialization, before the calendar system is ready.
+Fired during module initialization, before calendars are loaded.
 
 ```javascript
 Hooks.on("calendaria.init", () => {
@@ -18,9 +20,18 @@ Hooks.on("calendaria.init", () => {
 
 Fired when Calendaria is fully loaded and ready.
 
+**Parameters:**
+- `data` (object)
+  - `api` (CalendariaAPI) - The public API
+  - `calendar` (CalendariaCalendar|null) - Active calendar
+  - `version` (string) - Module version
+
 ```javascript
-Hooks.on("calendaria.ready", () => {
-  console.log("Calendaria ready");
+Hooks.on("calendaria.ready", ({ api, calendar, version }) => {
+  console.log(`Calendaria v${version} ready`);
+  if (calendar) {
+    console.log(`Active: ${calendar.name}`);
+  }
 });
 ```
 
@@ -30,21 +41,43 @@ Hooks.on("calendaria.ready", () => {
 
 ### calendaria.calendarSwitched
 
-Fired when the active calendar changes.
+Fired when the active calendar changes (local switch).
+
+**Parameters:**
+- `id` (string) - Calendar ID
+- `calendar` (CalendariaCalendar) - Calendar instance
 
 ```javascript
 Hooks.on("calendaria.calendarSwitched", (id, calendar) => {
-  console.log(`Switched to calendar: ${id}`);
+  console.log(`Switched to: ${id}`);
+});
+```
+
+### calendaria.remoteCalendarSwitch
+
+Fired when another client switches the active calendar.
+
+**Parameters:**
+- `id` (string) - Calendar ID
+- `calendar` (CalendariaCalendar) - Calendar instance
+
+```javascript
+Hooks.on("calendaria.remoteCalendarSwitch", (id, calendar) => {
+  console.log(`Remote switch to: ${id}`);
 });
 ```
 
 ### calendaria.calendarAdded
 
-Fired when a new calendar is added.
+Fired when a calendar is created or imported.
+
+**Parameters:**
+- `id` (string) - Calendar ID
+- `calendar` (CalendariaCalendar) - Calendar instance
 
 ```javascript
 Hooks.on("calendaria.calendarAdded", (id, calendar) => {
-  console.log(`Added calendar: ${calendar.name}`);
+  console.log(`Added: ${calendar.name}`);
 });
 ```
 
@@ -52,9 +85,13 @@ Hooks.on("calendaria.calendarAdded", (id, calendar) => {
 
 Fired when a calendar is modified.
 
+**Parameters:**
+- `id` (string) - Calendar ID
+- `calendar` (CalendariaCalendar) - Updated calendar instance
+
 ```javascript
 Hooks.on("calendaria.calendarUpdated", (id, calendar) => {
-  console.log(`Updated calendar: ${id}`);
+  console.log(`Updated: ${id}`);
 });
 ```
 
@@ -62,9 +99,12 @@ Hooks.on("calendaria.calendarUpdated", (id, calendar) => {
 
 Fired when a calendar is deleted.
 
+**Parameters:**
+- `id` (string) - Calendar ID
+
 ```javascript
 Hooks.on("calendaria.calendarRemoved", (id) => {
-  console.log(`Removed calendar: ${id}`);
+  console.log(`Removed: ${id}`);
 });
 ```
 
@@ -74,11 +114,20 @@ Hooks.on("calendaria.calendarRemoved", (id) => {
 
 ### calendaria.dateTimeChange
 
-Fired whenever world time changes.
+Fired on every world time change. Primary hook for time tracking.
+
+**Parameters:**
+- `data` (object)
+  - `previous` (object) - Previous time components (year, month, dayOfMonth, hour, minute, second)
+  - `current` (object) - Current time components
+  - `diff` (number) - Time delta in seconds
+  - `calendar` (CalendariaCalendar) - Active calendar
+  - `worldTime` (number) - Current world time in seconds
 
 ```javascript
 Hooks.on("calendaria.dateTimeChange", (data) => {
-  console.log(`Time: ${data.hour}:${data.minute}`);
+  console.log(`Time: ${data.current.hour}:${data.current.minute}`);
+  console.log(`Delta: ${data.diff}s`);
 });
 ```
 
@@ -86,9 +135,15 @@ Hooks.on("calendaria.dateTimeChange", (data) => {
 
 Fired when the day changes.
 
+**Parameters:**
+- `data` (object)
+  - `previous` (object) - Previous time components
+  - `current` (object) - Current time components
+  - `calendar` (CalendariaCalendar) - Active calendar
+
 ```javascript
 Hooks.on("calendaria.dayChange", (data) => {
-  console.log(`New day: ${data.day}`);
+  console.log(`Day ${data.current.dayOfMonth}`);
 });
 ```
 
@@ -96,9 +151,12 @@ Hooks.on("calendaria.dayChange", (data) => {
 
 Fired when the month changes.
 
+**Parameters:**
+- `data` (object) - Same structure as `calendaria.dayChange`
+
 ```javascript
 Hooks.on("calendaria.monthChange", (data) => {
-  console.log(`New month: ${data.month}`);
+  console.log(`Month ${data.current.month}`);
 });
 ```
 
@@ -106,9 +164,12 @@ Hooks.on("calendaria.monthChange", (data) => {
 
 Fired when the year changes.
 
+**Parameters:**
+- `data` (object) - Same structure as `calendaria.dayChange`
+
 ```javascript
 Hooks.on("calendaria.yearChange", (data) => {
-  console.log(`New year: ${data.year}`);
+  console.log(`Year ${data.current.year}`);
 });
 ```
 
@@ -116,9 +177,32 @@ Hooks.on("calendaria.yearChange", (data) => {
 
 Fired when the season changes.
 
+**Parameters:**
+- `data` (object)
+  - `previous` (object) - Previous time components
+  - `current` (object) - Current time components
+  - `calendar` (CalendariaCalendar) - Active calendar
+  - `previousSeason` (object|null) - Previous season definition
+  - `currentSeason` (object|null) - Current season definition
+
 ```javascript
 Hooks.on("calendaria.seasonChange", (data) => {
-  console.log(`Season: ${data.season.name}`);
+  console.log(`Season: ${data.currentSeason?.name}`);
+});
+```
+
+### calendaria.remoteDateChange
+
+Fired when time changes from another client.
+
+**Parameters:**
+- `data` (object)
+  - `worldTime` (number) - New world time in seconds
+  - `delta` (number) - Time delta in seconds
+
+```javascript
+Hooks.on("calendaria.remoteDateChange", (data) => {
+  console.log(`Remote time update: ${data.worldTime}`);
 });
 ```
 
@@ -126,9 +210,15 @@ Hooks.on("calendaria.seasonChange", (data) => {
 
 ## Solar Hooks
 
+Fired when crossing time-of-day thresholds.
+
 ### calendaria.sunrise
 
-Fired at sunrise.
+**Parameters:**
+- `data` (object)
+  - `worldTime` (number) - World time in seconds
+  - `components` (object) - Time components
+  - `calendar` (CalendariaCalendar) - Active calendar
 
 ```javascript
 Hooks.on("calendaria.sunrise", (data) => {
@@ -138,7 +228,7 @@ Hooks.on("calendaria.sunrise", (data) => {
 
 ### calendaria.sunset
 
-Fired at sunset.
+**Parameters:** Same as `calendaria.sunrise`
 
 ```javascript
 Hooks.on("calendaria.sunset", (data) => {
@@ -148,21 +238,21 @@ Hooks.on("calendaria.sunset", (data) => {
 
 ### calendaria.midnight
 
-Fired at midnight.
+**Parameters:** Same as `calendaria.sunrise`
 
 ```javascript
 Hooks.on("calendaria.midnight", (data) => {
-  console.log("A new day begins");
+  console.log("Midnight");
 });
 ```
 
 ### calendaria.midday
 
-Fired at noon.
+**Parameters:** Same as `calendaria.sunrise`
 
 ```javascript
 Hooks.on("calendaria.midday", (data) => {
-  console.log("High noon");
+  console.log("Noon");
 });
 ```
 
@@ -174,10 +264,22 @@ Hooks.on("calendaria.midday", (data) => {
 
 Fired when any moon's phase changes.
 
+**Parameters:**
+- `data` (object)
+  - `moons` (array) - Array of changed moon data
+    - `moonIndex` (number) - Index of the moon
+    - `moonName` (string) - Localized moon name
+    - `previousPhaseIndex` (number) - Previous phase index
+    - `previousPhaseName` (string|null) - Previous phase name
+    - `currentPhaseIndex` (number) - Current phase index
+    - `currentPhaseName` (string|null) - Current phase name
+  - `calendar` (CalendariaCalendar) - Active calendar
+  - `worldTime` (number) - World time in seconds
+
 ```javascript
 Hooks.on("calendaria.moonPhaseChange", (data) => {
   for (const moon of data.moons) {
-    console.log(`${moon.name}: ${moon.phase}`);
+    console.log(`${moon.moonName}: ${moon.currentPhaseName}`);
   }
 });
 ```
@@ -190,11 +292,17 @@ Hooks.on("calendaria.moonPhaseChange", (data) => {
 
 Fired when transitioning to or from a rest day.
 
+**Parameters:**
+- `data` (object)
+  - `isRestDay` (boolean) - Current rest day status
+  - `wasRestDay` (boolean) - Previous rest day status
+  - `weekday` (object|null) - Weekday info (index, name, abbreviation)
+  - `worldTime` (number) - World time in seconds
+  - `calendar` (CalendariaCalendar) - Active calendar
+
 ```javascript
 Hooks.on("calendaria.restDayChange", (data) => {
-  if (data.isRestDay) {
-    console.log("It's a day of rest");
-  }
+  if (data.isRestDay) console.log("Rest day begins");
 });
 ```
 
@@ -204,25 +312,31 @@ Hooks.on("calendaria.restDayChange", (data) => {
 
 ### calendaria.clockStartStop
 
-Fired when real-time clock starts or stops.
+Fired when the real-time clock starts or stops.
+
+**Parameters:**
+- `data` (object)
+  - `running` (boolean) - Whether clock is running
+  - `increment` (number) - Time increment in seconds
 
 ```javascript
 Hooks.on("calendaria.clockStartStop", (data) => {
-  if (data.running) {
-    console.log("Clock started");
-  } else {
-    console.log("Clock stopped");
-  }
+  console.log(data.running ? "Clock started" : "Clock stopped");
 });
 ```
 
 ### calendaria.clockUpdate
 
-Fired periodically while clock is running.
+Fired on remote clock state updates.
+
+**Parameters:**
+- `data` (object)
+  - `running` (boolean) - Whether clock is running
+  - `ratio` (number) - Real-time to game-time ratio
 
 ```javascript
 Hooks.on("calendaria.clockUpdate", (data) => {
-  // data.running, data.ratio
+  console.log(`Clock sync: running=${data.running}`);
 });
 ```
 
@@ -232,27 +346,36 @@ Hooks.on("calendaria.clockUpdate", (data) => {
 
 ### calendaria.noteCreated
 
-Fired when a note is created.
+Fired when a calendar note is created.
+
+**Parameters:**
+- `stub` (object) - Note stub with id, name, flagData
 
 ```javascript
-Hooks.on("calendaria.noteCreated", (note) => {
-  console.log(`Created: ${note.name}`);
+Hooks.on("calendaria.noteCreated", (stub) => {
+  console.log(`Created: ${stub.name}`);
 });
 ```
 
 ### calendaria.noteUpdated
 
-Fired when a note is modified.
+Fired when a calendar note is modified.
+
+**Parameters:**
+- `stub` (object) - Note stub with id, name, flagData
 
 ```javascript
-Hooks.on("calendaria.noteUpdated", (note) => {
-  console.log(`Updated: ${note.name}`);
+Hooks.on("calendaria.noteUpdated", (stub) => {
+  console.log(`Updated: ${stub.name}`);
 });
 ```
 
 ### calendaria.noteDeleted
 
-Fired when a note is deleted.
+Fired when a calendar note is deleted.
+
+**Parameters:**
+- `pageId` (string) - Journal page ID
 
 ```javascript
 Hooks.on("calendaria.noteDeleted", (pageId) => {
@@ -266,14 +389,21 @@ Hooks.on("calendaria.noteDeleted", (pageId) => {
 
 ### calendaria.eventTriggered
 
-Fired when a scheduled event occurs.
+Fired when a scheduled event or reminder occurs.
+
+**Parameters:**
+- `data` (object)
+  - `id` (string) - Note/event ID
+  - `name` (string) - Event name
+  - `flagData` (object) - Event calendar data
+  - `currentDate` (object) - Current date components (events only)
+  - `reminderType` (string) - Reminder type (reminders only)
+  - `isReminder` (boolean) - True if this is a reminder
 
 ```javascript
 Hooks.on("calendaria.eventTriggered", (data) => {
   console.log(`Event: ${data.name}`);
-  if (data.isReminder) {
-    console.log("This is a reminder");
-  }
+  if (data.isReminder) console.log("This is a reminder");
 });
 ```
 
@@ -281,9 +411,15 @@ Hooks.on("calendaria.eventTriggered", (data) => {
 
 Fired when a multi-day event progresses to a new day.
 
+**Parameters:**
+- `data` (object)
+  - `id` (string) - Note ID
+  - `name` (string) - Event name
+  - `progress` (object) - Progress info (currentDay, totalDays, percentage, isFirstDay, isLastDay)
+
 ```javascript
 Hooks.on("calendaria.eventDayChanged", (data) => {
-  console.log(`Day ${data.progress} of event: ${data.name}`);
+  console.log(`Day ${data.progress.currentDay} of ${data.progress.totalDays}`);
 });
 ```
 
@@ -295,9 +431,17 @@ Hooks.on("calendaria.eventDayChanged", (data) => {
 
 Fired when weather changes.
 
+**Parameters:**
+- `data` (object)
+  - `previous` (object|null) - Previous weather state
+  - `current` (object|null) - Current weather state
+  - `remote` (boolean) - True if change originated from another client (optional)
+
 ```javascript
-Hooks.on("calendaria.weatherChange", (weather) => {
-  console.log(`Weather: ${weather.condition}, ${weather.temperature}°`);
+Hooks.on("calendaria.weatherChange", (data) => {
+  if (data.current) {
+    console.log(`Weather: ${data.current.id}`);
+  }
 });
 ```
 
@@ -309,15 +453,26 @@ Hooks.on("calendaria.weatherChange", (weather) => {
 
 Fired when a calendar import begins.
 
+**Parameters:**
+- `data` (object)
+  - `importerId` (string) - Importer ID
+  - `calendarId` (string) - Target calendar ID
+
 ```javascript
 Hooks.on("calendaria.importStarted", (data) => {
-  console.log(`Importing from ${data.importerId}`);
+  console.log(`Importing via ${data.importerId}`);
 });
 ```
 
 ### calendaria.importComplete
 
 Fired when import finishes successfully.
+
+**Parameters:**
+- `data` (object)
+  - `importerId` (string) - Importer ID
+  - `calendarId` (string) - Created calendar ID
+  - `calendar` (CalendariaCalendar) - Imported calendar
 
 ```javascript
 Hooks.on("calendaria.importComplete", (data) => {
@@ -329,6 +484,12 @@ Hooks.on("calendaria.importComplete", (data) => {
 
 Fired when import fails.
 
+**Parameters:**
+- `data` (object)
+  - `importerId` (string) - Importer ID
+  - `calendarId` (string) - Target calendar ID
+  - `error` (string) - Error message
+
 ```javascript
 Hooks.on("calendaria.importFailed", (data) => {
   console.error(`Import failed: ${data.error}`);
@@ -337,24 +498,17 @@ Hooks.on("calendaria.importFailed", (data) => {
 
 ---
 
-## Render Hooks
+## Display Hooks
 
-### calendaria.preRenderCalendar
+### calendaria.displayFormatsChanged
 
-Fired before the calendar renders. Can modify render data.
+Fired when display format settings are saved.
 
-```javascript
-Hooks.on("calendaria.preRenderCalendar", (app, data) => {
-  // Modify data before render
-});
-```
-
-### calendaria.renderCalendar
-
-Fired after the calendar renders.
+**Parameters:**
+- `newFormats` (object) - Updated display format configuration
 
 ```javascript
-Hooks.on("calendaria.renderCalendar", (app, html) => {
-  // Modify rendered HTML
+Hooks.on("calendaria.displayFormatsChanged", (newFormats) => {
+  console.log("Display formats updated");
 });
 ```

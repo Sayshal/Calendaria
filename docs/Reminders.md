@@ -1,119 +1,91 @@
 # Reminders
 
-Calendaria can notify you before scheduled events occur. Configure reminders to get alerts via toast notifications, chat messages, or dialog prompts.
+Calendaria notifies users before scheduled note events occur. Reminders are configured per-note and support three notification types.
 
-## Setting Up a Reminder
+## Configuration
 
-1. Create or edit a note
-2. Find the **Reminder** section
-3. Enable **Remind Before Event**
-4. Set the **Offset** (e.g., 30 minutes, 1 hour, 1 day)
-5. Choose the **Notification Type**
-6. Set the **Target** (who receives it)
+Reminders are configured in the note sheet under the **Reminder** fieldset:
 
----
+| Field | Description |
+|-------|-------------|
+| Offset | Minutes before the event to trigger the reminder (0 = disabled) |
+| Type | Notification method: toast, chat, or dialog |
+| Targets | Who receives the reminder |
+| Users | Specific user selection (when target is "specific") |
 
 ## Notification Types
 
 ### Toast
+Brief popup notification in the corner of the screen. Auto-dismisses after a few seconds.
 
-A brief popup notification in the corner of the screen.
+### Chat
+Message posted to the chat log with a link to open the note. Can be whispered to specific users based on target settings.
 
-- Non-intrusive
-- Auto-dismisses after a few seconds
-- Good for minor reminders
-
-### Chat Message
-
-A message posted to the chat log.
-
-- Permanent record
-- Can be whispered to specific users
-- Good for important events
+**Note:** If a note has `gmOnly: true`, chat reminders are always whispered to GM users regardless of the target setting.
 
 ### Dialog
+Modal dialog requiring acknowledgment. Includes "Open Note" and "Dismiss" buttons.
 
-A modal dialog that requires acknowledgment.
-
-- Most prominent
-- Includes **Snooze** option
-- Good for critical events
-
----
+**Note:** There is no snooze functionality.
 
 ## Target Options
 
-| Target | Description |
-|--------|-------------|
-| Everyone | All connected players see the reminder |
-| GM Only | Only GMs receive the notification |
-| Author Only | Only the note creator sees it |
-| Specific Users | Choose which players receive it |
+| Target | Recipients |
+|--------|------------|
+| `all` | All connected users |
+| `gm` | Only GM users |
+| `author` | Only the note creator |
+| `specific` | Manually selected users |
 
----
+## How Reminders Work
 
-## Snooze
+The `ReminderScheduler` class monitors world time and triggers reminders:
 
-When using dialog notifications, players can **Snooze** the reminder:
+1. Only runs on the GM client
+2. Checks for pending reminders every 5 minutes (300 seconds of game time)
+3. Compares current time against each note's start time minus the offset
+4. Fires reminders when the current time falls within the reminder window (after offset time, before event time)
+5. Tracks fired reminders per day to prevent duplicates
+6. Clears the fired reminders list when the date changes
 
-1. Click **Snooze** on the dialog
-2. Choose a snooze duration
-3. The reminder reappears after that time
+### Recurring Events
 
----
+For recurring notes (including those with conditions), the scheduler:
+- Checks if the event occurs today or tomorrow
+- For all-day events occurring tomorrow, triggers the reminder if current time is within the offset window from midnight
 
-## Reminder Scheduling
+### Silent Notes
 
-Reminders are checked when world time changes. The ReminderScheduler:
+Notes with `silent: true` are skipped by the reminder system.
 
-- Monitors world time with a 5-minute throttle
-- Fires reminders when the offset time is reached
-- Handles reminders that were missed (if time jumped forward)
+## Data Model Fields
 
----
+From `CalendarNoteDataModel`:
 
-## Examples
+```javascript
+reminderOffset: NumberField({ integer: true, min: 0, initial: 0 })
+reminderType: StringField({ choices: ['toast', 'chat', 'dialog'], initial: 'toast' })
+reminderTargets: StringField({ choices: ['all', 'gm', 'author', 'specific'], initial: 'all' })
+reminderUsers: ArrayField(StringField(), { initial: [] })
+```
 
-### Combat Preparation
+## Hook
 
-Remind the party 1 hour before a scheduled battle:
+When a reminder fires, the following hook is called:
 
-- Event: "Ambush at the bridge" at 14:00
-- Reminder: 1 hour before
-- Type: Chat message
-- Target: Everyone
+```javascript
+Hooks.callAll('calendaria.eventTriggered', {
+  id: note.id,
+  name: note.name,
+  flagData: note.flagData,
+  reminderType,
+  isReminder: true
+});
+```
 
-### GM Session Prep
+## Relevant Files
 
-Private reminder for the GM:
-
-- Event: "Introduce BBEG" at session start
-- Reminder: 30 minutes before
-- Type: Dialog
-- Target: GM Only
-
-### Recurring Reminders
-
-Combined with recurring events:
-
-- Event: "Weekly market day" every Starday
-- Reminder: 1 day before
-- Type: Toast
-- Target: Everyone
-
----
-
-## Troubleshooting
-
-### Reminders Not Firing
-
-1. Check that world time is advancing
-2. Verify the reminder is enabled on the note
-3. Ensure you're in the target group
-4. Check if time jumped past the reminder window
-
-### Too Many Reminders
-
-- Reduce reminder frequency
-- Use longer offsets
-- Target specific users instead of everyone
+- `scripts/time/reminder-scheduler.mjs` - Core reminder logic
+- `scripts/sheets/calendar-note-data-model.mjs` - Data schema
+- `scripts/sheets/calendar-note-sheet.mjs` - UI handling
+- `templates/sheets/calendar-note-form.hbs` - Form template

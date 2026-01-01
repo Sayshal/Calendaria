@@ -1,10 +1,124 @@
 # Macros
 
-Common macro examples for Calendaria automation.
+Calendaria supports macro automation through two mechanisms: **Trigger Configuration** and **Event-Attached Macros**.
 
-## Time Control
+---
 
-### Advance Time
+## Macro Triggers
+
+Configure macros to execute automatically when calendar events occur. Access via **Settings Panel > Macros** tab (GM only).
+
+### Global Triggers
+
+Time-based triggers that fire when thresholds are crossed:
+
+| Trigger | Description |
+|---------|-------------|
+| Dawn | Fires at sunrise |
+| Dusk | Fires at sunset |
+| Midday | Fires at noon (12:00) |
+| Midnight | Fires at midnight (00:00) |
+| New Day | Fires when the day changes |
+
+### Season Triggers
+
+Execute macros when seasons change. Options:
+- **Specific season**: Fires when entering that season
+- **All seasons**: Fires on any season change
+
+### Moon Phase Triggers
+
+Execute macros when moon phases change. Configure:
+- **Moon**: Specific moon or "All Moons"
+- **Phase**: Specific phase or "All Phases"
+
+Wildcard combinations allow broad triggers (e.g., "All Moons + Full Moon" fires for any full moon).
+
+---
+
+## Event-Attached Macros
+
+Calendar notes can have an attached macro that executes when the event triggers.
+
+### Trigger Conditions
+
+Macros attached to notes execute when:
+- The event's start time is reached
+- Multi-day events progress (fires daily with progress data)
+
+### Context Data
+
+Macros receive context via the `scope` parameter:
+
+```javascript
+// Event trigger context
+const { event } = scope;
+console.log(event.id);       // Note page ID
+console.log(event.name);     // Note name
+console.log(event.flagData); // Full note data (startDate, endDate, categories, etc.)
+
+// Multi-day progress context (if applicable)
+const { trigger, progress } = scope;
+if (trigger === 'multiDayProgress') {
+  console.log(progress.currentDay);  // Current day number
+  console.log(progress.totalDays);   // Total event duration
+  console.log(progress.percentage);  // Completion percentage
+  console.log(progress.isFirstDay);  // boolean
+  console.log(progress.isLastDay);   // boolean
+}
+```
+
+---
+
+## Global Trigger Context
+
+Macros executed via global triggers receive context data:
+
+### Time Threshold Triggers (dawn, dusk, midday, midnight)
+
+```javascript
+const { trigger, worldTime, components, calendar } = scope;
+console.log(trigger);      // "sunrise", "sunset", "midday", "midnight"
+console.log(worldTime);    // Current world time in seconds
+console.log(components);   // { year, month, dayOfMonth, hour, minute, ... }
+```
+
+### New Day Trigger
+
+```javascript
+const { trigger, previous, current, calendar } = scope;
+console.log(trigger);         // "newDay"
+console.log(previous.year);   // Previous year
+console.log(current.year);    // Current year
+```
+
+### Season Change Trigger
+
+```javascript
+const { trigger, previousSeason, currentSeason, calendar } = scope;
+console.log(trigger);          // "seasonChange"
+console.log(previousSeason);   // Previous season object { name, ... }
+console.log(currentSeason);    // Current season object { name, ... }
+```
+
+### Moon Phase Trigger
+
+```javascript
+const { trigger, moon } = scope;
+console.log(trigger);              // "moonPhaseChange"
+console.log(moon.moonIndex);       // Moon index
+console.log(moon.moonName);        // Moon name
+console.log(moon.previousPhaseIndex);
+console.log(moon.previousPhaseName);
+console.log(moon.currentPhaseIndex);
+console.log(moon.currentPhaseName);
+```
+
+---
+
+## Common Macro Examples
+
+### Time Control
 
 ```javascript
 // Advance 1 hour
@@ -16,250 +130,177 @@ await CALENDARIA.api.advanceTime({ hour: 8 });
 // Advance 1 day
 await CALENDARIA.api.advanceTime({ day: 1 });
 
-// Advance 1 week
-await CALENDARIA.api.advanceTime({ day: 7 });
+// Jump to specific date
+await CALENDARIA.api.jumpToDate({ year: 1492, month: 5, day: 15 });
+
+// Advance to next sunrise
+await CALENDARIA.api.advanceTimeToPreset('sunrise');
+
+// Advance to next sunset
+await CALENDARIA.api.advanceTimeToPreset('sunset');
 ```
 
-### Short Rest (1 hour)
+### Display Information
 
 ```javascript
-await CALENDARIA.api.advanceTime({ hour: 1 });
-ui.notifications.info("Short rest complete. 1 hour has passed.");
-```
-
-### Long Rest (8 hours)
-
-```javascript
-await CALENDARIA.api.advanceTime({ hour: 8 });
-ui.notifications.info("Long rest complete. 8 hours have passed.");
-```
-
-### Advance to Specific Time
-
-```javascript
-// Jump to 6:00 AM
-const now = CALENDARIA.api.getCurrentDateTime();
-let hoursToAdvance = 6 - now.hour;
-if (hoursToAdvance <= 0) hoursToAdvance += 24;
-await CALENDARIA.api.advanceTime({ hour: hoursToAdvance });
-```
-
----
-
-## Display Information
-
-### Show Current Date/Time
-
-```javascript
+// Show current date/time
 const now = CALENDARIA.api.getCurrentDateTime();
 const formatted = CALENDARIA.api.formatDate(now, 'datetime');
+ChatMessage.create({ content: `<b>Current Time:</b> ${formatted}` });
+
+// Show weather
+const weather = CALENDARIA.api.getCurrentWeather();
 ChatMessage.create({
-  content: `<b>Current Time:</b> ${formatted}`
+  content: `<b>Weather:</b> ${weather.label}, ${weather.temperature}`
 });
-```
 
-### Show Weather
-
-```javascript
-const weather = CALENDARIA.api.getWeather();
-ChatMessage.create({
-  content: `<b>Weather:</b> ${weather.condition}, ${weather.temperature}°`
-});
-```
-
-### Show Moon Phase
-
-```javascript
+// Show moon phase
 const phase = CALENDARIA.api.getMoonPhase(0);
-ChatMessage.create({
-  content: `<b>Moon:</b> ${phase.name}`
-});
-```
+ChatMessage.create({ content: `<b>Moon:</b> ${phase.name}` });
 
-### Show Season
-
-```javascript
+// Show season
 const season = CALENDARIA.api.getCurrentSeason();
-ChatMessage.create({
-  content: `<b>Season:</b> ${season.name}`
-});
+ChatMessage.create({ content: `<b>Season:</b> ${season.name}` });
 ```
 
----
-
-## Check Conditions
-
-### Is It Night?
+### Check Conditions
 
 ```javascript
-const now = CALENDARIA.api.getCurrentDateTime();
-const sunrise = CALENDARIA.api.getSunrise();
-const sunset = CALENDARIA.api.getSunset();
-
-const isNight = now.hour < sunrise || now.hour >= sunset;
+// Is it night?
+const isNight = CALENDARIA.api.isNighttime();
 ui.notifications.info(isNight ? "It is nighttime" : "It is daytime");
-```
 
-### Is It a Full Moon?
-
-```javascript
-const phase = CALENDARIA.api.getMoonPhase(0);
-if (phase.name.toLowerCase().includes("full")) {
-  ui.notifications.warn("The moon is full!");
+// Is it a rest day?
+if (CALENDARIA.api.isRestDay()) {
+  ui.notifications.info("Today is a rest day");
 }
-```
 
-### Is Today a Festival?
-
-```javascript
+// Is it a festival?
 if (CALENDARIA.api.isFestivalDay()) {
   const festival = CALENDARIA.api.getCurrentFestival();
   ui.notifications.info(`Today is ${festival.name}!`);
 }
 ```
 
----
-
-## Notes Management
-
-### Create a Quick Note
+### Notes Management
 
 ```javascript
+// Create a quick note
 const now = CALENDARIA.api.getCurrentDateTime();
 await CALENDARIA.api.createNote({
   name: "Session Note",
   content: "<p>Something important happened here.</p>",
-  startDate: { year: now.year, month: now.month, day: now.day },
+  startDate: { year: now.year, month: now.month, day: now.dayOfMonth },
   allDay: true
 });
-ui.notifications.info("Note created!");
-```
 
-### List Today's Events
-
-```javascript
-const now = CALENDARIA.api.getCurrentDateTime();
-const notes = await CALENDARIA.api.getNotesForDate(now.year, now.month, now.day);
-
-if (notes.length === 0) {
-  ui.notifications.info("No events today");
-} else {
+// Get today's events
+const notes = CALENDARIA.api.getNotesForDate(now.year, now.month, now.dayOfMonth);
+if (notes.length > 0) {
   const list = notes.map(n => n.name).join(", ");
   ui.notifications.info(`Today: ${list}`);
 }
 ```
 
----
-
-## Weather
-
-### Generate New Weather
+### Weather Control
 
 ```javascript
+// Set specific weather
+await CALENDARIA.api.setWeather("thunderstorm", { temperature: 55 });
+
+// Generate weather from climate zone
 await CALENDARIA.api.generateWeather();
-const weather = CALENDARIA.api.getWeather();
-ui.notifications.info(`New weather: ${weather.condition}`);
-```
 
-### Set Specific Weather
-
-```javascript
-// Options: clear, cloudy, rain, thunderstorm, snow, fog, etc.
-await CALENDARIA.api.setWeather("thunderstorm", 55);
-ui.notifications.info("A storm rolls in!");
+// Get forecast
+const forecast = await CALENDARIA.api.getWeatherForecast({ days: 7 });
 ```
 
 ---
 
-## Travel Time
+## Hooks
 
-### Travel by Distance
-
-```javascript
-// Calculate travel time (assuming 3 mph walking speed)
-const miles = 24;
-const speed = 3; // mph
-const hours = Math.ceil(miles / speed);
-
-await CALENDARIA.api.advanceTime({ hour: hours });
-ui.notifications.info(`Traveled ${miles} miles in ${hours} hours.`);
-```
-
-### Travel with Rest
+Listen for Calendaria events in world scripts or modules:
 
 ```javascript
-// 8 hours travel, 8 hours rest, repeat for days
-const travelDays = 3;
-for (let i = 0; i < travelDays; i++) {
-  await CALENDARIA.api.advanceTime({ hour: 8 }); // Travel
-  await CALENDARIA.api.advanceTime({ hour: 8 }); // Rest
-  await CALENDARIA.api.advanceTime({ hour: 8 }); // Downtime
-}
-ui.notifications.info(`${travelDays} days of travel complete.`);
-```
-
----
-
-## Dialog-Based Macros
-
-### Time Advance Dialog
-
-```javascript
-new Dialog({
-  title: "Advance Time",
-  content: `
-    <form>
-      <div class="form-group">
-        <label>Hours:</label>
-        <input type="number" name="hours" value="1" min="0">
-      </div>
-      <div class="form-group">
-        <label>Days:</label>
-        <input type="number" name="days" value="0" min="0">
-      </div>
-    </form>
-  `,
-  buttons: {
-    advance: {
-      label: "Advance",
-      callback: async (html) => {
-        const hours = parseInt(html.find('[name="hours"]').val()) || 0;
-        const days = parseInt(html.find('[name="days"]').val()) || 0;
-        await CALENDARIA.api.advanceTime({ hour: hours, day: days });
-        ui.notifications.info(`Advanced ${days} days, ${hours} hours`);
-      }
-    },
-    cancel: { label: "Cancel" }
-  }
-}).render(true);
-```
-
----
-
-## Hook-Based Automation
-
-### Announce Sunrise
-
-```javascript
-// Put this in a world script or always-on macro
-Hooks.on("calendaria.sunrise", () => {
-  ChatMessage.create({
-    content: "<b>The sun rises.</b> A new day begins."
-  });
+// Time thresholds
+Hooks.on("calendaria.sunrise", (data) => {
+  ChatMessage.create({ content: "<b>The sun rises.</b>" });
 });
-```
 
-### Full Moon Warning
+Hooks.on("calendaria.sunset", (data) => {
+  ChatMessage.create({ content: "<b>The sun sets.</b>" });
+});
 
-```javascript
+// Day/period changes
+Hooks.on("calendaria.dayChange", (data) => {
+  console.log("New day:", data.current);
+});
+
+Hooks.on("calendaria.seasonChange", (data) => {
+  console.log("Season changed to:", data.currentSeason?.name);
+});
+
+// Moon phases
 Hooks.on("calendaria.moonPhaseChange", (data) => {
   for (const moon of data.moons) {
-    if (moon.phase.toLowerCase().includes("full")) {
+    if (moon.currentPhaseName?.includes("Full")) {
       ChatMessage.create({
-        content: `<b>${moon.name} is full!</b> Beware the creatures of the night.`,
+        content: `<b>${moon.moonName} is full!</b>`,
         whisper: game.users.filter(u => u.isGM).map(u => u.id)
       });
     }
   }
 });
+
+// Events
+Hooks.on("calendaria.eventTriggered", (data) => {
+  console.log("Event triggered:", data.name);
+});
+
+Hooks.on("calendaria.weatherChange", (data) => {
+  console.log("Weather changed:", data);
+});
 ```
+
+### Available Hooks
+
+| Hook | Description |
+|------|-------------|
+| `calendaria.sunrise` | Sunrise threshold crossed |
+| `calendaria.sunset` | Sunset threshold crossed |
+| `calendaria.midnight` | Midnight threshold crossed |
+| `calendaria.midday` | Midday threshold crossed |
+| `calendaria.dayChange` | Day changed |
+| `calendaria.monthChange` | Month changed |
+| `calendaria.yearChange` | Year changed |
+| `calendaria.seasonChange` | Season changed |
+| `calendaria.moonPhaseChange` | Moon phase changed |
+| `calendaria.restDayChange` | Rest day status changed |
+| `calendaria.eventTriggered` | Calendar event triggered |
+| `calendaria.weatherChange` | Weather changed |
+| `calendaria.dateTimeChange` | Any time change |
+
+---
+
+## API Reference
+
+Access via `CALENDARIA.api`. See [API Reference](API-Reference.md) for full documentation.
+
+### Key Methods
+
+| Method | Description |
+|--------|-------------|
+| `getCurrentDateTime()` | Get current time components |
+| `advanceTime(delta)` | Advance time by delta |
+| `setDateTime(components)` | Set absolute time |
+| `jumpToDate(options)` | Jump to specific date |
+| `advanceTimeToPreset(preset)` | Advance to sunrise/sunset/midday/midnight |
+| `formatDate(components, format)` | Format date string |
+| `getMoonPhase(index)` | Get moon phase |
+| `getCurrentSeason()` | Get current season |
+| `getCurrentWeather()` | Get current weather |
+| `isDaytime()` / `isNighttime()` | Check time of day |
+| `isRestDay()` | Check if rest day |
+| `isFestivalDay()` | Check if festival |
+| `createNote(options)` | Create calendar note |
+| `getNotesForDate(y, m, d)` | Get notes on date |

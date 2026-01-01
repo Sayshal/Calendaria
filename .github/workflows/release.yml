@@ -58,6 +58,7 @@ jobs:
       run: |
         zip -r ${{ env.ZIP_NAME }} \
           assets/ \
+          calendars/ \
           lang/ \
           scripts/ \
           styles/ \
