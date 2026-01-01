@@ -9,7 +9,6 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { formatForLocation } from '../utils/format-utils.mjs';
-import { format, localize } from '../utils/localization.mjs';
 
 const ChatLog = foundry.applications.sidebar.tabs.ChatLog;
 

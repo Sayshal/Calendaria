@@ -11,7 +11,7 @@ import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 import { formatForLocation } from '../utils/format-utils.mjs';
-import { format, localize } from '../utils/localization.mjs';
+import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
@@ -730,17 +730,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     if (!calendar) return '';
     return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudDate');
-  }
-
-  /**
-   * Get ordinal suffix for a number.
-   * @param {number} n - Number
-   * @returns {string} Ordinal suffix (st, nd, rd, th)
-   */
-  #getOrdinalSuffix(n) {
-    const s = ['th', 'st', 'nd', 'rd'];
-    const v = n % 100;
-    return s[(v - 20) % 10] || s[v] || s[0];
   }
 
   /**

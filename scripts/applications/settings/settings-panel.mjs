@@ -10,7 +10,7 @@ import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
-import { COLOR_DEFINITIONS, COLOR_CATEGORIES, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, ThemePreset, applyCustomColors, applyPreset, getColorsByCategory, getCurrentColors } from '../../utils/theme-utils.mjs';
+import { COLOR_DEFINITIONS, COLOR_CATEGORIES, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
 import { CalendarApplication } from '../calendar-application.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
 import { CalendariaHUD } from '../calendaria-hud.mjs';

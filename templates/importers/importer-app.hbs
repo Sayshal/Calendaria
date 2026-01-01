@@ -1,229 +1,229 @@
 <div class="importer-content">
   {{#unless hasImporters}}
-    <div class="no-importers">
-      <i class="fas fa-exclamation-triangle"></i>
-      <p>{{localize "CALENDARIA.Importer.NoImportersAvailable"}}</p>
-    </div>
+  <div class="no-importers">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>{{localize "CALENDARIA.Importer.NoImportersAvailable"}}</p>
+  </div>
   {{else}}
 
-    <div class="importer-grid">
+  <div class="importer-grid">
 
-      <div class="importer-left">
-        <fieldset class="source-section">
-          <legend>
-            <i class="fas fa-database"></i>
-            {{localize "CALENDARIA.Importer.SelectSource"}}
-          </legend>
-          <div class="form-group">
-            <div class="form-fields">
-              <select name="importerId">
-                <option value="">{{localize "CALENDARIA.Importer.ChooseSource"}}</option>
-                {{#each importers}}
-                  <option value="{{this.value}}" {{#if (eq
-                                this.value
-                                ..
-                            /selectedImporterId)}}selected{{/if}}>
-                    {{localize this.label}}{{#if this.detected}} ✓{{/if}}
-                  </option>
-                {{/each}}
-              </select>
-            </div>
-          </div>
-
-          {{#if selectedImporter}}
-            {{#if selectedImporter.description}}
-              <p class="importer-description hint">{{localize selectedImporter.description}}</p>
-            {{/if}}
-
-            {{#if canUpload}}
-              <div class="file-upload-zone {{#if loadedFileName}}has-file{{/if}}" data-action="uploadFile">
-                {{#if loadedFileName}}
-                  <i class="fas fa-file"></i>
-                  <span class="file-name">{{loadedFileName}}</span>
-                  <button type="button" class="clear-file" data-action="clearData"
-                    data-tooltip="{{localize 'CALENDARIA.Importer.ClearFile'}}">
-                    <i class="fas fa-times"></i>
-                  </button>
-                {{else}}
-                  <i class="fas fa-cloud-upload-alt"></i>
-                  <span>{{localize "CALENDARIA.Importer.DropFileHere"}}</span>
-                {{/if}}
-                <input type="file" accept="{{fileExtensions}}" style="display: none;">
-              </div>
-            {{/if}}
-
-            {{#if canImportFromModule}}
-              {{#if loadedFromModule}}
-                <div class="module-loaded">
-                  <i class="fas fa-plug"></i>
-                  <span>{{localize "CALENDARIA.Importer.LoadedFromModule"}}</span>
-                  <button type="button" class="clear-module" data-action="clearData"
-                    data-tooltip="{{localize 'CALENDARIA.Importer.Preview.ClearData'}}">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              {{else}}
-                <button type="button" class="import-from-module" data-action="importFromModule">
-                  <i class="fas fa-plug"></i>
-                  {{localize "CALENDARIA.Importer.ImportFromModule"}}
-                </button>
-              {{/if}}
-            {{/if}}
-          {{/if}}
-        </fieldset>
-
-        {{#if errorMessage}}
-          <div class="import-error">
-            <i class="fas fa-exclamation-circle"></i>
-            <span>{{errorMessage}}</span>
-          </div>
-        {{/if}}
-
-        {{#if hasData}}
-          <fieldset class="preview-section">
-            <legend>
-              <i class="fas fa-eye"></i>
-              {{localize "CALENDARIA.Common.Preview"}}
-            </legend>
-
-            <div class="preview-header">{{previewData.name}}</div>
-            <div class="preview-grid">
-              <div class="preview-item">
-                <span class="preview-value">{{previewData.weekdayCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Common.Weekdays"}}</span>
-              </div>
-              <div class="preview-item">
-                <span class="preview-value">{{previewData.monthCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Common.Months"}}</span>
-              </div>
-              <div class="preview-item">
-                <span class="preview-value">{{previewData.moonCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Common.Moons"}}</span>
-              </div>
-              <div class="preview-item">
-                <span class="preview-value">{{previewData.seasonCount}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Common.Seasons"}}</span>
-              </div>
-              <div class="preview-item">
-                <span class="preview-value">{{previewData.daysPerYear}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.DaysPerYear"}}</span>
-              </div>
-              <div class="preview-item">
-                <span class="preview-value">{{previewData.currentDate}}</span>
-                <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.CurrentDate"}}</span>
-              </div>
-            </div>
-
-            {{#if previewData.undatedCount}}
-              <div class="undated-notice">
-                <i class="fas fa-book"></i>
-                <span>{{localize "CALENDARIA.Importer.Preview.UndatedEvents" count=previewData.undatedCount}}</span>
-              </div>
-            {{/if}}
-          </fieldset>
-
-          <fieldset class="import-options">
-            <legend>
-              <i class="fas fa-cog"></i>
-              {{localize "CALENDARIA.Importer.Options.Title"}}
-            </legend>
-
-            <div class="form-group slim">
-              <label>{{localize "CALENDARIA.Importer.Options.CalendarId"}}</label>
-              <div class="form-fields">
-                <span class="id-prefix">{{localize 'CALENDARIA.Importer.Options.IdPrefix'}}</span>
-                <input type="text" name="calendarId" value="{{suggestedId}}" placeholder="{{suggestedId}}">
-              </div>
-            </div>
-
-            <div class="form-group slim">
-              <label>{{localize "CALENDARIA.Importer.Options.CalendarName"}}</label>
-              <div class="form-fields">
-                <input type="text" name="calendarName" value="{{previewData.name}}" placeholder="{{previewData.name}}">
-              </div>
-            </div>
-          </fieldset>
-        {{/if}}
-      </div>
-
-      <div class="importer-right">
-        {{#if extractedNotes.length}}
-          <fieldset class="note-selection">
-            <legend>
-              <i class="fas fa-sticky-note"></i>
-              {{localize "CALENDARIA.Importer.Notes.Title"}}
-              <span class="note-count">({{extractedNotes.length}})</span>
-            </legend>
-
-            <div class="note-bulk-actions">
-              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="skip"
-                data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllSkip'}}">
-                <i class="fas fa-ban"></i>
-              </button>
-              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="festival"
-                data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllFestival'}}">
-                <i class="fas fa-star"></i>
-              </button>
-              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="note"
-                data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllNote'}}">
-                <i class="fas fa-sticky-note"></i>
-              </button>
-            </div>
-
-            <div class="note-selection-table">
-              <div class="note-row header">
-                <span class="note-name">{{localize "CALENDARIA.Common.Name"}}</span>
-                <span class="note-date">{{localize "CALENDARIA.Common.Date"}}</span>
-                <span class="note-radios">
-                  <i class="fas fa-ban" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Skip'}}"></i>
-                  <i class="fas fa-star" data-tooltip="{{localize 'CALENDARIA.Common.Festival'}}"></i>
-                  <i class="fas fa-sticky-note" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Note'}}"></i>
-                </span>
-              </div>
-              {{#each extractedNotes}}
-                <div class="note-row">
-                  <span class="note-name" data-tooltip="{{this.name}}">{{this.name}}</span>
-                  <span class="note-date">{{this.displayDate}}</span>
-                  <span class="note-radios">
-                    <input type="radio" name="noteType[{{@index}}]" value="skip"
-                      {{#unless this.suggestedType}}checked{{/unless}}
-                      {{#if (eq this.suggestedType "skip")}}checked{{/if}} />
-                    <input type="radio" name="noteType[{{@index}}]" value="festival" {{#if (eq
-                                this.suggestedType
-                                "festival")}}checked{{/if}} />
-                    <input type="radio" name="noteType[{{@index}}]" value="note" {{#if (eq
-                                this.suggestedType
-                                "note")}}checked{{/if}} />
-                  </span>
-                </div>
+    <div class="importer-left">
+      <fieldset class="source-section">
+        <legend>
+          <i class="fas fa-database"></i>
+          {{localize "CALENDARIA.Importer.SelectSource"}}
+        </legend>
+        <div class="form-group">
+          <div class="form-fields">
+            <select name="importerId">
+              <option value="">{{localize "CALENDARIA.Importer.ChooseSource"}}</option>
+              {{#each importers}}
+              <option value="{{this.value}}" {{#if (eq
+                this.value
+                ..
+              /selectedImporterId)}}selected{{/if}}>
+                {{localize this.label}}{{#if this.detected}} ✓{{/if}}
+              </option>
               {{/each}}
-            </div>
-          </fieldset>
-        {{else if hasData}}
-          <div class="no-notes">
-            <i class="fas fa-sticky-note"></i>
-            <p>{{localize "CALENDARIA.Importer.Notes.NoNotes"}}</p>
+            </select>
           </div>
-        {{else}}
-          <div class="no-notes">
-            <i class="fas fa-arrow-left"></i>
-            <p>{{localize "CALENDARIA.Importer.SelectSourceFirst"}}</p>
-          </div>
+        </div>
+
+        {{#if selectedImporter}}
+        {{#if selectedImporter.description}}
+        <p class="importer-description hint">{{localize selectedImporter.description}}</p>
         {{/if}}
+
+        {{#if canUpload}}
+        <div class="file-upload-zone {{#if loadedFileName}}has-file{{/if}}" data-action="uploadFile">
+          {{#if loadedFileName}}
+          <i class="fas fa-file"></i>
+          <span class="file-name">{{loadedFileName}}</span>
+          <button type="button" class="clear-file" data-action="clearData"
+            data-tooltip="{{localize 'CALENDARIA.Importer.ClearFile'}}">
+            <i class="fas fa-times"></i>
+          </button>
+          {{else}}
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>{{localize "CALENDARIA.Importer.DropFileHere"}}</span>
+          {{/if}}
+          <input type="file" accept="{{fileExtensions}}" style="display: none;">
+        </div>
+        {{/if}}
+
+        {{#if canImportFromModule}}
+        {{#if loadedFromModule}}
+        <div class="module-loaded">
+          <i class="fas fa-plug"></i>
+          <span>{{localize "CALENDARIA.Importer.LoadedFromModule"}}</span>
+          <button type="button" class="clear-module" data-action="clearData"
+            data-tooltip="{{localize 'CALENDARIA.Importer.Preview.ClearData'}}">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {{else}}
+        <button type="button" class="import-from-module" data-action="importFromModule">
+          <i class="fas fa-plug"></i>
+          {{localize "CALENDARIA.Importer.ImportFromModule"}}
+        </button>
+        {{/if}}
+        {{/if}}
+        {{/if}}
+      </fieldset>
+
+      {{#if errorMessage}}
+      <div class="import-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{errorMessage}}</span>
       </div>
+      {{/if}}
+
+      {{#if hasData}}
+      <fieldset class="preview-section">
+        <legend>
+          <i class="fas fa-eye"></i>
+          {{localize "CALENDARIA.Common.Preview"}}
+        </legend>
+
+        <div class="preview-header">{{previewData.name}}</div>
+        <div class="preview-grid">
+          <div class="preview-item">
+            <span class="preview-value">{{previewData.weekdayCount}}</span>
+            <span class="preview-label">{{localize "CALENDARIA.Common.Weekdays"}}</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-value">{{previewData.monthCount}}</span>
+            <span class="preview-label">{{localize "CALENDARIA.Common.Months"}}</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-value">{{previewData.moonCount}}</span>
+            <span class="preview-label">{{localize "CALENDARIA.Common.Moons"}}</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-value">{{previewData.seasonCount}}</span>
+            <span class="preview-label">{{localize "CALENDARIA.Common.Seasons"}}</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-value">{{previewData.daysPerYear}}</span>
+            <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.DaysPerYear"}}</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-value">{{previewData.currentDate}}</span>
+            <span class="preview-label">{{localize "CALENDARIA.Importer.Preview.CurrentDate"}}</span>
+          </div>
+        </div>
+
+        {{#if previewData.undatedCount}}
+        <div class="undated-notice">
+          <i class="fas fa-book"></i>
+          <span>{{localize "CALENDARIA.Importer.Preview.UndatedEvents" count=previewData.undatedCount}}</span>
+        </div>
+        {{/if}}
+      </fieldset>
+
+      <fieldset class="import-options">
+        <legend>
+          <i class="fas fa-cog"></i>
+          {{localize "CALENDARIA.Importer.Options.Title"}}
+        </legend>
+
+        <div class="form-group slim">
+          <label>{{localize "CALENDARIA.Importer.Options.CalendarId"}}</label>
+          <div class="form-fields">
+            <span class="id-prefix">{{localize 'CALENDARIA.Importer.Options.IdPrefix'}}</span>
+            <input type="text" name="calendarId" value="{{suggestedId}}" placeholder="{{suggestedId}}">
+          </div>
+        </div>
+
+        <div class="form-group slim">
+          <label>{{localize "CALENDARIA.Importer.Options.CalendarName"}}</label>
+          <div class="form-fields">
+            <input type="text" name="calendarName" value="{{previewData.name}}" placeholder="{{previewData.name}}">
+          </div>
+        </div>
+      </fieldset>
+      {{/if}}
     </div>
 
-    {{#if hasData}}
-      <footer class="form-footer">
-        {{#each buttons}}
-          <button type="{{this.type}}" {{#if this.action}}data-action="{{this.action}}" {{/if}}
-            {{#if this.disabled}}disabled{{/if}}>
-            {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
-            {{localize this.label}}
+    <div class="importer-right">
+      {{#if extractedNotes.length}}
+      <fieldset class="note-selection">
+        <legend>
+          <i class="fas fa-sticky-note"></i>
+          {{localize "CALENDARIA.Importer.Notes.Title"}}
+          <span class="note-count">({{extractedNotes.length}})</span>
+        </legend>
+
+        <div class="note-bulk-actions">
+          <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="skip"
+            data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllSkip'}}">
+            <i class="fas fa-ban"></i>
           </button>
-        {{/each}}
-      </footer>
-    {{/if}}
+          <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="festival"
+            data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllFestival'}}">
+            <i class="fas fa-star"></i>
+          </button>
+          <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="note"
+            data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllNote'}}">
+            <i class="fas fa-sticky-note"></i>
+          </button>
+        </div>
+
+        <div class="note-selection-table">
+          <div class="note-row header">
+            <span class="note-name">{{localize "CALENDARIA.Common.Name"}}</span>
+            <span class="note-date">{{localize "CALENDARIA.Common.Date"}}</span>
+            <span class="note-radios">
+              <i class="fas fa-ban" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Skip'}}"></i>
+              <i class="fas fa-star" data-tooltip="{{localize 'CALENDARIA.Common.Festival'}}"></i>
+              <i class="fas fa-sticky-note" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Note'}}"></i>
+            </span>
+          </div>
+          {{#each extractedNotes}}
+          <div class="note-row">
+            <span class="note-name" data-tooltip="{{this.name}}">{{this.name}}</span>
+            <span class="note-date">{{this.displayDate}}</span>
+            <span class="note-radios">
+              <input type="radio" name="noteType[{{@index}}]" value="skip"
+                {{#unless this.suggestedType}}checked{{/unless}}
+                      {{#if (eq this.suggestedType "skip")}}checked{{/if}} />
+              <input type="radio" name="noteType[{{@index}}]" value="festival" {{#if (eq
+                this.suggestedType
+                "festival")}}checked{{/if}} />
+              <input type="radio" name="noteType[{{@index}}]" value="note" {{#if (eq
+                this.suggestedType
+                "note")}}checked{{/if}} />
+            </span>
+          </div>
+          {{/each}}
+        </div>
+      </fieldset>
+      {{else if hasData}}
+      <div class="no-notes">
+        <i class="fas fa-sticky-note"></i>
+        <p>{{localize "CALENDARIA.Importer.Notes.NoNotes"}}</p>
+      </div>
+      {{else}}
+      <div class="no-notes">
+        <i class="fas fa-arrow-left"></i>
+        <p>{{localize "CALENDARIA.Importer.SelectSourceFirst"}}</p>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+
+  {{#if hasData}}
+  <footer class="form-footer">
+    {{#each buttons}}
+    <button type="{{this.type}}" {{#if this.action}}data-action="{{this.action}}" {{/if}}
+            {{#if this.disabled}}disabled{{/if}}>
+      {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
+      {{localize this.label}}
+    </button>
+    {{/each}}
+  </footer>
+  {{/if}}
 
   {{/unless}}
 </div>

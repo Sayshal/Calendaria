@@ -1,66 +1,66 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}</legend>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}</legend>
 
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
-        <div class="form-fields">
-          <select name="temperatureUnit">
-            {{#each temperatureUnitOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.TemperatureUnit.Hint"}}</p>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
+      <div class="form-fields">
+        <select name="temperatureUnit">
+          {{#each temperatureUnitOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
       </div>
-    </fieldset>
+      <p class="hint">{{localize "CALENDARIA.Settings.TemperatureUnit.Hint"}}</p>
+    </div>
+  </fieldset>
   {{/if}}
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Climate"}}</p>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Climate"}}</p>
 
-      <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>{{localize "CALENDARIA.SettingsPanel.Climate.EditorInfo"}}</p>
-      </div>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.Climate.EditorInfo"}}</p>
+    </div>
 
-      <div class="form-group stacked button-row">
-        <button type="button" data-action="openCalendarEditor">
-          <i class="fas fa-cloud-sun"></i>
-          {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
-        </button>
-      </div>
-    </fieldset>
+    <div class="form-group stacked button-row">
+      <button type="button" data-action="openCalendarEditor">
+        <i class="fas fa-cloud-sun"></i>
+        {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
+      </button>
+    </div>
+  </fieldset>
   {{/if}}
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
 
-      {{#if customWeatherPresets.length}}
-        <p class="hint section-hint">
-          {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Count" count=customWeatherPresets.length}}
-        </p>
-      {{else}}
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.None"}}</p>
-      {{/if}}
+    {{#if customWeatherPresets.length}}
+    <p class="hint section-hint">
+      {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Count" count=customWeatherPresets.length}}
+    </p>
+    {{else}}
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.None"}}</p>
+    {{/if}}
 
-      <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.EditorInfo"}}</p>
-      </div>
-    </fieldset>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.EditorInfo"}}</p>
+    </div>
+  </fieldset>
   {{/if}}
 
   {{#unless isGM}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.WeatherTab.PlayerMessage"}}</p>
-    </div>
+  <div class="info-box">
+    <i class="fas fa-info-circle"></i>
+    <p>{{localize "CALENDARIA.SettingsPanel.WeatherTab.PlayerMessage"}}</p>
+  </div>
   {{/unless}}
 
 </section>

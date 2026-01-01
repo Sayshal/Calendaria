@@ -7,7 +7,7 @@
     <label>{{localize "CALENDARIA.Common.Month"}}</label>
     <select name="month" id="month-select">
       {{#each months}}
-        <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+      <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
       {{/each}}
     </select>
   </div>
@@ -15,7 +15,7 @@
     <label>{{localize "CALENDARIA.Common.Day"}}</label>
     <select name="day" id="day-select">
       {{#each days}}
-        <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>
+      <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>
       {{/each}}
     </select>
   </div>

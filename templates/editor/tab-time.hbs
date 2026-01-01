@@ -88,7 +88,7 @@
       <div class="form-fields solstice-fields">
         <select name="daylight.winterSolsticeMonth">
           {{#each winterSolsticeMonthOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
         <input type="number" name="daylight.winterSolsticeDay" value="{{winterSolsticeDay}}" min="1" max="31" step="1">
@@ -101,7 +101,7 @@
       <div class="form-fields solstice-fields">
         <select name="daylight.summerSolsticeMonth">
           {{#each summerSolsticeMonthOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
         <input type="number" name="daylight.summerSolsticeDay" value="{{summerSolsticeDay}}" min="1" max="31" step="1">
@@ -136,50 +136,50 @@
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.CanonicalHours"}}</p>
 
     {{#if canonicalHoursWithNav.length}}
-      <div class="items-list canonical-hours-list">
-        <div class="list-header flexrow">
-          <span class="col-name"
-            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourName'}}">{{localize "CALENDARIA.Common.Name"}}</span>
-          <span class="col-abbr"
-            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
-          <span class="col-start"
-            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourStart'}}">{{localize "CALENDARIA.Editor.Field.CanonicalHourStart"}}</span>
-          <span class="col-end"
-            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourEnd'}}">{{localize "CALENDARIA.Editor.Field.CanonicalHourEnd"}}</span>
-          <span class="col-controls"></span>
+    <div class="items-list canonical-hours-list">
+      <div class="list-header flexrow">
+        <span class="col-name"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourName'}}">{{localize "CALENDARIA.Common.Name"}}</span>
+        <span class="col-abbr"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
+        <span class="col-start"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourStart'}}">{{localize "CALENDARIA.Editor.Field.CanonicalHourStart"}}</span>
+        <span class="col-end"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CanonicalHourEnd'}}">{{localize "CALENDARIA.Editor.Field.CanonicalHourEnd"}}</span>
+        <span class="col-controls"></span>
+      </div>
+
+      {{#each canonicalHoursWithNav}}
+      <div class="item canonical-hour-item flexrow" data-index="{{this.index}}">
+        <input type="text" name="canonicalHours.{{this.index}}.name" value="{{this.name}}" class="col-name">
+        <input type="text" name="canonicalHours.{{this.index}}.abbreviation" value="{{this.abbreviation}}"
+          class="col-abbr">
+        <input type="number" name="canonicalHours.{{this.index}}.startHour" value="{{this.startHour}}" min="0"
+          max="23" class="col-start">
+        <input type="number" name="canonicalHours.{{this.index}}.endHour" value="{{this.endHour}}" min="0" max="23"
+          class="col-end">
+
+        <div class="item-controls col-controls">
+          <button type="button" data-action="addCanonicalHour" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Editor.AddCanonicalHour'}}">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button type="button" data-action="removeCanonicalHour" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
+            <i class="fas fa-minus"></i>
+          </button>
         </div>
-
-        {{#each canonicalHoursWithNav}}
-          <div class="item canonical-hour-item flexrow" data-index="{{this.index}}">
-            <input type="text" name="canonicalHours.{{this.index}}.name" value="{{this.name}}" class="col-name">
-            <input type="text" name="canonicalHours.{{this.index}}.abbreviation" value="{{this.abbreviation}}"
-              class="col-abbr">
-            <input type="number" name="canonicalHours.{{this.index}}.startHour" value="{{this.startHour}}" min="0"
-              max="23" class="col-start">
-            <input type="number" name="canonicalHours.{{this.index}}.endHour" value="{{this.endHour}}" min="0" max="23"
-              class="col-end">
-
-            <div class="item-controls col-controls">
-              <button type="button" data-action="addCanonicalHour" data-index="{{this.index}}"
-                data-tooltip="{{localize 'CALENDARIA.Editor.AddCanonicalHour'}}">
-                <i class="fas fa-plus"></i>
-              </button>
-              <button type="button" data-action="removeCanonicalHour" data-index="{{this.index}}"
-                data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
-                <i class="fas fa-minus"></i>
-              </button>
-            </div>
-          </div>
-        {{/each}}
       </div>
+      {{/each}}
+    </div>
     {{else}}
-      <div class="empty-list">
-        <p>{{localize "CALENDARIA.Editor.NoCanonicalHours"}}</p>
-        <button type="button" data-action="addCanonicalHour" data-index="-1">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.Editor.AddCanonicalHour"}}
-        </button>
-      </div>
+    <div class="empty-list">
+      <p>{{localize "CALENDARIA.Editor.NoCanonicalHours"}}</p>
+      <button type="button" data-action="addCanonicalHour" data-index="-1">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.Editor.AddCanonicalHour"}}
+      </button>
+    </div>
     {{/if}}
   </fieldset>
 

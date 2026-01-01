@@ -11,7 +11,7 @@ import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import SearchManager from './search/search-manager.mjs';
-import { formatCustom, PRESET_FORMATTERS, timeSince, getAvailableTokens, DEFAULT_FORMAT_PRESETS } from './utils/format-utils.mjs';
+import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, timeSince } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
@@ -355,10 +355,8 @@ export const CalendariaAPI = {
    * @returns {string} Relative time string (e.g., "3 days ago", "in 2 weeks")
    */
   timeSince(targetDate, currentDate = null) {
-    const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return '';
     currentDate = currentDate || game.time.components;
-    return timeSince(calendar, targetDate, currentDate);
+    return timeSince(targetDate, currentDate);
   },
 
   /**

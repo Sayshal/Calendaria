@@ -6,7 +6,7 @@
     <div class="form-fields">
       <select name="seasons.type" class="season-type-select">
         {{#each seasonTypeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+        <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
         {{/each}}
       </select>
     </div>
@@ -14,81 +14,81 @@
   </div>
 
   {{#if isPeriodic}}
-    <div class="form-group season-offset-group">
-      <label>{{localize "CALENDARIA.Editor.Season.OffsetLabel"}}</label>
-      <div class="form-fields">
-        <input type="number" name="seasons.offset" value="{{seasonOffset}}" min="0" class="season-offset-input">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.SeasonOffset"}}</p>
+  <div class="form-group season-offset-group">
+    <label>{{localize "CALENDARIA.Editor.Season.OffsetLabel"}}</label>
+    <div class="form-fields">
+      <input type="number" name="seasons.offset" value="{{seasonOffset}}" min="0" class="season-offset-input">
     </div>
+    <p class="hint">{{localize "CALENDARIA.Editor.Hint.SeasonOffset"}}</p>
+  </div>
   {{/if}}
 
   {{#if seasonsWithNav.length}}
-    <div class="items-list seasons-list">
-      {{#each seasonsWithNav}}
-        <div class="item season-item" data-index="{{this.index}}">
-          <div class="season-row-top flexrow">
-            <input type="text" name="seasons.{{this.index}}.name" value="{{this.name}}" class="col-name"
-              placeholder="{{localize 'CALENDARIA.Common.Name'}}">
-            <input type="text" name="seasons.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr"
-              placeholder="{{localize 'CALENDARIA.Common.Abbreviation'}}">
-            <input type="text" name="seasons.{{this.index}}.icon" value="{{this.icon}}" placeholder="fas fa-leaf"
-              class="col-icon">
-            <input type="color" name="seasons.{{this.index}}.color" value="{{this.color}}" class="col-color">
-            <div class="item-controls col-controls">
-              <button type="button" data-action="addSeason" data-index="{{this.index}}"
-                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddSeason'}}">
-                <i class="fas fa-plus"></i>
-              </button>
-            </div>
-          </div>
-          {{#if ../isPeriodic}}
-            <div class="season-row-bottom flexrow periodic-row">
-              <label class="col-duration-label">{{localize "CALENDARIA.Editor.Column.Duration"}}</label>
-              <input type="number" name="seasons.{{this.index}}.duration" value="{{this.duration}}" min="1"
-                placeholder="91" class="col-duration">
-              <span class="duration-unit">{{localize "CALENDARIA.Editor.Season.DurationUnit"}}</span>
-              <div class="item-controls col-controls">
-                <button type="button" data-action="removeSeason" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-            </div>
-          {{else}}
-            <div class="season-row-bottom flexrow">
-              <select name="seasons.{{this.index}}.monthStart" class="col-start-month">
-                {{#each this.startMonthOptions}}
-                  <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                {{/each}}
-              </select>
-              <input type="number" name="seasons.{{this.index}}.dayStart" value="{{this.displayStartDay}}" min="1"
-                placeholder="{{localize 'CALENDARIA.Common.Day'}}" class="col-start-day">
-              <select name="seasons.{{this.index}}.monthEnd" class="col-end-month">
-                {{#each this.endMonthOptions}}
-                  <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                {{/each}}
-              </select>
-              <input type="number" name="seasons.{{this.index}}.dayEnd" value="{{this.displayEndDay}}" min="1"
-                placeholder="{{localize 'CALENDARIA.Common.Day'}}" class="col-end-day">
-              <div class="item-controls col-controls">
-                <button type="button" data-action="removeSeason" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-            </div>
-          {{/if}}
+  <div class="items-list seasons-list">
+    {{#each seasonsWithNav}}
+    <div class="item season-item" data-index="{{this.index}}">
+      <div class="season-row-top flexrow">
+        <input type="text" name="seasons.{{this.index}}.name" value="{{this.name}}" class="col-name"
+          placeholder="{{localize 'CALENDARIA.Common.Name'}}">
+        <input type="text" name="seasons.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr"
+          placeholder="{{localize 'CALENDARIA.Common.Abbreviation'}}">
+        <input type="text" name="seasons.{{this.index}}.icon" value="{{this.icon}}" placeholder="fas fa-leaf"
+          class="col-icon">
+        <input type="color" name="seasons.{{this.index}}.color" value="{{this.color}}" class="col-color">
+        <div class="item-controls col-controls">
+          <button type="button" data-action="addSeason" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddSeason'}}">
+            <i class="fas fa-plus"></i>
+          </button>
         </div>
-      {{/each}}
+      </div>
+      {{#if ../isPeriodic}}
+      <div class="season-row-bottom flexrow periodic-row">
+        <label class="col-duration-label">{{localize "CALENDARIA.Editor.Column.Duration"}}</label>
+        <input type="number" name="seasons.{{this.index}}.duration" value="{{this.duration}}" min="1"
+          placeholder="91" class="col-duration">
+        <span class="duration-unit">{{localize "CALENDARIA.Editor.Season.DurationUnit"}}</span>
+        <div class="item-controls col-controls">
+          <button type="button" data-action="removeSeason" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
+      {{else}}
+      <div class="season-row-bottom flexrow">
+        <select name="seasons.{{this.index}}.monthStart" class="col-start-month">
+          {{#each this.startMonthOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+        <input type="number" name="seasons.{{this.index}}.dayStart" value="{{this.displayStartDay}}" min="1"
+          placeholder="{{localize 'CALENDARIA.Common.Day'}}" class="col-start-day">
+        <select name="seasons.{{this.index}}.monthEnd" class="col-end-month">
+          {{#each this.endMonthOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+        <input type="number" name="seasons.{{this.index}}.dayEnd" value="{{this.displayEndDay}}" min="1"
+          placeholder="{{localize 'CALENDARIA.Common.Day'}}" class="col-end-day">
+        <div class="item-controls col-controls">
+          <button type="button" data-action="removeSeason" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
+      {{/if}}
     </div>
+    {{/each}}
+  </div>
   {{else}}
-    <div class="empty-list">
-      <p>{{localize "CALENDARIA.Editor.NoSeasons"}}</p>
-      <button type="button" data-action="addSeason" data-index="-1">
-        <i class="fas fa-plus"></i>
-        {{localize "CALENDARIA.Editor.AddSeason"}}
-      </button>
-    </div>
+  <div class="empty-list">
+    <p>{{localize "CALENDARIA.Editor.NoSeasons"}}</p>
+    <button type="button" data-action="addSeason" data-index="-1">
+      <i class="fas fa-plus"></i>
+      {{localize "CALENDARIA.Editor.AddSeason"}}
+    </button>
+  </div>
   {{/if}}
 </section>

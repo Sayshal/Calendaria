@@ -418,6 +418,12 @@ export function formatCustom(calendar, components, formatStr) {
 /*  Helper Functions for Custom Tokens          */
 /* -------------------------------------------- */
 
+/**
+ * Get moon phase name for the given date.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @returns {string} Moon phase name
+ */
 function getMoonPhaseName(calendar, components) {
   const { year, month, dayOfMonth } = components;
   if (!calendar?.moons?.length) return '';
@@ -434,6 +440,12 @@ function getMoonPhaseName(calendar, components) {
   return phase ? localize(phase.name) : '';
 }
 
+/**
+ * Get moon phase icon for the given date.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @returns {string} Moon phase icon
+ */
 function getMoonPhaseIcon(calendar, components) {
   const { year, month, dayOfMonth } = components;
   if (!calendar?.moons?.length) return '';
@@ -450,6 +462,12 @@ function getMoonPhaseIcon(calendar, components) {
   return phase?.icon || '';
 }
 
+/**
+ * Get canonical hour name for the given time.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Time components
+ * @returns {string} Canonical hour name
+ */
 function getCanonicalHour(calendar, components) {
   const { hour = 0 } = components;
   if (!calendar?.canonicalHours?.length) return '';
@@ -461,6 +479,12 @@ function getCanonicalHour(calendar, components) {
   return '';
 }
 
+/**
+ * Get canonical hour abbreviation for the given time.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Time components
+ * @returns {string} Canonical hour abbreviation
+ */
 function getCanonicalHourAbbr(calendar, components) {
   const { hour = 0 } = components;
   if (!calendar?.canonicalHours?.length) return '';
@@ -472,6 +496,12 @@ function getCanonicalHourAbbr(calendar, components) {
   return '';
 }
 
+/**
+ * Get cycle name for the given year.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @returns {string} Cycle name
+ */
 function getCycleName(calendar, components) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
@@ -482,6 +512,12 @@ function getCycleName(calendar, components) {
   return localize(cycle.names[cycleIndex]);
 }
 
+/**
+ * Get cycle year number for the given year.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @returns {number|string} Cycle year number
+ */
 function getCycleYear(calendar, components) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
@@ -645,7 +681,7 @@ export function formatForLocation(calendar, components, locationId) {
 
 /**
  * Get all display location definitions with labels.
- * @returns {Array<{id: string, label: string, category: string}>}
+ * @returns {Array<{id: string, label: string, category: string}>} Array of location definitions
  */
 export function getDisplayLocationDefinitions() {
   return [
@@ -664,12 +700,11 @@ export function getDisplayLocationDefinitions() {
 
 /**
  * Get relative time description between two dates.
- * @param {object} calendar - Calendar data
  * @param {object} targetDate - Target date { year, month, dayOfMonth }
  * @param {object} currentDate - Current date { year, month, dayOfMonth }
- * @returns {string} - Relative time string (e.g., "3 days ago", "in 2 weeks")
+ * @returns {string} Relative time string (e.g., "3 days ago", "in 2 weeks")
  */
-export function timeSince(calendar, targetDate, currentDate) {
+export function timeSince(targetDate, currentDate) {
   const daysPerMonth = 30;
   const daysPerYear = 365;
 
@@ -717,7 +752,7 @@ export function timeSince(calendar, targetDate, currentDate) {
 
 /**
  * Get all available tokens with descriptions.
- * @returns {Array<{token: string, description: string, type: string}>}
+ * @returns {Array<{token: string, description: string, type: string}>} Array of token definitions
  */
 export function getAvailableTokens() {
   return [

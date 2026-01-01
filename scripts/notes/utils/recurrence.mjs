@@ -754,7 +754,7 @@ function getComputedOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurr
  * @returns {boolean}  True if note occurs on this date
  */
 export function isRecurringMatch(noteData, targetDate) {
-  const { startDate, endDate, repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, cachedRandomOccurrences, linkedEvent, maxOccurrences, computedConfig } = noteData;
+  const { startDate, endDate, repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, cachedRandomOccurrences, linkedEvent, maxOccurrences } = noteData;
   if (linkedEvent?.noteId) return matchesLinkedEvent(linkedEvent, targetDate, startDate, repeatEndDate);
   if (repeat === 'computed') return matchesComputed(noteData, targetDate);
   if (repeat === 'random') {

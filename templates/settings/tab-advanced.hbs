@@ -1,21 +1,21 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
 
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
-        <div class="form-fields">
-          <select name="primaryGM">
-            {{#each primaryGMOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
+      <div class="form-fields">
+        <select name="primaryGM">
+          {{#each primaryGMOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
       </div>
-    </fieldset>
+      <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
+    </div>
+  </fieldset>
   {{/if}}
 
   <fieldset>
@@ -26,7 +26,7 @@
       <div class="form-fields">
         <select name="loggingLevel">
           {{#each loggingLevelOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -34,13 +34,13 @@
     </div>
 
     {{#if isGM}}
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
       </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
+    </div>
     {{/if}}
   </fieldset>
 
@@ -58,10 +58,10 @@
           <span class="info-value">Tyler</span>
         </div>
         {{#if translations}}
-          <div class="info-row">
-            <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Translations"}}</span>
-            <span class="info-value">{{translations}}</span>
-          </div>
+        <div class="info-row">
+          <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Translations"}}</span>
+          <span class="info-value">{{translations}}</span>
+        </div>
         {{/if}}
       </div>
       <a href="https://ko-fi.com/sayshal" target="_blank" class="kofi-button">

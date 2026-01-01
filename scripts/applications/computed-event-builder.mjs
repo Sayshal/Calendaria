@@ -119,10 +119,10 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
 
   /**
    * Add a new step to the chain.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event (unused)
+   * @param {HTMLElement} _target - Target element (unused)
    */
-  static async #onAddStep(event, target) {
+  static async #onAddStep(_event, _target) {
     const isFirst = this.#config.chain.length === 0;
     const step = isFirst
       ? { type: 'anchor', value: 'springEquinox' }
@@ -134,10 +134,10 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
 
   /**
    * Remove a step from the chain.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event (unused)
+   * @param {HTMLElement} target - Target element with step index
    */
-  static async #onRemoveStep(event, target) {
+  static async #onRemoveStep(_event, target) {
     const idx = parseInt(target.dataset.index, 10);
     this.#config.chain.splice(idx, 1);
     this.render();
@@ -146,10 +146,10 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
 
   /**
    * Add a year override.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event (unused)
+   * @param {HTMLElement} _target - Target element (unused)
    */
-  static async #onAddOverride(event, target) {
+  static async #onAddOverride(_event, _target) {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
     const currentYear = (game.time?.components?.year ?? 0) + yearZero;
@@ -161,10 +161,10 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
 
   /**
    * Remove a year override.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event (unused)
+   * @param {HTMLElement} target - Target element with year data
    */
-  static async #onRemoveOverride(event, target) {
+  static async #onRemoveOverride(_event, target) {
     const year = target.dataset.year;
     delete this.#config.yearOverrides[year];
     this.render();
@@ -173,10 +173,10 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
 
   /**
    * Save and close the builder.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {Event} _event - Click event (unused)
+   * @param {HTMLElement} _target - Target element (unused)
    */
-  static async #onSave(event, target) {
+  static async #onSave(_event, _target) {
     this.#notifyChange();
     this.close();
   }

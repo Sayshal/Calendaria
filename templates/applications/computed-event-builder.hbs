@@ -78,7 +78,7 @@
         {{#if isDaysAfter}}
         <div class="form-group">
           <label>Days</label>
-          <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}" />
+          <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}">
         </div>
         {{/if}}
 
@@ -113,7 +113,7 @@
         <option value="{{index}}" {{#if (eq index ../month)}}selected{{/if}}>{{name}}</option>
         {{/each}}
       </select>
-      <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31" />
+      <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31">
       <button type="button" class="remove-override" data-action="removeOverride" data-year="{{year}}">
         <i class="fas fa-times"></i>
       </button>

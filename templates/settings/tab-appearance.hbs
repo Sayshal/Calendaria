@@ -4,56 +4,56 @@
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Theme"}}</legend>
 
     {{#if hasCustomTheme}}
-      <p class="hint section-hint success">
-        <i class="fas fa-check-circle"></i>
-        {{localize "CALENDARIA.SettingsPanel.Theme.CustomActive"}}
-      </p>
+    <p class="hint section-hint success">
+      <i class="fas fa-check-circle"></i>
+      {{localize "CALENDARIA.SettingsPanel.Theme.CustomActive"}}
+    </p>
     {{else}}
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Theme.UsingDefault"}}</p>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Theme.UsingDefault"}}</p>
     {{/if}}
 
     <div class="form-group theme-presets">
       <label>{{localize "CALENDARIA.ThemeEditor.PresetSelect"}}</label>
       <div class="form-fields preset-buttons">
         {{#each themePresets}}
-          <button type="button" class="preset-btn" data-action="applyPreset" data-preset="{{this.key}}">
-            {{this.label}}
-          </button>
+        <button type="button" class="preset-btn" data-action="applyPreset" data-preset="{{this.key}}">
+          {{this.label}}
+        </button>
         {{/each}}
       </div>
     </div>
 
     <div class="color-categories-grid">
       {{#each themeCategories}}
-        <div class="color-category">
-          <h4>{{localize this.label}}</h4>
-          {{#each this.colors}}
-            <div class="form-group color-row">
-              <label>
-                {{localize this.label}}
-                {{#if this.componentLabel}}
-                  <span class="component-badge" data-tooltip="{{localize this.componentLabel}}">
-                    {{localize this.componentLabel}}
-                  </span>
-                {{/if}}
-              </label>
-              <div class="form-fields color-fields">
-                <input type="color" name="colors.{{this.key}}" value="{{this.value}}" data-key="{{this.key}}">
-                <input type="text" class="color-hex" value="{{this.value}}" readonly>
-                {{#if this.isCustom}}
-                  <button type="button" class="reset-color" data-action="resetColor" data-key="{{this.key}}"
-                    data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}">
-                    <i class="fas fa-undo"></i>
-                  </button>
-                {{else}}
-                  <span class="default-indicator" data-tooltip="{{localize 'CALENDARIA.ThemeEditor.UsingDefault'}}">
-                    <i class="fas fa-check"></i>
-                  </span>
-                {{/if}}
-              </div>
-            </div>
-          {{/each}}
+      <div class="color-category">
+        <h4>{{localize this.label}}</h4>
+        {{#each this.colors}}
+        <div class="form-group color-row">
+          <label>
+            {{localize this.label}}
+            {{#if this.componentLabel}}
+            <span class="component-badge" data-tooltip="{{localize this.componentLabel}}">
+              {{localize this.componentLabel}}
+            </span>
+            {{/if}}
+          </label>
+          <div class="form-fields color-fields">
+            <input type="color" name="colors.{{this.key}}" value="{{this.value}}" data-key="{{this.key}}">
+            <input type="text" class="color-hex" value="{{this.value}}" readonly>
+            {{#if this.isCustom}}
+            <button type="button" class="reset-color" data-action="resetColor" data-key="{{this.key}}"
+              data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}">
+              <i class="fas fa-undo"></i>
+            </button>
+            {{else}}
+            <span class="default-indicator" data-tooltip="{{localize 'CALENDARIA.ThemeEditor.UsingDefault'}}">
+              <i class="fas fa-check"></i>
+            </span>
+            {{/if}}
+          </div>
         </div>
+        {{/each}}
+      </div>
       {{/each}}
     </div>
 
