@@ -330,7 +330,8 @@ export default class WeatherManager {
    */
   static async setActiveZone(zoneId) {
     if (!game.user.isGM) return;
-    const calendarId = CalendarManager.getActiveCalendarId();
+    const calendar = CalendarManager.getActiveCalendar();
+    const calendarId = calendar?.metadata?.id;
     if (!calendarId) return;
     const calendarData = CalendarManager.getCalendarData(calendarId);
     if (!calendarData?.weather) return;
