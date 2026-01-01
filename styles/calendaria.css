@@ -2181,8 +2181,13 @@
     }
 
     .col-start-weekday {
-      flex: 0 0 100px;
-      width: 100px;
+      flex: 0 0 80px;
+      width: 80px;
+    }
+
+    .col-type {
+      flex: 0 0 110px;
+      width: 110px;
     }
 
     .col-controls {
@@ -2267,6 +2272,35 @@
       }
     }
 
+    .season-row-single {
+      gap: 0.5rem;
+
+      .col-name {
+        flex: 1 1 120px;
+      }
+
+      .col-abbr {
+        flex: 0 0 60px;
+      }
+
+      .col-icon {
+        flex: 1 1 100px;
+      }
+
+      .col-color {
+        flex: 0 0 40px;
+      }
+
+      .col-duration {
+        flex: 0 0 60px;
+      }
+
+      .col-controls {
+        width: fit-content;
+        margin-left: auto;
+      }
+    }
+
     .season-row-bottom {
       gap: 0.5rem;
       margin-top: 0.25rem;
@@ -2290,22 +2324,6 @@
       .col-controls {
         width: fit-content;
         margin-left: auto;
-      }
-
-      &.periodic-row {
-        .col-duration-label {
-          flex: 0 0 auto;
-          font-weight: 500;
-        }
-
-        .col-duration {
-          flex: 0 0 80px;
-        }
-
-        .duration-unit {
-          flex: 0 0 auto;
-          color: var(--color-text-dark-secondary);
-        }
       }
     }
   }
@@ -2529,11 +2547,32 @@
     }
 
     .reference-date {
-      .date-fields {
-        gap: 1rem;
+      .ref-date-grid {
+        gap: 0.75rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr 80px 1fr 80px;
 
-        .form-group {
-          flex: 1;
+        .grid-col {
+          gap: 0.25rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          label {
+            color: var(--color-text-secondary, var(--calendaria-text-secondary));
+            font-weight: 600;
+            font-size: var(--font-size-11);
+            text-align: center;
+          }
+
+          input,
+          select {
+            width: 100%;
+          }
+
+          input[type="checkbox"] {
+            width: auto;
+          }
         }
       }
     }
@@ -2635,37 +2674,38 @@
     align-items: stretch;
     padding: 0.75rem;
 
-    .cycle-header {
-      gap: 1rem;
-      display: flex;
-      align-items: flex-end;
+    .cycle-header-grid {
+      gap: 0.75rem;
+      display: grid;
+      grid-template-columns: 1fr 80px 80px 140px auto;
       padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
 
-      .form-group {
+      .grid-col {
+        gap: 0.25rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
         label {
+          color: var(--color-text-secondary, var(--calendaria-text-secondary));
+          font-weight: 600;
+          font-size: var(--font-size-11);
+          text-align: center;
           white-space: nowrap;
+        }
+
+        input,
+        select {
+          width: 100%;
         }
       }
 
-      .col-name {
-        flex: 1;
-        min-width: 150px;
-      }
-
-      .col-length,
-      .col-offset {
-        flex: 0 0 80px;
-      }
-
-      .col-based-on {
-        flex: 0 0 140px;
-      }
-
-      .item-controls {
-        flex: none;
-        margin-left: auto;
-        padding-bottom: 2px;
+      .col-controls {
+        .item-controls {
+          gap: 0.25rem;
+          display: flex;
+        }
       }
     }
 
@@ -2727,13 +2767,6 @@
     font-style: italic;
     text-align: center;
     background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
-  }
-
-  .time-summary ul {
-    margin: 0;
-    padding-left: 1.5rem;
-    color: var(--color-text-secondary, var(--calendaria-text-secondary));
-    font-size: var(--font-size-14);
   }
 
   footer.form-footer {
@@ -4582,6 +4615,25 @@
     gap: 1rem;
     display: flex;
     flex-direction: column;
+  }
+
+  .zone-selector {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--calendaria-border);
+
+    label {
+      color: var(--calendaria-text-dim);
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    select {
+      flex: 1;
+    }
   }
 
   .weather-category {

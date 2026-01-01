@@ -5,12 +5,13 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
+import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
-import { COLOR_DEFINITIONS, COLOR_CATEGORIES, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
+import { COLOR_DEFINITIONS, DEFAULT_COLORS, applyCustomColors } from '../../utils/theme-utils.mjs';
+import WeatherManager from '../../weather/weather-manager.mjs';
 import { CalendarApplication } from '../calendar-application.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
 import { CalendariaHUD } from '../calendaria-hud.mjs';
@@ -350,6 +351,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
     context.customWeatherPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const zones = WeatherManager.getCalendarZones() || [];
+    const activeZone = WeatherManager.getActiveZone();
+    context.hasZones = zones.length > 0;
+    context.zoneOptions = zones.map((z) => ({ value: z.id, label: z.name, selected: z.id === activeZone?.id }));
   }
 
   /**
@@ -516,6 +521,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
+    if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('compactStickySection' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
         timeControls: !!data.compactStickyTimeControls,

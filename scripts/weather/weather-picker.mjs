@@ -20,9 +20,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: 'weather-picker',
     classes: ['calendaria', 'weather-picker-app'],
-    tag: 'div',
+    tag: 'form',
     window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },
     position: { width: 550, height: 'auto' },
+    form: { handler: WeatherPickerApp._onZoneChange, submitOnChange: true, closeOnSubmit: false },
     actions: {
       selectWeather: WeatherPickerApp._onSelectWeather,
       randomWeather: WeatherPickerApp._onRandomWeather
@@ -61,7 +62,23 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
+    const zones = WeatherManager.getCalendarZones() || [];
+    const activeZone = WeatherManager.getActiveZone();
+    context.hasZones = zones.length > 0;
+    context.zoneOptions = zones.map((z) => ({ value: z.id, label: z.name, selected: z.id === activeZone?.id }));
+
     return context;
+  }
+
+  /**
+   * Handle zone selection change.
+   * @param {Event} _event - The change event
+   * @param {HTMLFormElement} _form - The form element
+   * @param {object} formData - The form data
+   */
+  static async _onZoneChange(_event, _form, formData) {
+    const data = foundry.utils.expandObject(formData.object);
+    if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
   }
 
   /**

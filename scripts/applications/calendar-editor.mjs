@@ -278,12 +278,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       context.daysPerYearDisplay = String(context.calculatedDaysPerYear);
     }
 
-    const { hoursPerDay, minutesPerHour, secondsPerMinute, daysPerYear } = this.#calendarData.days;
-    context.secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
-    context.secondsPerYear = daysPerYear * context.secondsPerDay;
     context.monthOptions = this.#calendarData.months.values.map((month, idx) => ({ value: idx + 1, label: month.name }));
     const startingWeekdayOptions = this.#calendarData.days.values.map((day, idx) => ({ value: idx, label: day.name }));
     const monthCount = this.#calendarData.months.values.length;
+    const monthTypeOptions = [
+      { value: '', label: 'CALENDARIA.Editor.MonthType.Standard' },
+      { value: 'intercalary', label: 'CALENDARIA.Editor.MonthType.Intercalary' }
+    ];
     context.monthsWithNav = this.#calendarData.months.values.map((month, idx) => ({
       ...month,
       index: idx,
@@ -292,7 +293,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       hasStartingWeekday: month.startingWeekday != null,
       hasCustomWeekdays: month.weekdays?.length > 0,
       customWeekdays: month.weekdays ?? [],
-      startingWeekdayOptions: startingWeekdayOptions.map((opt) => ({ ...opt, selected: opt.value === month.startingWeekday }))
+      startingWeekdayOptions: startingWeekdayOptions.map((opt) => ({ ...opt, selected: opt.value === month.startingWeekday })),
+      typeOptions: monthTypeOptions.map((opt) => ({ ...opt, selected: (opt.value || null) === (month.type || null) }))
     }));
     context.festivalsWithNav = this.#calendarData.festivals.map((festival, idx) => ({
       ...festival,
@@ -397,7 +399,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'year', label: 'CALENDARIA.Editor.Cycle.BasedOn.Year' },
       { value: 'eraYear', label: 'CALENDARIA.Editor.Cycle.BasedOn.EraYear' },
       { value: 'month', label: 'CALENDARIA.Common.Month' },
-      { value: 'monthDay', label: 'CALENDARIA.Common.MonthDay' },
+      { value: 'monthDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.MonthDay' },
       { value: 'day', label: 'CALENDARIA.Editor.Cycle.BasedOn.Day' },
       { value: 'yearDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.YearDay' }
     ];
@@ -766,6 +768,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         startingWeekday: this.#parseOptionalInt(data[`months.${idx}.startingWeekday`]),
         ordinal: this.#calendarData.months.values.length + 1
       };
+      const monthType = data[`months.${idx}.type`];
+      if (monthType) month.type = monthType;
       const hasCustom = data[`months.${idx}.hasCustomWeekdays`] === 'true' || data[`months.${idx}.hasCustomWeekdays`] === true;
       if (hasCustom) {
         const weekdayIndices = new Set();
