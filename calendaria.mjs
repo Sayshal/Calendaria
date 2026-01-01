@@ -29,6 +29,7 @@ import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/k
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
+import { migrateCustomCalendars } from './scripts/utils/format-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
 
 Hooks.once('init', async () => {
@@ -57,6 +58,7 @@ Hooks.once('dnd5e.setupCalendar', () => {
 Hooks.once('ready', async () => {
   registerReadySettings();
   await CalendarManager.initialize();
+  await migrateCustomCalendars();
   await NoteManager.initialize();
   TimeTracker.initialize();
   TimeKeeper.initialize();

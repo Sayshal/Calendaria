@@ -10,6 +10,7 @@ import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { formatForLocation } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
@@ -242,6 +243,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({
       name: 'collapseSidebar',
       id: Hooks.on('collapseSidebar', () => this.#clampToViewport())
+    });
+    this.#hooks.push({
+      name: 'calendaria.displayFormatsChanged',
+      id: Hooks.on('calendaria.displayFormatsChanged', () => this.render({ parts: ['bar'] }))
     });
   }
 
@@ -701,32 +706,30 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Format time for display.
+   * Format time for display using display format settings.
    * @param {object} components - Time components
-   * @returns {string} Formatted time (HH:MM:SS)
+   * @returns {string} Formatted time
    */
   #formatTime(components) {
-    const h = String(components.hour ?? 0).padStart(2, '0');
-    const m = String(components.minute ?? 0).padStart(2, '0');
-    const s = String(components.second ?? 0).padStart(2, '0');
-    return `${h}:${m}:${s}`;
+    const calendar = this.calendar;
+    if (!calendar) {
+      const h = String(components.hour ?? 0).padStart(2, '0');
+      const m = String(components.minute ?? 0).padStart(2, '0');
+      const s = String(components.second ?? 0).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+    return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudTime');
   }
 
   /**
-   * Format full date display (inline format).
+   * Format full date display using display format settings.
    * @param {object} components - Time components
-   * @returns {string} Formatted date (e.g., "15th of Hammer, 1492 DR")
+   * @returns {string} Formatted date
    */
   #formatDateDisplay(components) {
     const calendar = this.calendar;
     if (!calendar) return '';
-    const day = (components.dayOfMonth ?? 0) + 1;
-    const month = calendar.months?.values?.[components.month];
-    const monthName = month?.name ? localize(month.name) : '';
-    const yearZero = calendar.years?.yearZero ?? 0;
-    const displayYear = components.year + yearZero;
-    const yearWithEra = calendar.formatYearWithEra?.(displayYear) ?? String(displayYear);
-    return format('CALENDARIA.Formatters.OrdinalDayOfMonth', { day, suffix: this.#getOrdinalSuffix(day), month: monthName, year: yearWithEra });
+    return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudDate');
   }
 
   /**
@@ -1217,7 +1220,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInMonth = calendar.months.values[components.month]?.days ?? 30;
     const currentDay = (components.dayOfMonth ?? 0) + 1;
-    const content = await renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
+    const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
       formClass: 'set-date-form',
       year: components.year + yearZero,
       months: calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month })),
@@ -1263,13 +1266,22 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!resultsContainer) return;
     if (this.#searchResults?.length) {
       resultsContainer.innerHTML = this.#searchResults
-        .map(
-          (r) => `
-        <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
-          <span class="result-name">${r.name}</span>
-          ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-        </div>`
-        )
+        .map((r) => {
+          const icons = [];
+          if (r.data?.icon) icons.push(`<i class="result-note-icon ${r.data.icon}" style="color: ${r.data.color || '#4a9eff'}" data-tooltip="${localize('CALENDARIA.Search.NoteIcon')}"></i>`);
+          if (r.data?.gmOnly) icons.push(`<i class="result-gm-icon fas fa-lock" data-tooltip="${localize('CALENDARIA.Search.GMOnly')}"></i>`);
+          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}" data-tooltip="${r.data.repeatTooltip || ''}"></i>`);
+          if (r.data?.categoryIcons?.length) {
+            for (const cat of r.data.categoryIcons) icons.push(`<i class="result-category-icon fas ${cat.icon}" style="color: ${cat.color}" data-tooltip="${cat.label}"></i>`);
+          }
+          return `<div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
+            <div class="result-content">
+              <span class="result-name">${r.name}</span>
+              ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
+            </div>
+            ${icons.length ? `<div class="result-icons">${icons.join('')}</div>` : ''}
+          </div>`;
+        })
         .join('');
       resultsContainer.classList.add('has-results');
       if (this.#searchPanelEl) {

@@ -8,6 +8,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { formatForLocation } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 
 const ChatLog = foundry.applications.sidebar.tabs.ChatLog;
@@ -97,7 +98,7 @@ export function overrideChatLogTimestamps() {
 }
 
 /**
- * Format world time to a readable date string.
+ * Format world time to a readable date string using display format settings.
  * @param {number} worldTime - The world time in seconds
  * @returns {string} Formatted date string
  */
@@ -105,20 +106,7 @@ export function formatWorldTime(worldTime) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return '';
   const components = calendar.timeToComponents(worldTime);
-  const showTime = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME);
-  const monthData = calendar.months?.values?.[components.month];
-  const monthNameRaw = monthData?.name ?? format('CALENDARIA.Calendar.MonthFallback', { num: components.month + 1 });
-  const monthName = localize(monthNameRaw);
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const displayYear = components.year + yearZero;
-  const day = components.dayOfMonth + 1;
-  let result = `${day} ${monthName}, ${displayYear}`;
-  if (showTime) {
-    const h = String(components.hour ?? 0).padStart(2, '0');
-    const m = String(components.minute ?? 0).padStart(2, '0');
-    result += ` ${h}:${m}`;
-  }
-  return result;
+  return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'chatTimestamp');
 }
 
 /**

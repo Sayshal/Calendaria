@@ -486,6 +486,263 @@ function getEraYear(year, eras) {
   return year - (era.startYear ?? 0) + 1;
 }
 
+
+/* -------------------------------------------- */
+/*  Computed Event (Moveable Feast) System      */
+/* -------------------------------------------- */
+
+/**
+ * Resolve a computed date for a given year using the chain.
+ * @param {object} computedConfig - Computed config { chain, yearOverrides }
+ * @param {number} year - Year to compute for
+ * @returns {object|null} Resolved date { year, month, day } or null
+ */
+export function resolveComputedDate(computedConfig, year) {
+  if (!computedConfig?.chain?.length) return null;
+  const { chain, yearOverrides } = computedConfig;
+  if (yearOverrides?.[year]) {
+    const override = yearOverrides[year];
+    return { year, month: override.month, day: override.day };
+  }
+
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return null;
+  let currentDate = null;
+
+  for (const step of chain) {
+    switch (step.type) {
+      case 'anchor':
+        currentDate = resolveAnchor(step.value, year, calendar);
+        break;
+      case 'firstAfter':
+        if (!currentDate) return null;
+        currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
+        break;
+      case 'daysAfter':
+        if (!currentDate) return null;
+        currentDate = addDays(currentDate, step.params?.days ?? 0);
+        break;
+      case 'weekdayOnOrAfter':
+        if (!currentDate) return null;
+        currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
+        break;
+      default:
+        break;
+    }
+    if (!currentDate) return null;
+  }
+
+  return currentDate;
+}
+
+/**
+ * Resolve an anchor point for a computed event.
+ * @param {string} anchorType - Anchor type (springEquinox, summerSolstice, etc.)
+ * @param {number} year - Year to resolve for
+ * @param {object} calendar - Calendar instance
+ * @returns {object|null} Date { year, month, day } or null
+ */
+function resolveAnchor(anchorType, year, calendar) {
+  const seasons = calendar?.seasons?.values || [];
+  const daylight = calendar?.daylight || {};
+  const totalDays = calendar.getDaysInYear(year);
+
+  switch (anchorType) {
+    case 'springEquinox': {
+      const springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
+      if (springIdx === -1 && seasons.length >= 4) return dayOfYearToDate(seasons[0]?.dayStart ?? 1, year, calendar);
+      if (springIdx !== -1) return dayOfYearToDate(seasons[springIdx].dayStart ?? 1, year, calendar);
+      return null;
+    }
+    case 'autumnEquinox': {
+      const autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
+      if (autumnIdx === -1 && seasons.length >= 4) return dayOfYearToDate(seasons[2]?.dayStart ?? 1, year, calendar);
+      if (autumnIdx !== -1) return dayOfYearToDate(seasons[autumnIdx].dayStart ?? 1, year, calendar);
+      return null;
+    }
+    case 'summerSolstice': {
+      if (daylight.summerSolstice) return dayOfYearToDate(daylight.summerSolstice, year, calendar);
+      const summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
+      if (summerIdx !== -1) {
+        const summer = seasons[summerIdx];
+        const mid = getMidpoint(summer.dayStart ?? 0, summer.dayEnd ?? 0, totalDays);
+        return dayOfYearToDate(mid, year, calendar);
+      }
+      return null;
+    }
+    case 'winterSolstice': {
+      if (daylight.winterSolstice) return dayOfYearToDate(daylight.winterSolstice, year, calendar);
+      const winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
+      if (winterIdx !== -1) {
+        const winter = seasons[winterIdx];
+        const mid = getMidpoint(winter.dayStart ?? 0, winter.dayEnd ?? 0, totalDays);
+        return dayOfYearToDate(mid, year, calendar);
+      }
+      return null;
+    }
+    default:
+      if (anchorType?.startsWith('seasonStart:')) {
+        const idx = parseInt(anchorType.split(':')[1], 10);
+        if (seasons[idx]) return dayOfYearToDate(seasons[idx].dayStart ?? 1, year, calendar);
+      }
+      if (anchorType?.startsWith('seasonEnd:')) {
+        const idx = parseInt(anchorType.split(':')[1], 10);
+        if (seasons[idx]) return dayOfYearToDate(seasons[idx].dayEnd ?? 1, year, calendar);
+      }
+      if (anchorType?.startsWith('event:')) {
+        const noteId = anchorType.split(':')[1];
+        const linkedNote = NoteManager.getNote(noteId);
+        if (linkedNote?.flagData) {
+          const linkedData = linkedNote.flagData;
+          if (linkedData.repeat === 'computed' && linkedData.computedConfig) return resolveComputedDate(linkedData.computedConfig, year);
+          const occurrences = getOccurrencesInRange(linkedData, { year, month: 0, day: 1 }, { year, month: 11, day: 31 }, 1);
+          if (occurrences.length > 0) return occurrences[0];
+        }
+      }
+      return null;
+  }
+}
+
+/**
+ * Resolve "first X after" condition.
+ * @param {object} startDate - Date to search from
+ * @param {string} condition - Condition type (moonPhase, weekday)
+ * @param {object} params - Condition params
+ * @param {object} calendar - Calendar instance
+ * @returns {object|null} Date or null
+ */
+function resolveFirstAfter(startDate, condition, params, calendar) {
+  const maxSearch = 200;
+  let currentDate = { ...startDate };
+
+  for (let i = 0; i < maxSearch; i++) {
+    currentDate = addDays(currentDate, 1);
+    switch (condition) {
+      case 'moonPhase': {
+        const moons = calendar?.moons || [];
+        const moonIndex = params?.moon ?? 0;
+        const targetPhase = params?.phase ?? 'full';
+        if (moonIndex >= moons.length) return null;
+        const moon = moons[moonIndex];
+        const phaseValue = getMoonPhase(currentDate, moon);
+        const phaseCount = moon.phases?.length || 8;
+        const phaseIndex = Math.floor(phaseValue * phaseCount);
+        const phaseName = moon.phases?.[phaseIndex]?.name?.toLowerCase() || '';
+        if (phaseName.includes(targetPhase.toLowerCase())) return currentDate;
+        break;
+      }
+      case 'weekday': {
+        const targetWeekday = params?.weekday ?? 0;
+        if (dayOfWeek(currentDate) === targetWeekday) return currentDate;
+        break;
+      }
+      default:
+        return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Resolve weekday on or after a date.
+ * @param {object} startDate - Date to search from
+ * @param {number} targetWeekday - Target weekday (0-indexed)
+ * @param {object} calendar - Calendar instance
+ * @returns {object} Date on or after with matching weekday
+ */
+function resolveWeekdayOnOrAfter(startDate, targetWeekday, calendar) {
+  const currentWeekday = dayOfWeek(startDate);
+  if (currentWeekday === targetWeekday) return { ...startDate };
+  const daysInWeek = calendar?.days?.values?.length || 7;
+  const daysToAdd = (targetWeekday - currentWeekday + daysInWeek) % daysInWeek;
+  return addDays(startDate, daysToAdd);
+}
+
+/**
+ * Convert day of year to date object.
+ * @param {number} dayOfYear - Day of year (1-based)
+ * @param {number} year - Year
+ * @param {object} calendar - Calendar instance
+ * @returns {object} Date { year, month, day }
+ */
+function dayOfYearToDate(dayOfYear, year, calendar) {
+  const months = calendar?.months?.values || [];
+  let remaining = dayOfYear;
+  for (let m = 0; m < months.length; m++) {
+    const daysInMonth = months[m]?.days || 30;
+    if (remaining <= daysInMonth) return { year, month: m, day: remaining };
+    remaining -= daysInMonth;
+  }
+  return { year, month: months.length - 1, day: months[months.length - 1]?.days || 1 };
+}
+
+/**
+ * Check if note matches computed recurrence pattern.
+ * @param {object} noteData - Note flag data
+ * @param {object} targetDate - Date to check
+ * @returns {boolean} True if matches
+ */
+function matchesComputed(noteData, targetDate) {
+  const { computedConfig, startDate, repeatEndDate, maxOccurrences } = noteData;
+  if (!computedConfig?.chain?.length) return false;
+  if (compareDays(targetDate, startDate) < 0) return false;
+  if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
+
+  const resolvedDate = resolveComputedDate(computedConfig, targetDate.year);
+  if (!resolvedDate) return false;
+  const matches = isSameDay(resolvedDate, targetDate);
+  if (matches && maxOccurrences > 0) {
+    const occurrenceNum = countComputedOccurrencesUpTo(noteData, targetDate);
+    if (occurrenceNum > maxOccurrences) return false;
+  }
+  return matches;
+}
+
+/**
+ * Count computed occurrences up to a target date.
+ * @param {object} noteData - Note flag data
+ * @param {object} targetDate - Target date
+ * @returns {number} Occurrence count
+ */
+function countComputedOccurrencesUpTo(noteData, targetDate) {
+  const { computedConfig, startDate } = noteData;
+  let count = 0;
+  for (let y = startDate.year; y <= targetDate.year; y++) {
+    const resolved = resolveComputedDate(computedConfig, y);
+    if (resolved && compareDays(resolved, startDate) >= 0 && compareDays(resolved, targetDate) <= 0) count++;
+  }
+  return count;
+}
+
+/**
+ * Get computed event occurrences in a date range.
+ * @param {object} noteData - Note flag data
+ * @param {object} rangeStart - Start of range
+ * @param {object} rangeEnd - End of range
+ * @param {number} maxOccurrences - Max occurrences to return
+ * @returns {object[]} Array of dates
+ */
+function getComputedOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurrences) {
+  const { computedConfig, startDate, repeatEndDate, maxOccurrences: noteMaxOccurrences } = noteData;
+  const occurrences = [];
+  if (!computedConfig?.chain?.length) return occurrences;
+
+  let totalCount = 0;
+  for (let year = rangeStart.year; year <= rangeEnd.year; year++) {
+    const resolved = resolveComputedDate(computedConfig, year);
+    if (!resolved) continue;
+    if (compareDays(resolved, startDate) < 0) continue;
+    if (repeatEndDate && compareDays(resolved, repeatEndDate) > 0) continue;
+    if (compareDays(resolved, rangeStart) < 0) continue;
+    if (compareDays(resolved, rangeEnd) > 0) continue;
+    totalCount++;
+    if (noteMaxOccurrences > 0 && totalCount > noteMaxOccurrences) break;
+    occurrences.push(resolved);
+    if (occurrences.length >= maxOccurrences) break;
+  }
+  return occurrences;
+}
+
 /* -------------------------------------------- */
 /*  Main Recurrence Functions                   */
 /* -------------------------------------------- */
@@ -497,8 +754,9 @@ function getEraYear(year, eras) {
  * @returns {boolean}  True if note occurs on this date
  */
 export function isRecurringMatch(noteData, targetDate) {
-  const { startDate, endDate, repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, cachedRandomOccurrences, linkedEvent, maxOccurrences } = noteData;
+  const { startDate, endDate, repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, cachedRandomOccurrences, linkedEvent, maxOccurrences, computedConfig } = noteData;
   if (linkedEvent?.noteId) return matchesLinkedEvent(linkedEvent, targetDate, startDate, repeatEndDate);
+  if (repeat === 'computed') return matchesComputed(noteData, targetDate);
   if (repeat === 'random') {
     if (!randomConfig) return false;
     if (compareDays(targetDate, startDate) < 0) return false;
@@ -1097,6 +1355,8 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
     return occurrences;
   }
 
+  if (repeat === 'computed') return getComputedOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurrences);
+
   if (repeat === 'seasonal') {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.seasons?.values?.length) return occurrences;
@@ -1193,6 +1453,7 @@ export function getRecurrenceDescription(noteData) {
     return appendUntil(appendMaxOccurrences(description));
   }
   if (repeat === 'never' || !repeat) return localize('CALENDARIA.Recurrence.DoesNotRepeat');
+  if (repeat === 'computed') return appendUntil(appendMaxOccurrences(getComputedDescription(noteData.computedConfig)));
   if (repeat === 'moon') return appendUntil(appendMaxOccurrences(getMoonConditionsDescription(moonConditions)));
   if (repeat === 'random') {
     const probability = randomConfig?.probability ?? 10;
@@ -1332,6 +1593,49 @@ export function needsRandomRegeneration(cachedData) {
 export function matchesCachedOccurrence(cachedOccurrences, targetDate) {
   if (!cachedOccurrences?.length) return false;
   return cachedOccurrences.some((occ) => occ.year === targetDate.year && occ.month === targetDate.month && occ.day === targetDate.day);
+}
+
+
+/**
+ * Get human-readable description of computed recurrence.
+ * @param {object} computedConfig - Computed config
+ * @returns {string} Description
+ */
+function getComputedDescription(computedConfig) {
+  if (!computedConfig?.chain?.length) return localize('CALENDARIA.Recurrence.ComputedEvent');
+  const steps = [];
+  for (const step of computedConfig.chain) {
+    switch (step.type) {
+      case 'anchor':
+        if (step.value === 'springEquinox') steps.push(localize('CALENDARIA.Recurrence.SpringEquinox'));
+        else if (step.value === 'autumnEquinox') steps.push(localize('CALENDARIA.Recurrence.AutumnEquinox'));
+        else if (step.value === 'summerSolstice') steps.push(localize('CALENDARIA.Recurrence.SummerSolstice'));
+        else if (step.value === 'winterSolstice') steps.push(localize('CALENDARIA.Recurrence.WinterSolstice'));
+        else if (step.value?.startsWith('event:')) steps.push(format('CALENDARIA.Recurrence.AfterEvent', { event: step.value.split(':')[1] }));
+        else steps.push(step.value);
+        break;
+      case 'firstAfter':
+        if (step.condition === 'moonPhase') steps.push(format('CALENDARIA.Recurrence.FirstMoonPhaseAfter', { phase: step.params?.phase || 'full' }));
+        else if (step.condition === 'weekday') {
+          const calendar = CalendarManager.getActiveCalendar();
+          const weekdays = calendar?.days?.values || [];
+          const wdName = weekdays[step.params?.weekday]?.name ? localize(weekdays[step.params?.weekday].name) : 'weekday';
+          steps.push(format('CALENDARIA.Recurrence.FirstWeekdayAfter', { weekday: wdName }));
+        }
+        break;
+      case 'daysAfter':
+        steps.push(format('CALENDARIA.Recurrence.DaysAfterAnchor', { days: step.params?.days || 0 }));
+        break;
+      case 'weekdayOnOrAfter': {
+        const calendar = CalendarManager.getActiveCalendar();
+        const weekdays = calendar?.days?.values || [];
+        const wdName = weekdays[step.params?.weekday]?.name ? localize(weekdays[step.params?.weekday].name) : 'weekday';
+        steps.push(format('CALENDARIA.Recurrence.WeekdayOnOrAfter', { weekday: wdName }));
+        break;
+      }
+    }
+  }
+  return steps.join(' → ') || localize('CALENDARIA.Recurrence.ComputedEvent');
 }
 
 /**

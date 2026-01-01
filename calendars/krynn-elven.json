@@ -7,29 +7,111 @@
   },
   "months": {
     "values": [
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.WinterNight", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterNightShort", "ordinal": 1, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.WinterDeep", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterDeepShort", "ordinal": 2, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.SpringDawning", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringDawningShort", "ordinal": 3, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.SpringRain", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringRainShort", "ordinal": 4, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.SpringBlossom", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringBlossomShort", "ordinal": 5, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.SummerHome", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerHomeShort", "ordinal": 6, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.SummerRun", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerRunShort", "ordinal": 7, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.SummerEnd", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerEndShort", "ordinal": 8, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnHarvest", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnHarvestShort", "ordinal": 9, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnTwilight", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnTwilightShort", "ordinal": 10, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnDark", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnDarkShort", "ordinal": 11, "days": 28 },
-      { "name": "CALENDARIA.Calendar.KrynnElven.Month.WinterCome", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterComeShort", "ordinal": 12, "days": 28 }
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.WinterNight",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterNightShort",
+        "ordinal": 1,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.WinterDeep",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterDeepShort",
+        "ordinal": 2,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.SpringDawning",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringDawningShort",
+        "ordinal": 3,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.SpringRain",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringRainShort",
+        "ordinal": 4,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.SpringBlossom",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringBlossomShort",
+        "ordinal": 5,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.SummerHome",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerHomeShort",
+        "ordinal": 6,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.SummerRun",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerRunShort",
+        "ordinal": 7,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.SummerEnd",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerEndShort",
+        "ordinal": 8,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnHarvest",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnHarvestShort",
+        "ordinal": 9,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnTwilight",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnTwilightShort",
+        "ordinal": 10,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnDark",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnDarkShort",
+        "ordinal": 11,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.KrynnElven.Month.WinterCome",
+        "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterComeShort",
+        "ordinal": 12,
+        "days": 28
+      }
     ]
   },
   "days": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Krynn.Day.Gateway", "ordinal": 1 },
-      { "name": "CALENDARIA.Calendar.Krynn.Day.BrightEye", "ordinal": 2 },
-      { "name": "CALENDARIA.Calendar.Krynn.Day.NightsEye", "ordinal": 3 },
-      { "name": "CALENDARIA.Calendar.Krynn.Day.DeadEye", "ordinal": 4 },
-      { "name": "CALENDARIA.Calendar.Krynn.Day.Winged", "ordinal": 5 },
-      { "name": "CALENDARIA.Calendar.Krynn.Day.Flowered", "ordinal": 6 },
-      { "name": "CALENDARIA.Calendar.Krynn.Day.World", "ordinal": 7, "isRestDay": true }
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.Gateway",
+        "ordinal": 1
+      },
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.BrightEye",
+        "ordinal": 2
+      },
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.NightsEye",
+        "ordinal": 3
+      },
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.DeadEye",
+        "ordinal": 4
+      },
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.Winged",
+        "ordinal": 5
+      },
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.Flowered",
+        "ordinal": 6
+      },
+      {
+        "name": "CALENDARIA.Calendar.Krynn.Day.World",
+        "ordinal": 7,
+        "isRestDay": true
+      }
     ],
     "daysPerYear": 336,
     "hoursPerDay": 24,
@@ -37,23 +119,81 @@
     "secondsPerMinute": 60
   },
   "festivals": [
-    { "name": "CALENDARIA.Calendar.Krynn.Festival.Yule", "month": 1, "day": 14 },
-    { "name": "CALENDARIA.Calendar.Krynn.Festival.SpringDawning", "month": 3, "day": 1 },
-    { "name": "CALENDARIA.Calendar.Krynn.Festival.Midyear", "month": 6, "day": 14 },
-    { "name": "CALENDARIA.Calendar.Krynn.Festival.Harvest", "month": 9, "day": 14 },
-    { "name": "CALENDARIA.Calendar.Krynn.Festival.NightOfTheEye", "month": 11, "day": 21 }
+    {
+      "name": "CALENDARIA.Calendar.Krynn.Festival.Yule",
+      "month": 1,
+      "day": 14
+    },
+    {
+      "name": "CALENDARIA.Calendar.Krynn.Festival.SpringDawning",
+      "month": 3,
+      "day": 1
+    },
+    {
+      "name": "CALENDARIA.Calendar.Krynn.Festival.Midyear",
+      "month": 6,
+      "day": 14
+    },
+    {
+      "name": "CALENDARIA.Calendar.Krynn.Festival.Harvest",
+      "month": 9,
+      "day": 14
+    },
+    {
+      "name": "CALENDARIA.Calendar.Krynn.Festival.NightOfTheEye",
+      "month": 11,
+      "day": 21
+    }
   ],
   "seasons": {
     "values": [
-      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 309, "dayEnd": 55 },
-      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 56, "dayEnd": 139 },
-      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 140, "dayEnd": 223 },
-      { "name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 224, "dayEnd": 308 }
+      {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "dayStart": 309,
+        "dayEnd": 55
+      },
+      {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "dayStart": 56,
+        "dayEnd": 139
+      },
+      {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "dayStart": 140,
+        "dayEnd": 223
+      },
+      {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "dayStart": 224,
+        "dayEnd": 308
+      }
     ]
   },
   "eras": [
-    { "name": "CALENDARIA.Era.AltCataclius", "abbreviation": "CALENDARIA.Era.AC", "startYear": 1, "endYear": null, "format": "suffix", "template": null },
-    { "name": "CALENDARIA.Era.PreCataclius", "abbreviation": "CALENDARIA.Era.PC", "startYear": -9999, "endYear": 0, "format": "suffix", "template": null }
+    {
+      "name": "CALENDARIA.Era.AltCataclius",
+      "abbreviation": "CALENDARIA.Era.AC",
+      "startYear": 1,
+      "endYear": null,
+      "format": "suffix",
+      "template": null
+    },
+    {
+      "name": "CALENDARIA.Era.PreCataclius",
+      "abbreviation": "CALENDARIA.Era.PC",
+      "startYear": -9999,
+      "endYear": 0,
+      "format": "suffix",
+      "template": null
+    }
   ],
   "moons": [
     {
@@ -61,32 +201,120 @@
       "cycleLength": 36,
       "color": "#FFFFFF",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 1 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 1
+      }
     },
     {
       "name": "CALENDARIA.Moon.Krynn.Lunitari",
       "cycleLength": 28,
       "color": "#FF4444",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 1 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 1
+      }
     },
     {
       "name": "CALENDARIA.Moon.Krynn.Nuitari",
@@ -94,16 +322,60 @@
       "color": "#1a1a1a",
       "hidden": true,
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 1 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 1
+      }
     }
   ],
   "daylight": {
@@ -115,14 +387,21 @@
   },
   "cycles": [],
   "canonicalHours": [],
-  "weeks": { "enabled": false, "type": "year-based", "names": [] },
-  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": []
+  },
+  "amPmNotation": {
+    "am": "AM",
+    "pm": "PM"
+  },
   "dateFormats": {
-    "short": "{{d}} {{b}}",
-    "long": "{{d}} {{B}}, {{y}}",
-    "full": "{{B}} {{d}}, {{y}}",
-    "time": "{{H}}:{{M}}",
-    "time12": "{{h}}:{{M}} {{p}}"
+    "short": "D MMM",
+    "long": "D MMMM, YYYY",
+    "full": "MMMM D, YYYY",
+    "time": "HH:mm",
+    "time12": "h:mm a"
   },
   "metadata": {
     "id": "krynn-elven",

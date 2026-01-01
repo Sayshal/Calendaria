@@ -38,7 +38,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         { nullable: true }
       ),
       allDay: new fields.BooleanField({ initial: false }),
-      repeat: new fields.StringField({ choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range'], initial: 'never' }),
+      repeat: new fields.StringField({ choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'], initial: 'never' }),
       repeatInterval: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       repeatEndDate: new fields.SchemaField(
         { year: new fields.NumberField({ integer: true }), month: new fields.NumberField({ integer: true, min: 0 }), day: new fields.NumberField({ integer: true, min: 1 }) },
@@ -72,6 +72,21 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         {
           seasonIndex: new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
           trigger: new fields.StringField({ choices: ['entire', 'firstDay', 'lastDay'], initial: 'entire' })
+        },
+        { nullable: true }
+      ),
+      computedConfig: new fields.SchemaField(
+        {
+          chain: new fields.ArrayField(
+            new fields.SchemaField({
+              type: new fields.StringField({ required: true, choices: ['anchor', 'firstAfter', 'daysAfter', 'weekdayOnOrAfter'] }),
+              value: new fields.StringField({ nullable: true }),
+              condition: new fields.StringField({ choices: ['moonPhase', 'weekday', 'seasonStart', 'seasonEnd'], nullable: true }),
+              params: new fields.ObjectField({ nullable: true })
+            }),
+            { initial: [] }
+          ),
+          yearOverrides: new fields.ObjectField({ initial: {} })
         },
         { nullable: true }
       ),

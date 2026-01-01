@@ -7,6 +7,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { getAllCategories } from '../notes/note-data.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 
@@ -70,7 +71,7 @@ export default class SearchManager {
     for (const note of allNotes) {
       if (results.length >= limit) break;
       if (this.#matches(note.name, term)) {
-        results.push({ type: 'note', id: note.id, name: note.name, description: this.#formatNoteDate(note), data: { journalId: note.journalId, flagData: note.flagData } });
+        results.push(this.#buildSearchResult(note, this.#formatNoteDate(note)));
         continue;
       }
 
@@ -78,12 +79,88 @@ export default class SearchManager {
         const page = NoteManager.getFullNote(note.id);
         if (page?.text?.content && this.#matches(page.text.content, term)) {
           const snippet = this.#extractSnippet(page.text.content, term);
-          results.push({ type: 'note', id: note.id, name: note.name, description: snippet, data: { journalId: note.journalId, flagData: note.flagData } });
+          results.push(this.#buildSearchResult(note, snippet));
         }
       }
     }
 
     return results;
+  }
+
+  /**
+   * Build a search result with icon data.
+   * @param {object} note - Note stub
+   * @param {string} description - Description text
+   * @returns {SearchResult} - Search result with icon data
+   */
+  static #buildSearchResult(note, description) {
+    const flagData = note.flagData || {};
+    const iconData = this.#extractIconData(flagData);
+    return {
+      type: 'note',
+      id: note.id,
+      name: note.name,
+      description,
+      data: {
+        journalId: note.journalId,
+        flagData,
+        ...iconData
+      }
+    };
+  }
+
+  /**
+   * Extract icon-related data from note flags.
+   * @param {object} flagData - Note flag data
+   * @returns {object} - Icon data for template
+   */
+  static #extractIconData(flagData) {
+    const result = {
+      icon: flagData.icon || null,
+      color: flagData.color || '#4a9eff',
+      gmOnly: flagData.gmOnly || false,
+      repeatIcon: null,
+      repeatTooltip: null,
+      categoryIcons: []
+    };
+
+    // Repeat icon based on recurrence type
+    const repeatIcons = {
+      daily: 'fas fa-rotate',
+      weekly: 'fas fa-rotate',
+      monthly: 'fas fa-rotate',
+      yearly: 'fas fa-rotate',
+      moon: 'fas fa-moon',
+      random: 'fas fa-dice',
+      linked: 'fas fa-link',
+      seasonal: 'fas fa-leaf',
+      weekOfMonth: 'fas fa-calendar-week',
+      range: 'fas fa-arrows-left-right'
+    };
+
+    if (flagData.repeat && flagData.repeat !== 'never') {
+      result.repeatIcon = repeatIcons[flagData.repeat] || 'fas fa-rotate';
+      result.repeatTooltip = localize(`CALENDARIA.Repeat.${flagData.repeat}`);
+    }
+
+    // Category icons (max 6 to fit 3x2 grid alongside other icons)
+    if (Array.isArray(flagData.categories) && flagData.categories.length > 0) {
+      const allCategories = getAllCategories();
+      const maxCategories = 6;
+      for (let i = 0; i < Math.min(flagData.categories.length, maxCategories); i++) {
+        const catId = flagData.categories[i];
+        const catDef = allCategories.find((c) => c.id === catId);
+        if (catDef) {
+          result.categoryIcons.push({
+            icon: catDef.icon,
+            color: catDef.color,
+            label: catDef.label
+          });
+        }
+      }
+    }
+
+    return result;
   }
 
   /* -------------------------------------------- */

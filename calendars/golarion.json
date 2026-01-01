@@ -11,29 +11,119 @@
   },
   "months": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Abadius", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.AbadiusShort", "ordinal": 1, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Calistril", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.CalistrilShort", "ordinal": 2, "days": 28, "leapDays": 29 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Pharast", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.PharastShort", "ordinal": 3, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Gozran", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.GozranShort", "ordinal": 4, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Desnus", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.DesnusShort", "ordinal": 5, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Sarenith", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.SarenithShort", "ordinal": 6, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Erastus", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.ErastusShort", "ordinal": 7, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Arodus", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.ArodusShort", "ordinal": 8, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Rova", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.RovaShort", "ordinal": 9, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Lamashan", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.LamashanShort", "ordinal": 10, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Neth", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.NethShort", "ordinal": 11, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Golarion.Month.Kuthona", "abbreviation": "CALENDARIA.Calendar.Golarion.Month.KuthonaShort", "ordinal": 12, "days": 31 }
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Abadius",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.AbadiusShort",
+        "ordinal": 1,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Calistril",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.CalistrilShort",
+        "ordinal": 2,
+        "days": 28,
+        "leapDays": 29
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Pharast",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.PharastShort",
+        "ordinal": 3,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Gozran",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.GozranShort",
+        "ordinal": 4,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Desnus",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.DesnusShort",
+        "ordinal": 5,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Sarenith",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.SarenithShort",
+        "ordinal": 6,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Erastus",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.ErastusShort",
+        "ordinal": 7,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Arodus",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.ArodusShort",
+        "ordinal": 8,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Rova",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.RovaShort",
+        "ordinal": 9,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Lamashan",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.LamashanShort",
+        "ordinal": 10,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Neth",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.NethShort",
+        "ordinal": 11,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Month.Kuthona",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Month.KuthonaShort",
+        "ordinal": 12,
+        "days": 31
+      }
     ]
   },
   "days": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Moonday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.MoondayShort", "ordinal": 1 },
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Toilday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.ToildayShort", "ordinal": 2 },
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Wealday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.WealdayShort", "ordinal": 3 },
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Oathday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.OathdayShort", "ordinal": 4 },
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Fireday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.FiredayShort", "ordinal": 5 },
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Starday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.StardayShort", "ordinal": 6 },
-      { "name": "CALENDARIA.Calendar.Golarion.Day.Sunday", "abbreviation": "CALENDARIA.Calendar.Golarion.Day.SundayShort", "ordinal": 7, "isRestDay": true }
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Moonday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.MoondayShort",
+        "ordinal": 1
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Toilday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.ToildayShort",
+        "ordinal": 2
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Wealday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.WealdayShort",
+        "ordinal": 3
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Oathday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.OathdayShort",
+        "ordinal": 4
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Fireday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.FiredayShort",
+        "ordinal": 5
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Starday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.StardayShort",
+        "ordinal": 6
+      },
+      {
+        "name": "CALENDARIA.Calendar.Golarion.Day.Sunday",
+        "abbreviation": "CALENDARIA.Calendar.Golarion.Day.SundayShort",
+        "ordinal": 7,
+        "isRestDay": true
+      }
     ],
     "daysPerYear": 365,
     "hoursPerDay": 24,
@@ -41,39 +131,167 @@
     "secondsPerMinute": 60
   },
   "festivals": [
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.FoundationDay", "month": 1, "day": 1 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Longnight", "month": 1, "day": 15 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Merrymead", "month": 2, "day": 2 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.LeapDay", "month": 2, "day": 29, "leapYearOnly": true },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.DayOfBones", "month": 3, "day": 5 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Firstbloom", "month": 3, "day": 20 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.PlantingWeek", "month": 3, "day": 21 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Taxfest", "month": 4, "day": 15 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.RemembranceMoon", "month": 5, "day": 15 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.SunwroughtFestival", "month": 6, "day": 21 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.BurningBlades", "month": 6, "day": 10 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.ArcherDay", "month": 7, "day": 3 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Armasse", "month": 8, "day": 16 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.SwallowtailFestival", "month": 9, "day": 22 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.HarvestFeast", "month": 9, "day": 23 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.AscendanceDay", "month": 10, "day": 6 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Jestercap", "month": 10, "day": 27 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.SevenVeils", "month": 11, "day": 7 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.WinterWeek", "month": 12, "day": 8 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Candlemark", "month": 12, "day": 21 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.Crystalhue", "month": 12, "day": 22 },
-    { "name": "CALENDARIA.Calendar.Golarion.Holiday.NightOfThePale", "month": 12, "day": 31 }
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.FoundationDay",
+      "month": 1,
+      "day": 1
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Longnight",
+      "month": 1,
+      "day": 15
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Merrymead",
+      "month": 2,
+      "day": 2
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.LeapDay",
+      "month": 2,
+      "day": 29,
+      "leapYearOnly": true
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.DayOfBones",
+      "month": 3,
+      "day": 5
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Firstbloom",
+      "month": 3,
+      "day": 20
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.PlantingWeek",
+      "month": 3,
+      "day": 21
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Taxfest",
+      "month": 4,
+      "day": 15
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.RemembranceMoon",
+      "month": 5,
+      "day": 15
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.SunwroughtFestival",
+      "month": 6,
+      "day": 21
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.BurningBlades",
+      "month": 6,
+      "day": 10
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.ArcherDay",
+      "month": 7,
+      "day": 3
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Armasse",
+      "month": 8,
+      "day": 16
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.SwallowtailFestival",
+      "month": 9,
+      "day": 22
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.HarvestFeast",
+      "month": 9,
+      "day": 23
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.AscendanceDay",
+      "month": 10,
+      "day": 6
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Jestercap",
+      "month": 10,
+      "day": 27
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.SevenVeils",
+      "month": 11,
+      "day": 7
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.WinterWeek",
+      "month": 12,
+      "day": 8
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Candlemark",
+      "month": 12,
+      "day": 21
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.Crystalhue",
+      "month": 12,
+      "day": 22
+    },
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Holiday.NightOfThePale",
+      "month": 12,
+      "day": 31
+    }
   ],
   "seasons": {
     "values": [
-      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "monthStart": 12, "monthEnd": 2, "dayStart": 1, "dayEnd": 28 },
-      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "monthStart": 3, "monthEnd": 5, "dayStart": 1, "dayEnd": 31 },
-      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "monthStart": 6, "monthEnd": 8, "dayStart": 1, "dayEnd": 31 },
-      { "name": "CALENDARIA.Season.Fall", "icon": "fas fa-leaf", "color": "#d2691e", "monthStart": 9, "monthEnd": 11, "dayStart": 1, "dayEnd": 30 }
+      {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "monthStart": 12,
+        "monthEnd": 2,
+        "dayStart": 1,
+        "dayEnd": 28
+      },
+      {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "monthStart": 3,
+        "monthEnd": 5,
+        "dayStart": 1,
+        "dayEnd": 31
+      },
+      {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "monthStart": 6,
+        "monthEnd": 8,
+        "dayStart": 1,
+        "dayEnd": 31
+      },
+      {
+        "name": "CALENDARIA.Season.Fall",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "monthStart": 9,
+        "monthEnd": 11,
+        "dayStart": 1,
+        "dayEnd": 30
+      }
     ]
   },
   "eras": [
-    { "name": "CALENDARIA.Calendar.Golarion.Era.AbsalomReckoning", "abbreviation": "CALENDARIA.Calendar.Golarion.Era.AR", "startYear": 1, "endYear": null, "format": "suffix", "template": null }
+    {
+      "name": "CALENDARIA.Calendar.Golarion.Era.AbsalomReckoning",
+      "abbreviation": "CALENDARIA.Calendar.Golarion.Era.AR",
+      "startYear": 1,
+      "endYear": null,
+      "format": "suffix",
+      "template": null
+    }
   ],
   "moons": [
     {
@@ -81,16 +299,60 @@
       "cycleLength": 29,
       "color": "#E8E8E8",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 1 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 1
+      }
     }
   ],
   "daylight": {
@@ -102,14 +364,21 @@
   },
   "cycles": [],
   "canonicalHours": [],
-  "weeks": { "enabled": false, "type": "year-based", "names": [] },
-  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": []
+  },
+  "amPmNotation": {
+    "am": "AM",
+    "pm": "PM"
+  },
   "dateFormats": {
-    "short": "{{d}} {{b}}",
-    "long": "{{d}} {{B}}, {{y}} {{era}}",
-    "full": "{{B}} {{d}}, {{y}}",
-    "time": "{{H}}:{{M}}",
-    "time12": "{{h}}:{{M}} {{p}}"
+    "short": "D MMM",
+    "long": "D MMMM, YYYY [era]",
+    "full": "MMMM D, YYYY",
+    "time": "HH:mm",
+    "time12": "h:mm a"
   },
   "metadata": {
     "id": "golarion",

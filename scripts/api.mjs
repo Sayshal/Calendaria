@@ -11,6 +11,7 @@ import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import SearchManager from './search/search-manager.mjs';
+import { formatCustom, PRESET_FORMATTERS, timeSince, getAvailableTokens, DEFAULT_FORMAT_PRESETS } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
@@ -330,17 +331,50 @@ export const CalendariaAPI = {
   /**
    * Format date and time components as a string.
    * @param {object} [components] - Time components to format (defaults to current time)
-   * @param {string} [formatter] - Formatter type (e.g., 'date', 'time', 'datetime')
+   * @param {string} [formatOrPreset] - Format string with tokens OR preset name (short, long, full, time, time12, datetime)
    * @returns {string} Formatted date/time string
    */
-  formatDate(components = null, formatter = 'date') {
+  formatDate(components = null, formatOrPreset = 'long') {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return '';
-    const isInternalComponents = !components;
     components = components || game.time.components;
-    if (typeof calendar.format === 'function') return calendar.format(components, formatter);
-    const displayYear = isInternalComponents ? components.year + calendar.years.yearZero : components.year;
-    return `${components.dayOfMonth + 1} ${calendar.months.values[components.month]?.name ?? 'Unknown'} ${displayYear}`;
+
+    // Check if it's a preset name
+    if (PRESET_FORMATTERS[formatOrPreset]) {
+      return PRESET_FORMATTERS[formatOrPreset](calendar, components);
+    }
+
+    // Otherwise treat as a format string
+    return formatCustom(calendar, components, formatOrPreset);
+  },
+
+  /**
+   * Get relative time description between two dates.
+   * @param {object} targetDate - Target date { year, month, dayOfMonth }
+   * @param {object} [currentDate] - Current date (defaults to current time)
+   * @returns {string} Relative time string (e.g., "3 days ago", "in 2 weeks")
+   */
+  timeSince(targetDate, currentDate = null) {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return '';
+    currentDate = currentDate || game.time.components;
+    return timeSince(calendar, targetDate, currentDate);
+  },
+
+  /**
+   * Get available format tokens and their descriptions.
+   * @returns {Array<{token: string, description: string, type: string}>}
+   */
+  getFormatTokens() {
+    return getAvailableTokens();
+  },
+
+  /**
+   * Get default format presets.
+   * @returns {Object<string, string>}
+   */
+  getFormatPresets() {
+    return { ...DEFAULT_FORMAT_PRESETS };
   },
 
   /* -------------------------------------------- */

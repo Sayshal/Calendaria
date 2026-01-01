@@ -44,7 +44,22 @@ export const SETTINGS = {
   HUD_STICKY_STATES: 'hudStickyStates',
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
-  CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime'
+  CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
+  DISPLAY_FORMATS: 'displayFormats'
+};
+
+/**
+ * Display format location identifiers.
+ * Each location can have separate GM and player formats.
+ * @enum {string}
+ */
+export const DISPLAY_LOCATIONS = {
+  HUD_DATE: 'hudDate',
+  HUD_TIME: 'hudTime',
+  COMPACT_HEADER: 'compactHeader',
+  COMPACT_TIME: 'compactTime',
+  FULL_CALENDAR_HEADER: 'fullCalendarHeader',
+  CHAT_TIMESTAMP: 'chatTimestamp'
 };
 
 /** @enum {string} Scene flags for scene-specific configuration */
@@ -68,7 +83,8 @@ export const TEMPLATES = {
     PANEL_COMPACT: `modules/${MODULE.ID}/templates/settings/tab-compact.hbs`,
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
-    PANEL_FULLCAL: `modules/${MODULE.ID}/templates/settings/tab-fullcal.hbs`
+    PANEL_FULLCAL: `modules/${MODULE.ID}/templates/settings/tab-fullcal.hbs`,
+    PANEL_FORMATS: `modules/${MODULE.ID}/templates/settings/tab-formats.hbs`
   },
   PARTIALS: {
     SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,

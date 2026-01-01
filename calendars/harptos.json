@@ -11,32 +11,123 @@
   },
   "months": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Hammer", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.HammerShort", "ordinal": 1, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Alturiak", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.AlturiakShort", "ordinal": 2, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Ches", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.ChesShort", "ordinal": 3, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Tarsakh", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.TarsakhShort", "ordinal": 4, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Mirtul", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.MirtulShort", "ordinal": 5, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Kythorn", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.KythornShort", "ordinal": 6, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Flamerule", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.FlameruleShort", "ordinal": 7, "days": 31, "leapDays": 32 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Eleasis", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.EleasisShort", "ordinal": 8, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Eleint", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.EleintShort", "ordinal": 9, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Marpenoth", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.MarpenothShort", "ordinal": 10, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Uktar", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.UktarShort", "ordinal": 11, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Harptos.Month.Nightal", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.NightalShort", "ordinal": 12, "days": 30 }
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Hammer",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.HammerShort",
+        "ordinal": 1,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Alturiak",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.AlturiakShort",
+        "ordinal": 2,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Ches",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.ChesShort",
+        "ordinal": 3,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Tarsakh",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.TarsakhShort",
+        "ordinal": 4,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Mirtul",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.MirtulShort",
+        "ordinal": 5,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Kythorn",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.KythornShort",
+        "ordinal": 6,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Flamerule",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.FlameruleShort",
+        "ordinal": 7,
+        "days": 31,
+        "leapDays": 32
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Eleasis",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.EleasisShort",
+        "ordinal": 8,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Eleint",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.EleintShort",
+        "ordinal": 9,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Marpenoth",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.MarpenothShort",
+        "ordinal": 10,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Uktar",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.UktarShort",
+        "ordinal": 11,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Month.Nightal",
+        "abbreviation": "CALENDARIA.Calendar.Harptos.Month.NightalShort",
+        "ordinal": 12,
+        "days": 30
+      }
     ]
   },
   "days": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Harptos.Day.One", "ordinal": 1 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Two", "ordinal": 2 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Three", "ordinal": 3 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Four", "ordinal": 4 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Five", "ordinal": 5 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Six", "ordinal": 6 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Seven", "ordinal": 7 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Eight", "ordinal": 8 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Nine", "ordinal": 9 },
-      { "name": "CALENDARIA.Calendar.Harptos.Day.Ten", "ordinal": 10 }
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.One",
+        "ordinal": 1
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Two",
+        "ordinal": 2
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Three",
+        "ordinal": 3
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Four",
+        "ordinal": 4
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Five",
+        "ordinal": 5
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Six",
+        "ordinal": 6
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Seven",
+        "ordinal": 7
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Eight",
+        "ordinal": 8
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Nine",
+        "ordinal": 9
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Day.Ten",
+        "ordinal": 10
+      }
     ],
     "daysPerYear": 365,
     "hoursPerDay": 24,
@@ -44,23 +135,79 @@
     "secondsPerMinute": 60
   },
   "festivals": [
-    { "name": "CALENDARIA.Calendar.Harptos.Festival.Midwinter", "month": 1, "day": 31 },
-    { "name": "CALENDARIA.Calendar.Harptos.Festival.Greengrass", "month": 4, "day": 31 },
-    { "name": "CALENDARIA.Calendar.Harptos.Festival.Midsummer", "month": 7, "day": 31 },
-    { "name": "CALENDARIA.Calendar.Harptos.Festival.Shieldmeet", "month": 7, "day": 32, "leapYearOnly": true },
-    { "name": "CALENDARIA.Calendar.Harptos.Festival.Highharvestide", "month": 9, "day": 31 },
-    { "name": "CALENDARIA.Calendar.Harptos.Festival.FeastOfTheMoon", "month": 11, "day": 31 }
+    {
+      "name": "CALENDARIA.Calendar.Harptos.Festival.Midwinter",
+      "month": 1,
+      "day": 31
+    },
+    {
+      "name": "CALENDARIA.Calendar.Harptos.Festival.Greengrass",
+      "month": 4,
+      "day": 31
+    },
+    {
+      "name": "CALENDARIA.Calendar.Harptos.Festival.Midsummer",
+      "month": 7,
+      "day": 31
+    },
+    {
+      "name": "CALENDARIA.Calendar.Harptos.Festival.Shieldmeet",
+      "month": 7,
+      "day": 32,
+      "leapYearOnly": true
+    },
+    {
+      "name": "CALENDARIA.Calendar.Harptos.Festival.Highharvestide",
+      "month": 9,
+      "day": 31
+    },
+    {
+      "name": "CALENDARIA.Calendar.Harptos.Festival.FeastOfTheMoon",
+      "month": 11,
+      "day": 31
+    }
   ],
   "seasons": {
     "values": [
-      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 79, "dayEnd": 171 },
-      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 172, "dayEnd": 263 },
-      { "name": "CALENDARIA.Calendar.Harptos.Season.Fall", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 264, "dayEnd": 353 },
-      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 354, "dayEnd": 78 }
+      {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "dayStart": 79,
+        "dayEnd": 171
+      },
+      {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "dayStart": 172,
+        "dayEnd": 263
+      },
+      {
+        "name": "CALENDARIA.Calendar.Harptos.Season.Fall",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "dayStart": 264,
+        "dayEnd": 353
+      },
+      {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "dayStart": 354,
+        "dayEnd": 78
+      }
     ]
   },
   "eras": [
-    { "name": "CALENDARIA.Era.DaleReckoning", "abbreviation": "CALENDARIA.Era.DR", "startYear": 1, "endYear": null, "format": "suffix", "template": null }
+    {
+      "name": "CALENDARIA.Era.DaleReckoning",
+      "abbreviation": "CALENDARIA.Era.DR",
+      "startYear": 1,
+      "endYear": null,
+      "format": "suffix",
+      "template": null
+    }
   ],
   "moons": [
     {
@@ -68,16 +215,60 @@
       "cycleLength": 30,
       "color": "#C0C0C0",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 15 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 15
+      }
     }
   ],
   "daylight": {
@@ -89,14 +280,21 @@
   },
   "cycles": [],
   "canonicalHours": [],
-  "weeks": { "enabled": false, "type": "year-based", "names": [] },
-  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": []
+  },
+  "amPmNotation": {
+    "am": "AM",
+    "pm": "PM"
+  },
   "dateFormats": {
-    "short": "{{d}} {{b}}",
-    "long": "{{d}} {{B}}, {{y}}",
-    "full": "{{B}} {{d}}, {{y}}",
-    "time": "{{H}}:{{M}}",
-    "time12": "{{h}}:{{M}} {{p}}"
+    "short": "D MMM",
+    "long": "D MMMM, YYYY",
+    "full": "MMMM D, YYYY",
+    "time": "HH:mm",
+    "time12": "h:mm a"
   },
   "metadata": {
     "id": "harptos",

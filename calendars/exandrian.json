@@ -7,28 +7,105 @@
   },
   "months": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Horisal", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.HorisalShort", "ordinal": 1, "days": 29 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Misuthar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.MisutharShort", "ordinal": 2, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Dualahei", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.DualaheiShort", "ordinal": 3, "days": 30 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Thunsheer", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.ThunsheerShort", "ordinal": 4, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Unndilar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.UnndillarShort", "ordinal": 5, "days": 28 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Brussendar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.BrussendarShort", "ordinal": 6, "days": 31 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Sydenstar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.SydenstarShort", "ordinal": 7, "days": 32 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Fessuran", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.FessuranShort", "ordinal": 8, "days": 29 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Quenthel", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.QuenthelShort", "ordinal": 9, "days": 27 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Cuersaar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.CuersaarShort", "ordinal": 10, "days": 29 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Month.Duscar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.DuscarShort", "ordinal": 11, "days": 32 }
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Horisal",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.HorisalShort",
+        "ordinal": 1,
+        "days": 29
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Misuthar",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.MisutharShort",
+        "ordinal": 2,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Dualahei",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.DualaheiShort",
+        "ordinal": 3,
+        "days": 30
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Thunsheer",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.ThunsheerShort",
+        "ordinal": 4,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Unndilar",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.UnndillarShort",
+        "ordinal": 5,
+        "days": 28
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Brussendar",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.BrussendarShort",
+        "ordinal": 6,
+        "days": 31
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Sydenstar",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.SydenstarShort",
+        "ordinal": 7,
+        "days": 32
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Fessuran",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.FessuranShort",
+        "ordinal": 8,
+        "days": 29
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Quenthel",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.QuenthelShort",
+        "ordinal": 9,
+        "days": 27
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Cuersaar",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.CuersaarShort",
+        "ordinal": 10,
+        "days": 29
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Month.Duscar",
+        "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.DuscarShort",
+        "ordinal": 11,
+        "days": 32
+      }
     ]
   },
   "days": {
     "values": [
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Miresen", "ordinal": 1 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Grissen", "ordinal": 2 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Whelsen", "ordinal": 3 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Conthsen", "ordinal": 4 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Folsen", "ordinal": 5 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Yulisen", "ordinal": 6 },
-      { "name": "CALENDARIA.Calendar.Exandrian.Day.Dapsen", "ordinal": 7, "isRestDay": true }
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Miresen",
+        "ordinal": 1
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Grissen",
+        "ordinal": 2
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Whelsen",
+        "ordinal": 3
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Conthsen",
+        "ordinal": 4
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Folsen",
+        "ordinal": 5
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Yulisen",
+        "ordinal": 6
+      },
+      {
+        "name": "CALENDARIA.Calendar.Exandrian.Day.Dapsen",
+        "ordinal": 7,
+        "isRestDay": true
+      }
     ],
     "daysPerYear": 328,
     "hoursPerDay": 24,
@@ -36,33 +113,128 @@
     "secondsPerMinute": 60
   },
   "festivals": [
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.NewDawn", "month": 1, "day": 1 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Hillsgold", "month": 2, "day": 27 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.DayOfChallenging", "month": 3, "day": 7 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Renewal", "month": 3, "day": 26 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.WildsMouth", "month": 4, "day": 20 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Zenith", "month": 6, "day": 26 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Midsummer", "month": 7, "day": 20 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Elvendawn", "month": 8, "day": 3 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Highsummer", "month": 8, "day": 7 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.HarvestClose", "month": 9, "day": 3 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.HarvestsRise", "month": 10, "day": 11 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Zan", "month": 10, "day": 26 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.Barren", "month": 11, "day": 2 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.EmbertideStart", "month": 11, "day": 5 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.EmbertideEnd", "month": 11, "day": 8 },
-    { "name": "CALENDARIA.Calendar.Exandrian.Festival.WintersClose", "month": 11, "day": 20 }
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.NewDawn",
+      "month": 1,
+      "day": 1
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Hillsgold",
+      "month": 2,
+      "day": 27
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.DayOfChallenging",
+      "month": 3,
+      "day": 7
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Renewal",
+      "month": 3,
+      "day": 26
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.WildsMouth",
+      "month": 4,
+      "day": 20
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Zenith",
+      "month": 6,
+      "day": 26
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Midsummer",
+      "month": 7,
+      "day": 20
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Elvendawn",
+      "month": 8,
+      "day": 3
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Highsummer",
+      "month": 8,
+      "day": 7
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.HarvestClose",
+      "month": 9,
+      "day": 3
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.HarvestsRise",
+      "month": 10,
+      "day": 11
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Zan",
+      "month": 10,
+      "day": 26
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.Barren",
+      "month": 11,
+      "day": 2
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.EmbertideStart",
+      "month": 11,
+      "day": 5
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.EmbertideEnd",
+      "month": 11,
+      "day": 8
+    },
+    {
+      "name": "CALENDARIA.Calendar.Exandrian.Festival.WintersClose",
+      "month": 11,
+      "day": 20
+    }
   ],
   "seasons": {
     "values": [
-      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 296, "dayEnd": 58 },
-      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 59, "dayEnd": 148 },
-      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 149, "dayEnd": 237 },
-      { "name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 238, "dayEnd": 295 }
+      {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "dayStart": 296,
+        "dayEnd": 58
+      },
+      {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "dayStart": 59,
+        "dayEnd": 148
+      },
+      {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "dayStart": 149,
+        "dayEnd": 237
+      },
+      {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "dayStart": 238,
+        "dayEnd": 295
+      }
     ]
   },
   "eras": [
-    { "name": "CALENDARIA.Era.PostDivergence", "abbreviation": "CALENDARIA.Era.PD", "startYear": 1, "endYear": null, "format": "suffix", "template": null }
+    {
+      "name": "CALENDARIA.Era.PostDivergence",
+      "abbreviation": "CALENDARIA.Era.PD",
+      "startYear": 1,
+      "endYear": null,
+      "format": "suffix",
+      "template": null
+    }
   ],
   "moons": [
     {
@@ -70,32 +242,120 @@
       "cycleLength": 33,
       "color": "#E8E8E8",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 1 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 1
+      }
     },
     {
       "name": "CALENDARIA.Moon.Exandrian.Ruidus",
       "cycleLength": 328,
       "color": "#8B0000",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 1 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 1
+      }
     }
   ],
   "daylight": {
@@ -107,14 +367,21 @@
   },
   "cycles": [],
   "canonicalHours": [],
-  "weeks": { "enabled": false, "type": "year-based", "names": [] },
-  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": []
+  },
+  "amPmNotation": {
+    "am": "AM",
+    "pm": "PM"
+  },
   "dateFormats": {
-    "short": "{{d}} {{b}}",
-    "long": "{{d}} {{B}}, {{y}}",
-    "full": "{{B}} {{d}}, {{y}}",
-    "time": "{{H}}:{{M}}",
-    "time12": "{{h}}:{{M}} {{p}}"
+    "short": "D MMM",
+    "long": "D MMMM, YYYY",
+    "full": "MMMM D, YYYY",
+    "time": "HH:mm",
+    "time12": "h:mm a"
   },
   "metadata": {
     "id": "exandrian",

@@ -12,6 +12,7 @@ import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { formatForLocation } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
@@ -323,11 +324,16 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
 
+    // Format header using display settings
+    const headerComponents = { year, month, dayOfMonth: 1 };
+    const formattedHeader = formatForLocation(calendar, headerComponents, 'compactHeader');
+
     return {
       year,
       month,
       monthName: localize(monthData.name),
       yearDisplay: calendar.formatYearWithEra?.(year) ?? String(year),
+      formattedHeader,
       currentSeason,
       currentEra,
       weeks,
@@ -573,6 +579,7 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
+    this.#hooks.push({ name: 'calendaria.displayFormatsChanged', id: Hooks.on('calendaria.displayFormatsChanged', () => this.render()) });
   }
 
   /** @override */
@@ -697,7 +704,11 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.rendered) return;
     const timeEl = this.element.querySelector('.time-value');
     const dateEl = this.element.querySelector('.date-value');
-    if (timeEl) timeEl.textContent = TimeKeeper.getFormattedTime();
+    const calendar = this.calendar;
+    const components = game.time.components;
+    if (timeEl && calendar) {
+      timeEl.textContent = formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'compactTime');
+    }
     if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
     const currentDay = ViewUtils.getCurrentViewedDate(this.calendar)?.day;
     if (currentDay !== this.#lastDay) {
@@ -1195,18 +1206,30 @@ export class CompactCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!resultsContainer) return;
     if (this.#searchResults?.length) {
       resultsContainer.innerHTML = this.#searchResults
-        .map(
-          (r) => `
-        <div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
-          <span class="result-name">${r.name}</span>
-          ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-        </div>`
-        )
+        .map((r) => {
+          const icons = [];
+          if (r.data?.icon) icons.push(`<i class="result-note-icon ${r.data.icon}" style="color: ${r.data.color || '#4a9eff'}" data-tooltip="${localize('CALENDARIA.Search.NoteIcon')}"></i>`);
+          if (r.data?.gmOnly) icons.push(`<i class="result-gm-icon fas fa-lock" data-tooltip="${localize('CALENDARIA.Search.GMOnly')}"></i>`);
+          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}" data-tooltip="${r.data.repeatTooltip || ''}"></i>`);
+          if (r.data?.categoryIcons?.length) {
+            for (const cat of r.data.categoryIcons) icons.push(`<i class="result-category-icon fas ${cat.icon}" style="color: ${cat.color}" data-tooltip="${cat.label}"></i>`);
+          }
+          return `<div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
+            <div class="result-content">
+              <span class="result-name">${r.name}</span>
+              ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
+            </div>
+            ${icons.length ? `<div class="result-icons">${icons.join('')}</div>` : ''}
+          </div>`;
+        })
         .join('');
+      resultsContainer.classList.add('has-results');
     } else if (this.#searchTerm?.length >= 2) {
       resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
+      resultsContainer.classList.add('has-results');
     } else {
       resultsContainer.innerHTML = '';
+      resultsContainer.classList.remove('has-results');
     }
   }
 

@@ -11,6 +11,7 @@ import { SettingsPanel } from './applications/settings/settings-panel.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
 import { BUNDLED_CALENDARS } from './calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
+import { migrateCustomCalendars } from './utils/format-utils.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 
@@ -88,6 +89,15 @@ export function registerSettings() {
     config: false,
     type: new ObjectField({ initial: { timeControls: false, sidebar: false, position: false } })
   });
+
+  /** Track if format migration has been run */
+  game.settings.register(MODULE.ID, 'formatMigrationComplete', {
+    name: 'Format Migration Complete',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
 
   /** Default setting for syncing scene darkness with sun position */
   game.settings.register(MODULE.ID, SETTINGS.DARKNESS_SYNC, {
@@ -261,6 +271,31 @@ export function registerSettings() {
   });
 
   // ========================================//
+  //  Display Formats                        //
+  // ========================================//
+
+  /**
+   * Display format configuration for each UI location.
+   * Stores format strings or preset names for GM and player views.
+   * Structure: { locationId: { gm: formatString, player: formatString } }
+   */
+  game.settings.register(MODULE.ID, SETTINGS.DISPLAY_FORMATS, {
+    name: 'Display Formats',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({
+      initial: {
+        hudDate: { gm: 'ordinal', player: 'ordinal' },
+        hudTime: { gm: 'time', player: 'time' },
+        compactHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
+        compactTime: { gm: 'time', player: 'time' },
+        fullCalendarHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
+        chatTimestamp: { gm: 'short', player: 'short' }
+      }
+    })
+  });
+
+  // ========================================//
   //  Time Integration                       //
   // ========================================//
 
@@ -419,4 +454,7 @@ export function registerReadySettings() {
       initial: ''
     })
   });
+
+  // Run format migration for custom calendars
+  migrateCustomCalendars();
 }

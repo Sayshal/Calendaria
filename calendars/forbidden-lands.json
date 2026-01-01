@@ -7,23 +7,79 @@
   },
   "months": {
     "values": [
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Winterwane", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.WinterwaneShort", "ordinal": 1, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Springrise", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SpringriseShort", "ordinal": 2, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Springwane", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SpringwaneShort", "ordinal": 3, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Summermaze", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SummermazeShort", "ordinal": 4, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Summerend", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SummerendShort", "ordinal": 5, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Harvestfall", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.HarvestfallShort", "ordinal": 6, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Fallwane", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.FallwaneShort", "ordinal": 7, "days": 45 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Winterdeep", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.WinterdeepShort", "ordinal": 8, "days": 45 }
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Winterwane",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.WinterwaneShort",
+        "ordinal": 1,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Springrise",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SpringriseShort",
+        "ordinal": 2,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Springwane",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SpringwaneShort",
+        "ordinal": 3,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Summermaze",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SummermazeShort",
+        "ordinal": 4,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Summerend",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SummerendShort",
+        "ordinal": 5,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Harvestfall",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.HarvestfallShort",
+        "ordinal": 6,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Fallwane",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.FallwaneShort",
+        "ordinal": 7,
+        "days": 45
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Month.Winterdeep",
+        "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.WinterdeepShort",
+        "ordinal": 8,
+        "days": 45
+      }
     ]
   },
   "days": {
     "values": [
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Sunday", "ordinal": 1 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Moonday", "ordinal": 2 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Bladeday", "ordinal": 3 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Spiritday", "ordinal": 4 },
-      { "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Stillday", "ordinal": 5, "isRestDay": true }
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Sunday",
+        "ordinal": 1
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Moonday",
+        "ordinal": 2
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Bladeday",
+        "ordinal": 3
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Spiritday",
+        "ordinal": 4
+      },
+      {
+        "name": "CALENDARIA.Calendar.ForbiddenLands.Day.Stillday",
+        "ordinal": 5,
+        "isRestDay": true
+      }
     ],
     "daysPerYear": 360,
     "hoursPerDay": 24,
@@ -31,23 +87,80 @@
     "secondsPerMinute": 60
   },
   "festivals": [
-    { "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.AwakeningDay", "month": 2, "day": 1 },
-    { "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.Springrise", "month": 2, "day": 23 },
-    { "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.MidsummerBlot", "month": 4, "day": 23 },
-    { "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.HarvestFeast", "month": 6, "day": 23 },
-    { "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.WinterNight", "month": 8, "day": 23 }
+    {
+      "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.AwakeningDay",
+      "month": 2,
+      "day": 1
+    },
+    {
+      "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.Springrise",
+      "month": 2,
+      "day": 23
+    },
+    {
+      "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.MidsummerBlot",
+      "month": 4,
+      "day": 23
+    },
+    {
+      "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.HarvestFeast",
+      "month": 6,
+      "day": 23
+    },
+    {
+      "name": "CALENDARIA.Calendar.ForbiddenLands.Festival.WinterNight",
+      "month": 8,
+      "day": 23
+    }
   ],
   "seasons": {
     "values": [
-      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 0, "dayEnd": 44 },
-      { "name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling", "color": "#90ee90", "dayStart": 45, "dayEnd": 134 },
-      { "name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun", "color": "#ffd700", "dayStart": 135, "dayEnd": 224 },
-      { "name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf", "color": "#d2691e", "dayStart": 225, "dayEnd": 314 },
-      { "name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 315, "dayEnd": 359 }
+      {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "dayStart": 0,
+        "dayEnd": 44
+      },
+      {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "dayStart": 45,
+        "dayEnd": 134
+      },
+      {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "dayStart": 135,
+        "dayEnd": 224
+      },
+      {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "dayStart": 225,
+        "dayEnd": 314
+      },
+      {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "dayStart": 315,
+        "dayEnd": 359
+      }
     ]
   },
   "eras": [
-    { "name": "CALENDARIA.Era.AlderlandReckoning", "abbreviation": "CALENDARIA.Era.AS", "startYear": 1, "endYear": null, "format": "suffix", "template": null }
+    {
+      "name": "CALENDARIA.Era.AlderlandReckoning",
+      "abbreviation": "CALENDARIA.Era.AS",
+      "startYear": 1,
+      "endYear": null,
+      "format": "suffix",
+      "template": null
+    }
   ],
   "moons": [
     {
@@ -55,16 +168,60 @@
       "cycleLength": 30,
       "color": "#E8E8E8",
       "phases": [
-        { "name": "CALENDARIA.MoonPhase.NewMoon", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg", "start": 0, "end": 0.125 },
-        { "name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        { "name": "CALENDARIA.MoonPhase.FirstQuarter", "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg", "start": 0.25, "end": 0.375 },
-        { "name": "CALENDARIA.MoonPhase.WaxingGibbous", "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg", "start": 0.375, "end": 0.5 },
-        { "name": "CALENDARIA.MoonPhase.FullMoon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg", "start": 0.5, "end": 0.625 },
-        { "name": "CALENDARIA.MoonPhase.WaningGibbous", "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg", "start": 0.625, "end": 0.75 },
-        { "name": "CALENDARIA.MoonPhase.LastQuarter", "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg", "start": 0.75, "end": 0.875 },
-        { "name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1 }
+        {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       ],
-      "referenceDate": { "year": 0, "month": 0, "day": 15 }
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "day": 15
+      }
     }
   ],
   "daylight": {
@@ -76,14 +233,21 @@
   },
   "cycles": [],
   "canonicalHours": [],
-  "weeks": { "enabled": false, "type": "year-based", "names": [] },
-  "amPmNotation": { "am": "AM", "pm": "PM" },
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": []
+  },
+  "amPmNotation": {
+    "am": "AM",
+    "pm": "PM"
+  },
   "dateFormats": {
-    "short": "{{d}} {{b}}",
-    "long": "{{d}} {{B}}, {{y}}",
-    "full": "{{B}} {{d}}, {{y}}",
-    "time": "{{H}}:{{M}}",
-    "time12": "{{h}}:{{M}} {{p}}"
+    "short": "D MMM",
+    "long": "D MMMM, YYYY",
+    "full": "MMMM D, YYYY",
+    "time": "HH:mm",
+    "time12": "h:mm a"
   },
   "metadata": {
     "id": "forbidden-lands",
