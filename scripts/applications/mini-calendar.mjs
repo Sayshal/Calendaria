@@ -714,7 +714,8 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = game.time.components;
     if (timeEl && calendar) {
-      timeEl.textContent = formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime');
+      const yearZero = calendar.years?.yearZero ?? 0;
+      timeEl.textContent = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime');
     }
     if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
     const currentDay = ViewUtils.getCurrentViewedDate(this.calendar)?.day;

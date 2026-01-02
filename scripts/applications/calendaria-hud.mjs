@@ -718,7 +718,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const s = String(components.second ?? 0).padStart(2, '0');
       return `${h}:${m}:${s}`;
     }
-    return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudTime');
+    const yearZero = calendar.years?.yearZero ?? 0;
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudTime');
   }
 
   /**
@@ -729,7 +730,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #formatDateDisplay(components) {
     const calendar = this.calendar;
     if (!calendar) return '';
-    return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudDate');
+    const yearZero = calendar.years?.yearZero ?? 0;
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudDate');
   }
 
   /**
