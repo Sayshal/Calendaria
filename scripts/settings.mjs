@@ -467,6 +467,7 @@ export function registerReadySettings() {
     scope: 'world',
     config: false,
     type: new StringField({
+      blank: true,
       choices: game.users
         .filter((user) => user.isGM)
         .reduce(
