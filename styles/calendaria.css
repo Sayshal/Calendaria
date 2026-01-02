@@ -5534,13 +5534,15 @@
 
 .calendaria-hud-wrapper.compact .calendaria-hud-bar {
   gap: 8px;
-  height: 32px;
-  padding: 5px 8px;
+  height: 30px;
+  padding: 4px 8px;
 }
 
 .calendaria-hud-wrapper.compact .calendaria-hud-btn {
   width: 22px;
-  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  align-self: center;
 }
 
 .calendaria-hud-wrapper.compact .calendaria-hud-btn i {

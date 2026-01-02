@@ -59,7 +59,23 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {boolean} - Is valid export
    */
   static isCalendariumExport(data) {
-    return !!(data.calendars && Array.isArray(data.calendars) && data.calendars[0]?.static?.months && data.calendars[0]?.static?.weekdays);
+    // Check for wrapped calendars array format
+    if (data.calendars && Array.isArray(data.calendars) && data.calendars[0]?.static?.months && data.calendars[0]?.static?.weekdays) return true;
+    // Check for single calendar object format (direct export)
+    if (data.static?.months && data.static?.weekdays) return true;
+    return false;
+  }
+
+  /**
+   * Normalize Calendarium data to expected format.
+   * Wraps single calendar exports in a calendars array.
+   * @param {object} data - Raw Calendarium data
+   * @returns {object} - Normalized data with calendars array
+   */
+  static normalizeData(data) {
+    if (data.calendars && Array.isArray(data.calendars)) return data;
+    // Wrap single calendar object in calendars array
+    return { calendars: [data] };
   }
 
   /* -------------------------------------------- */
@@ -73,7 +89,8 @@ export default class CalendariumImporter extends BaseImporter {
    */
   async transform(data) {
     if (!CalendariumImporter.isCalendariumExport(data)) throw new Error(localize('CALENDARIA.Importer.Calendarium.InvalidFormat'));
-    const calendar = data.calendars[0];
+    const normalizedData = CalendariumImporter.normalizeData(data);
+    const calendar = normalizedData.calendars[0];
     log(3, 'Transforming Calendarium data:', calendar.name);
     this._categories = this.#buildCategoryMap(calendar.categories);
     const months = this.#transformMonths(calendar.static.months);
@@ -364,7 +381,8 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {Promise<object[]>} - Extracted notes array
    */
   async extractNotes(data) {
-    const calendar = data.calendars[0];
+    const normalizedData = CalendariumImporter.normalizeData(data);
+    const calendar = normalizedData.calendars[0];
     const events = calendar.events || [];
     const notes = [];
     this._undatedEvents = [];
@@ -526,7 +544,8 @@ export default class CalendariumImporter extends BaseImporter {
   /** @override */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
-    const calendar = rawData.calendars?.[0] || {};
+    const normalizedData = CalendariumImporter.normalizeData(rawData);
+    const calendar = normalizedData.calendars?.[0] || {};
     preview.noteCount = calendar.events?.length ?? 0;
     preview.categoryCount = calendar.categories?.length ?? 0;
     preview.intercalaryMonths = calendar.static?.months?.filter((m) => m.type === 'intercalary').length || 0;
