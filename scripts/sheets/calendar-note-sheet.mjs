@@ -48,6 +48,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** Current sheet mode. */
   _mode = CalendarNoteSheet.MODES.VIEW;
 
+  /** Track if this is a newly created note that may need cleanup. */
+  _isNewNote = false;
+
   /** @returns {boolean} Whether currently in view mode. */
   get isViewMode() {
     return this._mode === CalendarNoteSheet.MODES.VIEW;
@@ -61,10 +64,35 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** @inheritdoc */
   _configureRenderOptions(options) {
     if (options.isFirstRender) {
-      if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
-      else this._mode = CalendarNoteSheet.MODES.VIEW;
+      if (options.mode === 'edit' && this.document.isOwner) {
+        this._mode = CalendarNoteSheet.MODES.EDIT;
+        // Track if this is a new note (default name and no text content)
+        const defaultName = localize('CALENDARIA.Note.NewNote');
+        const hasDefaultName = this.document.name === defaultName;
+        const hasNoContent = !this.document.text?.content?.trim();
+        this._isNewNote = hasDefaultName && hasNoContent;
+      } else {
+        this._mode = CalendarNoteSheet.MODES.VIEW;
+      }
     }
     super._configureRenderOptions(options);
+  }
+
+  /** @inheritdoc */
+  async _onClose(options) {
+    // Clean up empty notes that were never edited
+    if (this._isNewNote && this.document) {
+      const defaultName = localize('CALENDARIA.Note.NewNote');
+      const hasDefaultName = this.document.name === defaultName;
+      const hasNoContent = !this.document.text?.content?.trim();
+      if (hasDefaultName && hasNoContent) {
+        const journal = this.document.parent;
+        if (journal?.pages?.size === 1) await journal.delete();
+        else await this.document.delete();
+        log(3, 'Deleted empty note on close');
+      }
+    }
+    return super._onClose(options);
   }
 
   /** @inheritdoc */

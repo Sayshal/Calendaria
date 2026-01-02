@@ -325,7 +325,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
 
     // Format header using display settings
-    const headerComponents = { year, month, dayOfMonth: 1 };
+    const headerComponents = { year, month, dayOfMonth: date.day };
     const formattedHeader = formatForLocation(calendar, headerComponents, 'miniCalendarHeader');
 
     return {
@@ -627,6 +627,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyTimeControls = states.timeControls ?? false;
     this.#stickySidebar = states.sidebar ?? false;
     this.#stickyPosition = states.position ?? false;
+    if (!this.element) return;
     const timeControls = this.element.querySelector('.mini-time-controls');
     const sidebar = this.element.querySelector('.mini-sidebar');
     if (this.#stickyTimeControls) {
@@ -713,7 +714,8 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = game.time.components;
     if (timeEl && calendar) {
-      timeEl.textContent = formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime');
+      const yearZero = calendar.years?.yearZero ?? 0;
+      timeEl.textContent = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime');
     }
     if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
     const currentDay = ViewUtils.getCurrentViewedDate(this.calendar)?.day;

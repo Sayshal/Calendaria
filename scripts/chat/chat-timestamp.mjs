@@ -105,7 +105,8 @@ export function formatWorldTime(worldTime) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return '';
   const components = calendar.timeToComponents(worldTime);
-  return formatForLocation(calendar, { ...components, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'chatTimestamp');
+  const yearZero = calendar.years?.yearZero ?? 0;
+  return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'chatTimestamp');
 }
 
 /**

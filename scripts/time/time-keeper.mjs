@@ -433,7 +433,7 @@ export default class TimeKeeper {
     const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
     const monthName = localize(monthNameRaw);
     const day = components.dayOfMonth + 1;
-    const yearZero = cal.year?.yearZero ?? 0;
+    const yearZero = cal.years?.yearZero ?? 0;
     const year = components.year + yearZero;
     return `${day} ${monthName}, ${year}`;
   }

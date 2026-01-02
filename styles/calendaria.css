@@ -5540,7 +5540,9 @@
 
 .calendaria-hud-wrapper.compact .calendaria-hud-btn {
   width: 22px;
-  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  align-self: center;
 }
 
 .calendaria-hud-wrapper.compact .calendaria-hud-btn i {

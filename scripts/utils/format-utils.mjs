@@ -33,8 +33,8 @@ export function ordinal(n) {
  */
 export function dateFormattingParts(calendar, components) {
   const { year, month, dayOfMonth, hour = 0, minute = 0, second = 0 } = components;
-  const yearZero = calendar?.years?.yearZero ?? 0;
-  const displayYear = year + yearZero;
+  // Note: year is expected to already include yearZero offset (display year)
+  const displayYear = year;
 
   // Month info
   const monthData = calendar?.months?.values?.[month];
@@ -376,9 +376,9 @@ export function formatCustom(calendar, components, formatStr) {
   };
 
   return normalizedFormat.replace(TOKEN_REGEX, (match, customToken) => {
-    // Custom token in brackets
+    // Custom token in brackets - return value if known, otherwise literal text
     if (customToken) {
-      return customContext[customToken] ?? match;
+      return customContext[customToken] ?? customToken;
     }
 
     // Standard token - map to parts
@@ -503,12 +503,11 @@ function getCanonicalHourAbbr(calendar, components) {
  * @returns {string} Cycle name
  */
 function getCycleName(calendar, components) {
-  const yearZero = calendar?.years?.yearZero ?? 0;
-  const displayYear = components.year + yearZero;
+  // components.year already includes yearZero offset
   if (!calendar?.cycles?.values?.length) return '';
   const cycle = calendar.cycles.values[0];
   if (!cycle.names?.length) return '';
-  const cycleIndex = (((displayYear - 1) % cycle.names.length) + cycle.names.length) % cycle.names.length;
+  const cycleIndex = (((components.year - 1) % cycle.names.length) + cycle.names.length) % cycle.names.length;
   return localize(cycle.names[cycleIndex]);
 }
 
@@ -519,12 +518,11 @@ function getCycleName(calendar, components) {
  * @returns {number|string} Cycle year number
  */
 function getCycleYear(calendar, components) {
-  const yearZero = calendar?.years?.yearZero ?? 0;
-  const displayYear = components.year + yearZero;
+  // components.year already includes yearZero offset
   if (!calendar?.cycles?.values?.length) return '';
   const cycle = calendar.cycles.values[0];
   if (!cycle.names?.length) return '';
-  const cycleIndex = (((displayYear - 1) % cycle.names.length) + cycle.names.length) % cycle.names.length;
+  const cycleIndex = (((components.year - 1) % cycle.names.length) + cycle.names.length) % cycle.names.length;
   return cycleIndex + 1;
 }
 

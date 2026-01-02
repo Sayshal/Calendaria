@@ -292,7 +292,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
-    const headerComponents = { year, month, dayOfMonth: 1 };
+    const headerComponents = { year, month, dayOfMonth: date.day };
     const formattedHeader = formatForLocation(calendar, headerComponents, 'fullCalendarHeader');
     return {
       year,
