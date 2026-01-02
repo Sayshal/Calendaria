@@ -3365,17 +3365,17 @@
 }
 
 /* ======================================== */
-/* Compact Calendar                         */
+/* MiniCalendar                             */
 /* ======================================== */
 
-.compact-calendar {
-  --compact-day-size: 52px;
-  --compact-gap: 3px;
+.mini-calendar {
+  --mini-day-size: 52px;
+  --mini-gap: 3px;
 
   z-index: var(--z-index-ui);
   position: fixed;
 
-  .compact-calendar-container {
+  .mini-calendar-container {
     display: flex;
     position: relative;
     flex-direction: column;
@@ -3386,24 +3386,24 @@
     box-shadow: 0 4px 12px var(--calendaria-shadow);
     transition: border-radius 0.2s ease;
 
-    &:has(.compact-sidebar:is(.visible, .locked)) {
+    &:has(.mini-sidebar:is(.visible, .locked)) {
       border-radius: 14px 0 0 14px;
 
-      .compact-top-row {
+      .mini-top-row {
         border-radius: 14px 0 0;
       }
 
-      .compact-time-display {
+      .mini-time-display {
         border-radius: 0 0 0 14px;
       }
 
-      .compact-time-controls {
+      .mini-time-controls {
         border-radius: 0 0 0 14px;
       }
     }
   }
 
-  .compact-top-row {
+  .mini-top-row {
     gap: 6px;
     display: flex;
     align-items: center;
@@ -3413,7 +3413,7 @@
     cursor: pointer;
     background: var(--calendaria-bg-lighter);
 
-    .compact-title-group {
+    .mini-title-group {
       gap: 0;
       display: flex;
       flex: 1;
@@ -3422,7 +3422,7 @@
       min-width: 0;
     }
 
-    .compact-title {
+    .mini-title {
       color: var(--calendaria-title-text);
       font-weight: 600;
       font-size: 0.95rem;
@@ -3454,7 +3454,7 @@
     }
   }
 
-  .compact-sidebar {
+  .mini-sidebar {
     gap: 4px;
     display: flex;
     z-index: -1;
@@ -3473,19 +3473,19 @@
     transform: translateX(-100%);
   }
 
-  .compact-sidebar.visible {
+  .mini-sidebar.visible {
     transform: translateX(0);
   }
 
-  .compact-sidebar.locked {
+  .mini-sidebar.locked {
     transform: translateX(0);
   }
 
-  .compact-calendar-container:has(.compact-notes-panel.visible) .compact-sidebar {
+  .mini-calendar-container:has(.mini-notes-panel.visible) .mini-sidebar {
     border-radius: 0;
   }
 
-  .compact-notes-panel {
+  .mini-notes-panel {
     display: flex;
     opacity: 0;
     z-index: -2;
@@ -3507,7 +3507,7 @@
     transform: translateX(-100%);
   }
 
-  .compact-notes-panel.visible {
+  .mini-notes-panel.visible {
     opacity: 1;
     pointer-events: auto;
     transform: translateX(0);
@@ -3766,16 +3766,16 @@
     }
   }
 
-  .compact-grid {
+  .mini-grid {
     z-index: 1;
     position: relative;
     padding: 8px;
     background: var(--calendaria-bg);
   }
 
-  .compact-weekdays {
-    gap: var(--compact-gap);
-    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
+  .mini-weekdays {
+    gap: var(--mini-gap);
+    grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
     display: grid;
     width: fit-content;
     margin: 0 auto 4px;
@@ -3794,21 +3794,21 @@
     }
   }
 
-  .compact-days {
-    gap: var(--compact-gap);
-    grid-template-columns: repeat(var(--compact-weekday-count, 7), var(--compact-day-size));
+  .mini-days {
+    gap: var(--mini-gap);
+    grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
     display: grid;
     width: fit-content;
     margin: 0 auto;
   }
 
-  .compact-day {
+  .mini-day {
     display: flex;
     position: relative;
     justify-content: center;
     align-items: center;
-    width: var(--compact-day-size);
-    height: var(--compact-day-size);
+    width: var(--mini-day-size);
+    height: var(--mini-day-size);
     border-radius: 4px;
     cursor: pointer;
     background: var(--calendaria-bg-lighter);
@@ -3911,7 +3911,7 @@
     }
   }
 
-  .compact-time-display {
+  .mini-time-display {
     display: flex;
     z-index: 1;
     position: relative;
@@ -3972,7 +3972,7 @@
     }
   }
 
-  .compact-time-controls {
+  .mini-time-controls {
     display: flex;
     position: relative;
     justify-content: center;
@@ -6145,7 +6145,7 @@
   }
 
   section.tab[data-tab='timekeeper'],
-  section.tab[data-tab='compact'],
+  section.tab[data-tab='miniCalendar'],
   section.tab[data-tab='hud'] {
     background: linear-gradient(135deg, var(--color-cool-5-50, rgb(30 30 30 / 50%)) 0%, transparent 100%);
   }

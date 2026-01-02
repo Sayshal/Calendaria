@@ -1,0 +1,72 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <div class="button-row open-app-button">
+    <button type="button" data-action="openMiniCalendar">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.Common.Open"}}
+    </button>
+  </div>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.ShowMiniCalendar.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="showMiniCalendar" {{#if showMiniCalendar}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ShowMiniCalendar.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.MiniCalendarControlsDelay.Name"}}</label>
+      <div class="form-fields">
+        <input type="range" name="miniCalendarControlsDelay" value="{{miniCalendarControlsDelay}}" min="1" max="10" step="1">
+        <span class="range-value">{{miniCalendarControlsDelay}}s</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalendarControlsDelay.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
+    <input type="hidden" name="miniCalendarStickySection" value="1">
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.StickyTimeControls"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="miniCalendarStickyTimeControls" {{#if miniCalendarStickyTimeControls}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTimeControls"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.SettingsPanel.Sticky.Sidebar"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="miniCalendarStickySidebar" {{#if miniCalendarStickySidebar}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickySidebar"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.LockPosition"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="miniCalendarStickyPosition" {{#if miniCalendarStickyPosition}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
+
+    <div class="button-row">
+      <button type="button" data-action="resetPosition" data-target="miniCalendar">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
+      </button>
+    </div>
+  </fieldset>
+
+</section>

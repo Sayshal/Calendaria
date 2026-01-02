@@ -17,7 +17,7 @@ import { format, localize } from '../utils/localization.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
-import { CompactCalendar } from './compact-calendar.mjs';
+import { MiniCalendar } from './mini-calendar.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -1113,16 +1113,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   }
 
   /**
-   * Toggle between full and compact calendar views.
-   * Closes this window and opens the compact calendar.
+   * Toggle between full and MiniCalendar views.
+   * Closes this window and opens the MiniCalendar.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onToggleCompact(_event, _target) {
     await this.close();
-    const existing = foundry.applications.instances.get('compact-calendar');
+    const existing = foundry.applications.instances.get('mini-calendar');
     if (existing) existing.render(true, { focus: true });
-    else new CompactCalendar().render(true);
+    else new MiniCalendar().render(true);
   }
 
   /**

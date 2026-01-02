@@ -687,8 +687,8 @@ export function getDisplayLocationDefinitions() {
   return [
     { id: 'hudDate', label: 'CALENDARIA.Format.Location.HudDate', category: 'hud' },
     { id: 'hudTime', label: 'CALENDARIA.Format.Location.HudTime', category: 'hud' },
-    { id: 'compactHeader', label: 'CALENDARIA.Format.Location.CompactHeader', category: 'compact' },
-    { id: 'compactTime', label: 'CALENDARIA.Format.Location.CompactTime', category: 'compact' },
+    { id: 'miniCalendarHeader', label: 'CALENDARIA.Format.Location.MiniCalendarHeader', category: 'miniCalendar' },
+    { id: 'miniCalendarTime', label: 'CALENDARIA.Format.Location.MiniCalendarTime', category: 'miniCalendar' },
     { id: 'fullCalendarHeader', label: 'CALENDARIA.Format.Location.FullCalendarHeader', category: 'fullcal' },
     { id: 'chatTimestamp', label: 'CALENDARIA.Format.Location.ChatTimestamp', category: 'chat' }
   ];

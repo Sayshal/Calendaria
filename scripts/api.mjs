@@ -6,7 +6,7 @@
 
 import { CalendarApplication } from './applications/calendar-application.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
-import { CompactCalendar } from './applications/compact-calendar.mjs';
+import { MiniCalendar } from './applications/mini-calendar.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
@@ -635,25 +635,25 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Show the compact calendar widget.
-   * @returns {Promise<object>} The compact calendar application
+   * Show the MiniCalendar widget.
+   * @returns {Promise<object>} The MiniCalendar application
    */
-  async showCompactCalendar() {
-    return CompactCalendar.show();
+  async showMiniCalendar() {
+    return MiniCalendar.show();
   },
 
   /**
-   * Hide the compact calendar widget.
+   * Hide the MiniCalendar widget.
    */
-  async hideCompactCalendar() {
-    CompactCalendar.hide();
+  async hideMiniCalendar() {
+    MiniCalendar.hide();
   },
 
   /**
-   * Toggle the compact calendar widget visibility.
+   * Toggle the MiniCalendar widget visibility.
    */
-  async toggleCompactCalendar() {
-    CompactCalendar.toggle();
+  async toggleMiniCalendar() {
+    MiniCalendar.toggle();
   },
 
   /* -------------------------------------------- */

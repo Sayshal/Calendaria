@@ -857,36 +857,36 @@ await CALENDARIA.api.openCalendarEditor("custom");  // Edit existing
 
 ---
 
-### showCompactCalendar()
+### showMiniCalendar()
 
-Show the compact calendar widget.
+Show the MiniCalendar widget.
 
 ```javascript
-await CALENDARIA.api.showCompactCalendar();
+await CALENDARIA.api.showMiniCalendar();
 ```
 
-**Returns:** `Promise<object>` - The compact calendar application.
+**Returns:** `Promise<object>` - The MiniCalendar application.
 
 ---
 
-### hideCompactCalendar()
+### hideMiniCalendar()
 
-Hide the compact calendar widget.
+Hide the MiniCalendar widget.
 
 ```javascript
-await CALENDARIA.api.hideCompactCalendar();
+await CALENDARIA.api.hideMiniCalendar();
 ```
 
 **Returns:** `Promise<void>`
 
 ---
 
-### toggleCompactCalendar()
+### toggleMiniCalendar()
 
-Toggle the compact calendar widget visibility.
+Toggle the MiniCalendar widget visibility.
 
 ```javascript
-await CALENDARIA.api.toggleCompactCalendar();
+await CALENDARIA.api.toggleMiniCalendar();
 ```
 
 **Returns:** `Promise<void>`

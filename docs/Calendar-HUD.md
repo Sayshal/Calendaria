@@ -77,7 +77,7 @@ Hover over the bar or enable sticky tray to reveal:
 
 ---
 
-## Compact Calendar
+## MiniCalendar
 
 A mini month view with integrated time controls.
 
@@ -155,7 +155,7 @@ Both HUD modes include a search panel:
 ### Dragging
 
 - **Full HUD**: Drag the info bar
-- **Compact**: Drag the top row (month/year header)
+- **MiniCalendar**: Drag the top row (month/year header)
 
 Position is saved per-client.
 
@@ -169,7 +169,7 @@ Enable "Lock Position" in settings or via the pin button context menu.
 
 ### Resetting Position
 
-Settings > HUD tab (or Compact tab) > Reset Position
+Settings > HUD tab (or MiniCalendar tab) > Reset Position
 
 ---
 
@@ -184,7 +184,7 @@ Access via the pin button. Options persist across sessions.
 | Sticky Tray | Keep time controls tray visible |
 | Lock Position | Prevent dragging |
 
-### Compact Calendar
+### MiniCalendar
 
 | Option | Effect |
 |--------|--------|
@@ -206,11 +206,11 @@ Access via the pin button. Options persist across sessions.
 | Lock Position | Prevent dragging |
 | Reset Position | Reset to default position |
 
-### Compact Tab
+### MiniCalendar Tab
 
 | Setting | Description |
 |---------|-------------|
-| Show Compact Calendar | Enable/disable on world load |
+| Show MiniCalendar | Enable/disable on world load |
 | Controls Delay | Seconds before controls auto-hide (1-10s) |
 | Sticky Time Controls | Keep time controls visible |
 | Sticky Sidebar | Keep sidebar visible |

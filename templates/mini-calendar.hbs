@@ -1,0 +1,266 @@
+<div class="mini-calendar-container">
+  <div class="mini-sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
+    <button type="button" class="sidebar-btn" data-action="close" data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
+      <i class="fas fa-times"></i>
+    </button>
+    <button type="button" class="sidebar-btn" data-action="openFull"
+      data-tooltip="{{localize 'CALENDARIA.MiniCalendar.OpenFull'}}">
+      <i class="fas fa-expand"></i>
+    </button>
+    {{#if isGM}}
+    <button type="button"
+      class="sidebar-btn pin-btn{{#if hasAnyStickyMode}} has-sticky{{/if}}{{#if stickyTimeControls}} sticky-time{{/if}}{{#if stickySidebar}} sticky-sidebar{{/if}}{{#if stickyPosition}} sticky-position{{/if}}"
+      data-action="toggleLock" data-tooltip="{{localize 'CALENDARIA.MiniCalendar.PinControls'}}">
+      <i class="fas fa-thumbtack"></i>
+    </button>
+    {{/if}}
+    <button type="button" class="sidebar-btn" data-action="today" data-tooltip="{{localize 'CALENDARIA.Common.Today'}}">
+      <i class="fas fa-calendar-day"></i>
+    </button>
+    {{#if showSetCurrentDate}}
+    <button type="button" class="sidebar-btn" data-action="setCurrentDate"
+      data-tooltip="{{localize 'CALENDARIA.MiniCalendar.SetCurrentDate'}}">
+      <i class="fas fa-calendar-plus"></i>
+    </button>
+    {{/if}}
+    <button type="button" class="sidebar-btn" data-action="addNote"
+      data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}">
+      <i class="fas fa-plus"></i>
+    </button>
+    <button type="button" class="sidebar-btn" data-action="toggleSearch"
+      data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
+      <i class="fas fa-search"></i>
+    </button>
+    {{#if showViewNotes}}
+    <button type="button" class="sidebar-btn" data-action="viewNotes"
+      data-tooltip="{{localize 'CALENDARIA.MiniCalendar.ViewNotes'}}">
+      <i class="fas fa-list"></i>
+    </button>
+    {{/if}}
+    <button type="button" class="sidebar-btn" data-action="openSettings"
+      data-tooltip="{{localize 'CALENDARIA.Common.Settings'}}">
+      <i class="fas fa-cog"></i>
+    </button>
+  </div>
+
+  <div class="mini-notes-panel{{#if notesPanelVisible}} visible{{/if}}">
+    <div class="notes-panel-header">
+      <span class="notes-panel-title">{{selectedDateLabel}}</span>
+      <button type="button" class="notes-panel-close" data-action="closeNotesPanel"
+        data-tooltip="{{localize 'CALENDARIA.Common.CloseNotesPanel'}}">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="notes-panel-list">
+      {{#each selectedDateNotes}}
+      <div class="notes-panel-item" data-action="openNote" data-page-id="{{id}}" data-journal-id="{{parentId}}">
+        <div class="note-item-icon" style="color: {{color}}">
+          {{#if isImageIcon}}
+          <img src="{{icon}}" alt="">
+          {{else}}
+          <i class="{{icon}}"></i>
+          {{/if}}
+        </div>
+        <div class="note-item-content">
+          <div class="note-item-title">{{name}}</div>
+          <div class="note-item-meta">
+            <span class="note-item-time">{{timeLabel}}</span>
+            <span class="note-item-author">{{author}}</span>
+          </div>
+        </div>
+        {{#if isOwner}}
+        <button type="button" class="note-item-edit" data-action="editNote" data-page-id="{{id}}"
+          data-journal-id="{{parentId}}" data-tooltip="{{localize 'CALENDARIA.ContextMenu.EditNote'}}">
+          <i class="fas fa-edit"></i>
+        </button>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="calendaria-hud-search-panel{{#if searchOpen}} visible{{/if}}">
+    <div class="search-panel-header">
+      <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
+        value="{{searchTerm}}" autocomplete="off">
+    </div>
+    <div class="search-panel-results">
+      {{#if searchResults.length}}
+      {{#each searchResults}}
+      <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}"
+        data-journal-id="{{data.journalId}}">
+        <div class="result-content">
+          <span class="result-name">{{name}}</span>
+          {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
+        </div>
+        <div class="result-icons">
+          {{#if data.icon}}
+          <i class="result-note-icon {{data.icon}}" style="color: {{data.color}}" data-tooltip="{{localize 'CALENDARIA.Search.NoteIcon'}}"></i>
+          {{/if}}
+          {{#if data.gmOnly}}
+          <i class="result-gm-icon fas fa-lock" data-tooltip="{{localize 'CALENDARIA.Search.GMOnly'}}"></i>
+          {{/if}}
+          {{#if data.repeatIcon}}
+          <i class="result-repeat-icon {{data.repeatIcon}}" data-tooltip="{{data.repeatTooltip}}"></i>
+          {{/if}}
+          {{#each data.categoryIcons}}
+          <i class="result-category-icon fas {{this.icon}}" style="color: {{this.color}}" data-tooltip="{{this.label}}"></i>
+          {{/each}}
+        </div>
+      </div>
+      {{/each}}
+      {{else if searchTerm}}
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <span>{{localize "CALENDARIA.Search.NoResults"}}</span>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="mini-top-row{{#if stickyPosition}} position-locked{{/if}}">
+    <button type="button" class="nav-btn" data-action="navigate" data-direction="prev"
+      data-tooltip="{{localize 'CALENDARIA.Common.PreviousMonth'}}">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="mini-title-group">
+      <span class="mini-title">{{calendarData.formattedHeader}}</span>
+    </div>
+    <button type="button" class="nav-btn" data-action="navigate" data-direction="next"
+      data-tooltip="{{localize 'CALENDARIA.Common.NextMonth'}}">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+
+  {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather isGM)}}
+  <div class="calendar-indicators">
+    {{#if weather}}
+    <span class="weather-indicator{{#if isGM}} clickable{{/if}}"
+      data-action="{{#if isGM}}openWeatherPicker{{else}}{{/if}}" style="--weather-color: {{weather.color}}"
+      data-tooltip="{{weather.tooltip}}">
+      <i class="fas {{weather.icon}}"></i>
+      {{weather.label}}
+      {{#if weather.temperature}}
+      <span class="weather-temp">{{weather.temperature}}</span>
+      {{/if}}
+    </span>
+    {{else if isGM}}
+    <span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+      data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
+      <i class="fas fa-cloud"></i>
+      {{localize 'CALENDARIA.Weather.None'}}
+    </span>
+    {{/if}}
+    {{#if calendarData.currentSeason}}
+    <span class="season-indicator" style="--season-color: {{calendarData.currentSeason.color}}"
+      data-tooltip="{{localize 'CALENDARIA.UI.CurrentSeason'}}">
+      <i class="{{calendarData.currentSeason.icon}}"></i>
+      {{localize calendarData.currentSeason.name}}
+    </span>
+    {{/if}}
+    {{#if calendarData.currentEra}}
+    <span class="era-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentEra'}}">
+      <i class="fas fa-hourglass-half"></i>
+      {{localize calendarData.currentEra.name}}
+    </span>
+    {{/if}}
+    {{#if cycleText}}
+    <span class="cycle-indicator" data-tooltip="{{localize 'CALENDARIA.UI.CurrentCycle'}}">
+      <i class="fas fa-arrows-rotate"></i>
+      {{{cycleText}}}
+    </span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  <div class="mini-grid" style="--mini-weekday-count: {{calendarData.daysInWeek}}">
+    <div class="mini-weekdays">
+      {{#each calendarData.weekdays}}
+      <div class="weekday{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
+      {{/each}}
+    </div>
+    <div class="mini-days">
+      {{#each calendarData.weeks}}
+      {{#each this}}
+      {{#if empty}}
+      <div class="mini-day empty"></div>
+      {{else if isFromOtherMonth}}
+      <div class="mini-day other-month{{#if isToday}} today{{/if}}"
+        data-action="navigateToMonth" data-year="{{year}}" data-month="{{month}}">
+        <span class="day-num">{{day}}</span>
+      </div>
+      {{else}}
+      <div
+        class="mini-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
+        data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
+        {{#if festivalName}}data-tooltip="{{festivalName}}" {{/if}}>
+        <span class="day-num">{{day}}</span>
+        {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
+        {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint" style="--moon-color: {{moonColor}}">
+          <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}"
+            data-tooltip="{{moonPhase}}"></span>
+        {{else}}
+        <img class="moon-tiny" src="{{moonIcon}}" alt="{{moonPhase}}" data-tooltip="{{moonPhase}}">
+        {{/if}}{{/if}}
+      </div>
+      {{/if}}
+      {{/each}}
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="mini-time-display" {{#if isGM}}data-action="toggle" {{/if}}>
+    <span class="time-value">{{currentTime}}</span>
+    <span class="date-value hidden">{{currentDate}}</span>
+    {{#if isGM}}
+    <div class="time-toggle {{#if running}}active{{/if}}"
+      data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
+      <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
+    </div>
+    {{/if}}
+  </div>
+
+  {{#if isGM}}
+  <div class="mini-time-controls{{#if controlsVisible}} visible{{/if}}">
+    <div class="controls-group">
+      <button type="button" class="time-btn time-shortcut" data-action="toSunrise"
+        data-tooltip="{{localize 'CALENDARIA.Common.Sunrise'}}">
+        <i class="fas fa-sun"></i>
+      </button>
+      <button type="button" class="time-btn time-shortcut" data-action="toMidday"
+        data-tooltip="{{localize 'CALENDARIA.Common.Midday'}}">
+        <i class="fas fa-cloud-sun"></i>
+      </button>
+      <button type="button" class="time-btn" data-action="reverse5x"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse5x'}}">
+        <i class="fas fa-angle-double-left"></i>
+      </button>
+      <button type="button" class="time-btn" data-action="reverse"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse'}}">
+        <i class="fas fa-angle-left"></i>
+      </button>
+      <select class="increment-select" data-action="increment">
+        {{#each increments}}
+        <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+      <button type="button" class="time-btn" data-action="forward"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward'}}">
+        <i class="fas fa-angle-right"></i>
+      </button>
+      <button type="button" class="time-btn" data-action="forward5x"
+        data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward5x'}}">
+        <i class="fas fa-angle-double-right"></i>
+      </button>
+      <button type="button" class="time-btn time-shortcut" data-action="toSunset"
+        data-tooltip="{{localize 'CALENDARIA.Common.Sunset'}}">
+        <i class="fas fa-cloud-moon"></i>
+      </button>
+      <button type="button" class="time-btn time-shortcut" data-action="toMidnight"
+        data-tooltip="{{localize 'CALENDARIA.Common.Midnight'}}">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </div>
+  {{/if}}
+</div>

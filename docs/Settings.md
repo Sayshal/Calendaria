@@ -84,8 +84,8 @@ Configure date/time display formats for different UI locations. Each location su
 ### Locations
 - **HUD Date**: Date display on Calendaria HUD
 - **HUD Time**: Time display on Calendaria HUD
-- **Compact Header**: Header text on Compact Calendar
-- **Compact Time**: Time display on Compact Calendar
+- **MiniCalendar Header**: Header text on MiniCalendar
+- **MiniCalendar Time**: Time display on MiniCalendar
 - **Full Calendar Header**: Header on the full calendar view
 - **Chat Timestamp**: In-game timestamps in chat
 
@@ -187,10 +187,10 @@ Button to reset HUD to default position.
 
 ---
 
-## Compact Calendar
+## MiniCalendar
 
 ### Show on World Load
-Display the Compact Calendar when the world loads.
+Display the MiniCalendar when the world loads.
 - Default: `true`
 
 ### Controls Delay
@@ -207,7 +207,7 @@ Remember sidebar visibility state.
 - Default: `false`
 
 ### Lock Position
-Prevent dragging the Compact Calendar.
+Prevent dragging the MiniCalendar.
 - Default: `false`
 
 ### Reset Position

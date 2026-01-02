@@ -36,60 +36,43 @@
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
             {{/each}}
           </select>
-          <div class="item month-item" data-index="{{this.index}}">
-            <div class="month-row-main flexrow">
-              <input type="text" name="months.{{this.index}}.name" value="{{this.name}}" class="col-name">
-              <input type="text" name="months.{{this.index}}.abbreviation" value="{{this.abbreviation}}"
-                class="col-abbr">
-              <input type="number" name="months.{{this.index}}.days" value="{{this.days}}" min="1" class="col-days">
-              <input type="number" name="months.{{this.index}}.leapDays" value="{{this.leapDays}}" min="0"
-                class="col-leap">
-              <select name="months.{{this.index}}.startingWeekday" class="col-start-weekday">
-                <option value="" {{#unless this.hasStartingWeekday}}selected{{/unless}}>
-                  {{localize "CALENDARIA.Editor.StartingWeekday.Auto"}}
-                </option>
-                {{#each this.startingWeekdayOptions}}
-                  <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                {{/each}}
-              </select>
-
-              <div class="item-controls col-controls">
-                <button type="button" data-action="toggleCustomWeekdays" data-index="{{this.index}}"
-                  class="{{#if this.hasCustomWeekdays}}active{{/if}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Month.CustomWeekdays'}}">
-                  <i class="fas fa-calendar-week"></i>
-                </button>
-                <button type="button" data-action="addMonth" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddMonth'}}">
-                  <i class="fas fa-plus"></i>
-                </button>
-                <button type="button" data-action="moveMonthUp" data-index="{{this.index}}"
-                  {{#if this.isFirst}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
-                  <i class="fas fa-chevron-up"></i>
-                </button>
-                <button type="button" data-action="moveMonthDown" data-index="{{this.index}}"
-                  {{#if this.isLast}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
-                  <i class="fas fa-chevron-down"></i>
-                </button>
-                <button type="button" data-action="removeMonth" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveMonth'}}">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-              <input type="hidden" name="months.{{this.index}}.hasCustomWeekdays"
-                value="{{#if this.hasCustomWeekdays}}true{{/if}}">
-              {{#if this.hasCustomWeekdays}}
-                {{#each this.customWeekdays}}
-                  <input type="hidden" name="months.{{../index}}.weekdays.{{@index}}.name" value="{{this.name}}">
-                  <input type="hidden" name="months.{{../index}}.weekdays.{{@index}}.abbreviation"
-                    value="{{this.abbreviation}}">
-                  {{#if this.isRestDay}}
-                    <input type="hidden" name="months.{{../index}}.weekdays.{{@index}}.isRestDay" value="true">
-                  {{/if}}
-                {{/each}}
-              {{/if}}
-            </div>
+          <div class="item-controls col-controls">
+            <button type="button" data-action="toggleCustomWeekdays" data-index="{{this.index}}"
+              class="{{#if this.hasCustomWeekdays}}active{{/if}}"
+              data-tooltip="{{localize 'CALENDARIA.Editor.Month.CustomWeekdays'}}">
+              <i class="fas fa-calendar-week"></i>
+            </button>
+            <button type="button" data-action="addMonth" data-index="{{this.index}}"
+              data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddMonth'}}">
+              <i class="fas fa-plus"></i>
+            </button>
+            <button type="button" data-action="moveMonthUp" data-index="{{this.index}}"
+              {{#if this.isFirst}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveUp'}}">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <button type="button" data-action="moveMonthDown" data-index="{{this.index}}"
+              {{#if this.isLast}}disabled{{/if}} data-tooltip="{{localize 'CALENDARIA.Editor.MoveDown'}}">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <button type="button" data-action="removeMonth" data-index="{{this.index}}"
+              data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveMonth'}}">
+              <i class="fas fa-minus"></i>
+            </button>
           </div>
+          <input type="hidden" name="months.{{this.index}}.hasCustomWeekdays"
+            value="{{#if this.hasCustomWeekdays}}true{{/if}}">
+          {{#if this.hasCustomWeekdays}}
+            {{#each this.customWeekdays}}
+              <input type="hidden" name="months.{{../index}}.weekdays.{{@index}}.name" value="{{this.name}}">
+              <input type="hidden" name="months.{{../index}}.weekdays.{{@index}}.abbreviation"
+                value="{{this.abbreviation}}">
+              {{#if this.isRestDay}}
+                <input type="hidden" name="months.{{../index}}.weekdays.{{@index}}.isRestDay" value="true">
+              {{/if}}
+            {{/each}}
+          {{/if}}
+        </div>
+      </div>
     {{/each}}
   </div>
 </section>

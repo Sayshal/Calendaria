@@ -9,7 +9,7 @@ import { CalendariaAPI } from './scripts/api.mjs';
 import { CalendarApplication } from './scripts/applications/calendar-application.mjs';
 import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
 import { CalendariaHUD } from './scripts/applications/calendaria-hud.mjs';
-import { CompactCalendar } from './scripts/applications/compact-calendar.mjs';
+import { MiniCalendar } from './scripts/applications/mini-calendar.mjs';
 import { TimeKeeperHUD } from './scripts/applications/time-keeper-hud.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
@@ -67,7 +67,7 @@ Hooks.once('ready', async () => {
   initializeTheme();
   await WeatherManager.initialize();
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) TimeKeeperHUD.show();
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR)) CompactCalendar.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR)) MiniCalendar.show();
   if (game.system.id === 'dnd5e') {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');
     if (calendarConfig?.enabled) {
@@ -92,7 +92,7 @@ globalThis['CALENDARIA'] = {
   NoteManager,
   CalendarApplication,
   CalendarEditor,
-  CompactCalendar,
+  MiniCalendar,
   TimeKeeper,
   TimeKeeperHUD,
   WeatherManager,

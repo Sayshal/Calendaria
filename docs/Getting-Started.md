@@ -70,7 +70,7 @@ To select a calendar:
 The calendar HUD appears automatically based on your settings. If you don't see it:
 
 1. Go to **Settings** → **Calendaria** → **Calendaria Settings**
-2. Click the **HUD**, **Compact Cal**, or **Time Keeper** tab
+2. Click the **HUD**, **MiniCalendar**, or **Time Keeper** tab
 3. Enable **Show** to display that widget
 
 You can also use the keyboard shortcut **Alt+C** to toggle HUD visibility.

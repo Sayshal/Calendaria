@@ -65,9 +65,9 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
-  /** Saved position for the compact calendar */
-  game.settings.register(MODULE.ID, SETTINGS.COMPACT_CALENDAR_POSITION, {
-    name: 'Compact Calendar Position',
+  /** Saved position for the MiniCalendar */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_POSITION, {
+    name: 'MiniCalendar Position',
     scope: 'user',
     config: false,
     type: new ObjectField({ nullable: true, initial: null })
@@ -81,18 +81,18 @@ export function registerSettings() {
     type: new ObjectField({ nullable: true, initial: null })
   });
 
-  /** Delay before auto-hiding compact calendar controls */
-  game.settings.register(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY, {
-    name: 'CALENDARIA.Settings.CompactControlsDelay.Name',
-    hint: 'CALENDARIA.Settings.CompactControlsDelay.Hint',
+  /** Delay before auto-hiding MiniCalendar controls */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, {
+    name: 'CALENDARIA.Settings.MiniCalendarControlsDelay.Name',
+    hint: 'CALENDARIA.Settings.MiniCalendarControlsDelay.Hint',
     scope: 'user',
     config: false,
     type: new NumberField({ min: 1, max: 10, step: 1, integer: true, initial: 3 })
   });
 
-  /** Sticky states for compact calendar */
-  game.settings.register(MODULE.ID, SETTINGS.COMPACT_STICKY_STATES, {
-    name: 'Compact Calendar Sticky States',
+  /** Sticky states for MiniCalendar */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_STICKY_STATES, {
+    name: 'MiniCalendar Sticky States',
     scope: 'user',
     config: false,
     type: new ObjectField({ initial: { timeControls: false, sidebar: false, position: false } })
@@ -139,10 +139,10 @@ export function registerSettings() {
     }
   });
 
-  /** Show Compact Calendar on world load */
-  game.settings.register(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR, {
-    name: 'CALENDARIA.Settings.ShowCompactCalendar.Name',
-    hint: 'CALENDARIA.Settings.ShowCompactCalendar.Hint',
+  /** Show MiniCalendar on world load */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, {
+    name: 'CALENDARIA.Settings.ShowMiniCalendar.Name',
+    hint: 'CALENDARIA.Settings.ShowMiniCalendar.Hint',
     scope: 'user',
     config: false,
     type: new BooleanField({ initial: true })
@@ -303,8 +303,8 @@ export function registerSettings() {
       initial: {
         hudDate: { gm: 'ordinal', player: 'ordinal' },
         hudTime: { gm: 'time', player: 'time' },
-        compactHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
-        compactTime: { gm: 'time', player: 'time' },
+        miniCalendarHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
+        miniCalendarTime: { gm: 'time', player: 'time' },
         fullCalendarHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
         chatTimestamp: { gm: 'short', player: 'short' }
       }
