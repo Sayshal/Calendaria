@@ -25,7 +25,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'time-keeper-hud',
-    classes: ['time-keeper-hud'],
+    classes: ['calendaria', 'time-keeper-hud'],
     position: { width: 'auto', height: 'auto', zIndex: 100 },
     window: { frame: false, positioned: true },
     actions: {

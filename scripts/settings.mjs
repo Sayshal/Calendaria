@@ -18,13 +18,21 @@ import { log } from './utils/logger.mjs';
 const { ArrayField, ObjectField, BooleanField, NumberField, StringField } = foundry.data.fields;
 
 /**
+ * Convert kebab-case ID to PascalCase for localization keys.
+ * @param {string} id - Calendar ID (e.g., 'forbidden-lands')
+ * @returns {string} PascalCase key (e.g., 'ForbiddenLands')
+ */
+function toPascalCase(id) {
+  return id.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+}
+
+/**
  * Build calendar choices for the active calendar dropdown.
  * @returns {Object<string, string>} Map of calendar ID to display name
  */
 function buildCalendarChoices() {
   const choices = BUNDLED_CALENDARS.reduce((acc, id) => {
-    const key = id.charAt(0).toUpperCase() + id.slice(1);
-    acc[id] = `CALENDARIA.Calendar.${key}.Name`;
+    acc[id] = `CALENDARIA.Calendar.${toPascalCase(id)}.Name`;
     return acc;
   }, {});
   const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
@@ -199,6 +207,14 @@ export function registerSettings() {
     type: new ObjectField({ initial: {} })
   });
 
+  /** Current theme mode (dark, highContrast, custom) */
+  game.settings.register(MODULE.ID, SETTINGS.THEME_MODE, {
+    name: 'Theme Mode',
+    scope: 'user',
+    config: false,
+    type: new StringField({ initial: 'dark', choices: ['dark', 'highContrast', 'custom'] })
+  });
+
   /** Stored calendar configurations and active calendar state */
   game.settings.register(MODULE.ID, SETTINGS.CALENDARS, {
     name: 'Calendar Configurations',
@@ -221,7 +237,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ActiveCalendar.Hint',
     scope: 'world',
     config: true,
-    type: new StringField({ choices: buildCalendarChoices(), initial: 'gregorian' }),
+    type: new StringField({ choices: buildCalendarChoices(), initial: 'gregorian', blank: true }),
     requiresReload: true
   });
 
@@ -312,6 +328,15 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT, {
     name: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Name',
     hint: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
+  /** Whether to sync clock pause with game pause */
+  game.settings.register(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, {
+    name: 'CALENDARIA.Settings.SyncClockPause.Name',
+    hint: 'CALENDARIA.Settings.SyncClockPause.Hint',
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false })

@@ -333,12 +333,16 @@ export default class WeatherManager {
     const calendar = CalendarManager.getActiveCalendar();
     const calendarId = calendar?.metadata?.id;
     if (!calendarId) return;
-    const calendarData = CalendarManager.getCalendarData(calendarId);
+    const calendarData = CalendarManager.getCalendar(calendarId)?.toObject();
     if (!calendarData?.weather) return;
     const zone = calendarData.weather.zones?.find((z) => z.id === zoneId);
     if (!zone) return;
     calendarData.weather.activeZone = zoneId;
-    await CalendarManager.updateCalendar(calendarId, calendarData);
+    if (CalendarManager.isCustomCalendar(calendarId)) {
+      await CalendarManager.updateCustomCalendar(calendarId, calendarData);
+    } else {
+      await CalendarManager.saveDefaultOverride(calendarId, calendarData);
+    }
     log(3, `Active climate zone set to: ${zoneId}`);
   }
 

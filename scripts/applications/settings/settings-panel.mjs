@@ -10,7 +10,7 @@ import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
-import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, applyCustomColors } from '../../utils/theme-utils.mjs';
+import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { CalendarApplication } from '../calendar-application.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
@@ -49,7 +49,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       resetAllColors: SettingsPanel.#onResetAllColors,
       exportTheme: SettingsPanel.#onExportTheme,
       importTheme: SettingsPanel.#onImportTheme,
-      applyPreset: SettingsPanel.#onApplyPreset,
       openHUD: SettingsPanel.#onOpenHUD,
       openCompact: SettingsPanel.#onOpenCompact,
       openTimeKeeper: SettingsPanel.#onOpenTimeKeeper,
@@ -110,6 +109,29 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     context.isGM = game.user.isGM;
     return context;
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+
+    // Handle theme mode dropdown change
+    const themeModeSelect = this.element.querySelector('select[name="themeMode"]');
+    themeModeSelect?.addEventListener('change', async (e) => {
+      const mode = e.target.value;
+      if (!mode) return;
+
+      await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, mode);
+
+      if (mode === 'custom') {
+        const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+        applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
+      } else {
+        applyPreset(mode);
+      }
+
+      this.render({ force: true, parts: ['appearance'] });
+    });
   }
 
   /** @override */
@@ -202,7 +224,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     context.calendarOptions = [];
     for (const id of BUNDLED_CALENDARS) {
-      const key = id.charAt(0).toUpperCase() + id.slice(1);
+      const key = id.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
       context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
     }
     for (const [id, data] of Object.entries(customCalendars)) context.calendarOptions.push({ value: id, label: data.name || id, selected: id === activeCalendarId, isCustom: true });
@@ -225,6 +247,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.darknessSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     context.advanceTimeOnCombat = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT);
+    context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
   }
 
   /**
@@ -362,37 +385,43 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareAppearanceContext(context) {
+    const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-    context.hasCustomTheme = Object.keys(customColors).length > 0;
 
-    // Theme presets
-    context.themePresets = Object.entries(THEME_PRESETS).map(([key, preset]) => ({
-      key,
-      label: localize(preset.name)
-    }));
+    // Theme modes dropdown
+    context.themeModes = [
+      { key: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: themeMode === 'dark' },
+      { key: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: themeMode === 'highContrast' },
+      { key: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: themeMode === 'custom' }
+    ];
 
-    // Build categories with component info
-    const categories = {};
-    for (const [catKey, catLabel] of Object.entries(COLOR_CATEGORIES)) {
-      categories[catKey] = { key: catKey, label: catLabel, colors: [] };
+    // Only show custom color editor when in custom mode
+    context.showCustomColors = themeMode === 'custom';
+
+    if (context.showCustomColors) {
+      // Build categories with component info
+      const categories = {};
+      for (const [catKey, catLabel] of Object.entries(COLOR_CATEGORIES)) {
+        categories[catKey] = { key: catKey, label: catLabel, colors: [] };
+      }
+
+      for (const def of COLOR_DEFINITIONS) {
+        const value = customColors[def.key] || DEFAULT_COLORS[def.key];
+        const isCustom = customColors[def.key] !== undefined;
+        const componentLabel = COMPONENT_CATEGORIES[def.component] || '';
+        categories[def.category].colors.push({
+          key: def.key,
+          label: def.label,
+          value,
+          defaultValue: DEFAULT_COLORS[def.key],
+          isCustom,
+          component: def.component,
+          componentLabel
+        });
+      }
+
+      context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
     }
-
-    for (const def of COLOR_DEFINITIONS) {
-      const value = customColors[def.key] || DEFAULT_COLORS[def.key];
-      const isCustom = customColors[def.key] !== undefined;
-      const componentLabel = COMPONENT_CATEGORIES[def.component] || '';
-      categories[def.category].colors.push({
-        key: def.key,
-        label: def.label,
-        value,
-        defaultValue: DEFAULT_COLORS[def.key],
-        isCustom,
-        component: def.component,
-        componentLabel
-      });
-    }
-
-    context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
   }
 
   /**
@@ -503,6 +532,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('darknessSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
     if ('advanceTimeOnCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT, data.advanceTimeOnCombat);
+    if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
     if ('chatTimestampShowTime' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, data.chatTimestampShowTime);
     if ('activeCalendar' in data) {
@@ -729,20 +759,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     a.click();
     URL.revokeObjectURL(url);
     ui.notifications.info('CALENDARIA.ThemeEditor.ExportSuccess', { localize: true });
-  }
-
-  /**
-   * Apply a theme preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async #onApplyPreset(_event, target) {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const presetKey = target.dataset.preset;
-    if (!presetKey || !THEME_PRESETS[presetKey]) return;
-    applyPreset(presetKey);
-    ui.notifications.info(localize('CALENDARIA.ThemeEditor.PresetApplied'));
-    app?.render({ force: true, parts: ['appearance'] });
   }
 
   /**

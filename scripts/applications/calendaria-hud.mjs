@@ -106,7 +106,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-hud',
-    classes: ['calendaria-hud-wrapper'],
+    classes: ['calendaria', 'calendaria-hud-wrapper'],
     position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },
     actions: {
@@ -1221,7 +1221,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.HUD.SetDate') },
       content,
       ok: {
-        label: localize('CALENDARIA.Common.Set'),
+        label: localize('CALENDARIA.HUD.SetDate'),
         icon: 'fas fa-calendar-check',
         callback: (_event, button, _dialog) => {
           const form = button.form;

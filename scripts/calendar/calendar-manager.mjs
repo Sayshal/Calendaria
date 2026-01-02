@@ -62,9 +62,19 @@ export default class CalendarManager {
     try {
       const savedData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
       if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
-        for (const calendarData of Object.values(savedData.calendars)) this.#migrateCalendarData(calendarData);
-        CalendarRegistry.fromObject(savedData);
-        log(3, `Loaded ${CalendarRegistry.size} calendars from settings`);
+        let count = 0;
+        for (const [id, calendarData] of Object.entries(savedData.calendars)) {
+          this.#migrateCalendarData(calendarData);
+          // Preserve isCustom flag from existing calendar if present
+          const existing = CalendarRegistry.get(id);
+          if (existing?.metadata?.isCustom) {
+            calendarData.metadata = calendarData.metadata || {};
+            calendarData.metadata.isCustom = true;
+          }
+          CalendarRegistry.register(id, calendarData);
+          count++;
+        }
+        log(3, `Merged ${count} calendars from settings (total: ${CalendarRegistry.size})`);
       }
     } catch (error) {
       log(1, 'Error loading calendars from settings:', error);
@@ -203,7 +213,8 @@ export default class CalendarManager {
         await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, id);
         log(3, `Updated active calendar setting to: ${id}`);
       } catch (error) {
-        log(1, `Error updating active calendar setting:`, error);
+        // Suppress validation errors for newly created custom calendars (will persist after reload)
+        if (error.name !== 'DataModelValidationError') log(1, `Error updating active calendar setting:`, error);
       } finally {
         this.#isSwitchingCalendar = false;
       }

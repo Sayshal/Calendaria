@@ -5,7 +5,7 @@
  * @author Tyler
  */
 
-import { HOOKS } from '../constants.mjs';
+import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -92,13 +92,36 @@ export default class TimeKeeper {
   /*  Initialization                              */
   /* -------------------------------------------- */
 
+  /** @type {boolean} Whether the clock was running before game pause */
+  static #wasRunningBeforePause = false;
+
   /**
    * Initialize the TimeKeeper and register socket listeners.
    */
   static initialize() {
     this.setIncrement('minute');
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
+    Hooks.on('pauseGame', this.#onPauseGame.bind(this));
     log(3, 'TimeKeeper initialized');
+  }
+
+  /**
+   * Handle game pause/unpause to sync clock state.
+   * @param {boolean} paused - Whether the game is paused
+   */
+  static #onPauseGame(paused) {
+    if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
+    if (!game.user.isGM) return;
+
+    if (paused && this.#running) {
+      this.#wasRunningBeforePause = true;
+      this.stop();
+      log(3, 'Clock paused (synced with game pause)');
+    } else if (!paused && this.#wasRunningBeforePause) {
+      this.#wasRunningBeforePause = false;
+      this.start();
+      log(3, 'Clock resumed (synced with game unpause)');
+    }
   }
 
   /* -------------------------------------------- */

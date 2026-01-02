@@ -32,6 +32,8 @@ export const DEFAULT_COLORS = {
   buttonBorder: '#4a4a4a',
   primary: '#4a90e2',
   today: '#ff6400',
+  accent: '#a89060',
+  success: '#88cc88',
   festivalBorder: '#d4af37',
   festivalText: '#ffd700',
   shadow: '#000000',
@@ -59,6 +61,8 @@ export const LIGHT_COLORS = {
   buttonBorder: '#d0d0d0',
   primary: '#2a70c2',
   today: '#e05500',
+  accent: '#8b7000',
+  success: '#228822',
   festivalBorder: '#b89527',
   festivalText: '#8b7000',
   shadow: '#000000',
@@ -86,6 +90,8 @@ export const HIGH_CONTRAST_COLORS = {
   buttonBorder: '#ffffff',
   primary: '#00aaff',
   today: '#ff8800',
+  accent: '#ffcc00',
+  success: '#00ff88',
   festivalBorder: '#ffdd00',
   festivalText: '#ffee00',
   shadow: '#000000',
@@ -98,7 +104,6 @@ export const HIGH_CONTRAST_COLORS = {
  */
 export const THEME_PRESETS = {
   dark: { name: 'CALENDARIA.ThemeEditor.Presets.Dark', colors: DEFAULT_COLORS },
-  light: { name: 'CALENDARIA.ThemeEditor.Presets.Light', colors: LIGHT_COLORS },
   highContrast: { name: 'CALENDARIA.ThemeEditor.Presets.HighContrast', colors: HIGH_CONTRAST_COLORS }
 };
 
@@ -162,6 +167,8 @@ export const COLOR_DEFINITIONS = [
   // Accents
   { key: 'primary', label: 'CALENDARIA.ThemeEditor.Colors.Primary', category: 'accents', component: 'common' },
   { key: 'today', label: 'CALENDARIA.ThemeEditor.Colors.Today', category: 'accents', component: 'common' },
+  { key: 'accent', label: 'CALENDARIA.ThemeEditor.Colors.Accent', category: 'accents', component: 'common' },
+  { key: 'success', label: 'CALENDARIA.ThemeEditor.Colors.Success', category: 'accents', component: 'common' },
 
   // Festivals
   { key: 'festivalBorder', label: 'CALENDARIA.ThemeEditor.Colors.FestivalBorder', category: 'festivals', component: 'common' },
@@ -409,6 +416,8 @@ const CSS_VAR_MAP = {
   buttonBorder: '--calendaria-button-border',
   primary: '--calendaria-primary',
   today: '--calendaria-today',
+  accent: '--calendaria-accent',
+  success: '--calendaria-success',
   festivalBorder: '--calendaria-festival-border',
   festivalText: '--calendaria-festival-text',
   shadow: '--calendaria-shadow-color',
@@ -442,9 +451,9 @@ export function applyCustomColors(colors) {
 
   styleEl.textContent = `.calendaria {\n  ${cssVars.join('\n  ')}\n}`;
 
-  // Re-render open calendar applications
+  // Re-render open Calendaria applications
   for (const app of foundry.applications.instances.values()) {
-    if (app.constructor.name.includes('Calendar')) app.render();
+    if (app.options?.classes?.includes('calendaria')) app.render();
   }
 }
 
@@ -477,12 +486,16 @@ export async function resetTheme() {
 }
 
 /**
- * Initialize custom theme colors on module ready.
+ * Initialize theme colors on module ready.
  */
 export function initializeTheme() {
-  const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-  if (Object.keys(customColors).length > 0) {
+  const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
+
+  if (themeMode === 'custom') {
+    const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
     const colors = { ...DEFAULT_COLORS, ...customColors };
     applyCustomColors(colors);
+  } else if (THEME_PRESETS[themeMode]) {
+    applyCustomColors(THEME_PRESETS[themeMode].colors);
   }
 }
