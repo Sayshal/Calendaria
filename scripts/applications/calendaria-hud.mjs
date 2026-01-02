@@ -1223,24 +1223,31 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ok: {
         label: localize('CALENDARIA.HUD.SetDate'),
         icon: 'fas fa-calendar-check',
-        callback: (_event, button, _dialog) => {
-          const form = button.form;
-          return { year: parseInt(form.elements.year.value) - yearZero, month: parseInt(form.elements.month.value), day: parseInt(form.elements.day.value) };
+        callback: (_event, _button, dialog) => {
+          const yearInput = dialog.element.querySelector('input[name="year"]');
+          const monthSelect = dialog.element.querySelector('select[name="month"]');
+          const daySelect = dialog.element.querySelector('select[name="day"]');
+          return { year: parseInt(yearInput.value) - yearZero, month: parseInt(monthSelect.value), day: parseInt(daySelect.value) };
         }
       },
       rejectClose: false
     });
 
     if (result) {
-      const newTime = calendar.componentsToTime({
+      // Calculate day of year from month and day
+      let dayOfYear = result.day - 1;
+      for (let i = 0; i < result.month; i++) {
+        dayOfYear += calendar.months.values[i]?.days ?? 30;
+      }
+      const newTimeComponents = {
         year: result.year,
         month: result.month,
-        dayOfMonth: result.day - 1,
+        day: dayOfYear,
         hour: components.hour,
         minute: components.minute,
         second: components.second ?? 0
-      });
-
+      };
+      const newTime = calendar.componentsToTime(newTimeComponents);
       await game.time.advance(newTime - game.time.worldTime);
     }
   }

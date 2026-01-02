@@ -157,8 +157,12 @@ export default class TimeTracker {
     for (const threshold of thresholds) this.#fireThresholdHook(threshold.name, threshold.data);
   }
 
+  /** @type {number} Maximum days to fire threshold hooks for (prevents hook spam on large advances) */
+  static #MAX_THRESHOLD_DAYS = 30;
+
   /**
    * Get all thresholds crossed between two time points.
+   * Limits threshold firing to MAX_THRESHOLD_DAYS to prevent hook spam on large time advances.
    * @param {object} startComponents - Starting time components
    * @param {object} endComponents - Ending time components
    * @param {object} calendar - The active calendar
@@ -182,7 +186,11 @@ export default class TimeTracker {
         if (hour !== null && startHour < hour) thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
       }
 
-      const intermediateDays = totalDays - 1;
+      // Cap intermediate days to prevent hook spam on large time advances
+      const intermediateDays = Math.min(totalDays - 1, this.#MAX_THRESHOLD_DAYS);
+      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) {
+        log(3, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
+      }
       for (let day = 0; day < intermediateDays; day++) {
         for (const [name, hour] of Object.entries(dayThresholds)) if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }

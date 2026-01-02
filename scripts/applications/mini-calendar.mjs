@@ -325,7 +325,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
 
     // Format header using display settings
-    const headerComponents = { year, month, dayOfMonth: 1 };
+    const headerComponents = { year, month, dayOfMonth: date.day };
     const formattedHeader = formatForLocation(calendar, headerComponents, 'miniCalendarHeader');
 
     return {
