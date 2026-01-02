@@ -627,6 +627,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyTimeControls = states.timeControls ?? false;
     this.#stickySidebar = states.sidebar ?? false;
     this.#stickyPosition = states.position ?? false;
+    if (!this.element) return;
     const timeControls = this.element.querySelector('.mini-time-controls');
     const sidebar = this.element.querySelector('.mini-sidebar');
     if (this.#stickyTimeControls) {
