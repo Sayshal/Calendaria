@@ -376,9 +376,9 @@ export function formatCustom(calendar, components, formatStr) {
   };
 
   return normalizedFormat.replace(TOKEN_REGEX, (match, customToken) => {
-    // Custom token in brackets
+    // Custom token in brackets - return value if known, otherwise literal text
     if (customToken) {
-      return customContext[customToken] ?? match;
+      return customContext[customToken] ?? customToken;
     }
 
     // Standard token - map to parts
