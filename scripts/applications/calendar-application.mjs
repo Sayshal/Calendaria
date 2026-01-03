@@ -192,7 +192,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const { year, month } = date;
     const monthData = calendar.months?.values?.[month];
     if (!monthData) return null;
-    const daysInMonth = monthData.days;
+    const daysInMonth = calendar.getDaysInMonth(month, year);
     const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
     let currentWeek = [];
@@ -209,7 +209,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
         if (checkMonth === totalMonths - 1) checkYear--;
         const checkMonthData = calendar.months?.values?.[checkMonth];
-        const checkMonthDays = checkMonthData?.days ?? 30;
+        const checkMonthDays = checkMonthData ? calendar.getDaysInMonth(checkMonth, checkYear) : 30;
         const daysToTake = Math.min(remainingSlots, checkMonthDays);
         for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
         remainingSlots -= daysToTake;

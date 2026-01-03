@@ -5593,17 +5593,17 @@
 /* ======================================== */
 /* Chat Message Timestamps                  */
 /* ======================================== */
-.chat-message .message-header .message-metadata {
+.chat-message:has(.calendaria-timestamp-wrapper) .message-header .message-metadata {
   gap: 4px;
   display: flex;
-  position: absolute;
-  top: 0;
-  right: 0;
   align-items: center;
-  max-width: calc(100% - 44px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
-.chat-message .message-header .message-metadata .message-timestamp {
+.chat-message:has(.calendaria-timestamp-wrapper) .message-header .message-metadata .message-timestamp {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

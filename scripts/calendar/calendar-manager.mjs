@@ -61,9 +61,12 @@ export default class CalendarManager {
   static async loadCalendars() {
     try {
       const savedData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
+      const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
         let count = 0;
         for (const [id, calendarData] of Object.entries(savedData.calendars)) {
+          // Skip calendars that have overrides (already loaded by #loadDefaultOverrides)
+          if (overrides[id]) continue;
           this.#migrateCalendarData(calendarData);
           // Preserve isCustom flag from existing calendar if present
           const existing = CalendarRegistry.get(id);

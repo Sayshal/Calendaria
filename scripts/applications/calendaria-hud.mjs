@@ -1209,11 +1209,12 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const daysInMonth = calendar.months.values[components.month]?.days ?? 30;
+    const displayYear = components.year + yearZero;
+    const daysInMonth = calendar.getDaysInMonth(components.month, displayYear);
     const currentDay = (components.dayOfMonth ?? 0) + 1;
     const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
       formClass: 'set-date-form',
-      year: components.year + yearZero,
+      year: displayYear,
       months: calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month })),
       days: Array.from({ length: daysInMonth }, (_, i) => i + 1),
       currentDay

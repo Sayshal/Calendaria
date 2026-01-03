@@ -157,7 +157,7 @@ export default class ReminderScheduler {
    * @private
    */
   static #getNextDay(currentDate, calendar) {
-    const daysInMonth = calendar.getDaysInMonth(currentDate.year, currentDate.month);
+    const daysInMonth = calendar.getDaysInMonth(currentDate.month, currentDate.year);
     let nextDay = currentDate.day + 1;
     let nextMonth = currentDate.month;
     let nextYear = currentDate.year;

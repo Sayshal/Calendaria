@@ -241,7 +241,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year, month } = date;
     const monthData = calendar.months?.values?.[month];
     if (!monthData) return null;
-    const daysInMonth = monthData.days;
+    const daysInMonth = calendar.getDaysInMonth(month, year);
     const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
     let currentWeek = [];
@@ -259,7 +259,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
         if (checkMonth === totalMonths - 1) checkYear--;
         const checkMonthData = calendar.months?.values?.[checkMonth];
-        const checkMonthDays = checkMonthData?.days ?? 30;
+        const checkMonthDays = checkMonthData ? calendar.getDaysInMonth(checkMonth, checkYear) : 30;
         const daysToTake = Math.min(remainingSlots, checkMonthDays);
         for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
         remainingSlots -= daysToTake;
@@ -448,15 +448,20 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Format hour and minute as time string.
+   * Format hour and minute as time string using display settings.
    * @param {number} hour - Hour (0-23)
    * @param {number} minute - Minute (0-59)
-   * @returns {string} Formatted time string (e.g., "14:30")
+   * @returns {string} Formatted time string respecting user's time format preference
    */
   _formatTime(hour, minute) {
-    const h = (hour ?? 0).toString().padStart(2, '0');
-    const m = (minute ?? 0).toString().padStart(2, '0');
-    return `${h}:${m}`;
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) {
+      const h = (hour ?? 0).toString().padStart(2, '0');
+      const m = (minute ?? 0).toString().padStart(2, '0');
+      return `${h}:${m}`;
+    }
+    const components = { year: 0, month: 0, dayOfMonth: 1, hour: hour ?? 0, minute: minute ?? 0, second: 0 };
+    return formatForLocation(calendar, components, 'miniCalendarTime');
   }
 
   /* -------------------------------------------- */
