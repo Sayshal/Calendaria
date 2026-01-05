@@ -13,7 +13,7 @@ import { createImporter } from '../importers/index.mjs';
 import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CLIMATE_ZONE_TEMPLATES, fromDisplayUnit, getClimateTemplateOptions, getDefaultZoneConfig, toDisplayUnit } from '../weather/climate-data.mjs';
-import { ALL_PRESETS, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
+import { ALL_PRESETS, getAllPresets, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -608,9 +608,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       hasClimate: !!(season.climate?.temperatures || season.climate?.presets?.length)
     }));
 
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const allPresets = getAllPresets(customPresets);
     context.weatherCategories = Object.values(WEATHER_CATEGORIES)
       .map((cat) => {
-        const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
+        const categoryPresets = allPresets.filter((p) => p.category === cat.id);
         let categoryChance = 0;
         let enabledCount = 0;
         const presetsWithData = categoryPresets.map((preset) => {
@@ -1326,9 +1328,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const displayMin = climate.temperatures?.min != null ? toDisplayUnit(climate.temperatures.min) : '';
     const displayMax = climate.temperatures?.max != null ? toDisplayUnit(climate.temperatures.max) : '';
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) === 'fahrenheit' ? '°F' : '°C';
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const allPresets = getAllPresets(customPresets);
     const presetRows = Object.values(WEATHER_CATEGORIES)
       .map((cat) => {
-        const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
+        const categoryPresets = allPresets.filter((p) => p.category === cat.id);
         const rows = categoryPresets
           .map((preset) => {
             const existing = climate.presets?.find((p) => p.id === preset.id);

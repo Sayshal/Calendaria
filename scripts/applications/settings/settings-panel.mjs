@@ -59,7 +59,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       addMoonTrigger: SettingsPanel.#onAddMoonTrigger,
       removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
-      removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger
+      removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger,
+      addWeatherPreset: SettingsPanel.#onAddWeatherPreset,
+      removeWeatherPreset: SettingsPanel.#onRemoveWeatherPreset
     }
   };
 
@@ -595,6 +597,23 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, validCategories);
     }
 
+    // Weather presets
+    if (data.weatherPresets) {
+      const validPresets = Object.values(data.weatherPresets)
+        .filter((p) => p && p.id && p.label?.trim())
+        .map((p) => ({
+          id: p.id,
+          label: p.label.trim(),
+          icon: p.icon?.trim() || 'fa-cloud',
+          color: p.color || '#888888',
+          category: 'custom',
+          tempMin: p.tempMin != null ? Number(p.tempMin) : 10,
+          tempMax: p.tempMax != null ? Number(p.tempMax) : 25,
+          description: p.description || ''
+        }));
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, validPresets);
+    }
+
     // Macro triggers
     if (data.macroTriggers) {
       const globalTriggerKeys = ['dawn', 'dusk', 'midday', 'midnight', 'newDay'];
@@ -955,6 +974,41 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     config.season.splice(index, 1);
     await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
     this.render({ parts: ['macros'] });
+  }
+
+  /**
+   * Add a custom weather preset.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onAddWeatherPreset(_event, _target) {
+    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    currentPresets.push({
+      id: foundry.utils.randomID(),
+      label: localize('CALENDARIA.SettingsPanel.WeatherPresets.NewName'),
+      icon: 'fa-cloud',
+      color: '#888888',
+      category: 'custom',
+      tempMin: 10,
+      tempMax: 25,
+      description: ''
+    });
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, currentPresets);
+    this.render({ parts: ['weather'] });
+  }
+
+  /**
+   * Remove a custom weather preset.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async #onRemoveWeatherPreset(_event, target) {
+    const presetId = target.dataset.presetId;
+    if (!presetId) return;
+    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const filtered = currentPresets.filter((p) => p.id !== presetId);
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, filtered);
+    this.render({ parts: ['weather'] });
   }
 
   /** @inheritdoc */

@@ -50,19 +50,40 @@
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.Hint"}}</p>
 
-      {{#if customWeatherPresets.length}}
-        <p class="hint section-hint">
-          {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Count" count=customWeatherPresets.length}}
-        </p>
-      {{else}}
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.None"}}</p>
-      {{/if}}
-
-      <div class="info-box">
-        <i class="fas fa-info-circle"></i>
-        <p>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.EditorInfo"}}</p>
+      <div class="weather-presets-list">
+        {{#each customWeatherPresets}}
+        <div class="weather-preset-row" data-preset-id="{{this.id}}">
+          <input type="hidden" name="weatherPresets.{{@index}}.id" value="{{this.id}}">
+          <input type="color" name="weatherPresets.{{@index}}.color" value="{{this.color}}" class="preset-color">
+          <input type="text" name="weatherPresets.{{@index}}.icon" value="{{this.icon}}"
+            placeholder="fa-cloud" class="preset-icon-input"
+            data-tooltip="{{localize 'CALENDARIA.SettingsPanel.WeatherPresets.IconTooltip'}}">
+          <input type="text" name="weatherPresets.{{@index}}.label" value="{{this.label}}"
+            placeholder="{{localize 'CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder'}}" class="preset-name">
+          <div class="preset-temp-range">
+            <input type="number" name="weatherPresets.{{@index}}.tempMin" value="{{this.tempMin}}"
+              placeholder="0" class="preset-temp">
+            <span class="temp-separator">–</span>
+            <input type="number" name="weatherPresets.{{@index}}.tempMax" value="{{this.tempMax}}"
+              placeholder="25" class="preset-temp">
+            <span class="temp-unit">°C</span>
+          </div>
+          <button type="button" data-action="removeWeatherPreset" data-preset-id="{{this.id}}"
+            class="icon-button danger" data-tooltip="{{localize 'CALENDARIA.Common.Delete'}}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        {{else}}
+        <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.None"}}</p>
+        {{/each}}
       </div>
+
+      <button type="button" data-action="addWeatherPreset" class="add-button">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Add"}}
+      </button>
     </fieldset>
   {{/if}}
 

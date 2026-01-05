@@ -6231,6 +6231,74 @@
     }
   }
 
+  .weather-presets-list {
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+  }
+
+  .weather-preset-row {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0;
+
+    .preset-color {
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid var(--calendaria-border);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .preset-icon-input {
+      flex: none;
+      width: 7rem;
+    }
+
+    .preset-name {
+      flex: 1;
+      min-width: 8rem;
+    }
+
+    .preset-temp-range {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+      flex: none;
+
+      .preset-temp {
+        width: 4rem;
+        text-align: center;
+      }
+
+      .temp-separator {
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      }
+
+      .temp-unit {
+        color: var(--color-text-secondary, var(--calendaria-text-secondary));
+        font-size: var(--font-size-11);
+      }
+    }
+
+    .icon-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+
+      &.danger:hover {
+        color: rgb(255 255 255);
+        background: var(--color-level-error, var(--calendaria-error));
+      }
+    }
+  }
+
   .automation-info {
     h4 {
       margin: 0 0 0.5rem;
