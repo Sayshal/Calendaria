@@ -1053,6 +1053,46 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Get the current 1-indexed cycle number for a specific cycle.
+   * Cycle 1 is the first cycle; negative years return Cycle 1.
+   * @param {number} [cycleIndex=0] - Index of the cycle definition to use
+   * @param {number|object} [time] - Time to use, by default the current world time
+   * @returns {number} - 1-indexed cycle number (minimum 1)
+   */
+  getCurrentCycleNumber(cycleIndex = 0, time = game.time.worldTime) {
+    const cycle = this.cycles?.[cycleIndex];
+    if (!cycle?.length) return 1;
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const displayYear = components.year + (this.years?.yearZero ?? 0);
+    const epochValues = this._getCycleEpochValues(components, displayYear);
+    const epochValue = epochValues[cycle.basedOn] ?? 0;
+    const adjustedValue = epochValue + (cycle.offset || 0);
+    const cycleNum = Math.floor(adjustedValue / cycle.length) + 1;
+    return Math.max(1, cycleNum);
+  }
+
+  /**
+   * Get the current cycle entry (named entry) for a specific cycle.
+   * @param {number} [cycleIndex=0] - Index of the cycle definition to use
+   * @param {number|object} [time] - Time to use, by default the current world time
+   * @returns {{name: string, index: number, cycleNumber: number}|null} - Entry data or null
+   */
+  getCycleEntry(cycleIndex = 0, time = game.time.worldTime) {
+    const cycle = this.cycles?.[cycleIndex];
+    if (!cycle?.entries?.length) return null;
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const displayYear = components.year + (this.years?.yearZero ?? 0);
+    const epochValues = this._getCycleEpochValues(components, displayYear);
+    const epochValue = epochValues[cycle.basedOn] ?? 0;
+    const adjustedValue = epochValue + (cycle.offset || 0);
+    let entryIndex = adjustedValue % cycle.entries.length;
+    if (entryIndex < 0) entryIndex += cycle.entries.length;
+    const cycleNumber = Math.max(1, Math.floor(adjustedValue / cycle.length) + 1);
+    const entry = cycle.entries[entryIndex];
+    return { name: entry?.name ?? '', index: entryIndex, cycleNumber };
+  }
+
+  /**
    * Prepare formatting context from calendar and components.
    * @param {object} calendar  The calendar instance.
    * @param {object} components    Time components.

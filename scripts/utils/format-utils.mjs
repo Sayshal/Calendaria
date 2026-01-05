@@ -21,6 +21,25 @@ export function ordinal(n) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
+/**
+ * Convert a number to Roman numerals.
+ * @param {number} n - Number (1-3999)
+ * @returns {string} - Roman numeral string
+ */
+export function toRomanNumeral(n) {
+  if (n < 1 || n > 3999) return String(n);
+  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  const numerals = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+  let result = '';
+  for (let i = 0; i < values.length; i++) {
+    while (n >= values[i]) {
+      result += numerals[i];
+      n -= values[i];
+    }
+  }
+  return result;
+}
+
 /* -------------------------------------------- */
 /*  Date Formatting Parts                       */
 /* -------------------------------------------- */
@@ -67,10 +86,12 @@ export function dateFormattingParts(calendar, components) {
   }
 
   let seasonName = '';
+  let seasonAbbr = '';
   let seasonIndex = -1;
   const currentSeason = calendar?.getCurrentSeason?.({ year, month, dayOfMonth, hour, minute, second });
   if (currentSeason) {
     seasonName = localize(currentSeason.name);
+    seasonAbbr = currentSeason.abbreviation ? localize(currentSeason.abbreviation) : seasonName.slice(0, 3);
     const seasonsArray = calendar?.seasons?.values || [];
     seasonIndex = seasonsArray.indexOf(currentSeason);
   }
@@ -125,6 +146,7 @@ export function dateFormattingParts(calendar, components) {
 
     // Season
     season: seasonName,
+    seasonAbbr: seasonAbbr,
     seasonIndex: seasonIndex,
 
     // Day of year (for calculations)
@@ -356,25 +378,28 @@ export function formatCustom(calendar, components, formatStr) {
   const parts = dateFormattingParts(calendar, components);
 
   // Build context for custom tokens
+  const cycleNum = getCycleNumber(calendar, components);
   const customContext = {
     moon: getMoonPhaseName(calendar, components),
     moonIcon: getMoonPhaseIcon(calendar, components),
     era: parts.era,
+    eraAbbr: parts.eraAbbr,
     eraYear: parts.eraYear,
     season: parts.season,
+    seasonAbbr: parts.seasonAbbr,
     ch: getCanonicalHour(calendar, components),
     chAbbr: getCanonicalHourAbbr(calendar, components),
-    cycle: getCycleName(calendar, components),
-    cycleYear: getCycleYear(calendar, components),
+    cycle: cycleNum,
+    cycleName: getCycleName(calendar, components) || cycleNum,
+    cycleRoman: cycleNum ? toRomanNumeral(cycleNum) : '',
+    cycleYear: cycleNum,
     approxTime: formatApproximateTime(calendar, components),
     approxDate: formatApproximateDate(calendar, components)
   };
 
   return normalizedFormat.replace(TOKEN_REGEX, (match, customToken) => {
     // Custom token in brackets - return value if known, otherwise literal text
-    if (customToken) {
-      return customContext[customToken] ?? customToken;
-    }
+    if (customToken) return customContext[customToken] ?? customToken;
 
     // Standard token - map to parts
     const tokenMap = {
@@ -492,33 +517,45 @@ function getCanonicalHourAbbr(calendar, components) {
 }
 
 /**
- * Get cycle name for the given year.
+ * Get cycle entry name for the given date.
+ * Uses calendar's getCycleEntry method if available.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
- * @returns {string} Cycle name
+ * @returns {string} Cycle entry name
  */
 function getCycleName(calendar, components) {
-  // components.year already includes yearZero offset
-  if (!calendar?.cycles?.values?.length) return '';
-  const cycle = calendar.cycles.values[0];
-  if (!cycle.names?.length) return '';
-  const cycleIndex = (((components.year - 1) % cycle.names.length) + cycle.names.length) % cycle.names.length;
-  return localize(cycle.names[cycleIndex]);
+  if (calendar?.getCycleEntry) {
+    const entry = calendar.getCycleEntry(0, components);
+    return entry?.name ? localize(entry.name) : '';
+  }
+  if (!calendar?.cycles?.length) return '';
+  const cycle = calendar.cycles[0];
+  if (!cycle?.entries?.length) return '';
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const displayYear = components.year + yearZero;
+  const adjustedValue = displayYear + (cycle.offset || 0);
+  let entryIndex = adjustedValue % cycle.entries.length;
+  if (entryIndex < 0) entryIndex += cycle.entries.length;
+  return localize(cycle.entries[entryIndex]?.name ?? '');
 }
 
 /**
- * Get cycle year number for the given year.
+ * Get 1-indexed cycle number for the given date.
+ * Uses calendar's getCurrentCycleNumber method if available.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
- * @returns {number|string} Cycle year number
+ * @returns {number|string} Cycle number (1-indexed)
  */
-function getCycleYear(calendar, components) {
-  // components.year already includes yearZero offset
-  if (!calendar?.cycles?.values?.length) return '';
-  const cycle = calendar.cycles.values[0];
-  if (!cycle.names?.length) return '';
-  const cycleIndex = (((components.year - 1) % cycle.names.length) + cycle.names.length) % cycle.names.length;
-  return cycleIndex + 1;
+function getCycleNumber(calendar, components) {
+  if (calendar?.getCurrentCycleNumber) return calendar.getCurrentCycleNumber(0, components);
+  if (!calendar?.cycles?.length) return '';
+  const cycle = calendar.cycles[0];
+  if (!cycle?.length) return '';
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const displayYear = components.year + yearZero;
+  const adjustedValue = displayYear + (cycle.offset || 0);
+  const cycleNum = Math.floor(adjustedValue / cycle.length) + 1;
+  return Math.max(1, cycleNum);
 }
 
 /* -------------------------------------------- */
@@ -772,10 +809,17 @@ export function getAvailableTokens() {
     { token: 'a', description: 'am/pm', type: 'standard' },
     // Custom tokens
     { token: '[era]', description: 'Era name', type: 'custom' },
+    { token: '[eraAbbr]', description: 'Era abbreviation', type: 'custom' },
+    { token: '[eraYear]', description: 'Year within era', type: 'custom' },
     { token: '[season]', description: 'Season name', type: 'custom' },
+    { token: '[seasonAbbr]', description: 'Season abbreviation', type: 'custom' },
     { token: '[moon]', description: 'Moon phase', type: 'custom' },
+    { token: '[moonIcon]', description: 'Moon phase icon', type: 'custom' },
     { token: '[ch]', description: 'Canonical hour', type: 'custom' },
-    { token: '[cycle]', description: 'Cycle name', type: 'custom' },
+    { token: '[chAbbr]', description: 'Canonical hour abbr', type: 'custom' },
+    { token: '[cycle]', description: 'Cycle number (1-indexed)', type: 'custom' },
+    { token: '[cycleName]', description: 'Cycle entry name', type: 'custom' },
+    { token: '[cycleRoman]', description: 'Cycle number (Roman)', type: 'custom' },
     { token: '[approxTime]', description: 'Approx time (Noon)', type: 'custom' },
     { token: '[approxDate]', description: 'Approx date (Early Spring)', type: 'custom' }
   ];
