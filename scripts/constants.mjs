@@ -55,7 +55,12 @@ export const SETTINGS = {
   TIME_SPEED_MULTIPLIER: 'timeSpeedMultiplier',
   TIME_SPEED_INCREMENT: 'timeSpeedIncrement',
   CUSTOM_TIME_JUMPS: 'customTimeJumps',
-  TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps'
+  TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
+  HUD_SHOW_WEATHER: 'hudShowWeather',
+  HUD_SHOW_SEASON: 'hudShowSeason',
+  HUD_SHOW_ERA: 'hudShowEra',
+  HUD_WEATHER_DISPLAY_MODE: 'hudWeatherDisplayMode',
+  HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode'
 };
 
 /**

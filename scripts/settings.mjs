@@ -250,6 +250,71 @@ export function registerSettings() {
     })
   });
 
+  /** Show weather indicator on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER, {
+    name: 'CALENDARIA.Settings.HUDShowWeather.Name',
+    hint: 'CALENDARIA.Settings.HUDShowWeather.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Show season indicator on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SHOW_SEASON, {
+    name: 'CALENDARIA.Settings.HUDShowSeason.Name',
+    hint: 'CALENDARIA.Settings.HUDShowSeason.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Show era/cycle indicators on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SHOW_ERA, {
+    name: 'CALENDARIA.Settings.HUDShowEra.Name',
+    hint: 'CALENDARIA.Settings.HUDShowEra.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Weather display mode on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
+        temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly',
+        icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+        iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Season display mode on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full',
+        icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly',
+        text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
   /** Force HUD display for all clients */
   game.settings.register(MODULE.ID, SETTINGS.FORCE_HUD, {
     name: 'CALENDARIA.Settings.ForceHUD.Name',

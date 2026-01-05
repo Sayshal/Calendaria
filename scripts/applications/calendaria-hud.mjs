@@ -177,13 +177,31 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     context.time = this.#formatTime(components);
     context.dateDisplay = this.#formatDateDisplay(components);
+
+    // Block visibility settings
+    const showWeatherBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
+    const showSeasonBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_SEASON);
+    const showEraBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
+    const weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
+
     const season = calendar?.getCurrentSeason?.();
-    context.currentSeason = season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
+    const seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
+    context.currentSeason = showSeasonBlock && season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
+    context.showSeasonIcon = seasonDisplayMode === 'full' || seasonDisplayMode === 'icon';
+    context.showSeasonLabel = seasonDisplayMode === 'full' || seasonDisplayMode === 'text';
     const era = calendar?.getCurrentEra?.();
-    context.currentEra = era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) } : null;
+    context.currentEra = showEraBlock && era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) } : null;
     const cycleData = calendar?.getCycleValues?.();
-    context.cycleText = cycleData?.text || null;
-    context.weather = this.#getWeatherContext();
+    context.cycleText = showEraBlock ? (cycleData?.text || null) : null;
+
+    // Weather with display mode
+    const weatherData = this.#getWeatherContext();
+    context.weather = showWeatherBlock ? weatherData : null;
+    context.showWeatherBlock = showWeatherBlock;
+    context.weatherDisplayMode = weatherDisplayMode;
+    context.showWeatherIcon = weatherDisplayMode === 'full' || weatherDisplayMode === 'icon' || weatherDisplayMode === 'iconTemp';
+    context.showWeatherLabel = weatherDisplayMode === 'full';
+    context.showWeatherTemp = weatherDisplayMode === 'full' || weatherDisplayMode === 'temp' || weatherDisplayMode === 'iconTemp';
     this.#liveEvents = this.#getLiveEvents();
     context.hasEvents = this.#liveEvents.length > 0;
     context.liveEvents = this.#liveEvents;

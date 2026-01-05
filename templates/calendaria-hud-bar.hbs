@@ -25,32 +25,34 @@
   <div class="calendaria-hud-bar{{#if locked}} locked{{/if}}{{#if hasEvents}} has-events{{/if}}"
     {{#if hasEvents}}style="--event-glow: {{firstEventColor}};" {{/if}}>
 
-    <div class="calendaria-hud-btn-group left" role="group" aria-label="{{localize 'CALENDARIA.HUD.NoteActions'}}">
-      <button type="button" class="calendaria-hud-btn" data-action="searchNotes"
-        data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
-      <button type="button" class="calendaria-hud-btn" data-action="addNote"
-        data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}">
-        <i class="fa-solid fa-calendar-plus"></i>
-      </button>
-    </div>
-
-    <div class="calendaria-hud-divider"></div>
-
-    <div class="calendaria-hud-info-panel left">
-      <span class="calendaria-hud-date"{{#if isGM}} data-action="setDate"
-        data-tooltip="{{dateDisplay}} (Click to set date)"{{else}} data-tooltip="{{dateDisplay}}"{{/if}}>{{dateDisplay}}</span>
-      {{#if hasEvents}}
-      <div class="calendaria-hud-events">
-        {{#each liveEvents}}
-        <div class="calendaria-hud-event-icon-wrapper" data-action="openEvent" data-event-id="{{this.id}}"
-          data-parent-id="{{this.parentId}}" data-tooltip="{{this.tooltip}}" style="--event-color: {{this.color}};">
-          <i class="{{this.icon}} calendaria-hud-event-icon"></i>
-        </div>
-        {{/each}}
+    <div class="calendaria-hud-section left">
+      <div class="calendaria-hud-btn-group left" role="group" aria-label="{{localize 'CALENDARIA.HUD.NoteActions'}}">
+        <button type="button" class="calendaria-hud-btn" data-action="searchNotes"
+          data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <button type="button" class="calendaria-hud-btn" data-action="addNote"
+          data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}">
+          <i class="fa-solid fa-calendar-plus"></i>
+        </button>
       </div>
-      {{/if}}
+
+      <div class="calendaria-hud-divider"></div>
+
+      <div class="calendaria-hud-info-panel">
+        <span class="calendaria-hud-date"{{#if isGM}} data-action="setDate"
+          data-tooltip="{{dateDisplay}} (Click to set date)"{{else}} data-tooltip="{{dateDisplay}}"{{/if}}>{{dateDisplay}}</span>
+        {{#if hasEvents}}
+        <div class="calendaria-hud-events">
+          {{#each liveEvents}}
+          <div class="calendaria-hud-event-icon-wrapper" data-action="openEvent" data-event-id="{{this.id}}"
+            data-parent-id="{{this.parentId}}" data-tooltip="{{this.tooltip}}" style="--event-color: {{this.color}};">
+            <i class="{{this.icon}} calendaria-hud-event-icon"></i>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+      </div>
     </div>
 
     <div class="calendaria-hud-center">
@@ -66,50 +68,54 @@
       </div>
     </div>
 
-    <div class="calendaria-hud-indicators">
-      {{#if weather}}
-      <span class="weather-indicator{{#if isGM}} clickable{{/if}}" {{#if isGM}}data-action="openWeatherPicker" {{/if}}
-          style="--weather-color: {{weather.color}}" data-tooltip="{{weather.tooltip}}">
-        <i class="{{weather.icon}}"></i>
-        <span class="weather-label">{{weather.label}}</span>
-        <span class="weather-temp">{{weather.temp}}</span>
-      </span>
-      {{else if isGM}}
-      <span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
-        data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
-        <i class="fas fa-cloud"></i>
-      </span>
-      {{/if}}
-      {{#if currentSeason}}
-      <span class="season-indicator" style="--season-color: {{currentSeason.color}}"
-        data-tooltip="{{currentSeason.name}}">
-        <i class="{{currentSeason.icon}}"></i>
-        <span class="season-label">{{currentSeason.name}}</span>
-      </span>
-      {{/if}}
-      {{#if currentEra}}
-      <span class="era-indicator" data-tooltip="{{currentEra.name}}">
-        <i class="fas fa-hourglass-half"></i>
-      </span>
-      {{/if}}
-      {{#if cycleText}}
-      <span class="cycle-indicator" data-tooltip="{{{cycleText}}}">
-        <i class="fas fa-arrows-rotate"></i>
-      </span>
-      {{/if}}
-    </div>
+    <div class="calendaria-hud-section right">
+      <div class="calendaria-hud-indicators">
+        {{#if weather}}
+        <span class="weather-indicator{{#if isGM}} clickable{{/if}} weather-mode-{{weatherDisplayMode}}" {{#if isGM}}data-action="openWeatherPicker" {{/if}}
+            style="--weather-color: {{weather.color}}" data-tooltip="{{weather.tooltip}}">
+          {{#if showWeatherIcon}}<i class="{{weather.icon}}"></i>{{/if}}
+          {{#if showWeatherLabel}}<span class="weather-label">{{weather.label}}</span>{{/if}}
+          {{#if showWeatherTemp}}<span class="weather-temp">{{weather.temp}}</span>{{/if}}
+        </span>
+        {{else if showWeatherBlock}}
+        {{#if isGM}}
+        <span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+          data-tooltip="{{localize 'CALENDARIA.Weather.ClickToGenerate'}}">
+          <i class="fas fa-cloud"></i>
+        </span>
+        {{/if}}
+        {{/if}}
+        {{#if currentSeason}}
+        <span class="season-indicator" style="--season-color: {{currentSeason.color}}"
+          data-tooltip="{{currentSeason.name}}">
+          {{#if showSeasonIcon}}<i class="{{currentSeason.icon}}"></i>{{/if}}
+          {{#if showSeasonLabel}}<span class="season-label">{{currentSeason.name}}</span>{{/if}}
+        </span>
+        {{/if}}
+        {{#if currentEra}}
+        <span class="era-indicator" data-tooltip="{{currentEra.name}}">
+          <i class="fas fa-hourglass-half"></i>
+        </span>
+        {{/if}}
+        {{#if cycleText}}
+        <span class="cycle-indicator" data-tooltip="{{{cycleText}}}">
+          <i class="fas fa-arrows-rotate"></i>
+        </span>
+        {{/if}}
+      </div>
 
-    <div class="calendaria-hud-divider"></div>
+      <div class="calendaria-hud-divider"></div>
 
-    <div class="calendaria-hud-btn-group right" role="group" aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">
-      <button type="button" class="calendaria-hud-btn" data-action="openCalendar"
-        data-tooltip="{{localize 'CALENDARIA.HUD.OpenCalendar'}}">
-        <i class="fa-solid fa-calendar-days"></i>
-      </button>
-      <button type="button" class="calendaria-hud-btn" data-action="openSettings"
-        data-tooltip="{{localize 'CALENDARIA.HUD.Settings.Name'}}">
-        <i class="fa-solid fa-gear"></i>
-      </button>
+      <div class="calendaria-hud-btn-group right" role="group" aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">
+        <button type="button" class="calendaria-hud-btn" data-action="openCalendar"
+          data-tooltip="{{localize 'CALENDARIA.HUD.OpenCalendar'}}">
+          <i class="fa-solid fa-calendar-days"></i>
+        </button>
+        <button type="button" class="calendaria-hud-btn" data-action="openSettings"
+          data-tooltip="{{localize 'CALENDARIA.HUD.Settings.Name'}}">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
     </div>
   </div>
 

@@ -46,6 +46,59 @@
   </fieldset>
 
   <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}</legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="hudShowWeather" {{#if hudShowWeather}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDShowWeather.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select name="hudWeatherDisplayMode">
+          {{#each weatherDisplayModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="hudShowSeason" {{#if hudShowSeason}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDShowSeason.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select name="hudSeasonDisplayMode">
+          {{#each seasonDisplayModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="hudShowEra" {{#if hudShowEra}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDShowEra.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
     <input type="hidden" name="hudStickySection" value="1">
 

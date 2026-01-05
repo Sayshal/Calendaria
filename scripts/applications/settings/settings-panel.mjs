@@ -322,6 +322,24 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'compact', label: localize('CALENDARIA.Settings.CalendarHUDMode.Compact'), selected: hudMode === 'compact' }
     ];
 
+    // Block visibility settings
+    context.hudShowWeather = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
+    context.hudShowSeason = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_SEASON);
+    context.hudShowEra = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
+    const weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
+    context.weatherDisplayModeOptions = [
+      { value: 'full', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: weatherDisplayMode === 'full' },
+      { value: 'iconTemp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: weatherDisplayMode === 'iconTemp' },
+      { value: 'icon', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly'), selected: weatherDisplayMode === 'icon' },
+      { value: 'temp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: weatherDisplayMode === 'temp' }
+    ];
+    const seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
+    context.seasonDisplayModeOptions = [
+      { value: 'full', label: localize('CALENDARIA.Settings.HUDSeasonDisplayMode.Full'), selected: seasonDisplayMode === 'full' },
+      { value: 'icon', label: localize('CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly'), selected: seasonDisplayMode === 'icon' },
+      { value: 'text', label: localize('CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly'), selected: seasonDisplayMode === 'text' }
+    ];
+
     // Custom time jumps per interval
     const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
     const incrementLabels = {
@@ -653,6 +671,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
+
+    // Block visibility settings
+    if ('hudShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER, data.hudShowWeather);
+    if ('hudShowSeason' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_SEASON, data.hudShowSeason);
+    if ('hudShowEra' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_ERA, data.hudShowEra);
+    if ('hudWeatherDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE, data.hudWeatherDisplayMode);
+    if ('hudSeasonDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE, data.hudSeasonDisplayMode);
 
     // Custom time jumps (HUD)
     if (data.customTimeJumps) {

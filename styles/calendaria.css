@@ -3446,7 +3446,9 @@
   cursor: pointer;
   pointer-events: none;
   background: transparent;
-  transition: opacity 0.15s ease, color 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
   transform: translate(-50%, -50%);
 
   i {
@@ -5183,12 +5185,14 @@
 /* ======================================== */
 .calendaria-hud-bar {
   gap: 10px;
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: 1fr auto 1fr;
   z-index: 10;
   position: relative;
   align-items: center;
+  align-content: center;
   height: 36px;
-  padding: 5px 10px;
+  padding: 0 10px;
   border: 1px solid var(--calendaria-border);
   border-radius: 6px;
   cursor: grab;
@@ -5209,6 +5213,23 @@
 }
 
 /* ======================================== */
+/* HUD Sections                             */
+/* ======================================== */
+.calendaria-hud-section {
+  gap: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.calendaria-hud-section.left {
+  justify-content: flex-start;
+}
+
+.calendaria-hud-section.right {
+  justify-content: flex-end;
+}
+
+/* ======================================== */
 /* HUD Buttons                              */
 /* ======================================== */
 .calendaria-hud-btn {
@@ -5216,14 +5237,19 @@
   flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  padding: 0;
+  margin: 0;
   border: 1px solid var(--calendaria-button-border);
-  border-radius: 4px;
+  border-radius: 3px;
   color: var(--calendaria-text-dim);
   cursor: pointer;
   background: var(--calendaria-button-bg);
   transition: all 0.15s ease;
+  line-height: 1;
 }
 
 .calendaria-hud-btn:hover {
@@ -5291,15 +5317,12 @@
 .calendaria-hud-info-panel {
   gap: 8px;
   display: flex;
+  flex: 1 1 0;
+  min-width: 0;
   position: relative;
   align-items: center;
-  width: 225px;
   overflow: hidden;
   cursor: default;
-}
-
-.calendaria-hud-info-panel.left {
-  justify-content: flex-start;
 }
 
 .calendaria-hud-date {
@@ -5390,7 +5413,6 @@
   flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  width: 160px;
 }
 
 .calendaria-hud-time-wrapper {
@@ -5402,6 +5424,8 @@
 
 .calendaria-hud-time {
   padding: 0 8px;
+  width: 140px;
+  text-align: center;
   color: var(--calendaria-text);
   font-size: var(--font-size-14, 0.875rem);
   font-family: Consolas, Monaco, monospace;
@@ -5467,10 +5491,7 @@
   gap: 8px;
   display: flex;
   flex-shrink: 0;
-  justify-content: flex-end;
   align-items: center;
-  width: 225px;
-  overflow: hidden;
 }
 
 .calendaria-hud-indicators .weather-indicator,
@@ -5556,6 +5577,16 @@
 .calendaria-hud-indicators .era-indicator,
 .calendaria-hud-indicators .cycle-indicator {
   color: rgb(160 160 160);
+}
+
+/* Weather display modes */
+.calendaria-hud-indicators .weather-indicator.weather-mode-temp,
+.calendaria-hud-indicators .weather-indicator.weather-mode-icon {
+  padding: 0.15rem 0.35rem;
+}
+
+.calendaria-hud-indicators .weather-indicator.weather-mode-temp .weather-temp {
+  margin-left: 0;
 }
 
 /* ======================================== */
@@ -5742,11 +5773,11 @@
   min-width: 50px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-info-panel,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators {
-  width: 160px;
+.calendaria-hud-wrapper.compact .calendaria-hud-section {
+  gap: 8px;
 }
 
+.calendaria-hud-wrapper.compact .calendaria-hud-info-panel,
 .calendaria-hud-wrapper.compact .calendaria-hud-indicators {
   gap: 4px;
 }
@@ -5754,14 +5785,14 @@
 .calendaria-hud-wrapper.compact .calendaria-hud-bar {
   gap: 8px;
   height: 30px;
-  padding: 4px 8px;
+  padding: 0 8px;
 }
 
 .calendaria-hud-wrapper.compact .calendaria-hud-btn {
-  width: 22px;
-  min-height: 22px;
-  max-height: 22px;
-  align-self: center;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  max-height: 18px;
 }
 
 .calendaria-hud-wrapper.compact .calendaria-hud-btn i {
