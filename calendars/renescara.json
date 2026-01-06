@@ -448,21 +448,21 @@
       "abbreviation": "CALENDARIA.Calendar.Renescara.Era.FirstAge.Abbr",
       "startYear": -2000,
       "endYear": -500,
-      "template": "Year {{yearInEra}} of the {{era}}"
+      "template": "Year [yearInEra] of the [era]"
     },
     {
       "name": "CALENDARIA.Calendar.Renescara.Era.DarkCenturies.Name",
       "abbreviation": "CALENDARIA.Calendar.Renescara.Era.DarkCenturies.Abbr",
       "startYear": -500,
       "endYear": 0,
-      "template": "Year {{yearInEra}} of the {{era}}"
+      "template": "Year [yearInEra] of the [era]"
     },
     {
       "name": "CALENDARIA.Calendar.Renescara.Era.SecondAge.Name",
       "abbreviation": "CALENDARIA.Calendar.Renescara.Era.SecondAge.Abbr",
       "startYear": 1,
       "endYear": null,
-      "template": "Year {{year}} of the {{era}}"
+      "template": "Year [year] of the [era]"
     }
   ],
   "canonicalHours": [
@@ -534,7 +534,7 @@
       ]
     }
   ],
-  "cycleFormat": "Year of {{1}}",
+  "cycleFormat": "Year of [1]",
   "weeks": {
     "enabled": true,
     "type": "month-based",

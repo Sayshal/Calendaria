@@ -289,11 +289,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       ),
       dateFormats: new SchemaField(
         {
-          short: new StringField({ required: false, initial: '{{d}} {{b}}' }),
-          long: new StringField({ required: false, initial: '{{d}} {{B}}, {{y}}' }),
-          full: new StringField({ required: false, initial: '{{B}} {{d}}, {{y}}' }),
-          time: new StringField({ required: false, initial: '{{H}}:{{M}}' }),
-          time12: new StringField({ required: false, initial: '{{h}}:{{M}} {{p}}' })
+          short: new StringField({ required: false, initial: 'D MMM' }),
+          long: new StringField({ required: false, initial: 'D MMMM, YYYY' }),
+          full: new StringField({ required: false, initial: 'MMMM D, YYYY' }),
+          time: new StringField({ required: false, initial: 'HH:mm' }),
+          time12: new StringField({ required: false, initial: 'h:mm a' })
         },
         { required: false }
       ),
@@ -1059,7 +1059,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     }
 
     let text = this.cycleFormat || '';
-    for (const [key, value] of Object.entries(textReplacements)) text = text.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+    for (const [key, value] of Object.entries(textReplacements)) text = text.replace(new RegExp(`\\[${key}\\]`, 'g'), value);
     return { text, values };
   }
 
@@ -1262,14 +1262,14 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     let template;
     if (calendar.dateFormats?.[format]) {
       template = calendar.dateFormats[format];
-    } else if (format.includes('{{')) {
+    } else if (format.includes('{{') || format.includes('[')) {
       template = format;
     } else {
-      const defaults = { short: '{{d}} {{b}}', long: '{{d}} {{B}}, {{y}}', full: '{{B}} {{d}}, {{y}}', time: '{{H}}:{{M}}', time12: '{{h}}:{{M}} {{p}}' };
+      const defaults = { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a' };
       template = defaults[format] ?? defaults.long;
     }
 
-    return template.replace(/{{(\w+)}}/g, (match, key) => {
+    return template.replace(/\[(\w+)]/g, (match, key) => {
       return context[key] !== undefined ? context[key] : match;
     });
   }

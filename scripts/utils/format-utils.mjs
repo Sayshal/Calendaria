@@ -374,8 +374,6 @@ const TOKEN_REGEX = /\[([^\]]+)]|YYYY|YY|MMMM|MMM|MM|Mo|M|dddd|ddd|dd|Do|DDD|DD|
  * @returns {string} - Formatted date string
  */
 export function formatCustom(calendar, components, formatStr) {
-  // Auto-migrate legacy {{var}} format if detected
-  const normalizedFormat = isLegacyFormat(formatStr) ? migrateLegacyFormat(formatStr) : formatStr;
   const parts = dateFormattingParts(calendar, components);
 
   // Build context for custom tokens
@@ -385,7 +383,7 @@ export function formatCustom(calendar, components, formatStr) {
     moonIcon: getMoonPhaseIcon(calendar, components),
     era: parts.era,
     eraAbbr: parts.eraAbbr,
-    eraYear: parts.eraYear,
+    yearInEra: parts.eraYear,
     season: parts.season,
     seasonAbbr: parts.seasonAbbr,
     ch: getCanonicalHour(calendar, components),
@@ -398,7 +396,7 @@ export function formatCustom(calendar, components, formatStr) {
     approxDate: formatApproximateDate(calendar, components)
   };
 
-  return normalizedFormat.replace(TOKEN_REGEX, (match, customToken) => {
+  return formatStr.replace(TOKEN_REGEX, (match, customToken) => {
     // Custom token in brackets - return value if known, otherwise literal text
     if (customToken) return customContext[customToken] ?? customToken;
 
@@ -607,15 +605,25 @@ export function migrateLegacyFormat(legacyFormat) {
     '{{ch}}': '[ch]',
     '{{chAbbr}}': '[chAbbr]',
     '{{E}}': '[era]',
-    '{{e}}': '[eraYear]',
+    '{{e}}': '[yearInEra]',
     '{{season}}': '[season]',
-    '{{moon}}': '[moon]'
+    '{{moon}}': '[moon]',
+    // Era template tokens
+    '{{era}}': '[era]',
+    '{{eraYear}}': '[yearInEra]',
+    '{{yearInEra}}': '[yearInEra]',
+    '{{year}}': 'YYYY',
+    '{{abbreviation}}': '[eraAbbr]',
+    '{{short}}': '[eraAbbr]'
   };
 
   let newFormat = legacyFormat;
 
   // Handle cycle tokens like {{c12}} -> [cycle]
   newFormat = newFormat.replace(/{{c\d+}}/g, '[cycle]');
+
+  // Handle numbered cycle tokens like {{1}}, {{2}} -> [1], [2]
+  newFormat = newFormat.replace(/{{(\d+)}}/g, '[$1]');
 
   // Apply standard migrations
   for (const [legacy, modern] of Object.entries(migrations)) {
@@ -854,7 +862,8 @@ export function getAvailableTokens() {
 /* -------------------------------------------- */
 
 /**
- * Migrate all custom calendars to new token format.
+ * Migrate all custom calendars to new bracket token format.
+ * Handles dateFormats, era templates, and cycleFormat.
  * Runs once per version.
  * @returns {Promise<void>}
  */
@@ -884,6 +893,8 @@ export async function migrateCustomCalendars() {
 
     for (const [id, calendar] of Object.entries(customCalendars)) {
       const updated = { ...calendar };
+
+      // Migrate dateFormats
       if (updated.dateFormats) {
         const formats = updated.dateFormats;
         for (const [key, fmt] of Object.entries(formats)) {
@@ -893,12 +904,29 @@ export async function migrateCustomCalendars() {
           }
         }
       }
+
+      // Migrate era templates
+      if (updated.eras && Array.isArray(updated.eras)) {
+        for (const era of updated.eras) {
+          if (era.template && isLegacyFormat(era.template)) {
+            era.template = migrateLegacyFormat(era.template);
+            migrated = true;
+          }
+        }
+      }
+
+      // Migrate cycleFormat
+      if (updated.cycleFormat && isLegacyFormat(updated.cycleFormat)) {
+        updated.cycleFormat = migrateLegacyFormat(updated.cycleFormat);
+        migrated = true;
+      }
+
       updatedCalendars[id] = updated;
     }
 
     if (migrated) {
       await game.settings.set(MODULE_ID, SETTINGS_KEY, updatedCalendars);
-      console.log('Calendaria: Migrated custom calendar date formats to new token syntax');
+      console.log('Calendaria: Migrated custom calendar formats to new bracket token syntax');
     }
 
     await game.settings.set(MODULE_ID, MIGRATION_KEY, true);

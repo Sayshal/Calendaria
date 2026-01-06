@@ -280,7 +280,7 @@
       ]
     }
   ],
-  "cycleFormat": "{{1}}'s {{2}}",
+  "cycleFormat": "[1]'s [2]",
   "canonicalHours": [],
   "weeks": {
     "enabled": false,

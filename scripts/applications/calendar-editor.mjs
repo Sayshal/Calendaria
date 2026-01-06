@@ -205,7 +205,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       canonicalHours: [],
       weeks: { enabled: false, type: 'year-based', names: [] },
       amPmNotation: { am: 'AM', pm: 'PM' },
-      dateFormats: { short: '{{d}} {{b}}', long: '{{d}} {{B}}, {{y}}', full: '{{B}} {{d}}, {{y}}', time: '{{H}}:{{M}}', time12: '{{h}}:{{M}} {{p}}' },
+      dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a' },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
       weather: { activeZone: null, autoGenerate: false, zones: [] }
     };
