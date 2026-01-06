@@ -828,7 +828,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #restorePosition() {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_POSITION);
-    if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
+    if (savedPos && Number.isFinite(savedPos.top) && Number.isFinite(savedPos.left)) {
       this.#snappedZoneId = savedPos.zoneId || null;
       if (this.#snappedZoneId && StickyZones.restorePinnedState(this.element, this.#snappedZoneId)) {
         StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
@@ -947,7 +947,10 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
       this.#activeSnapZone = null;
       previousZoneId = null;
-      await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_POSITION, { left: this.position.left, top: this.position.top, zoneId: this.#snappedZoneId });
+      const finalRect = this.element.getBoundingClientRect();
+      const left = Number.isFinite(finalRect.left) ? finalRect.left : 16;
+      const top = Number.isFinite(finalRect.top) ? finalRect.top : 100;
+      await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_POSITION, { left, top, zoneId: this.#snappedZoneId });
     };
   }
 
@@ -1510,6 +1513,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Called when settings change externally (e.g., from settings panel).
    */
   static refreshStickyStates() {
+    if (!this._instance) return;
     this._instance.#restoreStickyStates();
   }
 }

@@ -247,10 +247,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     this.element.classList.toggle('compact', this.isCompact);
     this.element.classList.toggle('slice-mode', this.useSliceMode);
-    if (options.isFirstRender) {
-      this.#restorePosition();
-      this.#enableDragging();
-    }
+    if (options.isFirstRender) this.#restorePosition();
+    this.#enableDragging();
     this.#updateCelestialDisplay();
     this.#updateDomeVisibility();
     this.#setupEventListeners();
@@ -308,7 +306,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
-    return super.close(options);
+    return super.close({ animate: false, ...options });
   }
 
   /** @override */
