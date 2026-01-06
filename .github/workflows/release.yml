@@ -142,6 +142,11 @@ jobs:
         # Get release notes from the release body, or use a default message
         RELEASE_NOTES="${RELEASE_BODY:-New release available!}"
 
+        # Truncate to 1500 characters to avoid Discord webhook limits
+        if [ ${#RELEASE_NOTES} -gt 1500 ]; then
+          RELEASE_NOTES="${RELEASE_NOTES:0:1497}..."
+        fi
+
         JSON_PAYLOAD=$(jq -n \
           --arg title "${{ steps.module.outputs.title }} v${{ env.VERSION }}" \
           --arg version "${{ env.VERSION }}" \
