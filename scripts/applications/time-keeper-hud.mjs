@@ -72,10 +72,8 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
-    if (options.isFirstRender) {
-      this.#restorePosition();
-      this.#enableDragging();
-    }
+    if (options.isFirstRender) this.#restorePosition();
+    this.#enableDragging();
     this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (e) => {
       TimeKeeper.setIncrement(e.target.value);
       this.#updateJumpTooltips();

@@ -5316,7 +5316,10 @@
   position: relative !important;
   left: auto !important;
   top: auto !important;
+  z-index: 1000 !important;
+  width: max-content;
   margin-bottom: 8px;
+  pointer-events: auto !important;
 }
 
 /* ======================================== */
