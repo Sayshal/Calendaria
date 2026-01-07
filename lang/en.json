@@ -1358,6 +1358,7 @@
   "CALENDARIA.Format.Token.dddd": "Full weekday name",
   "CALENDARIA.Format.Token.era": "Era name",
   "CALENDARIA.Format.Token.eraAbbr": "Era abbreviation",
+  "CALENDARIA.Format.Token.yearInEra": "Year within era",
   "CALENDARIA.Format.Token.h": "Hour 12h (1-12)",
   "CALENDARIA.Format.Token.hh": "Hour 12h (01-12)",
   "CALENDARIA.Format.Token.mm": "Minute (00-59)",
