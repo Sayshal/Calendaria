@@ -806,14 +806,14 @@
   z-index: 10;
   position: absolute;
   align-items: center;
-  height: 24px;
+  height: 16px;
   padding: 2px 10px;
   border: 1px solid var(--calendaria-shadow-light);
   border-radius: 12px;
   overflow: hidden;
   color: var(--calendaria-text-on-color);
   font-weight: 600;
-  font-size: 12px;
+  font-size: 10px;
   text-overflow: ellipsis;
   text-shadow:
     -1px -1px 0 var(--calendaria-text-shadow-on-color),
