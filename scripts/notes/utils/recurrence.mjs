@@ -487,7 +487,6 @@ function getEraYear(year, eras) {
   return year - (era.startYear ?? 0) + 1;
 }
 
-
 /* -------------------------------------------- */
 /*  Computed Event (Moveable Feast) System      */
 /* -------------------------------------------- */
@@ -794,12 +793,8 @@ export function isRecurringMatch(noteData, targetDate) {
 
   if (compareDays(targetDate, startDate) < 0) return false;
   if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
-  if (endDate && !isSameDay(startDate, endDate)) {
-    const afterStart = compareDays(targetDate, startDate) >= 0;
-    const beforeEnd = compareDays(targetDate, endDate) <= 0;
-    if (afterStart && beforeEnd) return true;
-  }
-
+  const duration = endDate && !isSameDay(startDate, endDate) ? daysBetween(startDate, endDate) : 0;
+  if (duration > 0 && compareDays(targetDate, endDate) <= 0) return true;
   const interval = repeatInterval || 1;
   let matches = false;
   switch (repeat) {
@@ -828,6 +823,37 @@ export function isRecurringMatch(noteData, targetDate) {
       break;
     default:
       return false;
+  }
+  if (!matches && duration > 0) {
+    for (let offset = 1; offset <= duration; offset++) {
+      const potentialStart = addDays(targetDate, -offset);
+      if (compareDays(potentialStart, startDate) < 0) continue;
+      if (repeatEndDate && compareDays(potentialStart, repeatEndDate) > 0) continue;
+      let isStart = false;
+      switch (repeat) {
+        case 'daily':
+          isStart = matchesDaily(startDate, potentialStart, interval);
+          break;
+        case 'weekly':
+          isStart = matchesWeekly(startDate, potentialStart, interval);
+          break;
+        case 'monthly':
+          isStart = matchesMonthly(startDate, potentialStart, interval);
+          break;
+        case 'yearly':
+          isStart = matchesYearly(startDate, potentialStart, interval);
+          break;
+        case 'weekOfMonth':
+          isStart = matchesWeekOfMonth(startDate, potentialStart, interval, noteData.weekday, noteData.weekNumber);
+          break;
+        default:
+          break;
+      }
+      if (isStart) {
+        matches = true;
+        break;
+      }
+    }
   }
 
   if (matches && maxOccurrences > 0) {
@@ -1597,7 +1623,6 @@ export function matchesCachedOccurrence(cachedOccurrences, targetDate) {
   if (!cachedOccurrences?.length) return false;
   return cachedOccurrences.some((occ) => occ.year === targetDate.year && occ.month === targetDate.month && occ.day === targetDate.day);
 }
-
 
 /**
  * Get human-readable description of computed recurrence.

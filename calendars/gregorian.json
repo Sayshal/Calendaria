@@ -3,7 +3,7 @@
   "name": "CALENDARIA.Calendar.Gregorian.Name",
   "years": {
     "yearZero": 2024,
-    "firstWeekday": 2,
+    "firstWeekday": 1,
     "leapYear": {
       "leapStart": 0,
       "leapInterval": 4,

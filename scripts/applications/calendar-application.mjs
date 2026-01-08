@@ -9,7 +9,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { dayOfWeek } from '../notes/utils/date-utils.mjs';
+import { addDays, dayOfWeek, daysBetween } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import { formatForLocation } from '../utils/format-utils.mjs';
@@ -712,6 +712,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     return notePages.filter((page) => {
       const start = page.system.startDate;
       const end = page.system.endDate;
+      // Exclude multi-day notes - they render as event bars via _findMultiDayEvents
       const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
       if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) return false;
       const noteData = {
@@ -772,27 +773,87 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   _findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth) {
     const events = [];
     const rows = [];
-    const multiDayEvents = notes
-      .map((note) => {
-        const start = note.system.startDate;
-        const end = note.system.endDate;
-        const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
-        if (!hasValidEndDate) return null;
-        const isSameDay = end.year === start.year && end.month === start.month && end.day === start.day;
-        if (isSameDay) return null;
+    const multiDayEvents = [];
+
+    for (const note of notes) {
+      const start = note.system.startDate;
+      const end = note.system.endDate;
+      const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
+      if (!hasValidEndDate) continue;
+      const isSameDay = end.year === start.year && end.month === start.month && end.day === start.day;
+      if (isSameDay) continue;
+
+      const repeat = note.system.repeat;
+      const duration = daysBetween(start, end);
+      const isAllDay = start.hour == null || note.system.allDay;
+      const priority = isAllDay ? -1 : start.hour;
+
+      // For repeating multi-day notes, find all occurrences in this month
+      if (repeat && repeat !== 'never') {
+        // Build noteData that looks like single-day to find occurrence START dates
+        const noteData = {
+          startDate: start,
+          endDate: start,
+          repeat: note.system.repeat,
+          repeatInterval: note.system.repeatInterval,
+          repeatEndDate: note.system.repeatEndDate,
+          maxOccurrences: note.system.maxOccurrences,
+          moonConditions: note.system.moonConditions,
+          randomConfig: note.system.randomConfig,
+          cachedRandomOccurrences: note.flags?.[MODULE.ID]?.randomOccurrences,
+          linkedEvent: note.system.linkedEvent,
+          weekday: note.system.weekday,
+          weekNumber: note.system.weekNumber,
+          seasonalConfig: note.system.seasonalConfig,
+          rangePattern: note.system.rangePattern,
+          computedConfig: note.system.computedConfig,
+          conditions: note.system.conditions
+        };
+
+        // Check previous month for occurrences that extend into this month
+        const calendar = CalendarManager.getActiveCalendar();
+        const yearZero = calendar?.years?.yearZero ?? 0;
+        const prevMonth = month === 0 ? (calendar?.months?.values?.length || 12) - 1 : month - 1;
+        const prevYear = month === 0 ? year - 1 : year;
+        const prevMonthDays = calendar?.getDaysInMonth(prevMonth, prevYear - yearZero) || 30;
+
+        // Only check days in previous month that could extend into current month
+        const checkFromDay = Math.max(1, prevMonthDays - duration);
+        for (let d = checkFromDay; d <= prevMonthDays; d++) {
+          const checkDate = { year: prevYear, month: prevMonth, day: d };
+          if (isRecurringMatch(noteData, checkDate)) {
+            const occEnd = addDays(checkDate, duration);
+            // Check if this occurrence extends into current month
+            if (occEnd.year > year || (occEnd.year === year && occEnd.month >= month)) {
+              const endDay = occEnd.month === month && occEnd.year === year ? occEnd.day : daysInMonth;
+              multiDayEvents.push({ note, start: checkDate, end: occEnd, startDay: 1, endDay, priority, isContinuation: true });
+            }
+          }
+        }
+
+        // Check current month for occurrence starts
+        for (let d = 1; d <= daysInMonth; d++) {
+          const checkDate = { year, month, day: d };
+          if (isRecurringMatch(noteData, checkDate)) {
+            const occEnd = addDays(checkDate, duration);
+            const endDay = occEnd.month === month && occEnd.year === year ? occEnd.day : daysInMonth;
+            multiDayEvents.push({ note, start: checkDate, end: occEnd, startDay: d, endDay, priority, isContinuation: false });
+          }
+        }
+      } else {
+        // Non-repeating multi-day note - original logic
         const startBeforeOrInMonth = start.year < year || (start.year === year && start.month <= month);
         const endInOrAfterMonth = end.year > year || (end.year === year && end.month >= month);
-        if (!startBeforeOrInMonth || !endInOrAfterMonth) return null;
+        if (!startBeforeOrInMonth || !endInOrAfterMonth) continue;
         const isContinuation = start.year < year || (start.year === year && start.month < month);
         const startDay = isContinuation ? 1 : start.day;
         const endDay = end.month === month && end.year === year ? end.day : daysInMonth;
-        if (endDay < startDay) return null;
-        const isAllDay = start.hour == null || note.system.allDay;
-        const priority = isAllDay ? -1 : start.hour;
-        return { note, start, end, startDay, endDay, priority, isContinuation };
-      })
-      .filter((e) => e !== null)
-      .sort((a, b) => a.priority - b.priority);
+        if (endDay < startDay) continue;
+        multiDayEvents.push({ note, start, end, startDay, endDay, priority, isContinuation });
+      }
+    }
+
+    multiDayEvents.sort((a, b) => a.priority - b.priority);
 
     multiDayEvents.forEach(({ note, startDay, endDay, isContinuation }) => {
       const startPosition = startDay - 1 + startDayOfWeek;
