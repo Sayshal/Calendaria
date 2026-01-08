@@ -26,6 +26,7 @@ export function registerHooks() {
   Hooks.on('calendaria.calendarSwitched', NoteManager.onCalendarSwitched.bind(NoteManager));
   Hooks.on('closeGame', CalendarManager.onCloseGame.bind(CalendarManager));
   Hooks.on('createJournalEntryPage', NoteManager.onCreateJournalEntryPage.bind(NoteManager));
+  Hooks.on('deleteJournalEntry', NoteManager.onDeleteJournalEntry.bind(NoteManager));
   Hooks.on('deleteJournalEntryPage', NoteManager.onDeleteJournalEntryPage.bind(NoteManager));
   Hooks.on('dnd5e.longRest', onLongRest);
   Hooks.on('dnd5e.preLongRest', onPreRest);

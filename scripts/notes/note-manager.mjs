@@ -168,6 +168,23 @@ export default class NoteManager {
   }
 
   /**
+   * Handle deleteJournalEntry hook.
+   * Cleans up index when parent journal is deleted (pages may not fire individual hooks).
+   * @param {JournalEntry} journal - The deleted journal
+   * @param {object} _options - Deletion options
+   * @param {string} _userId - User ID who deleted the journal
+   */
+  static onDeleteJournalEntry(journal, _options, _userId) {
+    for (const page of journal.pages) {
+      if (NoteManager.#noteIndex.has(page.id)) {
+        NoteManager.#noteIndex.delete(page.id);
+        log(3, `Deleted note from index (parent deleted): ${page.name}`);
+        Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
+      }
+    }
+  }
+
+  /**
    * Handle calendaria.calendarSwitched hook.
    * @param {string} calendarId - The calendar ID that was switched to
    * @param {object} calendar - The calendar that was switched to
