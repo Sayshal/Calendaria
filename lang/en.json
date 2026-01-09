@@ -1733,6 +1733,7 @@
   "CALENDARIA.Note.ReminderType": "Notification Type",
   "CALENDARIA.Note.ReminderTypeChat": "Chat Message",
   "CALENDARIA.Note.ReminderTypeDialog": "Dialog",
+  "CALENDARIA.Note.ReminderTypeNone": "None",
   "CALENDARIA.Note.ReminderTypeToast": "Toast",
   "CALENDARIA.Note.ReminderUsers": "Users",
   "CALENDARIA.Note.Repeat": "Repeat",

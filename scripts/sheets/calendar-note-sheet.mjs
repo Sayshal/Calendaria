@@ -82,12 +82,13 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   async _onClose(options) {
     // Clean up empty notes that were never edited
     if (this._isNewNote && this.document) {
+      const journal = this.document.parent;
+      if (!journal || !game.journal.has(journal.id)) return super._onClose(options);
       const defaultName = localize('CALENDARIA.Note.NewNote');
       const hasDefaultName = this.document.name === defaultName;
       const hasNoContent = !this.document.text?.content?.trim();
       if (hasDefaultName && hasNoContent) {
-        const journal = this.document.parent;
-        if (journal?.pages?.size === 1) await journal.delete();
+        if (journal.pages?.size === 1) await journal.delete();
         else await this.document.delete();
         log(3, 'Deleted empty note on close');
       }
@@ -426,10 +427,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.conditions = rawConditions.map((cond, idx) => ({ ...cond, index: idx, description: this.#getConditionDescription(cond, calendar) }));
     const currentReminderType = this.document.system.reminderType || 'toast';
     context.reminderTypeOptions = [
+      { value: 'none', label: localize('CALENDARIA.Note.ReminderTypeNone'), selected: currentReminderType === 'none' },
       { value: 'toast', label: localize('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
       { value: 'chat', label: localize('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
       { value: 'dialog', label: localize('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }
     ];
+    context.showReminderOptions = currentReminderType !== 'none';
     const currentReminderTargets = this.document.system.reminderTargets || 'all';
     context.reminderTargetOptions = [
       { value: 'all', label: localize('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
@@ -490,6 +493,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         imgPreview.style.filter = `drop-shadow(0px 1000px 0 ${target.value})`;
         imgPreview.style.transform = 'translateY(-1000px)';
       }
+    }
+
+    if (target?.name === 'system.reminderType') {
+      const disabled = target.value === 'none';
+      this.element.querySelector('select[name="system.reminderTargets"]').disabled = disabled;
+      this.element.querySelector('input[name="system.reminderOffset"]').disabled = disabled;
     }
   }
 
@@ -816,7 +825,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
 
     const gmOnlyInput = form.querySelector('input[name="system.gmOnly"]');
-    if (gmOnlyInput) gmOnlyInput.checked = false;
+    if (gmOnlyInput) gmOnlyInput.checked = game.user.isGM;
     const startYearInput = form.querySelector('input[name="system.startDate.year"]');
     const startMonthInput = form.querySelector('input[name="system.startDate.month"]');
     const startDayInput = form.querySelector('input[name="system.startDate.day"]');

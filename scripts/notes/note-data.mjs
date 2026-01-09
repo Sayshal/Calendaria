@@ -35,10 +35,12 @@ export function getDefaultNoteData() {
     iconType: 'fontawesome',
     remindUsers: [],
     reminderOffset: 0,
+    reminderType: 'toast',
+    reminderTargets: game.user.isGM ? 'gm' : 'author',
     macro: null,
     sceneId: null,
     author: null,
-    gmOnly: false,
+    gmOnly: game.user.isGM,
     isCalendarNote: true,
     version: 1
   };
@@ -160,10 +162,12 @@ export function sanitizeNoteData(noteData) {
     icon: noteData.icon || defaults.icon,
     remindUsers: Array.isArray(noteData.remindUsers) ? noteData.remindUsers : defaults.remindUsers,
     reminderOffset: noteData.reminderOffset ?? defaults.reminderOffset,
+    reminderType: noteData.reminderType || defaults.reminderType,
+    reminderTargets: noteData.reminderTargets || defaults.reminderTargets,
     macro: noteData.macro || null,
     sceneId: noteData.sceneId || null,
     author: noteData.author || null,
-    gmOnly: noteData.gmOnly ?? false,
+    gmOnly: noteData.gmOnly ?? game.user.isGM,
     isCalendarNote: true,
     version: noteData.version || defaults.version
   };
