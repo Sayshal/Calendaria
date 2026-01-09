@@ -655,7 +655,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('forceHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, data.forceHUD);
     if ('forceMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR, data.forceMiniCalendar);
     if ('showMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MOON_PHASES, data.showMoonPhases);
-    if ('calendarHUDMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, data.calendarHUDMode);
+    if ('calendarHUDMode' in data) {
+      const oldMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
+      await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, data.calendarHUDMode);
+      // Re-render HUD tab to show/hide display mode settings based on compact mode
+      if (oldMode !== data.calendarHUDMode) {
+        const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
+        if (settingsPanel?.rendered) settingsPanel.render({ parts: ['hud'] });
+      }
+    }
     if ('hudDialStyle' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, data.hudDialStyle);
     if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);
     if ('hudWidthScale' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE, Number(data.hudWidthScale));
@@ -1332,10 +1340,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const dialStyleSelect = htmlElement.querySelector('select[name="hudDialStyle"]');
       const dialStyleGroup = dialStyleSelect?.closest('.form-group');
       const dialStyleHint = dialStyleGroup?.querySelector('.hint');
-      const weatherDisplaySelect = htmlElement.querySelector('select[name="hudWeatherDisplayMode"]');
-      const weatherDisplayGroup = weatherDisplaySelect?.closest('.form-group');
-      const seasonDisplaySelect = htmlElement.querySelector('select[name="hudSeasonDisplayMode"]');
-      const seasonDisplayGroup = seasonDisplaySelect?.closest('.form-group');
       const widthScaleInput = htmlElement.querySelector('input[name="hudWidthScale"]');
       const widthScaleGroup = widthScaleInput?.closest('.form-group');
       const widthScaleHint = widthScaleGroup?.querySelector('.hint');
@@ -1360,16 +1364,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             if (dialStyleHint) {
               dialStyleHint.textContent = isCompact ? game.i18n.localize('CALENDARIA.Settings.HUDDialStyle.DisabledHint') : game.i18n.localize('CALENDARIA.Settings.HUDDialStyle.Hint');
             }
-          }
-          if (weatherDisplaySelect) {
-            weatherDisplaySelect.disabled = isCompact;
-            if (isCompact) weatherDisplaySelect.value = 'icon';
-            weatherDisplayGroup?.classList.toggle('disabled', isCompact);
-          }
-          if (seasonDisplaySelect) {
-            seasonDisplaySelect.disabled = isCompact;
-            if (isCompact) seasonDisplaySelect.value = 'icon';
-            seasonDisplayGroup?.classList.toggle('disabled', isCompact);
           }
           if (widthScaleInput) {
             widthScaleInput.disabled = isCompact;

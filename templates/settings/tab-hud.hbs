@@ -86,6 +86,7 @@
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowWeather.Hint"}}</p>
     </div>
 
+    {{#unless isCompactMode}}
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
       <div class="form-fields">
@@ -97,6 +98,7 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Hint"}}</p>
     </div>
+    {{/unless}}
 
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
@@ -106,6 +108,7 @@
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowSeason.Hint"}}</p>
     </div>
 
+    {{#unless isCompactMode}}
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
       <div class="form-fields">
@@ -117,6 +120,7 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Hint"}}</p>
     </div>
+    {{/unless}}
 
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
