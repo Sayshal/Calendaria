@@ -67,4 +67,16 @@
     {{/if}}
   </fieldset>
 
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.UIBehavior"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.StickyZones.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="stickyZonesEnabled" {{#if stickyZonesEnabled}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.StickyZones.Hint"}}</p>
+    </div>
+  </fieldset>
+
 </section>

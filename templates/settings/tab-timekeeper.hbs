@@ -9,6 +9,10 @@
       <i class="fas fa-times"></i>
       {{localize "CALENDARIA.Common.Close"}}
     </button>
+    <button type="button" data-action="resetPosition" data-target="timekeeper">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
+    </button>
   </div>
 
   <fieldset>
@@ -23,31 +27,20 @@
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.TimeKeeperAutoFade.Name"}}</label>
+      <label>{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" name="timeKeeperAutoFade" {{#if timeKeeperAutoFade}}checked{{/if}}>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.TimeKeeperAutoFade.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
     </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.TimeKeeperIdleOpacity.Name"}}</label>
+    <div class="form-group{{#unless timeKeeperAutoFade}} disabled{{/unless}}">
+      <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
         <input type="range" name="timeKeeperIdleOpacity" min="0" max="100" value="{{timeKeeperIdleOpacity}}" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
         <span class="range-value">{{timeKeeperIdleOpacity}}%</span>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.TimeKeeperIdleOpacity.Hint"}}</p>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
-
-    <div class="button-row">
-      <button type="button" data-action="resetPosition" data-target="timekeeper">
-        <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.Common.ResetPosition"}}
-      </button>
+      <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>
   </fieldset>
 

@@ -9,6 +9,10 @@
       <i class="fas fa-times"></i>
       {{localize "CALENDARIA.Common.Close"}}
     </button>
+    <button type="button" data-action="resetPosition" data-target="miniCalendar">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
+    </button>
   </div>
 
   <fieldset>
@@ -50,6 +54,23 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.MiniCalendarControlsDelay.Hint"}}</p>
     </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="miniCalendarAutoFade" {{#if miniCalendarAutoFade}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless miniCalendarAutoFade}} disabled{{/unless}}">
+      <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <div class="form-fields">
+        <input type="range" name="miniCalendarIdleOpacity" min="0" max="100" value="{{miniCalendarIdleOpacity}}" {{#unless miniCalendarAutoFade}}disabled{{/unless}}>
+        <span class="range-value">{{miniCalendarIdleOpacity}}%</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+    </div>
   </fieldset>
 
   <fieldset>
@@ -79,17 +100,6 @@
         <input type="checkbox" name="miniCalendarStickyPosition" {{#if miniCalendarStickyPosition}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Position"}}</legend>
-
-    <div class="button-row">
-      <button type="button" data-action="resetPosition" data-target="miniCalendar">
-        <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.Common.ResetPosition"}}
-      </button>
     </div>
   </fieldset>
 

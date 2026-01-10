@@ -1536,6 +1536,15 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Update the idle opacity CSS variable from settings.
+   */
+  static updateIdleOpacity() {
+    const autoFade = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_AUTO_FADE);
+    const opacity = autoFade ? game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_IDLE_OPACITY) / 100 : 1;
+    document.documentElement.style.setProperty('--calendaria-minicalendar-idle-opacity', opacity);
+  }
+
+  /**
    * Get the singleton instance.
    * @returns {MiniCalendar|null} The singleton instance or null if not created
    */

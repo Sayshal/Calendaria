@@ -3624,6 +3624,13 @@
 
   z-index: var(--z-index-ui);
   position: fixed;
+  opacity: var(--calendaria-minicalendar-idle-opacity, 1);
+  transition: opacity 0.3s ease-in-out 2s;
+
+  &:hover {
+    opacity: 1;
+    transition-delay: 0s;
+  }
 
   .mini-calendar-container {
     display: flex;
@@ -5010,6 +5017,13 @@
   align-items: center;
   color: var(--calendaria-text);
   font-family: var(--font-primary, 'Signika', 'Palatino Linotype', serif);
+  opacity: var(--calendaria-hud-idle-opacity, 1);
+  transition: opacity 0.3s ease-in-out 2s;
+
+  &:hover {
+    opacity: 1;
+    transition-delay: 0s;
+  }
 }
 
 .calendaria-hud {

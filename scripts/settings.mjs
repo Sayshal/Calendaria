@@ -59,6 +59,26 @@ export function registerSettings() {
     type: new ObjectField({ nullable: true, initial: null })
   });
 
+  /** MiniCalendar auto-fade on idle */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_AUTO_FADE, {
+    name: 'CALENDARIA.Settings.AutoFade.Name',
+    hint: 'CALENDARIA.Settings.AutoFade.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: false }),
+    onChange: () => MiniCalendar.updateIdleOpacity()
+  });
+
+  /** MiniCalendar idle opacity (0-100) */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_IDLE_OPACITY, {
+    name: 'CALENDARIA.Settings.IdleOpacity.Name',
+    hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
+    scope: 'user',
+    config: false,
+    type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
+    onChange: () => MiniCalendar.updateIdleOpacity()
+  });
+
   /** Delay before auto-hiding MiniCalendar controls */
   game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, {
     name: 'CALENDARIA.Settings.MiniCalendarControlsDelay.Name',
@@ -145,8 +165,8 @@ export function registerSettings() {
 
   /** TimeKeeper auto-fade on idle */
   game.settings.register(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, {
-    name: 'CALENDARIA.Settings.TimeKeeperAutoFade.Name',
-    hint: 'CALENDARIA.Settings.TimeKeeperAutoFade.Hint',
+    name: 'CALENDARIA.Settings.AutoFade.Name',
+    hint: 'CALENDARIA.Settings.AutoFade.Hint',
     scope: 'user',
     config: false,
     type: new BooleanField({ initial: true }),
@@ -155,8 +175,8 @@ export function registerSettings() {
 
   /** TimeKeeper idle opacity (0-100) */
   game.settings.register(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY, {
-    name: 'CALENDARIA.Settings.TimeKeeperIdleOpacity.Name',
-    hint: 'CALENDARIA.Settings.TimeKeeperIdleOpacity.Hint',
+    name: 'CALENDARIA.Settings.IdleOpacity.Name',
+    hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
     scope: 'user',
     config: false,
     type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
@@ -251,6 +271,26 @@ export function registerSettings() {
     scope: 'user',
     config: false,
     type: new BooleanField({ initial: false })
+  });
+
+  /** Calendar HUD auto-fade on idle */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_AUTO_FADE, {
+    name: 'CALENDARIA.Settings.AutoFade.Name',
+    hint: 'CALENDARIA.Settings.AutoFade.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: false }),
+    onChange: () => CalendariaHUD.updateIdleOpacity()
+  });
+
+  /** Calendar HUD idle opacity (0-100) */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY, {
+    name: 'CALENDARIA.Settings.IdleOpacity.Name',
+    hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
+    scope: 'user',
+    config: false,
+    type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
+    onChange: () => CalendariaHUD.updateIdleOpacity()
   });
 
   /** Calendar HUD width scale (fullsize mode only) */

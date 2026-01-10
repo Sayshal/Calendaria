@@ -69,6 +69,8 @@ Hooks.once('ready', async () => {
   initializeTheme();
   await WeatherManager.initialize();
   TimeKeeperHUD.updateIdleOpacity();
+  CalendariaHUD.updateIdleOpacity();
+  MiniCalendar.updateIdleOpacity();
   if (game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) TimeKeeperHUD.show();
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);

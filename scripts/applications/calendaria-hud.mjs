@@ -1742,6 +1742,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Update the idle opacity CSS variable from settings.
+   */
+  static updateIdleOpacity() {
+    const autoFade = game.settings.get(MODULE.ID, SETTINGS.HUD_AUTO_FADE);
+    const opacity = autoFade ? game.settings.get(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY) / 100 : 1;
+    document.documentElement.style.setProperty('--calendaria-hud-idle-opacity', opacity);
+  }
+
+  /**
    * Register global combat hooks for hide during combat functionality.
    * Should be called once during module initialization.
    */

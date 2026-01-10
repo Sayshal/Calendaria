@@ -303,6 +303,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalendarStickyPosition = miniCalendarSticky?.position ?? false;
     context.showMiniCalendar = game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR);
     context.showToolbarButton = game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON);
+    context.miniCalendarAutoFade = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_AUTO_FADE);
+    context.miniCalendarIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_IDLE_OPACITY);
     context.miniCalendarControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY);
     context.forceMiniCalendar = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR);
   }
@@ -333,9 +335,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
     context.hudCombatCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
     context.hudCombatHide = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE);
+    context.hudAutoFade = game.settings.get(MODULE.ID, SETTINGS.HUD_AUTO_FADE);
+    context.hudIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY);
     context.hudWidthScale = game.settings.get(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE);
     context.hudWidthScalePixels = Math.round(context.hudWidthScale * 800);
-    context.hudStickyZonesEnabled = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED);
 
     // Block visibility settings
     context.hudShowWeather = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
@@ -519,29 +522,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showCustomColors = themeMode === 'custom';
 
     if (context.showCustomColors) {
-      // Build categories with component info
       const categories = {};
-      for (const [catKey, catLabel] of Object.entries(COLOR_CATEGORIES)) {
-        categories[catKey] = { key: catKey, label: catLabel, colors: [] };
-      }
-
+      for (const [catKey, catLabel] of Object.entries(COLOR_CATEGORIES)) categories[catKey] = { key: catKey, label: catLabel, colors: [] };
       for (const def of COLOR_DEFINITIONS) {
         const value = customColors[def.key] || DEFAULT_COLORS[def.key];
         const isCustom = customColors[def.key] !== undefined;
         const componentLabel = COMPONENT_CATEGORIES[def.component] || '';
-        categories[def.category].colors.push({
-          key: def.key,
-          label: def.label,
-          value,
-          defaultValue: DEFAULT_COLORS[def.key],
-          isCustom,
-          component: def.component,
-          componentLabel
-        });
+        categories[def.category].colors.push({ key: def.key, label: def.label, value, defaultValue: DEFAULT_COLORS[def.key], isCustom, component: def.component, componentLabel });
       }
 
       context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
     }
+
+    context.stickyZonesEnabled = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED);
   }
 
   /**
@@ -560,11 +553,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { key: 'midnight', label: 'CALENDARIA.MacroTrigger.Midnight' },
       { key: 'newDay', label: 'CALENDARIA.MacroTrigger.NewDay' }
     ];
-    context.globalTriggers = globalTriggers.map((trigger) => ({
-      ...trigger,
-      label: localize(trigger.label),
-      macroId: config.global?.[trigger.key] || ''
-    }));
+    context.globalTriggers = globalTriggers.map((trigger) => ({ ...trigger, label: localize(trigger.label), macroId: config.global?.[trigger.key] || '' }));
 
     // Season triggers
     const calendar = CalendarManager.getActiveCalendar();
@@ -669,7 +658,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudDialStyle' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, data.hudDialStyle);
     if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);
     if ('hudCombatHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE, data.hudCombatHide);
+    if ('hudAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_AUTO_FADE, data.hudAutoFade);
+    if ('hudIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY, Number(data.hudIdleOpacity));
     if ('hudWidthScale' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE, Number(data.hudWidthScale));
+    if ('miniCalendarAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_AUTO_FADE, data.miniCalendarAutoFade);
+    if ('miniCalendarIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_IDLE_OPACITY, Number(data.miniCalendarIdleOpacity));
     if ('miniCalendarControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, Number(data.miniCalendarControlsDelay));
     if ('darknessSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
     if ('ambienceSync' in data) await game.settings.set(MODULE.ID, SETTINGS.AMBIENCE_SYNC, data.ambienceSync);
@@ -704,7 +697,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
-    if ('hudStickyZonesEnabled' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED, data.hudStickyZonesEnabled);
+    if ('stickyZonesEnabled' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED, data.stickyZonesEnabled);
 
     // Block visibility settings
     if ('hudShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER, data.hudShowWeather);
@@ -1409,7 +1402,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
                 let currentFormat = savedFormats[locationId]?.[role] || 'long';
                 // Resolve calendarDefault to actual format string from calendar
                 if (currentFormat === 'calendarDefault') {
-                  const locationFormatKeys = { hudDate: 'long', hudTime: 'time', timekeeperDate: 'long', timekeeperTime: 'time', miniCalendarHeader: 'long', miniCalendarTime: 'time', fullCalendarHeader: 'full', chatTimestamp: 'long' };
+                  const locationFormatKeys = {
+                    hudDate: 'long',
+                    hudTime: 'time',
+                    timekeeperDate: 'long',
+                    timekeeperTime: 'time',
+                    miniCalendarHeader: 'long',
+                    miniCalendarTime: 'time',
+                    fullCalendarHeader: 'full',
+                    chatTimestamp: 'long'
+                  };
                   const formatKey = locationFormatKeys[locationId] || 'long';
                   const calendar = CalendarManager.getActiveCalendar();
                   currentFormat = calendar?.dateFormats?.[formatKey] || formatKey;
