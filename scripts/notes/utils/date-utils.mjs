@@ -6,6 +6,7 @@
  */
 
 import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { log } from '../../utils/logger.mjs';
 
 /**
  * Compare two date objects.
