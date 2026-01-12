@@ -67,6 +67,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeNamedWeek: CalendarEditor.#onRemoveNamedWeek,
       duplicateCalendar: CalendarEditor.#onDuplicateCalendar,
       saveCalendar: CalendarEditor.#onSaveCalendar,
+      exportCalendar: CalendarEditor.#onExportCalendar,
       resetCalendar: CalendarEditor.#onResetCalendar,
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       toggleCategory: CalendarEditor.#onToggleCategory,
@@ -431,6 +432,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#prepareWeatherContext(context);
     context.buttons = [
       { type: 'button', action: 'saveCalendar', icon: 'fas fa-save', label: 'CALENDARIA.Common.Save' },
+      { type: 'button', action: 'exportCalendar', icon: 'fas fa-file-export', label: 'CALENDARIA.Common.Export' },
       { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Common.Reset' },
       { type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Common.DeleteCalendar', cssClass: 'delete-button' }
     ];
@@ -2119,6 +2121,40 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         if (result === undefined) resolve(null);
       });
     });
+  }
+
+  /**
+   * Export the calendar as a JSON file.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onExportCalendar(_event, _target) {
+    if (!this.#calendarData.name) {
+      ui.notifications.error('CALENDARIA.Editor.Error.NameRequired', { localize: true });
+      return;
+    }
+
+    const exportData = foundry.utils.deepClone(this.#calendarData);
+    exportData.metadata = exportData.metadata || {};
+    exportData.metadata.exportedFrom = 'calendaria';
+    exportData.metadata.exportedAt = Date.now();
+    exportData.metadata.version = game.modules.get('calendaria')?.version || '1.0.0';
+
+    const filename = this.#calendarData.name
+      .toLowerCase()
+      .replace(/[^\da-z]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .concat('.json');
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    ui.notifications.info(format('CALENDARIA.Editor.ExportSuccess', { name: this.#calendarData.name }));
   }
 
   /**

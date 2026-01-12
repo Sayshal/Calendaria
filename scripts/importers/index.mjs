@@ -7,6 +7,7 @@
 
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
+import CalendariaImporter from './calendaria-importer.mjs';
 import CalendariumImporter from './calendarium-importer.mjs';
 import FantasyCalendarImporter from './fantasy-calendar-importer.mjs';
 import SeasonsStarsImporter from './seasons-stars-importer.mjs';
@@ -87,6 +88,7 @@ export function createImporter(id) {
  * Registers all built-in importers.
  */
 export function initializeImporters() {
+  registerImporter(CalendariaImporter);
   registerImporter(SimpleCalendarImporter);
   registerImporter(FantasyCalendarImporter);
   registerImporter(SeasonsStarsImporter);
