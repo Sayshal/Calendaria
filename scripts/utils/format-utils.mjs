@@ -55,13 +55,19 @@ export function dateFormattingParts(calendar, components) {
   const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = calendar?.days?.values || [];
-  const daysInMonthsBefore = isMonthless ? 0 : (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
-  const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
   const yearZero = calendar?.years?.yearZero ?? 0;
   const internalYear = displayYear - yearZero;
-  const daysPerYear = calendar?.days?.daysPerYear ?? 365;
+  let daysInMonthsBefore = 0;
+  if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
+  else if (!isMonthless) daysInMonthsBefore = (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
+  const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
+  let totalDaysFromPriorYears = 0;
+  if (calendar?.getDaysInYear) {
+    if (internalYear > 0) for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
+    else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
+  }
+  const totalDays = totalDaysFromPriorYears + dayOfYear - 1;
   const firstWeekday = calendar?.years?.firstWeekday ?? 0;
-  const totalDays = internalYear * daysPerYear + dayOfYear - 1;
   const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
   const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
   const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
