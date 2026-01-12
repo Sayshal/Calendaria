@@ -380,7 +380,10 @@ export default class EventScheduler {
     const calendar = CalendarManager.getActiveCalendar();
     const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.day - 1, hour: 0, minute: 0, second: 0 });
     const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.day - 1, hour: 0, minute: 0, second: 0 });
-    const secondsPerDay = 24 * 60 * 60;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar?.days?.secondsPerMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
     return Math.floor((endSeconds - startSeconds) / secondsPerDay);
   }
 

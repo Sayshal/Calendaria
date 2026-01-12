@@ -77,6 +77,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     context.hour = components.hour ?? 0;
     context.minute = components.minute ?? 0;
+    context.maxHour = (calendar?.days?.hoursPerDay ?? 24) - 1;
     context.timepointsExpanded = this.#timepointsExpanded;
     context.timepoints = this.#getTimepointsContext();
     context.editingTimepointId = this.#editingTimepointId;

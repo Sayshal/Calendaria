@@ -22,7 +22,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
           year: new fields.NumberField({ required: true, integer: true, initial: 1492 }),
           month: new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
           day: new fields.NumberField({ required: true, integer: true, min: 1, initial: 1 }),
-          hour: new fields.NumberField({ integer: true, min: 0, max: 23, initial: 12 }),
+          hour: new fields.NumberField({ integer: true, min: 0, initial: 12 }),
           minute: new fields.NumberField({ integer: true, min: 0, max: 59, initial: 0 })
         },
         { required: true }
@@ -32,7 +32,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
           year: new fields.NumberField({ integer: true }),
           month: new fields.NumberField({ integer: true, min: 0 }),
           day: new fields.NumberField({ integer: true, min: 1 }),
-          hour: new fields.NumberField({ integer: true, min: 0, max: 23 }),
+          hour: new fields.NumberField({ integer: true, min: 0 }),
           minute: new fields.NumberField({ integer: true, min: 0, max: 59 })
         },
         { nullable: true }

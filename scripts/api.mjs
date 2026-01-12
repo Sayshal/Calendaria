@@ -238,13 +238,14 @@ export const CalendariaAPI = {
   },
 
   /**
-   * @param {number} targetHour - Target hour (0-24)
+   * @param {number} targetHour - Target hour (0-hoursPerDay)
    * @returns {object|null} Time until target hour
    */
   getTimeUntilTarget(targetHour) {
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
-    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    const hoursUntil = currentHour < targetHour ? targetHour - currentHour : hoursPerDay - currentHour + targetHour;
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
@@ -744,17 +745,18 @@ export const CalendariaAPI = {
     }
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
     let targetHour;
     switch (preset.toLowerCase()) {
       case 'sunrise':
-        targetHour = this.getSunrise() ?? 6;
+        targetHour = this.getSunrise() ?? hoursPerDay / 4;
         break;
       case 'midday':
       case 'noon':
-        targetHour = 12;
+        targetHour = hoursPerDay / 2;
         break;
       case 'sunset':
-        targetHour = this.getSunset() ?? 18;
+        targetHour = this.getSunset() ?? (hoursPerDay * 3) / 4;
         break;
       case 'midnight':
         targetHour = 0;
@@ -764,7 +766,7 @@ export const CalendariaAPI = {
         return game.time.worldTime;
     }
     let hoursUntil = targetHour - currentHour;
-    if (hoursUntil <= 0) hoursUntil += 24;
+    if (hoursUntil <= 0) hoursUntil += hoursPerDay;
     const secondsUntil = Math.floor(hoursUntil * 3600);
     return await game.time.advance(secondsUntil);
   },

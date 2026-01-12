@@ -265,7 +265,8 @@ export default class TimeTracker {
   static #getThresholdsForDay(_components, calendar) {
     const sunrise = calendar.sunrise();
     const sunset = calendar.sunset();
-    return { midnight: 0, sunrise: sunrise, midday: 12, sunset: sunset };
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    return { midnight: 0, sunrise: sunrise, midday: hoursPerDay / 2, sunset: sunset };
   }
 
   /**

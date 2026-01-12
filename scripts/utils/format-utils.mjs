@@ -7,10 +7,6 @@
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
 
-/* -------------------------------------------- */
-/*  Ordinal Suffix Helper                       */
-/* -------------------------------------------- */
-
 /**
  * Get ordinal suffix for a number.
  * @param {number} n - Number
@@ -40,10 +36,6 @@ export function toRomanNumeral(n) {
   }
   return result;
 }
-
-/* -------------------------------------------- */
-/*  Date Formatting Parts                       */
-/* -------------------------------------------- */
 
 /**
  * Prepared date parts passed to formatters.
@@ -80,8 +72,10 @@ export function dateFormattingParts(calendar, components) {
   const weekdayData = weekdays[weekday];
   const weekdayName = weekdayData ? localize(weekdayData.name) : '';
   const weekdayAbbr = weekdayData?.abbreviation ? localize(weekdayData.abbreviation) : weekdayName.slice(0, 3);
-  const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-  const ampm = hour < 12 ? 'AM' : 'PM';
+  const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+  const midday = Math.floor(hoursPerDay / 2);
+  const hour12 = hour === 0 ? midday : hour > midday ? hour - midday : hour;
+  const ampm = hour < midday ? 'AM' : 'PM';
   let eraName = '';
   let eraAbbr = '';
   let eraYear = '';
@@ -199,10 +193,6 @@ export function dateFormattingParts(calendar, components) {
     dayOfYear: dayOfYear
   };
 }
-
-/* -------------------------------------------- */
-/*  Preset Formatter Functions                  */
-/* -------------------------------------------- */
 
 /**
  * Format date as short (e.g., "5 Jan").
@@ -401,10 +391,6 @@ export function formatApproximateDate(calendar, components) {
   return format(`CALENDARIA.Format.ApproxDate.${formatter}`, { season: seasonName });
 }
 
-/* -------------------------------------------- */
-/*  Custom Token-based Formatting               */
-/* -------------------------------------------- */
-
 /**
  * Token regex pattern for custom format strings.
  * Matches standard tokens (longest first) and custom tokens in brackets.
@@ -506,10 +492,6 @@ export function formatCustom(calendar, components, formatStr) {
     return tokenMap[match] ?? match;
   });
 }
-
-/* -------------------------------------------- */
-/*  Helper Functions for Custom Tokens          */
-/* -------------------------------------------- */
 
 /**
  * Get moon phase name for the given date.
@@ -631,10 +613,6 @@ function getCycleNumber(calendar, components) {
   return Math.max(1, cycleNum);
 }
 
-/* -------------------------------------------- */
-/*  Legacy Format Migration                     */
-/* -------------------------------------------- */
-
 /**
  * Check if a format string uses legacy {{var}} syntax.
  * @param {string} formatStr - Format string
@@ -707,10 +685,6 @@ export function migrateLegacyFormat(legacyFormat) {
   return newFormat;
 }
 
-/* -------------------------------------------- */
-/*  Preset Registry                             */
-/* -------------------------------------------- */
-
 /**
  * Map of preset names to formatter functions.
  */
@@ -746,10 +720,6 @@ export const DEFAULT_FORMAT_PRESETS = {
   datetime: 'D MMMM YYYY, HH:mm',
   datetime12: 'D MMMM YYYY, h:mm A'
 };
-
-/* -------------------------------------------- */
-/*  Display Location Formatting                 */
-/* -------------------------------------------- */
 
 /**
  * Map location IDs to their corresponding calendar dateFormat key.
@@ -830,10 +800,6 @@ export function getDisplayLocationDefinitions() {
   ];
 }
 
-/* -------------------------------------------- */
-/*  Relative Time                               */
-/* -------------------------------------------- */
-
 /**
  * Get relative time description between two dates.
  * @param {object} targetDate - Target date { year, month, dayOfMonth }
@@ -881,10 +847,6 @@ export function timeSince(targetDate, currentDate) {
     return format('CALENDARIA.Format.InPast', { count, unit });
   }
 }
-
-/* -------------------------------------------- */
-/*  Token Reference                             */
-/* -------------------------------------------- */
 
 /**
  * Get all available tokens with descriptions.
@@ -1134,10 +1096,6 @@ export async function migrateAllDeprecatedTokens() {
     ui.notifications?.info(`Calendaria: Auto-migrated deprecated format tokens: ${changeList}`, { permanent: true });
   }
 }
-
-/* -------------------------------------------- */
-/*  Migration                                   */
-/* -------------------------------------------- */
 
 /**
  * Migrate all custom calendars to new bracket token format.

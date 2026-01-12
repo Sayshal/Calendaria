@@ -273,12 +273,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const endMonth = this.document.system.endDate?.month ?? startMonth;
     const endDay = this.document.system.endDate?.day || startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
-    const startHour = String(this.document.system.startDate.hour ?? 12).padStart(2, '0');
-    const startMinute = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
-    context.startTimeValue = `${startHour}:${startMinute}`;
-    const endHour = String(this.document.system.endDate?.hour ?? ((this.document.system.startDate.hour ?? 12) + 1) % 24).padStart(2, '0');
-    const endMinute = String(this.document.system.endDate?.minute ?? this.document.system.startDate.minute ?? 0).padStart(2, '0');
-    context.endTimeValue = `${endHour}:${endMinute}`;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    context.maxHour = hoursPerDay - 1;
     const repeatType = this.document.system.repeat;
     const hasLinkedEvent = !!this.document.system.linkedEvent?.noteId;
     const isMonthless = calendar?.isMonthless ?? false;
@@ -455,6 +451,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const allCategories = getAllCategories();
       context.displayCategories = selectedCategories.map((id) => allCategories.find((c) => c.id === id)?.label).filter(Boolean);
       context.hasEndDate = endYear !== startYear || endMonth !== startMonth || endDay !== startDay;
+      const startHour = String(this.document.system.startDate.hour ?? 12).padStart(2, '0');
+      const startMinute = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
+      const endHour = String(this.document.system.endDate?.hour ?? ((this.document.system.startDate.hour ?? 12) + 1) % hoursPerDay).padStart(2, '0');
+      const endMinute = String(this.document.system.endDate?.minute ?? this.document.system.startDate.minute ?? 0).padStart(2, '0');
       context.startTimeDisplay = `${startHour}:${startMinute}`;
       context.endTimeDisplay = `${endHour}:${endMinute}`;
       context.hasEndTime = this.document.system.endDate?.hour !== undefined || this.document.system.endDate?.minute !== undefined;
@@ -469,20 +469,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** @inheritdoc */
   _onChangeForm(formConfig, event) {
     const target = event.target;
-    if (target?.name === 'system.startDate.time' || target?.name === 'system.endDate.time') {
-      const [hour, minute] = target.value.split(':').map(Number);
-      if (!isNaN(hour) && !isNaN(minute)) {
-        const prefix = target.name.includes('startDate') ? 'system.startDate' : 'system.endDate';
-        this.element.querySelector(`input[name="${prefix}.hour"]`).value = hour;
-        this.element.querySelector(`input[name="${prefix}.minute"]`).value = minute;
-      }
-    }
-
     super._onChangeForm(formConfig, event);
 
     if (target?.name === 'system.allDay') {
-      this.element.querySelector('input[name="system.startDate.time"]').disabled = target.checked;
-      this.element.querySelector('input[name="system.endDate.time"]').disabled = target.checked;
+      const timeInputs = this.element.querySelectorAll('.time-inputs input[type="number"]');
+      timeInputs.forEach((input) => (input.disabled = target.checked));
     }
 
     if (target?.name === 'system.color') {
@@ -710,7 +701,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {number} currentYear - Current year
    * @param {number} currentMonth - Current month (0-based)
    * @param {number} currentDay - Current day
-   * @returns {Promise<{year: number, month: number, day: number}|null>} - Dialog
+   * @returns {Promise<{year: number, month: number, day: number}|null>} Dialog
    * @private
    */
   static async _showDatePickerDialog(calendar, currentYear, currentMonth, currentDay) {
@@ -843,16 +834,20 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const endDateDisplay = form.querySelector('[data-date-field="endDate"] .date-display');
     if (startDateDisplay) startDateDisplay.textContent = dateDisplay;
     if (endDateDisplay) endDateDisplay.textContent = dateDisplay;
-    const hourInput = form.querySelector('input[name="system.startDate.hour"]');
-    const minuteInput = form.querySelector('input[name="system.startDate.minute"]');
-    const timeInput = form.querySelector('input[name="system.startDate.time"]');
-    if (hourInput) hourInput.value = currentHour;
-    if (minuteInput) minuteInput.value = currentMinute;
-    if (timeInput) timeInput.value = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+    const startHourInput = form.querySelector('input[name="system.startDate.hour"]');
+    const startMinuteInput = form.querySelector('input[name="system.startDate.minute"]');
+    const endHourInput = form.querySelector('input[name="system.endDate.hour"]');
+    const endMinuteInput = form.querySelector('input[name="system.endDate.minute"]');
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    if (startHourInput) startHourInput.value = currentHour;
+    if (startMinuteInput) startMinuteInput.value = currentMinute;
+    if (endHourInput) endHourInput.value = (currentHour + 1) % hoursPerDay;
+    if (endMinuteInput) endMinuteInput.value = currentMinute;
     const allDayInput = form.querySelector('input[name="system.allDay"]');
     if (allDayInput) {
       allDayInput.checked = false;
-      if (timeInput) timeInput.disabled = false;
+      const timeInputs = form.querySelectorAll('.time-inputs input[type="number"]');
+      timeInputs.forEach((input) => (input.disabled = false));
     }
 
     const repeatSelect = form.querySelector('select[name="system.repeat"]');

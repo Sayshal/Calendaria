@@ -144,7 +144,8 @@ export default class ReminderScheduler {
       // For all-day events, check if we should fire reminder tonight for tomorrow's occurrence
       if (occursTomorrow && note.flagData.allDay) {
         const currentMinutes = currentDate.hour * 60 + currentDate.minute;
-        const minutesInDay = 24 * 60;
+        const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+        const minutesInDay = hoursPerDay * 60;
         const reminderMinutes = minutesInDay - offsetMinutes;
         log(3, `  Day-before check: currentMinutes=${currentMinutes}, reminderMinutes=${reminderMinutes}, shouldFire=${currentMinutes >= reminderMinutes}`);
         if (currentMinutes >= reminderMinutes) return true;
@@ -175,7 +176,8 @@ export default class ReminderScheduler {
     // For all-day events, fire reminder the evening before each day of the event
     if (note.flagData.allDay && offsetMinutes > 0 && tomorrowInRange) {
       const currentMinutes = currentDate.hour * 60 + currentDate.minute;
-      const minutesInDay = 24 * 60;
+      const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+      const minutesInDay = hoursPerDay * 60;
       const reminderMinutes = minutesInDay - offsetMinutes;
       log(3, `  Multi-day before check: currentMinutes=${currentMinutes}, reminderMinutes=${reminderMinutes}, shouldFire=${currentMinutes >= reminderMinutes}`);
       return currentMinutes >= reminderMinutes;
@@ -185,8 +187,8 @@ export default class ReminderScheduler {
     if (todayInRange) {
       const isFirstDay = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.day === startDate.day;
       const currentMinutes = currentDate.hour * 60 + currentDate.minute;
-      const eventHour = note.flagData.allDay ? 0 : (isFirstDay ? (startDate.hour ?? 0) : 0);
-      const eventMinute = note.flagData.allDay ? 0 : (isFirstDay ? (startDate.minute ?? 0) : 0);
+      const eventHour = note.flagData.allDay ? 0 : isFirstDay ? (startDate.hour ?? 0) : 0;
+      const eventMinute = note.flagData.allDay ? 0 : isFirstDay ? (startDate.minute ?? 0) : 0;
       const eventMinutes = eventHour * 60 + eventMinute;
       const reminderMinutes = eventMinutes - offsetMinutes;
       return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
@@ -448,7 +450,6 @@ export default class ReminderScheduler {
    */
   static handleReminderNotify(data) {
     if (!data.targets.includes(game.user.id)) return;
-    const noteStub = { id: data.noteId, name: data.noteName, journalId: data.journalId, flagData: { icon: data.icon, iconType: data.iconType, color: data.color } };
     const iconHtml = this.#getIconHtmlFromData(data);
 
     if (data.type === 'toast') {

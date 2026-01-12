@@ -29,18 +29,15 @@ let animationFrameId = null;
 
 /**
  * Calculate darkness level based on time of day.
- *
- * The darkness level follows the sun's position:
- * - Noon (12:00): Minimum darkness (0.0 - brightest)
- * - Midnight (00:00): Maximum darkness (1.0 - darkest)
- * - Dawn/Dusk: Gradual transition
- * @param {number} hours - Hours (0-23)
+ * @param {number} hours - Hours (0 to hoursPerDay-1)
  * @param {number} minutes - Minutes (0-59)
+ * @param {number} [hoursPerDay] - Hours per day for this calendar
  * @returns {number} Darkness level between 0.0 (brightest) and 1.0 (darkest)
  */
-export function calculateDarknessFromTime(hours, minutes) {
-  const totalMinutes = hours * 60 + minutes;
-  const dayProgress = totalMinutes / (24 * 60);
+export function calculateDarknessFromTime(hours, minutes, hoursPerDay = 24) {
+  const minutesPerHour = 60;
+  const totalMinutes = hours * minutesPerHour + minutes;
+  const dayProgress = totalMinutes / (hoursPerDay * minutesPerHour);
   const darkness = (Math.cos(dayProgress * 2 * Math.PI) + 1) / 2;
   return Math.max(0, Math.min(1, darkness));
 }
@@ -50,11 +47,11 @@ export function calculateDarknessFromTime(hours, minutes) {
  * @returns {number} Darkness level between 0.0 (brightest) and 1.0 (darkest)
  */
 export function getCurrentDarkness() {
-  const currentTime = game.time.worldTime;
-  const date = new Date(currentTime * 1000);
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  return calculateDarknessFromTime(hours, minutes);
+  const components = game.time.components;
+  const hours = components.hour ?? 0;
+  const minutes = components.minute ?? 0;
+  const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
+  return calculateDarknessFromTime(hours, minutes, hoursPerDay);
 }
 
 /**
@@ -80,7 +77,6 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
 
 /**
  * Calculate environment lighting overrides from climate zone and weather.
- * Weather overrides climate zone values when both are set.
  * @returns {{base: {hue: number|null, saturation: number|null}, dark: {hue: number|null, saturation: number|null}}|null} - environment config
  */
 export function calculateEnvironmentLighting() {
@@ -103,9 +99,6 @@ export function calculateEnvironmentLighting() {
 
 /**
  * Apply environment lighting to a scene.
- * Only updates values that are explicitly set (non-null).
- * Hue values are stored as degrees (0-360) but Foundry uses normalized (0-1).
- * Saturation in presets is 0-1, Foundry uses -1 to 1 (we map 0-1 to appropriate range).
  * @param {object} scene - The scene to update
  * @param {{base: {hue: number|null, saturation: number|null}, dark: {hue: number|null, saturation: number|null}}|null} lighting - Lighting overrides
  */
@@ -134,7 +127,6 @@ async function applyEnvironmentLighting(scene, lighting) {
 
 /**
  * Update a scene's darkness level based on current time.
- * Only GM can update scene darkness.
  * @param {object} scene - The scene to update
  * @returns {Promise<void>}
  */
@@ -185,8 +177,6 @@ export async function onRenderSceneConfig(app, html, _data) {
 
 /**
  * Update scene darkness when world time changes.
- * Only triggers transition when the hour changes.
- * Only GM should update scene darkness to avoid permission errors.
  * @param {number} worldTime - The new world time
  * @param {number} _dt - The time delta
  */
@@ -199,7 +189,8 @@ export async function onUpdateWorldTime(worldTime, _dt) {
   const currentHour = components?.hour ?? 0;
   if (lastHour !== null && lastHour === currentHour) return;
   lastHour = currentHour;
-  const baseDarkness = calculateDarknessFromTime(currentHour, 0);
+  const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
+  const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay);
   const newTargetDarkness = calculateAdjustedDarkness(baseDarkness, activeScene);
   startDarknessTransition(activeScene, newTargetDarkness);
   log(3, `Hour changed: ${lastHour} → ${currentHour}`);
@@ -269,7 +260,6 @@ function shouldSyncSceneDarkness(scene) {
 
 /**
  * Handle weather change to update scene darkness and environment lighting.
- * Recalculates darkness with new weather penalty and applies lighting overrides.
  */
 export async function onWeatherChange() {
   if (!game.user.isGM) return;
@@ -278,7 +268,8 @@ export async function onWeatherChange() {
   if (!shouldSyncSceneDarkness(activeScene)) return;
   const components = game.time.components;
   const currentHour = components?.hour ?? 0;
-  const baseDarkness = calculateDarknessFromTime(currentHour, 0);
+  const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
+  const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay);
   const newTargetDarkness = calculateAdjustedDarkness(baseDarkness, activeScene);
   startDarknessTransition(activeScene, newTargetDarkness);
   const lighting = calculateEnvironmentLighting();

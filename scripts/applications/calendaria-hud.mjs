@@ -640,13 +640,22 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         sky.style.background = `linear-gradient(to bottom, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
       }
 
+      const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+      const midday = hoursPerDay / 2;
+      const sunrise = this.calendar?.sunrise?.() ?? hoursPerDay / 4;
+      const sunset = this.calendar?.sunset?.() ?? (hoursPerDay * 3) / 4;
+      const dawnStart = sunrise - 0.5;
+      const dawnEnd = sunrise + 1;
+      const duskStart = sunset - 0.5;
+      const duskEnd = sunset + 1;
+
       const stars = this.element.querySelector('.calendaria-hud-stars');
       if (stars) {
-        const showStars = hour < 5.5 || hour > 19;
-        const partialStars = (hour >= 5.5 && hour < 7) || (hour > 17.5 && hour <= 19);
+        const showStars = hour < dawnStart || hour > duskEnd;
+        const partialStars = (hour >= dawnStart && hour < dawnEnd) || (hour > duskStart && hour <= duskEnd);
         stars.classList.toggle('visible', showStars || partialStars);
         if (partialStars) {
-          const starOpacity = hour < 12 ? 1 - (hour - 5.5) / 1.5 : (hour - 17.5) / 1.5;
+          const starOpacity = hour < midday ? 1 - (hour - dawnStart) / 1.5 : (hour - duskStart) / 1.5;
           stars.style.opacity = Math.max(0, Math.min(1, starOpacity));
         } else {
           stars.style.opacity = '';
@@ -655,11 +664,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
       const clouds = this.element.querySelector('.calendaria-hud-clouds');
       if (clouds) {
-        const showClouds = hour >= 7 && hour < 18;
-        const partialClouds = (hour >= 6 && hour < 7) || (hour >= 18 && hour < 19);
+        const showClouds = hour >= dawnEnd && hour < sunset;
+        const partialClouds = (hour >= sunrise && hour < dawnEnd) || (hour >= sunset && hour < duskEnd);
         clouds.classList.toggle('visible', showClouds || partialClouds);
         if (partialClouds) {
-          const cloudOpacity = hour < 12 ? hour - 6 : 1 - (hour - 18);
+          const cloudOpacity = hour < midday ? hour - sunrise : 1 - (hour - sunset);
           clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
         } else {
           clouds.style.opacity = '';
@@ -671,16 +680,16 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const trackHeight = isCompact ? 50 : 70;
       const sunSize = isCompact ? 16 : 20;
       const moonSize = isCompact ? 14 : 18;
-      const isSunVisible = hour >= 6 && hour < 18;
+      const isSunVisible = hour >= sunrise && hour < sunset;
       const sun = this.element.querySelector('.calendaria-hud-sun');
       const moon = this.element.querySelector('.calendaria-hud-moon');
       if (sun) {
         sun.style.opacity = isSunVisible ? '1' : '0';
-        if (isSunVisible) this.#positionCelestialBody(sun, hour, trackWidth, trackHeight, sunSize, true);
+        if (isSunVisible) this.#positionCelestialBody(sun, hour, trackWidth, trackHeight, sunSize, true, sunrise, sunset);
       }
       if (moon) {
         moon.style.opacity = isSunVisible ? '0' : '1';
-        if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false);
+        if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false, sunrise, sunset);
       }
     } else {
       // Update slice elements
@@ -706,18 +715,20 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const sliceWidth = isCompact ? 100 : 120;
     const sunSize = isCompact ? 12 : 14;
     const moonSize = isCompact ? 10 : 12;
-    const isSunVisible = hour >= 6 && hour < 18;
-
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    const sunrise = this.calendar?.sunrise?.() ?? hoursPerDay / 4;
+    const sunset = this.calendar?.sunset?.() ?? (hoursPerDay * 3) / 4;
+    const isSunVisible = hour >= sunrise && hour < sunset;
     const sun = slice.querySelector('.calendaria-slice-sun');
     const moon = slice.querySelector('.calendaria-slice-moon');
 
     if (sun) {
       sun.style.opacity = isSunVisible ? '1' : '0';
-      if (isSunVisible) this.#positionSliceBody(sun, hour, sliceWidth, sunSize, true);
+      if (isSunVisible) this.#positionSliceBody(sun, hour, sliceWidth, sunSize, true, sunrise, sunset);
     }
     if (moon) {
       moon.style.opacity = isSunVisible ? '0' : '1';
-      if (!isSunVisible) this.#positionSliceBody(moon, hour, sliceWidth, moonSize, false);
+      if (!isSunVisible) this.#positionSliceBody(moon, hour, sliceWidth, moonSize, false, sunrise, sunset);
     }
   }
 
@@ -728,23 +739,25 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} sliceWidth - Slice width in pixels
    * @param {number} bodySize - Body size in pixels
    * @param {boolean} isSun - Whether this is the sun (vs moon)
+   * @param {number} sunrise - Sunrise hour
+   * @param {number} sunset - Sunset hour
    */
-  #positionSliceBody(element, hour, sliceWidth, bodySize, isSun) {
+  #positionSliceBody(element, hour, sliceWidth, bodySize, isSun, sunrise, sunset) {
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    const daylightHours = sunset - sunrise;
+    const nightHours = hoursPerDay - daylightHours;
     let normalizedHour;
     if (isSun) {
-      // Sun: 6AM = left edge (0), 6PM = right edge (12)
-      normalizedHour = hour - 6;
+      normalizedHour = hour - sunrise;
     } else {
-      // Moon: 6PM = left edge, 6AM = right edge
-      if (hour >= 18) normalizedHour = hour - 18;
-      else normalizedHour = hour + 6;
+      if (hour >= sunset) normalizedHour = hour - sunset;
+      else normalizedHour = hoursPerDay - sunset + hour;
     }
-    normalizedHour = Math.max(0, Math.min(12, normalizedHour));
-
-    // Position from left to right
+    const spanHours = isSun ? daylightHours : nightHours;
+    normalizedHour = Math.max(0, Math.min(spanHours, normalizedHour));
     const padding = bodySize / 2 + 4;
     const availableWidth = sliceWidth - padding * 2;
-    const x = padding + (normalizedHour / 12) * availableWidth - bodySize / 2;
+    const x = padding + (normalizedHour / spanHours) * availableWidth - bodySize / 2;
     element.style.left = `${x}px`;
   }
 
@@ -756,17 +769,23 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} trackHeight - Track height in pixels
    * @param {number} bodySize - Body size in pixels
    * @param {boolean} isSun - Whether this is the sun (vs moon)
+   * @param {number} sunrise - Sunrise hour
+   * @param {number} sunset - Sunset hour
    */
-  #positionCelestialBody(element, hour, trackWidth, trackHeight, bodySize, isSun) {
+  #positionCelestialBody(element, hour, trackWidth, trackHeight, bodySize, isSun, sunrise, sunset) {
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    const daylightHours = sunset - sunrise;
+    const nightHours = hoursPerDay - daylightHours;
     let normalizedHour;
     if (isSun) {
-      normalizedHour = hour - 6;
+      normalizedHour = hour - sunrise;
     } else {
-      if (hour >= 18) normalizedHour = hour - 18;
-      else normalizedHour = hour + 6;
+      if (hour >= sunset) normalizedHour = hour - sunset;
+      else normalizedHour = hoursPerDay - sunset + hour;
     }
-    normalizedHour = Math.max(0, Math.min(12, normalizedHour));
-    const angle = (normalizedHour / 12) * Math.PI;
+    const spanHours = isSun ? daylightHours : nightHours;
+    normalizedHour = Math.max(0, Math.min(spanHours, normalizedHour));
+    const angle = (normalizedHour / spanHours) * Math.PI;
     const centerX = trackWidth / 2;
     const centerY = trackHeight;
     const radius = Math.min(trackWidth / 2, trackHeight) - bodySize / 2 - 4;
@@ -778,11 +797,12 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get interpolated sky colors for a given hour.
-   * @param {number} hour - Hour (0-24, decimal)
+   * @param {number} hour - Hour (0-hoursPerDay, decimal)
    * @returns {{top: string, mid: string, bottom: string}} Sky gradient colors
    */
   #getSkyColors(hour) {
-    hour = ((hour % 24) + 24) % 24;
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    hour = ((hour / hoursPerDay) * 24 + 24) % 24;
     let kf1 = SKY_KEYFRAMES[0];
     let kf2 = SKY_KEYFRAMES[1];
     for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
@@ -1271,9 +1291,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       hours = h;
       minutes = 0;
     }
-    if (isPM && hours < 12) hours += 12;
-    else if (isAM && hours === 12) hours = 0;
-    if (hours < 0 || hours > 23) return null;
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    const midday = Math.floor(hoursPerDay / 2);
+    if (isPM && hours < midday) hours += midday;
+    else if (isAM && hours === midday) hours = 0;
+    if (hours < 0 || hours >= hoursPerDay) return null;
     if (minutes < 0 || minutes > 59) return null;
     return { hours, minutes };
   }

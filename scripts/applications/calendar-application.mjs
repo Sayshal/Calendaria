@@ -588,7 +588,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       }
     }
     const timeSlots = [];
-    for (let hour = 0; hour < 24; hour++) timeSlots.push({ label: hour.toString(), hour: hour });
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    for (let hour = 0; hour < hoursPerDay; hour++) timeSlots.push({ label: hour.toString(), hour: hour });
     const eventBlocks = this._createEventBlocks(notes, days);
     days.forEach((day) => {
       day.eventBlocks = eventBlocks.filter((block) => block.year === day.year && block.month === day.month && block.day === day.day);
@@ -614,6 +615,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       timeSlots: timeSlots,
       weekdays: weekWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false })),
       daysInWeek,
+      hoursPerDay,
       currentHour,
       currentSeason,
       currentEra
@@ -933,6 +935,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   _createEventBlocks(notes, days) {
     const blocks = [];
+    const calendar = CalendarManager.getActiveCalendar();
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     notes.forEach((note) => {
       const start = note.system.startDate;
       const end = note.system.endDate;
@@ -946,7 +950,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         const startHour = allDay ? 0 : (start.hour ?? 0);
         let hourSpan = 1;
         if (allDay) {
-          hourSpan = 24;
+          hourSpan = hoursPerDay;
         } else if (hasValidEnd) {
           const endHour = end.hour ?? startHour;
           hourSpan = Math.max(endHour - startHour, 1);
@@ -970,8 +974,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         });
       } else {
         const eventStartHour = allDay ? 0 : (start.hour ?? 0);
-        const eventEndHour = allDay ? 24 : (end.hour ?? eventStartHour);
-        const eventHourSpan = allDay ? 24 : Math.max(eventEndHour - eventStartHour, 1);
+        const eventEndHour = allDay ? hoursPerDay : (end.hour ?? eventStartHour);
+        const eventHourSpan = allDay ? hoursPerDay : Math.max(eventEndHour - eventStartHour, 1);
         const eventStartTime = allDay ? 'All Day' : `${eventStartHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
         const eventEndTime = allDay ? null : `${eventEndHour.toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}`;
         for (const dayData of days) {
@@ -1321,7 +1325,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       year = target.dataset.year;
       hour = 12;
     }
-    const endHour = (parseInt(hour) + 1) % 24;
+    const calendar = this.calendar;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    const endHour = (parseInt(hour) + 1) % hoursPerDay;
     const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
     const page = await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
@@ -1341,6 +1347,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   static async _onAddNoteToday(_event, _target) {
     let day, month, year, hour, minute;
+    const calendar = this.calendar;
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     if (this._selectedTimeSlot) {
       ({ day, month, year, hour } = this._selectedTimeSlot);
       minute = 0;
@@ -1350,8 +1359,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       minute = 0;
     } else {
       const today = game.time.components;
-      const calendar = this.calendar;
-      const yearZero = calendar?.years?.yearZero ?? 0;
       year = today.year + yearZero;
       month = today.month;
       day = (today.dayOfMonth ?? 0) + 1;
@@ -1359,7 +1366,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       minute = today.minute ?? 0;
     }
 
-    const endHour = (parseInt(hour) + 1) % 24;
+    const endHour = (parseInt(hour) + 1) % hoursPerDay;
     const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
     const page = await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
