@@ -336,15 +336,21 @@ export const CalendariaAPI = {
   formatDate(components = null, formatOrPreset = 'long') {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return '';
-    components = components || game.time.components;
+
+    // Get components and convert dayOfMonth from 0-indexed to 1-indexed for display
+    const raw = components || game.time.components;
+    const formatted = {
+      ...raw,
+      dayOfMonth: (raw.dayOfMonth ?? 0) + 1
+    };
 
     // Check if it's a preset name
     if (PRESET_FORMATTERS[formatOrPreset]) {
-      return PRESET_FORMATTERS[formatOrPreset](calendar, components);
+      return PRESET_FORMATTERS[formatOrPreset](calendar, formatted);
     }
 
     // Otherwise treat as a format string
-    return formatCustom(calendar, components, formatOrPreset);
+    return formatCustom(calendar, formatted, formatOrPreset);
   },
 
   /**
