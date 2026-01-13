@@ -104,17 +104,21 @@ export function calculateEnvironmentLighting() {
  * @param {{base: {hue: number|null, saturation: number|null}, dark: {hue: number|null, saturation: number|null}}|null} lighting - Lighting overrides
  */
 async function applyEnvironmentLighting(scene, lighting) {
-  if (!lighting || !game.user.isGM) return;
+  if (!game.user.isGM) return;
   const ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
   if (!ambienceSync) return;
+  if (!lighting) {
+    await scene.update({ 'environment.base.intensity': 0, 'environment.dark.intensity': 0 });
+    log(3, 'Reset environment lighting to defaults');
+    return;
+  }
   const intensityData = {};
   if (lighting.base.hue !== null) intensityData['environment.base.intensity'] = 0.5;
+  else intensityData['environment.base.intensity'] = 0;
   if (lighting.dark.hue !== null) intensityData['environment.dark.intensity'] = 0.5;
-  if (Object.keys(intensityData).length > 0) {
-    await scene.update(intensityData);
-    log(3, 'Set environment intensity:', intensityData);
-  }
-
+  else intensityData['environment.dark.intensity'] = 0;
+  await scene.update(intensityData);
+  log(3, 'Set environment intensity:', intensityData);
   const updateData = {};
   if (lighting.base.hue !== null) updateData['environment.base.hue'] = lighting.base.hue / 360;
   if (lighting.base.saturation !== null) updateData['environment.base.saturation'] = lighting.base.saturation * 2 - 1;
