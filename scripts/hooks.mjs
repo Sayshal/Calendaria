@@ -8,6 +8,7 @@
 import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { MiniCalendar } from './applications/mini-calendar.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
+import { onChatMessage } from './chat/chat-commands.mjs';
 import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessageHTML } from './chat/chat-timestamp.mjs';
 import { HOOKS, MODULE, SETTINGS } from './constants.mjs';
 import { onRenderSceneConfig, onUpdateScene, onUpdateWorldTime, onWeatherChange } from './darkness.mjs';
@@ -25,6 +26,7 @@ import { log } from './utils/logger.mjs';
  */
 export function registerHooks() {
   Hooks.on('calendaria.calendarSwitched', NoteManager.onCalendarSwitched.bind(NoteManager));
+  Hooks.on('chatMessage', onChatMessage);
   Hooks.on('closeGame', CalendarManager.onCloseGame.bind(CalendarManager));
   Hooks.on('createJournalEntryPage', NoteManager.onCreateJournalEntryPage.bind(NoteManager));
   Hooks.on('deleteJournalEntry', NoteManager.onDeleteJournalEntry.bind(NoteManager));
