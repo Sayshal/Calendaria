@@ -203,7 +203,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       TimeKeeper.setIncrement(stickyStates.increment);
     }
 
-    context.time = this.#formatTime(components);
+    const timeFormatted = this.#formatTime(components);
+    context.time = stripMoonIconMarkers(timeFormatted);
+    context.timeHtml = renderMoonIcons(timeFormatted);
     const dateFormatted = this.#formatDateDisplay(components);
     context.dateDisplay = stripMoonIconMarkers(dateFormatted);
     context.dateDisplayHtml = renderMoonIcons(dateFormatted);
@@ -978,7 +980,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     const timeEl = this.element.querySelector('.calendaria-hud-time');
-    if (timeEl) timeEl.textContent = this.#formatTime(components);
+    if (timeEl) {
+      const timeFormatted = this.#formatTime(components);
+      if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);
+      else timeEl.textContent = timeFormatted;
+    }
     const dateEl = this.element.querySelector('.calendaria-hud-date');
     if (dateEl) {
       const dateFormatted = this.#formatDateDisplay(components);

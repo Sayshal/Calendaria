@@ -12,7 +12,7 @@ import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
-import { formatForLocation } from '../utils/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { canChangeDateTime, canChangeWeather, canViewMiniCalendar } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -164,9 +164,10 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     context.running = TimeKeeper.running;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
-    context.currentTime = calendar
+    const rawTime = calendar
       ? formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime')
       : TimeKeeper.getFormattedTime();
+    context.currentTime = hasMoonIconMarkers(rawTime) ? renderMoonIcons(rawTime) : rawTime;
     context.currentDate = TimeKeeper.getFormattedDate();
     const isMonthless = calendar?.isMonthless ?? false;
     context.increments = Object.entries(getTimeIncrements())
@@ -459,7 +460,8 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
     const headerComponents = { year, month, dayOfMonth: date.day };
-    const formattedHeader = formatForLocation(calendar, headerComponents, 'miniCalendarHeader');
+    const rawHeader = formatForLocation(calendar, headerComponents, 'miniCalendarHeader');
+    const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
 
     return {
       year,
@@ -1046,7 +1048,9 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const components = game.time.components;
     if (timeEl && calendar) {
       const yearZero = calendar.years?.yearZero ?? 0;
-      timeEl.textContent = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime');
+      const timeFormatted = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime');
+      if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);
+      else timeEl.textContent = timeFormatted;
     }
     if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;

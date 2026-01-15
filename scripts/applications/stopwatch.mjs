@@ -7,7 +7,7 @@
 
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import TimeKeeper from '../time/time-keeper.mjs';
-import { formatDuration, formatGameDuration } from '../utils/format-utils.mjs';
+import { DEFAULT_FORMAT_PRESETS, formatDuration, formatGameDuration, getDisplayFormat } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import * as StickyZones from '../utils/sticky-zones.mjs';
@@ -140,8 +140,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #getFormat() {
-    if (this.#mode === 'realtime') return game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_REALTIME) || 'HH:mm:ss.SSS';
-    return game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_GAMETIME) || 'HH:mm:ss';
+    const locationId = this.#mode === 'realtime' ? 'stopwatchRealtime' : 'stopwatchGametime';
+    const defaultFormat = this.#mode === 'realtime' ? 'stopwatchRealtimeFull' : 'stopwatchGametimeFull';
+    const formatSetting = getDisplayFormat(locationId) || defaultFormat;
+    // Resolve preset name to format string, or use as custom format string
+    return DEFAULT_FORMAT_PRESETS[formatSetting] || formatSetting;
   }
 
   /**

@@ -75,23 +75,6 @@ export function registerSettings() {
     type: new ObjectField({ nullable: true, initial: null })
   });
 
-  /** Stopwatch display format */
-  game.settings.register(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_REALTIME, {
-    name: 'CALENDARIA.Settings.StopwatchFormatRealtime.Name',
-    hint: 'CALENDARIA.Settings.StopwatchFormatRealtime.Hint',
-    scope: 'user',
-    config: false,
-    type: new StringField({ initial: 'HH:mm:ss.SSS' })
-  });
-
-  game.settings.register(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_GAMETIME, {
-    name: 'CALENDARIA.Settings.StopwatchFormatGametime.Name',
-    hint: 'CALENDARIA.Settings.StopwatchFormatGametime.Hint',
-    scope: 'user',
-    config: false,
-    type: new StringField({ initial: 'HH:mm:ss' })
-  });
-
   /** Stopwatch auto-start game time */
   game.settings.register(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME, {
     name: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name',
@@ -619,7 +602,9 @@ export function registerSettings() {
         miniCalendarHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
         miniCalendarTime: { gm: 'time', player: 'time' },
         fullCalendarHeader: { gm: 'MMMM [era]', player: 'MMMM [era]' },
-        chatTimestamp: { gm: 'short', player: 'short' }
+        chatTimestamp: { gm: 'short', player: 'short' },
+        stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
+        stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' }
       }
     })
   });

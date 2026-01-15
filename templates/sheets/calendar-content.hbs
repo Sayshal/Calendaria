@@ -7,10 +7,10 @@
 
     <h2 class="calendar-title">
       {{#if calendarData}} {{#if (eq displayMode 'week')}} {{localize 'CALENDARIA.Common.Week'}}
-          {{calendarData.weekNumber}}, {{calendarData.formattedHeader}}
+          {{calendarData.weekNumber}}, {{{calendarData.formattedHeader}}}
         {{else if (eq displayMode 'year')}}
           {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
-        {{else}} {{calendarData.formattedHeader}} {{/if}}
+        {{else}} {{{calendarData.formattedHeader}}} {{/if}}
       {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
     </h2>
 

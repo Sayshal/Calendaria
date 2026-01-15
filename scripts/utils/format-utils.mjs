@@ -872,7 +872,17 @@ export const DEFAULT_FORMAT_PRESETS = {
   approxTime: '[approxTime]',
   approxDate: '[approxDate]',
   datetime: 'D MMMM YYYY, HH:mm',
-  datetime12: 'D MMMM YYYY, h:mm A'
+  datetime12: 'D MMMM YYYY, h:mm A',
+  // Stopwatch duration presets (realtime)
+  stopwatchRealtimeFull: 'HH:mm:ss.SSS',
+  stopwatchRealtimeNoMs: 'HH:mm:ss',
+  stopwatchRealtimeMinSec: 'mm:ss.SSS',
+  stopwatchRealtimeMinSecNoMs: 'mm:ss',
+  stopwatchRealtimeSecOnly: 'ss.SSS',
+  // Stopwatch duration presets (gametime)
+  stopwatchGametimeFull: 'HH:mm:ss',
+  stopwatchGametimeMinSec: 'mm:ss',
+  stopwatchGametimeSecOnly: 'ss'
 };
 
 /**
@@ -891,6 +901,23 @@ const LOCATION_FORMAT_KEYS = {
 };
 
 /**
+ * Default format presets for each location (fallback when not in settings).
+ * @type {Object<string, string>}
+ */
+export const LOCATION_DEFAULTS = {
+  hudDate: 'ordinal',
+  hudTime: 'time',
+  timekeeperDate: 'long',
+  timekeeperTime: 'time',
+  miniCalendarHeader: 'long',
+  miniCalendarTime: 'time',
+  fullCalendarHeader: 'full',
+  chatTimestamp: 'short',
+  stopwatchRealtime: 'stopwatchRealtimeFull',
+  stopwatchGametime: 'stopwatchGametimeFull'
+};
+
+/**
  * Get the format string/preset for a specific display location.
  * Automatically selects GM or player format based on user role.
  * @param {string} locationId - Location identifier
@@ -899,16 +926,17 @@ const LOCATION_FORMAT_KEYS = {
 export function getDisplayFormat(locationId) {
   const MODULE_ID = 'calendaria';
   const SETTINGS_KEY = 'displayFormats';
+  const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
 
   try {
     const formats = game.settings.get(MODULE_ID, SETTINGS_KEY);
     const locationFormats = formats?.[locationId];
-    if (!locationFormats) return 'long';
+    if (!locationFormats) return defaultFormat;
 
     const isGM = game.user.isGM;
-    return isGM ? locationFormats.gm || 'long' : locationFormats.player || 'long';
+    return isGM ? locationFormats.gm || defaultFormat : locationFormats.player || defaultFormat;
   } catch {
-    return 'long';
+    return defaultFormat;
   }
 }
 

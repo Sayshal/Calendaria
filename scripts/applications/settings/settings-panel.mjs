@@ -9,7 +9,7 @@ import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../../time/time-keeper.mjs';
-import { DEFAULT_FORMAT_PRESETS } from '../../utils/format-utils.mjs';
+import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS } from '../../utils/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canViewMiniCalendar, canViewTimeKeeper } from '../../utils/permissions.mjs';
@@ -430,6 +430,24 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     // Locations that support "Off" option (hides the element entirely)
     const supportsOff = ['timekeeperDate'];
 
+    // Stopwatch preset configurations - values are preset NAMES (like other locations)
+    const stopwatchRealtimePresets = [
+      { value: 'stopwatchRealtimeFull', label: 'HH:mm:ss.SSS' },
+      { value: 'stopwatchRealtimeNoMs', label: 'HH:mm:ss' },
+      { value: 'stopwatchRealtimeMinSec', label: 'mm:ss.SSS' },
+      { value: 'stopwatchRealtimeMinSecNoMs', label: 'mm:ss' },
+      { value: 'stopwatchRealtimeSecOnly', label: 'ss.SSS' },
+      { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
+    ];
+    const stopwatchGametimePresets = [
+      { value: 'stopwatchGametimeFull', label: 'HH:mm:ss' },
+      { value: 'stopwatchGametimeMinSec', label: 'mm:ss' },
+      { value: 'stopwatchGametimeSecOnly', label: 'ss' },
+      { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
+    ];
+    const stopwatchRealtimeKnown = ['stopwatchRealtimeFull', 'stopwatchRealtimeNoMs', 'stopwatchRealtimeMinSec', 'stopwatchRealtimeMinSecNoMs', 'stopwatchRealtimeSecOnly'];
+    const stopwatchGametimeKnown = ['stopwatchGametimeFull', 'stopwatchGametimeMinSec', 'stopwatchGametimeSecOnly'];
+
     const locations = [
       { id: 'hudDate', label: localize('CALENDARIA.Format.Location.HudDate'), category: 'hud' },
       { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud' },
@@ -438,16 +456,33 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'miniCalendarHeader', label: localize('CALENDARIA.Format.Location.MiniCalendarHeader'), category: 'miniCalendar' },
       { id: 'miniCalendarTime', label: localize('CALENDARIA.Format.Location.MiniCalendarTime'), category: 'miniCalendar' },
       { id: 'fullCalendarHeader', label: localize('CALENDARIA.Format.Location.FullCalendarHeader'), category: 'fullcal' },
-      { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat' }
+      { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat' },
+      { id: 'stopwatchRealtime', label: localize('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', gmOnly: true },
+      { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', gmOnly: true }
     ];
 
     context.formatLocations = locations.map((loc) => {
-      const formats = displayFormats[loc.id] || { gm: 'long', player: 'long' };
-      const knownPresets = ['off', 'calendarDefault', 'short', 'long', 'full', 'ordinal', 'fantasy', 'time', 'time12', 'approxTime', 'approxDate', 'datetime', 'datetime12'];
+      // Determine presets and knownPresets based on location
+      let knownPresets, locationPresets, defaultFormat;
+      if (loc.id === 'stopwatchRealtime') {
+        knownPresets = stopwatchRealtimeKnown;
+        locationPresets = stopwatchRealtimePresets;
+        defaultFormat = 'stopwatchRealtimeFull';
+      } else if (loc.id === 'stopwatchGametime') {
+        knownPresets = stopwatchGametimeKnown;
+        locationPresets = stopwatchGametimePresets;
+        defaultFormat = 'stopwatchGametimeFull';
+      } else {
+        knownPresets = ['off', 'calendarDefault', 'short', 'long', 'full', 'ordinal', 'fantasy', 'time', 'time12', 'approxTime', 'approxDate', 'datetime', 'datetime12'];
+        locationPresets = [...presetOptions];
+        defaultFormat = 'long';
+        if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: localize('CALENDARIA.Format.Preset.Off') }, ...locationPresets];
+      }
+
+      // All locations use displayFormats setting
+      const formats = displayFormats[loc.id] || { gm: defaultFormat, player: defaultFormat };
       const isCustomGM = !knownPresets.includes(formats.gm);
       const isCustomPlayer = !knownPresets.includes(formats.player);
-      let locationPresets = [...presetOptions];
-      if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: localize('CALENDARIA.Format.Preset.Off') }, ...locationPresets];
 
       return {
         ...loc,
@@ -466,32 +501,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'timekeeper', label: localize('CALENDARIA.Format.Category.Timekeeper'), locations: context.formatLocations.filter((l) => l.category === 'timekeeper') },
       { id: 'miniCalendar', label: localize('CALENDARIA.Format.Category.MiniCalendar'), locations: context.formatLocations.filter((l) => l.category === 'miniCalendar') },
       { id: 'fullcal', label: localize('CALENDARIA.Format.Category.FullCalendar'), locations: context.formatLocations.filter((l) => l.category === 'fullcal') },
-      { id: 'chat', label: localize('CALENDARIA.Format.Category.Chat'), locations: context.formatLocations.filter((l) => l.category === 'chat') }
+      { id: 'chat', label: localize('CALENDARIA.Format.Category.Chat'), locations: context.formatLocations.filter((l) => l.category === 'chat') },
+      { id: 'stopwatch', label: localize('CALENDARIA.Format.Category.Stopwatch'), locations: context.formatLocations.filter((l) => l.category === 'stopwatch') }
     ];
-
-    // Stopwatch formats (elapsed time formats)
-    const realtimePresets = ['HH:mm:ss.SSS', 'HH:mm:ss', 'mm:ss.SSS', 'mm:ss', 'ss.SSS'];
-    const gametimePresets = ['HH:mm:ss', 'mm:ss', 'ss'];
-
-    const currentRealtimeFormat = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_REALTIME) || 'HH:mm:ss.SSS';
-    const currentGametimeFormat = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_GAMETIME) || 'HH:mm:ss';
-
-    const isRealtimeCustom = !realtimePresets.includes(currentRealtimeFormat);
-    const isGametimeCustom = !gametimePresets.includes(currentGametimeFormat);
-
-    context.stopwatchRealtimeOptions = [
-      ...realtimePresets.map((f) => ({ value: f, label: f, selected: currentRealtimeFormat === f })),
-      { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom'), selected: isRealtimeCustom }
-    ];
-    context.stopwatchRealtimeCustom = isRealtimeCustom ? currentRealtimeFormat : '';
-    context.stopwatchRealtimeValue = currentRealtimeFormat;
-
-    context.stopwatchGametimeOptions = [
-      ...gametimePresets.map((f) => ({ value: f, label: f, selected: currentGametimeFormat === f })),
-      { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom'), selected: isGametimeCustom }
-    ];
-    context.stopwatchGametimeCustom = isGametimeCustom ? currentGametimeFormat : '';
-    context.stopwatchGametimeValue = currentGametimeFormat;
   }
 
   /**
@@ -806,7 +818,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
     if (data.permissions) {
-      const permissionKeys = ['viewFullCalendar', 'viewMiniCalendar', 'viewTimeKeeper', 'addNotes', 'changeDateTime', 'changeActiveCalendar', 'changeWeather', 'editNotes', 'deleteNotes', 'editCalendars'];
+      const permissionKeys = [
+        'viewFullCalendar',
+        'viewMiniCalendar',
+        'viewTimeKeeper',
+        'addNotes',
+        'changeDateTime',
+        'changeActiveCalendar',
+        'changeWeather',
+        'editNotes',
+        'deleteNotes',
+        'editCalendars'
+      ];
       const permissions = {};
       for (const key of permissionKeys) {
         if (data.permissions[key]) {
@@ -855,46 +878,32 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
     }
 
-    // Display format settings
-    if (data.displayFormats) {
+    // Display format settings (includes stopwatch - all locations use the same code path)
+    if (data.displayFormats && Object.keys(data.displayFormats).length > 0) {
       const currentFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
       const newFormats = { ...currentFormats };
+      let stopwatchChanged = false;
       for (const [locationId, formats] of Object.entries(data.displayFormats)) {
         if (formats) {
+          const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
           let gmFormat, playerFormat;
           if (formats.gmPreset === 'custom') {
             const customValue = formats.gmCustom?.trim();
-            gmFormat = customValue || currentFormats[locationId]?.gm || 'long';
-          } else gmFormat = formats.gmPreset || 'long';
+            gmFormat = customValue || currentFormats[locationId]?.gm || defaultFormat;
+          } else gmFormat = formats.gmPreset || defaultFormat;
           if (formats.playerPreset === 'custom') {
             const customValue = formats.playerCustom?.trim();
-            playerFormat = customValue || currentFormats[locationId]?.player || 'long';
-          } else playerFormat = formats.playerPreset || 'long';
+            playerFormat = customValue || currentFormats[locationId]?.player || defaultFormat;
+          } else playerFormat = formats.playerPreset || defaultFormat;
           newFormats[locationId] = { gm: gmFormat, player: playerFormat };
+          if (locationId === 'stopwatchRealtime' || locationId === 'stopwatchGametime') stopwatchChanged = true;
         }
       }
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, newFormats);
       Hooks.callAll('calendaria.displayFormatsChanged', newFormats);
+      if (stopwatchChanged) foundry.applications.instances.get('calendaria-stopwatch')?.render();
       const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
       if (settingsPanel?.rendered) settingsPanel.render({ parts: ['formats'] });
-    }
-
-    // Stopwatch format settings
-    if (data.stopwatchFormatRealtime) {
-      // Validate: only allow time tokens (HH, mm, ss, SSS) and separators
-      const validTimeTokens = /^[HhmsS:.\- ]*$/;
-      let format = data.stopwatchFormatRealtime;
-      if (!validTimeTokens.test(format)) format = format.replace(/[^HhmsS:.\- ]/g, '');
-      if (format) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_REALTIME, format);
-      foundry.applications.instances.get('calendaria-stopwatch')?.render();
-    }
-    if (data.stopwatchFormatGametime) {
-      // Validate: only allow time tokens without milliseconds (HH, mm, ss) and separators
-      const validTimeTokens = /^[Hhms:.\- ]*$/;
-      let format = data.stopwatchFormatGametime;
-      if (!validTimeTokens.test(format)) format = format.replace(/[^Hhms:.\- ]/g, '');
-      if (format) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_FORMAT_GAMETIME, format);
-      foundry.applications.instances.get('calendaria-stopwatch')?.render();
     }
 
     // Re-render applications when their settings change
@@ -1592,7 +1601,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
               // Pre-populate with current format string if empty (fixes #199, #210)
               if (!customInput.value.trim()) {
                 const savedFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
-                let currentFormat = savedFormats[locationId]?.[role] || 'long';
+                const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
+                let currentFormat = savedFormats[locationId]?.[role] || defaultFormat;
                 // Resolve calendarDefault to actual format string from calendar
                 if (currentFormat === 'calendarDefault') {
                   const locationFormatKeys = {
@@ -1610,30 +1620,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
                   currentFormat = calendar?.dateFormats?.[formatKey] || formatKey;
                 }
                 // Convert preset name to format string, or use as-is if already custom
-                customInput.value = DEFAULT_FORMAT_PRESETS[currentFormat] || currentFormat;
+                currentFormat = DEFAULT_FORMAT_PRESETS[currentFormat] || currentFormat;
+                customInput.value = currentFormat;
               }
               customInput.focus();
             } else {
               customInput.classList.add('hidden');
               customInput.value = '';
-            }
-          }
-        });
-      });
-
-      // Stopwatch format select handling
-      const stopwatchSelects = htmlElement.querySelectorAll('select[data-format-target]');
-      stopwatchSelects.forEach((select) => {
-        select.addEventListener('change', (event) => {
-          const targetName = event.target.dataset.formatTarget;
-          const customInput = htmlElement.querySelector(`input[name="${targetName}"]`);
-          if (customInput) {
-            if (event.target.value === 'custom') {
-              customInput.style.display = '';
-              customInput.focus();
-            } else {
-              customInput.style.display = 'none';
-              customInput.value = event.target.value;
             }
           }
         });

@@ -8,7 +8,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
-import { formatForLocation, getDisplayFormat } from '../utils/format-utils.mjs';
+import { formatForLocation, getDisplayFormat, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { canChangeDateTime, canViewTimeKeeper } from '../utils/permissions.mjs';
 import * as StickyZones from '../utils/sticky-zones.mjs';
@@ -59,8 +59,10 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.running = TimeKeeper.running;
     context.isGM = game.user.isGM;
     context.canChangeDateTime = canChangeDateTime();
-    context.currentTime = this.#formatTime();
-    context.currentDate = this.#formatDate();
+    const rawTime = this.#formatTime();
+    const rawDate = this.#formatDate();
+    context.currentTime = hasMoonIconMarkers(rawTime) ? renderMoonIcons(rawTime) : rawTime;
+    context.currentDate = hasMoonIconMarkers(rawDate) ? renderMoonIcons(rawDate) : rawDate;
     const dateFormat = getDisplayFormat('timekeeperDate');
     context.showDate = dateFormat !== 'off';
     const tooltips = this.#getJumpTooltips();
@@ -282,8 +284,16 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.rendered) return;
     const timeEl = this.element.querySelector('.time-display-time');
     const dateEl = this.element.querySelector('.time-display-date');
-    if (timeEl) timeEl.textContent = this.#formatTime();
-    if (dateEl) dateEl.textContent = this.#formatDate();
+    if (timeEl) {
+      const timeFormatted = this.#formatTime();
+      if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);
+      else timeEl.textContent = timeFormatted;
+    }
+    if (dateEl) {
+      const dateFormatted = this.#formatDate();
+      if (hasMoonIconMarkers(dateFormatted)) dateEl.innerHTML = renderMoonIcons(dateFormatted);
+      else dateEl.textContent = dateFormatted;
+    }
   }
 
   /**

@@ -121,7 +121,7 @@
       <i class="fas fa-chevron-left"></i>
     </button>
     <div class="mini-title-group">
-      <span class="mini-title">{{calendarData.formattedHeader}}</span>
+      <span class="mini-title">{{{calendarData.formattedHeader}}}</span>
     </div>
     <button type="button" class="nav-btn" data-action="navigate" data-direction="next"
       data-tooltip="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
@@ -206,7 +206,7 @@
   </div>
 
   <div class="mini-time-display" {{#if canChangeDateTime}}data-action="toggle" {{/if}}>
-    <span class="time-value">{{currentTime}}</span>
+    <span class="time-value">{{{currentTime}}}</span>
     <span class="date-value hidden">{{currentDate}}</span>
     {{#if canChangeDateTime}}
       <div class="time-toggle {{#if running}}active{{/if}}"

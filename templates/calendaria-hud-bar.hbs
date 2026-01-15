@@ -68,7 +68,7 @@
             <div class="calendaria-slice-body calendaria-slice-moon"></div>
           </div>
           <div class="calendaria-slice-time-overlay">
-            <span class="calendaria-hud-time">{{time}}</span>
+            <span class="calendaria-hud-time">{{{timeHtml}}}</span>
             {{#if canChangeDateTime}}
               <button type="button" class="calendaria-hud-play-btn" data-action="toggleTimeFlow"
                 aria-pressed="{{isPlaying}}"
@@ -80,7 +80,7 @@
         </div>
       {{else}}
         <div class="calendaria-hud-time-wrapper">
-          <span class="calendaria-hud-time">{{time}}</span>
+          <span class="calendaria-hud-time">{{{timeHtml}}}</span>
           {{#if canChangeDateTime}}
             <button type="button" class="calendaria-hud-play-btn" data-action="toggleTimeFlow"
               aria-pressed="{{isPlaying}}"

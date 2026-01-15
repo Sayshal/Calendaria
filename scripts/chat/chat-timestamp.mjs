@@ -8,7 +8,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { formatForLocation } from '../utils/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 
 const ChatLog = foundry.applications.sidebar.tabs.ChatLog;
 
@@ -45,13 +45,15 @@ export function onRenderChatMessageHTML(message, html, _context) {
   const formattedDate = flags.fantasyDate || formatWorldTime(flags.worldTime);
   if (!formattedDate) return;
   if (mode === 'replace') {
-    timestampEl.textContent = formattedDate;
+    if (hasMoonIconMarkers(formattedDate)) timestampEl.innerHTML = renderMoonIcons(formattedDate);
+    else timestampEl.textContent = formattedDate;
   } else if (mode === 'augment') {
     const wrapper = document.createElement('span');
     wrapper.className = 'calendaria-timestamp-wrapper';
     const gameDate = document.createElement('span');
     gameDate.className = 'calendaria-timestamp';
-    gameDate.textContent = `${formattedDate} `;
+    if (hasMoonIconMarkers(formattedDate)) gameDate.innerHTML = `${renderMoonIcons(formattedDate)} `;
+    else gameDate.textContent = `${formattedDate} `;
     const realDate = document.createElement('span');
     realDate.className = 'calendaria-timestamp-real';
     realDate.textContent = timestampEl.textContent;
@@ -80,11 +82,15 @@ export function overrideChatLogTimestamps() {
         const formattedDate = flags.fantasyDate || formatWorldTime(flags.worldTime);
         if (formattedDate) {
           if (mode === 'replace') {
-            stamp.textContent = formattedDate;
+            if (hasMoonIconMarkers(formattedDate)) stamp.innerHTML = renderMoonIcons(formattedDate);
+            else stamp.textContent = formattedDate;
             stamp.dataset.tooltip = foundry.utils.timeSince(message.timestamp);
           } else if (mode === 'augment') {
             const gameDate = stamp.querySelector('.calendaria-timestamp');
-            if (gameDate) gameDate.textContent = `${formattedDate} `;
+            if (gameDate) {
+              if (hasMoonIconMarkers(formattedDate)) gameDate.innerHTML = `${renderMoonIcons(formattedDate)} `;
+              else gameDate.textContent = `${formattedDate} `;
+            }
             const realDate = stamp.querySelector('.calendaria-timestamp-real');
             if (realDate) realDate.textContent = foundry.utils.timeSince(message.timestamp);
           }

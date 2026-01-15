@@ -12,7 +12,7 @@ import NoteManager from '../notes/note-manager.mjs';
 import { addDays, dayOfWeek, daysBetween } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
-import { formatForLocation } from '../utils/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { canViewFullCalendar } from '../utils/permissions.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
@@ -451,13 +451,15 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
     const headerComponents = { year, month, dayOfMonth: date.day };
-    const formattedHeader = formatForLocation(calendar, headerComponents, 'fullCalendarHeader');
+    const rawHeader = formatForLocation(calendar, headerComponents, 'fullCalendarHeader');
+    const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     return {
       year,
       month,
       monthName: localize(monthData.name),
       yearDisplay: calendar.formatYearWithEra?.(year) ?? String(year),
       formattedHeader,
+      formattedHeaderHtml: hasMoonIconMarkers(rawHeader),
       weeks,
       weekdays: weekdaysData,
       daysInWeek,
@@ -688,13 +690,15 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const currentEra = calendar.getCurrentEra?.();
     const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.days?.values ?? [];
     const weekHeaderComponents = { year: weekStartYear, month: weekStartMonth, dayOfMonth: weekStartDay };
-    const formattedHeader = formatForLocation(calendar, weekHeaderComponents, 'fullCalendarHeader');
+    const rawHeader = formatForLocation(calendar, weekHeaderComponents, 'fullCalendarHeader');
+    const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     return {
       year: weekStartYear,
       month: weekStartMonth,
       monthName: calendar.months?.values?.[month]?.name ? localize(calendar.months.values[month].name) : '',
       yearDisplay: calendar.formatYearWithEra?.(weekStartYear) ?? String(weekStartYear),
       formattedHeader,
+      formattedHeaderHtml: hasMoonIconMarkers(rawHeader),
       weekNumber,
       days: days,
       timeSlots: timeSlots,

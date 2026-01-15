@@ -45,40 +45,6 @@
   {{/each}}
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Format.Category.Stopwatch"}}</legend>
-
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Format.Location.StopwatchRealtime"}}</label>
-      <div class="form-fields stopwatch-format-fields">
-        <select name="stopwatchRealtimeSelect" data-format-target="stopwatchFormatRealtime">
-          {{#each stopwatchRealtimeOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-          {{/each}}
-        </select>
-        <input type="text" name="stopwatchFormatRealtime" value="{{stopwatchRealtimeValue}}"
-          class="stopwatch-custom-format" placeholder="HH:mm:ss.SSS"
-          {{#unless stopwatchRealtimeCustom}}style="display:none" {{/unless}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Format.StopwatchRealtimeHint"}}</p>
-    </div>
-
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Format.Location.StopwatchGametime"}}</label>
-      <div class="form-fields stopwatch-format-fields">
-        <select name="stopwatchGametimeSelect" data-format-target="stopwatchFormatGametime">
-          {{#each stopwatchGametimeOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-          {{/each}}
-        </select>
-        <input type="text" name="stopwatchFormatGametime" value="{{stopwatchGametimeValue}}"
-          class="stopwatch-custom-format" placeholder="HH:mm:ss" {{#unless stopwatchGametimeCustom}}style="display:none"
-          {{/unless}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Format.StopwatchGametimeHint"}}</p>
-    </div>
-  </fieldset>
-
-  <fieldset>
     <legend>{{localize "CALENDARIA.Format.TokenReference"}}</legend>
     <div class="token-reference">
       <div class="token-group">

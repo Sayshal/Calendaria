@@ -1,7 +1,7 @@
 <div class="time-keeper-content">
   <div class="time-display">
     <div class="time-display-time-wrapper">
-      <span class="time-display-time">{{currentTime}}</span>
+      <span class="time-display-time">{{{currentTime}}}</span>
       {{#if canChangeDateTime}}
         <button type="button" class="time-display-play-btn" data-action="toggle"
           data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
@@ -13,7 +13,7 @@
         <i class="fas fa-stopwatch"></i>
       </button>
     </div>
-    {{#if showDate}}<span class="time-display-date">{{currentDate}}</span>{{/if}}
+    {{#if showDate}}<span class="time-display-date">{{{currentDate}}}</span>{{/if}}
   </div>
 
   {{#if canChangeDateTime}}

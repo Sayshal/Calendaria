@@ -68,8 +68,6 @@ export const SETTINGS = {
   SHOW_TIME_KEEPER: 'showTimeKeeper',
   SHOW_TOOLBAR_BUTTON: 'showToolbarButton',
   STOPWATCH_AUTO_START_TIME: 'stopwatchAutoStartTime',
-  STOPWATCH_FORMAT_GAMETIME: 'stopwatchFormatGametime',
-  STOPWATCH_FORMAT_REALTIME: 'stopwatchFormatRealtime',
   STOPWATCH_POSITION: 'stopwatchPosition',
   STOPWATCH_STATE: 'stopwatchState',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
@@ -95,6 +93,8 @@ export const DISPLAY_LOCATIONS = {
   HUD_TIME: 'hudTime',
   MINI_CALENDAR_HEADER: 'miniCalendarHeader',
   MINI_CALENDAR_TIME: 'miniCalendarTime',
+  STOPWATCH_GAMETIME: 'stopwatchGametime',
+  STOPWATCH_REALTIME: 'stopwatchRealtime',
   TIMEKEEPER_DATE: 'timekeeperDate',
   TIMEKEEPER_TIME: 'timekeeperTime'
 };
