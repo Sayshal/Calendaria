@@ -1182,12 +1182,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const cycle = this.cycles[i];
       if (!cycle.entries?.length) continue;
       const epochValue = epochValues[cycle.basedOn] ?? 0;
-      let cycleNum = Math.floor(epochValue / cycle.length);
-      if (cycleNum < 0) cycleNum += Math.ceil(Math.abs(epochValue) / cycle.entries.length) * cycle.entries.length;
-      const cycleIndex = (cycleNum + Math.floor((cycle.offset || 0) / cycle.length)) % cycle.entries.length;
-      const normalizedIndex = ((cycleIndex % cycle.entries.length) + cycle.entries.length) % cycle.entries.length;
-      const entry = cycle.entries[normalizedIndex];
-      values.push({ cycleName: cycle.name, entryName: entry?.name ?? '', index: normalizedIndex });
+      const adjustedValue = epochValue + (cycle.offset || 0);
+      let entryIndex = adjustedValue % cycle.entries.length;
+      if (entryIndex < 0) entryIndex += cycle.entries.length;
+      const entry = cycle.entries[entryIndex];
+      values.push({ cycleName: cycle.name, entryName: entry?.name ?? '', index: entryIndex });
       textReplacements[(i + 1).toString()] = localize(entry?.name ?? '');
     }
 
