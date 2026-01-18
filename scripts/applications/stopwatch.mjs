@@ -322,7 +322,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         const form = dialog.element.querySelector('form');
         const filePickerBtn = form.querySelector('.file-picker');
         filePickerBtn?.addEventListener('click', async () => {
-          const fp = new FilePicker({
+          const fp = new foundry.applications.apps.FilePicker({
             type: 'audio',
             current: form.sound.value || 'sounds/',
             callback: (path) => {

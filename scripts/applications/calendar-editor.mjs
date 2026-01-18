@@ -5,8 +5,8 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendarRegistry from '../calendar/calendar-registry.mjs';
 import { formatEraTemplate } from '../calendar/calendar-utils.mjs';
 import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
@@ -1574,7 +1574,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const moon = this.#calendarData.moons[moonIdx];
     if (!moon) return;
     const currentIcon = moon.phases?.[phaseIdx]?.icon || '';
-    const picker = new FilePicker({
+    const picker = new foundry.applications.apps.FilePicker({
       type: 'image',
       current: currentIcon.startsWith('icons/') ? currentIcon : '',
       callback: (path) => {

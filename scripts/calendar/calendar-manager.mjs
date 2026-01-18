@@ -89,9 +89,10 @@ export default class CalendarManager {
    * @private
    */
   static #migrateCalendarData(data) {
-    if (!data.seasons) data.seasons = { values: [] };
-    if (!data.months) data.months = { values: [] };
-    log(3, `Migrated calendar "${data.name}": added missing fields`);
+    const added = [];
+    if (!data.seasons) { data.seasons = { values: [] }; added.push('seasons'); }
+    if (!data.months) { data.months = { values: [] }; added.push('months'); }
+    if (added.length) log(3, `Migrated calendar "${data.name}": added missing fields: ${added.join(', ')}`);
   }
 
   /**
