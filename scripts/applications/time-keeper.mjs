@@ -1,13 +1,13 @@
 /**
  * TimeKeeper HUD - Compact time control interface.
  * Provides forward/reverse buttons, increment selector, and current time display.
- * @module Applications/TimeKeeperHUD
+ * @module Applications/TimeKeeper
  * @author Tyler
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
-import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import { formatForLocation, getDisplayFormat, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { canChangeDateTime, canViewTimeKeeper } from '../utils/permissions.mjs';
@@ -20,7 +20,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 /**
  * Compact HUD for controlling game time.
  */
-export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
+export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {number|null} Hook ID for updateWorldTime */
   #timeHookId = null;
 
@@ -39,10 +39,10 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'time-keeper-hud',
-    classes: ['calendaria', 'time-keeper-hud'],
+    classes: ['calendaria', 'time-keeper'],
     position: { width: 200, height: 'auto', zIndex: 100 },
     window: { frame: false, positioned: true },
-    actions: { dec2: TimeKeeperHUD.#onDec2, dec1: TimeKeeperHUD.#onDec1, inc1: TimeKeeperHUD.#onInc1, inc2: TimeKeeperHUD.#onInc2, toggle: TimeKeeperHUD.#onToggle, openStopwatch: TimeKeeperHUD.#onOpenStopwatch }
+    actions: { dec2: TimeKeeper.#onDec2, dec1: TimeKeeper.#onDec1, inc1: TimeKeeper.#onInc1, inc2: TimeKeeper.#onInc2, toggle: TimeKeeper.#onToggle, openStopwatch: TimeKeeper.#onOpenStopwatch }
   };
 
   /** @override */
@@ -55,8 +55,8 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const isMonthless = calendar?.isMonthless ?? false;
     context.increments = Object.entries(getTimeIncrements())
       .filter(([key]) => !isMonthless || key !== 'month')
-      .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeKeeper.incrementKey }));
-    context.running = TimeKeeper.running;
+      .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeClock.incrementKey }));
+    context.running = TimeClock.running;
     context.isGM = game.user.isGM;
     context.canChangeDateTime = canChangeDateTime();
     const rawTime = this.#formatTime();
@@ -83,7 +83,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.isFirstRender) this.#restorePosition();
     this.#enableDragging();
     this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (e) => {
-      TimeKeeper.setIncrement(e.target.value);
+      TimeClock.setIncrement(e.target.value);
       this.render();
     });
 
@@ -95,7 +95,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       '.time-keeper-content',
       [
         { name: 'CALENDARIA.Common.Settings', icon: '<i class="fas fa-cog"></i>', callback: () => new SettingsPanel().render(true) },
-        { name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => TimeKeeperHUD.hide() }
+        { name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => TimeKeeper.hide() }
       ],
       { fixed: true, jQuery: false }
     );
@@ -228,38 +228,38 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Decrement time by configured dec2 amount. */
   static #onDec2() {
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeKeeper.incrementKey] || { dec2: -5 };
+    const currentJumps = jumps[TimeClock.incrementKey] || { dec2: -5 };
     const amount = currentJumps.dec2 || -5;
-    TimeKeeper.forward(amount);
+    TimeClock.forward(amount);
   }
 
   /** Decrement time by configured dec1 amount. */
   static #onDec1() {
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeKeeper.incrementKey] || { dec1: -1 };
+    const currentJumps = jumps[TimeClock.incrementKey] || { dec1: -1 };
     const amount = currentJumps.dec1 || -1;
-    TimeKeeper.forward(amount);
+    TimeClock.forward(amount);
   }
 
   /** Increment time by configured inc1 amount. */
   static #onInc1() {
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeKeeper.incrementKey] || { inc1: 1 };
+    const currentJumps = jumps[TimeClock.incrementKey] || { inc1: 1 };
     const amount = currentJumps.inc1 || 1;
-    TimeKeeper.forward(amount);
+    TimeClock.forward(amount);
   }
 
   /** Increment time by configured inc2 amount. */
   static #onInc2() {
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeKeeper.incrementKey] || { inc2: 5 };
+    const currentJumps = jumps[TimeClock.incrementKey] || { inc2: 5 };
     const amount = currentJumps.inc2 || 5;
-    TimeKeeper.forward(amount);
+    TimeClock.forward(amount);
   }
 
   /** Toggle clock running state. */
   static #onToggle() {
-    TimeKeeper.toggle();
+    TimeClock.toggle();
     this.render();
   }
 
@@ -303,7 +303,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #formatTime() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return TimeKeeper.getFormattedTime();
+    if (!calendar) return TimeClock.getFormattedTime();
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
     return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperTime');
@@ -316,7 +316,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #formatDate() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return TimeKeeper.getFormattedDate();
+    if (!calendar) return TimeClock.getFormattedDate();
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
     return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperDate');
@@ -350,19 +350,19 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #getJumpTooltips() {
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeKeeper.incrementKey] || {};
+    const currentJumps = jumps[TimeClock.incrementKey] || {};
     const dec2 = currentJumps.dec2 ?? null;
     const dec1 = currentJumps.dec1 ?? null;
     const inc1 = currentJumps.inc1 ?? null;
     const inc2 = currentJumps.inc2 ?? null;
-    const unitLabel = this.#formatIncrementLabel(TimeKeeper.incrementKey);
+    const unitLabel = this.#formatIncrementLabel(TimeClock.incrementKey);
     const formatTooltip = (val) => (val !== null ? `${val > 0 ? '+' : ''}${val} ${unitLabel}` : null);
     return { dec2Tooltip: formatTooltip(dec2), dec1Tooltip: formatTooltip(dec1), inc1Tooltip: formatTooltip(inc1), inc2Tooltip: formatTooltip(inc2), dec2, dec1, inc1, inc2 };
   }
 
   /**
    * Get the singleton instance from Foundry's application registry.
-   * @returns {TimeKeeperHUD|undefined} The instance if it exists
+   * @returns {TimeKeeper|undefined} The instance if it exists
    */
   static get instance() {
     return foundry.applications.instances.get(this.DEFAULT_OPTIONS.id);
@@ -372,7 +372,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Render the TimeKeeper HUD singleton.
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
-   * @returns {TimeKeeperHUD} The HUD instance
+   * @returns {TimeKeeper} The HUD instance
    */
   static show({ silent = false } = {}) {
     if (!canViewTimeKeeper()) {
@@ -384,7 +384,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       existing.render({ force: true });
       return existing;
     }
-    const instance = new TimeKeeperHUD();
+    const instance = new TimeKeeper();
     instance.render(true);
     return instance;
   }

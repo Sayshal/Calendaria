@@ -8,19 +8,19 @@
 import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
-import TimeKeeper, { getTimeIncrements } from '../../time/time-keeper.mjs';
+import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS } from '../../utils/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canViewMiniCalendar, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
-import { CalendarApplication } from '../calendar-application.mjs';
+import { BigCal } from '../big-cal.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
-import { CalendariaHUD } from '../calendaria-hud.mjs';
+import { HUD } from '../hud.mjs';
 import { ImporterApp } from '../importer-app.mjs';
-import { MiniCalendar } from '../mini-calendar.mjs';
-import { TimeKeeperHUD } from '../time-keeper-hud.mjs';
+import { MiniCal } from '../mini-cal.mjs';
+import { TimeKeeper } from '../time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -36,7 +36,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: ['calendaria', 'settings-panel', 'standard-form'],
     tag: 'form',
     window: { icon: 'fas fa-cog', resizable: false, title: 'CALENDARIA.SettingsPanel.Title' },
-    position: { width: 700, height: 650 },
+    position: { width: 900, height: 835 },
     form: {
       handler: SettingsPanel.#onSubmit,
       submitOnChange: true,
@@ -721,7 +721,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('timeSpeedMultiplier' in data || 'timeSpeedIncrement' in data) {
       if ('timeSpeedMultiplier' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER, Math.max(1, Number(data.timeSpeedMultiplier) || 1));
       if ('timeSpeedIncrement' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT, data.timeSpeedIncrement);
-      TimeKeeper.loadSpeedFromSettings();
+      TimeClock.loadSpeedFromSettings();
     }
     if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('showMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, data.showMiniCalendar);
@@ -784,7 +784,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         sidebar: !!data.miniCalendarStickySidebar,
         position: !!data.miniCalendarStickyPosition
       });
-      MiniCalendar.refreshStickyStates();
+      MiniCal.refreshStickyStates();
     }
 
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
@@ -1130,7 +1130,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenHUD(_event, _target) {
-    CalendariaHUD.show();
+    HUD.show();
   }
 
   /**
@@ -1139,7 +1139,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onCloseHUD(_event, _target) {
-    CalendariaHUD.hide();
+    HUD.hide();
   }
 
   /**
@@ -1148,7 +1148,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenMiniCalendar(_event, _target) {
-    MiniCalendar.show();
+    MiniCal.show();
   }
 
   /**
@@ -1157,7 +1157,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onCloseMiniCalendar(_event, _target) {
-    MiniCalendar.hide();
+    MiniCal.hide();
   }
 
   /**
@@ -1166,7 +1166,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenTimeKeeper(_event, _target) {
-    TimeKeeperHUD.show();
+    TimeKeeper.show();
   }
 
   /**
@@ -1175,7 +1175,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onCloseTimeKeeper(_event, _target) {
-    TimeKeeperHUD.hide();
+    TimeKeeper.hide();
   }
 
   /**
@@ -1184,7 +1184,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenFullCal(_event, _target) {
-    new CalendarApplication().render(true);
+    new BigCal().render(true);
   }
 
   /**

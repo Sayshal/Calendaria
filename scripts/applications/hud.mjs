@@ -1,7 +1,7 @@
 /**
  * Calendaria HUD - System-agnostic calendar widget.
  * Displays a sundial dome with sun/moon, time controls, date/weather info.
- * @module Applications/CalendariaHUD
+ * @module Applications/HUD
  * @author Tyler
  */
 
@@ -9,7 +9,7 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
-import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -19,7 +19,7 @@ import * as StickyZones from '../utils/sticky-zones.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
-import { CalendarApplication } from './calendar-application.mjs';
+import { BigCal } from './big-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import { SetDateDialog } from './set-date-dialog.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
@@ -52,7 +52,7 @@ const SKY_KEYFRAMES = [
  * Calendar HUD with sundial dome, time controls, and calendar info.
  * System-agnostic implementation using AppV2.
  */
-export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
+export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Tracks if HUD was closed due to combat (for reopening) */
   static #closedForCombat = false;
 
@@ -110,31 +110,31 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-hud',
-    classes: ['calendaria', 'calendaria-hud-wrapper'],
+    classes: ['calendaria', 'hud'],
     position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },
     actions: {
-      openTimeDial: CalendariaHUD.#onOpenTimeDial,
-      searchNotes: CalendariaHUD.#onSearchNotes,
-      addNote: CalendariaHUD.#onAddNote,
-      openEvent: CalendariaHUD.#onOpenEvent,
-      toggleTimeFlow: CalendariaHUD.#onToggleTimeFlow,
-      openCalendar: CalendariaHUD.#onOpenCalendar,
-      openSettings: CalendariaHUD.#onOpenSettings,
-      openWeatherPicker: CalendariaHUD.#onOpenWeatherPicker,
-      toSunrise: CalendariaHUD.#onToSunrise,
-      toMidday: CalendariaHUD.#onToMidday,
-      toSunset: CalendariaHUD.#onToSunset,
-      toMidnight: CalendariaHUD.#onToMidnight,
-      reverse: CalendariaHUD.#onReverse,
-      forward: CalendariaHUD.#onForward,
-      customDec2: CalendariaHUD.#onCustomDec2,
-      customDec1: CalendariaHUD.#onCustomDec1,
-      customInc1: CalendariaHUD.#onCustomInc1,
-      customInc2: CalendariaHUD.#onCustomInc2,
-      closeSearch: CalendariaHUD.#onCloseSearch,
-      openSearchResult: CalendariaHUD.#onOpenSearchResult,
-      setDate: CalendariaHUD.#onSetDate
+      openTimeDial: HUD.#onOpenTimeDial,
+      searchNotes: HUD.#onSearchNotes,
+      addNote: HUD.#onAddNote,
+      openEvent: HUD.#onOpenEvent,
+      toggleTimeFlow: HUD.#onToggleTimeFlow,
+      openCalendar: HUD.#onOpenCalendar,
+      openSettings: HUD.#onOpenSettings,
+      openWeatherPicker: HUD.#onOpenWeatherPicker,
+      toSunrise: HUD.#onToSunrise,
+      toMidday: HUD.#onToMidday,
+      toSunset: HUD.#onToSunset,
+      toMidnight: HUD.#onToMidnight,
+      reverse: HUD.#onReverse,
+      forward: HUD.#onForward,
+      customDec2: HUD.#onCustomDec2,
+      customDec1: HUD.#onCustomDec1,
+      customInc1: HUD.#onCustomInc1,
+      customInc2: HUD.#onCustomInc2,
+      closeSearch: HUD.#onCloseSearch,
+      openSearchResult: HUD.#onOpenSearchResult,
+      setDate: HUD.#onSetDate
     }
   };
 
@@ -191,16 +191,16 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
     context.locked = this.isLocked;
-    context.isPlaying = TimeKeeper.running;
+    context.isPlaying = TimeClock.running;
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
     this.#stickyTray = stickyStates.tray ?? false;
     this.#stickyPosition = stickyStates.position ?? false;
     context.stickyTray = this.#stickyTray;
     context.trayUp = game.settings.get(MODULE.ID, SETTINGS.HUD_TRAY_DIRECTION) === 'up';
-    const appSettings = TimeKeeper.getAppSettings('calendaria-hud');
+    const appSettings = TimeClock.getAppSettings('calendaria-hud');
     if (stickyStates.increment && stickyStates.increment !== appSettings.incrementKey) {
-      TimeKeeper.setAppIncrement('calendaria-hud', stickyStates.increment);
-      TimeKeeper.setIncrement(stickyStates.increment);
+      TimeClock.setAppIncrement('calendaria-hud', stickyStates.increment);
+      TimeClock.setIncrement(stickyStates.increment);
     }
 
     const timeFormatted = this.#formatTime(components);
@@ -405,7 +405,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     this.#inCombat = !!game.combat?.started;
     if (this.#inCombat && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) {
-      CalendariaHUD.#closedForCombat = true;
+      HUD.#closedForCombat = true;
       this.close({ combat: true });
     }
   }
@@ -419,7 +419,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#inCombat = inCombat;
     if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) {
       if (inCombat) {
-        CalendariaHUD.#closedForCombat = true;
+        HUD.#closedForCombat = true;
         this.close({ combat: true });
       }
       return;
@@ -467,8 +467,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #setupEventListeners() {
     this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]')?.addEventListener('change', async (event) => {
-      TimeKeeper.setAppIncrement('calendaria-hud', event.target.value);
-      TimeKeeper.setIncrement(event.target.value);
+      TimeClock.setAppIncrement('calendaria-hud', event.target.value);
+      TimeClock.setIncrement(event.target.value);
       await this.#saveStickyStates();
       this.render({ parts: ['bar'] });
     });
@@ -509,7 +509,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     new foundry.applications.ux.ContextMenu.implementation(
       this.element,
       '.calendaria-hud-bar',
-      [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => CalendariaHUD.hide() }],
+      [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => HUD.hide() }],
       { fixed: true, jQuery: false }
     );
   }
@@ -523,8 +523,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyTray = states.tray ?? false;
     this.#stickyPosition = states.position ?? false;
     if (states.increment) {
-      TimeKeeper.setAppIncrement('calendaria-hud', states.increment);
-      TimeKeeper.setIncrement(states.increment);
+      TimeClock.setAppIncrement('calendaria-hud', states.increment);
+      TimeClock.setIncrement(states.increment);
     }
 
     if (this.#stickyTray) {
@@ -540,7 +540,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
       tray: this.#stickyTray,
       position: this.#stickyPosition,
-      increment: TimeKeeper.getAppSettings('calendaria-hud').incrementKey
+      increment: TimeClock.getAppSettings('calendaria-hud').incrementKey
     });
   }
 
@@ -1004,7 +1004,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       else dateEl.textContent = dateFormatted;
     }
     const hud = this.element.querySelector('.calendaria-hud');
-    if (hud) hud.classList.toggle('time-flowing', TimeKeeper.running);
+    if (hud) hud.classList.toggle('time-flowing', TimeClock.running);
     this.#updateCelestialDisplay();
   }
 
@@ -1013,7 +1013,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onClockStateChange() {
     if (!this.rendered) return;
-    const running = TimeKeeper.running;
+    const running = TimeClock.running;
     const hud = this.element.querySelector('.calendaria-hud');
     if (hud) hud.classList.toggle('time-flowing', running);
     const playBtn = this.element.querySelector('.calendaria-hud-play-btn');
@@ -1733,7 +1733,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static #onToggleTimeFlow(_event, _target) {
-    TimeKeeper.toggle();
+    TimeClock.toggle();
   }
 
   /**
@@ -1742,7 +1742,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static #onOpenCalendar(_event, _target) {
-    new CalendarApplication().render(true);
+    new BigCal().render(true);
   }
 
   /**
@@ -1822,7 +1822,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static #onReverse(_event, _target) {
-    TimeKeeper.reverseFor('calendaria-hud');
+    TimeClock.reverseFor('calendaria-hud');
   }
 
   /**
@@ -1831,27 +1831,27 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static #onForward(_event, _target) {
-    TimeKeeper.forwardFor('calendaria-hud');
+    TimeClock.forwardFor('calendaria-hud');
   }
 
   /** Handle custom decrement 2 (larger). */
   static #onCustomDec2() {
-    CalendariaHUD.#applyCustomJump('dec2');
+    HUD.#applyCustomJump('dec2');
   }
 
   /** Handle custom decrement 1 (smaller). */
   static #onCustomDec1() {
-    CalendariaHUD.#applyCustomJump('dec1');
+    HUD.#applyCustomJump('dec1');
   }
 
   /** Handle custom increment 1 (smaller). */
   static #onCustomInc1() {
-    CalendariaHUD.#applyCustomJump('inc1');
+    HUD.#applyCustomJump('inc1');
   }
 
   /** Handle custom increment 2 (larger). */
   static #onCustomInc2() {
-    CalendariaHUD.#applyCustomJump('inc2');
+    HUD.#applyCustomJump('inc2');
   }
 
   /**
@@ -1860,7 +1860,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #applyCustomJump(jumpKey) {
     if (!canChangeDateTime()) return;
-    const appSettings = TimeKeeper.getAppSettings('calendaria-hud');
+    const appSettings = TimeClock.getAppSettings('calendaria-hud');
     const incrementKey = appSettings.incrementKey || 'minute';
     const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
     const jumps = customJumps[incrementKey] || {};
@@ -1878,7 +1878,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the HUD.
-   * @returns {CalendariaHUD|null} The HUD instance, or null if blocked by combat hide
+   * @returns {HUD|null} The HUD instance, or null if blocked by combat hide
    */
   static show() {
     if (game.combat?.started && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return null;
@@ -1887,7 +1887,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       existing.render({ force: true });
       return existing;
     }
-    const hud = new CalendariaHUD();
+    const hud = new HUD();
     hud.render({ force: true });
     return hud;
   }
@@ -1938,17 +1938,17 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return;
       const instance = foundry.applications.instances.get('calendaria-hud');
       if (instance?.rendered) {
-        CalendariaHUD.#closedForCombat = true;
+        HUD.#closedForCombat = true;
         instance.close({ combat: true });
       }
     });
 
     Hooks.on('deleteCombat', () => {
-      CalendariaHUD.#onCombatEnd();
+      HUD.#onCombatEnd();
     });
 
     Hooks.on('updateCombat', () => {
-      if (!game.combat?.started) CalendariaHUD.#onCombatEnd();
+      if (!game.combat?.started) HUD.#onCombatEnd();
     });
   }
 
@@ -1956,8 +1956,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Handle combat ending - reopen HUD if it was closed due to combat.
    */
   static #onCombatEnd() {
-    if (!CalendariaHUD.#closedForCombat) return;
-    CalendariaHUD.#closedForCombat = false;
-    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE) && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) CalendariaHUD.show();
+    if (!HUD.#closedForCombat) return;
+    HUD.#closedForCombat = false;
+    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE) && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
   }
 }

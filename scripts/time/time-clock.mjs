@@ -1,7 +1,7 @@
 /**
- * TimeKeeper - Real-time clock controller for Calendaria.
+ * TimeClock - Real-time clock controller for Calendaria.
  * Manages automatic time advancement with configurable intervals and increments.
- * @module Time/TimeKeeper
+ * @module Time/TimeClock
  * @author Tyler
  */
 
@@ -38,7 +38,7 @@ export function getTimeIncrements() {
 /**
  * Real-time clock controller for advancing game time automatically.
  */
-export default class TimeKeeper {
+export default class TimeClock {
   /** @type {number|null} Interval ID for the clock tick */
   static #intervalId = null;
 
@@ -86,7 +86,7 @@ export default class TimeKeeper {
   }
 
   /**
-   * Initialize the TimeKeeper and register socket listeners.
+   * Initialize the TimeClock and register socket listeners.
    */
   static initialize() {
     this.setIncrement('minute');
@@ -96,7 +96,7 @@ export default class TimeKeeper {
     Hooks.on('combatStart', this.#onCombatStart.bind(this));
     Hooks.on('deleteCombat', this.#onCombatEnd.bind(this));
     this.#autoStartIfSynced();
-    log(3, 'TimeKeeper initialized');
+    log(3, 'TimeClock initialized');
   }
 
   /**
@@ -121,7 +121,7 @@ export default class TimeKeeper {
     const increments = getTimeIncrements();
     const incrementSeconds = increments[incrementKey] || 1;
     this.#realTimeSpeed = multiplier * incrementSeconds;
-    log(3, `TimeKeeper real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
+    log(3, `TimeClock real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
 
     // Restart interval if running to apply new speed
     if (this.#running) {
@@ -184,7 +184,7 @@ export default class TimeKeeper {
   static start({ broadcast = true } = {}) {
     if (this.#running) return;
     if (!this.canAdjustTime()) {
-      ui.notifications.warn('CALENDARIA.TimeKeeper.NoPermission', { localize: true });
+      ui.notifications.warn('CALENDARIA.TimeClock.NoPermission', { localize: true });
       return;
     }
 
@@ -193,7 +193,7 @@ export default class TimeKeeper {
       if (game.paused || game.combat?.started) {
         log(3, 'Clock start blocked (sync active, game paused or in combat)');
         ui.notifications.clear();
-        ui.notifications.warn('CALENDARIA.TimeKeeper.ClockBlocked', { localize: true });
+        ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
         return;
       }
     }
@@ -213,7 +213,7 @@ export default class TimeKeeper {
     if (!this.#running) return;
     this.#running = false;
     this.#stopInterval();
-    log(3, 'TimeKeeper stopped');
+    log(3, 'TimeClock stopped');
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: false, increment: this.#increment });
     if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(false, this.#increment);
   }
@@ -236,7 +236,7 @@ export default class TimeKeeper {
     if (!increments[key]) return;
     this.#incrementKey = key;
     this.#increment = increments[key];
-    log(3, `TimeKeeper manual increment set to: ${key} (${this.#increment}s)`);
+    log(3, `TimeClock manual increment set to: ${key} (${this.#increment}s)`);
   }
 
   /**
@@ -262,7 +262,7 @@ export default class TimeKeeper {
     }
     const settings = this.getAppSettings(appId);
     settings.incrementKey = key;
-    log(3, `TimeKeeper[${appId}] increment set to: ${key}`);
+    log(3, `TimeClock[${appId}] increment set to: ${key}`);
   }
 
   /**
@@ -273,7 +273,7 @@ export default class TimeKeeper {
   static setAppMultiplier(appId, multiplier) {
     const settings = this.getAppSettings(appId);
     settings.multiplier = Math.max(0.25, Math.min(10, multiplier));
-    log(3, `TimeKeeper[${appId}] multiplier set to: ${settings.multiplier}x`);
+    log(3, `TimeClock[${appId}] multiplier set to: ${settings.multiplier}x`);
   }
 
   /**
@@ -390,7 +390,7 @@ export default class TimeKeeper {
     const intervalMs = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, idealInterval));
     const actualUpdatesPerSec = 1000 / intervalMs;
     const advanceAmount = targetRate / actualUpdatesPerSec;
-    log(3, `TimeKeeper interval: ${intervalMs.toFixed(0)}ms, advance: ${advanceAmount.toFixed(1)}s (speed: ${targetRate})`);
+    log(3, `TimeClock interval: ${intervalMs.toFixed(0)}ms, advance: ${advanceAmount.toFixed(1)}s (speed: ${targetRate})`);
     this.#intervalId = setInterval(async () => {
       if (!this.#running) return;
       if (!CalendariaSocket.isPrimaryGM()) return;

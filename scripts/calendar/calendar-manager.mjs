@@ -233,7 +233,7 @@ export default class CalendarManager {
   static rerenderCalendarUIs() {
     for (const app of foundry.applications.instances.values()) {
       const name = app.constructor.name;
-      if (['CalendariaHUD', 'TimeKeeperHUD', 'MiniCalendar', 'CalendarApplication'].includes(name)) app.render();
+      if (['HUD', 'TimeKeeper', 'MiniCal', 'BigCal'].includes(name)) app.render();
     }
   }
 

@@ -181,7 +181,7 @@ export class CalendariaSocket {
     const { action, id } = data;
     if (!action || !id) return;
     log(3, `Handling remote note ${action}: ${id}`);
-    for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'CalendarApplication') app.render();
+    for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'BigCal') app.render();
 
     switch (action) {
       case 'created':

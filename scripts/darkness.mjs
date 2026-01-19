@@ -5,7 +5,7 @@
  */
 
 import { MODULE, SCENE_FLAGS, SETTINGS, TEMPLATES } from './constants.mjs';
-import TimeKeeper from './time/time-keeper.mjs';
+import TimeClock from './time/time-clock.mjs';
 import { log } from './utils/logger.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
@@ -220,7 +220,7 @@ function startDarknessTransition(scene, target) {
   startDarkness = scene.environment.darknessLevel;
   targetDarkness = target;
   transitionStart = performance.now();
-  const gameSecondsPerRealSecond = TimeKeeper.increment * TimeKeeper.multiplier;
+  const gameSecondsPerRealSecond = TimeClock.increment * TimeClock.multiplier;
   const minutesPerHour = game.time.calendar?.days?.minutesPerHour ?? 60;
   const secondsPerMinute = game.time.calendar?.days?.secondsPerMinute ?? 60;
   const secondsPerHour = minutesPerHour * secondsPerMinute;

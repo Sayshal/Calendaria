@@ -4,9 +4,9 @@
  * @author Tyler
  */
 
-import { CalendarApplication } from './applications/calendar-application.mjs';
+import { BigCal } from './applications/big-cal.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
-import { MiniCalendar } from './applications/mini-calendar.mjs';
+import { MiniCal } from './applications/mini-cal.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
@@ -582,7 +582,7 @@ export const CalendariaAPI = {
    * @returns {Promise<object>} The calendar application
    */
   async openCalendar(options = {}) {
-    const app = new CalendarApplication();
+    const app = new BigCal();
     return app.render(true, options);
   },
 
@@ -605,21 +605,21 @@ export const CalendariaAPI = {
    * @returns {Promise<object>} The MiniCalendar application
    */
   async showMiniCalendar() {
-    return MiniCalendar.show();
+    return MiniCal.show();
   },
 
   /**
    * Hide the MiniCalendar widget.
    */
   async hideMiniCalendar() {
-    MiniCalendar.hide();
+    MiniCal.hide();
   },
 
   /**
    * Toggle the MiniCalendar widget visibility.
    */
   async toggleMiniCalendar() {
-    MiniCalendar.toggle();
+    MiniCal.toggle();
   },
 
   /**

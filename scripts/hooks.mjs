@@ -5,8 +5,8 @@
  * @author Tyler
  */
 
-import { CalendariaHUD } from './applications/calendaria-hud.mjs';
-import { MiniCalendar } from './applications/mini-calendar.mjs';
+import { HUD } from './applications/hud.mjs';
+import { MiniCal } from './applications/mini-cal.mjs';
 import { Stopwatch } from './applications/stopwatch.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { onChatMessage } from './chat/chat-commands.mjs';
@@ -52,7 +52,7 @@ export function registerHooks() {
   Hooks.on('getSceneControlButtons', onGetSceneControlButtons);
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());
-  CalendariaHUD.registerCombatHooks();
+  HUD.registerCombatHooks();
   log(3, 'Hooks registered');
 }
 
@@ -68,7 +68,7 @@ function onGetSceneControlButtons(controls) {
     title: localize('CALENDARIA.SceneControl.OpenCalendar'),
     icon: 'fas fa-calendar-days',
     visible: true,
-    onChange: () => MiniCalendar.toggle(),
+    onChange: () => MiniCal.toggle(),
     button: true
   };
 }

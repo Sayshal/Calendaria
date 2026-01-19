@@ -5,7 +5,7 @@
  * @author Tyler
  */
 
-import { CalendarApplication } from '../applications/calendar-application.mjs';
+import { BigCal } from '../applications/big-cal.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { localize } from './localization.mjs';
 import { log } from './logger.mjs';
@@ -35,7 +35,7 @@ function addCalendarButton({ element }) {
   button.type = 'button';
   button.className = 'calendaria-open-button';
   button.innerHTML = `<i class="fas fa-calendar-days"></i> ${localize('CALENDARIA.HUD.OpenCalendar')}`;
-  button.addEventListener('click', () => new CalendarApplication().render(true));
+  button.addEventListener('click', () => new BigCal().render(true));
   footer.appendChild(button);
   log(3, 'Journal calendar button added');
 }

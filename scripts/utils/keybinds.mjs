@@ -4,7 +4,7 @@
  * @author Tyler
  */
 
-import { CalendariaHUD } from '../applications/calendaria-hud.mjs';
+import { HUD } from '../applications/hud.mjs';
 import { Stopwatch } from '../applications/stopwatch.mjs';
 import { log } from './logger.mjs';
 
@@ -67,5 +67,5 @@ export function registerKeybindings() {
  * Toggle calendar HUD visibility.
  */
 export function toggleCalendarVisibility() {
-  CalendariaHUD.toggle();
+  HUD.toggle();
 }

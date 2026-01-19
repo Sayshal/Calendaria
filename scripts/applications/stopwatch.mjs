@@ -6,7 +6,7 @@
  */
 
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
-import TimeKeeper from '../time/time-keeper.mjs';
+import TimeClock from '../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatDuration, formatGameDuration, getDisplayFormat } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -203,7 +203,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     } else {
       this.#startWorldTime = game.time.worldTime;
       this.#registerTimeHook();
-      if (game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME)) TimeKeeper.start();
+      if (game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME)) TimeClock.start();
     }
     this.#notificationFired = false;
     this.#saveState();

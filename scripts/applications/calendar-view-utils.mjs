@@ -1,6 +1,6 @@
 /**
  * Shared utilities for calendar view applications.
- * Provides common methods used by CalendarApplication and MiniCalendar.
+ * Provides common methods used by BigCal and MiniCal.
  * @module Applications/CalendarViewUtils
  * @author Tyler
  */
@@ -329,7 +329,7 @@ export async function createNoteOnDate(year, month, day) {
 export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {}) {
   return [
     {
-      name: 'CALENDARIA.MiniCalendar.SetCurrentDate',
+      name: 'CALENDARIA.MiniCal.SetCurrentDate',
       icon: '<i class="fas fa-calendar-plus"></i>',
       condition: (target) => {
         if (!game.user.isGM) return false;

@@ -2,7 +2,7 @@
  * Calendar Application
  * Standalone application for displaying the calendar UI.
  * This is NOT a sheet - it's an independent application.
- * @module Applications/CalendarApplication
+ * @module Applications/BigCal
  * @author Tyler
  */
 
@@ -19,7 +19,7 @@ import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
-import { MiniCalendar } from './mini-calendar.mjs';
+import { MiniCal } from './mini-cal.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -45,7 +45,7 @@ function processMoonPhases(phases) {
  * Calendar Application - displays the calendar UI.
  * @extends ApplicationV2
  */
-export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV2) {
+export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * @param {object} options - Application options
    */
@@ -63,28 +63,28 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   }
 
   static DEFAULT_OPTIONS = {
-    classes: ['calendaria', 'calendar-application'],
+    classes: ['calendaria', 'big-cal'],
     tag: 'div',
     window: { contentClasses: ['calendar-application'], icon: 'fas fa-calendar', resizable: false },
     actions: {
-      navigate: CalendarApplication._onNavigate,
-      today: CalendarApplication._onToday,
-      addNote: CalendarApplication._onAddNote,
-      addNoteToday: CalendarApplication._onAddNoteToday,
-      editNote: CalendarApplication._onEditNote,
-      deleteNote: CalendarApplication._onDeleteNote,
-      changeView: CalendarApplication._onChangeView,
-      selectDay: CalendarApplication._onSelectDay,
-      selectMonth: CalendarApplication._onSelectMonth,
-      setAsCurrentDate: CalendarApplication._onSetAsCurrentDate,
-      selectTimeSlot: CalendarApplication._onSelectTimeSlot,
-      toggleCompact: CalendarApplication._onToggleCompact,
-      openWeatherPicker: CalendarApplication._onOpenWeatherPicker,
-      toggleSearch: CalendarApplication._onToggleSearch,
-      closeSearch: CalendarApplication._onCloseSearch,
-      openSearchResult: CalendarApplication._onOpenSearchResult,
-      openSettings: CalendarApplication._onOpenSettings,
-      navigateToMonth: CalendarApplication._onNavigateToMonth
+      navigate: BigCal._onNavigate,
+      today: BigCal._onToday,
+      addNote: BigCal._onAddNote,
+      addNoteToday: BigCal._onAddNoteToday,
+      editNote: BigCal._onEditNote,
+      deleteNote: BigCal._onDeleteNote,
+      changeView: BigCal._onChangeView,
+      selectDay: BigCal._onSelectDay,
+      selectMonth: BigCal._onSelectMonth,
+      setAsCurrentDate: BigCal._onSetAsCurrentDate,
+      selectTimeSlot: BigCal._onSelectTimeSlot,
+      toggleCompact: BigCal._onToggleCompact,
+      openWeatherPicker: BigCal._onOpenWeatherPicker,
+      toggleSearch: BigCal._onToggleSearch,
+      closeSearch: BigCal._onCloseSearch,
+      openSearchResult: BigCal._onOpenSearchResult,
+      openSettings: BigCal._onOpenSettings,
+      navigateToMonth: BigCal._onNavigateToMonth
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -1127,7 +1127,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       if (e.target.closest('button, a, input, select, [data-action], .calendar-day, .note-item, .event-block, .multi-day-event')) return;
       e.preventDefault();
       this.close();
-      MiniCalendar.show();
+      MiniCal.show();
     });
     const searchInput = this.element.querySelector('.search-input');
     if (searchInput) {
@@ -1602,7 +1602,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     await this.close();
     const existing = foundry.applications.instances.get('mini-calendar');
     if (existing) existing.render(true, { focus: true });
-    else new MiniCalendar().render(true);
+    else new MiniCal().render(true);
   }
 
   /**
