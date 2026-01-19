@@ -159,14 +159,9 @@ export function addDays(date, days) {
   try {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = date.year - yearZero;
-    let dayOfYear = (date.day ?? 0) - 1;
-    if (dayOfYear == -1) {
-      dayOfYear = date.dayOfMonth || 0;
-      for (let i = 0; i < date.month; i++) dayOfYear += calendar.getDaysInMonth(i, internalYear);
-    }      
-
+    let dayOfYear = date.day - 1;
+    for (let i = 0; i < date.month; i++) dayOfYear += calendar.getDaysInMonth(i, internalYear);
     const components = { year: internalYear, day: dayOfYear, hour: date.hour ?? 0, minute: date.minute ?? 0, second: 0 };
-    
     const time = calendar.componentsToTime(components);
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;

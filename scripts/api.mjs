@@ -634,14 +634,14 @@ export const CalendariaAPI = {
   /**
    * Convert a timestamp (world time in seconds) to date components.
    * @param {number} timestamp - World time in seconds
-   * @returns {object} Date components {year, month, dayOfMonth, hour, minute, second}
+   * @returns {object} Date components {year, month, day, hour, minute}
    */
   timestampToDate(timestamp) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
     const components = calendar.timeToComponents(timestamp);
     const yearZero = calendar.years?.yearZero ?? 0;
-    return { ...components, year: components.year + yearZero };
+    return { year: components.year + yearZero, month: components.month, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
   },
 
   /**
