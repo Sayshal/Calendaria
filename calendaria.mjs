@@ -35,7 +35,7 @@ import * as StickyZones from './scripts/utils/sticky-zones.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
 
-const { canViewMiniCalendar, canViewTimeKeeper } = Permissions;
+const { canViewMiniCal, canViewTimeKeeper } = Permissions;
 
 Hooks.once('init', async () => {
   Hooks.callAll(HOOKS.INIT);
@@ -76,9 +76,9 @@ Hooks.once('ready', async () => {
   HUD.updateIdleOpacity();
   MiniCal.updateIdleOpacity();
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
-  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, true);
+  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR) && canViewMiniCalendar()) MiniCal.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CAL) && canViewMiniCal()) MiniCal.show({ silent: true });
   if (game.system.id === 'dnd5e' && foundry.utils.isNewerVersion(game.system.version, '5.1.10')) {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');
     if (calendarConfig?.enabled) {

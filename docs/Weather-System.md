@@ -230,7 +230,7 @@ Weather inertia creates smoother, more realistic transitions by favoring the cur
 
 ## Weather Picker
 
-GMs can manually set weather by clicking the weather indicator on the CalendariaHUD or MiniCalendar. This opens the Weather Picker dialog with:
+GMs can manually set weather by clicking the weather indicator on the HUD or MiniCal. This opens the Weather Picker dialog with:
 
 - All weather presets grouped by category (Standard, Severe, Fantasy, Environmental, Custom)
 - Climate zone selector with "None" option (always visible)

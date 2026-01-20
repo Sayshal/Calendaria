@@ -10,8 +10,8 @@ import { MODULE, SETTINGS } from '../constants.mjs';
  * Default permission settings for each action.
  */
 const DEFAULTS = {
-  viewFullCalendar: { player: false, trusted: true, assistant: true },
-  viewMiniCalendar: { player: false, trusted: true, assistant: true },
+  viewBigCal: { player: false, trusted: true, assistant: true },
+  viewMiniCal: { player: false, trusted: true, assistant: true },
   viewTimeKeeper: { player: false, trusted: true, assistant: true },
   addNotes: { player: true, trusted: true, assistant: true },
   changeDateTime: { player: false, trusted: false, assistant: true },
@@ -39,19 +39,19 @@ export function hasPermission(permissionKey) {
 }
 
 /**
- * Check if the current user can view the full calendar.
+ * Check if the current user can view the BigCal.
  * @returns {boolean} True if user has permission
  */
-export function canViewFullCalendar() {
-  return hasPermission('viewFullCalendar');
+export function canViewBigCal() {
+  return hasPermission('viewBigCal');
 }
 
 /**
- * Check if the current user can view the MiniCalendar.
+ * Check if the current user can view the MiniCal.
  * @returns {boolean} True if user has permission
  */
-export function canViewMiniCalendar() {
-  return hasPermission('viewMiniCalendar');
+export function canViewMiniCal() {
+  return hasPermission('viewMiniCal');
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Calendaria HUD - System-agnostic calendar widget.
+ * HUD - System-agnostic calendar widget.
  * Displays a sundial dome with sun/moon, time controls, date/weather info.
  * @module Applications/HUD
  * @author Tyler
@@ -110,7 +110,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-hud',
-    classes: ['calendaria', 'hud'],
+    classes: ['calendaria', 'calendaria-hud'],
     position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },
     actions: {
@@ -119,7 +119,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       addNote: HUD.#onAddNote,
       openEvent: HUD.#onOpenEvent,
       toggleTimeFlow: HUD.#onToggleTimeFlow,
-      openCalendar: HUD.#onOpenCalendar,
+      openBigCal: HUD.#onOpenBigCal,
       openSettings: HUD.#onOpenSettings,
       openWeatherPicker: HUD.#onOpenWeatherPicker,
       toSunrise: HUD.#onToSunrise,
@@ -141,8 +141,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static PARTS = {
     container: { template: TEMPLATES.CALENDAR_HUD },
-    dome: { template: TEMPLATES.CALENDAR_HUD_DOME, container: '.calendaria-hud' },
-    bar: { template: TEMPLATES.CALENDAR_HUD_BAR, container: '.calendaria-hud' }
+    dome: { template: TEMPLATES.CALENDAR_HUD_DOME, container: '.calendaria-hud-content' },
+    bar: { template: TEMPLATES.CALENDAR_HUD_BAR, container: '.calendaria-hud-content' }
   };
 
   /**
@@ -1003,7 +1003,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (hasMoonIconMarkers(dateFormatted)) dateEl.innerHTML = renderMoonIcons(dateFormatted);
       else dateEl.textContent = dateFormatted;
     }
-    const hud = this.element.querySelector('.calendaria-hud');
+    const hud = this.element.querySelector('.calendaria-hud-content');
     if (hud) hud.classList.toggle('time-flowing', TimeClock.running);
     this.#updateCelestialDisplay();
   }
@@ -1014,7 +1014,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #onClockStateChange() {
     if (!this.rendered) return;
     const running = TimeClock.running;
-    const hud = this.element.querySelector('.calendaria-hud');
+    const hud = this.element.querySelector('.calendaria-hud-content');
     if (hud) hud.classList.toggle('time-flowing', running);
     const playBtn = this.element.querySelector('.calendaria-hud-play-btn');
     if (playBtn) {
@@ -1737,11 +1737,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click to open calendar application.
+   * Handle click to open BigCal application.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
-  static #onOpenCalendar(_event, _target) {
+  static #onOpenBigCal(_event, _target) {
     new BigCal().render(true);
   }
 

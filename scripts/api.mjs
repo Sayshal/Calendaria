@@ -575,13 +575,13 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Open the main calendar application.
+   * Open the main BigCal application.
    * @param {object} [options] - Open options
    * @param {object} [options.date] - Date to display {year, month, day}
    * @param {string} [options.view] - View mode: 'month', 'week', 'year'
-   * @returns {Promise<object>} The calendar application
+   * @returns {Promise<object>} The BigCal application
    */
-  async openCalendar(options = {}) {
+  async openBigCal(options = {}) {
     const app = new BigCal();
     return app.render(true, options);
   },
@@ -601,24 +601,24 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Show the MiniCalendar widget.
-   * @returns {Promise<object>} The MiniCalendar application
+   * Show the MiniCal widget.
+   * @returns {Promise<object>} The MiniCal application
    */
-  async showMiniCalendar() {
+  async showMiniCal() {
     return MiniCal.show();
   },
 
   /**
-   * Hide the MiniCalendar widget.
+   * Hide the MiniCal widget.
    */
-  async hideMiniCalendar() {
+  async hideMiniCal() {
     MiniCal.hide();
   },
 
   /**
-   * Toggle the MiniCalendar widget visibility.
+   * Toggle the MiniCal widget visibility.
    */
-  async toggleMiniCalendar() {
+  async toggleMiniCal() {
     MiniCal.toggle();
   },
 

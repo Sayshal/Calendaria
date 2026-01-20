@@ -1,13 +1,13 @@
-# Calendar Application
+# BigCal
 
-The full calendar window provides month, week, and year views with comprehensive note management and navigation.
+The BigCal window provides month, week, and year views with comprehensive note management and navigation.
 
 ---
 
-## Opening the Calendar
+## Opening BigCal
 
-- Double-click the CalendariaHUD or MiniCalendar
-- Use the API: `CALENDARIA.api.openCalendar()`
+- Double-click the HUD or MiniCal
+- Use the API: `CALENDARIA.api.openBigCal()`
 - Scene controls button (if enabled in settings)
 
 ---
@@ -55,7 +55,7 @@ A 9-year overview grid for quick navigation:
 | Add Note | Create note on selected or current date |
 | Search | Toggle search panel |
 | Settings | Open settings panel |
-| Compact | Switch to MiniCalendar |
+| Compact | Switch to MiniCal |
 | Set Current Date | Set world time to selected date (GM only) |
 
 ---
@@ -134,7 +134,7 @@ Events spanning multiple days appear as horizontal bars:
 | Today button | Return to current date |
 | Click other-month day | Navigate to that month |
 | Click month in year view | Jump to that month in month view |
-| Double-click calendar background | Switch to MiniCalendar |
+| Double-click calendar background | Switch to MiniCal |
 
 ---
 

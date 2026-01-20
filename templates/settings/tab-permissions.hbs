@@ -12,32 +12,32 @@
     </header>
 
     <ul class="permissions-list">
-      {{!-- View Full Calendar --}}
+      {{!-- View BigCal --}}
       <li class="permission-row">
-        <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewFullCalendar"}}</span>
-        <input type="checkbox" name="permissions.viewFullCalendar.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.viewFullCalendar.player}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewFullCalendar.trusted"
-          data-tooltip="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewFullCalendar.trusted}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewFullCalendar.assistant"
+        <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewBigCal"}}</span>
+        <input type="checkbox" name="permissions.viewBigCal.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
+          {{#if permissions.viewBigCal.player}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewBigCal.trusted"
+          data-tooltip="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewBigCal.trusted}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewBigCal.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.viewFullCalendar.assistant}}checked{{/if}} />
+          {{#if permissions.viewBigCal.assistant}}checked{{/if}} />
         <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
-        <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewFullCalendarHint"}}</p>
+        <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewBigCalHint"}}</p>
       </li>
 
-      {{!-- View MiniCalendar --}}
+      {{!-- View MiniCal --}}
       <li class="permission-row">
-        <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewMiniCalendar"}}</span>
-        <input type="checkbox" name="permissions.viewMiniCalendar.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.viewMiniCalendar.player}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewMiniCalendar.trusted"
-          data-tooltip="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewMiniCalendar.trusted}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewMiniCalendar.assistant"
+        <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewMiniCal"}}</span>
+        <input type="checkbox" name="permissions.viewMiniCal.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
+          {{#if permissions.viewMiniCal.player}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewMiniCal.trusted"
+          data-tooltip="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewMiniCal.trusted}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewMiniCal.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.viewMiniCalendar.assistant}}checked{{/if}} />
+          {{#if permissions.viewMiniCal.assistant}}checked{{/if}} />
         <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
-        <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewMiniCalendarHint"}}</p>
+        <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewMiniCalHint"}}</p>
       </li>
 
       {{!-- View TimeKeeper --}}

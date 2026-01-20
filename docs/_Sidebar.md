@@ -9,9 +9,9 @@
 
 **Applications**
 
-- [Calendar Application](CalendarApplication)
-- [CalendariaHUD](CalendariaHUD)
-- [MiniCalendar](MiniCalendar)
+- [BigCal](BigCal)
+- [HUD](HUD)
+- [MiniCal](MiniCal)
 - [TimeKeeper](TimeKeeper)
 - [Stopwatch](Stopwatch)
 

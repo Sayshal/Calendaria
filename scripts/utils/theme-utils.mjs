@@ -125,7 +125,7 @@ export const COMPONENT_CATEGORIES = {
   common: 'CALENDARIA.ThemeEditor.Component.Common',
   domeHud: 'CALENDARIA.ThemeEditor.Component.DomeHud',
   timeKeeper: 'CALENDARIA.ThemeEditor.Component.TimeKeeper',
-  miniCalendar: 'CALENDARIA.ThemeEditor.Component.MiniCalendar'
+  miniCal: 'CALENDARIA.ThemeEditor.Component.MiniCal'
 };
 
 /**
@@ -147,9 +147,9 @@ export const COLOR_DEFINITIONS = [
   { key: 'text', label: 'CALENDARIA.ThemeEditor.Colors.Text', category: 'text', component: 'common' },
   { key: 'textDim', label: 'CALENDARIA.ThemeEditor.Colors.TextDim', category: 'text', component: 'common' },
   { key: 'titleText', label: 'CALENDARIA.ThemeEditor.Colors.TitleText', category: 'text', component: 'common' },
-  { key: 'weekdayHeader', label: 'CALENDARIA.ThemeEditor.Colors.WeekdayHeader', category: 'text', component: 'miniCalendar' },
-  { key: 'dayNumber', label: 'CALENDARIA.ThemeEditor.Colors.DayNumber', category: 'text', component: 'miniCalendar' },
-  { key: 'restDay', label: 'CALENDARIA.ThemeEditor.Colors.RestDay', category: 'text', component: 'miniCalendar' },
+  { key: 'weekdayHeader', label: 'CALENDARIA.ThemeEditor.Colors.WeekdayHeader', category: 'text', component: 'miniCal' },
+  { key: 'dayNumber', label: 'CALENDARIA.ThemeEditor.Colors.DayNumber', category: 'text', component: 'miniCal' },
+  { key: 'restDay', label: 'CALENDARIA.ThemeEditor.Colors.RestDay', category: 'text', component: 'miniCal' },
 
   // Buttons
   { key: 'buttonBg', label: 'CALENDARIA.ThemeEditor.Colors.ButtonBackground', category: 'buttons', component: 'common' },

@@ -335,10 +335,10 @@
 }
 
 /* ======================================== */
-/* Calendar Application Styles              */
+/* BigCal Application Styles                */
 /* ======================================== */
 
-.calendar-application {
+.big-cal {
   display: flex;
   flex-direction: column;
   color: var(--calendaria-text);
@@ -465,7 +465,7 @@
   border-bottom: 2px solid var(--calendaria-border);
 }
 
-.calendar-application .calendaria-hud-search-panel {
+.big-cal .calendaria-hud-search-panel {
   position: absolute;
   top: 100%;
   left: 50%;
@@ -473,7 +473,7 @@
   transform: translateX(-50%);
 }
 
-.calendar-application button:not(.view-selector button.active) {
+.big-cal button:not(.view-selector button.active) {
   border-color: var(--calendaria-button-border);
   color: var(--calendaria-button-text);
   background: var(--calendaria-button-bg);
@@ -3478,10 +3478,10 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
-/* TimeKeeper HUD Styles                    */
+/* TimeKeeper Styles                        */
 /* ======================================== */
 
-.time-keeper-hud {
+.time-keeper {
   position: fixed;
   width: 200px;
   padding: 6px;
@@ -3505,21 +3505,21 @@ span.calendaria-moon-icon {
   }
 }
 
-.time-keeper-hud .time-display {
+.time-keeper .time-display {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: move;
 }
 
-.time-keeper-hud .time-display-time-wrapper {
+.time-keeper .time-display-time-wrapper {
   display: flex;
   position: relative;
   justify-content: center;
   align-items: center;
 }
 
-.time-keeper-hud .time-display-time {
+.time-keeper .time-display-time {
   color: var(--calendaria-text);
   font-weight: bold;
   font-size: 20px;
@@ -3529,7 +3529,7 @@ span.calendaria-moon-icon {
   transition: opacity 0.15s ease;
 }
 
-.time-keeper-hud .time-display-play-btn {
+.time-keeper .time-display-play-btn {
   display: flex;
   opacity: 0;
   position: absolute;
@@ -3557,22 +3557,22 @@ span.calendaria-moon-icon {
   }
 }
 
-.time-keeper-hud .time-display-time-wrapper:hover .time-display-play-btn {
+.time-keeper .time-display-time-wrapper:hover .time-display-play-btn {
   opacity: 1;
   pointer-events: auto;
 }
 
-.time-keeper-hud .time-display-time-wrapper:hover .time-display-time {
+.time-keeper .time-display-time-wrapper:hover .time-display-time {
   opacity: 0.3;
 }
 
-.time-keeper-hud .time-display-date {
+.time-keeper .time-display-date {
   color: var(--calendaria-text-dim);
   font-size: 11px;
   line-height: 1.2;
 }
 
-.time-keeper-hud .time-keeper-controls {
+.time-keeper .time-keeper-controls {
   gap: 4px;
   display: flex;
   justify-content: center;
@@ -3583,7 +3583,7 @@ span.calendaria-moon-icon {
   transition: all 0.2s ease-out;
 }
 
-.time-keeper-hud .time-btn {
+.time-keeper .time-btn {
   display: flex;
   flex: 1;
   justify-content: center;
@@ -3606,7 +3606,7 @@ span.calendaria-moon-icon {
   }
 }
 
-.time-keeper-hud .increment-select {
+.time-keeper .increment-select {
   flex: 2;
   box-sizing: border-box;
   min-width: 0;
@@ -3635,7 +3635,7 @@ span.calendaria-moon-icon {
   }
 }
 
-.time-keeper-hud .time-keeper-readonly {
+.time-keeper .time-keeper-readonly {
   gap: 4px;
   display: flex;
   justify-content: center;
@@ -3653,14 +3653,14 @@ span.calendaria-moon-icon {
   }
 }
 
-.time-keeper-hud:hover .time-keeper-readonly {
+.time-keeper:hover .time-keeper-readonly {
   max-height: 30px;
   margin-top: 6px;
   padding: 4px 0;
   opacity: 1;
 }
 
-.time-keeper-hud .time-display-stopwatch-btn {
+.time-keeper .time-display-stopwatch-btn {
   display: flex;
   opacity: 0;
   position: absolute;
@@ -3686,7 +3686,7 @@ span.calendaria-moon-icon {
   }
 }
 
-.time-keeper-hud .time-display:hover .time-display-stopwatch-btn {
+.time-keeper .time-display:hover .time-display-stopwatch-btn {
   opacity: 1;
   pointer-events: auto;
 }
@@ -4053,16 +4053,16 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
-/* MiniCalendar                             */
+/* MiniCal                                  */
 /* ======================================== */
 
-.mini-calendar {
+.mini-cal {
   --mini-day-size: 52px;
   --mini-gap: 3px;
 
   z-index: var(--z-index-ui);
   position: fixed;
-  opacity: var(--calendaria-minicalendar-idle-opacity, 1);
+  opacity: var(--calendaria-minical-idle-opacity, 1);
   transition: opacity 0.3s ease-in-out 2s;
 
   &:hover {
@@ -4070,7 +4070,7 @@ span.calendaria-moon-icon {
     transition-delay: 0s;
   }
 
-  .mini-calendar-container {
+  .mini-cal-container {
     display: flex;
     position: relative;
     flex-direction: column;
@@ -4176,7 +4176,7 @@ span.calendaria-moon-icon {
     transform: translateX(0);
   }
 
-  .mini-calendar-container:has(.mini-notes-panel.visible) .mini-sidebar {
+  .mini-cal-container:has(.mini-notes-panel.visible) .mini-sidebar {
     border-radius: 0;
   }
 
@@ -5456,10 +5456,10 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
-/* CalendariaHUD - Sundial Widget           */
+/* HUD - Sundial Widget                     */
 /* ======================================== */
 
-.calendaria-hud-wrapper {
+.calendaria-hud {
   display: inline-flex;
   z-index: 100;
   position: fixed;
@@ -5476,7 +5476,7 @@ span.calendaria-moon-icon {
   }
 }
 
-.calendaria-hud {
+.calendaria-hud-content {
   display: flex;
   position: relative;
   flex-direction: column;
@@ -5717,50 +5717,50 @@ span.calendaria-moon-icon {
 }
 
 /* Width scale for fullsize mode - prevents content-driven resizing */
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-bar {
+.calendaria-hud:not(.compact) .calendaria-hud-bar {
   display: grid;
   width: calc(800px * var(--hud-width-scale, 1));
   box-sizing: border-box;
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-section {
+.calendaria-hud:not(.compact) .calendaria-hud-section {
   overflow: hidden;
   min-width: 0;
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-indicators {
+.calendaria-hud:not(.compact) .calendaria-hud-indicators {
   overflow: hidden;
   min-width: 0;
   flex: 1 1 0;
   flex-shrink: 1;
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-indicators .weather-indicator {
+.calendaria-hud:not(.compact) .calendaria-hud-indicators .weather-indicator {
   overflow: hidden;
   max-width: 100%;
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-indicators .weather-label,
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-indicators .season-label {
+.calendaria-hud:not(.compact) .calendaria-hud-indicators .weather-label,
+.calendaria-hud:not(.compact) .calendaria-hud-indicators .season-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-tray {
+.calendaria-hud:not(.compact) .calendaria-hud-tray {
   max-width: calc(800px * var(--hud-width-scale, 1));
   box-sizing: border-box;
   gap: clamp(3px, calc(6px * var(--hud-width-scale, 1)), 6px);
   padding: clamp(4px, calc(6px * var(--hud-width-scale, 1)), 6px) clamp(6px, calc(10px * var(--hud-width-scale, 1)), 10px);
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-tray .calendaria-hud-time-btn {
+.calendaria-hud:not(.compact) .calendaria-hud-tray .calendaria-hud-time-btn {
   width: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
   height: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
   font-size: clamp(0.5rem, calc(0.75rem * var(--hud-width-scale, 1)), 0.75rem);
 }
 
-.calendaria-hud-wrapper:not(.compact) .calendaria-hud-tray .calendaria-hud-select {
+.calendaria-hud:not(.compact) .calendaria-hud-tray .calendaria-hud-select {
   height: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
   font-size: clamp(0.5rem, calc(0.6875rem * var(--hud-width-scale, 1)), 0.6875rem);
   padding: 0 clamp(4px, calc(8px * var(--hud-width-scale, 1)), 8px);
@@ -5792,8 +5792,8 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-bar.near-snap,
-.time-keeper-hud .time-display.near-snap,
-.mini-calendar .mini-top-row.near-snap {
+.time-keeper .time-display.near-snap,
+.mini-cal .mini-top-row.near-snap {
   animation: calendaria-wobble 0.15s ease-in-out infinite;
   border-color: var(--calendaria-primary);
   box-shadow:
@@ -6253,7 +6253,7 @@ span.calendaria-moon-icon {
   color: var(--widget-color, rgb(160 160 160));
 }
 
-/* MiniCalendar / Full Calendar widget indicators */
+/* MiniCal / BigCal widget indicators */
 .calendar-indicators .calendaria-widget-indicator {
   gap: 0.25rem;
   display: inline-flex;
@@ -6271,12 +6271,12 @@ span.calendaria-moon-icon {
   font-size: 0.75rem;
 }
 
-.mini-calendar-container .calendar-indicators .calendaria-widget-indicator {
+.mini-cal-container .calendar-indicators .calendaria-widget-indicator {
   font-size: 0.7rem;
 }
 
-.mini-calendar-container .calendar-indicators .calendaria-widget-indicator i,
-.mini-calendar-container .calendar-indicators .calendaria-widget-indicator .widget-label {
+.mini-cal-container .calendar-indicators .calendaria-widget-indicator i,
+.mini-cal-container .calendar-indicators .calendaria-widget-indicator .widget-label {
   font-size: 0.7rem;
 }
 
@@ -6311,7 +6311,7 @@ span.calendaria-moon-icon {
   transition: all 0.25s ease;
 }
 
-.calendaria-hud-wrapper:hover .calendaria-hud-tray,
+.calendaria-hud:hover .calendaria-hud-tray,
 .calendaria-hud-tray.visible {
   opacity: 1;
   max-height: 42px;
@@ -6438,19 +6438,19 @@ span.calendaria-moon-icon {
 /* ======================================== */
 /* Compact Mode                             */
 /* ======================================== */
-.calendaria-hud-wrapper.compact .calendaria-hud-dome {
+.calendaria-hud.compact .calendaria-hud-dome {
   bottom: calc(100% - 10px);
   width: 120px;
   height: 60px;
   border-radius: 60px 60px 0 0;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-dome::before {
+.calendaria-hud.compact .calendaria-hud-dome::before {
   border-radius: 60px 60px 0 0;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-stars::before,
-.calendaria-hud-wrapper.compact .calendaria-hud-stars::after {
+.calendaria-hud.compact .calendaria-hud-stars::before,
+.calendaria-hud.compact .calendaria-hud-stars::after {
   box-shadow:
     12px 10px 0 0 rgb(255 255 255 / 75%),
     40px 18px 0 0 rgb(255 255 255 / 60%),
@@ -6461,7 +6461,7 @@ span.calendaria-moon-icon {
     72px 8px 0 1px rgb(255 255 255 / 75%);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-stars::after {
+.calendaria-hud.compact .calendaria-hud-stars::after {
   box-shadow:
     20px 14px 0 0 rgb(255 255 255 / 70%),
     50px 25px 0 0 rgb(255 255 255 / 65%),
@@ -6469,107 +6469,107 @@ span.calendaria-moon-icon {
     95px 35px 0 0 rgb(255 255 255 / 60%);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-track {
+.calendaria-hud.compact .calendaria-hud-track {
   width: 100px;
   height: 50px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-sun {
+.calendaria-hud.compact .calendaria-hud-sun {
   width: 16px;
   height: 16px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-moon {
+.calendaria-hud.compact .calendaria-hud-moon {
   width: 14px;
   height: 14px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-center {
+.calendaria-hud.compact .calendaria-hud-center {
   flex-shrink: 0;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-btn-group.left,
-.calendaria-hud-wrapper.compact .calendaria-hud-btn-group.right {
+.calendaria-hud.compact .calendaria-hud-btn-group.left,
+.calendaria-hud.compact .calendaria-hud-btn-group.right {
   min-width: 50px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-section {
+.calendaria-hud.compact .calendaria-hud-section {
   gap: 8px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-info-panel,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators {
+.calendaria-hud.compact .calendaria-hud-info-panel,
+.calendaria-hud.compact .calendaria-hud-indicators {
   gap: 4px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-bar {
+.calendaria-hud.compact .calendaria-hud-bar {
   gap: 8px;
   height: 30px;
   padding: 0 8px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-btn {
+.calendaria-hud.compact .calendaria-hud-btn {
   width: 18px;
   height: 18px;
   min-height: 18px;
   max-height: 18px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-btn i {
+.calendaria-hud.compact .calendaria-hud-btn i {
   font-size: var(--font-size-11, 0.6875rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-btn-group {
+.calendaria-hud.compact .calendaria-hud-btn-group {
   gap: 3px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-date,
-.calendaria-hud-wrapper.compact .calendaria-hud-event-name {
+.calendaria-hud.compact .calendaria-hud-date,
+.calendaria-hud.compact .calendaria-hud-event-name {
   font-size: var(--font-size-10, 0.625rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-time {
+.calendaria-hud.compact .calendaria-hud-time {
   padding: 0 6px;
   font-size: var(--font-size-12, 0.75rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .weather-indicator,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .season-indicator,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .era-indicator,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .cycle-indicator,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .calendaria-widget-indicator {
+.calendaria-hud.compact .calendaria-hud-indicators .weather-indicator,
+.calendaria-hud.compact .calendaria-hud-indicators .season-indicator,
+.calendaria-hud.compact .calendaria-hud-indicators .era-indicator,
+.calendaria-hud.compact .calendaria-hud-indicators .cycle-indicator,
+.calendaria-hud.compact .calendaria-hud-indicators .calendaria-widget-indicator {
   font-size: var(--font-size-10, 0.625rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .calendaria-widget-indicator i,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .calendaria-widget-indicator .widget-label {
+.calendaria-hud.compact .calendaria-hud-indicators .calendaria-widget-indicator i,
+.calendaria-hud.compact .calendaria-hud-indicators .calendaria-widget-indicator .widget-label {
   font-size: var(--font-size-10, 0.625rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-select {
+.calendaria-hud.compact .calendaria-hud-select {
   min-width: 40px;
   height: 22px;
   padding: 1px 4px;
   font-size: var(--font-size-10, 0.625rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-divider {
+.calendaria-hud.compact .calendaria-hud-divider {
   height: 16px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-live-event {
+.calendaria-hud.compact .calendaria-hud-live-event {
   width: 22px;
   height: 22px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-hud-live-event-icon {
+.calendaria-hud.compact .calendaria-hud-live-event-icon {
   font-size: var(--font-size-10, 0.625rem);
 }
 
 /* ======================================== */
 /* Slice Mode                               */
 /* ======================================== */
-.calendaria-hud-wrapper.slice-mode .calendaria-hud-dome {
+.calendaria-hud.slice-mode .calendaria-hud-dome {
   display: none;
 }
 
@@ -6693,26 +6693,26 @@ span.calendaria-moon-icon {
 }
 
 /* Compact slice adjustments */
-.calendaria-hud-wrapper.compact .calendaria-hud-slice {
+.calendaria-hud.compact .calendaria-hud-slice {
   width: 100px;
   height: 20px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-slice-sun {
+.calendaria-hud.compact .calendaria-slice-sun {
   width: 12px;
   height: 12px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-slice-moon {
+.calendaria-hud.compact .calendaria-slice-moon {
   width: 10px;
   height: 10px;
 }
 
-.calendaria-hud-wrapper.compact .calendaria-slice-time-overlay .calendaria-hud-time {
+.calendaria-hud.compact .calendaria-slice-time-overlay .calendaria-hud-time {
   font-size: var(--font-size-10, 0.625rem);
 }
 
-.calendaria-hud-wrapper.compact .calendaria-slice-time-overlay .calendaria-hud-play-btn {
+.calendaria-hud.compact .calendaria-slice-time-overlay .calendaria-hud-play-btn {
   width: 14px;
   height: 14px;
   min-height: 14px;
@@ -7026,7 +7026,7 @@ span.calendaria-moon-icon {
   }
 
   nav.sheet-tabs {
-    gap: 0.125rem;
+    gap: 0;
     grid-column: 1;
     grid-row: 1;
     display: flex;
@@ -7040,7 +7040,32 @@ span.calendaria-moon-icon {
     border-top: none;
     border-right: 1px solid var(--color-cool-4);
     border-bottom: none;
-    overflow: hidden auto;
+
+    .tab-group {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 0.25rem;
+      border-left: 3px solid var(--group-color, var(--color-cool-4));
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--color-cool-4-75);
+        margin-bottom: 0.25rem;
+      }
+
+      .tab-group-header {
+        padding: 0.5rem 0.5rem 0.25rem;
+        color: var(--color-text-dark-secondary);
+        font-weight: 600;
+        font-size: var(--font-size-12);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: right;
+      }
+
+      [data-tab] {
+        border-left: none;
+      }
+    }
 
     [data-tab] {
       gap: 0.5rem;
@@ -7049,10 +7074,11 @@ span.calendaria-moon-icon {
       justify-content: flex-end;
       align-items: center;
       max-width: 100%;
-      padding-right: 0.5rem;
+      padding: 0.5rem;
       border-bottom: none;
       border-left: 3px solid transparent;
       border-radius: 0;
+      font-size: var(--font-size-13);
       text-align: right;
 
       > span:not(.notification-pip) {
@@ -7068,7 +7094,12 @@ span.calendaria-moon-icon {
       }
 
       &.active {
-        border-left-color: var(--color-warm-1);
+        border-left-color: var(--group-color, var(--color-warm-1));
+        background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
+      }
+
+      &:hover:not(.active) {
+        border-left-color: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 50%, transparent);
       }
     }
   }
@@ -7533,17 +7564,6 @@ span.calendaria-moon-icon {
     i {
       font-size: var(--font-size-14);
     }
-  }
-
-  .sheet-tabs [data-tab='hud'].app-tab {
-    margin-top: auto;
-    border-top: 1px solid var(--color-cool-4);
-  }
-
-  section.tab[data-tab='timekeeper'],
-  section.tab[data-tab='miniCalendar'],
-  section.tab[data-tab='hud'] {
-    background: linear-gradient(135deg, var(--color-cool-5-50, rgb(30 30 30 / 50%)) 0%, transparent 100%);
   }
 
   .color-categories-grid {

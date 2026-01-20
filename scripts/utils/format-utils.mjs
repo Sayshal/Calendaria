@@ -915,9 +915,9 @@ const LOCATION_FORMAT_KEYS = {
   hudTime: 'time',
   timekeeperDate: 'long',
   timekeeperTime: 'time',
-  miniCalendarHeader: 'long',
-  miniCalendarTime: 'time',
-  fullCalendarHeader: 'full',
+  miniCalHeader: 'long',
+  miniCalTime: 'time',
+  bigCalHeader: 'full',
   chatTimestamp: 'long'
 };
 
@@ -930,9 +930,9 @@ export const LOCATION_DEFAULTS = {
   hudTime: 'time',
   timekeeperDate: 'long',
   timekeeperTime: 'time',
-  miniCalendarHeader: 'long',
-  miniCalendarTime: 'time',
-  fullCalendarHeader: 'full',
+  miniCalHeader: 'long',
+  miniCalTime: 'time',
+  bigCalHeader: 'full',
   chatTimestamp: 'short',
   stopwatchRealtime: 'stopwatchRealtimeFull',
   stopwatchGametime: 'stopwatchGametimeFull'
@@ -996,9 +996,9 @@ export function getDisplayLocationDefinitions() {
   return [
     { id: 'hudDate', label: 'CALENDARIA.Format.Location.HudDate', category: 'hud' },
     { id: 'hudTime', label: 'CALENDARIA.Format.Location.HudTime', category: 'hud' },
-    { id: 'miniCalendarHeader', label: 'CALENDARIA.Format.Location.MiniCalendarHeader', category: 'miniCalendar' },
-    { id: 'miniCalendarTime', label: 'CALENDARIA.Format.Location.MiniCalendarTime', category: 'miniCalendar' },
-    { id: 'fullCalendarHeader', label: 'CALENDARIA.Format.Location.FullCalendarHeader', category: 'fullcal' },
+    { id: 'miniCalHeader', label: 'CALENDARIA.Format.Location.MiniCalHeader', category: 'miniCal' },
+    { id: 'miniCalTime', label: 'CALENDARIA.Format.Location.MiniCalTime', category: 'miniCal' },
+    { id: 'bigCalHeader', label: 'CALENDARIA.Format.Location.BigCalHeader', category: 'bigcal' },
     { id: 'chatTimestamp', label: 'CALENDARIA.Format.Location.ChatTimestamp', category: 'chat' }
   ];
 }

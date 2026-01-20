@@ -62,9 +62,9 @@ These errors appear when a non-GM user attempts GM-only actions:
 
 ### Calendar Not Appearing
 
-1. Check **Settings** > **Calendaria** > **Settings Panel** > **MiniCalendar** tab
-2. Enable **Show MiniCalendar**
-3. Try resetting position: **Settings Panel** > **MiniCalendar** > **Reset Position**
+1. Check **Settings** > **Calendaria** > **Settings Panel** > **MiniCal** tab
+2. Enable **Show MiniCal**
+3. Try resetting position: **Settings Panel** > **MiniCal** > **Reset Position**
 4. Check if UI is off-screen (resize browser window)
 
 ---
@@ -256,7 +256,7 @@ Common import errors and solutions:
 ### Reset UI Positions
 
 1. Open **Settings** > **Module Settings** > **Calendaria** > **Settings Panel**
-2. Navigate to the relevant tab (MiniCalendar, HUD, or TimeKeeper)
+2. Navigate to the relevant tab (MiniCal, HUD, or TimeKeeper)
 3. Click **Reset Position**
 
 ### Reset Theme Colors

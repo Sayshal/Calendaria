@@ -1,5 +1,5 @@
 /**
- * TimeKeeper HUD - Compact time control interface.
+ * TimeKeeper - Compact time control interface.
  * Provides forward/reverse buttons, increment selector, and current time display.
  * @module Applications/TimeKeeper
  * @author Tyler
@@ -369,10 +369,10 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Render the TimeKeeper HUD singleton.
+   * Render the TimeKeeper singleton.
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
-   * @returns {TimeKeeper} The HUD instance
+   * @returns {TimeKeeper} The instance
    */
   static show({ silent = false } = {}) {
     if (!canViewTimeKeeper()) {
@@ -389,13 +389,13 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     return instance;
   }
 
-  /** Hide the TimeKeeper HUD. */
+  /** Hide the TimeKeeper. */
   static hide() {
     const instance = foundry.applications.instances.get('time-keeper-hud');
     if (instance) instance.close();
   }
 
-  /** Toggle the TimeKeeper HUD visibility. */
+  /** Toggle the TimeKeeper visibility. */
   static toggle() {
     const existing = foundry.applications.instances.get('time-keeper-hud');
     if (existing?.rendered) this.hide();

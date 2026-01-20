@@ -130,7 +130,7 @@ function resolveValue(value) {
 
 /**
  * Get button class for location.
- * @param {string} location - Location identifier (hud, minical, fullcal)
+ * @param {string} location - Location identifier (hud, minical, bigcal)
  * @returns {string} CSS class
  */
 function getButtonClass(location) {

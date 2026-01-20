@@ -24,7 +24,7 @@ Button to open the calendar importer for Simple Calendar, Fantasy Calendar, and 
 
 ### Open/Close Buttons
 
-Context-specific buttons to open or close the HUD, MiniCalendar, and TimeKeeper applications.
+Context-specific buttons to open or close the HUD, MiniCal, and TimeKeeper applications.
 
 > [!NOTE]
 > Changes in the Calendar tab are automatically saved. An "Changes saved automatically" indicator confirms this.
@@ -39,9 +39,9 @@ Configure which user roles can access Calendaria features.
 
 | Permission | Description |
 |------------|-------------|
-| **View MiniCalendar** | Can see the MiniCalendar widget |
-| **View TimeKeeper** | Can see the TimeKeeper HUD |
-| **View CalendariaHUD** | Can see the main CalendariaHUD |
+| **View MiniCal** | Can see the MiniCal widget |
+| **View TimeKeeper** | Can see the TimeKeeper |
+| **View HUD** | Can see the main HUD |
 | **Manage Notes** | Can create, edit, and delete calendar notes |
 | **Change Date/Time** | Can modify the world date and time |
 | **Change Weather** | Can set weather conditions |
@@ -173,7 +173,7 @@ When Theme Mode is set to `Custom`, you can customize all UI colors. See [Themin
 
 ### Enable Sticky Zones
 
-Allow draggable windows (HUD, MiniCalendar, TimeKeeper) to snap to predefined positions.
+Allow draggable windows (HUD, MiniCal, TimeKeeper) to snap to predefined positions.
 
 - Default: `true`
 
@@ -185,13 +185,13 @@ Configure date/time display formats for different UI locations. Each location su
 
 ### Locations
 
-- **HUD Date**: Date display on Calendaria HUD
-- **HUD Time**: Time display on Calendaria HUD
-- **TimeKeeper Date**: Date display on TimeKeeper HUD (supports `Off` to hide)
-- **TimeKeeper Time**: Time display on TimeKeeper HUD
-- **MiniCalendar Header**: Header text on MiniCalendar
-- **MiniCalendar Time**: Time display on MiniCalendar
-- **Full Calendar Header**: Header on the full calendar view
+- **HUD Date**: Date display on HUD
+- **HUD Time**: Time display on HUD
+- **TimeKeeper Date**: Date display on TimeKeeper (supports `Off` to hide)
+- **TimeKeeper Time**: Time display on TimeKeeper
+- **MiniCal Header**: Header text on MiniCal
+- **MiniCal Time**: Time display on MiniCal
+- **BigCal Header**: Header on the BigCal view
 - **Chat Timestamp**: In-game timestamps in chat
 - **Elapsed Time (Real Time)**: Stopwatch display in real-time mode
 - **Elapsed Time (Game Time)**: Stopwatch display in game-time mode
@@ -393,11 +393,11 @@ Enable developer features such as calendar journal deletion and sticky zone visu
 
 ---
 
-## Calendaria HUD
+## HUD
 
 ### Show on World Load
 
-Display the Calendaria HUD when the world loads.
+Display the HUD when the world loads.
 
 - Default: `false`
 
@@ -526,11 +526,11 @@ Button to reset HUD to default position.
 
 ---
 
-## MiniCalendar
+## MiniCal
 
 ### Show on World Load
 
-Display the MiniCalendar when the world loads.
+Display the MiniCal when the world loads.
 
 - Default: `true`
 
@@ -567,26 +567,26 @@ Remember sidebar visibility state.
 
 ### Lock Position
 
-Prevent dragging the MiniCalendar.
+Prevent dragging the MiniCal.
 
 - Default: `false`
 
 ### Auto-Fade
 
-Enable opacity fade when mouse leaves the MiniCalendar.
+Enable opacity fade when mouse leaves the MiniCal.
 
 - Default: `false`
 
 ### Idle Opacity
 
-Opacity level when MiniCalendar is faded (when Auto-Fade is enabled).
+Opacity level when MiniCal is faded (when Auto-Fade is enabled).
 
 - Range: `0` to `100` (percentage)
 - Default: `40`
 
-### Force MiniCalendar (GM Only)
+### Force MiniCal (GM Only)
 
-Force MiniCalendar display for all connected clients.
+Force MiniCal display for all connected clients.
 
 - Default: `false`
 
@@ -600,7 +600,7 @@ Button to reset position to default.
 
 ### Show on World Load (GM Only)
 
-Display the TimeKeeper HUD when the world loads.
+Display the TimeKeeper when the world loads.
 
 - Default: `false`
 

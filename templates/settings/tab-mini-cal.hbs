@@ -1,15 +1,15 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   <div class="button-row open-app-button">
-    <button type="button" data-action="openMiniCalendar">
+    <button type="button" data-action="openMiniCal">
       <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenMiniCalendar"}}
+      {{localize "CALENDARIA.SettingsPanel.OpenMiniCal"}}
     </button>
-    <button type="button" data-action="closeMiniCalendar">
+    <button type="button" data-action="closeMiniCal">
       <i class="fas fa-times"></i>
-      {{localize "CALENDARIA.SettingsPanel.CloseMiniCalendar"}}
+      {{localize "CALENDARIA.SettingsPanel.CloseMiniCal"}}
     </button>
-    <button type="button" data-action="resetPosition" data-target="miniCalendar">
+    <button type="button" data-action="resetPosition" data-target="miniCal">
       <i class="fas fa-undo"></i>
       {{localize "CALENDARIA.Common.ResetPosition"}}
     </button>
@@ -19,20 +19,20 @@
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.ShowMiniCalendar.Name"}}</label>
+      <label>{{localize "CALENDARIA.Settings.ShowMiniCal.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="showMiniCalendar" {{#if showMiniCalendar}}checked{{/if}}>
+        <input type="checkbox" name="showMiniCal" {{#if showMiniCal}}checked{{/if}}>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.ShowMiniCalendar.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.ShowMiniCal.Hint"}}</p>
     </div>
 
     {{#if isGM}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ForceMiniCalendar.Name"}}</label>
+        <label>{{localize "CALENDARIA.Settings.ForceMiniCal.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="forceMiniCalendar" {{#if forceMiniCalendar}}checked{{/if}}>
+          <input type="checkbox" name="forceMiniCal" {{#if forceMiniCal}}checked{{/if}}>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ForceMiniCalendar.Hint"}}</p>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceMiniCal.Hint"}}</p>
       </div>
     {{/if}}
 
@@ -47,30 +47,30 @@
     {{/if}}
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.MiniCalendarControlsDelay.Name"}}</label>
+      <label>{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Name"}}</label>
       <div class="form-fields">
-        <input type="range" name="miniCalendarControlsDelay" value="{{miniCalendarControlsDelay}}" min="1" max="10"
+        <input type="range" name="miniCalControlsDelay" value="{{miniCalControlsDelay}}" min="1" max="10"
           step="1">
-        <span class="range-value">{{miniCalendarControlsDelay}}s</span>
+        <span class="range-value">{{miniCalControlsDelay}}s</span>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalendarControlsDelay.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Hint"}}</p>
     </div>
 
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="miniCalendarAutoFade" {{#if miniCalendarAutoFade}}checked{{/if}}>
+        <input type="checkbox" name="miniCalAutoFade" {{#if miniCalAutoFade}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
     </div>
 
-    <div class="form-group{{#unless miniCalendarAutoFade}} disabled{{/unless}}">
+    <div class="form-group{{#unless miniCalAutoFade}} disabled{{/unless}}">
       <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" name="miniCalendarIdleOpacity" min="0" max="100" value="{{miniCalendarIdleOpacity}}"
-          {{#unless miniCalendarAutoFade}}disabled{{/unless}}>
-        <input type="number" class="range-value" min="0" max="100" value="{{miniCalendarIdleOpacity}}"
-          style="width: 48px; flex: none" {{#unless miniCalendarAutoFade}}disabled{{/unless}}>
+        <input type="range" name="miniCalIdleOpacity" min="0" max="100" value="{{miniCalIdleOpacity}}"
+          {{#unless miniCalAutoFade}}disabled{{/unless}}>
+        <input type="number" class="range-value" min="0" max="100" value="{{miniCalIdleOpacity}}"
+          style="width: 48px; flex: none" {{#unless miniCalAutoFade}}disabled{{/unless}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>
@@ -79,7 +79,7 @@
       <div class="form-group">
         <label>{{localize "CALENDARIA.Settings.ConfirmSetDate.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="miniCalendarConfirmSetDate" {{#if miniCalendarConfirmSetDate}}checked{{/if}}>
+          <input type="checkbox" name="miniCalConfirmSetDate" {{#if miniCalConfirmSetDate}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ConfirmSetDate.Hint"}}</p>
       </div>
@@ -88,14 +88,14 @@
 
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
-    <input type="hidden" name="miniCalendarStickySection" value="1">
+    <input type="hidden" name="miniCalStickySection" value="1">
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
     <div class="form-group">
       <label>{{localize "CALENDARIA.Common.StickyTimeControls"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="miniCalendarStickyTimeControls"
-          {{#if miniCalendarStickyTimeControls}}checked{{/if}}>
+        <input type="checkbox" name="miniCalStickyTimeControls"
+          {{#if miniCalStickyTimeControls}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTimeControls"}}</p>
     </div>
@@ -103,7 +103,7 @@
     <div class="form-group">
       <label>{{localize "CALENDARIA.SettingsPanel.Sticky.Sidebar"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="miniCalendarStickySidebar" {{#if miniCalendarStickySidebar}}checked{{/if}}>
+        <input type="checkbox" name="miniCalStickySidebar" {{#if miniCalStickySidebar}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickySidebar"}}</p>
     </div>
@@ -111,7 +111,7 @@
     <div class="form-group">
       <label>{{localize "CALENDARIA.Common.LockPosition"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="miniCalendarStickyPosition" {{#if miniCalendarStickyPosition}}checked{{/if}}>
+        <input type="checkbox" name="miniCalStickyPosition" {{#if miniCalStickyPosition}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
     </div>

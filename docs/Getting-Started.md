@@ -37,9 +37,9 @@ Search for "Calendaria" in The Forge's Bazaar.
 
 ### 2. Choose a Calendar
 
-On first load, the MiniCalendar appears with the Gregorian calendar selected by default. To change calendars:
+On first load, the MiniCal appears with the Gregorian calendar selected by default. To change calendars:
 
-1. Click the **gear icon** on the MiniCalendar (or any Calendaria application) to open the Settings Panel
+1. Click the **gear icon** on the MiniCal (or any Calendaria application) to open the Settings Panel
 2. In the **Calendar** tab, select a calendar from the dropdown
 3. The world will reload to apply the change
 
@@ -69,19 +69,19 @@ To create a custom calendar or import from another source, use the buttons in th
 
 ### 3. Configure Applications
 
-By default, the **MiniCalendar** appears on world load. Other applications are available:
+By default, the **MiniCal** appears on world load. Other applications are available:
 
-- **CalendariaHUD** — Floating HUD with animated sky dome
+- **HUD** — Floating HUD with animated sky dome
 - **TimeKeeper** — Minimal time display and controls
 
 To configure which applications display:
 
 1. Open the Settings Panel (gear icon on any Calendaria application)
-2. Select the **HUD**, **MiniCalendar**, or **TimeKeeper** tab
+2. Select the **HUD**, **MiniCal**, or **TimeKeeper** tab
 3. Enable or disable the **Show** option for each application
 
 > [!TIP]
-> Use the keyboard shortcut **Alt+C** to quickly toggle CalendariaHUD visibility.
+> Use the keyboard shortcut **Alt+C** to quickly toggle HUD visibility.
 
 ---
 
@@ -89,7 +89,7 @@ To configure which applications display:
 
 To set the initial date for your campaign:
 
-1. Open the **CalendariaHUD** (Alt+C) or use the **MiniCalendar**
+1. Open the **HUD** (Alt+C) or use the **MiniCal**
 2. Click on the **current date display** in the info bar
 3. Use the **Set Date** dialog to choose your starting date and time
 4. Click **Set** to apply the new date

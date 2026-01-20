@@ -1,4 +1,4 @@
-# MiniCalendar
+# MiniCal
 
 A compact month-view calendar widget with integrated time controls.
 
@@ -6,11 +6,11 @@ A compact month-view calendar widget with integrated time controls.
 
 ## Display
 
-The MiniCalendar shows a monthly grid with the current date highlighted. For monthless calendars (like Traveller), it displays a 3-week view instead.
+The MiniCal shows a monthly grid with the current date highlighted. For monthless calendars (like Traveller), it displays a 3-week view instead.
 
 ### Indicators
 
-Below the navigation row, the MiniCalendar displays contextual indicators:
+Below the navigation row, the MiniCal displays contextual indicators:
 
 - **Weather** - Current weather with icon, label, and temperature. GM can click to open weather picker. Shows "click to generate" prompt when no weather is set.
 - **Season** - Current season with icon and name
@@ -26,7 +26,7 @@ Below the navigation row, the MiniCalendar displays contextual indicators:
 
 ### Monthless Calendars
 
-For calendars without months (like Traveller), the MiniCalendar shows a 3-week view:
+For calendars without months (like Traveller), the MiniCal shows a 3-week view:
 
 - Previous week, current week, and next week
 - Navigation moves by week instead of month
@@ -48,8 +48,8 @@ Each day cell may show:
 
 Appears on hover over the calendar area (or always visible when sticky):
 
-- **Close** - Close the MiniCalendar
-- **Open Full Calendar** - Opens the full Calendar Application
+- **Close** - Close the MiniCal
+- **Open BigCal** - Opens the BigCal Application
 - **Today** - Return to current date view
 - **Set Current Date** - Set world time to selected date (GM only, appears when date selected). Shows confirmation dialog by default (can be disabled in settings).
 - **Add Note** - Create a new note on selected/current date
@@ -57,7 +57,7 @@ Appears on hover over the calendar area (or always visible when sticky):
 - **View Notes** - View notes on selected date (appears when notes exist)
 - **Settings** - Open the settings panel
 
-Right-click the MiniCalendar container for a context menu with a Close option.
+Right-click the MiniCal container for a context menu with a Close option.
 
 ### Notes Panel
 
@@ -96,11 +96,11 @@ Revealed on hover over the time display:
 
 ## Double-Click Behavior
 
-- Double-click MiniCalendar to open the full Calendar Application
-- Double-click the full Calendar Application to return to MiniCalendar
+- Double-click MiniCal to open the BigCal Application
+- Double-click the BigCal Application to return to MiniCal
 
 ---
 
 ## Settings
 
-Configure via **Settings Panel > MiniCalendar** tab. See [Settings](Settings#minicalendar) for all options.
+Configure via **Settings Panel > MiniCal** tab. See [Settings](Settings#minical) for all options.

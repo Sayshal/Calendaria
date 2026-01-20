@@ -1044,13 +1044,13 @@ const results = CALENDARIA.api.search("council", {
 
 ## UI
 
-### openCalendar(options)
+### openBigCal(options)
 
-Open the main calendar application.
+Open the BigCal application.
 
 ```javascript
-await CALENDARIA.api.openCalendar();
-await CALENDARIA.api.openCalendar({ view: 'week' });
+await CALENDARIA.api.openBigCal();
+await CALENDARIA.api.openBigCal({ view: 'week' });
 ```
 
 | Parameter | Type | Description |
@@ -1058,7 +1058,7 @@ await CALENDARIA.api.openCalendar({ view: 'week' });
 | `options.date` | `object` | Date to display `{year, month, day}` |
 | `options.view` | `string` | View mode: `'month'`, `'week'`, `'year'` |
 
-**Returns:** `Promise<object>` - The calendar application.
+**Returns:** `Promise<object>` - The BigCal application.
 
 ---
 
@@ -1079,36 +1079,36 @@ await CALENDARIA.api.openCalendarEditor("custom");  // Edit existing
 
 ---
 
-### showMiniCalendar()
+### showMiniCal()
 
-Show the MiniCalendar widget.
+Show the MiniCal widget.
 
 ```javascript
-await CALENDARIA.api.showMiniCalendar();
+await CALENDARIA.api.showMiniCal();
 ```
 
-**Returns:** `Promise<object>` - The MiniCalendar application.
+**Returns:** `Promise<object>` - The MiniCal application.
 
 ---
 
-### hideMiniCalendar()
+### hideMiniCal()
 
-Hide the MiniCalendar widget.
+Hide the MiniCal widget.
 
 ```javascript
-await CALENDARIA.api.hideMiniCalendar();
+await CALENDARIA.api.hideMiniCal();
 ```
 
 **Returns:** `Promise<void>`
 
 ---
 
-### toggleMiniCalendar()
+### toggleMiniCal()
 
-Toggle the MiniCalendar widget visibility.
+Toggle the MiniCal widget visibility.
 
 ```javascript
-await CALENDARIA.api.toggleMiniCalendar();
+await CALENDARIA.api.toggleMiniCal();
 ```
 
 **Returns:** `Promise<void>`
@@ -1379,18 +1379,18 @@ const canChange = CALENDARIA.api.hasPermission('changeDateTime');
 |-----------|------|-------------|
 | `permission` | `string` | Permission key |
 
-**Permission Keys:** `viewMiniCalendar`, `viewTimeKeeper`, `viewHUD`, `manageNotes`, `changeDateTime`, `changeWeather`, `changeCalendar`, `editCalendars`
+**Permission Keys:** `viewMiniCal`, `viewTimeKeeper`, `viewHUD`, `manageNotes`, `changeDateTime`, `changeWeather`, `changeCalendar`, `editCalendars`
 
 **Returns:** `boolean`
 
 ---
 
-### canViewMiniCalendar()
+### canViewMiniCal()
 
-Check if current user can view the MiniCalendar.
+Check if current user can view the MiniCal.
 
 ```javascript
-const canView = CALENDARIA.api.canViewMiniCalendar();
+const canView = CALENDARIA.api.canViewMiniCal();
 ```
 
 **Returns:** `boolean`
@@ -1467,7 +1467,7 @@ Available widget insertion points.
 
 ```javascript
 const points = CALENDARIA.api.widgetPoints;
-// { HUD_BUTTONS_LEFT, HUD_BUTTONS_RIGHT, HUD_INDICATORS, HUD_TRAY, MINICAL_SIDEBAR, FULLCAL_ACTIONS }
+// { HUD_BUTTONS_LEFT, HUD_BUTTONS_RIGHT, HUD_INDICATORS, HUD_TRAY, MINICAL_SIDEBAR, BIGCAL_ACTIONS }
 ```
 
 ---

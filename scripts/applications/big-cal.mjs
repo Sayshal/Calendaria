@@ -1,7 +1,5 @@
 /**
- * Calendar Application
  * Standalone application for displaying the calendar UI.
- * This is NOT a sheet - it's an independent application.
  * @module Applications/BigCal
  * @author Tyler
  */
@@ -14,7 +12,7 @@ import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
-import { canViewFullCalendar } from '../utils/permissions.mjs';
+import { canViewBigCal } from '../utils/permissions.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
@@ -65,7 +63,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     classes: ['calendaria', 'big-cal'],
     tag: 'div',
-    window: { contentClasses: ['calendar-application'], icon: 'fas fa-calendar', resizable: false },
+    window: { contentClasses: ['big-cal'], icon: 'fas fa-calendar', resizable: false },
     actions: {
       navigate: BigCal._onNavigate,
       today: BigCal._onToday,
@@ -93,7 +91,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async render(options = {}, _options = {}) {
-    if (!canViewFullCalendar()) {
+    if (!canViewBigCal()) {
       if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this;
     }
@@ -202,12 +200,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _prepareWidgetContext(context) {
     const widgets = {};
-    widgets.actions = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.FULLCAL_ACTIONS, 'fullcal');
-    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this._renderWeatherIndicator(context), 'fullcal');
-    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this._renderSeasonIndicator(context), 'fullcal');
-    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this._renderEraIndicator(context), 'fullcal');
-    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this._renderCycleIndicator(context), 'fullcal');
-    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'fullcal');
+    widgets.actions = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.BIGCAL_ACTIONS, 'bigcal');
+    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this._renderWeatherIndicator(context), 'bigcal');
+    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this._renderSeasonIndicator(context), 'bigcal');
+    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this._renderEraIndicator(context), 'bigcal');
+    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this._renderCycleIndicator(context), 'bigcal');
+    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'bigcal');
     widgets.hasIndicators = WidgetManager.hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
     return widgets;
   }
@@ -452,7 +450,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
     const headerComponents = { year, month, dayOfMonth: date.day };
-    const rawHeader = formatForLocation(calendar, headerComponents, 'fullCalendarHeader');
+    const rawHeader = formatForLocation(calendar, headerComponents, 'bigCalHeader');
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     return {
       year,
@@ -692,7 +690,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentEra = calendar.getCurrentEra?.();
     const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.days?.values ?? [];
     const weekHeaderComponents = { year: weekStartYear, month: weekStartMonth, dayOfMonth: weekStartDay };
-    const rawHeader = formatForLocation(calendar, weekHeaderComponents, 'fullCalendarHeader');
+    const rawHeader = formatForLocation(calendar, weekHeaderComponents, 'bigCalHeader');
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     return {
       year: weekStartYear,
@@ -1593,8 +1591,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Toggle between full and MiniCalendar views.
-   * Closes this window and opens the MiniCalendar.
+   * Toggle between full and MiniCal views.
+   * Closes this window and opens the MiniCal.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */

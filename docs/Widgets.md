@@ -8,7 +8,7 @@ Calendaria provides a widget system for external modules to add custom UI elemen
 
 Widgets allow module developers to:
 
-- Add custom buttons to the CalendariaHUD, Full Calendar, and MiniCalendar
+- Add custom buttons to the HUD, BigCal, and MiniCal
 - Add custom indicator displays
 - Replace built-in indicators with custom implementations
 
@@ -24,8 +24,8 @@ Widgets can be inserted at these locations:
 | `hud.buttons.right` | Right side of HUD bar | Buttons |
 | `hud.indicators` | Indicator section of HUD bar | Indicators |
 | `hud.tray` | Time controls tray | Buttons |
-| `minical.sidebar` | MiniCalendar sidebar | Buttons |
-| `fullcal.actions` | Full Calendar action bar | Buttons |
+| `minical.sidebar` | MiniCal sidebar | Buttons |
+| `bigcal.actions` | BigCal action bar | Buttons |
 
 Access these via `CALENDARIA.api.widgetPoints`.
 
@@ -33,7 +33,7 @@ Access these via `CALENDARIA.api.widgetPoints`.
 
 ## Replaceable Elements
 
-Built-in indicator elements that can be replaced by custom widgets. Replacements apply across all three applications (CalendariaHUD, MiniCalendar, Full Calendar):
+Built-in indicator elements that can be replaced by custom widgets. Replacements apply across all three applications (HUD, MiniCal, BigCal):
 
 | Element ID | Description |
 |------------|-------------|

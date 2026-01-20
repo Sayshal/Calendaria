@@ -191,13 +191,13 @@ Advance the world time by a specified amount. GM only.
 
 ### /calendar
 
-Open the calendar application.
+Open the BigCal application.
 
 ```text
 /calendar
 ```
 
-**Output:** Opens the Calendar Application window.
+**Output:** Opens the BigCal window.
 
 ---
 

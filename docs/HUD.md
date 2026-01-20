@@ -1,6 +1,6 @@
-# CalendariaHUD
+# HUD
 
-The CalendariaHUD displays date, time, weather, and events in a draggable widget. Two display modes are available: the full HUD with an animated dome (or slice), or a compact calendar view.
+The HUD displays date, time, weather, and events in a draggable widget. Two display modes are available: the full HUD with an animated dome (or slice), or a compact calendar view.
 
 ---
 
@@ -10,7 +10,7 @@ The CalendariaHUD displays date, time, weather, and events in a draggable widget
 - Automatically opens on world load (if enabled in settings)
 - Double-click the HUD bar to toggle between fullsize and compact modes
 
-> See also: [MiniCalendar](MiniCalendar) and [TimeKeeper](TimeKeeper) for alternative display options.
+> See also: [MiniCal](MiniCal) and [TimeKeeper](TimeKeeper) for alternative display options.
 
 ---
 
@@ -101,7 +101,7 @@ The bar displays (left to right):
 - **Season** - Current season name and icon
 - **Era** - Current era indicator
 - **Cycle** - Current cycle value (if configured)
-- **Open Calendar** - Opens the full Calendar Application
+- **Open Calendar** - Opens the BigCal Application
 - **Settings** - Opens the settings panel
 
 ### Block Visibility
@@ -182,7 +182,7 @@ Both HUD modes include a search panel:
 ### Dragging
 
 - **Full HUD**: Drag the info bar
-- **MiniCalendar**: Drag the top row (month/year header)
+- **MiniCal**: Drag the top row (month/year header)
 
 Position is saved per-client.
 
@@ -213,7 +213,7 @@ Enable "Lock Position" in settings to prevent dragging.
 
 ### Resetting Position
 
-Settings > HUD tab (or MiniCalendar tab) > Reset Position
+Settings > HUD tab (or MiniCal tab) > Reset Position
 
 ---
 
@@ -231,7 +231,7 @@ Configure via Settings > HUD tab.
 
 ## Settings
 
-Configure via **Settings Panel > Calendaria HUD** tab. See [Settings](Settings#calendaria-hud) for all options.
+Configure via **Settings Panel > HUD** tab. See [Settings](Settings#hud) for all options.
 
 ---
 

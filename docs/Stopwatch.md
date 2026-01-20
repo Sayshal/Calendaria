@@ -7,7 +7,7 @@ A versatile stopwatch application for tracking elapsed time in real-time or game
 ## Opening the Stopwatch
 
 - Press **Alt+W** to toggle visibility
-- Click the stopwatch button on the TimeKeeper HUD
+- Click the stopwatch button on the TimeKeeper
 
 ---
 
@@ -115,7 +115,7 @@ Drag the edges or corners to resize the stopwatch window.
 
 ### Sticky Zones
 
-The Stopwatch supports sticky zone snapping when dragged near predefined positions. See [CalendariaHUD > Sticky Zones](CalendariaHUD#sticky-zones) for zone locations.
+The Stopwatch supports sticky zone snapping when dragged near predefined positions. See [HUD > Sticky Zones](HUD#sticky-zones) for zone locations.
 
 ---
 

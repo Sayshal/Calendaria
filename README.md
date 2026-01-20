@@ -21,15 +21,15 @@ A dome-style widget with animated sky gradients, sun/moon positioning, cloud eff
 
 ---
 
-## MiniCalendar
+## MiniCal
 
 A standalone month view widget with quick navigation, note indicators, festival highlights, and integrated time controls.
 
-![MiniCalendar](.github/assets/mini-calendar.png)
+![MiniCal](.github/assets/mini-calendar.png)
 
 ---
 
-## Full Calendar
+## BigCal
 
 Full-featured calendar views for managing your campaign timeline. Switch between month, week, and year views.
 

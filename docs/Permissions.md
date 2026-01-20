@@ -31,9 +31,9 @@ GMs always have full access to all features.
 
 | Permission | Description |
 |------------|-------------|
-| **View MiniCalendar** | Can see the MiniCalendar widget |
-| **View TimeKeeper** | Can see the TimeKeeper HUD |
-| **View CalendariaHUD** | Can see the main CalendariaHUD |
+| **View MiniCal** | Can see the MiniCal widget |
+| **View TimeKeeper** | Can see the TimeKeeper |
+| **View HUD** | Can see the main HUD |
 
 ### Action Permissions
 
@@ -53,9 +53,9 @@ By default, all non-GM roles have restricted access:
 
 | Permission | Player | Trusted | Assistant GM |
 |------------|:------:|:-------:|:------------:|
-| View MiniCalendar | ✓ | ✓ | ✓ |
+| View MiniCal | ✓ | ✓ | ✓ |
 | View TimeKeeper | - | - | ✓ |
-| View CalendariaHUD | ✓ | ✓ | ✓ |
+| View HUD | ✓ | ✓ | ✓ |
 | Manage Notes | - | ✓ | ✓ |
 | Change Date/Time | - | - | ✓ |
 | Change Weather | - | - | ✓ |
@@ -106,7 +106,7 @@ Permissions do not automatically inherit upward. Each role must be configured in
 
 ### Change Date/Time
 
-- Affects all time controls (HUD, MiniCalendar, TimeKeeper)
+- Affects all time controls (HUD, MiniCal, TimeKeeper)
 - Includes advancing time, setting specific dates, and real-time clock control
 - Time changes are broadcast to all clients
 

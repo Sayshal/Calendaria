@@ -43,15 +43,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
-  /** Saved position for the MiniCalendar */
-  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_POSITION, {
-    name: 'MiniCalendar Position',
+  /** Saved position for the MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_POSITION, {
+    name: 'MiniCal Position',
     scope: 'user',
     config: false,
     type: new ObjectField({ nullable: true, initial: null })
   });
 
-  /** Saved position for the TimeKeeper HUD */
+  /** Saved position for the TimeKeeper */
   game.settings.register(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, {
     name: 'TimeKeeper Position',
     scope: 'user',
@@ -84,8 +84,8 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
-  /** MiniCalendar auto-fade on idle */
-  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_AUTO_FADE, {
+  /** MiniCal auto-fade on idle */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_AUTO_FADE, {
     name: 'CALENDARIA.Settings.AutoFade.Name',
     hint: 'CALENDARIA.Settings.AutoFade.Hint',
     scope: 'user',
@@ -94,8 +94,8 @@ export function registerSettings() {
     onChange: () => MiniCal.updateIdleOpacity()
   });
 
-  /** MiniCalendar idle opacity (0-100) */
-  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_IDLE_OPACITY, {
+  /** MiniCal idle opacity (0-100) */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_IDLE_OPACITY, {
     name: 'CALENDARIA.Settings.IdleOpacity.Name',
     hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
     scope: 'user',
@@ -104,25 +104,25 @@ export function registerSettings() {
     onChange: () => MiniCal.updateIdleOpacity()
   });
 
-  /** Delay before auto-hiding MiniCalendar controls */
-  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, {
-    name: 'CALENDARIA.Settings.MiniCalendarControlsDelay.Name',
-    hint: 'CALENDARIA.Settings.MiniCalendarControlsDelay.Hint',
+  /** Delay before auto-hiding MiniCal controls */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY, {
+    name: 'CALENDARIA.Settings.MiniCalControlsDelay.Name',
+    hint: 'CALENDARIA.Settings.MiniCalControlsDelay.Hint',
     scope: 'user',
     config: false,
     type: new NumberField({ min: 1, max: 10, step: 1, integer: true, initial: 3 })
   });
 
-  /** Sticky states for MiniCalendar */
-  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_STICKY_STATES, {
-    name: 'MiniCalendar Sticky States',
+  /** Sticky states for MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+    name: 'MiniCal Sticky States',
     scope: 'user',
     config: false,
     type: new ObjectField({ initial: { timeControls: false, sidebar: false, position: false } })
   });
 
-  /** Confirm before setting current date in MiniCalendar */
-  game.settings.register(MODULE.ID, SETTINGS.MINI_CALENDAR_CONFIRM_SET_DATE, {
+  /** Confirm before setting current date in MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE, {
     name: 'CALENDARIA.Settings.ConfirmSetDate.Name',
     hint: 'CALENDARIA.Settings.ConfirmSetDate.Hint',
     scope: 'user',
@@ -198,7 +198,7 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
-  /** Show TimeKeeper HUD on world load (GM only) */
+  /** Show TimeKeeper on world load (GM only) */
   game.settings.register(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, {
     name: 'CALENDARIA.Settings.ShowTimeKeeper.Name',
     hint: 'CALENDARIA.Settings.ShowTimeKeeper.Hint',
@@ -263,10 +263,10 @@ export function registerSettings() {
     requiresReload: true
   });
 
-  /** Show MiniCalendar on world load */
-  game.settings.register(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, {
-    name: 'CALENDARIA.Settings.ShowMiniCalendar.Name',
-    hint: 'CALENDARIA.Settings.ShowMiniCalendar.Hint',
+  /** Show MiniCal on world load */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_MINI_CAL, {
+    name: 'CALENDARIA.Settings.ShowMiniCal.Name',
+    hint: 'CALENDARIA.Settings.ShowMiniCal.Hint',
     scope: 'user',
     config: false,
     type: new BooleanField({ initial: true })
@@ -496,16 +496,16 @@ export function registerSettings() {
     }
   });
 
-  /** Force MiniCalendar display for all clients */
-  game.settings.register(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR, {
-    name: 'CALENDARIA.Settings.ForceMiniCalendar.Name',
-    hint: 'CALENDARIA.Settings.ForceMiniCalendar.Hint',
+  /** Force MiniCal display for all clients */
+  game.settings.register(MODULE.ID, SETTINGS.FORCE_MINI_CAL, {
+    name: 'CALENDARIA.Settings.ForceMiniCal.Name',
+    hint: 'CALENDARIA.Settings.ForceMiniCal.Hint',
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false }),
     onChange: async (value) => {
       if (value) {
-        await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, true);
+        await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
         MiniCal.show();
       }
     }
@@ -615,9 +615,9 @@ export function registerSettings() {
       initial: {
         hudDate: { gm: 'ordinal', player: 'ordinal' },
         hudTime: { gm: 'time', player: 'time' },
-        miniCalendarHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
-        miniCalendarTime: { gm: 'time', player: 'time' },
-        fullCalendarHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
+        miniCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
+        miniCalTime: { gm: 'time', player: 'time' },
+        bigCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
         chatTimestamp: { gm: 'short', player: 'short' },
         stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
         stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' }
@@ -676,8 +676,8 @@ export function registerSettings() {
     config: false,
     type: new ObjectField({
       initial: {
-        viewFullCalendar: { player: false, trusted: true, assistant: true },
-        viewMiniCalendar: { player: false, trusted: true, assistant: true },
+        viewBigCal: { player: false, trusted: true, assistant: true },
+        viewMiniCal: { player: false, trusted: true, assistant: true },
         viewTimeKeeper: { player: false, trusted: true, assistant: true },
         addNotes: { player: true, trusted: true, assistant: true },
         changeDateTime: { player: false, trusted: false, assistant: true },
@@ -861,12 +861,15 @@ async function migrateSettingKeys() {
   if (game.settings.get(MODULE.ID, 'settingKeyMigrationComplete')) return;
 
   // Key mapping: oldKey -> newKey
-  // Note: Keys commented out are planned for future migration
   const keyMap = {
-    // These will be uncommented when setting keys are actually renamed
-    // 'miniCalendarAutoFade': 'miniCalAutoFade',
-    // 'miniCalendarIdleOpacity': 'miniCalIdleOpacity',
-    // etc.
+    'forceMiniCalendar': 'forceMiniCal',
+    'miniCalendarAutoFade': 'miniCalAutoFade',
+    'miniCalendarConfirmSetDate': 'miniCalConfirmSetDate',
+    'miniCalendarControlsDelay': 'miniCalControlsDelay',
+    'miniCalendarIdleOpacity': 'miniCalIdleOpacity',
+    'miniCalendarPosition': 'miniCalPosition',
+    'miniCalendarStickyStates': 'miniCalStickyStates',
+    'showMiniCalendar': 'showMiniCal'
   };
 
   let migrated = 0;

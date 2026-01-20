@@ -12,7 +12,7 @@ A minimal time-only display for GMs who want a smaller footprint.
 - Stopwatch button to open the Stopwatch application
 - Right-click for context menu (Settings, Close)
 - Four configurable time jump buttons per increment type
-- Date display can be hidden by setting the timekeeper date format to "off"
+- Date display can be hidden by setting the TimeKeeper date format to "off"
 - Draggable via the time display area
 
 See [Stopwatch](Stopwatch) for stopwatch feature documentation.

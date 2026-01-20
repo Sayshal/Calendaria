@@ -89,7 +89,7 @@ const ZONE_CONFIG = {
  */
 export function getStickyZones(hudWidth, hudHeight) {
   const zones = [];
-  const isSliceMode = !!document.querySelector('.calendaria-hud-wrapper.slice-mode, .calendaria-hud-wrapper.compact');
+  const isSliceMode = !!document.querySelector('.calendaria-hud.slice-mode, .calendaria-hud.compact');
   const topCenterY = isSliceMode ? 16 + hudHeight / 2 : 80 + hudHeight / 2;
   zones.push({ id: 'top-center', center: { x: window.innerWidth / 2, y: topCenterY } });
   const hotbar = document.getElementById('hotbar');

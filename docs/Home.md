@@ -12,9 +12,9 @@ A system-agnostic calendar and time tracking module for Foundry VTT.
 
 ## Applications
 
-- [Calendar Application](CalendarApplication) — Full application with month, week, and year views
-- [CalendariaHUD](CalendariaHUD) — Floating HUD with animated sky dome
-- [MiniCalendar](MiniCalendar) — Compact grid view with quick navigation
+- [BigCal](BigCal) — Full application with month, week, and year views
+- [HUD](HUD) — Floating HUD with animated sky dome
+- [MiniCal](MiniCal) — Compact grid view with quick navigation
 - [TimeKeeper](TimeKeeper) — Minimal time display and controls
 
 ## Features
