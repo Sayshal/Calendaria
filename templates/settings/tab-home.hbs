@@ -1,13 +1,53 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{#if isGM}}
+  {{! Welcome Section - visible to all users }}
+  <fieldset class="welcome-section">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Welcome"}}</legend>
+
+    <div class="welcome-content">
+      <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.Greeting"}}</p>
+      <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.Description"}}</p>
+      <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.GettingStarted"}}</p>
+      <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.Closing"}}</p>
+
+      <div class="button-row welcome-links">
+        <a href="https://github.com/Sayshal/calendaria/wiki" target="_blank" class="link-button">
+          <i class="fas fa-book"></i>
+          {{localize "CALENDARIA.SettingsPanel.About.Documentation"}}
+        </a>
+        <a href="https://discord.gg/Sa4wBuc8Cu" target="_blank" class="link-button">
+          <i class="fab fa-discord"></i>
+          {{localize "CALENDARIA.SettingsPanel.About.Discord"}}
+        </a>
+      </div>
+    </div>
+  </fieldset>
+
+  {{! Recently Changed Settings - user-specific }}
+  {{#if recentSettings.length}}
+    <fieldset class="recent-settings">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.RecentSettings"}}</legend>
+
+      <div class="recent-list">
+        {{#each recentSettings}}
+          <a class="recent-item" data-action="navigateToSetting" data-tab="{{this.tab}}" data-fieldset="{{this.fieldset}}">
+            <span class="recent-label">{{this.label}}</span>
+            <span class="recent-time">{{this.timeAgo}}</span>
+          </a>
+        {{/each}}
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{! Active Calendar Fieldset }}
+  {{#if showActiveCalendar}}
     <fieldset>
       <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
 
       <div class="form-group">
         <label>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
         <div class="form-fields">
-          <select name="activeCalendar">
+          <select name="activeCalendar" {{#unless canChangeCalendar}}disabled{{/unless}}>
             {{#each calendarOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
                 {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
@@ -18,24 +58,35 @@
         <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
       </div>
 
-      <div class="button-row">
-        <button type="button" data-action="openCalendarEditor">
-          <i class="fas fa-calendar-plus"></i>
-          {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
-        </button>
-        <button type="button" data-action="openImporter">
-          <i class="fas fa-file-import"></i>
-          {{localize "CALENDARIA.Settings.Importer.Label"}}
-        </button>
-      </div>
+      {{#if isGM}}
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" name="showActiveCalendarToPlayers" {{#if showActiveCalendarToPlayers}}checked{{/if}}>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint"}}</p>
+        </div>
+
+        <div class="button-row">
+          <button type="button" data-action="openCalendarEditor">
+            <i class="fas fa-calendar-plus"></i>
+            {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
+          </button>
+          <button type="button" data-action="openImporter">
+            <i class="fas fa-file-import"></i>
+            {{localize "CALENDARIA.Settings.Importer.Label"}}
+          </button>
+        </div>
+      {{/if}}
     </fieldset>
   {{/if}}
 
   {{#unless isGM}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.HomeTab.PlayerMessage"}}</p>
-    </div>
+    {{#unless showActiveCalendar}}
+      <div class="info-box push-bottom">
+        <i class="fas fa-info-circle"></i>
+        <p>{{localize "CALENDARIA.SettingsPanel.HomeTab.PlayerMessage"}}</p>
+      </div>
+    {{/unless}}
   {{/unless}}
-  <p class="auto-save-hint"><i class="fas fa-check-circle"></i> {{localize "CALENDARIA.SettingsPanel.AutoSaveHint"}}</p>
 </section>

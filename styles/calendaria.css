@@ -7156,6 +7156,16 @@ span.calendaria-moon-icon {
       display: flex;
       flex-direction: column;
     }
+
+    &[data-tab='home'] {
+      overflow-y: hidden;
+
+      > :last-child {
+        flex-shrink: 0;
+        height: auto;
+        margin-top: auto;
+      }
+    }
   }
 
   .section-hint {
@@ -7168,17 +7178,6 @@ span.calendaria-moon-icon {
       i {
         margin-right: 0.25rem;
       }
-    }
-  }
-
-  .auto-save-hint {
-    margin: 0.5rem 0 0;
-    color: var(--color-level-success);
-    font-size: var(--font-size-12);
-    text-align: center;
-
-    i {
-      margin-right: 0.25rem;
     }
   }
 
@@ -7201,6 +7200,71 @@ span.calendaria-moon-icon {
       margin: 0;
       color: var(--color-text-secondary);
       font-size: var(--font-size-12);
+    }
+  }
+
+  /* Welcome Section */
+  .welcome-section {
+    flex-shrink: 0;
+
+    .welcome-content {
+      .welcome-text {
+        margin: 0 0 0.75rem;
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-13);
+        line-height: 1.5;
+
+        &:last-of-type {
+          margin-bottom: 1rem;
+        }
+      }
+
+      .welcome-links {
+        justify-content: flex-start;
+      }
+    }
+  }
+
+  /* Recent Settings */
+  .recent-settings {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .recent-item {
+      gap: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.1rem 0.25rem;
+      border-radius: 4px;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: var(--color-cool-5);
+      }
+
+      .recent-label {
+        font-size: var(--font-size-13);
+      }
+
+      .recent-time {
+        color: var(--color-text-dark-secondary);
+        font-size: var(--font-size-11);
+        white-space: nowrap;
+      }
     }
   }
 

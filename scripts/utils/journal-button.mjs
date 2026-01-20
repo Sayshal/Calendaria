@@ -34,7 +34,7 @@ function addCalendarButton({ element }) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'calendaria-open-button';
-  button.innerHTML = `<i class="fas fa-calendar-days"></i> ${localize('CALENDARIA.HUD.OpenCalendar')}`;
+  button.innerHTML = `<i class="fas fa-calendar-days"></i> ${localize('CALENDARIA.HUD.OpenBigCal')}`;
   button.addEventListener('click', () => new BigCal().render(true));
   footer.appendChild(button);
   log(3, 'Journal calendar button added');

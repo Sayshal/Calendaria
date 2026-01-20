@@ -553,6 +553,15 @@ export function registerSettings() {
     requiresReload: true
   });
 
+  /** Whether to show the active calendar setting to players */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS, {
+    name: 'CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name',
+    hint: 'CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   /** User overrides for default/built-in calendars */
   game.settings.register(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, {
     name: 'Default Calendar Overrides',

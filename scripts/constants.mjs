@@ -63,6 +63,7 @@ export const SETTINGS = {
   POSITION_LOCKED: 'positionLocked',
   PRIMARY_GM: 'primaryGM',
   SAVED_TIMEPOINTS: 'savedTimepoints',
+  SHOW_ACTIVE_CALENDAR_TO_PLAYERS: 'showActiveCalendarToPlayers',
   SHOW_CALENDAR_HUD: 'showCalendarHUD',
   SHOW_MINI_CAL: 'showMiniCal',
   SHOW_MOON_PHASES: 'showMoonPhases',
