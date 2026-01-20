@@ -8,7 +8,7 @@
   {{/each}}
   {{! Grouped tabs }}
   {{#each tabGroups as |group|}}
-    <div class="tab-group" data-group-id="{{group.id}}" style="--group-color: {{group.color}}">
+    <div class="tab-group {{group.id}}" data-group-id="{{group.id}}" style="--group-color: {{group.color}}">
       <div class="tab-group-header">{{localize group.label}}</div>
       {{#each group.tabs as |tab|}}
         <a data-action="tab" data-group="{{tab.group}}" data-tab="{{tab.id}}" {{#if tab.cssClass}}class="{{tab.cssClass}}" {{/if}} {{#if tab.tooltip}}data-tooltip="{{tab.tooltip}}" {{/if}}>

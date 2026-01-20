@@ -1,32 +1,35 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
+    <div class="button-row open-app-button">
+      <button type="button" data-action="openStopwatch">
+        <i class="fas fa-external-link-alt"></i>
+        {{localize "CALENDARIA.SettingsPanel.OpenStopwatch"}}
+      </button>
+      <button type="button" data-action="closeStopwatch">
+        <i class="fas fa-times"></i>
+        {{localize "CALENDARIA.SettingsPanel.CloseStopwatch"}}
+      </button>
+      <button type="button" data-action="resetPosition" data-target="stopwatch">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
+      </button>
+    </div>
+
     <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}</legend>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
+        <label>{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
         <div class="form-fields">
-          <select name="chatTimestampMode">
-            {{#each chatTimestampModeOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
+          <input type="checkbox" name="stopwatchAutoStartTime" {{#if stopwatchAutoStartTime}}checked{{/if}}>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampMode.Hint"}}</p>
-      </div>
-
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" name="chatTimestampShowTime" {{#if chatTimestampShowTime}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
+        <p class="hint">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Hint"}}</p>
       </div>
     </fieldset>
 
     <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}</legend>
+      <legend>{{localize "CALENDARIA.Format.Category.Stopwatch"}}</legend>
       <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
       {{#each formatLocations}}
@@ -44,7 +47,7 @@
                 {{/each}}
               </select>
               <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-                placeholder="D MMM" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                placeholder="HH:mm:ss.SSS" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
                 data-location="{{id}}" data-role="gm">
             </div>
 
@@ -56,7 +59,7 @@
                 {{/each}}
               </select>
               <input type="text" name="displayFormats.{{id}}.playerCustom"
-                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMM"
+                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="HH:mm:ss.SSS"
                 class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
                 data-role="player">
             </div>
@@ -64,13 +67,11 @@
         </div>
       {{/each}}
     </fieldset>
-  {{/if}}
-
-  {{#unless isGM}}
+  {{else}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.ChatTab.PlayerMessage"}}</p>
+      <p>{{localize "CALENDARIA.SettingsPanel.StopwatchTab.PlayerMessage"}}</p>
     </div>
-  {{/unless}}
+  {{/if}}
 
 </section>

@@ -125,7 +125,7 @@ export const TEMPLATES = {
     PANEL_MINI_CAL: `modules/${MODULE.ID}/templates/settings/tab-mini-cal.hbs`,
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
-    PANEL_FORMATS: `modules/${MODULE.ID}/templates/settings/tab-formats.hbs`,
+    PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/settings/tab-stopwatch.hbs`,
     TAB_NAVIGATION: `modules/${MODULE.ID}/templates/settings/tab-navigation.hbs`
   },
   PARTIALS: {

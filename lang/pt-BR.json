@@ -1274,7 +1274,6 @@
   "CALENDARIA.SettingsPanel.DevMode.Hint": "Ative o modo de desenvolvedor para permitir a exclusão de diários de notas do calendário e outras operações avançadas.",
   "CALENDARIA.SettingsPanel.DevMode.Name": "Modo de Desenvolvedor",
   "CALENDARIA.SettingsPanel.Field.ClimateZone": "Ativar Zona Climática",
-  "CALENDARIA.SettingsPanel.BigCalTab.Info": "BigCal com navegação por mês/semana e anotações.",
   "CALENDARIA.SettingsPanel.Hint.BlockVisibility": "Alternar quais blocos indicadores aparecem na HUD. Ocultar blocos reduz a largura da HUD.",
   "CALENDARIA.SettingsPanel.Hint.Categories": "Crie categorias personalizadas para organizar as notas do calendário.",
   "CALENDARIA.SettingsPanel.Hint.Climate": "As condições climáticas determinam as faixas de temperatura e os padrões climáticos de cada estação.",

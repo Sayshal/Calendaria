@@ -5,11 +5,54 @@
       <i class="fas fa-external-link-alt"></i>
       {{localize "CALENDARIA.SettingsPanel.OpenBigCal"}}
     </button>
+    <button type="button" data-action="closeBigCal">
+      <i class="fas fa-times"></i>
+      {{localize "CALENDARIA.SettingsPanel.CloseBigCal"}}
+    </button>
+    <button type="button" data-action="resetPosition" data-target="bigcal">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
+    </button>
   </div>
 
-  <div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.BigCalTab.Info"}}</p>
-  </div>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}</legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+
+    {{#each formatLocations}}
+      <div class="format-location" data-location="{{id}}">
+        <div class="form-group">
+          <label>{{label}}</label>
+        </div>
+
+        <div class="format-row">
+          <div class="format-column">
+            <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}}</span>
+            <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+              {{#each gmPresetOptions}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+            <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+              placeholder="EEEE, D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+              data-location="{{id}}" data-role="gm">
+          </div>
+
+          <div class="format-column">
+            <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}}</span>
+            <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+              {{#each playerPresetOptions}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+            <input type="text" name="displayFormats.{{id}}.playerCustom"
+              value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="EEEE, D MMMM YYYY"
+              class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+              data-role="player">
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </fieldset>
 
 </section>

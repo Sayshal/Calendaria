@@ -20,6 +20,7 @@ import { CalendarEditor } from '../calendar-editor.mjs';
 import { HUD } from '../hud.mjs';
 import { ImporterApp } from '../importer-app.mjs';
 import { MiniCal } from '../mini-cal.mjs';
+import { Stopwatch } from '../stopwatch.mjs';
 import { TimeKeeper } from '../time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -59,6 +60,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openTimeKeeper: SettingsPanel.#onOpenTimeKeeper,
       closeTimeKeeper: SettingsPanel.#onCloseTimeKeeper,
       openBigCal: SettingsPanel.#onOpenBigCal,
+      closeBigCal: SettingsPanel.#onCloseBigCal,
+      openStopwatch: SettingsPanel.#onOpenStopwatch,
+      closeStopwatch: SettingsPanel.#onCloseStopwatch,
       addMoonTrigger: SettingsPanel.#onAddMoonTrigger,
       removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
@@ -86,7 +90,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     bigcal: { template: TEMPLATES.SETTINGS.PANEL_BIGCAL, scrollable: [''] },
     miniCal: { template: TEMPLATES.SETTINGS.PANEL_MINI_CAL, scrollable: [''] },
     hud: { template: TEMPLATES.SETTINGS.PANEL_HUD, scrollable: [''] },
-    timekeeper: { template: TEMPLATES.SETTINGS.PANEL_TIMEKEEPER, scrollable: [''] }
+    timekeeper: { template: TEMPLATES.SETTINGS.PANEL_TIMEKEEPER, scrollable: [''] },
+    stopwatch: { template: TEMPLATES.SETTINGS.PANEL_STOPWATCH, scrollable: [''] }
   };
 
   /** Tab group definitions with colors */
@@ -110,7 +115,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'theme', group: 'primary', icon: 'fas fa-palette', label: 'CALENDARIA.SettingsPanel.Tab.Theme', tabGroup: 'calendar' },
         // Technical group
         { id: 'macros', group: 'primary', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros', tabGroup: 'technical', gmOnly: true },
-        { id: 'chat', group: 'primary', icon: 'fas fa-comment', label: 'CALENDARIA.SettingsPanel.Tab.Chat', tabGroup: 'technical', gmOnly: true },
+        { id: 'chat', group: 'primary', icon: 'fas fa-comments', label: 'CALENDARIA.SettingsPanel.Tab.Chat', tabGroup: 'technical', gmOnly: true },
         { id: 'permissions', group: 'primary', icon: 'fas fa-user-shield', label: 'CALENDARIA.SettingsPanel.Tab.Permissions', tabGroup: 'technical', gmOnly: true },
         { id: 'canvas', group: 'primary', icon: 'fas fa-map', label: 'CALENDARIA.SettingsPanel.Tab.Canvas', tabGroup: 'technical', gmOnly: true },
         { id: 'module', group: 'primary', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Module', tabGroup: 'technical' },
@@ -118,7 +123,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'bigcal', group: 'primary', icon: 'fas fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', tabGroup: 'apps' },
         { id: 'miniCal', group: 'primary', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCal', tabGroup: 'apps' },
         { id: 'hud', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', tabGroup: 'apps' },
-        { id: 'timekeeper', group: 'primary', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', tabGroup: 'apps', gmOnly: true }
+        { id: 'timekeeper', group: 'primary', icon: 'fas fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', tabGroup: 'apps', gmOnly: true },
+        { id: 'stopwatch', group: 'primary', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', tabGroup: 'apps', gmOnly: true }
       ],
       initial: 'home'
     }
@@ -268,6 +274,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       case 'timekeeper':
         await this.#prepareTimeKeeperContext(context);
         break;
+      case 'stopwatch':
+        await this.#prepareStopwatchContext(context);
+        break;
     }
     return context;
   }
@@ -347,6 +356,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'augment', label: localize('CALENDARIA.Settings.ChatTimestampMode.Augment'), selected: chatMode === 'augment' }
     ];
     context.chatTimestampShowTime = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME);
+    context.formatLocations = this.#prepareFormatLocationsForCategory('chat');
   }
 
   /**
@@ -365,6 +375,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY);
     context.miniCalConfirmSetDate = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE);
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
+    context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
   }
 
   /**
@@ -441,6 +452,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.customTimeJumps = Object.keys(getTimeIncrements())
       .filter((key) => !isMonthless || key !== 'month')
       .map((key) => ({ key, label: incrementLabels[key] || key, jumps: customJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
+    context.formatLocations = this.#prepareFormatLocationsForCategory('hud');
   }
 
   /**
@@ -448,14 +460,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareBigCalContext(context) {
-    // BigCal tab is primarily a launcher, minimal context needed
+    context.formatLocations = this.#prepareFormatLocationsForCategory('bigcal');
   }
 
   /**
-   * Prepare context for the Formats tab.
-   * @param {object} context - The context object
+   * Prepare format locations for a specific category.
+   * @param {string} category - The category to filter by (hud, timekeeper, miniCal, bigcal, chat, stopwatch)
+   * @returns {Array<object>} Prepared format locations for the category
    */
-  async #prepareFormatsContext(context) {
+  #prepareFormatLocationsForCategory(category) {
     const displayFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
 
     // Get active calendar name for "Calendar Default" option
@@ -467,7 +480,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
         .join('')}.Name`;
       const localized = localize(locKey);
-      // Fall back to calendar.name if localization key doesn't exist (custom calendars)
       calendarName = localized !== locKey ? localized : calendar.name || localize('CALENDARIA.Common.Calendar');
     }
     const calendarDefaultLabel = format('CALENDARIA.Format.Preset.CalendarDefault', { calendar: calendarName });
@@ -488,10 +500,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
     ];
 
-    // Locations that support "Off" option (hides the element entirely)
+    // Locations that support "Off" option
     const supportsOff = ['timekeeperDate'];
 
-    // Stopwatch preset configurations - values are preset NAMES (like other locations)
+    // Stopwatch preset configurations
     const stopwatchRealtimePresets = [
       { value: 'stopwatchRealtimeFull', label: 'HH:mm:ss.SSS' },
       { value: 'stopwatchRealtimeNoMs', label: 'HH:mm:ss' },
@@ -509,7 +521,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const stopwatchRealtimeKnown = ['stopwatchRealtimeFull', 'stopwatchRealtimeNoMs', 'stopwatchRealtimeMinSec', 'stopwatchRealtimeMinSecNoMs', 'stopwatchRealtimeSecOnly'];
     const stopwatchGametimeKnown = ['stopwatchGametimeFull', 'stopwatchGametimeMinSec', 'stopwatchGametimeSecOnly'];
 
-    const locations = [
+    const allLocations = [
       { id: 'hudDate', label: localize('CALENDARIA.Format.Location.HudDate'), category: 'hud' },
       { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud' },
       { id: 'timekeeperDate', label: localize('CALENDARIA.Format.Location.TimeKeeperDate'), category: 'timekeeper' },
@@ -522,8 +534,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', gmOnly: true }
     ];
 
-    context.formatLocations = locations.map((loc) => {
-      // Determine presets and knownPresets based on location
+    const locations = allLocations.filter((loc) => loc.category === category);
+
+    return locations.map((loc) => {
       let knownPresets, locationPresets, defaultFormat;
       if (loc.id === 'stopwatchRealtime') {
         knownPresets = stopwatchRealtimeKnown;
@@ -540,7 +553,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: localize('CALENDARIA.Format.Preset.Off') }, ...locationPresets];
       }
 
-      // All locations use displayFormats setting
       const formats = displayFormats[loc.id] || { gm: defaultFormat, player: defaultFormat };
       const isCustomGM = !knownPresets.includes(formats.gm);
       const isCustomPlayer = !knownPresets.includes(formats.player);
@@ -555,16 +567,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         isCustomPlayer
       };
     });
+  }
 
-    // Group by category for organized display
-    context.formatCategories = [
-      { id: 'hud', label: localize('CALENDARIA.Format.Category.HUD'), locations: context.formatLocations.filter((l) => l.category === 'hud') },
-      { id: 'timekeeper', label: localize('CALENDARIA.Format.Category.TimeKeeper'), locations: context.formatLocations.filter((l) => l.category === 'timekeeper') },
-      { id: 'miniCal', label: localize('CALENDARIA.Format.Category.MiniCal'), locations: context.formatLocations.filter((l) => l.category === 'miniCal') },
-      { id: 'bigcal', label: localize('CALENDARIA.Format.Category.BigCal'), locations: context.formatLocations.filter((l) => l.category === 'bigcal') },
-      { id: 'chat', label: localize('CALENDARIA.Format.Category.Chat'), locations: context.formatLocations.filter((l) => l.category === 'chat') },
-      { id: 'stopwatch', label: localize('CALENDARIA.Format.Category.Stopwatch'), locations: context.formatLocations.filter((l) => l.category === 'stopwatch') }
-    ];
+  /**
+   * Prepare context for the Stopwatch tab.
+   * @param {object} context - The context object
+   */
+  async #prepareStopwatchContext(context) {
+    context.stopwatchAutoStartTime = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME);
+    context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
   }
 
   /**
@@ -576,8 +587,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.timeKeeperAutoFade = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE);
     context.timeKeeperIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY);
 
-    // Stopwatch settings
-    context.stopwatchAutoStartTime = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME);
+    // Format locations for TimeKeeper
+    context.formatLocations = this.#prepareFormatLocationsForCategory('timekeeper');
 
     // TimeKeeper time jumps
     const timeKeeperJumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
@@ -646,7 +657,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
       context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
     }
-
   }
 
   /**
@@ -903,18 +913,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
     if (data.permissions) {
-      const permissionKeys = [
-        'viewBigCal',
-        'viewMiniCal',
-        'viewTimeKeeper',
-        'addNotes',
-        'changeDateTime',
-        'changeActiveCalendar',
-        'changeWeather',
-        'editNotes',
-        'deleteNotes',
-        'editCalendars'
-      ];
+      const permissionKeys = ['viewBigCal', 'viewMiniCal', 'viewTimeKeeper', 'addNotes', 'changeDateTime', 'changeActiveCalendar', 'changeWeather', 'editNotes', 'deleteNotes', 'editCalendars'];
       const permissions = {};
       for (const key of permissionKeys) {
         if (data.permissions[key]) {
@@ -968,6 +967,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const currentFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
       const newFormats = { ...currentFormats };
       let stopwatchChanged = false;
+      const affectedParts = new Set();
+      const locationToPartMap = {
+        hudDate: 'hud', hudTime: 'hud',
+        timekeeperDate: 'timekeeper', timekeeperTime: 'timekeeper',
+        miniCalHeader: 'miniCal', miniCalTime: 'miniCal',
+        bigCalHeader: 'bigcal',
+        chatTimestamp: 'chat',
+        stopwatchRealtime: 'stopwatch', stopwatchGametime: 'stopwatch'
+      };
       for (const [locationId, formats] of Object.entries(data.displayFormats)) {
         if (formats) {
           const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
@@ -982,13 +990,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           } else playerFormat = formats.playerPreset || defaultFormat;
           newFormats[locationId] = { gm: gmFormat, player: playerFormat };
           if (locationId === 'stopwatchRealtime' || locationId === 'stopwatchGametime') stopwatchChanged = true;
+          if (locationToPartMap[locationId]) affectedParts.add(locationToPartMap[locationId]);
         }
       }
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, newFormats);
       Hooks.callAll('calendaria.displayFormatsChanged', newFormats);
       if (stopwatchChanged) foundry.applications.instances.get('calendaria-stopwatch')?.render();
+      // Re-render affected parts to sync dropdown state
       const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
-      if (settingsPanel?.rendered) settingsPanel.render({ parts: ['formats'] });
+      if (settingsPanel?.rendered && affectedParts.size > 0) settingsPanel.render({ parts: [...affectedParts] });
     }
 
     // Re-render applications when their settings change
@@ -1012,15 +1022,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
     if (hudKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-hud')?.render();
 
-    const miniCalKeys = [
-      'miniCalAutoFade',
-      'miniCalIdleOpacity',
-      'miniCalControlsDelay',
-      'miniCalConfirmSetDate',
-      'miniCalStickyTimeControls',
-      'miniCalStickySidebar',
-      'miniCalStickyPosition'
-    ];
+    const miniCalKeys = ['miniCalAutoFade', 'miniCalIdleOpacity', 'miniCalControlsDelay', 'miniCalConfirmSetDate', 'miniCalStickyTimeControls', 'miniCalStickySidebar', 'miniCalStickyPosition'];
     if (miniCalKeys.some((k) => k in data)) foundry.applications.instances.get('mini-calendar')?.render();
   }
 
@@ -1257,6 +1259,33 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenBigCal(_event, _target) {
     new BigCal().render(true);
+  }
+
+  /**
+   * Close the BigCal.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onCloseBigCal(_event, _target) {
+    foundry.applications.instances.get('calendaria-big-cal')?.close();
+  }
+
+  /**
+   * Open the Stopwatch.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onOpenStopwatch(_event, _target) {
+    Stopwatch.show();
+  }
+
+  /**
+   * Close the Stopwatch.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onCloseStopwatch(_event, _target) {
+    Stopwatch.hide();
   }
 
   /**
@@ -1673,7 +1702,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Format preset dropdowns toggle custom input visibility
-    if (partId === 'formats') {
+    // Applied to all tabs with format settings: hud, timekeeper, miniCal, bigcal, chat, stopwatch
+    const formatParts = ['hud', 'timekeeper', 'miniCal', 'bigcal', 'chat', 'stopwatch'];
+    if (formatParts.includes(partId)) {
       const presetSelects = htmlElement.querySelectorAll('select[name*="Preset"]');
       presetSelects.forEach((select) => {
         select.addEventListener('change', (event) => {
