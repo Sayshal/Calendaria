@@ -363,10 +363,10 @@ export function registerSettings() {
     onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
   });
 
-  /** Calendar HUD sticky zones enabled */
+  /** Sticky zones enabled for all Calendaria windows */
   game.settings.register(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED, {
-    name: 'CALENDARIA.Settings.HUDStickyZones.Name',
-    hint: 'CALENDARIA.Settings.HUDStickyZones.Hint',
+    name: 'CALENDARIA.Settings.StickyZones.Name',
+    hint: 'CALENDARIA.Settings.StickyZones.Hint',
     scope: 'user',
     config: false,
     type: new BooleanField({ initial: true })

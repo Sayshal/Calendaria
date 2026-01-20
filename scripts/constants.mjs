@@ -119,6 +119,7 @@ export const TEMPLATES = {
     PANEL_MACROS: `modules/${MODULE.ID}/templates/settings/tab-macros.hbs`,
     PANEL_CHAT: `modules/${MODULE.ID}/templates/settings/tab-chat.hbs`,
     PANEL_PERMISSIONS: `modules/${MODULE.ID}/templates/settings/tab-permissions.hbs`,
+    PANEL_CANVAS: `modules/${MODULE.ID}/templates/settings/tab-canvas.hbs`,
     PANEL_MODULE: `modules/${MODULE.ID}/templates/settings/tab-module.hbs`,
     PANEL_BIGCAL: `modules/${MODULE.ID}/templates/settings/tab-bigcal.hbs`,
     PANEL_MINI_CAL: `modules/${MODULE.ID}/templates/settings/tab-mini-cal.hbs`,

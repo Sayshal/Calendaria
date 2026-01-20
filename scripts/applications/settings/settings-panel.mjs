@@ -81,6 +81,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     macros: { template: TEMPLATES.SETTINGS.PANEL_MACROS, scrollable: [''] },
     chat: { template: TEMPLATES.SETTINGS.PANEL_CHAT, scrollable: [''] },
     permissions: { template: TEMPLATES.SETTINGS.PANEL_PERMISSIONS, scrollable: [''] },
+    canvas: { template: TEMPLATES.SETTINGS.PANEL_CANVAS, scrollable: [''] },
     module: { template: TEMPLATES.SETTINGS.PANEL_MODULE, scrollable: [''] },
     bigcal: { template: TEMPLATES.SETTINGS.PANEL_BIGCAL, scrollable: [''] },
     miniCal: { template: TEMPLATES.SETTINGS.PANEL_MINI_CAL, scrollable: [''] },
@@ -111,6 +112,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'macros', group: 'primary', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros', tabGroup: 'technical', gmOnly: true },
         { id: 'chat', group: 'primary', icon: 'fas fa-comment', label: 'CALENDARIA.SettingsPanel.Tab.Chat', tabGroup: 'technical', gmOnly: true },
         { id: 'permissions', group: 'primary', icon: 'fas fa-user-shield', label: 'CALENDARIA.SettingsPanel.Tab.Permissions', tabGroup: 'technical', gmOnly: true },
+        { id: 'canvas', group: 'primary', icon: 'fas fa-map', label: 'CALENDARIA.SettingsPanel.Tab.Canvas', tabGroup: 'technical', gmOnly: true },
         { id: 'module', group: 'primary', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Module', tabGroup: 'technical' },
         // Apps group
         { id: 'bigcal', group: 'primary', icon: 'fas fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', tabGroup: 'apps' },
@@ -248,6 +250,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       case 'permissions':
         await this.#preparePermissionsContext(context);
         break;
+      case 'canvas':
+        await this.#prepareCanvasContext(context);
+        break;
       case 'module':
         await this.#prepareModuleContext(context);
         break;
@@ -308,9 +313,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareTimeContext(context) {
-    context.darknessSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
-    context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
-    context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
@@ -606,7 +608,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'celsius', label: localize('CALENDARIA.Settings.TemperatureUnit.Celsius'), selected: tempUnit === 'celsius' },
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
-    context.defaultBrightnessMultiplier = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
     context.customWeatherPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
@@ -646,7 +647,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
     }
 
+  }
+
+  /**
+   * Prepare context for the Canvas tab.
+   * @param {object} context - The context object
+   */
+  async #prepareCanvasContext(context) {
     context.stickyZonesEnabled = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED);
+    context.darknessSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
+    context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
+    context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
+    context.defaultBrightnessMultiplier = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
   }
 
   /**
