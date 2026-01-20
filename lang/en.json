@@ -1261,6 +1261,8 @@
   "CALENDARIA.SettingsPanel.About.Support": "Support",
   "CALENDARIA.SettingsPanel.About.Translations": "Translations:",
   "CALENDARIA.SettingsPanel.About.Version": "Version:",
+  "CALENDARIA.SettingsPanel.Footer.Saved": "Saved",
+  "CALENDARIA.SettingsPanel.Footer.Saving": "Saving...",
   "CALENDARIA.SettingsPanel.Automation.AvailableTriggers": "Trigger events you can automate:",
   "CALENDARIA.SettingsPanel.Automation.Trigger.Dawn": "Dawn (sunrise)",
   "CALENDARIA.SettingsPanel.Automation.Trigger.Dusk": "Dusk (sunset)",

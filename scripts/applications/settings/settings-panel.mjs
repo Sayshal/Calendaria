@@ -92,7 +92,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     miniCal: { template: TEMPLATES.SETTINGS.PANEL_MINI_CAL, scrollable: [''] },
     hud: { template: TEMPLATES.SETTINGS.PANEL_HUD, scrollable: [''] },
     timekeeper: { template: TEMPLATES.SETTINGS.PANEL_TIMEKEEPER, scrollable: [''] },
-    stopwatch: { template: TEMPLATES.SETTINGS.PANEL_STOPWATCH, scrollable: [''] }
+    stopwatch: { template: TEMPLATES.SETTINGS.PANEL_STOPWATCH, scrollable: [''] },
+    footer: { template: TEMPLATES.SETTINGS.PANEL_FOOTER }
   };
 
   /** Tab group definitions with colors */
@@ -192,6 +193,37 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ force: true, parts: ['theme'] });
       });
     }
+
+    if (!this.element.dataset.formListenerAttached) {
+      this.element.dataset.formListenerAttached = 'true';
+      this.element.addEventListener('change', () => this.#setSaveIndicator('saving'));
+    }
+  }
+
+  /** Track save indicator state across re-renders */
+  #saveState = 'saved';
+
+  /** Timeout ID for resetting save indicator */
+  #saveTimeout = null;
+
+  /**
+   * Update the save indicator state.
+   * @param {'saved'|'saving'} state - The indicator state
+   */
+  #setSaveIndicator(state) {
+    this.#saveState = state;
+    const indicator = this.element?.querySelector('.save-indicator');
+    if (!indicator) return;
+    indicator.dataset.state = state;
+    const icon = indicator.querySelector('i');
+    const text = indicator.childNodes[indicator.childNodes.length - 1];
+    if (state === 'saving') {
+      if (icon) icon.className = 'fas fa-sync fa-spin';
+      if (text?.nodeType === Node.TEXT_NODE) text.textContent = localize('CALENDARIA.SettingsPanel.Footer.Saving');
+    } else {
+      if (icon) icon.className = 'fas fa-check';
+      if (text?.nodeType === Node.TEXT_NODE) text.textContent = localize('CALENDARIA.SettingsPanel.Footer.Saved');
+    }
   }
 
   /** @override */
@@ -273,6 +305,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         break;
       case 'stopwatch':
         await this.#prepareStopwatchContext(context);
+        break;
+      case 'footer':
+        await this.#prepareFooterContext(context);
         break;
     }
     return context;
@@ -688,6 +723,17 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareStopwatchContext(context) {
     context.stopwatchAutoStartTime = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME);
     context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
+  }
+
+  /**
+   * Prepare context for the footer.
+   * @param {object} context - The context object
+   */
+  async #prepareFooterContext(context) {
+    context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
+    context.saveState = this.#saveState;
+    context.saveLabel = this.#saveState === 'saving' ? localize('CALENDARIA.SettingsPanel.Footer.Saving') : localize('CALENDARIA.SettingsPanel.Footer.Saved');
+    context.saveIcon = this.#saveState === 'saving' ? 'fa-sync fa-spin' : 'fa-check';
   }
 
   /**
@@ -1144,7 +1190,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterSnapshot = SettingsPanel.#snapshotSettings();
     await SettingsPanel.#trackChangedSettings(beforeSnapshot, afterSnapshot);
     const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
-    if (settingsPanel?.rendered) settingsPanel.render({ parts: ['home'] });
+    if (settingsPanel?.rendered) {
+      settingsPanel.render({ parts: ['home'] });
+      // Reset save indicator after brief delay, clearing any existing timeout
+      if (settingsPanel.#saveTimeout) clearTimeout(settingsPanel.#saveTimeout);
+      settingsPanel.#saveTimeout = setTimeout(() => settingsPanel.#setSaveIndicator('saved'), 750);
+    }
   }
 
   /**

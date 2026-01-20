@@ -127,7 +127,8 @@ export const TEMPLATES = {
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
     PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/settings/tab-stopwatch.hbs`,
-    TAB_NAVIGATION: `modules/${MODULE.ID}/templates/settings/tab-navigation.hbs`
+    TAB_NAVIGATION: `modules/${MODULE.ID}/templates/settings/tab-navigation.hbs`,
+    PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`
   },
   PARTIALS: {
     SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,

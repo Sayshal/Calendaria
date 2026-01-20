@@ -1,0 +1,35 @@
+<footer class="settings-footer">
+  <div class="footer-left">
+    <span class="save-indicator" data-state="{{saveState}}">
+      <i class="fas {{saveIcon}}"></i>
+      {{saveLabel}}
+    </span>
+  </div>
+
+  <div class="footer-center">
+    <span class="module-name">Calendaria</span>
+    <a href="https://github.com/Sayshal/calendaria/releases/tag/v{{moduleVersion}}" target="_blank"
+      class="version-link">
+      {{moduleVersion}}
+    </a>
+  </div>
+
+  <div class="footer-right">
+    <a href="https://discord.gg/Sa4wBuc8Cu" target="_blank" class="social-icon"
+      data-tooltip="{{localize 'CALENDARIA.SettingsPanel.About.Discord'}}">
+      <i class="fab fa-discord"></i>
+    </a>
+    <a href="https://ko-fi.com/sayshal" target="_blank" class="social-icon"
+      data-tooltip="{{localize 'CALENDARIA.SettingsPanel.About.Support'}}">
+      <i class="fas fa-heart"></i>
+    </a>
+    <a href="https://github.com/Sayshal/calendaria" target="_blank" class="social-icon"
+      data-tooltip="{{localize 'CALENDARIA.SettingsPanel.About.GitHub'}}">
+      <i class="fab fa-github"></i>
+    </a>
+    <a href="https://github.com/Sayshal/calendaria/wiki" target="_blank" class="social-icon"
+      data-tooltip="{{localize 'CALENDARIA.SettingsPanel.About.Documentation'}}">
+      <i class="fas fa-book"></i>
+    </a>
+  </div>
+</footer>
