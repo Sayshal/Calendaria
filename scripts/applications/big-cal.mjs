@@ -831,7 +831,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         conditions: page.system.conditions
       };
       return isRecurringMatch(noteData, targetDate);
-    });
+    }).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
@@ -1547,10 +1547,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Select a day in the calendar.
-   * @param {PointerEvent} event - The click event
+   * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element with date data
    */
-  static async _onSelectDay(event, target) {
+  static async _onSelectDay(_event, target) {
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);

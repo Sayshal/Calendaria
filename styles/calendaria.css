@@ -488,7 +488,7 @@
   transform: translateX(-50%);
 }
 
-.big-cal button:not(.view-selector button.active):not(.add-note-btn) {
+.big-cal button:not(.view-selector button.active, .add-note-btn) {
   border-color: var(--calendaria-button-border);
   color: var(--calendaria-button-text);
   background: var(--calendaria-button-bg);
@@ -677,10 +677,6 @@ span.calendaria-moon-icon {
 
   &:not(.empty):hover {
     background: var(--calendaria-bg-hover);
-
-    .add-note-btn {
-      opacity: 1;
-    }
   }
 
   &.odd-day {
@@ -773,8 +769,26 @@ span.calendaria-moon-icon {
 .day-notes {
   gap: 0.25rem;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
   margin-top: auto;
+  overflow: hidden;
+
+  .add-note-btn {
+    position: static;
+    flex-shrink: 0;
+    opacity: 0;
+    margin-left: auto;
+    transform: none;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+}
+
+.calendar-day:hover .day-notes .add-note-btn {
+  opacity: 1;
 }
 
 .note-indicator {
@@ -808,8 +822,9 @@ span.calendaria-moon-icon {
   right: 2px;
   justify-content: center;
   align-items: center;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
+  min-height: 14px;
   padding: 0;
   border: none;
   border-radius: 0;
@@ -818,7 +833,10 @@ span.calendaria-moon-icon {
   font-size: 14px;
   background: none;
   cursor: pointer;
-  transition: opacity 0.2s, color 0.15s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    color 0.15s,
+    transform 0.1s;
   pointer-events: auto;
 
   i {
@@ -987,10 +1005,7 @@ span.calendaria-moon-icon {
   }
 
   .add-note-btn {
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
+    inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
 
     &:hover {
@@ -4735,13 +4750,57 @@ span.calendaria-moon-icon {
   }
 }
 
+#context-menu {
+  .context-group {
+    max-height: none;
+    overflow: visible;
+  }
 
-#context-menu .context-item.sticky-active {
-  color: var(--color-text-light-highlight, rgb(255 255 255));
-  background: var(--calendaria-primary);
+  .context-item {
+    &.sticky-active {
+      color: var(--color-text-light-highlight, rgb(255 255 255));
+      background: var(--calendaria-primary);
 
-  &:hover {
-    background: var(--calendaria-primary);
+      &:hover {
+        background: var(--calendaria-primary);
+      }
+    }
+
+    &:has(.note-row) {
+      display: flex;
+      align-items: center;
+    }
+
+    .note-row {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .note-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 150px;
+    }
+
+    .note-actions {
+      display: inline-flex;
+      gap: 0.5rem;
+      margin-left: auto;
+      padding-left: 0.5rem;
+
+      i {
+        opacity: 0.6;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
   }
 }
 
@@ -4755,23 +4814,23 @@ span.calendaria-moon-icon {
     margin-bottom: 2px;
 
     strong {
-      color: var(--color-text-primary, #eee);
+      color: var(--color-text-primary, rgb(238 238 238));
     }
   }
 
   .calendaria-day-tooltip-festival {
     font-size: 0.85rem;
-    color: var(--calendaria-primary, #4a9eff);
+    color: var(--calendaria-primary, rgb(74 158 255));
   }
 
   .calendaria-day-tooltip-season {
     font-size: 0.8rem;
-    color: var(--color-text-secondary, #aaa);
+    color: var(--color-text-secondary, rgb(170 170 170));
   }
 
   .calendaria-day-tooltip-sun {
     font-size: 0.8rem;
-    color: var(--color-text-secondary, #aaa);
+    color: var(--color-text-secondary, rgb(170 170 170));
     margin-top: 4px;
 
     i {
@@ -4780,11 +4839,11 @@ span.calendaria-moon-icon {
     }
 
     .fa-sun {
-      color: #fbbf24;
+      color: rgb(251 191 36);
     }
 
     .fa-moon {
-      color: #a78bfa;
+      color: rgb(167 139 250);
     }
   }
 }
@@ -6268,7 +6327,6 @@ span.calendaria-moon-icon {
 .calendar-indicators .calendaria-widget-indicator i {
   color: var(--widget-color, var(--calendaria-text-dim));
 }
-
 
 /* Custom widgets */
 .calendaria-widget-custom {
