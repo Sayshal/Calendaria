@@ -724,11 +724,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const container = this.element.querySelector('.mini-cal-container');
     const sidebar = this.element.querySelector('.mini-sidebar');
 
-    // Double-click on container opens full BigCal
+    // Double-click anywhere (except interactive elements) opens BigCal
     container?.addEventListener('dblclick', (e) => {
-      if (e.target.closest('button, a, input, select, [data-action]')) return;
+      if (e.target.closest('button, a, input, select, .note-badge')) return;
       e.preventDefault();
-      MiniCal.hide();
+      this.close();
       new BigCal().render(true);
     });
 
@@ -1175,14 +1175,6 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element
    */
   static async _onSelectDay(event, target) {
-    const wasDoubleClick = await ViewUtils.handleDayClick(event, this.calendar, {
-      onSetDate: () => {
-        this._selectedDate = null;
-        this.render();
-      },
-      onCreateNote: () => this.render()
-    });
-    if (wasDoubleClick) return;
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);

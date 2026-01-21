@@ -14,12 +14,6 @@ import { CalendariaSocket } from '../utils/socket.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
-/** @type {number} Double-click detection threshold in milliseconds */
-const DOUBLE_CLICK_THRESHOLD = 400;
-
-/** @type {{time: number, year: number|null, month: number|null, day: number|null}} Click state for double-click detection */
-const clickState = { time: 0, year: null, month: null, day: null };
-
 /** @type {string|null} User-selected moon name override for display */
 let selectedMoonOverride = null;
 
@@ -327,110 +321,87 @@ export async function createNoteOnDate(year, month, day) {
  * @returns {Array<object>} Context menu items
  */
 export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {}) {
-  return [
-    {
-      name: 'CALENDARIA.MiniCal.SetCurrentDate',
-      icon: '<i class="fas fa-calendar-plus"></i>',
-      condition: (target) => {
-        if (!game.user.isGM) return false;
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const today = getCurrentViewedDate(calendar);
-        return !(year === today.year && month === today.month && day === today.day);
-      },
-      callback: async (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        await setDateTo(year, month, day, calendar);
-        onSetDate?.();
-      }
-    },
-    {
+  return (target) => {
+    const year = parseInt(target.dataset.year);
+    const month = parseInt(target.dataset.month);
+    const day = parseInt(target.dataset.day);
+    const notes = getNotesOnDay(year, month, day);
+    const ownedNotes = notes.filter((n) => n.isOwner);
+    const today = getCurrentViewedDate(calendar);
+    const isToday = year === today.year && month === today.month && day === today.day;
+    const items = [];
+    items.push({
       name: 'CALENDARIA.Common.AddNote',
       icon: '<i class="fas fa-plus"></i>',
-      callback: async (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
+      callback: async () => {
         await createNoteOnDate(year, month, day);
         onCreateNote?.();
       }
-    },
-    {
-      name: 'CALENDARIA.ContextMenu.EditNote',
-      icon: '<i class="fas fa-edit"></i>',
-      group: 'notes',
-      condition: (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const notes = getNotesOnDay(year, month, day).filter((n) => n.isOwner);
-        return notes.length === 1;
-      },
-      callback: (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const notes = getNotesOnDay(year, month, day).filter((n) => n.isOwner);
-        if (notes.length === 1) notes[0].sheet.render(true, { mode: 'edit' });
-      }
-    },
-    {
-      name: 'CALENDARIA.ContextMenu.ViewNote',
-      icon: '<i class="fas fa-eye"></i>',
-      group: 'notes',
-      condition: (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const notes = getNotesOnDay(year, month, day);
-        return notes.length === 1;
-      },
-      callback: (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const notes = getNotesOnDay(year, month, day);
-        if (notes.length === 1) notes[0].sheet.render(true, { mode: 'view' });
-      }
-    },
-    {
-      name: 'CALENDARIA.ContextMenu.DeleteNote',
-      icon: '<i class="fas fa-trash"></i>',
-      group: 'notes',
-      condition: (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const notes = getNotesOnDay(year, month, day).filter((n) => n.isOwner);
-        return notes.length === 1;
-      },
-      callback: async (target) => {
-        const year = parseInt(target.dataset.year);
-        const month = parseInt(target.dataset.month);
-        const day = parseInt(target.dataset.day);
-        const notes = getNotesOnDay(year, month, day).filter((n) => n.isOwner);
-        if (notes.length !== 1) return;
+    });
 
-        const page = notes[0];
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
-          content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
-          rejectClose: false,
-          modal: true
-        });
+    if (game.user.isGM && !isToday) {
+      items.push({
+        name: 'CALENDARIA.MiniCal.SetCurrentDate',
+        icon: '<i class="fas fa-calendar-check"></i>',
+        callback: async () => {
+          await setDateTo(year, month, day, calendar);
+          onSetDate?.();
+        }
+      });
+    }
 
-        if (confirmed) {
-          const journal = page.parent;
-          if (journal.pages.size === 1) await journal.delete();
-          else await page.delete();
+    if (notes.length > 0) {
+      for (const note of notes) {
+        const isOwner = note.isOwner;
+        const noteIcon = note.system?.icon || 'fas fa-sticky-note';
+        const noteColor = note.system?.color || '#4a9eff';
+        const iconHtml = note.system?.iconType === 'fontawesome' ? `<i class="${noteIcon}" style="color: ${noteColor}"></i>` : `<i class="fas fa-sticky-note" style="color: ${noteColor}"></i>`;
+        if (isOwner) {
+          items.push({
+            name: `${localize('CALENDARIA.ContextMenu.Edit')}: ${note.name}`,
+            icon: iconHtml,
+            group: 'notes',
+            callback: () => note.sheet.render(true, { mode: 'edit' })
+          });
+        } else {
+          items.push({
+            name: `${localize('CALENDARIA.ContextMenu.View')}: ${note.name}`,
+            icon: iconHtml,
+            group: 'notes',
+            callback: () => note.sheet.render(true, { mode: 'view' })
+          });
         }
       }
+
+      for (const note of ownedNotes) {
+        items.push({
+          name: `${localize('CALENDARIA.ContextMenu.Delete')}: ${note.name}`,
+          icon: '<i class="fas fa-trash"></i>',
+          group: 'delete',
+          callback: async () => {
+            const confirmed = await foundry.applications.api.DialogV2.confirm({
+              window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+              content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
+              rejectClose: false,
+              modal: true
+            });
+
+            if (confirmed) {
+              const journal = note.parent;
+              if (journal.pages.size === 1) await journal.delete();
+              else await note.delete();
+            }
+          }
+        });
+      }
     }
-  ];
+
+    return items;
+  };
 }
+
+/** @type {ContextMenu|null} Active day cell context menu instance */
+let activeDayContextMenu = null;
 
 /**
  * Inject date info header into context menu.
@@ -476,6 +447,65 @@ export function injectContextMenuInfo(target, calendar) {
 }
 
 /**
+ * Escape text content for safe HTML embedding.
+ * @param {string} str - Text to escape
+ * @returns {string} Escaped text
+ */
+function escapeText(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/**
+ * Encode HTML for safe use in data-tooltip-html attribute.
+ * @param {string} html - HTML string to encode
+ * @returns {string} HTML-encoded string (< becomes &lt; etc.)
+ */
+function encodeHtmlAttribute(html) {
+  return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Generate HTML tooltip content for a day cell.
+ * @param {object} calendar - The calendar
+ * @param {number} year - Display year (with yearZero applied)
+ * @param {number} month - Month (0-indexed)
+ * @param {number} day - Day of month (1-indexed)
+ * @param {string} [festivalName] - Optional festival name to include
+ * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
+ */
+export function generateDayTooltip(calendar, year, month, day, festivalName = null) {
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
+  const monthData = calendar.months?.values?.[month];
+  const monthName = monthData ? localize(monthData.name) : '';
+  const yearDisplay = calendar.formatYearWithEra?.(year) ?? String(year);
+  const fullDate = `${monthName} ${day}, ${yearDisplay}`;
+  let dayOfYear = day - 1;
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, internalYear);
+  const targetComponents = { year: internalYear, month, day: dayOfYear, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
+  const season = calendar.getCurrentSeason?.(targetComponents);
+  const seasonName = season ? localize(season.name) : null;
+  const sunriseHour = calendar.sunrise?.(targetComponents) ?? 6;
+  const sunsetHour = calendar.sunset?.(targetComponents) ?? 18;
+  const formatTime = (hours) => {
+    let h = Math.floor(hours);
+    let m = Math.round((hours - h) * 60);
+    if (m === 60) {
+      m = 0;
+      h += 1;
+    }
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  };
+
+  const rows = [];
+  rows.push(`<div class="calendaria-day-tooltip-date"><strong>${escapeText(fullDate)}</strong></div>`);
+  if (festivalName) rows.push(`<div class="calendaria-day-tooltip-festival"><em>${escapeText(festivalName)}</em></div>`);
+  if (seasonName) rows.push(`<div class="calendaria-day-tooltip-season">${escapeText(seasonName)}</div>`);
+  rows.push(`<div class="calendaria-day-tooltip-sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
+  const rawHtml = `<div class="calendaria-day-tooltip">${rows.join('')}</div>`;
+  return encodeHtmlAttribute(rawHtml);
+}
+
+/**
  * Set up a context menu for day cells.
  * @param {HTMLElement} container - The container element
  * @param {string} selector - CSS selector for day cells
@@ -486,47 +516,22 @@ export function injectContextMenuInfo(target, calendar) {
  * @returns {ContextMenu} The created context menu
  */
 export function setupDayContextMenu(container, selector, calendar, options = {}) {
-  return new ContextMenu(container, selector, getDayContextMenuItems({ calendar, ...options }), {
-    fixed: true,
-    jQuery: false,
-    onOpen: (target) => {
-      requestAnimationFrame(() => injectContextMenuInfo(target, calendar));
+  const itemsGenerator = getDayContextMenuItems({ calendar, ...options });
+  container.addEventListener('contextmenu', (event) => {
+    const target = event.target.closest(selector);
+    if (!target) return;
+    if (target.classList.contains('empty')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (activeDayContextMenu) {
+      activeDayContextMenu.close();
+      activeDayContextMenu = null;
     }
-  });
-}
 
-/**
- * Handle click on a day cell, detecting double-clicks manually.
- * Native dblclick doesn't work because re-render destroys the element between clicks.
- * @param {MouseEvent} event - The click event
- * @param {object} calendar - The calendar
- * @param {object} [options] - Additional options
- * @param {Function} [options.onSetDate] - Callback after setting date
- * @param {Function} [options.onCreateNote] - Callback after creating note
- * @returns {boolean} True if double-click was handled (caller should skip single-click logic)
- */
-export async function handleDayClick(event, calendar, options = {}) {
-  const dayCell = event.target.closest('[data-year][data-month][data-day]');
-  if (!dayCell || dayCell.classList.contains('empty')) return false;
-  const year = parseInt(dayCell.dataset.year);
-  const month = parseInt(dayCell.dataset.month);
-  const day = parseInt(dayCell.dataset.day);
-  const now = Date.now();
-  const isDoubleClick = now - clickState.time < DOUBLE_CLICK_THRESHOLD && clickState.year === year && clickState.month === month && clickState.day === day;
-  clickState.time = now;
-  clickState.year = year;
-  clickState.month = month;
-  clickState.day = day;
-  if (!isDoubleClick) return false;
-  clickState.time = 0;
-  const today = getCurrentViewedDate(calendar);
-  const isTodayCell = year === today.year && month === today.month && day === today.day;
-  if (isTodayCell) {
-    await createNoteOnDate(year, month, day);
-    options.onCreateNote?.();
-  } else if (game.user.isGM) {
-    await setDateTo(year, month, day, calendar);
-    options.onSetDate?.();
-  }
-  return true;
+    const items = itemsGenerator(target);
+    activeDayContextMenu = new ContextMenu(container, selector, items, { fixed: true, jQuery: false });
+    activeDayContextMenu._onActivate(event);
+  });
+
+  return null;
 }

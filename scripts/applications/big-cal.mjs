@@ -363,6 +363,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
       if (isIntercalary) {
         // Don't add to weekday grid - collect separately
+        const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         intercalaryDays.push({
           day,
           year,
@@ -371,12 +372,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isSelected: this._isSelected(year, month, day),
           notes: dayNotes,
           isFestival: true,
-          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          festivalName: festivalNameStr,
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalNameStr),
           moonPhases,
           isIntercalary: true
         });
       } else {
         const weekdayData = calendar.days?.values?.[currentWeek.length];
+        const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         currentWeek.push({
           day,
           year,
@@ -386,7 +389,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           notes: dayNotes,
           isOddDay: dayIndex % 2 === 1,
           isFestival: !!festivalDay,
-          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          festivalName: festivalNameStr,
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalNameStr),
           isRestDay: weekdayData?.isRestDay || false,
           moonPhases
         });
@@ -1123,7 +1127,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element.classList.add(`view-${this._displayMode}`);
     const content = this.element.querySelector('.window-content');
     content?.addEventListener('dblclick', (e) => {
-      if (e.target.closest('button, a, input, select, [data-action], .calendar-day, .note-item, .event-block, .multi-day-event')) return;
+      if (e.target.closest('button, a, input, select, .note-item, .event-block, .multi-day-event')) return;
       e.preventDefault();
       this.close();
       MiniCal.show();
@@ -1409,7 +1413,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       day = target.dataset.day;
       month = target.dataset.month;
       year = target.dataset.year;
-      hour = 12;
+      hour = target.dataset.hour ?? 12;
     }
     const calendar = this.calendar;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
@@ -1547,14 +1551,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element with date data
    */
   static async _onSelectDay(event, target) {
-    const wasDoubleClick = await ViewUtils.handleDayClick(event, this.calendar, {
-      onSetDate: () => {
-        this._selectedDate = null;
-        this.render();
-      },
-      onCreateNote: () => this.render()
-    });
-    if (wasDoubleClick) return;
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
