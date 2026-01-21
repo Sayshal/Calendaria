@@ -385,12 +385,22 @@
 }
 
 .calendar-indicators {
-  gap: 1rem;
+  gap: 0.75rem;
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: -0.2rem;
   color: var(--calendaria-text-dim);
-  font-size: 0.75rem;
+  font-size: var(--font-size-12, 0.75rem);
+
+  .weather-indicator i,
+  .season-indicator i,
+  .era-indicator i,
+  .cycle-indicator i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .weather-indicator,
@@ -398,16 +408,21 @@
 .era-indicator,
 .cycle-indicator {
   gap: 0.25rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
 
+  > * {
+    display: inline-flex;
+    align-items: center;
+  }
+
   i {
-    font-size: 0.65rem;
+    font-size: 0.85em;
   }
 }
 
 .weather-indicator {
-  padding: 0.15rem 0.5rem;
+  padding: 0.25rem 0.5rem;
   border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
   border-radius: 4px;
   color: var(--calendaria-text);
@@ -444,7 +459,7 @@
 .weather-indicator .weather-temp {
   opacity: 0.8;
   margin-left: 0.25rem;
-  font-size: 0.7rem;
+  font-size: 0.85em;
 }
 
 .season-indicator {
@@ -4411,71 +4426,17 @@ span.calendaria-moon-icon {
 
   .calendar-indicators {
     gap: 0.5rem;
-    display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     margin: 0 8px 4px;
     padding: 4px 0;
-    color: var(--calendaria-text-dim);
-    font-size: 0.7rem;
+    font-size: var(--font-size-12, 0.75rem);
   }
 
-  .weather-indicator,
-  .season-indicator,
-  .era-indicator,
-  .cycle-indicator {
-    gap: 0.25rem;
-    display: flex;
-    align-items: center;
-
-    i {
-      font-size: 0.65rem;
-    }
-  }
-
-  .weather-indicator {
-    padding: 0.15rem 0.5rem;
-    border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
-    border-radius: 4px;
-    color: var(--calendaria-text);
-    background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
-
-    i {
-      color: var(--weather-color, var(--calendaria-text-dim));
-    }
-
-    &.clickable {
-      cursor: pointer;
-      transition:
-        background 0.15s ease,
-        border-color 0.15s ease;
-
-      &:hover {
-        border-color: var(--weather-color, var(--calendaria-text-dim));
-        background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
-      }
-    }
-
-    &.no-weather {
-      border-style: dashed;
-      color: var(--calendaria-text-dim);
-    }
-
-    .weather-temp {
-      opacity: 0.8;
-      margin-left: 0.15rem;
-      padding-left: 0.25rem;
-      border-left: 1px solid var(--calendaria-border);
-      font-size: 0.65rem;
-    }
-  }
-
-  .season-indicator {
-    color: var(--season-color, var(--calendaria-text-dim));
-
-    i {
-      color: var(--season-color, var(--calendaria-text-dim));
-    }
+  .weather-indicator .weather-temp {
+    margin-left: 0.15rem;
+    padding-left: 0.25rem;
+    border-left: 1px solid var(--calendaria-border);
+    font-size: 0.85em;
   }
 
   .mini-grid {
@@ -6188,33 +6149,24 @@ span.calendaria-moon-icon {
 .calendaria-hud-indicators .season-indicator,
 .calendaria-hud-indicators .era-indicator,
 .calendaria-hud-indicators .cycle-indicator {
-  gap: 0.25rem;
-  display: flex;
-  align-items: center;
-  font-size: var(--font-size-11, 0.6875rem);
+  font-size: var(--font-size-12, 0.75rem);
   cursor: default;
 }
 
-.calendaria-hud-indicators .weather-indicator i,
-.calendaria-hud-indicators .season-indicator i,
-.calendaria-hud-indicators .era-indicator i,
-.calendaria-hud-indicators .cycle-indicator i {
-  font-size: 0.65rem;
-}
-
 .calendaria-hud-indicators .weather-indicator {
-  padding: 0.15rem 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--weather-color, rgb(181 179 164)) 30%, transparent);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
   border-radius: 4px;
-  color: rgb(240 240 224);
-  background: color-mix(in srgb, var(--weather-color, rgb(181 179 164)) 15%, transparent);
+  color: var(--calendaria-text);
+  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
 }
 
 .calendaria-hud-indicators .weather-indicator i {
-  color: var(--weather-color, rgb(181 179 164));
+  color: var(--weather-color, var(--calendaria-text-dim));
 }
 
-.calendaria-hud-indicators .weather-label {
+.calendaria-hud-indicators .weather-label,
+.calendaria-hud-indicators .season-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6228,45 +6180,39 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-indicators .weather-indicator.clickable:hover {
-  border-color: var(--weather-color, rgb(181 179 164));
-  background: color-mix(in srgb, var(--weather-color, rgb(181 179 164)) 30%, transparent);
+  border-color: var(--weather-color, var(--calendaria-text-dim));
+  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
 }
 
 .calendaria-hud-indicators .weather-indicator.no-weather {
-  border: 1px dashed rgb(255 255 255 / 15%);
-  color: rgb(160 160 160);
+  border: 1px dashed var(--calendaria-border);
+  color: var(--calendaria-text-dim);
   background: transparent;
 }
 
 .calendaria-hud-indicators .weather-indicator.no-weather:hover {
-  border-color: rgb(100 180 100);
-  background: color-mix(in srgb, rgb(100 180 100) 20%, transparent);
+  border-color: var(--color-positive-fg, var(--calendaria-positive-fg));
+  background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
 }
 
 .calendaria-hud-indicators .weather-temp {
   opacity: 0.8;
   margin-left: 0.25rem;
-  font-size: 0.7rem;
+  font-size: 0.85em;
 }
 
 .calendaria-hud-indicators .season-indicator {
   overflow: hidden;
-  color: var(--season-color, rgb(160 160 160));
+  color: var(--season-color, var(--calendaria-text-dim));
 }
 
 .calendaria-hud-indicators .season-indicator i {
-  color: var(--season-color, rgb(160 160 160));
-}
-
-.calendaria-hud-indicators .season-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--season-color, var(--calendaria-text-dim));
 }
 
 .calendaria-hud-indicators .era-indicator,
 .calendaria-hud-indicators .cycle-indicator {
-  color: rgb(160 160 160);
+  color: var(--calendaria-text-dim);
 }
 
 /* Weather display modes */
@@ -6286,15 +6232,20 @@ span.calendaria-moon-icon {
   gap: 0.25rem;
   display: inline-flex;
   align-items: center;
+  line-height: 1;
   cursor: default;
 }
 
 .calendaria-widget-indicator i {
-  font-size: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  line-height: 1;
 }
 
 .calendaria-widget-indicator .widget-label {
-  font-size: 0.65rem;
+  line-height: 1;
 }
 
 .calendaria-widget-indicator.clickable {
@@ -6302,39 +6253,22 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-indicators .calendaria-widget-indicator {
-  color: var(--widget-color, rgb(160 160 160));
+  color: var(--widget-color, var(--calendaria-text-dim));
 }
 
 .calendaria-hud-indicators .calendaria-widget-indicator i {
-  color: var(--widget-color, rgb(160 160 160));
+  color: var(--widget-color, var(--calendaria-text-dim));
 }
 
 /* MiniCal / BigCal widget indicators */
 .calendar-indicators .calendaria-widget-indicator {
-  gap: 0.25rem;
-  display: inline-flex;
-  align-items: center;
   color: var(--widget-color, var(--calendaria-text-dim));
-  font-size: 0.75rem;
 }
 
 .calendar-indicators .calendaria-widget-indicator i {
   color: var(--widget-color, var(--calendaria-text-dim));
-  font-size: 0.75rem;
 }
 
-.calendar-indicators .calendaria-widget-indicator .widget-label {
-  font-size: 0.75rem;
-}
-
-.mini-cal-container .calendar-indicators .calendaria-widget-indicator {
-  font-size: 0.7rem;
-}
-
-.mini-cal-container .calendar-indicators .calendaria-widget-indicator i,
-.mini-cal-container .calendar-indicators .calendaria-widget-indicator .widget-label {
-  font-size: 0.7rem;
-}
 
 /* Custom widgets */
 .calendaria-widget-custom {
@@ -6594,12 +6528,12 @@ span.calendaria-moon-icon {
 .calendaria-hud.compact .calendaria-hud-indicators .era-indicator,
 .calendaria-hud.compact .calendaria-hud-indicators .cycle-indicator,
 .calendaria-hud.compact .calendaria-hud-indicators .calendaria-widget-indicator {
-  font-size: var(--font-size-10, 0.625rem);
+  font-size: var(--font-size-12, 0.75rem);
 }
 
 .calendaria-hud.compact .calendaria-hud-indicators .calendaria-widget-indicator i,
 .calendaria-hud.compact .calendaria-hud-indicators .calendaria-widget-indicator .widget-label {
-  font-size: var(--font-size-10, 0.625rem);
+  font-size: var(--font-size-12, 0.75rem);
 }
 
 .calendaria-hud.compact .calendaria-hud-select {
