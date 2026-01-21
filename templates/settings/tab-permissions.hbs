@@ -16,13 +16,12 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewBigCal"}}</span>
         <input type="checkbox" name="permissions.viewBigCal.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.viewBigCal.player}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewBigCal.trusted"
-          data-tooltip="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewBigCal.trusted}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewBigCal.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.viewBigCal.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-role-order="0" {{#if permissions.viewBigCal.player}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewBigCal.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
+          data-role-order="1" {{#if permissions.viewBigCal.trusted}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewBigCal.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
+          data-role-order="2" {{#if permissions.viewBigCal.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewBigCalHint"}}</p>
       </li>
 
@@ -30,13 +29,12 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewMiniCal"}}</span>
         <input type="checkbox" name="permissions.viewMiniCal.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.viewMiniCal.player}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewMiniCal.trusted"
-          data-tooltip="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewMiniCal.trusted}}checked{{/if}} />
-        <input type="checkbox" name="permissions.viewMiniCal.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.viewMiniCal.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-role-order="0" {{#if permissions.viewMiniCal.player}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewMiniCal.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
+          data-role-order="1" {{#if permissions.viewMiniCal.trusted}}checked{{/if}} />
+        <input type="checkbox" name="permissions.viewMiniCal.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
+          data-role-order="2" {{#if permissions.viewMiniCal.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewMiniCalHint"}}</p>
       </li>
 
@@ -44,12 +42,13 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.ViewTimeKeeper"}}</span>
         <input type="checkbox" name="permissions.viewTimeKeeper.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.viewTimeKeeper.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.viewTimeKeeper.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.viewTimeKeeper.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.viewTimeKeeper.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.viewTimeKeeper.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.viewTimeKeeper.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewTimeKeeper.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
+          {{#if permissions.viewTimeKeeper.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewTimeKeeperHint"}}</p>
       </li>
 
@@ -57,12 +56,12 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.AddNotes"}}</span>
         <input type="checkbox" name="permissions.addNotes.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.addNotes.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.addNotes.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.addNotes.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.addNotes.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.addNotes.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.addNotes.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.addNotes.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-role-order="2" {{#if permissions.addNotes.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.AddNotesHint"}}</p>
       </li>
 
@@ -70,12 +69,12 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.EditNotes"}}</span>
         <input type="checkbox" name="permissions.editNotes.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.editNotes.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.editNotes.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.editNotes.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.editNotes.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.editNotes.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.editNotes.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.editNotes.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-role-order="2" {{#if permissions.editNotes.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.EditNotesHint"}}</p>
       </li>
 
@@ -83,12 +82,12 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.DeleteNotes"}}</span>
         <input type="checkbox" name="permissions.deleteNotes.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.deleteNotes.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.deleteNotes.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.deleteNotes.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.deleteNotes.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.deleteNotes.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.deleteNotes.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
-          {{#if permissions.deleteNotes.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-role-order="2" {{#if permissions.deleteNotes.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.DeleteNotesHint"}}</p>
       </li>
 
@@ -96,12 +95,13 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.ChangeDateTime"}}</span>
         <input type="checkbox" name="permissions.changeDateTime.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.changeDateTime.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.changeDateTime.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.changeDateTime.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.changeDateTime.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.changeDateTime.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.changeDateTime.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}" {{#if permissions.changeDateTime.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
+          {{#if permissions.changeDateTime.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ChangeDateTimeHint"}}</p>
       </li>
 
@@ -109,12 +109,13 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.ChangeWeather"}}</span>
         <input type="checkbox" name="permissions.changeWeather.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.changeWeather.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.changeWeather.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.changeWeather.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.changeWeather.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.changeWeather.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.changeWeather.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}" {{#if permissions.changeWeather.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
+          {{#if permissions.changeWeather.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ChangeWeatherHint"}}</p>
       </li>
 
@@ -122,14 +123,15 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.ChangeActiveCalendar"}}</span>
         <input type="checkbox" name="permissions.changeActiveCalendar.player"
-          data-tooltip="{{localize 'USER.RolePlayer'}}" {{#if permissions.changeActiveCalendar.player}}checked{{/if}} />
+          data-tooltip="{{localize 'USER.RolePlayer'}}" data-role-order="0"
+          {{#if permissions.changeActiveCalendar.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.changeActiveCalendar.trusted"
-          data-tooltip="{{localize 'USER.RoleTrusted'}}"
+          data-tooltip="{{localize 'USER.RoleTrusted'}}" data-role-order="1"
           {{#if permissions.changeActiveCalendar.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.changeActiveCalendar.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}"
+          data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
           {{#if permissions.changeActiveCalendar.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ChangeActiveCalendarHint"}}</p>
       </li>
 
@@ -137,12 +139,13 @@
       <li class="permission-row">
         <span class="permission-name">{{localize "CALENDARIA.Permissions.EditCalendars"}}</span>
         <input type="checkbox" name="permissions.editCalendars.player" data-tooltip="{{localize 'USER.RolePlayer'}}"
-          {{#if permissions.editCalendars.player}}checked{{/if}} />
+          data-role-order="0" {{#if permissions.editCalendars.player}}checked{{/if}} />
         <input type="checkbox" name="permissions.editCalendars.trusted" data-tooltip="{{localize 'USER.RoleTrusted'}}"
-          {{#if permissions.editCalendars.trusted}}checked{{/if}} />
+          data-role-order="1" {{#if permissions.editCalendars.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.editCalendars.assistant"
-          data-tooltip="{{localize 'USER.RoleAssistant'}}" {{#if permissions.editCalendars.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" checked disabled />
+          data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
+          {{#if permissions.editCalendars.assistant}}checked{{/if}} />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.EditCalendarsHint"}}</p>
       </li>
     </ul>
