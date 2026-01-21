@@ -2,8 +2,8 @@
   <div class="weather-header">
     <div class="zone-controls">
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.ClimateZone"}}</label>
-        <select name="weather.activeZone" class="zone-select">
+        <label for="editor-weather-zone">{{localize "CALENDARIA.Common.ClimateZone"}}</label>
+        <select id="editor-weather-zone" name="weather.activeZone" class="zone-select">
           {{#each zoneOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}
             </option>
@@ -26,8 +26,9 @@
       </div>
     </div>
     <div class="form-group auto-generate">
-      <label class="checkbox">
-        <input type="checkbox" name="weather.autoGenerate" {{#if calendar.weather.autoGenerate}}checked{{/if}}>
+      <label class="checkbox" for="editor-weather-auto-generate">
+        <input type="checkbox" id="editor-weather-auto-generate" name="weather.autoGenerate"
+          {{#if calendar.weather.autoGenerate}}checked{{/if}}>
         {{localize "CALENDARIA.Editor.Weather.AutoGenerate"}}
       </label>
     </div>

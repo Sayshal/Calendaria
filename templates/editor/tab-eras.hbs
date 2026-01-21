@@ -18,15 +18,17 @@
       {{#each erasWithNav}}
         <div class="item era-item" data-index="{{this.index}}">
           <div class="era-main flexrow">
-            <input type="text" name="eras.{{this.index}}.name" value="{{this.name}}" class="col-name"
-              placeholder="{{localize 'CALENDARIA.Editor.Placeholder.EraName'}}">
-            <input type="text" name="eras.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr"
+            <input type="text" id="editor-era-{{this.index}}-name" name="eras.{{this.index}}.name" value="{{this.name}}"
+              class="col-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.EraName'}}">
+            <input type="text" id="editor-era-{{this.index}}-abbr" name="eras.{{this.index}}.abbreviation"
+              value="{{this.abbreviation}}" class="col-abbr"
               placeholder="{{localize 'CALENDARIA.Editor.Placeholder.EraAbbr'}}">
-            <input type="number" name="eras.{{this.index}}.startYear" value="{{this.startYear}}" class="col-start-year"
-              placeholder="1">
-            <input type="number" name="eras.{{this.index}}.endYear" value="{{this.endYear}}" class="col-end-year"
+            <input type="number" id="editor-era-{{this.index}}-start" name="eras.{{this.index}}.startYear"
+              value="{{this.startYear}}" class="col-start-year" placeholder="1">
+            <input type="number" id="editor-era-{{this.index}}-end" name="eras.{{this.index}}.endYear"
+              value="{{this.endYear}}" class="col-end-year"
               placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Ongoing'}}">
-            <select name="eras.{{this.index}}.format" class="col-format">
+            <select id="editor-era-{{this.index}}-format" name="eras.{{this.index}}.format" class="col-format">
               {{#each this.formatOptions}}
                 <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
               {{/each}}
@@ -39,13 +41,15 @@
               </button>
               <button type="button" data-action="removeEra" data-index="{{this.index}}"
                 data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveEra'}}">
-                <i class="fas fa-minus"></i>
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
           <div class="era-template flexrow">
-            <label class="col-template-label">{{localize "CALENDARIA.Editor.Era.Template"}}</label>
-            <input type="text" name="eras.{{this.index}}.template" value="{{this.template}}" class="col-template"
+            <label class="col-template-label"
+              for="editor-era-{{this.index}}-template">{{localize "CALENDARIA.Editor.Era.Template"}}</label>
+            <input type="text" id="editor-era-{{this.index}}-template" name="eras.{{this.index}}.template"
+              value="{{this.template}}" class="col-template"
               placeholder="{{localize 'CALENDARIA.Editor.Era.TemplatePlaceholder'}}"
               data-tooltip="{{localize 'CALENDARIA.Editor.Era.TemplateHint'}}" data-action="updateEraPreview"
               data-index="{{this.index}}">

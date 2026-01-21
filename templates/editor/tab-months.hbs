@@ -34,11 +34,16 @@
     {{#each monthsWithNav}}
       <div class="item month-item" data-index="{{this.index}}">
         <div class="month-row-main flexrow">
-          <input type="text" name="months.{{this.index}}.name" value="{{this.name}}" class="col-name">
-          <input type="text" name="months.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
-          <input type="number" name="months.{{this.index}}.days" value="{{this.days}}" min="0" class="col-days">
-          <input type="number" name="months.{{this.index}}.leapDays" value="{{this.leapDays}}" min="0" class="col-leap">
-          <select name="months.{{this.index}}.startingWeekday" class="col-start-weekday">
+          <input type="text" id="editor-month-{{this.index}}-name" name="months.{{this.index}}.name"
+            value="{{this.name}}" class="col-name">
+          <input type="text" id="editor-month-{{this.index}}-abbr" name="months.{{this.index}}.abbreviation"
+            value="{{this.abbreviation}}" class="col-abbr">
+          <input type="number" id="editor-month-{{this.index}}-days" name="months.{{this.index}}.days"
+            value="{{this.days}}" min="0" class="col-days">
+          <input type="number" id="editor-month-{{this.index}}-leap" name="months.{{this.index}}.leapDays"
+            value="{{this.leapDays}}" min="0" class="col-leap">
+          <select id="editor-month-{{this.index}}-weekday" name="months.{{this.index}}.startingWeekday"
+            class="col-start-weekday">
             <option value="" {{#unless this.hasStartingWeekday}}selected{{/unless}}>
               {{localize "CALENDARIA.Editor.StartingWeekday.Auto"}}
             </option>
@@ -46,7 +51,7 @@
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
           </select>
-          <select name="months.{{this.index}}.type" class="col-type">
+          <select id="editor-month-{{this.index}}-type" name="months.{{this.index}}.type" class="col-type">
             {{#each this.typeOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
             {{/each}}
@@ -71,7 +76,7 @@
             </button>
             <button type="button" data-action="removeMonth" data-index="{{this.index}}"
               data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveMonth'}}">
-              <i class="fas fa-minus"></i>
+              <i class="fas fa-trash"></i>
             </button>
           </div>
           <input type="hidden" name="months.{{this.index}}.hasCustomWeekdays"

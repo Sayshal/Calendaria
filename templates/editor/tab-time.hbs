@@ -3,9 +3,9 @@
     <legend>{{localize "CALENDARIA.Editor.Section.TimeStructure"}}</legend>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DaysPerYear"}}</label>
+      <label for="editor-days-per-year">{{localize "CALENDARIA.Editor.Field.DaysPerYear"}}</label>
       <div class="form-fields">
-        <input type="text" value="{{daysPerYearDisplay}}" disabled>
+        <input type="text" id="editor-days-per-year" value="{{daysPerYearDisplay}}" disabled>
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaysPerYearComputed"}}</p>
     </div>
@@ -16,30 +16,34 @@
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.HoursPerDay"}}</label>
+      <label for="editor-hours-per-day">{{localize "CALENDARIA.Editor.Field.HoursPerDay"}}</label>
       <div class="form-fields">
-        <input type="number" name="days.hoursPerDay" value="{{calendar.days.hoursPerDay}}" min="1" step="1">
+        <input type="number" id="editor-hours-per-day" name="days.hoursPerDay" value="{{calendar.days.hoursPerDay}}"
+          min="1" step="1">
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.MinutesPerHour"}}</label>
+      <label for="editor-minutes-per-hour">{{localize "CALENDARIA.Editor.Field.MinutesPerHour"}}</label>
       <div class="form-fields">
-        <input type="number" name="days.minutesPerHour" value="{{calendar.days.minutesPerHour}}" min="1" step="1">
+        <input type="number" id="editor-minutes-per-hour" name="days.minutesPerHour"
+          value="{{calendar.days.minutesPerHour}}" min="1" step="1">
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.SecondsPerMinute"}}</label>
+      <label for="editor-seconds-per-minute">{{localize "CALENDARIA.Editor.Field.SecondsPerMinute"}}</label>
       <div class="form-fields">
-        <input type="number" name="days.secondsPerMinute" value="{{calendar.days.secondsPerMinute}}" min="1" step="1">
+        <input type="number" id="editor-seconds-per-minute" name="days.secondsPerMinute"
+          value="{{calendar.days.secondsPerMinute}}" min="1" step="1">
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.SecondsPerRound"}}</label>
+      <label for="editor-seconds-per-round">{{localize "CALENDARIA.Editor.Field.SecondsPerRound"}}</label>
       <div class="form-fields">
-        <input type="number" name="secondsPerRound" value="{{calendar.secondsPerRound}}" min="1" step="1">
+        <input type="number" id="editor-seconds-per-round" name="secondsPerRound" value="{{calendar.secondsPerRound}}"
+          min="1" step="1">
       </div>
     </div>
   </fieldset>
@@ -48,55 +52,58 @@
     <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DaylightEnabled"}}</label>
+      <label for="editor-daylight-enabled">{{localize "CALENDARIA.Editor.Field.DaylightEnabled"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="daylight.enabled" {{#if calendar.daylight.enabled}}checked{{/if}}>
+        <input type="checkbox" id="editor-daylight-enabled" name="daylight.enabled"
+          {{#if calendar.daylight.enabled}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightEnabled"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
+      <label for="editor-shortest-day">{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
       <div class="form-fields">
-        <input type="number" name="daylight.shortestDay" value="{{calendar.daylight.shortestDay}}" min="0"
-          max="{{calendar.days.hoursPerDay}}" step="0.5">
+        <input type="number" id="editor-shortest-day" name="daylight.shortestDay"
+          value="{{calendar.daylight.shortestDay}}" min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
         <span class="units">{{localize "CALENDARIA.Editor.Units.Hours"}}</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.ShortestDay"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
+      <label for="editor-longest-day">{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
       <div class="form-fields">
-        <input type="number" name="daylight.longestDay" value="{{calendar.daylight.longestDay}}" min="0"
-          max="{{calendar.days.hoursPerDay}}" step="0.5">
+        <input type="number" id="editor-longest-day" name="daylight.longestDay" value="{{calendar.daylight.longestDay}}"
+          min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
         <span class="units">{{localize "CALENDARIA.Editor.Units.Hours"}}</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.LongestDay"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.WinterSolstice"}}</label>
+      <label for="editor-winter-solstice-month">{{localize "CALENDARIA.Editor.Field.WinterSolstice"}}</label>
       <div class="form-fields solstice-fields">
-        <select name="daylight.winterSolsticeMonth">
+        <select id="editor-winter-solstice-month" name="daylight.winterSolsticeMonth">
           {{#each winterSolsticeMonthOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
-        <input type="number" name="daylight.winterSolsticeDay" value="{{winterSolsticeDay}}" min="1" max="31" step="1">
+        <input type="number" id="editor-winter-solstice-day" name="daylight.winterSolsticeDay"
+          value="{{winterSolsticeDay}}" min="1" max="31" step="1">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.WinterSolstice"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.SummerSolstice"}}</label>
+      <label for="editor-summer-solstice-month">{{localize "CALENDARIA.Editor.Field.SummerSolstice"}}</label>
       <div class="form-fields solstice-fields">
-        <select name="daylight.summerSolsticeMonth">
+        <select id="editor-summer-solstice-month" name="daylight.summerSolsticeMonth">
           {{#each summerSolsticeMonthOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
-        <input type="number" name="daylight.summerSolsticeDay" value="{{summerSolsticeDay}}" min="1" max="31" step="1">
+        <input type="number" id="editor-summer-solstice-day" name="daylight.summerSolsticeDay"
+          value="{{summerSolsticeDay}}" min="1" max="31" step="1">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.SummerSolstice"}}</p>
     </div>
@@ -107,17 +114,17 @@
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.AmPmNotation"}}</p>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.AmNotation"}}</label>
+      <label for="editor-am-notation">{{localize "CALENDARIA.Editor.Field.AmNotation"}}</label>
       <div class="form-fields">
-        <input type="text" name="amPmNotation.am" value="{{calendar.amPmNotation.am}}"
+        <input type="text" id="editor-am-notation" name="amPmNotation.am" value="{{calendar.amPmNotation.am}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.AM'}}">
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.PmNotation"}}</label>
+      <label for="editor-pm-notation">{{localize "CALENDARIA.Editor.Field.PmNotation"}}</label>
       <div class="form-fields">
-        <input type="text" name="amPmNotation.pm" value="{{calendar.amPmNotation.pm}}"
+        <input type="text" id="editor-pm-notation" name="amPmNotation.pm" value="{{calendar.amPmNotation.pm}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.PM'}}">
       </div>
     </div>
@@ -143,13 +150,15 @@
 
         {{#each canonicalHoursWithNav}}
           <div class="item canonical-hour-item flexrow" data-index="{{this.index}}">
-            <input type="text" name="canonicalHours.{{this.index}}.name" value="{{this.name}}" class="col-name">
-            <input type="text" name="canonicalHours.{{this.index}}.abbreviation" value="{{this.abbreviation}}"
-              class="col-abbr">
-            <input type="number" name="canonicalHours.{{this.index}}.startHour" value="{{this.startHour}}" min="0"
-              max="23" class="col-start">
-            <input type="number" name="canonicalHours.{{this.index}}.endHour" value="{{this.endHour}}" min="0" max="23"
-              class="col-end">
+            <input type="text" id="editor-canonical-{{this.index}}-name" name="canonicalHours.{{this.index}}.name"
+              value="{{this.name}}" class="col-name">
+            <input type="text" id="editor-canonical-{{this.index}}-abbr"
+              name="canonicalHours.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
+            <input type="number" id="editor-canonical-{{this.index}}-start"
+              name="canonicalHours.{{this.index}}.startHour" value="{{this.startHour}}" min="0" max="23"
+              class="col-start">
+            <input type="number" id="editor-canonical-{{this.index}}-end" name="canonicalHours.{{this.index}}.endHour"
+              value="{{this.endHour}}" min="0" max="23" class="col-end">
 
             <div class="item-controls col-controls">
               <button type="button" data-action="addCanonicalHour" data-index="{{this.index}}"
@@ -158,7 +167,7 @@
               </button>
               <button type="button" data-action="removeCanonicalHour" data-index="{{this.index}}"
                 data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
-                <i class="fas fa-minus"></i>
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
@@ -181,45 +190,46 @@
     <p class="hint small">{{localize "CALENDARIA.Editor.DateFormatVariables.Description"}}</p>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DateFormatShort"}}</label>
+      <label for="editor-date-format-short">{{localize "CALENDARIA.Editor.Field.DateFormatShort"}}</label>
       <div class="form-fields">
-        <input type="text" name="dateFormats.short" value="{{calendar.dateFormats.short}}"
+        <input type="text" id="editor-date-format-short" name="dateFormats.short" value="{{calendar.dateFormats.short}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.DateShortExample'}}">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DateFormatShort"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DateFormatLong"}}</label>
+      <label for="editor-date-format-long">{{localize "CALENDARIA.Editor.Field.DateFormatLong"}}</label>
       <div class="form-fields">
-        <input type="text" name="dateFormats.long" value="{{calendar.dateFormats.long}}"
+        <input type="text" id="editor-date-format-long" name="dateFormats.long" value="{{calendar.dateFormats.long}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.DateLongExample'}}">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DateFormatLong"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DateFormatFull"}}</label>
+      <label for="editor-date-format-full">{{localize "CALENDARIA.Editor.Field.DateFormatFull"}}</label>
       <div class="form-fields">
-        <input type="text" name="dateFormats.full" value="{{calendar.dateFormats.full}}"
+        <input type="text" id="editor-date-format-full" name="dateFormats.full" value="{{calendar.dateFormats.full}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.DateFullExample'}}">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DateFormatFull"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DateFormatTime"}}</label>
+      <label for="editor-date-format-time">{{localize "CALENDARIA.Editor.Field.DateFormatTime"}}</label>
       <div class="form-fields">
-        <input type="text" name="dateFormats.time" value="{{calendar.dateFormats.time}}"
+        <input type="text" id="editor-date-format-time" name="dateFormats.time" value="{{calendar.dateFormats.time}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.TimeExample'}}">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DateFormatTime"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.DateFormatTime12"}}</label>
+      <label for="editor-date-format-time12">{{localize "CALENDARIA.Editor.Field.DateFormatTime12"}}</label>
       <div class="form-fields">
-        <input type="text" name="dateFormats.time12" value="{{calendar.dateFormats.time12}}"
+        <input type="text" id="editor-date-format-time12" name="dateFormats.time12"
+          value="{{calendar.dateFormats.time12}}"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Time12Example'}}">
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DateFormatTime12"}}</p>

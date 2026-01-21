@@ -1,10 +1,10 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <div class="cycle-format-section">
     <div class="form-group">
-      <label data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleFormat'}}">
+      <label for="editor-cycle-format" data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleFormat'}}">
         {{localize "CALENDARIA.Editor.Field.CycleFormat"}}
       </label>
-      <input type="text" name="cycleFormat" value="{{cycleFormat}}"
+      <input type="text" id="editor-cycle-format" name="cycleFormat" value="{{cycleFormat}}"
         placeholder="{{localize 'CALENDARIA.Editor.Placeholder.CycleFormat'}}">
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.CycleFormat"}}</p>
     </div>
@@ -16,28 +16,35 @@
         <div class="item cycle-item" data-index="{{this.index}}">
           <div class="cycle-header-grid">
             <div class="grid-col col-name">
-              <label data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleName'}}">
+              <label for="editor-cycle-{{this.index}}-name"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleName'}}">
                 {{localize "CALENDARIA.Common.Name"}}
               </label>
-              <input type="text" name="cycles.{{this.index}}.name" value="{{this.name}}">
+              <input type="text" id="editor-cycle-{{this.index}}-name" name="cycles.{{this.index}}.name"
+                value="{{this.name}}">
             </div>
             <div class="grid-col col-length">
-              <label data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CyclePeriod'}}">
+              <label for="editor-cycle-{{this.index}}-length"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CyclePeriod'}}">
                 {{localize "CALENDARIA.Editor.Field.Length"}}
               </label>
-              <input type="number" name="cycles.{{this.index}}.length" value="{{this.length}}" min="1" step="1">
+              <input type="number" id="editor-cycle-{{this.index}}-length" name="cycles.{{this.index}}.length"
+                value="{{this.length}}" min="1" step="1">
             </div>
             <div class="grid-col col-offset">
-              <label data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleOffset'}}">
+              <label for="editor-cycle-{{this.index}}-offset"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleOffset'}}">
                 {{localize "CALENDARIA.Common.Offset"}}
               </label>
-              <input type="number" name="cycles.{{this.index}}.offset" value="{{this.offset}}" step="1">
+              <input type="number" id="editor-cycle-{{this.index}}-offset" name="cycles.{{this.index}}.offset"
+                value="{{this.offset}}" step="1">
             </div>
             <div class="grid-col col-based-on">
-              <label data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleBasedOn'}}">
+              <label for="editor-cycle-{{this.index}}-basedOn"
+                data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleBasedOn'}}">
                 {{localize "CALENDARIA.Editor.Field.BasedOn"}}
               </label>
-              <select name="cycles.{{this.index}}.basedOn">
+              <select id="editor-cycle-{{this.index}}-basedOn" name="cycles.{{this.index}}.basedOn">
                 {{#each this.basedOnOptions}}
                   <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
                 {{/each}}
@@ -52,7 +59,7 @@
                 </button>
                 <button type="button" data-action="removeCycle" data-index="{{this.index}}"
                   data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveCycle'}}">
-                  <i class="fas fa-minus"></i>
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </div>
@@ -75,7 +82,7 @@
                     <button type="button" data-action="removeCycleEntry" data-cycle-index="{{this.cycleIndex}}"
                       data-entry-index="{{this.index}}"
                       data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveEntry'}}">
-                      <i class="fas fa-minus"></i>
+                      <i class="fas fa-trash"></i>
                     </button>
                   </div>
                 </div>

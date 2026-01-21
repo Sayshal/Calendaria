@@ -16,11 +16,12 @@
               </span>
               <span class="col-controls list-header"></span>
             {{/if}}
-            <input type="text" name="moons.{{this.index}}.name" value="{{this.name}}" class="col-name">
-            <input type="number" name="moons.{{this.index}}.cycleLength" value="{{this.cycleLength}}" min="1" step="any"
-              class="col-cycle">
+            <input type="text" id="editor-moon-{{this.index}}-name" name="moons.{{this.index}}.name"
+              value="{{this.name}}" class="col-name">
+            <input type="number" id="editor-moon-{{this.index}}-cycle" name="moons.{{this.index}}.cycleLength"
+              value="{{this.cycleLength}}" min="1" step="any" class="col-cycle">
             <div class="col-color color-input-wrapper">
-              <input type="color" name="moons.{{this.index}}.color"
+              <input type="color" id="editor-moon-{{this.index}}-color" name="moons.{{this.index}}.color"
                 value="{{#if this.color}}{{this.color}}{{else}}#b8b8b8{{/if}}">
               <span class="moon-color-preview{{#if this.color}} tinted{{/if}}"
                 style="--moon-color: {{#if this.color}}{{this.color}}{{else}}#b8b8b8{{/if}}">
@@ -35,7 +36,7 @@
               </button>
               <button type="button" data-action="removeMoon" data-index="{{this.index}}"
                 data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveMoon'}}">
-                <i class="fas fa-minus"></i>
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
@@ -47,13 +48,13 @@
 
               <div class="ref-date-grid">
                 <div class="grid-col">
-                  <label>{{localize "CALENDARIA.Common.Year"}}</label>
-                  <input type="number" name="moons.{{this.index}}.referenceDate.year"
-                    value="{{this.referenceDate.year}}" step="1">
+                  <label for="editor-moon-{{this.index}}-ref-year">{{localize "CALENDARIA.Common.Year"}}</label>
+                  <input type="number" id="editor-moon-{{this.index}}-ref-year"
+                    name="moons.{{this.index}}.referenceDate.year" value="{{this.referenceDate.year}}" step="1">
                 </div>
                 <div class="grid-col">
-                  <label>{{localize "CALENDARIA.Common.Month"}}</label>
-                  <select name="moons.{{this.index}}.referenceDate.month">
+                  <label for="editor-moon-{{this.index}}-ref-month">{{localize "CALENDARIA.Common.Month"}}</label>
+                  <select id="editor-moon-{{this.index}}-ref-month" name="moons.{{this.index}}.referenceDate.month">
                     {{#each this.refMonthOptions}}
                       <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
                         {{this.label}}
@@ -62,21 +63,22 @@
                   </select>
                 </div>
                 <div class="grid-col">
-                  <label>{{localize "CALENDARIA.Common.Day"}}</label>
-                  <input type="number" name="moons.{{this.index}}.referenceDate.day" value="{{this.referenceDate.day}}"
-                    min="1" step="1">
+                  <label for="editor-moon-{{this.index}}-ref-day">{{localize "CALENDARIA.Common.Day"}}</label>
+                  <input type="number" id="editor-moon-{{this.index}}-ref-day"
+                    name="moons.{{this.index}}.referenceDate.day" value="{{this.referenceDate.day}}" min="1" step="1">
                 </div>
                 <div class="grid-col">
-                  <label data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleDayAdjust'}}">
+                  <label for="editor-moon-{{this.index}}-adjust"
+                    data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.CycleDayAdjust'}}">
                     {{localize "CALENDARIA.Editor.Field.CycleDayAdjust"}}
                   </label>
-                  <input type="number" name="moons.{{this.index}}.cycleDayAdjust" value="{{this.cycleDayAdjust}}"
-                    step="1">
+                  <input type="number" id="editor-moon-{{this.index}}-adjust" name="moons.{{this.index}}.cycleDayAdjust"
+                    value="{{this.cycleDayAdjust}}" step="1">
                 </div>
                 <div class="grid-col">
-                  <label>{{localize "CALENDARIA.Editor.Field.Hidden"}}</label>
-                  <input type="checkbox" name="moons.{{this.index}}.hidden" value="true"
-                    {{#if this.hidden}}checked{{/if}}>
+                  <label for="editor-moon-{{this.index}}-hidden">{{localize "CALENDARIA.Editor.Field.Hidden"}}</label>
+                  <input type="checkbox" id="editor-moon-{{this.index}}-hidden" name="moons.{{this.index}}.hidden"
+                    value="true" {{#if this.hidden}}checked{{/if}}>
                 </div>
               </div>
             </fieldset>
@@ -116,18 +118,21 @@
                       <input type="hidden" name="moons.{{this.moonIndex}}.phases.{{this.index}}.icon"
                         value="{{this.icon}}">
                     </div>
-                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.name" value="{{this.name}}"
+                    <input type="text" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-name"
+                      name="moons.{{this.moonIndex}}.phases.{{this.index}}.name" value="{{this.name}}"
                       class="col-phase-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.PhaseName'}}">
-                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.rising"
-                      value="{{this.rising}}" class="col-rising"
-                      placeholder="{{localize 'CALENDARIA.Editor.Placeholder.RisingName'}}">
-                    <input type="text" name="moons.{{this.moonIndex}}.phases.{{this.index}}.fading"
-                      value="{{this.fading}}" class="col-fading"
-                      placeholder="{{localize 'CALENDARIA.Editor.Placeholder.FadingName'}}">
-                    <input type="number" name="moons.{{this.moonIndex}}.phases.{{this.index}}.startPercent"
-                      value="{{this.startPercent}}" min="0" max="100" step="0.1" class="col-start">
-                    <input type="number" name="moons.{{this.moonIndex}}.phases.{{this.index}}.endPercent"
-                      value="{{this.endPercent}}" min="0" max="100" step="0.1" class="col-end">
+                    <input type="text" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-rising"
+                      name="moons.{{this.moonIndex}}.phases.{{this.index}}.rising" value="{{this.rising}}"
+                      class="col-rising" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.RisingName'}}">
+                    <input type="text" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-fading"
+                      name="moons.{{this.moonIndex}}.phases.{{this.index}}.fading" value="{{this.fading}}"
+                      class="col-fading" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.FadingName'}}">
+                    <input type="number" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-start"
+                      name="moons.{{this.moonIndex}}.phases.{{this.index}}.startPercent" value="{{this.startPercent}}"
+                      min="0" max="100" step="0.1" class="col-start">
+                    <input type="number" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-end"
+                      name="moons.{{this.moonIndex}}.phases.{{this.index}}.endPercent" value="{{this.endPercent}}"
+                      min="0" max="100" step="0.1" class="col-end">
                     <div class="col-controls item-controls">
                       <button type="button" data-action="addMoonPhase" data-moon-index="{{this.moonIndex}}"
                         data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddPhase'}}">
@@ -136,7 +141,7 @@
                       <button type="button" data-action="removeMoonPhase" data-moon-index="{{this.moonIndex}}"
                         data-phase-index="{{this.index}}"
                         data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemovePhase'}}">
-                        <i class="fas fa-minus"></i>
+                        <i class="fas fa-trash"></i>
                       </button>
                     </div>
                   </div>

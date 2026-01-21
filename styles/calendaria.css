@@ -1960,52 +1960,17 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .calendar-editor {
-  --editor-footer-height: 3.5rem;
-  --editor-sidebar-max-width: 160px;
-  --editor-sidebar-min-width: 100px;
+  --editor-sidebar-max-width: 180px;
+  --editor-sidebar-min-width: 120px;
 
   &.standard-form {
     gap: 0;
   }
 
-  button,
-  a.button {
-    border: none;
-    background: transparent;
-    transition:
-      background 0.15s ease,
-      opacity 0.15s ease;
-
-    &:hover {
-      border: none;
-      background: var(--color-cool-5);
-    }
-
-    &:focus {
-      outline: none;
-      box-shadow: none;
-    }
-
-    &:disabled {
-      opacity: 0.4;
-    }
-  }
-
-  button[type='submit'],
-  button.primary {
-    border: 1px solid var(--button-border-color);
-    background: var(--button-background-color);
-
-    &:hover {
-      border-color: var(--button-hover-border-color);
-      background: var(--button-hover-background-color);
-    }
-  }
-
   .window-content {
     gap: 0;
     grid-template-columns: auto 1fr;
-    grid-template-rows: 1fr var(--editor-footer-height);
+    grid-template-rows: 1fr auto;
     display: grid;
     height: 100%;
     padding: 0;
@@ -2037,12 +2002,21 @@ span.calendaria-moon-icon {
   .template-selector {
     gap: 0.5rem;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+
+    .form-group {
+      margin: 0;
+    }
 
     select {
-      flex: none;
-      width: fit-content;
+      flex: 1;
+    }
+
+    .template-actions {
+      gap: 0.5rem;
+      display: flex;
+      justify-content: flex-end;
     }
   }
 
@@ -2889,13 +2863,14 @@ span.calendaria-moon-icon {
   footer.form-footer {
     grid-column: 1 / -1;
     grid-row: 2;
-    justify-content: center;
+    display: flex;
+    align-items: center;
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--color-cool-4);
     background: var(--color-cool-5);
 
     button {
-      flex: unset;
+      flex: none;
       width: fit-content;
       border: 1px solid var(--button-border-color);
 
@@ -2908,6 +2883,22 @@ span.calendaria-moon-icon {
       &:focus {
         outline: 1px solid var(--button-focus-outline-color);
         box-shadow: 0 0 4px var(--button-focus-outline-color);
+      }
+
+      /* Export and Save get equal flex width */
+      &[data-action='exportCalendar'],
+      &[data-action='saveCalendar'] {
+        flex: 1;
+      }
+
+      &.primary {
+        border: 1px solid var(--button-border-color);
+        background: var(--button-background-color);
+
+        &:hover {
+          border-color: var(--button-hover-border-color);
+          background: var(--button-hover-background-color);
+        }
       }
     }
   }

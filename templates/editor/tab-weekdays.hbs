@@ -15,8 +15,10 @@
 
       {{#each weekdaysWithNav}}
         <div class="item weekday-item flexrow" data-index="{{this.index}}">
-          <input type="text" name="weekdays.{{this.index}}.name" value="{{this.name}}" class="col-name">
-          <input type="text" name="weekdays.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
+          <input type="text" id="editor-weekday-{{this.index}}-name" name="weekdays.{{this.index}}.name"
+            value="{{this.name}}" class="col-name">
+          <input type="text" id="editor-weekday-{{this.index}}-abbr" name="weekdays.{{this.index}}.abbreviation"
+            value="{{this.abbreviation}}" class="col-abbr">
           <label class="col-rest checkbox">
             <input type="checkbox" name="weekdays.{{this.index}}.isRestDay" {{#if this.isRestDay}}checked{{/if}}>
           </label>
@@ -36,7 +38,7 @@
             </button>
             <button type="button" data-action="removeWeekday" data-index="{{this.index}}"
               data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveWeekday'}}">
-              <i class="fas fa-minus"></i>
+              <i class="fas fa-trash"></i>
             </button>
           </div>
         </div>
@@ -49,16 +51,17 @@
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.NamedWeeks"}}</p>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.WeeksEnabled"}}</label>
+      <label for="editor-weeks-enabled">{{localize "CALENDARIA.Editor.Field.WeeksEnabled"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="weeks.enabled" {{#if calendar.weeks.enabled}}checked{{/if}}>
+        <input type="checkbox" id="editor-weeks-enabled" name="weeks.enabled"
+          {{#if calendar.weeks.enabled}}checked{{/if}}>
       </div>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.WeeksType"}}</label>
+      <label for="editor-weeks-type">{{localize "CALENDARIA.Editor.Field.WeeksType"}}</label>
       <div class="form-fields">
-        <select name="weeks.type">
+        <select id="editor-weeks-type" name="weeks.type">
           {{#each weeksTypeOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
           {{/each}}
@@ -79,9 +82,10 @@
 
         {{#each namedWeeksWithNav}}
           <div class="item named-week-item flexrow" data-index="{{this.index}}">
-            <input type="text" name="weeks.names.{{this.index}}.name" value="{{this.name}}" class="col-name">
-            <input type="text" name="weeks.names.{{this.index}}.abbreviation" value="{{this.abbreviation}}"
-              class="col-abbr">
+            <input type="text" id="editor-week-{{this.index}}-name" name="weeks.names.{{this.index}}.name"
+              value="{{this.name}}" class="col-name">
+            <input type="text" id="editor-week-{{this.index}}-abbr" name="weeks.names.{{this.index}}.abbreviation"
+              value="{{this.abbreviation}}" class="col-abbr">
 
             <div class="item-controls col-controls">
               <button type="button" data-action="addNamedWeek" data-index="{{this.index}}"
@@ -90,7 +94,7 @@
               </button>
               <button type="button" data-action="removeNamedWeek" data-index="{{this.index}}"
                 data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
-                <i class="fas fa-minus"></i>
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
