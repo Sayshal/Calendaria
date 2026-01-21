@@ -36,14 +36,6 @@
           <i class="fa-solid fa-calendar-plus"></i>
         </button>
         {{{widgets.buttonsLeft}}}
-      </div>
-
-      <div class="calendaria-hud-divider"></div>
-
-      <div class="calendaria-hud-info-panel">
-        <span class="calendaria-hud-date" {{#if canChangeDateTime}} data-action="setDate"
-          data-tooltip="{{dateDisplay}} ({{localize 'CALENDARIA.HUD.ClickToSetDate'}})" {{else}}
-          data-tooltip="{{dateDisplay}}" {{/if}}>{{{dateDisplayHtml}}}</span>
         {{#if hasEvents}}
           <div class="calendaria-hud-events">
             {{#each liveEvents}}
@@ -55,6 +47,12 @@
             {{/each}}
           </div>
         {{/if}}
+      </div>
+
+      <div class="calendaria-hud-info-panel">
+        <span class="calendaria-hud-date" {{#if canChangeDateTime}} data-action="setDate"
+          data-tooltip="{{dateDisplay}} ({{localize 'CALENDARIA.HUD.ClickToSetDate'}})" {{else}}
+          data-tooltip="{{dateDisplay}}" {{/if}}>{{{dateDisplayHtml}}}</span>
       </div>
     </div>
 
@@ -105,8 +103,6 @@
         {{!-- Custom widget indicators insertion point --}}
         {{{widgets.indicators}}}
       </div>
-
-      <div class="calendaria-hud-divider"></div>
 
       <div class="calendaria-hud-btn-group right" role="group"
         aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">

@@ -5751,7 +5751,7 @@ span.calendaria-moon-icon {
 
 .calendaria-hud:not(.compact) .calendaria-hud-indicators {
   flex: 1 1 0;
-  flex-shrink: 1;
+  justify-content: flex-start;
   min-width: 0;
   overflow: hidden;
 }
@@ -5956,12 +5956,6 @@ span.calendaria-moon-icon {
   justify-content: flex-end;
 }
 
-.calendaria-hud-divider {
-  flex-shrink: 0;
-  width: 1px;
-  height: 20px;
-  background: var(--calendaria-border);
-}
 
 /* ======================================== */
 /* Left Info Panel                          */
@@ -6036,7 +6030,6 @@ span.calendaria-moon-icon {
   gap: 4px;
   display: flex;
   align-items: center;
-  margin-left: 6px;
 }
 
 .calendaria-hud-event-icon-wrapper {
@@ -6574,9 +6567,6 @@ span.calendaria-moon-icon {
   font-size: var(--font-size-10, 0.625rem);
 }
 
-.calendaria-hud.compact .calendaria-hud-divider {
-  height: 16px;
-}
 
 .calendaria-hud.compact .calendaria-hud-live-event {
   width: 22px;
