@@ -5,9 +5,9 @@
 
     {{#if isGM}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
+        <label for="showMoonPhases">{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="showMoonPhases" {{#if showMoonPhases}}checked{{/if}}>
+          <input type="checkbox" id="showMoonPhases" name="showMoonPhases" {{#if showMoonPhases}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowMoonPhases.Hint"}}</p>
       </div>

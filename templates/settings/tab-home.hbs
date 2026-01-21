@@ -19,7 +19,8 @@
 
       <div class="recent-list">
         {{#each recentSettings}}
-          <a class="recent-item" data-action="navigateToSetting" data-tab="{{this.tab}}" data-fieldset="{{this.fieldset}}">
+          <a class="recent-item" data-action="navigateToSetting" data-tab="{{this.tab}}"
+            data-fieldset="{{this.fieldset}}">
             <span class="recent-label">{{this.label}}</span>
             <span class="recent-time">{{this.timeAgo}}</span>
           </a>
@@ -34,9 +35,9 @@
       <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
+        <label for="activeCalendar">{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
         <div class="form-fields">
-          <select name="activeCalendar" {{#unless canChangeCalendar}}disabled{{/unless}}>
+          <select id="activeCalendar" name="activeCalendar" {{#unless canChangeCalendar}}disabled{{/unless}}>
             {{#each calendarOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
                 {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
@@ -49,9 +50,11 @@
 
       {{#if isGM}}
         <div class="form-group">
-          <label>{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name"}}</label>
+          <label
+            for="showActiveCalendarToPlayers">{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name"}}</label>
           <div class="form-fields">
-            <input type="checkbox" name="showActiveCalendarToPlayers" {{#if showActiveCalendarToPlayers}}checked{{/if}}>
+            <input type="checkbox" id="showActiveCalendarToPlayers" name="showActiveCalendarToPlayers"
+              {{#if showActiveCalendarToPlayers}}checked{{/if}}>
           </div>
           <p class="hint">{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint"}}</p>
         </div>

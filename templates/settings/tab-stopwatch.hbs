@@ -1,18 +1,18 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <div class="button-row open-app-button">
-      <button type="button" data-action="openStopwatch">
-        <i class="fas fa-external-link-alt"></i>
-        {{localize "CALENDARIA.SettingsPanel.OpenStopwatch"}}
+    <div class="button-row app-controls">
+      <button type="button" data-action="resetPosition" data-target="stopwatch">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
       </button>
       <button type="button" data-action="closeStopwatch">
         <i class="fas fa-times"></i>
         {{localize "CALENDARIA.SettingsPanel.CloseStopwatch"}}
       </button>
-      <button type="button" data-action="resetPosition" data-target="stopwatch">
-        <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.Common.ResetPosition"}}
+      <button type="button" data-action="openStopwatch">
+        <i class="fas fa-external-link-alt"></i>
+        {{localize "CALENDARIA.SettingsPanel.OpenStopwatch"}}
       </button>
     </div>
 
@@ -20,9 +20,10 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
+        <label for="stopwatchAutoStartTime">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="stopwatchAutoStartTime" {{#if stopwatchAutoStartTime}}checked{{/if}}>
+          <input type="checkbox" id="stopwatchAutoStartTime" name="stopwatchAutoStartTime"
+            {{#if stopwatchAutoStartTime}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Hint"}}</p>
       </div>

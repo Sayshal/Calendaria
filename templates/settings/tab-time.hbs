@@ -5,10 +5,11 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
+        <label for="timeSpeedMultiplier">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
         <div class="form-fields time-speed-fields">
-          <input type="number" name="timeSpeedMultiplier" value="{{timeSpeedMultiplier}}" min="1" step="1">
-          <select name="timeSpeedIncrement">
+          <input type="number" id="timeSpeedMultiplier" name="timeSpeedMultiplier" value="{{timeSpeedMultiplier}}"
+            min="1" step="1">
+          <select id="timeSpeedIncrement" name="timeSpeedIncrement">
             {{#each timeSpeedIncrements}}
               <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
@@ -23,17 +24,18 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>
+        <label for="advanceTimeOnRest">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="advanceTimeOnRest" {{#if advanceTimeOnRest}}checked{{/if}}>
+          <input type="checkbox" id="advanceTimeOnRest" name="advanceTimeOnRest"
+            {{#if advanceTimeOnRest}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
       </div>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
+        <label for="syncClockPause">{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="syncClockPause" {{#if syncClockPause}}checked{{/if}}>
+          <input type="checkbox" id="syncClockPause" name="syncClockPause" {{#if syncClockPause}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.SyncClockPause.Hint"}}</p>
       </div>

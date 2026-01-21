@@ -100,9 +100,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Tab group definitions with colors */
   static TAB_GROUPS = [
-    { id: 'calendar', label: 'CALENDARIA.SettingsPanel.Group.Calendar', color: '#84cc16' },
-    { id: 'technical', label: 'CALENDARIA.SettingsPanel.Group.Technical', color: '#f97316' },
-    { id: 'apps', label: 'CALENDARIA.SettingsPanel.Group.Apps', color: '#14b8a6' }
+    { id: 'calendar', label: 'CALENDARIA.SettingsPanel.Group.Calendar', tooltip: 'CALENDARIA.SettingsPanel.GroupTooltip.Calendar', color: '#84cc16' },
+    { id: 'technical', label: 'CALENDARIA.SettingsPanel.Group.Technical', tooltip: 'CALENDARIA.SettingsPanel.GroupTooltip.Technical', color: '#f97316' },
+    { id: 'apps', label: 'CALENDARIA.SettingsPanel.Group.Apps', tooltip: 'CALENDARIA.SettingsPanel.GroupTooltip.Apps', color: '#14b8a6' }
   ];
 
   /** @override */
@@ -1121,9 +1121,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Default brightness multiplier
-    if (data.defaultBrightnessMultiplier != null) {
-      await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER, Number(data.defaultBrightnessMultiplier));
-    }
+    if (data.defaultBrightnessMultiplier != null) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER, Number(data.defaultBrightnessMultiplier));
 
     // Macro triggers
     if (data.macroTriggers) {
@@ -1131,12 +1129,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const config = { global: {}, season: [], moonPhase: [] };
       for (const key of globalTriggerKeys) config.global[key] = data.macroTriggers.global?.[key] || '';
       if (data.macroTriggers.seasonTrigger) {
-        const triggers = Array.isArray(data.macroTriggers.seasonTrigger) ? data.macroTriggers.seasonTrigger : [data.macroTriggers.seasonTrigger];
-        for (const trigger of triggers) if (trigger?.macroId) config.season.push({ seasonIndex: parseInt(trigger.seasonIndex), macroId: trigger.macroId });
+        for (const trigger of Object.values(data.macroTriggers.seasonTrigger)) {
+          if (trigger) config.season.push({ seasonIndex: parseInt(trigger.seasonIndex), macroId: trigger.macroId || '' });
+        }
       }
       if (data.macroTriggers.moonTrigger) {
-        const triggers = Array.isArray(data.macroTriggers.moonTrigger) ? data.macroTriggers.moonTrigger : [data.macroTriggers.moonTrigger];
-        for (const trigger of triggers) if (trigger?.macroId) config.moonPhase.push({ moonIndex: parseInt(trigger.moonIndex), phaseIndex: parseInt(trigger.phaseIndex), macroId: trigger.macroId });
+        for (const trigger of Object.values(data.macroTriggers.moonTrigger)) {
+          if (trigger) config.moonPhase.push({ moonIndex: parseInt(trigger.moonIndex), phaseIndex: parseInt(trigger.phaseIndex), macroId: trigger.macroId || '' });
+        }
       }
       await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
     }
@@ -1486,24 +1486,34 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onAddMoonTrigger(_event, _target) {
-    const moonSelect = this.element.querySelector('select[name="newMoonTrigger.moonIndex"]');
-    const phaseSelect = this.element.querySelector('select[name="newMoonTrigger.phaseIndex"]');
-    const macroSelect = this.element.querySelector('select[name="newMoonTrigger.macroId"]');
-    const moonIndex = parseInt(moonSelect?.value);
-    const phaseIndex = parseInt(phaseSelect?.value);
-    const macroId = macroSelect?.value;
-    if (isNaN(moonIndex) || isNaN(phaseIndex) || !macroId) {
-      ui.notifications.warn('CALENDARIA.MacroTrigger.SelectAll', { localize: true });
-      return;
-    }
     const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
     if (!config.moonPhase) config.moonPhase = [];
-    const exists = config.moonPhase.some((t) => t.moonIndex === moonIndex && t.phaseIndex === phaseIndex);
-    if (exists) {
-      ui.notifications.warn('CALENDARIA.MacroTrigger.DuplicateMoon', { localize: true });
+    const calendar = CalendarManager.getActiveCalendar();
+    const moons = calendar?.moons?.values || [];
+    const usedCombos = new Set(config.moonPhase.map((t) => `${t.moonIndex}:${t.phaseIndex}`));
+    let found = false;
+    let moonIndex = -1;
+    let phaseIndex = -1;
+    for (let m = 0; m < moons.length && !found; m++) {
+      const phases = moons[m]?.phases || [];
+      for (let p = 0; p < phases.length && !found; p++) {
+        if (!usedCombos.has(`${m}:${p}`)) {
+          moonIndex = m;
+          phaseIndex = p;
+          found = true;
+        }
+      }
+    }
+    if (!found && !usedCombos.has('-1:-1')) {
+      moonIndex = -1;
+      phaseIndex = -1;
+      found = true;
+    }
+    if (!found) {
+      ui.notifications.warn('CALENDARIA.MacroTrigger.AllMoonsUsed', { localize: true });
       return;
     }
-    config.moonPhase.push({ moonIndex, phaseIndex, macroId });
+    config.moonPhase.push({ moonIndex, phaseIndex, macroId: '' });
     await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
     this.render({ parts: ['macros'] });
   }
@@ -1529,22 +1539,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onAddSeasonTrigger(_event, _target) {
-    const seasonSelect = this.element.querySelector('select[name="newSeasonTrigger.seasonIndex"]');
-    const macroSelect = this.element.querySelector('select[name="newSeasonTrigger.macroId"]');
-    const seasonIndex = parseInt(seasonSelect?.value);
-    const macroId = macroSelect?.value;
-    if (isNaN(seasonIndex) || !macroId) {
-      ui.notifications.warn('CALENDARIA.MacroTrigger.SelectSeasonAndMacro', { localize: true });
-      return;
-    }
     const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
     if (!config.season) config.season = [];
-    const exists = config.season.some((t) => t.seasonIndex === seasonIndex);
-    if (exists) {
-      ui.notifications.warn('CALENDARIA.MacroTrigger.DuplicateSeason', { localize: true });
+    const calendar = CalendarManager.getActiveCalendar();
+    const seasons = calendar?.seasons?.values || [];
+    const usedIndices = new Set(config.season.map((t) => t.seasonIndex));
+    let seasonIndex = seasons.findIndex((_, i) => !usedIndices.has(i));
+    if (seasonIndex === -1 && !usedIndices.has(-1)) seasonIndex = -1;
+    if (seasonIndex === -1 && usedIndices.has(-1)) {
+      ui.notifications.warn('CALENDARIA.MacroTrigger.AllSeasonsUsed', { localize: true });
       return;
     }
-    config.season.push({ seasonIndex, macroId });
+    config.season.push({ seasonIndex, macroId: '' });
     await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
     this.render({ parts: ['macros'] });
   }
@@ -1777,6 +1783,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             else opt.hidden = opt.dataset.moon !== '-1' && opt.dataset.moon !== selectedMoon;
           });
           if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
+        });
+      }
+    }
+
+    if (partId === 'module') {
+      const toolbarCheckbox = htmlElement.querySelector('input[name="showToolbarButton"]');
+      const toolbarAppsGroup = htmlElement.querySelector('.toolbar-apps-checkboxes')?.closest('.form-group');
+      const toolbarAppsInputs = toolbarAppsGroup?.querySelectorAll('input[name="toolbarApps"]');
+      if (toolbarCheckbox && toolbarAppsGroup && toolbarAppsInputs) {
+        toolbarCheckbox.addEventListener('change', () => {
+          toolbarAppsGroup.classList.toggle('disabled', !toolbarCheckbox.checked);
+          toolbarAppsInputs.forEach((input) => (input.disabled = !toolbarCheckbox.checked));
         });
       }
     }

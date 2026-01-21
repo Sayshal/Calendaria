@@ -5254,79 +5254,99 @@ span.calendaria-moon-icon {
     margin-bottom: 1rem;
   }
 
+  .trigger-header {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0;
+    color: var(--color-text-dark-secondary);
+    font-size: var(--font-size-12);
+    font-weight: 500;
+
+    span:first-child {
+      flex: 0 0 160px;
+    }
+
+    span:nth-child(2) {
+      flex: 1;
+    }
+
+    span:last-child {
+      width: 28px;
+    }
+  }
+
   .season-trigger-row,
   .moon-trigger-row {
     gap: 0.5rem;
     display: flex;
     align-items: center;
-    padding: 0.5rem;
-    border-radius: 4px;
-    background: var(--color-cool-5);
+    padding: 0.25rem 0;
+  }
 
-    .trigger-label {
+  .season-trigger-row {
+    > select:first-child {
       flex: 0 0 160px;
-      overflow: hidden;
-      font-size: 0.85rem;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    .remove-trigger {
-      display: flex;
-      flex-shrink: 0;
-      justify-content: center;
-      align-items: center;
-      width: 28px;
-      height: 28px;
-      padding: 0;
-      border: none;
-      border-radius: 4px;
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      background: transparent;
-      transition:
-        background 0.15s,
-        color 0.15s;
-
-      &:hover {
-        color: var(--color-level-error);
-        background: var(--color-cool-4);
-      }
+    > select:nth-child(2) {
+      flex: 1;
     }
   }
 
-  .add-season-trigger,
-  .add-moon-trigger {
-    .trigger-inputs {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
+  .moon-trigger-row {
+    > select:first-child {
+      flex: 0 0 120px;
+    }
 
-      .add-trigger-btn {
-        display: flex;
-        flex-shrink: 0;
-        justify-content: center;
-        align-items: center;
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        border: none;
-        border-radius: 4px;
-        color: var(--color-text-light-highlight);
-        cursor: pointer;
-        background: var(--color-warm-1);
-        transition: opacity 0.15s;
+    > select:nth-child(2) {
+      flex: 0 0 120px;
+    }
 
-        &:hover {
-          opacity: 0.85;
-        }
-      }
+    > select:nth-child(3) {
+      flex: 1;
+    }
+  }
+
+  .moon-triggers-list .trigger-header {
+    span:first-child {
+      flex: 0 0 120px;
+    }
+
+    span:nth-child(2) {
+      flex: 0 0 120px;
+    }
+
+    span:nth-child(3) {
+      flex: 1;
+    }
+  }
+
+  .fieldset-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    > .hint {
+      flex: 1;
+      margin: 0;
+    }
+  }
+
+  .add-trigger-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    select {
+      min-width: 100px;
     }
   }
 
   .toolbar-apps-checkboxes {
     display: flex;
     gap: 8px;
+    margin-right: 3px;
 
     .checkbox-inline {
       display: flex;
@@ -5956,7 +5976,6 @@ span.calendaria-moon-icon {
   justify-content: flex-end;
 }
 
-
 /* ======================================== */
 /* Left Info Panel                          */
 /* ======================================== */
@@ -6567,7 +6586,6 @@ span.calendaria-moon-icon {
   font-size: var(--font-size-10, 0.625rem);
 }
 
-
 .calendaria-hud.compact .calendaria-hud-live-event {
   width: 22px;
   height: 22px;
@@ -7056,7 +7074,6 @@ span.calendaria-moon-icon {
     .tab-group {
       display: flex;
       flex-direction: column;
-      border-left: 3px solid var(--group-color, var(--color-cool-4));
 
       &:last-child {
         margin-top: auto;
@@ -7065,15 +7082,9 @@ span.calendaria-moon-icon {
       .tab-group-header {
         padding: 0.5rem 0.5rem 0.25rem;
         color: var(--color-text-dark-secondary);
-        font-weight: 600;
+        font-weight: 500;
         font-size: var(--font-size-14);
         text-align: right;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-
-      [data-tab] {
-        border-left: none;
       }
     }
 
@@ -7357,6 +7368,17 @@ span.calendaria-moon-icon {
     flex-wrap: wrap;
     justify-content: center;
 
+    &.app-controls {
+      > button:first-child {
+        flex: 1;
+      }
+
+      > button:nth-child(2),
+      > button:nth-child(3) {
+        flex: 2;
+      }
+    }
+
     button,
     a.link-button {
       gap: 0.5rem;
@@ -7456,8 +7478,6 @@ span.calendaria-moon-icon {
   }
 
   .form-group .form-fields:has(input[type='range']) {
-    gap: 0.75rem;
-    display: flex;
     align-items: center;
 
     input[type='range'] {
@@ -7466,6 +7486,7 @@ span.calendaria-moon-icon {
 
     .range-value {
       min-width: 2.5em;
+      flex: 0;
       color: var(--color-text-secondary);
       font-size: var(--font-size-12);
       text-align: center;
@@ -7477,6 +7498,33 @@ span.calendaria-moon-icon {
     display: flex;
     flex-direction: column;
     margin-bottom: 0.75rem;
+  }
+
+  .category-header {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0;
+    color: var(--color-text-dark-secondary);
+    font-size: var(--font-size-12);
+    font-weight: 500;
+
+    .col-color {
+      width: 2rem;
+      text-align: center;
+    }
+
+    .col-name {
+      flex: 1;
+    }
+
+    .col-icon {
+      width: 10em;
+    }
+
+    .col-actions {
+      width: 2rem;
+    }
   }
 
   .category-row {
@@ -8002,10 +8050,10 @@ span.calendaria-moon-icon {
   .permission-row {
     display: contents;
 
-    .permission-name {
+    label.permission-name {
       padding: 0.25rem 0;
-      font-weight: bold;
-      font-size: var(--font-size-16);
+      font-weight: 500;
+      font-size: var(--font-size-14);
     }
 
     input[type='checkbox'] {
@@ -8014,9 +8062,15 @@ span.calendaria-moon-icon {
 
     .permission-hint {
       grid-column: 1 / -1;
-      margin: 0 0 0.75rem;
+      margin: 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border-light-tertiary);
       color: var(--color-text-light-secondary);
       font-size: var(--font-size-11);
+    }
+
+    &:last-child .permission-hint {
+      border-bottom: none;
     }
   }
 }

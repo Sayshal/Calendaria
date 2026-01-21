@@ -4,9 +4,9 @@
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Theme"}}</legend>
 
     <div class="form-group theme-selector">
-      <label>{{localize "CALENDARIA.ThemeEditor.PresetSelect"}}</label>
+      <label for="themeMode">{{localize "CALENDARIA.ThemeEditor.PresetSelect"}}</label>
       <div class="form-fields">
-        <select name="themeMode">
+        <select id="themeMode" name="themeMode">
           {{#each themeModes}}
             <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -55,19 +55,23 @@
           {{/each}}
         </div>
 
-        <div class="button-row theme-actions">
-          <button type="button" data-action="resetAllColors">
-            <i class="fas fa-undo"></i>
-            {{localize "CALENDARIA.ThemeEditor.ResetAll"}}
-          </button>
-          <button type="button" data-action="exportTheme">
-            <i class="fas fa-download"></i>
-            {{localize "CALENDARIA.ThemeEditor.Export"}}
-          </button>
-          <button type="button" data-action="importTheme">
-            <i class="fas fa-upload"></i>
-            {{localize "CALENDARIA.Importer.Import"}}
-          </button>
+        <div class="button-row theme-actions open-app-button">
+          <div class="btn-group-left">
+            <button type="button" data-action="resetAllColors">
+              <i class="fas fa-undo"></i>
+              {{localize "CALENDARIA.ThemeEditor.ResetAll"}}
+            </button>
+          </div>
+          <div class="btn-group-right">
+            <button type="button" data-action="importTheme">
+              <i class="fas fa-upload"></i>
+              {{localize "CALENDARIA.Importer.Import"}}
+            </button>
+            <button type="button" data-action="exportTheme">
+              <i class="fas fa-download"></i>
+              {{localize "CALENDARIA.ThemeEditor.Export"}}
+            </button>
+          </div>
         </div>
       </div>
     {{/if}}

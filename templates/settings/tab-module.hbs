@@ -5,9 +5,9 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
+        <label for="primaryGM">{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
         <div class="form-fields">
-          <select name="primaryGM">
+          <select id="primaryGM" name="primaryGM">
             {{#each primaryGMOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
@@ -21,32 +21,33 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Integration"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
+        <label for="showToolbarButton">{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="showToolbarButton" {{#if showToolbarButton}}checked{{/if}}>
+          <input type="checkbox" id="showToolbarButton" name="showToolbarButton"
+            {{#if showToolbarButton}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowToolbarButton.Hint"}}</p>
       </div>
 
-      {{#if showToolbarButton}}
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Settings.ToolbarApps.Name"}}</label>
-          <div class="form-fields toolbar-apps-checkboxes">
-            {{#each toolbarAppOptions}}
-              <label class="checkbox-inline" data-tooltip="{{this.label}}">
-                <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}>
-                <i class="fas {{this.icon}}"></i>
-              </label>
-            {{/each}}
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Settings.ToolbarApps.Hint"}}</p>
+      <div class="form-group{{#unless showToolbarButton}} disabled{{/unless}}">
+        <label>{{localize "CALENDARIA.Settings.ToolbarApps.Name"}}</label>
+        <div class="form-fields toolbar-apps-checkboxes">
+          {{#each toolbarAppOptions}}
+            <label class="checkbox-inline" data-tooltip="{{this.label}}">
+              <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}
+                {{#unless ../showToolbarButton}}disabled{{/unless}}>
+              <i class="fas {{this.icon}}"></i>
+            </label>
+          {{/each}}
         </div>
-      {{/if}}
+        <p class="hint">{{localize "CALENDARIA.Settings.ToolbarApps.Hint"}}</p>
+      </div>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ShowJournalFooter.Name"}}</label>
+        <label for="showJournalFooter">{{localize "CALENDARIA.Settings.ShowJournalFooter.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="showJournalFooter" {{#if showJournalFooter}}checked{{/if}}>
+          <input type="checkbox" id="showJournalFooter" name="showJournalFooter"
+            {{#if showJournalFooter}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowJournalFooter.Hint"}}</p>
       </div>
@@ -57,9 +58,9 @@
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}</legend>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.Logger.Name"}}</label>
+      <label for="loggingLevel">{{localize "CALENDARIA.Settings.Logger.Name"}}</label>
       <div class="form-fields">
-        <select name="loggingLevel">
+        <select id="loggingLevel" name="loggingLevel">
           {{#each loggingLevelOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -70,9 +71,9 @@
 
     {{#if isGM}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
+        <label for="devMode">{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="devMode" {{#if devMode}}checked{{/if}}>
+          <input type="checkbox" id="devMode" name="devMode" {{#if devMode}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
       </div>

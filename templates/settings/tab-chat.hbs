@@ -5,9 +5,9 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
+        <label for="chatTimestampMode">{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
         <div class="form-fields">
-          <select name="chatTimestampMode">
+          <select id="chatTimestampMode" name="chatTimestampMode">
             {{#each chatTimestampModeOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
@@ -17,9 +17,10 @@
       </div>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
+        <label for="chatTimestampShowTime">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="chatTimestampShowTime" {{#if chatTimestampShowTime}}checked{{/if}}>
+          <input type="checkbox" id="chatTimestampShowTime" name="chatTimestampShowTime"
+            {{#if chatTimestampShowTime}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
       </div>

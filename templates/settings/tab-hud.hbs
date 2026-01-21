@@ -1,17 +1,17 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  <div class="button-row open-app-button">
-    <button type="button" data-action="openHUD">
-      <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenHUD"}}
+  <div class="button-row app-controls">
+    <button type="button" data-action="resetPosition" data-target="hud">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
     </button>
     <button type="button" data-action="closeHUD">
       <i class="fas fa-times"></i>
       {{localize "CALENDARIA.SettingsPanel.CloseHUD"}}
     </button>
-    <button type="button" data-action="resetPosition" data-target="hud">
-      <i class="fas fa-undo"></i>
-      {{localize "CALENDARIA.Common.ResetPosition"}}
+    <button type="button" data-action="openHUD">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.SettingsPanel.OpenHUD"}}
     </button>
   </div>
 
@@ -19,27 +19,27 @@
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.ShowCalendarHUD.Name"}}</label>
+      <label for="showCalendarHUD">{{localize "CALENDARIA.Settings.ShowCalendarHUD.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="showCalendarHUD" {{#if showCalendarHUD}}checked{{/if}}>
+        <input type="checkbox" id="showCalendarHUD" name="showCalendarHUD" {{#if showCalendarHUD}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.ShowCalendarHUD.Hint"}}</p>
     </div>
 
     {{#if isGM}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
+        <label for="forceHUD">{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
+          <input type="checkbox" id="forceHUD" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
       </div>
     {{/if}}
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.CalendarHUDMode.Name"}}</label>
+      <label for="calendarHUDMode">{{localize "CALENDARIA.Settings.CalendarHUDMode.Name"}}</label>
       <div class="form-fields">
-        <select name="calendarHUDMode">
+        <select id="calendarHUDMode" name="calendarHUDMode">
           {{#each hudModeOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -49,9 +49,9 @@
     </div>
 
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
-      <label>{{localize "CALENDARIA.Settings.HUDDialStyle.Name"}}</label>
+      <label for="hudDialStyle">{{localize "CALENDARIA.Settings.HUDDialStyle.Name"}}</label>
       <div class="form-fields">
-        <select name="hudDialStyle" {{#if isCompactMode}}disabled{{/if}}>
+        <select id="hudDialStyle" name="hudDialStyle" {{#if isCompactMode}}disabled{{/if}}>
           {{#each dialStyleOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -63,9 +63,9 @@
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDTrayDirection.Name"}}</label>
+      <label for="hudTrayDirection">{{localize "CALENDARIA.Settings.HUDTrayDirection.Name"}}</label>
       <div class="form-fields">
-        <select name="hudTrayDirection">
+        <select id="hudTrayDirection" name="hudTrayDirection">
           {{#each trayDirectionOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -75,34 +75,34 @@
     </div>
 
     <div class="form-group{{#if hudCombatHide}} disabled{{/if}}">
-      <label>{{localize "CALENDARIA.Settings.HUDCombatCompact.Name"}}</label>
+      <label for="hudCombatCompact">{{localize "CALENDARIA.Settings.HUDCombatCompact.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}}
+        <input type="checkbox" id="hudCombatCompact" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}}
           {{#if hudCombatHide}}disabled{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatCompact.Hint"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDCombatHide.Name"}}</label>
+      <label for="hudCombatHide">{{localize "CALENDARIA.Settings.HUDCombatHide.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudCombatHide" {{#if hudCombatHide}}checked{{/if}}>
+        <input type="checkbox" id="hudCombatHide" name="hudCombatHide" {{#if hudCombatHide}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatHide.Hint"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <label for="hudAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudAutoFade" {{#if hudAutoFade}}checked{{/if}}>
+        <input type="checkbox" id="hudAutoFade" name="hudAutoFade" {{#if hudAutoFade}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
     </div>
 
     <div class="form-group{{#unless hudAutoFade}} disabled{{/unless}}">
-      <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <label for="hudIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
+        <input type="range" id="hudIdleOpacity" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
           {{#unless hudAutoFade}}disabled{{/unless}}>
         <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}"
           style="width: 48px; flex: none" {{#unless hudAutoFade}}disabled{{/unless}}>
@@ -111,10 +111,10 @@
     </div>
 
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
-      <label>{{localize "CALENDARIA.Settings.HUDWidthScale.Name"}}</label>
+      <label for="hudWidthScale">{{localize "CALENDARIA.Settings.HUDWidthScale.Name"}}</label>
       <div class="form-fields range-field">
-        <input type="range" name="hudWidthScale" min="0.5" max="2" step="0.05" value="{{hudWidthScale}}"
-          {{#if isCompactMode}}disabled{{/if}}>
+        <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
+          value="{{hudWidthScale}}" {{#if isCompactMode}}disabled{{/if}}>
         <span class="range-value">{{hudWidthScale}}x ({{hudWidthScalePixels}}px)</span>
       </div>
       <p class="hint">
@@ -128,18 +128,18 @@
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
+      <label for="hudShowWeather">{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudShowWeather" {{#if hudShowWeather}}checked{{/if}}>
+        <input type="checkbox" id="hudShowWeather" name="hudShowWeather" {{#if hudShowWeather}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowWeather.Hint"}}</p>
     </div>
 
     {{#unless isCompactMode}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+        <label for="hudWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
         <div class="form-fields">
-          <select name="hudWeatherDisplayMode">
+          <select id="hudWeatherDisplayMode" name="hudWeatherDisplayMode">
             {{#each weatherDisplayModeOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
@@ -150,18 +150,18 @@
     {{/unless}}
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
+      <label for="hudShowSeason">{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudShowSeason" {{#if hudShowSeason}}checked{{/if}}>
+        <input type="checkbox" id="hudShowSeason" name="hudShowSeason" {{#if hudShowSeason}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowSeason.Hint"}}</p>
     </div>
 
     {{#unless isCompactMode}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+        <label for="hudSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
         <div class="form-fields">
-          <select name="hudSeasonDisplayMode">
+          <select id="hudSeasonDisplayMode" name="hudSeasonDisplayMode">
             {{#each seasonDisplayModeOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
@@ -172,9 +172,9 @@
     {{/unless}}
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
+      <label for="hudShowEra">{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudShowEra" {{#if hudShowEra}}checked{{/if}}>
+        <input type="checkbox" id="hudShowEra" name="hudShowEra" {{#if hudShowEra}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowEra.Hint"}}</p>
     </div>
@@ -185,17 +185,17 @@
     <input type="hidden" name="hudStickySection" value="1">
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.SettingsPanel.Sticky.Tray"}}</label>
+      <label for="hudStickyTray">{{localize "CALENDARIA.SettingsPanel.Sticky.Tray"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudStickyTray" {{#if hudStickyTray}}checked{{/if}}>
+        <input type="checkbox" id="hudStickyTray" name="hudStickyTray" {{#if hudStickyTray}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTray"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Common.LockPosition"}}</label>
+      <label for="calendarHUDLocked">{{localize "CALENDARIA.Common.LockPosition"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="calendarHUDLocked" {{#if calendarHUDLocked}}checked{{/if}}>
+        <input type="checkbox" id="calendarHUDLocked" name="calendarHUDLocked" {{#if calendarHUDLocked}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.LockHUDPosition"}}</p>
     </div>

@@ -3,9 +3,23 @@
   {{#if isGM}}
     <fieldset>
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Categories"}}</legend>
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
+      <div class="fieldset-header-row">
+        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
+        <button type="button" data-action="addCategory" class="add-button">
+          <i class="fas fa-plus"></i>
+          {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
+        </button>
+      </div>
 
       <div class="categories-list">
+        {{#if categories.length}}
+          <div class="category-header">
+            <span class="col-color">{{localize "CALENDARIA.Common.Color"}}</span>
+            <span class="col-name">{{localize "CALENDARIA.Common.Name"}}</span>
+            <span class="col-icon">{{localize "CALENDARIA.Common.Icon"}}</span>
+            <span class="col-actions"></span>
+          </div>
+        {{/if}}
         {{#each categories}}
           <div class="category-row" data-category-id="{{this.id}}">
             <input type="hidden" name="categories.{{@index}}.id" value="{{this.id}}">
@@ -23,11 +37,6 @@
           <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.Category.None"}}</p>
         {{/each}}
       </div>
-
-      <button type="button" data-action="addCategory" class="add-button">
-        <i class="fas fa-plus"></i>
-        {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
-      </button>
     </fieldset>
   {{/if}}
 

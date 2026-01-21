@@ -1,17 +1,17 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  <div class="button-row open-app-button">
-    <button type="button" data-action="openTimeKeeper">
-      <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenTimeKeeper"}}
+  <div class="button-row app-controls">
+    <button type="button" data-action="resetPosition" data-target="timekeeper">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
     </button>
     <button type="button" data-action="closeTimeKeeper">
       <i class="fas fa-times"></i>
       {{localize "CALENDARIA.SettingsPanel.CloseTimeKeeper"}}
     </button>
-    <button type="button" data-action="resetPosition" data-target="timekeeper">
-      <i class="fas fa-undo"></i>
-      {{localize "CALENDARIA.Common.ResetPosition"}}
+    <button type="button" data-action="openTimeKeeper">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.SettingsPanel.OpenTimeKeeper"}}
     </button>
   </div>
 
@@ -19,26 +19,27 @@
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.ShowTimeKeeper.Name"}}</label>
+      <label for="showTimeKeeper">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="showTimeKeeper" {{#if showTimeKeeper}}checked{{/if}}>
+        <input type="checkbox" id="showTimeKeeper" name="showTimeKeeper" {{#if showTimeKeeper}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <label for="timeKeeperAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="timeKeeperAutoFade" {{#if timeKeeperAutoFade}}checked{{/if}}>
+        <input type="checkbox" id="timeKeeperAutoFade" name="timeKeeperAutoFade"
+          {{#if timeKeeperAutoFade}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
     </div>
 
     <div class="form-group{{#unless timeKeeperAutoFade}} disabled{{/unless}}">
-      <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <label for="timeKeeperIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" name="timeKeeperIdleOpacity" min="0" max="100" value="{{timeKeeperIdleOpacity}}"
-          {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+        <input type="range" id="timeKeeperIdleOpacity" name="timeKeeperIdleOpacity" min="0" max="100"
+          value="{{timeKeeperIdleOpacity}}" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
         <input type="number" class="range-value" min="0" max="100" value="{{timeKeeperIdleOpacity}}"
           style="width: 48px; flex: none" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
       </div>

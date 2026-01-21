@@ -1,17 +1,17 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  <div class="button-row open-app-button">
-    <button type="button" data-action="openBigCal">
-      <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenBigCal"}}
+  <div class="button-row app-controls">
+    <button type="button" data-action="resetPosition" data-target="bigcal">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
     </button>
     <button type="button" data-action="closeBigCal">
       <i class="fas fa-times"></i>
       {{localize "CALENDARIA.SettingsPanel.CloseBigCal"}}
     </button>
-    <button type="button" data-action="resetPosition" data-target="bigcal">
-      <i class="fas fa-undo"></i>
-      {{localize "CALENDARIA.Common.ResetPosition"}}
+    <button type="button" data-action="openBigCal">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.SettingsPanel.OpenBigCal"}}
     </button>
   </div>
 

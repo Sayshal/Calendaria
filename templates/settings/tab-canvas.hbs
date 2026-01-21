@@ -5,9 +5,10 @@
       <legend>{{localize "CALENDARIA.Settings.StickyZones.Name"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.StickyZones.Enable"}}</label>
+        <label for="stickyZonesEnabled">{{localize "CALENDARIA.Settings.StickyZones.Enable"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="stickyZonesEnabled" {{#if stickyZonesEnabled}}checked{{/if}}>
+          <input type="checkbox" id="stickyZonesEnabled" name="stickyZonesEnabled"
+            {{#if stickyZonesEnabled}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.StickyZones.Hint"}}</p>
       </div>
@@ -17,34 +18,36 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.SceneIntegration"}}</legend>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>
+        <label for="darknessSync">{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="darknessSync" {{#if darknessSync}}checked{{/if}}>
+          <input type="checkbox" id="darknessSync" name="darknessSync" {{#if darknessSync}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.DarknessSync.Hint"}}</p>
       </div>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.DarknessWeatherSync.Name"}}</label>
+        <label for="darknessWeatherSync">{{localize "CALENDARIA.Settings.DarknessWeatherSync.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="darknessWeatherSync" {{#if darknessWeatherSync}}checked{{/if}}>
+          <input type="checkbox" id="darknessWeatherSync" name="darknessWeatherSync"
+            {{#if darknessWeatherSync}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.DarknessWeatherSync.Hint"}}</p>
       </div>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.AmbienceSync.Name"}}</label>
+        <label for="ambienceSync">{{localize "CALENDARIA.Settings.AmbienceSync.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" name="ambienceSync" {{#if ambienceSync}}checked{{/if}}>
+          <input type="checkbox" id="ambienceSync" name="ambienceSync" {{#if ambienceSync}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.AmbienceSync.Hint"}}</p>
       </div>
 
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Name"}}</label>
+        <label
+          for="defaultBrightnessMultiplier">{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Name"}}</label>
         <div class="form-fields range-field">
-          <input type="range" name="defaultBrightnessMultiplier" min="0.5" max="1.5" step="0.1"
-            value="{{defaultBrightnessMultiplier}}">
+          <input type="range" id="defaultBrightnessMultiplier" name="defaultBrightnessMultiplier" min="0.5" max="1.5"
+            step="0.1" value="{{defaultBrightnessMultiplier}}">
           <span class="range-value">{{defaultBrightnessMultiplier}}x</span>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Hint"}}</p>
