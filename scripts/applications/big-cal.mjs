@@ -61,6 +61,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static DEFAULT_OPTIONS = {
+    id: 'calendaria-big-cal',
     classes: ['calendaria', 'big-cal'],
     tag: 'div',
     window: { contentClasses: ['big-cal'], icon: 'fas fa-calendar', resizable: false },
@@ -1695,5 +1696,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const year = parseInt(target.dataset.year);
     this.viewedDate = { year, month, day: 1 };
     await this.render();
+  }
+
+  /**
+   * Toggle the BigCal visibility.
+   */
+  static toggle() {
+    const existing = foundry.applications.instances.get(this.DEFAULT_OPTIONS.id);
+    if (existing?.rendered) existing.close();
+    else new BigCal().render(true);
   }
 }

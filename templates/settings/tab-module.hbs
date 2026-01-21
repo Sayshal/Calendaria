@@ -16,6 +16,41 @@
         <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
       </div>
     </fieldset>
+
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Integration"}}</legend>
+
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="showToolbarButton" {{#if showToolbarButton}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowToolbarButton.Hint"}}</p>
+      </div>
+
+      {{#if showToolbarButton}}
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.Settings.ToolbarApps.Name"}}</label>
+          <div class="form-fields toolbar-apps-checkboxes">
+            {{#each toolbarAppOptions}}
+              <label class="checkbox-inline" data-tooltip="{{this.label}}">
+                <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}>
+                <i class="fas {{this.icon}}"></i>
+              </label>
+            {{/each}}
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.ToolbarApps.Hint"}}</p>
+        </div>
+      {{/if}}
+
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ShowJournalFooter.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="showJournalFooter" {{#if showJournalFooter}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowJournalFooter.Hint"}}</p>
+      </div>
+    </fieldset>
   {{/if}}
 
   <fieldset>

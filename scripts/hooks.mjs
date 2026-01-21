@@ -5,9 +5,11 @@
  * @author Tyler
  */
 
+import { BigCal } from './applications/big-cal.mjs';
 import { HUD } from './applications/hud.mjs';
 import { MiniCal } from './applications/mini-cal.mjs';
 import { Stopwatch } from './applications/stopwatch.mjs';
+import { TimeKeeper } from './applications/time-keeper.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { onChatMessage } from './chat/chat-commands.mjs';
 import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessageHTML } from './chat/chat-timestamp.mjs';
@@ -56,19 +58,33 @@ export function registerHooks() {
   log(3, 'Hooks registered');
 }
 
+/** App definitions for toolbar buttons. */
+const TOOLBAR_APP_DEFS = {
+  bigcal: { icon: 'fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', toggle: () => BigCal.toggle() },
+  minical: { icon: 'fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCal', toggle: () => MiniCal.toggle() },
+  hud: { icon: 'fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
+  timekeeper: { icon: 'fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', toggle: () => TimeKeeper.toggle() },
+  stopwatch: { icon: 'fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', toggle: () => Stopwatch.toggle() }
+};
+
 /**
- * Add Calendaria button to scene controls.
+ * Add Calendaria buttons to scene controls.
  * @param {object} controls - Scene controls object (V13 style)
  */
 function onGetSceneControlButtons(controls) {
   if (!controls.notes?.tools) return;
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON)) return;
-  controls.notes.tools.calendaria = {
-    name: 'calendaria',
-    title: localize('CALENDARIA.SceneControl.OpenCalendar'),
-    icon: 'fas fa-calendar-days',
-    visible: true,
-    onChange: () => MiniCal.toggle(),
-    button: true
-  };
+  const toolbarApps = game.settings.get(MODULE.ID, SETTINGS.TOOLBAR_APPS);
+  for (const appId of toolbarApps) {
+    const def = TOOLBAR_APP_DEFS[appId];
+    if (!def) continue;
+    controls.notes.tools[`calendaria-${appId}`] = {
+      name: `calendaria-${appId}`,
+      title: localize(def.label),
+      icon: `fas ${def.icon}`,
+      visible: true,
+      onChange: def.toggle,
+      button: true
+    };
+  }
 }

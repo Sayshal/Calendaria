@@ -16,7 +16,7 @@ import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 import * as StickyZones from './utils/sticky-zones.mjs';
 
-const { ArrayField, ObjectField, BooleanField, NumberField, StringField } = foundry.data.fields;
+const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
 
 /**
  * Register all module settings with Foundry VTT.
@@ -253,13 +253,34 @@ export function registerSettings() {
     })
   });
 
-  /** Show toolbar button in scene controls */
+  /** Show toolbar buttons in scene controls */
   game.settings.register(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, {
     name: 'CALENDARIA.Settings.ShowToolbarButton.Name',
     hint: 'CALENDARIA.Settings.ShowToolbarButton.Hint',
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: true }),
+    requiresReload: true
+  });
+
+  /** Which apps to show as toolbar buttons */
+  game.settings.register(MODULE.ID, SETTINGS.TOOLBAR_APPS, {
+    name: 'CALENDARIA.Settings.ToolbarApps.Name',
+    hint: 'CALENDARIA.Settings.ToolbarApps.Hint',
+    scope: 'world',
+    config: false,
+    type: new SetField(new StringField()),
+    default: ['minical'],
+    requiresReload: true
+  });
+
+  /** Show Calendaria footer in journal sidebar */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_JOURNAL_FOOTER, {
+    name: 'CALENDARIA.Settings.ShowJournalFooter.Name',
+    hint: 'CALENDARIA.Settings.ShowJournalFooter.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false }),
     requiresReload: true
   });
 

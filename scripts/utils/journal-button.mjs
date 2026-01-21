@@ -1,43 +1,71 @@
 /**
- * Journal Calendar Button
- * Adds a calendar button to the journal sidebar and hides calendar infrastructure.
+ * Journal Calendar Footer
+ * Replaces the journal sidebar footer with Calendaria app toggles.
  * @module Utils/JournalButton
  * @author Tyler
  */
 
 import { BigCal } from '../applications/big-cal.mjs';
+import { HUD } from '../applications/hud.mjs';
+import { MiniCal } from '../applications/mini-cal.mjs';
+import { Stopwatch } from '../applications/stopwatch.mjs';
+import { TimeKeeper } from '../applications/time-keeper.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { localize } from './localization.mjs';
 import { log } from './logger.mjs';
 
 /**
  * Handle Journal Directory activation.
- * Adds calendar button and hides calendar folders/journals from sidebar.
+ * Replaces footer with Calendaria controls and hides calendar infrastructure.
  * @param {object} app - The document directory application
  */
 export function onActivateDocumentDirectory(app) {
+  if (app.documentName !== 'JournalEntry') return;
   const element = app.element;
   if (!element) return;
-  addCalendarButton({ element });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_JOURNAL_FOOTER)) replaceFooter({ element });
   hideCalendarInfrastructure({ element });
 }
 
 /**
- * Add Calendar button to journal sidebar footer.
+ * Replace the journal sidebar footer with Calendaria controls.
  * @param {object} options - Options object
  * @param {HTMLElement} options.element - The sidebar element
  */
-function addCalendarButton({ element }) {
+function replaceFooter({ element }) {
   const footer = element.querySelector('.directory-footer');
   if (!footer) return;
-  if (footer.querySelector('.calendaria-open-button')) return;
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'calendaria-open-button';
-  button.innerHTML = `<i class="fas fa-calendar-days"></i> ${localize('CALENDARIA.HUD.OpenBigCal')}`;
-  button.addEventListener('click', () => new BigCal().render(true));
-  footer.appendChild(button);
-  log(3, 'Journal calendar button added');
+  if (footer.querySelector('.calendaria-footer')) return;
+
+  footer.innerHTML = '';
+  footer.classList.add('calendaria-footer');
+
+  // Button container
+  const buttons = document.createElement('div');
+  buttons.className = 'calendaria-footer-buttons';
+
+  const apps = [
+    { id: 'bigcal', icon: 'fa-calendar-days', tooltip: 'CALENDARIA.SettingsPanel.Tab.BigCal', toggle: () => BigCal.toggle() },
+    { id: 'minical', icon: 'fa-compress', tooltip: 'CALENDARIA.SettingsPanel.Tab.MiniCal', toggle: () => MiniCal.toggle() },
+    { id: 'hud', icon: 'fa-sun', tooltip: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
+    { id: 'timekeeper', icon: 'fa-gauge', tooltip: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', toggle: () => TimeKeeper.toggle() },
+    { id: 'stopwatch', icon: 'fa-stopwatch', tooltip: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', toggle: () => Stopwatch.toggle() }
+  ];
+
+  for (const app of apps) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'calendaria-footer-btn';
+    btn.dataset.app = app.id;
+    btn.dataset.tooltip = localize(app.tooltip);
+    btn.dataset.tooltipDirection = 'UP';
+    btn.innerHTML = `<i class="fas ${app.icon}"></i>`;
+    btn.addEventListener('click', app.toggle);
+    buttons.appendChild(btn);
+  }
+
+  footer.appendChild(buttons);
+  log(3, 'Journal footer replaced with Calendaria controls');
 }
 
 /**

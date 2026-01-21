@@ -373,6 +373,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.PRIMARY_GM]: { tab: 'module', label: 'CALENDARIA.Settings.PrimaryGM.Name' },
     [SETTINGS.LOGGING_LEVEL]: { tab: 'module', label: 'CALENDARIA.Settings.Logger.Name' },
     [SETTINGS.DEV_MODE]: { tab: 'module', label: 'CALENDARIA.SettingsPanel.DevMode.Name' },
+    [SETTINGS.SHOW_TOOLBAR_BUTTON]: { tab: 'module', label: 'CALENDARIA.Settings.ShowToolbarButton.Name' },
+    [SETTINGS.TOOLBAR_APPS]: { tab: 'module', label: 'CALENDARIA.Settings.ToolbarApps.Name' },
+    [SETTINGS.SHOW_JOURNAL_FOOTER]: { tab: 'module', label: 'CALENDARIA.Settings.ShowJournalFooter.Name' },
     [SETTINGS.SHOW_CALENDAR_HUD]: { tab: 'hud', label: 'CALENDARIA.Settings.ShowCalendarHUD.Name' },
     [SETTINGS.FORCE_HUD]: { tab: 'hud', label: 'CALENDARIA.Settings.ForceHUD.Name' },
     [SETTINGS.CALENDAR_HUD_LOCKED]: { tab: 'hud', label: 'CALENDARIA.Settings.CalendarHUDLocked.Name' },
@@ -394,7 +397,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.DISPLAY_FORMATS]: { tab: 'hud', label: 'CALENDARIA.SettingsPanel.Section.DisplayFormats' },
     [SETTINGS.SHOW_MINI_CAL]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ShowMiniCal.Name' },
     [SETTINGS.FORCE_MINI_CAL]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ForceMiniCal.Name' },
-    [SETTINGS.SHOW_TOOLBAR_BUTTON]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ShowToolbarButton.Name' },
     [SETTINGS.MINI_CAL_AUTO_FADE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.MINI_CAL_IDLE_OPACITY]: { tab: 'miniCal', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.MINI_CAL_CONTROLS_DELAY]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalControlsDelay.Name' },
@@ -518,7 +520,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalStickySidebar = miniCalSticky?.sidebar ?? false;
     context.miniCalStickyPosition = miniCalSticky?.position ?? false;
     context.showMiniCal = game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CAL);
-    context.showToolbarButton = game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON);
     context.miniCalAutoFade = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_FADE);
     context.miniCalIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_IDLE_OPACITY);
     context.miniCalControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY);
@@ -917,6 +918,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
     const moduleData = game.data.modules?.find((m) => m.id === MODULE.ID);
     if (moduleData?.languages?.length) context.translations = moduleData.languages.map((lang) => lang.name).join(', ');
+
+    // Toolbar integration settings
+    context.showToolbarButton = game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON);
+    const toolbarApps = game.settings.get(MODULE.ID, SETTINGS.TOOLBAR_APPS);
+    context.toolbarAppOptions = [
+      { id: 'bigcal', icon: 'fa-calendar-days', label: localize('CALENDARIA.SettingsPanel.Tab.BigCal'), checked: toolbarApps.has('bigcal') },
+      { id: 'minical', icon: 'fa-compress', label: localize('CALENDARIA.SettingsPanel.Tab.MiniCal'), checked: toolbarApps.has('minical') },
+      { id: 'hud', icon: 'fa-sun', label: localize('CALENDARIA.SettingsPanel.Tab.HUD'), checked: toolbarApps.has('hud') },
+      { id: 'timekeeper', icon: 'fa-gauge', label: localize('CALENDARIA.SettingsPanel.Tab.TimeKeeper'), checked: toolbarApps.has('timekeeper') },
+      { id: 'stopwatch', icon: 'fa-stopwatch', label: localize('CALENDARIA.SettingsPanel.Tab.Stopwatch'), checked: toolbarApps.has('stopwatch') }
+    ];
+    context.showJournalFooter = game.settings.get(MODULE.ID, SETTINGS.SHOW_JOURNAL_FOOTER);
   }
 
   /**
@@ -968,6 +981,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
+    if ('toolbarApps' in data) {
+      const apps = Array.isArray(data.toolbarApps) ? data.toolbarApps : data.toolbarApps ? [data.toolbarApps] : [];
+      await game.settings.set(MODULE.ID, SETTINGS.TOOLBAR_APPS, new Set(apps));
+    }
+    if ('showJournalFooter' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_JOURNAL_FOOTER, data.showJournalFooter);
     if ('showMiniCal' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, data.showMiniCal);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
     if ('forceHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, data.forceHUD);
