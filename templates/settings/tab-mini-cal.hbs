@@ -49,8 +49,7 @@
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Name"}}</label>
       <div class="form-fields">
-        <input type="range" name="miniCalControlsDelay" value="{{miniCalControlsDelay}}" min="1" max="10"
-          step="1">
+        <input type="range" name="miniCalControlsDelay" value="{{miniCalControlsDelay}}" min="1" max="10" step="1">
         <span class="range-value">{{miniCalControlsDelay}}s</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Hint"}}</p>
@@ -94,8 +93,7 @@
     <div class="form-group">
       <label>{{localize "CALENDARIA.Common.StickyTimeControls"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="miniCalStickyTimeControls"
-          {{#if miniCalStickyTimeControls}}checked{{/if}}>
+        <input type="checkbox" name="miniCalStickyTimeControls" {{#if miniCalStickyTimeControls}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTimeControls"}}</p>
     </div>
@@ -118,7 +116,8 @@
   </fieldset>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}</legend>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}} <a data-action="showTokenReference"
+        data-context-type="date"><i class="fa-regular fa-circle-question"></i></a></legend>
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
     {{#each formatLocations}}

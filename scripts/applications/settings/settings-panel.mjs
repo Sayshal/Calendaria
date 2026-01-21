@@ -22,6 +22,7 @@ import { ImporterApp } from '../importer-app.mjs';
 import { MiniCal } from '../mini-cal.mjs';
 import { Stopwatch } from '../stopwatch.mjs';
 import { TimeKeeper } from '../time-keeper.mjs';
+import { TokenReferenceDialog } from '../token-reference-dialog.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -70,7 +71,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       addWeatherPreset: SettingsPanel.#onAddWeatherPreset,
       editWeatherPreset: SettingsPanel.#onEditWeatherPreset,
       removeWeatherPreset: SettingsPanel.#onRemoveWeatherPreset,
-      navigateToSetting: SettingsPanel.#onNavigateToSetting
+      navigateToSetting: SettingsPanel.#onNavigateToSetting,
+      showTokenReference: SettingsPanel.#onShowTokenReference
     }
   };
 
@@ -669,16 +671,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const stopwatchGametimeKnown = ['stopwatchGametimeFull', 'stopwatchGametimeMinSec', 'stopwatchGametimeSecOnly'];
 
     const allLocations = [
-      { id: 'hudDate', label: localize('CALENDARIA.Format.Location.HudDate'), category: 'hud' },
-      { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud' },
-      { id: 'timekeeperDate', label: localize('CALENDARIA.Format.Location.TimeKeeperDate'), category: 'timekeeper' },
-      { id: 'timekeeperTime', label: localize('CALENDARIA.Format.Location.TimeKeeperTime'), category: 'timekeeper' },
-      { id: 'miniCalHeader', label: localize('CALENDARIA.Format.Location.MiniCalHeader'), category: 'miniCal' },
-      { id: 'miniCalTime', label: localize('CALENDARIA.Format.Location.MiniCalTime'), category: 'miniCal' },
-      { id: 'bigCalHeader', label: localize('CALENDARIA.Format.Location.BigCalHeader'), category: 'bigcal' },
-      { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat' },
-      { id: 'stopwatchRealtime', label: localize('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', gmOnly: true },
-      { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', gmOnly: true }
+      { id: 'hudDate', label: localize('CALENDARIA.Format.Location.HudDate'), category: 'hud', contextType: 'date' },
+      { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud', contextType: 'time' },
+      { id: 'timekeeperDate', label: localize('CALENDARIA.Format.Location.TimeKeeperDate'), category: 'timekeeper', contextType: 'date' },
+      { id: 'timekeeperTime', label: localize('CALENDARIA.Format.Location.TimeKeeperTime'), category: 'timekeeper', contextType: 'time' },
+      { id: 'miniCalHeader', label: localize('CALENDARIA.Format.Location.MiniCalHeader'), category: 'miniCal', contextType: 'date' },
+      { id: 'miniCalTime', label: localize('CALENDARIA.Format.Location.MiniCalTime'), category: 'miniCal', contextType: 'time' },
+      { id: 'bigCalHeader', label: localize('CALENDARIA.Format.Location.BigCalHeader'), category: 'bigcal', contextType: 'date' },
+      { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat', contextType: 'date' },
+      { id: 'stopwatchRealtime', label: localize('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true },
+      { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true }
     ];
 
     const locations = allLocations.filter((loc) => loc.category === category);
@@ -1729,6 +1731,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         if (fieldsetEl) fieldsetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
+  }
+
+  /**
+   * Show the token reference dialog.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static #onShowTokenReference(_event, target) {
+    const contextType = target.dataset.contextType || 'all';
+    TokenReferenceDialog.open({ contextType });
   }
 
   /** @inheritdoc */

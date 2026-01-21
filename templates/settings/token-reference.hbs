@@ -1,0 +1,31 @@
+<div class="token-reference-content">
+  <p class="context-hint">{{localize "CALENDARIA.TokenReference.HighlightHint"}}</p>
+
+  <div class="token-groups">
+    {{#each groups}}
+      <div class="token-group">
+        <h3 class="group-header">{{label}}</h3>
+        <div class="token-list">
+          {{#each tokens}}
+            <div class="token-item {{#if highlighted}}highlighted{{/if}} {{#if isCustom}}custom{{/if}}">
+              <code class="token-code">{{token}}</code>
+              <span class="token-description">{{description}}</span>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+
+  <div class="token-syntax-help">
+    <h3>{{localize "CALENDARIA.TokenReference.SyntaxHelp"}}</h3>
+    <p>{{localize "CALENDARIA.TokenReference.SyntaxExamples"}}</p>
+    <ul class="syntax-examples">
+      <li>{{localize "CALENDARIA.TokenReference.SyntaxExample.Short"}}</li>
+      <li>{{localize "CALENDARIA.TokenReference.SyntaxExample.Long"}}</li>
+      <li>{{localize "CALENDARIA.TokenReference.SyntaxExample.Full"}}</li>
+      <li>{{localize "CALENDARIA.TokenReference.SyntaxExample.DateTime24"}}</li>
+      <li>{{localize "CALENDARIA.TokenReference.SyntaxExample.DateTime12"}}</li>
+    </ul>
+  </div>
+</div>
