@@ -27,7 +27,7 @@ import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
 import TimeClock from './scripts/time/time-clock.mjs';
 import TimeTracker from './scripts/time/time-tracker.mjs';
 import { migrateAllDeprecatedTokens, migrateCustomCalendars } from './scripts/utils/format-utils.mjs';
-import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
+import { registerKeybindings } from './scripts/utils/keybinds.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import * as Permissions from './scripts/utils/permissions.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
@@ -116,7 +116,6 @@ globalThis['CALENDARIA'] = {
   TimeClock,
   TimeKeeper,
   WeatherManager,
-  toggleCalendarVisibility,
   api: CalendariaAPI,
   ...Permissions
 };

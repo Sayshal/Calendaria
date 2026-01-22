@@ -526,6 +526,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalConfirmSetDate = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE);
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
     context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
   }
 
   /**
@@ -603,6 +604,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       .filter((key) => !isMonthless || key !== 'month')
       .map((key) => ({ key, label: incrementLabels[key] || key, jumps: customJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
     context.formatLocations = this.#prepareFormatLocationsForCategory('hud');
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'HUD' });
   }
 
   /**
@@ -611,6 +613,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareBigCalContext(context) {
     context.formatLocations = this.#prepareFormatLocationsForCategory('bigcal');
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'BigCal' });
   }
 
   /**
@@ -726,6 +729,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareStopwatchContext(context) {
     context.stopwatchAutoStartTime = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME);
     context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stopwatch' });
   }
 
   /**
@@ -768,6 +772,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.timeKeeperTimeJumps = Object.keys(getTimeIncrements())
       .filter((key) => !isMonthless || key !== 'month')
       .map((key) => ({ key, label: incrementLabels[key] || key, jumps: timeKeeperJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'TimeKeeper' });
   }
 
   /**
