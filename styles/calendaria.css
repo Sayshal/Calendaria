@@ -8061,13 +8061,11 @@ span.calendaria-moon-icon {
     display: contents;
 
     span {
-      padding: 0.5rem 0.25rem;
-      font-weight: 600;
-      font-size: var(--font-size-11);
-      line-height: 1.3;
+      padding: 0.25rem 0;
+      font-weight: 500;
+      font-size: var(--font-size-12);
+      color: var(--color-text-dark-secondary);
       text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.0313rem;
     }
 
     span:first-child {
@@ -8095,7 +8093,8 @@ span.calendaria-moon-icon {
     label.permission-name {
       padding: 0.25rem 0;
       font-weight: 500;
-      font-size: var(--font-size-14);
+      font-size: var(--font-size-12);
+      color: var(--color-text-dark-secondary);
     }
 
     input[type='checkbox'] {
@@ -8109,10 +8108,6 @@ span.calendaria-moon-icon {
       border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
       color: var(--color-text-light-secondary);
       font-size: var(--font-size-11);
-    }
-
-    &:last-child .permission-hint {
-      border-bottom: none;
     }
   }
 }
