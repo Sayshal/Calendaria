@@ -6078,6 +6078,10 @@ span.calendaria-moon-icon {
   display: none;
 }
 
+.calendaria-hud-date.compressed {
+  font-size: var(--font-size-10, 0.625rem);
+}
+
 .calendaria-hud-event {
   gap: 0.375rem;
   display: flex;

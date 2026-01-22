@@ -213,6 +213,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const dateFormatted = this.#formatDateDisplay(components);
     context.dateDisplay = stripMoonIconMarkers(dateFormatted);
     context.dateDisplayHtml = renderMoonIcons(dateFormatted);
+    context.dateCompressed = context.dateDisplay.length > 35;
     const showWeatherBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
     const showSeasonBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_SEASON);
     const showEraBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
@@ -1166,8 +1167,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const dateEl = this.element.querySelector('.calendaria-hud-date');
     if (dateEl) {
       const dateFormatted = this.#formatDateDisplay(components);
+      const dateText = stripMoonIconMarkers(dateFormatted);
       if (hasMoonIconMarkers(dateFormatted)) dateEl.innerHTML = renderMoonIcons(dateFormatted);
       else dateEl.textContent = dateFormatted;
+      dateEl.classList.toggle('compressed', dateText.length > 35);
     }
     const hud = this.element.querySelector('.calendaria-hud-content');
     if (hud) hud.classList.toggle('time-flowing', TimeClock.running);

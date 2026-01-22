@@ -50,7 +50,7 @@
       </div>
 
       <div class="calendaria-hud-info-panel">
-        <span class="calendaria-hud-date" {{#if canChangeDateTime}} data-action="setDate"
+        <span class="calendaria-hud-date{{#if dateCompressed}} compressed{{/if}}" {{#if canChangeDateTime}} data-action="setDate"
           data-tooltip="{{dateDisplay}} ({{localize 'CALENDARIA.HUD.ClickToSetDate'}})" {{else}}
           data-tooltip="{{dateDisplay}}" {{/if}}>{{{dateDisplayHtml}}}</span>
       </div>
