@@ -1084,7 +1084,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       }
       await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS, jumps);
-      foundry.applications.instances.get('time-keeper-hud')?.render();
+      foundry.applications.instances.get('time-keeper')?.render();
     }
 
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
@@ -1179,14 +1179,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, newFormats);
       Hooks.callAll('calendaria.displayFormatsChanged', newFormats);
       if (stopwatchChanged) foundry.applications.instances.get('calendaria-stopwatch')?.render();
-      // Re-render affected parts to sync dropdown state
       const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
       if (settingsPanel?.rendered && affectedParts.size > 0) settingsPanel.render({ parts: [...affectedParts] });
     }
 
     // Re-render applications when their settings change
     const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity'];
-    if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('time-keeper-hud')?.render();
+    if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('time-keeper')?.render();
 
     const hudKeys = [
       'hudDialStyle',
@@ -1246,7 +1245,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const config = {
       miniCal: { setting: SETTINGS.MINI_CAL_POSITION, appId: 'mini-cal' },
       hud: { setting: SETTINGS.CALENDAR_HUD_POSITION, appId: 'calendaria-hud' },
-      timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'time-keeper-hud' }
+      timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'time-keeper' }
     };
     const { setting, appId } = config[targetType] || {};
     if (!setting) return;
@@ -1872,12 +1871,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const widthScaleHint = widthScaleGroup?.querySelector('.hint');
       const widthScaleValue = widthScaleGroup?.querySelector('.range-value');
 
-      // Width scale range slider value display
       if (widthScaleInput && widthScaleValue) {
         widthScaleInput.addEventListener('input', (e) => {
           const scale = parseFloat(e.target.value);
-          const pixels = Math.round(scale * 800);
-          widthScaleValue.textContent = `${scale}x (${pixels}px)`;
+          const rem = Math.round(scale * 50 * 10) / 10;
+          widthScaleValue.textContent = `${scale}x (${rem}rem)`;
         });
       }
 

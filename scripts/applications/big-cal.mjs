@@ -1208,8 +1208,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _positionSearchPanel() {
     const panel = this.element.querySelector('.calendaria-hud-search-panel');
     if (!panel) return;
-    panel.style.width = '280px';
-    panel.style.maxHeight = '350px';
+    panel.style.width = '17.5rem';
+    panel.style.maxHeight = '21.875rem';
   }
 
   /**

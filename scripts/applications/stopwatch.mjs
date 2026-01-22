@@ -611,9 +611,17 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       isDragging = true;
       previousZoneId = this.#snappedZoneId;
-      const rect = this.element.getBoundingClientRect();
-      elementStartLeft = rect.left;
-      elementStartTop = rect.top;
+      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
+        const preserved = StickyZones.unpinFromZone(this.element);
+        if (preserved) {
+          elementStartLeft = preserved.left;
+          elementStartTop = preserved.top;
+        }
+      } else {
+        const rect = this.element.getBoundingClientRect();
+        elementStartLeft = rect.left;
+        elementStartTop = rect.top;
+      }
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       window.addEventListener('mousemove', onMouseMove);

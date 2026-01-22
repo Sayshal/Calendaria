@@ -27,9 +27,9 @@
   --calendaria-cool-5-50: rgb(45 45 45 / 50%);
   --calendaria-cool-5-75: rgb(45 45 45 / 75%);
   --calendaria-current-hour: rgb(255 100 0 / 12%);
-  --calendaria-day-gap: 2px;
+  --calendaria-day-gap: 0.125rem;
   --calendaria-day-number: rgb(224 224 224);
-  --calendaria-day-size: 90px;
+  --calendaria-day-size: 5.625rem;
   --calendaria-error: rgb(244 67 54);
   --calendaria-event-shadow: rgb(0 0 0 / 20%);
   --calendaria-festival-bg: rgb(212 175 55 / 15%);
@@ -67,18 +67,18 @@
   /* ======================================== */
 
   --calendaria-warning: rgb(255 193 7);
-  --calendaria-week-day-width: 100px;
-  --calendaria-week-header-height: 24px;
-  --calendaria-week-hour-height: 24px;
-  --calendaria-week-hour-width: 25px;
+  --calendaria-week-day-width: 6.25rem;
+  --calendaria-week-header-height: 1.5rem;
+  --calendaria-week-hour-height: 1.5rem;
+  --calendaria-week-hour-width: 1.5625rem;
   --calendaria-weekday-header: rgb(224 224 224);
-  --calendaria-weekday-height: 28px;
-  --calendaria-year-cell-padding: 8px;
-  --calendaria-year-gap: 12px;
-  --calendaria-year-header-height: 32px;
-  --calendaria-year-month-gap: 4px;
-  --calendaria-year-month-height: 24px;
-  --calendaria-year-month-width: 50px;
+  --calendaria-weekday-height: 1.75rem;
+  --calendaria-year-cell-padding: 0.5rem;
+  --calendaria-year-gap: 0.75rem;
+  --calendaria-year-header-height: 2rem;
+  --calendaria-year-month-gap: 0.25rem;
+  --calendaria-year-month-height: 1.5rem;
+  --calendaria-year-month-width: 3.125rem;
 }
 
 /* ======================================== */
@@ -145,7 +145,7 @@
 /* ======================================== */
 
 .calendaria-time-dial {
-  --dial-sun-size: 15px;
+  --dial-sun-size: 0.9375rem;
   --sky-bottom-color: rgb(161 176 209);
   --sky-top-color: rgb(0 115 188);
 
@@ -163,8 +163,8 @@
 
   .dial-container {
     position: relative;
-    width: 300px;
-    height: 300px;
+    width: 18.75rem;
+    height: 18.75rem;
     pointer-events: all;
   }
 
@@ -173,12 +173,12 @@
     position: relative;
     width: 100%;
     height: 100%;
-    border: 3px solid rgb(201 170 113);
+    border: 0.1875rem solid rgb(201 170 113);
     border-radius: 50%;
     overflow: hidden;
     box-shadow:
-      0 0 40px rgb(0 0 0 / 90%),
-      0 0 20px rgb(201 170 113 / 40%);
+      0 0 2.5rem rgb(0 0 0 / 90%),
+      0 0 1.25rem rgb(201 170 113 / 40%);
 
     &::after {
       inset: 0;
@@ -194,14 +194,14 @@
     rotate: calc(var(--calendar-night-progress, 0) * -0.5turn);
     z-index: -2;
     position: absolute;
-    top: -15px;
-    left: -15px;
-    width: 300px;
-    height: 300px;
+    top: -0.9375rem;
+    left: -0.9375rem;
+    width: 18.75rem;
+    height: 18.75rem;
     border-radius: 50%;
 
     &::before {
-      inset: -30px;
+      inset: -1.875rem;
       position: absolute;
       border-radius: 50%;
       content: '';
@@ -211,10 +211,10 @@
 
   .dial-sun {
     position: absolute;
-    top: -15px;
-    left: -15px;
-    width: 300px;
-    height: 300px;
+    top: -0.9375rem;
+    left: -0.9375rem;
+    width: 18.75rem;
+    height: 18.75rem;
     border-radius: 50%;
 
     &::before {
@@ -225,8 +225,8 @@
       height: 100%;
       content: '';
       background:
-        radial-gradient(30px 15px, rgb(252 249 214 / 70%), transparent), radial-gradient(45px 30px, rgb(248 243 161 / 50%), transparent),
-        radial-gradient(52px 38px, rgb(250 188 90 / 30%), transparent), radial-gradient(60px 45px, rgb(234 158 111 / 20%), transparent);
+        radial-gradient(1.875rem 0.9375rem, rgb(252 249 214 / 70%), transparent), radial-gradient(2.8125rem 1.875rem, rgb(248 243 161 / 50%), transparent),
+        radial-gradient(3.25rem 2.375rem, rgb(250 188 90 / 30%), transparent), radial-gradient(3.75rem 2.8125rem, rgb(234 158 111 / 20%), transparent);
     }
 
     &::after {
@@ -239,7 +239,7 @@
       border-radius: 50%;
       content: '';
       background: rgb(255 255 0);
-      box-shadow: 0 0 10px rgb(255 255 0 / 80%);
+      box-shadow: 0 0 0.625rem rgb(255 255 0 / 80%);
     }
   }
 
@@ -253,8 +253,8 @@
     border-radius: 50%;
     background: rgb(230 230 240);
     box-shadow:
-      0 0 15px rgb(200 200 220 / 90%),
-      0 0 8px rgb(255 255 255 / 60%);
+      0 0 0.9375rem rgb(200 200 220 / 90%),
+      0 0 0.5rem rgb(255 255 255 / 60%);
   }
 
   .dial-markers {
@@ -279,23 +279,23 @@
   .dial-handle {
     clip-path: polygon(50% 100%, 0% 0%, 50% 15%, 100% 0%);
     position: absolute;
-    top: -10px;
-    left: -12px;
-    width: 24px;
-    height: 30px;
+    top: -0.625rem;
+    left: -0.75rem;
+    width: 1.5rem;
+    height: 1.875rem;
     cursor: grab;
     pointer-events: all;
     background: rgb(255 100 0);
     box-shadow:
-      0 0 10px rgb(0 0 0 / 50%),
-      0 0 5px rgb(255 100 0 / 50%);
-    filter: drop-shadow(0 0 2px rgb(255 255 255));
+      0 0 0.625rem rgb(0 0 0 / 50%),
+      0 0 0.3125rem rgb(255 100 0 / 50%);
+    filter: drop-shadow(0 0 0.125rem rgb(255 255 255));
 
     &:hover {
       background: rgb(255 132 51);
       box-shadow:
-        0 0 15px rgb(0 0 0 / 70%),
-        0 0 8px rgb(255 100 0 / 80%);
+        0 0 0.9375rem rgb(0 0 0 / 70%),
+        0 0 0.5rem rgb(255 100 0 / 80%);
       transform: scale(1.1);
     }
 
@@ -320,16 +320,16 @@
     outline: none;
     color: rgb(255 100 0);
     font-weight: bold;
-    font-size: 36px;
+    font-size: 2.25rem;
     line-height: 1;
     font-family: 'Modesto Condensed', 'Palatino Linotype', serif;
     text-align: center;
-    text-shadow: 0 0 10px rgb(255 100 0 / 80%);
+    text-shadow: 0 0 0.625rem rgb(255 100 0 / 80%);
     cursor: text;
     background: transparent;
 
     &:focus {
-      text-shadow: 0 0 15px rgb(255 100 0);
+      text-shadow: 0 0 0.9375rem rgb(255 100 0);
     }
   }
 }
@@ -371,8 +371,8 @@
   margin-bottom: 0.25rem;
 
   button {
-    min-width: 28px;
-    height: 28px;
+    min-width: 1.75rem;
+    height: 1.75rem;
     padding: 0.25rem;
   }
 }
@@ -423,8 +423,8 @@
 
 .weather-indicator {
   padding: 0.25rem 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
-  border-radius: 4px;
+  border: 0.0625rem solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+  border-radius: 0.25rem;
   color: var(--calendaria-text);
   background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
 
@@ -446,7 +446,7 @@
 }
 
 .weather-indicator.no-weather {
-  border: 1px dashed var(--calendaria-border);
+  border: 0.0625rem dashed var(--calendaria-border);
   color: var(--calendaria-text-dim);
   background: transparent;
 }
@@ -477,14 +477,14 @@
   justify-content: center;
   align-items: center;
   padding-bottom: 0.25rem;
-  border-bottom: 2px solid var(--calendaria-border);
+  border-bottom: 0.125rem solid var(--calendaria-border);
 }
 
 .big-cal .calendaria-hud-search-panel {
   position: absolute;
   top: 100%;
   left: 50%;
-  margin-top: 4px;
+  margin-top: 0.25rem;
   transform: translateX(-50%);
 }
 
@@ -495,18 +495,18 @@
 }
 
 .day-moons {
-  gap: 2px;
+  gap: 0.125rem;
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  max-height: 24px;
+  max-height: 1.5rem;
   overflow: hidden;
 }
 
 .moon-phase {
   display: inline-flex;
   align-items: center;
-  height: 10px;
+  height: 0.625rem;
 
   img {
     width: auto;
@@ -528,13 +528,13 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  min-width: 16px;
-  height: 14px;
-  padding: 0 3px;
-  border-radius: 3px;
+  min-width: 1rem;
+  height: 0.875rem;
+  padding: 0 0.1875rem;
+  border-radius: 0.1875rem;
   color: var(--calendaria-text);
   font-weight: 600;
-  font-size: 10px;
+  font-size: 0.625rem;
   cursor: help;
   background: var(--calendaria-bg-lighter);
 }
@@ -570,14 +570,14 @@ span.calendaria-moon-icon {
 }
 
 .moon-tooltip-row {
-  gap: 6px;
+  gap: 0.375rem;
   display: flex;
   align-items: center;
-  padding: 2px 0;
+  padding: 0.125rem 0;
 
   img {
-    width: 14px;
-    height: 14px;
+    width: 0.875rem;
+    height: 0.875rem;
   }
 }
 
@@ -670,7 +670,7 @@ span.calendaria-moon-icon {
   width: var(--calendaria-day-size);
   height: var(--calendaria-day-size);
   padding: 0.25rem;
-  border: 1px solid var(--calendaria-border-light);
+  border: 0.0625rem solid var(--calendaria-border-light);
   cursor: pointer;
   background: var(--calendaria-bg);
   transition: background 0.2s ease;
@@ -703,14 +703,14 @@ span.calendaria-moon-icon {
   &.today {
     z-index: 1;
     position: relative;
-    border: 1px solid var(--calendaria-today);
+    border: 0.0625rem solid var(--calendaria-today);
     background: var(--calendaria-today-bg);
   }
 
   &.selected {
     z-index: 1;
     position: relative;
-    border: 1px solid var(--calendaria-primary);
+    border: 0.0625rem solid var(--calendaria-primary);
     cursor: pointer;
   }
 
@@ -729,7 +729,7 @@ span.calendaria-moon-icon {
       top: 0;
       right: 0;
       left: 0;
-      height: 3px;
+      height: 0.1875rem;
       content: '';
       background: linear-gradient(90deg, transparent, var(--calendaria-festival-text) 50%, transparent);
     }
@@ -799,13 +799,13 @@ span.calendaria-moon-icon {
   transition: transform 0.1s ease;
 
   i {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   img {
     object-fit: contain;
-    width: 16px;
-    height: 16px;
+    width: 1rem;
+    height: 1rem;
   }
 
   &:hover {
@@ -818,19 +818,19 @@ span.calendaria-moon-icon {
   z-index: 5;
   opacity: 0;
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 0.125rem;
+  right: 0.125rem;
   justify-content: center;
   align-items: center;
-  width: 14px;
-  height: 14px;
-  min-height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
+  min-height: 0.875rem;
   padding: 0;
   border: none;
   border-radius: 0;
   box-shadow: none;
   color: var(--calendaria-text-muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   background: none;
   cursor: pointer;
   transition:
@@ -859,48 +859,48 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .event-bar {
-  -webkit-text-stroke: 0.5px var(--calendaria-shadow-light);
+  -webkit-text-stroke: 0.0313rem var(--calendaria-shadow-light);
   display: flex;
   z-index: 10;
   position: absolute;
   align-items: center;
-  height: 16px;
-  padding: 2px 10px;
-  border: 1px solid var(--calendaria-shadow-light);
-  border-radius: 12px;
+  height: 1rem;
+  padding: 0.125rem 0.625rem;
+  border: 0.0625rem solid var(--calendaria-shadow-light);
+  border-radius: 0.75rem;
   overflow: hidden;
   color: var(--calendaria-text-on-color);
   font-weight: 600;
-  font-size: 10px;
+  font-size: 0.625rem;
   text-overflow: ellipsis;
   text-shadow:
-    -1px -1px 0 var(--calendaria-text-shadow-on-color),
-    1px -1px 0 var(--calendaria-text-shadow-on-color),
-    -1px 1px 0 var(--calendaria-text-shadow-on-color),
-    1px 1px 0 var(--calendaria-text-shadow-on-color),
-    0 2px 4px var(--calendaria-text-shadow-on-color);
+    -0.0625rem -0.0625rem 0 var(--calendaria-text-shadow-on-color),
+    0.0625rem -0.0625rem 0 var(--calendaria-text-shadow-on-color),
+    -0.0625rem 0.0625rem 0 var(--calendaria-text-shadow-on-color),
+    0.0625rem 0.0625rem 0 var(--calendaria-text-shadow-on-color),
+    0 0.125rem 0.25rem var(--calendaria-text-shadow-on-color);
   white-space: nowrap;
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: 0 2px 4px var(--calendaria-shadow-light);
+  box-shadow: 0 0.125rem 0.25rem var(--calendaria-shadow-light);
   transition: all 0.15s ease;
 
   &:hover {
     z-index: 20;
-    box-shadow: 0 4px 8px var(--calendaria-shadow);
+    box-shadow: 0 0.25rem 0.5rem var(--calendaria-shadow);
     filter: brightness(1.1);
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
   }
 
   .event-bar-icon {
     flex-shrink: 0;
-    margin-right: 6px;
+    margin-right: 0.375rem;
     color: var(--calendaria-text-on-color);
-    filter: drop-shadow(0 1px 2px var(--calendaria-text-shadow-on-color));
+    filter: drop-shadow(0 0.0625rem 0.125rem var(--calendaria-text-shadow-on-color));
 
     &:is(img) {
-      width: 14px;
-      height: 14px;
+      width: 0.875rem;
+      height: 0.875rem;
     }
   }
 
@@ -912,10 +912,10 @@ span.calendaria-moon-icon {
 
   .event-bar-continuation {
     flex-shrink: 0;
-    margin-right: 6px;
+    margin-right: 0.375rem;
     color: var(--calendaria-text-on-color);
     font-size: 0.75rem;
-    filter: drop-shadow(0 1px 2px var(--calendaria-text-shadow-on-color));
+    filter: drop-shadow(0 0.0625rem 0.125rem var(--calendaria-text-shadow-on-color));
   }
 }
 
@@ -930,20 +930,20 @@ span.calendaria-moon-icon {
 }
 
 .week-grid {
-  gap: 1px;
+  gap: 0.0625rem;
   grid-template-columns: var(--calendaria-week-day-width) repeat(var(--hours-per-day, 24), var(--calendaria-week-hour-width));
   display: grid;
   width: fit-content;
   height: fit-content;
   margin-top: 0.5rem;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 4px;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.25rem;
   background: var(--calendaria-border-light);
 }
 
 .week-corner-header {
-  border-right: 2px solid var(--calendaria-border);
-  border-bottom: 2px solid var(--calendaria-border);
+  border-right: 0.125rem solid var(--calendaria-border);
+  border-bottom: 0.125rem solid var(--calendaria-border);
   background: var(--calendaria-bg-lighter);
 }
 
@@ -954,7 +954,7 @@ span.calendaria-moon-icon {
   align-items: center;
   margin: 0;
   padding: 0;
-  border-bottom: 2px solid var(--calendaria-border);
+  border-bottom: 0.125rem solid var(--calendaria-border);
   overflow: hidden;
   color: var(--calendaria-text-dim);
   font-weight: 600;
@@ -973,13 +973,13 @@ span.calendaria-moon-icon {
   justify-content: flex-start;
   align-items: center;
   padding: 0.25rem 0.5rem;
-  border-right: 2px solid var(--calendaria-border);
+  border-right: 0.125rem solid var(--calendaria-border);
   font-size: 0.85rem;
   white-space: nowrap;
   background: var(--calendaria-bg);
 
   &.today {
-    border-right: 3px solid var(--calendaria-today);
+    border-right: 0.1875rem solid var(--calendaria-today);
     background: var(--calendaria-today-bg);
   }
 
@@ -990,7 +990,7 @@ span.calendaria-moon-icon {
 
 .week-time-cell {
   position: relative;
-  border-right: 1px solid var(--calendaria-border-light);
+  border-right: 0.0625rem solid var(--calendaria-border-light);
   overflow: visible;
   cursor: pointer;
   background: var(--calendaria-bg);
@@ -1014,12 +1014,12 @@ span.calendaria-moon-icon {
   }
 
   &.current-hour {
-    border-top: 3px solid var(--calendaria-today);
+    border-top: 0.1875rem solid var(--calendaria-today);
     background: var(--calendaria-current-hour);
   }
 
   &.selected {
-    border: 2px solid var(--calendaria-primary);
+    border: 0.125rem solid var(--calendaria-primary);
     background: color-mix(in srgb, var(--calendaria-primary) 30%, transparent);
   }
 }
@@ -1027,37 +1027,37 @@ span.calendaria-moon-icon {
 .week-event-block {
   --hour-span: 1;
 
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   z-index: 10;
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  left: 2px;
+  top: 0.125rem;
+  bottom: 0.125rem;
+  left: 0.125rem;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  width: calc(var(--hour-span) * 100% + (var(--hour-span) - 1) * 1px - 4px);
-  padding: 4px 6px;
-  border-top: 3px solid var(--calendaria-shadow);
-  border-radius: 4px;
+  width: calc(var(--hour-span) * 100% + (var(--hour-span) - 1) * 0.0625rem - 0.25rem);
+  padding: 0.25rem 0.375rem;
+  border-top: 0.1875rem solid var(--calendaria-shadow);
+  border-radius: 0.25rem;
   overflow: hidden;
   color: var(--calendaria-text-on-color);
-  font-size: 11px;
-  text-shadow: 0 1px 2px var(--calendaria-text-shadow-on-color);
+  font-size: 0.6875rem;
+  text-shadow: 0 0.0625rem 0.125rem var(--calendaria-text-shadow-on-color);
   cursor: pointer;
   box-shadow:
-    0 2px 4px var(--calendaria-shadow-light),
-    inset 0 1px 0 var(--calendaria-highlight);
+    0 0.125rem 0.25rem var(--calendaria-shadow-light),
+    inset 0 0.0625rem 0 var(--calendaria-highlight);
   transition: all 0.15s ease;
 
   &:hover {
     z-index: 20;
     box-shadow:
-      0 4px 8px var(--calendaria-shadow),
-      inset 0 1px 0 var(--calendaria-highlight);
+      0 0.25rem 0.5rem var(--calendaria-shadow),
+      inset 0 0.0625rem 0 var(--calendaria-highlight);
     filter: brightness(1.15);
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
   }
 
   .event-icon {
@@ -1067,13 +1067,13 @@ span.calendaria-moon-icon {
     align-items: center;
 
     i {
-      font-size: 12px;
+      font-size: 0.75rem;
     }
 
     img {
       object-fit: contain;
-      width: 14px;
-      height: 14px;
+      width: 0.875rem;
+      height: 0.875rem;
     }
   }
 
@@ -1087,27 +1087,27 @@ span.calendaria-moon-icon {
   }
 
   &.compact {
-    gap: 2px;
+    gap: 0.125rem;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2px 4px;
+    padding: 0.125rem 0.25rem;
     text-align: center;
 
     .event-icon {
       i {
-        font-size: 14px;
+        font-size: 0.875rem;
       }
 
       img {
-        width: 16px;
-        height: 16px;
+        width: 1rem;
+        height: 1rem;
       }
     }
 
     .event-name {
       max-width: 100%;
-      font-size: 9px;
+      font-size: 0.5625rem;
     }
   }
 }
@@ -1144,20 +1144,20 @@ span.calendaria-moon-icon {
   width: fit-content;
   height: fit-content;
   padding: var(--calendaria-year-cell-padding);
-  border: 2px solid var(--calendaria-border-light);
-  border-radius: 4px;
+  border: 0.125rem solid var(--calendaria-border-light);
+  border-radius: 0.25rem;
   cursor: pointer;
   background: var(--calendaria-bg);
   transition: all 0.2s;
 
   &:hover {
     border-color: var(--calendaria-border);
-    box-shadow: 0 2px 8px var(--calendaria-shadow-light);
-    transform: translateY(-2px);
+    box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow-light);
+    transform: translateY(-0.125rem);
   }
 
   &.current-year {
-    box-shadow: 0 0 0 2px var(--calendaria-today);
+    box-shadow: 0 0 0 0.125rem var(--calendaria-today);
   }
 }
 
@@ -1167,7 +1167,7 @@ span.calendaria-moon-icon {
   align-items: center;
   height: var(--calendaria-year-header-height);
   padding-bottom: 0.25rem;
-  border-bottom: 1px solid var(--calendaria-border-light);
+  border-bottom: 0.0625rem solid var(--calendaria-border-light);
   color: var(--calendaria-title-text);
   font-weight: bold;
   font-size: 1.2rem;
@@ -1187,7 +1187,7 @@ span.calendaria-moon-icon {
   align-items: center;
   width: var(--calendaria-year-month-width);
   height: var(--calendaria-year-month-height);
-  border-radius: 2px;
+  border-radius: 0.125rem;
   font-size: 0.8rem;
   cursor: pointer;
   background: var(--calendaria-bg-lighter);
@@ -1249,20 +1249,20 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--color-border-light, var(--calendaria-border));
+    border-bottom: 0.125rem solid var(--color-border-light, var(--calendaria-border));
   }
 
   .note-icon {
     flex-shrink: 0;
 
     i {
-      font-size: 32px;
+      font-size: 2rem;
     }
 
     img {
       object-fit: contain;
-      width: 32px;
-      height: 32px;
+      width: 2rem;
+      height: 2rem;
     }
   }
 
@@ -1276,7 +1276,7 @@ span.calendaria-moon-icon {
 
   .gm-only-badge {
     padding: 0.25rem 0.5rem;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     color: var(--calendaria-text-on-color);
     font-size: 0.75rem;
     background: var(--color-level-warning, var(--calendaria-warning));
@@ -1287,7 +1287,7 @@ span.calendaria-moon-icon {
     display: flex;
     flex-wrap: wrap;
     padding: 0.5rem 0.75rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     font-size: 0.9rem;
     background: var(--color-cool-5-50);
 
@@ -1308,7 +1308,7 @@ span.calendaria-moon-icon {
 
     .category-tag {
       padding: 0.25rem 0.75rem;
-      border: 1px solid var(--color-cool-3, var(--calendaria-cool-3));
+      border: 0.0625rem solid var(--color-cool-3, var(--calendaria-cool-3));
       border-radius: 1rem;
       font-size: 0.85rem;
       background: var(--color-cool-4);
@@ -1369,7 +1369,7 @@ span.calendaria-moon-icon {
 
         .form-group-stacked {
           flex: 1 1 auto;
-          min-width: 120px;
+          min-width: 7.5rem;
 
           label {
             margin-bottom: 0.25rem;
@@ -1383,7 +1383,7 @@ span.calendaria-moon-icon {
 
             input[type='number'] {
               flex: 0 0 auto;
-              width: 60px;
+              width: 3.75rem;
             }
 
             .hint {
@@ -1435,7 +1435,7 @@ span.calendaria-moon-icon {
 
   .editor-fieldset {
     flex: 1;
-    min-height: 150px;
+    min-height: 9.375rem;
 
     prose-mirror {
       display: flex;
@@ -1456,7 +1456,7 @@ span.calendaria-moon-icon {
     align-items: center;
     min-width: 0;
     padding: 0.125rem 0.375rem;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     font-size: var(--font-size-11);
     line-height: 1.4;
     text-align: left;
@@ -1499,13 +1499,13 @@ span.calendaria-moon-icon {
   .icon-preview {
     object-fit: contain;
     width: auto;
-    height: 24px;
-    font-size: 24px;
+    height: 1.5rem;
+    font-size: 1.5rem;
   }
 
   .color-input {
-    width: 60px;
-    height: 24px;
+    width: 3.75rem;
+    height: 1.5rem;
     padding: 0;
     border: none;
     cursor: pointer;
@@ -1516,11 +1516,11 @@ span.calendaria-moon-icon {
     }
 
     &::-webkit-color-swatch {
-      border-radius: 3px;
+      border-radius: 0.1875rem;
     }
 
     &::-moz-color-swatch {
-      border-radius: 3px;
+      border-radius: 0.1875rem;
     }
   }
 
@@ -1575,7 +1575,7 @@ span.calendaria-moon-icon {
       input[type='number'] {
         width: 2.5rem;
         padding: 0.125rem 0.25rem;
-        border-radius: 3px;
+        border-radius: 0.1875rem;
         font-size: var(--font-size-11);
         text-align: center;
       }
@@ -1611,7 +1611,7 @@ span.calendaria-moon-icon {
 
     > select {
       padding: 0.125rem 0.375rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       font-size: var(--font-size-11);
       line-height: 1.4;
     }
@@ -1623,9 +1623,9 @@ span.calendaria-moon-icon {
       align-items: center;
 
       input {
-        width: 60px;
+        width: 3.75rem;
         padding: 0.125rem 0.375rem;
-        border-radius: 3px;
+        border-radius: 0.1875rem;
         font-size: var(--font-size-11);
         line-height: 1.4;
         text-align: center;
@@ -1664,7 +1664,7 @@ span.calendaria-moon-icon {
     align-items: center;
     max-width: 100%;
     padding: 0.25rem 0.5rem;
-    border: 1px solid var(--color-cool-3, var(--calendaria-cool-3));
+    border: 0.0625rem solid var(--color-cool-3, var(--calendaria-cool-3));
     border-radius: 1rem;
     font-size: var(--font-size-11);
     background: var(--color-cool-4);
@@ -1714,20 +1714,20 @@ span.calendaria-moon-icon {
       height: 2rem;
       min-height: 2rem;
       padding: 0.25rem 0.5rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       font-size: var(--font-size-11);
       line-height: 1;
     }
 
     select {
       flex: 1;
-      min-width: 100px;
+      min-width: 6.25rem;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     input[type='number'] {
-      width: 70px;
+      width: 4.375rem;
     }
   }
 
@@ -1739,7 +1739,7 @@ span.calendaria-moon-icon {
     width: 2rem;
     height: 2rem;
     padding: 0;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     color: var(--color-text-light-heading, var(--calendaria-text-heading));
     font-size: var(--font-size-11);
     white-space: nowrap;
@@ -1769,19 +1769,19 @@ span.calendaria-moon-icon {
     select,
     input {
       padding: 0.125rem 0.375rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       font-size: var(--font-size-11);
       line-height: 1.4;
     }
 
     select {
-      min-width: 100px;
+      min-width: 6.25rem;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     input[type='number'] {
-      width: 80px;
+      width: 5rem;
     }
   }
 
@@ -1803,13 +1803,13 @@ span.calendaria-moon-icon {
       height: 2rem;
       min-height: 2rem;
       padding: 0.25rem 0.5rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       font-size: var(--font-size-11);
       line-height: 1;
     }
 
     input[type='number'] {
-      width: 80px;
+      width: 5rem;
     }
 
     .inline-form {
@@ -1836,7 +1836,7 @@ span.calendaria-moon-icon {
       flex: 1;
       align-content: start;
       min-width: 0;
-      min-height: 112px;
+      min-height: 7rem;
 
       > .inline-form {
         align-self: end;
@@ -1859,7 +1859,7 @@ span.calendaria-moon-icon {
 
       input[type='number'] {
         flex: 0 0 auto;
-        width: 60px;
+        width: 3.75rem;
       }
     }
   }
@@ -1878,9 +1878,9 @@ span.calendaria-moon-icon {
     }
 
     input[type='number'] {
-      width: 60px;
+      width: 3.75rem;
       padding: 0.125rem 0.375rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       text-align: center;
     }
   }
@@ -1903,7 +1903,7 @@ span.calendaria-moon-icon {
 
     > label {
       flex-shrink: 0;
-      min-width: 50px;
+      min-width: 3.125rem;
       font-weight: 600;
       font-size: var(--font-size-11);
     }
@@ -1940,16 +1940,16 @@ span.calendaria-moon-icon {
         gap: 0.25rem;
         display: flex;
         flex-wrap: wrap;
-        min-height: 24px;
-        max-height: 24px;
+        min-height: 1.5rem;
+        max-height: 1.5rem;
         padding-right: 0.25rem;
         overflow-y: auto;
       }
 
       select {
-        height: 26px !important;
+        height: 1.625rem !important;
         padding: 0.125rem 0.375rem !important;
-        border-radius: 3px;
+        border-radius: 0.1875rem;
         font-size: var(--font-size-11) !important;
         line-height: 1.4 !important;
       }
@@ -1969,7 +1969,7 @@ span.calendaria-moon-icon {
       align-self: flex-end;
       width: 10rem;
       padding: 0.125rem 0.375rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       font-size: var(--font-size-11);
       line-height: 1.4;
 
@@ -1993,17 +1993,17 @@ span.calendaria-moon-icon {
   input[type='text']:not(prose-mirror *),
   input[type='number']:not(prose-mirror *),
   select:not(prose-mirror *) {
-    border-radius: 3px;
+    border-radius: 0.1875rem;
   }
 
   button:not(prose-mirror *) {
-    border: 1px solid var(--calendaria-border);
-    border-radius: 3px;
+    border: 0.0625rem solid var(--calendaria-border);
+    border-radius: 0.1875rem;
   }
 
   fieldset {
-    border: 1px solid var(--calendaria-border);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--calendaria-border);
+    border-radius: 0.25rem;
   }
 }
 
@@ -2012,8 +2012,8 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .calendar-editor {
-  --editor-sidebar-max-width: 180px;
-  --editor-sidebar-min-width: 120px;
+  --editor-sidebar-max-width: 11.25rem;
+  --editor-sidebar-min-width: 7.5rem;
 
   &.standard-form {
     gap: 0;
@@ -2105,7 +2105,7 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     font-size: var(--font-size-14);
     background: var(--color-cool-5-50);
 
@@ -2133,8 +2133,8 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding: 0.5rem;
-    border: 1px solid var(--color-cool-4);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-cool-4);
+    border-radius: 0.25rem;
     background: var(--color-cool-5-50);
   }
 
@@ -2185,27 +2185,27 @@ span.calendaria-moon-icon {
 
     input[type='text'] {
       flex: 1;
-      min-width: 100px;
+      min-width: 6.25rem;
     }
 
     .abbr-field {
       flex: none;
-      width: 55px;
+      width: 3.4375rem;
     }
 
     .days-field {
       flex: none;
-      width: 55px;
+      width: 3.4375rem;
     }
 
     .day-field {
       flex: none;
-      width: 60px;
+      width: 3.75rem;
     }
 
     .type-field {
       flex: none;
-      width: 95px;
+      width: 5.9375rem;
     }
 
     .range-fields,
@@ -2252,7 +2252,7 @@ span.calendaria-moon-icon {
     align-items: flex-start;
     margin-bottom: 0.75rem;
     padding: 0.5rem 0.75rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     font-size: var(--font-size-13);
     line-height: 1.4;
 
@@ -2262,7 +2262,7 @@ span.calendaria-moon-icon {
     }
 
     &.warning {
-      border: 1px solid color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 40%, transparent);
+      border: 0.0625rem solid color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 40%, transparent);
       background: color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 15%, transparent);
     }
   }
@@ -2291,35 +2291,35 @@ span.calendaria-moon-icon {
     }
 
     .col-name {
-      flex: 2 1 80px;
-      min-width: 80px;
+      flex: 2 1 5rem;
+      min-width: 5rem;
     }
 
     .col-abbr {
-      flex: 1 1 60px;
-      min-width: 60px;
+      flex: 1 1 3.75rem;
+      min-width: 3.75rem;
     }
 
     .col-days,
     .col-leap {
-      flex: 0 0 55px;
-      width: 55px;
+      flex: 0 0 3.4375rem;
+      width: 3.4375rem;
       text-align: center;
     }
 
     .col-start-weekday {
-      flex: 0 0 80px;
-      width: 80px;
+      flex: 0 0 5rem;
+      width: 5rem;
     }
 
     .col-type {
-      flex: 0 0 110px;
-      width: 110px;
+      flex: 0 0 6.875rem;
+      width: 6.875rem;
     }
 
     .col-controls {
-      flex: 0 0 115px;
-      width: 115px;
+      flex: 0 0 7.1875rem;
+      width: 7.1875rem;
     }
 
     .list-header > span {
@@ -2338,24 +2338,24 @@ span.calendaria-moon-icon {
   .weekdays-list {
     .col-name {
       flex: 1;
-      min-width: 80px;
+      min-width: 5rem;
     }
 
     .col-abbr {
       flex: 0.5;
-      min-width: 70px;
+      min-width: 4.375rem;
     }
 
     .col-rest {
       display: flex;
       flex: 0.2;
       justify-content: center;
-      width: 60px;
+      width: 3.75rem;
     }
 
     .col-controls {
       flex: none;
-      width: 90px;
+      width: 5.625rem;
     }
   }
 
@@ -2403,27 +2403,27 @@ span.calendaria-moon-icon {
       gap: 0.5rem;
 
       .col-name {
-        flex: 1 1 120px;
+        flex: 1 1 7.5rem;
       }
 
       .col-abbr {
-        flex: 0 0 60px;
+        flex: 0 0 3.75rem;
       }
 
       .col-icon {
-        flex: 1 1 100px;
+        flex: 1 1 6.25rem;
       }
 
       .col-color {
-        flex: 0 0 40px;
+        flex: 0 0 2.5rem;
       }
 
       .col-seasonal-type {
-        flex: 0 0 80px;
+        flex: 0 0 5rem;
       }
 
       .col-duration {
-        flex: 0 0 60px;
+        flex: 0 0 3.75rem;
       }
 
       .col-controls {
@@ -2441,7 +2441,7 @@ span.calendaria-moon-icon {
       }
 
       .col-start-day {
-        flex: 0 0 50px;
+        flex: 0 0 3.125rem;
       }
 
       .col-end-month {
@@ -2449,11 +2449,11 @@ span.calendaria-moon-icon {
       }
 
       .col-end-day {
-        flex: 0 0 50px;
+        flex: 0 0 3.125rem;
       }
 
       .col-seasonal-type {
-        flex: 0 0 80px;
+        flex: 0 0 5rem;
       }
 
       .col-controls {
@@ -2466,23 +2466,23 @@ span.calendaria-moon-icon {
   .festivals-list {
     .col-name {
       flex: 2;
-      min-width: 100px;
+      min-width: 6.25rem;
     }
 
     .col-month {
       flex: none;
-      width: 110px;
+      width: 6.875rem;
     }
 
     .col-day {
       flex: none;
-      width: 50px;
+      width: 3.125rem;
     }
 
     .col-duration,
     .col-leap-duration {
       flex: none;
-      width: 55px;
+      width: 3.4375rem;
     }
 
     .col-leap,
@@ -2491,52 +2491,52 @@ span.calendaria-moon-icon {
       flex: none;
       justify-content: center;
       align-items: center;
-      width: 70px;
+      width: 4.375rem;
     }
 
     .col-controls {
       flex: none;
-      width: 50px;
+      width: 3.125rem;
     }
   }
 
   .canonical-hours-list {
     .col-name {
       flex: 2;
-      min-width: 100px;
+      min-width: 6.25rem;
     }
 
     .col-abbr {
       flex: none;
-      width: 80px;
+      width: 5rem;
     }
 
     .col-start,
     .col-end {
       flex: none;
-      width: 60px;
+      width: 3.75rem;
     }
 
     .col-controls {
       flex: none;
-      width: 50px;
+      width: 3.125rem;
     }
   }
 
   .named-weeks-list {
     .col-name {
       flex: 2;
-      min-width: 120px;
+      min-width: 7.5rem;
     }
 
     .col-abbr {
       flex: none;
-      width: 100px;
+      width: 6.25rem;
     }
 
     .col-controls {
       flex: none;
-      width: 50px;
+      width: 3.125rem;
     }
   }
 
@@ -2547,28 +2547,28 @@ span.calendaria-moon-icon {
   .eras-list {
     .col-name {
       flex: 1;
-      min-width: 60px;
+      min-width: 3.75rem;
     }
 
     .col-abbr {
       flex: none;
-      width: 85px;
+      width: 5.3125rem;
     }
 
     .col-start-year,
     .col-end-year {
       flex: none;
-      width: 70px;
+      width: 4.375rem;
     }
 
     .col-format {
       flex: none;
-      width: 135px;
+      width: 8.4375rem;
     }
 
     .col-controls {
       flex: none;
-      width: 50px;
+      width: 3.125rem;
     }
   }
 
@@ -2602,7 +2602,7 @@ span.calendaria-moon-icon {
       .era-preview {
         flex: 3;
         padding: 0.25rem 0.5rem;
-        border-radius: 3px;
+        border-radius: 0.1875rem;
         color: var(--color-text-secondary);
         font-style: italic;
         white-space: nowrap;
@@ -2614,7 +2614,7 @@ span.calendaria-moon-icon {
   .moons-list {
     .moon-header {
       gap: 0.5rem;
-      grid-template-columns: 1fr 100px 90px 50px;
+      grid-template-columns: 1fr 6.25rem 5.625rem 3.125rem;
       display: grid;
       align-items: center;
       padding: 0.25rem 0.5rem;
@@ -2624,7 +2624,7 @@ span.calendaria-moon-icon {
       grid-template-rows: auto auto;
       row-gap: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 0.0625rem solid var(--color-cool-4);
     }
   }
 
@@ -2634,29 +2634,29 @@ span.calendaria-moon-icon {
     padding: 0.75rem 0.5rem;
 
     .moon-header {
-      border-bottom: 1px solid var(--color-cool-5);
+      border-bottom: 0.0625rem solid var(--color-cool-5);
 
       .col-cycle {
         text-align: right;
       }
 
       .color-input-wrapper {
-        gap: 6px;
+        gap: 0.375rem;
         display: flex;
         align-items: center;
       }
 
       input[type='color'] {
-        width: 40px;
-        height: 24px;
-        padding: 2px;
+        width: 2.5rem;
+        height: 1.5rem;
+        padding: 0.125rem;
         cursor: pointer;
       }
 
       .moon-color-preview {
         flex-shrink: 0;
-        width: 24px;
-        height: 24px;
+        width: 1.5rem;
+        height: 1.5rem;
         border-radius: 50%;
         overflow: hidden;
 
@@ -2678,7 +2678,7 @@ span.calendaria-moon-icon {
         gap: 0.5rem;
         display: flex;
         justify-content: flex-end;
-        padding-bottom: 2px;
+        padding-bottom: 0.125rem;
       }
     }
 
@@ -2692,7 +2692,7 @@ span.calendaria-moon-icon {
     .reference-date {
       .ref-date-grid {
         gap: 0.75rem;
-        grid-template-columns: 1fr 1fr 80px 1fr 80px;
+        grid-template-columns: 1fr 1fr 5rem 1fr 5rem;
         display: grid;
 
         .grid-col {
@@ -2726,7 +2726,7 @@ span.calendaria-moon-icon {
       .phases-list {
         .list-header {
           padding: 0.25rem 0.5rem;
-          border-bottom: 1px solid var(--color-cool-4);
+          border-bottom: 0.0625rem solid var(--color-cool-4);
           font-weight: bold;
           font-size: var(--font-size-12);
         }
@@ -2743,25 +2743,25 @@ span.calendaria-moon-icon {
 
         .col-icon {
           flex: none;
-          width: 40px;
+          width: 2.5rem;
           text-align: center;
         }
 
         .col-phase-name {
           flex: 2;
-          min-width: 80px;
+          min-width: 5rem;
         }
 
         .col-rising,
         .col-fading {
           flex: 1;
-          min-width: 70px;
+          min-width: 4.375rem;
         }
 
         .col-start,
         .col-end {
           flex: none;
-          width: 55px;
+          width: 3.4375rem;
         }
 
         .col-controls {
@@ -2769,16 +2769,16 @@ span.calendaria-moon-icon {
           display: flex;
           flex: none;
           justify-content: flex-end;
-          width: 50px;
+          width: 3.125rem;
         }
       }
 
       .phase-icon-btn {
-        width: 32px;
-        height: 32px;
-        padding: 2px;
-        border: 1px solid var(--color-cool-4);
-        border-radius: 4px;
+        width: 2rem;
+        height: 2rem;
+        padding: 0.125rem;
+        border: 0.0625rem solid var(--color-cool-4);
+        border-radius: 0.25rem;
         cursor: pointer;
         background: var(--color-cool-5);
 
@@ -2794,7 +2794,7 @@ span.calendaria-moon-icon {
         }
 
         .phase-emoji {
-          font-size: 20px;
+          font-size: 1.25rem;
           line-height: 1;
         }
       }
@@ -2809,7 +2809,7 @@ span.calendaria-moon-icon {
   .cycle-format-section {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-cool-4);
+    border-bottom: 0.0625rem solid var(--color-cool-4);
   }
 
   .cycle-item {
@@ -2819,10 +2819,10 @@ span.calendaria-moon-icon {
 
     .cycle-header-grid {
       gap: 0.75rem;
-      grid-template-columns: 1fr 80px 80px 140px auto;
+      grid-template-columns: 1fr 5rem 5rem 8.75rem auto;
       display: grid;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 0.0625rem solid var(--color-cool-4);
 
       .grid-col {
         gap: 0.25rem;
@@ -2864,7 +2864,7 @@ span.calendaria-moon-icon {
         gap: 0.25rem;
         display: flex;
         flex-direction: column;
-        max-height: 200px;
+        max-height: 12.5rem;
         overflow-y: auto;
       }
 
@@ -2879,14 +2879,14 @@ span.calendaria-moon-icon {
         }
 
         .entry-number {
-          flex: 0 0 30px;
+          flex: 0 0 1.875rem;
           color: var(--color-text-secondary);
           font-weight: bold;
         }
 
         .col-entry-name {
           flex: 1;
-          min-width: 100px;
+          min-width: 6.25rem;
         }
 
         .item-controls {
@@ -2904,8 +2904,8 @@ span.calendaria-moon-icon {
     flex-direction: column;
     align-items: center;
     padding: 2rem;
-    border: 1px dashed var(--color-cool-4);
-    border-radius: 4px;
+    border: 0.0625rem dashed var(--color-cool-4);
+    border-radius: 0.25rem;
     color: var(--color-text-secondary);
     font-style: italic;
     text-align: center;
@@ -2918,13 +2918,13 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
-    border-top: 1px solid var(--color-cool-4);
+    border-top: 0.0625rem solid var(--color-cool-4);
     background: var(--color-cool-5);
 
     button {
       flex: none;
       width: fit-content;
-      border: 1px solid var(--button-border-color);
+      border: 0.0625rem solid var(--button-border-color);
 
       &:hover {
         border-color: var(--button-hover-border-color);
@@ -2933,8 +2933,8 @@ span.calendaria-moon-icon {
       }
 
       &:focus {
-        outline: 1px solid var(--button-focus-outline-color);
-        box-shadow: 0 0 4px var(--button-focus-outline-color);
+        outline: 0.0625rem solid var(--button-focus-outline-color);
+        box-shadow: 0 0 0.25rem var(--button-focus-outline-color);
       }
 
       /* Export and Save get equal flex width */
@@ -2944,7 +2944,7 @@ span.calendaria-moon-icon {
       }
 
       &.primary {
-        border: 1px solid var(--button-border-color);
+        border: 0.0625rem solid var(--button-border-color);
         background: var(--button-background-color);
 
         &:hover {
@@ -2972,7 +2972,7 @@ span.calendaria-moon-icon {
     max-width: var(--editor-sidebar-max-width);
     padding: 0;
     border-top: none;
-    border-right: 1px solid var(--color-cool-4);
+    border-right: 0.0625rem solid var(--color-cool-4);
     border-bottom: none;
     overflow: hidden auto;
 
@@ -2985,7 +2985,7 @@ span.calendaria-moon-icon {
       max-width: 100%;
       padding-right: 0.5rem;
       border-bottom: none;
-      border-left: 3px solid transparent;
+      border-left: 0.1875rem solid transparent;
       border-radius: 0;
       text-align: right;
 
@@ -3023,7 +3023,7 @@ span.calendaria-moon-icon {
     align-items: center;
     margin-bottom: 0.75rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-cool-4);
+    border-bottom: 0.0625rem solid var(--color-cool-4);
 
     .zone-controls {
       gap: 0.5rem;
@@ -3038,7 +3038,7 @@ span.calendaria-moon-icon {
       }
 
       .zone-select {
-        min-width: 150px;
+        min-width: 9.375rem;
       }
     }
 
@@ -3051,11 +3051,11 @@ span.calendaria-moon-icon {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 28px;
-      height: 28px;
+      width: 1.75rem;
+      height: 1.75rem;
       padding: 0;
-      border: 1px solid var(--color-cool-4);
-      border-radius: 3px;
+      border: 0.0625rem solid var(--color-cool-4);
+      border-radius: 0.1875rem;
       color: var(--color-text-secondary);
       cursor: pointer;
       background: var(--color-cool-5);
@@ -3074,8 +3074,8 @@ span.calendaria-moon-icon {
   .season-climate-section {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    border: 1px solid var(--color-cool-4);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-cool-4);
+    border-radius: 0.25rem;
 
     legend {
       padding: 0 0.5rem;
@@ -3099,7 +3099,7 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding: 0.35rem 0.5rem;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     background: var(--color-cool-5);
 
     .season-info {
@@ -3112,7 +3112,7 @@ span.calendaria-moon-icon {
 
     .season-icon {
       flex-shrink: 0;
-      width: 18px;
+      width: 1.125rem;
       text-align: center;
     }
 
@@ -3136,8 +3136,8 @@ span.calendaria-moon-icon {
       flex-shrink: 0;
       width: fit-content;
       padding: 0.2rem 0.4rem;
-      border: 1px solid var(--color-cool-4);
-      border-radius: 3px;
+      border: 0.0625rem solid var(--color-cool-4);
+      border-radius: 0.1875rem;
       cursor: pointer;
       background: transparent;
 
@@ -3149,8 +3149,8 @@ span.calendaria-moon-icon {
 
   .zone-presets-section {
     padding: 0.75rem;
-    border: 1px solid var(--color-cool-4);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-cool-4);
+    border-radius: 0.25rem;
 
     legend {
       padding: 0 0.5rem;
@@ -3170,8 +3170,8 @@ span.calendaria-moon-icon {
   }
 
   .weather-category {
-    border: 1px solid var(--color-cool-4);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-cool-4);
+    border-radius: 0.25rem;
 
     .category-header {
       gap: 0.5rem;
@@ -3204,7 +3204,7 @@ span.calendaria-moon-icon {
         font-size: var(--font-size-12);
 
         .category-percent {
-          min-width: 40px;
+          min-width: 2.5rem;
           text-align: right;
         }
 
@@ -3232,7 +3232,7 @@ span.calendaria-moon-icon {
   .weather-preset-header,
   .weather-preset-item {
     gap: 0.5rem;
-    grid-template-columns: 24px 28px 1fr 90px 130px 50px;
+    grid-template-columns: 1.5rem 1.75rem 1fr 5.625rem 8.125rem 3.125rem;
     display: grid;
     align-items: center;
     padding: 0.35rem 0.75rem;
@@ -3248,7 +3248,7 @@ span.calendaria-moon-icon {
 
   .weather-preset-item {
     position: relative;
-    border-top: 1px solid var(--color-cool-4-50, var(--calendaria-cool-4-50));
+    border-top: 0.0625rem solid var(--color-cool-4-50, var(--calendaria-cool-4-50));
 
     &:hover {
       background: var(--color-cool-5-50);
@@ -3273,7 +3273,7 @@ span.calendaria-moon-icon {
       align-items: center;
 
       input {
-        width: 60px;
+        width: 3.75rem;
         text-align: right;
       }
     }
@@ -3284,7 +3284,7 @@ span.calendaria-moon-icon {
       align-items: center;
 
       input {
-        width: 45px;
+        width: 2.8125rem;
         text-align: right;
       }
 
@@ -3300,8 +3300,8 @@ span.calendaria-moon-icon {
       display: flex;
 
       button {
-        width: 24px;
-        height: 24px;
+        width: 1.5rem;
+        height: 1.5rem;
         padding: 0.25rem;
       }
     }
@@ -3314,10 +3314,10 @@ span.calendaria-moon-icon {
       right: 0;
       left: 0;
       padding: 0.5rem;
-      border: 1px solid var(--color-cool-4);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--color-cool-4);
+      border-radius: 0.25rem;
       background: var(--color-cool-5);
-      box-shadow: 0 2px 8px var(--calendaria-shadow-light);
+      box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow-light);
 
       &.show {
         display: block;
@@ -3325,7 +3325,7 @@ span.calendaria-moon-icon {
 
       textarea {
         width: 100%;
-        min-height: 60px;
+        min-height: 3.75rem;
         font-size: var(--font-size-13);
         resize: vertical;
       }
@@ -3338,7 +3338,7 @@ span.calendaria-moon-icon {
     align-items: center;
     margin-top: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     background: var(--color-cool-5);
 
     .total-label {
@@ -3371,7 +3371,7 @@ span.calendaria-moon-icon {
 
 .calendaria.climate-settings-dialog {
   .dialog-content {
-    max-height: 500px;
+    max-height: 31.25rem;
     overflow-y: auto;
   }
 
@@ -3382,7 +3382,7 @@ span.calendaria-moon-icon {
     margin-bottom: 0.5rem;
 
     input {
-      width: 80px;
+      width: 5rem;
     }
   }
 
@@ -3391,14 +3391,14 @@ span.calendaria-moon-icon {
 
     h4 {
       margin: 0.5rem 0;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 0.0625rem solid var(--color-cool-4);
       font-size: 0.9rem;
     }
   }
 
   .preset-row {
     gap: 0.5rem;
-    grid-template-columns: 24px 1fr 60px 20px;
+    grid-template-columns: 1.5rem 1fr 3.75rem 1.25rem;
     display: grid;
     align-items: center;
     padding: 0.25rem 0;
@@ -3527,13 +3527,13 @@ span.calendaria-moon-icon {
 .time-keeper {
   opacity: var(--calendaria-timekeeper-idle-opacity, 0.4);
   position: fixed;
-  width: 200px;
-  padding: 6px;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 6px;
+  width: 12.5rem;
+  padding: 0.375rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.375rem;
   pointer-events: auto;
   background: color-mix(in srgb, var(--calendaria-bg) 95%, transparent);
-  box-shadow: 0 2px 8px var(--calendaria-shadow);
+  box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow);
   transition: opacity 0.3s ease-in-out 2s;
 
   &:hover {
@@ -3542,8 +3542,8 @@ span.calendaria-moon-icon {
 
     .time-keeper-controls {
       opacity: 1;
-      max-height: 30px;
-      margin-top: 6px;
+      max-height: 1.875rem;
+      margin-top: 0.375rem;
     }
   }
 }
@@ -3565,10 +3565,10 @@ span.calendaria-moon-icon {
 .time-keeper .time-display-time {
   color: var(--calendaria-text);
   font-weight: bold;
-  font-size: 20px;
+  font-size: 1.25rem;
   line-height: 1.2;
   font-family: monospace;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
   transition: opacity 0.15s ease;
 }
 
@@ -3580,7 +3580,7 @@ span.calendaria-moon-icon {
   left: 50%;
   justify-content: center;
   align-items: center;
-  padding: 4px;
+  padding: 0.25rem;
   border: none;
   color: var(--calendaria-text-dim);
   cursor: pointer;
@@ -3611,12 +3611,12 @@ span.calendaria-moon-icon {
 
 .time-keeper .time-display-date {
   color: var(--calendaria-text-dim);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.2;
 }
 
 .time-keeper .time-keeper-controls {
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   opacity: 0;
   justify-content: center;
@@ -3629,12 +3629,13 @@ span.calendaria-moon-icon {
 .time-keeper .time-btn {
   display: flex;
   flex: 1;
+  box-sizing: border-box;
   justify-content: center;
   align-items: center;
-  height: 24px;
+  height: 1.5rem;
   padding: 0;
-  border: 1px solid var(--calendaria-button-border);
-  border-radius: 3px;
+  border: 0.0625rem solid var(--calendaria-button-border);
+  border-radius: 0.1875rem;
   color: var(--calendaria-button-text);
   cursor: pointer;
   background: var(--calendaria-button-bg);
@@ -3644,8 +3645,13 @@ span.calendaria-moon-icon {
     background: var(--calendaria-button-hover);
   }
 
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
   i {
-    font-size: 10px;
+    font-size: 0.625rem;
   }
 }
 
@@ -3653,16 +3659,17 @@ span.calendaria-moon-icon {
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
-  flex: 2;
   box-sizing: border-box;
-  min-width: 0;
-  height: 24px;
-  padding: 0 4px;
-  border: 1px solid var(--calendaria-button-border);
-  border-radius: 3px;
+  width: 3.25rem;
+  min-width: 3.25rem;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0 0.375rem;
+  border: 0.0625rem solid var(--calendaria-button-border);
+  border-radius: 0.1875rem;
   color: var(--calendaria-button-text);
-  font-size: 11px;
-  line-height: 22px;
+  font-size: 0.75rem;
+  line-height: calc(1.75rem - 0.125rem);
   text-align: center;
   cursor: pointer;
   background: var(--calendaria-button-bg);
@@ -3673,13 +3680,13 @@ span.calendaria-moon-icon {
   }
 
   &:focus {
-    border-color: var(--calendaria-button-active);
     outline: none;
+    box-shadow: none;
   }
 }
 
 .time-keeper .time-keeper-readonly {
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   opacity: 0;
   justify-content: center;
@@ -3688,35 +3695,35 @@ span.calendaria-moon-icon {
   padding: 0;
   overflow: hidden;
   color: var(--calendaria-text-dim);
-  font-size: 11px;
+  font-size: 0.6875rem;
   transition: all 0.2s ease-out;
 
   i {
-    font-size: 11px;
+    font-size: 0.6875rem;
   }
 }
 
 .time-keeper:hover .time-keeper-readonly {
   opacity: 1;
-  max-height: 30px;
-  margin-top: 6px;
-  padding: 4px 0;
+  max-height: 1.875rem;
+  margin-top: 0.375rem;
+  padding: 0.25rem 0;
 }
 
 .time-keeper .time-display-stopwatch-btn {
   display: flex;
   opacity: 0;
   position: absolute;
-  right: -24px;
+  right: -4rem;
   justify-content: center;
   align-items: center;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   color: var(--calendaria-text-dim);
-  font-size: 12px;
+  font-size: 0.75rem;
   cursor: pointer;
   pointer-events: none;
   background: transparent;
@@ -3739,7 +3746,7 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .stopwatch {
-  --stopwatch-size: 200px;
+  --stopwatch-size: 12.5rem;
 
   position: fixed;
   padding: 0;
@@ -3764,13 +3771,13 @@ span.calendaria-moon-icon {
   align-items: center;
   width: var(--stopwatch-size);
   height: var(--stopwatch-size);
-  border: 4px solid var(--calendaria-border);
+  border: 0.25rem solid var(--calendaria-border);
   border-radius: 50%;
   cursor: grab;
   background: var(--calendaria-bg);
   box-shadow:
-    0 4px 16px var(--calendaria-shadow),
-    inset 0 0 20px rgb(0 0 0 / 20%);
+    0 0.25rem 1rem var(--calendaria-shadow),
+    inset 0 0 1.25rem rgb(0 0 0 / 20%);
 
   &:active {
     cursor: grabbing;
@@ -3778,9 +3785,9 @@ span.calendaria-moon-icon {
 }
 
 .stopwatch .stopwatch-dial {
-  inset: 8px;
+  inset: 0.5rem;
   position: absolute;
-  border: 2px solid var(--calendaria-border-light);
+  border: 0.125rem solid var(--calendaria-border-light);
   border-radius: 50%;
   pointer-events: none;
   background: linear-gradient(180deg, var(--calendaria-bg-lighter) 0%, var(--calendaria-bg-darker) 100%);
@@ -3794,7 +3801,7 @@ span.calendaria-moon-icon {
 
   &::before {
     -webkit-mask: radial-gradient(circle, transparent 88%, rgb(0 0 0) 88%);
-    inset: 2px;
+    inset: 0.125rem;
     mask: radial-gradient(circle, transparent 88%, rgb(0 0 0) 88%);
     position: absolute;
     border-radius: 50%;
@@ -3807,26 +3814,26 @@ span.calendaria-moon-icon {
   position: absolute;
   bottom: 50%;
   left: 50%;
-  border-radius: 2px;
+  border-radius: 0.125rem;
   pointer-events: none;
   transform-origin: bottom center;
 
   &.second-hand {
     z-index: 3;
-    width: 2px;
+    width: 0.125rem;
     height: 42%;
-    margin-left: -1px;
+    margin-left: -0.0625rem;
     background: var(--calendaria-error);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--calendaria-error) 80%, transparent);
+    box-shadow: 0 0 0.5rem color-mix(in srgb, var(--calendaria-error) 80%, transparent);
   }
 
   &.minute-hand {
     z-index: 2;
-    width: 5px;
+    width: 0.3125rem;
     height: 32%;
-    margin-left: -2.5px;
+    margin-left: -0.1562rem;
     background: var(--calendaria-text);
-    box-shadow: 0 0 3px rgb(0 0 0 / 40%);
+    box-shadow: 0 0 0.1875rem rgb(0 0 0 / 40%);
   }
 }
 
@@ -3835,14 +3842,14 @@ span.calendaria-moon-icon {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border: 2px solid var(--calendaria-border);
+  width: 0.75rem;
+  height: 0.75rem;
+  margin: -0.375rem 0 0 -0.375rem;
+  border: 0.125rem solid var(--calendaria-border);
   border-radius: 50%;
   pointer-events: none;
   background: var(--calendaria-text);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  box-shadow: 0 0.0625rem 0.1875rem rgb(0 0 0 / 30%);
 }
 
 .stopwatch .stopwatch-display {
@@ -3853,23 +3860,23 @@ span.calendaria-moon-icon {
   left: 50%;
   flex-direction: column;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.375rem;
   pointer-events: none;
   background: color-mix(in srgb, var(--calendaria-bg) 85%, transparent);
   transform: translate(-50%, -50%);
 }
 
 .stopwatch .stopwatch-time {
-  padding: 4px 8px;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.25rem;
   color: var(--calendaria-text);
   font-weight: bold;
   font-size: calc(var(--stopwatch-size) * 0.09);
   line-height: 1;
   font-family: monospace;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0313rem;
   user-select: none;
   pointer-events: none;
   background: var(--calendaria-bg);
@@ -3886,14 +3893,14 @@ span.calendaria-moon-icon {
   position: absolute;
   justify-content: center;
   align-items: center;
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   margin: 0;
   padding: 0;
   border: none;
   outline: none;
   color: var(--calendaria-text-dim);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1;
   cursor: pointer;
   pointer-events: auto;
@@ -3915,8 +3922,8 @@ span.calendaria-moon-icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 32px;
-    height: 32px;
+    width: 2rem;
+    height: 2rem;
     margin: 0;
     padding: 0;
     font-size: inherit;
@@ -3978,35 +3985,35 @@ span.calendaria-moon-icon {
 
 .stopwatch .stopwatch-laps {
   width: var(--stopwatch-size);
-  margin-top: 25px;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 8px;
+  margin-top: 1.5625rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.5rem;
   background: var(--calendaria-bg);
-  box-shadow: 0 2px 6px var(--calendaria-shadow);
+  box-shadow: 0 0.125rem 0.375rem var(--calendaria-shadow);
 }
 
 .stopwatch .stopwatch-laps-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
-  border-bottom: 1px solid var(--calendaria-border-light);
+  padding: 0.25rem 0.5rem;
+  border-bottom: 0.0625rem solid var(--calendaria-border-light);
   color: var(--calendaria-text-dim);
   font-weight: 600;
-  font-size: 9px;
+  font-size: 0.5625rem;
   text-transform: uppercase;
 
   .stopwatch-clear-laps {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 14px;
-    height: 14px;
+    width: 0.875rem;
+    height: 0.875rem;
     padding: 0;
     border: none;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     color: var(--calendaria-text-dim);
-    font-size: 8px;
+    font-size: 0.5rem;
     cursor: pointer;
     background: transparent;
     transition: color 0.15s ease;
@@ -4018,9 +4025,9 @@ span.calendaria-moon-icon {
 }
 
 .stopwatch .stopwatch-lap-list {
-  max-height: 60px;
+  max-height: 3.75rem;
   margin: 0;
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   overflow-y: auto;
   list-style: none;
 }
@@ -4028,9 +4035,9 @@ span.calendaria-moon-icon {
 .stopwatch .stopwatch-lap {
   display: flex;
   justify-content: space-between;
-  padding: 2px 0;
+  padding: 0.125rem 0;
   color: var(--calendaria-text);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-family: monospace;
 
   .lap-index {
@@ -4043,19 +4050,19 @@ span.calendaria-moon-icon {
   position: absolute;
   top: 0;
   right: 0;
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
   cursor: nesw-resize;
   transition: opacity 0.15s ease;
 
   &::after {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 8px;
-    height: 8px;
-    border-top: 2px solid var(--calendaria-text-dim);
-    border-right: 2px solid var(--calendaria-text-dim);
+    top: 0.125rem;
+    right: 0.125rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-top: 0.125rem solid var(--calendaria-text-dim);
+    border-right: 0.125rem solid var(--calendaria-text-dim);
     content: '';
   }
 
@@ -4070,11 +4077,11 @@ span.calendaria-moon-icon {
 
 .stopwatch-notification-form {
   .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 0.75rem;
 
     label {
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 0.25rem;
       font-weight: 600;
     }
 
@@ -4082,15 +4089,15 @@ span.calendaria-moon-icon {
     select {
       box-sizing: border-box;
       width: 100%;
-      padding: 6px 8px;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 4px;
+      padding: 0.375rem 0.5rem;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.25rem;
     }
 
     .hint {
-      margin-top: 4px;
+      margin-top: 0.25rem;
       color: var(--color-text-dark-secondary);
-      font-size: 11px;
+      font-size: 0.6875rem;
     }
   }
 }
@@ -4100,8 +4107,8 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .mini-cal {
-  --mini-day-size: 52px;
-  --mini-gap: 3px;
+  --mini-day-size: 3.25rem;
+  --mini-gap: 0.1875rem;
 
   opacity: var(--calendaria-minical-idle-opacity, 1);
   z-index: var(--z-index-ui);
@@ -4117,37 +4124,37 @@ span.calendaria-moon-icon {
     display: flex;
     position: relative;
     flex-direction: column;
-    border: 1px solid var(--calendaria-border);
-    border-radius: 14px;
+    border: 0.0625rem solid var(--calendaria-border);
+    border-radius: 0.875rem;
     overflow: visible;
     background: var(--calendaria-bg);
-    box-shadow: 0 4px 12px var(--calendaria-shadow);
+    box-shadow: 0 0.25rem 0.75rem var(--calendaria-shadow);
     transition: border-radius 0.2s ease;
 
     &:has(.mini-sidebar:is(.visible, .locked)) {
-      border-radius: 14px 0 0 14px;
+      border-radius: 0.875rem 0 0 0.875rem;
 
       .mini-top-row {
-        border-radius: 14px 0 0;
+        border-radius: 0.875rem 0 0;
       }
 
       .mini-time-display {
-        border-radius: 0 0 0 14px;
+        border-radius: 0 0 0 0.875rem;
       }
 
       .mini-time-controls {
-        border-radius: 0 0 0 14px;
+        border-radius: 0 0 0 0.875rem;
       }
     }
   }
 
   .mini-top-row {
-    gap: 6px;
+    gap: 0.375rem;
     display: flex;
     align-items: center;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--calendaria-border-light);
-    border-radius: 14px 14px 0 0;
+    padding: 0.375rem 0.5rem;
+    border-bottom: 0.0625rem solid var(--calendaria-border-light);
+    border-radius: 0.875rem 0.875rem 0 0;
     cursor: pointer;
     background: var(--calendaria-bg-lighter);
 
@@ -4172,11 +4179,11 @@ span.calendaria-moon-icon {
       flex-shrink: 0;
       justify-content: center;
       align-items: center;
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
       padding: 0;
       border: none;
-      border-radius: 4px;
+      border-radius: 0.25rem;
       color: var(--calendaria-text);
       cursor: pointer;
       background: transparent;
@@ -4193,19 +4200,19 @@ span.calendaria-moon-icon {
   }
 
   .mini-sidebar {
-    gap: 4px;
+    gap: 0.25rem;
     display: flex;
     z-index: -1;
     position: absolute;
-    top: -1px;
-    bottom: -1px;
+    top: -0.0625rem;
+    bottom: -0.0625rem;
     left: 100%;
     flex-direction: column;
     align-items: center;
-    width: 30px;
-    padding: 6px 0;
-    border-left: 1px solid var(--calendaria-border-light);
-    border-radius: 0 14px 14px 0;
+    width: 1.875rem;
+    padding: 0.375rem 0;
+    border-left: 0.0625rem solid var(--calendaria-border-light);
+    border-radius: 0 0.875rem 0.875rem 0;
     background: var(--calendaria-bg-lighter);
     transition: transform 0.2s ease;
     transform: translateX(-100%);
@@ -4228,17 +4235,17 @@ span.calendaria-moon-icon {
     opacity: 0;
     z-index: -2;
     position: absolute;
-    top: -1px;
-    bottom: -1px;
-    left: calc(100% + 30px);
+    top: -0.0625rem;
+    bottom: -0.0625rem;
+    left: calc(100% + 1.875rem);
     flex-direction: column;
-    width: 220px;
-    border: 1px solid var(--calendaria-border);
+    width: 13.75rem;
+    border: 0.0625rem solid var(--calendaria-border);
     border-left: none;
-    border-radius: 0 14px 14px 0;
+    border-radius: 0 0.875rem 0.875rem 0;
     pointer-events: none;
     background: var(--calendaria-bg);
-    box-shadow: 4px 0 12px var(--calendaria-shadow);
+    box-shadow: 0.25rem 0 0.75rem var(--calendaria-shadow);
     transition:
       transform 0.25s ease,
       opacity 0.25s ease;
@@ -4252,13 +4259,13 @@ span.calendaria-moon-icon {
   }
 
   .notes-panel-header {
-    gap: 4px;
+    gap: 0.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--calendaria-border-light);
-    border-radius: 0 14px 0 0;
+    padding: 0.375rem 0.5rem;
+    border-bottom: 0.0625rem solid var(--calendaria-border-light);
+    border-radius: 0 0.875rem 0 0;
     background: var(--calendaria-bg-lighter);
   }
 
@@ -4276,11 +4283,11 @@ span.calendaria-moon-icon {
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
-    width: 24px;
-    height: 24px;
+    width: 1.5rem;
+    height: 1.5rem;
     padding: 0;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     color: var(--calendaria-text);
     cursor: pointer;
     background: transparent;
@@ -4295,20 +4302,20 @@ span.calendaria-moon-icon {
   }
 
   .notes-panel-list {
-    gap: 4px;
+    gap: 0.25rem;
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 6px;
+    padding: 0.375rem;
     overflow-y: auto;
   }
 
   .notes-panel-item {
-    gap: 8px;
+    gap: 0.5rem;
     display: flex;
     align-items: center;
-    padding: 6px 8px;
-    border-radius: 4px;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
     cursor: pointer;
     background: var(--calendaria-bg-lighter);
     transition: background 0.15s;
@@ -4323,22 +4330,22 @@ span.calendaria-moon-icon {
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
 
     i {
-      font-size: 14px;
+      font-size: 0.875rem;
     }
 
     img {
       object-fit: contain;
-      width: 18px;
-      height: 18px;
+      width: 1.125rem;
+      height: 1.125rem;
     }
   }
 
   .note-item-content {
-    gap: 1px;
+    gap: 0.0625rem;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -4355,7 +4362,7 @@ span.calendaria-moon-icon {
   }
 
   .note-item-meta {
-    gap: 6px;
+    gap: 0.375rem;
     display: flex;
     align-items: center;
     color: var(--calendaria-text-dim);
@@ -4372,7 +4379,7 @@ span.calendaria-moon-icon {
     white-space: nowrap;
 
     &::before {
-      margin-right: 6px;
+      margin-right: 0.375rem;
       content: '•';
     }
   }
@@ -4383,11 +4390,11 @@ span.calendaria-moon-icon {
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
-    width: 22px;
-    height: 22px;
+    width: 1.375rem;
+    height: 1.375rem;
     padding: 0;
     border: none;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     color: var(--calendaria-text-dim);
     cursor: pointer;
     background: transparent;
@@ -4410,11 +4417,11 @@ span.calendaria-moon-icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 24px;
-    height: 24px;
+    width: 1.5rem;
+    height: 1.5rem;
     padding: 0;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     color: var(--calendaria-text);
     cursor: pointer;
     background: transparent;
@@ -4442,22 +4449,22 @@ span.calendaria-moon-icon {
   .calendar-indicators {
     gap: 0.5rem;
     flex-wrap: wrap;
-    margin: 0 8px 4px;
-    padding: 4px 0;
+    margin: 0 0.5rem 0.25rem;
+    padding: 0.25rem 0;
     font-size: var(--font-size-12, 0.75rem);
   }
 
   .weather-indicator .weather-temp {
     margin-left: 0.15rem;
     padding-left: 0.25rem;
-    border-left: 1px solid var(--calendaria-border);
+    border-left: 0.0625rem solid var(--calendaria-border);
     font-size: 0.85em;
   }
 
   .mini-grid {
     z-index: 1;
     position: relative;
-    padding: 8px;
+    padding: 0.5rem;
     background: var(--calendaria-bg);
   }
 
@@ -4466,10 +4473,10 @@ span.calendaria-moon-icon {
     grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
     display: grid;
     width: fit-content;
-    margin: 0 auto 4px;
+    margin: 0 auto 0.25rem;
 
     .weekday {
-      padding: 2px 0;
+      padding: 0.125rem 0;
       color: var(--calendaria-weekday-header);
       font-weight: 600;
       font-size: 0.7rem;
@@ -4516,7 +4523,7 @@ span.calendaria-moon-icon {
     align-items: center;
     width: var(--mini-day-size);
     height: var(--mini-day-size);
-    border-radius: 4px;
+    border-radius: 0.25rem;
     cursor: pointer;
     background: var(--calendaria-bg-lighter);
     transition: all 0.15s;
@@ -4548,7 +4555,7 @@ span.calendaria-moon-icon {
 
     &.today {
       background: var(--calendaria-today-bg);
-      box-shadow: inset 0 0 0 2px var(--calendaria-today);
+      box-shadow: inset 0 0 0 0.125rem var(--calendaria-today);
 
       .day-num {
         color: var(--calendaria-today);
@@ -4558,7 +4565,7 @@ span.calendaria-moon-icon {
 
     &.selected {
       background: var(--calendaria-selected-bg);
-      box-shadow: inset 0 0 0 2px var(--calendaria-primary);
+      box-shadow: inset 0 0 0 0.125rem var(--calendaria-primary);
     }
 
     &.festival {
@@ -4578,14 +4585,14 @@ span.calendaria-moon-icon {
     .note-badge {
       display: flex;
       position: absolute;
-      bottom: 2.5px;
-      left: 2.4px;
+      bottom: 0.1563rem;
+      left: 0.15rem;
       justify-content: center;
       align-items: center;
-      width: 15px;
-      height: 15px;
-      padding: 0 2px;
-      border-radius: 4px;
+      width: 0.9375rem;
+      height: 0.9375rem;
+      padding: 0 0.125rem;
+      border-radius: 0.25rem;
       color: var(--calendaria-note-badge-text);
       font-weight: 700;
       font-size: 0.85rem;
@@ -4594,10 +4601,10 @@ span.calendaria-moon-icon {
 
     .moon-tint {
       position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 12px;
-      height: 12px;
+      top: 0.125rem;
+      right: 0.125rem;
+      width: 0.75rem;
+      height: 0.75rem;
       border-radius: 50%;
       overflow: hidden;
       background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
@@ -4605,10 +4612,10 @@ span.calendaria-moon-icon {
 
     .moon-tiny {
       position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 12px;
-      height: 12px;
+      top: 0.125rem;
+      right: 0.125rem;
+      width: 0.75rem;
+      height: 0.75rem;
 
       &.tinted {
         mix-blend-mode: multiply;
@@ -4625,9 +4632,9 @@ span.calendaria-moon-icon {
     position: relative;
     justify-content: center;
     align-items: center;
-    padding: 8px 10px;
-    border-top: 1px solid var(--calendaria-border-light);
-    border-radius: 0 0 14px 14px;
+    padding: 0.5rem 0.625rem;
+    border-top: 0.0625rem solid var(--calendaria-border-light);
+    border-radius: 0 0 0.875rem 0.875rem;
     cursor: pointer;
     background: var(--calendaria-bg-lighter);
 
@@ -4636,7 +4643,7 @@ span.calendaria-moon-icon {
       font-weight: 600;
       font-size: 1.1rem;
       font-family: monospace;
-      letter-spacing: 1px;
+      letter-spacing: 0.0625rem;
       transition: opacity 0.15s;
     }
 
@@ -4685,11 +4692,11 @@ span.calendaria-moon-icon {
     position: relative;
     justify-content: center;
     align-items: center;
-    height: 44px;
-    margin-bottom: -44px;
-    padding: 8px 10px;
-    border-top: 1px solid var(--calendaria-border-light);
-    border-radius: 0 0 14px 14px;
+    height: 2.75rem;
+    margin-bottom: -2.75rem;
+    padding: 0.5rem 0.625rem;
+    border-top: 0.0625rem solid var(--calendaria-border-light);
+    border-radius: 0 0 0.875rem 0.875rem;
     background: var(--calendaria-bg-lighter);
     transition:
       transform 0.25s ease,
@@ -4702,20 +4709,21 @@ span.calendaria-moon-icon {
     }
 
     .controls-group {
-      gap: 2px;
+      gap: 0.25rem;
       display: flex;
       align-items: center;
     }
 
     .time-btn {
       display: flex;
+      box-sizing: border-box;
       justify-content: center;
       align-items: center;
-      width: 28px;
-      height: 28px;
+      width: 1.75rem;
+      height: 1.75rem;
       padding: 0;
-      border: 1px solid var(--calendaria-button-border);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--calendaria-button-border);
+      border-radius: 0.25rem;
       color: var(--calendaria-button-text);
       cursor: pointer;
       background: var(--calendaria-button-bg);
@@ -4725,26 +4733,40 @@ span.calendaria-moon-icon {
         border-color: var(--calendaria-primary);
         background: var(--calendaria-bg-hover);
       }
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
+      }
     }
 
     .increment-select {
-      width: fit-content;
-      height: 28px;
-      padding: 0 6px;
-      border: 1px solid var(--calendaria-button-border);
-      border-radius: 4px;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      appearance: none;
+      box-sizing: border-box;
+      width: 3.25rem;
+      min-width: 3.25rem;
+      height: 1.75rem;
+      margin: 0;
+      padding: 0 0.375rem;
+      border: 0.0625rem solid var(--calendaria-button-border);
+      border-radius: 0.25rem;
       color: var(--calendaria-button-text);
       font-size: 0.75rem;
+      line-height: 1.625rem;
+      text-align: center;
       cursor: pointer;
       background: var(--calendaria-button-bg);
+      background-image: none;
 
       &:hover {
         border-color: var(--calendaria-primary);
       }
 
       &:focus {
-        border-color: var(--calendaria-primary);
         outline: none;
+        box-shadow: none;
       }
     }
   }
@@ -4782,7 +4804,7 @@ span.calendaria-moon-icon {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 150px;
+      max-width: 9.375rem;
     }
 
     .note-actions {
@@ -4811,7 +4833,7 @@ span.calendaria-moon-icon {
 
   .calendaria-day-tooltip-date {
     font-size: 0.9rem;
-    margin-bottom: 2px;
+    margin-bottom: 0.125rem;
 
     strong {
       color: var(--color-text-primary, rgb(238 238 238));
@@ -4831,11 +4853,11 @@ span.calendaria-moon-icon {
   .calendaria-day-tooltip-sun {
     font-size: 0.8rem;
     color: var(--color-text-secondary, rgb(170 170 170));
-    margin-top: 4px;
+    margin-top: 0.25rem;
 
     i {
       opacity: 0.7;
-      margin: 0 2px;
+      margin: 0 0.125rem;
     }
 
     .fa-sun {
@@ -4882,12 +4904,12 @@ span.calendaria-moon-icon {
   }
 
   fieldset {
-    border-radius: 5px;
+    border-radius: 0.3125rem;
   }
 
   .importer-grid {
     gap: 0.75rem;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 17.5rem 1fr;
     display: grid;
     flex: 1;
     min-height: 0;
@@ -4938,8 +4960,8 @@ span.calendaria-moon-icon {
     justify-content: center;
     align-items: center;
     padding: 0.75rem;
-    border: 1px dashed var(--color-border-light-tertiary, var(--calendaria-input-border));
-    border-radius: 6px;
+    border: 0.0625rem dashed var(--color-border-light-tertiary, var(--calendaria-input-border));
+    border-radius: 0.375rem;
     cursor: pointer;
     transition: border-color 0.2s;
 
@@ -4997,7 +5019,7 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+    border-radius: 0.375rem;
 
     span {
       flex: 1;
@@ -5023,7 +5045,7 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: flex-start;
     padding: 0.5rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     background: rgb(255 0 0 / 10%);
 
     i {
@@ -5086,7 +5108,7 @@ span.calendaria-moon-icon {
     align-items: center;
     margin-top: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     color: var(--calendaria-primary, rgb(33 150 243));
     font-size: 0.85rem;
     background: var(--calendaria-primary-10, rgb(33 150 243 / 10%));
@@ -5176,17 +5198,17 @@ span.calendaria-moon-icon {
     display: flex;
     flex: 1;
     flex-direction: column;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     overflow-y: auto;
   }
 
   .note-row {
     gap: 0.35rem;
-    grid-template-columns: 1fr 50px 72px;
+    grid-template-columns: 1fr 3.125rem 4.5rem;
     display: grid;
     align-items: center;
     padding: 0.3rem 0.5rem;
-    border-bottom: 1px solid var(--color-border-light-tertiary, var(--calendaria-input-border));
+    border-bottom: 0.0625rem solid var(--color-border-light-tertiary, var(--calendaria-input-border));
 
     &:last-child {
       border-bottom: none;
@@ -5235,8 +5257,8 @@ span.calendaria-moon-icon {
     align-items: center;
 
     input[type='radio'] {
-      width: 14px;
-      height: 14px;
+      width: 0.875rem;
+      height: 0.875rem;
       margin: 0;
       cursor: pointer;
     }
@@ -5267,7 +5289,7 @@ span.calendaria-moon-icon {
     display: flex;
     justify-content: center;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--color-border-light-tertiary, var(--calendaria-input-border));
+    border-top: 0.0625rem solid var(--color-border-light-tertiary, var(--calendaria-input-border));
 
     button[type='submit'] {
       padding: 0.5rem 1.5rem;
@@ -5307,7 +5329,7 @@ span.calendaria-moon-icon {
     font-weight: 500;
 
     span:first-child {
-      flex: 0 0 160px;
+      flex: 0 0 10rem;
     }
 
     span:nth-child(2) {
@@ -5315,7 +5337,7 @@ span.calendaria-moon-icon {
     }
 
     span:last-child {
-      width: 28px;
+      width: 1.75rem;
     }
   }
 
@@ -5329,7 +5351,7 @@ span.calendaria-moon-icon {
 
   .season-trigger-row {
     > select:first-child {
-      flex: 0 0 160px;
+      flex: 0 0 10rem;
     }
 
     > select:nth-child(2) {
@@ -5339,11 +5361,11 @@ span.calendaria-moon-icon {
 
   .moon-trigger-row {
     > select:first-child {
-      flex: 0 0 120px;
+      flex: 0 0 7.5rem;
     }
 
     > select:nth-child(2) {
-      flex: 0 0 120px;
+      flex: 0 0 7.5rem;
     }
 
     > select:nth-child(3) {
@@ -5353,11 +5375,11 @@ span.calendaria-moon-icon {
 
   .moon-triggers-list .trigger-header {
     span:first-child {
-      flex: 0 0 120px;
+      flex: 0 0 7.5rem;
     }
 
     span:nth-child(2) {
-      flex: 0 0 120px;
+      flex: 0 0 7.5rem;
     }
 
     span:nth-child(3) {
@@ -5382,20 +5404,20 @@ span.calendaria-moon-icon {
     align-items: center;
 
     select {
-      min-width: 100px;
+      min-width: 6.25rem;
     }
   }
 
   .toolbar-apps-checkboxes {
     display: flex;
-    gap: 8px;
-    margin-right: 3px;
+    gap: 0.5rem;
+    margin-right: 0.1875rem;
 
     .checkbox-inline {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 0.25rem;
       cursor: pointer;
 
       input[type='checkbox'] {
@@ -5430,7 +5452,7 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--calendaria-border);
+    border-bottom: 0.0625rem solid var(--calendaria-border);
 
     label {
       color: var(--calendaria-text-dim);
@@ -5448,7 +5470,7 @@ span.calendaria-moon-icon {
     .category-header {
       margin: 0 0 0.5rem;
       padding-bottom: 0.25rem;
-      border-bottom: 1px solid var(--calendaria-border);
+      border-bottom: 0.0625rem solid var(--calendaria-border);
       color: var(--calendaria-text-dim);
       font-weight: 600;
       font-size: 0.85rem;
@@ -5456,7 +5478,7 @@ span.calendaria-moon-icon {
 
     .weather-buttons {
       gap: 0.4rem;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(6.875rem, 1fr));
       display: grid;
     }
   }
@@ -5466,8 +5488,8 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: center;
     padding: 0.4rem 0.6rem;
-    border: 1px solid color-mix(in srgb, var(--weather-color) 50%, transparent);
-    border-radius: 4px;
+    border: 0.0625rem solid color-mix(in srgb, var(--weather-color) 50%, transparent);
+    border-radius: 0.25rem;
     color: var(--calendaria-text);
     text-align: left;
     cursor: pointer;
@@ -5477,7 +5499,7 @@ span.calendaria-moon-icon {
     &:hover {
       border-color: var(--weather-color);
       background: color-mix(in srgb, var(--weather-color) 35%, var(--calendaria-bg-lighter));
-      transform: translateY(-1px);
+      transform: translateY(-0.0625rem);
     }
 
     &:active {
@@ -5505,7 +5527,7 @@ span.calendaria-moon-icon {
     display: flex;
     justify-content: center;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--calendaria-border);
+    border-top: 0.0625rem solid var(--calendaria-border);
 
     .footer-btn {
       gap: 0.5rem;
@@ -5513,7 +5535,7 @@ span.calendaria-moon-icon {
       align-items: center;
       padding: 0.5rem 1.5rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 0.25rem;
       color: var(--calendaria-text-on-color);
       font-weight: 500;
       font-size: 0.9rem;
@@ -5573,13 +5595,13 @@ span.calendaria-moon-icon {
 .calendaria-hud-dome {
   z-index: 1;
   position: absolute;
-  bottom: calc(100% - 14px);
+  bottom: calc(100% - 0.875rem);
   left: 50%;
-  width: 160px;
-  height: 80px;
-  border: 2px solid rgb(26 26 26);
+  width: 10rem;
+  height: 5rem;
+  border: 0.125rem solid rgb(26 26 26);
   border-bottom: none;
-  border-radius: 80px 80px 0 0;
+  border-radius: 5rem 5rem 0 0;
   overflow: hidden;
   cursor: pointer;
   transition:
@@ -5589,20 +5611,20 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-dome:focus {
-  outline: 2px solid rgb(100 180 255 / 60%);
-  outline-offset: 2px;
+  outline: 0.125rem solid rgb(100 180 255 / 60%);
+  outline-offset: 0.125rem;
 }
 
 .calendaria-hud-dome::before {
   inset: 0;
   z-index: 10;
   position: absolute;
-  border: 2px solid rgb(20 20 20 / 90%);
+  border: 0.125rem solid rgb(20 20 20 / 90%);
   border-bottom: none;
-  border-radius: 80px 80px 0 0;
+  border-radius: 5rem 5rem 0 0;
   pointer-events: none;
   content: '';
-  box-shadow: inset 0 0 20px rgb(0 0 0 / 40%);
+  box-shadow: inset 0 0 1.25rem rgb(0 0 0 / 40%);
 }
 
 .calendaria-hud-dome.hidden {
@@ -5633,32 +5655,32 @@ span.calendaria-moon-icon {
 .calendaria-hud-stars::before,
 .calendaria-hud-stars::after {
   position: absolute;
-  width: 2px;
-  height: 2px;
+  width: 0.125rem;
+  height: 0.125rem;
   border-radius: 50%;
   content: '';
   background: rgb(255 255 255);
   box-shadow:
-    16px 12px 0 0 rgb(255 255 255 / 80%),
-    56px 22px 0 0 rgb(255 255 255 / 60%),
-    77px 26px 0 0 rgb(255 255 255 / 70%),
-    120px 14px 0 0 rgb(255 255 255 / 65%),
-    140px 38px 0 0 rgb(255 255 255 / 75%),
-    35px 28px 0 1px rgb(255 255 255 / 90%),
-    99px 8px 0 1px rgb(255 255 255 / 85%),
-    48px 44px 0 1px rgb(255 255 255 / 80%),
-    88px 40px 0 0 rgb(255 255 255 / 70%),
-    128px 30px 0 0 rgb(255 255 255 / 75%);
+    1rem 0.75rem 0 0 rgb(255 255 255 / 80%),
+    3.5rem 1.375rem 0 0 rgb(255 255 255 / 60%),
+    4.8125rem 1.625rem 0 0 rgb(255 255 255 / 70%),
+    7.5rem 0.875rem 0 0 rgb(255 255 255 / 65%),
+    8.75rem 2.375rem 0 0 rgb(255 255 255 / 75%),
+    2.1875rem 1.75rem 0 0.0625rem rgb(255 255 255 / 90%),
+    6.1875rem 0.5rem 0 0.0625rem rgb(255 255 255 / 85%),
+    3rem 2.75rem 0 0.0625rem rgb(255 255 255 / 80%),
+    5.5rem 2.5rem 0 0 rgb(255 255 255 / 70%),
+    8rem 1.875rem 0 0 rgb(255 255 255 / 75%);
   animation: calendaria-twinkle 3s ease-in-out infinite;
 }
 
 .calendaria-hud-stars::after {
   box-shadow:
-    25px 18px 0 0 rgb(255 255 255 / 70%),
-    65px 35px 0 0 rgb(255 255 255 / 80%),
-    105px 20px 0 0 rgb(255 255 255 / 65%),
-    45px 10px 0 1px rgb(255 255 255 / 90%),
-    115px 48px 0 0 rgb(255 255 255 / 75%);
+    1.5625rem 1.125rem 0 0 rgb(255 255 255 / 70%),
+    4.0625rem 2.1875rem 0 0 rgb(255 255 255 / 80%),
+    6.5625rem 1.25rem 0 0 rgb(255 255 255 / 65%),
+    2.8125rem 0.625rem 0 0.0625rem rgb(255 255 255 / 90%),
+    7.1875rem 3rem 0 0 rgb(255 255 255 / 75%);
   animation-delay: 1.5s;
 }
 
@@ -5696,28 +5718,28 @@ span.calendaria-moon-icon {
   border-radius: 50%;
   content: '';
   background: rgb(255 255 255 / 35%);
-  filter: blur(2px);
+  filter: blur(0.125rem);
 }
 
 .calendaria-hud-clouds::before {
-  top: 25px;
-  left: -40px;
-  width: 35px;
-  height: 14px;
+  top: 1.5625rem;
+  left: -2.5rem;
+  width: 2.1875rem;
+  height: 0.875rem;
   box-shadow:
-    8px -4px 0 -2px rgb(255 255 255 / 30%),
-    16px 0 0 -1px rgb(255 255 255 / 25%);
+    0.5rem -0.25rem 0 -0.125rem rgb(255 255 255 / 30%),
+    1rem 0 0 -0.0625rem rgb(255 255 255 / 25%);
   animation: calendaria-clouds-drift 25s linear infinite;
 }
 
 .calendaria-hud-clouds::after {
-  top: 45px;
-  left: -30px;
-  width: 28px;
-  height: 11px;
+  top: 2.8125rem;
+  left: -1.875rem;
+  width: 1.75rem;
+  height: 0.6875rem;
   box-shadow:
-    6px -3px 0 -1px rgb(255 255 255 / 28%),
-    12px 0 0 0 rgb(255 255 255 / 22%);
+    0.375rem -0.1875rem 0 -0.0625rem rgb(255 255 255 / 28%),
+    0.75rem 0 0 0 rgb(255 255 255 / 22%);
   animation: calendaria-clouds-drift 35s linear infinite;
   animation-delay: 8s;
 }
@@ -5728,7 +5750,7 @@ span.calendaria-moon-icon {
   }
 
   100% {
-    transform: translateX(220px);
+    transform: translateX(13.75rem);
   }
 }
 
@@ -5740,8 +5762,8 @@ span.calendaria-moon-icon {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 140px;
-  height: 70px;
+  width: 8.75rem;
+  height: 4.375rem;
   pointer-events: none;
   transform: translateX(-50%);
 }
@@ -5754,23 +5776,23 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-sun {
   opacity: 0;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   background: radial-gradient(circle at 35% 35%, rgb(255 245 170) 0%, rgb(255 229 92) 30%, rgb(255 217 61) 60%, rgb(255 165 0) 100%);
   box-shadow:
-    0 0 15px rgb(255 217 61),
-    0 0 30px rgb(255 217 61 / 50%),
-    0 0 50px rgb(255 165 0 / 30%);
+    0 0 0.9375rem rgb(255 217 61),
+    0 0 1.875rem rgb(255 217 61 / 50%),
+    0 0 3.125rem rgb(255 165 0 / 30%);
 }
 
 .calendaria-hud-moon {
   opacity: 0;
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
   background: radial-gradient(circle at 35% 35%, rgb(255 255 248) 0%, rgb(232 232 224) 40%, rgb(200 200 184) 100%);
   box-shadow:
-    0 0 10px rgb(255 255 255 / 50%),
-    0 0 20px rgb(255 255 255 / 20%);
+    0 0 0.625rem rgb(255 255 255 / 50%),
+    0 0 1.25rem rgb(255 255 255 / 20%);
 }
 
 /* ======================================== */
@@ -5784,27 +5806,27 @@ span.calendaria-moon-icon {
 /* Main Bar                                 */
 /* ======================================== */
 .calendaria-hud-bar {
-  gap: 10px;
+  gap: 0.625rem;
   grid-template-columns: 1fr auto 1fr;
   display: inline-grid;
   z-index: 10;
   position: relative;
   align-items: center;
   align-content: center;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 6px;
+  height: 2.25rem;
+  padding: 0 0.625rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.375rem;
   cursor: grab;
   background: var(--calendaria-bg);
-  box-shadow: 0 0 10px var(--calendaria-shadow);
+  box-shadow: 0 0 0.625rem var(--calendaria-shadow);
 }
 
 /* Width scale for fullsize mode - prevents content-driven resizing */
 .calendaria-hud:not(.compact) .calendaria-hud-bar {
   display: grid;
   box-sizing: border-box;
-  width: calc(800px * var(--hud-width-scale, 1));
+  width: calc(50rem * var(--hud-width-scale, 1));
 }
 
 .calendaria-hud:not(.compact) .calendaria-hud-section {
@@ -5832,23 +5854,23 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud:not(.compact) .calendaria-hud-tray {
-  gap: clamp(3px, calc(6px * var(--hud-width-scale, 1)), 6px);
+  gap: 0.25rem;
   box-sizing: border-box;
-  max-width: calc(800px * var(--hud-width-scale, 1));
-  padding: clamp(4px, calc(6px * var(--hud-width-scale, 1)), 6px) clamp(6px, calc(10px * var(--hud-width-scale, 1)), 10px);
+  max-width: calc(50rem * var(--hud-width-scale, 1));
+  padding: clamp(0.25rem, calc(0.375rem * var(--hud-width-scale, 1)), 0.375rem) clamp(0.375rem, calc(0.625rem * var(--hud-width-scale, 1)), 0.625rem);
 }
 
 .calendaria-hud:not(.compact) .calendaria-hud-tray .calendaria-hud-time-btn {
-  width: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
-  height: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
-  font-size: clamp(0.5rem, calc(0.75rem * var(--hud-width-scale, 1)), 0.75rem);
+  width: 1.625rem;
+  height: 1.625rem;
+  font-size: 0.75rem;
 }
 
 .calendaria-hud:not(.compact) .calendaria-hud-tray .calendaria-hud-select {
-  height: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
-  padding: 0 clamp(4px, calc(8px * var(--hud-width-scale, 1)), 8px);
-  font-size: clamp(0.5rem, calc(0.6875rem * var(--hud-width-scale, 1)), 0.6875rem);
-  line-height: clamp(18px, calc(26px * var(--hud-width-scale, 1)), 26px);
+  height: 1.625rem;
+  padding: 0 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
 }
 
 .calendaria-hud-bar.dragging {
@@ -5880,8 +5902,8 @@ span.calendaria-moon-icon {
 .mini-cal .mini-top-row.near-snap {
   border-color: var(--calendaria-primary);
   box-shadow:
-    0 0 10px var(--calendaria-shadow),
-    0 0 8px var(--calendaria-primary);
+    0 0 0.625rem var(--calendaria-shadow),
+    0 0 0.5rem var(--calendaria-primary);
   animation: calendaria-wobble 0.15s ease-in-out infinite;
 }
 
@@ -5893,10 +5915,10 @@ span.calendaria-moon-icon {
   position: fixed;
   justify-content: center;
   align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border: 2px dashed var(--calendaria-primary);
-  border-radius: 6px;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 0.125rem dashed var(--calendaria-primary);
+  border-radius: 0.375rem;
   pointer-events: none;
   background: color-mix(in srgb, var(--calendaria-primary) 15%, transparent);
   transition: opacity 0.15s ease;
@@ -5909,9 +5931,9 @@ span.calendaria-moon-icon {
 .calendaria-snap-indicator::before {
   display: block;
   opacity: 0.5;
-  width: 60px;
-  height: 4px;
-  border-radius: 2px;
+  width: 3.75rem;
+  height: 0.25rem;
+  border-radius: 0.125rem;
   content: '';
   background: var(--calendaria-primary);
 }
@@ -5923,7 +5945,7 @@ span.calendaria-moon-icon {
   top: auto !important;
   left: auto !important;
   width: max-content;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   pointer-events: auto !important;
 }
 
@@ -5931,7 +5953,7 @@ span.calendaria-moon-icon {
 /* HUD Sections                             */
 /* ======================================== */
 .calendaria-hud-section {
-  gap: 10px;
+  gap: 0.625rem;
   display: flex;
   align-items: center;
 }
@@ -5952,14 +5974,14 @@ span.calendaria-moon-icon {
   flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  width: 22px;
-  height: 22px;
-  min-height: 22px;
-  max-height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
+  min-height: 1.375rem;
+  max-height: 1.375rem;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--calendaria-button-border);
-  border-radius: 3px;
+  border: 0.0625rem solid var(--calendaria-button-border);
+  border-radius: 0.1875rem;
   color: var(--calendaria-text-dim);
   line-height: 1;
   cursor: pointer;
@@ -5973,8 +5995,8 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-btn:focus-visible {
-  outline: 2px solid var(--calendaria-primary);
-  outline-offset: 1px;
+  outline: 0.125rem solid var(--calendaria-primary);
+  outline-offset: 0.0625rem;
 }
 
 .calendaria-hud-btn i {
@@ -6000,7 +6022,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-btn-group {
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -6008,7 +6030,7 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-btn-group.left,
 .calendaria-hud-btn-group.right {
-  min-width: 60px;
+  min-width: 3.75rem;
 }
 
 .calendaria-hud-btn-group.left {
@@ -6023,7 +6045,7 @@ span.calendaria-moon-icon {
 /* Left Info Panel                          */
 /* ======================================== */
 .calendaria-hud-info-panel {
-  gap: 8px;
+  gap: 0.5rem;
   display: flex;
   position: relative;
   flex: 1 1 0;
@@ -6041,7 +6063,7 @@ span.calendaria-moon-icon {
   overflow: hidden;
   color: var(--calendaria-text);
   font-weight: 500;
-  font-size: var(--font-size-11, 0.6875rem);
+  font-size: clamp(var(--font-size-10, 0.625rem), calc(var(--font-size-12, 0.75rem) * var(--hud-width-scale, 1)), var(--font-size-12, 0.75rem));
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
@@ -6057,11 +6079,11 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-event {
-  gap: 6px;
+  gap: 0.375rem;
   display: flex;
   align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
   cursor: pointer;
   background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 20%, transparent);
   transition: all 0.15s ease;
@@ -6081,7 +6103,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-event-name {
-  max-width: 140px;
+  max-width: 8.75rem;
   overflow: hidden;
   color: var(--calendaria-text);
   font-size: var(--font-size-11, 0.6875rem);
@@ -6089,7 +6111,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-events {
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   align-items: center;
 }
@@ -6098,9 +6120,9 @@ span.calendaria-moon-icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
   cursor: pointer;
   background: color-mix(in srgb, var(--event-color, rgb(168 100 100)) 25%, transparent);
   transition: all 0.15s ease;
@@ -6134,12 +6156,12 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-time {
-  padding: 0 8px;
+  padding: 0 0.5rem;
   color: var(--calendaria-text);
-  font-size: var(--font-size-14, 0.875rem);
+  font-size: clamp(var(--font-size-12, 0.75rem), calc(var(--font-size-14, 0.875rem) * var(--hud-width-scale, 1)), var(--font-size-14, 0.875rem));
   font-family: Consolas, Monaco, monospace;
   text-align: center;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0313rem;
 }
 
 .calendaria-hud-play-btn {
@@ -6150,7 +6172,7 @@ span.calendaria-moon-icon {
   left: 50%;
   justify-content: center;
   align-items: center;
-  padding: 4px;
+  padding: 0.25rem;
   border: none;
   color: var(--calendaria-text-dim);
   cursor: pointer;
@@ -6198,7 +6220,7 @@ span.calendaria-moon-icon {
 /* Right Section                            */
 /* ======================================== */
 .calendaria-hud-indicators {
-  gap: 8px;
+  gap: 0.5rem;
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -6214,8 +6236,8 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-indicators .weather-indicator {
   padding: 0.25rem 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
-  border-radius: 4px;
+  border: 0.0625rem solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+  border-radius: 0.25rem;
   color: var(--calendaria-text);
   background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
 }
@@ -6244,7 +6266,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-indicators .weather-indicator.no-weather {
-  border: 1px dashed var(--calendaria-border);
+  border: 0.0625rem dashed var(--calendaria-border);
   color: var(--calendaria-text-dim);
   background: transparent;
 }
@@ -6342,18 +6364,18 @@ span.calendaria-moon-icon {
 /* Hover Tray                               */
 /* ======================================== */
 .calendaria-hud-tray {
-  gap: 6px;
+  gap: 0.25rem;
   display: flex;
   opacity: 0;
   z-index: 5;
   justify-content: center;
   align-items: center;
   max-height: 0;
-  margin-top: -1px;
-  padding: 0 10px;
-  border: 1px solid var(--calendaria-border);
+  margin-top: -0.0625rem;
+  padding: 0 0.625rem;
+  border: 0.0625rem solid var(--calendaria-border);
   border-top: none;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 0.375rem 0.375rem;
   overflow: hidden;
   background: var(--calendaria-bg);
   transition: all 0.25s ease;
@@ -6362,8 +6384,8 @@ span.calendaria-moon-icon {
 .calendaria-hud:hover .calendaria-hud-tray,
 .calendaria-hud-tray.visible {
   opacity: 1;
-  max-height: 42px;
-  padding: 6px 10px;
+  max-height: 2.625rem;
+  padding: 0.375rem 0.625rem;
 }
 
 /* ======================================== */
@@ -6374,10 +6396,10 @@ span.calendaria-moon-icon {
   flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--calendaria-button-border);
-  border-radius: 4px;
+  width: 1.625rem;
+  height: 1.625rem;
+  border: 0.0625rem solid var(--calendaria-button-border);
+  border-radius: 0.25rem;
   color: var(--calendaria-text-dim);
   cursor: pointer;
   background: var(--calendaria-button-bg);
@@ -6389,13 +6411,14 @@ span.calendaria-moon-icon {
   background: var(--calendaria-bg-hover);
 }
 
+.calendaria-hud-time-btn:focus,
 .calendaria-hud-time-btn:focus-visible {
-  outline: 2px solid var(--calendaria-primary);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: none;
 }
 
 .calendaria-hud-time-btn i {
-  font-size: var(--font-size-12, 0.75rem);
+  font-size: var(--font-size-14, 0.875rem);
 }
 
 .calendaria-hud-time-btn.time-shortcut {
@@ -6409,8 +6432,8 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-time-btn.custom-jump {
   width: auto;
-  min-width: 26px;
-  padding: 0 4px;
+  min-width: 1.625rem;
+  padding: 0 0.25rem;
   font-weight: 600;
   font-size: var(--font-size-10, 0.625rem);
 }
@@ -6423,14 +6446,14 @@ span.calendaria-moon-icon {
   -webkit-appearance: none;
   appearance: none;
   box-sizing: border-box;
-  min-width: 50px;
-  height: 26px;
-  padding: 0 6px;
-  border: 1px solid var(--calendaria-button-border);
-  border-radius: 4px;
+  min-width: 3.25rem;
+  height: 1.625rem;
+  padding: 0 0.375rem;
+  border: 0.0625rem solid var(--calendaria-button-border);
+  border-radius: 0.25rem;
   color: var(--calendaria-text-dim);
-  font-size: var(--font-size-11, 0.6875rem);
-  line-height: 24px;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
   text-align: center;
   cursor: pointer;
   background: var(--calendaria-button-bg);
@@ -6449,18 +6472,18 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-select:focus {
-  border-color: var(--calendaria-primary);
   outline: none;
+  box-shadow: none;
 }
 
 .calendaria-hud-select[data-action='setIncrement'] {
-  width: 70px;
-  min-width: 70px;
+  width: 3.25rem;
+  min-width: 3.25rem;
 }
 
 .calendaria-hud-tray-divider {
-  width: 1px;
-  height: 18px;
+  width: 0.0625rem;
+  height: 1.125rem;
   background: var(--calendaria-border);
 }
 
@@ -6476,10 +6499,10 @@ span.calendaria-moon-icon {
   bottom: 100%;
   left: 50%;
   margin-top: 0;
-  margin-bottom: -1px;
-  border-top: 1px solid var(--calendaria-border);
+  margin-bottom: -0.0625rem;
+  border-top: 0.0625rem solid var(--calendaria-border);
   border-bottom: none;
-  border-radius: 6px 6px 0 0;
+  border-radius: 0.375rem 0.375rem 0 0;
   transform: translateX(-50%);
 }
 
@@ -6487,49 +6510,49 @@ span.calendaria-moon-icon {
 /* Compact Mode                             */
 /* ======================================== */
 .calendaria-hud.compact .calendaria-hud-dome {
-  bottom: calc(100% - 10px);
-  width: 120px;
-  height: 60px;
-  border-radius: 60px 60px 0 0;
+  bottom: calc(100% - 0.625rem);
+  width: 7.5rem;
+  height: 3.75rem;
+  border-radius: 3.75rem 3.75rem 0 0;
 }
 
 .calendaria-hud.compact .calendaria-hud-dome::before {
-  border-radius: 60px 60px 0 0;
+  border-radius: 3.75rem 3.75rem 0 0;
 }
 
 .calendaria-hud.compact .calendaria-hud-stars::before,
 .calendaria-hud.compact .calendaria-hud-stars::after {
   box-shadow:
-    12px 10px 0 0 rgb(255 255 255 / 75%),
-    40px 18px 0 0 rgb(255 255 255 / 60%),
-    60px 12px 0 0 rgb(255 255 255 / 70%),
-    85px 22px 0 0 rgb(255 255 255 / 65%),
-    100px 15px 0 0 rgb(255 255 255 / 80%),
-    28px 35px 0 1px rgb(255 255 255 / 85%),
-    72px 8px 0 1px rgb(255 255 255 / 75%);
+    0.75rem 0.625rem 0 0 rgb(255 255 255 / 75%),
+    2.5rem 1.125rem 0 0 rgb(255 255 255 / 60%),
+    3.75rem 0.75rem 0 0 rgb(255 255 255 / 70%),
+    5.3125rem 1.375rem 0 0 rgb(255 255 255 / 65%),
+    6.25rem 0.9375rem 0 0 rgb(255 255 255 / 80%),
+    1.75rem 2.1875rem 0 0.0625rem rgb(255 255 255 / 85%),
+    4.5rem 0.5rem 0 0.0625rem rgb(255 255 255 / 75%);
 }
 
 .calendaria-hud.compact .calendaria-hud-stars::after {
   box-shadow:
-    20px 14px 0 0 rgb(255 255 255 / 70%),
-    50px 25px 0 0 rgb(255 255 255 / 65%),
-    80px 18px 0 0 rgb(255 255 255 / 75%),
-    95px 35px 0 0 rgb(255 255 255 / 60%);
+    1.25rem 0.875rem 0 0 rgb(255 255 255 / 70%),
+    3.125rem 1.5625rem 0 0 rgb(255 255 255 / 65%),
+    5rem 1.125rem 0 0 rgb(255 255 255 / 75%),
+    5.9375rem 2.1875rem 0 0 rgb(255 255 255 / 60%);
 }
 
 .calendaria-hud.compact .calendaria-hud-track {
-  width: 100px;
-  height: 50px;
+  width: 6.25rem;
+  height: 3.125rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-sun {
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-moon {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-center {
@@ -6538,29 +6561,29 @@ span.calendaria-moon-icon {
 
 .calendaria-hud.compact .calendaria-hud-btn-group.left,
 .calendaria-hud.compact .calendaria-hud-btn-group.right {
-  min-width: 50px;
+  min-width: 3.125rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-section {
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-info-panel,
 .calendaria-hud.compact .calendaria-hud-indicators {
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-bar {
-  gap: 8px;
-  height: 30px;
-  padding: 0 8px;
+  gap: 0.5rem;
+  height: 1.875rem;
+  padding: 0 0.5rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-btn {
-  width: 18px;
-  height: 18px;
-  min-height: 18px;
-  max-height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
+  min-height: 1.125rem;
+  max-height: 1.125rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-btn i {
@@ -6568,7 +6591,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud.compact .calendaria-hud-btn-group {
-  gap: 3px;
+  gap: 0.1875rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-date,
@@ -6577,7 +6600,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud.compact .calendaria-hud-time {
-  padding: 0 6px;
+  padding: 0 0.375rem;
   font-size: var(--font-size-12, 0.75rem);
 }
 
@@ -6595,15 +6618,15 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud.compact .calendaria-hud-select {
-  min-width: 40px;
-  height: 22px;
-  padding: 1px 4px;
+  min-width: 2.5rem;
+  height: 1.375rem;
+  padding: 0.0625rem 0.25rem;
   font-size: var(--font-size-10, 0.625rem);
 }
 
 .calendaria-hud.compact .calendaria-hud-live-event {
-  width: 22px;
-  height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
 }
 
 .calendaria-hud.compact .calendaria-hud-live-event-icon {
@@ -6619,17 +6642,17 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-slice {
   position: relative;
-  width: 120px;
-  height: 24px;
-  border: 1px solid rgb(0 0 0 / 30%);
-  border-radius: 4px;
+  width: 7.5rem;
+  height: 1.5rem;
+  border: 0.0625rem solid rgb(0 0 0 / 30%);
+  border-radius: 0.25rem;
   overflow: hidden;
   cursor: pointer;
 }
 
 .calendaria-hud-slice:focus {
-  outline: 2px solid rgb(100 180 255 / 60%);
-  outline-offset: 1px;
+  outline: 0.125rem solid rgb(100 180 255 / 60%);
+  outline-offset: 0.0625rem;
 }
 
 .calendaria-slice-sky {
@@ -6655,22 +6678,22 @@ span.calendaria-moon-icon {
 
 .calendaria-slice-sun {
   opacity: 0;
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
   background: radial-gradient(circle at 35% 35%, rgb(255 245 170) 0%, rgb(255 229 92) 30%, rgb(255 217 61) 60%, rgb(255 165 0) 100%);
   box-shadow:
-    0 0 8px rgb(255 217 61),
-    0 0 16px rgb(255 217 61 / 50%);
+    0 0 0.5rem rgb(255 217 61),
+    0 0 1rem rgb(255 217 61 / 50%);
 }
 
 .calendaria-slice-moon {
   opacity: 0;
-  width: 12px;
-  height: 12px;
+  width: 0.75rem;
+  height: 0.75rem;
   background: radial-gradient(circle at 35% 35%, rgb(255 255 248) 0%, rgb(232 232 224) 40%, rgb(200 200 184) 100%);
   box-shadow:
-    0 0 6px rgb(255 255 255 / 50%),
-    0 0 12px rgb(255 255 255 / 20%);
+    0 0 0.375rem rgb(255 255 255 / 50%),
+    0 0 0.75rem rgb(255 255 255 / 20%);
 }
 
 .calendaria-slice-time-overlay {
@@ -6684,17 +6707,17 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-slice-time-overlay .calendaria-hud-time {
-  padding: 0 4px;
+  padding: 0 0.25rem;
   color: rgb(255 255 255);
   font-weight: 600;
   font-size: var(--font-size-12, 0.75rem);
   text-shadow:
-    0 0 2px rgb(0 0 0),
-    0 0 4px rgb(0 0 0),
-    1px 1px 2px rgb(0 0 0),
-    -1px -1px 2px rgb(0 0 0),
-    1px -1px 2px rgb(0 0 0),
-    -1px 1px 2px rgb(0 0 0);
+    0 0 0.125rem rgb(0 0 0),
+    0 0 0.25rem rgb(0 0 0),
+    0.0625rem 0.0625rem 0.125rem rgb(0 0 0),
+    -0.0625rem -0.0625rem 0.125rem rgb(0 0 0),
+    0.0625rem -0.0625rem 0.125rem rgb(0 0 0),
+    -0.0625rem 0.0625rem 0.125rem rgb(0 0 0);
 }
 
 .calendaria-slice-time-overlay .calendaria-hud-play-btn {
@@ -6705,10 +6728,10 @@ span.calendaria-moon-icon {
   left: 50%;
   justify-content: center;
   align-items: center;
-  width: 18px;
-  height: 18px;
-  min-height: 18px;
-  max-height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
+  min-height: 1.125rem;
+  max-height: 1.125rem;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -6738,18 +6761,18 @@ span.calendaria-moon-icon {
 
 /* Compact slice adjustments */
 .calendaria-hud.compact .calendaria-hud-slice {
-  width: 100px;
-  height: 20px;
+  width: 6.25rem;
+  height: 1.25rem;
 }
 
 .calendaria-hud.compact .calendaria-slice-sun {
-  width: 12px;
-  height: 12px;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .calendaria-hud.compact .calendaria-slice-moon {
-  width: 10px;
-  height: 10px;
+  width: 0.625rem;
+  height: 0.625rem;
 }
 
 .calendaria-hud.compact .calendaria-slice-time-overlay .calendaria-hud-time {
@@ -6757,18 +6780,18 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud.compact .calendaria-slice-time-overlay .calendaria-hud-play-btn {
-  width: 14px;
-  height: 14px;
-  min-height: 14px;
-  max-height: 14px;
-  font-size: 8px;
+  width: 0.875rem;
+  height: 0.875rem;
+  min-height: 0.875rem;
+  max-height: 0.875rem;
+  font-size: 0.5rem;
 }
 
 /* ======================================== */
 /* Chat Message Timestamps                  */
 /* ======================================== */
 .chat-message:has(.calendaria-timestamp-wrapper) .message-header .message-metadata {
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   align-items: center;
   max-width: 100%;
@@ -6810,12 +6833,12 @@ span.calendaria-moon-icon {
   z-index: 100000;
   position: fixed;
   flex-direction: column;
-  width: 280px;
-  padding: 8px;
-  border: 1px solid var(--calendaria-border, rgb(58 58 94));
-  border-radius: 8px;
+  width: 17.5rem;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--calendaria-border, rgb(58 58 94));
+  border-radius: 0.5rem;
   background: var(--calendaria-bg, rgb(26 26 46));
-  box-shadow: 0 4px 20px rgb(0 0 0 / 50%);
+  box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 50%);
 }
 
 .calendaria-hud-search-panel.visible {
@@ -6823,7 +6846,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-search-panel .search-panel-header {
-  gap: 4px;
+  gap: 0.25rem;
   display: flex;
   position: relative;
   align-items: center;
@@ -6831,27 +6854,27 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-search-panel .search-input {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.375rem;
   color: var(--calendaria-text);
   font-size: var(--font-size-13, 0.8125rem);
   background: var(--calendaria-bg);
-  box-shadow: 0 2px 8px var(--calendaria-shadow);
+  box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow);
 }
 
 .calendaria-hud-search-panel .search-input:focus {
   border-color: var(--calendaria-primary);
   outline: none;
-  box-shadow: 0 2px 12px var(--calendaria-shadow);
+  box-shadow: 0 0.125rem 0.75rem var(--calendaria-shadow);
 }
 
 .calendaria-hud-search-panel .search-input::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
   opacity: 0.5;
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
   cursor: pointer;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath fill='%23888' d='M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256l105.3-105.4z'/%3E%3C/svg%3E")
     center/contain no-repeat;
@@ -6868,24 +6891,24 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-search-panel .search-panel-results.has-results {
   display: block;
-  max-height: 250px;
-  margin-top: 4px;
-  padding: 8px;
-  border: 1px solid var(--calendaria-border);
-  border-radius: 6px;
+  max-height: 15.625rem;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.375rem;
   overflow-y: auto;
   background: var(--calendaria-bg);
-  box-shadow: 0 4px 16px var(--calendaria-shadow);
+  box-shadow: 0 0.25rem 1rem var(--calendaria-shadow);
 }
 
 .calendaria-hud-search-panel .search-result-item {
-  gap: 8px;
+  gap: 0.5rem;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 8px;
-  border-radius: 4px;
+  padding: 0.3125rem 0.5rem;
+  border-radius: 0.25rem;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -6895,7 +6918,7 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-search-panel .result-content {
-  gap: 1px;
+  gap: 0.0625rem;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -6917,11 +6940,11 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-search-panel .result-icons {
-  gap: 2px;
+  gap: 0.125rem;
   grid-template-columns: repeat(3, 1fr);
   display: grid;
   flex-shrink: 0;
-  max-width: 54px;
+  max-width: 3.375rem;
 }
 
 .calendaria-hud-search-panel .result-icons i {
@@ -6929,9 +6952,9 @@ span.calendaria-moon-icon {
   opacity: 0.85;
   justify-content: center;
   align-items: center;
-  width: 16px;
-  height: 16px;
-  font-size: 10px;
+  width: 1rem;
+  height: 1rem;
+  font-size: 0.625rem;
   transition: opacity 0.15s ease;
 }
 
@@ -6940,15 +6963,15 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-search-panel .result-note-icon {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .calendaria-hud-search-panel .no-results {
-  gap: 8px;
+  gap: 0.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px;
+  padding: 0.75rem;
   color: var(--calendaria-text-dim);
   font-size: var(--font-size-11, 0.6875rem);
 }
@@ -6959,24 +6982,24 @@ span.calendaria-moon-icon {
 .calendaria-moons-tooltip {
   z-index: 100001;
   position: fixed;
-  padding: 12px;
-  border: 1px solid var(--calendaria-border, rgb(58 58 94));
-  border-radius: 10px;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--calendaria-border, rgb(58 58 94));
+  border-radius: 0.625rem;
   cursor: grab;
   background: var(--calendaria-bg, rgb(26 26 46));
-  box-shadow: 0 4px 20px rgb(0 0 0 / 60%);
+  box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 60%);
 }
 
 .calendaria-moons-tooltip .moons-radial {
   position: relative;
   width: var(--radial-size);
   height: var(--radial-size);
-  margin: 8px auto;
+  margin: 0.5rem auto;
 }
 
 .calendaria-moons-tooltip .moon-radial-item {
   --angle: calc(360deg / var(--moon-count) * var(--moon-index));
-  --radius: calc(var(--radial-size) / 2 - 16px);
+  --radius: calc(var(--radial-size) / 2 - 1rem);
 
   display: flex;
   position: absolute;
@@ -6993,12 +7016,12 @@ span.calendaria-moon-icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 28px;
-  height: 28px;
-  padding: 3px;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0.1875rem;
   border-radius: 50%;
   background: var(--calendaria-bg-hover, rgb(40 40 70));
-  box-shadow: 0 2px 6px rgb(0 0 0 / 40%);
+  box-shadow: 0 0.125rem 0.375rem rgb(0 0 0 / 40%);
 }
 
 .calendaria-moons-tooltip .moon-radial-icon.tinted {
@@ -7021,8 +7044,8 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-moons-tooltip .moon-radial-item.selected .moon-radial-icon {
-  outline: 2px solid var(--calendaria-primary, rgb(123 104 238));
-  outline-offset: 2px;
+  outline: 0.125rem solid var(--calendaria-primary, rgb(123 104 238));
+  outline-offset: 0.125rem;
 }
 
 .calendaria-moons-tooltip .moon-name {
@@ -7058,8 +7081,8 @@ span.calendaria-moon-icon {
 /* Settings Panel                           */
 /* ======================================== */
 .settings-panel {
-  --panel-sidebar-max-width: 180px;
-  --panel-sidebar-min-width: 120px;
+  --panel-sidebar-max-width: 11.25rem;
+  --panel-sidebar-min-width: 7.5rem;
 
   &.standard-form {
     gap: 0;
@@ -7083,7 +7106,7 @@ span.calendaria-moon-icon {
     height: 100%;
     padding: 0;
     border-top: none;
-    border-right: 1px solid var(--color-cool-4);
+    border-right: 0.0625rem solid var(--color-cool-4);
     border-bottom: none;
 
     .tab-group {
@@ -7112,7 +7135,7 @@ span.calendaria-moon-icon {
       max-width: 100%;
       padding: 0.5rem;
       border-bottom: none;
-      border-left: 3px solid var(--group-color, transparent);
+      border-left: 0.1875rem solid var(--group-color, transparent);
       border-radius: 0;
       font-size: var(--font-size-13);
       text-align: right;
@@ -7159,7 +7182,7 @@ span.calendaria-moon-icon {
 
   button[type='submit'],
   button.primary {
-    border: 1px solid var(--button-border-color);
+    border: 0.0625rem solid var(--button-border-color);
     background: var(--button-background-color);
 
     &:hover {
@@ -7186,7 +7209,7 @@ span.calendaria-moon-icon {
     justify-content: space-between;
     gap: 1rem;
     padding: 0.5rem 1rem;
-    border-top: 1px solid var(--color-cool-4);
+    border-top: 0.0625rem solid var(--color-cool-4);
     background: var(--color-cool-5-75);
 
     .footer-left,
@@ -7194,7 +7217,7 @@ span.calendaria-moon-icon {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      min-width: 120px;
+      min-width: 7.5rem;
     }
 
     .footer-left {
@@ -7248,9 +7271,9 @@ span.calendaria-moon-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.25rem;
       color: var(--color-text-dark-secondary);
       font-size: var(--font-size-14);
       text-decoration: none;
@@ -7299,12 +7322,12 @@ span.calendaria-moon-icon {
     display: flex;
     align-items: flex-start;
     padding: 0.75rem 1rem;
-    border-left: 3px solid var(--color-warm-1);
-    border-radius: 4px;
+    border-left: 0.1875rem solid var(--color-warm-1);
+    border-radius: 0.25rem;
     background: var(--color-cool-5-50);
 
     i {
-      margin-top: 2px;
+      margin-top: 0.125rem;
       color: var(--color-warm-1);
       font-size: var(--font-size-14);
     }
@@ -7355,7 +7378,7 @@ span.calendaria-moon-icon {
       justify-content: space-between;
       align-items: center;
       padding: 0.1rem 0.25rem;
-      border-radius: 4px;
+      border-radius: 0.25rem;
       color: var(--color-text-primary);
       text-decoration: none;
       cursor: pointer;
@@ -7400,8 +7423,8 @@ span.calendaria-moon-icon {
       display: inline-flex;
       align-items: center;
       width: fit-content;
-      border: 1px solid var(--button-border-color);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--button-border-color);
+      border-radius: 0.25rem;
       color: inherit;
       text-decoration: none;
       cursor: pointer;
@@ -7425,7 +7448,7 @@ span.calendaria-moon-icon {
     align-items: center;
 
     input[type='number'] {
-      width: 60px;
+      width: 3.75rem;
       text-align: center;
     }
 
@@ -7446,7 +7469,7 @@ span.calendaria-moon-icon {
     align-items: center;
 
     .jump-input {
-      width: 50px;
+      width: 3.125rem;
       text-align: center;
     }
 
@@ -7459,7 +7482,7 @@ span.calendaria-moon-icon {
 
   .time-jumps-grid {
     gap: 0.25rem 0.5rem;
-    grid-template-columns: 1fr repeat(4, 50px);
+    grid-template-columns: 1fr repeat(4, 3.125rem);
     display: grid;
     align-items: center;
 
@@ -7552,8 +7575,8 @@ span.calendaria-moon-icon {
       width: 2rem;
       height: 2rem;
       padding: 0;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.25rem;
       cursor: pointer;
     }
 
@@ -7594,8 +7617,8 @@ span.calendaria-moon-icon {
     width: fit-content;
     margin: 0 auto;
     padding: 0.5rem 1rem;
-    border: 1px solid var(--button-border-color);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--button-border-color);
+    border-radius: 0.25rem;
     cursor: pointer;
     background: var(--button-background-color);
 
@@ -7620,7 +7643,7 @@ span.calendaria-moon-icon {
   .weather-presets-header {
     margin-bottom: 0.25rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-border-light-tertiary);
+    border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
     color: var(--color-text-secondary);
     font-weight: 600;
     font-size: var(--font-size-11);
@@ -7631,7 +7654,7 @@ span.calendaria-moon-icon {
   }
 
   .weather-preset-row {
-    border-bottom: 1px solid var(--color-border-light-secondary);
+    border-bottom: 0.0625rem solid var(--color-border-light-secondary);
 
     &:last-child {
       border-bottom: none;
@@ -7640,8 +7663,8 @@ span.calendaria-moon-icon {
     .preset-color-swatch {
       width: 1.5rem;
       height: 1.5rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.25rem;
     }
 
     .preset-icon-display {
@@ -7697,7 +7720,7 @@ span.calendaria-moon-icon {
 
     .trigger-list {
       gap: 0.25rem 1rem;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(9.375rem, 1fr));
       display: grid;
       margin: 0;
       padding: 0;
@@ -7752,7 +7775,7 @@ span.calendaria-moon-icon {
     display: inline-flex;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     color: rgb(255 255 255);
     font-weight: 500;
     font-size: var(--font-size-14);
@@ -7773,7 +7796,7 @@ span.calendaria-moon-icon {
 
   .color-categories-grid {
     gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
     display: grid;
   }
 
@@ -7781,7 +7804,7 @@ span.calendaria-moon-icon {
     h4 {
       margin: 0 0 0.5rem;
       padding-bottom: 0.25rem;
-      border-bottom: 1px solid var(--color-cool-4);
+      border-bottom: 0.0625rem solid var(--color-cool-4);
       font-weight: 500;
       font-size: var(--font-size-13);
     }
@@ -7790,7 +7813,7 @@ span.calendaria-moon-icon {
       margin-bottom: 0.25rem;
 
       label {
-        min-width: 120px;
+        min-width: 7.5rem;
         font-size: var(--font-size-12);
       }
     }
@@ -7805,8 +7828,8 @@ span.calendaria-moon-icon {
       width: 2.5rem;
       height: 1.75rem;
       padding: 0;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.25rem;
       cursor: pointer;
     }
 
@@ -7825,8 +7848,8 @@ span.calendaria-moon-icon {
       width: 1.75rem;
       height: 1.75rem;
       padding: 0;
-      border: 1px solid var(--button-border-color);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--button-border-color);
+      border-radius: 0.25rem;
       background: var(--button-background-color);
 
       &:hover:not(:disabled) {
@@ -7857,7 +7880,7 @@ span.calendaria-moon-icon {
   .color-table-header,
   .color-table-row {
     gap: 0.5rem;
-    grid-template-columns: 100px 1fr 36px 80px 36px;
+    grid-template-columns: 6.25rem 1fr 2.25rem 5rem 2.25rem;
     display: grid;
     align-items: center;
     padding: 0.25rem 0.5rem;
@@ -7866,16 +7889,16 @@ span.calendaria-moon-icon {
   .color-table-header {
     margin-bottom: 0.25rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-border-light-tertiary);
+    border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
     font-weight: 600;
     font-size: var(--font-size-11);
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.0313rem;
   }
 
   .color-table-row {
-    border-radius: 4px;
+    border-radius: 0.25rem;
 
     &:hover {
       background: var(--color-cool-4);
@@ -7888,7 +7911,7 @@ span.calendaria-moon-icon {
     .category-label {
       margin-bottom: 0.25rem;
       padding: 0.5rem;
-      border-bottom: 1px solid var(--color-border-light-secondary);
+      border-bottom: 0.0625rem solid var(--color-border-light-secondary);
       font-weight: 600;
       font-size: var(--font-size-12);
     }
@@ -7903,11 +7926,11 @@ span.calendaria-moon-icon {
   }
 
   .col-color input[type='color'] {
-    width: 32px;
-    height: 24px;
+    width: 2rem;
+    height: 1.5rem;
     padding: 0;
-    border: 1px solid var(--color-border-light-tertiary);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
     cursor: pointer;
   }
 
@@ -7926,7 +7949,7 @@ span.calendaria-moon-icon {
   .component-badge {
     margin-left: 0.25rem;
     padding: 0.125rem 0.375rem;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     font-size: var(--font-size-10);
   }
 
@@ -7936,7 +7959,7 @@ span.calendaria-moon-icon {
 
   /* Format Settings Tab */
   .format-location {
-    border-radius: 4px;
+    border-radius: 0.25rem;
 
     > .form-group {
       margin-bottom: 0.5rem;
@@ -7958,7 +7981,7 @@ span.calendaria-moon-icon {
     display: flex;
     flex: 1;
     flex-direction: column;
-    min-width: 200px;
+    min-width: 12.5rem;
 
     .format-label {
       font-size: var(--font-size-11);
@@ -7984,7 +8007,7 @@ span.calendaria-moon-icon {
 
     .token-group {
       flex: 1;
-      min-width: 200px;
+      min-width: 12.5rem;
 
       h4 {
         margin: 0 0 0.5rem;
@@ -8001,7 +8024,7 @@ span.calendaria-moon-icon {
         .token-header {
           opacity: 0.7;
           padding-bottom: 0.25rem;
-          border-bottom: 1px solid var(--color-border-light-tertiary);
+          border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
           font-weight: 600;
           font-size: var(--font-size-11);
           text-transform: uppercase;
@@ -8010,7 +8033,7 @@ span.calendaria-moon-icon {
         code {
           width: fit-content;
           padding: 0.125rem 0.375rem;
-          border-radius: 3px;
+          border-radius: 0.1875rem;
           font-size: var(--font-size-11);
           white-space: nowrap;
         }
@@ -8025,7 +8048,7 @@ span.calendaria-moon-icon {
   /* Permissions Tab */
   .permissions-table {
     gap: 0.5rem 0;
-    grid-template-columns: 180px repeat(4, 1fr);
+    grid-template-columns: 11.25rem repeat(4, 1fr);
     display: grid;
     align-items: center;
   }
@@ -8040,7 +8063,7 @@ span.calendaria-moon-icon {
       line-height: 1.3;
       text-align: center;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.0313rem;
     }
 
     span:first-child {
@@ -8050,7 +8073,7 @@ span.calendaria-moon-icon {
     &::after {
       grid-column: 1 / -1;
       margin-bottom: 0.25rem;
-      border-bottom: 1px solid var(--color-border-light-tertiary);
+      border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
       content: '';
     }
   }
@@ -8079,7 +8102,7 @@ span.calendaria-moon-icon {
       grid-column: 1 / -1;
       margin: 0;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--color-border-light-tertiary);
+      border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
       color: var(--color-text-light-secondary);
       font-size: var(--font-size-11);
     }
@@ -8150,7 +8173,7 @@ span.calendaria-moon-icon {
     h3.group-header {
       margin: 0 0 0.375rem;
       padding-bottom: 0.25rem;
-      border-bottom: 1px solid var(--color-border-light-tertiary);
+      border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
       font-size: var(--font-size-h4);
     }
 
@@ -8165,7 +8188,7 @@ span.calendaria-moon-icon {
       align-items: baseline;
       gap: 0.75rem;
       padding: 0.25rem 0.5rem;
-      border-radius: 3px;
+      border-radius: 0.1875rem;
       opacity: 0.5;
       font-size: var(--font-size-12);
 
@@ -8179,10 +8202,10 @@ span.calendaria-moon-icon {
 
       .token-code {
         flex-shrink: 0;
-        min-width: 80px;
+        min-width: 5rem;
         padding: 0.125rem 0.375rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 3px;
+        border: 0.0625rem solid var(--color-border-light-tertiary);
+        border-radius: 0.1875rem;
         font-family: var(--font-mono);
         font-size: var(--font-size-11);
       }
@@ -8199,8 +8222,8 @@ span.calendaria-moon-icon {
 
   .token-syntax-help {
     padding: 0.75rem;
-    border: 1px solid var(--color-border-light-tertiary);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
     font-size: var(--font-size-12);
 
     h3 {
@@ -8223,8 +8246,8 @@ span.calendaria-moon-icon {
 
       code {
         padding: 0.125rem 0.25rem;
-        border: 1px solid var(--color-border-light-tertiary);
-        border-radius: 2px;
+        border: 0.0625rem solid var(--color-border-light-tertiary);
+        border-radius: 0.125rem;
         font-size: var(--font-size-11);
       }
     }
@@ -8246,7 +8269,7 @@ span.calendaria-moon-icon {
   .computed-help {
     margin: 0;
     padding: 0.75rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     color: var(--color-warm-2);
     font-size: var(--font-size-12);
     background: var(--color-cool-5-25);
@@ -8255,8 +8278,8 @@ span.calendaria-moon-icon {
   fieldset {
     margin: 0;
     padding: 0.75rem;
-    border: 1px solid var(--color-border-light-tertiary);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
 
     legend {
       padding: 0 0.5rem;
@@ -8267,8 +8290,8 @@ span.calendaria-moon-icon {
   .chain-step {
     margin-bottom: 0.75rem;
     padding: 0.75rem;
-    border: 1px solid var(--color-border-light-secondary);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--color-border-light-secondary);
+    border-radius: 0.25rem;
     background: var(--color-cool-5-10);
 
     &:last-of-type {
@@ -8282,7 +8305,7 @@ span.calendaria-moon-icon {
     align-items: center;
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-border-light-secondary);
+    border-bottom: 0.0625rem solid var(--color-border-light-secondary);
   }
 
   .step-label {
@@ -8294,7 +8317,7 @@ span.calendaria-moon-icon {
   .remove-override {
     padding: 0.25rem 0.5rem;
     border: none;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     color: var(--color-level-error);
     font-size: var(--font-size-11);
     cursor: pointer;
@@ -8317,7 +8340,7 @@ span.calendaria-moon-icon {
     align-items: center;
 
     label {
-      min-width: 80px;
+      min-width: 5rem;
       font-size: var(--font-size-12);
     }
 
@@ -8325,13 +8348,13 @@ span.calendaria-moon-icon {
     input {
       flex: 1;
       padding: 0.375rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.1875rem;
       font-size: var(--font-size-12);
     }
 
     input[type='number'] {
-      max-width: 80px;
+      max-width: 5rem;
     }
   }
 
@@ -8343,8 +8366,8 @@ span.calendaria-moon-icon {
     align-items: center;
     margin-top: 0.5rem;
     padding: 0.5rem;
-    border: 1px dashed var(--color-border-light-tertiary);
-    border-radius: 4px;
+    border: 0.0625rem dashed var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
     color: var(--color-text-secondary);
     font-size: var(--font-size-12);
     cursor: pointer;
@@ -8373,23 +8396,23 @@ span.calendaria-moon-icon {
     margin-bottom: 0.5rem;
 
     .override-year {
-      min-width: 60px;
+      min-width: 3.75rem;
       font-weight: 600;
     }
 
     select {
       flex: 1;
       padding: 0.375rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.1875rem;
       font-size: var(--font-size-12);
     }
 
     input[type='number'] {
-      width: 60px;
+      width: 3.75rem;
       padding: 0.375rem;
-      border: 1px solid var(--color-border-light-tertiary);
-      border-radius: 3px;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.1875rem;
       font-size: var(--font-size-12);
     }
   }
@@ -8398,15 +8421,15 @@ span.calendaria-moon-icon {
     display: flex;
     justify-content: flex-end;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--color-border-light-tertiary);
+    border-top: 0.0625rem solid var(--color-border-light-tertiary);
 
     button {
       gap: 0.5rem;
       display: flex;
       align-items: center;
       padding: 0.5rem 1rem;
-      border: 1px solid var(--button-border-color);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--button-border-color);
+      border-radius: 0.25rem;
       font-size: var(--font-size-12);
       cursor: pointer;
       background: var(--button-background-color);
@@ -8438,7 +8461,7 @@ span.calendaria-moon-icon {
     h3 {
       margin: 0 0 0.5rem;
       padding-bottom: 0.25rem;
-      border-bottom: 1px solid var(--calendaria-border-light);
+      border-bottom: 0.0625rem solid var(--calendaria-border-light);
       color: var(--calendaria-text-heading);
       font-weight: 600;
       font-size: var(--font-size-14);
@@ -8469,13 +8492,13 @@ span.calendaria-moon-icon {
     input:not([type='checkbox']),
     select {
       box-sizing: border-box;
-      height: 30px;
+      height: 1.875rem;
       padding: 0 0.5rem;
-      border: 1px solid var(--calendaria-input-border);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--calendaria-input-border);
+      border-radius: 0.25rem;
       color: var(--calendaria-text);
       font-size: var(--font-size-13);
-      line-height: 28px;
+      line-height: 1.75rem;
       text-align: center;
       background: var(--calendaria-input-bg);
 
@@ -8487,12 +8510,12 @@ span.calendaria-moon-icon {
 
     select {
       appearance: none;
-      padding-right: 24px;
+      padding-right: 1.5rem;
       cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 8px center;
-      background-size: 10px;
+      background-position: right 0.5rem center;
+      background-size: 0.625rem;
     }
 
     input[type='number'] {
@@ -8527,8 +8550,8 @@ span.calendaria-moon-icon {
 
   /* Timepoints Section */
   .timepoints-section {
-    border: 1px solid var(--calendaria-border-light);
-    border-radius: 4px;
+    border: 0.0625rem solid var(--calendaria-border-light);
+    border-radius: 0.25rem;
     background: var(--calendaria-bg-lighter);
 
     .timepoints-header {
@@ -8544,7 +8567,7 @@ span.calendaria-moon-icon {
       }
 
       i {
-        width: 12px;
+        width: 0.75rem;
         color: var(--calendaria-text-dim);
         font-size: var(--font-size-10);
       }
@@ -8559,7 +8582,7 @@ span.calendaria-moon-icon {
 
       .timepoints-count {
         padding: 0.125rem 0.5rem;
-        border-radius: 10px;
+        border-radius: 0.625rem;
         font-size: var(--font-size-11);
         background: var(--calendaria-primary);
       }
@@ -8567,11 +8590,11 @@ span.calendaria-moon-icon {
 
     .timepoints-content {
       padding: 0.5rem;
-      border-top: 1px solid var(--calendaria-border-light);
+      border-top: 0.0625rem solid var(--calendaria-border-light);
     }
 
     .timepoints-list {
-      max-height: 180px;
+      max-height: 11.25rem;
       margin: 0 0 0.5rem;
       padding: 0;
       overflow-y: auto;
@@ -8583,7 +8606,7 @@ span.calendaria-moon-icon {
       display: flex;
       align-items: center;
       padding: 0.5rem;
-      border-radius: 4px;
+      border-radius: 0.25rem;
 
       &:hover {
         background: var(--calendaria-bg-hover);
@@ -8614,8 +8637,8 @@ span.calendaria-moon-icon {
       .timepoint-name-input {
         flex: 1;
         padding: 0.25rem 0.5rem;
-        border: 1px solid var(--calendaria-primary);
-        border-radius: 3px;
+        border: 0.0625rem solid var(--calendaria-primary);
+        border-radius: 0.1875rem;
         color: var(--calendaria-text);
         font-size: var(--font-size-13);
         background: var(--calendaria-input-bg);
@@ -8634,11 +8657,11 @@ span.calendaria-moon-icon {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 28px;
-        height: 28px;
+        width: 1.75rem;
+        height: 1.75rem;
         padding: 0;
-        border: 1px solid var(--calendaria-border);
-        border-radius: 4px;
+        border: 0.0625rem solid var(--calendaria-border);
+        border-radius: 0.25rem;
         color: var(--calendaria-text-dim);
         font-size: var(--font-size-12);
         cursor: pointer;
@@ -8676,8 +8699,8 @@ span.calendaria-moon-icon {
       align-items: center;
       width: 100%;
       padding: 0.5rem;
-      border: 1px dashed var(--calendaria-border);
-      border-radius: 4px;
+      border: 0.0625rem dashed var(--calendaria-border);
+      border-radius: 0.25rem;
       color: var(--calendaria-text-dim);
       font-size: var(--font-size-12);
       cursor: pointer;
@@ -8697,7 +8720,7 @@ span.calendaria-moon-icon {
     display: flex;
     justify-content: center;
     padding-top: 0.5rem;
-    border-top: 1px solid var(--calendaria-border-light);
+    border-top: 0.0625rem solid var(--calendaria-border-light);
 
     .submit-btn {
       gap: 0.5rem;
@@ -8705,7 +8728,7 @@ span.calendaria-moon-icon {
       align-items: center;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 0.25rem;
       font-weight: 500;
       font-size: var(--font-size-13);
       cursor: pointer;
@@ -8743,13 +8766,13 @@ span.calendaria-moon-icon {
     input:not([type='checkbox']),
     select {
       box-sizing: border-box;
-      height: 30px;
+      height: 1.875rem;
       padding: 0 0.5rem;
-      border: 1px solid var(--calendaria-input-border);
-      border-radius: 4px;
+      border: 0.0625rem solid var(--calendaria-input-border);
+      border-radius: 0.25rem;
       color: var(--calendaria-text);
       font-size: var(--font-size-13);
-      line-height: 28px;
+      line-height: 1.75rem;
       text-align: center;
       background: var(--calendaria-input-bg);
 
@@ -8761,12 +8784,12 @@ span.calendaria-moon-icon {
 
     select {
       appearance: none;
-      padding-right: 24px;
+      padding-right: 1.5rem;
       cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 8px center;
-      background-size: 10px;
+      background-position: right 0.5rem center;
+      background-size: 0.625rem;
     }
 
     input[type='number'] {
@@ -8790,12 +8813,12 @@ span.calendaria-moon-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  border-top: 1px solid var(--color-border-light-tertiary);
+  gap: 0.125rem;
+  border-top: 0.0625rem solid var(--color-border-light-tertiary);
 
   .calendaria-footer-buttons {
     display: flex;
-    gap: 4px;
+    gap: 0.25rem;
   }
 
   i {

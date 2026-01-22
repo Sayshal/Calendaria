@@ -392,7 +392,7 @@ export default class ReminderScheduler {
     const color = note.flagData.color || '#4a9eff';
     if (!icon) return `<i class="fas fa-bell" style="color: ${color};"></i>`;
     if (icon.startsWith('fa') || note.flagData.iconType === 'fontawesome') return `<i class="${icon}" style="color: ${color};"></i>`;
-    return `<img src="${icon}" alt="" style="width: 16px; height: 16px; vertical-align: middle;" />`;
+    return `<img src="${icon}" alt="" style="width: 1rem; height: 1rem; vertical-align: middle;" />`;
   }
 
   /**
@@ -406,7 +406,7 @@ export default class ReminderScheduler {
     const color = data.color || '#4a9eff';
     if (!icon) return `<i class="fas fa-bell" style="color: ${color};"></i>`;
     if (icon.startsWith('fa') || data.iconType === 'fontawesome') return `<i class="${icon}" style="color: ${color};"></i>`;
-    return `<img src="${icon}" alt="" style="width: 16px; height: 16px; vertical-align: middle;" />`;
+    return `<img src="${icon}" alt="" style="width: 1rem; height: 1rem; vertical-align: middle;" />`;
   }
 
   /**

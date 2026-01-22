@@ -203,7 +203,7 @@ async function cmdMoon() {
   const lines = calendar.moons.map((moon, index) => {
     const phase = calendar.getMoonPhase(index);
     if (!phase) return null;
-    const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:4px;">` : '';
+    const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
     return `${icon}<strong>${localize(moon.name)}:</strong> ${phase.subPhaseName || localize(phase.name)}`;
   }).filter(Boolean);
   if (!lines.length) return sendChat(localize('CALENDARIA.ChatCommand.NoMoons'));

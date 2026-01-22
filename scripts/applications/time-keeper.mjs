@@ -38,15 +38,22 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static DEFAULT_OPTIONS = {
-    id: 'time-keeper-hud',
+    id: 'time-keeper',
     classes: ['calendaria', 'time-keeper'],
     position: { width: 200, height: 'auto', zIndex: 100 },
     window: { frame: false, positioned: true },
-    actions: { dec2: TimeKeeper.#onDec2, dec1: TimeKeeper.#onDec1, inc1: TimeKeeper.#onInc1, inc2: TimeKeeper.#onInc2, toggle: TimeKeeper.#onToggle, openStopwatch: TimeKeeper.#onOpenStopwatch }
+    actions: {
+      dec2: TimeKeeper.#onDec2,
+      dec1: TimeKeeper.#onDec1,
+      inc1: TimeKeeper.#onInc1,
+      inc2: TimeKeeper.#onInc2,
+      toggle: TimeKeeper.#onToggle,
+      openStopwatch: TimeKeeper.#onOpenStopwatch
+    }
   };
 
   /** @override */
-  static PARTS = { main: { template: TEMPLATES.TIME_KEEPER_HUD } };
+  static PARTS = { main: { template: TEMPLATES.TIME_KEEPER } };
 
   /** @override */
   async _prepareContext(options) {
@@ -82,10 +89,28 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     if (options.isFirstRender) this.#restorePosition();
     this.#enableDragging();
-    this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (e) => {
+    const incrementSelect = this.element.querySelector('[data-action="increment"]');
+    incrementSelect?.addEventListener('change', (e) => {
       TimeClock.setIncrement(e.target.value);
       this.render();
     });
+    if (incrementSelect && canChangeDateTime()) {
+      incrementSelect.addEventListener(
+        'wheel',
+        (event) => {
+          event.preventDefault();
+          const incrementKeys = Object.keys(getTimeIncrements());
+          const currentIndex = incrementKeys.indexOf(TimeClock.incrementKey);
+          if (currentIndex === -1) return;
+          const direction = event.deltaY < 0 ? -1 : 1;
+          const newIndex = Math.max(0, Math.min(incrementKeys.length - 1, currentIndex + direction));
+          if (newIndex === currentIndex) return;
+          TimeClock.setIncrement(incrementKeys[newIndex]);
+          this.render();
+        },
+        { passive: false }
+      );
+    }
 
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
@@ -160,9 +185,17 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     const originalMouseDown = drag._onDragMouseDown.bind(drag);
     drag._onDragMouseDown = (event) => {
       previousZoneId = this.#snappedZoneId;
-      const rect = this.element.getBoundingClientRect();
-      elementStartLeft = rect.left;
-      elementStartTop = rect.top;
+      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
+        const preserved = StickyZones.unpinFromZone(this.element);
+        if (preserved) {
+          elementStartLeft = preserved.left;
+          elementStartTop = preserved.top;
+        }
+      } else {
+        const rect = this.element.getBoundingClientRect();
+        elementStartLeft = rect.left;
+        elementStartTop = rect.top;
+      }
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       originalMouseDown(event);
@@ -204,6 +237,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     return super.close({ animate: false, ...options });
   }
 
+  /** @override */
   _onClose(options) {
     const pos = this.position;
     if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { top: pos.top, left: pos.left, zoneId: this.#snappedZoneId });
@@ -379,7 +413,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const existing = foundry.applications.instances.get('time-keeper-hud');
+    const existing = foundry.applications.instances.get('time-keeper');
     if (existing) {
       existing.render({ force: true });
       return existing;
@@ -391,13 +425,13 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Hide the TimeKeeper. */
   static hide() {
-    const instance = foundry.applications.instances.get('time-keeper-hud');
+    const instance = foundry.applications.instances.get('time-keeper');
     if (instance) instance.close();
   }
 
   /** Toggle the TimeKeeper visibility. */
   static toggle() {
-    const existing = foundry.applications.instances.get('time-keeper-hud');
+    const existing = foundry.applications.instances.get('time-keeper');
     if (existing?.rendered) this.hide();
     else this.show();
   }

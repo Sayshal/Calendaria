@@ -107,10 +107,12 @@
       <div class="calendaria-hud-btn-group right" role="group"
         aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">
         {{{widgets.buttonsRight}}}
-        <button type="button" class="calendaria-hud-btn" data-action="openBigCal"
-          data-tooltip="{{localize 'CALENDARIA.HUD.OpenBigCal'}}">
-          <i class="fa-solid fa-calendar-days"></i>
-        </button>
+        {{#if canViewBigCal}}
+          <button type="button" class="calendaria-hud-btn" data-action="openBigCal"
+            data-tooltip="{{localize 'CALENDARIA.HUD.OpenBigCal'}}">
+            <i class="fa-solid fa-calendar-days"></i>
+          </button>
+        {{/if}}
         <button type="button" class="calendaria-hud-btn" data-action="openSettings"
           data-tooltip="{{localize 'CALENDARIA.HUD.Settings.Name'}}">
           <i class="fa-solid fa-gear"></i>
@@ -129,7 +131,6 @@
         data-tooltip="{{localize 'CALENDARIA.HUD.Midday'}}">
         <i class="fa-solid fa-cloud-sun"></i>
       </button>
-      <div class="calendaria-hud-tray-divider"></div>
       {{#if customJumps.dec2}}
         <button type="button" class="calendaria-hud-time-btn custom-jump" data-action="customDec2"
           data-tooltip="{{customJumps.dec2}}">
@@ -141,9 +142,6 @@
           data-tooltip="{{customJumps.dec1}}">
           {{customJumps.dec1}}
         </button>
-      {{/if}}
-      {{#if (or customJumps.dec1 customJumps.dec2)}}
-        <div class="calendaria-hud-tray-divider"></div>
       {{/if}}
       <button type="button" class="calendaria-hud-time-btn" data-action="reverse"
         data-tooltip="{{localize 'CALENDARIA.HUD.Reverse'}}">
@@ -159,9 +157,6 @@
         data-tooltip="{{localize 'CALENDARIA.HUD.Forward'}}">
         <i class="fa-solid fa-forward"></i>
       </button>
-      {{#if (or customJumps.inc1 customJumps.inc2)}}
-        <div class="calendaria-hud-tray-divider"></div>
-      {{/if}}
       {{#if customJumps.inc1}}
         <button type="button" class="calendaria-hud-time-btn custom-jump" data-action="customInc1"
           data-tooltip="+{{customJumps.inc1}}">
@@ -174,7 +169,6 @@
           +{{customJumps.inc2}}
         </button>
       {{/if}}
-      <div class="calendaria-hud-tray-divider"></div>
       <button type="button" class="calendaria-hud-time-btn time-shortcut" data-action="toSunset"
         data-tooltip="{{localize 'CALENDARIA.HUD.Sunset'}}">
         <i class="fa-solid fa-cloud-moon"></i>

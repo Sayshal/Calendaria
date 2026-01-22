@@ -41,14 +41,14 @@ export function showDebugZones(hudWidth = 200, hudHeight = 100) {
       width: ${SNAP_DISTANCE * 2}px;
       height: ${SNAP_DISTANCE * 2}px;
       background: rgba(255, 0, 255, 0.3);
-      border: 2px solid magenta;
+      border: 0.125rem solid magenta;
       border-radius: 50%;
       pointer-events: none;
       z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 0.625rem;
       color: magenta;
       font-weight: bold;
     `;
@@ -237,12 +237,17 @@ export function pinToZone(element, zoneId) {
 /**
  * Unpin an element from DOM parenting back to body with fixed positioning.
  * @param {HTMLElement} element - The element to unpin
+ * @returns {{left: number, top: number}|null} The preserved position, or null if not pinned
  */
 export function unpinFromZone(element) {
-  if (!element?.classList?.contains(PINNED_CLASS)) return;
+  if (!element?.classList?.contains(PINNED_CLASS)) return null;
+  const rect = element.getBoundingClientRect();
   element.classList.remove(PINNED_CLASS);
   element.style.position = 'fixed';
+  element.style.left = `${rect.left}px`;
+  element.style.top = `${rect.top}px`;
   document.body.appendChild(element);
+  return { left: rect.left, top: rect.top };
 }
 
 /**

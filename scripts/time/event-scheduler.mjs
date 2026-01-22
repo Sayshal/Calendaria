@@ -215,7 +215,7 @@ export default class EventScheduler {
     let iconHtml;
     if (flagData.icon) {
       if (flagData.icon.startsWith('fa') || flagData.iconType === 'fontawesome') iconHtml = `<i class="${flagData.icon}"></i>`;
-      else iconHtml = `<img src="${flagData.icon}" alt="" style="width: 24px; height: 24px; object-fit: contain;" />`;
+      else iconHtml = `<img src="${flagData.icon}" alt="" style="width: 1.5rem; height: 1.5rem; object-fit: contain;" />`;
     } else {
       iconHtml = '<i class="fas fa-calendar"></i>';
     }

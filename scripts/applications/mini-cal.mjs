@@ -716,9 +716,29 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.isFirstRender) this.#restorePosition();
     else this.#updateDockedPosition();
     this.#enableDragging();
-    this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (event) => {
+    const incrementSelect = this.element.querySelector('[data-action="increment"]');
+    incrementSelect?.addEventListener('change', (event) => {
       TimeClock.setIncrement(event.target.value);
     });
+    if (incrementSelect && canChangeDateTime()) {
+      incrementSelect.addEventListener(
+        'wheel',
+        (event) => {
+          event.preventDefault();
+          const calendar = game.time?.calendar;
+          const isMonthless = calendar?.isMonthless ?? false;
+          const incrementKeys = Object.keys(getTimeIncrements()).filter((key) => !isMonthless || key !== 'month');
+          const currentIndex = incrementKeys.indexOf(TimeClock.incrementKey);
+          if (currentIndex === -1) return;
+          const direction = event.deltaY < 0 ? -1 : 1;
+          const newIndex = Math.max(0, Math.min(incrementKeys.length - 1, currentIndex + direction));
+          if (newIndex === currentIndex) return;
+          TimeClock.setIncrement(incrementKeys[newIndex]);
+          this.render();
+        },
+        { passive: false }
+      );
+    }
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
     if (!this.#hooks.some((h) => h.name === HOOKS.CLOCK_START_STOP)) this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this)) });
     const container = this.element.querySelector('.mini-cal-container');
@@ -1004,9 +1024,17 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (event.target.closest('button, a, input, select, [data-action]')) return;
       previousZoneId = this.#snappedZoneId;
       this.#snappedZoneId = null;
-      const rect = this.element.getBoundingClientRect();
-      elementStartLeft = rect.left;
-      elementStartTop = rect.top;
+      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
+        const preserved = StickyZones.unpinFromZone(this.element);
+        if (preserved) {
+          elementStartLeft = preserved.left;
+          elementStartTop = preserved.top;
+        }
+      } else {
+        const rect = this.element.getBoundingClientRect();
+        elementStartLeft = rect.left;
+        elementStartTop = rect.top;
+      }
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       originalMouseDown(event);
@@ -1171,10 +1199,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Select a day on the calendar.
-   * @param {PointerEvent} event - The click event
+   * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onSelectDay(event, target) {
+  static async _onSelectDay(_event, target) {
     const day = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
@@ -1727,7 +1755,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const existing = foundry.applications.instances.get('calendaria-mini-calendar');
+    const existing = foundry.applications.instances.get('mini-calendar');
     if (existing) {
       existing.render({ force: true });
       return existing;
@@ -1739,13 +1767,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Hide the MiniCal. */
   static hide() {
-    const instance = foundry.applications.instances.get('calendaria-mini-calendar');
+    const instance = foundry.applications.instances.get('mini-calendar');
     if (instance) instance.close();
   }
 
   /** Toggle the MiniCal visibility. */
   static toggle() {
-    const existing = foundry.applications.instances.get('calendaria-mini-calendar');
+    const existing = foundry.applications.instances.get('mini-calendar');
     if (existing?.rendered) this.hide();
     else this.show();
   }

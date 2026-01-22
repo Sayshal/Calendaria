@@ -40,7 +40,7 @@
                       {{#if (eq system.iconType "fontawesome")}}
                         <i class="{{system.icon}}" style="color: {{system.color}}"></i>
                       {{else}}
-                        <img src="{{system.icon}}" alt="{{name}}" style="width: 16px; height: 16px;">
+                        <img src="{{system.icon}}" alt="{{name}}" style="width: 1rem; height: 1rem;">
                       {{/if}}
                     </div>
                   {{/each}}
@@ -97,7 +97,7 @@
                         {{#if (eq system.iconType "fontawesome")}}
                           <i class="{{system.icon}}" style="color: {{system.color}}"></i>
                         {{else}}
-                          <img src="{{system.icon}}" alt="{{name}}" style="width: 16px; height: 16px;">
+                          <img src="{{system.icon}}" alt="{{name}}" style="width: 1rem; height: 1rem;">
                         {{/if}}
                       </div>
                     {{/each}}
@@ -114,7 +114,7 @@
 
             {{#each multiDayEvents}}
               <div class="event-bar{{#if isContinuation}} continuation{{/if}}"
-                style="left: {{left}}%; width: {{width}}%; top: calc(26px + {{row}} * 26px); background-color: {{color}};"
+                style="left: {{left}}%; width: {{width}}%; top: calc(1.625rem + {{row}} * 1.625rem); background-color: {{color}};"
                 data-tooltip="{{name}}" data-action="editNote" data-note-id="{{id}}">
                 {{#if isContinuation}}
                   <i class="fas fa-angles-right event-bar-continuation"></i>

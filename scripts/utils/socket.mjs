@@ -135,6 +135,9 @@ export class CalendariaSocket {
       case SOCKET_TYPES.REMINDER_NOTIFY:
         this.#handleReminderNotify(data);
         break;
+      case SOCKET_TYPES.HUD_VISIBILITY:
+        this.#handleHUDVisibility(data);
+        break;
       default:
         log(1, `Unknown socket message type: ${type}`);
     }
@@ -315,6 +318,26 @@ export class CalendariaSocket {
   static #handleReminderNotify(data) {
     log(3, `Handling reminder notification for ${data.noteName}`);
     Hooks.callAll(HOOKS.REMINDER_RECEIVED, data);
+  }
+
+  /**
+   * Handle HUD visibility commands from GM.
+   * @private
+   * @param {object} data - The HUD visibility data
+   * @param {boolean} data.visible - Whether HUD should be visible
+   * @returns {void}
+   */
+  static #handleHUDVisibility(data) {
+    if (game.user.isGM) return; // GMs control their own HUD
+    const { visible } = data;
+    log(3, `Handling HUD visibility: ${visible}`);
+    if (visible) {
+      const { HUD } = game.modules.get(MODULE.ID).api;
+      HUD?.show();
+    } else {
+      const instance = foundry.applications.instances.get('calendaria-hud');
+      instance?.close();
+    }
   }
 
   /**
