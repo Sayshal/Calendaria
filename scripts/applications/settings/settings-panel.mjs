@@ -1879,8 +1879,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (widthScaleInput && widthScaleValue) {
         widthScaleInput.addEventListener('input', (e) => {
           const scale = parseFloat(e.target.value);
-          const rem = Math.round(scale * 50 * 10) / 10;
-          widthScaleValue.textContent = `${scale}x (${rem}rem)`;
+          widthScaleValue.textContent = `${scale}x`;
         });
       }
 
@@ -1948,10 +1947,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
-    // Weather tab brightness multiplier range slider
-    if (partId === 'weather') {
+    // Canvas tab brightness multiplier range slider
+    if (partId === 'canvas') {
       const rangeInput = htmlElement.querySelector('input[name="defaultBrightnessMultiplier"]');
-      const rangeValue = rangeInput?.parentElement?.querySelector('.range-value');
+      const rangeGroup = rangeInput?.closest('.form-group');
+      const rangeValue = rangeGroup?.querySelector('.range-value');
       if (rangeInput && rangeValue) {
         rangeInput.addEventListener('input', (e) => {
           rangeValue.textContent = `${e.target.value}x`;

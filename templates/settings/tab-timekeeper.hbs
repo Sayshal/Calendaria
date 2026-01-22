@@ -39,10 +39,16 @@
     <div class="form-group{{#unless timeKeeperAutoFade}} disabled{{/unless}}">
       <label for="timeKeeperIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" id="timeKeeperIdleOpacity" name="timeKeeperIdleOpacity" min="0" max="100"
-          value="{{timeKeeperIdleOpacity}}" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+        <div class="slider-with-ticks">
+          <input type="range" id="timeKeeperIdleOpacity" name="timeKeeperIdleOpacity" min="0" max="100"
+            value="{{timeKeeperIdleOpacity}}" list="opacity-ticks" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
         <input type="number" class="range-value" min="0" max="100" value="{{timeKeeperIdleOpacity}}"
           style="width: 3rem; flex: none" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+        <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>

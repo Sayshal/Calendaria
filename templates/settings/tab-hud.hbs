@@ -103,10 +103,23 @@
     <div class="form-group{{#unless hudAutoFade}} disabled{{/unless}}">
       <label for="hudIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" id="hudIdleOpacity" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
-          {{#unless hudAutoFade}}disabled{{/unless}}>
+        <div class="slider-with-ticks">
+          <input type="range" id="hudIdleOpacity" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
+            list="opacity-ticks" {{#unless hudAutoFade}}disabled{{/unless}}>
+          <datalist id="opacity-ticks">
+            <option value="0"></option>
+            <option value="25"></option>
+            <option value="50"></option>
+            <option value="75"></option>
+            <option value="100"></option>
+          </datalist>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
         <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}"
           style="width: 3rem; flex: none" {{#unless hudAutoFade}}disabled{{/unless}}>
+        <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>
@@ -114,9 +127,20 @@
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
       <label for="hudWidthScale">{{localize "CALENDARIA.Settings.HUDWidthScale.Name"}}</label>
       <div class="form-fields range-field">
-        <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
-          value="{{hudWidthScale}}" {{#if isCompactMode}}disabled{{/if}}>
-        <span class="range-value">{{hudWidthScale}}x ({{hudWidthScalePixels}}px)</span>
+        <div class="slider-with-ticks">
+          <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
+            value="{{hudWidthScale}}" list="scale-ticks" {{#if isCompactMode}}disabled{{/if}}>
+          <datalist id="scale-ticks">
+            <option value="0.5"></option>
+            <option value="1"></option>
+            <option value="1.5"></option>
+            <option value="2"></option>
+          </datalist>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <span class="range-value">{{hudWidthScale}}x</span>
       </div>
       <p class="hint">
         {{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDWidthScale.Hint"}}{{/if}}

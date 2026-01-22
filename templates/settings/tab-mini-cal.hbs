@@ -40,8 +40,25 @@
     <div class="form-group">
       <label for="miniCalControlsDelay">{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Name"}}</label>
       <div class="form-fields">
-        <input type="range" id="miniCalControlsDelay" name="miniCalControlsDelay" value="{{miniCalControlsDelay}}"
-          min="1" max="10" step="1">
+        <div class="slider-with-ticks">
+          <input type="range" id="miniCalControlsDelay" name="miniCalControlsDelay" value="{{miniCalControlsDelay}}"
+            min="1" max="10" step="1" list="delay-ticks">
+          <datalist id="delay-ticks">
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="3"></option>
+            <option value="4"></option>
+            <option value="5"></option>
+            <option value="6"></option>
+            <option value="7"></option>
+            <option value="8"></option>
+            <option value="9"></option>
+            <option value="10"></option>
+          </datalist>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
         <span class="range-value">{{miniCalControlsDelay}}s</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Hint"}}</p>
@@ -58,10 +75,16 @@
     <div class="form-group{{#unless miniCalAutoFade}} disabled{{/unless}}">
       <label for="miniCalIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" id="miniCalIdleOpacity" name="miniCalIdleOpacity" min="0" max="100"
-          value="{{miniCalIdleOpacity}}" {{#unless miniCalAutoFade}}disabled{{/unless}}>
+        <div class="slider-with-ticks">
+          <input type="range" id="miniCalIdleOpacity" name="miniCalIdleOpacity" min="0" max="100"
+            value="{{miniCalIdleOpacity}}" list="opacity-ticks" {{#unless miniCalAutoFade}}disabled{{/unless}}>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
         <input type="number" class="range-value" min="0" max="100" value="{{miniCalIdleOpacity}}"
           style="width: 3rem; flex: none" {{#unless miniCalAutoFade}}disabled{{/unless}}>
+        <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>

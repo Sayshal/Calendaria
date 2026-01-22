@@ -46,8 +46,18 @@
         <label
           for="defaultBrightnessMultiplier">{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Name"}}</label>
         <div class="form-fields range-field">
-          <input type="range" id="defaultBrightnessMultiplier" name="defaultBrightnessMultiplier" min="0.5" max="1.5"
-            step="0.1" value="{{defaultBrightnessMultiplier}}">
+          <div class="slider-with-ticks">
+            <input type="range" id="defaultBrightnessMultiplier" name="defaultBrightnessMultiplier" min="0.5" max="1.5"
+              step="0.1" value="{{defaultBrightnessMultiplier}}" list="brightness-ticks">
+            <datalist id="brightness-ticks">
+              <option value="0.5"></option>
+              <option value="1"></option>
+              <option value="1.5"></option>
+            </datalist>
+            <div class="slider-ticks">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
           <span class="range-value">{{defaultBrightnessMultiplier}}x</span>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Hint"}}</p>
