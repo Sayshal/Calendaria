@@ -4,6 +4,9 @@
  * @author Tyler
  */
 
+import { HUD } from '../applications/hud.mjs';
+import { MiniCal } from '../applications/mini-cal.mjs';
+import { TimeKeeper } from '../applications/time-keeper.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
@@ -138,6 +141,12 @@ export class CalendariaSocket {
       case SOCKET_TYPES.HUD_VISIBILITY:
         this.#handleHUDVisibility(data);
         break;
+      case SOCKET_TYPES.MINI_CAL_VISIBILITY:
+        this.#handleMiniCalVisibility(data);
+        break;
+      case SOCKET_TYPES.TIME_KEEPER_VISIBILITY:
+        this.#handleTimeKeeperVisibility(data);
+        break;
       default:
         log(1, `Unknown socket message type: ${type}`);
     }
@@ -184,7 +193,7 @@ export class CalendariaSocket {
     const { action, id } = data;
     if (!action || !id) return;
     log(3, `Handling remote note ${action}: ${id}`);
-    for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'BigCal') app.render();
+    foundry.applications.instances.get('calendaria-big-cal')?.render();
 
     switch (action) {
       case 'created':
@@ -328,16 +337,41 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static #handleHUDVisibility(data) {
-    if (game.user.isGM) return; // GMs control their own HUD
+    if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling HUD visibility: ${visible}`);
-    if (visible) {
-      const { HUD } = game.modules.get(MODULE.ID).api;
-      HUD?.show();
-    } else {
-      const instance = foundry.applications.instances.get('calendaria-hud');
-      instance?.close();
-    }
+    if (visible) HUD.show();
+    else HUD.hide();
+  }
+
+  /**
+   * Handle MiniCal visibility commands from GM.
+   * @private
+   * @param {object} data - The MiniCal visibility data
+   * @param {boolean} data.visible - Whether MiniCal should be visible
+   * @returns {void}
+   */
+  static #handleMiniCalVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling MiniCal visibility: ${visible}`);
+    if (visible) MiniCal.show();
+    else MiniCal.hide();
+  }
+
+  /**
+   * Handle TimeKeeper visibility commands from GM.
+   * @private
+   * @param {object} data - The TimeKeeper visibility data
+   * @param {boolean} data.visible - Whether TimeKeeper should be visible
+   * @returns {void}
+   */
+  static #handleTimeKeeperVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling TimeKeeper visibility: ${visible}`);
+    if (visible) TimeKeeper.show();
+    else TimeKeeper.hide();
   }
 
   /**

@@ -23,6 +23,7 @@ import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { BigCal } from './big-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
+import { TimeKeeper } from './time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -752,6 +753,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       new BigCal().render(true);
     });
 
+    container?.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('#context-menu, .mini-day')) return;
+      e.preventDefault();
+      document.getElementById('context-menu')?.remove();
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.mini-cal-container', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      menu._onActivate(e);
+    });
+
     if (container && sidebar) {
       container.addEventListener('mouseenter', () => {
         clearTimeout(this.#sidebarTimeout);
@@ -1004,6 +1013,79 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       sidebar?.classList.remove('visible');
       this.#sidebarVisible = false;
     }
+  }
+
+  /**
+   * Save sticky states to settings.
+   */
+  async #saveStickyStates() {
+    await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+      timeControls: this.#stickyTimeControls,
+      sidebar: this.#stickySidebar,
+      position: this.#stickyPosition
+    });
+  }
+
+  /**
+   * Build context menu items for MiniCal.
+   * @returns {object[]} Array of context menu item definitions
+   */
+  #getContextMenuItems() {
+    const items = [];
+    items.push({
+      name: 'CALENDARIA.MiniCal.ContextMenu.Settings',
+      icon: '<i class="fas fa-gear"></i>',
+      callback: () => {
+        const panel = new SettingsPanel();
+        panel.render(true).then(() => {
+          requestAnimationFrame(() => panel.changeTab('miniCal', 'primary'));
+        });
+      }
+    });
+    if (game.user.isGM) {
+      const forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
+      items.push({
+        name: forceMiniCal ? 'CALENDARIA.MiniCal.ContextMenu.HideFromAll' : 'CALENDARIA.MiniCal.ContextMenu.ShowToAll',
+        icon: forceMiniCal ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>',
+        callback: async () => {
+          const newValue = !forceMiniCal;
+          await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CAL, newValue);
+          CalendariaSocket.emit(SOCKET_TYPES.MINI_CAL_VISIBILITY, { visible: newValue });
+        }
+      });
+    }
+    items.push({ name: 'CALENDARIA.MiniCal.ContextMenu.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => MiniCal.resetPosition() });
+    items.push({
+      name: this.#stickyPosition ? 'CALENDARIA.MiniCal.ContextMenu.UnlockPosition' : 'CALENDARIA.MiniCal.ContextMenu.LockPosition',
+      icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
+      callback: () => this._toggleStickyPosition()
+    });
+    items.push({
+      name: 'CALENDARIA.MiniCal.ContextMenu.SwapToBigCal',
+      icon: '<i class="fas fa-calendar"></i>',
+      callback: () => {
+        this.close();
+        new BigCal().render(true);
+      }
+    });
+    items.push({
+      name: 'CALENDARIA.MiniCal.ContextMenu.SwapToTimeKeeper',
+      icon: '<i class="fas fa-clock"></i>',
+      callback: () => {
+        MiniCal.hide();
+        TimeKeeper.show();
+      }
+    });
+    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() });
+    return items;
+  }
+
+  /**
+   * Toggle sticky position state.
+   */
+  _toggleStickyPosition() {
+    this.#stickyPosition = !this.#stickyPosition;
+    this.#saveStickyStates();
   }
 
   /**
@@ -1755,26 +1837,28 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const existing = foundry.applications.instances.get('mini-calendar');
-    if (existing) {
-      existing.render({ force: true });
-      return existing;
-    }
-    const instance = new MiniCal();
-    instance.render(true);
+    const instance = this.instance ?? new MiniCal();
+    instance.render({ force: true });
     return instance;
   }
 
   /** Hide the MiniCal. */
   static hide() {
-    const instance = foundry.applications.instances.get('mini-calendar');
-    if (instance) instance.close();
+    this.instance?.close();
+  }
+
+  /** Reset position to default. */
+  static async resetPosition() {
+    await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_POSITION, null);
+    if (this.instance?.rendered) {
+      this.hide();
+      this.show();
+    }
   }
 
   /** Toggle the MiniCal visibility. */
   static toggle() {
-    const existing = foundry.applications.instances.get('mini-calendar');
-    if (existing?.rendered) this.hide();
+    if (this.instance?.rendered) this.hide();
     else this.show();
   }
 

@@ -318,9 +318,10 @@ export async function createNoteOnDate(year, month, day) {
  * @param {object} options.calendar - The calendar
  * @param {Function} [options.onSetDate] - Callback after setting date
  * @param {Function} [options.onCreateNote] - Callback after creating note
+ * @param {object[]} [options.extraItems] - Additional context menu items to append
  * @returns {Array<object>} Context menu items
  */
-export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {}) {
+export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extraItems } = {}) {
   return (target) => {
     const year = parseInt(target.dataset.year);
     const month = parseInt(target.dataset.month);
@@ -348,6 +349,8 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote } = {
         }
       });
     }
+
+    if (extraItems?.length) items.push(...extraItems);
 
     if (notes.length > 0) {
       const sortedNotes = [...notes].sort((a, b) => a.name.localeCompare(b.name));
@@ -483,6 +486,7 @@ export function generateDayTooltip(calendar, year, month, day, festivalName = nu
  * @param {object} [options] - Additional options
  * @param {Function} [options.onSetDate] - Callback after setting date
  * @param {Function} [options.onCreateNote] - Callback after creating note
+ * @param {object[]} [options.extraItems] - Additional context menu items to append
  * @returns {ContextMenu} The created context menu
  */
 export function setupDayContextMenu(container, selector, calendar, options = {}) {

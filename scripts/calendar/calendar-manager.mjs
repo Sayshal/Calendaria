@@ -231,10 +231,8 @@ export default class CalendarManager {
    * Re-render all calendar-related UI applications.
    */
   static rerenderCalendarUIs() {
-    for (const app of foundry.applications.instances.values()) {
-      const name = app.constructor.name;
-      if (['HUD', 'TimeKeeper', 'MiniCal', 'BigCal'].includes(name)) app.render();
-    }
+    const ids = ['calendaria-hud', 'time-keeper', 'mini-calendar', 'calendaria-big-cal'];
+    for (const id of ids) foundry.applications.instances.get(id)?.render();
   }
 
   /**

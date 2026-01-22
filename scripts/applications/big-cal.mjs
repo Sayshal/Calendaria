@@ -1132,6 +1132,17 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       this.close();
       MiniCal.show();
     });
+
+    // Right-click context menu on header
+    const header = this.element.querySelector('.window-header');
+    header?.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('#context-menu')) return;
+      e.preventDefault();
+      document.getElementById('context-menu')?.remove();
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.window-header', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      menu._onActivate(e);
+    });
+
     const searchInput = this.element.querySelector('.search-input');
     if (searchInput) {
       if (this._searchOpen) searchInput.focus();
@@ -1163,6 +1174,34 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     WidgetManager.attachWidgetListeners(this.element);
+  }
+
+  /**
+   * Build context menu items for BigCal.
+   * @returns {object[]} Array of context menu item definitions
+   */
+  #getContextMenuItems() {
+    const items = [];
+    items.push({
+      name: 'CALENDARIA.BigCal.ContextMenu.Settings',
+      icon: '<i class="fas fa-gear"></i>',
+      callback: () => {
+        const panel = new SettingsPanel();
+        panel.render(true).then(() => {
+          requestAnimationFrame(() => panel.changeTab('bigcal', 'primary'));
+        });
+      }
+    });
+    items.push({
+      name: 'CALENDARIA.BigCal.ContextMenu.SwapToMiniCal',
+      icon: '<i class="fas fa-calendar-alt"></i>',
+      callback: () => {
+        this.close();
+        MiniCal.show();
+      }
+    });
+    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    return items;
   }
 
   /**
@@ -1240,7 +1279,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         this._selectedDate = null;
         this.render();
       },
-      onCreateNote: () => this.render()
+      onCreateNote: () => this.render(),
+      extraItems: this.#getContextMenuItems()
     });
     this._hooks = [];
     const c = game.time.components;
@@ -1595,9 +1635,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async _onToggleCompact(_event, _target) {
     await this.close();
-    const existing = foundry.applications.instances.get('mini-calendar');
-    if (existing) existing.render(true, { focus: true });
-    else new MiniCal().render(true);
+    MiniCal.show();
   }
 
   /**
@@ -1697,9 +1735,29 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Toggle the BigCal visibility.
    */
+  /**
+   * Get the singleton instance from Foundry's application registry.
+   * @returns {BigCal|undefined} The instance if it exists
+   */
+  static get instance() {
+    return foundry.applications.instances.get(this.DEFAULT_OPTIONS.id);
+  }
+
+  /** Show the BigCal. */
+  static show() {
+    const instance = this.instance ?? new BigCal();
+    instance.render({ force: true });
+    return instance;
+  }
+
+  /** Hide the BigCal. */
+  static hide() {
+    this.instance?.close();
+  }
+
+  /** Toggle the BigCal visibility. */
   static toggle() {
-    const existing = foundry.applications.instances.get(this.DEFAULT_OPTIONS.id);
-    if (existing?.rendered) existing.close();
-    else new BigCal().render(true);
+    if (this.instance?.rendered) this.hide();
+    else this.show();
   }
 }

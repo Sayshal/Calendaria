@@ -436,9 +436,8 @@ export function applyCustomColors(colors) {
   styleEl.textContent = `.calendaria {\n  ${cssVars.join('\n  ')}\n}`;
 
   // Re-render open Calendaria applications
-  for (const app of foundry.applications.instances.values()) {
-    if (app.options?.classes?.includes('calendaria')) app.render();
-  }
+  const ids = ['calendaria-hud', 'time-keeper', 'mini-calendar', 'calendaria-big-cal', 'calendaria-stopwatch'];
+  for (const id of ids) foundry.applications.instances.get(id)?.render();
 }
 
 /**

@@ -249,8 +249,10 @@ export const SOCKET_TYPES = {
   CLOCK_UPDATE: 'clockUpdate',
   DATE_CHANGE: 'dateChange',
   HUD_VISIBILITY: 'hudVisibility',
+  MINI_CAL_VISIBILITY: 'miniCalVisibility',
   NOTE_UPDATE: 'noteUpdate',
   REMINDER_NOTIFY: 'reminderNotify',
+  TIME_KEEPER_VISIBILITY: 'timeKeeperVisibility',
   TIME_REQUEST: 'timeRequest',
   WEATHER_CHANGE: 'weatherChange',
   WEATHER_REQUEST: 'weatherRequest'

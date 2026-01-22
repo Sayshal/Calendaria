@@ -559,7 +559,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Right-click context menu - create fresh instance each time for dynamic state
     bar?.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('#context-menu')) return;
       e.preventDefault();
+      document.getElementById('context-menu')?.remove();
       const menu = new foundry.applications.ux.ContextMenu.implementation(
         this.element,
         '.calendaria-hud-bar',
@@ -2041,35 +2043,36 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Get the singleton instance from Foundry's application registry.
+   * @returns {HUD|undefined} The instance if it exists
+   */
+  static get instance() {
+    return foundry.applications.instances.get(this.DEFAULT_OPTIONS.id);
+  }
+
+  /**
    * Show the HUD.
    * @returns {HUD|null} The HUD instance, or null if blocked by combat hide
    */
   static show() {
     if (game.combat?.started && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return null;
-    const existing = foundry.applications.instances.get('calendaria-hud');
-    if (existing) {
-      existing.render({ force: true });
-      return existing;
-    }
-    const hud = new HUD();
-    hud.render({ force: true });
-    return hud;
+    const instance = this.instance ?? new HUD();
+    instance.render({ force: true });
+    return instance;
   }
 
   /**
    * Hide the HUD.
    */
   static hide() {
-    const instance = foundry.applications.instances.get('calendaria-hud');
-    if (instance) instance.close();
+    this.instance?.close();
   }
 
   /**
    * Toggle HUD visibility.
    */
   static toggle() {
-    const existing = foundry.applications.instances.get('calendaria-hud');
-    if (existing?.rendered) this.hide();
+    if (this.instance?.rendered) this.hide();
     else this.show();
   }
 
@@ -2078,7 +2081,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async resetPosition() {
     await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, null);
-    if (foundry.applications.instances.get('calendaria-hud')?.rendered) {
+    if (this.instance?.rendered) {
       this.hide();
       this.show();
     }
@@ -2100,10 +2103,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static registerCombatHooks() {
     Hooks.on('combatStart', () => {
       if (!game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return;
-      const instance = foundry.applications.instances.get('calendaria-hud');
-      if (instance?.rendered) {
+      if (this.instance?.rendered) {
         HUD.#closedForCombat = true;
-        instance.close({ combat: true });
+        this.instance.close({ combat: true });
       }
     });
 

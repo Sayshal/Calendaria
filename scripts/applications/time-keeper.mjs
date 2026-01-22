@@ -6,12 +6,14 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../constants.mjs';
 import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import { formatForLocation, getDisplayFormat, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { canChangeDateTime, canViewTimeKeeper } from '../utils/permissions.mjs';
+import { CalendariaSocket } from '../utils/socket.mjs';
 import * as StickyZones from '../utils/sticky-zones.mjs';
+import { MiniCal } from './mini-cal.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 import { Stopwatch } from './stopwatch.mjs';
 
@@ -115,15 +117,14 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
     if (!this.#formatsHookId) this.#formatsHookId = Hooks.on('calendaria.displayFormatsChanged', () => this.render());
-    new foundry.applications.ux.ContextMenu.implementation(
-      this.element,
-      '.time-keeper-content',
-      [
-        { name: 'CALENDARIA.Common.Settings', icon: '<i class="fas fa-cog"></i>', callback: () => new SettingsPanel().render(true) },
-        { name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => TimeKeeper.hide() }
-      ],
-      { fixed: true, jQuery: false }
-    );
+    const container = this.element.querySelector('.time-keeper-content');
+    container?.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('#context-menu')) return;
+      e.preventDefault();
+      document.getElementById('context-menu')?.remove();
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.time-keeper-content', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      menu._onActivate(e);
+    });
   }
 
   /**
@@ -257,6 +258,92 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       Hooks.off('calendaria.displayFormatsChanged', this.#formatsHookId);
       this.#formatsHookId = null;
     }
+  }
+
+  /**
+   * Get context menu items for the TimeKeeper.
+   * @returns {object[]} Array of context menu item configs
+   * @private
+   */
+  #getContextMenuItems() {
+    const items = [];
+    items.push({
+      name: 'CALENDARIA.TimeKeeper.ContextMenu.Settings',
+      icon: '<i class="fas fa-gear"></i>',
+      callback: () => {
+        const panel = new SettingsPanel();
+        panel.render(true).then(() => {
+          requestAnimationFrame(() => panel.changeTab('timekeeper', 'primary'));
+        });
+      }
+    });
+    if (game.user.isGM) {
+      const isVisible = !!TimeKeeper.instance;
+      items.push({
+        name: isVisible ? 'CALENDARIA.TimeKeeper.ContextMenu.HideFromAll' : 'CALENDARIA.TimeKeeper.ContextMenu.ShowToAll',
+        icon: `<i class="fas fa-${isVisible ? 'eye-slash' : 'eye'}"></i>`,
+        callback: () => CalendariaSocket.emit(SOCKET_TYPES.TIME_KEEPER_VISIBILITY, { visible: !isVisible })
+      });
+    }
+    items.push({
+      name: 'CALENDARIA.TimeKeeper.ContextMenu.ResetPosition',
+      icon: '<i class="fas fa-arrows-to-dot"></i>',
+      callback: () => this.resetPosition()
+    });
+    const stickyStates = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
+    const isLocked = stickyStates.positionLocked ?? false;
+    items.push({
+      name: isLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.UnlockPosition' : 'CALENDARIA.TimeKeeper.ContextMenu.LockPosition',
+      icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
+      callback: () => this._toggleStickyPosition()
+    });
+    items.push({
+      name: 'CALENDARIA.TimeKeeper.ContextMenu.OpenStopwatch',
+      icon: '<i class="fas fa-stopwatch"></i>',
+      callback: () => Stopwatch.show()
+    });
+    items.push({
+      name: 'CALENDARIA.TimeKeeper.ContextMenu.SwapToMiniCal',
+      icon: '<i class="fas fa-calendar-alt"></i>',
+      callback: () => {
+        TimeKeeper.hide();
+        MiniCal.show();
+      }
+    });
+    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    return items;
+  }
+
+  /**
+   * Save sticky states to settings.
+   * @param {object} updates - The state updates to save
+   * @private
+   */
+  async #saveStickyStates(updates) {
+    const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
+    await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, { ...current, ...updates });
+  }
+
+  /**
+   * Toggle position lock state.
+   */
+  async _toggleStickyPosition() {
+    const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
+    const newLocked = !(current.positionLocked ?? false);
+    await this.#saveStickyStates({ positionLocked: newLocked });
+    ui.notifications.info(newLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.PositionLocked' : 'CALENDARIA.TimeKeeper.ContextMenu.PositionUnlocked', { localize: true });
+  }
+
+  /**
+   * Reset position to default and clear any sticky zone.
+   */
+  async resetPosition() {
+    StickyZones.unregisterFromZoneUpdates(this);
+    StickyZones.unpinFromZone(this.element);
+    this.#snappedZoneId = null;
+    this.setPosition({ left: 120, top: 120 });
+    await game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { left: 120, top: 120, zoneId: null });
+    ui.notifications.info('CALENDARIA.TimeKeeper.ContextMenu.PositionReset', { localize: true });
   }
 
   /** Decrement time by configured dec2 amount. */
@@ -413,26 +500,19 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const existing = foundry.applications.instances.get('time-keeper');
-    if (existing) {
-      existing.render({ force: true });
-      return existing;
-    }
-    const instance = new TimeKeeper();
-    instance.render(true);
+    const instance = this.instance ?? new TimeKeeper();
+    instance.render({ force: true });
     return instance;
   }
 
   /** Hide the TimeKeeper. */
   static hide() {
-    const instance = foundry.applications.instances.get('time-keeper');
-    if (instance) instance.close();
+    this.instance?.close();
   }
 
   /** Toggle the TimeKeeper visibility. */
   static toggle() {
-    const existing = foundry.applications.instances.get('time-keeper');
-    if (existing?.rendered) this.hide();
+    if (this.instance?.rendered) this.hide();
     else this.show();
   }
 

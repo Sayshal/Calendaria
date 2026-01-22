@@ -670,12 +670,42 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Setup context menu. */
   #setupContextMenu() {
-    new foundry.applications.ux.ContextMenu.implementation(
-      this.element,
-      '.stopwatch-face',
-      [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => Stopwatch.hide() }],
-      { fixed: true, jQuery: false }
-    );
+    const container = this.element.querySelector('.stopwatch-face');
+    container?.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('#context-menu')) return;
+      e.preventDefault();
+      document.getElementById('context-menu')?.remove();
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.stopwatch-face', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      menu._onActivate(e);
+    });
+  }
+
+  /**
+   * Get context menu items for the Stopwatch.
+   * @returns {object[]} Array of context menu item configs
+   * @private
+   */
+  #getContextMenuItems() {
+    const items = [];
+    items.push({
+      name: 'CALENDARIA.Stopwatch.ContextMenu.ResetPosition',
+      icon: '<i class="fas fa-arrows-to-dot"></i>',
+      callback: () => this.resetPosition()
+    });
+    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    return items;
+  }
+
+  /**
+   * Reset position to default and clear any sticky zone.
+   */
+  async resetPosition() {
+    StickyZones.unregisterFromZoneUpdates(this);
+    StickyZones.unpinFromZone(this.element);
+    this.#snappedZoneId = null;
+    this.setPosition({ left: 150, top: 150 });
+    await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: 150, top: 150, size: 140, zoneId: null });
+    ui.notifications.info('CALENDARIA.Stopwatch.ContextMenu.PositionReset', { localize: true });
   }
 
   /**
@@ -691,26 +721,19 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {Stopwatch} The instance
    */
   static show() {
-    const existing = foundry.applications.instances.get('calendaria-stopwatch');
-    if (existing) {
-      existing.render({ force: true });
-      return existing;
-    }
-    const instance = new Stopwatch();
-    instance.render(true);
+    const instance = this.instance ?? new Stopwatch();
+    instance.render({ force: true });
     return instance;
   }
 
   /** Hide the Stopwatch. */
   static hide() {
-    const instance = foundry.applications.instances.get('calendaria-stopwatch');
-    if (instance) instance.close();
+    this.instance?.close();
   }
 
   /** Toggle visibility. */
   static toggle() {
-    const existing = foundry.applications.instances.get('calendaria-stopwatch');
-    if (existing?.rendered) this.hide();
+    if (this.instance?.rendered) this.hide();
     else this.show();
   }
 
