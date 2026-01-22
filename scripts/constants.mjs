@@ -59,6 +59,7 @@ export const SETTINGS = {
   MINI_CAL_IDLE_OPACITY: 'miniCalIdleOpacity',
   MINI_CAL_POSITION: 'miniCalPosition',
   MINI_CAL_STICKY_STATES: 'miniCalStickyStates',
+  MINI_CAL_TIME_JUMPS: 'miniCalTimeJumps',
   PERMISSIONS: 'permissions',
   POSITION_LOCKED: 'positionLocked',
   PRIMARY_GM: 'primaryGM',

@@ -112,9 +112,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       openFull: MiniCal._onOpenFull,
       toggle: MiniCal._onToggleClock,
       forward: MiniCal._onForward,
-      forward5x: MiniCal._onForward5x,
       reverse: MiniCal._onReverse,
-      reverse5x: MiniCal._onReverse5x,
+      customDec2: MiniCal.#onCustomDec2,
+      customDec1: MiniCal.#onCustomDec1,
+      customInc1: MiniCal.#onCustomInc1,
+      customInc2: MiniCal.#onCustomInc2,
       setCurrentDate: MiniCal._onSetCurrentDate,
       viewNotes: MiniCal._onViewNotes,
       closeNotesPanel: MiniCal._onCloseNotesPanel,
@@ -179,9 +181,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.currentTime = hasMoonIconMarkers(rawTime) ? renderMoonIcons(rawTime) : rawTime;
     context.currentDate = TimeClock.getFormattedDate();
     const isMonthless = calendar?.isMonthless ?? false;
+    const appSettings = TimeClock.getAppSettings('mini-calendar');
     context.increments = Object.entries(getTimeIncrements())
       .filter(([key]) => !isMonthless || key !== 'month')
-      .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeClock.incrementKey }));
+      .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === appSettings.incrementKey }));
+    const customJumps = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS) || {};
+    const currentJumps = customJumps[appSettings.incrementKey] || {};
+    context.customJumps = { dec2: currentJumps.dec2 ?? null, dec1: currentJumps.dec1 ?? null, inc1: currentJumps.inc1 ?? null, inc2: currentJumps.inc2 ?? null };
     const allNotes = ViewUtils.getCalendarNotes();
     const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
     if (calendar) context.calendarData = this._generateMiniCalData(calendar, viewedDate, visibleNotes);
@@ -719,7 +725,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#enableDragging();
     const incrementSelect = this.element.querySelector('[data-action="increment"]');
     incrementSelect?.addEventListener('change', (event) => {
+      TimeClock.setAppIncrement('mini-calendar', event.target.value);
       TimeClock.setIncrement(event.target.value);
+      this.render();
     });
     if (incrementSelect && canChangeDateTime()) {
       incrementSelect.addEventListener(
@@ -728,12 +736,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           event.preventDefault();
           const calendar = game.time?.calendar;
           const isMonthless = calendar?.isMonthless ?? false;
+          const appSettings = TimeClock.getAppSettings('mini-calendar');
           const incrementKeys = Object.keys(getTimeIncrements()).filter((key) => !isMonthless || key !== 'month');
-          const currentIndex = incrementKeys.indexOf(TimeClock.incrementKey);
+          const currentIndex = incrementKeys.indexOf(appSettings.incrementKey);
           if (currentIndex === -1) return;
           const direction = event.deltaY < 0 ? -1 : 1;
           const newIndex = Math.max(0, Math.min(incrementKeys.length - 1, currentIndex + direction));
           if (newIndex === currentIndex) return;
+          TimeClock.setAppIncrement('mini-calendar', incrementKeys[newIndex]);
           TimeClock.setIncrement(incrementKeys[newIndex]);
           this.render();
         },
@@ -1351,39 +1361,63 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Advance time forward by one increment.
+   * Advance time forward.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static _onForward(_event, _target) {
-    TimeClock.forward();
+    TimeClock.forwardFor('mini-calendar');
   }
 
   /**
-   * Advance time forward by five increments.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static _onForward5x(_event, _target) {
-    TimeClock.forward(5);
-  }
-
-  /**
-   * Reverse time by one increment.
+   * Reverse time.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static _onReverse(_event, _target) {
-    TimeClock.reverse();
+    TimeClock.reverseFor('mini-calendar');
+  }
+
+  /** Handle custom decrement 2 (larger). */
+  static #onCustomDec2() {
+    MiniCal.#applyCustomJump('dec2');
+  }
+
+  /** Handle custom decrement 1 (smaller). */
+  static #onCustomDec1() {
+    MiniCal.#applyCustomJump('dec1');
+  }
+
+  /** Handle custom increment 1 (smaller). */
+  static #onCustomInc1() {
+    MiniCal.#applyCustomJump('inc1');
+  }
+
+  /** Handle custom increment 2 (larger). */
+  static #onCustomInc2() {
+    MiniCal.#applyCustomJump('inc2');
   }
 
   /**
-   * Reverse time by five increments.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
+   * Apply a custom time jump based on the current increment.
+   * @param {string} jumpKey - The jump key (dec2, dec1, inc1, inc2)
    */
-  static _onReverse5x(_event, _target) {
-    TimeClock.reverse(5);
+  static #applyCustomJump(jumpKey) {
+    if (!canChangeDateTime()) return;
+    const appSettings = TimeClock.getAppSettings('mini-calendar');
+    const incrementKey = appSettings.incrementKey || 'minute';
+    const customJumps = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS) || {};
+    const jumps = customJumps[incrementKey] || {};
+    const amount = jumps[jumpKey];
+    if (!amount) return;
+    const increments = getTimeIncrements();
+    const secondsPerUnit = increments[incrementKey] || 60;
+    const totalSeconds = amount * secondsPerUnit;
+    if (!game.user.isGM) {
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: totalSeconds });
+      return;
+    }
+    game.time.advance(totalSeconds);
   }
 
   /**

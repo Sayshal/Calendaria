@@ -231,22 +231,28 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}</legend>
       <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
 
-      {{#each customTimeJumps}}
-        <div class="form-group custom-time-jumps-row">
-          <label>{{label}}</label>
-          <div class="form-fields custom-jumps-inputs">
-            <input type="number" name="customTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}" placeholder="-"
-              class="jump-input">
-            <input type="number" name="customTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}" placeholder="-"
-              class="jump-input">
-            <span class="jump-separator">/</span>
-            <input type="number" name="customTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}" placeholder="+"
-              class="jump-input">
-            <input type="number" name="customTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}" placeholder="+"
-              class="jump-input">
-          </div>
+      <div class="time-jumps-grid">
+        <div class="time-jumps-header">
+          <span></span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}</span>
         </div>
-      {{/each}}
+        {{#each customTimeJumps}}
+          <div class="time-jumps-row">
+            <label>{{label}}</label>
+            <input type="number" name="customTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}">
+            <input type="number" name="customTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}">
+            <input type="number" name="customTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}">
+            <input type="number" name="customTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}">
+          </div>
+        {{/each}}
+      </div>
     </fieldset>
 
     <fieldset>

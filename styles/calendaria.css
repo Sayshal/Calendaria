@@ -4738,6 +4738,14 @@ span.calendaria-moon-icon {
         outline: none;
         box-shadow: none;
       }
+
+      &.custom-jump {
+        width: auto;
+        min-width: 1.75rem;
+        padding: 0 0.25rem;
+        font-weight: 600;
+        font-size: var(--font-size-11);
+      }
     }
 
     .increment-select {
@@ -7467,28 +7475,11 @@ span.calendaria-moon-icon {
     }
   }
 
-  .custom-time-jumps-row .form-fields.custom-jumps-inputs {
-    gap: 0.25rem;
-    display: flex;
-    align-items: center;
-
-    .jump-input {
-      width: 3.125rem;
-      text-align: center;
-    }
-
-    .jump-separator {
-      color: var(--color-text-secondary);
-      font-weight: 600;
-      text-align: center;
-    }
-  }
-
   .time-jumps-grid {
     gap: 0.25rem 0.5rem;
-    grid-template-columns: 1fr repeat(4, 3.125rem);
+    grid-template-columns: 1fr repeat(4, 4.5rem);
     display: grid;
-    align-items: center;
+    align-items: start;
 
     .time-jumps-header {
       display: contents;
@@ -7497,6 +7488,7 @@ span.calendaria-moon-icon {
         color: var(--color-text-secondary);
         font-weight: 600;
         font-size: var(--font-size-11);
+        line-height: 1.2;
         text-align: center;
 
         &:first-child {
@@ -7507,10 +7499,6 @@ span.calendaria-moon-icon {
 
     .time-jumps-row {
       display: contents;
-
-      label {
-        font-size: var(--font-size-12);
-      }
 
       input[type='number'] {
         width: 100%;

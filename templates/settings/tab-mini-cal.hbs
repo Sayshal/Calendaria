@@ -134,6 +134,36 @@
     </div>
   </fieldset>
 
+  {{#if isGM}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}</legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
+
+      <div class="time-jumps-grid">
+        <div class="time-jumps-header">
+          <span></span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}</span>
+        </div>
+        {{#each miniCalTimeJumps}}
+          <div class="time-jumps-row">
+            <label>{{label}}</label>
+            <input type="number" name="miniCalTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}">
+            <input type="number" name="miniCalTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}">
+            <input type="number" name="miniCalTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}">
+            <input type="number" name="miniCalTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}">
+          </div>
+        {{/each}}
+      </div>
+    </fieldset>
+  {{/if}}
+
   <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}} <a data-action="showTokenReference"
         data-context-type="date"><i class="fa-regular fa-circle-question"></i></a></legend>

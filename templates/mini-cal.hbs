@@ -229,12 +229,20 @@
           data-tooltip="{{localize 'CALENDARIA.Common.Midday'}}">
           <i class="fas fa-cloud-sun"></i>
         </button>
-        <button type="button" class="time-btn" data-action="reverse5x"
-          data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse5x'}}">
-          <i class="fas fa-backward-fast"></i>
-        </button>
+        {{#if customJumps.dec2}}
+          <button type="button" class="time-btn custom-jump" data-action="customDec2"
+            data-tooltip="{{customJumps.dec2}}">
+            {{customJumps.dec2}}
+          </button>
+        {{/if}}
+        {{#if customJumps.dec1}}
+          <button type="button" class="time-btn custom-jump" data-action="customDec1"
+            data-tooltip="{{customJumps.dec1}}">
+            {{customJumps.dec1}}
+          </button>
+        {{/if}}
         <button type="button" class="time-btn" data-action="reverse"
-          data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse'}}">
+          data-tooltip="{{localize 'CALENDARIA.HUD.Reverse'}}">
           <i class="fas fa-backward"></i>
         </button>
         <select class="increment-select" data-action="increment">
@@ -243,13 +251,21 @@
           {{/each}}
         </select>
         <button type="button" class="time-btn" data-action="forward"
-          data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward'}}">
+          data-tooltip="{{localize 'CALENDARIA.HUD.Forward'}}">
           <i class="fas fa-forward"></i>
         </button>
-        <button type="button" class="time-btn" data-action="forward5x"
-          data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward5x'}}">
-          <i class="fas fa-forward-fast"></i>
-        </button>
+        {{#if customJumps.inc1}}
+          <button type="button" class="time-btn custom-jump" data-action="customInc1"
+            data-tooltip="+{{customJumps.inc1}}">
+            +{{customJumps.inc1}}
+          </button>
+        {{/if}}
+        {{#if customJumps.inc2}}
+          <button type="button" class="time-btn custom-jump" data-action="customInc2"
+            data-tooltip="+{{customJumps.inc2}}">
+            +{{customJumps.inc2}}
+          </button>
+        {{/if}}
         <button type="button" class="time-btn time-shortcut" data-action="toSunset"
           data-tooltip="{{localize 'CALENDARIA.Common.Sunset'}}">
           <i class="fas fa-cloud-moon"></i>

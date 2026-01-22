@@ -62,18 +62,22 @@
       <div class="time-jumps-grid timekeeper-jumps">
         <div class="time-jumps-header">
           <span></span>
-          <span>&lt;&lt;</span>
-          <span>&lt;</span>
-          <span>&gt;</span>
-          <span>&gt;&gt;</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}</span>
         </div>
         {{#each timeKeeperTimeJumps}}
           <div class="time-jumps-row">
             <label>{{label}}</label>
-            <input type="number" name="timeKeeperTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}" placeholder="-5">
-            <input type="number" name="timeKeeperTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}" placeholder="-1">
-            <input type="number" name="timeKeeperTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}" placeholder="1">
-            <input type="number" name="timeKeeperTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}" placeholder="5">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}">
           </div>
         {{/each}}
       </div>

@@ -402,6 +402,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.MINI_CAL_CONTROLS_DELAY]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalControlsDelay.Name' },
     [SETTINGS.MINI_CAL_CONFIRM_SET_DATE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ConfirmSetDate.Name' },
     [SETTINGS.MINI_CAL_STICKY_STATES]: { tab: 'miniCal', label: 'CALENDARIA.SettingsPanel.Section.StickyStates' },
+    [SETTINGS.MINI_CAL_TIME_JUMPS]: { tab: 'miniCal', label: 'CALENDARIA.SettingsPanel.Section.CustomTimeJumps' },
     [SETTINGS.SHOW_TIME_KEEPER]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.ShowTimeKeeper.Name' },
     [SETTINGS.TIMEKEEPER_AUTO_FADE]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.TIMEKEEPER_IDLE_OPACITY]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
@@ -527,6 +528,24 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
     context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
+
+    // MiniCal time jumps
+    const miniCalJumps = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS) || {};
+    const incrementLabels = {
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
+    };
+    const isMonthless = CalendarManager.getActiveCalendar()?.isMonthless ?? false;
+    context.miniCalTimeJumps = Object.keys(getTimeIncrements())
+      .filter((key) => !isMonthless || key !== 'month')
+      .map((key) => ({ key, label: incrementLabels[key] || key, jumps: miniCalJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
   }
 
   /**
@@ -1090,6 +1109,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS, jumps);
       foundry.applications.instances.get('time-keeper')?.render();
+    }
+
+    if (data.miniCalTimeJumps) {
+      const jumps = {};
+      for (const [key, values] of Object.entries(data.miniCalTimeJumps)) {
+        jumps[key] = {
+          dec2: values.dec2 ? Number(values.dec2) : null,
+          dec1: values.dec1 ? Number(values.dec1) : null,
+          inc1: values.inc1 ? Number(values.inc1) : null,
+          inc2: values.inc2 ? Number(values.inc2) : null
+        };
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS, jumps);
+      foundry.applications.instances.get('mini-cal')?.render();
     }
 
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
