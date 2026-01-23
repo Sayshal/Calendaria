@@ -272,7 +272,7 @@
 
           <div class="format-row">
             <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}}</span>
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview" data-location="{{id}}" data-role="gm"></span></span>
               <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
                 {{#each gmPresetOptions}}
                   <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -284,7 +284,7 @@
             </div>
 
             <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}}</span>
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview" data-location="{{id}}" data-role="player"></span></span>
               <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
                 {{#each playerPresetOptions}}
                   <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>

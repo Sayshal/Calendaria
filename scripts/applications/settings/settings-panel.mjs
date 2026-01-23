@@ -9,7 +9,7 @@ import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
-import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS } from '../../utils/format-utils.mjs';
+import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS, validateFormatString } from '../../utils/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
@@ -1992,52 +1992,148 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
-    // Format preset dropdowns toggle custom input visibility
+    // Format preset dropdowns toggle custom input visibility and update preview
     // Applied to all tabs with format settings: hud, timekeeper, miniCal, bigcal, chat, stopwatch
     const formatParts = ['hud', 'timekeeper', 'miniCal', 'bigcal', 'chat', 'stopwatch'];
     if (formatParts.includes(partId)) {
       const presetSelects = htmlElement.querySelectorAll('select[name*="Preset"]');
       presetSelects.forEach((select) => {
+        const locationId = select.dataset.location;
+        const role = select.dataset.role;
+        const customInput = htmlElement.querySelector(`input[name="displayFormats.${locationId}.${role}Custom"]`);
+        const previewSpan = htmlElement.querySelector(`.format-preview[data-location="${locationId}"][data-role="${role}"]`);
+
+        // Update preview on preset change
         select.addEventListener('change', (event) => {
-          const locationId = event.target.dataset.location;
-          const role = event.target.dataset.role;
-          const customInput = htmlElement.querySelector(`input[name="displayFormats.${locationId}.${role}Custom"]`);
-          if (customInput) {
-            if (event.target.value === 'custom') {
-              customInput.classList.remove('hidden');
-              // Pre-populate with current format string if empty (fixes #199, #210)
-              if (!customInput.value.trim()) {
-                const savedFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
-                const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
-                let currentFormat = savedFormats[locationId]?.[role] || defaultFormat;
-                // Resolve calendarDefault to actual format string from calendar
-                if (currentFormat === 'calendarDefault') {
-                  const locationFormatKeys = {
-                    hudDate: 'long',
-                    hudTime: 'time',
-                    timekeeperDate: 'long',
-                    timekeeperTime: 'time',
-                    miniCalHeader: 'long',
-                    miniCalTime: 'time',
-                    bigCalHeader: 'full',
-                    chatTimestamp: 'long'
-                  };
-                  const formatKey = locationFormatKeys[locationId] || 'long';
-                  const calendar = CalendarManager.getActiveCalendar();
-                  currentFormat = calendar?.dateFormats?.[formatKey] || formatKey;
-                }
-                // Convert preset name to format string, or use as-is if already custom
-                currentFormat = DEFAULT_FORMAT_PRESETS[currentFormat] || currentFormat;
-                customInput.value = currentFormat;
+          if (event.target.value === 'custom') {
+            customInput?.classList.remove('hidden');
+            // Pre-populate with current format string if empty (fixes #199, #210)
+            if (customInput && !customInput.value.trim()) {
+              const savedFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
+              const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
+              let currentFormat = savedFormats[locationId]?.[role] || defaultFormat;
+              // Resolve calendarDefault to actual format string from calendar
+              if (currentFormat === 'calendarDefault') {
+                const locationFormatKeys = {
+                  hudDate: 'long',
+                  hudTime: 'time',
+                  timekeeperDate: 'long',
+                  timekeeperTime: 'time',
+                  miniCalHeader: 'long',
+                  miniCalTime: 'time',
+                  bigCalHeader: 'full',
+                  chatTimestamp: 'long'
+                };
+                const formatKey = locationFormatKeys[locationId] || 'long';
+                const calendar = CalendarManager.getActiveCalendar();
+                currentFormat = calendar?.dateFormats?.[formatKey] || formatKey;
               }
-              customInput.focus();
-            } else {
-              customInput.classList.add('hidden');
-              customInput.value = '';
+              // Convert preset name to format string, or use as-is if already custom
+              currentFormat = DEFAULT_FORMAT_PRESETS[currentFormat] || currentFormat;
+              customInput.value = currentFormat;
             }
+            customInput?.focus();
+          } else {
+            customInput?.classList.add('hidden');
+            if (customInput) customInput.value = '';
           }
+          // Update preview for new selection
+          this.#updateFormatPreview(previewSpan, locationId, event.target.value, customInput?.value);
+        });
+
+        // Initial preview on load
+        this.#updateFormatPreview(previewSpan, locationId, select.value, customInput?.value);
+      });
+
+      // Custom format input handlers with debounced preview
+      const customInputs = htmlElement.querySelectorAll('.format-custom-input');
+      customInputs.forEach((input) => {
+        const locationId = input.dataset.location;
+        const role = input.dataset.role;
+        const previewSpan = htmlElement.querySelector(`.format-preview[data-location="${locationId}"][data-role="${role}"]`);
+
+        let debounceTimer;
+        input.addEventListener('input', () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            this.#updateFormatPreview(previewSpan, locationId, 'custom', input.value);
+            // Sync invalid class with error state
+            input.classList.toggle('invalid', previewSpan?.classList.contains('error') ?? false);
+          }, 300);
         });
       });
+    }
+  }
+
+  /**
+   * Update format preview for a format location.
+   * @param {HTMLSpanElement} previewSpan - The preview span element
+   * @param {string} locationId - The location identifier
+   * @param {string} preset - The selected preset value
+   * @param {string} [customValue] - Custom format string (when preset is 'custom')
+   */
+  #updateFormatPreview(previewSpan, locationId, preset, customValue) {
+    if (!previewSpan) return;
+
+    // Handle 'off' preset - no preview
+    if (preset === 'off') {
+      previewSpan.textContent = '';
+      previewSpan.classList.remove('error');
+      return;
+    }
+
+    // Resolve format string from preset or custom value
+    let formatStr;
+    if (preset === 'custom') {
+      formatStr = customValue?.trim();
+      if (!formatStr) {
+        previewSpan.textContent = '';
+        previewSpan.classList.remove('error');
+        return;
+      }
+    } else if (preset === 'calendarDefault') {
+      // Resolve calendarDefault to actual format string from calendar
+      const locationFormatKeys = {
+        hudDate: 'long',
+        hudTime: 'time',
+        timekeeperDate: 'long',
+        timekeeperTime: 'time',
+        miniCalHeader: 'long',
+        miniCalTime: 'time',
+        bigCalHeader: 'full',
+        chatTimestamp: 'long'
+      };
+      const formatKey = locationFormatKeys[locationId] || 'long';
+      const calendar = CalendarManager.getActiveCalendar();
+      const calFormat = calendar?.dateFormats?.[formatKey];
+      formatStr = calFormat || DEFAULT_FORMAT_PRESETS[formatKey] || formatKey;
+    } else {
+      formatStr = DEFAULT_FORMAT_PRESETS[preset] || preset;
+    }
+
+    // Get current date components for preview
+    const calendar = CalendarManager.getActiveCalendar();
+    const rawComponents = calendar?.timeToComponents?.(game.time.worldTime);
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const components = rawComponents
+      ? { ...rawComponents, year: rawComponents.year + yearZero, dayOfMonth: (rawComponents.dayOfMonth ?? 0) + 1 }
+      : { year: 1492, month: 0, dayOfMonth: 15, hour: 14, minute: 30, second: 0 };
+
+    // Check if this is a stopwatch location (uses different format)
+    const isStopwatch = locationId === 'stopwatchRealtime' || locationId === 'stopwatchGametime';
+    if (isStopwatch) {
+      previewSpan.textContent = formatStr;
+      previewSpan.classList.remove('error');
+      return;
+    }
+
+    const result = validateFormatString(formatStr, calendar, components);
+    if (result.valid) {
+      previewSpan.textContent = result.preview || formatStr;
+      previewSpan.classList.remove('error');
+    } else {
+      previewSpan.textContent = localize(result.error || 'CALENDARIA.Format.Error.Invalid');
+      previewSpan.classList.add('error');
     }
   }
 }

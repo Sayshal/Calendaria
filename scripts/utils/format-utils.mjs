@@ -514,6 +514,44 @@ export function formatCustom(calendar, components, formatStr) {
 }
 
 /**
+ * Validate a custom format string and generate a preview.
+ * @param {string} formatStr - The format string to validate
+ * @param {object} [calendar] - Optional calendar data for preview
+ * @param {object} [components] - Optional date components for preview
+ * @returns {{valid: boolean, preview?: string, error?: string}} Validation result
+ */
+export function validateFormatString(formatStr, calendar, components) {
+  // Empty/missing strings are handled by UI reset logic
+  if (!formatStr || typeof formatStr !== 'string') return { valid: true };
+
+  // Check for unclosed brackets
+  const openBrackets = (formatStr.match(/\[/g) || []).length;
+  const closeBrackets = (formatStr.match(/]/g) || []).length;
+  if (openBrackets !== closeBrackets) {
+    return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
+  }
+
+  // Check for empty brackets
+  if (/\[\]/.test(formatStr)) {
+    return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
+  }
+
+  // Generate preview if calendar and components provided
+  if (calendar && components) {
+    try {
+      const preview = formatCustom(calendar, components, formatStr);
+      // Strip moon icon markers for text preview
+      const cleanPreview = stripMoonIconMarkers(preview);
+      return { valid: true, preview: cleanPreview };
+    } catch (e) {
+      return { valid: false, error: 'CALENDARIA.Format.Error.Invalid' };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
  * Get moon phase name for the given date.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
