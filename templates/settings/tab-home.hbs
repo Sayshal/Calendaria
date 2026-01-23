@@ -37,7 +37,8 @@
       <div class="form-group">
         <label for="activeCalendar">{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
         <div class="form-fields">
-          <select id="activeCalendar" name="activeCalendar" {{#unless canChangeCalendar}}disabled{{/unless}}>
+          <select id="activeCalendar" name="activeCalendar"
+            {{#unless canChangeCalendar}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.ActiveCalendar.DisabledTitle"}}"{{/unless}}>
             {{#each calendarOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
                 {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}

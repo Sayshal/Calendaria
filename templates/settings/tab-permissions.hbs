@@ -21,7 +21,8 @@
           data-role-order="1" {{#if permissions.viewBigCal.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.viewBigCal.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
           data-role-order="2" {{#if permissions.viewBigCal.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewBigCalHint"}}</p>
       </li>
 
@@ -34,7 +35,8 @@
           data-role-order="1" {{#if permissions.viewMiniCal.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.viewMiniCal.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
           data-role-order="2" {{#if permissions.viewMiniCal.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewMiniCalHint"}}</p>
       </li>
 
@@ -48,7 +50,8 @@
         <input type="checkbox" name="permissions.viewTimeKeeper.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
           {{#if permissions.viewTimeKeeper.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ViewTimeKeeperHint"}}</p>
       </li>
 
@@ -61,7 +64,8 @@
           data-role-order="1" {{#if permissions.addNotes.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.addNotes.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
           data-role-order="2" {{#if permissions.addNotes.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.AddNotesHint"}}</p>
       </li>
 
@@ -74,7 +78,8 @@
           data-role-order="1" {{#if permissions.editNotes.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.editNotes.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
           data-role-order="2" {{#if permissions.editNotes.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.EditNotesHint"}}</p>
       </li>
 
@@ -87,7 +92,8 @@
           data-role-order="1" {{#if permissions.deleteNotes.trusted}}checked{{/if}} />
         <input type="checkbox" name="permissions.deleteNotes.assistant" data-tooltip="{{localize 'USER.RoleAssistant'}}"
           data-role-order="2" {{#if permissions.deleteNotes.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.DeleteNotesHint"}}</p>
       </li>
 
@@ -101,7 +107,8 @@
         <input type="checkbox" name="permissions.changeDateTime.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
           {{#if permissions.changeDateTime.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ChangeDateTimeHint"}}</p>
       </li>
 
@@ -115,7 +122,8 @@
         <input type="checkbox" name="permissions.changeWeather.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
           {{#if permissions.changeWeather.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ChangeWeatherHint"}}</p>
       </li>
 
@@ -131,7 +139,8 @@
         <input type="checkbox" name="permissions.changeActiveCalendar.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
           {{#if permissions.changeActiveCalendar.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.ChangeActiveCalendarHint"}}</p>
       </li>
 
@@ -145,7 +154,8 @@
         <input type="checkbox" name="permissions.editCalendars.assistant"
           data-tooltip="{{localize 'USER.RoleAssistant'}}" data-role-order="2"
           {{#if permissions.editCalendars.assistant}}checked{{/if}} />
-        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled />
+        <input type="checkbox" data-tooltip="{{localize 'USER.RoleGamemaster'}}" data-role-order="3" checked disabled
+          aria-disabled="true" title="{{localize 'CALENDARIA.Permissions.GMAlwaysEnabled'}}" />
         <p class="permission-hint">{{localize "CALENDARIA.Permissions.EditCalendarsHint"}}</p>
       </li>
     </ul>

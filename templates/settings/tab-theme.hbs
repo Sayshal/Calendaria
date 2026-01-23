@@ -45,7 +45,7 @@
                   <span class="col-reset">
                     <button type="button" class="reset-color" data-action="resetColor" data-key="{{this.key}}"
                       data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}"
-                      {{#unless this.isCustom}}disabled{{/unless}}>
+                      {{#unless this.isCustom}}disabled aria-disabled="true" title="{{localize 'CALENDARIA.ThemeEditor.Header.ResetDisabledTitle'}}"{{/unless}}>
                       <i class="fas fa-undo"></i>
                     </button>
                   </span>

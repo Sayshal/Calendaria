@@ -35,7 +35,7 @@
           {{#each toolbarAppOptions}}
             <label class="checkbox-inline" data-tooltip="{{this.label}}">
               <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}
-                {{#unless ../showToolbarButton}}disabled{{/unless}}>
+                {{#unless ../showToolbarButton}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.ToolbarApps.DisabledTitle"}}"{{/unless}}>
               <i class="fas {{this.icon}}"></i>
             </label>
           {{/each}}

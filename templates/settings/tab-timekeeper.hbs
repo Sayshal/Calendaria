@@ -41,13 +41,15 @@
       <div class="form-fields">
         <div class="slider-with-ticks">
           <input type="range" id="timeKeeperIdleOpacity" name="timeKeeperIdleOpacity" min="0" max="100"
-            value="{{timeKeeperIdleOpacity}}" list="opacity-ticks" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+            value="{{timeKeeperIdleOpacity}}" list="opacity-ticks"
+            {{#unless timeKeeperAutoFade}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"{{/unless}}>
           <div class="slider-ticks">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </div>
         <input type="number" class="range-value" min="0" max="100" value="{{timeKeeperIdleOpacity}}"
-          style="width: 3rem; flex: none" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+          style="width: 3rem; flex: none"
+          {{#unless timeKeeperAutoFade}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"{{/unless}}>
         <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>

@@ -52,7 +52,8 @@
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
       <label for="hudDialStyle">{{localize "CALENDARIA.Settings.HUDDialStyle.Name"}}</label>
       <div class="form-fields">
-        <select id="hudDialStyle" name="hudDialStyle" {{#if isCompactMode}}disabled{{/if}}>
+        <select id="hudDialStyle" name="hudDialStyle"
+          {{#if isCompactMode}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledTitle"}}"{{/if}}>
           {{#each dialStyleOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -79,7 +80,7 @@
       <label for="hudCombatCompact">{{localize "CALENDARIA.Settings.HUDCombatCompact.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudCombatCompact" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}}
-          {{#if hudCombatHide}}disabled{{/if}}>
+          {{#if hudCombatHide}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.HUDCombatCompact.DisabledTitle"}}"{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatCompact.Hint"}}</p>
     </div>
@@ -105,7 +106,8 @@
       <div class="form-fields">
         <div class="slider-with-ticks">
           <input type="range" id="hudIdleOpacity" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
-            list="opacity-ticks" {{#unless hudAutoFade}}disabled{{/unless}}>
+            list="opacity-ticks"
+            {{#unless hudAutoFade}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"{{/unless}}>
           <datalist id="opacity-ticks">
             <option value="0"></option>
             <option value="25"></option>
@@ -118,7 +120,8 @@
           </div>
         </div>
         <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}"
-          style="width: 3rem; flex: none" {{#unless hudAutoFade}}disabled{{/unless}}>
+          style="width: 3rem; flex: none"
+          {{#unless hudAutoFade}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"{{/unless}}>
         <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
@@ -129,7 +132,8 @@
       <div class="form-fields range-field">
         <div class="slider-with-ticks">
           <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
-            value="{{hudWidthScale}}" list="scale-ticks" {{#if isCompactMode}}disabled{{/if}}>
+            value="{{hudWidthScale}}" list="scale-ticks"
+            {{#if isCompactMode}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledTitle"}}"{{/if}}>
           <datalist id="scale-ticks">
             <option value="0.5"></option>
             <option value="1"></option>
