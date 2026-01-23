@@ -16,8 +16,11 @@
   </div>
   <p class="hint section-hint">{{openHint}}</p>
 
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
+  <fieldset data-section="hud-display">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="hud-display"
+        title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
 
     <div class="form-group">
       <label for="showCalendarHUD">{{localize "CALENDARIA.Settings.ShowCalendarHUD.Name"}}</label>
@@ -52,8 +55,8 @@
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
       <label for="hudDialStyle">{{localize "CALENDARIA.Settings.HUDDialStyle.Name"}}</label>
       <div class="form-fields">
-        <select id="hudDialStyle" name="hudDialStyle"
-          {{#if isCompactMode}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledTitle"}}"{{/if}}>
+        <select id="hudDialStyle" name="hudDialStyle" {{#if isCompactMode}}disabled aria-disabled="true"
+          title="{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledTitle"}}" {{/if}}>
           {{#each dialStyleOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -80,7 +83,8 @@
       <label for="hudCombatCompact">{{localize "CALENDARIA.Settings.HUDCombatCompact.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudCombatCompact" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}}
-          {{#if hudCombatHide}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.HUDCombatCompact.DisabledTitle"}}"{{/if}}>
+          {{#if hudCombatHide}}disabled aria-disabled="true"
+          title="{{localize "CALENDARIA.Settings.HUDCombatCompact.DisabledTitle"}}" {{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatCompact.Hint"}}</p>
     </div>
@@ -106,8 +110,8 @@
       <div class="form-fields">
         <div class="slider-with-ticks">
           <input type="range" id="hudIdleOpacity" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
-            list="opacity-ticks"
-            {{#unless hudAutoFade}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"{{/unless}}>
+            list="opacity-ticks" {{#unless hudAutoFade}}disabled aria-disabled="true"
+            title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
           <datalist id="opacity-ticks">
             <option value="0"></option>
             <option value="25"></option>
@@ -120,8 +124,8 @@
           </div>
         </div>
         <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}"
-          style="width: 3rem; flex: none"
-          {{#unless hudAutoFade}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"{{/unless}}>
+          style="width: 3rem; flex: none" {{#unless hudAutoFade}}disabled aria-disabled="true"
+          title="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
         <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
@@ -132,8 +136,8 @@
       <div class="form-fields range-field">
         <div class="slider-with-ticks">
           <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
-            value="{{hudWidthScale}}" list="scale-ticks"
-            {{#if isCompactMode}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledTitle"}}"{{/if}}>
+            value="{{hudWidthScale}}" list="scale-ticks" {{#if isCompactMode}}disabled aria-disabled="true"
+            title="{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledTitle"}}" {{/if}}>
           <datalist id="scale-ticks">
             <option value="0.5"></option>
             <option value="1"></option>
@@ -152,8 +156,11 @@
     </div>
   </fieldset>
 
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}</legend>
+  <fieldset data-section="hud-block-visibility">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="hud-block-visibility"
+        title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
 
     <div class="form-group">
@@ -209,8 +216,11 @@
     </div>
   </fieldset>
 
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}</legend>
+  <fieldset data-section="hud-sticky">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="hud-sticky"
+        title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
     <input type="hidden" name="hudStickySection" value="1">
 
     <div class="form-group">
@@ -231,8 +241,11 @@
   </fieldset>
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}</legend>
+    <fieldset data-section="hud-time-jumps">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="hud-time-jumps"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
       <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
 
       <div class="time-jumps-grid">
@@ -260,8 +273,11 @@
     </fieldset>
 
     <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}} <a data-action="showTokenReference"
-          data-context-type="date"><i class="fa-regular fa-circle-question"></i></a></legend>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date"
+          title="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+            class="fa-solid fa-question"></i></button>
+      </legend>
       <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
       {{#each formatLocations}}
@@ -272,7 +288,8 @@
 
           <div class="format-row">
             <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview" data-location="{{id}}" data-role="gm"></span></span>
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="gm"></span></span>
               <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
                 {{#each gmPresetOptions}}
                   <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -284,7 +301,8 @@
             </div>
 
             <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview" data-location="{{id}}" data-role="player"></span></span>
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="player"></span></span>
               <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
                 {{#each playerPresetOptions}}
                   <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>

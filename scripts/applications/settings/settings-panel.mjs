@@ -51,7 +51,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       addCategory: SettingsPanel.#onAddCategory,
       removeCategory: SettingsPanel.#onRemoveCategory,
       resetColor: SettingsPanel.#onResetColor,
-      resetAllColors: SettingsPanel.#onResetAllColors,
       exportTheme: SettingsPanel.#onExportTheme,
       importTheme: SettingsPanel.#onImportTheme,
       openHUD: SettingsPanel.#onOpenHUD,
@@ -72,7 +71,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       editWeatherPreset: SettingsPanel.#onEditWeatherPreset,
       removeWeatherPreset: SettingsPanel.#onRemoveWeatherPreset,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
-      showTokenReference: SettingsPanel.#onShowTokenReference
+      showTokenReference: SettingsPanel.#onShowTokenReference,
+      resetSection: SettingsPanel.#onResetSection
     }
   };
 
@@ -360,7 +360,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
     [SETTINGS.TEMPERATURE_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.TemperatureUnit.Name' },
-    [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.Settings.ThemeMode.Name' },
+    [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.ThemeEditor.PresetSelect' },
     [SETTINGS.CUSTOM_THEME_COLORS]: { tab: 'theme', label: 'CALENDARIA.SettingsPanel.Section.Theme' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
     [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampShowTime.Name' },
@@ -411,6 +411,65 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CUSTOM_CATEGORIES]: { tab: 'notes', label: 'CALENDARIA.SettingsPanel.Section.Categories' },
     [SETTINGS.MACRO_TRIGGERS]: { tab: 'macros', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
     [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'CALENDARIA.SettingsPanel.Section.WeatherPresets' }
+  };
+
+  /**
+   * Mapping of section IDs to their associated settings.
+   * Used for per-section reset functionality.
+   */
+  static SECTION_SETTINGS = {
+    // HUD tab sections
+    'hud-display': [
+      SETTINGS.SHOW_CALENDAR_HUD,
+      SETTINGS.FORCE_HUD,
+      SETTINGS.CALENDAR_HUD_MODE,
+      SETTINGS.HUD_DIAL_STYLE,
+      SETTINGS.HUD_TRAY_DIRECTION,
+      SETTINGS.HUD_COMBAT_COMPACT,
+      SETTINGS.HUD_COMBAT_HIDE,
+      SETTINGS.HUD_AUTO_FADE,
+      SETTINGS.HUD_IDLE_OPACITY,
+      SETTINGS.HUD_WIDTH_SCALE
+    ],
+    'hud-block-visibility': [SETTINGS.HUD_SHOW_WEATHER, SETTINGS.HUD_WEATHER_DISPLAY_MODE, SETTINGS.HUD_SHOW_SEASON, SETTINGS.HUD_SEASON_DISPLAY_MODE, SETTINGS.HUD_SHOW_ERA],
+    'hud-sticky': [SETTINGS.HUD_STICKY_STATES, SETTINGS.CALENDAR_HUD_LOCKED],
+    'hud-time-jumps': [SETTINGS.CUSTOM_TIME_JUMPS],
+    // MiniCal tab sections
+    'minical-display': [
+      SETTINGS.SHOW_MINI_CAL,
+      SETTINGS.FORCE_MINI_CAL,
+      SETTINGS.MINI_CAL_AUTO_FADE,
+      SETTINGS.MINI_CAL_IDLE_OPACITY,
+      SETTINGS.MINI_CAL_CONTROLS_DELAY,
+      SETTINGS.MINI_CAL_CONFIRM_SET_DATE
+    ],
+    'minical-sticky': [SETTINGS.MINI_CAL_STICKY_STATES],
+    'minical-time-jumps': [SETTINGS.MINI_CAL_TIME_JUMPS],
+    // TimeKeeper tab sections
+    'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY],
+    'timekeeper-time-jumps': [SETTINGS.TIMEKEEPER_TIME_JUMPS],
+    // Time tab sections
+    'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT],
+    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.SYNC_CLOCK_PAUSE],
+    // Chat tab sections
+    'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
+    // Canvas tab sections
+    'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED],
+    'canvas-scene-integration': [SETTINGS.DARKNESS_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC, SETTINGS.AMBIENCE_SYNC, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER],
+    // Weather tab sections
+    'weather-temperature': [SETTINGS.TEMPERATURE_UNIT],
+    // Moons tab sections
+    'moons-display': [SETTINGS.SHOW_MOON_PHASES],
+    // Module tab sections
+    'module-sync': [SETTINGS.PRIMARY_GM],
+    'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
+    'module-debugging': [SETTINGS.DEV_MODE, SETTINGS.LOGGING_LEVEL],
+    // Stopwatch tab sections
+    'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
+    // Permissions tab sections
+    'permissions': [SETTINGS.PERMISSIONS],
+    // Theme tab sections
+    'theme': [SETTINGS.CUSTOM_THEME_COLORS, SETTINGS.THEME_MODE]
   };
 
   /**
@@ -738,12 +797,32 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         defaultFormat = 'stopwatchGametimeFull';
       } else {
         knownPresets = [
-          'off', 'calendarDefault', 'approxDate', 'approxTime',
-          'dateShort', 'dateMedium', 'dateLong', 'dateFull',
-          'dateUS', 'dateUSFull', 'dateISO', 'dateNumericUS', 'dateNumericEU',
-          'ordinal', 'ordinalLong', 'ordinalEra', 'ordinalFull', 'seasonDate',
-          'time12', 'time12Sec', 'time24', 'time24Sec',
-          'datetimeShort12', 'datetimeShort24', 'datetime12', 'datetime24'
+          'off',
+          'calendarDefault',
+          'approxDate',
+          'approxTime',
+          'dateShort',
+          'dateMedium',
+          'dateLong',
+          'dateFull',
+          'dateUS',
+          'dateUSFull',
+          'dateISO',
+          'dateNumericUS',
+          'dateNumericEU',
+          'ordinal',
+          'ordinalLong',
+          'ordinalEra',
+          'ordinalFull',
+          'seasonDate',
+          'time12',
+          'time12Sec',
+          'time24',
+          'time24Sec',
+          'datetimeShort12',
+          'datetimeShort24',
+          'datetime12',
+          'datetime24'
         ];
         locationPresets = [...presetOptions];
         defaultFormat = 'dateLong';
@@ -1379,25 +1458,43 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reset all colors to defaults.
+   * Reset a section's settings to their default values.
    * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
+   * @param {HTMLElement} target - The clicked element
    */
-  static async #onResetAllColors(_event, _target) {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
+  static async #onResetSection(_event, target) {
+    const sectionId = target.dataset.section;
+    const settingKeys = SettingsPanel.SECTION_SETTINGS[sectionId];
+    if (!settingKeys?.length) return;
+
+    // Build list of setting labels for the confirmation dialog
+    const settingLabels = settingKeys
+      .map((key) => {
+        const meta = SettingsPanel.SETTING_METADATA[key];
+        return meta ? localize(meta.label) : key;
+      })
+      .filter((label) => label);
+
+    const listHtml = settingLabels.map((label) => `<li>${label}</li>`).join('');
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.ThemeEditor.ResetAll') },
-      content: `<p>${localize('CALENDARIA.ThemeEditor.ConfirmResetAll')}</p>`,
-      yes: { label: localize('CALENDARIA.ThemeEditor.ResetAll'), icon: 'fas fa-undo' },
+      window: { title: localize('CALENDARIA.SettingsPanel.ResetSection.Title') },
+      content: `<p>${localize('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-section-list">${listHtml}</ul>`,
+      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
       no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     });
 
-    if (confirmed) {
-      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {});
-      applyCustomColors({ ...DEFAULT_COLORS });
-      ui.notifications.info('CALENDARIA.ThemeEditor.ColorsReset', { localize: true });
-      app?.render({ force: true, parts: ['theme'] });
+    if (!confirmed) return;
+
+    // Reset each setting to its default value
+    for (const key of settingKeys) {
+      const setting = game.settings.settings.get(`${MODULE.ID}.${key}`);
+      if (setting) {
+        const defaultValue = setting.type?.initial ?? setting.default;
+        if (defaultValue !== undefined) await game.settings.set(MODULE.ID, key, defaultValue);
+      }
     }
+
+    this.render();
   }
 
   /**

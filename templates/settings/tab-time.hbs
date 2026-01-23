@@ -1,8 +1,11 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}</legend>
+    <fieldset data-section="time-realtime">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="time-realtime"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="timeSpeedMultiplier">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
@@ -20,8 +23,11 @@
       </div>
     </fieldset>
 
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
+    <fieldset data-section="time-integration">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="time-integration"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="advanceTimeOnRest">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>

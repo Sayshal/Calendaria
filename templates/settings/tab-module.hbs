@@ -1,8 +1,11 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}</legend>
+    <fieldset data-section="module-sync">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="module-sync"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="primaryGM">{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
@@ -17,8 +20,11 @@
       </div>
     </fieldset>
 
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Integration"}}</legend>
+    <fieldset data-section="module-integration">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Integration"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="module-integration"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="showToolbarButton">{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
@@ -35,7 +41,8 @@
           {{#each toolbarAppOptions}}
             <label class="checkbox-inline" data-tooltip="{{this.label}}">
               <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}
-                {{#unless ../showToolbarButton}}disabled aria-disabled="true" title="{{localize "CALENDARIA.Settings.ToolbarApps.DisabledTitle"}}"{{/unless}}>
+                {{#unless ../showToolbarButton}}disabled aria-disabled="true"
+                title="{{localize "CALENDARIA.Settings.ToolbarApps.DisabledTitle"}}" {{/unless}}>
               <i class="fas {{this.icon}}"></i>
             </label>
           {{/each}}
@@ -54,8 +61,11 @@
     </fieldset>
   {{/if}}
 
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}</legend>
+  <fieldset data-section="module-debugging">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="module-debugging"
+        title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
 
     <div class="form-group">
       <label for="loggingLevel">{{localize "CALENDARIA.Settings.Logger.Name"}}</label>

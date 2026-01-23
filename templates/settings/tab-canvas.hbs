@@ -1,8 +1,11 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.Settings.StickyZones.Name"}}</legend>
+    <fieldset data-section="canvas-sticky-zones">
+      <legend>{{localize "CALENDARIA.Settings.StickyZones.Name"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="canvas-sticky-zones"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="stickyZonesEnabled">{{localize "CALENDARIA.Settings.StickyZones.Enable"}}</label>
@@ -14,8 +17,11 @@
       </div>
     </fieldset>
 
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.SceneIntegration"}}</legend>
+    <fieldset data-section="canvas-scene-integration">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.SceneIntegration"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="canvas-scene-integration"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="darknessSync">{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>

@@ -17,8 +17,11 @@
     </div>
     <p class="hint section-hint">{{openHint}}</p>
 
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}</legend>
+    <fieldset data-section="stopwatch-display">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-display"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="stopwatchAutoStartTime">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
@@ -31,8 +34,11 @@
     </fieldset>
 
     <fieldset>
-      <legend>{{localize "CALENDARIA.Format.Category.Stopwatch"}} <a data-action="showTokenReference"
-          data-context-type="stopwatch"><i class="fa-regular fa-circle-question"></i></a></legend>
+      <legend>{{localize "CALENDARIA.Format.Category.Stopwatch"}}
+        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="stopwatch"
+          title="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+            class="fa-solid fa-question"></i></button>
+      </legend>
       <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
       {{#each formatLocations}}
@@ -43,7 +49,8 @@
 
           <div class="format-row">
             <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview" data-location="{{id}}" data-role="gm"></span></span>
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="gm"></span></span>
               <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
                 {{#each gmPresetOptions}}
                   <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -55,7 +62,8 @@
             </div>
 
             <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview" data-location="{{id}}" data-role="player"></span></span>
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="player"></span></span>
               <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
                 {{#each playerPresetOptions}}
                   <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>

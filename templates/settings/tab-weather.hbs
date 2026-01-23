@@ -1,8 +1,11 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}</legend>
+    <fieldset data-section="weather-temperature">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-temperature"
+          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
       <div class="form-group">
         <label for="temperatureUnit">{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
