@@ -664,11 +664,11 @@ export function registerSettings() {
     type: new ObjectField({
       initial: {
         hudDate: { gm: 'ordinal', player: 'ordinal' },
-        hudTime: { gm: 'time', player: 'time' },
+        hudTime: { gm: 'time24', player: 'time24' },
         miniCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
-        miniCalTime: { gm: 'time', player: 'time' },
+        miniCalTime: { gm: 'time24', player: 'time24' },
         bigCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
-        chatTimestamp: { gm: 'short', player: 'short' },
+        chatTimestamp: { gm: 'dateShort', player: 'dateShort' },
         stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
         stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' }
       }

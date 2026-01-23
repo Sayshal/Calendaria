@@ -900,20 +900,12 @@ export function migrateLegacyFormat(legacyFormat) {
 
 /**
  * Map of preset names to formatter functions.
+ * Most presets use formatCustom with a format string from DEFAULT_FORMAT_PRESETS.
  */
 export const PRESET_FORMATTERS = {
   off: () => '',
-  short: formatShort,
-  long: formatLong,
-  full: formatFull,
-  ordinal: formatOrdinal,
-  fantasy: formatFantasy,
-  time: formatTime,
-  time12: formatTime12,
   approxTime: formatApproximateTime,
-  approxDate: formatApproximateDate,
-  datetime: formatDateTime,
-  datetime12: formatDateTime12
+  approxDate: formatApproximateDate
 };
 
 /**
@@ -921,22 +913,40 @@ export const PRESET_FORMATTERS = {
  * @type {Object<string, string>}
  */
 export const DEFAULT_FORMAT_PRESETS = {
-  short: 'D MMM',
-  long: 'D MMMM, YYYY',
-  full: 'EEEE, D MMMM YYYY',
-  ordinal: 'Do of MMMM, GGGG',
-  fantasy: 'Do of MMMM, YYYY GGGG',
-  time: 'HH:mm',
-  time12: 'h:mm A',
-  approxTime: '[approxTime]',
+  // Approximate
   approxDate: '[approxDate]',
-  datetime: 'D MMMM YYYY, HH:mm',
+  approxTime: '[approxTime]',
+  // Date - Standard
+  dateShort: 'D MMM',
+  dateMedium: 'D MMMM',
+  dateLong: 'D MMMM, YYYY',
+  dateFull: 'EEEE, D MMMM YYYY',
+  // Date - Regional
+  dateUS: 'MMMM D, YYYY',
+  dateUSFull: 'EEEE, MMMM D, YYYY',
+  dateISO: 'YYYY-MM-DD',
+  dateNumericUS: 'MM/DD/YYYY',
+  dateNumericEU: 'DD/MM/YYYY',
+  // Date - Ordinal/Fantasy
+  ordinal: 'Do of MMMM',
+  ordinalLong: 'Do of MMMM, YYYY',
+  ordinalEra: 'Do of MMMM, YYYY GGGG',
+  ordinalFull: 'EEEE, Do of MMMM, YYYY GGGG',
+  seasonDate: 'QQQQ, Do of MMMM',
+  // Time
+  time12: 'h:mm A',
+  time12Sec: 'h:mm:ss A',
+  time24: 'HH:mm',
+  time24Sec: 'HH:mm:ss',
+  // Date + Time
+  datetimeShort12: 'D MMM, h:mm A',
+  datetimeShort24: 'D MMM, HH:mm',
   datetime12: 'D MMMM YYYY, h:mm A',
+  datetime24: 'D MMMM YYYY, HH:mm',
   // Stopwatch duration presets (realtime)
   stopwatchRealtimeFull: 'HH:mm:ss.SSS',
   stopwatchRealtimeNoMs: 'HH:mm:ss',
   stopwatchRealtimeMinSec: 'mm:ss.SSS',
-  stopwatchRealtimeMinSecNoMs: 'mm:ss',
   stopwatchRealtimeSecOnly: 'ss.SSS',
   // Stopwatch duration presets (gametime)
   stopwatchGametimeFull: 'HH:mm:ss',
@@ -949,14 +959,14 @@ export const DEFAULT_FORMAT_PRESETS = {
  * Used for "Calendar Default" preset resolution.
  */
 const LOCATION_FORMAT_KEYS = {
-  hudDate: 'long',
-  hudTime: 'time',
-  timekeeperDate: 'long',
-  timekeeperTime: 'time',
-  miniCalHeader: 'long',
-  miniCalTime: 'time',
-  bigCalHeader: 'full',
-  chatTimestamp: 'long'
+  hudDate: 'dateLong',
+  hudTime: 'time24',
+  timekeeperDate: 'dateLong',
+  timekeeperTime: 'time24',
+  miniCalHeader: 'dateLong',
+  miniCalTime: 'time24',
+  bigCalHeader: 'dateFull',
+  chatTimestamp: 'dateLong'
 };
 
 /**
@@ -965,13 +975,13 @@ const LOCATION_FORMAT_KEYS = {
  */
 export const LOCATION_DEFAULTS = {
   hudDate: 'ordinal',
-  hudTime: 'time',
-  timekeeperDate: 'long',
-  timekeeperTime: 'time',
-  miniCalHeader: 'long',
-  miniCalTime: 'time',
-  bigCalHeader: 'full',
-  chatTimestamp: 'short',
+  hudTime: 'time24',
+  timekeeperDate: 'dateLong',
+  timekeeperTime: 'time24',
+  miniCalHeader: 'dateLong',
+  miniCalTime: 'time24',
+  bigCalHeader: 'dateFull',
+  chatTimestamp: 'dateShort',
   stopwatchRealtime: 'stopwatchRealtimeFull',
   stopwatchGametime: 'stopwatchGametimeFull'
 };
@@ -985,7 +995,7 @@ export const LOCATION_DEFAULTS = {
 export function getDisplayFormat(locationId) {
   const MODULE_ID = 'calendaria';
   const SETTINGS_KEY = 'displayFormats';
-  const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
+  const defaultFormat = LOCATION_DEFAULTS[locationId] || 'dateLong';
 
   try {
     const formats = game.settings.get(MODULE_ID, SETTINGS_KEY);
@@ -1006,9 +1016,18 @@ export function getDisplayFormat(locationId) {
  * @returns {string} - Resolved format string or fallback preset name
  */
 function resolveCalendarDefault(calendar, locationId) {
-  const formatKey = LOCATION_FORMAT_KEYS[locationId] || 'long';
+  const formatKey = LOCATION_FORMAT_KEYS[locationId] || 'dateLong';
   const calendarFormat = calendar?.dateFormats?.[formatKey];
   return calendarFormat || formatKey;
+}
+
+/**
+ * Resolve a preset name or format string to an actual format string.
+ * @param {string} formatSetting - Preset name or custom format string
+ * @returns {string} - Format string
+ */
+export function resolveFormatString(formatSetting) {
+  return DEFAULT_FORMAT_PRESETS[formatSetting] || formatSetting;
 }
 
 /**
@@ -1023,7 +1042,8 @@ export function formatForLocation(calendar, components, locationId) {
   let formatSetting = getDisplayFormat(locationId);
   if (formatSetting === 'calendarDefault') formatSetting = resolveCalendarDefault(calendar, locationId);
   if (PRESET_FORMATTERS[formatSetting]) return PRESET_FORMATTERS[formatSetting](calendar, components);
-  return formatCustom(calendar, components, formatSetting);
+  const formatStr = resolveFormatString(formatSetting);
+  return formatCustom(calendar, components, formatStr);
 }
 
 /**

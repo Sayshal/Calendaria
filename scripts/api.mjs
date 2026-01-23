@@ -12,7 +12,7 @@ import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './cons
 import NoteManager from './notes/note-manager.mjs';
 import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/utils/date-utils.mjs';
 import SearchManager from './search/search-manager.mjs';
-import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, timeSince } from './utils/format-utils.mjs';
+import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes } from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
@@ -332,16 +332,17 @@ export const CalendariaAPI = {
   /**
    * Format date and time components as a string.
    * @param {object} [components] - Time components to format (defaults to current time)
-   * @param {string} [formatOrPreset] - Format string with tokens OR preset name (short, long, full, time, time12, datetime)
+   * @param {string} [formatOrPreset] - Format string with tokens OR preset name (dateLong, dateFull, time24, etc.)
    * @returns {string} Formatted date/time string
    */
-  formatDate(components = null, formatOrPreset = 'long') {
+  formatDate(components = null, formatOrPreset = 'dateLong') {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return '';
     const raw = components || game.time.components;
     const formatted = { ...raw, dayOfMonth: (raw.dayOfMonth ?? 0) + 1 };
     if (PRESET_FORMATTERS[formatOrPreset]) return PRESET_FORMATTERS[formatOrPreset](calendar, formatted);
-    return formatCustom(calendar, formatted, formatOrPreset);
+    const formatStr = resolveFormatString(formatOrPreset);
+    return formatCustom(calendar, formatted, formatStr);
   },
 
   /**

@@ -658,18 +658,37 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const presetOptions = [
       { value: 'calendarDefault', label: calendarDefaultLabel },
-      { value: 'short', label: localize('CALENDARIA.Format.Preset.Short') },
-      { value: 'long', label: localize('CALENDARIA.Format.Preset.Long') },
-      { value: 'full', label: localize('CALENDARIA.Format.Preset.Full') },
-      { value: 'ordinal', label: localize('CALENDARIA.Format.Preset.Ordinal') },
-      { value: 'fantasy', label: localize('CALENDARIA.Format.Preset.Fantasy') },
-      { value: 'time', label: localize('CALENDARIA.Format.Preset.Time') },
-      { value: 'time12', label: localize('CALENDARIA.Format.Preset.Time12') },
-      { value: 'approxTime', label: localize('CALENDARIA.Format.Preset.ApproxTime') },
+      { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') },
+      // Approximate
       { value: 'approxDate', label: localize('CALENDARIA.Format.Preset.ApproxDate') },
-      { value: 'datetime', label: localize('CALENDARIA.Format.Preset.DateTime') },
-      { value: 'datetime12', label: localize('CALENDARIA.Format.Preset.DateTime12') },
-      { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
+      { value: 'approxTime', label: localize('CALENDARIA.Format.Preset.ApproxTime') },
+      // Date - Standard
+      { value: 'dateShort', label: localize('CALENDARIA.Format.Preset.DateShort') },
+      { value: 'dateMedium', label: localize('CALENDARIA.Format.Preset.DateMedium') },
+      { value: 'dateLong', label: localize('CALENDARIA.Format.Preset.DateLong') },
+      { value: 'dateFull', label: localize('CALENDARIA.Format.Preset.DateFull') },
+      // Date - Regional
+      { value: 'dateUS', label: localize('CALENDARIA.Format.Preset.DateUS') },
+      { value: 'dateUSFull', label: localize('CALENDARIA.Format.Preset.DateUSFull') },
+      { value: 'dateISO', label: localize('CALENDARIA.Format.Preset.DateISO') },
+      { value: 'dateNumericUS', label: localize('CALENDARIA.Format.Preset.DateNumericUS') },
+      { value: 'dateNumericEU', label: localize('CALENDARIA.Format.Preset.DateNumericEU') },
+      // Date - Ordinal/Fantasy
+      { value: 'ordinal', label: localize('CALENDARIA.Format.Preset.Ordinal') },
+      { value: 'ordinalLong', label: localize('CALENDARIA.Format.Preset.OrdinalLong') },
+      { value: 'ordinalEra', label: localize('CALENDARIA.Format.Preset.OrdinalEra') },
+      { value: 'ordinalFull', label: localize('CALENDARIA.Format.Preset.OrdinalFull') },
+      { value: 'seasonDate', label: localize('CALENDARIA.Format.Preset.SeasonDate') },
+      // Time
+      { value: 'time12', label: localize('CALENDARIA.Format.Preset.Time12') },
+      { value: 'time12Sec', label: localize('CALENDARIA.Format.Preset.Time12Sec') },
+      { value: 'time24', label: localize('CALENDARIA.Format.Preset.Time24') },
+      { value: 'time24Sec', label: localize('CALENDARIA.Format.Preset.Time24Sec') },
+      // Date + Time
+      { value: 'datetimeShort12', label: localize('CALENDARIA.Format.Preset.DatetimeShort12') },
+      { value: 'datetimeShort24', label: localize('CALENDARIA.Format.Preset.DatetimeShort24') },
+      { value: 'datetime12', label: localize('CALENDARIA.Format.Preset.Datetime12') },
+      { value: 'datetime24', label: localize('CALENDARIA.Format.Preset.Datetime24') }
     ];
 
     // Locations that support "Off" option
@@ -677,20 +696,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Stopwatch preset configurations
     const stopwatchRealtimePresets = [
-      { value: 'stopwatchRealtimeFull', label: 'HH:mm:ss.SSS' },
-      { value: 'stopwatchRealtimeNoMs', label: 'HH:mm:ss' },
-      { value: 'stopwatchRealtimeMinSec', label: 'mm:ss.SSS' },
-      { value: 'stopwatchRealtimeMinSecNoMs', label: 'mm:ss' },
-      { value: 'stopwatchRealtimeSecOnly', label: 'ss.SSS' },
+      { value: 'stopwatchRealtimeFull', label: localize('CALENDARIA.Format.Preset.StopwatchFull') },
+      { value: 'stopwatchRealtimeNoMs', label: localize('CALENDARIA.Format.Preset.StopwatchNoMs') },
+      { value: 'stopwatchRealtimeMinSec', label: localize('CALENDARIA.Format.Preset.StopwatchMinSec') },
+      { value: 'stopwatchRealtimeSecOnly', label: localize('CALENDARIA.Format.Preset.StopwatchSecOnly') },
       { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
     ];
     const stopwatchGametimePresets = [
-      { value: 'stopwatchGametimeFull', label: 'HH:mm:ss' },
-      { value: 'stopwatchGametimeMinSec', label: 'mm:ss' },
-      { value: 'stopwatchGametimeSecOnly', label: 'ss' },
+      { value: 'stopwatchGametimeFull', label: localize('CALENDARIA.Format.Preset.StopwatchFull') },
+      { value: 'stopwatchGametimeMinSec', label: localize('CALENDARIA.Format.Preset.StopwatchMinSec') },
+      { value: 'stopwatchGametimeSecOnly', label: localize('CALENDARIA.Format.Preset.StopwatchSecOnly') },
       { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
     ];
-    const stopwatchRealtimeKnown = ['stopwatchRealtimeFull', 'stopwatchRealtimeNoMs', 'stopwatchRealtimeMinSec', 'stopwatchRealtimeMinSecNoMs', 'stopwatchRealtimeSecOnly'];
+    const stopwatchRealtimeKnown = ['stopwatchRealtimeFull', 'stopwatchRealtimeNoMs', 'stopwatchRealtimeMinSec', 'stopwatchRealtimeSecOnly'];
     const stopwatchGametimeKnown = ['stopwatchGametimeFull', 'stopwatchGametimeMinSec', 'stopwatchGametimeSecOnly'];
 
     const allLocations = [
@@ -719,9 +737,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         locationPresets = stopwatchGametimePresets;
         defaultFormat = 'stopwatchGametimeFull';
       } else {
-        knownPresets = ['off', 'calendarDefault', 'short', 'long', 'full', 'ordinal', 'fantasy', 'time', 'time12', 'approxTime', 'approxDate', 'datetime', 'datetime12'];
+        knownPresets = [
+          'off', 'calendarDefault', 'approxDate', 'approxTime',
+          'dateShort', 'dateMedium', 'dateLong', 'dateFull',
+          'dateUS', 'dateUSFull', 'dateISO', 'dateNumericUS', 'dateNumericEU',
+          'ordinal', 'ordinalLong', 'ordinalEra', 'ordinalFull', 'seasonDate',
+          'time12', 'time12Sec', 'time24', 'time24Sec',
+          'datetimeShort12', 'datetimeShort24', 'datetime12', 'datetime24'
+        ];
         locationPresets = [...presetOptions];
-        defaultFormat = 'long';
+        defaultFormat = 'dateLong';
         if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: localize('CALENDARIA.Format.Preset.Off') }, ...locationPresets];
       }
 
@@ -1199,7 +1224,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       };
       for (const [locationId, formats] of Object.entries(data.displayFormats)) {
         if (formats) {
-          const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
+          const defaultFormat = LOCATION_DEFAULTS[locationId] || 'dateLong';
           let gmFormat, playerFormat;
           if (formats.gmPreset === 'custom') {
             const customValue = formats.gmCustom?.trim();
@@ -2010,21 +2035,21 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             // Pre-populate with current format string if empty (fixes #199, #210)
             if (customInput && !customInput.value.trim()) {
               const savedFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
-              const defaultFormat = LOCATION_DEFAULTS[locationId] || 'long';
+              const defaultFormat = LOCATION_DEFAULTS[locationId] || 'dateLong';
               let currentFormat = savedFormats[locationId]?.[role] || defaultFormat;
               // Resolve calendarDefault to actual format string from calendar
               if (currentFormat === 'calendarDefault') {
                 const locationFormatKeys = {
-                  hudDate: 'long',
-                  hudTime: 'time',
-                  timekeeperDate: 'long',
-                  timekeeperTime: 'time',
-                  miniCalHeader: 'long',
-                  miniCalTime: 'time',
-                  bigCalHeader: 'full',
-                  chatTimestamp: 'long'
+                  hudDate: 'dateLong',
+                  hudTime: 'time24',
+                  timekeeperDate: 'dateLong',
+                  timekeeperTime: 'time24',
+                  miniCalHeader: 'dateLong',
+                  miniCalTime: 'time24',
+                  bigCalHeader: 'dateFull',
+                  chatTimestamp: 'dateLong'
                 };
-                const formatKey = locationFormatKeys[locationId] || 'long';
+                const formatKey = locationFormatKeys[locationId] || 'dateLong';
                 const calendar = CalendarManager.getActiveCalendar();
                 currentFormat = calendar?.dateFormats?.[formatKey] || formatKey;
               }
@@ -2094,16 +2119,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     } else if (preset === 'calendarDefault') {
       // Resolve calendarDefault to actual format string from calendar
       const locationFormatKeys = {
-        hudDate: 'long',
-        hudTime: 'time',
-        timekeeperDate: 'long',
-        timekeeperTime: 'time',
-        miniCalHeader: 'long',
-        miniCalTime: 'time',
-        bigCalHeader: 'full',
-        chatTimestamp: 'long'
+        hudDate: 'dateLong',
+        hudTime: 'time24',
+        timekeeperDate: 'dateLong',
+        timekeeperTime: 'time24',
+        miniCalHeader: 'dateLong',
+        miniCalTime: 'time24',
+        bigCalHeader: 'dateFull',
+        chatTimestamp: 'dateLong'
       };
-      const formatKey = locationFormatKeys[locationId] || 'long';
+      const formatKey = locationFormatKeys[locationId] || 'dateLong';
       const calendar = CalendarManager.getActiveCalendar();
       const calFormat = calendar?.dateFormats?.[formatKey];
       formatStr = calFormat || DEFAULT_FORMAT_PRESETS[formatKey] || formatKey;
