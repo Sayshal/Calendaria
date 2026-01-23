@@ -380,6 +380,7 @@
 .calendar-title {
   margin: 0;
   color: var(--calendaria-title-text);
+  font-family: var(--font-body);
   font-weight: bold;
   font-size: 1.1rem;
 }
