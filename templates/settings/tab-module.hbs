@@ -90,6 +90,34 @@
     {{/if}}
   </fieldset>
 
+  {{#if isGM}}
+    <fieldset data-section="module-data">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Data"}}</legend>
+
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.ExportSettings.Name"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="exportSettings" class="link-button">
+            <i class="fas fa-file-export"></i>
+            {{localize "CALENDARIA.SettingsPanel.ExportSettings.Label"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.ExportSettings.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.ImportSettings.Name"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="importSettings" class="link-button">
+            <i class="fas fa-file-import"></i>
+            {{localize "CALENDARIA.SettingsPanel.ImportSettings.Label"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.ImportSettings.Hint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
   <fieldset data-section="about">
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.About"}}</legend>
 

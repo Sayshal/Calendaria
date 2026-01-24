@@ -13,6 +13,7 @@ import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS, validateFormatString } from 
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
+import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { BigCal } from '../big-cal.mjs';
@@ -72,7 +73,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       removeWeatherPreset: SettingsPanel.#onRemoveWeatherPreset,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
-      resetSection: SettingsPanel.#onResetSection
+      resetSection: SettingsPanel.#onResetSection,
+      exportSettings: SettingsPanel.#onExportSettings,
+      importSettings: SettingsPanel.#onImportSettings
     }
   };
 
@@ -1745,6 +1748,24 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     input.click();
+  }
+
+  /**
+   * Export all world settings to JSON file.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onExportSettings(_event, _target) {
+    await exportSettings();
+  }
+
+  /**
+   * Import settings from JSON file.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onImportSettings(_event, _target) {
+    await importSettings(() => this?.render({ force: true }));
   }
 
   /**
