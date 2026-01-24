@@ -57,7 +57,15 @@ Appears on hover over the calendar area (or always visible when sticky):
 - **View Notes** - View notes on selected date (appears when notes exist)
 - **Settings** - Open the settings panel
 
-Right-click the MiniCal container for a context menu with a Close option.
+Right-click the MiniCal container for a context menu with the following options:
+
+- **Settings** - Opens the Settings panel to the MiniCal tab
+- **Show/Hide to All Players** - Toggle visibility for all players (GM only)
+- **Reset Position** - Reset MiniCal to default screen position
+- **Lock/Unlock Position** - Toggle position locking to prevent accidental dragging
+- **Open BigCal** - Opens the BigCal Application
+- **Open TimeKeeper** - Opens the TimeKeeper Application
+- **Close** - Close the MiniCal
 
 ### Notes Panel
 
@@ -80,24 +88,39 @@ Shows current time. GM can:
 
 Revealed on hover over the time display:
 
-| Button | Action |
-|--------|--------|
-| Sunrise | Advance to next sunrise |
-| Midday | Advance to solar noon |
-| Reverse 5x | Step backward by 5 increments |
-| Reverse | Step backward by one increment |
-| Increment selector | Set step size |
-| Forward | Step forward by one increment |
-| Forward 5x | Step forward by 5 increments |
-| Sunset | Advance to next sunset |
-| Midnight | Advance to next midnight |
+| Button             | Action                                              |
+| ------------------ | --------------------------------------------------- |
+| Sunrise            | Advance to next sunrise                             |
+| Midday             | Advance to solar noon                               |
+| Custom Reverse     | Step backward by custom amount (e.g., "-5")         |
+| Reverse            | Step backward by one increment                      |
+| Increment selector | Set step size (scroll mouse wheel to cycle options) |
+| Forward            | Step forward by one increment                       |
+| Custom Forward     | Step forward by custom amount (e.g., "+30")         |
+| Sunset             | Advance to next sunset                              |
+| Midnight           | Advance to next midnight                            |
+
+Custom time jump buttons display the configured jump amount directly on the button. Configure these values in **Settings > MiniCal > Custom Time Jumps**.
 
 ---
 
 ## Double-Click Behavior
 
-- Double-click MiniCal to open the BigCal Application
-- Double-click the BigCal Application to return to MiniCal
+Double-click anywhere in the calendar area to toggle between MiniCal and BigCal. This works on all non-interactive areas (excluding buttons, inputs, and note badges).
+
+---
+
+## Block Visibility
+
+Configure which information blocks appear below the navigation row via **Settings > MiniCal**:
+
+| Setting          | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| Show Weather     | Display weather block. Weather Display Mode controls detail level. |
+| Show Season      | Display season block. Season Display Mode controls detail level.   |
+| Show Era         | Display era block. Era Display Mode controls detail level.         |
+| Show Cycles      | Display cycles block. Cycles Display Mode controls detail level.   |
+| Show Moon Phases | Display moon phase icons in day cells.                             |
 
 ---
 

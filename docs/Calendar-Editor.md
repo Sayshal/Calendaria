@@ -6,18 +6,18 @@ The Calendar Editor lets you create custom calendars or modify existing ones. Ac
 
 The editor is organized into tabs, each handling a different aspect of your calendar:
 
-| Tab | Purpose |
-|-----|---------|
-| Basic | Name, description, year settings, leap year configuration |
-| Months | Define months and their lengths |
-| Weekdays | Set weekday names, rest days, and named weeks |
-| Time | Hours per day, daylight, date formats, canonical hours |
-| Seasons | Seasonal periods (dated or periodic) |
-| Eras | Historical periods and year formatting |
-| Festivals | Holidays and special days |
-| Moons | Lunar cycles, phases, and reference dates |
-| Cycles | Repeating patterns (zodiac, elements, etc.) |
-| Weather | Climate zones and weather presets |
+| Tab       | Purpose                                                   |
+| --------- | --------------------------------------------------------- |
+| Basic     | Name, description, year settings, leap year configuration |
+| Months    | Define months and their lengths                           |
+| Weekdays  | Set weekday names, rest days, and named weeks             |
+| Time      | Hours per day, daylight, date formats, canonical hours    |
+| Seasons   | Seasonal periods (dated or periodic)                      |
+| Eras      | Historical periods and year formatting                    |
+| Festivals | Holidays and special days                                 |
+| Moons     | Lunar cycles, phases, and reference dates                 |
+| Cycles    | Repeating patterns (zodiac, elements, etc.)               |
+| Weather   | Climate zones and weather presets                         |
 
 ---
 
@@ -27,9 +27,10 @@ Configure fundamental calendar properties.
 
 ### Calendar Selector
 
+- **Calendar** label above the dropdown
 - **Calendar Dropdown** — Select an existing calendar template or custom calendar to edit (auto-loads on selection)
-- **Duplicate** — Create a copy of the currently loaded calendar
-- **Create New** — Start a fresh blank calendar from scratch
+- **Duplicate Calendar** — Create a copy of the currently loaded calendar (below dropdown, right-aligned)
+- **Create From Scratch** — Start a fresh blank calendar (below dropdown, right-aligned)
 
 ### Calendar Identity
 
@@ -68,14 +69,14 @@ Define your calendar's months.
 
 ### Month Fields
 
-| Column | Description |
-|--------|-------------|
-| **Name** | Full month name (e.g., "January") |
-| **Abbreviation** | Short form (e.g., "Jan") |
-| **Days** | Number of days in a normal year |
-| **Leap** | Extra days added during leap years |
+| Column            | Description                                                |
+| ----------------- | ---------------------------------------------------------- |
+| **Name**          | Full month name (e.g., "January")                          |
+| **Abbreviation**  | Short form (e.g., "Jan")                                   |
+| **Days**          | Number of days in a normal year                            |
+| **Leap**          | Extra days added during leap years                         |
 | **Start Weekday** | Auto (calculated) or fixed weekday for day 1 of this month |
-| **Type** | Standard or Intercalary |
+| **Type**          | Standard or Intercalary                                    |
 
 ### Month Types
 
@@ -87,7 +88,7 @@ Define your calendar's months.
 - **Custom Weekdays** (calendar-week icon) — Toggle custom weekday names for this month only
 - **Add** (+) — Insert a new month after this one
 - **Move Up/Down** (chevrons) — Reorder months
-- **Remove** (−) — Delete this month
+- **Remove** (trash icon) — Delete this month
 
 ### Custom Weekdays Per Month
 
@@ -108,17 +109,17 @@ Configure the days of the week and optional named weeks.
 
 ### Weekdays List
 
-| Column | Description |
-|--------|-------------|
-| **Name** | Full weekday name (e.g., "Monday") |
-| **Abbreviation** | Short form (e.g., "Mon") |
-| **Rest Day** | Checkbox — marks weekends for styling (this can be hooked into to trigger events) |
+| Column           | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| **Name**         | Full weekday name (e.g., "Monday")                                                |
+| **Abbreviation** | Short form (e.g., "Mon")                                                          |
+| **Rest Day**     | Checkbox — marks weekends for styling (this can be hooked into to trigger events) |
 
 ### Weekday Controls
 
 - **Add** (+) — Insert a new weekday after this one
 - **Move Up/Down** (chevrons) — Reorder weekdays
-- **Remove** (−) — Delete this weekday
+- **Remove** (trash icon) — Delete this weekday
 
 ### Named Weeks
 
@@ -131,10 +132,10 @@ Give each week a name (like "Week of the Wolf" or "Tenday of Stars").
 
 ### Named Weeks List
 
-| Column | Description |
-|--------|-------------|
-| **Week Name** | Full week name |
-| **Abbreviation** | Short form |
+| Column           | Description    |
+| ---------------- | -------------- |
+| **Week Name**    | Full week name |
+| **Abbreviation** | Short form     |
 
 ---
 
@@ -193,24 +194,24 @@ Examples: "Sunward" / "Moonward", "Before Noon" / "After Noon"
 
 Define named time periods like "Dawn", "Midday", or "Dusk".
 
-| Column | Description |
-|--------|-------------|
-| **Name** | Period name (e.g., "Matins") |
-| **Abbreviation** | Short form |
-| **Start Hour** | When this period begins (0-23) |
-| **End Hour** | When this period ends (0-23) |
+| Column           | Description                    |
+| ---------------- | ------------------------------ |
+| **Name**         | Period name (e.g., "Matins")   |
+| **Abbreviation** | Short form                     |
+| **Start Hour**   | When this period begins (0-23) |
+| **End Hour**     | When this period ends (0-23)   |
 
 ### Date Formats
 
 Customize how dates and times display using template variables.
 
-| Format | Purpose | Example Output |
-|--------|---------|----------------|
-| **Short** | Compact date display | "15 Jan 1492" |
-| **Long** | Detailed date display | "15th of January, 1492" |
-| **Full** | Complete date with weekday | "Sunday, 15th of January, 1492" |
-| **Time** | 24-hour time format | "14:30" |
-| **Time (12-hour)** | 12-hour time format | "2:30 PM" |
+| Format             | Purpose                    | Example Output                  |
+| ------------------ | -------------------------- | ------------------------------- |
+| **Short**          | Compact date display       | "15 Jan 1492"                   |
+| **Long**           | Detailed date display      | "15th of January, 1492"         |
+| **Full**           | Complete date with weekday | "Sunday, 15th of January, 1492" |
+| **Time**           | 24-hour time format        | "14:30"                         |
+| **Time (12-hour)** | 12-hour time format        | "2:30 PM"                       |
 
 ---
 
@@ -229,12 +230,12 @@ Define seasonal periods with visual styling.
 
 ### Season Fields
 
-| Field | Description |
-|-------|-------------|
-| **Name** | Season name (e.g., "Spring") |
-| **Abbreviation** | Short form |
-| **Icon** | Font Awesome class (e.g., `fas fa-leaf`) |
-| **Color** | Color picker for visual theming |
+| Field            | Description                              |
+| ---------------- | ---------------------------------------- |
+| **Name**         | Season name (e.g., "Spring")             |
+| **Abbreviation** | Short form                               |
+| **Icon**         | Font Awesome class (e.g., `fas fa-leaf`) |
+| **Color**        | Color picker for visual theming          |
 
 #### Dated Season Fields
 
@@ -248,7 +249,7 @@ Define seasonal periods with visual styling.
 ### Season Controls
 
 - **Add** (+) — Insert a new season after this one
-- **Remove** (−) — Delete this season
+- **Remove** (trash icon) — Delete this season
 - **Climate** (thermometer icon) — Configure per-season temperature ranges and weather chance overrides
 
 ### Season Climate Configuration
@@ -266,13 +267,13 @@ Define historical periods for your calendar.
 
 ### Era Fields
 
-| Column | Description |
-|--------|-------------|
-| **Name** | Era name (e.g., "Age of Humanity") |
-| **Abbreviation** | Short form (e.g., "AH") |
-| **Start Year** | First year of this era |
-| **End Year** | Last year of this era (leave blank for ongoing) |
-| **Format** | How years display: Before/After, prefix, suffix, etc. |
+| Column           | Description                                           |
+| ---------------- | ----------------------------------------------------- |
+| **Name**         | Era name (e.g., "Age of Humanity")                    |
+| **Abbreviation** | Short form (e.g., "AH")                               |
+| **Start Year**   | First year of this era                                |
+| **End Year**     | Last year of this era (leave blank for ongoing)       |
+| **Format**       | How years display: Before/After, prefix, suffix, etc. |
 
 ### Era Template
 
@@ -293,7 +294,7 @@ Define historical periods for your calendar.
 ### Era Controls
 
 - **Add** (+) — Insert a new era after this one
-- **Remove** (−) — Delete this era
+- **Remove** (trash icon) — Delete this era
 
 ---
 
@@ -303,14 +304,14 @@ Create holidays and special days that appear on the calendar.
 
 ### Festival Fields
 
-| Column | Description |
-|--------|-------------|
-| **Name** | Festival name (e.g., "Midwinter") |
-| **Month** | Which month the festival falls in |
-| **Day** | Day of the month |
-| **Duration** | Number of days the festival lasts (default: 1) |
-| **Leap Duration** | Duration on leap years (leave blank to use standard duration) |
-| **Leap Year Only** | Checkbox — festival only occurs in leap years |
+| Column                 | Description                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Name**               | Festival name (e.g., "Midwinter")                                                                                      |
+| **Month**              | Which month the festival falls in                                                                                      |
+| **Day**                | Day of the month                                                                                                       |
+| **Duration**           | Number of days the festival lasts (default: 1)                                                                         |
+| **Leap Duration**      | Duration on leap years (leave blank to use standard duration)                                                          |
+| **Leap Year Only**     | Checkbox — festival only occurs in leap years                                                                          |
 | **Counts for Weekday** | Checkbox — whether this day advances weekday counting (uncheck for intercalary days that exist "outside" normal weeks) |
 
 > [!NOTE]
@@ -319,7 +320,7 @@ Create holidays and special days that appear on the calendar.
 ### Festival Controls
 
 - **Add** (+) — Insert a new festival after this one
-- **Remove** (−) — Delete this festival
+- **Remove** (trash icon) — Delete this festival
 
 Festivals appear as indicators on the calendar grid and in the day detail view.
 
@@ -331,11 +332,11 @@ Add one or more moons with customizable phases.
 
 ### Moon Fields
 
-| Field | Description |
-|-------|-------------|
-| **Name** | Moon name (e.g., "Selûne") |
+| Field            | Description                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Name**         | Moon name (e.g., "Selûne")                                                                                                   |
 | **Cycle Length** | Days for a complete lunar cycle (new moon to new moon). Accepts decimal values (e.g., `29.53059` for Earth's synodic month). |
-| **Color** | Tint color for the moon icon |
+| **Color**        | Tint color for the moon icon                                                                                                 |
 
 ### Reference Date
 
@@ -351,21 +352,21 @@ A known date when the moon was at a specific phase (typically new moon at day 0 
 
 Define the phases of the lunar cycle. Each phase covers a percentage range of the cycle.
 
-| Column | Description |
-|--------|-------------|
-| **Icon** | Click to pick a phase icon (SVG or emoji) |
-| **Phase** | Phase name (e.g., "Full Moon") |
-| **Rising** | Name for the transitional sub-phase as the moon approaches this phase |
-| **Fading** | Name for the transitional sub-phase as the moon leaves this phase |
-| **Start %** | Percentage through the cycle when this phase begins |
-| **End %** | Percentage through the cycle when this phase ends |
+| Column      | Description                                                           |
+| ----------- | --------------------------------------------------------------------- |
+| **Icon**    | Click to pick a phase icon (SVG or emoji)                             |
+| **Phase**   | Phase name (e.g., "Full Moon")                                        |
+| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase |
+| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase     |
+| **Start %** | Percentage through the cycle when this phase begins                   |
+| **End %**   | Percentage through the cycle when this phase ends                     |
 
 ### Moon & Phase Controls
 
 - **Add Moon** (+) — Add a new moon
-- **Remove Moon** (−) — Delete this moon
+- **Remove Moon** (trash icon) — Delete this moon
 - **Add Phase** (+) — Add a phase to this moon
-- **Remove Phase** (−) — Delete this phase
+- **Remove Phase** (trash icon) — Delete this phase
 
 ---
 
@@ -379,11 +380,11 @@ Create repeating patterns like zodiac signs, elemental weeks, or numbered years.
 
 ### Cycle Fields
 
-| Field | Description |
-|-------|-------------|
-| **Name** | Cycle name (e.g., "Zodiac") |
-| **Length** | How many entries before the cycle repeats |
-| **Offset** | Starting offset (which entry is "first") |
+| Field        | Description                                    |
+| ------------ | ---------------------------------------------- |
+| **Name**     | Cycle name (e.g., "Zodiac")                    |
+| **Length**   | How many entries before the cycle repeats      |
+| **Offset**   | Starting offset (which entry is "first")       |
 | **Based On** | What unit drives the cycle (see options below) |
 
 #### Based On Options
@@ -404,9 +405,9 @@ Each cycle has numbered entries that repeat in order.
 ### Cycle Controls
 
 - **Add Cycle** (+) — Add a new cycle
-- **Remove Cycle** (−) — Delete this cycle
+- **Remove Cycle** (trash icon) — Delete this cycle
 - **Add Entry** (+) — Add an entry to this cycle
-- **Remove Entry** (−) — Delete this entry
+- **Remove Entry** (trash icon) — Delete this entry
 
 ---
 
@@ -442,13 +443,13 @@ Weather presets are organized into collapsible categories:
 
 ### Weather Preset Fields
 
-| Field | Description |
-|-------|-------------|
-| **Enabled** | Checkbox — include this weather in random generation |
-| **Icon** | Visual indicator (display only) |
-| **Name** | Weather condition name (display only) |
-| **Chance** | Percentage chance when rolling weather (0-100%) |
-| **Temp Min/Max** | Temperature range modifiers for this condition |
+| Field            | Description                                          |
+| ---------------- | ---------------------------------------------------- |
+| **Enabled**      | Checkbox — include this weather in random generation |
+| **Icon**         | Visual indicator (display only)                      |
+| **Name**         | Weather condition name (display only)                |
+| **Chance**       | Percentage chance when rolling weather (0-100%)      |
+| **Temp Min/Max** | Temperature range modifiers for this condition       |
 
 ### Weather Preset Actions
 
@@ -502,7 +503,7 @@ Exported calendars can be re-imported using the **Calendaria JSON** importer. Se
 
 ## Saving Your Calendar
 
-Click **Save** to store your calendar. Options:
+Click **Save Changes** to store your calendar. Options:
 
 - **Set as Active** — Checkbox to switch to this calendar immediately after saving (reloads the world)
 

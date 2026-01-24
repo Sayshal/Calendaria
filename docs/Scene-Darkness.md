@@ -23,20 +23,20 @@ Only the GM can update scene darkness.
 
 ### Global Setting
 
-Enable via **Settings Panel > Time tab > Sync Scene Darkness with Time** (default: enabled).
+Enable via **Settings Panel > Canvas tab > Sync Scene Darkness with Time** (default: enabled).
 
 ### Default Brightness Multiplier
 
-A global brightness multiplier applied to all scenes unless overridden. Configure in **Settings Panel > Weather tab** (range 0.5x-1.5x, default 1.0x).
+A global brightness multiplier applied to all scenes unless overridden. Configure in **Settings Panel > Canvas tab** (range 0.5x-1.5x, default 1.0x).
 
 ### Per-Scene Override
 
 Override settings for individual scenes via **Scene Configuration > Ambiance tab**:
 
-| Setting | Options |
-|---------|---------|
-| Darkness Sync | Use Global / Enabled / Disabled |
-| Brightness Multiplier | 0.5x - 1.5x slider |
+| Setting               | Options                         |
+| --------------------- | ------------------------------- |
+| Darkness Sync         | Use Global / Enabled / Disabled |
+| Brightness Multiplier | 0.5x - 1.5x slider              |
 
 ---
 
@@ -62,12 +62,12 @@ Base darkness (from time of day)
 
 Weather conditions add darkness:
 
-| Condition | Penalty |
-|-----------|---------|
-| Clear | 0 |
-| Overcast | +0.1 |
-| Heavy Rain | +0.2 |
-| Thunderstorm | +0.3 |
+| Condition    | Penalty |
+| ------------ | ------- |
+| Clear        | 0       |
+| Overcast     | +0.1    |
+| Heavy Rain   | +0.2    |
+| Thunderstorm | +0.3    |
 
 ### Climate Zone Brightness
 

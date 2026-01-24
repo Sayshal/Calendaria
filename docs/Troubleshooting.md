@@ -26,15 +26,15 @@ Common issues and solutions for Calendaria.
 
 These errors appear when a non-GM user attempts GM-only actions:
 
-| Error Message | Cause |
-|---------------|-------|
-| `Only GMs can advance time` | Player tried to use time controls |
-| `Only GMs can set date/time` | Player tried to set specific date/time |
-| `Only GMs can jump to date` | Player tried to navigate to a date |
+| Error Message                   | Cause                                  |
+| ------------------------------- | -------------------------------------- |
+| `Only GMs can advance time`     | Player tried to use time controls      |
+| `Only GMs can set date/time`    | Player tried to set specific date/time |
+| `Only GMs can jump to date`     | Player tried to navigate to a date     |
 | `Only GMs can switch calendars` | Player tried to change active calendar |
-| `Only GMs can create notes` | Player tried to create a calendar note |
-| `Only GMs can update notes` | Player tried to modify a note |
-| `Only GMs can edit calendars` | Player tried to access Calendar Editor |
+| `Only GMs can create notes`     | Player tried to create a calendar note |
+| `Only GMs can update notes`     | Player tried to modify a note          |
+| `Only GMs can edit calendars`   | Player tried to access Calendar Editor |
 
 > [!TIP]
 > Only GM users can modify time and calendar data. Players receive these errors when attempting GM-only actions.
@@ -120,17 +120,17 @@ These errors appear when a non-GM user attempts GM-only actions:
 
 Common import errors and solutions:
 
-| Error | Solution |
-|-------|----------|
-| `Invalid Calendarium export format` | File must contain `calendars` array with `static.months` and `static.weekdays` |
-| `Invalid Fantasy-Calendar export format` | File must contain `static_data` and `dynamic_data` fields |
-| `Simple Calendar module is not installed or active` | Enable the Simple Calendar module first |
-| `No calendars found in Simple Calendar module settings` | Configure a calendar in Simple Calendar before importing |
-| `Seasons & Stars module is not installed or active` | Enable the Seasons & Stars module first |
-| `No active calendar found in Seasons & Stars module settings` | Configure a calendar in Seasons & Stars before importing |
-| `Simple Timekeeping module is not installed or active` | Enable the Simple Timekeeping module first |
-| `No configuration found in Simple Timekeeping module settings` | Configure calendar settings in Simple Timekeeping before importing |
-| `No calendars found` | Source module has no calendar data configured |
+| Error                                                          | Solution                                                                       |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `Invalid Calendarium export format`                            | File must contain `calendars` array with `static.months` and `static.weekdays` |
+| `Invalid Fantasy-Calendar export format`                       | File must contain `static_data` and `dynamic_data` fields                      |
+| `Simple Calendar module is not installed or active`            | Enable the Simple Calendar module first                                        |
+| `No calendars found in Simple Calendar module settings`        | Configure a calendar in Simple Calendar before importing                       |
+| `Seasons & Stars module is not installed or active`            | Enable the Seasons & Stars module first                                        |
+| `No active calendar found in Seasons & Stars module settings`  | Configure a calendar in Seasons & Stars before importing                       |
+| `Simple Timekeeping module is not installed or active`         | Enable the Simple Timekeeping module first                                     |
+| `No configuration found in Simple Timekeeping module settings` | Configure calendar settings in Simple Timekeeping before importing             |
+| `No calendars found`                                           | Source module has no calendar data configured                                  |
 
 ### "No data loaded"
 
@@ -278,25 +278,25 @@ Run this macro to completely reset Calendaria:
 
 ```javascript
 if (!game.user.isGM) {
-  ui.notifications.error("Only GMs can reset Calendaria");
+  ui.notifications.error('Only GMs can reset Calendaria');
   return;
 }
 
 const confirm = await foundry.applications.api.DialogV2.confirm({
-  window: { title: "Reset Calendaria" },
-  content: "<p>This will delete ALL Calendaria settings, custom calendars, and notes. This cannot be undone.</p><p>Are you sure?</p>",
+  window: { title: 'Reset Calendaria' },
+  content: '<p>This will delete ALL Calendaria settings, custom calendars, and notes. This cannot be undone.</p><p>Are you sure?</p>',
   yes: { default: false },
   no: { default: true }
 });
 
 if (!confirm) return;
-await game.settings.set("calendaria", "devMode", true);
+await game.settings.set('calendaria', 'devMode', true);
 await CALENDARIA.api.deleteAllNotes();
-const folders = game.folders.filter(f => f.flags?.calendaria && !f.folder?.flags?.calendaria);
+const folders = game.folders.filter((f) => f.flags?.calendaria && !f.folder?.flags?.calendaria);
 for (const folder of folders) await folder.delete({ deleteSubfolders: true, deleteContents: true });
-const settings = game.settings.storage.get("world").filter(s => s.key.startsWith("calendaria."));
+const settings = game.settings.storage.get('world').filter((s) => s.key.startsWith('calendaria.'));
 for (const setting of settings) await setting.delete();
-ui.notifications.info("Calendaria reset complete. Please refresh.");
+ui.notifications.info('Calendaria reset complete. Please refresh.');
 ```
 
 ---
@@ -305,12 +305,12 @@ ui.notifications.info("Calendaria reset complete. Please refresh.");
 
 ### Log Level Reference
 
-| Level | Output |
-|-------|--------|
-| Off | No logging |
-| Errors Only | Only errors (red) |
+| Level             | Output                     |
+| ----------------- | -------------------------- |
+| Off               | No logging                 |
+| Errors Only       | Only errors (red)          |
 | Warnings & Errors | Errors + warnings (orange) |
-| Verbose (All) | All debug output (violet) |
+| Verbose (All)     | All debug output (violet)  |
 
 ---
 

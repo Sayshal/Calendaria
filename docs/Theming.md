@@ -33,8 +33,8 @@ Themes are organized into categories:
 
 ### Accent Colors
 
-- **Primary Accent** - Main accent color (buttons, highlights)
-- **Secondary Accent** - Alternate accent color
+- **Accent** - Calendar selector, era/cycle indicators
+- **Focus** - Button hovers, focus outlines
 
 ### Status Colors
 
@@ -55,22 +55,24 @@ Themes are organized into categories:
 
 ## Resetting Theme
 
-Click **Reset All** in the Appearance tab to restore default colors.
+Click the reset button (undo icon) in the Theme section header to restore default colors. A confirmation dialog will list which settings will be reset.
 
 ---
 
 ## Exporting & Importing Themes
 
+Import and Export buttons are located inline with the Theme Preset dropdown.
+
 ### Export
 
 1. Open Appearance tab
-2. Click **Export Theme**
+2. Click the **Export** button next to the preset dropdown
 3. Save the JSON file
 
 ### Import
 
 1. Open Appearance tab
-2. Click **Import Theme**
+2. Click the **Import** button next to the preset dropdown
 3. Select a previously exported JSON file
 4. Colors update immediately
 
@@ -80,4 +82,4 @@ Theme files contain a `colors` object with all customizable color values.
 
 ## CSS Variables
 
-Themes work by setting CSS custom properties on the Calendaria UI elements. Advanced users can inspect these in browser developer tools for additional customization via world scripts or custom CSS modules.
+Themes inherit from Foundry's AppV2 theme system. The color settings modify CSS custom properties that integrate with Foundry's native theming. Advanced users can inspect these in browser developer tools for additional customization via world scripts or custom CSS modules.

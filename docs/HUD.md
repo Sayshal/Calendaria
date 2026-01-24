@@ -18,12 +18,19 @@ The HUD displays date, time, weather, and events in a draggable widget. Two disp
 
 Configured via Settings > HUD tab:
 
-| Mode | Description |
-|------|-------------|
+| Mode       | Description                                      |
+| ---------- | ------------------------------------------------ |
 | `fullsize` | Animated sky view with sun/moon arc and info bar |
-| `compact` | Condensed bar with slice dial (no dome) |
+| `compact`  | Condensed bar with slice dial (no dome)          |
 
-Double-click the HUD bar to toggle between fullsize and compact modes. Right-click the bar for a context menu with a Close option.
+Double-click the HUD bar to toggle between fullsize and compact modes. Right-click the bar for a context menu with options:
+
+- **Settings** - Opens the HUD settings tab
+- **Show/Hide to All Players** - Toggle HUD visibility for all players (GM only)
+- **Reset Position** - Reset HUD to default position
+- **Lock/Unlock Position** - Toggle position locking
+- **Switch to Compact/Fullsize** - Toggle between display modes
+- **Close** - Close the HUD
 
 ---
 
@@ -31,9 +38,9 @@ Double-click the HUD bar to toggle between fullsize and compact modes. Right-cli
 
 The HUD supports two dial styles for displaying the sun/moon:
 
-| Style | Description |
-|-------|-------------|
-| `dome` | Semi-circular dome above the bar with sun/moon arc |
+| Style   | Description                                                       |
+| ------- | ----------------------------------------------------------------- |
+| `dome`  | Semi-circular dome above the bar with sun/moon arc                |
 | `slice` | Horizontal strip in the bar with sun/moon traveling left-to-right |
 
 Configure via Settings > HUD tab > Dial Style.
@@ -94,14 +101,14 @@ The bar displays (left to right):
 
 - **Search button** - Opens note search panel
 - **Add Note button** - Creates a new note for today
-- **Date** - Click to open Set Date dialog (GM only)
 - **Events** - Icons for today's notes (up to 5 displayed); click to open note
+- **Date** - Click to open Set Date dialog (GM only)
 - **Time** - Current time with play/pause button (GM only)
 - **Weather** - Current weather; click to open weather picker (GM only). Shows "click to generate" prompt when no weather set.
 - **Season** - Current season name and icon
-- **Era** - Current era indicator
-- **Cycle** - Current cycle value (if configured)
-- **Open Calendar** - Opens the BigCal Application
+- **Era** - Current era indicator (toggle via Show Era setting)
+- **Cycle** - Current cycle value (toggle via Show Cycles setting)
+- **Open Calendar** - Opens the BigCal Application (hidden if user lacks BigCal view permission)
 - **Settings** - Opens the settings panel
 
 ### Block Visibility
@@ -127,23 +134,24 @@ Settings are user-scoped - each player can customize their view.
 
 Hover over the bar to reveal time controls:
 
-| Button | Action |
-|--------|--------|
-| Sunrise | Advance to next sunrise |
-| Midday | Advance to solar noon |
-| Custom Dec 2 | Jump backward by custom amount (if configured) |
-| Custom Dec 1 | Jump backward by custom amount (if configured) |
-| Reverse | Step backward by one increment |
-| Increment dropdown | Set step size (second, round, minute, hour, day, week, month, season, year) |
-| Forward | Step forward by one increment |
-| Custom Inc 1 | Jump forward by custom amount (if configured) |
-| Custom Inc 2 | Jump forward by custom amount (if configured) |
-| Sunset | Advance to next sunset |
-| Midnight | Advance to next midnight |
+| Button             | Action                                                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Sunrise            | Advance to next sunrise                                                                                                                 |
+| Midday             | Advance to solar noon                                                                                                                   |
+| Custom Dec 2       | Jump backward by custom amount (if configured)                                                                                          |
+| Custom Dec 1       | Jump backward by custom amount (if configured)                                                                                          |
+| Reverse            | Step backward by one increment                                                                                                          |
+| Increment dropdown | Set step size (second, round, minute, hour, day, week, month, season, year). Scroll mouse wheel over dropdown to cycle through options. |
+| Forward            | Step forward by one increment                                                                                                           |
+| Custom Inc 1       | Jump forward by custom amount (if configured)                                                                                           |
+| Custom Inc 2       | Jump forward by custom amount (if configured)                                                                                           |
+| Sunset             | Advance to next sunset                                                                                                                  |
+| Midnight           | Advance to next midnight                                                                                                                |
 
 The tray can be configured to open upward or downward via Settings > HUD tab > Tray Open Direction.
 
-**Note:** Real-time clock speed is configured in Settings > Time tab, not on the HUD.
+> [!NOTE]
+> Real-time clock speed is configured in Settings > Time tab, not on the HUD.
 
 ### Custom Time Jumps
 
@@ -190,12 +198,12 @@ Position is saved per-client.
 
 Drag the HUD near predefined zones for automatic snapping:
 
-| Zone | Location |
-|------|----------|
-| `top-center` | Centered at top of viewport |
-| `above-hotbar` | Above the macro hotbar |
-| `above-players` | Above the players list |
-| `below-controls` | Below the scene controls |
+| Zone             | Location                    |
+| ---------------- | --------------------------- |
+| `top-center`     | Centered at top of viewport |
+| `above-hotbar`   | Above the macro hotbar      |
+| `above-players`  | Above the players list      |
+| `below-controls` | Below the scene controls    |
 
 When dragging into a zone, the HUD wobbles to indicate snapping will occur. Release to snap into position.
 
@@ -205,11 +213,11 @@ Toggle sticky zones via Settings > HUD tab > Enable Sticky Zones.
 
 ### Dome Visibility (Full HUD)
 
-The dome automatically fades when approaching the top of the viewport and hides entirely if insufficient space.
+The dome automatically fades when approaching the top of the viewport and hides entirely if insufficient space. This auto-hide behavior can be disabled via Settings > HUD tab > Dome Auto-Hide.
 
 ### Locking Position
 
-Enable "Lock Position" in settings to prevent dragging.
+Enable "Lock Position" in settings to prevent dragging. Position can also be locked/unlocked via right-click context menu. Snapping to a sticky zone also locks position.
 
 ### Resetting Position
 
@@ -237,10 +245,12 @@ Configure via **Settings Panel > HUD** tab. See [Settings](Settings#hud) for all
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| Alt+C | Toggle HUD visibility |
-| Escape | Close search panel |
+| Shortcut | Action                |
+| -------- | --------------------- |
+| Alt+C    | Toggle HUD visibility |
+| Escape   | Close search panel    |
+
+See [Keybinds](Keybinds) for all available keyboard shortcuts and configuration instructions.
 
 ---
 

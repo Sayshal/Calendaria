@@ -20,7 +20,7 @@ GMs always have full access to all features.
 
 1. Open the Settings Panel (gear icon on any Calendaria application)
 2. Navigate to the **Permissions** tab (GM only)
-3. Configure permissions for each role using checkboxes
+3. Configure permissions for each role (Player, Trusted, Assistant GM) using checkboxes
 4. Changes save automatically
 
 ---
@@ -29,21 +29,21 @@ GMs always have full access to all features.
 
 ### UI Visibility Permissions
 
-| Permission | Description |
-|------------|-------------|
-| **View MiniCal** | Can see the MiniCal widget |
-| **View TimeKeeper** | Can see the TimeKeeper |
-| **View HUD** | Can see the main HUD |
+| Permission          | Description                |
+| ------------------- | -------------------------- |
+| **View MiniCal**    | Can see the MiniCal widget |
+| **View TimeKeeper** | Can see the TimeKeeper     |
+| **View HUD**        | Can see the main HUD       |
 
 ### Action Permissions
 
-| Permission | Description |
-|------------|-------------|
-| **Manage Notes** | Can create, edit, and delete calendar notes |
-| **Change Date/Time** | Can modify the world date and time |
-| **Change Weather** | Can set weather conditions |
-| **Change Calendar** | Can switch the active calendar |
-| **Edit Calendars** | Can access the Calendar Editor |
+| Permission           | Description                                 |
+| -------------------- | ------------------------------------------- |
+| **Manage Notes**     | Can create, edit, and delete calendar notes |
+| **Change Date/Time** | Can modify the world date and time          |
+| **Change Weather**   | Can set weather conditions                  |
+| **Change Calendar**  | Can switch the active calendar              |
+| **Edit Calendars**   | Can access the Calendar Editor              |
 
 ---
 
@@ -51,16 +51,16 @@ GMs always have full access to all features.
 
 By default, all non-GM roles have restricted access:
 
-| Permission | Player | Trusted | Assistant GM |
-|------------|:------:|:-------:|:------------:|
-| View MiniCal | ✓ | ✓ | ✓ |
-| View TimeKeeper | - | - | ✓ |
-| View HUD | ✓ | ✓ | ✓ |
-| Manage Notes | - | ✓ | ✓ |
-| Change Date/Time | - | - | ✓ |
-| Change Weather | - | - | ✓ |
-| Change Calendar | - | - | - |
-| Edit Calendars | - | - | - |
+| Permission       | Player | Trusted | Assistant GM |
+| ---------------- | :----: | :-----: | :----------: |
+| View MiniCal     |   ✓    |    ✓    |      ✓       |
+| View TimeKeeper  |   -    |    -    |      ✓       |
+| View HUD         |   ✓    |    ✓    |      ✓       |
+| Manage Notes     |   -    |    ✓    |      ✓       |
+| Change Date/Time |   -    |    -    |      ✓       |
+| Change Weather   |   -    |    -    |      ✓       |
+| Change Calendar  |   -    |    -    |      -       |
+| Edit Calendars   |   -    |    -    |      -       |
 
 ---
 
@@ -89,10 +89,10 @@ See [API Reference > Permissions](API-Reference#permissions) for programmatic pe
 
 ## Permission Inheritance
 
-Permissions do not automatically inherit upward. Each role must be configured independently:
+The permission UI provides cascade-up behavior for easier configuration:
 
-- Enabling a permission for Players does **not** enable it for Trusted Players
-- Configure each role separately based on your table's needs
+- **Cascade Up**: Checking a lower role (e.g., Player) automatically checks higher roles (Trusted, Assistant GM)
+- **Independent Unchecking**: Unchecking a role does not affect other roles — each can be unchecked individually
 
 ---
 
@@ -109,6 +109,11 @@ Permissions do not automatically inherit upward. Each role must be configured in
 - Affects all time controls (HUD, MiniCal, TimeKeeper)
 - Includes advancing time, setting specific dates, and real-time clock control
 - Time changes are broadcast to all clients
+
+### Change Calendar
+
+- Controls whether users can switch the active calendar
+- **Note**: Visibility of the active calendar for players is controlled separately via the "Show Active Calendar to Players" setting in Settings > Home tab
 
 ### Edit Calendars
 

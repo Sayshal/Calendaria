@@ -8,14 +8,14 @@ Calendaria supports multiple moons with configurable cycle lengths, phases, and 
 
 Configure moons via **Calendar Editor > Moons tab**:
 
-| Setting | Description |
-|---------|-------------|
-| Name | Moon display name |
-| Cycle Length | Days for one complete cycle |
-| Color | Tint color for icon display |
-| Reference Date | A known new moon date (year, month, day) |
-| Cycle Day Adjust | Fine-tune phase alignment |
-| Hidden | Exclude from UI display |
+| Setting          | Description                              |
+| ---------------- | ---------------------------------------- |
+| Name             | Moon display name                        |
+| Cycle Length     | Days for one complete cycle              |
+| Color            | Tint color for icon display              |
+| Reference Date   | A known new moon date (year, month, day) |
+| Cycle Day Adjust | Fine-tune phase alignment                |
+| Hidden           | Exclude from UI display                  |
 
 ### Phase Configuration
 
@@ -50,7 +50,14 @@ When a phase spans multiple days:
 
 ### Calendar View
 
-Moon phases display on calendar day cells when **Show Moon Phases** is enabled (Settings Panel > Moons tab). Each day shows icons for all configured moons, tinted with their colors.
+Moon phases display on calendar day cells when **Show Moon Phases** is enabled. This setting is controlled per-application:
+
+- **Settings Panel > MiniCal tab > Block Visibility > Show Moon Phases**
+- **Settings Panel > BigCal tab > Block Visibility > Show Moon Phases**
+
+**BigCal:** Shows moon icons for each configured moon, tinted with their colors. When there are many moons, a `+X` indicator appears to show how many additional moons exist beyond the displayed icons.
+
+**MiniCal:** Shows a single moon icon due to space constraints. Click the moon icon to cycle through available moons when multiple are configured.
 
 ### HUD Dome
 

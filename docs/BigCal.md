@@ -1,6 +1,6 @@
 # BigCal
 
-The BigCal window provides month, week, and year views with comprehensive note management and navigation.
+The BigCal window provides month, week, and year views with full note management and navigation.
 
 ---
 
@@ -34,6 +34,7 @@ A detailed 7-day view with hourly time slots:
 - All-day events displayed at the top of each column
 - Timed events positioned by start hour and duration
 - Click any time slot to select it, then click Add Note to create an event at that hour
+- Each time cell (day:hour intersection) has a "+" button for quick note creation at that specific hour
 
 ### Year View
 
@@ -47,16 +48,16 @@ A 9-year overview grid for quick navigation:
 
 ## Header Controls
 
-| Button | Action |
-|--------|--------|
-| Previous/Next | Navigate by month, week, or year depending on view |
-| Month/Week/Year | Switch display mode |
-| Today | Jump to current date |
-| Add Note | Create note on selected or current date |
-| Search | Toggle search panel |
-| Settings | Open settings panel |
-| Compact | Switch to MiniCal |
-| Set Current Date | Set world time to selected date (GM only) |
+| Button           | Action                                             |
+| ---------------- | -------------------------------------------------- |
+| Previous/Next    | Navigate by month, week, or year depending on view |
+| Month/Week/Year  | Switch display mode                                |
+| Today            | Jump to current date                               |
+| Add Note         | Create note on selected or current date            |
+| Search           | Toggle search panel                                |
+| Settings         | Open settings panel                                |
+| Compact          | Switch to MiniCal                                  |
+| Set Current Date | Set world time to selected date (GM only)          |
 
 ---
 
@@ -75,18 +76,27 @@ Below the header, contextual indicators display:
 
 Each day cell in month view displays:
 
-| Element | Description |
-|---------|-------------|
-| Day number | The date, with today highlighted |
-| Festival star | Indicates a festival day |
-| Moon icons | Up to 3 visible, hover "+N" badge for additional moons |
-| Note indicators | Custom icons and colors for each note |
-| Add button | Quick note creation (appears on hover) |
+| Element         | Description                                            |
+| --------------- | ------------------------------------------------------ |
+| Day number      | The date, with today highlighted                       |
+| Festival star   | Indicates a festival day                               |
+| Moon icons      | Up to 3 visible, hover "+N" badge for additional moons |
+| Note indicators | Custom icons and colors for each note                  |
+| Add button      | Quick note creation (appears on hover)                 |
+
+**Hover Tooltip:**
+Hovering over a day cell displays a tooltip with:
+
+- Full date (Month Day, Year with era)
+- Festival name (if applicable)
+- Season name
+- Sunrise/sunset times
 
 **Interactions:**
+
 - Click a day to select it (click again to deselect)
-- Double-click a day to set it as current date (GM only)
-- Right-click for context menu with quick actions
+- Right-click for context menu with notes (sorted alphabetically) showing inline edit/delete icons, plus BigCal-specific items (Settings, Open MiniCal, Close)
+- Right-click the BigCal window header to also open the context menu
 - Click a grayed-out day from another month to navigate there
 
 ---
@@ -128,13 +138,13 @@ Events spanning multiple days appear as horizontal bars:
 
 ## Navigation
 
-| Action | Result |
-|--------|--------|
-| Arrow buttons | Move by month, week, or 9 years depending on view |
-| Today button | Return to current date |
-| Click other-month day | Navigate to that month |
-| Click month in year view | Jump to that month in month view |
-| Double-click calendar background | Switch to MiniCal |
+| Action                            | Result                                            |
+| --------------------------------- | ------------------------------------------------- |
+| Arrow buttons                     | Move by month, week, or 9 years depending on view |
+| Today button                      | Return to current date                            |
+| Click other-month day             | Navigate to that month                            |
+| Click month in year view          | Jump to that month in month view                  |
+| Double-click anywhere in calendar | Switch to MiniCal                                 |
 
 ---
 
@@ -166,4 +176,16 @@ For calendars without months (like Traveller), the month view displays a 3-week 
 
 ## Settings
 
-Configure via **Settings Panel > Calendar** tab. See [Settings](Settings#calendar) for all options.
+Configure via **Settings Panel > BigCal** tab. See [Settings](Settings#bigcal) for all options.
+
+### Block Visibility
+
+Control which information blocks appear on the BigCal interface:
+
+| Setting          | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| Show Weather     | Display weather block (with Weather Display Mode) |
+| Show Season      | Display season block (with Season Display Mode)   |
+| Show Era         | Display era block (with Era Display Mode)         |
+| Show Cycles      | Display cycles block (with Cycles Display Mode)   |
+| Show Moon Phases | Display moon phase indicators on day cells        |

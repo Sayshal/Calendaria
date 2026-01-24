@@ -6,23 +6,24 @@ Calendaria notifies users before scheduled note events occur. Reminders are conf
 
 Reminders are configured in the note sheet under the **Reminder** fieldset:
 
-| Field | Description |
-|-------|-------------|
-| Type | Notification method: none, toast, chat, or dialog |
-| Targets | Who receives the reminder |
-| Offset | Hours before the event to trigger (0 = at event time, max 720) |
-| Users | Specific user selection (when target is "specific") |
+| Field   | Description                                                    |
+| ------- | -------------------------------------------------------------- |
+| Type    | Notification method: none, toast, chat, or dialog              |
+| Targets | Who receives the reminder                                      |
+| Offset  | Hours before the event to trigger (0 = at event time, max 720) |
+| Users   | Specific user selection (when target is "specific")            |
 
 Selecting `none` as the type disables the reminder and disables other inputs.
 
 ### Defaults
 
-| User Type | Default Targets |
-|-----------|-----------------|
-| GM users | `GM` |
-| Non-GM users | `Author` |
+| User Type    | Default Targets |
+| ------------ | --------------- |
+| GM users     | `GM`            |
+| Non-GM users | `Author`        |
 
-Note: Defaults are based on the current user creating the note, not the note's `gmOnly` flag.
+> [!NOTE]
+> Defaults are based on the current user creating the note, not the note's `gmOnly` flag.
 
 ## Notification Types
 
@@ -38,7 +39,8 @@ Brief popup notification in the top-center of the screen. Auto-dismisses after a
 
 Message posted to the chat log with a link to open the note. Can be whispered to specific users based on target settings.
 
-**Note:** If a note has `gmOnly: true`, chat reminders are always whispered to GM users regardless of the target setting.
+> [!NOTE]
+> If a note has `gmOnly: true`, chat reminders are always whispered to GM users regardless of the target setting.
 
 ### Dialog
 
@@ -46,11 +48,11 @@ Modal dialog requiring acknowledgment. Includes "Open Note" and "Dismiss" button
 
 ## Target Options
 
-| Target | Recipients |
-|--------|------------|
-| `all` | All connected users |
-| `gm` | Only GM users |
-| `author` | Only the note creator |
+| Target     | Recipients              |
+| ---------- | ----------------------- |
+| `all`      | All connected users     |
+| `gm`       | Only GM users           |
+| `author`   | Only the note creator   |
 | `specific` | Manually selected users |
 
 ## How Reminders Work

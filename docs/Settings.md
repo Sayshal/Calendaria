@@ -6,6 +6,23 @@ The settings panel is organized into tabs. GM-only tabs are marked below.
 
 ---
 
+## Searching Settings
+
+A search input at the top of the sidebar navigation allows quick access to any setting.
+
+- Type 2+ characters to see matching results
+- Results match setting labels, hints, and section headings
+- Click a result to navigate (auto-switches tab, scrolls, highlights target)
+- Press Escape or click outside to dismiss
+
+---
+
+## Per-Section Reset Buttons
+
+Each settings section has a reset button in the fieldset legend. Clicking shows a confirmation dialog listing the affected settings before resetting them to defaults.
+
+---
+
 ## Calendar (GM Only)
 
 ### Active Calendar
@@ -37,24 +54,24 @@ Configure which user roles can access Calendaria features.
 
 ### Available Permissions
 
-| Permission | Description |
-|------------|-------------|
-| **View MiniCal** | Can see the MiniCal widget |
-| **View TimeKeeper** | Can see the TimeKeeper |
-| **View HUD** | Can see the main HUD |
-| **Manage Notes** | Can create, edit, and delete calendar notes |
-| **Change Date/Time** | Can modify the world date and time |
-| **Change Weather** | Can set weather conditions |
-| **Change Calendar** | Can switch the active calendar |
-| **Edit Calendars** | Can access the Calendar Editor |
+| Permission           | Description                                 |
+| -------------------- | ------------------------------------------- |
+| **View MiniCal**     | Can see the MiniCal widget                  |
+| **View TimeKeeper**  | Can see the TimeKeeper                      |
+| **View HUD**         | Can see the main HUD                        |
+| **Manage Notes**     | Can create, edit, and delete calendar notes |
+| **Change Date/Time** | Can modify the world date and time          |
+| **Change Weather**   | Can set weather conditions                  |
+| **Change Calendar**  | Can switch the active calendar              |
+| **Edit Calendars**   | Can access the Calendar Editor              |
 
 ### Configurable Roles
 
-- **Player** — Standard player role
-- **Trusted Player** — Trusted player role
-- **Assistant GM** — Assistant GM role
+The permissions grid shows columns for:
 
-GMs always have full access to all features.
+- **Player** — Standard player role
+- **Trusted** — Trusted player role
+- **Assistant** — Assistant GM role
 
 See [Permissions](Permissions) for detailed documentation.
 
@@ -73,12 +90,6 @@ Create custom note categories with:
 ---
 
 ## Time (GM Only)
-
-### Sync Scene Darkness
-
-Automatically adjust scene darkness based on time of day.
-
-- Default: `true`
 
 ### Advance Time on Rest
 
@@ -107,22 +118,6 @@ Clock automatically stops when the game is paused. When enabled, the clock also 
 > [!NOTE]
 > When sync is enabled and blocked (paused or in combat), manually starting the clock shows a warning notification.
 
-### Sync Scene Ambience with Weather
-
-Automatically update scene darkness and environment lighting based on current weather and climate zone.
-
-- Default: `true`
-
----
-
-## Moons (GM Only)
-
-### Show Moon Phases
-
-Display moon phase information in the calendar UI.
-
-- Default: `true`
-
 ---
 
 ## Weather (GM Only)
@@ -149,12 +144,44 @@ Create custom weather conditions with an inline editor UI:
 
 Custom presets appear in the Calendar Editor Weather tab and Climate dialogs alongside built-in conditions.
 
-### Brightness Multiplier
+---
+
+## Canvas (GM Only)
+
+### Scene Integration
+
+#### Darkness Sync
+
+Automatically adjust scene darkness based on time of day.
+
+- Default: `true`
+
+#### Darkness Weather Sync
+
+Adjust scene darkness based on current weather conditions.
+
+- Default: `true`
+
+#### Ambience Sync
+
+Automatically update scene environment lighting based on current weather and climate zone.
+
+- Default: `true`
+
+#### Default Brightness Multiplier
 
 Global default brightness multiplier for scene ambience.
 
 - Range: `0.5` to `1.5`
 - Default: `1.0`
+
+### Sticky Zones
+
+#### Enable Sticky Zones
+
+Allow draggable windows (HUD, MiniCal, TimeKeeper) to snap to predefined positions.
+
+- Default: `true`
 
 ---
 
@@ -170,159 +197,6 @@ Select the visual theme for Calendaria UI components.
 ### Theme Colors
 
 When Theme Mode is set to `Custom`, you can customize all UI colors. See [Theming](Theming) for details on color categories, export/import, and CSS variables.
-
-### Enable Sticky Zones
-
-Allow draggable windows (HUD, MiniCal, TimeKeeper) to snap to predefined positions.
-
-- Default: `true`
-
----
-
-## Formats (GM Only)
-
-Configure date/time display formats for different UI locations. Each location supports separate GM and player formats.
-
-### Locations
-
-- **HUD Date**: Date display on HUD
-- **HUD Time**: Time display on HUD
-- **TimeKeeper Date**: Date display on TimeKeeper (supports `Off` to hide)
-- **TimeKeeper Time**: Time display on TimeKeeper
-- **MiniCal Header**: Header text on MiniCal
-- **MiniCal Time**: Time display on MiniCal
-- **BigCal Header**: Header on the BigCal view
-- **Chat Timestamp**: In-game timestamps in chat
-- **Elapsed Time (Real Time)**: Stopwatch display in real-time mode
-- **Elapsed Time (Game Time)**: Stopwatch display in game-time mode
-
-### Stopwatch Format Tokens
-
-For Elapsed Time formats:
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `HH` | Hours (2-digit) | 01 |
-| `mm` | Minutes (2-digit) | 05 |
-| `ss` | Seconds (2-digit) | 30 |
-| `SSS` | Milliseconds (3-digit) | 250 |
-
-### Format Presets
-
-- `calendarDefault`: Uses the active calendar's built-in format for that location
-- `short`: Abbreviated format
-- `long`: Standard format
-- `full`: Complete format with all details
-- `ordinal`: Day with ordinal suffix
-- `fantasy`: Fantasy-style descriptive format
-- `time`: 24-hour time
-- `time12`: 12-hour time with AM/PM
-- `approxTime`: Approximate time of day
-- `approxDate`: Approximate date
-- `datetime`: Date and time combined
-- `datetime12`: Date and 12-hour time
-- `custom`: User-defined format string
-- `off`: Hide the element entirely (only available for specific locations)
-
-### Format Tokens
-
-#### Year
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `YYYY` | 4-digit year | 1492 |
-| `YY` | 2-digit year | 92 |
-| `Y` | Unpadded year | 1492 |
-
-#### Month
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `MMMM` | Full month name | Flamerule |
-| `MMM` | Abbreviated month name | Fla |
-| `MM` | 2-digit month | 07 |
-| `M` | Unpadded month | 7 |
-| `Mo` | Month with ordinal | 7th |
-
-#### Day
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `DD` | 2-digit day | 05 |
-| `D` | Unpadded day | 5 |
-| `Do` | Day with ordinal | 5th |
-| `DDD` | Day of year | 186 |
-
-#### Weekday
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `EEEE` | Full weekday name | Sunday |
-| `EEE` | Abbreviated weekday | Sun |
-| `E`, `EE` | Numeric weekday | 1 |
-| `e` | Local numeric weekday | 0 |
-
-#### Time
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `HH`, `H` | 24-hour (padded/unpadded) | 14, 14 |
-| `hh`, `h` | 12-hour (padded/unpadded) | 02, 2 |
-| `mm`, `m` | Minutes (padded/unpadded) | 05, 5 |
-| `ss`, `s` | Seconds (padded/unpadded) | 09, 9 |
-| `A`, `a` | AM/PM (upper/lower) | PM, pm |
-
-#### Era
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `GGGG`, `GGG` | Full era name | Dale Reckoning |
-| `GG` | Abbreviated era | DR |
-| `G` | Narrow era | D |
-
-#### Season
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `QQQQ` | Full season name | Summer |
-| `QQQ` | Abbreviated season | Sum |
-| `QQ`, `Q` | Numeric season | 2 |
-
-#### Week
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `ww`, `w` | Week of year | 27, 27 |
-| `W` | Week of month | 1 |
-
-#### Climate Zone
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `zzzz` | Full climate zone name | Temperate Forest |
-| `z` | Abbreviated climate zone | Temp |
-
-#### Fantasy
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `[approxTime]` | Approximate time of day | Afternoon |
-| `[approxDate]` | Approximate date | Midsummer |
-| `[moon]` | Current moon phase name | Full Moon |
-| `[moonIcon]` | Moon phase icon (rendered as image) | 🌕 |
-| `[moonIcon='name']` | Specific moon by name | Moon phase for named moon |
-| `[moonIcon=0]` | Specific moon by index | Moon phase for first moon |
-| `[ch]` | Current canonical hour | Vespers |
-| `[chAbbr]` | Abbreviated canonical hour | Ves |
-| `[cycle]` | Current cycle value | 3 |
-| `[cycleName]` | Current cycle entry name | Gemini |
-| `[cycleRoman]` | Cycle value as roman numeral | III |
-| `[yearInEra]` | Year within current era | 5 |
-
-> [!NOTE]
-> The `[moonIcon]` token renders the actual moon phase image with color tinting matching the calendar configuration. Use `[moon]` for text-only phase names.
->
-> On intercalary days, `MMMM`/`MMM` return the festival name; `D`/`DD`/`Do`/`M`/`MM`/`Mo` return empty strings.
 
 ---
 
@@ -391,6 +265,40 @@ Enable developer features such as calendar journal deletion and sticky zone visu
 
 - Default: `false`
 
+### UI Integration (GM Only)
+
+#### Show Toolbar Buttons
+
+Master toggle for toolbar button visibility.
+
+- Default: `true`
+
+#### Toolbar Apps
+
+Multi-select for which apps appear in the toolbar:
+
+- BigCal
+- MiniCal
+- HUD
+- TimeKeeper
+- Stopwatch
+
+#### Show Journal Footer
+
+Replaces Journal sidebar footer with app toggle buttons.
+
+- Default: `false`
+
+### Backup & Transfer (GM Only)
+
+#### Export Settings
+
+Downloads all Calendaria settings as a JSON file for backup or transfer between worlds.
+
+#### Import Settings
+
+Loads settings from a previously exported JSON file.
+
 ---
 
 ## HUD
@@ -437,17 +345,23 @@ Automatically hide the HUD during active combat. When enabled, disables auto-com
 
 - Default: `false`
 
+### Dome Auto-Hide
+
+Fade and hide the sundial dome as the HUD approaches the top of the viewport.
+
+- Default: `true`
+
 ### Block Visibility
 
-Toggle visibility of indicator blocks in the HUD bar:
+Toggle visibility of indicator blocks in the HUD bar. Hiding blocks automatically shrinks HUD width. Settings are user-scoped (each player can customize their view).
 
-- **Show Weather**: Display weather indicator
-- **Show Season**: Display season indicator
-- **Show Era/Cycle**: Display era and cycle indicators
+#### Show Weather
 
-Hiding blocks automatically shrinks HUD width. Settings are user-scoped (each player can customize their view).
+Display weather indicator.
 
-### Weather Display Mode
+- Default: `true`
+
+#### Weather Display Mode
 
 - `Full`: Icon + label + temperature
 - `Icon + Temperature`: Icon and temp only
@@ -455,14 +369,56 @@ Hiding blocks automatically shrinks HUD width. Settings are user-scoped (each pl
 - `Temperature Only`: Just the temperature
 - Default: `full`
 
-### Season Display Mode
+#### Show Season
+
+Display season indicator.
+
+- Default: `true`
+
+#### Season Display Mode
 
 - `Icon + Text`: Both icon and season name
 - `Icon Only`: Just the season icon
 - `Text Only`: Just the season name
 - Default: `icon + text`
 
-### Enable Sticky Zones
+#### Show Era
+
+Display era indicator.
+
+- Default: `true`
+
+#### Era Display Mode
+
+- `Full`: Icon + name + abbreviation
+- `Icon`: Just the era icon
+- `Text`: Just the era name
+- `Abbreviation`: Just the era abbreviation
+- Default: `full`
+
+#### Show Cycles
+
+Display cycle indicators.
+
+- Default: `true`
+
+#### Cycles Display Mode
+
+- `Name`: Cycle entry name
+- `Icon`: Just the cycle icon
+- `Number`: Numeric value
+- `Roman Numeral`: Roman numeral value
+- Default: `name`
+
+#### Show Moon Phases
+
+Display moon phase indicators.
+
+- Default: `true`
+
+### Sticky States
+
+#### Enable Sticky Zones
 
 Allow HUD to snap to predefined positions when dragging:
 
@@ -474,18 +430,24 @@ Allow HUD to snap to predefined positions when dragging:
 
 Position is preserved when switching between display modes (dome/slice/compact). Bottom-anchored zones (like above-hotbar) maintain position relative to the bar bottom across mode changes.
 
+#### Sticky Tray
+
+Remember tray open/closed state between sessions.
+
+- Default: `false`
+
+#### Lock Position
+
+Prevent dragging the HUD.
+
+- Default: `false`
+
 ### Custom Time Jumps
 
 Configure custom time jump buttons per increment (e.g., skip 8 hours). Each increment can have its own jump values.
 
 > [!TIP]
 > Leave a field blank (empty) to hide that button. This applies to both increment and decrement buttons.
-
-### Sticky Tray
-
-Remember tray open/closed state between sessions.
-
-- Default: `false`
 
 ### Tray Open Direction
 
@@ -507,12 +469,6 @@ Opacity level when HUD is faded (when Auto-Fade is enabled). Use the slider or e
 
 - Range: `0` to `100` %
 - Default: `40`
-
-### Lock Position
-
-Prevent dragging the HUD.
-
-- Default: `false`
 
 ### Force HUD (GM Only)
 
@@ -540,11 +496,81 @@ Show a confirmation dialog before changing the world date via the "Set Current D
 
 - Default: `true`
 
-### Show Toolbar Button (GM Only)
+### Block Visibility
 
-Show the Calendaria button in the scene controls toolbar.
+Toggle visibility of indicator blocks in the MiniCal. Settings are user-scoped (each player can customize their view).
+
+#### Show Weather
+
+Display weather indicator.
 
 - Default: `true`
+
+#### Weather Display Mode
+
+- `Full`: Icon + label + temperature
+- `Icon + Temperature`: Icon and temp only
+- `Icon Only`: Just the weather icon
+- `Temperature Only`: Just the temperature
+- Default: `full`
+
+#### Show Season
+
+Display season indicator.
+
+- Default: `true`
+
+#### Season Display Mode
+
+- `Icon + Text`: Both icon and season name
+- `Icon Only`: Just the season icon
+- `Text Only`: Just the season name
+- Default: `icon + text`
+
+#### Show Era
+
+Display era indicator.
+
+- Default: `true`
+
+#### Era Display Mode
+
+- `Full`: Icon + name + abbreviation
+- `Icon`: Just the era icon
+- `Text`: Just the era name
+- `Abbreviation`: Just the era abbreviation
+- Default: `full`
+
+#### Show Cycles
+
+Display cycle indicators.
+
+- Default: `true`
+
+#### Cycles Display Mode
+
+- `Name`: Cycle entry name
+- `Icon`: Just the cycle icon
+- `Number`: Numeric value
+- `Roman Numeral`: Roman numeral value
+- Default: `name`
+
+#### Show Moon Phases
+
+Display moon phase indicators.
+
+- Default: `true`
+
+### Custom Time Jumps (GM Only)
+
+Configure custom time jump buttons using a grid layout with four columns:
+
+- **Major Decrement**: Large backward time jump
+- **Minor Decrement**: Small backward time jump
+- **Minor Increment**: Small forward time jump
+- **Major Increment**: Large forward time jump
+
+Each row represents a time unit (seconds, minutes, hours, etc.). Leave a field blank (empty) to hide that button.
 
 ### Controls Delay
 
@@ -596,6 +622,75 @@ Button to reset position to default.
 
 ---
 
+## BigCal
+
+### Block Visibility
+
+Toggle visibility of indicator blocks in the BigCal. Settings are user-scoped (each player can customize their view).
+
+#### Show Weather
+
+Display weather indicator.
+
+- Default: `true`
+
+#### Weather Display Mode
+
+- `Full`: Icon + label + temperature
+- `Icon + Temperature`: Icon and temp only
+- `Icon Only`: Just the weather icon
+- `Temperature Only`: Just the temperature
+- Default: `full`
+
+#### Show Season
+
+Display season indicator.
+
+- Default: `true`
+
+#### Season Display Mode
+
+- `Icon + Text`: Both icon and season name
+- `Icon Only`: Just the season icon
+- `Text Only`: Just the season name
+- Default: `icon + text`
+
+#### Show Era
+
+Display era indicator.
+
+- Default: `true`
+
+#### Era Display Mode
+
+- `Full`: Icon + name + abbreviation
+- `Icon`: Just the era icon
+- `Text`: Just the era name
+- `Abbreviation`: Just the era abbreviation
+- Default: `full`
+
+#### Show Cycles
+
+Display cycle indicators.
+
+- Default: `true`
+
+#### Cycles Display Mode
+
+- `Name`: Cycle entry name
+- `Icon`: Just the cycle icon
+- `Number`: Numeric value
+- `Roman Numeral`: Roman numeral value
+- Default: `name`
+
+#### Show Moon Phases
+
+Display moon phase indicators.
+
+- Default: `true`
+
+---
+
 ## TimeKeeper
 
 ### Show on World Load (GM Only)
@@ -617,6 +712,14 @@ When enabled, the game-time stopwatch automatically starts when world time begin
 
 - Default: `false`
 
+### Sticky States
+
+#### Lock Position
+
+Prevent dragging the TimeKeeper.
+
+- Default: `false`
+
 ### Auto-Fade
 
 Enable opacity fade when mouse leaves the TimeKeeper.
@@ -633,6 +736,203 @@ Opacity level when TimeKeeper is faded (when Auto-Fade is enabled).
 ### Reset Position
 
 Button to reset position to default.
+
+---
+
+## Stopwatch
+
+### Display Formats
+
+Configure display format for stopwatch time. A live preview appears next to GM/Player format labels showing how the format will render.
+
+#### Elapsed Time (Real Time)
+
+Format for real-time stopwatch display.
+
+#### Elapsed Time (Game Time)
+
+Format for game-time stopwatch display.
+
+### Stopwatch Format Tokens
+
+| Token | Description            | Example |
+| ----- | ---------------------- | ------- |
+| `HH`  | Hours (2-digit)        | 01      |
+| `mm`  | Minutes (2-digit)      | 05      |
+| `ss`  | Seconds (2-digit)      | 30      |
+| `SSS` | Milliseconds (3-digit) | 250     |
+
+### Sticky States
+
+#### Lock Position
+
+Prevent dragging the Stopwatch.
+
+- Default: `false`
+
+---
+
+## Display Formats Reference
+
+Display format settings appear throughout various app tabs (HUD, MiniCal, BigCal, TimeKeeper, Stopwatch, Chat). Each location supports separate GM and player formats.
+
+### Format Preview
+
+A live preview appears next to GM/Player format labels showing how the format will render with the current date. Invalid custom formats display an error message.
+
+### Token Reference Dialog
+
+Click the help icon (?) next to Display Formats headings to open an interactive reference showing all format tokens organized by category with examples.
+
+### Format Presets
+
+#### Utility
+
+- `off`: Hide the element entirely (only available for specific locations)
+- `calendarDefault`: Uses the active calendar's built-in format for that location
+- `custom`: User-defined format string
+
+#### Approximate
+
+- `approxDate`: Approximate date (e.g., "Midsummer")
+- `approxTime`: Approximate time of day (e.g., "Afternoon")
+
+#### Standard Dates
+
+- `dateShort`: Short date format
+- `dateMedium`: Medium date format
+- `dateLong`: Long date format
+- `dateFull`: Complete date with all details
+
+#### Regional Dates
+
+- `dateUS`: US-style date
+- `dateUSFull`: Full US-style date
+- `dateISO`: ISO 8601 date format
+- `dateNumericUS`: Numeric US format (MM/DD/YYYY)
+- `dateNumericEU`: Numeric EU format (DD/MM/YYYY)
+
+#### Ordinal/Fantasy
+
+- `ordinal`: Day with ordinal suffix
+- `ordinalLong`: Long ordinal format
+- `ordinalEra`: Ordinal with era
+- `ordinalFull`: Complete ordinal format
+- `seasonDate`: Season-based date format
+
+#### Time
+
+- `time12`: 12-hour time with AM/PM
+- `time12Sec`: 12-hour time with seconds
+- `time24`: 24-hour time
+- `time24Sec`: 24-hour time with seconds
+
+#### DateTime
+
+- `datetimeShort12`: Short date with 12-hour time
+- `datetimeShort24`: Short date with 24-hour time
+- `datetime12`: Date with 12-hour time
+- `datetime24`: Date with 24-hour time
+
+### Format Tokens
+
+#### Year
+
+| Token  | Description   | Example |
+| ------ | ------------- | ------- |
+| `YYYY` | 4-digit year  | 1492    |
+| `YY`   | 2-digit year  | 92      |
+| `Y`    | Unpadded year | 1492    |
+
+#### Month
+
+| Token  | Description            | Example   |
+| ------ | ---------------------- | --------- |
+| `MMMM` | Full month name        | Flamerule |
+| `MMM`  | Abbreviated month name | Fla       |
+| `MM`   | 2-digit month          | 07        |
+| `M`    | Unpadded month         | 7         |
+| `Mo`   | Month with ordinal     | 7th       |
+
+#### Day
+
+| Token | Description      | Example |
+| ----- | ---------------- | ------- |
+| `DD`  | 2-digit day      | 05      |
+| `D`   | Unpadded day     | 5       |
+| `Do`  | Day with ordinal | 5th     |
+| `DDD` | Day of year      | 186     |
+
+#### Weekday
+
+| Token     | Description           | Example |
+| --------- | --------------------- | ------- |
+| `EEEE`    | Full weekday name     | Sunday  |
+| `EEE`     | Abbreviated weekday   | Sun     |
+| `E`, `EE` | Numeric weekday       | 1       |
+| `e`       | Local numeric weekday | 0       |
+
+#### Time
+
+| Token     | Description               | Example |
+| --------- | ------------------------- | ------- |
+| `HH`, `H` | 24-hour (padded/unpadded) | 14, 14  |
+| `hh`, `h` | 12-hour (padded/unpadded) | 02, 2   |
+| `mm`, `m` | Minutes (padded/unpadded) | 05, 5   |
+| `ss`, `s` | Seconds (padded/unpadded) | 09, 9   |
+| `A`, `a`  | AM/PM (upper/lower)       | PM, pm  |
+
+#### Era
+
+| Token         | Description     | Example        |
+| ------------- | --------------- | -------------- |
+| `GGGG`, `GGG` | Full era name   | Dale Reckoning |
+| `GG`          | Abbreviated era | DR             |
+| `G`           | Narrow era      | D              |
+
+#### Season
+
+| Token     | Description        | Example |
+| --------- | ------------------ | ------- |
+| `QQQQ`    | Full season name   | Summer  |
+| `QQQ`     | Abbreviated season | Sum     |
+| `QQ`, `Q` | Numeric season     | 2       |
+
+#### Week
+
+| Token     | Description   | Example |
+| --------- | ------------- | ------- |
+| `ww`, `w` | Week of year  | 27, 27  |
+| `W`       | Week of month | 1       |
+
+#### Climate Zone
+
+| Token  | Description              | Example          |
+| ------ | ------------------------ | ---------------- |
+| `zzzz` | Full climate zone name   | Temperate Forest |
+| `z`    | Abbreviated climate zone | Temp             |
+
+#### Fantasy
+
+| Token               | Description                         | Example                   |
+| ------------------- | ----------------------------------- | ------------------------- |
+| `[approxTime]`      | Approximate time of day             | Afternoon                 |
+| `[approxDate]`      | Approximate date                    | Midsummer                 |
+| `[moon]`            | Current moon phase name             | Full Moon                 |
+| `[moonIcon]`        | Moon phase icon (rendered as image) | (moon icon)               |
+| `[moonIcon='name']` | Specific moon by name               | Moon phase for named moon |
+| `[moonIcon=0]`      | Specific moon by index              | Moon phase for first moon |
+| `[ch]`              | Current canonical hour              | Vespers                   |
+| `[chAbbr]`          | Abbreviated canonical hour          | Ves                       |
+| `[cycle]`           | Current cycle value                 | 3                         |
+| `[cycleName]`       | Current cycle entry name            | Gemini                    |
+| `[cycleRoman]`      | Cycle value as roman numeral        | III                       |
+| `[yearInEra]`       | Year within current era             | 5                         |
+
+> [!NOTE]
+> The `[moonIcon]` token renders the actual moon phase image with color tinting matching the calendar configuration. Use `[moon]` for text-only phase names.
+>
+> On intercalary days, `MMMM`/`MMM` return the festival name; `D`/`DD`/`Do`/`M`/`MM`/`Mo` return empty strings.
 
 ---
 

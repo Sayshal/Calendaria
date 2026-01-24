@@ -4,15 +4,15 @@ Calendaria can import calendars from other modules and websites, letting you mig
 
 ## Supported Sources
 
-| Source | Live | JSON |
-|--------|:----:|:----:|
-| Calendaria JSON | | ✓ |
-| Calendarium (Obsidian) | | ✓ |
-| Fantasy-Calendar.com | | ✓ |
-| Mini Calendar | ✓ | ✓ |
-| Seasons & Stars | ✓ | ✓ |
-| Simple Calendar | ✓ | ✓ |
-| Simple Timekeeping | ✓ | |
+| Source                 | Live | JSON |
+| ---------------------- | :--: | :--: |
+| Calendaria JSON        |      |  ✓   |
+| Calendarium (Obsidian) |      |  ✓   |
+| Fantasy-Calendar.com   |      |  ✓   |
+| Mini Calendar          |  ✓   |  ✓   |
+| Seasons & Stars        |  ✓   |  ✓   |
+| Simple Calendar        |  ✓   |  ✓   |
+| Simple Timekeeping     |  ✓   |      |
 
 Missing your calendar source? [Request a new importer](https://github.com/Sayshal/Calendaria/issues/new?labels=type:feature&title=Importer%20Request%3A%20).
 

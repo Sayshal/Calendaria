@@ -18,14 +18,14 @@ Widgets allow module developers to:
 
 Widgets can be inserted at these locations:
 
-| Point | Location | Widget Types |
-|-------|----------|--------------|
-| `hud.buttons.left` | Left side of HUD bar | Buttons |
-| `hud.buttons.right` | Right side of HUD bar | Buttons |
-| `hud.indicators` | Indicator section of HUD bar | Indicators |
-| `hud.tray` | Time controls tray | Buttons |
-| `minical.sidebar` | MiniCal sidebar | Buttons |
-| `bigcal.actions` | BigCal action bar | Buttons |
+| Point               | Location                     | Widget Types |
+| ------------------- | ---------------------------- | ------------ |
+| `hud.buttons.left`  | Left side of HUD bar         | Buttons      |
+| `hud.buttons.right` | Right side of HUD bar        | Buttons      |
+| `hud.indicators`    | Indicator section of HUD bar | Indicators   |
+| `hud.tray`          | Time controls tray           | Buttons      |
+| `minical.sidebar`   | MiniCal sidebar              | Buttons      |
+| `bigcal.actions`    | BigCal action bar            | Buttons      |
 
 Access these via `CALENDARIA.api.widgetPoints`.
 
@@ -35,12 +35,12 @@ Access these via `CALENDARIA.api.widgetPoints`.
 
 Built-in indicator elements that can be replaced by custom widgets. Replacements apply across all three applications (HUD, MiniCal, BigCal):
 
-| Element ID | Description |
-|------------|-------------|
-| `weather-indicator` | Weather condition display |
-| `season-indicator` | Current season display |
-| `era-indicator` | Era/year display |
-| `cycle-indicator` | Cycle (zodiac, etc.) display |
+| Element ID          | Description                  |
+| ------------------- | ---------------------------- |
+| `weather-indicator` | Weather condition display    |
+| `season-indicator`  | Current season display       |
+| `era-indicator`     | Era/year display             |
+| `cycle-indicator`   | Cycle (zodiac, etc.) display |
 
 Access these via `CALENDARIA.api.replaceableElements`.
 
@@ -111,38 +111,38 @@ CALENDARIA.api.registerWidget('my-module', {
 
 ### Required Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | string | Unique widget identifier within your module |
-| `type` | string | `'button'` or `'indicator'` |
+| Property | Type   | Description                                 |
+| -------- | ------ | ------------------------------------------- |
+| `id`     | string | Unique widget identifier within your module |
+| `type`   | string | `'button'` or `'indicator'`                 |
 
 ### Insertion Properties
 
 One of these is required:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `insertAt` | string | Widget point ID from `widgetPoints` |
+| Property   | Type   | Description                           |
+| ---------- | ------ | ------------------------------------- |
+| `insertAt` | string | Widget point ID from `widgetPoints`   |
 | `replaces` | string | Element ID from `replaceableElements` |
 
 ### Button Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `icon` | string | FontAwesome icon class |
-| `label` | string | Button text (optional) |
-| `tooltip` | string | Hover tooltip text |
-| `color` | string | Icon color (CSS color value) |
-| `onClick` | function | Click handler |
+| Property   | Type                | Description                                 |
+| ---------- | ------------------- | ------------------------------------------- |
+| `icon`     | string              | FontAwesome icon class                      |
+| `label`    | string              | Button text (optional)                      |
+| `tooltip`  | string              | Hover tooltip text                          |
+| `color`    | string              | Icon color (CSS color value)                |
+| `onClick`  | function            | Click handler                               |
 | `disabled` | boolean or function | Disable state or function returning boolean |
 
 ### Indicator Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `render` | function | Receives container element, renders content |
-| `onAttach` | function | Called when added to DOM |
-| `onDetach` | function | Called when removed from DOM |
+| Property   | Type     | Description                                 |
+| ---------- | -------- | ------------------------------------------- |
+| `render`   | function | Receives container element, renders content |
+| `onAttach` | function | Called when added to DOM                    |
+| `onDetach` | function | Called when removed from DOM                |
 
 ---
 
@@ -188,7 +188,7 @@ Each widget receives a class based on its module ID for targeted styling:
 }
 
 /* Style a specific widget */
-.widget-my-module[data-widget-id="my-button"] {
+.widget-my-module[data-widget-id='my-button'] {
   /* Your styles */
 }
 ```

@@ -31,9 +31,9 @@ await CALENDARIA.api.advanceTime({ hour: 8 });
 await CALENDARIA.api.advanceTime({ day: 1, hour: 6 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `delta` | `object` | Time delta (e.g., `{day: 1, hour: 2}`) |
+| Parameter | Type     | Description                            |
+| --------- | -------- | -------------------------------------- |
+| `delta`   | `object` | Time delta (e.g., `{day: 1, hour: 2}`) |
 
 **Returns:** `Promise<number>` - New world time in seconds.
 
@@ -53,8 +53,8 @@ await CALENDARIA.api.setDateTime({
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type     | Description            |
+| ------------ | -------- | ---------------------- |
 | `components` | `object` | Time components to set |
 
 **Returns:** `Promise<number>` - New world time in seconds.
@@ -68,16 +68,16 @@ Jump to a specific date while preserving current time of day. GM only.
 ```javascript
 await CALENDARIA.api.jumpToDate({
   year: 1492,
-  month: 5,  // 0-indexed
+  month: 5, // 0-indexed
   day: 1
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `options.year` | `number` | Target year |
+| Parameter       | Type     | Description              |
+| --------------- | -------- | ------------------------ |
+| `options.year`  | `number` | Target year              |
 | `options.month` | `number` | Target month (0-indexed) |
-| `options.day` | `number` | Target day of month |
+| `options.day`   | `number` | Target day of month      |
 
 **Returns:** `Promise<void>`
 
@@ -92,9 +92,9 @@ await CALENDARIA.api.advanceTimeToPreset('sunrise');
 await CALENDARIA.api.advanceTimeToPreset('midnight');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `preset` | `string` | `'sunrise'`, `'midday'`, `'noon'`, `'sunset'`, or `'midnight'` |
+| Parameter | Type     | Description                                                    |
+| --------- | -------- | -------------------------------------------------------------- |
+| `preset`  | `string` | `'sunrise'`, `'midday'`, `'noon'`, `'sunset'`, or `'midnight'` |
 
 **Returns:** `Promise<number>` - New world time in seconds.
 
@@ -119,12 +119,12 @@ const calendar = CALENDARIA.api.getActiveCalendar();
 Get a specific calendar by ID.
 
 ```javascript
-const calendar = CALENDARIA.api.getCalendar("harptos");
+const calendar = CALENDARIA.api.getCalendar('harptos');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | `string` | Calendar ID |
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `id`      | `string` | Calendar ID |
 
 **Returns:** `object|null` - The calendar or null if not found.
 
@@ -159,12 +159,12 @@ const metadata = CALENDARIA.api.getAllCalendarMetadata();
 Switch to a different calendar. GM only.
 
 ```javascript
-await CALENDARIA.api.switchCalendar("greyhawk");
+await CALENDARIA.api.switchCalendar('greyhawk');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | `string` | Calendar ID to switch to |
+| Parameter | Type     | Description              |
+| --------- | -------- | ------------------------ |
+| `id`      | `string` | Calendar ID to switch to |
 
 **Returns:** `Promise<boolean>` - True if switched successfully.
 
@@ -181,8 +181,8 @@ const phase = CALENDARIA.api.getMoonPhase(0);
 // Returns: { name, icon, position, dayInCycle }
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type     | Description                    |
+| ----------- | -------- | ------------------------------ |
 | `moonIndex` | `number` | Index of the moon (default: 0) |
 
 **Returns:** `object|null` - Moon phase data.
@@ -299,8 +299,8 @@ const time = CALENDARIA.api.getTimeUntilTarget(12);
 // Returns: { hours, minutes, seconds }
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type     | Description                    |
+| ------------ | -------- | ------------------------------ |
 | `targetHour` | `number` | Target hour (0 to hoursPerDay) |
 
 **Returns:** `object|null` - Time remaining as `{ hours, minutes, seconds }`.
@@ -444,24 +444,34 @@ Format date and time components as a string.
 
 ```javascript
 // Using presets
-const formatted = CALENDARIA.api.formatDate(null, 'long');
-const formatted = CALENDARIA.api.formatDate(null, 'datetime');
+const formatted = CALENDARIA.api.formatDate(null, 'dateLong');
+const formatted = CALENDARIA.api.formatDate(null, 'datetime12');
 
 // Using custom format
-const formatted = CALENDARIA.api.formatDate({ year: 1492, month: 5, day: 15 }, '{DD} {MMMM} {YYYY}');
+const formatted = CALENDARIA.api.formatDate({ year: 1492, month: 5, day: 15 }, 'DD MMMM YYYY');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `components` | `object` | Time components (defaults to current time) |
-| `formatOrPreset` | `string` | Preset name or format string (default: `'long'`) |
+| Parameter        | Type     | Description                                          |
+| ---------------- | -------- | ---------------------------------------------------- |
+| `components`     | `object` | Time components (defaults to current time)           |
+| `formatOrPreset` | `string` | Preset name or format string (default: `'dateLong'`) |
 
-**Presets:** `'short'`, `'long'`, `'full'`, `'time'`, `'time12'`, `'datetime'`
+**Presets:**
+
+| Category        | Presets                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| Utility         | `'off'`, `'calendarDefault'`, `'custom'`                                      |
+| Approximate     | `'approxDate'`, `'approxTime'`                                                |
+| Standard        | `'dateShort'`, `'dateMedium'`, `'dateLong'`, `'dateFull'`                     |
+| Regional        | `'dateUS'`, `'dateUSFull'`, `'dateISO'`, `'dateNumericUS'`, `'dateNumericEU'` |
+| Ordinal/Fantasy | `'ordinal'`, `'ordinalLong'`, `'ordinalEra'`, `'ordinalFull'`, `'seasonDate'` |
+| Time            | `'time12'`, `'time12Sec'`, `'time24'`, `'time24Sec'`                          |
+| DateTime        | `'datetimeShort12'`, `'datetimeShort24'`, `'datetime12'`, `'datetime24'`      |
 
 **Returns:** `string` - Formatted date/time string.
 
 > [!NOTE]
-> Internal time components use 0-indexed `dayOfMonth` (0-30). The `formatDate()` function automatically converts to 1-indexed (1-31) for display when using `{D}` or `{DD}` tokens.
+> When passing custom `components`, the `day` property should be 1-indexed (1-31). Internal time components use 0-indexed `dayOfMonth` (0-30). The `formatDate()` function automatically converts to 1-indexed for display when using `D` or `DD` tokens.
 
 ---
 
@@ -474,10 +484,10 @@ const relative = CALENDARIA.api.timeSince({ year: 1492, month: 5, dayOfMonth: 15
 // Returns: "3 days ago" or "in 2 weeks"
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `targetDate` | `object` | Target date `{ year, month, dayOfMonth }` |
-| `currentDate` | `object` or `null` | Current date (defaults to current time) |
+| Parameter     | Type               | Description                               |
+| ------------- | ------------------ | ----------------------------------------- |
+| `targetDate`  | `object`           | Target date `{ year, month, dayOfMonth }` |
+| `currentDate` | `object` or `null` | Current date (defaults to current time)   |
 
 **Returns:** `string` - Relative time string.
 
@@ -519,8 +529,8 @@ const date = CALENDARIA.api.timestampToDate(86400);
 // Returns: { year, month, dayOfMonth, hour, minute, second }
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type     | Description           |
+| ----------- | -------- | --------------------- |
 | `timestamp` | `number` | World time in seconds |
 
 **Returns:** `object|null` - Date components.
@@ -541,9 +551,9 @@ const timestamp = CALENDARIA.api.dateToTimestamp({
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date` | `object` | Date components |
+| Parameter | Type     | Description     |
+| --------- | -------- | --------------- |
+| `date`    | `object` | Date components |
 
 **Returns:** `number` - World time in seconds.
 
@@ -554,16 +564,13 @@ const timestamp = CALENDARIA.api.dateToTimestamp({
 Generate a random date within a range.
 
 ```javascript
-const randomDate = CALENDARIA.api.chooseRandomDate(
-  { year: 1492, month: 0, day: 1 },
-  { year: 1492, month: 11, day: 31 }
-);
+const randomDate = CALENDARIA.api.chooseRandomDate({ year: 1492, month: 0, day: 1 }, { year: 1492, month: 11, day: 31 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `startDate` | `object` | Start date (defaults to current date) |
-| `endDate` | `object` | End date (defaults to 1 year from start) |
+| Parameter   | Type     | Description                              |
+| ----------- | -------- | ---------------------------------------- |
+| `startDate` | `object` | Start date (defaults to current date)    |
+| `endDate`   | `object` | End date (defaults to 1 year from start) |
 
 **Returns:** `object` - Random date components.
 
@@ -580,10 +587,10 @@ const newDate = CALENDARIA.api.addDays({ year: 1492, month: 5, day: 15 }, 10);
 // Returns date 10 days later
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date` | `object` | Date `{ year, month, day }` |
-| `days` | `number` | Days to add (negative to subtract) |
+| Parameter | Type     | Description                        |
+| --------- | -------- | ---------------------------------- |
+| `date`    | `object` | Date `{ year, month, day }`        |
+| `days`    | `number` | Days to add (negative to subtract) |
 
 **Returns:** `object` - New date components.
 
@@ -597,10 +604,10 @@ Add months to a date.
 const newDate = CALENDARIA.api.addMonths({ year: 1492, month: 5, day: 15 }, 3);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date` | `object` | Date `{ year, month, day }` |
-| `months` | `number` | Months to add (negative to subtract) |
+| Parameter | Type     | Description                          |
+| --------- | -------- | ------------------------------------ |
+| `date`    | `object` | Date `{ year, month, day }`          |
+| `months`  | `number` | Months to add (negative to subtract) |
 
 **Returns:** `object` - New date components.
 
@@ -614,10 +621,10 @@ Add years to a date.
 const newDate = CALENDARIA.api.addYears({ year: 1492, month: 5, day: 15 }, 10);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date` | `object` | Date `{ year, month, day }` |
-| `years` | `number` | Years to add (negative to subtract) |
+| Parameter | Type     | Description                         |
+| --------- | -------- | ----------------------------------- |
+| `date`    | `object` | Date `{ year, month, day }`         |
+| `years`   | `number` | Years to add (negative to subtract) |
 
 **Returns:** `object` - New date components.
 
@@ -628,17 +635,14 @@ const newDate = CALENDARIA.api.addYears({ year: 1492, month: 5, day: 15 }, 10);
 Calculate the number of days between two dates.
 
 ```javascript
-const days = CALENDARIA.api.daysBetween(
-  { year: 1492, month: 5, day: 1 },
-  { year: 1492, month: 5, day: 15 }
-);
+const days = CALENDARIA.api.daysBetween({ year: 1492, month: 5, day: 1 }, { year: 1492, month: 5, day: 15 });
 // Returns: 14
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type     | Description                       |
+| ----------- | -------- | --------------------------------- |
 | `startDate` | `object` | Start date `{ year, month, day }` |
-| `endDate` | `object` | End date `{ year, month, day }` |
+| `endDate`   | `object` | End date `{ year, month, day }`   |
 
 **Returns:** `number` - Days between dates (positive if endDate is later).
 
@@ -649,17 +653,14 @@ const days = CALENDARIA.api.daysBetween(
 Calculate the number of months between two dates.
 
 ```javascript
-const months = CALENDARIA.api.monthsBetween(
-  { year: 1492, month: 0, day: 1 },
-  { year: 1492, month: 6, day: 1 }
-);
+const months = CALENDARIA.api.monthsBetween({ year: 1492, month: 0, day: 1 }, { year: 1492, month: 6, day: 1 });
 // Returns: 6
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type     | Description                       |
+| ----------- | -------- | --------------------------------- |
 | `startDate` | `object` | Start date `{ year, month, day }` |
-| `endDate` | `object` | End date `{ year, month, day }` |
+| `endDate`   | `object` | End date `{ year, month, day }`   |
 
 **Returns:** `number` - Months between dates.
 
@@ -670,17 +671,14 @@ const months = CALENDARIA.api.monthsBetween(
 Compare two dates including time components.
 
 ```javascript
-const result = CALENDARIA.api.compareDates(
-  { year: 1492, month: 5, day: 15, hour: 10 },
-  { year: 1492, month: 5, day: 15, hour: 14 }
-);
+const result = CALENDARIA.api.compareDates({ year: 1492, month: 5, day: 15, hour: 10 }, { year: 1492, month: 5, day: 15, hour: 14 });
 // Returns: -1 (date1 is earlier)
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date1` | `object` | First date |
-| `date2` | `object` | Second date |
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `date1`   | `object` | First date  |
+| `date2`   | `object` | Second date |
 
 **Returns:** `number` - `-1` if date1 < date2, `0` if equal, `1` if date1 > date2.
 
@@ -691,17 +689,14 @@ const result = CALENDARIA.api.compareDates(
 Compare two dates ignoring time components.
 
 ```javascript
-const result = CALENDARIA.api.compareDays(
-  { year: 1492, month: 5, day: 15 },
-  { year: 1492, month: 5, day: 20 }
-);
+const result = CALENDARIA.api.compareDays({ year: 1492, month: 5, day: 15 }, { year: 1492, month: 5, day: 20 });
 // Returns: -1 (date1 is earlier)
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date1` | `object` | First date |
-| `date2` | `object` | Second date |
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `date1`   | `object` | First date  |
+| `date2`   | `object` | Second date |
 
 **Returns:** `number` - `-1` if date1 < date2, `0` if same day, `1` if date1 > date2.
 
@@ -712,17 +707,14 @@ const result = CALENDARIA.api.compareDays(
 Check if two dates are the same day.
 
 ```javascript
-const same = CALENDARIA.api.isSameDay(
-  { year: 1492, month: 5, day: 15, hour: 10 },
-  { year: 1492, month: 5, day: 15, hour: 20 }
-);
+const same = CALENDARIA.api.isSameDay({ year: 1492, month: 5, day: 15, hour: 10 }, { year: 1492, month: 5, day: 15, hour: 20 });
 // Returns: true
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date1` | `object` | First date |
-| `date2` | `object` | Second date |
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `date1`   | `object` | First date  |
+| `date2`   | `object` | Second date |
 
 **Returns:** `boolean` - True if same calendar day.
 
@@ -737,9 +729,9 @@ const weekday = CALENDARIA.api.dayOfWeek({ year: 1492, month: 5, day: 15 });
 // Returns: 0-6 depending on calendar weekdays
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date` | `object` | Date `{ year, month, day }` |
+| Parameter | Type     | Description                 |
+| --------- | -------- | --------------------------- |
+| `date`    | `object` | Date `{ year, month, day }` |
 
 **Returns:** `number` - Weekday index (0-based).
 
@@ -753,9 +745,9 @@ Check if a date is valid for the active calendar.
 const valid = CALENDARIA.api.isValidDate({ year: 1492, month: 5, day: 31 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `date` | `object` | Date `{ year, month, day }` |
+| Parameter | Type     | Description                 |
+| --------- | -------- | --------------------------- |
+| `date`    | `object` | Date `{ year, month, day }` |
 
 **Returns:** `boolean` - True if date exists in the calendar.
 
@@ -780,12 +772,12 @@ const notes = CALENDARIA.api.getAllNotes();
 Get a specific note by ID.
 
 ```javascript
-const note = CALENDARIA.api.getNote("abc123");
+const note = CALENDARIA.api.getNote('abc123');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `pageId` | `string` | Journal entry page ID |
+| Parameter | Type     | Description           |
+| --------- | -------- | --------------------- |
+| `pageId`  | `string` | Journal entry page ID |
 
 **Returns:** `object|null` - Note stub or null.
 
@@ -796,14 +788,14 @@ const note = CALENDARIA.api.getNote("abc123");
 Get the full Foundry JournalEntryPage document for a note.
 
 ```javascript
-const page = CALENDARIA.api.getNoteDocument("abc123");
+const page = CALENDARIA.api.getNoteDocument('abc123');
 // Access full document properties
 console.log(page.text.content);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `pageId` | `string` | Journal entry page ID |
+| Parameter | Type     | Description           |
+| --------- | -------- | --------------------- |
+| `pageId`  | `string` | Journal entry page ID |
 
 **Returns:** `JournalEntryPage|null` - Full Foundry document or null.
 
@@ -818,31 +810,31 @@ Create a new calendar note. Players can create their own notes; GM can create no
 
 ```javascript
 const note = await CALENDARIA.api.createNote({
-  name: "Council Meeting",
+  name: 'Council Meeting',
   content: "<p>Meeting with the Lords' Alliance</p>",
   startDate: { year: 1492, month: 5, day: 15, hour: 14, minute: 0 },
   endDate: { year: 1492, month: 5, day: 15, hour: 16, minute: 0 },
   allDay: false,
-  repeat: "never",
-  categories: ["meeting"],
-  icon: "fas fa-handshake",
-  color: "#4a90e2",
+  repeat: 'never',
+  categories: ['meeting'],
+  icon: 'fas fa-handshake',
+  color: '#4a90e2',
   gmOnly: false
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `options.name` | `string` | Note title |
-| `options.content` | `string` | Note content (HTML) |
-| `options.startDate` | `object` | Start date `{year, month, day, hour?, minute?}` |
-| `options.endDate` | `object` | End date (optional) |
-| `options.allDay` | `boolean` | All-day event (default: `true`) |
-| `options.repeat` | `string` | `'never'`, `'daily'`, `'weekly'`, `'monthly'`, `'yearly'` |
-| `options.categories` | `string[]` | Category IDs |
-| `options.icon` | `string` | Icon path or class |
-| `options.color` | `string` | Event color (hex) |
-| `options.gmOnly` | `boolean` | GM-only visibility |
+| Parameter            | Type       | Description                                               |
+| -------------------- | ---------- | --------------------------------------------------------- |
+| `options.name`       | `string`   | Note title                                                |
+| `options.content`    | `string`   | Note content (HTML)                                       |
+| `options.startDate`  | `object`   | Start date `{year, month, day, hour?, minute?}`           |
+| `options.endDate`    | `object`   | End date (optional)                                       |
+| `options.allDay`     | `boolean`  | All-day event (default: `true`)                           |
+| `options.repeat`     | `string`   | `'never'`, `'daily'`, `'weekly'`, `'monthly'`, `'yearly'` |
+| `options.categories` | `string[]` | Category IDs                                              |
+| `options.icon`       | `string`   | Icon path or class                                        |
+| `options.color`      | `string`   | Event color (hex)                                         |
+| `options.gmOnly`     | `boolean`  | GM-only visibility                                        |
 
 **Returns:** `Promise<object|null>` - Created note page.
 
@@ -853,16 +845,16 @@ const note = await CALENDARIA.api.createNote({
 Update an existing note. GM only.
 
 ```javascript
-await CALENDARIA.api.updateNote("abc123", {
-  name: "Rescheduled Meeting",
+await CALENDARIA.api.updateNote('abc123', {
+  name: 'Rescheduled Meeting',
   startDate: { year: 1492, month: 5, day: 16, hour: 14 }
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `pageId` | `string` | Journal entry page ID |
-| `updates` | `object` | Updates to apply |
+| Parameter | Type     | Description           |
+| --------- | -------- | --------------------- |
+| `pageId`  | `string` | Journal entry page ID |
+| `updates` | `object` | Updates to apply      |
 
 **Returns:** `Promise<object|null>` - Updated note page.
 
@@ -873,12 +865,12 @@ await CALENDARIA.api.updateNote("abc123", {
 Delete a calendar note.
 
 ```javascript
-await CALENDARIA.api.deleteNote("abc123");
+await CALENDARIA.api.deleteNote('abc123');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `pageId` | `string` | Journal entry page ID |
+| Parameter | Type     | Description           |
+| --------- | -------- | --------------------- |
+| `pageId`  | `string` | Journal entry page ID |
 
 **Returns:** `Promise<boolean>` - True if deleted successfully.
 
@@ -901,12 +893,12 @@ await CALENDARIA.api.deleteAllNotes();
 Open a note in the UI.
 
 ```javascript
-await CALENDARIA.api.openNote("abc123", { mode: "edit" });
+await CALENDARIA.api.openNote('abc123', { mode: 'edit' });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `pageId` | `string` | Journal entry page ID |
+| Parameter      | Type     | Description                              |
+| -------------- | -------- | ---------------------------------------- |
+| `pageId`       | `string` | Journal entry page ID                    |
 | `options.mode` | `string` | `'view'` or `'edit'` (default: `'view'`) |
 
 **Returns:** `Promise<void>`
@@ -923,11 +915,11 @@ Get notes on a specific date.
 const notes = CALENDARIA.api.getNotesForDate(1492, 5, 15);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `year` | `number` | Display year |
-| `month` | `number` | Month (0-indexed) |
-| `day` | `number` | Day of month |
+| Parameter | Type     | Description       |
+| --------- | -------- | ----------------- |
+| `year`    | `number` | Display year      |
+| `month`   | `number` | Month (0-indexed) |
+| `day`     | `number` | Day of month      |
 
 **Returns:** `object[]` - Array of note stubs.
 
@@ -941,10 +933,10 @@ Get all notes in a month.
 const notes = CALENDARIA.api.getNotesForMonth(1492, 5);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `year` | `number` | Display year |
-| `month` | `number` | Month (0-indexed) |
+| Parameter | Type     | Description       |
+| --------- | -------- | ----------------- |
+| `year`    | `number` | Display year      |
+| `month`   | `number` | Month (0-indexed) |
 
 **Returns:** `object[]` - Array of note stubs.
 
@@ -955,16 +947,13 @@ const notes = CALENDARIA.api.getNotesForMonth(1492, 5);
 Get notes within a date range.
 
 ```javascript
-const notes = CALENDARIA.api.getNotesInRange(
-  { year: 1492, month: 5, day: 1 },
-  { year: 1492, month: 5, day: 31 }
-);
+const notes = CALENDARIA.api.getNotesInRange({ year: 1492, month: 5, day: 1 }, { year: 1492, month: 5, day: 31 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type     | Description                     |
+| ----------- | -------- | ------------------------------- |
 | `startDate` | `object` | Start date `{year, month, day}` |
-| `endDate` | `object` | End date `{year, month, day}` |
+| `endDate`   | `object` | End date `{year, month, day}`   |
 
 **Returns:** `object[]` - Array of note stubs.
 
@@ -975,17 +964,17 @@ const notes = CALENDARIA.api.getNotesInRange(
 Search notes by name or content.
 
 ```javascript
-const results = CALENDARIA.api.searchNotes("dragon", {
+const results = CALENDARIA.api.searchNotes('dragon', {
   caseSensitive: false,
-  categories: ["quest"]
+  categories: ['quest']
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `searchTerm` | `string` | Text to search for |
-| `options.caseSensitive` | `boolean` | Case-sensitive search (default: `false`) |
-| `options.categories` | `string[]` | Filter by category IDs |
+| Parameter               | Type       | Description                              |
+| ----------------------- | ---------- | ---------------------------------------- |
+| `searchTerm`            | `string`   | Text to search for                       |
+| `options.caseSensitive` | `boolean`  | Case-sensitive search (default: `false`) |
+| `options.categories`    | `string[]` | Filter by category IDs                   |
 
 **Returns:** `object[]` - Array of note stubs.
 
@@ -996,11 +985,11 @@ const results = CALENDARIA.api.searchNotes("dragon", {
 Get notes with a specific category.
 
 ```javascript
-const notes = CALENDARIA.api.getNotesByCategory("meeting");
+const notes = CALENDARIA.api.getNotesByCategory('meeting');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type     | Description |
+| ------------ | -------- | ----------- |
 | `categoryId` | `string` | Category ID |
 
 **Returns:** `object[]` - Array of note stubs.
@@ -1026,17 +1015,17 @@ const categories = CALENDARIA.api.getCategories();
 Search all content including notes and dates.
 
 ```javascript
-const results = CALENDARIA.api.search("council", {
+const results = CALENDARIA.api.search('council', {
   searchContent: true,
   limit: 10
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `term` | `string` | Search term (minimum 2 characters) |
-| `options.searchContent` | `boolean` | Search note content |
-| `options.limit` | `number` | Max results |
+| Parameter               | Type      | Description                        |
+| ----------------------- | --------- | ---------------------------------- |
+| `term`                  | `string`  | Search term (minimum 2 characters) |
+| `options.searchContent` | `boolean` | Search note content                |
+| `options.limit`         | `number`  | Max results                        |
 
 **Returns:** `object[]` - Array of results with type field.
 
@@ -1053,9 +1042,9 @@ await CALENDARIA.api.openBigCal();
 await CALENDARIA.api.openBigCal({ view: 'week' });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `options.date` | `object` | Date to display `{year, month, day}` |
+| Parameter      | Type     | Description                              |
+| -------------- | -------- | ---------------------------------------- |
+| `options.date` | `object` | Date to display `{year, month, day}`     |
 | `options.view` | `string` | View mode: `'month'`, `'week'`, `'year'` |
 
 **Returns:** `Promise<object>` - The BigCal application.
@@ -1067,12 +1056,12 @@ await CALENDARIA.api.openBigCal({ view: 'week' });
 Open the calendar editor. GM only.
 
 ```javascript
-await CALENDARIA.api.openCalendarEditor();          // New calendar
-await CALENDARIA.api.openCalendarEditor("custom");  // Edit existing
+await CALENDARIA.api.openCalendarEditor(); // New calendar
+await CALENDARIA.api.openCalendarEditor('custom'); // Edit existing
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type     | Description                        |
+| ------------ | -------- | ---------------------------------- |
 | `calendarId` | `string` | Calendar ID to edit (omit for new) |
 
 **Returns:** `Promise<object|null>` - The editor application.
@@ -1115,6 +1104,30 @@ await CALENDARIA.api.toggleMiniCal();
 
 ---
 
+## Toggle Methods
+
+These static methods provide quick access to toggle UI components.
+
+### HUD.toggle()
+
+Toggle the HUD visibility.
+
+```javascript
+CALENDARIA.HUD.toggle();
+```
+
+---
+
+### BigCal.toggle()
+
+Toggle the BigCal application.
+
+```javascript
+CALENDARIA.BigCal.toggle();
+```
+
+---
+
 ## Weather
 
 ### getCurrentWeather()
@@ -1135,13 +1148,13 @@ const weather = CALENDARIA.api.getCurrentWeather();
 Set weather by preset ID.
 
 ```javascript
-await CALENDARIA.api.setWeather("thunderstorm", { temperature: 65 });
+await CALENDARIA.api.setWeather('thunderstorm', { temperature: 65 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `presetId` | `string` | Weather preset ID (e.g., `'clear'`, `'rain'`, `'thunderstorm'`) |
-| `options.temperature` | `number` | Optional temperature value |
+| Parameter             | Type     | Description                                                     |
+| --------------------- | -------- | --------------------------------------------------------------- |
+| `presetId`            | `string` | Weather preset ID (e.g., `'clear'`, `'rain'`, `'thunderstorm'`) |
+| `options.temperature` | `number` | Optional temperature value                                      |
 
 **Returns:** `Promise<object>` - The set weather.
 
@@ -1153,21 +1166,21 @@ Set custom weather with arbitrary values.
 
 ```javascript
 await CALENDARIA.api.setCustomWeather({
-  label: "Magical Storm",
-  icon: "fas fa-bolt",
-  color: "#9b59b6",
-  description: "Arcane lightning crackles overhead",
+  label: 'Magical Storm',
+  icon: 'fas fa-bolt',
+  color: '#9b59b6',
+  description: 'Arcane lightning crackles overhead',
   temperature: 45
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `weatherData.label` | `string` | Display label |
-| `weatherData.icon` | `string` | Font Awesome icon class |
-| `weatherData.color` | `string` | Display color |
-| `weatherData.description` | `string` | Description text |
-| `weatherData.temperature` | `number` | Temperature value |
+| Parameter                 | Type     | Description             |
+| ------------------------- | -------- | ----------------------- |
+| `weatherData.label`       | `string` | Display label           |
+| `weatherData.icon`        | `string` | Font Awesome icon class |
+| `weatherData.color`       | `string` | Display color           |
+| `weatherData.description` | `string` | Description text        |
+| `weatherData.temperature` | `number` | Temperature value       |
 
 **Returns:** `Promise<object>` - The set weather.
 
@@ -1191,13 +1204,13 @@ Generate and set weather based on climate and season.
 
 ```javascript
 await CALENDARIA.api.generateWeather();
-await CALENDARIA.api.generateWeather({ climate: "tropical", season: "summer" });
+await CALENDARIA.api.generateWeather({ climate: 'tropical', season: 'summer' });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter         | Type     | Description      |
+| ----------------- | -------- | ---------------- |
 | `options.climate` | `string` | Climate override |
-| `options.season` | `string` | Season override |
+| `options.season`  | `string` | Season override  |
 
 **Returns:** `Promise<object>` - Generated weather.
 
@@ -1211,10 +1224,10 @@ Get a weather forecast for upcoming days.
 const forecast = await CALENDARIA.api.getWeatherForecast({ days: 7 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `options.days` | `number` | Number of days to forecast |
-| `options.climate` | `string` | Climate override |
+| Parameter         | Type     | Description                |
+| ----------------- | -------- | -------------------------- |
+| `options.days`    | `number` | Number of days to forecast |
+| `options.climate` | `string` | Climate override           |
 
 **Returns:** `Promise<object[]>` - Array of forecast entries.
 
@@ -1237,12 +1250,12 @@ const zone = CALENDARIA.api.getActiveZone();
 Set the active climate zone.
 
 ```javascript
-await CALENDARIA.api.setActiveZone("desert");
+await CALENDARIA.api.setActiveZone('desert');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `zoneId` | `string` | Climate zone ID |
+| Parameter | Type     | Description     |
+| --------- | -------- | --------------- |
+| `zoneId`  | `string` | Climate zone ID |
 
 **Returns:** `Promise<void>`
 
@@ -1278,21 +1291,21 @@ Add a custom weather preset.
 
 ```javascript
 await CALENDARIA.api.addWeatherPreset({
-  id: "acid-rain",
-  label: "Acid Rain",
-  icon: "fas fa-skull",
-  color: "#2ecc71",
-  description: "Corrosive precipitation"
+  id: 'acid-rain',
+  label: 'Acid Rain',
+  icon: 'fas fa-skull',
+  color: '#2ecc71',
+  description: 'Corrosive precipitation'
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `preset.id` | `string` | Unique ID |
-| `preset.label` | `string` | Display label |
-| `preset.icon` | `string` | Icon class |
-| `preset.color` | `string` | Display color |
-| `preset.description` | `string` | Description |
+| Parameter            | Type     | Description   |
+| -------------------- | -------- | ------------- |
+| `preset.id`          | `string` | Unique ID     |
+| `preset.label`       | `string` | Display label |
+| `preset.icon`        | `string` | Icon class    |
+| `preset.color`       | `string` | Display color |
+| `preset.description` | `string` | Description   |
 
 **Returns:** `Promise<object>` - The added preset.
 
@@ -1303,11 +1316,11 @@ await CALENDARIA.api.addWeatherPreset({
 Remove a custom weather preset.
 
 ```javascript
-await CALENDARIA.api.removeWeatherPreset("acid-rain");
+await CALENDARIA.api.removeWeatherPreset('acid-rain');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter  | Type     | Description         |
+| ---------- | -------- | ------------------- |
 | `presetId` | `string` | Preset ID to remove |
 
 **Returns:** `Promise<boolean>` - True if removed.
@@ -1375,8 +1388,8 @@ Check if current user has a specific permission.
 const canChange = CALENDARIA.api.hasPermission('changeDateTime');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type     | Description    |
+| ------------ | -------- | -------------- |
 | `permission` | `string` | Permission key |
 
 **Permission Keys:** `viewMiniCal`, `viewTimeKeeper`, `viewHUD`, `manageNotes`, `changeDateTime`, `changeWeather`, `changeCalendar`, `editCalendars`
@@ -1498,10 +1511,10 @@ CALENDARIA.api.registerWidget('my-module', {
 });
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `moduleId` | `string` | Your module's ID |
-| `config` | `object` | Widget configuration |
+| Parameter  | Type     | Description          |
+| ---------- | -------- | -------------------- |
+| `moduleId` | `string` | Your module's ID     |
+| `config`   | `object` | Widget configuration |
 
 See [Widgets](Widgets#widget-configuration) for config options.
 
@@ -1515,8 +1528,8 @@ Get widgets registered at a specific point.
 const widgets = CALENDARIA.api.getRegisteredWidgets('hud.buttons.right');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter     | Type     | Description     |
+| ------------- | -------- | --------------- |
 | `insertPoint` | `string` | Widget point ID |
 
 **Returns:** `array` - Registered widget configs.
@@ -1531,8 +1544,8 @@ Get widget that replaces a built-in element.
 const widget = CALENDARIA.api.getWidgetByReplacement('weather-indicator');
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter   | Type     | Description            |
+| ----------- | -------- | ---------------------- |
 | `elementId` | `string` | Replaceable element ID |
 
 **Returns:** `object|null` - Widget config or null.
@@ -1563,41 +1576,41 @@ const hooks = CALENDARIA.api.hooks;
 
 **Available Hooks:**
 
-| Hook | Description |
-|------|-------------|
-| `calendaria.init` | Module initialization |
-| `calendaria.ready` | Module ready (provides `{api, calendar, version}`) |
-| `calendaria.calendarSwitched` | Active calendar changed |
-| `calendaria.remoteCalendarSwitch` | Remote calendar switch received |
-| `calendaria.calendarAdded` | New calendar added |
-| `calendaria.calendarUpdated` | Calendar updated |
-| `calendaria.calendarRemoved` | Calendar removed |
-| `calendaria.dateTimeChange` | Date/time changed |
-| `calendaria.dayChange` | Day changed |
-| `calendaria.monthChange` | Month changed |
-| `calendaria.yearChange` | Year changed |
-| `calendaria.seasonChange` | Season changed |
-| `calendaria.remoteDateChange` | Remote date change received |
-| `calendaria.sunrise` | Sunrise occurred |
-| `calendaria.sunset` | Sunset occurred |
-| `calendaria.midnight` | Midnight occurred |
-| `calendaria.midday` | Midday occurred |
-| `calendaria.moonPhaseChange` | Moon phase changed |
-| `calendaria.restDayChange` | Rest day status changed |
-| `calendaria.clockStartStop` | Clock started/stopped |
-| `calendaria.clockUpdate` | Clock tick |
-| `calendaria.noteCreated` | Note created |
-| `calendaria.noteUpdated` | Note updated |
-| `calendaria.noteDeleted` | Note deleted |
-| `calendaria.eventTriggered` | Scheduled event triggered |
-| `calendaria.eventDayChanged` | Event day changed |
-| `calendaria.reminderReceived` | Reminder notification received |
-| `calendaria.preRenderCalendar` | Before calendar render |
-| `calendaria.renderCalendar` | After calendar render |
-| `calendaria.importStarted` | Import started |
-| `calendaria.importComplete` | Import completed |
-| `calendaria.importFailed` | Import failed |
-| `calendaria.weatherChange` | Weather changed |
+| Hook                              | Description                                        |
+| --------------------------------- | -------------------------------------------------- |
+| `calendaria.init`                 | Module initialization                              |
+| `calendaria.ready`                | Module ready (provides `{api, calendar, version}`) |
+| `calendaria.calendarSwitched`     | Active calendar changed                            |
+| `calendaria.remoteCalendarSwitch` | Remote calendar switch received                    |
+| `calendaria.calendarAdded`        | New calendar added                                 |
+| `calendaria.calendarUpdated`      | Calendar updated                                   |
+| `calendaria.calendarRemoved`      | Calendar removed                                   |
+| `calendaria.dateTimeChange`       | Date/time changed                                  |
+| `calendaria.dayChange`            | Day changed                                        |
+| `calendaria.monthChange`          | Month changed                                      |
+| `calendaria.yearChange`           | Year changed                                       |
+| `calendaria.seasonChange`         | Season changed                                     |
+| `calendaria.remoteDateChange`     | Remote date change received                        |
+| `calendaria.sunrise`              | Sunrise occurred                                   |
+| `calendaria.sunset`               | Sunset occurred                                    |
+| `calendaria.midnight`             | Midnight occurred                                  |
+| `calendaria.midday`               | Midday occurred                                    |
+| `calendaria.moonPhaseChange`      | Moon phase changed                                 |
+| `calendaria.restDayChange`        | Rest day status changed                            |
+| `calendaria.clockStartStop`       | Clock started/stopped                              |
+| `calendaria.clockUpdate`          | Clock tick                                         |
+| `calendaria.noteCreated`          | Note created                                       |
+| `calendaria.noteUpdated`          | Note updated                                       |
+| `calendaria.noteDeleted`          | Note deleted                                       |
+| `calendaria.eventTriggered`       | Scheduled event triggered                          |
+| `calendaria.eventDayChanged`      | Event day changed                                  |
+| `calendaria.reminderReceived`     | Reminder notification received                     |
+| `calendaria.preRenderCalendar`    | Before calendar render                             |
+| `calendaria.renderCalendar`       | After calendar render                              |
+| `calendaria.importStarted`        | Import started                                     |
+| `calendaria.importComplete`       | Import completed                                   |
+| `calendaria.importFailed`         | Import failed                                      |
+| `calendaria.weatherChange`        | Weather changed                                    |
 
 **Hook Example:**
 

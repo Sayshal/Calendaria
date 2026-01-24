@@ -21,11 +21,11 @@ Calendar infrastructure folders are hidden from the Journal sidebar to reduce cl
 
 ```javascript
 await CALENDARIA.api.createNote({
-  name: "Council Meeting",
+  name: 'Council Meeting',
   content: "<p>Meeting with the Lords' Alliance</p>",
   startDate: { year: 1492, month: 5, day: 15, hour: 14, minute: 0 },
   allDay: false,
-  categories: ["meeting"]
+  categories: ['meeting']
 });
 ```
 
@@ -33,72 +33,74 @@ await CALENDARIA.api.createNote({
 
 ### Core Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | String | Note title |
-| `text.content` | HTML | Rich text content (ProseMirror) |
-| `author` | String | User ID of the note creator |
+| Field          | Type   | Description                     |
+| -------------- | ------ | ------------------------------- |
+| `name`         | String | Note title                      |
+| `text.content` | HTML   | Rich text content (ProseMirror) |
+| `author`       | String | User ID of the note creator     |
 
 ### Date & Time Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `startDate` | Object | `{year, month, day, hour, minute}` |
-| `endDate` | Object | Optional end date/time |
-| `allDay` | Boolean | Ignores time fields when true |
+| Field       | Type    | Description                        |
+| ----------- | ------- | ---------------------------------- |
+| `startDate` | Object  | `{year, month, day, hour, minute}` |
+| `endDate`   | Object  | Optional end date/time             |
+| `allDay`    | Boolean | Ignores time fields when true      |
 
 ### Recurrence Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `repeat` | String | Recurrence pattern |
-| `repeatInterval` | Number | Interval for repeating (e.g., every N days/weeks) |
-| `repeatEndDate` | Object | Stop repeating after this date `{year, month, day}` |
-| `maxOccurrences` | Number | Limit total recurrences (0 = unlimited) |
-| `weekday` | Number | Target weekday for `weekOfMonth` pattern (0-indexed) |
-| `weekNumber` | Number | Week ordinal for `weekOfMonth` (1-5, or -1 to -5 for last) |
-| `moonConditions` | Array | Moon phase conditions `[{moonIndex, phaseStart, phaseEnd}]` |
-| `randomConfig` | Object | Random event config `{seed, probability, checkInterval}` |
-| `linkedEvent` | Object | Linked event config `{noteId, offset}` |
-| `rangePattern` | Object | Range pattern `{year, month, day}` with values or `[min, max]` |
-| `seasonalConfig` | Object | Seasonal config `{seasonIndex, trigger}` |
-| `computedConfig` | Object | Computed event chain `{chain, yearOverrides}` |
-| `conditions` | Array | Advanced conditions `[{field, op, value, value2?, offset?}]` |
+| Field            | Type   | Description                                                    |
+| ---------------- | ------ | -------------------------------------------------------------- |
+| `repeat`         | String | Recurrence pattern                                             |
+| `repeatInterval` | Number | Interval for repeating (e.g., every N days/weeks)              |
+| `repeatEndDate`  | Object | Stop repeating after this date `{year, month, day}`            |
+| `maxOccurrences` | Number | Limit total recurrences (0 = unlimited)                        |
+| `weekday`        | Number | Target weekday for `weekOfMonth` pattern (0-indexed)           |
+| `weekNumber`     | Number | Week ordinal for `weekOfMonth` (1-5, or -1 to -5 for last)     |
+| `moonConditions` | Array  | Moon phase conditions `[{moonIndex, phaseStart, phaseEnd}]`    |
+| `randomConfig`   | Object | Random event config `{seed, probability, checkInterval}`       |
+| `linkedEvent`    | Object | Linked event config `{noteId, offset}`                         |
+| `rangePattern`   | Object | Range pattern `{year, month, day}` with values or `[min, max]` |
+| `seasonalConfig` | Object | Seasonal config `{seasonIndex, trigger}`                       |
+| `computedConfig` | Object | Computed event chain `{chain, yearOverrides}`                  |
+| `conditions`     | Array  | Advanced conditions `[{field, op, value, value2?, offset?}]`   |
 
 ### Display Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `categories` | String[] | Category IDs |
-| `color` | Hex | Display color (default: `#4a9eff`) |
-| `icon` | String | FontAwesome class or image path |
-| `iconType` | String | `fontawesome` or `image` |
+| Field        | Type     | Description                        |
+| ------------ | -------- | ---------------------------------- |
+| `categories` | String[] | Category IDs                       |
+| `color`      | Hex      | Display color (default: `#4a9eff`) |
+| `icon`       | String   | FontAwesome class or image path    |
+| `iconType`   | String   | `fontawesome` or `image`           |
 
 ### Visibility Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `gmOnly` | Boolean | Visible only to GMs |
+| Field    | Type    | Description                            |
+| -------- | ------- | -------------------------------------- |
+| `gmOnly` | Boolean | Visible only to GMs                    |
 | `silent` | Boolean | Suppresses reminders and announcements |
 
 ### Reminder Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `reminderType` | String | `none`, `toast`, `chat`, or `dialog` |
-| `reminderOffset` | Number | Minutes before event to trigger reminder |
-| `reminderTargets` | String | Who receives reminders: `all`, `gm`, `author`, `specific` |
-| `reminderUsers` | String[] | User IDs when `reminderTargets` is `specific` |
+| Field             | Type     | Description                                               |
+| ----------------- | -------- | --------------------------------------------------------- |
+| `reminderType`    | String   | `none`, `toast`, `chat`, or `dialog`                      |
+| `reminderOffset`  | Number   | Minutes before event to trigger reminder                  |
+| `reminderTargets` | String   | Who receives reminders: `all`, `gm`, `author`, `specific` |
+| `reminderUsers`   | String[] | User IDs when `reminderTargets` is `specific`             |
 
 ### Trigger Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `macro` | String | Macro ID to execute on trigger |
-| `sceneId` | String | Scene ID to activate when event triggers |
-| `playlistId` | String | Playlist ID to play when event triggers |
+| Field        | Type   | Description                              |
+| ------------ | ------ | ---------------------------------------- |
+| `macro`      | String | Macro ID to execute on trigger           |
+| `sceneId`    | String | Scene ID to activate when event triggers |
+| `playlistId` | String | Playlist ID to play when event triggers  |
 
 ## Editing and Deleting
+
+When multiple notes exist on the same day, they are displayed in alphabetical order by title.
 
 ### Edit a Note
 
@@ -117,20 +119,20 @@ await CALENDARIA.api.createNote({
 
 Set the **Repeat** dropdown to enable recurrence. Available patterns:
 
-| Pattern | Description |
-|---------|-------------|
-| `never` | One-time event (default) |
-| `daily` | Every N days |
-| `weekly` | Same weekday every N weeks |
-| `monthly` | Same day of month every N months |
-| `yearly` | Same month/day every N years |
-| `weekOfMonth` | Ordinal weekday (e.g., "2nd Tuesday") |
-| `seasonal` | Based on season boundaries |
-| `moon` | Based on moon phase conditions |
-| `random` | Probability-based with seeded randomness |
-| `range` | Pattern matching on year/month/day values |
-| `linked` | Relative to another note's occurrences |
-| `computed` | Complex moveable feast calculations |
+| Pattern       | Description                               |
+| ------------- | ----------------------------------------- |
+| `never`       | One-time event (default)                  |
+| `daily`       | Every N days                              |
+| `weekly`      | Same weekday every N weeks                |
+| `monthly`     | Same day of month every N months          |
+| `yearly`      | Same month/day every N years              |
+| `weekOfMonth` | Ordinal weekday (e.g., "2nd Tuesday")     |
+| `seasonal`    | Based on season boundaries                |
+| `moon`        | Based on moon phase conditions            |
+| `random`      | Probability-based with seeded randomness  |
+| `range`       | Pattern matching on year/month/day values |
+| `linked`      | Relative to another note's occurrences    |
+| `computed`    | Complex moveable feast calculations       |
 
 ### Repeat Options
 
@@ -138,7 +140,8 @@ Set the **Repeat** dropdown to enable recurrence. Available patterns:
 - **Max Occurrences**: Limits total recurrences (0 = unlimited)
 - **Repeat End Date**: Stop repeating after this date
 
-**Note:** For monthless calendars (e.g., Traveller), the `monthly` and `weekOfMonth` patterns are hidden since they don't apply.
+> [!NOTE]
+> For monthless calendars (e.g., Traveller), the `monthly` and `weekOfMonth` patterns are hidden since they don't apply.
 
 ### Week of Month
 
@@ -217,16 +220,16 @@ Additional filters applied on top of recurrence patterns. All conditions must pa
 
 Available condition fields:
 
-| Category | Fields |
-|----------|--------|
-| Date | year, month, day, dayOfYear, daysBeforeMonthEnd |
-| Weekday | weekday, weekNumberInMonth, inverseWeekNumber |
-| Week | weekInMonth, weekInYear, totalWeek, weeksBeforeMonthEnd, weeksBeforeYearEnd |
-| Season | season, seasonPercent, seasonDay, isLongestDay, isShortestDay, isSpringEquinox, isAutumnEquinox |
-| Moon | moonPhase, moonPhaseIndex, moonPhaseCountMonth, moonPhaseCountYear |
-| Cycle | cycle (if calendar has cycles) |
-| Era | era, eraYear (if calendar has eras) |
-| Other | intercalary (for intercalary days) |
+| Category | Fields                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| Date     | year, month, day, dayOfYear, daysBeforeMonthEnd                                                 |
+| Weekday  | weekday, weekNumberInMonth, inverseWeekNumber                                                   |
+| Week     | weekInMonth, weekInYear, totalWeek, weeksBeforeMonthEnd, weeksBeforeYearEnd                     |
+| Season   | season, seasonPercent, seasonDay, isLongestDay, isShortestDay, isSpringEquinox, isAutumnEquinox |
+| Moon     | moonPhase, moonPhaseIndex, moonPhaseCountMonth, moonPhaseCountYear                              |
+| Cycle    | cycle (if calendar has cycles)                                                                  |
+| Era      | era, eraYear (if calendar has eras)                                                             |
+| Other    | intercalary (for intercalary days)                                                              |
 
 Operators: `==`, `!=`, `>=`, `<=`, `>`, `<`, `%` (modulo)
 
@@ -236,18 +239,18 @@ The `%` (modulo) operator supports an optional offset for patterns like "every 3
 
 Predefined categories:
 
-| ID | Label |
-|----|-------|
-| `holiday` | Holiday |
+| ID         | Label    |
+| ---------- | -------- |
+| `holiday`  | Holiday  |
 | `festival` | Festival |
-| `quest` | Quest |
-| `session` | Session |
-| `combat` | Combat |
-| `meeting` | Meeting |
+| `quest`    | Quest    |
+| `session`  | Session  |
+| `combat`   | Combat   |
+| `meeting`  | Meeting  |
 | `birthday` | Birthday |
 | `deadline` | Deadline |
 | `reminder` | Reminder |
-| `other` | Other |
+| `other`    | Other    |
 
 ### Custom Categories
 
@@ -277,20 +280,20 @@ Notes can trigger reminders before the event starts.
 
 ### Reminder Types
 
-| Type | Description |
-|------|-------------|
-| `none` | No reminder |
-| `toast` | UI notification popup |
-| `chat` | Message in chat log |
-| `dialog` | Modal dialog box |
+| Type     | Description           |
+| -------- | --------------------- |
+| `none`   | No reminder           |
+| `toast`  | UI notification popup |
+| `chat`   | Message in chat log   |
+| `dialog` | Modal dialog box      |
 
 ### Reminder Targets
 
-| Target | Description |
-|--------|-------------|
-| `all` | All connected users |
-| `gm` | Game Master only |
-| `author` | Note creator only |
+| Target     | Description                |
+| ---------- | -------------------------- |
+| `all`      | All connected users        |
+| `gm`       | Game Master only           |
+| `author`   | Note creator only          |
 | `specific` | Selected users from a list |
 
 ### Reminder Offset

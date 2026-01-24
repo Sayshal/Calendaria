@@ -15,9 +15,9 @@ A versatile stopwatch application for tracking elapsed time in real-time or game
 
 The Stopwatch supports two timing modes:
 
-| Mode | Description |
-|------|-------------|
-| **Real Time** | Tracks actual elapsed time regardless of game state |
+| Mode          | Description                                             |
+| ------------- | ------------------------------------------------------- |
+| **Real Time** | Tracks actual elapsed time regardless of game state     |
 | **Game Time** | Tracks elapsed in-game time based on world time changes |
 
 Click the mode indicator to switch between modes.
@@ -39,21 +39,15 @@ Click the mode indicator to switch between modes.
 
 ## Controls
 
-| Button | Action |
-|--------|--------|
-| **Start/Pause** | Toggle the stopwatch running state |
-| **Reset** | Clear elapsed time and lap history |
-| **Lap** | Record current elapsed time as a lap |
+| Button          | Action                               |
+| --------------- | ------------------------------------ |
+| **Start/Pause** | Toggle the stopwatch running state   |
+| **Reset**       | Clear elapsed time and lap history   |
+| **Lap**         | Record current elapsed time as a lap |
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| Alt+W | Toggle Stopwatch visibility |
-| (Configurable) | Start/Pause Stopwatch |
-| (Configurable) | Reset Stopwatch |
-
-Configure keybindings in **Settings > Configure Controls > Calendaria**.
+All stopwatch keybinds are unbound by default. See [Keybinds](Keybinds) for configuration instructions.
 
 ---
 
@@ -73,19 +67,21 @@ Use laps to track intervals, phases, or checkpoints during timed activities.
 
 ## Display Format
 
-The elapsed time display format is configurable per mode in **Settings Panel > Formats tab**:
+The elapsed time display format is configurable per mode in **Settings Panel > Stopwatch tab**:
 
 - **Elapsed Time (Real Time)** — Format for real-time mode
 - **Elapsed Time (Game Time)** — Format for game-time mode
 
+The Display Formats section shows a live preview of how the format will render.
+
 ### Format Tokens
 
-| Token | Description | Example |
-|-------|-------------|---------|
-| `HH` | Hours (2-digit) | 01 |
-| `mm` | Minutes (2-digit) | 05 |
-| `ss` | Seconds (2-digit) | 30 |
-| `SSS` | Milliseconds (3-digit) | 250 |
+| Token | Description            | Example |
+| ----- | ---------------------- | ------- |
+| `HH`  | Hours (2-digit)        | 01      |
+| `mm`  | Minutes (2-digit)      | 05      |
+| `ss`  | Seconds (2-digit)      | 30      |
+| `SSS` | Milliseconds (3-digit) | 250     |
 
 **Example Formats:**
 
@@ -97,9 +93,21 @@ The elapsed time display format is configurable per mode in **Settings Panel > F
 
 ## Auto-Start Game Time
 
-When enabled, the game-time stopwatch automatically starts when world time begins advancing. Configure in **Settings Panel > TimeKeeper tab > Auto-start Game Time**.
+When enabled, the game-time stopwatch automatically starts when world time begins advancing. Configure in **Settings Panel > Stopwatch tab > Auto-start Game Time**.
 
 This is useful for automatically tracking in-game duration when the real-time clock starts.
+
+---
+
+## Context Menu
+
+Right-click on the Stopwatch face to access the context menu:
+
+| Option                   | Description                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| **Lock/Unlock Position** | Toggle position locking (also available in Settings > Stopwatch tab > Sticky States section) |
+| **Reset Position**       | Restore to default position (150, 150) and clear any sticky zone snapping                    |
+| **Close**                | Close the Stopwatch window                                                                   |
 
 ---
 
@@ -135,4 +143,4 @@ State persists across page reloads within the same session.
 
 ## Settings
 
-See [Settings > TimeKeeper](Settings#timekeeper) for stopwatch-related settings and [Settings > Formats](Settings#formats-gm-only) for display format configuration.
+See [Settings > Stopwatch](Settings#stopwatch) for stopwatch-related settings and display format configuration.

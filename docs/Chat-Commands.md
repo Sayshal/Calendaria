@@ -6,19 +6,19 @@ Calendaria provides 11 slash commands for interacting with the calendar directly
 
 ## Available Commands
 
-| Command | Description | Permission |
-|---------|-------------|------------|
-| `/date` | Display current date | Everyone |
-| `/time` | Display current time | Everyone |
-| `/today` | Display full date and time | Everyone |
-| `/sunrise` | Display today's sunrise time | Everyone |
-| `/sunset` | Display today's sunset time | Everyone |
-| `/moon` | Display current moon phase(s) | Everyone |
-| `/season` | Display current season | Everyone |
-| `/weather` | Display current weather | Everyone |
-| `/note` | Create a quick note | Note permissions |
-| `/advance` | Advance time | GM only |
-| `/calendar` | Open the calendar | Everyone |
+| Command     | Description                   | Permission       |
+| ----------- | ----------------------------- | ---------------- |
+| `/date`     | Display current date          | Everyone         |
+| `/time`     | Display current time          | Everyone         |
+| `/today`    | Display full date and time    | Everyone         |
+| `/sunrise`  | Display today's sunrise time  | Everyone         |
+| `/sunset`   | Display today's sunset time   | Everyone         |
+| `/moon`     | Display current moon phase(s) | Everyone         |
+| `/season`   | Display current season        | Everyone         |
+| `/weather`  | Display current weather       | Everyone         |
+| `/note`     | Create a quick note           | Note permissions |
+| `/advance`  | Advance time                  | GM only          |
+| `/calendar` | Open the calendar             | Everyone         |
 
 ---
 
@@ -30,12 +30,12 @@ Display the current in-game date.
 
 ```text
 /date
-/date {EEEE}, {MMMM} {Do}
+/date EEEE, MMMM Do
 ```
 
 **Arguments:**
 
-- Optional format string using [format tokens](Settings#format-tokens)
+- Optional format string using [format tokens](Format-Tokens)
 
 **Output:** Formatted date posted to chat.
 
@@ -47,12 +47,12 @@ Display the current in-game time.
 
 ```text
 /time
-/time {HH}:{mm}:{ss}
+/time HH:mm:ss
 ```
 
 **Arguments:**
 
-- Optional format string using [format tokens](Settings#format-tokens)
+- Optional format string using [format tokens](Format-Tokens)
 
 **Output:** Formatted time posted to chat.
 
@@ -76,12 +76,12 @@ Display today's sunrise time.
 
 ```text
 /sunrise
-/sunrise {h}:{mm} {A}
+/sunrise h:mm A
 ```
 
 **Arguments:**
 
-- Optional format string using [format tokens](Settings#format-tokens)
+- Optional format string using [format tokens](Format-Tokens)
 
 **Output:** Formatted sunrise time for the current day.
 
@@ -93,12 +93,12 @@ Display today's sunset time.
 
 ```text
 /sunset
-/sunset {h}:{mm} {A}
+/sunset h:mm A
 ```
 
 **Arguments:**
 
-- Optional format string using [format tokens](Settings#format-tokens)
+- Optional format string using [format tokens](Format-Tokens)
 
 **Output:** Formatted sunset time for the current day.
 
@@ -175,16 +175,16 @@ Advance the world time by a specified amount. GM only.
 
 **Supported Units:**
 
-| Unit | Aliases |
-|------|---------|
+| Unit   | Aliases               |
+| ------ | --------------------- |
 | second | seconds, sec, secs, s |
 | minute | minutes, min, mins, m |
-| hour | hours, hr, hrs, h |
-| day | days, d |
-| week | weeks, w |
-| month | months |
-| year | years, y |
-| round | rounds, r |
+| hour   | hours, hr, hrs, h     |
+| day    | days, d               |
+| week   | weeks, w              |
+| month  | months                |
+| year   | years, y              |
+| round  | rounds, r             |
 
 **Examples:**
 

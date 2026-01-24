@@ -6,50 +6,50 @@ Calendaria includes a procedural weather generation system with climate zones, s
 
 ### Standard (10 presets)
 
-| ID | Condition | Temp Range (C) |
-|----|-----------|----------------|
-| `clear` | Clear | 18-32 |
-| `partly-cloudy` | Partly Cloudy | 15-28 |
-| `cloudy` | Cloudy | 12-24 |
-| `overcast` | Overcast | 10-20 |
-| `drizzle` | Drizzle | 8-18 |
-| `rain` | Rain | 10-22 |
-| `fog` | Fog | 5-15 |
-| `mist` | Mist | 8-18 |
-| `windy` | Windy | 10-25 |
-| `sunshower` | Sunshower | 15-26 |
+| ID              | Condition     | Temp Range (C) |
+| --------------- | ------------- | -------------- |
+| `clear`         | Clear         | 18-32          |
+| `partly-cloudy` | Partly Cloudy | 15-28          |
+| `cloudy`        | Cloudy        | 12-24          |
+| `overcast`      | Overcast      | 10-20          |
+| `drizzle`       | Drizzle       | 8-18           |
+| `rain`          | Rain          | 10-22          |
+| `fog`           | Fog           | 5-15           |
+| `mist`          | Mist          | 8-18           |
+| `windy`         | Windy         | 10-25          |
+| `sunshower`     | Sunshower     | 15-26          |
 
 ### Severe (6 presets)
 
-| ID | Condition | Temp Range (C) |
-|----|-----------|----------------|
-| `thunderstorm` | Thunderstorm | 15-28 |
-| `blizzard` | Blizzard | -20 to -5 |
-| `snow` | Snow | -10 to 2 |
-| `hail` | Hail | 5-18 |
-| `tornado` | Tornado | 18-35 |
-| `hurricane` | Hurricane | 22-35 |
+| ID             | Condition    | Temp Range (C) |
+| -------------- | ------------ | -------------- |
+| `thunderstorm` | Thunderstorm | 15-28          |
+| `blizzard`     | Blizzard     | -20 to -5      |
+| `snow`         | Snow         | -10 to 2       |
+| `hail`         | Hail         | 5-18           |
+| `tornado`      | Tornado      | 18-35          |
+| `hurricane`    | Hurricane    | 22-35          |
 
 ### Environmental (3 presets)
 
-| ID | Condition | Temp Range (C) |
-|----|-----------|----------------|
-| `ashfall` | Ashfall | 15-40 |
-| `sandstorm` | Sandstorm | 25-45 |
-| `luminous-sky` | Luminous Sky | -5 to 10 |
+| ID             | Condition    | Temp Range (C) |
+| -------------- | ------------ | -------------- |
+| `ashfall`      | Ashfall      | 15-40          |
+| `sandstorm`    | Sandstorm    | 25-45          |
+| `luminous-sky` | Luminous Sky | -5 to 10       |
 
 ### Fantasy (8 presets)
 
-| ID | Condition | Temp Range (C) |
-|----|-----------|----------------|
-| `black-sun` | Black Sun | 5-20 |
-| `ley-surge` | Ley Surge | 10-25 |
-| `aether-haze` | Aether Haze | 12-22 |
-| `nullfront` | Nullfront | 0-15 |
-| `permafrost-surge` | Permafrost Surge | -30 to -10 |
-| `gravewind` | Gravewind | 5-18 |
-| `veilfall` | Veilfall | 8-20 |
-| `arcane` | Arcane | 15-28 |
+| ID                 | Condition        | Temp Range (C) |
+| ------------------ | ---------------- | -------------- |
+| `black-sun`        | Black Sun        | 5-20           |
+| `ley-surge`        | Ley Surge        | 10-25          |
+| `aether-haze`      | Aether Haze      | 12-22          |
+| `nullfront`        | Nullfront        | 0-15           |
+| `permafrost-surge` | Permafrost Surge | -30 to -10     |
+| `gravewind`        | Gravewind        | 5-18           |
+| `veilfall`         | Veilfall         | 8-20           |
+| `arcane`           | Arcane           | 15-28          |
 
 ---
 
@@ -59,15 +59,15 @@ Seven built-in climate zone templates define temperature ranges and weather prob
 
 ### Available Templates
 
-| ID | Zone | Temperature Range (C) |
-|----|------|----------------------|
-| `arctic` | Arctic | -45 to 8 |
-| `subarctic` | Subarctic | -35 to 18 |
-| `temperate` | Temperate | -5 to 30 |
-| `subtropical` | Subtropical | 5 to 35 |
-| `tropical` | Tropical | 22 to 35 |
-| `arid` | Arid | 5 to 48 |
-| `polar` | Polar | -50 to 10 |
+| ID            | Zone        | Temperature Range (C) |
+| ------------- | ----------- | --------------------- |
+| `arctic`      | Arctic      | -45 to 8              |
+| `subarctic`   | Subarctic   | -35 to 18             |
+| `temperate`   | Temperate   | -5 to 30              |
+| `subtropical` | Subtropical | 5 to 35               |
+| `tropical`    | Tropical    | 22 to 35              |
+| `arid`        | Arid        | 5 to 48               |
+| `polar`       | Polar       | -50 to 10             |
 
 ### Zone Configuration
 
@@ -144,11 +144,11 @@ Hue and saturation adjustments create atmospheric effects:
 
 Control how strongly weather affects scene brightness at three levels:
 
-| Level | Description |
-|-------|-------------|
-| Per-Scene | Override in Scene Configuration > Ambiance |
-| Per-Climate-Zone | Set in Calendar Editor > Weather tab |
-| Global Default | Set in Settings > Weather tab (default 1.0) |
+| Level            | Description                                 |
+| ---------------- | ------------------------------------------- |
+| Per-Scene        | Override in Scene Configuration > Ambiance  |
+| Per-Climate-Zone | Set in Calendar Editor > Weather tab        |
+| Global Default   | Set in Settings > Weather tab (default 1.0) |
 
 ### Value Priority
 
@@ -166,50 +166,50 @@ When switching to a weather preset that does not define custom colors (hue/satur
 
 Each weather preset defines a `darknessPenalty` that increases scene darkness:
 
-| Category | Preset | Darkness Penalty |
-|----------|--------|------------------|
-| Standard | Clear, Windy | 0 |
-| Standard | Partly Cloudy, Sunshower | 0.05 |
-| Standard | Cloudy, Drizzle, Mist | 0.1 |
-| Standard | Rain, Overcast | 0.15 |
-| Standard | Fog | 0.2 |
-| Severe | Snow | 0.1 |
-| Severe | Hail | 0.2 |
-| Severe | Thunderstorm | 0.25 |
-| Severe | Blizzard, Tornado | 0.3 |
-| Severe | Hurricane | 0.35 |
-| Environmental | Sandstorm | 0.2 |
-| Environmental | Ashfall | 0.25 |
-| Environmental | Luminous Sky | -0.1 (brightens) |
-| Fantasy | Arcane | -0.05 (brightens) |
-| Fantasy | Ley Surge | -0.1 (brightens) |
-| Fantasy | Permafrost Surge, Veilfall | 0.1 |
-| Fantasy | Gravewind, Aether Haze | 0.15 |
-| Fantasy | Nullfront | 0.2 |
-| Fantasy | Black Sun | 0.4 |
+| Category      | Preset                     | Darkness Penalty  |
+| ------------- | -------------------------- | ----------------- |
+| Standard      | Clear, Windy               | 0                 |
+| Standard      | Partly Cloudy, Sunshower   | 0.05              |
+| Standard      | Cloudy, Drizzle, Mist      | 0.1               |
+| Standard      | Rain, Overcast             | 0.15              |
+| Standard      | Fog                        | 0.2               |
+| Severe        | Snow                       | 0.1               |
+| Severe        | Hail                       | 0.2               |
+| Severe        | Thunderstorm               | 0.25              |
+| Severe        | Blizzard, Tornado          | 0.3               |
+| Severe        | Hurricane                  | 0.35              |
+| Environmental | Sandstorm                  | 0.2               |
+| Environmental | Ashfall                    | 0.25              |
+| Environmental | Luminous Sky               | -0.1 (brightens)  |
+| Fantasy       | Arcane                     | -0.05 (brightens) |
+| Fantasy       | Ley Surge                  | -0.1 (brightens)  |
+| Fantasy       | Permafrost Surge, Veilfall | 0.1               |
+| Fantasy       | Gravewind, Aether Haze     | 0.15              |
+| Fantasy       | Nullfront                  | 0.2               |
+| Fantasy       | Black Sun                  | 0.4               |
 
 ### Built-in Preset Defaults
 
-| Category | Preset | Lighting Effect |
-|----------|--------|-----------------|
-| Standard | Overcast | Desaturated |
-| Severe | Blizzard | Blue-tinted, dark |
-| Environmental | Sandstorm | Warm orange |
-| Fantasy | Various | Magical coloring |
+| Category      | Preset    | Lighting Effect   |
+| ------------- | --------- | ----------------- |
+| Standard      | Overcast  | Desaturated       |
+| Severe        | Blizzard  | Blue-tinted, dark |
+| Environmental | Sandstorm | Warm orange       |
+| Fantasy       | Various   | Magical coloring  |
 
 ### Climate Zone Templates
 
 Built-in climate zones include environment lighting defaults (`environmentBase` and `environmentDark`):
 
-| Zone | Hue | Saturation | Notes |
-|------|-----|------------|-------|
-| Arctic | 200 | 0.6 | Blue-tinted, dark variant at 210/0.5 |
-| Subarctic | 200 | 0.7 | Blue-tinted |
-| Temperate | - | - | Neutral (no override) |
-| Subtropical | - | - | Neutral (no override) |
-| Tropical | 40 | 0.9 | Warm/golden |
-| Arid | 35 | 0.8 | Warm/orange tinted |
-| Polar | 210 | 0.5 | Blue-tinted, dark variant at 220/0.4 |
+| Zone        | Hue | Saturation | Notes                                |
+| ----------- | --- | ---------- | ------------------------------------ |
+| Arctic      | 200 | 0.6        | Blue-tinted, dark variant at 210/0.5 |
+| Subarctic   | 200 | 0.7        | Blue-tinted                          |
+| Temperate   | -   | -          | Neutral (no override)                |
+| Subtropical | -   | -          | Neutral (no override)                |
+| Tropical    | 40  | 0.9        | Warm/golden                          |
+| Arid        | 35  | 0.8        | Warm/orange tinted                   |
+| Polar       | 210 | 0.5        | Blue-tinted, dark variant at 220/0.4 |
 
 ---
 

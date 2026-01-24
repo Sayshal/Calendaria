@@ -1,43 +1,60 @@
 # Calendaria
 
-A system-agnostic calendar and time tracking module for Foundry VTT.
+A powerful calendar and time tracking module for Foundry VTT.
+
+Track in-game time with animated sky domes, schedule events with complex recurrence patterns, sync scene lighting to sunrise/sunset, and support multiple moons, eras, and custom calendars.
 
 ---
 
-## Getting Started
+## New to Calendaria?
 
-- [Getting Started](Getting-Started) — Installation, setup, choosing a calendar
-- [Calendar Editor](Calendar-Editor) — Create and customize calendars
-- [Importing Calendars](Importing-Calendars) — Migrate from Simple Calendar, Fantasy-Calendar.com, and more
+Start here: **[Getting Started](Getting-Started)** — Installation, setup, and first steps.
 
-## Applications
+Migrating from another module? **[Importing Calendars](Importing-Calendars)** — Import from Simple Calendar, Fantasy-Calendar.com, and more.
 
-- [BigCal](BigCal) — Full application with month, week, and year views
-- [HUD](HUD) — Floating HUD with animated sky dome
-- [MiniCal](MiniCal) — Compact grid view with quick navigation
-- [TimeKeeper](TimeKeeper) — Minimal time display and controls
+---
 
-## Features
+## Highlights
 
-- [Chat Timestamps](Chat-Timestamps) — Display in-game time on chat messages
-- [Eras and Cycles](Eras-and-Cycles) — Historical periods and repeating cycles
-- [Moon Phases](Moon-Phases) — Track lunar cycles
-- [Notes and Events](Notes-and-Events) — Schedule events with recurrence
-- [Reminders](Reminders) — Get notified before events
-- [Scene Darkness](Scene-Darkness) — Day/night lighting sync
-- [Weather System](Weather-System) — Climate zones and weather generation
+### Animated Time Display
 
-## Customization
+Watch the sun and moon arc across a realistic sky dome, or choose from compact displays for minimal screen space. The [HUD](HUD) provides at-a-glance time, weather, and event information.
 
-- [Settings](Settings) — All configuration options
-- [Theming](Theming) — Customize UI colors with presets or custom themes
+### Flexible Calendars
+
+Use bundled calendars (Gregorian, Harptos, Exandria, Golarian, and more) or create your own with the [Calendar Editor](Calendar-Editor). Support for custom months, weekdays, leap years, intercalary days, and year zero handling.
+
+### Smart Events
+
+Schedule [notes and events](Notes-and-Events) with powerful recurrence patterns—daily, weekly, monthly, yearly, or advanced options like moon phases, seasons, linked events, and computed dates (Easter, lunar new year, etc.).
+
+### Multi-Moon Support
+
+Track multiple [moons](Moon-Phases) with independent cycle lengths, phases, and colors. Trigger events on specific lunar phases.
+
+### Weather & Darkness
+
+[Generate weather](Weather-System) based on climate zones and seasons. [Sync scene darkness](Scene-Darkness) to time of day with smooth transitions at sunrise and sunset.
+
+### Eras & Cycles
+
+Define historical [eras](Eras-and-Cycles) with custom year formatting (1492 DR, Year 5 of the Third Age) and repeating cycles (zodiac signs, elemental weeks).
+
+---
 
 ## For Developers
 
-- [API Reference](API-Reference) — CALENDARIA.api documentation
-- [Hooks](Hooks) — Integration points for modules
-- [Macros](Macros) — Automation examples
+Calendaria provides a full API for module integration:
 
-## Reference
+- **[API Reference](API-Reference)** — Full documentation of `CALENDARIA.api` methods
+- **[Hooks](Hooks)** — 35+ hooks for time, calendar, note, and weather events
+- **[Widgets](Widgets)** — Inject custom UI into Calendaria applications
+- **[Macros](Macros)** — Automation examples and recipes
 
-- [Troubleshooting](Troubleshooting) — Common issues and fixes
+---
+
+## Support
+
+- **Issues & Features** — [GitHub Issues](https://github.com/Sayshal/calendaria/issues)
+- **Community** — [Discord](https://discord.gg/foundryvtt)
+- **Support Development** — [Ko-fi](https://ko-fi.com/sayshal)

@@ -6,14 +6,14 @@ Eras define historical periods with custom year formatting. Configure eras in th
 
 ### Era Fields
 
-| Field | Description |
-|-------|-------------|
-| Name | Full era name (e.g., "Dale Reckoning") |
-| Abbreviation | Short form (e.g., "DR") |
-| Start Year | First year of this era |
-| End Year | Last year (leave empty if ongoing) |
-| Format | Position of abbreviation: `prefix` or `suffix` |
-| Template | Custom format template (overrides Format if set) |
+| Field        | Description                                      |
+| ------------ | ------------------------------------------------ |
+| Name         | Full era name (e.g., "Dale Reckoning")           |
+| Abbreviation | Short form (e.g., "DR")                          |
+| Start Year   | First year of this era                           |
+| End Year     | Last year (leave empty if ongoing)               |
+| Format       | Position of abbreviation: `prefix` or `suffix`   |
+| Template     | Custom format template (overrides Format if set) |
 
 ### Era Resolution
 
@@ -23,12 +23,12 @@ When displaying a year, Calendaria finds the matching era by checking which era 
 
 Custom templates use these placeholders:
 
-| Token | Description |
-|-------|-------------|
-| `YYYY` | Absolute display year (e.g., 1492) |
-| `YY` | 2-digit year (e.g., 92) |
-| `yy` | Year within current era |
-| `G` | Era abbreviation (e.g., DR) |
+| Token  | Description                          |
+| ------ | ------------------------------------ |
+| `YYYY` | Absolute display year (e.g., 1492)   |
+| `YY`   | 2-digit year (e.g., 92)              |
+| `yy`   | Year within current era              |
+| `G`    | Era abbreviation (e.g., DR)          |
 | `GGGG` | Full era name (e.g., Dale Reckoning) |
 
 Examples:
@@ -50,24 +50,24 @@ Cycles are repeating sequences (zodiac signs, elemental weeks, etc.). Configure 
 
 ### Cycle Fields
 
-| Field | Description |
-|-------|-------------|
-| Name | Cycle name (e.g., "Zodiac") |
-| Length | How many units before advancing to next entry |
-| Offset | Starting offset for calculation |
-| Based On | Time unit driving the cycle |
-| Entries | List of cycle entries with names |
+| Field    | Description                                   |
+| -------- | --------------------------------------------- |
+| Name     | Cycle name (e.g., "Zodiac")                   |
+| Length   | How many units before advancing to next entry |
+| Offset   | Starting offset for calculation               |
+| Based On | Time unit driving the cycle                   |
+| Entries  | List of cycle entries with names              |
 
 ### Based On Options
 
-| Value | Description |
-|-------|-------------|
-| `year` | Calendar year |
-| `eraYear` | Year within current era |
-| `month` | Month index |
-| `monthDay` | Day of month |
-| `day` | Absolute day count from epoch |
-| `yearDay` | Day of year |
+| Value      | Description                   |
+| ---------- | ----------------------------- |
+| `year`     | Calendar year                 |
+| `eraYear`  | Year within current era       |
+| `month`    | Month index                   |
+| `monthDay` | Day of month                  |
+| `day`      | Absolute day count from epoch |
+| `yearDay`  | Day of year                   |
 
 ### Display Format
 
@@ -78,21 +78,8 @@ The cycle format field controls how cycles appear in the UI. Use numbered placeh
 
 Example: `[1] - Week of [2]` produces "Gemini - Week of Fire"
 
----
-
-## Using Eras and Cycles in Format Strings
-
-To display era and cycle information in date format strings, use the format tokens documented in [Settings > Formats](Settings#format-tokens).
-
-Key tokens:
-
-| Token | Description | Example |
-|-------|-------------|---------|
-| `GGGG` | Full era name | Dale Reckoning |
-| `G` | Era abbreviation | DR |
-| `[yearInEra]` | Year within era | 5 |
-| `[cycleName]` | Current cycle entry | Gemini |
-| `[cycle]` | Current cycle number | 3 |
+> [!TIP]
+> To display era and cycle information in date format strings, use the format tokens documented in [Format Tokens](Format-Tokens).
 
 ---
 
