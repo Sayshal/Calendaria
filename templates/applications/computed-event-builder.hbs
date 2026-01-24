@@ -8,8 +8,8 @@
       <div class="chain-step" data-index="{{index}}">
         <header class="step-header">
           <span class="step-label">{{localize "CALENDARIA.Note.ComputedStep" num=(math index "+" 1)}}</span>
-          <button type="button" class="remove-step" data-action="removeStep" data-index="{{index}}"
-            title="{{localize 'CALENDARIA.Note.ComputedRemoveStep'}}">
+          <button type="button" class="remove-step" data-action="removeStep" data-index="{{index}}" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Note.ComputedRemoveStep'}}">
             <i class="fas fa-times"></i>
           </button>
         </header>

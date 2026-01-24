@@ -2,8 +2,8 @@
 
   <fieldset class="theme-colors-fieldset" data-section="theme">
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Theme"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="theme"
-        title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      <button type="button" class="reset-section" data-action="resetSection" data-section="theme" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>
 
     <div class="form-group theme-selector">
@@ -14,10 +14,12 @@
             <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
-        <button type="button" data-action="importTheme" data-tooltip="{{localize 'CALENDARIA.Importer.Import'}}">
+        <button type="button" data-action="importTheme" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Importer.Import'}}">
           <i class="fas fa-upload"></i>
         </button>
-        <button type="button" data-action="exportTheme" data-tooltip="{{localize 'CALENDARIA.ThemeEditor.Export'}}">
+        <button type="button" data-action="exportTheme" data-tooltip
+          aria-label="{{localize 'CALENDARIA.ThemeEditor.Export'}}">
           <i class="fas fa-download"></i>
         </button>
       </div>
@@ -30,16 +32,16 @@
             <div class="color-category-section">
               <h3 class="category-label">{{localize this.label}}</h3>
               <div class="color-table-header">
-                <span class="col-location"
-                  data-tooltip="{{localize 'CALENDARIA.ThemeEditor.Header.LocationHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Location"}}</span>
-                <span class="col-usage"
-                  data-tooltip="{{localize 'CALENDARIA.ThemeEditor.Header.UsageHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Usage"}}</span>
-                <span class="col-color"
-                  data-tooltip="{{localize 'CALENDARIA.ThemeEditor.Header.ColorHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Color"}}</span>
-                <span class="col-hex"
-                  data-tooltip="{{localize 'CALENDARIA.ThemeEditor.Header.ColorCodeHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.ColorCode"}}</span>
-                <span class="col-reset"
-                  data-tooltip="{{localize 'CALENDARIA.ThemeEditor.Header.ResetHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Reset"}}</span>
+                <span class="col-location" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.LocationHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Location"}}</span>
+                <span class="col-usage" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.UsageHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Usage"}}</span>
+                <span class="col-color" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ColorHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Color"}}</span>
+                <span class="col-hex" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ColorCodeHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.ColorCode"}}</span>
+                <span class="col-reset" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ResetHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Reset"}}</span>
               </div>
               {{#each this.colors}}
                 <div class="color-table-row">
@@ -49,9 +51,9 @@
                     data-key="{{this.key}}">
                   <input type="text" class="col-hex color-hex" value="{{this.value}}" readonly>
                   <button type="button" class="col-reset reset-color" data-action="resetColor" data-key="{{this.key}}"
-                    data-tooltip="{{localize 'CALENDARIA.Common.Reset'}}" {{#unless this.isCustom}}disabled
-                    aria-disabled="true" title="{{localize 'CALENDARIA.ThemeEditor.Header.ResetDisabledTitle'}}"
-                    {{/unless}}>
+                    data-tooltip aria-label="{{localize 'CALENDARIA.Common.Reset'}}" {{#unless this.isCustom}}disabled
+                    aria-disabled="true" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ResetDisabledTitle'}}" {{/unless}}>
                     <i class="fas fa-undo"></i>
                   </button>
                 </div>

@@ -69,19 +69,19 @@
                 {{#if isEditing}}
                   <input type="text" class="timepoint-name-input" value="{{name}}" maxlength="50">
                 {{else}}
-                  <div class="timepoint-info" data-action="editTimepointName"
-                    data-tooltip="{{localize 'CALENDARIA.SetDate.EditName'}}">
+                  <div class="timepoint-info" data-action="editTimepointName" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.SetDate.EditName'}}">
                     <span class="timepoint-name">{{name}}</span>
                     <span class="timepoint-date">{{formattedDate}} {{formattedTime}}</span>
                   </div>
                 {{/if}}
                 <div class="timepoint-actions">
-                  <button type="button" class="timepoint-btn jump" data-action="jumpToTimepoint"
-                    data-tooltip="{{localize 'CALENDARIA.SetDate.JumpTo'}}">
+                  <button type="button" class="timepoint-btn jump" data-action="jumpToTimepoint" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.SetDate.JumpTo'}}">
                     <i class="fas fa-arrow-right"></i>
                   </button>
-                  <button type="button" class="timepoint-btn delete" data-action="deleteTimepoint"
-                    data-tooltip="{{localize 'CALENDARIA.SetDate.Delete'}}">
+                  <button type="button" class="timepoint-btn delete" data-action="deleteTimepoint" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.SetDate.Delete'}}">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>

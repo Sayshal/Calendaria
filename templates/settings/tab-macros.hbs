@@ -7,7 +7,7 @@
 
       {{#each globalTriggers}}
         <div class="form-group">
-          <label data-tooltip="{{hint}}">{{label}}</label>
+          <label data-tooltip aria-label="{{hint}}">{{label}}</label>
           <select name="macroTriggers.global.{{key}}">
             <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
             {{#each ../macros}}
@@ -54,7 +54,7 @@
                 {{/each}}
               </select>
               <button type="button" class="remove-trigger" data-action="removeSeasonTrigger" data-index="{{index}}"
-                data-tooltip="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
+                data-tooltip aria-label="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
@@ -116,7 +116,7 @@
                 {{/each}}
               </select>
               <button type="button" class="remove-trigger" data-action="removeMoonTrigger" data-index="{{index}}"
-                data-tooltip="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
+                data-tooltip aria-label="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
                 <i class="fas fa-trash"></i>
               </button>
             </div>

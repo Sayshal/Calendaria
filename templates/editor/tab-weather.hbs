@@ -11,16 +11,16 @@
         </select>
       </div>
       <div class="zone-actions">
-        <button type="button" class="zone-btn" data-action="addZone"
-          data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.Add'}}">
+        <button type="button" class="zone-btn" data-action="addZone" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Editor.Weather.Zone.Add'}}">
           <i class="fas fa-plus"></i>
         </button>
-        <button type="button" class="zone-btn" data-action="editZone"
-          data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.Edit'}}">
+        <button type="button" class="zone-btn" data-action="editZone" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Editor.Weather.Zone.Edit'}}">
           <i class="fas fa-edit"></i>
         </button>
-        <button type="button" class="zone-btn" data-action="deleteZone"
-          data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.Delete'}}">
+        <button type="button" class="zone-btn" data-action="deleteZone" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Editor.Weather.Zone.Delete'}}">
           <i class="fas fa-trash"></i>
         </button>
       </div>
@@ -55,7 +55,7 @@
               {{/if}}
             </span>
             <button type="button" class="season-climate-btn" data-action="editSeasonClimate" data-index="{{this.index}}"
-              data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.EditSeasonClimate'}}">
+              data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.EditSeasonClimate'}}">
               <i class="fas fa-edit"></i>
             </button>
           </div>
@@ -84,14 +84,15 @@
           </div>
           <div class="category-content">
             <div class="weather-preset-header list-header">
-              <span class="col-enabled" data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Enabled'}}"></span>
+              <span class="col-enabled" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Enabled'}}"></span>
               <span class="col-icon"></span>
-              <span class="col-name"
-                data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Name'}}">{{localize "CALENDARIA.Common.Name"}}</span>
-              <span class="col-chance"
-                data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Chance'}}">{{localize "CALENDARIA.Editor.Weather.Chance"}}</span>
-              <span class="col-temp"
-                data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Temp'}}">{{localize "CALENDARIA.Editor.Weather.Temp"}}</span>
+              <span class="col-name" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Name'}}">{{localize "CALENDARIA.Common.Name"}}</span>
+              <span class="col-chance" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Chance'}}">{{localize "CALENDARIA.Editor.Weather.Chance"}}</span>
+              <span class="col-temp" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Temp'}}">{{localize "CALENDARIA.Editor.Weather.Temp"}}</span>
               <span class="col-actions"></span>
             </div>
             {{#each category.presets as |preset|}}
@@ -117,12 +118,12 @@
                   <span class="temp-unit">{{@root.tempUnit}}</span>
                 </div>
                 <div class="preset-actions">
-                  <button type="button" data-action="toggleDescription" data-preset-id="{{preset.id}}"
-                    data-tooltip="{{localize 'CALENDARIA.Editor.Weather.EditDescription'}}">
+                  <button type="button" data-action="toggleDescription" data-preset-id="{{preset.id}}" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.Editor.Weather.EditDescription'}}">
                     <i class="fas fa-comment-alt"></i>
                   </button>
-                  <button type="button" data-action="resetWeatherPreset" data-preset-id="{{preset.id}}"
-                    data-tooltip="{{localize 'CALENDARIA.Editor.Weather.ResetPreset'}}">
+                  <button type="button" data-action="resetWeatherPreset" data-preset-id="{{preset.id}}" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.Editor.Weather.ResetPreset'}}">
                     <i class="fas fa-undo"></i>
                   </button>
                 </div>

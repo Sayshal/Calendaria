@@ -11,29 +11,30 @@
     </div>
     <div class="stopwatch-controls">
       <button type="button" class="stopwatch-btn notification {{#if hasNotification}}active{{/if}}"
-        data-action="openNotification" data-tooltip="{{localize 'CALENDARIA.Stopwatch.ConfigureNotification'}}">
+        data-action="openNotification" data-tooltip
+        aria-label="{{localize 'CALENDARIA.Stopwatch.ConfigureNotification'}}">
         <i class="fas fa-bell"></i>
       </button>
-      <button type="button" class="stopwatch-btn lap" data-action="lap"
-        data-tooltip="{{localize 'CALENDARIA.Stopwatch.RecordLap'}}" {{#unless running}}disabled{{/unless}}>
+      <button type="button" class="stopwatch-btn lap" data-action="lap" data-tooltip
+        aria-label="{{localize 'CALENDARIA.Stopwatch.RecordLap'}}" {{#unless running}}disabled{{/unless}}>
         <i class="fas fa-flag"></i>
       </button>
       {{#if running}}
-        <button type="button" class="stopwatch-btn pause" data-action="pause"
-          data-tooltip="{{localize 'CALENDARIA.Stopwatch.Pause'}}">
+        <button type="button" class="stopwatch-btn pause" data-action="pause" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.Pause'}}">
           <i class="fas fa-pause"></i>
         </button>
       {{else}}
-        <button type="button" class="stopwatch-btn start" data-action="start"
-          data-tooltip="{{localize 'CALENDARIA.Stopwatch.Start'}}">
+        <button type="button" class="stopwatch-btn start" data-action="start" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.Start'}}">
           <i class="fas fa-play"></i>
         </button>
       {{/if}}
-      <button type="button" class="stopwatch-btn reset" data-action="reset"
-        data-tooltip="{{localize 'CALENDARIA.Stopwatch.Reset'}}">
+      <button type="button" class="stopwatch-btn reset" data-action="reset" data-tooltip
+        aria-label="{{localize 'CALENDARIA.Stopwatch.Reset'}}">
         <i class="fas fa-undo"></i>
       </button>
-      <button type="button" class="stopwatch-btn mode" data-action="toggleMode" data-tooltip="{{modeLabel}}">
+      <button type="button" class="stopwatch-btn mode" data-action="toggleMode" data-tooltip aria-label="{{modeLabel}}">
         <i class="fas {{#if (eq mode 'realtime')}}fa-clock{{else}}fa-hourglass-half{{/if}}"></i>
       </button>
     </div>
@@ -42,8 +43,8 @@
     <div class="stopwatch-laps">
       <div class="stopwatch-laps-header">
         <span>{{localize "CALENDARIA.Stopwatch.Laps"}}</span>
-        <button type="button" class="stopwatch-clear-laps" data-action="clearLaps"
-          data-tooltip="{{localize 'CALENDARIA.Stopwatch.ClearLaps'}}">
+        <button type="button" class="stopwatch-clear-laps" data-action="clearLaps" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.ClearLaps'}}">
           <i class="fas fa-trash"></i>
         </button>
       </div>

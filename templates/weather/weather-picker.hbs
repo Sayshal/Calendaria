@@ -14,7 +14,7 @@
       <div class="weather-buttons">
         {{#each presets}}
           <button type="button" class="weather-btn" data-action="selectWeather" data-preset-id="{{id}}"
-            style="--weather-color: {{color}}" data-tooltip="{{description}}">
+            style="--weather-color: {{color}}" data-tooltip aria-label="{{description}}">
             <i class="fas {{icon}}"></i>
             <span class="weather-label">{{label}}</span>
           </button>

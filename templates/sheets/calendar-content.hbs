@@ -1,7 +1,7 @@
 <div class="calendar-main-content">
   <div class="calendar-nav">
-    <button type="button" data-action="navigate" data-direction="previous"
-      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
+    <button type="button" data-action="navigate" data-direction="previous" data-tooltip
+      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -14,8 +14,8 @@
       {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
     </h2>
 
-    <button type="button" data-action="navigate" data-direction="next"
-      data-tooltip="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
+    <button type="button" data-action="navigate" data-direction="next" data-tooltip
+      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>

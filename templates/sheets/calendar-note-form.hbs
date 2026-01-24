@@ -11,8 +11,8 @@
     <fieldset>
       <legend>{{localize "CALENDARIA.Note.Emblem"}}</legend>
       <div class="emblem-controls">
-        <div class="icon-picker" data-action="selectIcon" data-icon-type="{{iconType}}"
-          data-tooltip="CALENDARIA.UI.IconPickerTooltip">
+        <div class="icon-picker" data-action="selectIcon" data-icon-type="{{iconType}}" data-tooltip
+          aria-label="{{localize 'CALENDARIA.UI.IconPickerTooltip'}}">
           {{#if (eq iconType "fontawesome")}}
             <i class="{{system.icon}} icon-preview" style="color: {{system.color}}"></i>
           {{else}}
@@ -22,8 +22,8 @@
           <input type="hidden" name="system.icon" value="{{system.icon}}">
           <input type="hidden" name="system.iconType" value="{{iconType}}">
         </div>
-        <input type="color" name="system.color" value="{{system.color}}" class="color-input"
-          data-tooltip="CALENDARIA.UI.ColorTooltip">
+        <input type="color" name="system.color" value="{{system.color}}" class="color-input" data-tooltip
+          aria-label="{{localize 'CALENDARIA.UI.ColorTooltip'}}">
       </div>
     </fieldset>
 
@@ -32,12 +32,12 @@
       <div class="checkbox-group">
         <label>
           <input type="checkbox" name="system.gmOnly" {{checked
-            system.gmOnly}} data-tooltip="CALENDARIA.UI.GmOnlyTooltip">
+            system.gmOnly}} data-tooltip aria-label="{{localize 'CALENDARIA.UI.GmOnlyTooltip'}}">
           {{localize "CALENDARIA.Common.GMOnly"}}
         </label>
         <label>
           <input type="checkbox" name="system.silent" {{checked
-            system.silent}} data-tooltip="CALENDARIA.UI.SilentTooltip">
+            system.silent}} data-tooltip aria-label="{{localize 'CALENDARIA.UI.SilentTooltip'}}">
           {{localize "CALENDARIA.Note.Silent"}}
         </label>
       </div>
@@ -55,8 +55,8 @@
       <legend>{{localize "CALENDARIA.Common.Date"}}</legend>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Common.Start"}}</label>
-        <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="startDate"
-          data-tooltip="CALENDARIA.UI.StartDateTooltip">
+        <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="startDate" data-tooltip
+          aria-label="{{localize 'CALENDARIA.UI.StartDateTooltip'}}">
           <i class="fas fa-calendar-alt"></i>
           <span>{{startDateDisplay}}</span>
         </button>
@@ -66,8 +66,8 @@
       </div>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Common.End"}}</label>
-        <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="endDate"
-          data-tooltip="CALENDARIA.UI.EndDateTooltip">
+        <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="endDate" data-tooltip
+          aria-label="{{localize 'CALENDARIA.UI.EndDateTooltip'}}">
           <i class="fas fa-calendar-alt"></i>
           <span>{{endDateDisplay}}</span>
         </button>
@@ -83,23 +83,26 @@
         <label>{{localize "CALENDARIA.Common.Start"}}</label>
         <div class="time-inputs">
           <input type="number" name="system.startDate.hour" value="{{system.startDate.hour}}" min="0" max="{{maxHour}}"
-            step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip="CALENDARIA.Common.Hour">
+            step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
           <span class="time-separator">:</span>
           <input type="number" name="system.startDate.minute" value="{{system.startDate.minute}}" min="0" max="59"
-            step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip="CALENDARIA.Common.Minute">
+            step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
         </div>
         <label class="all-day-label">
-          <input type="checkbox" name="system.allDay" {{checked system.allDay}}
-            data-tooltip="CALENDARIA.UI.AllDayTooltip">
+          <input type="checkbox" name="system.allDay" {{checked system.allDay}} data-tooltip
+            aria-label="{{localize 'CALENDARIA.UI.AllDayTooltip'}}">
           {{localize "CALENDARIA.MiniCal.AllDay"}}
         </label>
         <label>{{localize "CALENDARIA.Common.End"}}</label>
         <div class="time-inputs">
           <input type="number" name="system.endDate.hour" value="{{system.endDate.hour}}" min="0" max="{{maxHour}}"
-            step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip="CALENDARIA.Common.Hour">
+            step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
           <span class="time-separator">:</span>
           <input type="number" name="system.endDate.minute" value="{{system.endDate.minute}}" min="0" max="59" step="1"
-            {{#if system.allDay}}disabled{{/if}} data-tooltip="CALENDARIA.Common.Minute">
+            {{#if system.allDay}}disabled{{/if}} data-tooltip aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
         </div>
       </div>
     </fieldset>
@@ -107,7 +110,7 @@
     <fieldset class="repeat-fieldset">
       <legend>{{localize "CALENDARIA.Note.Repeat"}}</legend>
       <div class="repeat-controls">
-        <select name="system.repeat" data-tooltip="CALENDARIA.UI.RepeatTooltip">
+        <select name="system.repeat" data-tooltip aria-label="{{localize 'CALENDARIA.UI.RepeatTooltip'}}">
           {{#each repeatOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
@@ -115,7 +118,7 @@
         {{#if showRepeatOptions}}
           <div class="max-occurrences">
             <input type="number" name="system.maxOccurrences" value="{{system.maxOccurrences}}" min="0" step="1"
-              placeholder="∞" data-tooltip="CALENDARIA.UI.MaxOccurrencesTooltip">
+              placeholder="∞" data-tooltip aria-label="{{localize 'CALENDARIA.UI.MaxOccurrencesTooltip'}}">
             <label>{{localize "CALENDARIA.Note.MaxOccurrences"}}</label>
           </div>
         {{/if}}
@@ -138,7 +141,7 @@
                       <span class="tag-label">{{moonName}}</span>
                       <span class="tag-value">{{phaseName}}</span>
                       <button type="button" class="remove-btn" data-action="removeMoonCondition" data-index="{{index}}"
-                        data-tooltip="CALENDARIA.Note.Condition.RemoveCondition">
+                        data-tooltip aria-label="{{localize 'CALENDARIA.Note.Condition.RemoveCondition'}}">
                         <i class="fas fa-times"></i>
                       </button>
                     </div>
@@ -161,8 +164,8 @@
                     {{/each}}
                   {{/each}}
                 </select>
-                <button type="button" class="add-btn" data-action="addMoonCondition"
-                  data-tooltip="CALENDARIA.UI.AddMoonCondition">
+                <button type="button" class="add-btn" data-action="addMoonCondition" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.UI.AddMoonCondition'}}">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
@@ -178,14 +181,14 @@
             <p class="hint">{{randomDescription}}</p>
             <div class="inline-form">
               <div class="form-group-stacked">
-                <label
-                  data-tooltip="CALENDARIA.UI.RandomProbabilityTooltip">{{localize "CALENDARIA.Note.Probability"}}</label>
+                <label data-tooltip
+                  aria-label="{{localize 'CALENDARIA.UI.RandomProbabilityTooltip'}}">{{localize "CALENDARIA.Note.Probability"}}</label>
                 <input type="number" name="system.randomConfig.probability" value="{{randomConfig.probability}}" min="0"
                   max="100" step="1">
               </div>
               <div class="form-group-stacked">
-                <label
-                  data-tooltip="CALENDARIA.UI.RandomIntervalTooltip">{{localize "CALENDARIA.Note.CheckEvery"}}</label>
+                <label data-tooltip
+                  aria-label="{{localize 'CALENDARIA.UI.RandomIntervalTooltip'}}">{{localize "CALENDARIA.Note.CheckEvery"}}</label>
                 <select name="system.randomConfig.checkInterval">
                   {{#each randomIntervalOptions}}
                     <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -193,11 +196,12 @@
                 </select>
               </div>
               <div class="form-group-stacked">
-                <label data-tooltip="CALENDARIA.UI.RandomSeedTooltip">{{localize "CALENDARIA.Note.Seed"}}</label>
+                <label data-tooltip
+                  aria-label="{{localize 'CALENDARIA.UI.RandomSeedTooltip'}}">{{localize "CALENDARIA.Note.Seed"}}</label>
                 <div class="inline-form">
                   <input type="number" name="system.randomConfig.seed" value="{{randomConfig.seed}}">
-                  <button type="button" class="add-btn" data-action="regenerateSeed"
-                    data-tooltip="CALENDARIA.UI.RegenerateSeedTooltip">
+                  <button type="button" class="add-btn" data-action="regenerateSeed" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.UI.RegenerateSeedTooltip'}}">
                     <i class="fas fa-dice"></i>
                   </button>
                 </div>
@@ -211,17 +215,19 @@
             <legend>{{localize "CALENDARIA.Note.LinkedSettings"}}</legend>
             <p class="hint">{{linkedDescription}}</p>
             <div class="inline-form">
-              <select name="system.linkedEvent.noteId" data-tooltip="CALENDARIA.UI.LinkedNoteTooltip">
+              <select name="system.linkedEvent.noteId" data-tooltip
+                aria-label="{{localize 'CALENDARIA.UI.LinkedNoteTooltip'}}">
                 <option value="">{{localize "CALENDARIA.Note.SelectEvent"}}</option>
                 {{#each availableNotes}}
                   <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
                 {{/each}}
               </select>
               <input type="number" name="system.linkedEvent.offset" value="{{linkedEvent.offset}}" step="1"
-                placeholder="{{localize 'CALENDARIA.Note.Offset'}}" data-tooltip="CALENDARIA.UI.LinkedOffsetTooltip">
+                placeholder="{{localize 'CALENDARIA.Note.Offset'}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.UI.LinkedOffsetTooltip'}}">
               {{#if linkedEvent.noteId}}
-                <button type="button" class="remove-btn" data-action="clearLinkedEvent"
-                  data-tooltip="CALENDARIA.UI.ClearLinkedEvent">
+                <button type="button" class="remove-btn" data-action="clearLinkedEvent" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.UI.ClearLinkedEvent'}}">
                   <i class="fas fa-times"></i>
                 </button>
               {{/if}}
@@ -383,7 +389,7 @@
                   <div class="tag" data-index="{{@index}}">
                     <span class="tag-value">{{description}}</span>
                     <button type="button" class="remove-btn" data-action="removeCondition" data-index="{{@index}}"
-                      data-tooltip="{{localize 'CALENDARIA.Common.Remove'}}">
+                      data-tooltip aria-label="{{localize 'CALENDARIA.Common.Remove'}}">
                       <i class="fas fa-times"></i>
                     </button>
                   </div>
@@ -492,8 +498,8 @@
                 placeholder="{{localize 'CALENDARIA.Note.Placeholder.Value'}}">
               <input type="number" name="newCondition.offset" placeholder="{{localize 'CALENDARIA.Common.Offset'}}"
                 style="display: none;">
-              <button type="button" class="add-btn" data-action="addCondition"
-                data-tooltip="{{localize 'CALENDARIA.Note.AddCondition'}}">
+              <button type="button" class="add-btn" data-action="addCondition" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Note.AddCondition'}}">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
@@ -509,7 +515,7 @@
       <div class="reminder-controls">
         <div class="form-group-stacked">
           <label>{{localize "CALENDARIA.Note.ReminderType"}}</label>
-          <select name="system.reminderType" data-tooltip="CALENDARIA.UI.ReminderTypeTooltip">
+          <select name="system.reminderType" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTypeTooltip'}}">
             {{#each reminderTypeOptions}}
               <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
@@ -517,10 +523,10 @@
         </div>
         <div class="form-group-stacked">
           <label>{{localize "CALENDARIA.Note.ReminderTargets"}}</label>
-          <select name="system.reminderTargets" data-tooltip="CALENDARIA.UI.ReminderTargetsTooltip"
+          <select name="system.reminderTargets" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTargetsTooltip"
             {{#unless showReminderOptions}}disabled{{/unless}}>
             {{#each reminderTargetOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              <option value=" {{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
           </select>
         </div>
@@ -528,9 +534,9 @@
           <label>{{localize "CALENDARIA.Note.ReminderOffset"}}</label>
           <div class="inline-form">
             <input type="number" name="system.reminderOffset" value="{{system.reminderOffset}}" min="0" max="720"
-              step="1" placeholder="0" data-tooltip="CALENDARIA.Note.ReminderOffsetTooltip"
+              step="1" placeholder="0" data-tooltip aria-label="{{localize 'CALENDARIA.Note.ReminderOffsetTooltip"
               {{#unless showReminderOptions}}disabled{{/unless}}>
-            <span class="hint">{{localize "CALENDARIA.Note.HoursBefore"}}</span>
+            <span class=" hint">{{localize "CALENDARIA.Note.HoursBefore"}}</span>
           </div>
         </div>
         {{#if showReminderUsers}}
@@ -559,7 +565,8 @@
           {{/each}}
         </multi-select>
         <input type="text" class="new-category-input" placeholder="{{localize 'CALENDARIA.Note.NewCategory'}}">
-        <button type="button" class="add-btn" data-action="addCategory" data-tooltip="CALENDARIA.UI.AddCategory">
+        <button type="button" class="add-btn" data-action="addCategory" data-tooltip
+          aria-label="{{localize 'CALENDARIA.UI.AddCategory'}}">
           <i class="fas fa-plus"></i>
         </button>
       </div>
@@ -569,7 +576,7 @@
       <legend>{{localize "CALENDARIA.Common.Macro"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Note.MacroHint"}}</p>
       <div class="inline-form">
-        <select name="system.macro" data-tooltip="CALENDARIA.UI.MacroTooltip">
+        <select name="system.macro" data-tooltip aria-label="{{localize 'CALENDARIA.UI.MacroTooltip'}}">
           <option value="">{{localize "CALENDARIA.Common.None"}}</option>
           {{#each availableMacros}}
             <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>

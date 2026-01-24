@@ -3,8 +3,8 @@
   {{#if isGM}}
     <fieldset data-section="time-realtime">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="time-realtime"
-          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+        <button type="button" class="reset-section" data-action="resetSection" data-section="time-realtime" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
       </legend>
 
       <div class="form-group">
@@ -26,7 +26,8 @@
     <fieldset data-section="time-integration">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}
         <button type="button" class="reset-section" data-action="resetSection" data-section="time-integration"
-          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
       </legend>
 
       <div class="form-group">

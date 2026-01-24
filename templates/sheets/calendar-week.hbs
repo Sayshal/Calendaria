@@ -20,8 +20,8 @@
             {{#each ../eventBlocks}}
               {{#if (eq ../hour startHour)}}
                 <div class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}}"
-                  style="--hour-span: {{hourSpan}}; background-color: {{color}};"
-                  data-tooltip="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}" data-action="editNote"
+                  style="--hour-span: {{hourSpan}}; background-color: {{color}};" data-tooltip
+                  aria-label="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}" data-action="editNote"
                   data-note-id="{{id}}">
                   <div class="event-icon">
                     {{#if (eq iconType "fontawesome")}}
@@ -35,9 +35,9 @@
               {{/if}}
             {{/each}}
             {{#if ../../canAddNotes}}
-              <button type="button" class="add-note-btn" data-action="addNote"
-                data-year="{{../year}}" data-month="{{../month}}" data-day="{{../day}}" data-hour="{{hour}}"
-                data-tooltip="CALENDARIA.Common.AddNote">
+              <button type="button" class="add-note-btn" data-action="addNote" data-year="{{../year}}"
+                data-month="{{../month}}" data-day="{{../day}}" data-hour="{{hour}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
                 <i class="fas fa-plus"></i>
               </button>
             {{/if}}

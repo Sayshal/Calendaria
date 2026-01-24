@@ -37,8 +37,8 @@
                 {{#if loadedFileName}}
                   <i class="fas fa-file"></i>
                   <span class="file-name">{{loadedFileName}}</span>
-                  <button type="button" class="clear-file" data-action="clearData"
-                    data-tooltip="{{localize 'CALENDARIA.Importer.ClearFile'}}">
+                  <button type="button" class="clear-file" data-action="clearData" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.Importer.ClearFile'}}">
                     <i class="fas fa-times"></i>
                   </button>
                 {{else}}
@@ -54,8 +54,8 @@
                 <div class="module-loaded">
                   <i class="fas fa-plug"></i>
                   <span>{{localize "CALENDARIA.Importer.LoadedFromModule"}}</span>
-                  <button type="button" class="clear-module" data-action="clearData"
-                    data-tooltip="{{localize 'CALENDARIA.Importer.Preview.ClearData'}}">
+                  <button type="button" class="clear-module" data-action="clearData" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.Importer.Preview.ClearData'}}">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
@@ -153,16 +153,16 @@
             </legend>
 
             <div class="note-bulk-actions">
-              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="skip"
-                data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllSkip'}}">
+              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="skip" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Importer.Notes.SetAllSkip'}}">
                 <i class="fas fa-ban"></i>
               </button>
-              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="festival"
-                data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllFestival'}}">
+              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="festival" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Importer.Notes.SetAllFestival'}}">
                 <i class="fas fa-star"></i>
               </button>
-              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="note"
-                data-tooltip="{{localize 'CALENDARIA.Importer.Notes.SetAllNote'}}">
+              <button type="button" class="bulk-btn" data-action="setAllNoteTypes" data-type="note" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Importer.Notes.SetAllNote'}}">
                 <i class="fas fa-sticky-note"></i>
               </button>
             </div>
@@ -172,14 +172,15 @@
                 <span class="note-name">{{localize "CALENDARIA.Common.Name"}}</span>
                 <span class="note-date">{{localize "CALENDARIA.Common.Date"}}</span>
                 <span class="note-radios">
-                  <i class="fas fa-ban" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Skip'}}"></i>
-                  <i class="fas fa-star" data-tooltip="{{localize 'CALENDARIA.Common.Festival'}}"></i>
-                  <i class="fas fa-sticky-note" data-tooltip="{{localize 'CALENDARIA.Importer.Notes.Note'}}"></i>
+                  <i class="fas fa-ban" data-tooltip aria-label="{{localize 'CALENDARIA.Importer.Notes.Skip'}}"></i>
+                  <i class="fas fa-star" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Festival'}}"></i>
+                  <i class="fas fa-sticky-note" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.Importer.Notes.Note'}}"></i>
                 </span>
               </div>
               {{#each extractedNotes}}
                 <div class="note-row">
-                  <span class="note-name" data-tooltip="{{this.name}}">{{this.name}}</span>
+                  <span class="note-name" data-tooltip aria-label="{{this.name}}">{{this.name}}</span>
                   <span class="note-date">{{this.displayDate}}</span>
                   <span class="note-radios">
                     <input type="radio" name="noteType[{{@index}}]" value="skip"

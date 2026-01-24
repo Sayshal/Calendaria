@@ -22,21 +22,22 @@
                   {{#if moonPhases}}
                     <span class="day-moons">
                       {{#each moonPhases.visible}}
-                        <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip="{{moonName}}: {{phaseName}}"
-                          {{#if color}}style="--moon-color: {{color}}" {{/if}}>
+                        <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
+                          aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}>
                           <img src="{{icon}}" alt="{{phaseName}}">
                         </span>
                       {{/each}}
                       {{#if moonPhases.overflow.length}}
-                        <span class="moon-overflow"
-                          data-tooltip="{{{moonPhases.overflowTooltip}}}">+{{moonPhases.overflow.length}}</span>
+                        <span class="moon-overflow" data-tooltip
+                          aria-label="{{{moonPhases.overflowTooltip}}}">+{{moonPhases.overflow.length}}</span>
                       {{/if}}
                     </span>
                   {{/if}}
                 </div>
                 <div class="day-notes">
                   {{#each notes}}
-                    <div class="note-indicator" data-tooltip="{{name}}" data-action="editNote" data-note-id="{{id}}">
+                    <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
+                      data-note-id="{{id}}">
                       {{#if (eq system.iconType "fontawesome")}}
                         <i class="{{system.icon}}" style="color: {{system.color}}"></i>
                       {{else}}
@@ -46,7 +47,8 @@
                   {{/each}}
                   {{#if ../../canAddNotes}}
                     <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                      data-month="{{month}}" data-day="{{day}}" data-tooltip="CALENDARIA.Common.AddNote">
+                      data-month="{{month}}" data-day="{{day}}" data-tooltip
+                      aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
                       <i class="fas fa-plus"></i>
                     </button>
                   {{/if}}
@@ -74,26 +76,28 @@
                   <div class="day-number">
                     {{day}}
                     {{#if isFestival}}
-                      <i class="fas fa-star festival-icon" data-tooltip="{{festivalName}}"></i>
+                      <i class="fas fa-star festival-icon" data-tooltip aria-label="{{festivalName}}"></i>
                     {{/if}}
                     {{#if moonPhases}}
                       <span class="day-moons">
                         {{#each moonPhases.visible}}
-                          <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip="{{moonName}}: {{phaseName}}"
-                            {{#if color}}style="--moon-color: {{color}}" {{/if}}>
+                          <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
+                            aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}"
+                            {{/if}}>
                             <img src="{{icon}}" alt="{{phaseName}}">
                           </span>
                         {{/each}}
                         {{#if moonPhases.overflow.length}}
-                          <span class="moon-overflow"
-                            data-tooltip="{{{moonPhases.overflowTooltip}}}">+{{moonPhases.overflow.length}}</span>
+                          <span class="moon-overflow" data-tooltip
+                            aria-label="{{{moonPhases.overflowTooltip}}}">+{{moonPhases.overflow.length}}</span>
                         {{/if}}
                       </span>
                     {{/if}}
                   </div>
                   <div class="day-notes">
                     {{#each notes}}
-                      <div class="note-indicator" data-tooltip="{{name}}" data-action="editNote" data-note-id="{{id}}">
+                      <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
+                        data-note-id="{{id}}">
                         {{#if (eq system.iconType "fontawesome")}}
                           <i class="{{system.icon}}" style="color: {{system.color}}"></i>
                         {{else}}
@@ -103,7 +107,8 @@
                     {{/each}}
                     {{#if ../../canAddNotes}}
                       <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                        data-month="{{month}}" data-day="{{day}}" data-tooltip="CALENDARIA.Common.AddNote">
+                        data-month="{{month}}" data-day="{{day}}" data-tooltip
+                        aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
                         <i class="fas fa-plus"></i>
                       </button>
                     {{/if}}
@@ -115,7 +120,7 @@
             {{#each multiDayEvents}}
               <div class="event-bar{{#if isContinuation}} continuation{{/if}}"
                 style="left: {{left}}%; width: {{width}}%; top: calc(1.625rem + {{row}} * 1.625rem); background-color: {{color}};"
-                data-tooltip="{{name}}" data-action="editNote" data-note-id="{{id}}">
+                data-tooltip aria-label="{{name}}" data-action="editNote" data-note-id="{{id}}">
                 {{#if isContinuation}}
                   <i class="fas fa-angles-right event-bar-continuation"></i>
                 {{else}}

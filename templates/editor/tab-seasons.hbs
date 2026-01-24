@@ -53,12 +53,12 @@
               <input type="number" id="editor-season-{{this.index}}-duration" name="seasons.{{this.index}}.duration"
                 value="{{this.duration}}" min="1" placeholder="91" class="col-duration">
               <div class="item-controls col-controls">
-                <button type="button" data-action="addSeason" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddSeason'}}">
+                <button type="button" data-action="addSeason" data-index="{{this.index}}" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddSeason'}}">
                   <i class="fas fa-plus"></i>
                 </button>
-                <button type="button" data-action="removeSeason" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
+                <button type="button" data-action="removeSeason" data-index="{{this.index}}" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -75,8 +75,8 @@
               <input type="color" id="editor-season-{{this.index}}-color" name="seasons.{{this.index}}.color"
                 value="{{this.color}}" class="col-color">
               <div class="item-controls col-controls">
-                <button type="button" data-action="addSeason" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.AddSeason'}}">
+                <button type="button" data-action="addSeason" data-index="{{this.index}}" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddSeason'}}">
                   <i class="fas fa-plus"></i>
                 </button>
               </div>
@@ -107,8 +107,8 @@
                 {{/each}}
               </select>
               <div class="item-controls col-controls">
-                <button type="button" data-action="removeSeason" data-index="{{this.index}}"
-                  data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
+                <button type="button" data-action="removeSeason" data-index="{{this.index}}" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveSeason'}}">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>

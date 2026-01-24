@@ -3,8 +3,8 @@
   {{#if isGM}}
     <fieldset data-section="module-sync">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Sync"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="module-sync"
-          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+        <button type="button" class="reset-section" data-action="resetSection" data-section="module-sync" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
       </legend>
 
       <div class="form-group">
@@ -23,7 +23,8 @@
     <fieldset data-section="module-integration">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Integration"}}
         <button type="button" class="reset-section" data-action="resetSection" data-section="module-integration"
-          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
       </legend>
 
       <div class="form-group">
@@ -39,10 +40,10 @@
         <label>{{localize "CALENDARIA.Settings.ToolbarApps.Name"}}</label>
         <div class="form-fields toolbar-apps-checkboxes">
           {{#each toolbarAppOptions}}
-            <label class="checkbox-inline" data-tooltip="{{this.label}}">
+            <label class="checkbox-inline" data-tooltip aria-label="{{this.label}}">
               <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}
-                {{#unless ../showToolbarButton}}disabled aria-disabled="true"
-                title="{{localize "CALENDARIA.Settings.ToolbarApps.DisabledTitle"}}" {{/unless}}>
+                {{#unless ../showToolbarButton}}disabled aria-disabled="true" data-tooltip
+                aria-label="{{localize "CALENDARIA.Settings.ToolbarApps.DisabledTitle"}}" {{/unless}}>
               <i class="fas {{this.icon}}"></i>
             </label>
           {{/each}}
@@ -64,7 +65,8 @@
   <fieldset data-section="module-debugging">
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="module-debugging"
-        title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
     </legend>
 
     <div class="form-group">

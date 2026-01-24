@@ -3,13 +3,13 @@
     <div class="time-display-time-wrapper">
       <span class="time-display-time">{{{currentTime}}}</span>
       {{#if canChangeDateTime}}
-        <button type="button" class="time-display-play-btn" data-action="toggle"
-          data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
+        <button type="button" class="time-display-play-btn" data-action="toggle" data-tooltip
+          aria-label="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
           <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
         </button>
       {{/if}}
-      <button type="button" class="time-display-stopwatch-btn" data-action="openStopwatch"
-        data-tooltip="{{localize 'CALENDARIA.Stopwatch.Title'}}">
+      <button type="button" class="time-display-stopwatch-btn" data-action="openStopwatch" data-tooltip
+        aria-label="{{localize 'CALENDARIA.Stopwatch.Title'}}">
         <i class="fas fa-stopwatch"></i>
       </button>
     </div>
@@ -19,12 +19,12 @@
   {{#if canChangeDateTime}}
     <div class="time-keeper-controls">
       {{#if showDec2}}
-        <button type="button" class="time-btn" data-action="dec2" data-tooltip="{{dec2Tooltip}}">
+        <button type="button" class="time-btn" data-action="dec2" data-tooltip aria-label="{{dec2Tooltip}}">
           <i class="fa-solid fa-backward-fast"></i>
         </button>
       {{/if}}
       {{#if showDec1}}
-        <button type="button" class="time-btn" data-action="dec1" data-tooltip="{{dec1Tooltip}}">
+        <button type="button" class="time-btn" data-action="dec1" data-tooltip aria-label="{{dec1Tooltip}}">
           <i class="fa-solid fa-backward"></i>
         </button>
       {{/if}}
@@ -34,12 +34,12 @@
         {{/each}}
       </select>
       {{#if showInc1}}
-        <button type="button" class="time-btn" data-action="inc1" data-tooltip="{{inc1Tooltip}}">
+        <button type="button" class="time-btn" data-action="inc1" data-tooltip aria-label="{{inc1Tooltip}}">
           <i class="fa-solid fa-forward"></i>
         </button>
       {{/if}}
       {{#if showInc2}}
-        <button type="button" class="time-btn" data-action="inc2" data-tooltip="{{inc2Tooltip}}">
+        <button type="button" class="time-btn" data-action="inc2" data-tooltip aria-label="{{inc2Tooltip}}">
           <i class="fa-solid fa-forward-fast"></i>
         </button>
       {{/if}}

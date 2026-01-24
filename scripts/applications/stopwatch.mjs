@@ -307,7 +307,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
           <label>${localize('CALENDARIA.Stopwatch.NotificationSoundFile')}</label>
           <div class="form-fields">
             <input type="text" name="sound" value="${currentSound}" placeholder="sounds/notify.wav" />
-            <button type="button" class="file-picker" data-type="audio" data-target="sound" title="${localize('FILES.BrowseTooltip')}">
+            <button type="button" class="file-picker" data-type="audio" data-target="sound" data-tooltip="${localize('FILES.BrowseTooltip')}">
               <i class="fas fa-file-audio"></i>
             </button>
           </div>

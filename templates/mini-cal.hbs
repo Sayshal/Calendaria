@@ -1,37 +1,39 @@
 <div class="mini-cal-container">
   <div class="mini-sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
-    <button type="button" class="sidebar-btn" data-action="close" data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
+    <button type="button" class="sidebar-btn" data-action="close" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>
     </button>
-    <button type="button" class="sidebar-btn" data-action="openFull"
-      data-tooltip="{{localize 'CALENDARIA.MiniCal.OpenFull'}}">
+    <button type="button" class="sidebar-btn" data-action="openFull" data-tooltip
+      aria-label="{{localize 'CALENDARIA.MiniCal.OpenFull'}}">
       <i class="fas fa-expand"></i>
     </button>
-    <button type="button" class="sidebar-btn" data-action="today" data-tooltip="{{localize 'CALENDARIA.Common.Today'}}">
+    <button type="button" class="sidebar-btn" data-action="today" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.Today'}}">
       <i class="fas fa-calendar-day"></i>
     </button>
     {{#if showSetCurrentDate}}
-      <button type="button" class="sidebar-btn set-current-date" data-action="setCurrentDate"
-        data-tooltip="{{localize 'CALENDARIA.MiniCal.SetCurrentDate'}}">
+      <button type="button" class="sidebar-btn set-current-date" data-action="setCurrentDate" data-tooltip
+        aria-label="{{localize 'CALENDARIA.MiniCal.SetCurrentDate'}}">
         <i class="fas fa-calendar-check"></i>
       </button>
     {{/if}}
-    <button type="button" class="sidebar-btn" data-action="addNote"
-      data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}">
+    <button type="button" class="sidebar-btn" data-action="addNote" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
       <i class="fas fa-plus"></i>
     </button>
-    <button type="button" class="sidebar-btn" data-action="toggleSearch"
-      data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
+    <button type="button" class="sidebar-btn" data-action="toggleSearch" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.SearchNotes'}}">
       <i class="fas fa-search"></i>
     </button>
     {{#if showViewNotes}}
-      <button type="button" class="sidebar-btn" data-action="viewNotes"
-        data-tooltip="{{localize 'CALENDARIA.MiniCal.ViewNotes'}}">
+      <button type="button" class="sidebar-btn" data-action="viewNotes" data-tooltip
+        aria-label="{{localize 'CALENDARIA.MiniCal.ViewNotes'}}">
         <i class="fas fa-list"></i>
       </button>
     {{/if}}
-    <button type="button" class="sidebar-btn" data-action="openSettings"
-      data-tooltip="{{localize 'CALENDARIA.Common.Settings'}}">
+    <button type="button" class="sidebar-btn" data-action="openSettings" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.Settings'}}">
       <i class="fas fa-cog"></i>
     </button>
     {{!-- Custom widget sidebar insertion point --}}
@@ -41,8 +43,8 @@
   <div class="mini-notes-panel{{#if notesPanelVisible}} visible{{/if}}">
     <div class="notes-panel-header">
       <span class="notes-panel-title">{{selectedDateLabel}}</span>
-      <button type="button" class="notes-panel-close" data-action="closeNotesPanel"
-        data-tooltip="{{localize 'CALENDARIA.MiniCal.CloseNotesPanel'}}">
+      <button type="button" class="notes-panel-close" data-action="closeNotesPanel" data-tooltip
+        aria-label="{{localize 'CALENDARIA.MiniCal.CloseNotesPanel'}}">
         <i class="fas fa-times"></i>
       </button>
     </div>
@@ -65,7 +67,7 @@
           </div>
           {{#if isOwner}}
             <button type="button" class="note-item-edit" data-action="editNote" data-page-id="{{id}}"
-              data-journal-id="{{parentId}}" data-tooltip="{{localize 'CALENDARIA.ContextMenu.EditNote'}}">
+              data-journal-id="{{parentId}}" data-tooltip aria-label="{{localize 'CALENDARIA.ContextMenu.EditNote'}}">
               <i class="fas fa-edit"></i>
             </button>
           {{/if}}
@@ -90,18 +92,19 @@
             </div>
             <div class="result-icons">
               {{#if data.icon}}
-                <i class="result-note-icon {{data.icon}}" style="color: {{data.color}}"
-                  data-tooltip="{{localize 'CALENDARIA.Search.NoteIcon'}}"></i>
+                <i class="result-note-icon {{data.icon}}" style="color: {{data.color}}" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Search.NoteIcon'}}"></i>
               {{/if}}
               {{#if data.gmOnly}}
-                <i class="result-gm-icon fas fa-lock" data-tooltip="{{localize 'CALENDARIA.Search.GMOnly'}}"></i>
+                <i class="result-gm-icon fas fa-lock" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Search.GMOnly'}}"></i>
               {{/if}}
               {{#if data.repeatIcon}}
-                <i class="result-repeat-icon {{data.repeatIcon}}" data-tooltip="{{data.repeatTooltip}}"></i>
+                <i class="result-repeat-icon {{data.repeatIcon}}" data-tooltip aria-label="{{data.repeatTooltip}}"></i>
               {{/if}}
               {{#each data.categoryIcons}}
-                <i class="result-category-icon fas {{this.icon}}" style="color: {{this.color}}"
-                  data-tooltip="{{this.label}}"></i>
+                <i class="result-category-icon fas {{this.icon}}" style="color: {{this.color}}" data-tooltip
+                  aria-label="{{this.label}}"></i>
               {{/each}}
             </div>
           </div>
@@ -116,15 +119,15 @@
   </div>
 
   <div class="mini-top-row{{#if stickyPosition}} position-locked{{/if}}">
-    <button type="button" class="nav-btn" data-action="navigate" data-direction="prev"
-      data-tooltip="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.PreviousWeek'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
+    <button type="button" class="nav-btn" data-action="navigate" data-direction="prev" data-tooltip
+      aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.PreviousWeek'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
     <div class="mini-title-group">
       <span class="mini-title">{{{calendarData.formattedHeader}}}</span>
     </div>
-    <button type="button" class="nav-btn" data-action="navigate" data-direction="next"
-      data-tooltip="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
+    <button type="button" class="nav-btn" data-action="navigate" data-direction="next" data-tooltip
+      aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
@@ -153,16 +156,16 @@
             {{#each this.days}}
               <div
                 class="mini-day intercalary{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}} festival"
-                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
-                data-tooltip="{{festivalName}}">
+                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-tooltip
+                aria-label="{{festivalName}}">
                 <span class="festival-name">{{festivalName}}</span>
                 {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
-                {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}" data-action="showMoons"
-                        data-tooltip="{{moonPhase}}">
+                {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}"
+                      data-action="showMoons" data-tooltip aria-label="{{moonPhase}}">
                       <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}"></span>
                   {{else}}
                     <img class="moon-tiny clickable" src="{{moonIcon}}" alt="{{moonPhase}}" data-action="showMoons"
-                      data-tooltip="{{moonPhase}}">
+                      data-tooltip aria-label="{{moonPhase}}">
                   {{/if}}{{/if}}
               </div>
             {{/each}}
@@ -181,7 +184,7 @@
               <div
                 class="mini-day other-week{{#if isToday}} today{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
                 data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
-                {{#if festivalName}}data-tooltip="{{festivalName}}" {{/if}}>
+                {{#if festivalName}}data-tooltip aria-label="{{festivalName}}" {{/if}}>
                 <span class="day-num">{{day}}</span>
                 {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
               </div>
@@ -189,15 +192,15 @@
               <div
                 class="mini-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
                 data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
-                {{#if festivalName}}data-tooltip="{{festivalName}}" {{/if}}>
+                {{#if festivalName}}data-tooltip aria-label="{{festivalName}}" {{/if}}>
                 <span class="day-num">{{day}}</span>
                 {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
-                {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}" data-action="showMoons"
-                        data-tooltip="{{moonPhase}}">
+                {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}"
+                      data-action="showMoons" data-tooltip aria-label="{{moonPhase}}">
                       <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}"></span>
                   {{else}}
                     <img class="moon-tiny clickable" src="{{moonIcon}}" alt="{{moonPhase}}" data-action="showMoons"
-                      data-tooltip="{{moonPhase}}">
+                      data-tooltip aria-label="{{moonPhase}}">
                   {{/if}}{{/if}}
               </div>
             {{/if}}
@@ -211,8 +214,8 @@
     <span class="time-value">{{{currentTime}}}</span>
     <span class="date-value hidden">{{currentDate}}</span>
     {{#if canChangeDateTime}}
-      <div class="time-toggle {{#if running}}active{{/if}}"
-        data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
+      <div class="time-toggle {{#if running}}active{{/if}}" data-tooltip
+        aria-label="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
         <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
       </div>
     {{/if}}
@@ -221,28 +224,28 @@
   {{#if canChangeDateTime}}
     <div class="mini-time-controls{{#if controlsVisible}} visible{{/if}}">
       <div class="controls-group">
-        <button type="button" class="time-btn time-shortcut" data-action="toSunrise"
-          data-tooltip="{{localize 'CALENDARIA.Common.Sunrise'}}">
+        <button type="button" class="time-btn time-shortcut" data-action="toSunrise" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Common.Sunrise'}}">
           <i class="fas fa-sun"></i>
         </button>
-        <button type="button" class="time-btn time-shortcut" data-action="toMidday"
-          data-tooltip="{{localize 'CALENDARIA.Common.Midday'}}">
+        <button type="button" class="time-btn time-shortcut" data-action="toMidday" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Common.Midday'}}">
           <i class="fas fa-cloud-sun"></i>
         </button>
         {{#if customJumps.dec2}}
-          <button type="button" class="time-btn custom-jump" data-action="customDec2"
-            data-tooltip="{{customJumps.dec2}}">
+          <button type="button" class="time-btn custom-jump" data-action="customDec2" data-tooltip
+            aria-label="{{customJumps.dec2}}">
             {{customJumps.dec2}}
           </button>
         {{/if}}
         {{#if customJumps.dec1}}
-          <button type="button" class="time-btn custom-jump" data-action="customDec1"
-            data-tooltip="{{customJumps.dec1}}">
+          <button type="button" class="time-btn custom-jump" data-action="customDec1" data-tooltip
+            aria-label="{{customJumps.dec1}}">
             {{customJumps.dec1}}
           </button>
         {{/if}}
-        <button type="button" class="time-btn" data-action="reverse"
-          data-tooltip="{{localize 'CALENDARIA.HUD.Reverse'}}">
+        <button type="button" class="time-btn" data-action="reverse" data-tooltip
+          aria-label="{{localize 'CALENDARIA.HUD.Reverse'}}">
           <i class="fas fa-backward"></i>
         </button>
         <select class="increment-select" data-action="increment">
@@ -250,28 +253,28 @@
             <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
-        <button type="button" class="time-btn" data-action="forward"
-          data-tooltip="{{localize 'CALENDARIA.HUD.Forward'}}">
+        <button type="button" class="time-btn" data-action="forward" data-tooltip
+          aria-label="{{localize 'CALENDARIA.HUD.Forward'}}">
           <i class="fas fa-forward"></i>
         </button>
         {{#if customJumps.inc1}}
-          <button type="button" class="time-btn custom-jump" data-action="customInc1"
-            data-tooltip="+{{customJumps.inc1}}">
+          <button type="button" class="time-btn custom-jump" data-action="customInc1" data-tooltip
+            aria-label="+{{customJumps.inc1}}">
             +{{customJumps.inc1}}
           </button>
         {{/if}}
         {{#if customJumps.inc2}}
-          <button type="button" class="time-btn custom-jump" data-action="customInc2"
-            data-tooltip="+{{customJumps.inc2}}">
+          <button type="button" class="time-btn custom-jump" data-action="customInc2" data-tooltip
+            aria-label="+{{customJumps.inc2}}">
             +{{customJumps.inc2}}
           </button>
         {{/if}}
-        <button type="button" class="time-btn time-shortcut" data-action="toSunset"
-          data-tooltip="{{localize 'CALENDARIA.Common.Sunset'}}">
+        <button type="button" class="time-btn time-shortcut" data-action="toSunset" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Common.Sunset'}}">
           <i class="fas fa-cloud-moon"></i>
         </button>
-        <button type="button" class="time-btn time-shortcut" data-action="toMidnight"
-          data-tooltip="{{localize 'CALENDARIA.Common.Midnight'}}">
+        <button type="button" class="time-btn time-shortcut" data-action="toMidnight" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Common.Midnight'}}">
           <i class="fas fa-moon"></i>
         </button>
       </div>

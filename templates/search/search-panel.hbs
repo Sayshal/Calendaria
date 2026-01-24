@@ -14,18 +14,19 @@
           </div>
           <div class="result-icons">
             {{#if data.icon}}
-              <i class="result-note-icon {{data.icon}}" style="color: {{data.color}}"
-                data-tooltip="{{localize 'CALENDARIA.Search.NoteIcon'}}"></i>
+              <i class="result-note-icon {{data.icon}}" style="color: {{data.color}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Search.NoteIcon'}}"></i>
             {{/if}}
             {{#if data.gmOnly}}
-              <i class="result-gm-icon fas fa-lock" data-tooltip="{{localize 'CALENDARIA.Search.GMOnly'}}"></i>
+              <i class="result-gm-icon fas fa-lock" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Search.GMOnly'}}"></i>
             {{/if}}
             {{#if data.repeatIcon}}
-              <i class="result-repeat-icon {{data.repeatIcon}}" data-tooltip="{{data.repeatTooltip}}"></i>
+              <i class="result-repeat-icon {{data.repeatIcon}}" data-tooltip aria-label="{{data.repeatTooltip}}"></i>
             {{/if}}
             {{#each data.categoryIcons}}
-              <i class="result-category-icon fas {{this.icon}}" style="color: {{this.color}}"
-                data-tooltip="{{this.label}}"></i>
+              <i class="result-category-icon fas {{this.icon}}" style="color: {{this.color}}" data-tooltip
+                aria-label="{{this.label}}"></i>
             {{/each}}
           </div>
         </div>

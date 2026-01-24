@@ -4,7 +4,8 @@
     <fieldset data-section="weather-temperature">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}
         <button type="button" class="reset-section" data-action="resetSection" data-section="weather-temperature"
-          title="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
       </legend>
 
       <div class="form-group">
@@ -26,8 +27,8 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
       <div class="fieldset-header-row">
         <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.ClimateConfig"}}</p>
-        <button type="button" data-action="openCalendarEditor" class="add-button"
-          data-tooltip="{{localize 'CALENDARIA.SettingsPanel.Hint.OpenClimateEditor'}}">
+        <button type="button" data-action="openCalendarEditor" class="add-button" data-tooltip
+          aria-label="{{localize 'CALENDARIA.SettingsPanel.Hint.OpenClimateEditor'}}">
           <i class="fas fa-calendar-plus"></i>
           {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
         </button>
@@ -54,8 +55,8 @@
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
       <div class="fieldset-header-row">
         <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.Hint"}}</p>
-        <button type="button" data-action="addWeatherPreset" class="add-button"
-          data-tooltip="{{localize 'CALENDARIA.SettingsPanel.WeatherPresets.AddTooltip'}}">
+        <button type="button" data-action="addWeatherPreset" class="add-button" data-tooltip
+          aria-label="{{localize 'CALENDARIA.SettingsPanel.WeatherPresets.AddTooltip'}}">
           <i class="fas fa-plus"></i>
           {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Add"}}
         </button>
@@ -80,11 +81,11 @@
               <span class="preset-darkness-display">{{this.darknessPenalty}}</span>
               <span class="preset-actions">
                 <button type="button" data-action="editWeatherPreset" data-preset-id="{{this.id}}" class="icon-button"
-                  data-tooltip="{{localize 'CALENDARIA.Common.Edit'}}">
+                  data-tooltip aria-label="{{localize 'CALENDARIA.Common.Edit'}}">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button type="button" data-action="removeWeatherPreset" data-preset-id="{{this.id}}"
-                  class="icon-button danger" data-tooltip="{{localize 'CALENDARIA.Common.Delete'}}">
+                  class="icon-button danger" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Delete'}}">
                   <i class="fas fa-trash"></i>
                 </button>
               </span>

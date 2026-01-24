@@ -23,35 +23,35 @@
   </div>
 
   <div class="calendar-actions">
-    <button type="button" data-action="toggleCompact" data-tooltip="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}"
-      class="toggle-compact-btn">
+    <button type="button" data-action="toggleCompact" data-tooltip
+      aria-label="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
       <i class="fas fa-compress"></i>
     </button>
 
-    <button type="button" data-action="openSettings" data-tooltip="{{localize 'CALENDARIA.HUD.Settings.Name'}}"
-      class="settings-btn">
+    <button type="button" data-action="openSettings" data-tooltip
+      aria-label="{{localize 'CALENDARIA.HUD.Settings.Name'}}" class="settings-btn">
       <i class="fas fa-gear"></i>
     </button>
 
-    <button type="button" class="search-toggle" data-action="toggleSearch"
-      data-tooltip="{{localize 'CALENDARIA.Common.SearchNotes'}}">
+    <button type="button" class="search-toggle" data-action="toggleSearch" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.SearchNotes'}}">
       <i class="fas fa-search"></i>
     </button>
 
-    <button type="button" data-action="today" data-tooltip="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
+    <button type="button" data-action="today" data-tooltip aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
       <i class="fas fa-calendar-day"></i> {{localize 'CALENDARIA.Common.Today'}}
     </button>
 
     {{#if canAddNotes}}
-      <button type="button" data-action="addNoteToday" data-tooltip="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}"
-        class="add-note-today-btn">
+      <button type="button" data-action="addNoteToday" data-tooltip
+        aria-label="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}" class="add-note-today-btn">
         <i class="fas fa-plus"></i> {{localize 'CALENDARIA.Common.AddNote'}}
       </button>
     {{/if}}
 
     {{#if editable}}
-      <button type="button" data-action="setAsCurrentDate"
-        data-tooltip="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
+      <button type="button" data-action="setAsCurrentDate" data-tooltip
+        aria-label="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
         class="set-current-date-btn" {{#if isToday}}disabled{{/if}}>
         <i class="fas fa-calendar-check"></i>
         {{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrentBtn'}}{{/if}}
