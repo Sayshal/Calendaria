@@ -2356,6 +2356,21 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @inheritdoc */
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
+
+    // Theme tab: enable reset button when color changes
+    if (partId === 'theme') {
+      const colorInputs = htmlElement.querySelectorAll('input[type="color"][data-key]');
+      colorInputs.forEach((input) => {
+        input.addEventListener('change', () => {
+          const resetBtn = input.closest('.color-table-row')?.querySelector('.reset-color');
+          if (resetBtn) {
+            resetBtn.disabled = false;
+            resetBtn.removeAttribute('aria-disabled');
+          }
+        });
+      });
+    }
+
     if (partId === 'macros') {
       const moonSelect = htmlElement.querySelector('select[name="newMoonTrigger.moonIndex"]');
       const phaseSelect = htmlElement.querySelector('select[name="newMoonTrigger.phaseIndex"]');
