@@ -1,7 +1,7 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{! Welcome Section - visible to all users }}
-  <fieldset class="welcome-section">
+  <fieldset class="welcome-section" data-section="welcome">
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Welcome"}}</legend>
 
     <div class="welcome-content">
@@ -14,7 +14,7 @@
 
   {{! Recently Changed Settings - user-specific }}
   {{#if recentSettings.length}}
-    <fieldset class="recent-settings">
+    <fieldset class="recent-settings" data-section="recent-settings">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.RecentSettings"}}</legend>
 
       <div class="recent-list">
@@ -31,7 +31,7 @@
 
   {{! Active Calendar Fieldset }}
   {{#if showActiveCalendar}}
-    <fieldset>
+    <fieldset data-section="active-calendar">
       <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
 
       <div class="form-group">

@@ -7119,9 +7119,6 @@ span.calendaria-moon-icon {
 /* Settings Panel                           */
 /* ======================================== */
 .settings-panel {
-  --panel-sidebar-max-width: 11.25rem;
-  --panel-sidebar-min-width: 7.5rem;
-
   /* Standardized font sizes */
   fieldset {
     legend {
@@ -7197,8 +7194,8 @@ span.calendaria-moon-icon {
     justify-content: flex-start;
     align-items: stretch;
     width: max-content;
-    min-width: var(--panel-sidebar-min-width);
-    max-width: var(--panel-sidebar-max-width);
+    min-width: 8rem;
+    max-width: 8rem;
     height: 100%;
     padding: 0;
     border-top: none;
@@ -7253,6 +7250,34 @@ span.calendaria-moon-icon {
         background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
       }
     }
+  }
+
+  /* Settings Search */
+  .settings-search {
+    position: relative;
+
+    input[type='search'] {
+      border: none;
+      border-radius: 0;
+      font-size: var(--font-size-11);
+      padding: 0 0.3rem 0 2rem;
+      margin: 0;
+    }
+
+    > i {
+      position: absolute;
+      top: 50%;
+      left: 0.5rem;
+      transform: translateY(-50%);
+      font-size: var(--font-size-16);
+      pointer-events: none;
+    }
+  }
+
+  /* Search highlight */
+  .search-highlight,
+  fieldset.search-highlight {
+    background: color-mix(in srgb, var(--color-warm-1) 20%, transparent) !important;
   }
 
   a.button,
@@ -8213,6 +8238,88 @@ span.calendaria-moon-icon {
   }
 }
 
+/* Settings Search Dropdown (appended to body) */
+.calendaria-search-results {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  max-height: 30rem;
+  border-radius: 0.25rem;
+  overflow: hidden auto;
+  background: var(--color-cool-5);
+  box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 20%);
+
+  .search-result {
+    gap: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border: none;
+    border-bottom: 0.0625rem solid var(--color-cool-4);
+    color: var(--color-text-light-highlight);
+    cursor: pointer;
+    text-align: left;
+    background: transparent;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--color-cool-4);
+      color: var(--color-text-light-highlight);
+    }
+
+    .result-label {
+      flex: 1;
+      overflow: hidden;
+      font-size: var(--font-size-12);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result-tab {
+      flex-shrink: 0;
+      color: var(--color-text-dark-secondary);
+      font-size: var(--font-size-10);
+    }
+  }
+
+  .no-results {
+    padding: 0.75rem;
+    color: var(--color-text-dark-secondary);
+    font-size: var(--font-size-12);
+    font-style: italic;
+    text-align: center;
+  }
+}
+
+/* Settings Search Dropdown - Light Theme */
+.theme-light .calendaria-search-results {
+  border: 0.0625rem solid var(--color-border-light-tertiary);
+  background: var(--color-light-2);
+
+  .search-result {
+    border-bottom-color: var(--color-border-light-tertiary);
+    color: var(--color-text-dark-primary);
+
+    &:hover {
+      background: rgb(0 0 0 / 8%);
+      color: var(--color-text-dark-primary);
+    }
+
+    .result-tab {
+      color: var(--color-text-dark-5);
+    }
+  }
+
+  .no-results {
+    color: var(--color-text-dark-5);
+  }
+}
+
 /* Settings Panel - Light Theme */
 .theme-light .settings-panel {
   .settings-footer {
@@ -8238,6 +8345,10 @@ span.calendaria-moon-icon {
 
   .recent-settings .recent-item:hover {
     background: rgb(0 0 0 / 8%);
+  }
+
+  .format-preview {
+    color: var(--color-text-dark-5);
   }
 }
 

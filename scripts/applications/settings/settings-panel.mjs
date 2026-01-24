@@ -200,6 +200,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       this.element.dataset.formListenerAttached = 'true';
       this.element.addEventListener('change', () => this.#setSaveIndicator('saving'));
     }
+
+    this.#setupSearchListeners();
+  }
+
+  /** @override */
+  _onClose(options) {
+    super._onClose(options);
+    this.#destroySearchDropdown();
   }
 
   /** Track save indicator state across re-renders */
@@ -226,6 +234,191 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (icon) icon.className = 'fas fa-check';
       if (text?.nodeType === Node.TEXT_NODE) text.textContent = localize('CALENDARIA.SettingsPanel.Footer.Saved');
     }
+  }
+
+  /** Cached search index */
+  #searchIndex = null;
+
+  /**
+   * Build the search index from SETTING_METADATA.
+   * @returns {Array<object>} Array of searchable items
+   */
+  #buildSearchIndex() {
+    if (this.#searchIndex) return this.#searchIndex;
+    const index = [];
+    const settingLabels = new Set();
+    for (const [key, meta] of Object.entries(SettingsPanel.SETTING_METADATA)) {
+      const label = localize(meta.label);
+      const hintKey = meta.label.replace('.Name', '.Hint');
+      const hint = game.i18n.has(hintKey) ? localize(hintKey) : '';
+      const tabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === meta.tab);
+      const tabLabel = tabDef ? localize(tabDef.label) : meta.tab;
+      index.push({ type: 'setting', key, tab: meta.tab, tabLabel, label, searchText: `${label} ${hint}`.toLowerCase() });
+      settingLabels.add(`${meta.tab}:${label.toLowerCase()}`);
+    }
+    this.element.querySelectorAll('fieldset[data-section]').forEach((fieldset) => {
+      const legend = fieldset.querySelector(':scope > legend');
+      if (!legend) return;
+      const label = legend.textContent.trim();
+      if (!label) return;
+      const tabEl = fieldset.closest('[data-tab]');
+      if (!tabEl) return;
+      const tab = tabEl.dataset.tab;
+      if (settingLabels.has(`${tab}:${label.toLowerCase()}`)) return;
+      const tabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === tab);
+      const tabLabel = tabDef ? localize(tabDef.label) : tab;
+      const fieldsetId = fieldset.dataset.section;
+      index.push({ type: 'fieldset', key: `${tab}:${fieldsetId}`, tab, tabLabel, label, searchText: label.toLowerCase() });
+    });
+    this.#searchIndex = index;
+    return index;
+  }
+
+  /** Reference to the search results dropdown appended to body */
+  #searchDropdown = null;
+
+  /**
+   * Setup search input listeners.
+   */
+  #setupSearchListeners() {
+    const searchInput = this.element.querySelector('input[name="settingsSearch"]');
+    if (!searchInput || searchInput.dataset.listenerAttached) return;
+    searchInput.dataset.listenerAttached = 'true';
+    let searchTimeout = null;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      const query = e.target.value.trim().toLowerCase();
+      if (query.length < 2) {
+        this.#destroySearchDropdown();
+        return;
+      }
+      searchTimeout = setTimeout(() => this.#performSearch(query, searchInput), 150);
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.#destroySearchDropdown();
+        searchInput.value = '';
+        searchInput.blur();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!this.#searchDropdown) return;
+      if (!searchInput.contains(e.target) && !this.#searchDropdown.contains(e.target)) {
+        this.#destroySearchDropdown();
+        searchInput.value = '';
+      }
+    });
+  }
+
+  /**
+   * Destroy the search dropdown if it exists.
+   */
+  #destroySearchDropdown() {
+    if (this.#searchDropdown) {
+      this.#searchDropdown.remove();
+      this.#searchDropdown = null;
+    }
+  }
+
+  /**
+   * Create and return the search dropdown, appending to body.
+   * @returns {HTMLElement} The dropdown element
+   */
+  #getOrCreateSearchDropdown() {
+    if (!this.#searchDropdown) {
+      this.#searchDropdown = document.createElement('div');
+      this.#searchDropdown.className = 'calendaria-search-results';
+      document.body.appendChild(this.#searchDropdown);
+    }
+    return this.#searchDropdown;
+  }
+
+  /**
+   * Position the search results dropdown using fixed positioning.
+   * @param {HTMLElement} container - Results container
+   * @param {HTMLElement} searchInput - The search input element
+   */
+  #positionSearchResults(container, searchInput) {
+    const rect = searchInput.getBoundingClientRect();
+    const dropdownWidth = rect.width * 1.5;
+    const leftOffset = (dropdownWidth - rect.width) / 2;
+    container.style.top = `${rect.bottom + 4}px`;
+    container.style.left = `${rect.left - leftOffset}px`;
+    container.style.width = `${dropdownWidth}px`;
+  }
+
+  /**
+   * Perform search and display results.
+   * @param {string} query - Search query
+   * @param {HTMLElement} searchInput - The search input element
+   */
+  #performSearch(query, searchInput) {
+    const container = this.#getOrCreateSearchDropdown();
+    const index = this.#buildSearchIndex();
+    const results = index.filter((item) => item.searchText.includes(query)).slice(0, 10);
+    if (results.length === 0) {
+      container.innerHTML = `<div class="no-results">${localize('CALENDARIA.SettingsPanel.Search.NoResults')}</div>`;
+      this.#positionSearchResults(container, searchInput);
+      return;
+    }
+    container.innerHTML = results
+      .map(
+        (item) => `
+      <button type="button" class="search-result" data-tab="${item.tab}" data-key="${item.key}" data-type="${item.type}">
+        <span class="result-label">${item.label}</span>
+        <span class="result-tab">${item.tabLabel}</span>
+      </button>
+    `
+      )
+      .join('');
+    this.#positionSearchResults(container, searchInput);
+    container.querySelectorAll('.search-result').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.#onSearchResultClick(btn.dataset.tab, btn.dataset.key, btn.dataset.type);
+      });
+    });
+  }
+
+  /**
+   * Handle search result click - navigate to tab and highlight element.
+   * @param {string} tab - Tab ID
+   * @param {string} key - Setting key or fieldset ID
+   * @param {string} type - Result type ('setting' or 'fieldset')
+   */
+  #onSearchResultClick(tab, key, type) {
+    const searchInput = this.element.querySelector('input[name="settingsSearch"]');
+    if (searchInput) searchInput.value = '';
+    this.#destroySearchDropdown();
+    this.changeTab(tab, 'primary');
+    setTimeout(() => {
+      const tabContent = this.element.querySelector(`section.tab[data-tab="${tab}"]`);
+      if (!tabContent) return;
+      let targetEl;
+      if (type === 'fieldset') {
+        const fieldsetId = key.includes(':') ? key.split(':')[1] : key;
+        targetEl = tabContent.querySelector(`fieldset[data-section="${fieldsetId}"]`);
+      } else {
+        const settingEl = tabContent.querySelector(`[name="${key}"], [data-setting="${key}"]`);
+        targetEl = settingEl?.closest('.form-group') || settingEl?.closest('fieldset') || settingEl;
+        if (!targetEl) {
+          for (const [sectionId, settingKeys] of Object.entries(SettingsPanel.SECTION_SETTINGS)) {
+            if (settingKeys.includes(key)) {
+              targetEl = tabContent.querySelector(`fieldset[data-section="${sectionId}"]`);
+              break;
+            }
+          }
+        }
+      }
+      if (targetEl) {
+        const containerRect = tabContent.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        const scrollTop = tabContent.scrollTop + (targetRect.top - containerRect.top) - 16;
+        tabContent.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+        targetEl.classList.add('search-highlight');
+        setTimeout(() => targetEl.classList.remove('search-highlight'), 2000);
+      }
+    }, 100);
   }
 
   /** @override */
@@ -467,9 +660,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     // Stopwatch tab sections
     'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
     // Permissions tab sections
-    'permissions': [SETTINGS.PERMISSIONS],
+    permissions: [SETTINGS.PERMISSIONS],
     // Theme tab sections
-    'theme': [SETTINGS.CUSTOM_THEME_COLORS, SETTINGS.THEME_MODE]
+    theme: [SETTINGS.CUSTOM_THEME_COLORS, SETTINGS.THEME_MODE]
   };
 
   /**

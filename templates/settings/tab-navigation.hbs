@@ -1,4 +1,10 @@
 <nav class="sheet-tabs tabs vertical" aria-roledescription="{{localize "SHEETS.FormNavLabel"}}">
+  {{! Search input }}
+  <div class="settings-search">
+    <input type="search" name="settingsSearch" placeholder="{{localize "CALENDARIA.SettingsPanel.Search.Placeholder"}}"
+      aria-label="{{localize "CALENDARIA.SettingsPanel.Search.Label"}}">
+    <i class="fas fa-search" inert></i>
+  </div>
   {{! Ungrouped tabs first }}
   {{#each ungroupedTabs as |tab|}}
     <a data-action="tab" data-group="{{tab.group}}" data-tab="{{tab.id}}" {{#if tab.cssClass}}class="{{tab.cssClass}}"

@@ -1,7 +1,7 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset>
+    <fieldset data-section="global-triggers">
       <legend>{{localize "CALENDARIA.MacroTrigger.GlobalTriggers"}}</legend>
       <p class="hint">{{localize "CALENDARIA.MacroTrigger.GlobalTriggersHint"}}</p>
 
@@ -19,7 +19,7 @@
     </fieldset>
 
     {{#if hasSeasons}}
-      <fieldset>
+      <fieldset data-section="season-triggers">
         <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
         <div class="fieldset-header-row">
           <p class="hint">{{localize "CALENDARIA.MacroTrigger.SeasonTriggersHint"}}</p>
@@ -62,14 +62,14 @@
         </div>
       </fieldset>
     {{else}}
-      <fieldset>
+      <fieldset data-section="season-triggers">
         <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
         <p class="hint no-seasons">{{localize "CALENDARIA.MacroTrigger.NoSeasons"}}</p>
       </fieldset>
     {{/if}}
 
     {{#if hasMoons}}
-      <fieldset>
+      <fieldset data-section="moon-triggers">
         <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
         <div class="fieldset-header-row">
           <p class="hint">{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggersHint"}}</p>
@@ -124,7 +124,7 @@
         </div>
       </fieldset>
     {{else}}
-      <fieldset>
+      <fieldset data-section="moon-triggers">
         <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
         <p class="hint no-moons">{{localize "CALENDARIA.MacroTrigger.NoMoons"}}</p>
       </fieldset>
