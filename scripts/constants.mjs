@@ -16,6 +16,7 @@ export const SETTINGS = {
   ACTIVE_CALENDAR: 'activeCalendar',
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
   AMBIENCE_SYNC: 'ambienceSync',
+  ALLOW_SIDEBAR_OVERLAP: 'allowSidebarOverlap',
   CALENDAR_HUD_LOCKED: 'calendarHUDLocked',
   CALENDAR_HUD_MODE: 'calendarHUDMode',
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',

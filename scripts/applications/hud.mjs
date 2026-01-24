@@ -859,10 +859,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
-    const sidebar = document.getElementById('sidebar');
-    const sidebarWidth = sidebar && !sidebar.classList.contains('collapsed') ? sidebar.offsetWidth : 0;
+    const rightBuffer = StickyZones.getSidebarBuffer();
     let { left, top } = this.position;
-    left = Math.max(0, Math.min(left, window.innerWidth - rect.width - sidebarWidth));
+    left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
     this.setPosition({ left, top });
   }
@@ -957,11 +956,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       // Only count as moved if we exceed a small threshold
       if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) hasMoved = true;
       const rect = this.element.getBoundingClientRect();
-      const sidebar = document.getElementById('sidebar');
-      const sidebarWidth = sidebar && !sidebar.classList.contains('collapsed') ? sidebar.offsetWidth : 0;
+      const rightBuffer = StickyZones.getSidebarBuffer();
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
-      newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - sidebarWidth));
+      newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
       this.#updateDomeVisibility();

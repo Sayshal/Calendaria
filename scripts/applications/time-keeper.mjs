@@ -164,8 +164,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
+    const rightBuffer = StickyZones.getSidebarBuffer();
     let { left, top } = this.position;
-    left = Math.max(0, Math.min(left, window.innerWidth - rect.width));
+    left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
     this.setPosition({ left, top });
   }
@@ -211,9 +212,10 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
+      const rightBuffer = StickyZones.getSidebarBuffer();
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
-      newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
+      newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
       this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);

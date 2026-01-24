@@ -548,6 +548,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampShowTime.Name' },
     [SETTINGS.PERMISSIONS]: { tab: 'permissions', label: 'CALENDARIA.SettingsPanel.Tab.Permissions' },
     [SETTINGS.HUD_STICKY_ZONES_ENABLED]: { tab: 'canvas', label: 'CALENDARIA.Settings.StickyZones.Name' },
+    [SETTINGS.ALLOW_SIDEBAR_OVERLAP]: { tab: 'canvas', label: 'CALENDARIA.Settings.AllowSidebarOverlap.Name' },
     [SETTINGS.DARKNESS_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessSync.Name' },
     [SETTINGS.DARKNESS_WEATHER_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessWeatherSync.Name' },
     [SETTINGS.AMBIENCE_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.AmbienceSync.Name' },
@@ -695,7 +696,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     // Chat tab sections
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     // Canvas tab sections
-    'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED],
+    'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [SETTINGS.DARKNESS_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC, SETTINGS.AMBIENCE_SYNC, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER],
     // Weather tab sections
     'weather-temperature': [SETTINGS.TEMPERATURE_UNIT],
@@ -1289,6 +1290,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareCanvasContext(context) {
     context.stickyZonesEnabled = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED);
+    context.allowSidebarOverlap = game.settings.get(MODULE.ID, SETTINGS.ALLOW_SIDEBAR_OVERLAP);
     context.darknessSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
     context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
     context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
@@ -1529,6 +1531,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
     if ('stickyZonesEnabled' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED, data.stickyZonesEnabled);
+    if ('allowSidebarOverlap' in data) await game.settings.set(MODULE.ID, SETTINGS.ALLOW_SIDEBAR_OVERLAP, data.allowSidebarOverlap);
     if ('hudShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER, data.hudShowWeather);
     if ('hudShowSeason' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_SEASON, data.hudShowSeason);
     if ('hudShowEra' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_ERA, data.hudShowEra);

@@ -16,6 +16,15 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.StickyZones.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="allowSidebarOverlap">{{localize "CALENDARIA.Settings.AllowSidebarOverlap.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="allowSidebarOverlap" name="allowSidebarOverlap"
+            {{#if allowSidebarOverlap}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AllowSidebarOverlap.Hint"}}</p>
+      </div>
     </fieldset>
 
     <fieldset data-section="canvas-scene-integration">

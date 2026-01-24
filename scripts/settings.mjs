@@ -438,6 +438,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  /** Allow Calendaria windows to overlap sidebar area */
+  game.settings.register(MODULE.ID, SETTINGS.ALLOW_SIDEBAR_OVERLAP, {
+    name: 'CALENDARIA.Settings.AllowSidebarOverlap.Name',
+    hint: 'CALENDARIA.Settings.AllowSidebarOverlap.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   /** Default brightness multiplier for all scenes */
   game.settings.register(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER, {
     name: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name',

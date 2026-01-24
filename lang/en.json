@@ -1237,6 +1237,8 @@
   "CALENDARIA.Settings.AdvanceTimeOnRest.Name": "Advance Time on Rest",
   "CALENDARIA.Settings.AmbienceSync.Hint": "Automatically adjust scene ambient lighting (hue/saturation) based on weather and climate zone. Disable to keep manual control of ambience settings.",
   "CALENDARIA.Settings.AmbienceSync.Name": "Sync Scene Ambience with Weather",
+  "CALENDARIA.Settings.AllowSidebarOverlap.Hint": "Allow the HUD to be dragged over the sidebar area. Useful if you've relocated the sidebar with another module.",
+  "CALENDARIA.Settings.AllowSidebarOverlap.Name": "Allow Sidebar Overlap",
   "CALENDARIA.Settings.AutoFade.Hint": "Fade when idle. Returns to full visibility on hover.",
   "CALENDARIA.Settings.AutoFade.Name": "Auto-Fade When Idle",
   "CALENDARIA.Settings.CalendarEditor.Hint": "Create and edit custom calendars for your world.",

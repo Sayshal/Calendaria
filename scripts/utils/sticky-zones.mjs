@@ -14,6 +14,21 @@ export const SNAP_DISTANCE = 50;
 /** CSS class for wobble animation */
 export const WOBBLE_CLASS = 'near-snap';
 
+/** Buffer pixels between windows and sidebar */
+const SIDEBAR_BUFFER = 8;
+
+/**
+ * Get the right-side boundary buffer (Foundry sidebar width + buffer).
+ * @returns {number} Pixels to reserve on the right side
+ */
+export function getSidebarBuffer() {
+  const allowOverlap = game.settings.get(MODULE.ID, SETTINGS.ALLOW_SIDEBAR_OVERLAP);
+  if (allowOverlap) return SIDEBAR_BUFFER;
+  const sidebar = document.getElementById('sidebar');
+  const sidebarWidth = sidebar && !sidebar.classList.contains('collapsed') ? sidebar.offsetWidth : 0;
+  return sidebarWidth + SIDEBAR_BUFFER;
+}
+
 /** CSS class for pinned/docked state */
 export const PINNED_CLASS = 'calendaria-pinned';
 
