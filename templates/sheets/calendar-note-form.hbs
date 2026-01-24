@@ -523,7 +523,7 @@
         </div>
         <div class="form-group-stacked">
           <label>{{localize "CALENDARIA.Note.ReminderTargets"}}</label>
-          <select name="system.reminderTargets" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTargetsTooltip"
+          <select name="system.reminderTargets" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTargetsTooltip'}}"
             {{#unless showReminderOptions}}disabled{{/unless}}>
             {{#each reminderTargetOptions}}
               <option value=" {{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -534,7 +534,7 @@
           <label>{{localize "CALENDARIA.Note.ReminderOffset"}}</label>
           <div class="inline-form">
             <input type="number" name="system.reminderOffset" value="{{system.reminderOffset}}" min="0" max="720"
-              step="1" placeholder="0" data-tooltip aria-label="{{localize 'CALENDARIA.Note.ReminderOffsetTooltip"
+              step="1" placeholder="0" data-tooltip aria-label="{{localize 'CALENDARIA.Note.ReminderOffsetTooltip'}}"
               {{#unless showReminderOptions}}disabled{{/unless}}>
             <span class=" hint">{{localize "CALENDARIA.Note.HoursBefore"}}</span>
           </div>

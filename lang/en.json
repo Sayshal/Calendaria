@@ -1379,6 +1379,7 @@
   "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name": "Show Active Calendar to Players",
   "CALENDARIA.Settings.ShowMiniCal.Hint": "Display the MiniCal on world load.",
   "CALENDARIA.Settings.ShowMiniCal.Name": "Show MiniCal on Load",
+  "CALENDARIA.Settings.ShowMoonPhases.Name": "Show Moon Phases",
   "CALENDARIA.Settings.ShowTimeKeeper.Hint": "Display the TimeKeeper on world load for quick time control access.",
   "CALENDARIA.Settings.ShowTimeKeeper.Name": "Show TimeKeeper on Load",
   "CALENDARIA.Settings.ShowJournalFooter.Hint": "Replace the Journal sidebar footer with quick-access buttons for Calendaria apps. Requires reload.",
