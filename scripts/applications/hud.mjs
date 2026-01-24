@@ -98,6 +98,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether combat is currently active */
   #inCombat = false;
 
+  /** @type {Function|null} Debounced resize handler for window resize */
+  #resizeHandler = null;
+
+  /** @type {Function|null} Debounced fullscreen change handler */
+  #fullscreenHandler = null;
+
   /** @type {object|null} Currently active sticky zone during drag */
   #activeSnapZone = null;
 
@@ -445,6 +451,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       HUD.#closedForCombat = true;
       this.close({ combat: true });
     }
+    // Register resize handler for fullscreen/window resize
+    this.#resizeHandler = foundry.utils.debounce(() => this.#onViewportResize(), 100);
+    window.addEventListener('resize', this.#resizeHandler);
+    // Fullscreenchange fires immediately - use shorter delay for snappier response
+    this.#fullscreenHandler = foundry.utils.debounce(() => this.#onViewportResize(), 50);
+    document.addEventListener('fullscreenchange', this.#fullscreenHandler);
   }
 
   /**
@@ -486,6 +498,14 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#clickOutsideHandler) {
       document.removeEventListener('mousedown', this.#clickOutsideHandler);
       this.#clickOutsideHandler = null;
+    }
+    if (this.#resizeHandler) {
+      window.removeEventListener('resize', this.#resizeHandler);
+      this.#resizeHandler = null;
+    }
+    if (this.#fullscreenHandler) {
+      document.removeEventListener('fullscreenchange', this.#fullscreenHandler);
+      this.#fullscreenHandler = null;
     }
     if (this.#searchPanelEl?.parentElement === document.body) {
       this.#searchPanelEl.remove();
@@ -845,6 +865,56 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - sidebarWidth));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
     this.setPosition({ left, top });
+  }
+
+  /**
+   * Handle viewport resize (fullscreen toggle, window resize).
+   * Recalculates position based on snapped zone or center-based positioning.
+   */
+  #onViewportResize() {
+    if (!this.rendered || !this.element) return;
+    log(3, 'HUD resize triggered', { viewport: { w: window.innerWidth, h: window.innerHeight }, zone: this.#snappedZoneId });
+    // Skip if DOM-parented (position flows with parent)
+    if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) {
+      log(3, 'HUD resize skipped - DOM parented zone');
+      return;
+    }
+    const rect = this.element.getBoundingClientRect();
+    const barEl = this.element.querySelector('.calendaria-hud-bar');
+    const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
+    const beforePos = { left: this.position.left, top: this.position.top };
+    if (this.#snappedZoneId) {
+      // Recalculate zone position with new viewport dimensions
+      const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
+      if (zonePos) {
+        let newTop = zonePos.top;
+        // For bottom-anchored zones, maintain anchorY relative position
+        if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+          const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
+          if (typeof savedPos?.anchorY === 'number') {
+            // Recalculate based on hotbar's new position
+            const hotbar = document.getElementById('hotbar');
+            if (hotbar) {
+              const hotbarRect = hotbar.getBoundingClientRect();
+              newTop = hotbarRect.top - barHeight;
+            }
+          }
+        }
+        this.setPosition({ left: zonePos.left, top: newTop });
+        log(3, 'HUD resize - zone repositioned', { zone: this.#snappedZoneId, from: beforePos, to: { left: zonePos.left, top: newTop } });
+      }
+    } else {
+      // Free positioning: recenter based on saved center coordinates
+      const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
+      if (savedPos && typeof savedPos.centerX === 'number' && typeof savedPos.centerY === 'number') {
+        const newLeft = savedPos.centerX - rect.width / 2;
+        const newTop = savedPos.centerY - rect.height / 2;
+        this.setPosition({ left: newLeft, top: newTop });
+        log(3, 'HUD resize - center repositioned', { center: { x: savedPos.centerX, y: savedPos.centerY }, from: beforePos, to: { left: newLeft, top: newTop } });
+      }
+    }
+    this.#clampToViewport();
+    this.#updateDomeVisibility();
   }
 
   /**
