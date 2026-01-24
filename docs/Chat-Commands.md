@@ -76,9 +76,14 @@ Display today's sunrise time.
 
 ```text
 /sunrise
+/sunrise {h}:{mm} {A}
 ```
 
-**Output:** Sunrise time for the current day.
+**Arguments:**
+
+- Optional format string using [format tokens](Settings#format-tokens)
+
+**Output:** Formatted sunrise time for the current day.
 
 ---
 
@@ -88,9 +93,14 @@ Display today's sunset time.
 
 ```text
 /sunset
+/sunset {h}:{mm} {A}
 ```
 
-**Output:** Sunset time for the current day.
+**Arguments:**
+
+- Optional format string using [format tokens](Settings#format-tokens)
+
+**Output:** Formatted sunset time for the current day.
 
 ---
 

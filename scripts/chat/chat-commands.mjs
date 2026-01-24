@@ -19,8 +19,8 @@ const COMMAND_PATTERNS = {
   moon: /^\/moon$/i,
   season: /^\/season$/i,
   today: /^\/today$/i,
-  sunrise: /^\/sunrise$/i,
-  sunset: /^\/sunset$/i,
+  sunrise: /^\/sunrise(?:\s+(.*))?$/i,
+  sunset: /^\/sunset(?:\s+(.*))?$/i,
   advance: /^\/advance\s+(.+)$/i,
   calendar: /^\/calendar$/i
 };
@@ -94,8 +94,8 @@ function handleCommand(cmd, match) {
     moon: cmdMoon,
     season: cmdSeason,
     today: cmdToday,
-    sunrise: cmdSunrise,
-    sunset: cmdSunset,
+    sunrise: () => cmdSunrise(match[1]?.trim() || ''),
+    sunset: () => cmdSunset(match[1]?.trim() || ''),
     advance: () => cmdAdvance(match[1]),
     calendar: cmdCalendar
   };
@@ -241,27 +241,39 @@ async function cmdToday() {
 }
 
 /**
- * Handle /sunrise command - output sunrise time.
+ * Handle /sunrise command - output formatted sunrise time.
+ * @param {string} formatStr - Optional format string
  * @returns {Promise<void>}
  */
-async function cmdSunrise() {
+async function cmdSunrise(formatStr) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
   const sunrise = CalendariaAPI.getSunrise();
   if (sunrise == null) return sendChat(localize('CALENDARIA.ChatCommand.NoSunData'));
-  await sendChat(`<i class="fas fa-sun"></i> ${localize('CALENDARIA.ChatCommand.Sunrise')}: ${formatHours(sunrise)}`);
+  const dt = CalendariaAPI.getCurrentDateTime();
+  const h = Math.floor(sunrise);
+  const m = Math.round((sunrise - h) * 60);
+  const components = { ...dt, hour: h, minute: m, second: 0 };
+  const formatted = CalendariaAPI.formatDate(components, formatStr || 'time24');
+  await sendChat(`<i class="fas fa-sun"></i> ${localize('CALENDARIA.ChatCommand.Sunrise')}: ${formatted}`);
 }
 
 /**
- * Handle /sunset command - output sunset time.
+ * Handle /sunset command - output formatted sunset time.
+ * @param {string} formatStr - Optional format string
  * @returns {Promise<void>}
  */
-async function cmdSunset() {
+async function cmdSunset(formatStr) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
   const sunset = CalendariaAPI.getSunset();
   if (sunset == null) return sendChat(localize('CALENDARIA.ChatCommand.NoSunData'));
-  await sendChat(`<i class="fas fa-moon"></i> ${localize('CALENDARIA.ChatCommand.Sunset')}: ${formatHours(sunset)}`);
+  const dt = CalendariaAPI.getCurrentDateTime();
+  const h = Math.floor(sunset);
+  const m = Math.round((sunset - h) * 60);
+  const components = { ...dt, hour: h, minute: m, second: 0 };
+  const formatted = CalendariaAPI.formatDate(components, formatStr || 'time24');
+  await sendChat(`<i class="fas fa-moon"></i> ${localize('CALENDARIA.ChatCommand.Sunset')}: ${formatted}`);
 }
 
 /**
