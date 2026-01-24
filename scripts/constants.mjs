@@ -84,7 +84,9 @@ export const SETTINGS = {
   TIME_SPEED_MULTIPLIER: 'timeSpeedMultiplier',
   TIMEKEEPER_AUTO_FADE: 'timeKeeperAutoFade',
   TIMEKEEPER_IDLE_OPACITY: 'timeKeeperIdleOpacity',
-  TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps'
+  TIMEKEEPER_STICKY_STATES: 'timeKeeperStickyStates',
+  TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
+  STOPWATCH_STICKY_STATES: 'stopwatchStickyStates'
 };
 
 /**

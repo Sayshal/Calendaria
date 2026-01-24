@@ -61,6 +61,23 @@
     </div>
   </fieldset>
 
+  <fieldset data-section="timekeeper-sticky">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="timekeeper-sticky" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
+    <input type="hidden" name="timeKeeperStickySection" value="1">
+
+    <div class="form-group">
+      <label for="timeKeeperStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="timeKeeperStickyPosition" name="timeKeeperStickyPosition"
+          {{#if timeKeeperStickyPosition}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+    </div>
+  </fieldset>
+
   {{#if isGM}}
     <fieldset data-section="timekeeper-time-jumps">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}

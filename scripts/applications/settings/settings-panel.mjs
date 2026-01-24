@@ -645,7 +645,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'minical-time-jumps': [SETTINGS.MINI_CAL_TIME_JUMPS],
     // TimeKeeper tab sections
     'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY],
+    'timekeeper-sticky': [SETTINGS.TIMEKEEPER_STICKY_STATES],
     'timekeeper-time-jumps': [SETTINGS.TIMEKEEPER_TIME_JUMPS],
+    // Stopwatch tab sections
+    'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
+    'stopwatch-sticky': [SETTINGS.STOPWATCH_STICKY_STATES],
     // Time tab sections
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT],
     'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.SYNC_CLOCK_PAUSE],
@@ -1050,6 +1054,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareStopwatchContext(context) {
     context.stopwatchAutoStartTime = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME);
+    const stopwatchSticky = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES);
+    context.stopwatchStickyPosition = stopwatchSticky?.position ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stopwatch' });
   }
@@ -1073,6 +1079,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER);
     context.timeKeeperAutoFade = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE);
     context.timeKeeperIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY);
+    const timeKeeperSticky = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES);
+    context.timeKeeperStickyPosition = timeKeeperSticky?.position ?? false;
 
     // Format locations for TimeKeeper
     context.formatLocations = this.#prepareFormatLocationsForCategory('timekeeper');
@@ -1371,12 +1379,24 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
+      const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
       await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+        ...current,
         timeControls: !!data.miniCalStickyTimeControls,
         sidebar: !!data.miniCalStickySidebar,
         position: !!data.miniCalStickyPosition
       });
       MiniCal.refreshStickyStates();
+    }
+    if ('timeKeeperStickySection' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, {
+        position: !!data.timeKeeperStickyPosition
+      });
+    }
+    if ('stopwatchStickySection' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, {
+        position: !!data.stopwatchStickyPosition
+      });
     }
 
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
@@ -1526,7 +1546,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Re-render applications when their settings change
-    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity'];
+    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity', 'timeKeeperStickyPosition'];
     if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('time-keeper')?.render();
 
     const hudKeys = [

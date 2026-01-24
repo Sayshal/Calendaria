@@ -880,6 +880,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       StickyZones.hideSnapIndicator();
       // If no actual movement, preserve the existing zone state
       if (!hasMoved) {
+        dragHandle.classList.remove(StickyZones.WOBBLE_CLASS);
         this.#activeSnapZone = null;
         previousZoneId = null;
         return;

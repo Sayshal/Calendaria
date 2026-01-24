@@ -34,6 +34,24 @@
       </div>
     </fieldset>
 
+    <fieldset data-section="stopwatch-sticky">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-sticky"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
+      <input type="hidden" name="stopwatchStickySection" value="1">
+
+      <div class="form-group">
+        <label for="stopwatchStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="stopwatchStickyPosition" name="stopwatchStickyPosition"
+            {{#if stopwatchStickyPosition}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+      </div>
+    </fieldset>
+
     <fieldset data-section="stopwatch-formats">
       <legend>{{localize "CALENDARIA.Format.Category.Stopwatch"}}
         <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="stopwatch"

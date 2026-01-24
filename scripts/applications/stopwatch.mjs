@@ -692,8 +692,26 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: '<i class="fas fa-arrows-to-dot"></i>',
       callback: () => this.resetPosition()
     });
+    const stickyStates = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};
+    const isLocked = stickyStates.position ?? false;
+    items.push({
+      name: isLocked ? 'CALENDARIA.Stopwatch.ContextMenu.UnlockPosition' : 'CALENDARIA.Stopwatch.ContextMenu.LockPosition',
+      icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
+      callback: () => this.#toggleStickyPosition()
+    });
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
+  }
+
+  /**
+   * Toggle position lock state.
+   * @private
+   */
+  async #toggleStickyPosition() {
+    const current = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};
+    const newLocked = !(current.position ?? false);
+    await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, { ...current, position: newLocked });
+    ui.notifications.info(newLocked ? 'CALENDARIA.Stopwatch.ContextMenu.PositionLocked' : 'CALENDARIA.Stopwatch.ContextMenu.PositionUnlocked', { localize: true });
   }
 
   /**

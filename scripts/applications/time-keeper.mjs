@@ -290,8 +290,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: '<i class="fas fa-arrows-to-dot"></i>',
       callback: () => this.resetPosition()
     });
-    const stickyStates = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
-    const isLocked = stickyStates.positionLocked ?? false;
+    const stickyStates = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
+    const isLocked = stickyStates.position ?? false;
     items.push({
       name: isLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.UnlockPosition' : 'CALENDARIA.TimeKeeper.ContextMenu.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
@@ -320,17 +320,17 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   async #saveStickyStates(updates) {
-    const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
-    await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, { ...current, ...updates });
+    const current = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
+    await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { ...current, ...updates });
   }
 
   /**
    * Toggle position lock state.
    */
   async _toggleStickyPosition() {
-    const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
-    const newLocked = !(current.positionLocked ?? false);
-    await this.#saveStickyStates({ positionLocked: newLocked });
+    const current = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
+    const newLocked = !(current.position ?? false);
+    await this.#saveStickyStates({ position: newLocked });
     ui.notifications.info(newLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.PositionLocked' : 'CALENDARIA.TimeKeeper.ContextMenu.PositionUnlocked', { localize: true });
   }
 

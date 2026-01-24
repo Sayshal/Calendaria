@@ -84,6 +84,14 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Sticky states for Stopwatch */
+  game.settings.register(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, {
+    name: 'Stopwatch Sticky States',
+    scope: 'user',
+    config: false,
+    type: new ObjectField({ initial: { position: false } })
+  });
+
   /** MiniCal auto-fade on idle */
   game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_AUTO_FADE, {
     name: 'CALENDARIA.Settings.AutoFade.Name',
@@ -251,6 +259,14 @@ export function registerSettings() {
         year: { dec2: -10, dec1: -1, inc1: 1, inc2: 10 }
       }
     })
+  });
+
+  /** Sticky states for TimeKeeper */
+  game.settings.register(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, {
+    name: 'TimeKeeper Sticky States',
+    scope: 'user',
+    config: false,
+    type: new ObjectField({ initial: { position: false } })
   });
 
   /** MiniCal custom time jump amounts per interval */
