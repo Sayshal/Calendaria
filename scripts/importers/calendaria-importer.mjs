@@ -11,6 +11,7 @@ import BaseImporter from './base-importer.mjs';
 /**
  * Importer for Calendaria JSON exports.
  * Since exported data is already in Calendaria format, minimal transformation is needed.
+ * Also accepts settings export files that contain calendarData.
  * @extends BaseImporter
  */
 export default class CalendariaImporter extends BaseImporter {
@@ -23,13 +24,28 @@ export default class CalendariaImporter extends BaseImporter {
   static fileExtensions = ['.json'];
 
   /**
+   * Check if data is a settings export file and extract calendar data if so.
+   * @param {object} data - Raw data from file
+   * @returns {object} Calendar data (extracted from settings export or original)
+   */
+  #extractCalendarData(data) {
+    // Detect settings export format: has settings object and calendarData
+    if (data.settings && data.calendarData?.name) {
+      log(3, 'Detected settings export file, extracting calendarData');
+      return data.calendarData;
+    }
+    return data;
+  }
+
+  /**
    * Extract current date from Calendaria data for preservation after import.
    * @param {object} data - Raw Calendaria data
    * @returns {{year: number, month: number, day: number}|null} Current date
    */
   extractCurrentDate(data) {
-    if (data.currentDate) return data.currentDate;
-    if (data.metadata?.currentDate) return data.metadata.currentDate;
+    const calendarData = this.#extractCalendarData(data);
+    if (calendarData.currentDate) return calendarData.currentDate;
+    if (calendarData.metadata?.currentDate) return calendarData.metadata.currentDate;
     return null;
   }
 
@@ -39,8 +55,9 @@ export default class CalendariaImporter extends BaseImporter {
    * @returns {Promise<object[]>} Array of note data objects
    */
   async extractNotes(data) {
-    if (!data.notes?.length) return [];
-    return data.notes.map((note) => ({
+    const calendarData = this.#extractCalendarData(data);
+    if (!calendarData.notes?.length) return [];
+    return calendarData.notes.map((note) => ({
       name: note.name,
       content: note.content || '',
       startDate: note.startDate,
@@ -56,16 +73,18 @@ export default class CalendariaImporter extends BaseImporter {
   /**
    * Transform Calendaria export data.
    * Validates structure and passes through with minimal changes.
-   * @param {object} data - Raw Calendaria export data
+   * Also handles settings export files by extracting calendarData.
+   * @param {object} data - Raw Calendaria export data or settings export
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data) {
-    if (!data.name || !data.months?.values) throw new Error('Invalid Calendaria export format');
-    log(3, `Transforming Calendaria export: ${data.name}`);
-    const metadata = { ...data.metadata };
+    const calendarData = this.#extractCalendarData(data);
+    if (!calendarData.name || !calendarData.months?.values) throw new Error('Invalid Calendaria export format');
+    log(3, `Transforming Calendaria export: ${calendarData.name}`);
+    const metadata = { ...calendarData.metadata };
     delete metadata.id;
     delete metadata.importedAt;
     metadata.importedFrom = 'calendaria';
-    return { ...data, metadata };
+    return { ...calendarData, metadata };
   }
 }
