@@ -339,7 +339,11 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return '';
     const raw = components || game.time.components;
-    const formatted = { ...raw, dayOfMonth: (raw.dayOfMonth ?? 0) + 1 };
+    const formatted = {
+      ...raw,
+      year: components ? raw.year : raw.year + (calendar.years?.yearZero ?? 0),
+      dayOfMonth: components ? (raw.day || 1) : (raw.dayOfMonth ?? 0) + 1
+    };
     if (PRESET_FORMATTERS[formatOrPreset]) return PRESET_FORMATTERS[formatOrPreset](calendar, formatted);
     const formatStr = resolveFormatString(formatOrPreset);
     return formatCustom(calendar, formatted, formatStr);

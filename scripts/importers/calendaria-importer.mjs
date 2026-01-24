@@ -34,6 +34,26 @@ export default class CalendariaImporter extends BaseImporter {
   }
 
   /**
+   * Extract notes from Calendaria export data.
+   * @param {object} data - Raw Calendaria export data
+   * @returns {Promise<object[]>} Array of note data objects
+   */
+  async extractNotes(data) {
+    if (!data.notes?.length) return [];
+    return data.notes.map((note) => ({
+      name: note.name,
+      content: note.content || '',
+      startDate: note.startDate,
+      endDate: note.endDate,
+      allDay: note.allDay ?? true,
+      repeat: note.repeat || 'never',
+      categories: note.categories || [],
+      originalId: note.id,
+      suggestedType: 'note'
+    }));
+  }
+
+  /**
    * Transform Calendaria export data.
    * Validates structure and passes through with minimal changes.
    * @param {object} data - Raw Calendaria export data
