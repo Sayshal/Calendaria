@@ -2799,6 +2799,13 @@ span.calendaria-moon-icon {
         }
       }
 
+      .empty-phases {
+        padding-top: 0.75rem;
+        text-align: center;
+        justify-content: center;
+        display: flex;
+      }
+
       .phase-icon-btn {
         width: 2rem;
         height: 2rem;

@@ -44,7 +44,7 @@
     ]
   },
   "eras"          : [ {"name": "Free Year", "abbreviation": "FY", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
-  "moons"         : [ {"name": "Ral", "color": "#228B22", "cycleLength": 34, "cycleDayAdjust": 0}, {"name": "Guthay", "color": "#DAA520", "cycleLength": 125, "cycleDayAdjust": 0} ],
+  "moons"         : [ {"name": "Ral", "color": "#228B22", "cycleLength": 33}, {"name": "Guthay", "color": "#DAA520", "cycleLength": 125} ],
   "daylight"      : {"enabled": true, "shortestDay": 11, "longestDay": 14, "winterSolstice": 310, "summerSolstice": 60},
   "cycles"        : [
     {

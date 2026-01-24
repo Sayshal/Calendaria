@@ -145,6 +145,13 @@
                       </button>
                     </div>
                   </div>
+                {{else}}
+                  <div class="empty-phases">
+                    <button type="button" data-action="addMoonPhase" data-moon-index="{{@../index}}">
+                      <i class="fas fa-plus"></i>
+                      {{localize "CALENDARIA.Editor.AddPhase"}}
+                    </button>
+                  </div>
                 {{/each}}
               </div>
 

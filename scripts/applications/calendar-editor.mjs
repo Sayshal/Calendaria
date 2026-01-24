@@ -344,8 +344,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       color: moon.color || '',
       index: idx,
       refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
-      phasesWithIndex: (moon.phases || DEFAULT_MOON_PHASES).map((phase, pIdx) => ({
+      phasesWithIndex: moon.phases.map((phase, pIdx) => ({
         ...phase,
+        name: localize(phase.name),
         index: pIdx,
         moonIndex: idx,
         isImagePath: phase.icon?.includes('/') ?? false,

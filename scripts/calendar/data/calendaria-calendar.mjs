@@ -6,6 +6,7 @@
  * @author Tyler
  */
 
+import { DEFAULT_MOON_PHASES } from '../../constants.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import CalendarRegistry from '../calendar-registry.mjs';
 import { formatEraTemplate } from '../calendar-utils.mjs';
@@ -253,7 +254,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               icon: new StringField({ required: false }),
               start: new NumberField({ required: true, min: 0, max: 1 }),
               end: new NumberField({ required: true, min: 0, max: 1 })
-            })
+            }),
+            { initial: DEFAULT_MOON_PHASES }
           ),
           referenceDate: new SchemaField({
             year: new NumberField({ required: true, integer: true, initial: 1 }),
