@@ -1293,6 +1293,8 @@
   "CALENDARIA.Settings.HUDWeatherDisplayMode.Name": "Weather Display",
   "CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly": "Temp Only",
   "CALENDARIA.Settings.HUDWidthScale.DisabledHint": "Compact mode has a fixed width.",
+  "CALENDARIA.Settings.DomeAutoHide.Hint": "Fade and hide the sundial dome as the HUD approaches the top of the viewport.",
+  "CALENDARIA.Settings.DomeAutoHide.Name": "Dome Auto-Hide",
   "CALENDARIA.Settings.HUDWidthScale.DisabledTitle": "Not available in Compact mode",
   "CALENDARIA.Settings.HUDWidthScale.Hint": "Set a fixed width scale for the HUD to prevent resizing when weather or other content changes.",
   "CALENDARIA.Settings.HUDWidthScale.Name": "HUD Width Scale",

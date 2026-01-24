@@ -98,6 +98,14 @@
     </div>
 
     <div class="form-group">
+      <label for="hudDomeAutoHide">{{localize "CALENDARIA.Settings.DomeAutoHide.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hudDomeAutoHide" name="hudDomeAutoHide" {{#if hudDomeAutoHide}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.DomeAutoHide.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="hudAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudAutoFade" name="hudAutoFade" {{#if hudAutoFade}}checked{{/if}}>

@@ -374,6 +374,16 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Calendar HUD dome auto-hide when near viewport top */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE, {
+    name: 'CALENDARIA.Settings.DomeAutoHide.Name',
+    hint: 'CALENDARIA.Settings.DomeAutoHide.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => HUD.instance?.render()
+  });
+
   /** Calendar HUD auto-fade on idle */
   game.settings.register(MODULE.ID, SETTINGS.HUD_AUTO_FADE, {
     name: 'CALENDARIA.Settings.AutoFade.Name',

@@ -911,6 +911,14 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #updateDomeVisibility() {
     const dome = this.element.querySelector('.calendaria-hud-dome');
     if (!dome) return;
+
+    // If auto-hide is disabled, always show dome at full opacity
+    if (!game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE)) {
+      dome.classList.remove('hidden');
+      dome.style.opacity = '';
+      return;
+    }
+
     const domeHeight = this.isCompact ? 60 : 80;
     const minVisibleHeight = 20;
     const hudTop = this.position.top;

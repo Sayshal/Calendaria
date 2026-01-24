@@ -41,6 +41,7 @@ export const SETTINGS = {
   HUD_COMBAT_COMPACT: 'hudCombatCompact',
   HUD_COMBAT_HIDE: 'hudCombatHide',
   HUD_DIAL_STYLE: 'hudDialStyle',
+  HUD_DOME_AUTO_HIDE: 'hudDomeAutoHide',
   HUD_IDLE_OPACITY: 'hudIdleOpacity',
   HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode',
   HUD_SHOW_ERA: 'hudShowEra',
