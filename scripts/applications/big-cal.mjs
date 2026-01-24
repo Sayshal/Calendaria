@@ -10,7 +10,7 @@ import NoteManager from '../notes/note-manager.mjs';
 import { addDays, dayOfWeek, daysBetween } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import SearchManager from '../search/search-manager.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../utils/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, toRomanNumeral } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { canViewBigCal } from '../utils/permissions.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
@@ -177,14 +177,26 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     context.currentMonthNotes = this._getNotesForMonth(context.visibleNotes, viewedDate.year, viewedDate.month);
-    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES);
+    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES);
     context.weather = this._getWeatherContext();
-    if (calendar.cycles?.length) {
+
+    // Block visibility settings
+    context.showWeather = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
+    context.showSeason = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON);
+    context.showEra = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_ERA);
+    context.showCycles = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_CYCLES);
+    context.weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE);
+    context.seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE);
+    context.eraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_ERA_DISPLAY_MODE);
+    context.cyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE);
+
+    if (calendar.cycles?.length && context.showCycles) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
       const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
       const cycleResult = calendar.getCycleValues(viewedComponents);
       context.cycleText = cycleResult.text;
       context.cycleValues = cycleResult.values;
+      context.cycleData = cycleResult;
     }
 
     context.searchTerm = this._searchTerm;
@@ -217,14 +229,20 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {string} HTML string
    */
   _renderWeatherIndicator(context) {
-    const { weather, editable } = context;
+    if (!context.showWeather) return '';
+    const { weather, editable, weatherDisplayMode } = context;
     if (weather) {
       const clickable = editable ? ' clickable' : '';
       const action = editable ? 'data-action="openWeatherPicker"' : '';
-      const temp = weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+      const showIcon = weatherDisplayMode === 'full' || weatherDisplayMode === 'icon' || weatherDisplayMode === 'iconTemp';
+      const showLabel = weatherDisplayMode === 'full';
+      const showTemp = weatherDisplayMode === 'full' || weatherDisplayMode === 'temp' || weatherDisplayMode === 'iconTemp';
+      const icon = showIcon ? `<i class="fas ${weather.icon}"></i>` : '';
+      const label = showLabel ? ` ${weather.label}` : '';
+      const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
       return `<span class="weather-indicator${clickable}" ${action}
         style="--weather-color: ${weather.color}" data-tooltip="${weather.tooltip}">
-        <i class="fas ${weather.icon}"></i> ${weather.label} ${temp}
+        ${icon}${label} ${temp}
       </span>`;
     } else if (editable) {
       return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
@@ -241,9 +259,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {string} HTML string
    */
   _renderSeasonIndicator(context) {
+    if (!context.showSeason) return '';
     const season = context.calendarData?.currentSeason;
     if (!season) return '';
-    return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${localize('CALENDARIA.UI.CurrentSeason')}"><i class="${season.icon}"></i> ${localize(season.name)}</span>`;
+    const mode = context.seasonDisplayMode;
+    const showIcon = mode === 'full' || mode === 'icon';
+    const showLabel = mode === 'full' || mode === 'text';
+    const icon = showIcon ? `<i class="${season.icon}"></i>` : '';
+    const label = showLabel ? ` ${localize(season.name)}` : '';
+    return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${localize(season.name)}">${icon}${label}</span>`;
   }
 
   /**
@@ -252,9 +276,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {string} HTML string
    */
   _renderEraIndicator(context) {
+    if (!context.showEra) return '';
     const era = context.calendarData?.currentEra;
     if (!era) return '';
-    return `<span class="era-indicator" data-tooltip="${localize('CALENDARIA.UI.CurrentEra')}"><i class="fas fa-hourglass-half"></i> ${localize(era.name)}</span>`;
+    const mode = context.eraDisplayMode;
+    const showIcon = mode === 'full' || mode === 'icon';
+    const showLabel = mode === 'full' || mode === 'text';
+    const showAbbr = mode === 'abbr';
+    const icon = showIcon ? '<i class="fas fa-hourglass-half"></i>' : '';
+    let label = '';
+    if (showLabel) label = ` ${localize(era.name)}`;
+    else if (showAbbr) label = ` ${localize(era.abbreviation || era.name)}`;
+    return `<span class="era-indicator" data-tooltip="${localize(era.name)}">${icon}${label}</span>`;
   }
 
   /**
@@ -263,8 +296,23 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {string} HTML string
    */
   _renderCycleIndicator(context) {
-    if (!context.cycleText) return '';
-    return `<span class="cycle-indicator" data-tooltip="${localize('CALENDARIA.UI.CurrentCycle')}"><i class="fas fa-arrows-rotate"></i> ${context.cycleText}</span>`;
+    if (!context.showCycles || !context.cycleData?.values?.length) return '';
+    const mode = context.cyclesDisplayMode;
+    const icon = '<i class="fas fa-arrows-rotate"></i>';
+    // Icon only mode - just show icon with tooltip
+    if (mode === 'icon') {
+      return `<span class="cycle-indicator" data-tooltip="${context.cycleText}">${icon}</span>`;
+    }
+    let displayText = '';
+    if (mode === 'number') {
+      displayText = context.cycleData.values.map((v) => v.index + 1).join(', ');
+    } else if (mode === 'roman') {
+      displayText = context.cycleData.values.map((v) => toRomanNumeral(v.index + 1)).join(', ');
+    } else {
+      displayText = context.cycleData.values.map((v) => v.entryName).join(', ');
+    }
+    const label = `<span class="cycle-label">${displayText}</span>`;
+    return `<span class="cycle-indicator" data-tooltip="${context.cycleText || displayText}">${icon}${label}</span>`;
   }
 
   /**
@@ -302,7 +350,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
     let currentWeek = [];
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES) && calendar.moons?.length;
+    const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moons?.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
     if (startDayOfWeek > 0) {
@@ -485,7 +533,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.days?.values?.length || 7;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES) && calendar.moons?.length;
+    const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moons?.length;
     const weekNumber = Math.floor((viewedDay - 1) / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];

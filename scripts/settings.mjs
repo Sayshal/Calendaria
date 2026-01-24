@@ -138,6 +138,256 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  // ========================================//
+  //  MiniCal Block Visibility               //
+  // ========================================//
+
+  /** Show weather on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER, {
+    name: 'CALENDARIA.Settings.MiniCalShowWeather.Name',
+    hint: 'CALENDARIA.Settings.MiniCalShowWeather.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Weather display mode on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.MiniCalWeatherDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.MiniCalWeatherDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
+        iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp',
+        icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+        temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Show season on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON, {
+    name: 'CALENDARIA.Settings.MiniCalShowSeason.Name',
+    hint: 'CALENDARIA.Settings.MiniCalShowSeason.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Season display mode on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.MiniCalSeasonDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.MiniCalSeasonDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full',
+        icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly',
+        text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Show era on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA, {
+    name: 'CALENDARIA.Settings.MiniCalShowEra.Name',
+    hint: 'CALENDARIA.Settings.MiniCalShowEra.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Era display mode on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_ERA_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.MiniCalEraDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.MiniCalEraDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
+        icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
+        text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+        abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Show cycles on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_SHOW_CYCLES, {
+    name: 'CALENDARIA.Settings.MiniCalShowCycles.Name',
+    hint: 'CALENDARIA.Settings.MiniCalShowCycles.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Cycles display mode on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
+        icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+        number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
+        roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
+      },
+      initial: 'icon'
+    }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  /** Show moon phases on MiniCal */
+  game.settings.register(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES, {
+    name: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Name',
+    hint: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('mini-cal')?.render()
+  });
+
+  // ========================================//
+  //  BigCal Block Visibility                //
+  // ========================================//
+
+  /** Show weather on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER, {
+    name: 'CALENDARIA.Settings.BigCalShowWeather.Name',
+    hint: 'CALENDARIA.Settings.BigCalShowWeather.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Weather display mode on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.BigCalWeatherDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.BigCalWeatherDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
+        iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp',
+        icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+        temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Show season on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON, {
+    name: 'CALENDARIA.Settings.BigCalShowSeason.Name',
+    hint: 'CALENDARIA.Settings.BigCalShowSeason.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Season display mode on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.BigCalSeasonDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.BigCalSeasonDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full',
+        icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly',
+        text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Show era on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_SHOW_ERA, {
+    name: 'CALENDARIA.Settings.BigCalShowEra.Name',
+    hint: 'CALENDARIA.Settings.BigCalShowEra.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Era display mode on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_ERA_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.BigCalEraDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.BigCalEraDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
+        icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
+        text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+        abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Show cycles on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_SHOW_CYCLES, {
+    name: 'CALENDARIA.Settings.BigCalShowCycles.Name',
+    hint: 'CALENDARIA.Settings.BigCalShowCycles.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Cycles display mode on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
+        icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+        number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
+        roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
+      },
+      initial: 'icon'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
+  /** Show moon phases on BigCal */
+  game.settings.register(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES, {
+    name: 'CALENDARIA.Settings.BigCalShowMoonPhases.Name',
+    hint: 'CALENDARIA.Settings.BigCalShowMoonPhases.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria')?.render()
+  });
+
   /** Track if format migration has been run */
   game.settings.register(MODULE.ID, 'formatMigrationComplete', {
     name: 'Format Migration Complete',
@@ -195,15 +445,6 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: new NumberField({ initial: 1.0, min: 0.5, max: 1.5, step: 0.1 })
-  });
-
-  /** Show moon phases on the calendar UI */
-  game.settings.register(MODULE.ID, SETTINGS.SHOW_MOON_PHASES, {
-    name: 'CALENDARIA.Settings.ShowMoonPhases.Name',
-    hint: 'CALENDARIA.Settings.ShowMoonPhases.Hint',
-    scope: 'world',
-    config: false,
-    type: new BooleanField({ initial: true })
   });
 
   /** Show TimeKeeper on world load (GM only) */
@@ -544,6 +785,52 @@ export function registerSettings() {
         text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly'
       },
       initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Era display mode on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_ERA_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.HUDEraDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.HUDEraDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
+        icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
+        text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+        abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
+      },
+      initial: 'full'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Show cycles indicator on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SHOW_CYCLES, {
+    name: 'CALENDARIA.Settings.HUDShowCycles.Name',
+    hint: 'CALENDARIA.Settings.HUDShowCycles.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
+  /** Cycles display mode on HUD */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_CYCLES_DISPLAY_MODE, {
+    name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Name',
+    hint: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({
+      choices: {
+        name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
+        icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+        number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
+        roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
+      },
+      initial: 'icon'
     }),
     onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
   });

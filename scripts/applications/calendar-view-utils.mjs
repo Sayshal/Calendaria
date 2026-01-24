@@ -194,7 +194,6 @@ export function getNotesForDay(notes, year, month, day) {
  * @returns {object|null} Moon phase data with icon and tooltip
  */
 export function getFirstMoonPhase(calendar, year, month, day) {
-  if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.length) return null;
   const sortedMoons = [...calendar.moons].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
   let moon = sortedMoons[0];
@@ -222,7 +221,6 @@ export function getFirstMoonPhase(calendar, year, month, day) {
  * @returns {Array|null} Array of moon phase data sorted alphabetically by moon name
  */
 export function getAllMoonPhases(calendar, year, month, day) {
-  if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.length) return null;
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   let dayOfYear = day - 1;

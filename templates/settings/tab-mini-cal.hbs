@@ -142,6 +142,103 @@
     </div>
   </fieldset>
 
+  <fieldset data-section="minical-block-visibility">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="minical-block-visibility"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
+
+    <div class="form-group">
+      <label for="miniCalShowWeather">{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalShowWeather" name="miniCalShowWeather" {{#if miniCalShowWeather}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalShowWeather.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless miniCalShowWeather}} disabled{{/unless}}">
+      <label for="miniCalWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="miniCalWeatherDisplayMode" name="miniCalWeatherDisplayMode" {{#unless miniCalShowWeather}}disabled aria-disabled="true"{{/unless}}>
+          {{#each miniCalWeatherDisplayModeOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalWeatherDisplayMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="miniCalShowSeason">{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalShowSeason" name="miniCalShowSeason" {{#if miniCalShowSeason}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalShowSeason.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless miniCalShowSeason}} disabled{{/unless}}">
+      <label for="miniCalSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="miniCalSeasonDisplayMode" name="miniCalSeasonDisplayMode" {{#unless miniCalShowSeason}}disabled aria-disabled="true"{{/unless}}>
+          {{#each miniCalSeasonDisplayModeOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalSeasonDisplayMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="miniCalShowEra">{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalShowEra" name="miniCalShowEra" {{#if miniCalShowEra}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalShowEra.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless miniCalShowEra}} disabled{{/unless}}">
+      <label for="miniCalEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="miniCalEraDisplayMode" name="miniCalEraDisplayMode" {{#unless miniCalShowEra}}disabled aria-disabled="true"{{/unless}}>
+          {{#each miniCalEraDisplayModeOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalEraDisplayMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="miniCalShowCycles">{{localize "CALENDARIA.Settings.HUDShowCycles.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalShowCycles" name="miniCalShowCycles" {{#if miniCalShowCycles}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalShowCycles.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless miniCalShowCycles}} disabled{{/unless}}">
+      <label for="miniCalCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="miniCalCyclesDisplayMode" name="miniCalCyclesDisplayMode" {{#unless miniCalShowCycles}}disabled aria-disabled="true"{{/unless}}>
+          {{#each miniCalCyclesDisplayModeOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalCyclesDisplayMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="miniCalShowMoonPhases">{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalShowMoonPhases" name="miniCalShowMoonPhases" {{#if miniCalShowMoonPhases}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalShowMoonPhases.Hint"}}</p>
+    </div>
+  </fieldset>
+
   {{#if isGM}}
     <fieldset data-section="minical-time-jumps">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}

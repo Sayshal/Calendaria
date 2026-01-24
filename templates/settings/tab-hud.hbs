@@ -181,10 +181,10 @@
     </div>
 
     {{#unless isCompactMode}}
-      <div class="form-group">
+      <div class="form-group{{#unless hudShowWeather}} disabled{{/unless}}">
         <label for="hudWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
         <div class="form-fields">
-          <select id="hudWeatherDisplayMode" name="hudWeatherDisplayMode">
+          <select id="hudWeatherDisplayMode" name="hudWeatherDisplayMode" {{#unless hudShowWeather}}disabled aria-disabled="true"{{/unless}}>
             {{#each weatherDisplayModeOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
@@ -203,10 +203,10 @@
     </div>
 
     {{#unless isCompactMode}}
-      <div class="form-group">
+      <div class="form-group{{#unless hudShowSeason}} disabled{{/unless}}">
         <label for="hudSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
         <div class="form-fields">
-          <select id="hudSeasonDisplayMode" name="hudSeasonDisplayMode">
+          <select id="hudSeasonDisplayMode" name="hudSeasonDisplayMode" {{#unless hudShowSeason}}disabled aria-disabled="true"{{/unless}}>
             {{#each seasonDisplayModeOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
@@ -223,6 +223,42 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowEra.Hint"}}</p>
     </div>
+
+    {{#unless isCompactMode}}
+      <div class="form-group{{#unless hudShowEra}} disabled{{/unless}}">
+        <label for="hudEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
+        <div class="form-fields">
+          <select id="hudEraDisplayMode" name="hudEraDisplayMode" {{#unless hudShowEra}}disabled aria-disabled="true"{{/unless}}>
+            {{#each eraDisplayModeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Hint"}}</p>
+      </div>
+    {{/unless}}
+
+    <div class="form-group">
+      <label for="hudShowCycles">{{localize "CALENDARIA.Settings.HUDShowCycles.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hudShowCycles" name="hudShowCycles" {{#if hudShowCycles}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDShowCycles.Hint"}}</p>
+    </div>
+
+    {{#unless isCompactMode}}
+      <div class="form-group{{#unless hudShowCycles}} disabled{{/unless}}">
+        <label for="hudCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
+        <div class="form-fields">
+          <select id="hudCyclesDisplayMode" name="hudCyclesDisplayMode" {{#unless hudShowCycles}}disabled aria-disabled="true"{{/unless}}>
+            {{#each cyclesDisplayModeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Hint"}}</p>
+      </div>
+    {{/unless}}
   </fieldset>
 
   <fieldset data-section="hud-sticky">

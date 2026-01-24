@@ -10,7 +10,7 @@ import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES,
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers } from '../utils/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers, toRomanNumeral } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canChangeDateTime, canChangeWeather, canViewBigCal } from '../utils/permissions.mjs';
@@ -224,10 +224,18 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.currentSeason = showSeasonBlock && season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
     context.showSeasonIcon = seasonDisplayMode === 'full' || seasonDisplayMode === 'icon';
     context.showSeasonLabel = seasonDisplayMode === 'full' || seasonDisplayMode === 'text';
+    const eraDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_ERA_DISPLAY_MODE);
     const era = calendar?.getCurrentEra?.();
-    context.currentEra = showEraBlock && era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) } : null;
+    context.currentEra = showEraBlock && era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name), icon: 'fas fa-hourglass-half' } : null;
+    context.showEraIcon = eraDisplayMode === 'full' || eraDisplayMode === 'icon';
+    context.showEraLabel = eraDisplayMode === 'full' || eraDisplayMode === 'text';
+    context.showEraAbbr = eraDisplayMode === 'abbr';
+    const showCyclesBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_CYCLES);
+    const cyclesDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_CYCLES_DISPLAY_MODE);
     const cycleData = calendar?.getCycleValues?.();
-    context.cycleText = showEraBlock ? cycleData?.text || null : null;
+    context.cycleData = showCyclesBlock && cycleData?.values?.length ? cycleData : null;
+    context.cycleText = showCyclesBlock ? cycleData?.text || null : null;
+    context.cyclesDisplayMode = cyclesDisplayMode;
     const weatherData = this.#getWeatherContext();
     context.weather = showWeatherBlock ? weatherData : null;
     context.showWeatherBlock = showWeatherBlock;
@@ -321,7 +329,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #renderEraIndicator(context) {
     if (!context.currentEra) return '';
-    return `<span class="era-indicator" data-tooltip="${context.currentEra.name}"><i class="fas fa-hourglass-half"></i></span>`;
+    const icon = context.showEraIcon ? `<i class="${context.currentEra.icon}"></i>` : '';
+    let label = '';
+    if (context.showEraLabel) label = `<span class="era-label">${context.currentEra.name}</span>`;
+    else if (context.showEraAbbr) label = `<span class="era-label">${context.currentEra.abbreviation}</span>`;
+    return `<span class="era-indicator" data-tooltip="${context.currentEra.name}">${icon}${label}</span>`;
   }
 
   /**
@@ -330,8 +342,24 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {string} HTML string
    */
   #renderCycleIndicator(context) {
-    if (!context.cycleText) return '';
-    return `<span class="cycle-indicator" data-tooltip="${context.cycleText}"><i class="fas fa-arrows-rotate"></i></span>`;
+    if (!context.cycleData?.values?.length) return '';
+    const mode = context.cyclesDisplayMode;
+    const icon = '<i class="fas fa-arrows-rotate"></i>';
+    // In compact/icon mode, just show icon with tooltip
+    if (mode === 'icon') {
+      return `<span class="cycle-indicator" data-tooltip="${context.cycleText}">${icon}</span>`;
+    }
+    let displayText = '';
+    if (mode === 'number') {
+      displayText = context.cycleData.values.map((v) => v.index + 1).join(', ');
+    } else if (mode === 'roman') {
+      displayText = context.cycleData.values.map((v) => toRomanNumeral(v.index + 1)).join(', ');
+    } else {
+      // 'name' mode - show entry names
+      displayText = context.cycleData.values.map((v) => v.entryName).join(', ');
+    }
+    const label = `<span class="cycle-label">${displayText}</span>`;
+    return `<span class="cycle-indicator" data-tooltip="${context.cycleText || displayText}">${icon}${label}</span>`;
   }
 
   /** @override */
