@@ -9,6 +9,7 @@
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
+import { migrateCalendarDataStructure } from '../utils/migrations.mjs';
 import { DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
@@ -66,7 +67,7 @@ export default class CalendarManager {
         for (const [id, calendarData] of Object.entries(savedData.calendars)) {
           // Skip calendars already loaded from dedicated settings
           if (overrides[id] || customCalendars[id]) continue;
-          this.#migrateCalendarData(calendarData);
+          migrateCalendarDataStructure(calendarData);
           // Preserve isCustom flag from existing calendar if present
           const existing = CalendarRegistry.get(id);
           if (existing?.metadata?.isCustom) {
@@ -84,18 +85,6 @@ export default class CalendarManager {
   }
 
   /**
-   * Migrate calendar data to ensure required fields exist.
-   * @param {object} data - Calendar data to migrate
-   * @private
-   */
-  static #migrateCalendarData(data) {
-    const added = [];
-    if (!data.seasons) { data.seasons = { values: [] }; added.push('seasons'); }
-    if (!data.months) { data.months = { values: [] }; added.push('months'); }
-    if (added.length) log(3, `Migrated calendar "${data.name}": added missing fields: ${added.join(', ')}`);
-  }
-
-  /**
    * Load custom calendars from settings.
    * @private
    */
@@ -106,7 +95,7 @@ export default class CalendarManager {
       if (ids.length === 0) return;
       for (const id of ids) {
         const data = customCalendars[id];
-        this.#migrateCalendarData(data);
+        migrateCalendarDataStructure(data);
         try {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
@@ -133,7 +122,7 @@ export default class CalendarManager {
       if (ids.length === 0) return;
       for (const id of ids) {
         const data = overrides[id];
-        this.#migrateCalendarData(data);
+        migrateCalendarDataStructure(data);
         try {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);

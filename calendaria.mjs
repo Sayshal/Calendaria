@@ -26,7 +26,7 @@ import EventScheduler from './scripts/time/event-scheduler.mjs';
 import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
 import TimeClock from './scripts/time/time-clock.mjs';
 import TimeTracker from './scripts/time/time-tracker.mjs';
-import { migrateAllDeprecatedTokens, migrateCustomCalendars } from './scripts/utils/format-utils.mjs';
+import { runAllMigrations } from './scripts/utils/migrations.mjs';
 import { registerKeybindings } from './scripts/utils/keybinds.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import * as Permissions from './scripts/utils/permissions.mjs';
@@ -63,8 +63,7 @@ Hooks.once('dnd5e.setupCalendar', () => {
 Hooks.once('ready', async () => {
   registerReadySettings();
   await CalendarManager.initialize();
-  await migrateCustomCalendars();
-  await migrateAllDeprecatedTokens();
+  await runAllMigrations();
   await NoteManager.initialize();
   TimeTracker.initialize();
   TimeClock.initialize();

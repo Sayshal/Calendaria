@@ -11,7 +11,6 @@ import { MiniCal } from './applications/mini-cal.mjs';
 import { SettingsPanel } from './applications/settings/settings-panel.mjs';
 import { TimeKeeper } from './applications/time-keeper.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
-import { migrateCustomCalendars, migrateIntercalaryFestivals } from './utils/format-utils.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 import * as StickyZones from './utils/sticky-zones.mjs';
@@ -1220,50 +1219,4 @@ export function registerReadySettings() {
       initial: ''
     })
   });
-
-  // Run migrations for custom calendars
-  migrateCustomCalendars();
-  migrateIntercalaryFestivals();
-  migrateSettingKeys();
-}
-
-/**
- * Migrate old setting keys to new names.
- * Runs once per world to preserve user settings across the rename.
- * @async
- */
-async function migrateSettingKeys() {
-  if (!game.user.isGM) return;
-  if (game.settings.get(MODULE.ID, 'settingKeyMigrationComplete')) return;
-
-  // Key mapping: oldKey -> newKey
-  const keyMap = {
-    'forceMiniCalendar': 'forceMiniCal',
-    'miniCalendarAutoFade': 'miniCalAutoFade',
-    'miniCalendarConfirmSetDate': 'miniCalConfirmSetDate',
-    'miniCalendarControlsDelay': 'miniCalControlsDelay',
-    'miniCalendarIdleOpacity': 'miniCalIdleOpacity',
-    'miniCalendarPosition': 'miniCalPosition',
-    'miniCalendarStickyStates': 'miniCalStickyStates',
-    'showMiniCalendar': 'showMiniCal'
-  };
-
-  let migrated = 0;
-  for (const [oldKey, newKey] of Object.entries(keyMap)) {
-    const storage = game.settings.storage.get('world');
-    const oldSetting = storage.getSetting(`${MODULE.ID}.${oldKey}`);
-    if (oldSetting) {
-      const newSetting = storage.getSetting(`${MODULE.ID}.${newKey}`);
-      if (!newSetting) {
-        await game.settings.set(MODULE.ID, newKey, oldSetting.value);
-        log(2, `Migrated setting: ${oldKey} -> ${newKey}`);
-        migrated++;
-      }
-    }
-  }
-
-  if (migrated > 0) {
-    log(2, `Setting key migration complete: ${migrated} settings migrated`);
-  }
-  await game.settings.set(MODULE.ID, 'settingKeyMigrationComplete', true);
 }
