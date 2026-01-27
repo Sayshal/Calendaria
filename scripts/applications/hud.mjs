@@ -837,18 +837,33 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Recenter the HUD if width changed (for center-based positioning).
+   * Recenter the HUD if width changed (for center-based positioning or snap zones).
    */
   #recenterIfWidthChanged() {
-    if (this.#snappedZoneId) return;
+    if (this.isLocked) return;
     const currentWidth = this.element.getBoundingClientRect().width;
     if (this.#lastWidth !== null && Math.abs(currentWidth - this.#lastWidth) > 1) {
-      const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
-      if (savedPos && typeof savedPos.centerX === 'number' && typeof savedPos.centerY === 'number') {
-        const newLeft = savedPos.centerX - currentWidth / 2;
-        const newTop = savedPos.centerY - this.element.getBoundingClientRect().height / 2;
-        this.setPosition({ left: newLeft, top: newTop });
-        this.#clampToViewport();
+      if (this.#snappedZoneId) {
+        const rect = this.element.getBoundingClientRect();
+        const barEl = this.element.querySelector('.calendaria-hud-bar');
+        const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
+        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, currentWidth, barHeight);
+        if (zonePos) {
+          let newTop = zonePos.top;
+          if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+            const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
+            if (typeof savedPos?.anchorY === 'number') newTop = savedPos.anchorY - barHeight;
+          }
+          this.setPosition({ left: zonePos.left, top: newTop });
+        }
+      } else {
+        const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
+        if (savedPos && typeof savedPos.centerX === 'number' && typeof savedPos.centerY === 'number') {
+          const newLeft = savedPos.centerX - currentWidth / 2;
+          const newTop = savedPos.centerY - this.element.getBoundingClientRect().height / 2;
+          this.setPosition({ left: newLeft, top: newTop });
+          this.#clampToViewport();
+        }
       }
     }
     this.#lastWidth = currentWidth;
