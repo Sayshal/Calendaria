@@ -32,11 +32,12 @@ const MAX_VISIBLE_MOONS = 3;
  */
 function processMoonPhases(phases) {
   if (!phases?.length) return null;
-  if (phases.length <= MAX_VISIBLE_MOONS) return { visible: phases, overflow: [], overflowTooltip: '' };
+  if (phases.length <= MAX_VISIBLE_MOONS) return { visible: phases, overflow: [], overflowTooltip: '', overflowTooltipText: '' };
   const visible = phases.slice(0, MAX_VISIBLE_MOONS);
   const overflow = phases.slice(MAX_VISIBLE_MOONS);
   const overflowTooltip = overflow.map((m) => `<div class='moon-tooltip-row'><img src='${m.icon}'><span>${m.moonName}: ${m.phaseName}</span></div>`).join('');
-  return { visible, overflow, overflowTooltip };
+  const overflowTooltipText = overflow.map((m) => `${m.moonName}: ${m.phaseName}`).join(', ');
+  return { visible, overflow, overflowTooltip, overflowTooltipText };
 }
 
 /**
