@@ -456,21 +456,6 @@ export function registerSettings() {
     type: new NumberField({ initial: 1.0, min: 0.5, max: 1.5, step: 0.1 })
   });
 
-  /** Show TimeKeeper on world load (GM only) */
-  game.settings.register(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, {
-    name: 'CALENDARIA.Settings.ShowTimeKeeper.Name',
-    hint: 'CALENDARIA.Settings.ShowTimeKeeper.Hint',
-    scope: 'world',
-    config: false,
-    type: new BooleanField({ initial: false }),
-    requiresReload: false,
-    onChange: (value) => {
-      if (!game.user.isGM) return;
-      if (value) TimeKeeper.show();
-      else TimeKeeper.hide();
-    }
-  });
-
   /** TimeKeeper auto-fade on idle */
   game.settings.register(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, {
     name: 'CALENDARIA.Settings.AutoFade.Name',
@@ -570,27 +555,46 @@ export function registerSettings() {
     requiresReload: true
   });
 
+  // ========================================//
+  //  Show on Load (visible in settings menu)  //
+  // ========================================//
+
+  /** Show HUD on world load */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, {
+    name: 'CALENDARIA.Settings.ShowCalendarHUD.Name',
+    hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
+    scope: 'user',
+    config: true,
+    type: new BooleanField({ initial: false })
+  });
+
   /** Show MiniCal on world load */
   game.settings.register(MODULE.ID, SETTINGS.SHOW_MINI_CAL, {
     name: 'CALENDARIA.Settings.ShowMiniCal.Name',
     hint: 'CALENDARIA.Settings.ShowMiniCal.Hint',
     scope: 'user',
-    config: false,
+    config: true,
     type: new BooleanField({ initial: true })
+  });
+
+  /** Show TimeKeeper on world load (GM only) */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, {
+    name: 'CALENDARIA.Settings.ShowTimeKeeper.Name',
+    hint: 'CALENDARIA.Settings.ShowTimeKeeper.Hint',
+    scope: 'world',
+    config: true,
+    type: new BooleanField({ initial: false }),
+    requiresReload: false,
+    onChange: (value) => {
+      if (!game.user.isGM) return;
+      if (value) TimeKeeper.show();
+      else TimeKeeper.hide();
+    }
   });
 
   // ========================================//
   //  Calendar HUD                            //
   // ========================================//
-
-  /** Show Calendar HUD on world load */
-  game.settings.register(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, {
-    name: 'CALENDARIA.Settings.ShowCalendarHUD.Name',
-    hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
-    scope: 'user',
-    config: false,
-    type: new BooleanField({ initial: false })
-  });
 
   /** Calendar HUD display mode (fullsize or compact) */
   game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, {
