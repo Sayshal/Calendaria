@@ -1426,7 +1426,7 @@
   "CALENDARIA.SettingsPanel.Hint.OpenClimateEditor": "Open the Calendar Editor to configure climate zones and weather presets.",
   "CALENDARIA.SettingsPanel.Hint.ResetPositions": "Reset all Calendaria UI elements to their default screen positions.",
   "CALENDARIA.SettingsPanel.Hint.StickyHUDPosition": "Remember the HUD position between sessions.",
-  "CALENDARIA.SettingsPanel.Hint.StickyPosition": "Prevent the MiniCal from being dragged to a new position.",
+  "CALENDARIA.SettingsPanel.Hint.StickyPosition": "Lock this window's position to prevent dragging.",
   "CALENDARIA.SettingsPanel.Hint.StickySidebar": "Keep the sidebar visible instead of auto-hiding when the mouse leaves.",
   "CALENDARIA.SettingsPanel.Hint.StickyStates": "Enable these options to keep UI elements visible instead of auto-hiding.",
   "CALENDARIA.SettingsPanel.Hint.StickyTimeControls": "Keep time controls visible instead of auto-hiding when the mouse leaves.",
