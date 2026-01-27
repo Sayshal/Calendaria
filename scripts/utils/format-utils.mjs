@@ -46,17 +46,17 @@ export function toRomanNumeral(n) {
 export function dateFormattingParts(calendar, components) {
   const { year, month, dayOfMonth, hour = 0, minute = 0, second = 0 } = components;
   const displayYear = year;
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const internalYear = displayYear - yearZero;
   const isMonthless = calendar?.isMonthless ?? false;
   const monthData = isMonthless ? null : calendar?.months?.values?.[month];
-  const festivalDay = calendar?.findFestivalDay?.(components);
+  const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: dayOfMonth - 1 });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
   const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = calendar?.days?.values || [];
-  const yearZero = calendar?.years?.yearZero ?? 0;
-  const internalYear = displayYear - yearZero;
   let daysInMonthsBefore = 0;
   if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
   else if (!isMonthless) daysInMonthsBefore = (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);

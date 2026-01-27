@@ -131,12 +131,63 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /** @override */
   timeToComponents(time) {
-    return super.timeToComponents(time + CalendariaCalendar.epochOffset);
+    const adjustedTime = time + CalendariaCalendar.epochOffset;
+    const secondsPerMinute = this.days?.secondsPerMinute ?? 60;
+    const minutesPerHour = this.days?.minutesPerHour ?? 60;
+    const hoursPerDay = this.days?.hoursPerDay ?? 24;
+    const secondsPerHour = secondsPerMinute * minutesPerHour;
+    const secondsPerDay = secondsPerHour * hoursPerDay;
+
+    let totalDays = Math.floor(adjustedTime / secondsPerDay);
+    const daySeconds = adjustedTime - totalDays * secondsPerDay;
+    const hour = Math.floor(daySeconds / secondsPerHour);
+    const minute = Math.floor((daySeconds % secondsPerHour) / secondsPerMinute);
+    const second = Math.floor(daySeconds % secondsPerMinute);
+
+    let year = 0;
+    if (totalDays >= 0) {
+      while (totalDays >= this.getDaysInYear(year)) {
+        totalDays -= this.getDaysInYear(year);
+        year++;
+      }
+    } else {
+      while (totalDays < 0) {
+        year--;
+        totalDays += this.getDaysInYear(year);
+      }
+    }
+
+    let month = 0;
+    const months = this.months?.values ?? [];
+    while (month < months.length && totalDays >= this.getDaysInMonth(month, year)) {
+      totalDays -= this.getDaysInMonth(month, year);
+      month++;
+    }
+
+    return { year, month, dayOfMonth: totalDays, hour, minute, second };
   }
 
   /** @override */
   componentsToTime(components) {
-    return super.componentsToTime(components) - CalendariaCalendar.epochOffset;
+    const { year = 0, month = 0, dayOfMonth = 0, hour = 0, minute = 0, second = 0 } = components;
+    const secondsPerMinute = this.days?.secondsPerMinute ?? 60;
+    const minutesPerHour = this.days?.minutesPerHour ?? 60;
+    const hoursPerDay = this.days?.hoursPerDay ?? 24;
+    const secondsPerHour = secondsPerMinute * minutesPerHour;
+    const secondsPerDay = secondsPerHour * hoursPerDay;
+
+    let totalDays = 0;
+    if (year >= 0) {
+      for (let y = 0; y < year; y++) totalDays += this.getDaysInYear(y);
+    } else {
+      for (let y = -1; y >= year; y--) totalDays -= this.getDaysInYear(y);
+    }
+
+    for (let m = 0; m < month; m++) totalDays += this.getDaysInMonth(m, year);
+    totalDays += dayOfMonth;
+
+    const totalSeconds = totalDays * secondsPerDay + hour * secondsPerHour + minute * secondsPerMinute + second;
+    return totalSeconds - CalendariaCalendar.epochOffset;
   }
 
   /** @override */
@@ -592,7 +643,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           return currentDayOfYear >= f.dayOfYear && currentDayOfYear < f.dayOfYear + duration;
         }
         if (f.month != null && f.day != null) {
-          const festivalDayOfYear = this._calculateDayOfYearFromMonthDay(f.month - 1, f.day - 1) + 1;
+          const festivalDayOfYear = this._calculateDayOfYearFromMonthDay(f.month - 1, f.day - 1, components.year) + 1;
           return currentDayOfYear >= festivalDayOfYear && currentDayOfYear < festivalDayOfYear + duration;
         }
         return false;
@@ -601,16 +652,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Calculate day of year (1-indexed) from month and day.
+   * Calculate day of year (0-indexed) from month and day.
    * @param {number} month - Month index (0-indexed)
    * @param {number} day - Day of month (0-indexed)
+   * @param {number} [year] - Year for leap year calculation
    * @returns {number} Day of year (0-indexed)
    * @private
    */
-  _calculateDayOfYearFromMonthDay(month, day) {
+  _calculateDayOfYearFromMonthDay(month, day, year) {
     if (this.isMonthless) return day;
     let dayOfYear = day;
-    for (let i = 0; i < month; i++) dayOfYear += this.months?.values?.[i]?.days ?? 0;
+    for (let i = 0; i < month; i++) dayOfYear += year !== undefined ? this.getDaysInMonth(i, year) : (this.months?.values?.[i]?.days ?? 0);
     return dayOfYear;
   }
 
@@ -623,7 +675,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   _calculateDayOfYear(components) {
     if (this.isMonthless) return components.dayOfMonth;
     let dayOfYear = components.dayOfMonth;
-    for (let i = 0; i < components.month; i++) dayOfYear += this.months?.values?.[i]?.days ?? 0;
+    for (let i = 0; i < components.month; i++) dayOfYear += components.year !== undefined ? this.getDaysInMonth(i, components.year) : (this.months?.values?.[i]?.days ?? 0);
     return dayOfYear;
   }
 
@@ -655,7 +707,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       if (festival.dayOfYear != null) {
         festivalStart = festival.dayOfYear;
       } else if (festival.month != null && festival.day != null) {
-        festivalStart = this._calculateDayOfYearFromMonthDay(festival.month - 1, festival.day - 1) + 1;
+        festivalStart = this._calculateDayOfYearFromMonthDay(festival.month - 1, festival.day - 1, components.year) + 1;
       } else {
         continue;
       }
