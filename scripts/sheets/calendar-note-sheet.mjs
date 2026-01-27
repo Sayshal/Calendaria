@@ -454,7 +454,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.isEditMode = this.isEditMode;
     context.canEdit = this.document.isOwner;
     if (this.isViewMode) {
-      context.enrichedContent = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.document.text?.content || '', { async: true, relativeTo: this.document });
+      context.enrichedContent = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.document.text?.content || '', { async: true, relativeTo: this.document, secrets: this.document.isOwner });
       const allCategories = getAllCategories();
       context.displayCategories = selectedCategories.map((id) => allCategories.find((c) => c.id === id)?.label).filter(Boolean);
       context.hasEndDate = endYear !== startYear || endMonth !== startMonth || endDay !== startDay;
