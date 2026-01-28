@@ -430,6 +430,13 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  game.settings.register(MODULE.ID, 'weatherZoneMigrationComplete', {
+    name: 'Weather Zone Migration Complete',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   /** Default setting for syncing scene darkness with sun position */
   game.settings.register(MODULE.ID, SETTINGS.DARKNESS_SYNC, {
     name: 'CALENDARIA.Settings.DarknessSync.Name',
