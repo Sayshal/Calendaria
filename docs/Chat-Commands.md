@@ -1,8 +1,8 @@
 # Chat Commands
 
-Calendaria provides 18 slash commands for interacting with the calendar directly from chat.
+Calendaria provides 18 slash commands for interacting with the calendar directly from chat. All commands and aliases work natively without any additional modules.
 
-If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is installed and active, commands gain enhanced autocomplete with format presets and calendar suggestions.
+If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is installed, commands gain enhanced autocomplete with format presets and calendar suggestions.
 
 ---
 
