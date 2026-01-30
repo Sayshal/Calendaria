@@ -562,25 +562,25 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Apply icon and color from first selected category if defaults are unchanged.
+   * Offer to apply icon and color from a newly added category.
+   * @param {string} categoryId - The ID of the newly added category
    * @private
    */
-  async #applyFirstCategoryStyle() {
-    const DEFAULT_ICON = 'fas fa-calendar';
-    const DEFAULT_COLOR = '#4a9eff';
-    const currentIcon = this.document.system.icon;
-    const currentColor = String(this.document.system.color || '').toLowerCase();
-    const isDefaultIcon = currentIcon === DEFAULT_ICON;
-    const isDefaultColor = currentColor === DEFAULT_COLOR;
-    if (!isDefaultIcon && !isDefaultColor) return;
-    const selectedCategories = this.document.system.categories || [];
-    if (selectedCategories.length === 0) return;
-    const firstCategory = getAllCategories().find((c) => c.id === selectedCategories[0]);
-    if (!firstCategory) return;
+  async #applyCategoryStyle(categoryId) {
+    const category = getAllCategories().find((c) => c.id === categoryId);
+    if (!category) return;
     const updates = {};
-    if (isDefaultIcon && firstCategory.icon) updates['system.icon'] = `fas ${firstCategory.icon}`;
-    if (isDefaultColor && firstCategory.color) updates['system.color'] = firstCategory.color;
-    if (Object.keys(updates).length > 0) await this.document.update(updates);
+    if (category.icon) updates['system.icon'] = `fas ${category.icon}`;
+    if (category.color) updates['system.color'] = category.color;
+    if (Object.keys(updates).length === 0) return;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize('CALENDARIA.Note.ApplyCategoryStyleTitle') },
+      content: `<p style="text-align:center;font-size:2rem;margin:0.5rem 0"><i class="fas ${category.icon}" style="color:${category.color}"></i></p><p>${format('CALENDARIA.Note.ApplyCategoryStyleConfirm', { label: category.label })}</p>`,
+      rejectClose: false,
+      modal: true
+    });
+    if (!confirmed) return;
+    await this.document.update(updates);
   }
 
   /**
@@ -1059,12 +1059,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
   /** @inheritdoc */
   async _processSubmitData(event, form, submitData, options = {}) {
-    const newCategories = submitData.system?.categories;
+    const newCategories = submitData.system?.categories || [];
     const oldCategories = this.document.system.categories || [];
-    const categoriesChanged = newCategories && JSON.stringify(newCategories) !== JSON.stringify(oldCategories);
+    const addedCategory = newCategories.find((id) => !oldCategories.includes(id));
     await super._processSubmitData(event, form, submitData, options);
     if (submitData.system?.repeat === 'random') setTimeout(() => this.#regenerateRandomOccurrences(), 100);
-    if (categoriesChanged && newCategories.length > 0 && oldCategories.length === 0) await this.#applyFirstCategoryStyle();
+    if (addedCategory) await this.#applyCategoryStyle(addedCategory);
   }
 
   /**
