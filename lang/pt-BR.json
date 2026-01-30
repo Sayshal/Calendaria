@@ -1002,6 +1002,8 @@
   "CALENDARIA.Note.AddCondition": "Adicionar Condição",
   "CALENDARIA.Note.AdvancedConditions": "Condições Avançadas",
   "CALENDARIA.Note.AdvancedConditionsHint": "Adicione condições personalizadas usando propriedades do calendário. Várias condições são combinadas com a lógica AND.",
+  "CALENDARIA.Note.ApplyCategoryStyleConfirm": "Aplicar o ícone e a cor da categoria \"{label}\" a esta nota?",
+  "CALENDARIA.Note.ApplyCategoryStyleTitle": "Aplicar Estilo de Categoria",
   "CALENDARIA.Note.CalendarDescription": "Descrição do Calendário",
   "CALENDARIA.Note.CalendarNotesFolder": "Notas do Calendário",
   "CALENDARIA.Note.Categories": "Categorias",
