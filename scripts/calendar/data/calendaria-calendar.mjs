@@ -878,19 +878,18 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     let phaseDuration = 1;
 
     if (hasRanges) {
-      // Match phase by normalized position against start/end ranges
+      // Convert fractional start/end to integer day boundaries to avoid floating-point precision issues
+      const totalCycleDays = Math.round(moon.cycleLength);
       for (let i = 0; i < phases.length; i++) {
         const phase = phases[i];
-        const start = phase.start ?? 0;
-        const end = phase.end ?? 1;
-        // Handle wrap-around (e.g., start=0.9, end=0.1)
-        const inRange = end > start ? normalizedPosition >= start && normalizedPosition < end : normalizedPosition >= start || normalizedPosition < end;
+        const startDay = Math.round((phase.start ?? 0) * moon.cycleLength);
+        const endDay = Math.round((phase.end ?? 1) * moon.cycleLength);
+        // Handle wrap-around (e.g., startDay=25, endDay=3 in a 28-day cycle)
+        const inRange = endDay > startDay ? dayIndex >= startDay && dayIndex < endDay : dayIndex >= startDay || dayIndex < endDay;
         if (inRange) {
           phaseArrayIndex = i;
-          const phaseLength = end > start ? end - start : 1 - start + end;
-          phaseDuration = Math.max(1, Math.round(phaseLength * moon.cycleLength));
-          const posInPhase = end > start ? normalizedPosition - start : normalizedPosition >= start ? normalizedPosition - start : normalizedPosition + (1 - start);
-          dayWithinPhase = Math.floor(posInPhase * moon.cycleLength);
+          phaseDuration = Math.max(1, endDay > startDay ? endDay - startDay : totalCycleDays - startDay + endDay);
+          dayWithinPhase = dayIndex >= startDay ? dayIndex - startDay : dayIndex + totalCycleDays - startDay;
           break;
         }
       }

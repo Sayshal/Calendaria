@@ -132,10 +132,10 @@
                       class="col-fading" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.FadingName'}}">
                     <input type="number" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-start"
                       name="moons.{{this.moonIndex}}.phases.{{this.index}}.startPercent" value="{{this.startPercent}}"
-                      min="0" max="100" step="0.1" class="col-start">
+                      min="0" max="100" step="0.01" class="col-start">
                     <input type="number" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-end"
                       name="moons.{{this.moonIndex}}.phases.{{this.index}}.endPercent" value="{{this.endPercent}}"
-                      min="0" max="100" step="0.1" class="col-end">
+                      min="0" max="100" step="0.01" class="col-end">
                     <div class="col-controls item-controls">
                       <button type="button" data-action="addMoonPhase" data-moon-index="{{this.moonIndex}}" data-tooltip
                         aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddPhase'}}">

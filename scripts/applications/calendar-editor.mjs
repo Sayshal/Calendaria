@@ -349,8 +349,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         index: pIdx,
         moonIndex: idx,
         isImagePath: phase.icon?.includes('/') ?? false,
-        startPercent: Math.round((phase.start ?? pIdx * 0.125) * 1000) / 10,
-        endPercent: Math.round((phase.end ?? (pIdx + 1) * 0.125) * 1000) / 10
+        startPercent: Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100,
+        endPercent: Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100
       }))
     }));
 

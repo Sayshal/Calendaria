@@ -2743,7 +2743,7 @@ span.calendaria-moon-icon {
 
         .col-phase-name {
           flex: 2;
-          min-width: 5rem;
+          min-width: 4.7rem;
         }
 
         .col-rising,
@@ -2755,7 +2755,7 @@ span.calendaria-moon-icon {
         .col-start,
         .col-end {
           flex: none;
-          width: 3.4375rem;
+          width: 3.5rem;
         }
 
         .col-controls {
