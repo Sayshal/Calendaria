@@ -150,6 +150,17 @@ const defaultCalendar = {
 
   countNonWeekdayFestivalsBefore: vi.fn(() => 0),
   countNonWeekdayFestivalsBeforeYear: vi.fn(() => 0),
+  countIntercalaryDaysBefore: vi.fn(() => 0),
+  countIntercalaryDaysBeforeYear: vi.fn(() => 0),
+
+  _computeDayOfWeek: vi.fn((components) => {
+    const daysInWeek = 7;
+    const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let dayOfYear = components.dayOfMonth ?? 0;
+    for (let m = 0; m < (components.month || 0); m++) dayOfYear += days[m];
+    const totalDays = (components.year || 0) * 365 + dayOfYear;
+    return (((totalDays) % daysInWeek) + daysInWeek) % daysInWeek;
+  }),
   getMoonPhase: vi.fn((moonIndex, components) => {
     // Simple moon phase calculation for testing
     const moon = defaultCalendar.moons[moonIndex];
@@ -191,6 +202,9 @@ const CalendarManager = {
       timeToComponents: vi.fn(defaultCalendar.timeToComponents),
       countNonWeekdayFestivalsBefore: vi.fn(() => 0),
       countNonWeekdayFestivalsBeforeYear: vi.fn(() => 0),
+      countIntercalaryDaysBefore: vi.fn(() => 0),
+      countIntercalaryDaysBeforeYear: vi.fn(() => 0),
+      _computeDayOfWeek: vi.fn(defaultCalendar._computeDayOfWeek),
       getMoonPhase: vi.fn(defaultCalendar.getMoonPhase)
     };
   },

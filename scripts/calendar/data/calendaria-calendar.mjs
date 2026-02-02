@@ -1095,10 +1095,41 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   getWeekdayForDate(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const weekdays = this.getWeekdaysForMonth(components.month);
-    const weekdayIndex = components.dayOfWeek ?? 0;
+    const weekdayIndex = this._computeDayOfWeek(components);
     const weekday = weekdays[weekdayIndex];
     if (!weekday) return null;
     return { ...weekday, index: weekdayIndex };
+  }
+
+  /**
+   * Compute the day-of-week index for decomposed time components.
+   * @param {object} components - Components from timeToComponents ({year, month, dayOfMonth})
+   * @returns {number} 0-based weekday index
+   */
+  _computeDayOfWeek(components) {
+    const daysInWeek = this.days?.values?.length || 7;
+    const monthData = this.months?.values?.[components.month];
+    if (monthData?.startingWeekday != null) {
+      const dayIndex = components.dayOfMonth ?? 0;
+      const ctx = { year: components.year, month: components.month, dayOfMonth: dayIndex };
+      const nonCounting = (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) + (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
+      return (monthData.startingWeekday + dayIndex - nonCounting + daysInWeek * 100) % daysInWeek;
+    }
+    let dayOfYear = components.dayOfMonth ?? 0;
+    for (let m = 0; m < components.month; m++) dayOfYear += this.getDaysInMonth(m, components.year);
+    let totalDaysFromPriorYears = 0;
+    if (components.year > 0) for (let y = 0; y < components.year; y++) totalDaysFromPriorYears += this.getDaysInYear(y);
+    else if (components.year < 0) for (let y = -1; y >= components.year; y--) totalDaysFromPriorYears -= this.getDaysInYear(y);
+    const totalDays = totalDaysFromPriorYears + dayOfYear;
+    const ctx = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
+    const totalNonCounting =
+      (this.countNonWeekdayFestivalsBeforeYear?.(components.year) ?? 0) +
+      (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) +
+      (this.countIntercalaryDaysBeforeYear?.(components.year) ?? 0) +
+      (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
+    const firstWeekday = this.years?.firstWeekday ?? 0;
+    const countingDays = totalDays - totalNonCounting;
+    return (((countingDays + firstWeekday) % daysInWeek) + daysInWeek) % daysInWeek;
   }
 
   /**

@@ -105,39 +105,10 @@ export function monthsBetween(startDate, endDate) {
 export function dayOfWeek(date) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return 0;
-
   try {
-    const daysInWeek = calendar.days?.values?.length || 7;
-    const monthData = calendar.months?.values?.[date.month];
-    if (monthData?.startingWeekday != null) {
-      const dayIndex = (date.day ?? 1) - 1;
-      const components = { year: date.year - (calendar.years?.yearZero ?? 0), month: date.month, dayOfMonth: (date.day ?? 1) - 1 };
-      const nonCountingFestivals = calendar.countNonWeekdayFestivalsBefore?.(components) ?? 0;
-      const nonCountingIntercalary = calendar.countIntercalaryDaysBefore?.(components) ?? 0;
-      const nonCountingDays = nonCountingFestivals + nonCountingIntercalary;
-      return (monthData.startingWeekday + dayIndex - nonCountingDays + daysInWeek * 100) % daysInWeek;
-    }
-
     const yearZero = calendar.years?.yearZero ?? 0;
-    const internalYear = date.year - yearZero;
-    let dayOfYear = (date.day ?? 1) - 1;
-    for (let m = 0; m < date.month; m++) dayOfYear += calendar.getDaysInMonth(m, internalYear);
-    let totalDaysFromPriorYears = 0;
-    if (internalYear > 0) {
-      for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
-    } else if (internalYear < 0) {
-      for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
-    }
-    const totalDays = totalDaysFromPriorYears + dayOfYear;
-    const components = { year: internalYear, month: date.month, dayOfMonth: (date.day ?? 1) - 1 };
-    const nonCountingFestivalsInYear = calendar.countNonWeekdayFestivalsBefore?.(components) ?? 0;
-    const nonCountingFestivalsFromPriorYears = calendar.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
-    const intercalaryInYear = calendar.countIntercalaryDaysBefore?.(components) ?? 0;
-    const intercalaryFromPriorYears = calendar.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
-    const totalNonCounting = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
-    const firstWeekday = calendar.years?.firstWeekday ?? 0;
-    const countingDays = totalDays - totalNonCounting;
-    return (((countingDays + firstWeekday) % daysInWeek) + daysInWeek) % daysInWeek;
+    const components = { year: date.year - yearZero, month: date.month, dayOfMonth: (date.day ?? 1) - 1 };
+    return calendar._computeDayOfWeek(components);
   } catch (error) {
     log(1, 'Error calculating day of week:', error);
     return 0;
