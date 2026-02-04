@@ -289,6 +289,20 @@ export const ENVIRONMENTAL_WEATHER = [
     darknessPenalty: -0.1,
     environmentBase: null,
     environmentDark: { hue: 280, saturation: 0.8 }
+  },
+  {
+    id: 'sakura-bloom',
+    label: 'CALENDARIA.Weather.SakuraBloom',
+    description: 'CALENDARIA.Weather.SakuraBloomDesc',
+    icon: 'fa‑flower',
+    color: '#ffb7c5',
+    category: 'environmental',
+    chance: 1.5,
+    tempMin: 18,
+    tempMax: 32,
+    darknessPenalty: 0,
+    environmentBase: null,
+    environmentDark: null
   }
 ];
 
