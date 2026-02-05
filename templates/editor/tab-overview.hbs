@@ -1,0 +1,45 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  <div class="template-selector">
+    <div class="form-group">
+      <label for="editor-calendar-select">{{localize "CALENDARIA.Common.Calendar"}}</label>
+      <div class="form-fields">
+        <select id="editor-calendar-select" name="calendarSelect">
+          <option value="">{{localize "CALENDARIA.Editor.SelectCalendar"}}</option>
+          {{#each templates}}
+            <option value="{{this.id}}">{{this.name}}{{#if this.isCustom}}
+                ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+            </option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+    <div class="template-actions">
+      <button type="button" data-action="duplicateCalendar">
+        <i class="fas fa-copy"></i>
+        {{localize "CALENDARIA.Editor.Duplicate"}}
+      </button>
+      <button type="button" data-action="createNew">
+        <i class="fas fa-file-circle-plus"></i>
+        {{localize "CALENDARIA.Editor.CreateNew"}}
+      </button>
+    </div>
+  </div>
+
+  <fieldset>
+    <legend>{{localize "CALENDARIA.Editor.Section.CalendarIdentity"}}</legend>
+
+    <div class="form-group">
+      <label for="editor-name">{{localize "CALENDARIA.Common.Name"}}</label>
+      <div class="form-fields">
+        <input type="text" id="editor-name" name="name" value="{{calendar.name}}"
+          placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Name'}}" required>
+      </div>
+    </div>
+
+    <div class="form-group stacked">
+      <label for="editor-description">{{localize "CALENDARIA.Common.Description"}}</label>
+      <textarea id="editor-description" name="metadata.description" rows="2"
+        placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Description'}}">{{calendar.metadata.description}}</textarea>
+    </div>
+  </fieldset>
+</section>

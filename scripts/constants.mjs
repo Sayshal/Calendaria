@@ -183,11 +183,13 @@ export const TEMPLATES = {
     CALENDAR_NOTE_VIEW: `modules/${MODULE.ID}/templates/sheets/calendar-note-view.hbs`
   },
   EDITOR: {
-    TAB_BASIC: `modules/${MODULE.ID}/templates/editor/tab-basic.hbs`,
+    TAB_OVERVIEW: `modules/${MODULE.ID}/templates/editor/tab-overview.hbs`,
+    TAB_DISPLAY: `modules/${MODULE.ID}/templates/editor/tab-display.hbs`,
     TAB_MONTHS: `modules/${MODULE.ID}/templates/editor/tab-months.hbs`,
     TAB_WEEKDAYS: `modules/${MODULE.ID}/templates/editor/tab-weekdays.hbs`,
     TAB_TIME: `modules/${MODULE.ID}/templates/editor/tab-time.hbs`,
     TAB_SEASONS: `modules/${MODULE.ID}/templates/editor/tab-seasons.hbs`,
+    TAB_YEARS: `modules/${MODULE.ID}/templates/editor/tab-years.hbs`,
     TAB_ERAS: `modules/${MODULE.ID}/templates/editor/tab-eras.hbs`,
     TAB_MOONS: `modules/${MODULE.ID}/templates/editor/tab-moons.hbs`,
     TAB_FESTIVALS: `modules/${MODULE.ID}/templates/editor/tab-festivals.hbs`,

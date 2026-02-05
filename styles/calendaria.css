@@ -2146,6 +2146,21 @@ span.calendaria-moon-icon {
     gap: 0;
   }
 
+  .legend-help {
+    height: 1.25rem;
+    padding: 0;
+    margin-right: 0.125rem;
+    border: none;
+    opacity: 0.6;
+    background: none;
+    font-size: var(--font-size-14);
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
   .window-content {
     gap: 0;
     grid-template-columns: auto 1fr;

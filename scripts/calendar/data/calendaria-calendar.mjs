@@ -380,7 +380,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           long: new StringField({ required: false, initial: 'D MMMM, YYYY' }),
           full: new StringField({ required: false, initial: 'MMMM D, YYYY' }),
           time: new StringField({ required: false, initial: 'HH:mm' }),
-          time12: new StringField({ required: false, initial: 'h:mm a' })
+          time12: new StringField({ required: false, initial: 'h:mm a' }),
+          weekHeader: new StringField({ required: false, initial: '[W]' }),
+          yearHeader: new StringField({ required: false, initial: '[YYYY]' }),
+          yearLabel: new StringField({ required: false, initial: '[YYYY] [GGGG]' })
         },
         { required: false }
       ),

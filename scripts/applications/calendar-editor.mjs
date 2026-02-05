@@ -12,6 +12,7 @@ import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../con
 import { createImporter } from '../importers/index.mjs';
 import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
+import { TokenReferenceDialog } from './token-reference-dialog.mjs';
 import { CLIMATE_ZONE_TEMPLATES, fromDisplayUnit, getClimateTemplateOptions, getDefaultZoneConfig, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
@@ -77,18 +78,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       editZone: CalendarEditor.#onEditZone,
       deleteZone: CalendarEditor.#onDeleteZone,
       toggleCategorySelectAll: CalendarEditor.#onToggleCategorySelectAll,
-      createNew: CalendarEditor.#onCreateNew
+      createNew: CalendarEditor.#onCreateNew,
+      showTokenReference: CalendarEditor.#onShowTokenReference
     }
   };
 
   /** @override */
   static PARTS = {
     tabs: { template: TEMPLATES.TAB_NAVIGATION },
-    basic: { template: TEMPLATES.EDITOR.TAB_BASIC, scrollable: [''] },
+    overview: { template: TEMPLATES.EDITOR.TAB_OVERVIEW, scrollable: [''] },
+    display: { template: TEMPLATES.EDITOR.TAB_DISPLAY, scrollable: [''] },
     months: { template: TEMPLATES.EDITOR.TAB_MONTHS, scrollable: [''] },
     weekdays: { template: TEMPLATES.EDITOR.TAB_WEEKDAYS, scrollable: [''] },
     time: { template: TEMPLATES.EDITOR.TAB_TIME, scrollable: [''] },
     seasons: { template: TEMPLATES.EDITOR.TAB_SEASONS, scrollable: [''] },
+    years: { template: TEMPLATES.EDITOR.TAB_YEARS, scrollable: [''] },
     eras: { template: TEMPLATES.EDITOR.TAB_ERAS, scrollable: [''] },
     festivals: { template: TEMPLATES.EDITOR.TAB_FESTIVALS, scrollable: [''] },
     moons: { template: TEMPLATES.EDITOR.TAB_MOONS, scrollable: [''] },
@@ -98,24 +102,32 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   /** Tab group definitions with colors */
-  static TAB_GROUPS = [];
+  static TAB_GROUPS = [
+    { id: 'structure', label: 'CALENDARIA.Editor.Group.Structure', tooltip: 'CALENDARIA.Editor.GroupTooltip.Structure', color: '#84cc16' },
+    { id: 'features', label: 'CALENDARIA.Editor.Group.Features', tooltip: 'CALENDARIA.Editor.GroupTooltip.Features', color: '#14b8a6' }
+  ];
 
   /** @override */
   static TABS = {
     primary: {
       tabs: [
-        { id: 'basic', icon: 'fas fa-info-circle', label: 'CALENDARIA.Editor.Tab.Basic' },
-        { id: 'months', icon: 'fas fa-calendar', label: 'CALENDARIA.Common.Months' },
-        { id: 'weekdays', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weekdays' },
-        { id: 'time', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time' },
-        { id: 'seasons', icon: 'fas fa-sun', label: 'CALENDARIA.Common.Seasons' },
-        { id: 'eras', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras' },
-        { id: 'festivals', icon: 'fas fa-star', label: 'CALENDARIA.Common.Festivals' },
-        { id: 'moons', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons' },
-        { id: 'cycles', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Common.Cycles' },
-        { id: 'weather', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather' }
+        // Core (ungrouped)
+        { id: 'overview', group: 'primary', icon: 'fas fa-info-circle', label: 'CALENDARIA.Editor.Tab.Overview', color: '#ff144f' },
+        { id: 'display', group: 'primary', icon: 'fas fa-eye', label: 'CALENDARIA.Editor.Tab.Display', color: '#ff144f' },
+        // Structure group
+        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'structure' },
+        { id: 'weekdays', group: 'primary', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weekdays', tabGroup: 'structure' },
+        { id: 'months', group: 'primary', icon: 'fas fa-calendar', label: 'CALENDARIA.Common.Months', tabGroup: 'structure' },
+        { id: 'seasons', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.Common.Seasons', tabGroup: 'structure' },
+        { id: 'years', group: 'primary', icon: 'fas fa-hashtag', label: 'CALENDARIA.Editor.Tab.Years', tabGroup: 'structure' },
+        { id: 'eras', group: 'primary', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras', tabGroup: 'structure' },
+        { id: 'cycles', group: 'primary', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Common.Cycles', tabGroup: 'structure' },
+        // Features group
+        { id: 'moons', group: 'primary', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons', tabGroup: 'features' },
+        { id: 'festivals', group: 'primary', icon: 'fas fa-star', label: 'CALENDARIA.Common.Festivals', tabGroup: 'features' },
+        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather', tabGroup: 'features' }
       ],
-      initial: 'basic'
+      initial: 'overview'
     }
   };
 
@@ -196,7 +208,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static #createBlankCalendar() {
     return {
       name: '',
-      years: { yearZero: 0, firstWeekday: 0, leapYear: null },
+      years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true },
       months: { values: [{ name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }] },
       days: {
         values: [{ name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 }],
@@ -214,7 +226,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       canonicalHours: [],
       weeks: { enabled: false, type: 'year-based', names: [] },
       amPmNotation: { am: 'AM', pm: 'PM' },
-      dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a' },
+      dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
       weather: { activeZone: null, autoGenerate: false, zones: [] }
     };
@@ -282,7 +294,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.tabGroups = tabGroups;
     context.ungroupedTabs = ungroupedTabs;
     context.showSearch = true;
-    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
+    context.searchPlaceholder = 'CALENDARIA.Editor.Search.Placeholder';
     context.searchLabel = 'CALENDARIA.Editor.Search.Label';
     context.calendar = this.#calendarData;
     context.isEditing = this.#isEditing;
@@ -467,7 +479,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {{tabGroups: Array<object>, ungroupedTabs: Array<object>}}
    */
   #prepareTabGroups() {
-    const activeTab = this.tabGroups.primary || 'basic';
+    const activeTab = this.tabGroups.primary || 'overview';
     const mapTab = (tab) => ({
       ...tab,
       group: 'primary',
@@ -501,18 +513,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _onRender(context, options) {
     super._onRender?.(context, options);
-    const leapRuleSelect = this.element.querySelector('.leap-rule-select');
-    if (leapRuleSelect) {
-      leapRuleSelect.addEventListener('change', (event) => {
-        const rule = event.target.value;
-        const simpleFields = this.element.querySelector('.leap-simple-fields');
-        const customFields = this.element.querySelector('.leap-custom-fields');
-        const gregorianInfo = this.element.querySelector('.leap-gregorian-info');
-        if (simpleFields) simpleFields.style.display = rule === 'simple' ? '' : 'none';
-        if (customFields) customFields.style.display = rule === 'custom' ? '' : 'none';
-        if (gregorianInfo) gregorianInfo.style.display = rule === 'gregorian' ? '' : 'none';
-      });
-    }
+    this.#setupLeapRuleListener();
     for (const colorInput of this.element.querySelectorAll('input[name^="moons."][name$=".color"]')) {
       colorInput.addEventListener('input', (event) => {
         const preview = event.target.closest('.color-input-wrapper')?.querySelector('.moon-color-preview');
@@ -545,6 +546,25 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.#setupWeatherTotalListener();
     this.#setupNavSearchListener();
+  }
+
+  /**
+   * Setup leap rule select to toggle visibility of leap year config fields.
+   * @private
+   */
+  #setupLeapRuleListener() {
+    const leapRuleSelect = this.element.querySelector('.leap-rule-select');
+    if (!leapRuleSelect || leapRuleSelect.dataset.listenerAttached) return;
+    leapRuleSelect.dataset.listenerAttached = 'true';
+    leapRuleSelect.addEventListener('change', (event) => {
+      const rule = event.target.value;
+      const simpleFields = this.element.querySelector('.leap-simple-fields');
+      const customFields = this.element.querySelector('.leap-custom-fields');
+      const gregorianInfo = this.element.querySelector('.leap-gregorian-info');
+      if (simpleFields) simpleFields.style.display = rule === 'simple' ? '' : 'none';
+      if (customFields) customFields.style.display = rule === 'custom' ? '' : 'none';
+      if (gregorianInfo) gregorianInfo.style.display = rule === 'gregorian' ? '' : 'none';
+    });
   }
 
   /**
@@ -743,6 +763,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     log(3, `updateFromFormData - after metadata: pendingNotes=${this.#calendarData.metadata?.pendingNotes?.length || 0}, importerId=${this.#calendarData.metadata?.importerId}`);
     this.#calendarData.years.yearZero = parseInt(data['years.yearZero']) || 0;
     this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
+    this.#calendarData.years.resetWeekdays = data['years.resetWeekdays'] ?? false;
+    this.#calendarData.years.allowNegativeYears = data['years.allowNegativeYears'] ?? true;
     const leapRule = data['leapYearConfig.rule'] || 'none';
     if (leapRule === 'none') {
       this.#calendarData.leapYearConfig = null;
@@ -792,6 +814,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.dateFormats.full = data['dateFormats.full'] || '{{B}} {{d}}, {{y}}';
     this.#calendarData.dateFormats.time = data['dateFormats.time'] || '{{H}}:{{M}}';
     this.#calendarData.dateFormats.time12 = data['dateFormats.time12'] || '{{h}}:{{M}} {{p}}';
+    if (data['dateFormats.weekHeader'] != null) this.#calendarData.dateFormats.weekHeader = data['dateFormats.weekHeader'];
+    if (data['dateFormats.yearHeader'] != null) this.#calendarData.dateFormats.yearHeader = data['dateFormats.yearHeader'];
+    if (data['dateFormats.yearLabel'] != null) this.#calendarData.dateFormats.yearLabel = data['dateFormats.yearLabel'];
     this.#updateCanonicalHoursFromFormData(data);
     this.#updateNamedWeeksFromFormData(data);
     this.#updateWeatherFromFormData(data);
@@ -2007,6 +2032,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarId = null;
     this.#isEditing = false;
     this.render();
+  }
+
+  /**
+   * Open the Token Reference Dialog.
+   * @param {PointerEvent} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static #onShowTokenReference(_event, target) {
+    const contextType = target.dataset.contextType || 'all';
+    TokenReferenceDialog.open({ contextType });
   }
 
   /**
