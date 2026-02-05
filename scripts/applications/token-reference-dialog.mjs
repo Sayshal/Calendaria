@@ -14,7 +14,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * @enum {string[]}
  */
 const TOKEN_CATEGORIES = {
-  date: ['Y', 'YY', 'YYYY', 'M', 'MM', 'MMM', 'MMMM', 'Mo', 'D', 'DD', 'Do', 'DDD', 'EEEE', 'EEE', 'EE', 'E', 'EEEEE', 'e', 'w', 'ww', 'W'],
+  date: ['Y', 'YY', 'YYYY', 'M', 'MM', 'MMM', 'MMMM', 'Mo', 'D', 'DD', 'Do', 'DDD', 'EEEE', 'EEE', 'EE', 'E', 'EEEEE', 'e', 'w', 'ww', 'W', '[namedWeek]', '[namedWeekAbbr]'],
   fantasy: [
     'GGGG',
     'GGG',
@@ -110,6 +110,8 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
       w: 'week',
       ww: 'week',
       W: 'week',
+      '[namedWeek]': 'week',
+      '[namedWeekAbbr]': 'week',
       H: 'time',
       HH: 'time',
       h: 'time',

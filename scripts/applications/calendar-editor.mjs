@@ -425,6 +425,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         seasonalTypeOptions: seasonalTypeOptions.map((opt) => ({ ...opt, selected: opt.value === (season.seasonalType ?? '') }))
       };
     });
+    context.lastSeasonIndex = this.#calendarData.seasons.values.length - 1;
 
     context.erasWithNav = this.#calendarData.eras.map((era, idx) => ({
       ...era,

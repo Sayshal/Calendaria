@@ -110,6 +110,13 @@ export function dateFormattingParts(calendar, components) {
   const daysPerWeek = weekdays.length || 7;
   const weekOfYear = Math.ceil(dayOfYear / daysPerWeek);
   const weekOfMonth = Math.ceil(dayOfMonth / daysPerWeek);
+  let namedWeek = '';
+  let namedWeekAbbr = '';
+  const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 });
+  if (currentWeek) {
+    namedWeek = localize(currentWeek.name);
+    namedWeekAbbr = currentWeek.abbreviation ? localize(currentWeek.abbreviation) : namedWeek.slice(0, 3);
+  }
   let climateZoneName = '';
   let climateZoneAbbr = '';
   const activeZone = calendar?.getActiveClimateZone?.();
@@ -153,6 +160,8 @@ export function dateFormattingParts(calendar, components) {
     w: weekOfYear,
     ww: String(weekOfYear).padStart(2, '0'),
     W: weekOfMonth,
+    namedWeek: namedWeek,
+    namedWeekAbbr: namedWeekAbbr,
 
     // Hour
     H: hour,
@@ -426,6 +435,8 @@ export function formatCustom(calendar, components, formatStr) {
     yearInEra: parts.eraYear,
     season: parts.season,
     seasonAbbr: parts.seasonAbbr,
+    namedWeek: parts.namedWeek,
+    namedWeekAbbr: parts.namedWeekAbbr,
     ch: getCanonicalHour(calendar, components),
     chAbbr: getCanonicalHourAbbr(calendar, components),
     cycle: cycleNum,
@@ -1076,6 +1087,8 @@ export function getAvailableTokens() {
     { token: 'w', descriptionKey: 'CALENDARIA.Format.Token.w', type: 'standard' },
     { token: 'ww', descriptionKey: 'CALENDARIA.Format.Token.ww', type: 'standard' },
     { token: 'W', descriptionKey: 'CALENDARIA.Format.Token.W', type: 'standard' },
+    { token: '[namedWeek]', descriptionKey: 'CALENDARIA.Format.Token.namedWeek', type: 'custom' },
+    { token: '[namedWeekAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedWeekAbbr', type: 'custom' },
     // Era tokens
     { token: 'GGGG', descriptionKey: 'CALENDARIA.Format.Token.GGGG', type: 'standard' },
     { token: 'GGG', descriptionKey: 'CALENDARIA.Format.Token.GGG', type: 'standard' },

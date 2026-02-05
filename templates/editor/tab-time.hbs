@@ -2,46 +2,29 @@
   <fieldset>
     <legend>{{localize "CALENDARIA.Editor.Section.TimeStructure"}}</legend>
 
-    <div class="form-group">
-      <label for="editor-days-per-year">{{localize "CALENDARIA.Editor.Field.DaysPerYear"}}</label>
-      <div class="form-fields">
-        <input type="text" id="editor-days-per-year" value="{{daysPerYearDisplay}}" disabled>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaysPerYearComputed"}}</p>
-    </div>
-
     <div class="notice warning">
       <i class="fas fa-exclamation-triangle"></i>
       {{localize "CALENDARIA.Editor.Warning.TimeSettings"}}
     </div>
 
-    <div class="form-group">
-      <label for="editor-hours-per-day">{{localize "CALENDARIA.Editor.Field.HoursPerDay"}}</label>
-      <div class="form-fields">
+    <div class="time-structure-columns">
+      <div class="time-col">
+        <label for="editor-hours-per-day">{{localize "CALENDARIA.Editor.Field.HoursPerDay"}}</label>
         <input type="number" id="editor-hours-per-day" name="days.hoursPerDay" value="{{calendar.days.hoursPerDay}}"
           min="1" step="1">
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="editor-minutes-per-hour">{{localize "CALENDARIA.Editor.Field.MinutesPerHour"}}</label>
-      <div class="form-fields">
+      <div class="time-col">
+        <label for="editor-minutes-per-hour">{{localize "CALENDARIA.Editor.Field.MinutesPerHour"}}</label>
         <input type="number" id="editor-minutes-per-hour" name="days.minutesPerHour"
           value="{{calendar.days.minutesPerHour}}" min="1" step="1">
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="editor-seconds-per-minute">{{localize "CALENDARIA.Editor.Field.SecondsPerMinute"}}</label>
-      <div class="form-fields">
+      <div class="time-col">
+        <label for="editor-seconds-per-minute">{{localize "CALENDARIA.Editor.Field.SecondsPerMinute"}}</label>
         <input type="number" id="editor-seconds-per-minute" name="days.secondsPerMinute"
           value="{{calendar.days.secondsPerMinute}}" min="1" step="1">
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="editor-seconds-per-round">{{localize "CALENDARIA.Editor.Field.SecondsPerRound"}}</label>
-      <div class="form-fields">
+      <div class="time-col">
+        <label for="editor-seconds-per-round">{{localize "CALENDARIA.Editor.Field.SecondsPerRound"}}</label>
         <input type="number" id="editor-seconds-per-round" name="secondsPerRound" value="{{calendar.secondsPerRound}}"
           min="1" step="1">
       </div>
@@ -60,29 +43,9 @@
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightEnabled"}}</p>
     </div>
 
-    <div class="form-group">
-      <label for="editor-shortest-day">{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
-      <div class="form-fields">
-        <input type="number" id="editor-shortest-day" name="daylight.shortestDay"
-          value="{{calendar.daylight.shortestDay}}" min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
-        <span class="units">{{localize "CALENDARIA.Editor.Units.Hours"}}</span>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.ShortestDay"}}</p>
-    </div>
-
-    <div class="form-group">
-      <label for="editor-longest-day">{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
-      <div class="form-fields">
-        <input type="number" id="editor-longest-day" name="daylight.longestDay" value="{{calendar.daylight.longestDay}}"
-          min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
-        <span class="units">{{localize "CALENDARIA.Editor.Units.Hours"}}</span>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.LongestDay"}}</p>
-    </div>
-
-    <div class="form-group">
-      <label for="editor-winter-solstice-month">{{localize "CALENDARIA.Editor.Field.WinterSolstice"}}</label>
-      <div class="form-fields solstice-fields">
+    <div class="daylight-row">
+      <label>{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
+      <div class="daylight-fields">
         <select id="editor-winter-solstice-month" name="daylight.winterSolsticeMonth">
           {{#each winterSolsticeMonthOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -91,12 +54,16 @@
         <input type="number" id="editor-winter-solstice-day" name="daylight.winterSolsticeDay"
           value="{{winterSolsticeDay}}" min="1" max="31" step="1">
       </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WinterSolstice"}}</p>
+      <div class="daylight-hours">
+        <input type="number" id="editor-shortest-day" name="daylight.shortestDay"
+          value="{{calendar.daylight.shortestDay}}" min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
+        <span class="units">{{localize "CALENDARIA.Editor.Units.HoursOfSunlight"}}</span>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="editor-summer-solstice-month">{{localize "CALENDARIA.Editor.Field.SummerSolstice"}}</label>
-      <div class="form-fields solstice-fields">
+    <div class="daylight-row">
+      <label>{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
+      <div class="daylight-fields">
         <select id="editor-summer-solstice-month" name="daylight.summerSolsticeMonth">
           {{#each summerSolsticeMonthOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -105,7 +72,11 @@
         <input type="number" id="editor-summer-solstice-day" name="daylight.summerSolsticeDay"
           value="{{summerSolsticeDay}}" min="1" max="31" step="1">
       </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.SummerSolstice"}}</p>
+      <div class="daylight-hours">
+        <input type="number" id="editor-longest-day" name="daylight.longestDay" value="{{calendar.daylight.longestDay}}"
+          min="0" max="{{calendar.days.hoursPerDay}}" step="0.5">
+        <span class="units">{{localize "CALENDARIA.Editor.Units.HoursOfSunlight"}}</span>
+      </div>
     </div>
   </fieldset>
 
