@@ -142,6 +142,7 @@ export const SCENE_FLAGS = {
 /** Template file paths for UI components */
 export const TEMPLATES = {
   FORM_FOOTER: 'templates/generic/form-footer.hbs',
+  TAB_NAVIGATION: `modules/${MODULE.ID}/templates/partials/tab-navigation.hbs`,
   SETTINGS: {
     PANEL_HOME: `modules/${MODULE.ID}/templates/settings/tab-home.hbs`,
     PANEL_NOTES: `modules/${MODULE.ID}/templates/settings/tab-notes.hbs`,
@@ -158,7 +159,6 @@ export const TEMPLATES = {
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
     PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/settings/tab-stopwatch.hbs`,
-    TAB_NAVIGATION: `modules/${MODULE.ID}/templates/settings/tab-navigation.hbs`,
     PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`
   },
   PARTIALS: {
@@ -183,7 +183,6 @@ export const TEMPLATES = {
     CALENDAR_NOTE_VIEW: `modules/${MODULE.ID}/templates/sheets/calendar-note-view.hbs`
   },
   EDITOR: {
-    TAB_NAVIGATION: `modules/${MODULE.ID}/templates/editor/tab-navigation.hbs`,
     TAB_BASIC: `modules/${MODULE.ID}/templates/editor/tab-basic.hbs`,
     TAB_MONTHS: `modules/${MODULE.ID}/templates/editor/tab-months.hbs`,
     TAB_WEEKDAYS: `modules/${MODULE.ID}/templates/editor/tab-weekdays.hbs`,

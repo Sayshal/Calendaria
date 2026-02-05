@@ -82,7 +82,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    tabs: { template: TEMPLATES.SETTINGS.TAB_NAVIGATION },
+    tabs: { template: TEMPLATES.TAB_NAVIGATION },
     home: { template: TEMPLATES.SETTINGS.PANEL_HOME, scrollable: [''] },
     notes: { template: TEMPLATES.SETTINGS.PANEL_NOTES, scrollable: [''] },
     time: { template: TEMPLATES.SETTINGS.PANEL_TIME, scrollable: [''] },
@@ -139,6 +139,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const { tabGroups, ungroupedTabs } = this.#prepareTabGroups();
     context.tabGroups = tabGroups;
     context.ungroupedTabs = ungroupedTabs;
+    context.showSearch = true;
+    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
+    context.searchLabel = 'CALENDARIA.SettingsPanel.Search.Label';
     return context;
   }
 
@@ -283,7 +286,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * Setup search input listeners.
    */
   #setupSearchListeners() {
-    const searchInput = this.element.querySelector('input[name="settingsSearch"]');
+    const searchInput = this.element.querySelector('input[name="navSearch"]');
     if (!searchInput || searchInput.dataset.listenerAttached) return;
     searchInput.dataset.listenerAttached = 'true';
     let searchTimeout = null;
@@ -389,7 +392,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} type - Result type ('setting' or 'fieldset')
    */
   #onSearchResultClick(tab, key, type) {
-    const searchInput = this.element.querySelector('input[name="settingsSearch"]');
+    const searchInput = this.element.querySelector('input[name="navSearch"]');
     if (searchInput) searchInput.value = '';
     this.#destroySearchDropdown();
     this.changeTab(tab, 'primary');

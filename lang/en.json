@@ -493,6 +493,7 @@
   "CALENDARIA.Editor.SetAsActive": "Set as active calendar",
   "CALENDARIA.Editor.SetAsActiveHint": "Makes this the active calendar and reloads the world to apply the change.",
   "CALENDARIA.Editor.StartingWeekday.Auto": "Auto",
+  "CALENDARIA.Editor.Search.Label": "Search editor tabs",
   "CALENDARIA.Editor.Tab.Basic": "Basic Info",
   "CALENDARIA.Editor.TemplateLoaded": "Loaded template: {name}",
   "CALENDARIA.Editor.TemplateNotFound": "Template \"{id}\" not found.",

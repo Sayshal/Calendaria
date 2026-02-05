@@ -29,7 +29,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: ['calendaria', 'calendar-editor', 'standard-form'],
     tag: 'form',
     window: { icon: 'fas fa-calendar-plus', resizable: true },
-    position: { width: 850, height: 750 },
+    position: { width: 900, height: 800 },
     form: {
       handler: CalendarEditor.#onSubmit,
       submitOnChange: true,
@@ -83,7 +83,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    tabs: { template: TEMPLATES.EDITOR.TAB_NAVIGATION },
+    tabs: { template: TEMPLATES.TAB_NAVIGATION },
     basic: { template: TEMPLATES.EDITOR.TAB_BASIC, scrollable: [''] },
     months: { template: TEMPLATES.EDITOR.TAB_MONTHS, scrollable: [''] },
     weekdays: { template: TEMPLATES.EDITOR.TAB_WEEKDAYS, scrollable: [''] },
@@ -96,6 +96,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     weather: { template: TEMPLATES.EDITOR.TAB_WEATHER, scrollable: [''] },
     footer: { template: TEMPLATES.FORM_FOOTER }
   };
+
+  /** Tab group definitions with colors */
+  static TAB_GROUPS = [];
 
   /** @override */
   static TABS = {
@@ -275,6 +278,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
+    const { tabGroups, ungroupedTabs } = this.#prepareTabGroups();
+    context.tabGroups = tabGroups;
+    context.ungroupedTabs = ungroupedTabs;
+    context.showSearch = true;
+    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
+    context.searchLabel = 'CALENDARIA.Editor.Search.Label';
     context.calendar = this.#calendarData;
     context.isEditing = this.#isEditing;
     context.calendarId = this.#calendarId;
@@ -453,6 +462,30 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return context;
   }
 
+  /**
+   * Prepare grouped and ungrouped tabs for template rendering.
+   * @returns {{tabGroups: Array<object>, ungroupedTabs: Array<object>}}
+   */
+  #prepareTabGroups() {
+    const activeTab = this.tabGroups.primary || 'basic';
+    const mapTab = (tab) => ({
+      ...tab,
+      group: 'primary',
+      active: tab.id === activeTab,
+      cssClass: tab.id === activeTab ? 'active' : ''
+    });
+    const ungroupedTabs = CalendarEditor.TABS.primary.tabs
+      .filter((tab) => !tab.tabGroup)
+      .map(mapTab);
+    const tabGroups = CalendarEditor.TAB_GROUPS.map((group) => {
+      const groupTabs = CalendarEditor.TABS.primary.tabs
+        .filter((tab) => tab.tabGroup === group.id)
+        .map(mapTab);
+      return { ...group, tabs: groupTabs };
+    }).filter((group) => group.tabs.length > 0);
+    return { tabGroups, ungroupedTabs };
+  }
+
   /** @override */
   async _preparePartContext(partId, context, options) {
     context = await super._preparePartContext(partId, context, options);
@@ -511,6 +544,30 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     this.#setupWeatherTotalListener();
+    this.#setupNavSearchListener();
+  }
+
+  /**
+   * Setup nav search input to filter visible tabs by name.
+   * @private
+   */
+  #setupNavSearchListener() {
+    const searchInput = this.element.querySelector('input[name="navSearch"]');
+    if (!searchInput || searchInput.dataset.listenerAttached) return;
+    searchInput.dataset.listenerAttached = 'true';
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      const nav = this.element.querySelector('nav.sheet-tabs');
+      if (!nav) return;
+      for (const tab of nav.querySelectorAll('[data-tab]')) {
+        const label = tab.textContent.trim().toLowerCase();
+        tab.style.display = (!query || label.includes(query)) ? '' : 'none';
+      }
+      for (const group of nav.querySelectorAll('.tab-group')) {
+        const visibleTabs = group.querySelectorAll('[data-tab]:not([style*="display: none"])');
+        group.style.display = visibleTabs.length > 0 ? '' : 'none';
+      }
+    });
   }
 
   /**

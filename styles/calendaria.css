@@ -2040,12 +2040,107 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
+/* Shared Vertical Tab Navigation           */
+/* ======================================== */
+
+.calendaria {
+  nav.sheet-tabs {
+    gap: 0;
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: max-content;
+    min-width: 8rem;
+    max-width: 8rem;
+    height: 100%;
+    padding: 0;
+    border-top: none;
+    border-right: 0.0625rem solid var(--color-cool-4);
+    border-bottom: none;
+
+    .tab-group {
+      display: flex;
+      flex-direction: column;
+
+      &:last-child {
+        margin-top: auto;
+      }
+
+      .tab-group-header {
+        padding: 0.5rem;
+        color: var(--color-text-dark-secondary);
+        font-weight: 500;
+        font-size: var(--font-size-18);
+        text-align: right;
+      }
+    }
+
+    [data-tab] {
+      gap: 0.5rem;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      max-width: 100%;
+      padding: 0.5rem;
+      border-bottom: none;
+      border-left: 0.1875rem solid var(--group-color, transparent);
+      border-radius: 0;
+      font-size: var(--font-size-16);
+      text-align: right;
+
+      > span:not(.notification-pip) {
+        overflow: hidden;
+        font-size: var(--font-size-13);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      i {
+        width: 1.25em;
+        margin: 0;
+        text-align: center;
+      }
+
+      &.active {
+        border-left-color: var(--group-color, var(--color-warm-1));
+        background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
+      }
+    }
+  }
+
+  .nav-search {
+    position: relative;
+
+    input[type='search'] {
+      border: none;
+      border-radius: 0;
+      font-size: var(--font-size-11);
+      padding: 0 0.3rem 0 2rem;
+      margin: 0;
+    }
+
+    > i {
+      position: absolute;
+      top: 50%;
+      left: 0.5rem;
+      transform: translateY(-50%);
+      font-size: var(--font-size-16);
+      pointer-events: none;
+    }
+  }
+}
+
+/* ======================================== */
 /* Calendar Editor Styles                   */
 /* ======================================== */
 
 .calendar-editor {
-  --editor-sidebar-max-width: 11.25rem;
-  --editor-sidebar-min-width: 7.5rem;
+  max-height: 90vh;
+  max-width: 90vw;
 
   &.standard-form {
     gap: 0;
@@ -2080,7 +2175,7 @@ span.calendaria-moon-icon {
   }
 
   .warning {
-    color: var(--color-level-warning, var(--calendaria-warning));
+    color: var(--color-level-warning);
   }
 
   .template-selector {
@@ -2146,11 +2241,11 @@ span.calendaria-moon-icon {
     }
 
     &.warning i {
-      color: var(--color-level-warning, var(--calendaria-warning));
+      color: var(--color-level-warning);
     }
 
     .mismatch {
-      color: var(--color-level-warning, var(--calendaria-warning));
+      color: var(--color-level-warning);
     }
   }
 
@@ -2188,11 +2283,11 @@ span.calendaria-moon-icon {
       }
 
       &:hover:not(:disabled) {
-        --button-hover-text-color: var(--color-text-primary, var(--calendaria-text));
+        --button-hover-text-color: var(--color-text-primary);
       }
 
       &.active {
-        color: var(--calendaria-primary);
+        color: var(--color-warm-1);
       }
 
       &[data-action='removeMonth'],
@@ -2202,7 +2297,7 @@ span.calendaria-moon-icon {
       &[data-action='removeMoon'],
       &[data-action='removeEra'] {
         &:hover:not(:disabled) {
-          --button-hover-text-color: var(--color-level-error, var(--calendaria-error));
+          --button-hover-text-color: var(--color-level-error);
         }
       }
     }
@@ -2267,7 +2362,7 @@ span.calendaria-moon-icon {
   }
 
   .computed-value {
-    color: var(--color-text-primary, var(--calendaria-text));
+    color: var(--color-text-primary);
     font-weight: 600;
     font-size: var(--font-size-16);
   }
@@ -2294,8 +2389,8 @@ span.calendaria-moon-icon {
     }
 
     &.warning {
-      border: 0.0625rem solid color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 40%, transparent);
-      background: color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 15%, transparent);
+      border: 0.0625rem solid color-mix(in srgb, var(--color-level-warning) 40%, transparent);
+      background: color-mix(in srgb, var(--color-level-warning) 15%, transparent);
     }
   }
 
@@ -2921,7 +3016,7 @@ span.calendaria-moon-icon {
     grid-row: 2;
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border-top: 0.0625rem solid var(--color-cool-4);
     background: var(--color-cool-5);
 
@@ -2955,63 +3050,6 @@ span.calendaria-moon-icon {
           border-color: var(--button-hover-border-color);
           background: var(--button-hover-background-color);
         }
-      }
-    }
-  }
-
-  /* -------------------------------------------- */
-  /*  Vertical Tab Sidebar Layout                 */
-  /* -------------------------------------------- */
-
-  nav.sheet-tabs {
-    gap: 0.125rem;
-    grid-column: 1;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    width: max-content;
-    min-width: var(--editor-sidebar-min-width);
-    max-width: var(--editor-sidebar-max-width);
-    padding: 0;
-    border-top: none;
-    border-right: 0.0625rem solid var(--color-cool-4);
-    border-bottom: none;
-    overflow: hidden auto;
-
-    [data-tab] {
-      gap: 0.5rem;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: center;
-      max-width: 100%;
-      padding-right: 0.5rem;
-      border-bottom: none;
-      border-left: 0.1875rem solid transparent;
-      border-radius: 0;
-      text-align: right;
-
-      > span:not(.notification-pip) {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      i {
-        width: 1.25em;
-        margin: 0;
-        text-align: center;
-      }
-
-      &.active {
-        border-left-color: var(--color-warm-1);
-        background: var(--color-cool-5);
-      }
-
-      &:hover:not(.active) {
-        background: var(--color-cool-5-50);
       }
     }
   }
@@ -3065,7 +3103,7 @@ span.calendaria-moon-icon {
       background: var(--color-cool-5);
 
       &:hover {
-        color: var(--color-text-primary, var(--calendaria-text));
+        color: var(--color-text-primary);
         background: var(--color-cool-4);
       }
     }
@@ -3252,7 +3290,7 @@ span.calendaria-moon-icon {
 
   .weather-preset-item {
     position: relative;
-    border-top: 0.0625rem solid var(--color-cool-4-50, var(--calendaria-cool-4-50));
+    border-top: 0.0625rem solid var(--color-cool-4-50);
 
     &:hover {
       background: var(--color-cool-5-50);
@@ -3321,7 +3359,7 @@ span.calendaria-moon-icon {
       border: 0.0625rem solid var(--color-cool-4);
       border-radius: 0.25rem;
       background: var(--color-cool-5);
-      box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow-light);
+      box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
 
       &.show {
         display: block;
@@ -3353,7 +3391,7 @@ span.calendaria-moon-icon {
       font-size: var(--font-size-16);
 
       &.warning {
-        color: var(--color-level-warning, var(--calendaria-warning));
+        color: var(--color-level-warning);
       }
 
       &.valid {
@@ -7188,95 +7226,6 @@ span.calendaria-moon-icon {
 
     .form-group > label {
       flex: 2;
-    }
-  }
-
-  nav.sheet-tabs {
-    gap: 0;
-    grid-column: 1;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    width: max-content;
-    min-width: 8rem;
-    max-width: 8rem;
-    height: 100%;
-    padding: 0;
-    border-top: none;
-    border-right: 0.0625rem solid var(--color-cool-4);
-    border-bottom: none;
-
-    .tab-group {
-      display: flex;
-      flex-direction: column;
-
-      &:last-child {
-        margin-top: auto;
-      }
-
-      .tab-group-header {
-        padding: 0.5rem;
-        color: var(--color-text-dark-secondary);
-        font-weight: 500;
-        font-size: var(--font-size-18);
-        text-align: right;
-      }
-    }
-
-    [data-tab] {
-      gap: 0.5rem;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: center;
-      max-width: 100%;
-      padding: 0.5rem;
-      border-bottom: none;
-      border-left: 0.1875rem solid var(--group-color, transparent);
-      border-radius: 0;
-      font-size: var(--font-size-16);
-      text-align: right;
-
-      > span:not(.notification-pip) {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      i {
-        width: 1.25em;
-        margin: 0;
-        text-align: center;
-      }
-
-      &.active {
-        border-left-color: var(--group-color, var(--color-warm-1));
-        background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
-      }
-    }
-  }
-
-  /* Settings Search */
-  .settings-search {
-    position: relative;
-
-    input[type='search'] {
-      border: none;
-      border-radius: 0;
-      font-size: var(--font-size-11);
-      padding: 0 0.3rem 0 2rem;
-      margin: 0;
-    }
-
-    > i {
-      position: absolute;
-      top: 50%;
-      left: 0.5rem;
-      transform: translateY(-50%);
-      font-size: var(--font-size-16);
-      pointer-events: none;
     }
   }
 
