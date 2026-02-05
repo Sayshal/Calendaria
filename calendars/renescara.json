@@ -161,7 +161,7 @@
       "length" : 5,
       "offset" : 0,
       "basedOn": "year",
-      "entries": [ {"name": "Ferrus"}, {"name": "Verdantis"}, {"name": "Crystallus"}, {"name": "Umbralis"}, {"name": "Temporis"} ]
+      "stages": [ {"name": "Ferrus"}, {"name": "Verdantis"}, {"name": "Crystallus"}, {"name": "Umbralis"}, {"name": "Temporis"} ]
     }
   ],
   "cycleFormat"   : "Year of [1]",

@@ -52,14 +52,14 @@
       "length" : 11,
       "offset" : 3,
       "basedOn": "year",
-      "entries": [ {"name": "Ral"}, {"name": "Friend"}, {"name": "Desert"}, {"name": "Priest"}, {"name": "Wind"}, {"name": "Dragon"}, {"name": "Mountain"}, {"name": "King"}, {"name": "Silt"}, {"name": "Enemy"}, {"name": "Guthay"} ]
+      "stages": [ {"name": "Ral"}, {"name": "Friend"}, {"name": "Desert"}, {"name": "Priest"}, {"name": "Wind"}, {"name": "Dragon"}, {"name": "Mountain"}, {"name": "King"}, {"name": "Silt"}, {"name": "Enemy"}, {"name": "Guthay"} ]
     },
     {
       "name"   : "Seofean Cycle",
       "length" : 7,
       "offset" : 4,
       "basedOn": "year",
-      "entries": [ {"name": "Fury"}, {"name": "Contemplation"}, {"name": "Vengeance"}, {"name": "Slumber"}, {"name": "Defiance"}, {"name": "Reverence"}, {"name": "Agitation"} ]
+      "stages": [ {"name": "Fury"}, {"name": "Contemplation"}, {"name": "Vengeance"}, {"name": "Slumber"}, {"name": "Defiance"}, {"name": "Reverence"}, {"name": "Agitation"} ]
     }
   ],
   "cycleFormat"   : "[1]'s [2]",

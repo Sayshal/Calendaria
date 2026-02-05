@@ -529,7 +529,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         .join('');
       context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
     }
-    for (const [id, data] of Object.entries(customCalendars)) context.calendarOptions.push({ value: id, label: data.name || id, selected: id === activeCalendarId, isCustom: true });
+    for (const [id, data] of Object.entries(customCalendars)) context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true });
     context.calendarOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.recentSettings = this.#prepareRecentSettings();
   }

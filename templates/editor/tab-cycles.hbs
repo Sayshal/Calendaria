@@ -65,23 +65,23 @@
             </div>
           </div>
 
-          <fieldset class="cycle-entries-section">
-            <legend>{{localize "CALENDARIA.Editor.Section.CycleEntries"}} ({{this.entriesWithIndex.length}})</legend>
+          <fieldset class="cycle-stages-section">
+            <legend>{{localize "CALENDARIA.Editor.Section.CycleStages"}} ({{this.stagesWithIndex.length}})</legend>
 
-            <div class="entries-list">
-              {{#each this.entriesWithIndex}}
-                <div class="entry-item flexrow" data-entry-index="{{this.index}}">
-                  <span class="entry-number">{{this.displayNum}}.</span>
-                  <input type="text" name="cycles.{{this.cycleIndex}}.entries.{{this.index}}.name" value="{{this.name}}"
-                    class="col-entry-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.EntryName'}}">
+            <div class="stages-list">
+              {{#each this.stagesWithIndex}}
+                <div class="stage-item flexrow" data-stage-index="{{this.index}}">
+                  <span class="stage-number">{{this.displayNum}}.</span>
+                  <input type="text" name="cycles.{{this.cycleIndex}}.stages.{{this.index}}.name" value="{{this.name}}"
+                    class="col-stage-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.StageName'}}">
                   <div class="item-controls">
-                    <button type="button" data-action="addCycleEntry" data-cycle-index="{{this.cycleIndex}}"
-                      data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddEntry'}}">
+                    <button type="button" data-action="addCycleStage" data-cycle-index="{{this.cycleIndex}}"
+                      data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddStage'}}">
                       <i class="fas fa-plus"></i>
                     </button>
-                    <button type="button" data-action="removeCycleEntry" data-cycle-index="{{this.cycleIndex}}"
-                      data-entry-index="{{this.index}}" data-tooltip
-                      aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveEntry'}}">
+                    <button type="button" data-action="removeCycleStage" data-cycle-index="{{this.cycleIndex}}"
+                      data-stage-index="{{this.index}}" data-tooltip
+                      aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveStage'}}">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>

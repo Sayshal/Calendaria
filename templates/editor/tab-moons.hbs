@@ -22,7 +22,7 @@
             <input type="text" id="editor-moon-{{this.index}}-name" name="moons.{{this.index}}.name"
               value="{{this.name}}" class="col-name">
             <input type="number" id="editor-moon-{{this.index}}-cycle" name="moons.{{this.index}}.cycleLength"
-              value="{{this.cycleLength}}" min="1" step="any" class="col-cycle">
+              value="{{this.cycleLength}}" min="1" step="0.01" class="col-cycle">
             <div class="col-color color-input-wrapper">
               <input type="color" id="editor-moon-{{this.index}}-color" name="moons.{{this.index}}.color"
                 value="{{#if this.color}}{{this.color}}{{else}}#b8b8b8{{/if}}">

@@ -114,7 +114,7 @@ export function dateFormattingParts(calendar, components) {
   let namedWeekAbbr = '';
   const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 });
   if (currentWeek) {
-    namedWeek = localize(currentWeek.name);
+    namedWeek = localize(currentWeek.name) || '';
     namedWeekAbbr = currentWeek.abbreviation ? localize(currentWeek.abbreviation) : namedWeek.slice(0, 3);
   }
   let climateZoneName = '';

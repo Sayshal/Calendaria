@@ -320,7 +320,7 @@ export default class CalendariumImporter extends BaseImporter {
     if (!staticData.useCustomYears || !staticData.years?.length) return { cycles: [], cycleFormat: null };
     return {
       cycles: [
-        { name: localize('CALENDARIA.Importer.CustomYears'), length: staticData.years.length, offset: 0, basedOn: 'year', entries: staticData.years.map((year) => ({ name: year.name || year.id })) }
+        { name: localize('CALENDARIA.Importer.CustomYears'), length: staticData.years.length, offset: 0, basedOn: 'year', stages: staticData.years.map((year) => ({ name: year.name || year.id })) }
       ],
       cycleFormat: localize('CALENDARIA.Importer.CycleFormatYear')
     };

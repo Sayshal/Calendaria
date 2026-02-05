@@ -41,9 +41,9 @@
           </label>
 
           <label class="col-weekday checkbox">
-            <input type="checkbox" name="festivals.{{this.index}}.countsForWeekday" {{#unless (eq
+            <input type="checkbox" name="festivals.{{this.index}}.countsForWeekday" {{#if (eq
           this.countsForWeekday
-          false)}}checked{{/unless}}>
+          false)}}checked{{/if}}>
           </label>
 
           <div class="item-controls col-controls">

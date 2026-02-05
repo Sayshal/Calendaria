@@ -293,7 +293,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       length: cycle.length || 12,
       offset: cycle.offset ?? 0,
       basedOn: basedOnMap[cycle.type] || 'year',
-      entries: (cycle.data || []).map((entry) => ({ name: entry.name || entry }))
+      stages: (cycle.data || []).map((entry) => ({ name: entry.name || entry }))
     }));
   }
 

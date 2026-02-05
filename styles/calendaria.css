@@ -2718,13 +2718,20 @@ span.calendaria-moon-icon {
       width: 3.4375rem;
     }
 
-    .col-leap,
-    .col-weekday {
+    .col-leap {
       display: flex;
       flex: none;
       justify-content: center;
       align-items: center;
       width: 4.375rem;
+    }
+
+    .col-weekday {
+      display: flex;
+      flex: none;
+      justify-content: center;
+      align-items: center;
+      width: 5.5rem;
     }
 
     .col-controls {
@@ -3057,7 +3064,7 @@ span.calendaria-moon-icon {
       }
     }
 
-    .cycle-entries-section {
+    .cycle-stages-section {
       margin-top: 0.75rem;
 
       legend {
@@ -3065,7 +3072,7 @@ span.calendaria-moon-icon {
         font-size: var(--font-size-12);
       }
 
-      .entries-list {
+      .stages-list {
         gap: 0.25rem;
         display: flex;
         flex-direction: column;
@@ -3073,7 +3080,7 @@ span.calendaria-moon-icon {
         overflow-y: auto;
       }
 
-      .entry-item {
+      .stage-item {
         gap: 0.5rem;
         display: flex;
         align-items: center;
@@ -3083,13 +3090,13 @@ span.calendaria-moon-icon {
           background: var(--color-cool-5-50);
         }
 
-        .entry-number {
+        .stage-number {
           flex: 0 0 1.875rem;
           color: var(--color-text-secondary);
           font-weight: bold;
         }
 
-        .col-entry-name {
+        .col-stage-name {
           flex: 1;
           min-width: 6.25rem;
         }

@@ -60,8 +60,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       pickMoonPhaseIcon: CalendarEditor.#onPickMoonPhaseIcon,
       addCycle: CalendarEditor.#onAddCycle,
       removeCycle: CalendarEditor.#onRemoveCycle,
-      addCycleEntry: CalendarEditor.#onAddCycleEntry,
-      removeCycleEntry: CalendarEditor.#onRemoveCycleEntry,
+      addCycleStage: CalendarEditor.#onAddCycleStage,
+      removeCycleStage: CalendarEditor.#onRemoveCycleStage,
       addCanonicalHour: CalendarEditor.#onAddCanonicalHour,
       removeCanonicalHour: CalendarEditor.#onRemoveCanonicalHour,
       addNamedWeek: CalendarEditor.#onAddNamedWeek,
@@ -444,7 +444,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       ...cycle,
       index: idx,
       basedOnOptions: basedOnOptions.map((opt) => ({ ...opt, selected: opt.value === (cycle.basedOn || 'month') })),
-      entriesWithIndex: (cycle.entries || []).map((entry, eIdx) => ({ ...entry, index: eIdx, displayNum: eIdx + 1, cycleIndex: idx }))
+      stagesWithIndex: (cycle.stages || cycle.entries || []).map((stage, sIdx) => ({ ...stage, index: sIdx, displayNum: sIdx + 1, cycleIndex: idx }))
     }));
     context.cycleFormat = this.#calendarData.cycleFormat || '';
     context.basedOnOptions = basedOnOptions;
@@ -1647,7 +1647,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       length: 12,
       offset: 0,
       basedOn: 'month',
-      entries: [{ name: format('CALENDARIA.Editor.Default.CycleEntry', { num: 1 }) }]
+      stages: [{ name: format('CALENDARIA.Editor.Default.CycleStage', { num: 1 }) }]
     });
     this.render();
   }
@@ -1664,31 +1664,31 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Add a new entry to a cycle.
+   * Add a new stage to a cycle.
    * @param {Event} _event - Click event
    * @param {HTMLElement} target - Target element
    */
-  static async #onAddCycleEntry(_event, target) {
+  static async #onAddCycleStage(_event, target) {
     const cycleIdx = parseInt(target.dataset.cycleIndex);
     const cycle = this.#calendarData.cycles[cycleIdx];
     if (!cycle) return;
-    if (!cycle.entries) cycle.entries = [];
-    const entryCount = cycle.entries.length + 1;
-    cycle.entries.push({ name: format('CALENDARIA.Editor.Default.CycleEntry', { num: entryCount }) });
+    if (!cycle.stages) cycle.stages = [];
+    const stageCount = cycle.stages.length + 1;
+    cycle.stages.push({ name: format('CALENDARIA.Editor.Default.CycleStage', { num: stageCount }) });
     this.render();
   }
 
   /**
-   * Remove an entry from a cycle.
+   * Remove a stage from a cycle.
    * @param {Event} _event - Click event
    * @param {HTMLElement} target - Target element
    */
-  static async #onRemoveCycleEntry(_event, target) {
+  static async #onRemoveCycleStage(_event, target) {
     const cycleIdx = parseInt(target.dataset.cycleIndex);
-    const entryIdx = parseInt(target.dataset.entryIndex);
+    const stageIdx = parseInt(target.dataset.stageIndex);
     const cycle = this.#calendarData.cycles[cycleIdx];
-    if (!cycle?.entries || cycle.entries.length <= 1) return;
-    cycle.entries.splice(entryIdx, 1);
+    if (!cycle?.stages || cycle.stages.length <= 1) return;
+    cycle.stages.splice(stageIdx, 1);
     this.render();
   }
 

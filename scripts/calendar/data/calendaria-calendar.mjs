@@ -187,6 +187,25 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return totalSeconds - CalendariaCalendar.epochOffset;
   }
 
+  /**
+   * Migrate source data before schema validation.
+   * Handles renaming cycle.entries → cycle.stages.
+   * @param {object} source - Raw source data
+   * @returns {object} Migrated source data
+   * @override
+   */
+  static migrateData(source) {
+    if (source.cycles?.length) {
+      for (const cycle of source.cycles) {
+        if (cycle.entries && !cycle.stages) {
+          cycle.stages = cycle.entries;
+          delete cycle.entries;
+        }
+      }
+    }
+    return super.migrateData(source);
+  }
+
   /** @override */
   static defineSchema() {
     const schema = super.defineSchema();
@@ -328,7 +347,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           length: new NumberField({ required: true, nullable: false, min: 1, initial: 12 }),
           offset: new NumberField({ required: false, nullable: false, initial: 0 }),
           basedOn: new StringField({ required: true, initial: 'month', choices: ['year', 'eraYear', 'month', 'monthDay', 'day', 'yearDay'] }),
-          entries: new ArrayField(new SchemaField({ name: new StringField({ required: true }) }))
+          stages: new ArrayField(new SchemaField({ name: new StringField({ required: true }) }))
         })
       ),
       cycleFormat: new StringField({ required: false, initial: '' }),
@@ -1268,14 +1287,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
     for (let i = 0; i < this.cycles.length; i++) {
       const cycle = this.cycles[i];
-      if (!cycle.entries?.length) continue;
+      const stages = cycle.stages || cycle.entries;
+      if (!stages?.length) continue;
       const epochValue = epochValues[cycle.basedOn] ?? 0;
       const adjustedValue = epochValue + (cycle.offset || 0);
-      let entryIndex = adjustedValue % cycle.entries.length;
-      if (entryIndex < 0) entryIndex += cycle.entries.length;
-      const entry = cycle.entries[entryIndex];
-      values.push({ cycleName: cycle.name, entryName: entry?.name ?? '', index: entryIndex });
-      textReplacements[(i + 1).toString()] = localize(entry?.name ?? '');
+      let stageIndex = adjustedValue % stages.length;
+      if (stageIndex < 0) stageIndex += stages.length;
+      const stage = stages[stageIndex];
+      values.push({ cycleName: cycle.name, entryName: stage?.name ?? '', index: stageIndex });
+      textReplacements[(i + 1).toString()] = localize(stage?.name ?? '');
     }
 
     let text = this.cycleFormat || '';
@@ -1342,17 +1362,18 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   getCycleEntry(cycleIndex = 0, time = game.time.worldTime) {
     const cycle = this.cycles?.[cycleIndex];
-    if (!cycle?.entries?.length) return null;
+    const stages = cycle?.stages || cycle?.entries;
+    if (!stages?.length) return null;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const displayYear = components.year + (this.years?.yearZero ?? 0);
     const epochValues = this._getCycleEpochValues(components, displayYear);
     const epochValue = epochValues[cycle.basedOn] ?? 0;
     const adjustedValue = epochValue + (cycle.offset || 0);
-    let entryIndex = adjustedValue % cycle.entries.length;
-    if (entryIndex < 0) entryIndex += cycle.entries.length;
+    let stageIndex = adjustedValue % stages.length;
+    if (stageIndex < 0) stageIndex += stages.length;
     const cycleNumber = Math.max(1, Math.floor(adjustedValue / cycle.length) + 1);
-    const entry = cycle.entries[entryIndex];
-    return { name: entry?.name ?? '', index: entryIndex, cycleNumber };
+    const stage = stages[stageIndex];
+    return { name: stage?.name ?? '', index: stageIndex, cycleNumber };
   }
 
   /**

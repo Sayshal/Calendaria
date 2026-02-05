@@ -540,7 +540,14 @@ export default class CalendarManager {
   static getCalendarTemplates() {
     const templates = [];
     for (const [id, calendar] of CalendarRegistry.getAll()) {
-      const name = calendar.name ? localize(calendar.name) : id;
+      let name;
+      if (isBundledCalendar(id)) {
+        // For bundled calendars, construct fresh localization key to avoid stale cached values
+        const key = id.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+        name = localize(`CALENDARIA.Calendar.${key}.Name`);
+      } else {
+        name = calendar.name ? localize(calendar.name) : id;
+      }
       templates.push({ id, name, description: calendar.metadata?.description || '', isCustom: calendar.metadata?.isCustom || false });
     }
     templates.sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
