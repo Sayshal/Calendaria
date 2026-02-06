@@ -8,12 +8,14 @@
       {{#each globalTriggers}}
         <div class="form-group">
           <label data-tooltip aria-label="{{hint}}">{{label}}</label>
-          <select name="macroTriggers.global.{{key}}">
-            <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
-            {{#each ../macros}}
-              <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
-            {{/each}}
-          </select>
+          <div class="form-fields">
+            <select name="macroTriggers.global.{{key}}">
+              <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
+              {{#each ../macros}}
+                <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
+              {{/each}}
+            </select>
+          </div>
         </div>
       {{/each}}
     </fieldset>
