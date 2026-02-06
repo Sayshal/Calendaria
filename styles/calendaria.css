@@ -3545,7 +3545,42 @@ span.calendaria-moon-icon {
     }
 
     .preset-name {
-      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      .preset-alias-input {
+        flex: 1;
+        min-width: 0;
+        font-weight: 500;
+        border: 0.0625rem solid transparent;
+        background: transparent;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+
+        &:hover,
+        &:focus {
+          border-color: var(--color-cool-4);
+          background: var(--color-cool-5);
+        }
+
+        &::placeholder {
+          color: var(--color-text-tertiary);
+          font-style: italic;
+        }
+      }
+
+      .preset-reset-alias {
+        width: 1.25rem;
+        height: 1.25rem;
+        padding: 0;
+        flex-shrink: 0;
+        color: var(--color-text-secondary);
+
+        &:hover {
+          color: var(--color-level-error);
+        }
+      }
     }
 
     .preset-chance {
@@ -5804,6 +5839,12 @@ span.calendaria-moon-icon {
       transform: translateY(0);
     }
 
+    &.active {
+      border-color: var(--weather-color);
+      background: color-mix(in srgb, var(--weather-color) 40%, var(--calendaria-bg-lighter));
+      box-shadow: 0 0 0 0.0625rem var(--weather-color);
+    }
+
     i {
       flex-shrink: 0;
       width: 1rem;
@@ -5855,8 +5896,13 @@ span.calendaria-moon-icon {
     }
 
     .random-btn {
-      flex: 1;
+      flex-shrink: 0;
       background: var(--calendaria-primary);
+    }
+
+    .save-btn {
+      flex: 1;
+      background: var(--calendaria-success);
     }
   }
 }

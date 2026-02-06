@@ -23,7 +23,7 @@
       <span class="category-header">{{label}}</span>
       <div class="weather-buttons">
         {{#each presets}}
-          <button type="button" class="weather-btn" data-action="selectWeather" data-preset-id="{{id}}"
+          <button type="button" class="weather-btn {{#if selected}}active{{/if}}" data-action="selectWeather" data-preset-id="{{id}}"
             style="--weather-color: {{color}}" data-tooltip aria-label="{{description}}">
             <i class="fas {{icon}}"></i>
             <span class="weather-label">{{label}}</span>
@@ -69,6 +69,10 @@
     <button type="button" class="footer-btn random-btn" data-action="randomWeather">
       <i class="fas fa-dice"></i>
       {{localize "CALENDARIA.Weather.Picker.Random"}}
+    </button>
+    <button type="submit" class="footer-btn save-btn">
+      <i class="fas fa-save"></i>
+      {{localize "CALENDARIA.Weather.Picker.Save"}}
     </button>
   </div>
 </div>

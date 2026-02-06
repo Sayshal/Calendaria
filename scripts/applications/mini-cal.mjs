@@ -20,6 +20,7 @@ import * as StickyZones from '../utils/sticky-zones.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
+import { getPresetAlias } from '../weather/weather-presets.mjs';
 import { BigCal } from './big-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
@@ -366,14 +367,15 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _getWeatherContext() {
     const weather = WeatherManager.getCurrentWeather();
     if (!weather) return null;
-
+    const alias = getPresetAlias(weather.id);
+    const label = alias || localize(weather.label);
     return {
       id: weather.id,
-      label: localize(weather.label),
+      label,
       icon: weather.icon,
       color: weather.color,
       temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
-      tooltip: weather.description ? localize(weather.description) : localize(weather.label)
+      tooltip: weather.description ? localize(weather.description) : label
     };
   }
 

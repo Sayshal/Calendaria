@@ -14,7 +14,7 @@ import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs
 import { log } from '../utils/logger.mjs';
 import { RangeSlider } from '../utils/range-slider.mjs';
 import { CLIMATE_ZONE_TEMPLATES, fromDisplayUnit, getClimateTemplateOptions, getDefaultZoneConfig, toDisplayUnit } from '../weather/climate-data.mjs';
-import { ALL_PRESETS, getAllPresets, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
+import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 import { TokenReferenceDialog } from './token-reference-dialog.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -74,6 +74,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       toggleCategory: CalendarEditor.#onToggleCategory,
       resetWeatherPreset: CalendarEditor.#onResetWeatherPreset,
+      resetPresetAlias: CalendarEditor.#onResetPresetAlias,
       toggleDescription: CalendarEditor.#onToggleDescription,
       addZone: CalendarEditor.#onAddZone,
       editZone: CalendarEditor.#onEditZone,
@@ -564,6 +565,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#setupWeatherTotalListener();
     this.#setupNavSearchListener();
     this.#setupPhaseSliderListeners();
+    this.#setupPresetAliasListeners();
   }
 
   /**
@@ -677,6 +679,30 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Set up event listeners for preset alias input changes.
+   * Saves alias to world settings when changed.
+   * @private
+   */
+  #setupPresetAliasListeners() {
+    for (const input of this.element.querySelectorAll('.preset-alias-input')) {
+      if (input.dataset.listenerAttached) continue;
+      input.dataset.listenerAttached = 'true';
+      input.addEventListener('change', async (e) => {
+        const presetId = e.target.dataset.presetId;
+        const alias = e.target.value.trim();
+        await setPresetAlias(presetId, alias || null);
+        // Show/hide reset button based on whether alias exists
+        const presetItem = e.target.closest('.preset-name');
+        const resetBtn = presetItem?.querySelector('.preset-reset-alias');
+        if (alias && !resetBtn) {
+          // Re-render weather tab to show the reset button
+          this.render({ parts: ['weather'] });
+        }
+      });
+    }
+  }
+
+  /**
    * Calculate total days per year from month definitions.
    * @param {boolean} [leapYear] - Whether to calculate for leap year
    * @returns {number} Total days
@@ -778,7 +804,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             chance: chance.toFixed(2),
             tempMin: saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '',
             tempMax: saved.tempMax != null ? toDisplayUnit(saved.tempMax) : '',
-            customDescription: saved.description || ''
+            customDescription: saved.description || '',
+            alias: getPresetAlias(preset.id) || ''
           };
           return presetData;
         });
@@ -1842,6 +1869,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       activeZone.presets.splice(idx, 1);
       this.render();
     }
+  }
+
+  /**
+   * Reset a preset's display alias to the default name.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onResetPresetAlias(_event, target) {
+    const presetId = target.dataset.presetId;
+    if (!presetId) return;
+    await setPresetAlias(presetId, null);
+    this.render({ parts: ['weather'] });
   }
 
   /**

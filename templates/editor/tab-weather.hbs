@@ -103,7 +103,17 @@
                 <span class="preset-icon" style="color: {{preset.color}}">
                   <i class="fas {{preset.icon}}"></i>
                 </span>
-                <span class="preset-name">{{localize preset.label}}</span>
+                <div class="preset-name">
+                  <input type="text" class="preset-alias-input" data-preset-id="{{preset.id}}"
+                    value="{{preset.alias}}" placeholder="{{localize preset.label}}"
+                    data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Rename'}}">
+                  {{#if preset.alias}}
+                  <button type="button" class="preset-reset-alias" data-action="resetPresetAlias" data-preset-id="{{preset.id}}"
+                    data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Weather.ResetAlias'}}">
+                    <i class="fas fa-times"></i>
+                  </button>
+                  {{/if}}
+                </div>
                 <div class="preset-chance">
                   <input type="number" name="weather.presets.{{preset.index}}.chance" value="{{preset.chance}}" min="0"
                     max="100" step="0.01" placeholder="0.00">

@@ -5,6 +5,8 @@
  * @author Tyler
  */
 
+import { MODULE, SETTINGS } from '../constants.mjs';
+
 /**
  * Standard weather conditions - common everyday weather.
  * @type {object[]}
@@ -457,4 +459,43 @@ export function getAllPresets(customPresets = []) {
 export function getPresetsByCategory(category, customPresets = []) {
   const all = getAllPresets(customPresets);
   return all.filter((p) => p.category === category);
+}
+
+/**
+ * Get all weather preset aliases from world settings.
+ * @returns {object} Map of preset ID to alias label
+ */
+export function getPresetAliases() {
+  if (!game.settings) return {};
+  try {
+    return game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Get the alias for a specific preset if one exists.
+ * @param {string} presetId - Weather preset ID
+ * @returns {string|null} Alias label or null if no alias
+ */
+export function getPresetAlias(presetId) {
+  const aliases = getPresetAliases();
+  return aliases[presetId] || null;
+}
+
+/**
+ * Set an alias for a weather preset.
+ * @param {string} presetId - Weather preset ID
+ * @param {string|null} alias - Alias label, or null to remove
+ * @returns {Promise<void>}
+ */
+export async function setPresetAlias(presetId, alias) {
+  const aliases = getPresetAliases();
+  if (alias && alias.trim()) {
+    aliases[presetId] = alias.trim();
+  } else {
+    delete aliases[presetId];
+  }
+  await game.settings.set(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES, aliases);
 }

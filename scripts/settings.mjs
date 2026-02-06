@@ -1138,6 +1138,14 @@ export function registerSettings() {
     type: new ArrayField(new ObjectField())
   });
 
+  /** World-level weather preset label aliases */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES, {
+    name: 'Weather Preset Aliases',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
   // ========================================//
   //  Timepoints                             //
   // ========================================//
