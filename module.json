@@ -54,6 +54,11 @@
       "lang": "pt-BR",
       "name": "Português (Brasil)",
       "path": "lang/pt-BR.json"
+    },
+    {
+      "lang": "de",
+      "name": "German",
+      "path": "lang/de.json"
     }
   ],
   "license": "https://github.com/Sayshal/calendaria?tab=MIT-1-ov-file",
