@@ -159,6 +159,33 @@
               </div>
 
               <p class="hint phase-hint">{{localize "CALENDARIA.Editor.Hint.PhasePercentage"}}</p>
+
+              {{! Phase slider visualization }}
+              {{#if this.phasesWithIndex.length}}
+              <div class="moon-phase-slider" data-moon-index="{{this.index}}">
+                <div class="slider-track">
+                  {{#each this.phasesWithIndex}}
+                    <div class="slider-segment{{#if this.moonColor}} tinted{{/if}}" data-phase-index="{{this.index}}"
+                      style="left: {{this.startPercent}}%; width: {{this.widthPercent}}%; --moon-color: {{#if this.moonColor}}{{this.moonColor}}{{else}}#b8b8b8{{/if}};"
+                      data-tooltip aria-label="{{this.name}}">
+                      {{#if this.isImagePath}}
+                        <span class="phase-icon-wrapper">
+                          <img src="{{this.icon}}" alt="{{this.name}}" class="phase-icon">
+                        </span>
+                      {{else}}
+                        <span class="phase-emoji">{{this.icon}}</span>
+                      {{/if}}
+                      {{#if (gte this.widthPercent 3)}}<span class="phase-percent">{{this.widthFormatted}}%</span>{{/if}}
+                    </div>
+                    {{#unless @last}}
+                    <div class="slider-handle" data-moon-index="{{this.moonIndex}}" data-phase-index="{{this.index}}"
+                      style="left: {{this.endPercent}}%;"
+                      data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.DragToAdjust'}}"></div>
+                    {{/unless}}
+                  {{/each}}
+                </div>
+              </div>
+              {{/if}}
             </fieldset>
           </div>
         </div>

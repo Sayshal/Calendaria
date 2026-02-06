@@ -12,9 +12,10 @@ import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../con
 import { createImporter } from '../importers/index.mjs';
 import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { TokenReferenceDialog } from './token-reference-dialog.mjs';
+import { RangeSlider } from '../utils/range-slider.mjs';
 import { CLIMATE_ZONE_TEMPLATES, fromDisplayUnit, getClimateTemplateOptions, getDefaultZoneConfig, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
+import { TokenReferenceDialog } from './token-reference-dialog.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -364,15 +365,23 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       color: moon.color || '',
       index: idx,
       refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
-      phasesWithIndex: moon.phases.map((phase, pIdx) => ({
-        ...phase,
-        name: localize(phase.name),
-        index: pIdx,
-        moonIndex: idx,
-        isImagePath: phase.icon?.includes('/') ?? false,
-        startPercent: Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100,
-        endPercent: Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100
-      }))
+      phasesWithIndex: moon.phases.map((phase, pIdx) => {
+        const startPercent = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
+        const endPercent = Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100;
+        const widthPercent = Math.max(0, endPercent - startPercent);
+        return {
+          ...phase,
+          name: localize(phase.name),
+          index: pIdx,
+          moonIndex: idx,
+          moonColor: moon.color || '',
+          isImagePath: phase.icon?.includes('/') ?? false,
+          startPercent,
+          endPercent,
+          widthPercent,
+          widthFormatted: widthPercent.toFixed(1)
+        };
+      })
     }));
 
     const seasonTypeOptions = [
@@ -477,7 +486,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Prepare grouped and ungrouped tabs for template rendering.
-   * @returns {{tabGroups: Array<object>, ungroupedTabs: Array<object>}}
+   * @returns {{tabGroups: Array<object>, ungroupedTabs: Array<object>}} Tab groups and ungrouped tabs
    */
   #prepareTabGroups() {
     const activeTab = this.tabGroups.primary || 'overview';
@@ -487,13 +496,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       active: tab.id === activeTab,
       cssClass: tab.id === activeTab ? 'active' : ''
     });
-    const ungroupedTabs = CalendarEditor.TABS.primary.tabs
-      .filter((tab) => !tab.tabGroup)
-      .map(mapTab);
+    const ungroupedTabs = CalendarEditor.TABS.primary.tabs.filter((tab) => !tab.tabGroup).map(mapTab);
     const tabGroups = CalendarEditor.TAB_GROUPS.map((group) => {
-      const groupTabs = CalendarEditor.TABS.primary.tabs
-        .filter((tab) => tab.tabGroup === group.id)
-        .map(mapTab);
+      const groupTabs = CalendarEditor.TABS.primary.tabs.filter((tab) => tab.tabGroup === group.id).map(mapTab);
       return { ...group, tabs: groupTabs };
     }).filter((group) => group.tabs.length > 0);
     return { tabGroups, ungroupedTabs };
@@ -523,6 +528,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const isDefault = color.toLowerCase() === '#b8b8b8';
         preview.style.setProperty('--moon-color', color);
         preview.classList.toggle('tinted', !isDefault);
+        const match = event.target.name.match(/moons\.(\d+)\.color/);
+        if (match) {
+          const moonIdx = match[1];
+          const slider = this.element.querySelector(`.moon-phase-slider[data-moon-index="${moonIdx}"]`);
+          if (slider) {
+            for (const segment of slider.querySelectorAll('.slider-segment')) {
+              segment.style.setProperty('--moon-color', color);
+              segment.classList.toggle('tinted', !isDefault);
+            }
+          }
+        }
       });
     }
     // Disable delete button for unsaved calendars
@@ -547,6 +563,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.#setupWeatherTotalListener();
     this.#setupNavSearchListener();
+    this.#setupPhaseSliderListeners();
   }
 
   /**
@@ -582,7 +599,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!nav) return;
       for (const tab of nav.querySelectorAll('[data-tab]')) {
         const label = tab.textContent.trim().toLowerCase();
-        tab.style.display = (!query || label.includes(query)) ? '' : 'none';
+        tab.style.display = !query || label.includes(query) ? '' : 'none';
       }
       for (const group of nav.querySelectorAll('.tab-group')) {
         const visibleTabs = group.querySelectorAll('[data-tab]:not([style*="display: none"])');
@@ -613,6 +630,50 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     for (const input of this.element.querySelectorAll('.preset-chance input')) input.addEventListener('input', updateTotal);
     for (const checkbox of this.element.querySelectorAll('.preset-enabled')) checkbox.addEventListener('change', updateTotal);
+  }
+
+  /**
+   * Set up drag handlers for moon phase sliders.
+   * @private
+   */
+  #setupPhaseSliderListeners() {
+    for (const slider of this.element.querySelectorAll('.moon-phase-slider')) {
+      if (slider.dataset.sliderAttached) continue;
+      slider.dataset.sliderAttached = 'true';
+      const moonIdx = parseInt(slider.dataset.moonIndex);
+      const moon = this.#calendarData.moons[moonIdx];
+      if (!moon?.phases) continue;
+      new RangeSlider({
+        container: this.element,
+        sliderSelector: `.moon-phase-slider[data-moon-index="${moonIdx}"]`,
+        trackSelector: '.slider-track',
+        segmentSelector: '.slider-segment',
+        handleSelector: '.slider-handle',
+        handleIndexAttr: 'data-phase-index',
+        segmentIndexAttr: 'data-phase-index',
+        labelClass: 'phase-percent',
+        inputStartSelector: `input[name="moons.${moonIdx}.phases.{i}.startPercent"]`,
+        inputEndSelector: `input[name="moons.${moonIdx}.phases.{i}.endPercent"]`,
+        minGap: 1,
+        labelMinWidth: 3,
+        labelModes: ['percent', 'days'],
+        getData: () => moon.phases.map((p) => ({ start: p.start, end: p.end })),
+        setData: (data) => {
+          for (let i = 0; i < data.length; i++) {
+            moon.phases[i].start = data[i].start;
+            moon.phases[i].end = data[i].end;
+          }
+        },
+        formatLabel: (widthPercent, mode) => {
+          if (mode === 'days') {
+            const cycleLength = moon.cycleLength || 29.5;
+            const days = (widthPercent / 100) * cycleLength;
+            return `${days.toFixed(1)}d`;
+          }
+          return `${widthPercent.toFixed(1)}%`;
+        }
+      });
+    }
   }
 
   /**

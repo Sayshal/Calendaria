@@ -521,6 +521,7 @@
   "CALENDARIA.Editor.Tooltip.CanonicalHourStart": "Hour when this period starts (0-23).",
   "CALENDARIA.Editor.Tooltip.ClickToChange": "Click to select a custom image.",
   "CALENDARIA.Editor.Tooltip.CountsForWeekday": "This day exists 'outside' the week cycle and doesn't advance the weekday (e.g., Midwinter is neither Monday nor Tuesday).",
+  "CALENDARIA.Editor.Tooltip.DragToAdjust": "Drag to adjust phase boundaries.",
   "CALENDARIA.Editor.Tooltip.CycleBasedOn": "What time unit the cycle is based on.",
   "CALENDARIA.Editor.Tooltip.CycleDayAdjust": "Adjust the moon phase by this many days. Use to fine-tune phase alignment.",
   "CALENDARIA.Editor.Tooltip.CycleFormat": "Template for displaying cycle values. Use [1], [2] etc. for each cycle.",
