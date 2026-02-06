@@ -689,8 +689,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       input.dataset.listenerAttached = 'true';
       input.addEventListener('change', async (e) => {
         const presetId = e.target.dataset.presetId;
+        const zoneId = e.target.dataset.zoneId;
         const alias = e.target.value.trim();
-        await setPresetAlias(presetId, alias || null);
+        await setPresetAlias(presetId, alias || null, this.#calendarId, zoneId);
         // Show/hide reset button based on whether alias exists
         const presetItem = e.target.closest('.preset-name');
         const resetBtn = presetItem?.querySelector('.preset-reset-alias');
@@ -766,6 +767,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZoneId }));
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     if (context.zoneOptions.length === 0) context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
+    context.activeZoneId = activeZoneId;
     const activeZone = zones.find((z) => z.id === activeZoneId) || null;
     const savedPresets = activeZone?.presets || [];
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
@@ -805,7 +807,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             tempMin: saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '',
             tempMax: saved.tempMax != null ? toDisplayUnit(saved.tempMax) : '',
             customDescription: saved.description || '',
-            alias: getPresetAlias(preset.id) || ''
+            alias: getPresetAlias(preset.id, this.#calendarId, activeZoneId) || ''
           };
           return presetData;
         });
@@ -1878,8 +1880,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetPresetAlias(_event, target) {
     const presetId = target.dataset.presetId;
+    const zoneId = target.dataset.zoneId;
     if (!presetId) return;
-    await setPresetAlias(presetId, null);
+    await setPresetAlias(presetId, null, this.#calendarId, zoneId);
     this.render({ parts: ['weather'] });
   }
 

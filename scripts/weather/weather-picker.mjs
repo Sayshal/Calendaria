@@ -5,6 +5,7 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, TEMPLATES } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
@@ -79,6 +80,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const shouldFilter = selectedZone && enabledPresetIds.size > 0;
     context.categories = [];
     context.selectedPresetId = this.#selectedPresetId;
+    const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
     const categoryIds = ['standard', 'severe', 'environmental', 'fantasy'];
     for (const categoryId of categoryIds) {
       const category = WEATHER_CATEGORIES[categoryId];
@@ -89,7 +91,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         id: categoryId,
         label: localize(category.label),
         presets: presets.map((p) => {
-          const alias = getPresetAlias(p.id);
+          const alias = getPresetAlias(p.id, calendarId, this.#selectedZoneId);
           const label = alias || localize(p.label);
           return { id: p.id, label, description: p.description ? localize(p.description) : label, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
         })
@@ -104,7 +106,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
           id: 'custom',
           label: localize(WEATHER_CATEGORIES.custom.label),
           presets: filtered.map((p) => {
-            const alias = getPresetAlias(p.id);
+            const alias = getPresetAlias(p.id, calendarId, this.#selectedZoneId);
             const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
             const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
             return { id: p.id, label, description, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
@@ -117,7 +119,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const currentWeather = WeatherManager.getCurrentWeather();
     const currentTemp = WeatherManager.getTemperature();
-    const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id) : null;
+    const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id, calendarId, this.#selectedZoneId) : null;
     context.customLabel = this.#customLabel ?? (currentWeatherAlias || (currentWeather?.label ? localize(currentWeather.label) : ''));
     context.customTemp = this.#customTemp ?? (currentTemp != null ? toDisplayUnit(currentTemp) : '');
     context.customIcon = this.#customIcon ?? (currentWeather?.icon || 'fa-question');
@@ -186,7 +188,8 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!preset) return;
     this.#selectedPresetId = presetId;
     this.#customEdited = false;
-    const alias = getPresetAlias(presetId);
+    const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+    const alias = getPresetAlias(presetId, calendarId, this.#selectedZoneId);
     this.#customLabel = alias || localize(preset.label);
     this.#customTemp = null;
     this.#customIcon = preset.icon || 'fa-question';

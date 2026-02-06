@@ -1415,7 +1415,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!weather) return null;
     let icon = weather.icon || 'fa-cloud';
     if (icon && !icon.includes('fa-solid') && !icon.includes('fa-regular') && !icon.includes('fa-light') && !icon.includes('fas ') && !icon.includes('far ')) icon = `fa-solid ${icon}`;
-    const alias = getPresetAlias(weather.id);
+    const calendarId = this.calendar?.metadata?.id;
+    const zoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id;
+    const alias = getPresetAlias(weather.id, calendarId, zoneId);
     const label = alias || localize(weather.label);
     return {
       id: weather.id,
