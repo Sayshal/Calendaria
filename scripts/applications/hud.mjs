@@ -56,8 +56,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Tracks if HUD was closed due to combat (for reopening) */
   static #closedForCombat = false;
 
-  /** @type {number|null} Hook ID for updateWorldTime */
+  /** @type {number|null} Hook ID for visual tick */
   #timeHookId = null;
+
+  /** @type {number|null} Hook ID for world time updated */
+  #worldTimeHookId = null;
 
   /** @type {Array} Hook references for cleanup */
   #hooks = [];
@@ -399,7 +402,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateDomeVisibility();
     this.#setupEventListeners();
     WidgetManager.attachWidgetListeners(this.element);
-    if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
+    if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
     const c = game.time.components;
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
   }
@@ -492,8 +496,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _onClose(options) {
     if (this.#timeHookId) {
-      Hooks.off('updateWorldTime', this.#timeHookId);
+      Hooks.off(HOOKS.VISUAL_TICK, this.#timeHookId);
       this.#timeHookId = null;
+    }
+    if (this.#worldTimeHookId) {
+      Hooks.off(HOOKS.WORLD_TIME_UPDATED, this.#worldTimeHookId);
+      this.#worldTimeHookId = null;
     }
     if (this.#clickOutsideHandler) {
       document.removeEventListener('mousedown', this.#clickOutsideHandler);
@@ -1046,7 +1054,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update the sundial dome display (sky gradient, sun/moon positions, stars).
    */
   #updateCelestialDisplay() {
-    const components = game.time.components;
+    const components = this.#getPredictedComponents();
     const hour = this.#getDecimalHour(components);
     const useSlice = this.useSliceMode;
 
@@ -1257,22 +1265,24 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle world time updates - update display without full re-render.
+   * Get predicted time components for UI display.
+   * Uses predicted world time when clock is running for smooth updates.
+   * @returns {object} Time components
    */
-  #onUpdateWorldTime() {
-    if (!this.rendered) return;
-    const components = game.time.components;
-    const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
-    const dayChanged = this.#lastDay !== null && this.#lastDay !== currentDay;
-    if (dayChanged) {
-      this.#lastDay = currentDay;
-      if (this.#barRenderDebounce) clearTimeout(this.#barRenderDebounce);
-      this.#barRenderDebounce = setTimeout(() => {
-        this.#barRenderDebounce = null;
-        this.render({ parts: ['bar'] });
-      }, 200);
+  #getPredictedComponents() {
+    if (TimeClock.running) {
+      const cal = game.time?.calendar;
+      if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
     }
+    return game.time.components;
+  }
 
+  /**
+   * Handle visual tick — update time/date text and celestial display every 1s.
+   */
+  #onVisualTick() {
+    if (!this.rendered) return;
+    const components = this.#getPredictedComponents();
     const timeEl = this.element.querySelector('.calendaria-hud-time');
     if (timeEl) {
       const timeFormatted = this.#formatTime(components);
@@ -1290,6 +1300,27 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const hud = this.element.querySelector('.calendaria-hud-content');
     if (hud) hud.classList.toggle('time-flowing', TimeClock.running);
     this.#updateCelestialDisplay();
+  }
+
+  /**
+   * Handle real world time update — day-change detection, bar re-render, and display sync.
+   * Fires every ~60s when clock is running, or immediately on manual advance.
+   */
+  #onWorldTimeUpdated() {
+    if (!this.rendered) return;
+    const components = game.time.components;
+    const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
+    const dayChanged = this.#lastDay !== null && this.#lastDay !== currentDay;
+    if (dayChanged) {
+      this.#lastDay = currentDay;
+      if (this.#barRenderDebounce) clearTimeout(this.#barRenderDebounce);
+      this.#barRenderDebounce = setTimeout(() => {
+        this.#barRenderDebounce = null;
+        this.render({ parts: ['bar'] });
+      }, 200);
+    }
+    // Also update display to sync with real world time
+    this.#onVisualTick();
   }
 
   /**

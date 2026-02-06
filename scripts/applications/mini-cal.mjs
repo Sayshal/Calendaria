@@ -37,8 +37,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {object|null} Currently viewed month/year */
   _viewedDate = null;
 
-  /** @type {number|null} Hook ID for updateWorldTime */
+  /** @type {number|null} Hook ID for visual tick */
   #timeHookId = null;
+
+  /** @type {number|null} Hook ID for world time updated */
+  #worldTimeHookId = null;
 
   /** @type {Array} Hook references for cleanup */
   #hooks = [];
@@ -802,7 +805,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         { passive: false }
       );
     }
-    if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
+    if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
     if (!this.#hooks.some((h) => h.name === HOOKS.CLOCK_START_STOP)) this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this)) });
     const container = this.element.querySelector('.mini-cal-container');
     const sidebar = this.element.querySelector('.mini-sidebar');
@@ -955,8 +959,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _onClose(options) {
     if (this.#timeHookId) {
-      Hooks.off('updateWorldTime', this.#timeHookId);
+      Hooks.off(HOOKS.VISUAL_TICK, this.#timeHookId);
       this.#timeHookId = null;
+    }
+    if (this.#worldTimeHookId) {
+      Hooks.off(HOOKS.WORLD_TIME_UPDATED, this.#worldTimeHookId);
+      this.#worldTimeHookId = null;
     }
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
@@ -1227,26 +1235,58 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle world time updates.
+   * Get predicted time components for UI display.
+   * Uses predicted world time when clock is running for smooth updates.
+   * @returns {object} Time components
    */
-  #onUpdateWorldTime() {
+  #getPredictedComponents() {
+    if (TimeClock.running) {
+      const cal = game.time?.calendar;
+      if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
+    }
+    return game.time.components;
+  }
+
+  /**
+   * Handle visual tick — update time/date text every 1s.
+   */
+  #onVisualTick() {
     if (!this.rendered) return;
     const timeEl = this.element.querySelector('.time-value');
     const dateEl = this.element.querySelector('.date-value');
     const calendar = this.calendar;
-    const components = game.time.components;
+    const components = this.#getPredictedComponents();
     if (timeEl && calendar) {
       const yearZero = calendar.years?.yearZero ?? 0;
       const timeFormatted = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalTime');
       if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);
       else timeEl.textContent = timeFormatted;
     }
-    if (dateEl) dateEl.textContent = TimeClock.getFormattedDate();
+    if (dateEl) {
+      const yearZero = calendar?.years?.yearZero ?? 0;
+      const monthData = calendar?.months?.values?.[components.month];
+      const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
+      const monthName = localize(monthNameRaw);
+      const day = (components.dayOfMonth ?? 0) + 1;
+      const year = components.year + yearZero;
+      dateEl.textContent = `${day} ${monthName}, ${year}`;
+    }
+  }
+
+  /**
+   * Handle real world time update — day-change detection and display sync.
+   * Fires every ~60s when clock is running, or immediately on manual advance.
+   */
+  #onWorldTimeUpdated() {
+    if (!this.rendered) return;
+    const components = game.time.components;
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (currentDay !== this.#lastDay) {
       this.#lastDay = currentDay;
       this.render();
     }
+    // Also update display to sync with real world time
+    this.#onVisualTick();
   }
 
   /**

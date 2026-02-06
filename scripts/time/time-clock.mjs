@@ -39,8 +39,14 @@ export function getTimeIncrements() {
  * Real-time clock controller for advancing game time automatically.
  */
 export default class TimeClock {
-  /** @type {number|null} Interval ID for the clock tick */
-  static #intervalId = null;
+  /** @type {number|null} Interval ID for the 60s advance tick */
+  static #advanceIntervalId = null;
+
+  /** @type {number|null} Interval ID for the 1s visual tick */
+  static #visualIntervalId = null;
+
+  /** @type {number} Game seconds accumulated since last advance */
+  static #accumulatedSeconds = 0;
 
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
@@ -75,6 +81,11 @@ export default class TimeClock {
   /** @returns {number} Real-time clock speed (game seconds per real second) */
   static get realTimeSpeed() {
     return this.#realTimeSpeed;
+  }
+
+  /** @returns {number} Predicted world time including accumulated seconds for UI display */
+  static get predictedWorldTime() {
+    return game.time.worldTime + this.#accumulatedSeconds;
   }
 
   /**
@@ -123,10 +134,10 @@ export default class TimeClock {
     this.#realTimeSpeed = multiplier * incrementSeconds;
     log(3, `TimeClock real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
 
-    // Restart interval if running to apply new speed
+    // Restart intervals if running to apply new speed
     if (this.#running) {
-      this.#stopInterval();
-      this.#startInterval();
+      this.#stopIntervals();
+      this.#startIntervals();
     }
   }
 
@@ -199,7 +210,8 @@ export default class TimeClock {
     }
 
     this.#running = true;
-    this.#startInterval();
+    this.#accumulatedSeconds = 0;
+    this.#startIntervals();
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
     if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(true, this.#increment);
   }
@@ -212,7 +224,8 @@ export default class TimeClock {
   static stop({ broadcast = true } = {}) {
     if (!this.#running) return;
     this.#running = false;
-    this.#stopInterval();
+    this.#flushAccumulated();
+    this.#stopIntervals();
     log(3, 'TimeClock stopped');
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: false, increment: this.#increment });
     if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(false, this.#increment);
@@ -356,57 +369,62 @@ export default class TimeClock {
     log(3, `Time advanced by ${seconds}s`);
   }
 
+  /** Advance interval period in milliseconds (60 real seconds). */
+  static ADVANCE_INTERVAL_MS = 60_000;
+
   /**
-   * Get the smooth animation unit based on real-time speed.
-   * Smaller speeds use seconds, larger use hours/days/months.
-   * @returns {number} Smooth unit in seconds
+   * Start both the visual tick (1s) and advance (60s) intervals.
    * @private
    */
-  static #getSmoothUnit() {
-    const increments = getTimeIncrements();
+  static #startIntervals() {
+    if (this.#visualIntervalId) return;
     const speed = this.#realTimeSpeed;
+    log(3, `TimeClock intervals started (speed: ${speed}, advance every ${this.ADVANCE_INTERVAL_MS / 1000}s)`);
 
-    // Choose smooth unit based on speed magnitude
-    if (speed <= increments.minute) return 1;
-    if (speed <= increments.hour) return increments.minute;
-    if (speed <= increments.day) return increments.hour;
-    if (speed <= increments.week) return increments.day;
-    return increments.day;
-  }
+    // Visual tick — fires every 1 real second, accumulates and fires hook for UI
+    this.#visualIntervalId = setInterval(() => {
+      if (!this.#running) return;
+      this.#accumulatedSeconds += speed;
+      Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: this.predictedWorldTime });
+    }, 1000);
 
-  /**
-   * Start the clock interval.
-   * Uses smooth units for animation while maintaining correct time rate.
-   * @private
-   */
-  static #startInterval() {
-    if (this.#intervalId) return;
-    const MIN_INTERVAL = 50;
-    const MAX_INTERVAL = 1000;
-    const smoothUnit = this.#getSmoothUnit();
-    const targetRate = this.#realTimeSpeed;
-    const idealUpdatesPerSec = targetRate / smoothUnit;
-    const idealInterval = 1000 / idealUpdatesPerSec;
-    const intervalMs = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, idealInterval));
-    const actualUpdatesPerSec = 1000 / intervalMs;
-    const advanceAmount = targetRate / actualUpdatesPerSec;
-    log(3, `TimeClock interval: ${intervalMs.toFixed(0)}ms, advance: ${advanceAmount.toFixed(1)}s (speed: ${targetRate})`);
-    this.#intervalId = setInterval(async () => {
+    // Advance tick — fires every 60 real seconds, calls game.time.advance() once (GM only)
+    this.#advanceIntervalId = setInterval(async () => {
       if (!this.#running) return;
       if (!CalendariaSocket.isPrimaryGM()) return;
-      await game.time.advance(advanceAmount);
-    }, intervalMs);
+      const toAdvance = this.#accumulatedSeconds;
+      if (toAdvance <= 0) return;
+      this.#accumulatedSeconds = 0;
+      await game.time.advance(toAdvance);
+    }, this.ADVANCE_INTERVAL_MS);
   }
 
   /**
-   * Stop the clock interval.
+   * Stop both intervals and reset accumulated seconds.
    * @private
    */
-  static #stopInterval() {
-    if (this.#intervalId) {
-      clearInterval(this.#intervalId);
-      this.#intervalId = null;
+  static #stopIntervals() {
+    if (this.#visualIntervalId) {
+      clearInterval(this.#visualIntervalId);
+      this.#visualIntervalId = null;
     }
+    if (this.#advanceIntervalId) {
+      clearInterval(this.#advanceIntervalId);
+      this.#advanceIntervalId = null;
+    }
+    this.#accumulatedSeconds = 0;
+  }
+
+  /**
+   * Flush any accumulated seconds as a final advance before stopping.
+   * @private
+   */
+  static async #flushAccumulated() {
+    if (this.#accumulatedSeconds <= 0) return;
+    if (!CalendariaSocket.isPrimaryGM()) return;
+    const toAdvance = this.#accumulatedSeconds;
+    this.#accumulatedSeconds = 0;
+    await game.time.advance(toAdvance);
   }
 
   /**
@@ -427,11 +445,12 @@ export default class TimeClock {
 
     if (running && !this.#running) {
       this.#running = true;
-      this.#startInterval();
+      this.#accumulatedSeconds = 0;
+      this.#startIntervals();
       Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
     } else if (!running && this.#running) {
       this.#running = false;
-      this.#stopInterval();
+      this.#stopIntervals();
       Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: false, increment: this.#increment });
     }
   }

@@ -198,7 +198,7 @@ export async function onRenderSceneConfig(app, html, _data) {
  * @param {number} worldTime - The new world time
  * @param {number} _dt - The time delta
  */
-export async function onUpdateWorldTime(worldTime, _dt) {
+export async function updateDarknessFromWorldTime(worldTime, _dt) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const activeScene = game.scenes.active;
   if (!activeScene) return;

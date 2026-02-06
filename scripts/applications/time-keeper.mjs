@@ -23,8 +23,11 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * Compact HUD for controlling game time.
  */
 export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
-  /** @type {number|null} Hook ID for updateWorldTime */
+  /** @type {number|null} Hook ID for visual tick */
   #timeHookId = null;
+
+  /** @type {number|null} Hook ID for world time updated */
+  #worldTimeHookId = null;
 
   /** @type {number|null} Hook ID for clock state changes */
   #clockHookId = null;
@@ -115,7 +118,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
-    if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
+    if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onVisualTick.bind(this));
     if (!this.#formatsHookId) this.#formatsHookId = Hooks.on('calendaria.displayFormatsChanged', () => this.render());
     const container = this.element.querySelector('.time-keeper-content');
     container?.addEventListener('contextmenu', (e) => {
@@ -249,8 +253,12 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     StickyZones.cleanupSnapIndicator();
     super._onClose(options);
     if (this.#timeHookId) {
-      Hooks.off('updateWorldTime', this.#timeHookId);
+      Hooks.off(HOOKS.VISUAL_TICK, this.#timeHookId);
       this.#timeHookId = null;
+    }
+    if (this.#worldTimeHookId) {
+      Hooks.off(HOOKS.WORLD_TIME_UPDATED, this.#worldTimeHookId);
+      this.#worldTimeHookId = null;
     }
     if (this.#clockHookId) {
       Hooks.off(HOOKS.CLOCK_START_STOP, this.#clockHookId);
@@ -400,10 +408,11 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle world time updates - update clock display without full re-render.
+   * Handle visual tick - update clock display without full re-render.
+   * Uses predicted world time for smooth 1/sec UI updates.
    * @private
    */
-  #onUpdateWorldTime() {
+  #onVisualTick() {
     if (!this.rendered) return;
     const timeEl = this.element.querySelector('.time-display-time');
     const dateEl = this.element.querySelector('.time-display-date');
@@ -420,6 +429,19 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Get time components, using predicted world time when clock is running.
+   * @returns {object} Time components
+   * @private
+   */
+  #getComponents() {
+    if (TimeClock.running) {
+      const cal = game.time?.calendar;
+      if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
+    }
+    return game.time.components;
+  }
+
+  /**
    * Format time using the timekeeperTime format location.
    * @returns {string} Formatted time
    * @private
@@ -427,7 +449,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   #formatTime() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return TimeClock.getFormattedTime();
-    const components = game.time.components;
+    const components = this.#getComponents();
     const yearZero = calendar.years?.yearZero ?? 0;
     return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperTime');
   }
@@ -440,7 +462,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   #formatDate() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return TimeClock.getFormattedDate();
-    const components = game.time.components;
+    const components = this.#getComponents();
     const yearZero = calendar.years?.yearZero ?? 0;
     return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperDate');
   }

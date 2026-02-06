@@ -1355,7 +1355,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
     this._hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => debouncedRender()) });
     this._hooks.push({ name: 'calendaria.displayFormatsChanged', id: Hooks.on('calendaria.displayFormatsChanged', () => debouncedRender()) });
-    this._hooks.push({ name: 'updateWorldTime', id: Hooks.on('updateWorldTime', this._onUpdateWorldTime.bind(this)) });
+    this._hooks.push({ name: HOOKS.WORLD_TIME_UPDATED, id: Hooks.on(HOOKS.WORLD_TIME_UPDATED, this._onUpdateWorldTime.bind(this)) });
   }
 
   /**

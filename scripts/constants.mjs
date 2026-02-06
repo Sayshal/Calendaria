@@ -254,7 +254,9 @@ export const HOOKS = {
   STOPWATCH_START: 'calendaria.stopwatchStart',
   SUNRISE: 'calendaria.sunrise',
   SUNSET: 'calendaria.sunset',
+  VISUAL_TICK: 'calendaria.visualTick',
   WEATHER_CHANGE: 'calendaria.weatherChange',
+  WORLD_TIME_UPDATED: 'calendaria.worldTimeUpdated',
   WIDGET_REGISTERED: 'calendaria.widgetRegistered',
   WIDGETS_REFRESH: 'calendaria.widgetsRefresh',
   YEAR_CHANGE: 'calendaria.yearChange'

@@ -14,7 +14,7 @@ import CalendarManager from './calendar/calendar-manager.mjs';
 import { onChatMessage } from './chat/chat-commands.mjs';
 import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessageHTML } from './chat/chat-timestamp.mjs';
 import { HOOKS, MODULE, SETTINGS } from './constants.mjs';
-import { onRenderSceneConfig, onUpdateScene, onUpdateWorldTime, onWeatherChange } from './darkness.mjs';
+import { onRenderSceneConfig, onUpdateScene, onWeatherChange, updateDarknessFromWorldTime } from './darkness.mjs';
 import { onLongRest, onPreRest } from './integrations/rest-time.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import EventScheduler from './time/event-scheduler.mjs';
@@ -47,15 +47,26 @@ export function registerHooks() {
   Hooks.on('updateJournalEntryPage', NoteManager.onUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('updateScene', onUpdateScene);
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
-  Hooks.on('updateWorldTime', EventScheduler.onUpdateWorldTime.bind(EventScheduler));
   Hooks.on('updateWorldTime', onUpdateWorldTime);
-  Hooks.on('updateWorldTime', ReminderScheduler.onUpdateWorldTime.bind(ReminderScheduler));
-  Hooks.on('updateWorldTime', TimeTracker.onUpdateWorldTime.bind(TimeTracker));
   Hooks.on('getSceneControlButtons', onGetSceneControlButtons);
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());
   HUD.registerCombatHooks();
   log(3, 'Hooks registered');
+}
+
+/**
+ * Unified updateWorldTime handler — calls all subsystems in sequence,
+ * then fires calendaria.worldTimeUpdated for UI apps.
+ * @param {number} worldTime - The new world time
+ * @param {number} dt - The delta time in seconds
+ */
+function onUpdateWorldTime(worldTime, dt) {
+  EventScheduler.onUpdateWorldTime(worldTime, dt);
+  updateDarknessFromWorldTime(worldTime, dt);
+  ReminderScheduler.onUpdateWorldTime(worldTime, dt);
+  TimeTracker.onUpdateWorldTime(worldTime, dt);
+  Hooks.callAll(HOOKS.WORLD_TIME_UPDATED, worldTime, dt);
 }
 
 /** App definitions for toolbar buttons. */

@@ -36,8 +36,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {number|null} Animation frame ID for real-time updates */
   #intervalId = null;
 
-  /** @type {number|null} Hook ID for updateWorldTime */
+  /** @type {number|null} Hook ID for world time updated */
   #timeHookId = null;
+
+  /** @type {number|null} Hook ID for visual tick */
+  #visualTickHookId = null;
 
   /** @type {Array<{elapsed: number, label: string}>} Recorded lap times */
   #laps = [];
@@ -161,7 +164,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     let total = this.#elapsedGameSeconds;
-    if (this.#running && this.#startWorldTime !== null) total += game.time.worldTime - this.#startWorldTime;
+    if (this.#running && this.#startWorldTime !== null) {
+      // Use predicted world time for smooth display when clock is running
+      const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+      total += worldTime - this.#startWorldTime;
+    }
     return formatGameDuration(total, game.time?.calendar, format);
   }
 
@@ -190,7 +197,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     let total = this.#elapsedGameSeconds;
-    if (this.#running && this.#startWorldTime !== null) total += game.time.worldTime - this.#startWorldTime;
+    if (this.#running && this.#startWorldTime !== null) {
+      const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+      total += worldTime - this.#startWorldTime;
+    }
     return total;
   }
 
@@ -201,7 +211,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#startTime = Date.now();
       this.#startRealTimeInterval();
     } else {
-      this.#startWorldTime = game.time.worldTime;
+      this.#startWorldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
       this.#registerTimeHook();
       if (game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME)) TimeClock.start();
     }
@@ -218,7 +228,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#startTime = null;
       this.#stopRealTimeInterval();
     } else {
-      if (this.#startWorldTime !== null) this.#elapsedGameSeconds += game.time.worldTime - this.#startWorldTime;
+      if (this.#startWorldTime !== null) {
+        const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+        this.#elapsedGameSeconds += worldTime - this.#startWorldTime;
+      }
       this.#startWorldTime = null;
       this.#unregisterTimeHook();
     }
@@ -261,7 +274,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         if (this.#startTime) this.#elapsedMs += Date.now() - this.#startTime;
         this.#stopRealTimeInterval();
       } else {
-        if (this.#startWorldTime !== null) this.#elapsedGameSeconds += game.time.worldTime - this.#startWorldTime;
+        if (this.#startWorldTime !== null) {
+          const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+          this.#elapsedGameSeconds += worldTime - this.#startWorldTime;
+        }
         this.#unregisterTimeHook();
       }
     }
@@ -406,7 +422,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     } else {
       totalSeconds = this.#elapsedGameSeconds;
       if (this.#running && this.#startWorldTime !== null) {
-        totalSeconds += game.time.worldTime - this.#startWorldTime;
+        const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+        totalSeconds += worldTime - this.#startWorldTime;
       }
     }
 
@@ -416,24 +433,33 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     minuteHand.style.transform = `rotate(${minuteDegrees}deg)`;
   }
 
-  /** Register hook for world time updates. */
+  /** Register hooks for game time tracking. */
   #registerTimeHook() {
-    if (this.#timeHookId) return;
-    this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
+    if (!this.#visualTickHookId) this.#visualTickHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
   }
 
-  /** Unregister world time hook. */
+  /** Unregister game time hooks. */
   #unregisterTimeHook() {
     if (this.#timeHookId) {
-      Hooks.off('updateWorldTime', this.#timeHookId);
+      Hooks.off(HOOKS.WORLD_TIME_UPDATED, this.#timeHookId);
       this.#timeHookId = null;
+    }
+    if (this.#visualTickHookId) {
+      Hooks.off(HOOKS.VISUAL_TICK, this.#visualTickHookId);
+      this.#visualTickHookId = null;
     }
   }
 
-  /** Handle world time updates. */
-  #onUpdateWorldTime() {
+  /** Handle visual tick — smooth display updates every 1s. */
+  #onVisualTick() {
     if (!this.#running || this.#mode !== 'gametime') return;
     this.#updateDisplay();
+  }
+
+  /** Handle real world time update — check notifications on actual advance. */
+  #onWorldTimeUpdated() {
+    if (!this.#running || this.#mode !== 'gametime') return;
     this.#checkNotification();
   }
 
@@ -505,7 +531,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     } else if (this.#mode === 'gametime' && state.savedWorldTime !== undefined) {
       // Add game time elapsed since save
       this.#elapsedGameSeconds += game.time.worldTime - state.savedWorldTime;
-      this.#startWorldTime = game.time.worldTime;
+      this.#startWorldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
       this.#registerTimeHook();
     }
   }
