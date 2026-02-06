@@ -66,16 +66,14 @@
               aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddMonth'}}">
               <i class="fas fa-plus"></i>
             </button>
-            <button type="button" data-action="moveMonthUp" data-index="{{this.index}}"
-              {{#if this.isFirst}}disabled aria-disabled="true" data-tooltip
-              aria-label="{{localize 'CALENDARIA.Editor.MoveUp.DisabledTitle'}}"
-              {{else}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveUp'}}"{{/if}}>
+            <button type="button" data-action="moveMonthUp" data-index="{{this.index}}" {{#if this.isFirst}}disabled
+              aria-disabled="true" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveUp.DisabledTitle'}}"
+              {{else}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveUp.Label'}}" {{/if}}>
               <i class="fas fa-chevron-up"></i>
             </button>
-            <button type="button" data-action="moveMonthDown" data-index="{{this.index}}"
-              {{#if this.isLast}}disabled aria-disabled="true" data-tooltip
-              aria-label="{{localize 'CALENDARIA.Editor.MoveDown.DisabledTitle'}}"
-              {{else}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveDown'}}"{{/if}}>
+            <button type="button" data-action="moveMonthDown" data-index="{{this.index}}" {{#if this.isLast}}disabled
+              aria-disabled="true" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveDown.DisabledTitle'}}"
+              {{else}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveDown.Label'}}" {{/if}}>
               <i class="fas fa-chevron-down"></i>
             </button>
             <button type="button" data-action="removeMonth" data-index="{{this.index}}" data-tooltip
