@@ -2146,6 +2146,12 @@ span.calendaria-moon-icon {
     gap: 0;
   }
 
+  fieldset legend {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
   .legend-help {
     height: 1.25rem;
     padding: 0;
@@ -2191,6 +2197,19 @@ span.calendaria-moon-icon {
 
   .warning {
     color: var(--color-level-warning);
+  }
+
+  .format-input.invalid {
+    border-color: var(--calendaria-error);
+    outline: 0.0625rem solid var(--calendaria-error);
+  }
+
+  .format-preview {
+    font-style: italic;
+
+    &.error {
+      color: var(--calendaria-error);
+    }
   }
 
   .template-selector {

@@ -10,6 +10,7 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendarRegistry from '../calendar/calendar-registry.mjs';
 import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import { createImporter } from '../importers/index.mjs';
+import { validateFormatString } from '../utils/format-utils.mjs';
 import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { RangeSlider } from '../utils/range-slider.mjs';
@@ -566,6 +567,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#setupNavSearchListener();
     this.#setupPhaseSliderListeners();
     this.#setupPresetAliasListeners();
+    this.#setupFormatPreviewListeners();
   }
 
   /**
@@ -608,6 +610,53 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         group.style.display = visibleTabs.length > 0 ? '' : 'none';
       }
     });
+  }
+
+  /**
+   * Set up live preview listeners for format inputs on the Display tab.
+   * @private
+   */
+  #setupFormatPreviewListeners() {
+    const formatInputs = this.element.querySelectorAll('.format-input');
+    if (!formatInputs.length) return;
+
+    // Build sample components from the calendar being edited
+    const cal = this.#calendarData;
+    const yearZero = cal?.years?.yearZero ?? 0;
+    const components = { year: yearZero + 1, month: 0, dayOfMonth: 1, hour: 14, minute: 30, second: 0 };
+
+    const updatePreview = (input) => {
+      const field = input.closest('.form-group')?.querySelector('.format-preview');
+      if (!field) return;
+      const formatStr = input.value.trim();
+      if (!formatStr) {
+        field.textContent = '';
+        field.classList.remove('error');
+        input.classList.remove('invalid');
+        return;
+      }
+      const result = validateFormatString(formatStr, cal, components);
+      if (result.valid) {
+        field.textContent = result.preview || formatStr;
+        field.classList.remove('error');
+        input.classList.remove('invalid');
+      } else {
+        field.textContent = localize(result.error || 'CALENDARIA.Format.Error.Invalid');
+        field.classList.add('error');
+        input.classList.add('invalid');
+      }
+    };
+
+    for (const input of formatInputs) {
+      // Initial preview on render
+      updatePreview(input);
+      // Debounced live preview on input
+      let debounceTimer;
+      input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => updatePreview(input), 200);
+      });
+    }
   }
 
   /**
