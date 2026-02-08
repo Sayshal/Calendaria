@@ -188,22 +188,118 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Legacy {{var}} → modern token mapping.
+   * @since 0.9.0
+   * @deprecated Remove in 1.1.0
+   */
+  static #LEGACY_TOKENS = {
+    '{{y}}': 'YY', '{{yyyy}}': 'YYYY', '{{Y}}': 'YYYY',
+    '{{B}}': 'MMMM', '{{b}}': 'MMM', '{{m}}': 'M', '{{mm}}': 'MM',
+    '{{d}}': 'D', '{{dd}}': 'DD', '{{0}}': 'Do', '{{j}}': 'DDD',
+    '{{w}}': 'd', '{{A}}': 'dddd', '{{a}}': 'ddd',
+    '{{H}}': 'HH', '{{h}}': 'h', '{{hh}}': 'hh', '{{M}}': 'mm', '{{S}}': 'ss',
+    '{{p}}': 'a', '{{P}}': 'A',
+    '{{W}}': 'W', '{{WW}}': 'WW', '{{WN}}': '[namedWeek]', '{{Wn}}': '[namedWeekAbbr]',
+    '{{ch}}': '[ch]', '{{chAbbr}}': '[chAbbr]',
+    '{{E}}': 'GGGG', '{{e}}': '[yearInEra]',
+    '{{season}}': 'QQQQ', '{{moon}}': '[moon]',
+    '{{era}}': 'GGGG', '{{eraYear}}': '[yearInEra]', '{{yearInEra}}': '[yearInEra]',
+    '{{year}}': 'YYYY', '{{abbreviation}}': 'G', '{{short}}': 'G'
+  };
+
+  /**
+   * Deprecated token → replacement mapping.
+   * @since 0.9.0
+   * @deprecated Remove in 1.1.0
+   */
+  static #DEPRECATED_TOKENS = {
+    dddd: 'EEEE', ddd: 'EEE', dd: 'EE', d: 'e',
+    '[era]': 'GGGG', '[eraAbbr]': 'G', '[year]': 'YYYY',
+    '[short]': 'G', '[season]': 'QQQQ', '[seasonAbbr]': 'QQQ'
+  };
+
+  /**
    * Migrate source data before schema validation.
-   * Handles renaming cycle.entries → cycle.stages.
+   * Each migration is idempotent and short-circuits if data is already current.
    * @param {object} source - Raw source data
    * @returns {object} Migrated source data
    * @override
    */
   static migrateData(source) {
-    if (source.cycles?.length) {
-      for (const cycle of source.cycles) {
-        if (cycle.entries && !cycle.stages) {
-          cycle.stages = cycle.entries;
-          delete cycle.entries;
-        }
+    CalendariaCalendar.#migrateCycleStages(source);
+    CalendariaCalendar.#migrateLegacyFormats(source);
+    CalendariaCalendar.#migrateDeprecatedTokens(source);
+    return super.migrateData(source);
+  }
+
+  /**
+   * Rename cycle.entries → cycle.stages.
+   * @param {object} source - Raw source data
+   * @since 0.9.0
+   * @deprecated Remove in 1.1.0
+   */
+  static #migrateCycleStages(source) {
+    if (!source.cycles?.length) return;
+    for (const cycle of source.cycles) {
+      if (cycle.entries && !cycle.stages) {
+        cycle.stages = cycle.entries;
+        delete cycle.entries;
       }
     }
-    return super.migrateData(source);
+  }
+
+  /**
+   * Convert legacy {{var}} format strings to modern bracket tokens.
+   * @param {object} source - Raw source data
+   * @since 0.9.0
+   * @deprecated Remove in 1.1.0
+   */
+  static #migrateLegacyFormats(source) {
+    const format = (str) => {
+      let out = str.replace(/{{c\d+}}/g, '[cycle]').replace(/{{(\d+)}}/g, '[$1]');
+      for (const [old, rep] of Object.entries(CalendariaCalendar.#LEGACY_TOKENS)) {
+        out = out.replace(new RegExp(old.replace(/[{}]/g, '\\$&'), 'g'), rep);
+      }
+      return out;
+    };
+    const isLegacy = (str) => typeof str === 'string' && /{{[^}]+}}/.test(str);
+    if (source.dateFormats) {
+      for (const [key, val] of Object.entries(source.dateFormats)) {
+        if (isLegacy(val)) source.dateFormats[key] = format(val);
+      }
+    }
+    if (isLegacy(source.cycleFormat)) source.cycleFormat = format(source.cycleFormat);
+  }
+
+  /**
+   * Replace deprecated format tokens with current equivalents.
+   * @param {object} source - Raw source data
+   * @since 0.9.0
+   * @deprecated Remove in 1.1.0
+   */
+  static #migrateDeprecatedTokens(source) {
+    const migrate = (str) => {
+      if (typeof str !== 'string') return str;
+      let out = str;
+      for (const [tok, rep] of Object.entries(CalendariaCalendar.#DEPRECATED_TOKENS).sort((a, b) => b[0].length - a[0].length)) {
+        if (tok.startsWith('[')) {
+          out = out.split(tok).join(rep);
+        } else {
+          out = out.replace(new RegExp(`(?<![a-zA-Z])${tok}(?![a-zA-Z])`, 'g'), rep);
+        }
+      }
+      return out;
+    };
+    if (source.dateFormats) {
+      for (const [key, val] of Object.entries(source.dateFormats)) {
+        const migrated = migrate(val);
+        if (migrated !== val) source.dateFormats[key] = migrated;
+      }
+    }
+    if (source.cycleFormat) {
+      const migrated = migrate(source.cycleFormat);
+      if (migrated !== source.cycleFormat) source.cycleFormat = migrated;
+    }
   }
 
   /** @override */

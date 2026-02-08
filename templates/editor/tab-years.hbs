@@ -15,7 +15,7 @@
       <div class="form-fields">
         <select id="editor-first-weekday" name="years.firstWeekday">
           {{#each weekdayOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -49,7 +49,7 @@
       <div class="form-fields">
         <select id="editor-leap-rule" name="leapYearConfig.rule">
           {{#each leapRuleOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -69,8 +69,7 @@
       <div class="form-group">
         <label for="editor-leap-start-simple">{{localize "CALENDARIA.Editor.Field.LeapStart"}}</label>
         <div class="form-fields">
-          <input type="number" id="editor-leap-start-simple" name="leapYearConfig.start" value="{{leapStart}}"
-            step="1">
+          <input type="number" id="editor-leap-start-simple" name="leapYearConfig.start" value="{{leapStart}}" step="1">
         </div>
         <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapStart"}}</p>
       </div>
@@ -89,51 +88,56 @@
       <div class="form-group">
         <label for="editor-leap-start-custom">{{localize "CALENDARIA.Editor.Field.LeapStart"}}</label>
         <div class="form-fields">
-          <input type="number" id="editor-leap-start-custom" name="leapYearConfig.start" value="{{leapStart}}"
-            step="1">
+          <input type="number" id="editor-leap-start-custom" name="leapYearConfig.start" value="{{leapStart}}" step="1">
         </div>
         <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapStart"}}</p>
       </div>
     </div>
 
-    <div class="standard-form" data-leap-rule="gregorian" {{#unless showLeapGregorian}}style="display: none;" {{/unless}}>
+    <div class="standard-form" data-leap-rule="gregorian" {{#unless showLeapGregorian}}style="display: none;"
+      {{/unless}}>
       <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
     </div>
   </fieldset>
 
   <fieldset>
-    <legend data-tooltip="{{localize 'CALENDARIA.Editor.Hint.NamedYears'}}">{{localize "CALENDARIA.Editor.Section.NamedYears"}}</legend>
+    <legend data-tooltip="{{localize 'CALENDARIA.Editor.Hint.NamedYears'}}">
+      {{localize "CALENDARIA.Editor.Section.NamedYears"}}
+    </legend>
 
     {{#if namedYears.length}}
-      <div class="items-list named-years-list">
-        <div class="list-header flexrow">
-          <span>{{localize "CALENDARIA.Common.Name"}}</span>
-          <span>{{localize "CALENDARIA.Common.Year"}}</span>
-          <span></span>
+    <div class="items-list named-years-list">
+      <div class="list-header flexrow">
+        <span>{{localize "CALENDARIA.Common.Name"}}</span>
+        <span>{{localize "CALENDARIA.Common.Year"}}</span>
+        <span></span>
+      </div>
+      {{#each namedYears}}
+      <div class="item flexrow" data-index="{{this.index}}">
+        <input type="text" name="years.names.{{this.index}}.name" value="{{this.name}}"
+          placeholder="{{localize 'CALENDARIA.Common.Name'}}">
+        <input type="number" name="years.names.{{this.index}}.year" value="{{this.year}}" step="1">
+        <div class="item-controls">
+          <button type="button" data-action="addNamedYear" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Common.Add'}}">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button type="button" data-action="removeNamedYear" data-index="{{this.index}}"
+            data-tooltip="{{localize 'CALENDARIA.Common.Delete'}}">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
-        {{#each namedYears}}
-          <div class="item flexrow" data-index="{{this.index}}">
-            <input type="text" name="years.names.{{this.index}}.name" value="{{this.name}}" placeholder="{{localize 'CALENDARIA.Common.Name'}}">
-            <input type="number" name="years.names.{{this.index}}.year" value="{{this.year}}" step="1">
-            <div class="item-controls">
-              <button type="button" data-action="addNamedYear" data-index="{{this.index}}" data-tooltip="{{localize 'CALENDARIA.Common.Add'}}">
-                <i class="fas fa-plus"></i>
-              </button>
-              <button type="button" data-action="removeNamedYear" data-index="{{this.index}}" data-tooltip="{{localize 'CALENDARIA.Common.Delete'}}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        {{/each}}
       </div>
+      {{/each}}
+    </div>
     {{else}}
-      <div class="empty-list">
-        <p>{{localize "CALENDARIA.Editor.NoNamedYears"}}</p>
-        <button type="button" data-action="addNamedYear" data-index="-1">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.Editor.AddNamedYear"}}
-        </button>
-      </div>
+    <div class="empty-list">
+      <p>{{localize "CALENDARIA.Editor.NoNamedYears"}}</p>
+      <button type="button" data-action="addNamedYear" data-index="-1">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.Editor.AddNamedYear"}}
+      </button>
+    </div>
     {{/if}}
   </fieldset>
 </section>

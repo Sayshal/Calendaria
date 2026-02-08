@@ -17,7 +17,8 @@
   <p class="hint section-hint">{{openHint}}</p>
 
   <fieldset data-section="hud-display">
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="hud-display" data-tooltip
         aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>
@@ -31,13 +32,13 @@
     </div>
 
     {{#if isGM}}
-      <div class="form-group">
-        <label for="forceHUD">{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="forceHUD" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
+    <div class="form-group">
+      <label for="forceHUD">{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="forceHUD" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
+    </div>
     {{/if}}
 
     <div class="form-group">
@@ -45,7 +46,7 @@
       <div class="form-fields">
         <select id="calendarHUDMode" name="calendarHUDMode">
           {{#each hudModeOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -58,7 +59,7 @@
         <select id="hudDialStyle" name="hudDialStyle" {{#if isCompactMode}}disabled aria-disabled="true" data-tooltip
           aria-label="{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledTitle"}}" {{/if}}>
           {{#each dialStyleOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -72,7 +73,7 @@
       <div class="form-fields">
         <select id="hudTrayDirection" name="hudTrayDirection">
           {{#each trayDirectionOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -165,7 +166,8 @@
   </fieldset>
 
   <fieldset data-section="hud-block-visibility">
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="hud-block-visibility"
         data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
           class="fas fa-undo"></i></button>
@@ -181,18 +183,18 @@
     </div>
 
     {{#unless isCompactMode}}
-      <div class="form-group{{#unless hudShowWeather}} disabled{{/unless}}">
-        <label for="hudWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
-        <div class="form-fields">
-          <select id="hudWeatherDisplayMode" name="hudWeatherDisplayMode" {{#unless hudShowWeather}}disabled
-            aria-disabled="true" {{/unless}}>
-            {{#each weatherDisplayModeOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Hint"}}</p>
+    <div class="form-group{{#unless hudShowWeather}} disabled{{/unless}}">
+      <label for="hudWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="hudWeatherDisplayMode" name="hudWeatherDisplayMode" {{#unless hudShowWeather}}disabled
+          aria-disabled="true" {{/unless}}>
+          {{#each weatherDisplayModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Hint"}}</p>
+    </div>
     {{/unless}}
 
     <div class="form-group">
@@ -204,18 +206,18 @@
     </div>
 
     {{#unless isCompactMode}}
-      <div class="form-group{{#unless hudShowSeason}} disabled{{/unless}}">
-        <label for="hudSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
-        <div class="form-fields">
-          <select id="hudSeasonDisplayMode" name="hudSeasonDisplayMode" {{#unless hudShowSeason}}disabled
-            aria-disabled="true" {{/unless}}>
-            {{#each seasonDisplayModeOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Hint"}}</p>
+    <div class="form-group{{#unless hudShowSeason}} disabled{{/unless}}">
+      <label for="hudSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="hudSeasonDisplayMode" name="hudSeasonDisplayMode" {{#unless hudShowSeason}}disabled
+          aria-disabled="true" {{/unless}}>
+          {{#each seasonDisplayModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Hint"}}</p>
+    </div>
     {{/unless}}
 
     <div class="form-group">
@@ -227,18 +229,18 @@
     </div>
 
     {{#unless isCompactMode}}
-      <div class="form-group{{#unless hudShowEra}} disabled{{/unless}}">
-        <label for="hudEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
-        <div class="form-fields">
-          <select id="hudEraDisplayMode" name="hudEraDisplayMode" {{#unless hudShowEra}}disabled aria-disabled="true"
-            {{/unless}}>
-            {{#each eraDisplayModeOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Hint"}}</p>
+    <div class="form-group{{#unless hudShowEra}} disabled{{/unless}}">
+      <label for="hudEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="hudEraDisplayMode" name="hudEraDisplayMode" {{#unless hudShowEra}}disabled aria-disabled="true"
+          {{/unless}}>
+          {{#each eraDisplayModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Hint"}}</p>
+    </div>
     {{/unless}}
 
     <div class="form-group">
@@ -250,103 +252,106 @@
     </div>
 
     {{#unless isCompactMode}}
-      <div class="form-group{{#unless hudShowCycles}} disabled{{/unless}}">
-        <label for="hudCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
-        <div class="form-fields">
-          <select id="hudCyclesDisplayMode" name="hudCyclesDisplayMode" {{#unless hudShowCycles}}disabled
-            aria-disabled="true" {{/unless}}>
-            {{#each cyclesDisplayModeOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Hint"}}</p>
+    <div class="form-group{{#unless hudShowCycles}} disabled{{/unless}}">
+      <label for="hudCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="hudCyclesDisplayMode" name="hudCyclesDisplayMode" {{#unless hudShowCycles}}disabled
+          aria-disabled="true" {{/unless}}>
+          {{#each cyclesDisplayModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Hint"}}</p>
+    </div>
     {{/unless}}
   </fieldset>
 
   {{#if isGM}}
-    <fieldset data-section="display-formats">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
-        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
-          aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
-            class="fa-solid fa-question"></i></button>
-      </legend>
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+  <fieldset data-section="display-formats">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+      <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+          class="fa-solid fa-question"></i></button>
+    </legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
-      {{#each formatLocations}}
-        <div class="format-location" data-location="{{id}}">
-          <div class="form-group">
-            <label>{{label}}</label>
-          </div>
-
-          <div class="format-row">
-            <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
-                  data-location="{{id}}" data-role="gm"></span></span>
-              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-                {{#each gmPresetOptions}}
-                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                {{/each}}
-              </select>
-              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-                placeholder="D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-                data-location="{{id}}" data-role="gm">
-            </div>
-
-            <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
-                  data-location="{{id}}" data-role="player"></span></span>
-              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-                {{#each playerPresetOptions}}
-                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                {{/each}}
-              </select>
-              <input type="text" name="displayFormats.{{id}}.playerCustom"
-                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMMM YYYY"
-                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
-                data-role="player">
-            </div>
-          </div>
-        </div>
-      {{/each}}
-    </fieldset>
-
-    <fieldset data-section="hud-time-jumps">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="hud-time-jumps"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
-
-      <div class="time-jumps-grid">
-        <div class="time-jumps-header">
-          <span></span>
-          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}</span>
-          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}</span>
-          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}</span>
-          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}</span>
-        </div>
-        {{#each customTimeJumps}}
-          <div class="time-jumps-row">
-            <label>{{label}}</label>
-            <input type="number" name="customTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}"
-              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}">
-            <input type="number" name="customTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}"
-              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}">
-            <input type="number" name="customTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}"
-              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}">
-            <input type="number" name="customTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}"
-              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}">
-          </div>
-        {{/each}}
+    {{#each formatLocations}}
+    <div class="format-location" data-location="{{id}}">
+      <div class="form-group">
+        <label>{{label}}</label>
       </div>
-    </fieldset>
+
+      <div class="format-row">
+        <div class="format-column">
+          <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+              data-location="{{id}}" data-role="gm"></span></span>
+          <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+            {{#each gmPresetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+            placeholder="D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+            data-location="{{id}}" data-role="gm">
+        </div>
+
+        <div class="format-column">
+          <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+              data-location="{{id}}" data-role="player"></span></span>
+          <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+            {{#each playerPresetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          <input type="text" name="displayFormats.{{id}}.playerCustom"
+            value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMMM YYYY"
+            class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+            data-role="player">
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </fieldset>
+
+  <fieldset data-section="hud-time-jumps">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="hud-time-jumps"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
+
+    <div class="time-jumps-grid">
+      <div class="time-jumps-header">
+        <span></span>
+        <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}</span>
+        <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}</span>
+        <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}</span>
+        <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}</span>
+      </div>
+      {{#each customTimeJumps}}
+      <div class="time-jumps-row">
+        <label>{{label}}</label>
+        <input type="number" name="customTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}"
+          aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}">
+        <input type="number" name="customTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}"
+          aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}">
+        <input type="number" name="customTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}"
+          aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}">
+        <input type="number" name="customTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}"
+          aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}">
+      </div>
+      {{/each}}
+    </div>
+  </fieldset>
   {{/if}}
 
   <fieldset data-section="hud-sticky">
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="hud-sticky" data-tooltip
         aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>

@@ -1,87 +1,89 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset data-section="chat-timestamps">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="chat-timestamps"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
+  <fieldset data-section="chat-timestamps">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.ChatTimestamps"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="chat-timestamps"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
 
+    <div class="form-group">
+      <label for="chatTimestampMode">{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="chatTimestampMode" name="chatTimestampMode">
+          {{#each chatTimestampModeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="chatTimestampShowTime">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="chatTimestampShowTime" name="chatTimestampShowTime"
+          {{#if chatTimestampShowTime}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset data-section="display-formats">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+      <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+          class="fa-solid fa-question"></i></button>
+    </legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+
+    {{#each formatLocations}}
+    <div class="format-location" data-location="{{id}}">
       <div class="form-group">
-        <label for="chatTimestampMode">{{localize "CALENDARIA.Settings.ChatTimestampMode.Name"}}</label>
-        <div class="form-fields">
-          <select id="chatTimestampMode" name="chatTimestampMode">
-            {{#each chatTimestampModeOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+        <label>{{label}}</label>
+      </div>
+
+      <div class="format-row">
+        <div class="format-column">
+          <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+              data-location="{{id}}" data-role="gm"></span></span>
+          <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+            {{#each gmPresetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
           </select>
+          <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+            placeholder="D MMM" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+            data-location="{{id}}" data-role="gm">
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampMode.Hint"}}</p>
+
+        <div class="format-column">
+          <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+              data-location="{{id}}" data-role="player"></span></span>
+          <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+            {{#each playerPresetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          <input type="text" name="displayFormats.{{id}}.playerCustom"
+            value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMM"
+            class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+            data-role="player">
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="chatTimestampShowTime">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Name"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="chatTimestampShowTime" name="chatTimestampShowTime"
-            {{#if chatTimestampShowTime}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ChatTimestampShowTime.Hint"}}</p>
-      </div>
-    </fieldset>
-
-    <fieldset data-section="display-formats">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
-        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
-          aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
-            class="fa-solid fa-question"></i></button>
-      </legend>
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
-
-      {{#each formatLocations}}
-        <div class="format-location" data-location="{{id}}">
-          <div class="form-group">
-            <label>{{label}}</label>
-          </div>
-
-          <div class="format-row">
-            <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
-                  data-location="{{id}}" data-role="gm"></span></span>
-              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-                {{#each gmPresetOptions}}
-                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                {{/each}}
-              </select>
-              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-                placeholder="D MMM" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-                data-location="{{id}}" data-role="gm">
-            </div>
-
-            <div class="format-column">
-              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
-                  data-location="{{id}}" data-role="player"></span></span>
-              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-                {{#each playerPresetOptions}}
-                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                {{/each}}
-              </select>
-              <input type="text" name="displayFormats.{{id}}.playerCustom"
-                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMM"
-                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
-                data-role="player">
-            </div>
-          </div>
-        </div>
-      {{/each}}
-    </fieldset>
+    </div>
+    {{/each}}
+  </fieldset>
   {{/if}}
 
   {{#unless isGM}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.ChatTab.PlayerMessage"}}</p>
-    </div>
+  <div class="info-box">
+    <i class="fas fa-info-circle"></i>
+    <p>{{localize "CALENDARIA.SettingsPanel.ChatTab.PlayerMessage"}}</p>
+  </div>
   {{/unless}}
 
 </section>

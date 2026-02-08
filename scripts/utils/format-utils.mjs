@@ -476,7 +476,10 @@ export function formatCustom(calendar, components, formatStr) {
     A: parts.A, a: parts.a
   };
 
-  /** Resolve a token string to its value. */
+  /**
+   * Resolve a token string to its value.
+   * @param {string} token - Format token to resolve
+   */
   const resolveToken = (token) => {
     if (token in tokenMap) return tokenMap[token];
     if (token in customContext) return customContext[token];

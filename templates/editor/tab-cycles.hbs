@@ -12,103 +12,104 @@
     <legend>{{localize "CALENDARIA.Common.Cycles"}}</legend>
 
     {{#if cyclesWithNav.length}}
-      <div class="items-list cycles-list">
-        {{#each cyclesWithNav}}
-          <div class="item cycle-item" data-index="{{this.index}}">
-            <div class="cycle-header-grid">
-              <div class="grid-col col-name">
-                <label for="editor-cycle-{{this.index}}-name" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleName'}}">
-                  {{localize "CALENDARIA.Common.Name"}}
-                </label>
-                <input type="text" id="editor-cycle-{{this.index}}-name" name="cycles.{{this.index}}.name"
-                  value="{{this.name}}">
-              </div>
-              <div class="grid-col col-length">
-                <label for="editor-cycle-{{this.index}}-length" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CyclePeriod'}}">
-                  {{localize "CALENDARIA.Editor.Field.Length"}}
-                </label>
-                <input type="number" id="editor-cycle-{{this.index}}-length" name="cycles.{{this.index}}.length"
-                  value="{{this.length}}" min="1" step="1">
-              </div>
-              <div class="grid-col col-offset">
-                <label for="editor-cycle-{{this.index}}-offset" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleOffset'}}">
-                  {{localize "CALENDARIA.Common.Offset"}}
-                </label>
-                <input type="number" id="editor-cycle-{{this.index}}-offset" name="cycles.{{this.index}}.offset"
-                  value="{{this.offset}}" step="1">
-              </div>
-              <div class="grid-col col-based-on">
-                <label for="editor-cycle-{{this.index}}-basedOn" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleBasedOn'}}">
-                  {{localize "CALENDARIA.Editor.Field.BasedOn"}}
-                </label>
-                <select id="editor-cycle-{{this.index}}-basedOn" name="cycles.{{this.index}}.basedOn">
-                  {{#each this.basedOnOptions}}
-                    <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
-                  {{/each}}
-                </select>
-              </div>
-              <div class="grid-col col-controls">
-                <label>&nbsp;</label>
-                <div class="item-controls">
-                  <button type="button" data-action="addCycle" data-index="{{this.index}}" data-tooltip
-                    aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddCycle'}}">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                  <button type="button" data-action="removeCycle" data-index="{{this.index}}" data-tooltip
-                    aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveCycle'}}">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
+    <div class="items-list cycles-list">
+      {{#each cyclesWithNav}}
+      <div class="item cycle-item" data-index="{{this.index}}">
+        <div class="cycle-header-grid">
+          <div class="grid-col col-name">
+            <label for="editor-cycle-{{this.index}}-name" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleName'}}">
+              {{localize "CALENDARIA.Common.Name"}}
+            </label>
+            <input type="text" id="editor-cycle-{{this.index}}-name" name="cycles.{{this.index}}.name"
+              value="{{this.name}}">
+          </div>
+          <div class="grid-col col-length">
+            <label for="editor-cycle-{{this.index}}-length" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CyclePeriod'}}">
+              {{localize "CALENDARIA.Editor.Field.Length"}}
+            </label>
+            <input type="number" id="editor-cycle-{{this.index}}-length" name="cycles.{{this.index}}.length"
+              value="{{this.length}}" min="1" step="1">
+          </div>
+          <div class="grid-col col-offset">
+            <label for="editor-cycle-{{this.index}}-offset" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleOffset'}}">
+              {{localize "CALENDARIA.Common.Offset"}}
+            </label>
+            <input type="number" id="editor-cycle-{{this.index}}-offset" name="cycles.{{this.index}}.offset"
+              value="{{this.offset}}" step="1">
+          </div>
+          <div class="grid-col col-based-on">
+            <label for="editor-cycle-{{this.index}}-basedOn" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleBasedOn'}}">
+              {{localize "CALENDARIA.Editor.Field.BasedOn"}}
+            </label>
+            <select id="editor-cycle-{{this.index}}-basedOn" name="cycles.{{this.index}}.basedOn">
+              {{#each this.basedOnOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="grid-col col-controls">
+            <label>&nbsp;</label>
+            <div class="item-controls">
+              <button type="button" data-action="addCycle" data-index="{{this.index}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddCycle'}}">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button type="button" data-action="removeCycle" data-index="{{this.index}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveCycle'}}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <fieldset class="cycle-stages-section">
+          <legend>{{localize "CALENDARIA.Editor.Section.CycleStages"}} ({{this.stagesWithIndex.length}})</legend>
+
+          {{#if this.stagesWithIndex.length}}
+          <div class="stages-list">
+            {{#each this.stagesWithIndex}}
+            <div class="stage-item flexrow" data-stage-index="{{this.index}}">
+              <input type="text" name="cycles.{{this.cycleIndex}}.stages.{{this.index}}.name"
+                value="{{this.name}}" class="col-stage-name"
+                placeholder="{{localize 'CALENDARIA.Editor.Placeholder.StageName'}}">
+              <div class="item-controls">
+                <button type="button" data-action="addCycleStage" data-cycle-index="{{this.cycleIndex}}"
+                  data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddStage'}}">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button type="button" data-action="removeCycleStage" data-cycle-index="{{this.cycleIndex}}"
+                  data-stage-index="{{this.index}}" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveStage'}}">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </div>
-
-            <fieldset class="cycle-stages-section">
-              <legend>{{localize "CALENDARIA.Editor.Section.CycleStages"}} ({{this.stagesWithIndex.length}})</legend>
-
-              {{#if this.stagesWithIndex.length}}
-                <div class="stages-list">
-                  {{#each this.stagesWithIndex}}
-                    <div class="stage-item flexrow" data-stage-index="{{this.index}}">
-                      <input type="text" name="cycles.{{this.cycleIndex}}.stages.{{this.index}}.name" value="{{this.name}}"
-                        class="col-stage-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.StageName'}}">
-                      <div class="item-controls">
-                        <button type="button" data-action="addCycleStage" data-cycle-index="{{this.cycleIndex}}"
-                          data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddStage'}}">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                        <button type="button" data-action="removeCycleStage" data-cycle-index="{{this.cycleIndex}}"
-                          data-stage-index="{{this.index}}" data-tooltip
-                          aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveStage'}}">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                  {{/each}}
-                </div>
-              {{else}}
-                <div class="empty-list">
-                  <p>{{localize "CALENDARIA.Editor.NoStages"}}</p>
-                  <button type="button" data-action="addCycleStage" data-cycle-index="{{this.index}}">
-                    <i class="fas fa-plus"></i> {{localize "CALENDARIA.Editor.AddStage"}}
-                  </button>
-                </div>
-              {{/if}}
-            </fieldset>
+            {{/each}}
           </div>
-        {{/each}}
+          {{else}}
+          <div class="empty-list">
+            <p>{{localize "CALENDARIA.Editor.NoStages"}}</p>
+            <button type="button" data-action="addCycleStage" data-cycle-index="{{this.index}}">
+              <i class="fas fa-plus"></i> {{localize "CALENDARIA.Editor.AddStage"}}
+            </button>
+          </div>
+          {{/if}}
+        </fieldset>
       </div>
+      {{/each}}
+    </div>
     {{else}}
-      <div class="empty-list">
-        <p>{{localize "CALENDARIA.Editor.NoCycles"}}</p>
-        <button type="button" data-action="addCycle" data-index="-1">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.Editor.AddCycle"}}
-        </button>
-      </div>
+    <div class="empty-list">
+      <p>{{localize "CALENDARIA.Editor.NoCycles"}}</p>
+      <button type="button" data-action="addCycle" data-index="-1">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.Editor.AddCycle"}}
+      </button>
+    </div>
     {{/if}}
   </fieldset>
 </section>

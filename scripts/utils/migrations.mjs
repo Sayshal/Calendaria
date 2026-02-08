@@ -117,20 +117,13 @@ export function migrateDeprecatedTokens(str) {
 }
 
 /**
- * Ensure calendar data has required fields
+ * Ensure calendar data has required fields.
  * @param {object} data - Calendar data object to migrate
+ * @deprecated since 1.0.0 — Now handled by CalendariaCalendar.migrateData
  */
 export function migrateCalendarDataStructure(data) {
-  const added = [];
-  if (!data.seasons) {
-    data.seasons = { values: [] };
-    added.push('seasons');
-  }
-  if (!data.months) {
-    data.months = { values: [] };
-    added.push('months');
-  }
-  if (added.length) log(3, `Migrated calendar "${data.name}": added ${added.join(', ')}`);
+  if (!data.seasons) data.seasons = { values: [] };
+  if (!data.months) data.months = { values: [] };
 }
 
 /**

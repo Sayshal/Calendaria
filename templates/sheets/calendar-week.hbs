@@ -1,53 +1,53 @@
 <div class="calendar-week-view">
   {{#if calendarData}}
-    <div class="week-grid"
-      style="--hours-per-day: {{calendarData.hoursPerDay}}; grid-template-rows: var(--calendaria-week-header-height) repeat({{calendarData.daysInWeek}}, var(--calendaria-week-hour-height));">
-      <div class="week-corner-header"></div>
-      {{#each calendarData.timeSlots}}
-        <div class="week-hour-label">{{label}}</div>
-      {{/each}}
+  <div class="week-grid"
+    style="--hours-per-day: {{calendarData.hoursPerDay}}; grid-template-rows: var(--calendaria-week-header-height) repeat({{calendarData.daysInWeek}}, var(--calendaria-week-hour-height));">
+    <div class="week-corner-header"></div>
+    {{#each calendarData.timeSlots}}
+    <div class="week-hour-label">{{label}}</div>
+    {{/each}}
 
-      {{#each calendarData.days}}
-        <div class="week-day-header {{#if isToday}}today{{/if}}{{#if isRestDay}} rest-day{{/if}}">
-          <span class="day-header-text"><strong>{{day}}</strong> - {{dayName}}</span>
+    {{#each calendarData.days}}
+    <div class="week-day-header {{#if isToday}}today{{/if}}{{#if isRestDay}} rest-day{{/if}}">
+      <span class="day-header-text"><strong>{{day}}</strong> - {{dayName}}</span>
+    </div>
+
+    {{#each ../calendarData.timeSlots}}
+    <div
+      class="week-time-cell {{#if (and ../isToday (eq hour ../currentHour))}}current-hour{{/if}}{{#if (eq hour ../selectedHour)}} selected{{/if}}"
+      data-day="{{../day}}" data-month="{{../month}}" data-year="{{../year}}" data-hour="{{hour}}"
+      data-action="selectTimeSlot">
+      {{#each ../eventBlocks}}
+      {{#if (eq ../hour startHour)}}
+      <div class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}}"
+        style="--hour-span: {{hourSpan}}; background-color: {{color}};" data-tooltip
+        aria-label="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}" data-action="editNote"
+        data-note-id="{{id}}">
+        <div class="event-icon">
+          {{#if (eq iconType "fontawesome")}}
+          <i class="{{icon}}"></i>
+          {{else if icon}}
+          <img src="{{icon}}" alt="{{name}}">
+          {{/if}}
         </div>
-
-        {{#each ../calendarData.timeSlots}}
-          <div
-            class="week-time-cell {{#if (and ../isToday (eq hour ../currentHour))}}current-hour{{/if}}{{#if (eq hour ../selectedHour)}} selected{{/if}}"
-            data-day="{{../day}}" data-month="{{../month}}" data-year="{{../year}}" data-hour="{{hour}}"
-            data-action="selectTimeSlot">
-            {{#each ../eventBlocks}}
-              {{#if (eq ../hour startHour)}}
-                <div class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}}"
-                  style="--hour-span: {{hourSpan}}; background-color: {{color}};" data-tooltip
-                  aria-label="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}" data-action="editNote"
-                  data-note-id="{{id}}">
-                  <div class="event-icon">
-                    {{#if (eq iconType "fontawesome")}}
-                      <i class="{{icon}}"></i>
-                    {{else if icon}}
-                      <img src="{{icon}}" alt="{{name}}">
-                    {{/if}}
-                  </div>
-                  <div class="event-name">{{name}}</div>
-                </div>
-              {{/if}}
-            {{/each}}
-            {{#if ../../canAddNotes}}
-              <button type="button" class="add-note-btn" data-action="addNote" data-year="{{../year}}"
-                data-month="{{../month}}" data-day="{{../day}}" data-hour="{{hour}}" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
-                <i class="fas fa-plus"></i>
-              </button>
-            {{/if}}
-          </div>
-        {{/each}}
+        <div class="event-name">{{name}}</div>
+      </div>
+      {{/if}}
       {{/each}}
+      {{#if ../../canAddNotes}}
+      <button type="button" class="add-note-btn" data-action="addNote" data-year="{{../year}}"
+        data-month="{{../month}}" data-day="{{../day}}" data-hour="{{hour}}" data-tooltip
+        aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
+        <i class="fas fa-plus"></i>
+      </button>
+      {{/if}}
     </div>
+    {{/each}}
+    {{/each}}
+  </div>
   {{else}}
-    <div class="no-calendar">
-      <p>{{localize 'CALENDARIA.CalendarApp.NoCalendarConfigured'}}</p>
-    </div>
+  <div class="no-calendar">
+    <p>{{localize 'CALENDARIA.CalendarApp.NoCalendarConfigured'}}</p>
+  </div>
   {{/if}}
 </div>

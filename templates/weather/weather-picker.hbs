@@ -5,7 +5,7 @@
       <div class="form-fields">
         <select id="climateZone" name="climateZone">
           {{#each zoneOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -19,18 +19,18 @@
   </div>
 
   {{#each categories}}
-    <div class="weather-category">
-      <span class="category-header">{{label}}</span>
-      <div class="weather-buttons">
-        {{#each presets}}
-          <button type="button" class="weather-btn {{#if selected}}active{{/if}}" data-action="selectWeather" data-preset-id="{{id}}"
-            style="--weather-color: {{color}}" data-tooltip aria-label="{{description}}">
-            <i class="fas {{icon}}"></i>
-            <span class="weather-label">{{label}}</span>
-          </button>
-        {{/each}}
-      </div>
+  <div class="weather-category">
+    <span class="category-header">{{label}}</span>
+    <div class="weather-buttons">
+      {{#each presets}}
+      <button type="button" class="weather-btn {{#if selected}}active{{/if}}" data-action="selectWeather" data-preset-id="{{id}}"
+        style="--weather-color: {{color}}" data-tooltip aria-label="{{description}}">
+        <i class="fas {{icon}}"></i>
+        <span class="weather-label">{{label}}</span>
+      </button>
+      {{/each}}
     </div>
+  </div>
   {{/each}}
 
   <div class="weather-category weather-picker-custom standard-form">
@@ -38,25 +38,25 @@
     <div class="form-group">
       <label for="customLabel" data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomLabel"}}</label>
       <div class="form-fields">
-        <input type="text" id="customLabel" name="customLabel" value="{{customLabel}}" />
+        <input type="text" id="customLabel" name="customLabel" value="{{customLabel}}">
       </div>
     </div>
     <div class="form-group">
       <label for="customTemp">{{localize "CALENDARIA.Weather.Picker.CustomTemp"}} ({{temperatureUnit}})</label>
       <div class="form-fields">
-        <input type="number" id="customTemp" name="customTemp" value="{{customTemp}}" />
+        <input type="number" id="customTemp" name="customTemp" value="{{customTemp}}">
       </div>
     </div>
     <div class="form-group">
       <label for="customIcon" data-tooltip="{{localize 'CALENDARIA.Common.IconHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomIcon"}}</label>
       <div class="form-fields">
-        <input type="text" id="customIcon" name="customIcon" value="{{customIcon}}" placeholder="fa-cloud-sun" />
+        <input type="text" id="customIcon" name="customIcon" value="{{customIcon}}" placeholder="fa-cloud-sun">
       </div>
     </div>
     <div class="form-group">
       <label for="customColor">{{localize "CALENDARIA.Weather.Picker.CustomColor"}}</label>
       <div class="form-fields">
-        <input type="color" id="customColor" name="customColor" value="{{customColor}}" />
+        <input type="color" id="customColor" name="customColor" value="{{customColor}}">
       </div>
     </div>
   </div>

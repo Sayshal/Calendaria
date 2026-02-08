@@ -5,8 +5,8 @@
         <label for="editor-weather-zone">{{localize "CALENDARIA.Common.ClimateZone"}}</label>
         <select id="editor-weather-zone" name="weather.activeZone" class="zone-select">
           {{#each zoneOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}
-            </option>
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}
+          </option>
           {{/each}}
         </select>
       </div>
@@ -35,33 +35,33 @@
   </div>
 
   {{#if seasonClimateList.length}}
-    <fieldset class="season-climate-section">
-      <legend>{{localize "CALENDARIA.Editor.Weather.SeasonClimate"}}</legend>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.SeasonClimateHint"}}</p>
-      <div class="season-climate-list">
-        {{#each seasonClimateList}}
-          <div class="season-climate-item">
-            <span class="season-info">
-              <span class="season-icon" style="color: {{this.color}}">
-                {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
-              </span>
-              <span class="season-name">{{localize this.name}}</span>
-            </span>
-            <span class="season-climate-status">
-              {{#if this.hasClimate}}
-                <i class="fas fa-check-circle" style="color: var(--color-success)"></i>
-              {{else}}
-                <i class="fas fa-minus-circle" style="color: var(--color-text-tertiary)"></i>
-              {{/if}}
-            </span>
-            <button type="button" class="season-climate-btn" data-action="editSeasonClimate" data-index="{{this.index}}"
-              data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.EditSeasonClimate'}}">
-              <i class="fas fa-edit"></i>
-            </button>
-          </div>
-        {{/each}}
+  <fieldset class="season-climate-section">
+    <legend>{{localize "CALENDARIA.Editor.Weather.SeasonClimate"}}</legend>
+    <p class="hint">{{localize "CALENDARIA.Editor.Weather.SeasonClimateHint"}}</p>
+    <div class="season-climate-list">
+      {{#each seasonClimateList}}
+      <div class="season-climate-item">
+        <span class="season-info">
+          <span class="season-icon" style="color: {{this.color}}">
+            {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
+          </span>
+          <span class="season-name">{{localize this.name}}</span>
+        </span>
+        <span class="season-climate-status">
+          {{#if this.hasClimate}}
+          <i class="fas fa-check-circle" style="color: var(--color-success)"></i>
+          {{else}}
+          <i class="fas fa-minus-circle" style="color: var(--color-text-tertiary)"></i>
+          {{/if}}
+        </span>
+        <button type="button" class="season-climate-btn" data-action="editSeasonClimate" data-index="{{this.index}}"
+          data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.EditSeasonClimate'}}">
+          <i class="fas fa-edit"></i>
+        </button>
       </div>
-    </fieldset>
+      {{/each}}
+    </div>
+  </fieldset>
   {{/if}}
 
   <fieldset class="zone-presets-section">
@@ -69,83 +69,84 @@
     <p class="hint">{{localize "CALENDARIA.Editor.Weather.ZonePresetsHint"}}</p>
     <div class="weather-presets-list">
       {{#each weatherCategories as |category|}}
-        <div class="weather-category" data-category="{{category.id}}">
-          <div class="category-header" data-action="toggleCategory">
-            <i class="fas fa-chevron-down toggle-icon"></i>
-            <label class="checkbox category-select-all">
-              <input type="checkbox" data-action="toggleCategorySelectAll" data-category="{{category.id}}"
-                {{#if category.allEnabled}}checked{{/if}}>
-            </label>
-            <span class="category-name">{{localize category.label}}</span>
-            <span class="category-stats">
-              <span class="category-percent">{{category.totalChance}}%</span>
-              <span class="category-count">({{category.enabledCount}}/{{category.presets.length}})</span>
-            </span>
-          </div>
-          <div class="category-content">
-            <div class="weather-preset-header list-header">
-              <span class="col-enabled" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Enabled'}}"></span>
-              <span class="col-icon"></span>
-              <span class="col-name" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Name'}}">{{localize "CALENDARIA.Common.Name"}}</span>
-              <span class="col-chance" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Chance'}}">{{localize "CALENDARIA.Editor.Weather.Chance"}}</span>
-              <span class="col-temp" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Temp'}}">{{localize "CALENDARIA.Editor.Weather.Temp"}}</span>
-              <span class="col-actions"></span>
-            </div>
-            {{#each category.presets as |preset|}}
-              <div class="weather-preset-item" data-preset-id="{{preset.id}}">
-                <input type="hidden" name="weather.presets.{{preset.index}}.id" value="{{preset.id}}">
-                <input type="checkbox" class="preset-enabled" name="weather.presets.{{preset.index}}.enabled"
-                  {{#if preset.enabled}}checked{{/if}}>
-                <span class="preset-icon" style="color: {{preset.color}}">
-                  <i class="fas {{preset.icon}}"></i>
-                </span>
-                <div class="preset-name">
-                  <input type="text" class="preset-alias-input" data-preset-id="{{preset.id}}"
-                    data-zone-id="{{@root.activeZoneId}}" value="{{preset.alias}}"
-                    placeholder="{{localize preset.label}}" data-tooltip
-                    aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Rename'}}">
-                  {{#if preset.alias}}
-                  <button type="button" class="preset-reset-alias" data-action="resetPresetAlias" data-preset-id="{{preset.id}}"
-                    data-zone-id="{{@root.activeZoneId}}" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Weather.ResetAlias'}}">
-                    <i class="fas fa-times"></i>
-                  </button>
-                  {{/if}}
-                </div>
-                <div class="preset-chance">
-                  <input type="number" name="weather.presets.{{preset.index}}.chance" value="{{preset.chance}}" min="0"
-                    max="100" step="0.01" placeholder="0.00">
-                  <span>%</span>
-                </div>
-                <div class="preset-temp">
-                  <input type="number" name="weather.presets.{{preset.index}}.tempMin" value="{{preset.tempMin}}"
-                    placeholder="—">
-                  <span class="temp-separator">–</span>
-                  <input type="number" name="weather.presets.{{preset.index}}.tempMax" value="{{preset.tempMax}}"
-                    placeholder="—">
-                  <span class="temp-unit">{{@root.tempUnit}}</span>
-                </div>
-                <div class="preset-actions">
-                  <button type="button" data-action="toggleDescription" data-preset-id="{{preset.id}}" data-tooltip
-                    aria-label="{{localize 'CALENDARIA.Editor.Weather.EditDescription'}}">
-                    <i class="fas fa-comment-alt"></i>
-                  </button>
-                  <button type="button" data-action="resetWeatherPreset" data-preset-id="{{preset.id}}" data-tooltip
-                    aria-label="{{localize 'CALENDARIA.Editor.Weather.ResetPreset'}}">
-                    <i class="fas fa-undo"></i>
-                  </button>
-                </div>
-                <div class="description-popover">
-                  <textarea name="weather.presets.{{preset.index}}.description"
-                    placeholder="{{localize preset.description}}">{{preset.customDescription}}</textarea>
-                </div>
-              </div>
-            {{/each}}
-          </div>
+      <div class="weather-category" data-category="{{category.id}}">
+        <div class="category-header" data-action="toggleCategory">
+          <i class="fas fa-chevron-down toggle-icon"></i>
+          <label class="checkbox category-select-all">
+            <input type="checkbox" data-action="toggleCategorySelectAll" data-category="{{category.id}}"
+              {{#if category.allEnabled}}checked{{/if}}>
+          </label>
+          <span class="category-name">{{localize category.label}}</span>
+          <span class="category-stats">
+            <span class="category-percent">{{category.totalChance}}%</span>
+            <span class="category-count">({{category.enabledCount}}/{{category.presets.length}})</span>
+          </span>
         </div>
+        <div class="category-content">
+          <div class="weather-preset-header list-header">
+            <span class="col-enabled" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Enabled'}}"></span>
+            <span class="col-icon"></span>
+            <span class="col-name" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Name'}}">{{localize "CALENDARIA.Common.Name"}}</span>
+            <span class="col-chance" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Chance'}}">{{localize "CALENDARIA.Editor.Weather.Chance"}}</span>
+            <span class="col-temp" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Temp'}}">{{localize "CALENDARIA.Editor.Weather.Temp"}}</span>
+            <span class="col-actions"></span>
+          </div>
+          {{#each category.presets as |preset|}}
+          <div class="weather-preset-item" data-preset-id="{{preset.id}}">
+            <input type="hidden" name="weather.presets.{{preset.index}}.id" value="{{preset.id}}">
+            <input type="checkbox" class="preset-enabled" name="weather.presets.{{preset.index}}.enabled"
+              {{#if preset.enabled}}checked{{/if}}>
+            <span class="preset-icon" style="color: {{preset.color}}">
+              <i class="fas {{preset.icon}}"></i>
+            </span>
+            <div class="preset-name">
+              <input type="text" class="preset-alias-input" data-preset-id="{{preset.id}}"
+                data-zone-id="{{@root.activeZoneId}}" value="{{preset.alias}}"
+                placeholder="{{localize preset.label}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.Tooltip.Rename'}}">
+              {{#if preset.alias}}
+              <button type="button" class="preset-reset-alias" data-action="resetPresetAlias"
+                data-preset-id="{{preset.id}}" data-zone-id="{{@root.activeZoneId}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.ResetAlias'}}">
+                <i class="fas fa-times"></i>
+              </button>
+              {{/if}}
+            </div>
+            <div class="preset-chance">
+              <input type="number" name="weather.presets.{{preset.index}}.chance" value="{{preset.chance}}" min="0"
+                max="100" step="0.01" placeholder="0.00">
+              <span>%</span>
+            </div>
+            <div class="preset-temp">
+              <input type="number" name="weather.presets.{{preset.index}}.tempMin" value="{{preset.tempMin}}"
+                placeholder="—">
+              <span class="temp-separator">–</span>
+              <input type="number" name="weather.presets.{{preset.index}}.tempMax" value="{{preset.tempMax}}"
+                placeholder="—">
+              <span class="temp-unit">{{@root.tempUnit}}</span>
+            </div>
+            <div class="preset-actions">
+              <button type="button" data-action="toggleDescription" data-preset-id="{{preset.id}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.EditDescription'}}">
+                <i class="fas fa-comment-alt"></i>
+              </button>
+              <button type="button" data-action="resetWeatherPreset" data-preset-id="{{preset.id}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.ResetPreset'}}">
+                <i class="fas fa-undo"></i>
+              </button>
+            </div>
+            <div class="description-popover">
+              <textarea name="weather.presets.{{preset.index}}.description"
+                placeholder="{{localize preset.description}}">{{preset.customDescription}}</textarea>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
       {{/each}}
     </div>
 

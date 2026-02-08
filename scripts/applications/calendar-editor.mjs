@@ -480,7 +480,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (let i = 0; i < weekNames.length; i++) {
       if (weekNames[i].weekNumber == null) weekNames[i].weekNumber = i + 1;
     }
-    const weekNumberCounts = weekNames.reduce((acc, w) => { acc[w.weekNumber] = (acc[w.weekNumber] || 0) + 1; return acc; }, {});
+    const weekNumberCounts = weekNames.reduce((acc, w) => {
+      acc[w.weekNumber] = (acc[w.weekNumber] || 0) + 1;
+      return acc;
+    }, {});
     context.namedWeeksWithNav = weekNames.map((week, idx) => ({ ...week, index: idx, duplicateWeekNumber: weekNumberCounts[week.weekNumber] > 1 }));
     const daylight = this.#calendarData.daylight || {};
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
@@ -1480,9 +1483,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               wd.isRestDay = form.querySelector(`[name="weekday-${i}-rest"]`)?.checked || false;
             });
             const globals = editor.#calendarData.days?.values ?? [];
-            const isIdentical = month.weekdays.length === globals.length && month.weekdays.every((wd, i) =>
-              wd.name === (globals[i]?.name || '') && wd.abbreviation === (globals[i]?.abbreviation || '') && wd.isRestDay === !!globals[i]?.isRestDay
-            );
+            const isIdentical =
+              month.weekdays.length === globals.length &&
+              month.weekdays.every((wd, i) => wd.name === (globals[i]?.name || '') && wd.abbreviation === (globals[i]?.abbreviation || '') && wd.isRestDay === !!globals[i]?.isRestDay);
             if (isIdentical) delete month.weekdays;
             editor.render();
           }
@@ -2032,7 +2035,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }));
   }
 
-  /** Add a named year. */
+  /**
+   * Add a named year.
+   * @param {Event} _event - Triggering event
+   * @param {HTMLElement} target - Button element
+   */
   static async #onAddNamedYear(_event, target) {
     if (!this.#calendarData.years.names) this.#calendarData.years.names = [];
     const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.years.names.length - 1;
@@ -2042,7 +2049,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.render();
   }
 
-  /** Remove a named year. */
+  /**
+   * Remove a named year.
+   * @param {Event} _event - Triggering event
+   * @param {HTMLElement} target - Button element
+   */
   static async #onRemoveNamedYear(_event, target) {
     const idx = parseInt(target.dataset.index);
     this.#calendarData.years.names.splice(idx, 1);

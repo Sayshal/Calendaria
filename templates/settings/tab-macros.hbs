@@ -1,143 +1,143 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset data-section="global-triggers">
-      <legend>{{localize "CALENDARIA.MacroTrigger.GlobalTriggers"}}</legend>
-      <p class="hint">{{localize "CALENDARIA.MacroTrigger.GlobalTriggersHint"}}</p>
+  <fieldset data-section="global-triggers">
+    <legend>{{localize "CALENDARIA.MacroTrigger.GlobalTriggers"}}</legend>
+    <p class="hint">{{localize "CALENDARIA.MacroTrigger.GlobalTriggersHint"}}</p>
 
-      {{#each globalTriggers}}
-        <div class="form-group">
-          <label data-tooltip aria-label="{{hint}}">{{label}}</label>
-          <div class="form-fields">
-            <select name="macroTriggers.global.{{key}}">
-              <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
-              {{#each ../macros}}
-                <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
-              {{/each}}
-            </select>
-          </div>
-        </div>
+    {{#each globalTriggers}}
+    <div class="form-group">
+      <label data-tooltip aria-label="{{hint}}">{{label}}</label>
+      <div class="form-fields">
+        <select name="macroTriggers.global.{{key}}">
+          <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
+          {{#each ../macros}}
+          <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+    {{/each}}
+  </fieldset>
+
+  {{#if hasSeasons}}
+  <fieldset data-section="season-triggers">
+    <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
+    <div class="fieldset-header-row">
+      <p class="hint">{{localize "CALENDARIA.MacroTrigger.SeasonTriggersHint"}}</p>
+      <button type="button" data-action="addSeasonTrigger">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.MacroTrigger.AddTrigger"}}
+      </button>
+    </div>
+
+    <div class="season-triggers-list">
+      {{#if seasonTriggers.length}}
+      <div class="trigger-header">
+        <span>{{localize "CALENDARIA.Common.Season"}}</span>
+        <span>{{localize "CALENDARIA.Common.Macro"}}</span>
+        <span></span>
+      </div>
+      {{/if}}
+      {{#each seasonTriggers}}
+      <div class="season-trigger-row">
+        <select name="macroTriggers.seasonTrigger.{{index}}.seasonIndex">
+          <option value="-1" {{#if (eq seasonIndex -1)}}selected{{/if}}>
+            {{localize "CALENDARIA.MacroTrigger.AllSeasons"}}
+          </option>
+          {{#each ../seasons}}
+          <option value="{{index}}" {{#if (eq index ../seasonIndex)}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+        <select name="macroTriggers.seasonTrigger.{{index}}.macroId">
+          <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
+          {{#each ../macros}}
+          <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+        <button type="button" class="remove-trigger" data-action="removeSeasonTrigger" data-index="{{index}}"
+          data-tooltip aria-label="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
       {{/each}}
-    </fieldset>
+    </div>
+  </fieldset>
+  {{else}}
+  <fieldset data-section="season-triggers">
+    <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
+    <p class="hint no-seasons">{{localize "CALENDARIA.MacroTrigger.NoSeasons"}}</p>
+  </fieldset>
+  {{/if}}
 
-    {{#if hasSeasons}}
-      <fieldset data-section="season-triggers">
-        <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
-        <div class="fieldset-header-row">
-          <p class="hint">{{localize "CALENDARIA.MacroTrigger.SeasonTriggersHint"}}</p>
-          <button type="button" data-action="addSeasonTrigger">
-            <i class="fas fa-plus"></i>
-            {{localize "CALENDARIA.MacroTrigger.AddTrigger"}}
-          </button>
-        </div>
+  {{#if hasMoons}}
+  <fieldset data-section="moon-triggers">
+    <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
+    <div class="fieldset-header-row">
+      <p class="hint">{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggersHint"}}</p>
+      <button type="button" data-action="addMoonTrigger">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.MacroTrigger.AddTrigger"}}
+      </button>
+    </div>
 
-        <div class="season-triggers-list">
-          {{#if seasonTriggers.length}}
-            <div class="trigger-header">
-              <span>{{localize "CALENDARIA.Common.Season"}}</span>
-              <span>{{localize "CALENDARIA.Common.Macro"}}</span>
-              <span></span>
-            </div>
-          {{/if}}
-          {{#each seasonTriggers}}
-            <div class="season-trigger-row">
-              <select name="macroTriggers.seasonTrigger.{{index}}.seasonIndex">
-                <option value="-1" {{#if (eq seasonIndex -1)}}selected{{/if}}>
-                  {{localize "CALENDARIA.MacroTrigger.AllSeasons"}}
-                </option>
-                {{#each ../seasons}}
-                  <option value="{{index}}" {{#if (eq index ../seasonIndex)}}selected{{/if}}>{{name}}</option>
-                {{/each}}
-              </select>
-              <select name="macroTriggers.seasonTrigger.{{index}}.macroId">
-                <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
-                {{#each ../macros}}
-                  <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
-                {{/each}}
-              </select>
-              <button type="button" class="remove-trigger" data-action="removeSeasonTrigger" data-index="{{index}}"
-                data-tooltip aria-label="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
+    <div class="moon-triggers-list">
+      {{#if moonTriggers.length}}
+      <div class="trigger-header">
+        <span>{{localize "CALENDARIA.Common.Moon"}}</span>
+        <span>{{localize "CALENDARIA.Common.Phase"}}</span>
+        <span>{{localize "CALENDARIA.Common.Macro"}}</span>
+        <span></span>
+      </div>
+      {{/if}}
+      {{#each moonTriggers}}
+      <div class="moon-trigger-row">
+        <select name="macroTriggers.moonTrigger.{{index}}.moonIndex">
+          <option value="-1" {{#if (eq moonIndex -1)}}selected{{/if}}>
+            {{localize "CALENDARIA.MacroTrigger.AllMoons"}}
+          </option>
+          {{#each ../moons}}
+          <option value="{{index}}" {{#if (eq index ../moonIndex)}}selected{{/if}}>{{name}}</option>
           {{/each}}
-        </div>
-      </fieldset>
-    {{else}}
-      <fieldset data-section="season-triggers">
-        <legend>{{localize "CALENDARIA.MacroTrigger.SeasonTriggers"}}</legend>
-        <p class="hint no-seasons">{{localize "CALENDARIA.MacroTrigger.NoSeasons"}}</p>
-      </fieldset>
-    {{/if}}
-
-    {{#if hasMoons}}
-      <fieldset data-section="moon-triggers">
-        <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
-        <div class="fieldset-header-row">
-          <p class="hint">{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggersHint"}}</p>
-          <button type="button" data-action="addMoonTrigger">
-            <i class="fas fa-plus"></i>
-            {{localize "CALENDARIA.MacroTrigger.AddTrigger"}}
-          </button>
-        </div>
-
-        <div class="moon-triggers-list">
-          {{#if moonTriggers.length}}
-            <div class="trigger-header">
-              <span>{{localize "CALENDARIA.Common.Moon"}}</span>
-              <span>{{localize "CALENDARIA.Common.Phase"}}</span>
-              <span>{{localize "CALENDARIA.Common.Macro"}}</span>
-              <span></span>
-            </div>
-          {{/if}}
-          {{#each moonTriggers}}
-            <div class="moon-trigger-row">
-              <select name="macroTriggers.moonTrigger.{{index}}.moonIndex">
-                <option value="-1" {{#if (eq moonIndex -1)}}selected{{/if}}>
-                  {{localize "CALENDARIA.MacroTrigger.AllMoons"}}
-                </option>
-                {{#each ../moons}}
-                  <option value="{{index}}" {{#if (eq index ../moonIndex)}}selected{{/if}}>{{name}}</option>
-                {{/each}}
-              </select>
-              <select name="macroTriggers.moonTrigger.{{index}}.phaseIndex">
-                <option value="-1" {{#if (eq phaseIndex -1)}}selected{{/if}}>
-                  {{localize "CALENDARIA.MacroTrigger.AllPhases"}}
-                </option>
-                {{#each ../moons}}
-                  {{#each (lookup ../../moonPhases index)}}
-                    <option value="{{index}}" data-moon="{{@../index}}"
-                      {{#if (eq index ../../phaseIndex)}}selected{{/if}}>{{name}}</option>
-                  {{/each}}
-                {{/each}}
-              </select>
-              <select name="macroTriggers.moonTrigger.{{index}}.macroId">
-                <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
-                {{#each ../macros}}
-                  <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
-                {{/each}}
-              </select>
-              <button type="button" class="remove-trigger" data-action="removeMoonTrigger" data-index="{{index}}"
-                data-tooltip aria-label="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
+        </select>
+        <select name="macroTriggers.moonTrigger.{{index}}.phaseIndex">
+          <option value="-1" {{#if (eq phaseIndex -1)}}selected{{/if}}>
+            {{localize "CALENDARIA.MacroTrigger.AllPhases"}}
+          </option>
+          {{#each ../moons}}
+          {{#each (lookup ../../moonPhases index)}}
+          <option value="{{index}}" data-moon="{{@../index}}"
+            {{#if (eq index ../../phaseIndex)}}selected{{/if}}>{{name}}</option>
           {{/each}}
-        </div>
-      </fieldset>
-    {{else}}
-      <fieldset data-section="moon-triggers">
-        <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
-        <p class="hint no-moons">{{localize "CALENDARIA.MacroTrigger.NoMoons"}}</p>
-      </fieldset>
-    {{/if}}
+          {{/each}}
+        </select>
+        <select name="macroTriggers.moonTrigger.{{index}}.macroId">
+          <option value="">{{localize "CALENDARIA.MacroTrigger.None"}}</option>
+          {{#each ../macros}}
+          <option value="{{id}}" {{#if (eq id ../macroId)}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+        <button type="button" class="remove-trigger" data-action="removeMoonTrigger" data-index="{{index}}"
+          data-tooltip aria-label="{{localize 'CALENDARIA.MacroTrigger.RemoveTrigger'}}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      {{/each}}
+    </div>
+  </fieldset>
+  {{else}}
+  <fieldset data-section="moon-triggers">
+    <legend>{{localize "CALENDARIA.MacroTrigger.MoonPhaseTriggers"}}</legend>
+    <p class="hint no-moons">{{localize "CALENDARIA.MacroTrigger.NoMoons"}}</p>
+  </fieldset>
+  {{/if}}
   {{/if}}
 
   {{#unless isGM}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.MacrosTab.PlayerMessage"}}</p>
-    </div>
+  <div class="info-box">
+    <i class="fas fa-info-circle"></i>
+    <p>{{localize "CALENDARIA.SettingsPanel.MacrosTab.PlayerMessage"}}</p>
+  </div>
   {{/unless}}
 
 </section>

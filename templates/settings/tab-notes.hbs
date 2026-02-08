@@ -1,50 +1,50 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset data-section="categories">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Categories"}}</legend>
-      <div class="fieldset-header-row">
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
-        <button type="button" data-action="addCategory" class="add-button">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
+  <fieldset data-section="categories">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Categories"}}</legend>
+    <div class="fieldset-header-row">
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
+      <button type="button" data-action="addCategory" class="add-button">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
+      </button>
+    </div>
+
+    <div class="categories-list">
+      {{#if categories.length}}
+      <div class="category-header">
+        <span class="col-color">{{localize "CALENDARIA.Common.Color"}}</span>
+        <span class="col-name">{{localize "CALENDARIA.Common.Name"}}</span>
+        <span class="col-icon">{{localize "CALENDARIA.Common.Icon"}}</span>
+        <span class="col-actions"></span>
+      </div>
+      {{/if}}
+      {{#each categories}}
+      <div class="category-row" data-category-id="{{this.id}}">
+        <input type="hidden" name="categories.{{@index}}.id" value="{{this.id}}">
+        <input type="color" name="categories.{{@index}}.color" value="{{this.color}}">
+        <input type="text" name="categories.{{@index}}.name" value="{{this.name}}"
+          placeholder="{{localize 'CALENDARIA.SettingsPanel.Category.NamePlaceholder'}}">
+        <input type="text" name="categories.{{@index}}.icon" value="{{this.icon}}" placeholder="fas fa-bookmark"
+          class="icon-input" data-tooltip="{{localize 'CALENDARIA.Common.IconHint'}}">
+        <button type="button" data-action="removeCategory" data-category-id="{{this.id}}"
+          class="icon-button danger">
+          <i class="fas fa-trash"></i>
         </button>
       </div>
-
-      <div class="categories-list">
-        {{#if categories.length}}
-          <div class="category-header">
-            <span class="col-color">{{localize "CALENDARIA.Common.Color"}}</span>
-            <span class="col-name">{{localize "CALENDARIA.Common.Name"}}</span>
-            <span class="col-icon">{{localize "CALENDARIA.Common.Icon"}}</span>
-            <span class="col-actions"></span>
-          </div>
-        {{/if}}
-        {{#each categories}}
-          <div class="category-row" data-category-id="{{this.id}}">
-            <input type="hidden" name="categories.{{@index}}.id" value="{{this.id}}">
-            <input type="color" name="categories.{{@index}}.color" value="{{this.color}}">
-            <input type="text" name="categories.{{@index}}.name" value="{{this.name}}"
-              placeholder="{{localize 'CALENDARIA.SettingsPanel.Category.NamePlaceholder'}}">
-            <input type="text" name="categories.{{@index}}.icon" value="{{this.icon}}" placeholder="fas fa-bookmark"
-              class="icon-input" data-tooltip="{{localize 'CALENDARIA.Common.IconHint'}}">
-            <button type="button" data-action="removeCategory" data-category-id="{{this.id}}"
-              class="icon-button danger">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        {{else}}
-          <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.Category.None"}}</p>
-        {{/each}}
-      </div>
-    </fieldset>
+      {{else}}
+      <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.Category.None"}}</p>
+      {{/each}}
+    </div>
+  </fieldset>
   {{/if}}
 
   {{#unless isGM}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.NotesTab.PlayerMessage"}}</p>
-    </div>
+  <div class="info-box">
+    <i class="fas fa-info-circle"></i>
+    <p>{{localize "CALENDARIA.SettingsPanel.NotesTab.PlayerMessage"}}</p>
+  </div>
   {{/unless}}
 
 </section>

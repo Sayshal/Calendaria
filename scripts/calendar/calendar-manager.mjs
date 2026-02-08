@@ -9,7 +9,6 @@
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { migrateCalendarDataStructure } from '../utils/migrations.mjs';
 import { DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
@@ -65,10 +64,7 @@ export default class CalendarManager {
       if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
         let count = 0;
         for (const [id, calendarData] of Object.entries(savedData.calendars)) {
-          // Skip calendars already loaded from dedicated settings
           if (overrides[id] || customCalendars[id]) continue;
-          migrateCalendarDataStructure(calendarData);
-          // Preserve isCustom flag from existing calendar if present
           const existing = CalendarRegistry.get(id);
           if (existing?.metadata?.isCustom) {
             calendarData.metadata = calendarData.metadata || {};
@@ -95,7 +91,6 @@ export default class CalendarManager {
       if (ids.length === 0) return;
       for (const id of ids) {
         const data = customCalendars[id];
-        migrateCalendarDataStructure(data);
         try {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
@@ -104,7 +99,6 @@ export default class CalendarManager {
           log(1, `Error loading custom calendar ${id}:`, error);
         }
       }
-
       log(3, `Loaded ${ids.length} custom calendars`);
     } catch (error) {
       log(1, 'Error loading custom calendars:', error);
@@ -122,7 +116,6 @@ export default class CalendarManager {
       if (ids.length === 0) return;
       for (const id of ids) {
         const data = overrides[id];
-        migrateCalendarDataStructure(data);
         try {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
@@ -543,7 +536,10 @@ export default class CalendarManager {
       let name;
       if (isBundledCalendar(id)) {
         // For bundled calendars, construct fresh localization key to avoid stale cached values
-        const key = id.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+        const key = id
+          .split('-')
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join('');
         name = localize(`CALENDARIA.Calendar.${key}.Name`);
       } else {
         name = calendar.name ? localize(calendar.name) : id;
