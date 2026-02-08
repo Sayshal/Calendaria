@@ -375,7 +375,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false, nullable: true }
       ),
-      amPmNotation: new SchemaField({ am: new StringField({ required: false, initial: 'AM' }), pm: new StringField({ required: false, initial: 'PM' }) }, { required: false }),
+      amPmNotation: new SchemaField({ am: new StringField({ required: false, initial: 'AM' }), pm: new StringField({ required: false, initial: 'PM' }), amAbbr: new StringField({ required: false, initial: 'AM' }), pmAbbr: new StringField({ required: false, initial: 'PM' }) }, { required: false }),
       canonicalHours: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
@@ -1221,23 +1221,32 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {{weekNumber: number, weekName: string, weekAbbr: string, type: string}|null} - Week data or null
    */
   getCurrentWeek(time = game.time.worldTime) {
-    if (!this.weeks?.enabled || !this.weeks?.names?.length) return null;
+    if (!this.weeks?.names?.length) return null;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const daysInWeek = this.days?.values?.length || 7;
     const weekNames = this.weeks.names;
 
     let weekNumber;
     if (this.weeks.type === 'month-based') {
-      const dayOfMonth = components.dayOfMonth;
-      weekNumber = Math.floor(dayOfMonth / daysInWeek);
-    } else {
-      let dayOfYear = components.dayOfMonth;
-      for (let i = 0; i < components.month; i++) dayOfYear += this.months.values[i]?.days ?? 0;
-      weekNumber = Math.floor(dayOfYear / daysInWeek);
+      weekNumber = Math.floor(components.dayOfMonth / daysInWeek) + 1;
+      const nameIndex = (weekNumber - 1) % weekNames.length;
+      const week = weekNames[nameIndex];
+      return { weekNumber, weekName: localize(week?.name ?? ''), weekAbbr: week?.abbreviation ? localize(week.abbreviation) : '', type: this.weeks.type };
     }
-    const nameIndex = weekNumber % weekNames.length;
-    const week = weekNames[nameIndex];
-    return { weekNumber: weekNumber + 1, weekName: localize(week?.name ?? ''), weekAbbr: week?.abbreviation ? localize(week.abbreviation) : '', type: this.weeks.type };
+
+    // Year-based: use explicit weekNumber assignments
+    let dayOfYear = components.dayOfMonth;
+    for (let i = 0; i < components.month; i++) dayOfYear += this.months.values[i]?.days ?? 0;
+    weekNumber = Math.floor(dayOfYear / daysInWeek) + 1;
+
+    let week = weekNames.find((w) => w.weekNumber === weekNumber);
+    if (!week && this.weeks.repeat) {
+      const sortedWeeks = [...weekNames].sort((a, b) => a.weekNumber - b.weekNumber);
+      const index = (weekNumber - sortedWeeks[0].weekNumber) % sortedWeeks.length;
+      week = sortedWeeks[((index % sortedWeeks.length) + sortedWeeks.length) % sortedWeeks.length];
+    }
+    if (!week) return { weekNumber, weekName: '', weekAbbr: '', type: this.weeks.type };
+    return { weekNumber, weekName: localize(week.name ?? ''), weekAbbr: week.abbreviation ? localize(week.abbreviation) : '', type: this.weeks.type };
   }
 
   /**
@@ -1283,7 +1292,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const displayYear = components.year + (this.years?.yearZero ?? 0);
     const epochValues = this._getCycleEpochValues(components, displayYear);
     const values = [];
-    const textReplacements = { n: '<br>' };
+    const textReplacements = {};
 
     for (let i = 0; i < this.cycles.length; i++) {
       const cycle = this.cycles[i];
@@ -1391,7 +1400,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const isPM = hour24 >= midday;
     const hour12 = hour24 === 0 ? midday : hour24 > midday ? hour24 - midday : hour24;
     const amPm = calendar.amPmNotation ?? {};
-    const period = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
+    const meridiemFull = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
+    const period = isPM ? amPm.pmAbbr || meridiemFull : amPm.amAbbr || meridiemFull;
     const canonicalHour = calendar.getCanonicalHour?.(components);
     const chName = canonicalHour ? localize(canonicalHour.name) : '';
     const chAbbr = canonicalHour?.abbreviation ? localize(canonicalHour.abbreviation) : '';

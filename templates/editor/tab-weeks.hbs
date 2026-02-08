@@ -1,5 +1,4 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  <div class="weekdays-tab-layout">
     <fieldset>
       <legend>{{localize "CALENDARIA.Common.Weekdays"}}</legend>
 
@@ -51,16 +50,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>{{localize "CALENDARIA.Common.NamedWeeks"}}</legend>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.NamedWeeks"}}</p>
-
-      <div class="form-group">
-        <label for="editor-weeks-enabled">{{localize "CALENDARIA.Editor.Field.WeeksEnabled"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="editor-weeks-enabled" name="weeks.enabled"
-            {{#if calendar.weeks.enabled}}checked{{/if}}>
-        </div>
-      </div>
+      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.NamedWeeks'}}">{{localize "CALENDARIA.Common.NamedWeeks"}}</legend>
 
       <div class="form-group">
         <label for="editor-weeks-type">{{localize "CALENDARIA.Editor.Field.WeeksType"}}</label>
@@ -75,12 +65,27 @@
       </div>
 
       {{#if namedWeeksWithNav.length}}
-        <div class="items-list named-weeks-list">
+        {{#if isYearBased}}
+          <div class="form-group">
+            <label for="editor-weeks-repeat">{{localize "CALENDARIA.Editor.Field.WeeksRepeat"}}</label>
+            <div class="form-fields">
+              <input type="checkbox" id="editor-weeks-repeat" name="weeks.repeat"
+                {{#if calendar.weeks.repeat}}checked{{/if}}>
+            </div>
+            <p class="hint">{{localize "CALENDARIA.Editor.Hint.WeeksRepeat"}}</p>
+          </div>
+        {{/if}}
+
+        <div class="items-list named-weeks-list {{#unless isYearBased}}no-week-number{{/unless}}">
           <div class="list-header flexrow">
             <span class="col-name" data-tooltip
               aria-label="{{localize 'CALENDARIA.Editor.Tooltip.WeekName'}}">{{localize "CALENDARIA.Editor.Field.WeekName"}}</span>
             <span class="col-abbr" data-tooltip
               aria-label="{{localize 'CALENDARIA.Editor.Tooltip.WeekAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
+            {{#if isYearBased}}
+              <span class="col-week-number" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.WeekNumber'}}">{{localize "CALENDARIA.Common.WeekNumber"}}</span>
+            {{/if}}
             <span class="col-controls"></span>
           </div>
 
@@ -90,6 +95,12 @@
                 value="{{this.name}}" class="col-name">
               <input type="text" id="editor-week-{{this.index}}-abbr" name="weeks.names.{{this.index}}.abbreviation"
                 value="{{this.abbreviation}}" class="col-abbr">
+              {{#if ../isYearBased}}
+                <input type="number" id="editor-week-{{this.index}}-number" name="weeks.names.{{this.index}}.weekNumber"
+                  value="{{this.weekNumber}}" min="1" max="{{../maxWeeks}}"
+                  class="col-week-number {{#if this.duplicateWeekNumber}}duplicate{{/if}}"
+                  {{#if this.duplicateWeekNumber}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.DuplicateWeekNumber'}}"{{/if}}>
+              {{/if}}
 
               <div class="item-controls col-controls">
                 <button type="button" data-action="addNamedWeek" data-index="{{this.index}}" data-tooltip
@@ -114,5 +125,4 @@
         </div>
       {{/if}}
     </fieldset>
-  </div>
 </section>

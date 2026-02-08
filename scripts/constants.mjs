@@ -187,7 +187,7 @@ export const TEMPLATES = {
     TAB_OVERVIEW: `modules/${MODULE.ID}/templates/editor/tab-overview.hbs`,
     TAB_DISPLAY: `modules/${MODULE.ID}/templates/editor/tab-display.hbs`,
     TAB_MONTHS: `modules/${MODULE.ID}/templates/editor/tab-months.hbs`,
-    TAB_WEEKDAYS: `modules/${MODULE.ID}/templates/editor/tab-weekdays.hbs`,
+    TAB_WEEKS: `modules/${MODULE.ID}/templates/editor/tab-weeks.hbs`,
     TAB_TIME: `modules/${MODULE.ID}/templates/editor/tab-time.hbs`,
     TAB_SEASONS: `modules/${MODULE.ID}/templates/editor/tab-seasons.hbs`,
     TAB_YEARS: `modules/${MODULE.ID}/templates/editor/tab-years.hbs`,

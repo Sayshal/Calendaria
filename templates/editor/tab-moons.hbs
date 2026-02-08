@@ -1,24 +1,24 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   {{#if moonsWithNav.length}}
     <div class="items-list moons-list">
+      <div class="list-header flexrow">
+        <span class="col-name" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MoonName'}}">
+          {{localize "CALENDARIA.Common.Name"}}
+        </span>
+        <span class="col-cycle" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleLength'}}">
+          {{localize "CALENDARIA.Editor.Field.CycleLength"}}
+        </span>
+        <span class="col-color" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MoonColor'}}">
+          {{localize "CALENDARIA.Common.Color"}}
+        </span>
+        <span class="col-controls"></span>
+      </div>
       {{#each moonsWithNav}}
         <div class="item moon-item" data-index="{{this.index}}">
-          <div class="moon-header">
-            {{#if @first}}
-              <span class="col-name list-header" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MoonName'}}">
-                {{localize "CALENDARIA.Common.Name"}}
-              </span>
-              <span class="col-cycle list-header" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleLength'}}">
-                {{localize "CALENDARIA.Editor.Field.CycleLength"}}
-              </span>
-              <span class="col-color list-header" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MoonColor'}}">
-                {{localize "CALENDARIA.Common.Color"}}
-              </span>
-              <span class="col-controls list-header"></span>
-            {{/if}}
+          <div class="item-fields moon-header flexrow">
             <input type="text" id="editor-moon-{{this.index}}-name" name="moons.{{this.index}}.name"
               value="{{this.name}}" class="col-name">
             <input type="number" id="editor-moon-{{this.index}}-cycle" name="moons.{{this.index}}.cycleLength"
@@ -89,11 +89,11 @@
             <fieldset class="moon-phases-section">
               <legend>{{localize "CALENDARIA.Editor.Section.MoonPhases"}}</legend>
 
-              <div class="phases-list">
+              <div class="items-list phases-list">
                 <div class="list-header flexrow">
                   <span class="col-icon" data-tooltip
                     aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseIcon'}}">{{localize "CALENDARIA.Editor.Column.Icon"}}</span>
-                  <span class="col-phase-name" data-tooltip
+                  <span class="col-name" data-tooltip
                     aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseName'}}">{{localize "CALENDARIA.Editor.Column.Phase"}}</span>
                   <span class="col-rising" data-tooltip
                     aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RisingName'}}">{{localize "CALENDARIA.Editor.Column.Rising"}}</span>
@@ -107,7 +107,7 @@
                 </div>
 
                 {{#each this.phasesWithIndex}}
-                  <div class="phase-item flexrow" data-phase-index="{{this.index}}">
+                  <div class="item phase-item flexrow" data-phase-index="{{this.index}}">
                     <div class="col-icon">
                       <button type="button" class="phase-icon-btn" data-action="pickMoonPhaseIcon"
                         data-moon-index="{{this.moonIndex}}" data-phase-index="{{this.index}}" data-tooltip
@@ -123,7 +123,7 @@
                     </div>
                     <input type="text" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-name"
                       name="moons.{{this.moonIndex}}.phases.{{this.index}}.name" value="{{this.name}}"
-                      class="col-phase-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.PhaseName'}}">
+                      class="col-name" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.PhaseName'}}">
                     <input type="text" id="editor-moon-{{this.moonIndex}}-phase-{{this.index}}-rising"
                       name="moons.{{this.moonIndex}}.phases.{{this.index}}.rising" value="{{this.rising}}"
                       class="col-rising" placeholder="{{localize 'CALENDARIA.Editor.Placeholder.RisingName'}}">

@@ -22,7 +22,7 @@
   "cycles"        : [],
   "canonicalHours": [],
   "weeks"         : {"enabled": true, "type": "year-based", "names": []},
-  "amPmNotation"  : {"am": "AM", "pm": "PM"},
+  "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "DDD-yyyy", "long": "DDD-yyyy GGGG", "full": "EEEE, DDD-yyyy GGGG", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "traveller", "description": "CALENDARIA.Calendar.Traveller.Description", "author": "calendaria", "system": "Traveller"}
 }

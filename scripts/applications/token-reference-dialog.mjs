@@ -14,13 +14,16 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * @enum {string[]}
  */
 const TOKEN_CATEGORIES = {
-  date: ['Y', 'YY', 'YYYY', 'M', 'MM', 'MMM', 'MMMM', 'Mo', 'D', 'DD', 'Do', 'DDD', 'EEEE', 'EEE', 'EE', 'E', 'EEEEE', 'e', 'w', 'ww', 'W', '[namedWeek]', '[namedWeekAbbr]'],
+  date: ['Y', 'YY', 'YYYY', '[yearName]', 'M', 'MM', 'MMM', 'MMMM', 'Mo', 'D', 'DD', 'Do', 'DDD', 'EEEE', 'EEE', 'EE', 'E', 'EEEEE', 'e', 'w', 'ww', 'W', '[namedWeek]', '[namedWeekAbbr]'],
   fantasy: [
     'GGGG',
     'GGG',
     'GG',
     'G',
     '[yearInEra]',
+    '[era=N]',
+    '[eraAbbr=N]',
+    '[yearInEra=N]',
     'QQQQ',
     'QQQ',
     'QQ',
@@ -37,7 +40,7 @@ const TOKEN_CATEGORIES = {
     '[approxTime]',
     '[approxDate]'
   ],
-  time: ['H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'A', 'a'],
+  time: ['H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'A', 'a', '[meridiemFull]'],
   stopwatch: ['HH', 'mm', 'ss', 'SSS']
 };
 
@@ -92,6 +95,7 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
       Y: 'year',
       YY: 'year',
       YYYY: 'year',
+      '[yearName]': 'year',
       M: 'month',
       MM: 'month',
       MMM: 'month',
@@ -122,11 +126,15 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
       ss: 'time',
       A: 'time',
       a: 'time',
+      '[meridiemFull]': 'time',
       GGGG: 'era',
       GGG: 'era',
       GG: 'era',
       G: 'era',
       '[yearInEra]': 'era',
+      '[era=N]': 'era',
+      '[eraAbbr=N]': 'era',
+      '[yearInEra=N]': 'era',
       QQQQ: 'season',
       QQQ: 'season',
       QQ: 'season',

@@ -31,8 +31,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-editor',
     classes: ['calendaria', 'calendar-editor', 'standard-form'],
     tag: 'form',
-    window: { icon: 'fas fa-calendar-plus', resizable: true },
-    position: { width: 900, height: 800 },
+    window: { icon: 'fas fa-calendar-plus', resizable: false },
+    position: { width: 1100, height: 900 },
     form: {
       handler: CalendarEditor.#onSubmit,
       submitOnChange: true,
@@ -50,6 +50,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       moveWeekdayDown: CalendarEditor.#onMoveWeekdayDown,
       addSeason: CalendarEditor.#onAddSeason,
       removeSeason: CalendarEditor.#onRemoveSeason,
+      editSeasonIcon: CalendarEditor.#onEditSeasonIcon,
       editSeasonClimate: CalendarEditor.#onEditSeasonClimate,
       addEra: CalendarEditor.#onAddEra,
       removeEra: CalendarEditor.#onRemoveEra,
@@ -68,6 +69,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeCanonicalHour: CalendarEditor.#onRemoveCanonicalHour,
       addNamedWeek: CalendarEditor.#onAddNamedWeek,
       removeNamedWeek: CalendarEditor.#onRemoveNamedWeek,
+      addNamedYear: CalendarEditor.#onAddNamedYear,
+      removeNamedYear: CalendarEditor.#onRemoveNamedYear,
       duplicateCalendar: CalendarEditor.#onDuplicateCalendar,
       saveCalendar: CalendarEditor.#onSaveCalendar,
       exportCalendar: CalendarEditor.#onExportCalendar,
@@ -91,9 +94,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     tabs: { template: TEMPLATES.TAB_NAVIGATION },
     overview: { template: TEMPLATES.EDITOR.TAB_OVERVIEW, scrollable: [''] },
     display: { template: TEMPLATES.EDITOR.TAB_DISPLAY, scrollable: [''] },
-    months: { template: TEMPLATES.EDITOR.TAB_MONTHS, scrollable: [''] },
-    weekdays: { template: TEMPLATES.EDITOR.TAB_WEEKDAYS, scrollable: [''] },
     time: { template: TEMPLATES.EDITOR.TAB_TIME, scrollable: [''] },
+    months: { template: TEMPLATES.EDITOR.TAB_MONTHS, scrollable: [''] },
+    weeks: { template: TEMPLATES.EDITOR.TAB_WEEKS, scrollable: [''] },
     seasons: { template: TEMPLATES.EDITOR.TAB_SEASONS, scrollable: [''] },
     years: { template: TEMPLATES.EDITOR.TAB_YEARS, scrollable: [''] },
     eras: { template: TEMPLATES.EDITOR.TAB_ERAS, scrollable: [''] },
@@ -107,7 +110,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Tab group definitions with colors */
   static TAB_GROUPS = [
     { id: 'structure', label: 'CALENDARIA.Editor.Group.Structure', tooltip: 'CALENDARIA.Editor.GroupTooltip.Structure', color: '#84cc16' },
-    { id: 'features', label: 'CALENDARIA.Editor.Group.Features', tooltip: 'CALENDARIA.Editor.GroupTooltip.Features', color: '#14b8a6' }
+    { id: 'features', label: 'CALENDARIA.Editor.Group.Features', tooltip: 'CALENDARIA.Editor.GroupTooltip.Features', color: '#f97316' }
   ];
 
   /** @override */
@@ -119,8 +122,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'display', group: 'primary', icon: 'fas fa-eye', label: 'CALENDARIA.Editor.Tab.Display', color: '#ff144f' },
         // Structure group
         { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'structure' },
-        { id: 'weekdays', group: 'primary', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weekdays', tabGroup: 'structure' },
         { id: 'months', group: 'primary', icon: 'fas fa-calendar', label: 'CALENDARIA.Common.Months', tabGroup: 'structure' },
+        { id: 'weeks', group: 'primary', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weeks', tabGroup: 'structure' },
         { id: 'seasons', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.Common.Seasons', tabGroup: 'structure' },
         { id: 'years', group: 'primary', icon: 'fas fa-hashtag', label: 'CALENDARIA.Editor.Tab.Years', tabGroup: 'structure' },
         { id: 'eras', group: 'primary', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras', tabGroup: 'structure' },
@@ -211,7 +214,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static #createBlankCalendar() {
     return {
       name: '',
-      years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true },
+      years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true, names: [] },
       months: { values: [{ name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }] },
       days: {
         values: [{ name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 }],
@@ -228,7 +231,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       cycles: [],
       canonicalHours: [],
       weeks: { enabled: false, type: 'year-based', names: [] },
-      amPmNotation: { am: 'AM', pm: 'PM' },
+      amPmNotation: { am: 'AM', pm: 'PM', amAbbr: 'AM', pmAbbr: 'PM' },
       dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
       weather: { activeZone: null, autoGenerate: false, zones: [] }
@@ -297,8 +300,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.tabGroups = tabGroups;
     context.ungroupedTabs = ungroupedTabs;
     context.showSearch = true;
-    context.searchPlaceholder = 'CALENDARIA.Editor.Search.Placeholder';
-    context.searchLabel = 'CALENDARIA.Editor.Search.Label';
+    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
+    context.searchLabel = 'CALENDARIA.SettingsPanel.Search.Label';
     context.calendar = this.#calendarData;
     context.isEditing = this.#isEditing;
     context.calendarId = this.#calendarId;
@@ -360,6 +363,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.leapInterval = leapYearConfig?.interval ?? legacyLeapYear?.leapInterval ?? 4;
     context.leapStart = leapYearConfig?.start ?? legacyLeapYear?.leapStart ?? 0;
     context.leapPattern = leapYearConfig?.pattern ?? '';
+
+    const yearNames = this.#calendarData.years.names || [];
+    context.namedYears = yearNames.map((entry, idx) => ({ ...entry, index: idx }));
+
     context.monthOptionsZeroIndexed = this.#calendarData.months.values.map((month, idx) => ({ value: idx, label: month.name }));
 
     context.moonsWithNav = this.#calendarData.moons.map((moon, idx) => ({
@@ -461,11 +468,20 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.basedOnOptions = basedOnOptions;
     context.canonicalHoursWithNav = (this.#calendarData.canonicalHours || []).map((ch, idx) => ({ ...ch, index: idx }));
     const currentWeeksType = this.#calendarData.weeks?.type || 'year-based';
+    context.isYearBased = currentWeeksType === 'year-based';
     context.weeksTypeOptions = [
       { value: 'year-based', label: 'CALENDARIA.Editor.WeeksType.YearBased', selected: currentWeeksType === 'year-based' },
       { value: 'month-based', label: 'CALENDARIA.Editor.WeeksType.MonthBased', selected: currentWeeksType === 'month-based' }
     ];
-    context.namedWeeksWithNav = (this.#calendarData.weeks?.names || []).map((week, idx) => ({ ...week, index: idx }));
+    const daysPerWeek = this.#calendarData.days?.values?.length || 7;
+    context.maxWeeks = Math.ceil(context.calculatedDaysPerYear / daysPerWeek);
+    const weekNames = this.#calendarData.weeks?.names || [];
+    // Backfill missing weekNumbers sequentially
+    for (let i = 0; i < weekNames.length; i++) {
+      if (weekNames[i].weekNumber == null) weekNames[i].weekNumber = i + 1;
+    }
+    const weekNumberCounts = weekNames.reduce((acc, w) => { acc[w.weekNumber] = (acc[w.weekNumber] || 0) + 1; return acc; }, {});
+    context.namedWeeksWithNav = weekNames.map((week, idx) => ({ ...week, index: idx, duplicateWeekNumber: weekNumberCounts[week.weekNumber] > 1 }));
     const daylight = this.#calendarData.daylight || {};
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
     const summerSolstice = this.#dayOfYearToMonthDay(daylight.summerSolstice ?? Math.floor(context.calculatedDaysPerYear / 2));
@@ -522,6 +538,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender?.(context, options);
     this.#setupLeapRuleListener();
+    this.#setupWeekNumberDuplicateListener();
     for (const colorInput of this.element.querySelectorAll('input[name^="moons."][name$=".color"]')) {
       colorInput.addEventListener('input', (event) => {
         const preview = event.target.closest('.color-input-wrapper')?.querySelector('.moon-color-preview');
@@ -575,17 +592,39 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #setupLeapRuleListener() {
-    const leapRuleSelect = this.element.querySelector('.leap-rule-select');
+    const leapRuleSelect = this.element.querySelector('[name="leapYearConfig.rule"]');
     if (!leapRuleSelect || leapRuleSelect.dataset.listenerAttached) return;
     leapRuleSelect.dataset.listenerAttached = 'true';
     leapRuleSelect.addEventListener('change', (event) => {
       const rule = event.target.value;
-      const simpleFields = this.element.querySelector('.leap-simple-fields');
-      const customFields = this.element.querySelector('.leap-custom-fields');
-      const gregorianInfo = this.element.querySelector('.leap-gregorian-info');
-      if (simpleFields) simpleFields.style.display = rule === 'simple' ? '' : 'none';
-      if (customFields) customFields.style.display = rule === 'custom' ? '' : 'none';
-      if (gregorianInfo) gregorianInfo.style.display = rule === 'gregorian' ? '' : 'none';
+      for (const el of this.element.querySelectorAll('[data-leap-rule]')) {
+        el.style.display = el.dataset.leapRule === rule ? '' : 'none';
+      }
+    });
+  }
+
+  /** Live duplicate detection on week number inputs. */
+  #setupWeekNumberDuplicateListener() {
+    const list = this.element.querySelector('.named-weeks-list');
+    if (!list || list.dataset.duplicateListenerAttached) return;
+    list.dataset.duplicateListenerAttached = 'true';
+    const tooltip = localize('CALENDARIA.Editor.Tooltip.DuplicateWeekNumber');
+    list.addEventListener('change', (event) => {
+      if (!event.target.matches('.col-week-number')) return;
+      const inputs = list.querySelectorAll('input.col-week-number');
+      const counts = {};
+      for (const input of inputs) counts[input.value] = (counts[input.value] || 0) + 1;
+      for (const input of inputs) {
+        const isDuplicate = counts[input.value] > 1;
+        input.classList.toggle('duplicate', isDuplicate);
+        if (isDuplicate) {
+          input.dataset.tooltip = '';
+          input.setAttribute('aria-label', tooltip);
+        } else {
+          delete input.dataset.tooltip;
+          input.removeAttribute('aria-label');
+        }
+      }
     });
   }
 
@@ -882,11 +921,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onSubmit(_event, _form, formData) {
     const oldSeasonType = this.#calendarData.seasons?.type;
+    const oldWeeksType = this.#calendarData.weeks?.type;
     const oldActiveZone = this.#calendarData.weather?.activeZone;
     this.#updateFromFormData(formData.object);
     const newSeasonType = this.#calendarData.seasons?.type;
+    const newWeeksType = this.#calendarData.weeks?.type;
     const newActiveZone = this.#calendarData.weather?.activeZone;
     if (oldSeasonType !== newSeasonType) this.render({ parts: ['seasons'] });
+    if (oldWeeksType !== newWeeksType) this.render({ parts: ['weeks'] });
     if (oldActiveZone !== newActiveZone) this.render({ parts: ['weather'] });
   }
 
@@ -896,11 +938,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateFromFormData(data) {
-    log(3, `updateFromFormData - before: pendingNotes=${this.#calendarData.metadata?.pendingNotes?.length || 0}, importerId=${this.#calendarData.metadata?.importerId}`);
     this.#calendarData.name = data.name || '';
     this.#calendarData.metadata.description = data['metadata.description'] || '';
     this.#calendarData.metadata.system = data['metadata.system'] || '';
-    log(3, `updateFromFormData - after metadata: pendingNotes=${this.#calendarData.metadata?.pendingNotes?.length || 0}, importerId=${this.#calendarData.metadata?.importerId}`);
     this.#calendarData.years.yearZero = parseInt(data['years.yearZero']) || 0;
     this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
     this.#calendarData.years.resetWeekdays = data['years.resetWeekdays'] ?? false;
@@ -948,6 +988,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#calendarData.amPmNotation) this.#calendarData.amPmNotation = {};
     this.#calendarData.amPmNotation.am = data['amPmNotation.am'] || 'AM';
     this.#calendarData.amPmNotation.pm = data['amPmNotation.pm'] || 'PM';
+    this.#calendarData.amPmNotation.amAbbr = data['amPmNotation.amAbbr'] || 'AM';
+    this.#calendarData.amPmNotation.pmAbbr = data['amPmNotation.pmAbbr'] || 'PM';
     if (!this.#calendarData.dateFormats) this.#calendarData.dateFormats = {};
     this.#calendarData.dateFormats.short = data['dateFormats.short'] || '{{d}} {{b}}';
     this.#calendarData.dateFormats.long = data['dateFormats.long'] || '{{d}} {{B}}, {{y}}';
@@ -959,6 +1001,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (data['dateFormats.yearLabel'] != null) this.#calendarData.dateFormats.yearLabel = data['dateFormats.yearLabel'];
     this.#updateCanonicalHoursFromFormData(data);
     this.#updateNamedWeeksFromFormData(data);
+    this.#updateNamedYearsFromFormData(data);
     this.#updateWeatherFromFormData(data);
   }
 
@@ -1195,21 +1238,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const sortedCycleIndices = [...cycleIndices].sort((a, b) => a - b);
     const newCycles = [];
     for (const cycleIdx of sortedCycleIndices) {
-      const entryIndices = new Set();
-      const entryPattern = new RegExp(`^cycles\\.${cycleIdx}\\.entries\\.(\\d+)\\.`);
+      const stageIndices = new Set();
+      const stagePattern = new RegExp(`^cycles\\.${cycleIdx}\\.stages\\.(\\d+)\\.`);
       for (const key of Object.keys(data)) {
-        const match = key.match(entryPattern);
-        if (match) entryIndices.add(parseInt(match[1]));
+        const match = key.match(stagePattern);
+        if (match) stageIndices.add(parseInt(match[1]));
       }
-      const sortedEntryIndices = [...entryIndices].sort((a, b) => a - b);
-      const entries = [];
-      for (const eIdx of sortedEntryIndices) entries.push({ name: data[`cycles.${cycleIdx}.entries.${eIdx}.name`] || '' });
+      const sortedStageIndices = [...stageIndices].sort((a, b) => a - b);
+      const stages = [];
+      for (const sIdx of sortedStageIndices) stages.push({ name: data[`cycles.${cycleIdx}.stages.${sIdx}.name`] || '' });
       const cycle = {
         name: data[`cycles.${cycleIdx}.name`] || '',
         length: parseInt(data[`cycles.${cycleIdx}.length`]) || 12,
         offset: parseInt(data[`cycles.${cycleIdx}.offset`]) || 0,
         basedOn: data[`cycles.${cycleIdx}.basedOn`] || 'month',
-        entries
+        stages
       };
       newCycles.push(cycle);
     }
@@ -1247,8 +1290,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #updateNamedWeeksFromFormData(data) {
     if (!this.#calendarData.weeks) this.#calendarData.weeks = {};
-    this.#calendarData.weeks.enabled = !!data['weeks.enabled'];
     this.#calendarData.weeks.type = data['weeks.type'] || 'year-based';
+    this.#calendarData.weeks.repeat = !!data['weeks.repeat'];
     const indices = new Set();
     for (const key of Object.keys(data)) {
       const match = key.match(/^weeks\.names\.(\d+)\./);
@@ -1256,7 +1299,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const sortedIndices = [...indices].sort((a, b) => a - b);
     const newNames = [];
-    for (const idx of sortedIndices) newNames.push({ name: data[`weeks.names.${idx}.name`] || '', abbreviation: data[`weeks.names.${idx}.abbreviation`] || '' });
+    const usedNumbers = new Set();
+    for (const idx of sortedIndices) {
+      let weekNumber = parseInt(data[`weeks.names.${idx}.weekNumber`]) || 1;
+      if (usedNumbers.has(weekNumber)) {
+        let next = weekNumber + 1;
+        while (usedNumbers.has(next)) next++;
+        weekNumber = next;
+      }
+      usedNumbers.add(weekNumber);
+      newNames.push({ name: data[`weeks.names.${idx}.name`] || '', abbreviation: data[`weeks.names.${idx}.abbreviation`] || '', weekNumber });
+    }
     this.#calendarData.weeks.names = newNames;
   }
 
@@ -1402,13 +1455,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const editor = this;
     new foundry.applications.api.DialogV2({
-      window: { title: format('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }) },
+      window: { title: format('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }), contentClasses: ['custom-weekdays-dialog'] },
       content,
       buttons: [
         {
           action: 'disable',
           label: localize('CALENDARIA.Editor.Month.DisableCustomWeekdays'),
-          icon: 'fas fa-times',
+          icon: 'fas fa-undo',
           callback: () => {
             delete month.weekdays;
             editor.render();
@@ -1426,6 +1479,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               wd.abbreviation = form.querySelector(`[name="weekday-${i}-abbr"]`)?.value || '';
               wd.isRestDay = form.querySelector(`[name="weekday-${i}-rest"]`)?.checked || false;
             });
+            const globals = editor.#calendarData.days?.values ?? [];
+            const isIdentical = month.weekdays.length === globals.length && month.weekdays.every((wd, i) =>
+              wd.name === (globals[i]?.name || '') && wd.abbreviation === (globals[i]?.abbreviation || '') && wd.isRestDay === !!globals[i]?.isRestDay
+            );
+            if (isIdentical) delete month.weekdays;
             editor.render();
           }
         }
@@ -1538,6 +1596,67 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.seasons.values.splice(idx, 1);
     this.#reindexArray(this.#calendarData.seasons.values);
     this.render();
+  }
+
+  /**
+   * Edit a season's icon and color via dialog.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onEditSeasonIcon(_event, target) {
+    const idx = parseInt(target.dataset.index);
+    const season = this.#calendarData.seasons.values[idx];
+    if (!season) return;
+
+    const savedCalendar = this.#calendarId ? CalendarManager.getCalendar(this.#calendarId) : null;
+    const savedSeason = savedCalendar?.seasons?.values?.[idx];
+    const savedIcon = savedSeason?.icon || '';
+    const savedColor = savedSeason?.color || '#808080';
+
+    const content = `
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Common.Icon')}</label>
+        <div class="form-fields">
+          <input type="text" name="icon" value="${season.icon || ''}" placeholder="fas fa-leaf">
+        </div>
+        <p class="hint">${localize('CALENDARIA.Common.IconHint')}</p>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Editor.Season.Color')}</label>
+        <div class="form-fields">
+          <input type="color" name="color" value="${season.color || '#808080'}">
+        </div>
+      </div>
+    `;
+    const editor = this;
+    new foundry.applications.api.DialogV2({
+      window: { title: format('CALENDARIA.Editor.Season.IconColorFor', { season: season.name }), contentClasses: ['calendaria', 'season-icon-dialog'] },
+      content,
+      buttons: [
+        {
+          action: 'reset',
+          label: localize('CALENDARIA.Common.Reset'),
+          icon: 'fas fa-undo',
+          callback: () => {
+            season.icon = savedIcon;
+            season.color = savedColor;
+            editor.render();
+          }
+        },
+        {
+          action: 'save',
+          label: localize('CALENDARIA.Common.Save'),
+          icon: 'fas fa-save',
+          default: true,
+          callback: (_event, _button, dialog) => {
+            season.icon = dialog.element.querySelector('[name="icon"]')?.value || '';
+            season.color = dialog.element.querySelector('[name="color"]')?.value || '#808080';
+            editor.render();
+          }
+        }
+      ],
+      position: { width: 350 }
+    }).render(true);
   }
 
   /**
@@ -1826,7 +1945,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const cycleIdx = parseInt(target.dataset.cycleIndex);
     const stageIdx = parseInt(target.dataset.stageIndex);
     const cycle = this.#calendarData.cycles[cycleIdx];
-    if (!cycle?.stages || cycle.stages.length <= 1) return;
+    if (!cycle?.stages?.length) return;
     cycle.stages.splice(stageIdx, 1);
     this.render();
   }
@@ -1867,14 +1986,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddNamedWeek(_event, target) {
-    if (!this.#calendarData.weeks) this.#calendarData.weeks = { enabled: false, type: 'year-based', names: [] };
+    if (!this.#calendarData.weeks) this.#calendarData.weeks = { type: 'year-based', repeat: false, names: [] };
     if (!this.#calendarData.weeks.names) this.#calendarData.weeks.names = [];
     const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.weeks.names.length - 1;
     const insertIdx = afterIdx + 1;
     const totalWeeks = this.#calendarData.weeks.names.length;
+    const existingNumbers = this.#calendarData.weeks.names.map((w) => w.weekNumber).filter((n) => n != null);
+    const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
     this.#calendarData.weeks.names.splice(insertIdx, 0, {
       name: format('CALENDARIA.Editor.Default.WeekName', { num: totalWeeks + 1 }),
-      abbreviation: ''
+      abbreviation: '',
+      weekNumber: maxExisting + 1
     });
     this.render();
   }
@@ -1887,6 +2009,43 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onRemoveNamedWeek(_event, target) {
     const idx = parseInt(target.dataset.index);
     this.#calendarData.weeks.names.splice(idx, 1);
+    this.render();
+  }
+
+  /**
+   * Parse named years from form data.
+   * @param {object} data - Form data
+   */
+  #updateNamedYearsFromFormData(data) {
+    const indices = Object.keys(data)
+      .filter((k) => k.startsWith('years.names.') && k.endsWith('.year'))
+      .map((k) => parseInt(k.split('.')[2]));
+    if (!indices.length) {
+      this.#calendarData.years.names = [];
+      return;
+    }
+    this.#calendarData.years.names = indices
+      .sort((a, b) => a - b)
+      .map((idx) => ({
+        year: parseInt(data[`years.names.${idx}.year`]) || 0,
+        name: data[`years.names.${idx}.name`] || ''
+      }));
+  }
+
+  /** Add a named year. */
+  static async #onAddNamedYear(_event, target) {
+    if (!this.#calendarData.years.names) this.#calendarData.years.names = [];
+    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.years.names.length - 1;
+    const insertIdx = afterIdx + 1;
+    const yearZero = this.#calendarData.years.yearZero ?? 0;
+    this.#calendarData.years.names.splice(insertIdx, 0, { year: yearZero, name: '' });
+    this.render();
+  }
+
+  /** Remove a named year. */
+  static async #onRemoveNamedYear(_event, target) {
+    const idx = parseInt(target.dataset.index);
+    this.#calendarData.years.names.splice(idx, 1);
     this.render();
   }
 

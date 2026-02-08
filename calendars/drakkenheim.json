@@ -60,7 +60,7 @@
   "cycles"        : [],
   "canonicalHours": [],
   "weeks"         : {"enabled": false, "type": "year-based", "names": []},
-  "amPmNotation"  : {"am": "AM", "pm": "PM"},
+  "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "drakkenheim", "description": "CALENDARIA.Calendar.Drakkenheim.Description", "author": "calendaria", "system": "Drakkenheim"}
 }

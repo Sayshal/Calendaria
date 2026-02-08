@@ -80,21 +80,29 @@ export function dateFormattingParts(calendar, components) {
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const midday = Math.floor(hoursPerDay / 2);
   const hour12 = hour === 0 ? midday : hour > midday ? hour - midday : hour;
-  const ampm = hour < midday ? 'AM' : 'PM';
-  let eraName = '';
-  let eraAbbr = '';
-  let eraYear = '';
+  const amPm = calendar?.amPmNotation ?? {};
+  const isPM = hour >= midday;
+  const meridiemFull = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
+  const meridiemAbbr = isPM ? amPm.pmAbbr || meridiemFull : amPm.amAbbr || meridiemFull;
   const erasArray = Array.isArray(calendar?.eras) ? calendar.eras : calendar?.eras?.values;
+  const matchingEras = [];
   if (erasArray?.length > 0) {
     for (const era of erasArray) {
       if (displayYear >= era.startYear && (era.endYear == null || displayYear <= era.endYear)) {
-        eraName = localize(era.name);
-        eraAbbr = era.abbreviation ? localize(era.abbreviation) : eraName.slice(0, 2);
-        eraYear = displayYear - era.startYear + 1;
-        break;
+        const name = localize(era.name);
+        const abbr = era.abbreviation ? localize(era.abbreviation) : name.slice(0, 2);
+        matchingEras.push({ name, abbr, yearInEra: displayYear - era.startYear + 1 });
       }
     }
   }
+  const primaryEra = matchingEras[0] || {};
+  const eraName = primaryEra.name || '';
+  const eraAbbr = primaryEra.abbr || '';
+  const eraYear = primaryEra.yearInEra || '';
+
+  const yearNames = calendar?.years?.names || [];
+  const yearNameEntry = yearNames.find((e) => e.year === displayYear);
+  const yearName = yearNameEntry ? localize(yearNameEntry.name) : '';
 
   let seasonName = '';
   let seasonAbbr = '';
@@ -130,6 +138,7 @@ export function dateFormattingParts(calendar, components) {
     y: displayYear,
     yy: String(displayYear).slice(-2),
     yyyy: String(displayYear).padStart(4, '0'),
+    yearName: yearName,
 
     // Month (empty for monthless calendars and intercalary festivals, festival name for MMMM/MMM)
     M: isIntercalaryFestival || isMonthless ? '' : month + 1,
@@ -177,9 +186,10 @@ export function dateFormattingParts(calendar, components) {
     s: second,
     ss: String(second).padStart(2, '0'),
 
-    // AM/PM
-    A: ampm,
-    a: ampm.toLowerCase(),
+    // AM/PM (abbreviation by default, [meridiemFull] for full name)
+    A: meridiemAbbr,
+    a: meridiemAbbr.toLowerCase(),
+    meridiemFull: meridiemFull,
 
     // Era (G tokens are UTS #35 standard, era* tokens deprecated)
     G: eraAbbr,
@@ -189,6 +199,7 @@ export function dateFormattingParts(calendar, components) {
     era: eraName,
     eraAbbr: eraAbbr,
     eraYear: eraYear,
+    matchingEras: matchingEras,
 
     // Season/Quarter (Q tokens mapped to season, season* tokens deprecated)
     Q: seasonIndex >= 0 ? seasonIndex + 1 : '',
@@ -444,11 +455,52 @@ export function formatCustom(calendar, components, formatStr) {
     cycleRoman: cycleNum ? toRomanNumeral(cycleNum) : '',
     cycleYear: cycleNum,
     approxTime: formatApproximateTime(calendar, components),
-    approxDate: formatApproximateDate(calendar, components)
+    approxDate: formatApproximateDate(calendar, components),
+    meridiemFull: parts.meridiemFull,
+    yearName: parts.yearName
+  };
+
+  // Standard token map (built once, used for both direct and fallback resolution)
+  const tokenMap = {
+    YYYY: parts.yyyy, YY: parts.yy, Y: parts.y,
+    MMMM: parts.MMMM, MMM: parts.MMM, MM: parts.MM, Mo: parts.Mo, M: parts.M,
+    EEEEE: parts.EEEEE, EEEE: parts.EEEE, EEE: parts.EEE, EE: parts.EE, E: parts.E, e: parts.e,
+    dddd: parts.dddd, ddd: parts.ddd, dd: parts.dd, d: parts.d,
+    Do: parts.Do, DDD: parts.DDD, DD: parts.DD, D: parts.D,
+    GGGG: parts.GGGG, GGG: parts.GGG, GG: parts.GG, G: parts.G,
+    QQQQ: parts.QQQQ, QQQ: parts.QQQ, QQ: parts.QQ, Q: parts.Q,
+    zzzz: parts.zzzz, z: parts.z,
+    ww: parts.ww, w: parts.w, W: parts.W,
+    HH: parts.HH, H: parts.H, hh: parts.hh, h: parts.h,
+    mm: parts.mm, m: parts.m, ss: parts.ss, s: parts.s,
+    A: parts.A, a: parts.a
+  };
+
+  /** Resolve a token string to its value. */
+  const resolveToken = (token) => {
+    if (token in tokenMap) return tokenMap[token];
+    if (token in customContext) return customContext[token];
+    return token;
   };
 
   return formatStr.replace(TOKEN_REGEX, (match, customToken) => {
     if (customToken) {
+      // Handle pipe fallback syntax: [token|fallback]
+      if (customToken.includes('|')) {
+        const [primary, fallback] = customToken.split('|', 2);
+        const value = customContext[primary] ?? '';
+        return value || String(resolveToken(fallback));
+      }
+      // Handle era index syntax: [era=N], [eraAbbr=N], [yearInEra=N]
+      const eraIndexMatch = customToken.match(/^(era|eraAbbr|yearInEra)=(\d+)$/);
+      if (eraIndexMatch) {
+        const [, field, idxStr] = eraIndexMatch;
+        const era = parts.matchingEras?.[parseInt(idxStr)] || {};
+        if (field === 'era') return era.name || '';
+        if (field === 'eraAbbr') return era.abbr || '';
+        if (field === 'yearInEra') return era.yearInEra != null ? String(era.yearInEra) : '';
+        return '';
+      }
       if (customToken.startsWith('moonIcon')) {
         const paramPart = customToken.slice(9);
         let moonSelector;
@@ -460,64 +512,6 @@ export function formatCustom(calendar, components, formatStr) {
       }
       return customContext[customToken] ?? customToken;
     }
-
-    // Standard token - map to parts
-    const tokenMap = {
-      // Year
-      YYYY: parts.yyyy,
-      YY: parts.yy,
-      Y: parts.y,
-      // Month
-      MMMM: parts.MMMM,
-      MMM: parts.MMM,
-      MM: parts.MM,
-      Mo: parts.Mo,
-      M: parts.M,
-      // Weekday
-      EEEEE: parts.EEEEE,
-      EEEE: parts.EEEE,
-      EEE: parts.EEE,
-      EE: parts.EE,
-      E: parts.E,
-      e: parts.e,
-      dddd: parts.dddd,
-      ddd: parts.ddd,
-      dd: parts.dd,
-      d: parts.d,
-      // Day
-      Do: parts.Do,
-      DDD: parts.DDD,
-      DD: parts.DD,
-      D: parts.D,
-      // Era
-      GGGG: parts.GGGG,
-      GGG: parts.GGG,
-      GG: parts.GG,
-      G: parts.G,
-      // Season/Quarter
-      QQQQ: parts.QQQQ,
-      QQQ: parts.QQQ,
-      QQ: parts.QQ,
-      Q: parts.Q,
-      // Climate zone
-      zzzz: parts.zzzz,
-      z: parts.z,
-      // Week
-      ww: parts.ww,
-      w: parts.w,
-      W: parts.W,
-      // Time
-      HH: parts.HH,
-      H: parts.H,
-      hh: parts.hh,
-      h: parts.h,
-      mm: parts.mm,
-      m: parts.m,
-      ss: parts.ss,
-      s: parts.s,
-      A: parts.A,
-      a: parts.a
-    };
 
     return tokenMap[match] ?? match;
   });
@@ -1065,6 +1059,7 @@ export function getAvailableTokens() {
     { token: 'Y', descriptionKey: 'CALENDARIA.Format.Token.Y', type: 'standard' },
     { token: 'YY', descriptionKey: 'CALENDARIA.Format.Token.YY', type: 'standard' },
     { token: 'YYYY', descriptionKey: 'CALENDARIA.Format.Token.YYYY', type: 'standard' },
+    { token: '[yearName]', descriptionKey: 'CALENDARIA.Format.Token.yearName', type: 'custom' },
     // Month tokens
     { token: 'M', descriptionKey: 'CALENDARIA.Format.Token.M', type: 'standard' },
     { token: 'MM', descriptionKey: 'CALENDARIA.Format.Token.MM', type: 'standard' },
@@ -1095,6 +1090,9 @@ export function getAvailableTokens() {
     { token: 'GG', descriptionKey: 'CALENDARIA.Format.Token.GG', type: 'standard' },
     { token: 'G', descriptionKey: 'CALENDARIA.Format.Token.G', type: 'standard' },
     { token: '[yearInEra]', descriptionKey: 'CALENDARIA.Format.Token.yearInEra', type: 'custom' },
+    { token: '[era=N]', descriptionKey: 'CALENDARIA.Format.Token.eraIndex', type: 'custom' },
+    { token: '[eraAbbr=N]', descriptionKey: 'CALENDARIA.Format.Token.eraAbbrIndex', type: 'custom' },
+    { token: '[yearInEra=N]', descriptionKey: 'CALENDARIA.Format.Token.yearInEraIndex', type: 'custom' },
     // Season/Quarter tokens
     { token: 'QQQQ', descriptionKey: 'CALENDARIA.Format.Token.QQQQ', type: 'standard' },
     { token: 'QQQ', descriptionKey: 'CALENDARIA.Format.Token.QQQ', type: 'standard' },
@@ -1114,6 +1112,7 @@ export function getAvailableTokens() {
     { token: 'ss', descriptionKey: 'CALENDARIA.Format.Token.ss', type: 'standard' },
     { token: 'A', descriptionKey: 'CALENDARIA.Format.Token.A', type: 'standard' },
     { token: 'a', descriptionKey: 'CALENDARIA.Format.Token.a', type: 'standard' },
+    { token: '[meridiemFull]', descriptionKey: 'CALENDARIA.Format.Token.meridiemFull', type: 'custom' },
     // Custom tokens (bracket syntax)
     { token: '[moon]', descriptionKey: 'CALENDARIA.Format.Token.moon', type: 'custom' },
     { token: '[moonIcon]', descriptionKey: 'CALENDARIA.Format.Token.moonIcon', type: 'custom' },
