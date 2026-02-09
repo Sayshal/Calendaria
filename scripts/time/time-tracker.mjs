@@ -358,8 +358,9 @@ export default class TimeTracker {
       const lastPhaseIndex = this.#lastMoonPhases.get(moonIndex);
       if (lastPhaseIndex !== undefined && lastPhaseIndex !== currentPhaseIndex) {
         const moon = calendar.moonsArray[moonIndex];
-        const previousPhase = moon.phases?.[lastPhaseIndex];
-        const currentPhase = moon.phases?.[currentPhaseIndex];
+        const phasesArr = Object.values(moon.phases ?? {});
+        const previousPhase = phasesArr[lastPhaseIndex];
+        const currentPhase = phasesArr[currentPhaseIndex];
         changedMoons.push({
           moonIndex,
           moonName: moon.name ? localize(moon.name) : format('CALENDARIA.Calendar.MoonFallback', { num: moonIndex + 1 }),

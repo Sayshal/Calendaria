@@ -333,7 +333,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       calendar?.moonsArray?.map((moon, index) => ({
         index,
         name: localize(moon.name),
-        phases: moon.phases?.map((phase) => ({ name: localize(phase.name), start: phase.start, end: phase.end })) || []
+        phases: Object.values(moon.phases ?? {}).map((phase) => ({ name: localize(phase.name), start: phase.start, end: phase.end }))
       })) ?? [];
     context.hasMoons = context.moons.length > 0;
     const modifierLabels = {
@@ -344,7 +344,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     };
     context.moonConditions = (this.document.system.moonConditions || []).map((cond, index) => {
       const moon = context.moons[cond.moonIndex];
-      const matchingPhase = moon?.phases?.find((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
+      const matchingPhase = Object.values(moon?.phases ?? {}).find((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
       const modifier = cond.modifier || 'any';
       return {
         index,

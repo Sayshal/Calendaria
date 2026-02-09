@@ -196,10 +196,11 @@ function getFieldValue(field, date, value2 = null) {
  * Evaluate a single condition against a date.
  * @param {object} condition - Condition { field, op, value, value2?, offset? }
  * @param {object} date - Date to evaluate
+ * @param {object} [startDate] - Note start date, used as implicit offset for modulo conditions
  * @returns {boolean} True if condition passes
  */
-function evaluateCondition(condition, date) {
-  const { field, op, value, value2, offset = 0 } = condition;
+function evaluateCondition(condition, date, startDate) {
+  const { field, op, value, value2 } = condition;
   const fieldValue = getFieldValue(field, date, value2);
   if (fieldValue === null || fieldValue === undefined) return false;
   switch (op) {
@@ -215,9 +216,11 @@ function evaluateCondition(condition, date) {
       return fieldValue > value;
     case '<':
       return fieldValue < value;
-    case '%':
+    case '%': {
       if (value === 0) return false;
-      return (fieldValue - offset) % value === 0;
+      const effectiveOffset = startDate ? (getFieldValue(field, startDate, value2) ?? 0) : 0;
+      return (fieldValue - effectiveOffset) % value === 0;
+    }
     default:
       return false;
   }
@@ -227,11 +230,12 @@ function evaluateCondition(condition, date) {
  * Evaluate all conditions for a date (AND logic).
  * @param {object[]} conditions - Array of conditions
  * @param {object} date - Date to evaluate
+ * @param {object} [startDate] - Note start date, used as implicit offset for modulo conditions
  * @returns {boolean} True if all conditions pass
  */
-function evaluateConditions(conditions, date) {
+function evaluateConditions(conditions, date, startDate) {
   if (!conditions?.length) return true;
-  return conditions.every((cond) => evaluateCondition(cond, date));
+  return conditions.every((cond) => evaluateCondition(cond, date, startDate));
 }
 
 /**
@@ -634,7 +638,7 @@ function resolveFirstAfter(startDate, condition, params, calendar) {
         const moon = moons[moonIndex];
         const phaseIndex = getCalendarMoonPhaseIndex(currentDate, moonIndex);
         if (phaseIndex === null) break;
-        const phaseName = moon.phases?.[phaseIndex]?.name?.toLowerCase() || '';
+        const phaseName = Object.values(moon.phases ?? {})[phaseIndex]?.name?.toLowerCase() || '';
         if (phaseName.includes(targetPhase.toLowerCase())) return currentDate;
         break;
       }
@@ -771,7 +775,7 @@ export function isRecurringMatch(noteData, targetDate) {
       const occurrenceNum = countOccurrencesUpTo(noteData, targetDate);
       if (occurrenceNum > maxOccurrences) return false;
     }
-    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate)) return false;
+    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
     return matches;
   }
 
@@ -784,14 +788,14 @@ export function isRecurringMatch(noteData, targetDate) {
       const occurrenceNum = countOccurrencesUpTo(noteData, targetDate);
       if (occurrenceNum > maxOccurrences) return false;
     }
-    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate)) return false;
+    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
     return matches;
   }
 
   if (moonConditions?.length > 0) if (!matchesMoonConditions(moonConditions, targetDate)) return false;
   if (repeat === 'never' || !repeat) {
     if (!isSameDay(startDate, targetDate)) return false;
-    if (noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate)) return false;
+    if (noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
     return true;
   }
 
@@ -817,7 +821,7 @@ export function isRecurringMatch(noteData, targetDate) {
     case 'range':
       if (!noteData.rangePattern) return false;
       if (!matchesRangePattern(noteData.rangePattern, targetDate, startDate, repeatEndDate)) return false;
-      if (noteData.conditions?.length > 0 && !evaluateConditions(noteData.conditions, targetDate)) return false;
+      if (noteData.conditions?.length > 0 && !evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
       return true;
     case 'weekOfMonth':
       matches = matchesWeekOfMonth(startDate, targetDate, interval, noteData.weekday, noteData.weekNumber);
@@ -865,7 +869,7 @@ export function isRecurringMatch(noteData, targetDate) {
     if (occurrenceNum > maxOccurrences) return false;
   }
 
-  if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate)) return false;
+  if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
   return matches;
 }
 
@@ -941,13 +945,14 @@ function matchesMoonConditions(moonConditions, targetDate) {
     if (modifier === 'any') {
       if (moonPhaseInfo.phaseIndex !== undefined) {
         const moon = calendar.moonsArray[cond.moonIndex];
-        const phase = moon?.phases?.[moonPhaseInfo.phaseIndex];
+        const phasesArr = Object.values(moon?.phases ?? {});
+        const phase = phasesArr[moonPhaseInfo.phaseIndex];
         if (phase && Math.abs(phase.start - cond.phaseStart) < 0.01 && Math.abs(phase.end - cond.phaseEnd) < 0.01) return true;
       }
       continue;
     }
     const moon = calendar.moonsArray[cond.moonIndex];
-    const phase = moon?.phases?.[moonPhaseInfo.phaseIndex];
+    const phase = Object.values(moon?.phases ?? {})[moonPhaseInfo.phaseIndex];
     if (!phase || Math.abs(phase.start - cond.phaseStart) >= 0.01 || Math.abs(phase.end - cond.phaseEnd) >= 0.01) continue;
     const { dayWithinPhase, phaseDuration } = moonPhaseInfo;
     const third = phaseDuration / 3;
@@ -1703,7 +1708,7 @@ function getMoonConditionsDescription(moonConditions) {
     const moonName = moon?.name ? localize(moon.name) : `Moon ${cond.moonIndex + 1}`;
     const modifierSuffix = modifierLabels[cond.modifier] || '';
 
-    const matchingPhases = moon?.phases?.filter((p) => {
+    const matchingPhases = Object.values(moon?.phases ?? {}).filter((p) => {
       if (cond.phaseStart <= cond.phaseEnd) return p.start < cond.phaseEnd && p.end > cond.phaseStart;
       else return p.end > cond.phaseStart || p.start < cond.phaseEnd;
     });
