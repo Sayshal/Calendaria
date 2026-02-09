@@ -396,7 +396,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = year - yearZero;
     const daysInMonth = calendar.getDaysInMonth(month, internalYear);
-    const daysInWeek = calendar.weekdaysArray.length || 7;
+    const daysInWeek = calendar.daysInWeek;
     const weeks = [];
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
@@ -565,7 +565,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _generateWeekViewData(calendar, date, visibleNotes) {
     const { year } = date;
     const viewedDay = date.day || 1;
-    const daysInWeek = calendar.weekdaysArray.length || 7;
+    const daysInWeek = calendar.daysInWeek;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const weekNumber = Math.floor((viewedDay - 1) / daysInWeek);
@@ -1328,7 +1328,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const current = this.viewedDate;
     const calendar = this.calendar;
     if (calendar.isMonthless) {
-      const daysInWeek = calendar.weekdaysArray.length || 7;
+      const daysInWeek = calendar.daysInWeek;
       const yearZero = calendar.years?.yearZero ?? 0;
       const daysInYear = calendar.getDaysInYear(current.year - yearZero);
       let newDay = (current.day || 1) + direction * daysInWeek;

@@ -348,7 +348,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = year - yearZero;
     const daysInMonth = calendar.getDaysInMonth(month, internalYear);
-    const daysInWeek = calendar.weekdaysArray.length || 7;
+    const daysInWeek = calendar.daysInWeek;
     const weeks = [];
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
@@ -539,7 +539,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _generateMonthlessWeekData(calendar, date, notes) {
     const { year } = date;
     const viewedDay = date.day || 1;
-    const daysInWeek = calendar.weekdaysArray.length || 7;
+    const daysInWeek = calendar.daysInWeek;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
@@ -676,7 +676,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const currentTime = game.time.components || {};
     const currentHour = currentTime.hour ?? 0;
-    const daysInWeek = calendar.weekdaysArray.length || 7;
+    const daysInWeek = calendar.daysInWeek;
     const days = [];
     let currentDay = weekStartDay;
     let currentMonth = weekStartMonth;
@@ -1411,7 +1411,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
     switch (this._displayMode) {
       case 'week': {
-        const daysInWeek = calendar.weekdaysArray.length || 7;
+        const daysInWeek = calendar.daysInWeek;
         let newDay = current.day + direction * daysInWeek;
         let newMonth = current.month;
         let newYear = current.year;
@@ -1441,7 +1441,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       default: {
         if (calendar.isMonthless) {
-          const daysInWeek = calendar.weekdaysArray.length || 7;
+          const daysInWeek = calendar.daysInWeek;
           const daysInYear = calendar.getDaysInYear(current.year - yearZero);
           let newDay = (current.day || 1) + direction * daysInWeek;
           let newYear = current.year;

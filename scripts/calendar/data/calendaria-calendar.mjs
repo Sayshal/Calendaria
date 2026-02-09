@@ -62,7 +62,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     totalDays += dayOfYear;
     const internalTime = totalDays * secondsPerDay + dt.hour * secondsPerHour + dt.minute * secondsPerMinute + dt.second;
     this.#epochOffset = internalTime - game.time.worldTime;
-    const numWeekdays = calendar.weekdaysArray?.length ?? 7;
+    const numWeekdays = calendar?.daysInWeek ?? 7;
     const components = { year: internalYear, month: dt.month - 1, dayOfMonth: dt.day - 1 };
     const nonCountingFestivalsInYear = calendar.countNonWeekdayFestivalsBefore?.(components) ?? 0;
     const nonCountingFestivalsFromPriorYears = calendar.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
@@ -114,35 +114,38 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** No-op setter, computed dynamically. */
   set currentDate(_value) {}
 
-  /** @returns {Array<object>} Months as ordered array */
+  /** @returns {Array<object>} Months in calendar order (from keyed `months.values` collection) */
   get monthsArray() { return this.months?.values ? Object.values(this.months.values) : []; }
 
-  /** @returns {Array<object>} Weekdays as ordered array */
+  /** @returns {Array<object>} Weekdays in calendar order (from keyed `days.values` collection) */
   get weekdaysArray() { return this.days?.values ? Object.values(this.days.values) : []; }
 
-  /** @returns {Array<object>} Seasons as ordered array */
+  /** @returns {Array<object>} Seasons in calendar order (from keyed `seasons.values` collection) */
   get seasonsArray() { return this.seasons?.values ? Object.values(this.seasons.values) : []; }
 
-  /** @returns {Array<object>} Moons as ordered array */
+  /** @returns {Array<object>} Moons in calendar order (from keyed `moons` collection) */
   get moonsArray() { return this.moons ? Object.values(this.moons) : []; }
 
-  /** @returns {Array<object>} Cycles as ordered array */
+  /** @returns {Array<object>} Cycles in calendar order (from keyed `cycles` collection) */
   get cyclesArray() { return this.cycles ? Object.values(this.cycles) : []; }
 
-  /** @returns {Array<object>} Eras as ordered array */
+  /** @returns {Array<object>} Eras in calendar order (from keyed `eras` collection) */
   get erasArray() { return this.eras ? Object.values(this.eras) : []; }
 
-  /** @returns {Array<object>} Festivals as ordered array */
+  /** @returns {Array<object>} Festivals in calendar order (from keyed `festivals` collection) */
   get festivalsArray() { return this.festivals ? Object.values(this.festivals) : []; }
 
-  /** @returns {Array<object>} Canonical hours as ordered array */
+  /** @returns {Array<object>} Canonical hours in calendar order (from keyed `canonicalHours` collection) */
   get canonicalHoursArray() { return this.canonicalHours ? Object.values(this.canonicalHours) : []; }
 
-  /** @returns {Array<object>} Named weeks as ordered array */
+  /** @returns {Array<object>} Named weeks in calendar order (from keyed `weeks.names` collection) */
   get namedWeeksArray() { return this.weeks?.names ? Object.values(this.weeks.names) : []; }
 
-  /** @returns {Array<object>} Weather zones as ordered array */
+  /** @returns {Array<object>} Weather zones in calendar order (from keyed `weather.zones` collection) */
   get weatherZonesArray() { return this.weather?.zones ? Object.values(this.weather.zones) : []; }
+
+  /** @returns {number} Number of days in a week (weekday count, defaults to 7) */
+  get daysInWeek() { return this.weekdaysArray.length || 7; }
 
   /**
    * Check if this calendar operates without named months (e.g., Traveller Imperial Calendar).
@@ -1307,7 +1310,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {number} 0-based weekday index
    */
   _computeDayOfWeek(components) {
-    const daysInWeek = this.weekdaysArray.length || 7;
+    const daysInWeek = this.daysInWeek;
     const monthData = this.monthsArray[components.month];
     if (monthData?.startingWeekday != null) {
       const dayIndex = components.dayOfMonth ?? 0;
@@ -1404,7 +1407,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const weekNames = this.namedWeeksArray;
     if (!weekNames.length) return null;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const daysInWeek = this.weekdaysArray.length || 7;
+    const daysInWeek = this.daysInWeek;
 
     let weekNumber;
     if (this.weeks.type === 'month-based') {
@@ -1437,7 +1440,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   getWeekOfYear(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const daysInWeek = this.weekdaysArray.length || 7;
+    const daysInWeek = this.daysInWeek;
     const months = this.monthsArray;
     let dayOfYear = components.dayOfMonth;
     for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
@@ -1451,7 +1454,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   getWeekOfMonth(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const daysInWeek = this.weekdaysArray.length || 7;
+    const daysInWeek = this.daysInWeek;
     return Math.floor(components.dayOfMonth / daysInWeek) + 1;
   }
 

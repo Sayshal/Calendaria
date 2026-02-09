@@ -68,35 +68,35 @@ function getFieldValue(field, date, value2 = null) {
     case 'weekday':
       return dayOfWeek(date) + 1;
     case 'weekNumberInMonth': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       return Math.ceil(date.day / daysInWeek);
     }
     case 'inverseWeekNumber': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       const lastDay = getLastDayOfMonth(date);
       return Math.floor((lastDay - date.day) / daysInWeek) + 1;
     }
     case 'weekInMonth': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       return Math.ceil(date.day / daysInWeek);
     }
     case 'weekInYear': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       const dayOfYear = getDayOfYear(date);
       return Math.ceil(dayOfYear / daysInWeek);
     }
     case 'totalWeek': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       const totalDays = getTotalDaysSinceEpoch(date);
       return Math.floor(totalDays / daysInWeek);
     }
     case 'weeksBeforeMonthEnd': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       const lastDay = getLastDayOfMonth(date);
       return Math.floor((lastDay - date.day) / daysInWeek);
     }
     case 'weeksBeforeYearEnd': {
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       const totalDaysInYear = getTotalDaysInYear(date.year);
       const dayOfYear = getDayOfYear(date);
       return Math.floor((totalDaysInYear - dayOfYear) / daysInWeek);
@@ -660,7 +660,7 @@ function resolveFirstAfter(startDate, condition, params, calendar) {
 function resolveWeekdayOnOrAfter(startDate, targetWeekday, calendar) {
   const currentWeekday = dayOfWeek(startDate);
   if (currentWeekday === targetWeekday) return { ...startDate };
-  const daysInWeek = calendar?.weekdaysArray?.length || 7;
+  const daysInWeek = calendar?.daysInWeek ?? 7;
   const daysToAdd = (targetWeekday - currentWeekday + daysInWeek) % daysInWeek;
   return addDays(startDate, daysToAdd);
 }
@@ -887,7 +887,7 @@ function countOccurrencesUpTo(noteData, targetDate) {
     case 'weekly': {
       const daysDiff = daysBetween(startDate, targetDate);
       const calendar = CalendarManager.getActiveCalendar();
-      const daysInWeek = calendar?.weekdaysArray?.length || 7;
+      const daysInWeek = calendar?.daysInWeek ?? 7;
       const weeksDiff = Math.floor(daysDiff / daysInWeek);
       return Math.floor(weeksDiff / interval) + 1;
     }
@@ -1061,7 +1061,7 @@ function matchesWeekly(startDate, targetDate, interval) {
   const targetDayOfWeek = dayOfWeek(targetDate);
   if (startDayOfWeek !== targetDayOfWeek) return false;
   const calendar = CalendarManager.getActiveCalendar();
-  const daysInWeek = calendar?.weekdaysArray?.length || 7;
+  const daysInWeek = calendar?.daysInWeek ?? 7;
   const weeksDiff = Math.floor(daysDiff / daysInWeek);
   return weeksDiff % interval === 0;
 }
@@ -1121,7 +1121,7 @@ function getLastDayOfMonth(date) {
  */
 function matchesWeekOfMonth(startDate, targetDate, interval, weekday, weekNumber) {
   const calendar = CalendarManager.getActiveCalendar();
-  const daysInWeek = calendar?.weekdaysArray?.length || 7;
+  const daysInWeek = calendar?.daysInWeek ?? 7;
   const targetWeekday = weekday ?? dayOfWeek(startDate);
   let targetWeekNumber = weekNumber;
   if (targetWeekNumber == null) targetWeekNumber = Math.ceil(startDate.day / daysInWeek);
@@ -1345,7 +1345,7 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
 
       if (checkInterval === 'weekly') {
         const calendar = CalendarManager.getActiveCalendar();
-        const daysInWeek = calendar?.weekdaysArray?.length || 7;
+        const daysInWeek = calendar?.daysInWeek ?? 7;
         currentDate = addDays(currentDate, daysInWeek);
       } else if (checkInterval === 'monthly') {
         currentDate = addMonths(currentDate, 1);
@@ -1375,7 +1375,7 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
 
   if (repeat === 'weekOfMonth') {
     const calendar = CalendarManager.getActiveCalendar();
-    const daysInWeek = calendar?.weekdaysArray?.length || 7;
+    const daysInWeek = calendar?.daysInWeek ?? 7;
     const interval = noteData.repeatInterval || 1;
     const targetWeekday = noteData.weekday ?? dayOfWeek(startDate);
     const weekNumber = noteData.weekNumber ?? Math.ceil(startDate.day / daysInWeek);
@@ -1451,7 +1451,7 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
  */
 function advanceDate(date, repeat, interval) {
   const calendar = CalendarManager.getActiveCalendar();
-  const daysInWeek = calendar?.weekdaysArray?.length || 7;
+  const daysInWeek = calendar?.daysInWeek ?? 7;
 
   switch (repeat) {
     case 'daily':
@@ -1598,7 +1598,7 @@ export function generateRandomOccurrences(noteData, targetYear) {
       }
     }
 
-    if (checkInterval === 'weekly') currentDate = addDays(currentDate, calendar?.weekdaysArray?.length);
+    if (checkInterval === 'weekly') currentDate = addDays(currentDate, calendar?.daysInWeek ?? 7);
     else if (checkInterval === 'monthly') currentDate = addMonths(currentDate, 1);
     else currentDate = addDays(currentDate, 1);
     iterations++;
@@ -1624,7 +1624,7 @@ export function needsRandomRegeneration(cachedData) {
   const currentDay = (components.dayOfMonth ?? 0) + 1;
   const lastMonthIndex = calendar.monthsArray.length - 1;
   const lastMonthDays = calendar.monthsArray[lastMonthIndex]?.days || 30;
-  const daysInWeek = calendar?.weekdaysArray?.length || 7;
+  const daysInWeek = calendar?.daysInWeek ?? 7;
   if (cachedData.year < currentYear) return true;
   if (currentMonth === lastMonthIndex && currentDay > lastMonthDays - daysInWeek) return cachedData.year <= currentYear;
   return false;
