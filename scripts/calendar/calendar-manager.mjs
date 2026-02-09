@@ -144,6 +144,8 @@ export default class CalendarManager {
           const bundledData = this.#bundledData.get(id);
 
           if (data._isDelta && bundledData) {
+            // Strip stale defaults before merging so bundled improvements flow through
+            CalendarManager.#stripStaleDefaults(data, bundledData);
             // Delta format: reconstruct full calendar from bundled + delta
             const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
             delete calendarData._isDelta;
@@ -413,8 +415,31 @@ export default class CalendarManager {
       if (delta.months && !Object.keys(delta.months).length) delete delta.months;
     }
 
+    CalendarManager.#stripStaleDefaults(delta, bundledData);
     delta._isDelta = true;
     return delta;
+  }
+
+  /**
+   * Recursively strip empty-string values from a delta where the bundled data has
+   * a non-empty string. Prevents DataModel defaults (e.g. `icon: ''`) from
+   * suppressing enriched bundled values (e.g. `icon: 'fas fa-sun'`).
+   * @param {object} delta - Delta object (mutated in place)
+   * @param {object} bundled - Pristine bundled data to compare against
+   * @private
+   */
+  static #stripStaleDefaults(delta, bundled) {
+    for (const key of Object.keys(delta)) {
+      if (key.startsWith('-=')) continue;
+      const dVal = delta[key];
+      const bVal = bundled?.[key];
+      if (dVal !== null && typeof dVal === 'object' && !Array.isArray(dVal) && bVal !== null && typeof bVal === 'object' && !Array.isArray(bVal)) {
+        CalendarManager.#stripStaleDefaults(dVal, bVal);
+        if (!Object.keys(dVal).length) delete delta[key];
+      } else if (typeof dVal === 'string' && dVal === '' && typeof bVal === 'string' && bVal !== '') {
+        delete delta[key];
+      }
+    }
   }
 
   /**

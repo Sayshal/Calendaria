@@ -77,14 +77,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       exportCalendar: CalendarEditor.#onExportCalendar,
       resetCalendar: CalendarEditor.#onResetCalendar,
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
-      toggleCategory: CalendarEditor.#onToggleCategory,
-      resetWeatherPreset: CalendarEditor.#onResetWeatherPreset,
-      resetPresetAlias: CalendarEditor.#onResetPresetAlias,
-      toggleDescription: CalendarEditor.#onToggleDescription,
       addZone: CalendarEditor.#onAddZone,
-      editZone: CalendarEditor.#onEditZone,
+      editZoneClimate: CalendarEditor.#onEditZoneClimate,
+      setActiveZone: CalendarEditor.#onSetActiveZone,
       deleteZone: CalendarEditor.#onDeleteZone,
-      toggleCategorySelectAll: CalendarEditor.#onToggleCategorySelectAll,
       createNew: CalendarEditor.#onCreateNew,
       showTokenReference: CalendarEditor.#onShowTokenReference
     }
@@ -892,71 +888,22 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #prepareWeatherContext(context) {
     const weather = this.#calendarData.weather || {};
     const zonesObj = weather.zones ?? {};
-    const zonesArray = Object.values(zonesObj);
-    let activeZoneId = weather.activeZone;
-    if (!activeZoneId || !zonesArray.find((z) => z.id === activeZoneId)) {
-      activeZoneId = zonesArray[0]?.id || null;
-      if (activeZoneId) weather.activeZone = activeZoneId;
-    }
-    context.zoneOptions = zonesArray.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZoneId }));
-    context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
-    if (context.zoneOptions.length === 0) context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
-    context.activeZoneId = activeZoneId;
-    const activeZone = zonesArray.find((z) => z.id === activeZoneId) || null;
-    const savedPresets = activeZone?.presets ? Object.values(activeZone.presets) : [];
-    const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
-    context.tempUnit = tempUnit === 'fahrenheit' ? 'F' : 'C';
-    let presetIndex = 0;
-    let totalChance = 0;
     context.seasonClimateList = Object.entries(this.#calendarData.seasons?.values ?? {}).map(([key, season], idx) => ({
       key,
       index: idx,
       name: season.name,
       icon: season.icon,
       color: season.color,
-      hasClimate: !!(season.climate?.temperatures || season.climate?.presets?.length)
+      hasClimate: !!(season.climate?.temperatures || Object.keys(season.climate?.presets ?? {}).length)
     }));
-
-    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const allPresets = getAllPresets(customPresets);
-    context.weatherCategories = Object.values(WEATHER_CATEGORIES)
-      .map((cat) => {
-        const categoryPresets = allPresets.filter((p) => p.category === cat.id);
-        let categoryChance = 0;
-        let enabledCount = 0;
-        const presetsWithData = categoryPresets.map((preset) => {
-          const saved = savedPresets.find((s) => s.id === preset.id) || {};
-          const chance = saved.chance ?? 0;
-          const enabled = saved.enabled ?? false;
-          if (enabled) {
-            totalChance += chance;
-            categoryChance += chance;
-            enabledCount++;
-          }
-          const presetData = {
-            ...preset,
-            index: presetIndex++,
-            enabled,
-            chance: chance.toFixed(2),
-            tempMin: saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '',
-            tempMax: saved.tempMax != null ? toDisplayUnit(saved.tempMax) : '',
-            customDescription: saved.description || '',
-            alias: getPresetAlias(preset.id, this.#calendarId, activeZoneId) || ''
-          };
-          return presetData;
-        });
-        return {
-          id: cat.id,
-          label: cat.label,
-          presets: presetsWithData,
-          totalChance: categoryChance.toFixed(1),
-          enabledCount,
-          allEnabled: enabledCount === presetsWithData.length && presetsWithData.length > 0
-        };
-      })
-      .filter((cat) => cat.presets.length > 0);
-    context.totalChance = totalChance.toFixed(2);
-    context.chancesValid = Math.abs(totalChance - 100) < 0.1;
+    const activeZoneId = weather.activeZone;
+    context.zoneList = Object.entries(zonesObj).map(([key, zone]) => ({
+      key,
+      name: zone.name || '',
+      id: zone.id,
+      isActive: zone.id === activeZoneId,
+      hasPresets: Object.keys(zone.presets ?? {}).length > 0
+    }));
   }
 
   /**
@@ -968,14 +915,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onSubmit(_event, _form, formData) {
     const oldSeasonType = this.#calendarData.seasons?.type;
     const oldWeeksType = this.#calendarData.weeks?.type;
-    const oldActiveZone = this.#calendarData.weather?.activeZone;
     this.#updateFromFormData(formData.object);
     const newSeasonType = this.#calendarData.seasons?.type;
     const newWeeksType = this.#calendarData.weeks?.type;
-    const newActiveZone = this.#calendarData.weather?.activeZone;
     if (oldSeasonType !== newSeasonType) this.render({ parts: ['seasons'] });
     if (oldWeeksType !== newWeeksType) this.render({ parts: ['weeks'] });
-    if (oldActiveZone !== newActiveZone) this.render({ parts: ['weather'] });
   }
 
   /**
@@ -1381,36 +1325,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateWeatherFromFormData(data) {
-    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: {}, activeZone: null, autoGenerate: false };
-    const oldZoneId = this.#calendarData.weather.activeZone;
-    const selectedZone = data['weather.activeZone'];
-    const zoneChanged = selectedZone && selectedZone !== oldZoneId;
-    if (selectedZone) this.#calendarData.weather.activeZone = selectedZone;
+    if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {}, autoGenerate: false };
     this.#calendarData.weather.autoGenerate = !!data['weather.autoGenerate'];
-    if (zoneChanged) return;
-    const presetKeys = new Set();
-    for (const key of Object.keys(data)) {
-      const match = key.match(/^weather\.presets\.([^.]+)\./);
-      if (match) presetKeys.add(match[1]);
-    }
-    const newPresets = {};
-    for (const pKey of presetKeys) {
-      const id = data[`weather.presets.${pKey}.id`];
-      if (!id) continue;
-      const preset = { id, enabled: !!data[`weather.presets.${pKey}.enabled`], chance: parseFloat(data[`weather.presets.${pKey}.chance`]) || 0 };
-      const tempMin = data[`weather.presets.${pKey}.tempMin`];
-      const tempMax = data[`weather.presets.${pKey}.tempMax`];
-      if (tempMin !== '' && tempMin != null) preset.tempMin = fromDisplayUnit(parseInt(tempMin));
-      if (tempMax !== '' && tempMax != null) preset.tempMax = fromDisplayUnit(parseInt(tempMax));
-      const desc = data[`weather.presets.${pKey}.description`]?.trim();
-      if (desc) preset.description = desc;
-      newPresets[pKey] = preset;
-    }
 
-    const activeZoneId = this.#calendarData.weather.activeZone;
-    const zones = this.#calendarData.weather.zones ?? {};
-    const activeZone = zones[activeZoneId];
-    if (activeZone) activeZone.presets = newPresets;
+    // Update zone names from inline inputs
+    const zonesObj = this.#calendarData.weather.zones ?? {};
+    for (const key of Object.keys(zonesObj)) {
+      const name = data[`weather.zones.${key}.name`];
+      if (name !== undefined) zonesObj[key].name = name;
+    }
   }
 
   /**
@@ -1755,7 +1678,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const key = target.dataset.key;
     const season = this.#calendarData.seasons.values[key];
     if (!season) return;
-    const climate = season.climate ?? { temperatures: null, presets: [] };
+    const climate = season.climate ?? { temperatures: null, presets: {} };
     const displayMin = climate.temperatures?.min != null ? toDisplayUnit(climate.temperatures.min) : '';
     const displayMax = climate.temperatures?.max != null ? toDisplayUnit(climate.temperatures.max) : '';
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) === 'fahrenheit' ? '°F' : '°C';
@@ -1766,7 +1689,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const categoryPresets = allPresets.filter((p) => p.category === cat.id);
         const rows = categoryPresets
           .map((preset) => {
-            const existing = climate.presets?.find((p) => p.id === preset.id);
+            const existing = Object.values(climate.presets ?? {}).find((p) => p.id === preset.id);
             return `
           <div class="preset-row" data-preset-id="${preset.id}">
             <span class="preset-icon" style="color: ${preset.color}"><i class="fas ${preset.icon}"></i></span>
@@ -1801,6 +1724,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       classes: ['calendaria', 'climate-settings-dialog'],
       window: { title: format('CALENDARIA.Editor.Season.Climate.Title', { name: localize(season.name) }) },
       content,
+      position: { width: 'auto', height: 'auto' },
       ok: {
         label: localize('CALENDARIA.Common.Save'),
         callback: (_event, button) => {
@@ -2244,69 +2168,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {Event} _event - Click event
    * @param {HTMLElement} target - Target element
    */
-  static async #onToggleCategory(_event, target) {
-    const category = target.closest('.weather-category');
-    if (category) category.classList.toggle('collapsed');
-  }
 
   /**
-   * Reset a weather preset to its default values.
+   * Add a new climate zone after the target key.
    * @param {Event} _event - Click event
    * @param {HTMLElement} target - Target element
    */
-  static async #onResetWeatherPreset(_event, target) {
-    const presetId = target.dataset.presetId;
-    if (!presetId) return;
-
-    // Find and reset this preset in the active zone
-    const activeZoneId = this.#calendarData.weather?.activeZone;
-    const zonesObj = this.#calendarData.weather?.zones ?? {};
-    const activeZone = Object.values(zonesObj).find((z) => z.id === activeZoneId);
-    if (!activeZone?.presets) return;
-
-    const presetEntry = Object.entries(activeZone.presets).find(([, p]) => p.id === presetId);
-    if (presetEntry) {
-      delete activeZone.presets[presetEntry[0]];
-      this.render();
-    }
-  }
-
-  /**
-   * Reset a preset's display alias to the default name.
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} target - Target element
-   */
-  static async #onResetPresetAlias(_event, target) {
-    const presetId = target.dataset.presetId;
-    const zoneId = target.dataset.zoneId;
-    if (!presetId) return;
-    await setPresetAlias(presetId, null, this.#calendarId, zoneId);
-    this.render({ parts: ['weather'] });
-  }
-
-  /**
-   * Toggle description popover visibility.
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} target - Target element
-   */
-  static #onToggleDescription(_event, target) {
-    const presetItem = target.closest('.weather-preset-item');
-    if (!presetItem) return;
-    const popover = presetItem.querySelector('.description-popover');
-    if (!popover) return;
-    this.element.querySelectorAll('.description-popover.show').forEach((p) => {
-      if (p !== popover) p.classList.remove('show');
-    });
-
-    popover.classList.toggle('show');
-  }
-
-  /**
-   * Add a new climate zone from a template.
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} _target - Target element
-   */
-  static async #onAddZone(_event, _target) {
+  static async #onAddZone(_event, target) {
+    const afterKey = target.dataset.key;
     const templateOptions = getClimateTemplateOptions();
     const selectHtml = templateOptions.map((opt) => `<option value="${opt.value}">${localize(opt.label)}</option>`).join('');
 
@@ -2346,187 +2215,225 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     while (existingIds.includes(zoneId)) zoneId = `${baseId}-${counter++}`;
     zoneConfig.id = zoneId;
     zoneConfig.name = result.name || localize(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
-    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: {}, activeZone: null, autoGenerate: false };
+    if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {}, autoGenerate: false };
     if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = {};
     const zoneKey = foundry.utils.randomID();
-    this.#calendarData.weather.zones[zoneKey] = zoneConfig;
-    this.#calendarData.weather.activeZone = zoneConfig.id;
+    const isFirst = !Object.keys(this.#calendarData.weather.zones).length;
+    if (afterKey) {
+      this.#calendarData.weather.zones = this.#insertAfterKey(this.#calendarData.weather.zones, afterKey, zoneKey, zoneConfig);
+    } else {
+      this.#calendarData.weather.zones[zoneKey] = zoneConfig;
+    }
+    if (isFirst) this.#calendarData.weather.activeZone = zoneConfig.id;
     this.render();
   }
 
   /**
-   * Edit the active climate zone.
+   * Edit a climate zone's weather configuration.
    * @param {Event} _event - Click event
-   * @param {HTMLElement} _target - Target element
+   * @param {HTMLElement} target - Target element
    */
-  static async #onEditZone(_event, _target) {
-    const zonesArr = Object.values(this.#calendarData.weather?.zones ?? {});
-    const activeZoneId = this.#calendarData.weather?.activeZone;
-    const zone = zonesArr.find((z) => z.id === activeZoneId);
-    if (!zone) {
-      ui.notifications.warn('CALENDARIA.Editor.Weather.Zone.NoZones', { localize: true });
-      return;
-    }
+  static async #onEditZoneClimate(_event, target) {
+    const zoneKey = target.dataset.key;
+    const zone = this.#calendarData.weather?.zones?.[zoneKey];
+    if (!zone) return;
 
+    const savedPresets = zone.presets ? Object.values(zone.presets) : [];
+    const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
+    const tempLabel = tempUnit === 'fahrenheit' ? '°F' : '°C';
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const allPresets = getAllPresets(customPresets);
+
+    // Build zone properties
+    const brightnessMultiplier = zone.brightnessMultiplier ?? 1.0;
+    const envBase = zone.environmentBase ?? {};
+    const envDark = zone.environmentDark ?? {};
+
+    // Build season temperature rows
     const seasonNames = Object.values(this.#calendarData.seasons?.values ?? {}).map((s) => s.name);
     if (!seasonNames.length) seasonNames.push('CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter');
     const tempRows = seasonNames
       .map((season) => {
         const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
-        const displayMin = toDisplayUnit(temp.min);
-        const displayMax = toDisplayUnit(temp.max);
-        return `
-        <div class="form-group temperature-row">
-          <label>${localize(season)}</label>
-          <input type="number" name="temp_${season}_min" value="${displayMin}" placeholder="${localize('CALENDARIA.Common.Min')}">
-          <span>–</span>
-          <input type="number" name="temp_${season}_max" value="${displayMax}" placeholder="${localize('CALENDARIA.Common.Max')}">
-        </div>
-      `;
+        return `<div class="form-group temperature-row">
+        <label>${localize(season)}</label>
+        <input type="number" name="temp_${season}_min" value="${toDisplayUnit(temp.min)}" placeholder="${localize('CALENDARIA.Common.Min')}">
+        <span>–</span>
+        <input type="number" name="temp_${season}_max" value="${toDisplayUnit(temp.max)}" placeholder="${localize('CALENDARIA.Common.Max')}">
+      </div>`;
       })
       .join('');
 
-    const brightnessMultiplier = zone.brightnessMultiplier ?? 1.0;
-    const envBase = zone.environmentBase ?? {};
-    const envDark = zone.environmentDark ?? {};
+    // Build preset rows by category
+    const presetRows = Object.values(WEATHER_CATEGORIES)
+      .map((cat) => {
+        const categoryPresets = allPresets.filter((p) => p.category === cat.id);
+        if (!categoryPresets.length) return '';
+        const rows = categoryPresets
+          .map((preset) => {
+            const saved = savedPresets.find((s) => s.id === preset.id) || {};
+            const chance = saved.chance ?? 0;
+            const enabled = saved.enabled ?? false;
+            const tMin = saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '';
+            const tMax = saved.tempMax != null ? toDisplayUnit(saved.tempMax) : '';
+            return `<div class="preset-row" data-preset-id="${preset.id}">
+          <input type="checkbox" name="preset_${preset.id}_enabled" ${enabled ? 'checked' : ''}>
+          <span class="preset-icon" style="color: ${preset.color}"><i class="fas ${preset.icon}"></i></span>
+          <span class="preset-label">${localize(preset.label)}</span>
+          <input type="number" name="preset_${preset.id}_chance" value="${chance ? chance.toFixed(2) : ''}" min="0" max="100" step="0.01" placeholder="0.00">
+          <span>%</span>
+          <input type="number" name="preset_${preset.id}_tempMin" value="${tMin}" placeholder="—" class="preset-temp-input">
+          <span>–</span>
+          <input type="number" name="preset_${preset.id}_tempMax" value="${tMax}" placeholder="—" class="preset-temp-input">
+          <span>${tempLabel}</span>
+        </div>`;
+          })
+          .join('');
+        return `<div class="preset-category"><h4>${localize(cat.label)}</h4>${rows}</div>`;
+      })
+      .join('');
+
     const content = `
-      <form>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Editor.Weather.Zone.Name')}</label>
-          <input type="text" name="name" value="${zone.name}">
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Common.Description')}</label>
+        <textarea name="description">${zone.description || ''}</textarea>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier')}</label>
+        <div class="form-fields">
+          <input type="range" name="brightnessMultiplier" min="0.5" max="1.5" step="0.1" value="${brightnessMultiplier}" oninput="this.nextElementSibling.textContent = this.value + 'x'">
+          <span>${brightnessMultiplier}x</span>
         </div>
+        <p class="hint">${localize('CALENDARIA.Editor.Weather.Zone.BrightnessMultiplierHint')}</p>
+      </div>
+      <fieldset>
+        <legend>${localize('CALENDARIA.Editor.Weather.Zone.EnvironmentLighting')}</legend>
+        <p class="hint">${localize('CALENDARIA.Editor.Weather.Zone.EnvironmentLightingHint')}</p>
         <div class="form-group">
-          <label>${localize('CALENDARIA.Common.Description')}</label>
-          <textarea name="description">${zone.description || ''}</textarea>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier')}</label>
+          <label>${localize('CALENDARIA.Editor.Weather.Zone.BaseHue')}</label>
           <div class="form-fields">
-            <input type="range" name="brightnessMultiplier" min="0.5" max="1.5" step="0.1" value="${brightnessMultiplier}" oninput="this.nextElementSibling.textContent = this.value + 'x'">
-            <span>${brightnessMultiplier}x</span>
+            <input type="number" name="baseHue" min="0" max="360" step="1" value="${envBase.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
+            <span>°</span>
           </div>
-          <p class="hint">${localize('CALENDARIA.Editor.Weather.Zone.BrightnessMultiplierHint')}</p>
         </div>
-        <fieldset>
-          <legend>${localize('CALENDARIA.Editor.Weather.Zone.EnvironmentLighting')}</legend>
-          <p class="hint">${localize('CALENDARIA.Editor.Weather.Zone.EnvironmentLightingHint')}</p>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.Editor.Weather.Zone.BaseHue')}</label>
-            <div class="form-fields">
-              <input type="number" name="baseHue" min="0" max="360" step="1" value="${envBase.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-              <span>°</span>
-            </div>
+        <div class="form-group">
+          <label>${localize('CALENDARIA.Editor.Weather.Zone.BaseSaturation')}</label>
+          <div class="form-fields">
+            <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="${envBase.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
           </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.Editor.Weather.Zone.BaseSaturation')}</label>
-            <div class="form-fields">
-              <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="${envBase.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-            </div>
+        </div>
+        <div class="form-group">
+          <label>${localize('CALENDARIA.Editor.Weather.Zone.DarkHue')}</label>
+          <div class="form-fields">
+            <input type="number" name="darkHue" min="0" max="360" step="1" value="${envDark.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
+            <span>°</span>
           </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.Editor.Weather.Zone.DarkHue')}</label>
-            <div class="form-fields">
-              <input type="number" name="darkHue" min="0" max="360" step="1" value="${envDark.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-              <span>°</span>
-            </div>
+        </div>
+        <div class="form-group">
+          <label>${localize('CALENDARIA.Editor.Weather.Zone.DarkSaturation')}</label>
+          <div class="form-fields">
+            <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="${envDark.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
           </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.Editor.Weather.Zone.DarkSaturation')}</label>
-            <div class="form-fields">
-              <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="${envDark.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-            </div>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>${localize('CALENDARIA.Editor.Weather.Zone.Temperatures')}</legend>
-          ${tempRows}
-        </fieldset>
-      </form>
-    `;
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>${localize('CALENDARIA.Editor.Weather.Zone.Temperatures')}</legend>
+        ${tempRows}
+      </fieldset>
+      <fieldset>
+        <legend>${localize('CALENDARIA.Editor.Weather.ZonePresets')}</legend>
+        <div class="preset-list">${presetRows}</div>
+      </fieldset>`;
 
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.Editor.Weather.Zone.Edit') },
-      position: { width: 'auto', height: 'auto' },
+      classes: ['calendaria', 'zone-climate-dialog'],
+      window: { title: format('CALENDARIA.Editor.Weather.Zone.EditTitle', { name: zone.name }) },
       content,
+      position: { width: 'auto', height: 'auto' },
       ok: {
-        callback: (_event, button, _dialog) => {
+        label: localize('CALENDARIA.Common.Save'),
+        callback: (_event, button) => {
           const form = button.form;
           const baseHue = form.elements.baseHue.value ? parseFloat(form.elements.baseHue.value) : null;
           const baseSat = form.elements.baseSaturation.value ? parseFloat(form.elements.baseSaturation.value) : null;
           const darkHue = form.elements.darkHue.value ? parseFloat(form.elements.darkHue.value) : null;
           const darkSat = form.elements.darkSaturation.value ? parseFloat(form.elements.darkSaturation.value) : null;
           const data = {
-            name: form.elements.name.value,
             description: form.elements.description.value,
             brightnessMultiplier: parseFloat(form.elements.brightnessMultiplier.value) || 1.0,
             environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
             environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null,
-            temperatures: {}
+            temperatures: {},
+            presets: {}
           };
           for (const season of seasonNames) {
-            const minVal = parseInt(form.elements[`temp_${season}_min`].value) || 0;
-            const maxVal = parseInt(form.elements[`temp_${season}_max`].value) || 20;
+            const minVal = parseInt(form.elements[`temp_${season}_min`]?.value) || 0;
+            const maxVal = parseInt(form.elements[`temp_${season}_max`]?.value) || 20;
             data.temperatures[season] = { min: fromDisplayUnit(minVal), max: fromDisplayUnit(maxVal) };
           }
-
+          for (const preset of allPresets) {
+            const enabled = !!form.elements[`preset_${preset.id}_enabled`]?.checked;
+            const chance = parseFloat(form.elements[`preset_${preset.id}_chance`]?.value) || 0;
+            if (!enabled && !chance) continue;
+            const pData = { id: preset.id, enabled, chance };
+            const tMin = form.elements[`preset_${preset.id}_tempMin`]?.value;
+            const tMax = form.elements[`preset_${preset.id}_tempMax`]?.value;
+            if (tMin !== '' && tMin != null) pData.tempMin = fromDisplayUnit(parseInt(tMin));
+            if (tMax !== '' && tMax != null) pData.tempMax = fromDisplayUnit(parseInt(tMax));
+            data.presets[preset.id] = pData;
+          }
           return data;
         }
       }
     });
 
     if (!result) return;
-    zone.name = result.name;
     zone.description = result.description;
     zone.brightnessMultiplier = result.brightnessMultiplier;
     zone.environmentBase = result.environmentBase;
     zone.environmentDark = result.environmentDark;
     zone.temperatures = result.temperatures;
-    this.render();
+    zone.presets = result.presets;
+    this.render({ parts: ['weather'] });
   }
 
   /**
-   * Delete the active climate zone.
+   * Set the active climate zone (mutual exclusion).
    * @param {Event} _event - Click event
-   * @param {HTMLElement} _target - Target element
+   * @param {HTMLElement} target - Checkbox element
    */
-  static async #onDeleteZone(_event, _target) {
-    const zonesObj = this.#calendarData.weather?.zones ?? {};
-    const activeZoneId = this.#calendarData.weather?.activeZone;
-    const zoneEntry = Object.entries(zonesObj).find(([, z]) => z.id === activeZoneId);
-    if (!zoneEntry) {
-      ui.notifications.warn('CALENDARIA.Editor.Weather.Zone.NoZones', { localize: true });
-      return;
-    }
+  static #onSetActiveZone(_event, target) {
+    const zoneKey = target.dataset.key;
+    const zone = this.#calendarData.weather?.zones?.[zoneKey];
+    if (!zone) return;
+    this.#calendarData.weather.activeZone = zone.id;
+    this.render({ parts: ['weather'] });
+  }
 
-    const [zoneKey, zone] = zoneEntry;
+  /**
+   * Delete a climate zone.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onDeleteZone(_event, target) {
+    const zoneKey = target.dataset.key;
+    const zonesObj = this.#calendarData.weather?.zones ?? {};
+    const zone = zonesObj[zoneKey];
+    if (!zone) return;
+
     const confirm = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Editor.Weather.Zone.Delete') },
       content: `<p>${format('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`
     });
 
     if (!confirm) return;
+    const wasActive = this.#calendarData.weather.activeZone === zone.id;
     delete zonesObj[zoneKey];
-    const remaining = Object.values(zonesObj);
-    this.#calendarData.weather.activeZone = remaining.length > 0 ? remaining[0].id : null;
+    if (wasActive) {
+      const firstRemaining = Object.values(zonesObj)[0];
+      this.#calendarData.weather.activeZone = firstRemaining?.id ?? null;
+    }
     this.render();
-  }
-
-  /**
-   * Toggle all presets in a category.
-   * @param {Event} event - Click event
-   * @param {HTMLElement} target - Target element
-   */
-  static #onToggleCategorySelectAll(event, target) {
-    event.stopPropagation();
-    const categoryId = target.dataset.category;
-    if (!categoryId) return;
-    const shouldEnable = target.checked;
-    const categoryDiv = this.element.querySelector(`.weather-category[data-category="${categoryId}"]`);
-    if (!categoryDiv) return;
-    const checkboxes = categoryDiv.querySelectorAll('.preset-enabled');
-    checkboxes.forEach((cb) => {
-      cb.checked = shouldEnable;
-    });
   }
 
   /**

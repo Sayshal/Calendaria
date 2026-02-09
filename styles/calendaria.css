@@ -2889,397 +2889,24 @@ span.calendaria-moon-icon {
   /* -------------------------------------------- */
   /*  Weather Tab Styles                          */
   /* -------------------------------------------- */
-
-  .weather-header {
-    gap: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 0.0625rem solid var(--color-cool-4);
-
-    .zone-controls {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-
-      .form-group {
-        gap: 0.5rem;
-        display: flex;
-        align-items: center;
-        margin: 0;
-      }
-
-      .zone-select {
-        min-width: 9.375rem;
-      }
-    }
-
-    .zone-actions {
-      gap: 0.25rem;
-      display: flex;
-    }
-
-    .zone-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 1.75rem;
-      height: 1.75rem;
-      padding: 0;
-      border: 0.0625rem solid var(--color-cool-4);
-      border-radius: 0.1875rem;
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      background: var(--color-cool-5);
-
-      &:hover {
-        color: var(--color-text-primary);
-        background: var(--color-cool-4);
-      }
-    }
-
-    .auto-generate {
-      margin: 0;
-    }
-  }
-
-  .season-climate-section {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border: 0.0625rem solid var(--color-cool-4);
-    border-radius: 0.25rem;
-
-    legend {
-      padding: 0 0.5rem;
-      font-weight: 600;
-    }
-
-    .hint {
-      margin: 0 0 0.5rem;
-      font-size: 0.85rem;
-    }
-  }
-
   .season-climate-list {
-    gap: 0.5rem;
-    grid-template-columns: repeat(2, 1fr);
-    display: grid;
+    --list-columns: auto 1fr auto;
   }
 
-  .season-climate-item {
-    gap: 0.5rem;
-    display: flex;
-    align-items: center;
-    padding: 0.35rem 0.5rem;
-    border-radius: 0.1875rem;
-    background: var(--color-cool-5);
-
-    .season-info {
-      gap: 0.35rem;
-      display: flex;
-      flex: 1;
-      align-items: center;
-      min-width: 0;
-    }
-
-    .season-icon {
-      flex-shrink: 0;
-      width: 1.125rem;
-      text-align: center;
-    }
-
-    .season-name {
-      overflow: hidden;
-      font-weight: 500;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .season-climate-status {
-      gap: 0.25rem;
-      display: flex;
-      flex-shrink: 0;
-      align-items: center;
-      color: var(--color-text-secondary);
-      font-size: 0.8rem;
-    }
-
-    .season-climate-btn {
-      flex-shrink: 0;
-      width: fit-content;
-      padding: 0.2rem 0.4rem;
-      border: 0.0625rem solid var(--color-cool-4);
-      border-radius: 0.1875rem;
-      cursor: pointer;
-      background: transparent;
-
-      &:hover {
-        background: var(--color-cool-4);
-      }
-    }
-  }
-
-  .zone-presets-section {
-    padding: 0.75rem;
-    border: 0.0625rem solid var(--color-cool-4);
-    border-radius: 0.25rem;
-
-    legend {
-      padding: 0 0.5rem;
-      font-weight: 600;
-    }
-
-    > .hint {
-      margin: 0 0 0.5rem;
-      font-size: 0.85rem;
-    }
-  }
-
-  .weather-presets-list {
-    gap: 1rem;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .weather-category {
-    border: 0.0625rem solid var(--color-cool-4);
-    border-radius: 0.25rem;
-
-    .category-header {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-      background: var(--color-cool-5);
-
-      i.toggle-icon {
-        transition: transform 0.2s;
-      }
-
-      .category-select-all {
-        margin: 0;
-        padding: 0;
-      }
-
-      .category-name {
-        flex: 1;
-      }
-
-      .category-stats {
-        gap: 0.5rem;
-        display: flex;
-        color: var(--color-text-secondary);
-        font-weight: 400;
-        font-size: var(--font-size-12);
-
-        .category-percent {
-          min-width: 2.5rem;
-          text-align: right;
-        }
-
-        .category-count {
-          opacity: 0.7;
-        }
-      }
-
-      &:hover {
-        background: var(--color-cool-4);
-      }
-    }
-
-    &.collapsed {
-      .category-header i.toggle-icon {
-        transform: rotate(-90deg);
-      }
-
-      .category-content {
-        display: none;
-      }
-    }
-  }
-
-  .weather-preset-header,
-  .weather-preset-item {
-    gap: 0.5rem;
-    grid-template-columns: 1.5rem 1.75rem 1fr 5.625rem 8.125rem 3.125rem;
-    display: grid;
-    align-items: center;
-    padding: 0.35rem 0.75rem;
-  }
-
-  .weather-preset-header {
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    font-size: var(--font-size-12);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .weather-preset-item {
-    position: relative;
-    border-top: 0.0625rem solid var(--color-cool-4-50);
-
-    &:hover {
-      background: var(--color-cool-5-50);
-    }
-
-    .preset-icon {
-      display: flex;
-      justify-content: center;
-
-      i {
-        font-size: var(--font-size-16);
-      }
-    }
-
-    .preset-name {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-
-      .preset-alias-input {
-        flex: 1;
-        min-width: 0;
-        font-weight: 500;
-        border: 0.0625rem solid transparent;
-        background: transparent;
-        padding: 0.125rem 0.25rem;
-        border-radius: 0.25rem;
-
-        &:hover,
-        &:focus {
-          border-color: var(--color-cool-4);
-          background: var(--color-cool-5);
-        }
-
-        &::placeholder {
-          color: var(--color-text-tertiary);
-          font-style: italic;
-        }
-      }
-
-      .preset-reset-alias {
-        width: 1.25rem;
-        height: 1.25rem;
-        padding: 0;
-        flex-shrink: 0;
-        color: var(--color-text-secondary);
-
-        &:hover {
-          color: var(--color-level-error);
-        }
-      }
-    }
-
-    .preset-chance {
-      gap: 0.25rem;
-      display: flex;
-      align-items: center;
-
-      input {
-        width: 3.75rem;
-        text-align: right;
-      }
-    }
-
-    .preset-temp {
-      gap: 0.25rem;
-      display: flex;
-      align-items: center;
-
-      input {
-        width: 2.8125rem;
-        text-align: right;
-      }
-
-      .temp-separator,
-      .temp-unit {
-        color: var(--color-text-secondary);
-        font-size: var(--font-size-12);
-      }
-    }
-
-    .preset-actions {
-      gap: 0.25rem;
-      display: flex;
-
-      button {
-        width: 1.5rem;
-        height: 1.5rem;
-        padding: 0.25rem;
-      }
-    }
-
-    .description-popover {
-      display: none;
-      z-index: 10;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      left: 0;
-      padding: 0.5rem;
-      border: 0.0625rem solid var(--color-cool-4);
-      border-radius: 0.25rem;
-      background: var(--color-cool-5);
-      box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 10%);
-
-      &.show {
-        display: block;
-      }
-
-      textarea {
-        width: 100%;
-        min-height: 3.75rem;
-        font-size: var(--font-size-13);
-        resize: vertical;
-      }
-    }
-  }
-
-  .weather-totals {
-    gap: 1rem;
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.25rem;
-    background: var(--color-cool-5);
-
-    .total-label {
-      font-weight: 600;
-    }
-
-    .total-value {
-      font-size: var(--font-size-16);
-
-      &.warning {
-        color: var(--color-level-warning);
-      }
-
-      &.valid {
-        color: var(--color-level-success);
-      }
-    }
-
-    .total-hint {
-      margin-left: auto;
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-12);
-    }
+  .zone-climate-list {
+    --list-columns: auto 1fr auto;
   }
 }
 /* -------------------------------------------- */
 /*  Climate Settings Dialog                     */
 /* -------------------------------------------- */
 
-.calendaria.climate-settings-dialog {
-  .dialog-content {
-    max-height: 31.25rem;
+.calendaria.climate-settings-dialog,
+.calendaria.zone-climate-dialog {
+  max-width: 62.5rem;
+  max-height: 53.125rem;
+
+  .window-content {
     overflow-y: auto;
   }
 
@@ -3323,6 +2950,26 @@ span.calendaria-moon-icon {
   .units {
     color: var(--color-text-secondary);
     font-size: 0.85rem;
+  }
+}
+
+.calendaria.zone-climate-dialog {
+  .temperature-row {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    input {
+      width: 5rem;
+    }
+  }
+
+  .preset-row {
+    grid-template-columns: 1.5rem 1.5rem 1fr 3.75rem 1.25rem 3.75rem 1.25rem 3.75rem 1.25rem;
+  }
+
+  .preset-temp-input {
+    width: 3.75rem;
   }
 }
 
