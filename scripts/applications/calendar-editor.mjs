@@ -118,16 +118,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'overview', group: 'primary', icon: 'fas fa-info-circle', label: 'CALENDARIA.Editor.Tab.Overview', color: '#ff144f' },
         { id: 'display', group: 'primary', icon: 'fas fa-eye', label: 'CALENDARIA.Editor.Tab.Display', color: '#ff144f' },
         // Structure group
-        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'structure' },
         { id: 'months', group: 'primary', icon: 'fas fa-calendar', label: 'CALENDARIA.Common.Months', tabGroup: 'structure' },
         { id: 'weeks', group: 'primary', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weeks', tabGroup: 'structure' },
-        { id: 'seasons', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.Common.Seasons', tabGroup: 'structure' },
         { id: 'years', group: 'primary', icon: 'fas fa-hashtag', label: 'CALENDARIA.Editor.Tab.Years', tabGroup: 'structure' },
-        { id: 'eras', group: 'primary', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras', tabGroup: 'structure' },
-        { id: 'cycles', group: 'primary', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Common.Cycles', tabGroup: 'structure' },
+        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'structure' },
         // Features group
-        { id: 'moons', group: 'primary', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons', tabGroup: 'features' },
         { id: 'festivals', group: 'primary', icon: 'fas fa-star', label: 'CALENDARIA.Common.Festivals', tabGroup: 'features' },
+        { id: 'eras', group: 'primary', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras', tabGroup: 'features' },
+        { id: 'cycles', group: 'primary', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Common.Cycles', tabGroup: 'features' },
+        { id: 'moons', group: 'primary', icon: 'fas fa-moon', label: 'CALENDARIA.Common.Moons', tabGroup: 'features' },
+        { id: 'seasons', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.Common.Seasons', tabGroup: 'features' },
         { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather', tabGroup: 'features' }
       ],
       initial: 'overview'

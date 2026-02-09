@@ -11,7 +11,7 @@
   </div>
 
   <fieldset class="season-climate-section">
-    <legend data-tooltip="{{localize 'CALENDARIA.Editor.Weather.SeasonClimateHint'}}">{{localize "CALENDARIA.Editor.Weather.SeasonClimate"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Weather.SeasonClimateHint'}}">{{localize "CALENDARIA.Editor.Weather.SeasonClimate"}}</legend>
     {{#if seasonClimateList.length}}
     <div class="items-list season-climate-list">
       {{#each seasonClimateList}}
@@ -33,7 +33,7 @@
   </fieldset>
 
   <fieldset>
-    <legend data-tooltip="{{localize 'CALENDARIA.Editor.Weather.ZoneClimateHint'}}">{{localize "CALENDARIA.Editor.Weather.ZoneClimate"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Weather.ZoneClimateHint'}}">{{localize "CALENDARIA.Editor.Weather.ZoneClimate"}}</legend>
     {{#if zoneList.length}}
     <div class="items-list zone-climate-list">
       <div class="list-header flexrow">

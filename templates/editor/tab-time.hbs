@@ -1,6 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.TimeStructure"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.TimeStructure'}}">{{localize "CALENDARIA.Editor.Section.TimeStructure"}}</legend>
 
     <div class="notice warning">
       <i class="fas fa-exclamation-triangle"></i>
@@ -38,7 +38,7 @@
   </fieldset>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.Daylight'}}">{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
 
     <div class="form-group">
       <label for="editor-daylight-enabled">{{localize "CALENDARIA.Editor.Field.DaylightEnabled"}}</label>
@@ -95,7 +95,7 @@
   </fieldset>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.AmPmNotation"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.AmPmNotation'}}">{{localize "CALENDARIA.Editor.Section.AmPmNotation"}}</legend>
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.AmPmNotation"}}</p>
 
     <div class="form-group">
@@ -132,7 +132,7 @@
   </fieldset>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Common.CanonicalHours"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.CanonicalHours'}}">{{localize "CALENDARIA.Common.CanonicalHours"}}</legend>
     <p class="hint">{{localize "CALENDARIA.Editor.Hint.CanonicalHours"}}</p>
 
     {{#if canonicalHoursWithNav.length}}

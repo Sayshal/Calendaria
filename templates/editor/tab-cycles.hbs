@@ -9,7 +9,7 @@
   </div>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Common.Cycles"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.Cycles'}}">{{localize "CALENDARIA.Common.Cycles"}}</legend>
 
     {{#if cyclesWithNav.length}}
     <div class="items-list cycles-list">
@@ -67,7 +67,7 @@
         </div>
 
         <fieldset class="cycle-stages-section">
-          <legend>{{localize "CALENDARIA.Editor.Section.CycleStages"}} ({{this.stagesWithIndex.length}})</legend>
+          <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.CycleStages'}}">{{localize "CALENDARIA.Editor.Section.CycleStages"}} ({{this.stagesWithIndex.length}})</legend>
 
           {{#if this.stagesWithIndex.length}}
           <div class="stages-list">

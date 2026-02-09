@@ -1,6 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.YearSettings"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.YearSettings'}}">{{localize "CALENDARIA.Editor.Section.YearSettings"}}</legend>
 
     <div class="form-group">
       <label for="editor-year-zero">{{localize "CALENDARIA.Editor.Field.YearZero"}}</label>
@@ -42,7 +42,7 @@
   </fieldset>
 
   <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Section.LeapYear"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.LeapYear'}}">{{localize "CALENDARIA.Editor.Section.LeapYear"}}</legend>
 
     <div class="form-group">
       <label for="editor-leap-rule">{{localize "CALENDARIA.Editor.Field.LeapRule"}}</label>
@@ -101,7 +101,7 @@
   </fieldset>
 
   <fieldset>
-    <legend data-tooltip="{{localize 'CALENDARIA.Editor.Hint.NamedYears'}}">
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.NamedYears'}}">
       {{localize "CALENDARIA.Editor.Section.NamedYears"}}
     </legend>
 
