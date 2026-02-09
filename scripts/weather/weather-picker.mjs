@@ -76,7 +76,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       return a.label.localeCompare(b.label, game.i18n.lang);
     });
     const enabledPresetIds = new Set();
-    if (selectedZone?.presets) for (const p of selectedZone.presets) if (p.enabled !== false) enabledPresetIds.add(p.id);
+    if (selectedZone?.presets) for (const p of Object.values(selectedZone.presets)) if (p.enabled !== false) enabledPresetIds.add(p.id);
     const shouldFilter = selectedZone && enabledPresetIds.size > 0;
     context.categories = [];
     context.selectedPresetId = this.#selectedPresetId;

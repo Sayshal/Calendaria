@@ -387,8 +387,8 @@ async function migrateWeatherZones() {
       fixed.temperatures = {};
       changed = true;
     }
-    if (!Array.isArray(fixed.presets)) {
-      fixed.presets = [];
+    if (!fixed.presets || typeof fixed.presets !== 'object') {
+      fixed.presets = Array.isArray(fixed.presets) ? fixed.presets : [];
       changed = true;
     }
     if (!fixed.seasonOverrides || typeof fixed.seasonOverrides !== 'object') {
@@ -396,12 +396,13 @@ async function migrateWeatherZones() {
       changed = true;
     }
 
-    // Validate presets array
-    fixed.presets = fixed.presets.filter((p) => p && typeof p === 'object' && p.id);
-    for (const preset of fixed.presets) {
+    // Validate presets (array or keyed object)
+    const presetsArr = Array.isArray(fixed.presets) ? fixed.presets : Object.values(fixed.presets);
+    for (const preset of presetsArr) {
       if (preset.enabled === undefined) preset.enabled = false;
       if (preset.chance === undefined) preset.chance = 0;
     }
+    if (Array.isArray(fixed.presets)) fixed.presets = fixed.presets.filter((p) => p && typeof p === 'object' && p.id);
 
     return changed ? fixed : zone;
   };

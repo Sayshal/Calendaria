@@ -63,14 +63,17 @@ function weightedSelect(weights, randomFn = Math.random) {
 function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, season) {
   const probabilities = {};
   let tempRange = { min: 10, max: 22 };
-  if (seasonClimate?.presets?.length) for (const preset of seasonClimate.presets) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
-  if (zoneOverride?.presets?.length) {
-    for (const preset of zoneOverride.presets) {
+  const seasonPresets = Object.values(seasonClimate?.presets ?? {});
+  if (seasonPresets.length) for (const preset of seasonPresets) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
+  const zonePresets = Object.values(zoneOverride?.presets ?? {});
+  if (zonePresets.length) {
+    for (const preset of zonePresets) {
       if (preset.chance === 0) delete probabilities[preset.id];
       else if (preset.chance > 0) probabilities[preset.id] = preset.chance;
     }
-  } else if (zoneFallback?.presets?.length) {
-    for (const preset of zoneFallback.presets) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
+  } else {
+    const fallbackPresets = Object.values(zoneFallback?.presets ?? {});
+    if (fallbackPresets.length) for (const preset of fallbackPresets) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
   }
   if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) tempRange = { min: zoneOverride.temperatures.min ?? 10, max: zoneOverride.temperatures.max ?? 22 };
   else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) tempRange = { min: seasonClimate.temperatures.min ?? 10, max: seasonClimate.temperatures.max ?? 22 };
@@ -100,7 +103,7 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
   let finalTempRange = { ...tempRange };
-  const presetConfig = zoneConfig?.presets?.find((p) => p.id === weatherId && p.enabled !== false);
+  const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
   if (presetConfig?.tempMin != null) finalTempRange.min = presetConfig.tempMin;
   if (presetConfig?.tempMax != null) finalTempRange.max = presetConfig.tempMax;
   const temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));

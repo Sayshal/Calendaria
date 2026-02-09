@@ -594,7 +594,8 @@ function getMoonPhaseName(calendar, components) {
   }
   // Fallback for non-CalendariaCalendar objects
   const moon = calendar.moonsArray[0];
-  if (!moon.phases?.length) return '';
+  const phasesArr = Object.values(moon.phases ?? {});
+  if (!phasesArr.length) return '';
   const { year, month, dayOfMonth } = components;
   const cycleLength = moon.cycleLength || 29;
   const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
@@ -602,8 +603,8 @@ function getMoonPhaseName(calendar, components) {
   const currentDays = year * 365 + month * 30 + dayOfMonth;
   const daysSinceRef = currentDays - refDays;
   const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
-  const phaseIndex = Math.floor(cyclePosition * moon.phases.length);
-  const phase = moon.phases[phaseIndex];
+  const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
+  const phase = phasesArr[phaseIndex];
   return phase ? localize(phase.name) : '';
 }
 
@@ -646,16 +647,19 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     if (phaseData) phase = { name: phaseData.name, icon: phaseData.icon };
   }
 
-  if (!phase && moon.phases?.length) {
-    const { year, month, dayOfMonth } = components;
-    const cycleLength = moon.cycleLength || 29;
-    const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
-    const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
-    const currentDays = year * 365 + month * 30 + dayOfMonth;
-    const daysSinceRef = currentDays - refDays;
-    const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
-    const phaseIndex = Math.floor(cyclePosition * moon.phases.length);
-    phase = moon.phases[phaseIndex];
+  if (!phase) {
+    const phasesArr = Object.values(moon.phases ?? {});
+    if (phasesArr.length) {
+      const { year, month, dayOfMonth } = components;
+      const cycleLength = moon.cycleLength || 29;
+      const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
+      const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
+      const currentDays = year * 365 + month * 30 + dayOfMonth;
+      const daysSinceRef = currentDays - refDays;
+      const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+      const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
+      phase = phasesArr[phaseIndex];
+    }
   }
 
   if (!phase?.icon) return '';

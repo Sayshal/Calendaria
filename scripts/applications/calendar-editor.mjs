@@ -1741,7 +1741,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     if (!result) return;
-    season.climate = result.presets.length > 0 || result.temperatures ? result : null;
+    season.climate = result.presets.length || result.temperatures ? result : null;
     this.render({ parts: ['weather'] });
   }
 
