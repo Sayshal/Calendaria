@@ -143,19 +143,18 @@ export default class BaseImporter {
   validate(data) {
     const errors = [];
     if (!data.name) errors.push(localize('CALENDARIA.Importer.Error.MissingName'));
-    if (!data.months?.values?.length) errors.push(localize('CALENDARIA.Importer.Error.NoMonths'));
+    const months = data.months?.values ? Object.values(data.months.values) : [];
+    if (!months.length) errors.push(localize('CALENDARIA.Importer.Error.NoMonths'));
     if (!data.days) errors.push(localize('CALENDARIA.Importer.Error.MissingTimeConfig'));
     if (data.days) {
       if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidHoursPerDay'));
       if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidMinutesPerHour'));
       if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidSecondsPerMinute'));
     }
-    if (data.months?.values) {
-      for (let i = 0; i < data.months.values.length; i++) {
-        const month = data.months.values[i];
-        if (!month.name) errors.push(format('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
-        if (!month.days || month.days < 1) errors.push(format('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
-      }
+    for (let i = 0; i < months.length; i++) {
+      const month = months[i];
+      if (!month.name) errors.push(format('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
+      if (!month.days || month.days < 1) errors.push(format('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
     }
 
     return { valid: errors.length === 0, errors };
@@ -252,12 +251,12 @@ export default class BaseImporter {
     const notes = this.#countNotes(rawData);
     return {
       name: transformedData.name || 'Unknown',
-      monthCount: transformedData.months?.values?.length ?? 0,
-      weekdayCount: transformedData.days?.values?.length ?? 0,
-      moonCount: transformedData.moons?.length ?? 0,
-      seasonCount: transformedData.seasons?.values?.length ?? 0,
-      eraCount: transformedData.eras?.length ?? 0,
-      festivalCount: transformedData.festivals?.length ?? 0,
+      monthCount: transformedData.months?.values ? Object.values(transformedData.months.values).length : 0,
+      weekdayCount: transformedData.days?.values ? Object.values(transformedData.days.values).length : 0,
+      moonCount: transformedData.moons ? Object.values(transformedData.moons).length : 0,
+      seasonCount: transformedData.seasons?.values ? Object.values(transformedData.seasons.values).length : 0,
+      eraCount: transformedData.eras ? Object.values(transformedData.eras).length : 0,
+      festivalCount: transformedData.festivals ? Object.values(transformedData.festivals).length : 0,
       noteCount: notes,
       undatedCount: this._undatedEvents?.length ?? 0,
       hasLeapYear: !!transformedData.years?.leapYear?.rule,
@@ -298,7 +297,7 @@ export default class BaseImporter {
    * @private
    */
   #calculateDaysPerYear(data) {
-    if (!data.months?.values) return 0;
-    return data.months.values.reduce((sum, month) => sum + (month.days || 0), 0);
+    const months = data.months?.values ? Object.values(data.months.values) : [];
+    return months.reduce((sum, month) => sum + (month.days || 0), 0);
   }
 }

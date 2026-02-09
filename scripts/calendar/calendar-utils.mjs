@@ -34,9 +34,9 @@ export function preLocalizeCalendar(calendarData) {
  * @returns {object|null} Festival object if found, null otherwise
  */
 export function findFestivalDay(calendar, time = game.time.worldTime) {
-  if (!calendar.festivals || calendar.festivals.length === 0) return null;
+  if (!calendar.festivalsArray?.length) return null;
   const components = typeof time === 'number' ? calendar.timeToComponents(time) : time;
-  return calendar.festivals.find((f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1) ?? null;
+  return calendar.festivalsArray.find((f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1) ?? null;
 }
 
 /**
@@ -61,7 +61,7 @@ export function formatMonthDay(calendar, components, options = {}) {
   const festivalDay = findFestivalDay(calendar, components);
   if (festivalDay) return localize(festivalDay.name);
   const day = components.dayOfMonth + 1;
-  const month = calendar.months.values[components.month];
+  const month = calendar.monthsArray[components.month];
   const monthName = options.abbreviated ? getMonthAbbreviation(month) : month.name;
   return format('CALENDARIA.Formatters.DayMonth', { day, month: localize(monthName) });
 }
@@ -83,7 +83,7 @@ export function formatMonthDayYear(calendar, components, options = {}) {
 
   // Use standard formatting if no festival
   const day = components.dayOfMonth + 1;
-  const month = calendar.months.values[components.month];
+  const month = calendar.monthsArray[components.month];
   const monthName = options.abbreviated ? getMonthAbbreviation(month) : month.name;
   const year = components.year + (calendar.years?.yearZero ?? 0);
   return format('CALENDARIA.Formatters.DayMonthYear', { day, month: localize(monthName), yyyy: year });

@@ -233,7 +233,7 @@ export default class ReminderScheduler {
     if (nextDay > daysInMonth) {
       nextDay = 1;
       nextMonth++;
-      if (nextMonth >= calendar.months.values.length) {
+      if (nextMonth >= calendar.monthsArray.length) {
         nextMonth = 0;
         nextYear++;
       }

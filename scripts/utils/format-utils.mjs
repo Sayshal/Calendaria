@@ -48,17 +48,17 @@ export function dateFormattingParts(calendar, components) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const internalYear = displayYear - yearZero;
   const isMonthless = calendar?.isMonthless ?? false;
-  const monthData = isMonthless ? null : calendar?.months?.values?.[month];
+  const monthData = isMonthless ? null : calendar?.monthsArray?.[month];
   const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: dayOfMonth - 1 });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
   const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
-  const weekdays = calendar?.days?.values || [];
+  const weekdays = calendar?.weekdaysArray ?? [];
   let daysInMonthsBefore = 0;
   if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
-  else if (!isMonthless) daysInMonthsBefore = (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
+  else if (!isMonthless) daysInMonthsBefore = (calendar?.monthsArray ?? []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
   let totalDaysFromPriorYears = 0;
   if (calendar?.getDaysInYear) {
@@ -84,7 +84,7 @@ export function dateFormattingParts(calendar, components) {
   const isPM = hour >= midday;
   const meridiemFull = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
   const meridiemAbbr = isPM ? amPm.pmAbbr || meridiemFull : amPm.amAbbr || meridiemFull;
-  const erasArray = Array.isArray(calendar?.eras) ? calendar.eras : calendar?.eras?.values;
+  const erasArray = calendar?.erasArray;
   const matchingEras = [];
   if (erasArray?.length > 0) {
     for (const era of erasArray) {
@@ -111,8 +111,8 @@ export function dateFormattingParts(calendar, components) {
   if (currentSeason) {
     seasonName = localize(currentSeason.name);
     seasonAbbr = currentSeason.abbreviation ? localize(currentSeason.abbreviation) : seasonName.slice(0, 3);
-    const seasonsArray = calendar?.seasons?.values || [];
-    seasonIndex = seasonsArray.indexOf(currentSeason);
+    const allSeasons = calendar?.seasonsArray ?? [];
+    seasonIndex = allSeasons.indexOf(currentSeason);
   }
 
   const daysPerWeek = weekdays.length || 7;
@@ -372,7 +372,7 @@ export function formatApproximateDate(calendar, components) {
 
   // Calculate day of year
   let dayOfYear = components.dayOfMonth;
-  const monthsValues = calendar?.months?.values || [];
+  const monthsValues = calendar?.monthsArray ?? [];
   for (let i = 0; i < components.month; i++) {
     dayOfYear += monthsValues[i]?.days ?? 0;
   }
@@ -380,7 +380,7 @@ export function formatApproximateDate(calendar, components) {
   // Get season bounds - check month-based first (most specific), then periodic, then day-of-year
   let seasonStart = 0;
   let seasonEnd = 365;
-  const seasonsArray = calendar?.seasons?.values || [];
+  const seasonsArray = calendar?.seasonsArray ?? [];
   const seasonIdx = seasonsArray.indexOf(season);
 
   if (season.monthStart != null && season.monthEnd != null) {
@@ -553,14 +553,14 @@ export function validateFormatString(formatStr, calendar, components) {
  * @returns {string} Moon phase name
  */
 function getMoonPhaseName(calendar, components) {
-  if (!calendar?.moons?.length) return '';
+  if (!calendar?.moonsArray?.length) return '';
   if (calendar.getMoonPhase && calendar.componentsToTime) {
     const worldTime = calendar.componentsToTime(components);
     const phaseData = calendar.getMoonPhase(0, worldTime);
     return phaseData?.subPhaseName || phaseData?.name || '';
   }
   // Fallback for non-CalendariaCalendar objects
-  const moon = calendar.moons[0];
+  const moon = calendar.moonsArray[0];
   if (!moon.phases?.length) return '';
   const { year, month, dayOfMonth } = components;
   const cycleLength = moon.cycleLength || 29;
@@ -582,14 +582,14 @@ function getMoonPhaseName(calendar, components) {
  * @returns {string} Moon phase icon marker (use renderMoonIcons to convert to HTML)
  */
 function getMoonPhaseIcon(calendar, components, moonSelector) {
-  if (!calendar?.moons?.length) return '';
+  if (!calendar?.moonsArray?.length) return '';
   let moonIndex = 0;
   if (moonSelector !== undefined && moonSelector !== null && moonSelector !== '') {
     if (typeof moonSelector === 'number') moonIndex = moonSelector;
     else if (/^\d+$/.test(moonSelector)) moonIndex = parseInt(moonSelector, 10);
     else {
       const selectorLower = String(moonSelector).toLowerCase();
-      const foundIndex = calendar.moons.findIndex((m) => {
+      const foundIndex = calendar.moonsArray.findIndex((m) => {
         const moonName = localize(m.name).toLowerCase();
         const rawName = (m.name || '').toLowerCase();
         return moonName === selectorLower || rawName === selectorLower;
@@ -598,7 +598,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     }
   }
 
-  const moon = calendar.moons[moonIndex];
+  const moon = calendar.moonsArray[moonIndex];
   if (!moon) return '';
   let phase;
   if (calendar.getMoonPhase && calendar.componentsToTime) {
@@ -672,8 +672,8 @@ export function stripMoonIconMarkers(str) {
  */
 function getCanonicalHour(calendar, components) {
   const { hour = 0 } = components;
-  if (!calendar?.canonicalHours?.length) return '';
-  for (const ch of calendar.canonicalHours) {
+  if (!calendar?.canonicalHoursArray?.length) return '';
+  for (const ch of calendar.canonicalHoursArray) {
     // Handle hours that wrap around midnight (e.g., 21-1 means 21:00 to 01:00)
     if (ch.startHour <= ch.endHour) {
       if (hour >= ch.startHour && hour < ch.endHour) return localize(ch.name);
@@ -693,8 +693,8 @@ function getCanonicalHour(calendar, components) {
  */
 function getCanonicalHourAbbr(calendar, components) {
   const { hour = 0 } = components;
-  if (!calendar?.canonicalHours?.length) return '';
-  for (const ch of calendar.canonicalHours) {
+  if (!calendar?.canonicalHoursArray?.length) return '';
+  for (const ch of calendar.canonicalHoursArray) {
     // Handle hours that wrap around midnight (e.g., 21-1 means 21:00 to 01:00)
     let matches = false;
     if (ch.startHour <= ch.endHour) matches = hour >= ch.startHour && hour < ch.endHour;
@@ -716,8 +716,8 @@ function getCycleName(calendar, components) {
     const entry = calendar.getCycleEntry(0, components);
     return entry?.name ? localize(entry.name) : '';
   }
-  if (!calendar?.cycles?.length) return '';
-  const cycle = calendar.cycles[0];
+  if (!calendar?.cyclesArray?.length) return '';
+  const cycle = calendar.cyclesArray[0];
   if (!cycle?.entries?.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
@@ -736,8 +736,8 @@ function getCycleName(calendar, components) {
  */
 function getCycleNumber(calendar, components) {
   if (calendar?.getCurrentCycleNumber) return calendar.getCurrentCycleNumber(0, components);
-  if (!calendar?.cycles?.length) return '';
-  const cycle = calendar.cycles[0];
+  if (!calendar?.cyclesArray?.length) return '';
+  const cycle = calendar.cyclesArray[0];
   if (!cycle?.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;

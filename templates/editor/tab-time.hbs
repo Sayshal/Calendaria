@@ -150,23 +150,23 @@
       </div>
 
       {{#each canonicalHoursWithNav}}
-      <div class="item canonical-hour-item flexrow" data-index="{{this.index}}">
-        <input type="text" id="editor-canonical-{{this.index}}-name" name="canonicalHours.{{this.index}}.name"
+      <div class="item canonical-hour-item flexrow" data-key="{{this.key}}">
+        <input type="text" id="editor-canonical-{{this.key}}-name" name="canonicalHours.{{this.key}}.name"
           value="{{this.name}}" class="col-name">
-        <input type="text" id="editor-canonical-{{this.index}}-abbr"
-          name="canonicalHours.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
-        <input type="number" id="editor-canonical-{{this.index}}-start"
-          name="canonicalHours.{{this.index}}.startHour" value="{{this.startHour}}" min="0" max="23"
+        <input type="text" id="editor-canonical-{{this.key}}-abbr"
+          name="canonicalHours.{{this.key}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
+        <input type="number" id="editor-canonical-{{this.key}}-start"
+          name="canonicalHours.{{this.key}}.startHour" value="{{this.startHour}}" min="0" max="23"
           class="col-start">
-        <input type="number" id="editor-canonical-{{this.index}}-end" name="canonicalHours.{{this.index}}.endHour"
+        <input type="number" id="editor-canonical-{{this.key}}-end" name="canonicalHours.{{this.key}}.endHour"
           value="{{this.endHour}}" min="0" max="23" class="col-end">
 
         <div class="item-controls col-controls">
-          <button type="button" data-action="addCanonicalHour" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="addCanonicalHour" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.AddCanonicalHour'}}">
             <i class="fas fa-plus"></i>
           </button>
-          <button type="button" data-action="removeCanonicalHour" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="removeCanonicalHour" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Common.Remove'}}">
             <i class="fas fa-trash"></i>
           </button>
@@ -177,7 +177,7 @@
     {{else}}
     <div class="empty-list">
       <p>{{localize "CALENDARIA.Editor.NoCanonicalHours"}}</p>
-      <button type="button" data-action="addCanonicalHour" data-index="-1">
+      <button type="button" data-action="addCanonicalHour">
         <i class="fas fa-plus"></i>
         {{localize "CALENDARIA.Editor.AddCanonicalHour"}}
       </button>

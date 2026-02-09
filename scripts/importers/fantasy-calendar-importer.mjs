@@ -1020,7 +1020,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #addDaysToDate(date, daysToAdd, calendar) {
     let { year, month, day } = { ...date };
     let remaining = daysToAdd;
-    const months = calendar?.months?.values || [];
+    const months = calendar?.monthsArray || [];
     if (!months.length) return { year, month, day: day + daysToAdd };
     while (remaining > 0) {
       const monthData = months[month];

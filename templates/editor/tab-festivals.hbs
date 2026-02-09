@@ -24,54 +24,54 @@
     </div>
 
     {{#each festivalsWithNav}}
-    <div class="item festival-item" data-index="{{this.index}}">
+    <div class="item festival-item" data-key="{{this.key}}">
       <div class="festival-main flexrow">
-        <input type="text" id="editor-festival-{{this.index}}-name" name="festivals.{{this.index}}.name"
+        <input type="text" id="editor-festival-{{this.index}}-name" name="festivals.{{this.key}}.name"
           value="{{this.name}}" class="col-name">
 
         <button type="button" class="col-icon festival-icon-display" data-action="editFestivalIcon"
-          data-index="{{this.index}}" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.FestivalIcon'}}"
+          data-key="{{this.key}}" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.FestivalIcon'}}"
           style="color: {{#if this.color}}{{this.color}}{{else}}#d4af37{{/if}}">
           <i class="{{#if this.icon}}{{this.icon}}{{else}}fas fa-star{{/if}}"></i>
         </button>
-        <input type="hidden" name="festivals.{{this.index}}.icon" value="{{this.icon}}">
-        <input type="hidden" name="festivals.{{this.index}}.color"
+        <input type="hidden" name="festivals.{{this.key}}.icon" value="{{this.icon}}">
+        <input type="hidden" name="festivals.{{this.key}}.color"
           value="{{#if this.color}}{{this.color}}{{else}}#d4af37{{/if}}">
 
-        <select id="editor-festival-{{this.index}}-month" name="festivals.{{this.index}}.month" class="col-month">
+        <select id="editor-festival-{{this.index}}-month" name="festivals.{{this.key}}.month" class="col-month">
           {{#each this.monthOptions}}
           <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
-        <input type="number" id="editor-festival-{{this.index}}-day" name="festivals.{{this.index}}.day"
+        <input type="number" id="editor-festival-{{this.index}}-day" name="festivals.{{this.key}}.day"
           value="{{this.day}}" min="1" class="col-day">
-        <input type="number" id="editor-festival-{{this.index}}-duration" name="festivals.{{this.index}}.duration"
+        <input type="number" id="editor-festival-{{this.index}}-duration" name="festivals.{{this.key}}.duration"
           value="{{#if this.duration}}{{this.duration}}{{else}}1{{/if}}" min="1" class="col-duration">
-        <input type="number" id="editor-festival-{{this.index}}-leap-dur" name="festivals.{{this.index}}.leapDuration"
+        <input type="number" id="editor-festival-{{this.index}}-leap-dur" name="festivals.{{this.key}}.leapDuration"
           value="{{this.leapDuration}}" min="1" class="col-leap-duration" placeholder="—">
 
         <label class="col-leap checkbox">
-          <input type="checkbox" name="festivals.{{this.index}}.leapYearOnly" {{#if this.leapYearOnly}}checked{{/if}}>
+          <input type="checkbox" name="festivals.{{this.key}}.leapYearOnly" {{#if this.leapYearOnly}}checked{{/if}}>
         </label>
 
         <label class="col-weekday checkbox">
-          <input type="checkbox" name="festivals.{{this.index}}.countsForWeekday" {{#if (eq
+          <input type="checkbox" name="festivals.{{this.key}}.countsForWeekday" {{#if (eq
             this.countsForWeekday
             false)}}checked{{/if}}>
         </label>
 
         <div class="item-controls col-controls">
-          <button type="button" data-action="addFestival" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="addFestival" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddFestival'}}">
             <i class="fas fa-plus"></i>
           </button>
-          <button type="button" data-action="removeFestival" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="removeFestival" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveFestival'}}">
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </div>
-      <textarea name="festivals.{{this.index}}.description" class="festival-description" rows="1"
+      <textarea name="festivals.{{this.key}}.description" class="festival-description" rows="1"
         placeholder="{{localize 'CALENDARIA.Editor.Placeholder.FestivalDescription'}}">{{this.description}}</textarea>
     </div>
     {{/each}}
@@ -79,7 +79,7 @@
     {{else}}
     <div class="empty-list">
       <p>{{localize "CALENDARIA.Editor.NoFestivals"}}</p>
-      <button type="button" data-action="addFestival" data-index="-1">
+      <button type="button" data-action="addFestival" data-key="">
         <i class="fas fa-plus"></i>
         {{localize "CALENDARIA.Editor.AddFestival"}}
       </button>

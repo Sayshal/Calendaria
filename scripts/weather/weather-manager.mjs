@@ -345,10 +345,11 @@ export default class WeatherManager {
    */
   static getActiveZone(zoneId, scene) {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.weather?.zones?.length) return null;
+    const zones = calendar?.weatherZonesArray;
+    if (!zones?.length) return null;
     const sceneOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE);
     const targetId = zoneId ?? sceneOverride ?? calendar.weather.activeZone ?? 'temperate';
-    return calendar.weather.zones.find((z) => z.id === targetId) ?? calendar.weather.zones[0] ?? null;
+    return zones.find((z) => z.id === targetId) ?? zones[0] ?? null;
   }
 
   /**
@@ -363,7 +364,8 @@ export default class WeatherManager {
     if (!calendarId) return;
     const calendarData = CalendarManager.getCalendar(calendarId)?.toObject();
     if (!calendarData?.weather) return;
-    const zone = calendarData.weather.zones?.find((z) => z.id === zoneId);
+    const zones = calendarData.weather.zones ? Object.values(calendarData.weather.zones) : [];
+    const zone = zones.find((z) => z.id === zoneId);
     if (!zone) return;
     calendarData.weather.activeZone = zoneId;
     // Use isBundledCalendar directly to avoid legacy data issues
@@ -381,7 +383,7 @@ export default class WeatherManager {
    */
   static getCalendarZones() {
     const calendar = CalendarManager.getActiveCalendar();
-    return calendar?.weather?.zones ?? [];
+    return calendar?.weatherZonesArray ?? [];
   }
 
   /**

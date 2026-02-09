@@ -200,8 +200,8 @@ export function getNotesForDay(notes, year, month, day) {
  * @returns {object|null} Moon phase data with icon and tooltip
  */
 export function getFirstMoonPhase(calendar, year, month, day) {
-  if (!calendar?.moons?.length) return null;
-  const sortedMoons = [...calendar.moons].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
+  if (!calendar?.moonsArray?.length) return null;
+  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
   let moon = sortedMoons[0];
   if (selectedMoonOverride) {
     const overrideMoon = sortedMoons.find((m) => localize(m.name) === selectedMoonOverride);
@@ -225,11 +225,11 @@ export function getFirstMoonPhase(calendar, year, month, day) {
  * @returns {Array|null} Array of moon phase data sorted alphabetically by moon name
  */
 export function getAllMoonPhases(calendar, year, month, day) {
-  if (!calendar?.moons?.length) return null;
+  if (!calendar?.moonsArray?.length) return null;
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   const dayComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
-  return calendar.moons
+  return calendar.moonsArray
     .map((moon, index) => {
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;

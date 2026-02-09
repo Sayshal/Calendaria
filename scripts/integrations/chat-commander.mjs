@@ -333,16 +333,17 @@ function cmdWeather() {
 function cmdMoon(_chat, parameters) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
-  if (!calendar.moons?.length) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoMoons')) };
+  const moons = calendar.moonsArray;
+  if (!moons?.length) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoMoons')) };
   const moonIndex = parameters?.trim() ? parseInt(parameters.trim(), 10) : null;
   if (moonIndex !== null && !isNaN(moonIndex)) {
-    const moon = calendar.moons[moonIndex];
+    const moon = moons[moonIndex];
     const phase = calendar.getMoonPhase(moonIndex);
     if (!moon || !phase) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoMoons')) };
     const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
     return { content: wrapContent(`${icon}<strong>${localize(moon.name)}:</strong> ${phase.subPhaseName || localize(phase.name)}`) };
   }
-  const lines = calendar.moons
+  const lines = moons
     .map((moon, index) => {
       const phase = calendar.getMoonPhase(index);
       if (!phase) return null;
@@ -528,8 +529,9 @@ function cmdCalendar() {
     const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
     lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Weather')}:</strong> <i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`);
   }
-  if (calendar.moons?.length) {
-    const moonStrs = calendar.moons
+  const calMoons = calendar.moonsArray;
+  if (calMoons?.length) {
+    const moonStrs = calMoons
       .map((moon, index) => {
         const phase = calendar.getMoonPhase(index);
         return phase ? `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` : null;

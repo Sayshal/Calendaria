@@ -27,55 +27,53 @@ export function preLocalizeCalendar(calendarData) {
   if (calendarData.name) calendarData.name = localize(calendarData.name);
   if (calendarData.metadata?.description) calendarData.metadata.description = localize(calendarData.metadata.description);
   if (calendarData.months?.values) {
-    for (const month of calendarData.months.values) {
+    for (const month of Object.values(calendarData.months.values)) {
       if (month.name) month.name = localize(month.name);
       if (month.abbreviation) month.abbreviation = localize(month.abbreviation);
     }
   }
 
   if (calendarData.days?.values) {
-    for (const day of calendarData.days.values) {
+    for (const day of Object.values(calendarData.days.values)) {
       if (day.name) day.name = localize(day.name);
       if (day.abbreviation) day.abbreviation = localize(day.abbreviation);
     }
   }
 
   if (calendarData.seasons?.values) {
-    for (const season of calendarData.seasons.values) {
+    for (const season of Object.values(calendarData.seasons.values)) {
       if (season.name) season.name = localize(season.name);
       if (season.abbreviation) season.abbreviation = localize(season.abbreviation);
     }
   }
 
   if (calendarData.eras) {
-    for (const era of calendarData.eras) {
+    for (const era of Object.values(calendarData.eras)) {
       if (era.name) era.name = localize(era.name);
       if (era.abbreviation) era.abbreviation = localize(era.abbreviation);
     }
   }
 
-  if (calendarData.festivals) for (const festival of calendarData.festivals) if (festival.name) festival.name = localize(festival.name);
-  if (calendarData.moons) for (const moon of calendarData.moons) if (moon.name) moon.name = localize(moon.name);
+  if (calendarData.festivals) for (const festival of Object.values(calendarData.festivals)) if (festival.name) festival.name = localize(festival.name);
+  if (calendarData.moons) for (const moon of Object.values(calendarData.moons)) if (moon.name) moon.name = localize(moon.name);
   if (calendarData.cycles) {
-    for (const cycle of calendarData.cycles) {
+    for (const cycle of Object.values(calendarData.cycles)) {
       if (cycle.name) cycle.name = localize(cycle.name);
-      if (cycle.entries) for (const entry of cycle.entries) if (entry.name) entry.name = localize(entry.name);
+      if (cycle.entries) for (const entry of Object.values(cycle.entries)) if (entry.name) entry.name = localize(entry.name);
     }
   }
 
   if (calendarData.canonicalHours) {
-    for (const hour of calendarData.canonicalHours) {
+    for (const hour of Object.values(calendarData.canonicalHours)) {
       if (hour.name) hour.name = localize(hour.name);
       if (hour.abbreviation) hour.abbreviation = localize(hour.abbreviation);
     }
   }
 
   if (calendarData.weeks?.names) {
-    calendarData.weeks.names = calendarData.weeks.names.map((n) => {
-      if (typeof n === 'string') return localize(n);
+    for (const n of Object.values(calendarData.weeks.names)) {
       if (n?.name) n.name = localize(n.name);
       if (n?.abbreviation) n.abbreviation = localize(n.abbreviation);
-      return n;
-    });
+    }
   }
 }

@@ -251,7 +251,7 @@ export default class EventScheduler {
   static #formatDateRange(calendar, flagData) {
     if (!calendar || !flagData.startDate) return '';
     const formatDate = (date) => {
-      const monthData = calendar.months?.values?.[date.month];
+      const monthData = calendar.monthsArray?.[date.month];
       const monthName = monthData?.name ? localize(monthData.name) : `Month ${date.month + 1}`;
       return `${date.day} ${monthName}, ${date.year}`;
     };
@@ -282,7 +282,7 @@ export default class EventScheduler {
    */
   static async #checkRandomEventRegeneration(currentDate) {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.months?.values) return;
+    if (!calendar?.monthsArray) return;
     const allNotes = NoteManager.getAllNotes();
     for (const note of allNotes) {
       if (note.flagData.repeat !== 'random') continue;

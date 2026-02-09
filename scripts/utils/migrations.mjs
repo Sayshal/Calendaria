@@ -316,8 +316,9 @@ async function migrateHarptos() {
     const out = {};
     for (const [id, cal] of Object.entries(cals)) {
       const upd = { ...cal };
-      if ((id === 'harptos' || cal.metadata?.id === 'harptos') && upd.festivals?.length) {
-        for (const f of upd.festivals) {
+      const festivals = upd.festivals ? (Array.isArray(upd.festivals) ? upd.festivals : Object.values(upd.festivals)) : [];
+      if ((id === 'harptos' || cal.metadata?.id === 'harptos') && festivals.length) {
+        for (const f of festivals) {
           if (HARPTOS.includes(f.name) && f.countsForWeekday === undefined) {
             f.countsForWeekday = false;
             mod = true;
@@ -408,11 +409,14 @@ async function migrateWeatherZones() {
   // Helper to migrate weather in a calendar
   const migrateCalendarWeather = (cal) => {
     if (!cal?.weather) return false;
-    if (!Array.isArray(cal.weather.zones) || cal.weather.zones.length === 0) return false;
+    const zones = cal.weather.zones;
+    if (!zones || typeof zones !== 'object') return false;
+    const zonesArray = Array.isArray(zones) ? zones : Object.values(zones);
+    if (zonesArray.length === 0) return false;
 
     let modified = false;
     const fixedZones = [];
-    for (const zone of cal.weather.zones) {
+    for (const zone of zonesArray) {
       const fixed = fixZone(zone);
       if (fixed) {
         fixedZones.push(fixed);
@@ -497,15 +501,22 @@ async function migrateWeatherZones() {
 export async function diagnoseWeatherConfig(showDialog = true) {
   const results = [];
 
+  // Helper to get zones array from either array or object format
+  const getZonesArray = (zones) => {
+    if (!zones || typeof zones !== 'object') return [];
+    return Array.isArray(zones) ? zones : Object.values(zones);
+  };
+
   // Check defaultOverrides (customized bundled calendars)
   const overrides = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
   for (const [id, cal] of Object.entries(overrides)) {
-    if (cal?.weather?.zones?.length) {
+    const zones = getZonesArray(cal?.weather?.zones);
+    if (zones.length) {
       results.push({
         source: 'defaultOverrides',
         calendarId: id,
         calendarName: cal.name || id,
-        zones: cal.weather.zones,
+        zones,
         activeZone: cal.weather.activeZone,
         autoGenerate: cal.weather.autoGenerate
       });
@@ -515,12 +526,13 @@ export async function diagnoseWeatherConfig(showDialog = true) {
   // Check customCalendars
   const customs = game.settings.get(MODULE.ID, 'customCalendars') || {};
   for (const [id, cal] of Object.entries(customs)) {
-    if (cal?.weather?.zones?.length) {
+    const zones = getZonesArray(cal?.weather?.zones);
+    if (zones.length) {
       results.push({
         source: 'customCalendars',
         calendarId: id,
         calendarName: cal.name || id,
-        zones: cal.weather.zones,
+        zones,
         activeZone: cal.weather.activeZone,
         autoGenerate: cal.weather.autoGenerate
       });
@@ -531,12 +543,13 @@ export async function diagnoseWeatherConfig(showDialog = true) {
   const legacy = game.settings.get(MODULE.ID, 'calendars') || {};
   if (legacy.calendars) {
     for (const [id, cal] of Object.entries(legacy.calendars)) {
-      if (cal?.weather?.zones?.length) {
+      const zones = getZonesArray(cal?.weather?.zones);
+      if (zones.length) {
         results.push({
           source: 'calendars (legacy)',
           calendarId: id,
           calendarName: cal.name || id,
-          zones: cal.weather.zones,
+          zones,
           activeZone: cal.weather.activeZone,
           autoGenerate: cal.weather.autoGenerate
         });
@@ -551,7 +564,7 @@ export async function diagnoseWeatherConfig(showDialog = true) {
   const diagnostic = {
     activeCalendar: active?.name || null,
     activeCalendarId: active?.metadata?.id || null,
-    activeWeatherZones: activeWeather?.zones?.length || 0,
+    activeWeatherZones: getZonesArray(activeWeather?.zones).length,
     settingsData: results,
     migrationComplete: game.settings.get(MODULE.ID, 'weatherZoneMigrationComplete')
   };
@@ -562,7 +575,7 @@ export async function diagnoseWeatherConfig(showDialog = true) {
   if (showDialog) {
     let report = '<h3>Active Calendar</h3>';
     report += `<p><strong>${active?.name || 'None'}</strong></p>`;
-    report += `<p>Weather zones loaded: ${activeWeather?.zones?.length || 0}</p>`;
+    report += `<p>Weather zones loaded: ${getZonesArray(activeWeather?.zones).length}</p>`;
 
     if (results.length > 0) {
       report += '<h3>Weather Data in Settings</h3>';

@@ -3,87 +3,99 @@
   "name"          : "CALENDARIA.Calendar.Golarion.Name",
   "years"         : { "yearZero": 2700, "firstWeekday": 6, "leapYear": {"leapStart": 0, "leapInterval": 4} },
   "months"        : {
-    "values": [
-      {"name": "Abadius",   "abbreviation": "Aba", "ordinal":  1, "days": 31                },
-      {"name": "Calistril", "abbreviation": "Cal", "ordinal":  2, "days": 28, "leapDays": 29},
-      {"name": "Pharast",   "abbreviation": "Pha", "ordinal":  3, "days": 31                },
-      {"name": "Gozran",    "abbreviation": "Goz", "ordinal":  4, "days": 30                },
-      {"name": "Desnus",    "abbreviation": "Des", "ordinal":  5, "days": 31                },
-      {"name": "Sarenith",  "abbreviation": "Sar", "ordinal":  6, "days": 30                },
-      {"name": "Erastus",   "abbreviation": "Era", "ordinal":  7, "days": 31                },
-      {"name": "Arodus",    "abbreviation": "Aro", "ordinal":  8, "days": 31                },
-      {"name": "Rova",      "abbreviation": "Rov", "ordinal":  9, "days": 30                },
-      {"name": "Lamashan",  "abbreviation": "Lam", "ordinal": 10, "days": 31                },
-      {"name": "Neth",      "abbreviation": "Net", "ordinal": 11, "days": 30                },
-      {"name": "Kuthona",   "abbreviation": "Kut", "ordinal": 12, "days": 31                }
-    ]
+    "values": {
+      "abadius000000000": {"name": "Abadius",   "abbreviation": "Aba", "ordinal":  1, "days": 31                },
+      "calistril0000000": {"name": "Calistril", "abbreviation": "Cal", "ordinal":  2, "days": 28, "leapDays": 29},
+      "pharast000000000": {"name": "Pharast",   "abbreviation": "Pha", "ordinal":  3, "days": 31                },
+      "gozran0000000000": {"name": "Gozran",    "abbreviation": "Goz", "ordinal":  4, "days": 30                },
+      "desnus0000000000": {"name": "Desnus",    "abbreviation": "Des", "ordinal":  5, "days": 31                },
+      "sarenith00000000": {"name": "Sarenith",  "abbreviation": "Sar", "ordinal":  6, "days": 30                },
+      "erastus000000000": {"name": "Erastus",   "abbreviation": "Era", "ordinal":  7, "days": 31                },
+      "arodus0000000000": {"name": "Arodus",    "abbreviation": "Aro", "ordinal":  8, "days": 31                },
+      "rova000000000000": {"name": "Rova",      "abbreviation": "Rov", "ordinal":  9, "days": 30                },
+      "lamashan00000000": {"name": "Lamashan",  "abbreviation": "Lam", "ordinal": 10, "days": 31                },
+      "neth000000000000": {"name": "Neth",      "abbreviation": "Net", "ordinal": 11, "days": 30                },
+      "kuthona000000000": {"name": "Kuthona",   "abbreviation": "Kut", "ordinal": 12, "days": 31                }
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "Moonday", "abbreviation": "Moo", "ordinal": 1                   }, {"name": "Toilday", "abbreviation": "Toi", "ordinal": 2                   }, {"name": "Wealday", "abbreviation": "Wea", "ordinal": 3                   },
-      {"name": "Oathday", "abbreviation": "Oat", "ordinal": 4                   }, {"name": "Fireday", "abbreviation": "Fir", "ordinal": 5                   }, {"name": "Starday", "abbreviation": "Sta", "ordinal": 6                   },
-      {"name": "Sunday",  "abbreviation": "Sun", "ordinal": 7, "isRestDay": true}
-    ],
+    "values"          : {
+      "moonday000000000": {"name": "Moonday", "abbreviation": "Moo", "ordinal": 1                   },
+      "toilday000000000": {"name": "Toilday", "abbreviation": "Toi", "ordinal": 2                   },
+      "wealday000000000": {"name": "Wealday", "abbreviation": "Wea", "ordinal": 3                   },
+      "oathday000000000": {"name": "Oathday", "abbreviation": "Oat", "ordinal": 4                   },
+      "fireday000000000": {"name": "Fireday", "abbreviation": "Fir", "ordinal": 5                   },
+      "starday000000000": {"name": "Starday", "abbreviation": "Sta", "ordinal": 6                   },
+      "sunday0000000000": {"name": "Sunday",  "abbreviation": "Sun", "ordinal": 7, "isRestDay": true}
+    },
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [
-    {"name": "Foundation Day", "month": 1, "day": 1, "icon": "fas fa-city", "color": "#B8860B", "description": "Absalom's celebration of both its founding and the new year."},
-    {"name": "Longnight", "month": 1, "day": 15, "icon": "fas fa-moon", "color": "#4169E1", "description": "Revelers stay awake through the longest winter night to defy the darkness and greet the dawn."},
-    {"name": "Merrymead", "month": 2, "day": 2, "icon": "fas fa-wine-bottle", "color": "#FFD700", "description": "A celebration of approaching spring where the previous year's alcohol is consumed."},
-    {"name": "Leap Day", "month": 2, "day": 29, "leapYearOnly": true, "icon": "fas fa-infinity", "color": "#9370DB", "description": "Followers of Mahathallah mark this rare day as Fateless Day, a time outside normal fate."},
-    {"name": "Day of Bones", "month": 3, "day": 5, "icon": "fas fa-skull", "color": "#696969", "description": "A solemn holiday honoring Pharasma where the dead are remembered and tombs are tended."},
-    {"name": "Firstbloom", "month": 3, "day": 20, "icon": "fas fa-seedling", "color": "#32CD32", "description": "Fertility dances celebrate the coming of spring at the vernal equinox."},
-    {"name": "Planting Week", "month": 3, "day": 21, "icon": "fas fa-trowel", "color": "#8B4513", "description": "A holy week dedicated to Erastil when farmers engage in heavy field work."},
-    {"name": "Taxfest", "month": 4, "day": 15, "icon": "fas fa-coins", "color": "#DAA520", "description": "Priests of Abadar accompany tax collectors to ensure fair taxation, followed by a feast."},
-    {"name": "Remembrance Moon", "month": 5, "day": 15, "icon": "fas fa-monument", "color": "#708090", "description": "A solemn holiday honoring those who fell in the Shining Crusade against the Whispering Tyrant."},
-    {"name": "Sunwrought Festival", "month": 6, "day": 21, "icon": "fas fa-sun", "color": "#FF6347", "description": "The summer solstice honors Sarenrae with fireworks and reenactments of her battle with Rovagug."},
-    {"name": "Burning Blades", "month": 6, "day": 10, "icon": "fas fa-fire", "color": "#FF4500", "description": "A festival for Sarenrae culminating in sacred dances performed with flaming blades."},
-    {"name": "Archer's Day", "month": 7, "day": 3, "icon": "fas fa-bullseye", "color": "#228B22", "description": "Erastil's holy day celebrated with archery contests and livestock bartering."},
-    {"name": "Armasse", "month": 8, "day": 16, "icon": "fas fa-shield-halved", "color": "#DC143C", "description": "A day to train commoners in combat, honoring Iomedae's martial legacy."},
-    {"name": "Swallowtail Festival", "month": 9, "day": 22, "icon": "fas fa-dove", "color": "#87CEEB", "description": "The first day of autumn honors Desna with feasting and the release of butterflies."},
-    {"name": "Harvest Feast", "month": 9, "day": 23, "icon": "fas fa-wheat-awn", "color": "#D2691E", "description": "The autumnal equinox celebration marks the harvest's end."},
-    {"name": "Ascendance Day", "month": 10, "day": 6, "icon": "fas fa-crown", "color": "#FFD700", "description": "Iomedae's divine ascension is celebrated with ceremonies honoring her rise to goddess."},
-    {"name": "Jestercap", "month": 10, "day": 27, "icon": "fas fa-hat-wizard", "color": "#FF1493", "description": "A day of pranks and practical jokes particularly favored by gnomes."},
-    {"name": "Seven Veils", "month": 11, "day": 7, "icon": "fas fa-masks-theater", "color": "#9932CC", "description": "Sivanah's sacred masquerade ball where participants disguise their identity behind magical veils."},
-    {"name": "Winter Week", "month": 12, "day": 8, "icon": "fas fa-snowflake", "color": "#ADD8E6", "description": "A traditional feast serving as a time for courting and gathering with friends."},
-    {"name": "Candlemark", "month": 12, "day": 21, "icon": "fas fa-fire-flame-simple", "color": "#FFA500", "description": "The winter solstice honors Sarenrae's healing power on the sun's weakest day."},
-    {"name": "Crystalhue", "month": 12, "day": 22, "icon": "fas fa-gem", "color": "#00CED1", "description": "A winter solstice celebration of art and courtship honoring Shelyn with crystal prisms."},
-    {"name": "Night of the Pale", "month": 12, "day": 31, "icon": "fas fa-ghost", "color": "#E6E6FA", "description": "The last night of the year when ghosts of the recently dead manifest to visit their former homes."}
-  ],
-  "seasons"       : {
-    "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "monthStart": 12, "monthEnd":  2, "dayStart": 1, "dayEnd": 28, "abbreviation": "Win"},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "monthStart":  3, "monthEnd":  5, "dayStart": 1, "dayEnd": 31, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "monthStart":  6, "monthEnd":  8, "dayStart": 1, "dayEnd": 31, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "monthStart":  9, "monthEnd": 11, "dayStart": 1, "dayEnd": 30, "abbreviation": "Fal"}
-    ]
+  "festivals"     : {
+    "foundationday000": {"name": "Foundation Day", "month": 1, "day": 1, "icon": "fas fa-city", "color": "#B8860B", "description": "Absalom's celebration of both its founding and the new year."},
+    "longnight0000000": {"name": "Longnight", "month": 1, "day": 15, "icon": "fas fa-moon", "color": "#4169E1", "description": "Revelers stay awake through the longest winter night to defy the darkness and greet the dawn."},
+    "merrymead0000000": {"name": "Merrymead", "month": 2, "day": 2, "icon": "fas fa-wine-bottle", "color": "#FFD700", "description": "A celebration of approaching spring where the previous year's alcohol is consumed."},
+    "leapday000000000": {
+      "name"        : "Leap Day",
+      "month"       : 2,
+      "day"         : 29,
+      "leapYearOnly": true,
+      "icon"        : "fas fa-infinity",
+      "color"       : "#9370DB",
+      "description" : "Followers of Mahathallah mark this rare day as Fateless Day, a time outside normal fate."
+    },
+    "dayofbones000000": {"name": "Day of Bones", "month": 3, "day": 5, "icon": "fas fa-skull", "color": "#696969", "description": "A solemn holiday honoring Pharasma where the dead are remembered and tombs are tended."},
+    "firstbloom000000": {"name": "Firstbloom", "month": 3, "day": 20, "icon": "fas fa-seedling", "color": "#32CD32", "description": "Fertility dances celebrate the coming of spring at the vernal equinox."},
+    "plantingweek0000": {"name": "Planting Week", "month": 3, "day": 21, "icon": "fas fa-trowel", "color": "#8B4513", "description": "A holy week dedicated to Erastil when farmers engage in heavy field work."},
+    "taxfest000000000": {"name": "Taxfest", "month": 4, "day": 15, "icon": "fas fa-coins", "color": "#DAA520", "description": "Priests of Abadar accompany tax collectors to ensure fair taxation, followed by a feast."},
+    "remembrancemoon0": {"name": "Remembrance Moon", "month": 5, "day": 15, "icon": "fas fa-monument", "color": "#708090", "description": "A solemn holiday honoring those who fell in the Shining Crusade against the Whispering Tyrant."},
+    "sunwroughtfestiv": {"name": "Sunwrought Festival", "month": 6, "day": 21, "icon": "fas fa-sun", "color": "#FF6347", "description": "The summer solstice honors Sarenrae with fireworks and reenactments of her battle with Rovagug."},
+    "burningblades000": {"name": "Burning Blades", "month": 6, "day": 10, "icon": "fas fa-fire", "color": "#FF4500", "description": "A festival for Sarenrae culminating in sacred dances performed with flaming blades."},
+    "archersday000000": {"name": "Archer's Day", "month": 7, "day": 3, "icon": "fas fa-bullseye", "color": "#228B22", "description": "Erastil's holy day celebrated with archery contests and livestock bartering."},
+    "armasse000000000": {"name": "Armasse", "month": 8, "day": 16, "icon": "fas fa-shield-halved", "color": "#DC143C", "description": "A day to train commoners in combat, honoring Iomedae's martial legacy."},
+    "swallowtailfesti": {"name": "Swallowtail Festival", "month": 9, "day": 22, "icon": "fas fa-dove", "color": "#87CEEB", "description": "The first day of autumn honors Desna with feasting and the release of butterflies."},
+    "harvestfeast0000": {"name": "Harvest Feast", "month": 9, "day": 23, "icon": "fas fa-wheat-awn", "color": "#D2691E", "description": "The autumnal equinox celebration marks the harvest's end."},
+    "ascendanceday000": {"name": "Ascendance Day", "month": 10, "day": 6, "icon": "fas fa-crown", "color": "#FFD700", "description": "Iomedae's divine ascension is celebrated with ceremonies honoring her rise to goddess."},
+    "jestercap0000000": {"name": "Jestercap", "month": 10, "day": 27, "icon": "fas fa-hat-wizard", "color": "#FF1493", "description": "A day of pranks and practical jokes particularly favored by gnomes."},
+    "sevenveils000000": {"name": "Seven Veils", "month": 11, "day": 7, "icon": "fas fa-masks-theater", "color": "#9932CC", "description": "Sivanah's sacred masquerade ball where participants disguise their identity behind magical veils."},
+    "winterweek000000": {"name": "Winter Week", "month": 12, "day": 8, "icon": "fas fa-snowflake", "color": "#ADD8E6", "description": "A traditional feast serving as a time for courting and gathering with friends."},
+    "candlemark000000": {"name": "Candlemark", "month": 12, "day": 21, "icon": "fas fa-fire-flame-simple", "color": "#FFA500", "description": "The winter solstice honors Sarenrae's healing power on the sun's weakest day."},
+    "crystalhue000000": {"name": "Crystalhue", "month": 12, "day": 22, "icon": "fas fa-gem", "color": "#00CED1", "description": "A winter solstice celebration of art and courtship honoring Shelyn with crystal prisms."},
+    "nightofthepale00": {"name": "Night of the Pale", "month": 12, "day": 31, "icon": "fas fa-ghost", "color": "#E6E6FA", "description": "The last night of the year when ghosts of the recently dead manifest to visit their former homes."}
   },
-  "eras"          : [ {"name": "Absalom Reckoning", "abbreviation": "AR", "startYear": 1, "endYear": null} ],
-  "moons"         : [
-    {
+  "seasons"       : {
+    "values": {
+      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "monthStart": 12, "monthEnd":  2, "dayStart": 1, "dayEnd": 28, "abbreviation": "Win"},
+      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "monthStart":  3, "monthEnd":  5, "dayStart": 1, "dayEnd": 31, "abbreviation": "Spr"},
+      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "monthStart":  6, "monthEnd":  8, "dayStart": 1, "dayEnd": 31, "abbreviation": "Sum"},
+      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "monthStart":  9, "monthEnd": 11, "dayStart": 1, "dayEnd": 30, "abbreviation": "Fal"}
+    }
+  },
+  "eras"          : { "absalomreckoning": {"name": "Absalom Reckoning", "abbreviation": "AR", "startYear": 1, "endYear": null} },
+  "moons"         : {
+    "somal00000000000": {
       "name"         : "Somal",
       "cycleLength"  : 29,
       "color"        : "#E8E8E8",
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     }
-  ],
+  },
   "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 355, "summerSolstice": 172},
-  "cycles"        : [],
-  "canonicalHours": [],
-  "weeks"         : {"enabled": false, "type": "year-based", "names": []},
+  "cycles"        : {},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y GGGG", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "golarion", "description": "CALENDARIA.Calendar.Golarion.Description", "author": "calendaria", "system": "Pathfinder2e (Golarion)"}

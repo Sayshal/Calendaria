@@ -14,31 +14,31 @@
       </div>
 
       {{#each weekdaysWithNav}}
-      <div class="item weekday-item flexrow" data-index="{{this.index}}">
-        <input type="text" id="editor-weekday-{{this.index}}-name" name="weekdays.{{this.index}}.name"
+      <div class="item weekday-item flexrow" data-key="{{this.key}}">
+        <input type="text" id="editor-weekday-{{this.index}}-name" name="weekdays.{{this.key}}.name"
           value="{{this.name}}" class="col-name">
-        <input type="text" id="editor-weekday-{{this.index}}-abbr" name="weekdays.{{this.index}}.abbreviation"
+        <input type="text" id="editor-weekday-{{this.index}}-abbr" name="weekdays.{{this.key}}.abbreviation"
           value="{{this.abbreviation}}" class="col-abbr">
         <label class="col-rest checkbox">
-          <input type="checkbox" name="weekdays.{{this.index}}.isRestDay" {{#if this.isRestDay}}checked{{/if}}>
+          <input type="checkbox" name="weekdays.{{this.key}}.isRestDay" {{#if this.isRestDay}}checked{{/if}}>
         </label>
 
         <div class="item-controls col-controls">
-          <button type="button" data-action="addWeekday" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="addWeekday" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddWeekday'}}">
             <i class="fas fa-plus"></i>
           </button>
-          <button type="button" data-action="moveWeekdayUp" data-index="{{this.index}}" {{#if this.isFirst}}disabled
+          <button type="button" data-action="moveWeekdayUp" data-key="{{this.key}}" {{#if this.isFirst}}disabled
             aria-disabled="true" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveUp.DisabledTitle'}}"
             {{else}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveUp.Label'}}" {{/if}}>
             <i class="fas fa-chevron-up"></i>
           </button>
-          <button type="button" data-action="moveWeekdayDown" data-index="{{this.index}}" {{#if this.isLast}}disabled
+          <button type="button" data-action="moveWeekdayDown" data-key="{{this.key}}" {{#if this.isLast}}disabled
             aria-disabled="true" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveDown.DisabledTitle'}}"
             {{else}}data-tooltip aria-label="{{localize 'CALENDARIA.Editor.MoveDown.Label'}}" {{/if}}>
             <i class="fas fa-chevron-down"></i>
           </button>
-          <button type="button" data-action="removeWeekday" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="removeWeekday" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveWeekday'}}">
             <i class="fas fa-trash"></i>
           </button>
@@ -90,13 +90,13 @@
       </div>
 
       {{#each namedWeeksWithNav}}
-      <div class="item named-week-item flexrow" data-index="{{this.index}}">
-        <input type="text" id="editor-week-{{this.index}}-name" name="weeks.names.{{this.index}}.name"
+      <div class="item named-week-item flexrow" data-key="{{this.key}}">
+        <input type="text" id="editor-week-{{this.index}}-name" name="weeks.names.{{this.key}}.name"
           value="{{this.name}}" class="col-name">
-        <input type="text" id="editor-week-{{this.index}}-abbr" name="weeks.names.{{this.index}}.abbreviation"
+        <input type="text" id="editor-week-{{this.index}}-abbr" name="weeks.names.{{this.key}}.abbreviation"
           value="{{this.abbreviation}}" class="col-abbr">
         {{#if ../isYearBased}}
-        <input type="number" id="editor-week-{{this.index}}-number" name="weeks.names.{{this.index}}.weekNumber"
+        <input type="number" id="editor-week-{{this.index}}-number" name="weeks.names.{{this.key}}.weekNumber"
           value="{{this.weekNumber}}" min="1" max="{{../maxWeeks}}"
           class="col-week-number {{#if this.duplicateWeekNumber}}duplicate{{/if}}"
           {{#if this.duplicateWeekNumber}}data-tooltip
@@ -104,11 +104,11 @@
         {{/if}}
 
         <div class="item-controls col-controls">
-          <button type="button" data-action="addNamedWeek" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="addNamedWeek" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.AddWeek'}}">
             <i class="fas fa-plus"></i>
           </button>
-          <button type="button" data-action="removeNamedWeek" data-index="{{this.index}}" data-tooltip
+          <button type="button" data-action="removeNamedWeek" data-key="{{this.key}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Common.Remove'}}">
             <i class="fas fa-trash"></i>
           </button>
@@ -119,7 +119,7 @@
     {{else}}
     <div class="empty-list">
       <p>{{localize "CALENDARIA.Editor.NoNamedWeeks"}}</p>
-      <button type="button" data-action="addNamedWeek" data-index="-1">
+      <button type="button" data-action="addNamedWeek" data-key="null">
         <i class="fas fa-plus"></i>
         {{localize "CALENDARIA.Editor.AddWeek"}}
       </button>

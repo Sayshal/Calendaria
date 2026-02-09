@@ -17,26 +17,26 @@
       </div>
 
       {{#each erasWithNav}}
-      <div class="item era-item" data-index="{{this.index}}">
+      <div class="item era-item" data-key="{{this.key}}">
         <div class="era-main flexrow">
-          <input type="text" id="editor-era-{{this.index}}-name" name="eras.{{this.index}}.name"
+          <input type="text" id="editor-era-{{this.index}}-name" name="eras.{{this.key}}.name"
             value="{{this.name}}" class="col-name"
             placeholder="{{localize 'CALENDARIA.Editor.Placeholder.EraName'}}">
-          <input type="text" id="editor-era-{{this.index}}-abbr" name="eras.{{this.index}}.abbreviation"
+          <input type="text" id="editor-era-{{this.index}}-abbr" name="eras.{{this.key}}.abbreviation"
             value="{{this.abbreviation}}" class="col-abbr"
             placeholder="{{localize 'CALENDARIA.Editor.Placeholder.EraAbbr'}}">
-          <input type="number" id="editor-era-{{this.index}}-start" name="eras.{{this.index}}.startYear"
+          <input type="number" id="editor-era-{{this.index}}-start" name="eras.{{this.key}}.startYear"
             value="{{this.startYear}}" class="col-start-year" placeholder="1">
-          <input type="number" id="editor-era-{{this.index}}-end" name="eras.{{this.index}}.endYear"
+          <input type="number" id="editor-era-{{this.index}}-end" name="eras.{{this.key}}.endYear"
             value="{{this.endYear}}" class="col-end-year"
             placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Ongoing'}}">
 
           <div class="item-controls col-controls">
-            <button type="button" data-action="addEra" data-index="{{this.index}}" data-tooltip
+            <button type="button" data-action="addEra" data-key="{{this.key}}" data-tooltip
               aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddEra'}}">
               <i class="fas fa-plus"></i>
             </button>
-            <button type="button" data-action="removeEra" data-index="{{this.index}}" data-tooltip
+            <button type="button" data-action="removeEra" data-key="{{this.key}}" data-tooltip
               aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveEra'}}">
               <i class="fas fa-trash"></i>
             </button>
@@ -48,7 +48,7 @@
     {{else}}
     <div class="empty-list">
       <p>{{localize "CALENDARIA.Editor.NoEras"}}</p>
-      <button type="button" data-action="addEra" data-index="-1">
+      <button type="button" data-action="addEra" data-key="">
         <i class="fas fa-plus"></i>
         {{localize "CALENDARIA.Editor.AddEra"}}
       </button>

@@ -330,11 +330,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.isMonthless = isMonthless;
     context.showRepeatOptions = repeatType !== 'never';
     context.moons =
-      calendar?.moons?.map((moon, index) => ({
+      calendar?.moonsArray?.map((moon, index) => ({
         index,
         name: localize(moon.name),
         phases: moon.phases?.map((phase) => ({ name: localize(phase.name), start: phase.start, end: phase.end })) || []
-      })) || [];
+      })) ?? [];
     context.hasMoons = context.moons.length > 0;
     const modifierLabels = {
       any: null,
@@ -406,7 +406,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const rangeMonthValue = monthType === 'exact' ? rangePattern.month : null;
     const rangeMonthMin = monthType === 'range' ? rangePattern.month[0] : null;
     const rangeMonthMax = monthType === 'range' ? rangePattern.month[1] : null;
-    const months = calendar?.months?.values || [];
+    const months = calendar?.monthsArray ?? [];
     context.monthOptions = months.map((m, idx) => ({ index: idx, name: localize(m.name), selected: rangeMonthValue === idx, selectedMin: rangeMonthMin === idx, selectedMax: rangeMonthMax === idx }));
     const dayType = getRangeType(rangePattern.day);
     context.rangeDayAny = dayType === 'any';
@@ -417,7 +417,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.rangeDayMax = dayType === 'range' ? (rangePattern.day[1] ?? '') : '';
     context.showWeekOfMonthConfig = this.document.system.repeat === 'weekOfMonth';
     context.weekNumber = this.document.system.weekNumber ?? 1;
-    const weekdays = calendar?.days?.values || [];
+    const weekdays = calendar?.weekdaysArray ?? [];
     const selectedWeekday = this.document.system.weekday ?? 0;
     context.weekdayOptions = weekdays.map((wd, idx) => ({ index: idx, name: localize(wd.name), selected: idx === selectedWeekday }));
     const selectedWeekNumber = this.document.system.weekNumber ?? 1;
@@ -451,7 +451,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.showSeasonalConfig = this.document.system.repeat === 'seasonal';
     const seasonalConfig = this.document.system.seasonalConfig || { seasonIndex: 0, trigger: 'entire' };
     context.seasonalTrigger = seasonalConfig.trigger || 'entire';
-    const seasons = calendar?.seasons?.values || [];
+    const seasons = calendar?.seasonsArray ?? [];
     context.seasonOptions = seasons.map((s, idx) => ({ index: idx, name: localize(s.name), selected: idx === seasonalConfig.seasonIndex }));
     context.hasSeasons = seasons.length > 0;
     const triggerChoices = this.document.system.schema.fields.seasonalConfig?.fields?.trigger?.choices || ['entire', 'firstDay', 'lastDay'];
@@ -472,8 +472,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
 
     context.showConditionsUI = repeatType !== 'never';
-    context.hasCycles = (calendar?.cycles?.length ?? 0) > 0;
-    context.hasEras = (calendar?.eras?.length ?? 0) > 0;
+    context.hasCycles = (calendar?.cyclesArray?.length ?? 0) > 0;
+    context.hasEras = (calendar?.erasArray?.length ?? 0) > 0;
     context.showRepeatConfigGrid =
       context.showMoonConditions ||
       context.showRandomConfig ||
@@ -735,8 +735,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   _formatDateDisplay(calendar, year, month, day) {
     const isMonthless = calendar?.isMonthless ?? false;
     if (isMonthless) return `${localize('CALENDARIA.Common.Day')} ${day}, ${year}`;
-    if (!calendar?.months?.values) return `${day} / ${month + 1} / ${year}`;
-    const monthData = calendar.months.values[month];
+    if (!calendar?.monthsArray) return `${day} / ${month + 1} / ${year}`;
+    const monthData = calendar.monthsArray[month];
     const monthName = monthData?.name ? localize(monthData.name) : `Month ${month + 1}`;
     return `${day} ${monthName}, ${year}`;
   }
@@ -775,7 +775,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       if (isMonthless) {
         displaySpan.textContent = `${localize('CALENDARIA.Common.Day')} ${result.day}, ${result.year}`;
       } else {
-        const monthData = calendar.months.values[result.month];
+        const monthData = calendar.monthsArray[result.month];
         const monthName = monthData?.name ? localize(monthData.name) : `Month ${result.month + 1}`;
         displaySpan.textContent = `${result.day} ${monthName}, ${result.year}`;
       }
@@ -801,7 +801,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       formClass: '',
       year: currentYear,
       isMonthless,
-      months: isMonthless ? [] : calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === currentMonth })),
+      months: isMonthless ? [] : calendar.monthsArray.map((m, i) => ({ index: i, name: localize(m.name), selected: i === currentMonth })),
       days: Array.from({ length: maxDays }, (_, i) => i + 1),
       currentDay
     });
@@ -823,7 +823,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         if (!monthSelect || !daySelect) return;
         monthSelect.addEventListener('change', () => {
           const selectedMonth = parseInt(monthSelect.value);
-          const daysInSelectedMonth = calendar.months.values[selectedMonth]?.days || 30;
+          const daysInSelectedMonth = calendar.monthsArray[selectedMonth]?.days || 30;
           daySelect.innerHTML = Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1)
             .map((d) => `<option value="${d}">${d}</option>`)
             .join('');
@@ -1045,7 +1045,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   async #regenerateRandomOccurrences() {
     if (this.document.system.repeat !== 'random') return;
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.months?.values) return;
+    if (!calendar?.monthsArray) return;
     const components = game.time.components || {};
     const yearZero = calendar?.years?.yearZero ?? 0;
     const currentYear = (components.year ?? 0) + yearZero;
@@ -1175,10 +1175,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const fieldLabel = fieldLabels[field] || field;
     const opLabel = opLabels[op] || op;
     let valueStr = String(value);
-    if (field === 'month' && calendar?.months?.values?.[value - 1]) valueStr = localize(calendar.months.values[value - 1].name);
-    if (field === 'weekday' && calendar?.days?.values?.[value - 1]) valueStr = localize(calendar.days.values[value - 1].name);
-    if (field === 'season' && calendar?.seasons?.values?.[value - 1]) valueStr = localize(calendar.seasons.values[value - 1].name);
-    if (field === 'era' && calendar?.eras?.[value - 1]) valueStr = localize(calendar.eras[value - 1].name);
+    if (field === 'month' && calendar?.monthsArray?.[value - 1]) valueStr = localize(calendar.monthsArray[value - 1].name);
+    if (field === 'weekday' && calendar?.weekdaysArray?.[value - 1]) valueStr = localize(calendar.weekdaysArray[value - 1].name);
+    if (field === 'season' && calendar?.seasonsArray?.[value - 1]) valueStr = localize(calendar.seasonsArray[value - 1].name);
+    if (field === 'era' && calendar?.erasArray?.[value - 1]) valueStr = localize(calendar.erasArray[value - 1].name);
     if (['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary'].includes(field)) {
       return value ? fieldLabel : format('CALENDARIA.Note.Condition.Not', { field: fieldLabel });
     }

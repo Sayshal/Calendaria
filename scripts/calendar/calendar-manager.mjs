@@ -64,7 +64,7 @@ export default class CalendarManager {
       if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
         let count = 0;
         for (const [id, calendarData] of Object.entries(savedData.calendars)) {
-          if (overrides[id] || customCalendars[id]) continue;
+          if (overrides[id] || customCalendars[id] || isBundledCalendar(id)) continue;
           const existing = CalendarRegistry.get(id);
           if (existing?.metadata?.isCustom) {
             calendarData.metadata = calendarData.metadata || {};
@@ -114,9 +114,17 @@ export default class CalendarManager {
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       const ids = Object.keys(overrides);
       if (ids.length === 0) return;
+
+      let needsSave = false;
+
       for (const id of ids) {
         const data = overrides[id];
         try {
+          const bundled = CalendarRegistry.get(id);
+          if (bundled && CalendarManager.#alignOverrideKeys(data, bundled.toObject())) {
+            needsSave = true;
+          }
+
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
           log(3, `Applied override for bundled calendar: ${id}`);
@@ -125,10 +133,149 @@ export default class CalendarManager {
         }
       }
 
+      // Persist aligned keys so alignment is a one-time migration
+      if (needsSave && game.user?.isGM) {
+        for (const id of ids) {
+          const cal = CalendarRegistry.get(id);
+          if (cal) overrides[id] = cal.toObject();
+        }
+        await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
+        log(3, 'Persisted aligned override keys');
+      }
+
       log(3, `Applied ${ids.length} default calendar overrides`);
     } catch (error) {
       log(1, 'Error loading default overrides:', error);
     }
+  }
+
+  /**
+   * Align override collection keys with bundled calendar keys.
+   * Two-pass: name match first, then positional assignment for unmatched items.
+   * Handles both array-format (pre-conversion) and mismatched object keys.
+   * @param {object} overrideData - Raw override data (mutated in place)
+   * @param {object} bundledData - Bundled calendar toObject() data
+   * @returns {boolean} True if any changes were made
+   */
+  static #alignOverrideKeys(overrideData, bundledData) {
+    let changed = false;
+
+    /**
+     * Align a single collection's keys to match bundled keys.
+     * @param {Array|object} collection - Override collection (array or keyed object)
+     * @param {object} bundled - Bundled collection (keyed object)
+     * @returns {object|null} Aligned keyed object, or null if already aligned
+     */
+    const alignCollection = (collection, bundled) => {
+      if (!bundled || typeof bundled !== 'object') return null;
+      const bundledKeys = Object.keys(bundled);
+      if (bundledKeys.length === 0) return null;
+
+      let items;
+      if (Array.isArray(collection)) {
+        items = collection;
+      } else if (typeof collection === 'object') {
+        const overrideKeys = Object.keys(collection);
+        const bundledKeySet = new Set(bundledKeys);
+        const matchCount = overrideKeys.filter((k) => bundledKeySet.has(k)).length;
+        if (matchCount === Math.min(overrideKeys.length, bundledKeys.length)) return null;
+        items = Object.values(collection);
+      } else {
+        return null;
+      }
+
+      if (items.length === 0) return null;
+
+      const nameToKey = new Map();
+      for (const [key, val] of Object.entries(bundled)) {
+        if (val?.name) nameToKey.set(val.name, key);
+      }
+
+      const result = {};
+      const usedKeys = new Set();
+      const unmatchedIndices = [];
+
+      // Pass 1: name matching
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item?.name && nameToKey.has(item.name)) {
+          const key = nameToKey.get(item.name);
+          if (!usedKeys.has(key)) {
+            result[key] = item;
+            usedKeys.add(key);
+            continue;
+          }
+        }
+        unmatchedIndices.push(i);
+      }
+
+      // Pass 2: positional assignment for unmatched items
+      const remainingKeys = bundledKeys.filter((k) => !usedKeys.has(k));
+      for (let j = 0; j < unmatchedIndices.length; j++) {
+        const item = items[unmatchedIndices[j]];
+        const key = j < remainingKeys.length ? remainingKeys[j] : foundry.utils.randomID();
+        result[key] = item;
+      }
+
+      return result;
+    };
+
+    // Top-level collections
+    for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) {
+      if (overrideData[key]) {
+        const aligned = alignCollection(overrideData[key], bundledData[key]);
+        if (aligned) {
+          overrideData[key] = aligned;
+          changed = true;
+        }
+      }
+    }
+
+    // Nested collections
+    const nested = [['months', 'values'], ['days', 'values'], ['seasons', 'values'], ['weather', 'zones'], ['weeks', 'names']];
+    for (const [parent, child] of nested) {
+      if (overrideData[parent]?.[child]) {
+        const aligned = alignCollection(overrideData[parent][child], bundledData[parent]?.[child]);
+        if (aligned) {
+          overrideData[parent][child] = aligned;
+          changed = true;
+        }
+      }
+    }
+
+    // Deeply nested collections (after parent keys are aligned)
+    const alignDeeplyNested = (parentObj, bundledParent, childKey) => {
+      if (!parentObj || typeof parentObj !== 'object' || Array.isArray(parentObj)) return;
+      for (const [key, entry] of Object.entries(parentObj)) {
+        if (entry?.[childKey] && bundledParent?.[key]?.[childKey]) {
+          const aligned = alignCollection(entry[childKey], bundledParent[key][childKey]);
+          if (aligned) {
+            entry[childKey] = aligned;
+            changed = true;
+          }
+        }
+      }
+    };
+
+    alignDeeplyNested(overrideData.moons, bundledData.moons, 'phases');
+    alignDeeplyNested(overrideData.cycles, bundledData.cycles, 'stages');
+    alignDeeplyNested(overrideData.weather?.zones, bundledData.weather?.zones, 'presets');
+    alignDeeplyNested(overrideData.months?.values, bundledData.months?.values, 'weekdays');
+
+    // seasons.*.climate.presets (extra nesting level)
+    if (overrideData.seasons?.values && typeof overrideData.seasons.values === 'object') {
+      for (const [key, season] of Object.entries(overrideData.seasons.values)) {
+        if (season?.climate?.presets && bundledData.seasons?.values?.[key]?.climate?.presets) {
+          const aligned = alignCollection(season.climate.presets, bundledData.seasons.values[key].climate.presets);
+          if (aligned) {
+            season.climate.presets = aligned;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    return changed;
   }
 
   /**

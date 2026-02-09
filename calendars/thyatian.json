@@ -3,65 +3,77 @@
   "name"          : "CALENDARIA.Calendar.Thyatian.Name",
   "years"         : {"yearZero": 1000, "firstWeekday": 0},
   "months"        : {
-    "values": [
-      {"name": "Nuwmont",   "abbreviation": "Nuw", "ordinal":  1, "days": 28}, {"name": "Vatermont", "abbreviation": "Vat", "ordinal":  2, "days": 28}, {"name": "Thaumont",  "abbreviation": "Tha", "ordinal":  3, "days": 28},
-      {"name": "Flaurmont", "abbreviation": "Fla", "ordinal":  4, "days": 28}, {"name": "Yarthmont", "abbreviation": "Yar", "ordinal":  5, "days": 28}, {"name": "Klarmont",  "abbreviation": "Kla", "ordinal":  6, "days": 28},
-      {"name": "Felmont",   "abbreviation": "Fel", "ordinal":  7, "days": 28}, {"name": "Fyrmont",   "abbreviation": "Fyr", "ordinal":  8, "days": 28}, {"name": "Ambyrmont", "abbreviation": "Amb", "ordinal":  9, "days": 28},
-      {"name": "Sviftmont", "abbreviation": "Svi", "ordinal": 10, "days": 28}, {"name": "Eirmont",   "abbreviation": "Eir", "ordinal": 11, "days": 28}, {"name": "Kaldmont",  "abbreviation": "Kal", "ordinal": 12, "days": 28}
-    ]
+    "values": {
+      "nuwmont000000000": {"name": "Nuwmont",   "abbreviation": "Nuw", "ordinal":  1, "days": 28},
+      "vatermont0000000": {"name": "Vatermont", "abbreviation": "Vat", "ordinal":  2, "days": 28},
+      "thaumont00000000": {"name": "Thaumont",  "abbreviation": "Tha", "ordinal":  3, "days": 28},
+      "flaurmont0000000": {"name": "Flaurmont", "abbreviation": "Fla", "ordinal":  4, "days": 28},
+      "yarthmont0000000": {"name": "Yarthmont", "abbreviation": "Yar", "ordinal":  5, "days": 28},
+      "klarmont00000000": {"name": "Klarmont",  "abbreviation": "Kla", "ordinal":  6, "days": 28},
+      "felmont000000000": {"name": "Felmont",   "abbreviation": "Fel", "ordinal":  7, "days": 28},
+      "fyrmont000000000": {"name": "Fyrmont",   "abbreviation": "Fyr", "ordinal":  8, "days": 28},
+      "ambyrmont0000000": {"name": "Ambyrmont", "abbreviation": "Amb", "ordinal":  9, "days": 28},
+      "sviftmont0000000": {"name": "Sviftmont", "abbreviation": "Svi", "ordinal": 10, "days": 28},
+      "eirmont000000000": {"name": "Eirmont",   "abbreviation": "Eir", "ordinal": 11, "days": 28},
+      "kaldmont00000000": {"name": "Kaldmont",  "abbreviation": "Kal", "ordinal": 12, "days": 28}
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "Lunadain", "ordinal": 1, "abbreviation": "Lun"                   }, {"name": "Gromdain", "ordinal": 2, "abbreviation": "Gro"                   }, {"name": "Tserdain", "ordinal": 3, "abbreviation": "Tse"                   },
-      {"name": "Moldain",  "ordinal": 4, "abbreviation": "Mol"                   }, {"name": "Nytdain",  "ordinal": 5, "abbreviation": "Nyt"                   }, {"name": "Loshdain", "ordinal": 6, "abbreviation": "Los"                   },
-      {"name": "Soladain", "ordinal": 7, "abbreviation": "Sol", "isRestDay": true}
-    ],
+    "values"          : {
+      "lunadain00000000": {"name": "Lunadain", "ordinal": 1, "abbreviation": "Lun"                   },
+      "gromdain00000000": {"name": "Gromdain", "ordinal": 2, "abbreviation": "Gro"                   },
+      "tserdain00000000": {"name": "Tserdain", "ordinal": 3, "abbreviation": "Tse"                   },
+      "moldain000000000": {"name": "Moldain",  "ordinal": 4, "abbreviation": "Mol"                   },
+      "nytdain000000000": {"name": "Nytdain",  "ordinal": 5, "abbreviation": "Nyt"                   },
+      "loshdain00000000": {"name": "Loshdain", "ordinal": 6, "abbreviation": "Los"                   },
+      "soladain00000000": {"name": "Soladain", "ordinal": 7, "abbreviation": "Sol", "isRestDay": true}
+    },
     "daysPerYear"     : 336,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [
-    {"name": "New Year's Day",    "month":  1, "day":  1, "icon": "fas fa-glass-cheers", "color": "#FFD700", "description": "First day of Nuwmont celebrating the new year across the Empire."          },
-    {"name": "Vaterna's Feast",   "month":  2, "day": 14, "icon": "fas fa-ship",         "color": "#4169E1", "description": "Start of shipping season with boat launchings and boating competitions."   },
-    {"name": "Spring Revel",      "month":  3, "day": 28, "icon": "fas fa-music",        "color": "#FF69B4", "description": "Springtime festival of music, dancing, and merriment."                     },
-    {"name": "Mid-Year Festival", "month":  6, "day": 28, "icon": "fas fa-sun",          "color": "#FFA500", "description": "Summer solstice celebration marking the halfway point of the year."        },
-    {"name": "Harvest Festival",  "month":  9, "day": 14, "icon": "fas fa-wheat-awn",    "color": "#DAA520", "description": "Autumn gathering to celebrate the harvest and give thanks."                },
-    {"name": "Day of the Dead",   "month": 10, "day": 28, "icon": "fas fa-cross",        "color": "#2F4F4F", "description": "Solemn day of remembrance for the departed and honoring ancestral spirits."},
-    {"name": "Coronation Day",    "month": 11, "day":  1, "icon": "fas fa-crown",        "color": "#B8860B", "description": "Anniversary commemorating the crowning of Emperor Zendrolion."             },
-    {"name": "Winter Solstice",   "month": 12, "day": 21, "icon": "fas fa-snowflake",    "color": "#87CEEB", "description": "Longest night marking winter's deepest point with candlelight vigils."     }
-  ],
-  "seasons"       : {
-    "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 309, "dayEnd":  55, "abbreviation": "Win"},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
-    ]
+  "festivals"     : {
+    "newyearsday00000": {"name": "New Year's Day",    "month":  1, "day":  1, "icon": "fas fa-glass-cheers", "color": "#FFD700", "description": "First day of Nuwmont celebrating the new year across the Empire."          },
+    "vaternasfeast000": {"name": "Vaterna's Feast",   "month":  2, "day": 14, "icon": "fas fa-ship",         "color": "#4169E1", "description": "Start of shipping season with boat launchings and boating competitions."   },
+    "springrevel00000": {"name": "Spring Revel",      "month":  3, "day": 28, "icon": "fas fa-music",        "color": "#FF69B4", "description": "Springtime festival of music, dancing, and merriment."                     },
+    "midyearfestival0": {"name": "Mid-Year Festival", "month":  6, "day": 28, "icon": "fas fa-sun",          "color": "#FFA500", "description": "Summer solstice celebration marking the halfway point of the year."        },
+    "harvestfestival0": {"name": "Harvest Festival",  "month":  9, "day": 14, "icon": "fas fa-wheat-awn",    "color": "#DAA520", "description": "Autumn gathering to celebrate the harvest and give thanks."                },
+    "dayofthedead0000": {"name": "Day of the Dead",   "month": 10, "day": 28, "icon": "fas fa-cross",        "color": "#2F4F4F", "description": "Solemn day of remembrance for the departed and honoring ancestral spirits."},
+    "coronationday000": {"name": "Coronation Day",    "month": 11, "day":  1, "icon": "fas fa-crown",        "color": "#B8860B", "description": "Anniversary commemorating the crowning of Emperor Zendrolion."             },
+    "wintersolstice00": {"name": "Winter Solstice",   "month": 12, "day": 21, "icon": "fas fa-snowflake",    "color": "#87CEEB", "description": "Longest night marking winter's deepest point with candlelight vigils."     }
   },
-  "eras"          : [ {"name": "After Crowning", "abbreviation": "AC", "startYear": 1, "endYear": null}, {"name": "Before Crowning", "abbreviation": "BC", "startYear": -9999, "endYear": 0} ],
-  "moons"         : [
-    {
+  "seasons"       : {
+    "values": {
+      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 309, "dayEnd":  55, "abbreviation": "Win"},
+      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
+      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
+      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
+    }
+  },
+  "eras"          : { "aftercrowning000": {"name": "After Crowning", "abbreviation": "AC", "startYear": 1, "endYear": null}, "beforecrowning00": {"name": "Before Crowning", "abbreviation": "BC", "startYear": -9999, "endYear": 0} },
+  "moons"         : {
+    "matera0000000000": {
       "name"         : "Matera",
       "cycleLength"  : 28,
       "color"        : "#E8E8E8",
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 0, "month": 0, "day": 14}
     }
-  ],
+  },
   "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 322, "summerSolstice": 154},
-  "cycles"        : [],
-  "canonicalHours": [],
-  "weeks"         : {"enabled": false, "type": "year-based", "names": []},
+  "cycles"        : {},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "thyatian", "description": "CALENDARIA.Calendar.Thyatian.Description", "author": "calendaria", "system": "Mystara"}

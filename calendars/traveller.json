@@ -2,26 +2,32 @@
   "id"            : "traveller",
   "name"          : "CALENDARIA.Calendar.Traveller.Name",
   "years"         : {"yearZero": 1105, "firstWeekday": 0},
-  "months"        : {"values": []},
+  "months"        : {"values": {}},
   "days"          : {
-    "values"          : [
-      {"name": "Wonday",  "abbreviation": "Wo", "ordinal": 1                   }, {"name": "Tuday",   "abbreviation": "Tu", "ordinal": 2                   }, {"name": "Thirday", "abbreviation": "Th", "ordinal": 3                   },
-      {"name": "Forday",  "abbreviation": "Fo", "ordinal": 4                   }, {"name": "Fiday",   "abbreviation": "Fi", "ordinal": 5                   }, {"name": "Sixday",  "abbreviation": "Si", "ordinal": 6                   },
-      {"name": "Senday",  "abbreviation": "Se", "ordinal": 7, "isRestDay": true}
-    ],
+    "values"          : {
+      "wonday0000000000": {"name": "Wonday",  "abbreviation": "Wo", "ordinal": 1                   },
+      "tuday00000000000": {"name": "Tuday",   "abbreviation": "Tu", "ordinal": 2                   },
+      "thirday000000000": {"name": "Thirday", "abbreviation": "Th", "ordinal": 3                   },
+      "forday0000000000": {"name": "Forday",  "abbreviation": "Fo", "ordinal": 4                   },
+      "fiday00000000000": {"name": "Fiday",   "abbreviation": "Fi", "ordinal": 5                   },
+      "sixday0000000000": {"name": "Sixday",  "abbreviation": "Si", "ordinal": 6                   },
+      "senday0000000000": {"name": "Senday",  "abbreviation": "Se", "ordinal": 7, "isRestDay": true}
+    },
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "seasons"       : {"values": []},
-  "eras"          : [ {"name": "Imperial Calendar", "abbreviation": "IC", "startYear": 0, "endYear": null} ],
-  "moons"         : [],
-  "festivals"     : [ {"name": "Holiday", "dayOfYear": 1, "countsForWeekday": false, "icon": "fas fa-rocket", "color": "#4169E1", "description": "Intercalary day commemorating the founding of the Third Imperium, dedicated to leisure."} ],
+  "seasons"       : {"values": {}},
+  "eras"          : { "imperialcalendar": {"name": "Imperial Calendar", "abbreviation": "IC", "startYear": 0, "endYear": null} },
+  "moons"         : {},
+  "festivals"     : {
+    "holiday000000000": {"name": "Holiday", "dayOfYear": 1, "countsForWeekday": false, "icon": "fas fa-rocket", "color": "#4169E1", "description": "Intercalary day commemorating the founding of the Third Imperium, dedicated to leisure."}
+  },
   "daylight"      : {"enabled": false},
-  "cycles"        : [],
-  "canonicalHours": [],
-  "weeks"         : {"enabled": true, "type": "year-based", "names": []},
+  "cycles"        : {},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": true, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "DDD-yyyy", "long": "DDD-yyyy GGGG", "full": "EEEE, DDD-yyyy GGGG", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "traveller", "description": "CALENDARIA.Calendar.Traveller.Description", "author": "calendaria", "system": "Traveller"}

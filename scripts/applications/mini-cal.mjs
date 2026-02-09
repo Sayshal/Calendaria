@@ -238,7 +238,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.eraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_ERA_DISPLAY_MODE);
     context.cyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE);
 
-    if (calendar && calendar.cycles?.length && context.showCycles) {
+    if (calendar && calendar.cyclesArray?.length && context.showCycles) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
       const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
       const cycleResult = calendar.getCycleValues(viewedComponents);
@@ -391,19 +391,19 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _generateMiniCalData(calendar, date, visibleNotes) {
     if (calendar.isMonthless) return this._generateWeekViewData(calendar, date, visibleNotes);
     const { year, month } = date;
-    const monthData = calendar.months?.values?.[month];
+    const monthData = calendar.monthsArray[month];
     if (!monthData) return null;
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = year - yearZero;
     const daysInMonth = calendar.getDaysInMonth(month, internalYear);
-    const daysInWeek = calendar.days?.values?.length || 7;
+    const daysInWeek = calendar.weekdaysArray.length || 7;
     const weeks = [];
     let currentWeek = [];
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moons?.length;
+    const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
     if (startDayOfWeek > 0) {
-      const totalMonths = calendar.months?.values?.length ?? 12;
+      const totalMonths = calendar.monthsArray.length ?? 12;
       let prevDays = [];
       let remainingSlots = startDayOfWeek;
       let checkMonth = month === 0 ? totalMonths - 1 : month - 1;
@@ -500,7 +500,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const lastRegularWeek = weeks.filter((w) => !w.isIntercalaryRow).pop();
     const needsNextMonth = intercalaryDays.length > 0 || (lastRegularWeek && lastRegularWeek.length < daysInWeek);
     if (needsNextMonth) {
-      const totalMonths = calendar.months?.values?.length ?? 12;
+      const totalMonths = calendar.monthsArray.length ?? 12;
       const startPosition = intercalaryDays.length > 0 ? lastRegularWeekLength : lastRegularWeek?.length || 0;
       let remainingSlots = daysInWeek - startPosition;
       let checkMonth = month;
@@ -534,7 +534,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.days?.values ?? [];
+    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED);
     const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, day: date.day };
     const headerComponents = { year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.day };
@@ -565,7 +565,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _generateWeekViewData(calendar, date, visibleNotes) {
     const { year } = date;
     const viewedDay = date.day || 1;
-    const daysInWeek = calendar.days?.values?.length || 7;
+    const daysInWeek = calendar.weekdaysArray.length || 7;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const weekNumber = Math.floor((viewedDay - 1) / daysInWeek);
@@ -619,7 +619,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedComponents = { month: 0, dayOfMonth: viewedDay - 1 };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-    const weekdayData = calendar.days?.values ?? [];
+    const weekdayData = calendar.weekdaysArray ?? [];
     const displayWeek = weekNumber + 1;
     const yearDisplay = String(year);
     const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;
@@ -759,7 +759,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this._selectedDate) return '';
     const { year, month, day } = this._selectedDate;
     const calendar = this.calendar;
-    const monthData = calendar.months?.values?.[month];
+    const monthData = calendar.monthsArray[month];
     const monthName = monthData ? localize(monthData.name) : '';
     const yearDisplay = String(year);
     return `${monthName} ${day}, ${yearDisplay}`;
@@ -1274,7 +1274,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if (dateEl) {
       const yearZero = calendar?.years?.yearZero ?? 0;
-      const monthData = calendar?.months?.values?.[components.month];
+      const monthData = calendar?.monthsArray?.[components.month];
       const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
       const monthName = localize(monthNameRaw);
       const day = (components.dayOfMonth ?? 0) + 1;
@@ -1328,7 +1328,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const current = this.viewedDate;
     const calendar = this.calendar;
     if (calendar.isMonthless) {
-      const daysInWeek = calendar.days?.values?.length || 7;
+      const daysInWeek = calendar.weekdaysArray.length || 7;
       const yearZero = calendar.years?.yearZero ?? 0;
       const daysInYear = calendar.getDaysInYear(current.year - yearZero);
       let newDay = (current.day || 1) + direction * daysInWeek;
@@ -1350,23 +1350,23 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let newMonth = current.month + direction;
     let newYear = current.year;
     const yearZero = calendar.years?.yearZero ?? 0;
-    if (newMonth >= calendar.months.values.length) {
+    if (newMonth >= calendar.monthsArray.length) {
       newMonth = 0;
       newYear++;
     } else if (newMonth < 0) {
-      newMonth = calendar.months.values.length - 1;
+      newMonth = calendar.monthsArray.length - 1;
       newYear--;
     }
 
     let attempts = 0;
-    const maxAttempts = calendar.months.values.length;
+    const maxAttempts = calendar.monthsArray.length;
     while (calendar.getDaysInMonth(newMonth, newYear - yearZero) === 0 && attempts < maxAttempts) {
       newMonth += direction;
-      if (newMonth >= calendar.months.values.length) {
+      if (newMonth >= calendar.monthsArray.length) {
         newMonth = 0;
         newYear++;
       } else if (newMonth < 0) {
-        newMonth = calendar.months.values.length - 1;
+        newMonth = calendar.monthsArray.length - 1;
         newYear--;
       }
       attempts++;

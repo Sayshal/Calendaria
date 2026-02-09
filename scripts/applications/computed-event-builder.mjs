@@ -54,9 +54,9 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
   /** @override */
   async _prepareContext() {
     const calendar = CalendarManager.getActiveCalendar();
-    const moons = calendar?.moons || [];
-    const weekdays = calendar?.days?.values || [];
-    const seasons = calendar?.seasons?.values || [];
+    const moons = calendar?.moonsArray ?? [];
+    const weekdays = calendar?.weekdaysArray ?? [];
+    const seasons = calendar?.seasonsArray ?? [];
 
     const anchorTypes = [
       { value: 'springEquinox', label: localize('CALENDARIA.Recurrence.SpringEquinox') },
@@ -110,7 +110,7 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
       moonPhases,
       moons: moons.map((m, i) => ({ index: i, name: localize(m.name) })),
       weekdays: weekdays.map((d, i) => ({ index: i, name: localize(d.name) })),
-      months: (calendar?.months?.values || []).map((m, i) => ({ index: i, name: localize(m.name) })),
+      months: (calendar?.monthsArray ?? []).map((m, i) => ({ index: i, name: localize(m.name) })),
       hasChain: chain.length > 0,
       hasOverrides: overrides.length > 0,
       helpText: localize('CALENDARIA.Note.ComputedHelp')

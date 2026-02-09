@@ -64,7 +64,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const isMonthless = calendar?.isMonthless ?? false;
     context.year = displayYear;
     context.isMonthless = isMonthless;
-    context.months = isMonthless ? [] : calendar?.months?.values?.map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month })) || [];
+    context.months = isMonthless ? [] : (calendar?.monthsArray ?? []).map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month }));
     if (isMonthless) {
       const daysInYear = calendar?.getDaysInYear?.(displayYear) ?? 365;
       context.days = Array.from({ length: daysInYear }, (_, i) => i + 1);
@@ -209,7 +209,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const monthName = calendar?.months?.values?.[components.month]?.name;
+    const monthName = calendar?.monthsArray?.[components.month]?.name;
     const defaultName = `${localize(monthName || 'Month')} ${(components.dayOfMonth ?? 0) + 1}, ${components.year + yearZero}`;
     const newTimepoint = { id: foundry.utils.randomID(), name: defaultName, worldTime: game.time.worldTime, createdAt: Date.now() };
     timepoints.push(newTimepoint);

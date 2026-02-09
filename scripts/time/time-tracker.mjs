@@ -154,7 +154,7 @@ export default class TimeTracker {
     const previousSeason = previousComponents.season ?? this.#lastSeason;
     const currentSeason = currentComponents.season;
     if (previousSeason !== null && currentSeason !== null && previousSeason !== currentSeason) {
-      const seasonData = { ...hookData, previousSeason: calendar.seasons?.values?.[previousSeason] ?? null, currentSeason: calendar.seasons?.values?.[currentSeason] ?? null };
+      const seasonData = { ...hookData, previousSeason: calendar.seasonsArray?.[previousSeason] ?? null, currentSeason: calendar.seasonsArray?.[currentSeason] ?? null };
       log(3, `Season changed: ${previousSeason} -> ${currentSeason}`);
       Hooks.callAll(HOOKS.SEASON_CHANGE, seasonData);
       this.#executePeriodMacro('season', seasonData);
@@ -253,7 +253,7 @@ export default class TimeTracker {
    */
   static #getDaysInYear(calendar) {
     let total = 0;
-    const months = calendar.months?.values || calendar.months || [];
+    const months = calendar.monthsArray || [];
     for (const month of months) total += month?.days || 30;
     return total || 365;
   }
@@ -319,7 +319,7 @@ export default class TimeTracker {
   static #getDayOfYear(components, calendar) {
     let dayOfYear = 0;
     for (let i = 0; i < components.month; i++) {
-      const month = calendar.months?.values?.[i];
+      const month = calendar.monthsArray?.[i];
       dayOfYear += month?.days || 30;
     }
     dayOfYear += components.dayOfMonth;
@@ -333,9 +333,9 @@ export default class TimeTracker {
    */
   static #getCurrentMoonPhases() {
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.moons?.length) return null;
+    if (!calendar?.moonsArray?.length) return null;
     const phases = new Map();
-    for (let i = 0; i < calendar.moons.length; i++) {
+    for (let i = 0; i < calendar.moonsArray.length; i++) {
       const phaseData = calendar.getMoonPhase?.(i);
       if (phaseData?.phaseIndex !== undefined) phases.set(i, phaseData.phaseIndex);
     }
@@ -348,7 +348,7 @@ export default class TimeTracker {
    * @private
    */
   static #checkMoonPhaseChanges(calendar) {
-    if (!calendar?.moons?.length) return;
+    if (!calendar?.moonsArray?.length) return;
     if (!this.#lastMoonPhases) return;
     const currentPhases = this.#getCurrentMoonPhases();
     if (!currentPhases) return;
@@ -357,7 +357,7 @@ export default class TimeTracker {
     for (const [moonIndex, currentPhaseIndex] of currentPhases) {
       const lastPhaseIndex = this.#lastMoonPhases.get(moonIndex);
       if (lastPhaseIndex !== undefined && lastPhaseIndex !== currentPhaseIndex) {
-        const moon = calendar.moons[moonIndex];
+        const moon = calendar.moonsArray[moonIndex];
         const previousPhase = moon.phases?.[lastPhaseIndex];
         const currentPhase = moon.phases?.[currentPhaseIndex];
         changedMoons.push({

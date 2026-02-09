@@ -3,87 +3,148 @@
   "name"          : "CALENDARIA.Calendar.Renescara.Name",
   "years"         : {"yearZero": 0, "firstWeekday": 0, "leapYear": null},
   "months"        : {
-    "values": [
-      {"name": "Thawmoon",         "abbreviation": "Thaw",      "ordinal":  1, "days": 28                       },
-      {"name": "Seedmoon",         "abbreviation": "Seed",      "ordinal":  2, "days": 28                       },
-      {"name": "Blossmoon",        "abbreviation": "Bloss",     "ordinal":  3, "days": 28                       },
-      {"name": "Greenmoon",        "abbreviation": "Green",     "ordinal":  4, "days": 28                       },
-      {"name": "Summertide",       "abbreviation": "Summer",    "ordinal":  5, "days": 28                       },
-      {"name": "Goldmoon",         "abbreviation": "Gold",      "ordinal":  6, "days": 28                       },
-      {"name": "Harvestmoon",      "abbreviation": "Harvest",   "ordinal":  7, "days": 28                       },
-      {"name": "Ambermoon",        "abbreviation": "Amber",     "ordinal":  8, "days": 28                       },
-      {"name": "Fadingmoon",       "abbreviation": "Fading",    "ordinal":  9, "days": 28                       },
-      {"name": "Frostmoon",        "abbreviation": "Frost",     "ordinal": 10, "days": 28                       },
-      {"name": "Winterdeep",       "abbreviation": "Winter",    "ordinal": 11, "days": 28                       },
-      {"name": "Ironmoon",         "abbreviation": "Iron",      "ordinal": 12, "days": 28                       },
-      {"name": "Shadowmoon",       "abbreviation": "Shadow",    "ordinal": 13, "days": 28                       },
-      {"name": "Day of Threshold", "abbreviation": "Threshold", "ordinal": 14, "days":  1, "type": "intercalary"}
-    ]
+    "values": {
+      "thawmoon00000000": {"name": "Thawmoon",         "abbreviation": "Thaw",      "ordinal":  1, "days": 28                       },
+      "seedmoon00000000": {"name": "Seedmoon",         "abbreviation": "Seed",      "ordinal":  2, "days": 28                       },
+      "blossmoon0000000": {"name": "Blossmoon",        "abbreviation": "Bloss",     "ordinal":  3, "days": 28                       },
+      "greenmoon0000000": {"name": "Greenmoon",        "abbreviation": "Green",     "ordinal":  4, "days": 28                       },
+      "summertide000000": {"name": "Summertide",       "abbreviation": "Summer",    "ordinal":  5, "days": 28                       },
+      "goldmoon00000000": {"name": "Goldmoon",         "abbreviation": "Gold",      "ordinal":  6, "days": 28                       },
+      "harvestmoon00000": {"name": "Harvestmoon",      "abbreviation": "Harvest",   "ordinal":  7, "days": 28                       },
+      "ambermoon0000000": {"name": "Ambermoon",        "abbreviation": "Amber",     "ordinal":  8, "days": 28                       },
+      "fadingmoon000000": {"name": "Fadingmoon",       "abbreviation": "Fading",    "ordinal":  9, "days": 28                       },
+      "frostmoon0000000": {"name": "Frostmoon",        "abbreviation": "Frost",     "ordinal": 10, "days": 28                       },
+      "winterdeep000000": {"name": "Winterdeep",       "abbreviation": "Winter",    "ordinal": 11, "days": 28                       },
+      "ironmoon00000000": {"name": "Ironmoon",         "abbreviation": "Iron",      "ordinal": 12, "days": 28                       },
+      "shadowmoon000000": {"name": "Shadowmoon",       "abbreviation": "Shadow",    "ordinal": 13, "days": 28                       },
+      "dayofthreshold00": {"name": "Day of Threshold", "abbreviation": "Threshold", "ordinal": 14, "days":  1, "type": "intercalary"}
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "Solday",   "ordinal": 1, "abbreviation": "Sol"}, {"name": "Ferriday", "ordinal": 2, "abbreviation": "Fer"}, {"name": "Verday",   "ordinal": 3, "abbreviation": "Ver"},
-      {"name": "Midweek",  "ordinal": 4, "abbreviation": "Mid"}, {"name": "Mercday",  "ordinal": 5, "abbreviation": "Mer"}, {"name": "Shadeday", "ordinal": 6, "abbreviation": "Sha"}, {"name": "Tideday",  "ordinal": 7, "abbreviation": "Tid"}
-    ],
+    "values"          : {
+      "solday0000000000": {"name": "Solday",   "ordinal": 1, "abbreviation": "Sol"},
+      "ferriday00000000": {"name": "Ferriday", "ordinal": 2, "abbreviation": "Fer"},
+      "verday0000000000": {"name": "Verday",   "ordinal": 3, "abbreviation": "Ver"},
+      "midweek000000000": {"name": "Midweek",  "ordinal": 4, "abbreviation": "Mid"},
+      "mercday000000000": {"name": "Mercday",  "ordinal": 5, "abbreviation": "Mer"},
+      "shadeday00000000": {"name": "Shadeday", "ordinal": 6, "abbreviation": "Sha"},
+      "tideday000000000": {"name": "Tideday",  "ordinal": 7, "abbreviation": "Tid"}
+    },
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [
-    {"name": "Firstlight Festival", "month": 1, "day": 15, "icon": "fas fa-sun", "color": "#F0C75E", "description": "Communities kindle bonfires and lanterns to welcome the new year and banish winter's lingering darkness."},
-    {"name": "Sowtide", "month": 2, "day": 7, "icon": "fas fa-seedling", "color": "#7CB342", "description": "Farmers and druids bless newly sown fields with ritual prayers for a bountiful growing season."},
-    {"name": "Firstbloom", "month": 3, "day": 21, "icon": "fas fa-heart", "color": "#E88AAF", "description": "A spring fertility festival of marriages and courtship, celebrated with flower garlands and dancing."},
-    {"name": "Greenfire", "month": 4, "day": 14, "icon": "fas fa-tree", "color": "#2E7D32", "description": "Forest clans honor the living world with bonfires of green wood, sacred to the Thornborn and all who revere nature."},
-    {"name": "Solstice Crown", "month": 5, "day": 14, "icon": "fas fa-crown", "color": "#FFB300", "description": "The summer solstice sacred to Solarius, when priests crown the sun's golden fire and the longest days are celebrated."},
-    {"name": "First Reaping", "month": 6, "day": 8, "icon": "fas fa-wheat-awn", "color": "#D4A017", "description": "The first sheaves of grain are cut and offered in thanksgiving as the harvest season begins."},
-    {"name": "The Gathering", "month": 7, "day": 15, "icon": "fas fa-utensils", "color": "#E65100", "description": "The great harvest feast where communities gather to share food, stories, and gratitude for the year's bounty."},
-    {"name": "The Turning", "month": 8, "day": 21, "icon": "fas fa-leaf", "color": "#BF6900", "description": "An autumn festival honoring transformation and the beauty of change as leaves turn gold and crimson."},
-    {"name": "Lastlight", "month": 9, "day": 7, "icon": "fas fa-cloud-sun", "color": "#A1887F", "description": "The last great fires are lit as communities make final preparations before winter's dark months descend."},
-    {"name": "Firstfrost Fair", "month": 10, "day": 14, "icon": "fas fa-tent", "color": "#4FC3F7", "description": "Merchants and travelers converge for the last great market before heavy snows close the mountain passes."},
-    {"name": "The Long Night", "month": 11, "day": 1, "icon": "fas fa-moon", "color": "#1A237E", "description": "The longest night of the year, kept as a solemn vigil with bonfires and prayers against the encroaching dark."},
-    {"name": "Iron Feast", "month": 12, "day": 28, "icon": "fas fa-hammer", "color": "#78909C", "description": "Valdris warriors feast in honor of The Iron Wolf, forging ancestor nails and blessing weapons through the night."},
-    {"name": "The Veilwalk", "month": 13, "day": 14, "icon": "fas fa-ghost", "color": "#7E57C2", "description": "The living walk among memories of the dead, leaving offerings at shrines as the veil between worlds grows thin."}
-  ],
-  "moons"         : [
-    {
+  "festivals"     : {
+    "firstlightfestiv": {
+      "name"       : "Firstlight Festival",
+      "month"      : 1,
+      "day"        : 15,
+      "icon"       : "fas fa-sun",
+      "color"      : "#F0C75E",
+      "description": "Communities kindle bonfires and lanterns to welcome the new year and banish winter's lingering darkness."
+    },
+    "sowtide000000000": {"name": "Sowtide", "month": 2, "day": 7, "icon": "fas fa-seedling", "color": "#7CB342", "description": "Farmers and druids bless newly sown fields with ritual prayers for a bountiful growing season."},
+    "firstbloom000000": {"name": "Firstbloom", "month": 3, "day": 21, "icon": "fas fa-heart", "color": "#E88AAF", "description": "A spring fertility festival of marriages and courtship, celebrated with flower garlands and dancing."},
+    "greenfire0000000": {
+      "name"       : "Greenfire",
+      "month"      : 4,
+      "day"        : 14,
+      "icon"       : "fas fa-tree",
+      "color"      : "#2E7D32",
+      "description": "Forest clans honor the living world with bonfires of green wood, sacred to the Thornborn and all who revere nature."
+    },
+    "solsticecrown000": {
+      "name"       : "Solstice Crown",
+      "month"      : 5,
+      "day"        : 14,
+      "icon"       : "fas fa-crown",
+      "color"      : "#FFB300",
+      "description": "The summer solstice sacred to Solarius, when priests crown the sun's golden fire and the longest days are celebrated."
+    },
+    "firstreaping0000": {"name": "First Reaping", "month": 6, "day": 8, "icon": "fas fa-wheat-awn", "color": "#D4A017", "description": "The first sheaves of grain are cut and offered in thanksgiving as the harvest season begins."},
+    "thegathering0000": {
+      "name"       : "The Gathering",
+      "month"      : 7,
+      "day"        : 15,
+      "icon"       : "fas fa-utensils",
+      "color"      : "#E65100",
+      "description": "The great harvest feast where communities gather to share food, stories, and gratitude for the year's bounty."
+    },
+    "theturning000000": {"name": "The Turning", "month": 8, "day": 21, "icon": "fas fa-leaf", "color": "#BF6900", "description": "An autumn festival honoring transformation and the beauty of change as leaves turn gold and crimson."},
+    "lastlight0000000": {"name": "Lastlight", "month": 9, "day": 7, "icon": "fas fa-cloud-sun", "color": "#A1887F", "description": "The last great fires are lit as communities make final preparations before winter's dark months descend."},
+    "firstfrostfair00": {
+      "name"       : "Firstfrost Fair",
+      "month"      : 10,
+      "day"        : 14,
+      "icon"       : "fas fa-tent",
+      "color"      : "#4FC3F7",
+      "description": "Merchants and travelers converge for the last great market before heavy snows close the mountain passes."
+    },
+    "thelongnight0000": {
+      "name"       : "The Long Night",
+      "month"      : 11,
+      "day"        : 1,
+      "icon"       : "fas fa-moon",
+      "color"      : "#1A237E",
+      "description": "The longest night of the year, kept as a solemn vigil with bonfires and prayers against the encroaching dark."
+    },
+    "ironfeast0000000": {
+      "name"       : "Iron Feast",
+      "month"      : 12,
+      "day"        : 28,
+      "icon"       : "fas fa-hammer",
+      "color"      : "#78909C",
+      "description": "Valdris warriors feast in honor of The Iron Wolf, forging ancestor nails and blessing weapons through the night."
+    },
+    "theveilwalk00000": {
+      "name"       : "The Veilwalk",
+      "month"      : 13,
+      "day"        : 14,
+      "icon"       : "fas fa-ghost",
+      "color"      : "#7E57C2",
+      "description": "The living walk among memories of the dead, leaving offerings at shrines as the veil between worlds grows thin."
+    }
+  },
+  "moons"         : {
+    "aela000000000000": {
       "name"         : "Aela",
       "cycleLength"  : 28,
       "color"        : "#C0C0C0",
       "hidden"       : false,
-      "phases"       : [
-        {"name": "The Dark Sister",  "rising": "Rising Dark Sister",  "fading": "Fading Dark Sister",  "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "The Silver Crown", "rising": "Rising Silver Crown", "fading": "Fading Silver Crown", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "thedarksister000": {"name": "The Dark Sister",  "rising": "Rising Dark Sister",  "fading": "Fading Dark Sister",  "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "thegrowing000000": {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "thegrowing000002": {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "thegrowing000003": {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "thesilvercrown00": {"name": "The Silver Crown", "rising": "Rising Silver Crown", "fading": "Fading Silver Crown", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "thefading0000000": {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "thefading0000002": {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "thefading0000003": {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 3247, "month": 0, "day": 1}
     },
-    {
+    "ruan000000000000": {
       "name"         : "Ruan",
       "cycleLength"  : 73,
       "color"        : "#B44622",
       "hidden"       : false,
-      "phases"       : [
-        {"name": "The Hidden Eye", "rising": "Rising Hidden Eye", "fading": "Fading Hidden Eye", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "The Blood Moon", "rising": "Rising Blood Moon", "fading": "Fading Blood Moon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "thehiddeneye0000": {"name": "The Hidden Eye", "rising": "Rising Hidden Eye", "fading": "Fading Hidden Eye", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "theawakening0000": {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "theawakening0002": {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "theawakening0003": {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "thebloodmoon0000": {"name": "The Blood Moon", "rising": "Rising Blood Moon", "fading": "Fading Blood Moon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "theclosing000000": {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "theclosing000002": {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "theclosing000003": {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 3247, "month": 0, "day": 19}
     }
-  ],
+  },
   "seasons"       : {
-    "values": [
-      {
+    "values": {
+      "spring0000000000": {
         "name"        : "Spring",
         "icon"        : "fas fa-seedling",
         "color"       : "#90ee90",
@@ -92,14 +153,19 @@
         "dayEnd"      : 83,
         "climate"     : {
           "temperatures": {"min": 5, "max": 18},
-          "presets"     : [
-            {"id": "clear",         "chance": 20}, {"id": "partly-cloudy", "chance": 25}, {"id": "cloudy",        "chance": 15}, {"id": "rain",          "chance": 20}, {"id": "drizzle",       "chance": 10},
-            {"id": "fog",           "chance":  5}, {"id": "thunderstorm",  "chance":  5}
-          ]
+          "presets"     : {
+            "clear00000000000": {"id": "clear",         "chance": 20},
+            "partlycloudy0000": {"id": "partly-cloudy", "chance": 25},
+            "cloudy0000000000": {"id": "cloudy",        "chance": 15},
+            "rain000000000000": {"id": "rain",          "chance": 20},
+            "drizzle000000000": {"id": "drizzle",       "chance": 10},
+            "fog0000000000000": {"id": "fog",           "chance":  5},
+            "thunderstorm0000": {"id": "thunderstorm",  "chance":  5}
+          }
         },
         "abbreviation": "Spr"
       },
-      {
+      "summer0000000000": {
         "name"        : "Summer",
         "icon"        : "fas fa-sun",
         "color"       : "#ffd700",
@@ -108,14 +174,19 @@
         "dayEnd"      : 167,
         "climate"     : {
           "temperatures": {"min": 18, "max": 32},
-          "presets"     : [
-            {"id": "clear",         "chance": 35}, {"id": "partly-cloudy", "chance": 25}, {"id": "cloudy",        "chance": 10}, {"id": "rain",          "chance": 10}, {"id": "thunderstorm",  "chance": 10},
-            {"id": "windy",         "chance":  5}, {"id": "sunshower",     "chance":  5}
-          ]
+          "presets"     : {
+            "clear00000000000": {"id": "clear",         "chance": 35},
+            "partlycloudy0000": {"id": "partly-cloudy", "chance": 25},
+            "cloudy0000000000": {"id": "cloudy",        "chance": 10},
+            "rain000000000000": {"id": "rain",          "chance": 10},
+            "thunderstorm0000": {"id": "thunderstorm",  "chance": 10},
+            "windy00000000000": {"id": "windy",         "chance":  5},
+            "sunshower0000000": {"id": "sunshower",     "chance":  5}
+          }
         },
         "abbreviation": "Sum"
       },
-      {
+      "autumn0000000000": {
         "name"        : "Autumn",
         "icon"        : "fas fa-leaf",
         "color"       : "#d2691e",
@@ -124,14 +195,19 @@
         "dayEnd"      : 251,
         "climate"     : {
           "temperatures": {"min": 5, "max": 20},
-          "presets"     : [
-            {"id": "clear",         "chance": 15}, {"id": "partly-cloudy", "chance": 20}, {"id": "cloudy",        "chance": 20}, {"id": "overcast",      "chance": 15}, {"id": "rain",          "chance": 15},
-            {"id": "fog",           "chance": 10}, {"id": "windy",         "chance":  5}
-          ]
+          "presets"     : {
+            "clear00000000000": {"id": "clear",         "chance": 15},
+            "partlycloudy0000": {"id": "partly-cloudy", "chance": 20},
+            "cloudy0000000000": {"id": "cloudy",        "chance": 20},
+            "overcast00000000": {"id": "overcast",      "chance": 15},
+            "rain000000000000": {"id": "rain",          "chance": 15},
+            "fog0000000000000": {"id": "fog",           "chance": 10},
+            "windy00000000000": {"id": "windy",         "chance":  5}
+          }
         },
         "abbreviation": "Aut"
       },
-      {
+      "winter0000000000": {
         "name"        : "Winter",
         "icon"        : "fas fa-snowflake",
         "color"       : "#87ceeb",
@@ -140,59 +216,80 @@
         "dayEnd"      : 364,
         "climate"     : {
           "temperatures": {"min": -10, "max": 5},
-          "presets"     : [
-            {"id": "clear",         "chance": 15}, {"id": "partly-cloudy", "chance": 15}, {"id": "cloudy",        "chance": 15}, {"id": "overcast",      "chance": 20}, {"id": "snow",          "chance": 20},
-            {"id": "blizzard",      "chance":  5}, {"id": "fog",           "chance":  5}, {"id": "windy",         "chance":  5}
-          ]
+          "presets"     : {
+            "clear00000000000": {"id": "clear",         "chance": 15},
+            "partlycloudy0000": {"id": "partly-cloudy", "chance": 15},
+            "cloudy0000000000": {"id": "cloudy",        "chance": 15},
+            "overcast00000000": {"id": "overcast",      "chance": 20},
+            "snow000000000000": {"id": "snow",          "chance": 20},
+            "blizzard00000000": {"id": "blizzard",      "chance":  5},
+            "fog0000000000000": {"id": "fog",           "chance":  5},
+            "windy00000000000": {"id": "windy",         "chance":  5}
+          }
         },
         "abbreviation": "Win"
       }
-    ]
+    }
   },
   "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 281, "summerSolstice": 126},
-  "eras"          : [
-    {"name": "First Age",      "abbreviation": "FA", "startYear": -2000, "endYear": -500},
-    {"name": "Dark Centuries", "abbreviation": "DC", "startYear":  -500, "endYear":    0},
-    {"name": "Second Age",     "abbreviation": "SA", "startYear":     1, "endYear": null}
-  ],
-  "canonicalHours": [
-    {"name": "Dawn Watch",      "abbreviation": "Dawn",  "startHour":  5, "endHour":  9},
-    {"name": "Iron Hours",      "abbreviation": "Iron",  "startHour":  9, "endHour": 13},
-    {"name": "Green Hours",     "abbreviation": "Green", "startHour": 13, "endHour": 17},
-    {"name": "Merchant's Bell", "abbreviation": "Bell",  "startHour": 17, "endHour": 21},
-    {"name": "Shade Hours",     "abbreviation": "Shade", "startHour": 21, "endHour":  1},
-    {"name": "Moon Watch",      "abbreviation": "Moon",  "startHour":  1, "endHour":  5}
-  ],
+  "eras"          : {
+    "firstage00000000": {"name": "First Age",      "abbreviation": "FA", "startYear": -2000, "endYear": -500},
+    "darkcenturies000": {"name": "Dark Centuries", "abbreviation": "DC", "startYear":  -500, "endYear":    0},
+    "secondage0000000": {"name": "Second Age",     "abbreviation": "SA", "startYear":     1, "endYear": null}
+  },
+  "canonicalHours": {
+    "dawnwatch0000000": {"name": "Dawn Watch",      "abbreviation": "Dawn",  "startHour":  5, "endHour":  9},
+    "ironhours0000000": {"name": "Iron Hours",      "abbreviation": "Iron",  "startHour":  9, "endHour": 13},
+    "greenhours000000": {"name": "Green Hours",     "abbreviation": "Green", "startHour": 13, "endHour": 17},
+    "merchantsbell000": {"name": "Merchant's Bell", "abbreviation": "Bell",  "startHour": 17, "endHour": 21},
+    "shadehours000000": {"name": "Shade Hours",     "abbreviation": "Shade", "startHour": 21, "endHour":  1},
+    "moonwatch0000000": {"name": "Moon Watch",      "abbreviation": "Moon",  "startHour":  1, "endHour":  5}
+  },
   "amPmNotation"  : {"am": "Sunward", "pm": "Moonward", "amAbbr": "SW", "pmAbbr": "MW"},
-  "cycles"        : [
-    {
+  "cycles"        : {
+    "thefivewanderers": {
       "name"   : "The Five Wanderers",
       "length" : 5,
       "offset" : 0,
       "basedOn": "year",
-      "stages" : [ {"name": "Ferrus"}, {"name": "Verdantis"}, {"name": "Crystallus"}, {"name": "Umbralis"}, {"name": "Temporis"} ]
+      "stages" : { "ferrus0000000000": {"name": "Ferrus"}, "verdantis0000000": {"name": "Verdantis"}, "crystallus000000": {"name": "Crystallus"}, "umbralis00000000": {"name": "Umbralis"}, "temporis00000000": {"name": "Temporis"} }
     }
-  ],
+  },
   "cycleFormat"   : "Year of [1]",
   "weeks"         : {
     "enabled": true,
     "type"   : "month-based",
-    "names"  : [ {"name": "Week of Rising", "abbreviation": "Rising"}, {"name": "Week of Fullness", "abbreviation": "Fullness"}, {"name": "Week of Turning", "abbreviation": "Turning"}, {"name": "Week of Fading", "abbreviation": "Fading"} ]
+    "names"  : {
+      "weekofrising0000": {"name": "Week of Rising",   "abbreviation": "Rising"  },
+      "weekoffullness00": {"name": "Week of Fullness", "abbreviation": "Fullness"},
+      "weekofturning000": {"name": "Week of Turning",  "abbreviation": "Turning" },
+      "weekoffading0000": {"name": "Week of Fading",   "abbreviation": "Fading"  }
+    }
   },
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y ([ch])", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "weather"       : {
-    "zones": [
-      {
+    "zones": {
+      "valdris000000000": {
         "id"             : "valdris",
         "name"           : "Kingdom of Valdris",
         "description"    : "Northern mountains and iron-rich ranges with harsh winters and extreme temperature swings.",
         "temperatures"   : { "_default": {"min": -10, "max": 15} },
-        "presets"        : [
-          {"id": "clear",         "enabled": true, "chance": 5}, {"id": "partly-cloudy", "enabled": true, "chance": 4}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "overcast",      "enabled": true, "chance": 3},
-          {"id": "snow",          "enabled": true, "chance": 4}, {"id": "blizzard",      "enabled": true, "chance": 2}, {"id": "fog",           "enabled": true, "chance": 2}, {"id": "windy",         "enabled": true, "chance": 3},
-          {"id": "aether-haze",   "enabled": true, "chance": 2}, {"id": "luminous-sky",  "enabled": true, "chance": 3}, {"id": "veilfall",      "enabled": true, "chance": 1}, {"id": "gravewind",     "enabled": true, "chance": 2},
-          {"id": "nullfront",     "enabled": true, "chance": 2}, {"id": "ley-surge",     "enabled": true, "chance": 2}
-        ],
+        "presets"        : {
+          "clear00000000000": {"id": "clear",         "enabled": true, "chance": 5},
+          "partlycloudy0000": {"id": "partly-cloudy", "enabled": true, "chance": 4},
+          "cloudy0000000000": {"id": "cloudy",        "enabled": true, "chance": 3},
+          "overcast00000000": {"id": "overcast",      "enabled": true, "chance": 3},
+          "snow000000000000": {"id": "snow",          "enabled": true, "chance": 4},
+          "blizzard00000000": {"id": "blizzard",      "enabled": true, "chance": 2},
+          "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 2},
+          "windy00000000000": {"id": "windy",         "enabled": true, "chance": 3},
+          "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 2},
+          "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 3},
+          "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 1},
+          "gravewind0000000": {"id": "gravewind",     "enabled": true, "chance": 2},
+          "nullfront0000000": {"id": "nullfront",     "enabled": true, "chance": 2},
+          "leysurge00000000": {"id": "ley-surge",     "enabled": true, "chance": 2}
+        },
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -18, "max": 10},
@@ -212,17 +309,27 @@
           }
         }
       },
-      {
+      "lys0000000000000": {
         "id"             : "lys",
         "name"           : "Merchant Confederacy of Lys",
         "description"    : "Coastal trading empire with temperate, mild weather year-round.",
         "temperatures"   : { "_default": {"min": 8, "max": 25} },
-        "presets"        : [
-          {"id": "clear",         "enabled": true, "chance": 6}, {"id": "partly-cloudy", "enabled": true, "chance": 5}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "rain",          "enabled": true, "chance": 4},
-          {"id": "drizzle",       "enabled": true, "chance": 3}, {"id": "thunderstorm",  "enabled": true, "chance": 2}, {"id": "fog",           "enabled": true, "chance": 3}, {"id": "windy",         "enabled": true, "chance": 3},
-          {"id": "aether-haze",   "enabled": true, "chance": 2}, {"id": "luminous-sky",  "enabled": true, "chance": 1}, {"id": "veilfall",      "enabled": true, "chance": 1}, {"id": "gravewind",     "enabled": true, "chance": 1},
-          {"id": "nullfront",     "enabled": true, "chance": 1}, {"id": "ley-surge",     "enabled": true, "chance": 2}
-        ],
+        "presets"        : {
+          "clear00000000000": {"id": "clear",         "enabled": true, "chance": 6},
+          "partlycloudy0000": {"id": "partly-cloudy", "enabled": true, "chance": 5},
+          "cloudy0000000000": {"id": "cloudy",        "enabled": true, "chance": 3},
+          "rain000000000000": {"id": "rain",          "enabled": true, "chance": 4},
+          "drizzle000000000": {"id": "drizzle",       "enabled": true, "chance": 3},
+          "thunderstorm0000": {"id": "thunderstorm",  "enabled": true, "chance": 2},
+          "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 3},
+          "windy00000000000": {"id": "windy",         "enabled": true, "chance": 3},
+          "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 2},
+          "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 1},
+          "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 1},
+          "gravewind0000000": {"id": "gravewind",     "enabled": true, "chance": 1},
+          "nullfront0000000": {"id": "nullfront",     "enabled": true, "chance": 1},
+          "leysurge00000000": {"id": "ley-surge",     "enabled": true, "chance": 2}
+        },
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": 5, "max": 25},
@@ -242,17 +349,27 @@
           }
         }
       },
-      {
+      "sanctus000000000": {
         "id"             : "sanctus",
         "name"           : "Theocracy of Sanctus Lumen",
         "description"    : "Mountain highlands with fortress-monasteries enduring harsh, arctic conditions.",
         "temperatures"   : { "_default": {"min": -20, "max": 5} },
-        "presets"        : [
-          {"id": "clear",         "enabled": true, "chance": 4}, {"id": "partly-cloudy", "enabled": true, "chance": 3}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "overcast",      "enabled": true, "chance": 4},
-          {"id": "snow",          "enabled": true, "chance": 5}, {"id": "blizzard",      "enabled": true, "chance": 4}, {"id": "fog",           "enabled": true, "chance": 2}, {"id": "windy",         "enabled": true, "chance": 4},
-          {"id": "aether-haze",   "enabled": true, "chance": 3}, {"id": "luminous-sky",  "enabled": true, "chance": 4}, {"id": "veilfall",      "enabled": true, "chance": 2}, {"id": "gravewind",     "enabled": true, "chance": 3},
-          {"id": "nullfront",     "enabled": true, "chance": 4}, {"id": "ley-surge",     "enabled": true, "chance": 2}
-        ],
+        "presets"        : {
+          "clear00000000000": {"id": "clear",         "enabled": true, "chance": 4},
+          "partlycloudy0000": {"id": "partly-cloudy", "enabled": true, "chance": 3},
+          "cloudy0000000000": {"id": "cloudy",        "enabled": true, "chance": 3},
+          "overcast00000000": {"id": "overcast",      "enabled": true, "chance": 4},
+          "snow000000000000": {"id": "snow",          "enabled": true, "chance": 5},
+          "blizzard00000000": {"id": "blizzard",      "enabled": true, "chance": 4},
+          "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 2},
+          "windy00000000000": {"id": "windy",         "enabled": true, "chance": 4},
+          "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 3},
+          "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 4},
+          "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 2},
+          "gravewind0000000": {"id": "gravewind",     "enabled": true, "chance": 3},
+          "nullfront0000000": {"id": "nullfront",     "enabled": true, "chance": 4},
+          "leysurge00000000": {"id": "ley-surge",     "enabled": true, "chance": 2}
+        },
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -25, "max": 5},
@@ -272,17 +389,27 @@
           }
         }
       },
-      {
+      "thornwood0000000": {
         "id"             : "thornwood",
         "name"           : "Thornwood Marches",
         "description"    : "Ancient primeval forest where Gyre influence is strongest near the crash site.",
         "temperatures"   : { "_default": {"min": 0, "max": 20} },
-        "presets"        : [
-          {"id": "clear",         "enabled": true, "chance": 4}, {"id": "partly-cloudy", "enabled": true, "chance": 4}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "overcast",      "enabled": true, "chance": 3},
-          {"id": "rain",          "enabled": true, "chance": 3}, {"id": "fog",           "enabled": true, "chance": 4}, {"id": "mist",          "enabled": true, "chance": 4}, {"id": "thunderstorm",  "enabled": true, "chance": 2},
-          {"id": "aether-haze",   "enabled": true, "chance": 4}, {"id": "luminous-sky",  "enabled": true, "chance": 2}, {"id": "veilfall",      "enabled": true, "chance": 5}, {"id": "gravewind",     "enabled": true, "chance": 4},
-          {"id": "nullfront",     "enabled": true, "chance": 3}, {"id": "ley-surge",     "enabled": true, "chance": 5}
-        ],
+        "presets"        : {
+          "clear00000000000": {"id": "clear",         "enabled": true, "chance": 4},
+          "partlycloudy0000": {"id": "partly-cloudy", "enabled": true, "chance": 4},
+          "cloudy0000000000": {"id": "cloudy",        "enabled": true, "chance": 3},
+          "overcast00000000": {"id": "overcast",      "enabled": true, "chance": 3},
+          "rain000000000000": {"id": "rain",          "enabled": true, "chance": 3},
+          "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 4},
+          "mist000000000000": {"id": "mist",          "enabled": true, "chance": 4},
+          "thunderstorm0000": {"id": "thunderstorm",  "enabled": true, "chance": 2},
+          "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 4},
+          "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 2},
+          "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 5},
+          "gravewind0000000": {"id": "gravewind",     "enabled": true, "chance": 4},
+          "nullfront0000000": {"id": "nullfront",     "enabled": true, "chance": 3},
+          "leysurge00000000": {"id": "ley-surge",     "enabled": true, "chance": 5}
+        },
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -8, "max": 22},
@@ -302,7 +429,7 @@
           }
         }
       }
-    ]
+    }
   },
   "metadata"      : {"id": "renescara", "description": "CALENDARIA.Calendar.Renescara.Description", "author": "calendaria", "system": "Renescara"}
 }

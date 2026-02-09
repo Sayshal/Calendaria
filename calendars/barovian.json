@@ -3,70 +3,74 @@
   "name"          : "CALENDARIA.Calendar.Barovian.Name",
   "years"         : { "yearZero": 735, "firstWeekday": 0, "leapYear": {"leapStart": 0, "leapInterval": 4} },
   "months"        : {
-    "values": [
-      {"name": "Yinvar",   "abbreviation": "Yin", "ordinal":  1, "days": 31                },
-      {"name": "Fivral",   "abbreviation": "Fiv", "ordinal":  2, "days": 28, "leapDays": 29},
-      {"name": "Mart",     "abbreviation": "Mar", "ordinal":  3, "days": 31                },
-      {"name": "Apryl",    "abbreviation": "Apr", "ordinal":  4, "days": 30                },
-      {"name": "Mai",      "abbreviation": "Mai", "ordinal":  5, "days": 31                },
-      {"name": "Iyun",     "abbreviation": "Iyn", "ordinal":  6, "days": 30                },
-      {"name": "Iyul",     "abbreviation": "Iyl", "ordinal":  7, "days": 31                },
-      {"name": "Avhust",   "abbreviation": "Avh", "ordinal":  8, "days": 31                },
-      {"name": "Sintyavr", "abbreviation": "Sin", "ordinal":  9, "days": 30                },
-      {"name": "Oktyavr",  "abbreviation": "Okt", "ordinal": 10, "days": 31                },
-      {"name": "Noyavr",   "abbreviation": "Noy", "ordinal": 11, "days": 30                },
-      {"name": "Dekavr",   "abbreviation": "Dek", "ordinal": 12, "days": 31                }
-    ]
+    "values": {
+      "yinvar0000000000": {"name": "Yinvar",   "abbreviation": "Yin", "ordinal":  1, "days": 31                },
+      "fivral0000000000": {"name": "Fivral",   "abbreviation": "Fiv", "ordinal":  2, "days": 28, "leapDays": 29},
+      "mart000000000000": {"name": "Mart",     "abbreviation": "Mar", "ordinal":  3, "days": 31                },
+      "apryl00000000000": {"name": "Apryl",    "abbreviation": "Apr", "ordinal":  4, "days": 30                },
+      "mai0000000000000": {"name": "Mai",      "abbreviation": "Mai", "ordinal":  5, "days": 31                },
+      "iyun000000000000": {"name": "Iyun",     "abbreviation": "Iyn", "ordinal":  6, "days": 30                },
+      "iyul000000000000": {"name": "Iyul",     "abbreviation": "Iyl", "ordinal":  7, "days": 31                },
+      "avhust0000000000": {"name": "Avhust",   "abbreviation": "Avh", "ordinal":  8, "days": 31                },
+      "sintyavr00000000": {"name": "Sintyavr", "abbreviation": "Sin", "ordinal":  9, "days": 30                },
+      "oktyavr000000000": {"name": "Oktyavr",  "abbreviation": "Okt", "ordinal": 10, "days": 31                },
+      "noyavr0000000000": {"name": "Noyavr",   "abbreviation": "Noy", "ordinal": 11, "days": 30                },
+      "dekavr0000000000": {"name": "Dekavr",   "abbreviation": "Dek", "ordinal": 12, "days": 31                }
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "Lunadi",  "ordinal": 1, "abbreviation": "Lun"                   }, {"name": "Martedi", "ordinal": 2, "abbreviation": "Mar"                   }, {"name": "Merkadi", "ordinal": 3, "abbreviation": "Mer"                   },
-      {"name": "Zhevdi",  "ordinal": 4, "abbreviation": "Zhe"                   }, {"name": "Pyatdi",  "ordinal": 5, "abbreviation": "Pya"                   }, {"name": "Subodi",  "ordinal": 6, "abbreviation": "Sub"                   },
-      {"name": "Nedelya", "ordinal": 7, "abbreviation": "Ned", "isRestDay": true}
-    ],
+    "values"          : {
+      "lunadi0000000000": {"name": "Lunadi",  "ordinal": 1, "abbreviation": "Lun"                   },
+      "martedi000000000": {"name": "Martedi", "ordinal": 2, "abbreviation": "Mar"                   },
+      "merkadi000000000": {"name": "Merkadi", "ordinal": 3, "abbreviation": "Mer"                   },
+      "zhevdi0000000000": {"name": "Zhevdi",  "ordinal": 4, "abbreviation": "Zhe"                   },
+      "pyatdi0000000000": {"name": "Pyatdi",  "ordinal": 5, "abbreviation": "Pya"                   },
+      "subodi0000000000": {"name": "Subodi",  "ordinal": 6, "abbreviation": "Sub"                   },
+      "nedelya000000000": {"name": "Nedelya", "ordinal": 7, "abbreviation": "Ned", "isRestDay": true}
+    },
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [
-    {"name": "Blessing of the Morninglord", "month":  3, "day": 21, "icon": "fas fa-sun",         "color": "#FFD700", "description": "Spring equinox honoring the Morninglord who once watched over Barovia."           },
-    {"name": "Harvest Festival",            "month":  9, "day": 22, "icon": "fas fa-wheat-awn",   "color": "#8B4513", "description": "A rare moment of joy in the cursed land of Barovia celebrating the harvest."      },
-    {"name": "Wine Festival",               "month": 10, "day": 15, "icon": "fas fa-wine-bottle", "color": "#722F37", "description": "Celebration of Barovia's famed wines, honoring the vintners and their craft."     },
-    {"name": "Night of the Dead",           "month": 10, "day": 31, "icon": "fas fa-skull",       "color": "#1C1C1C", "description": "Somber remembrance when the veil between the living and dead grows thin."         },
-    {"name": "Winter Solstice",             "month": 12, "day": 21, "icon": "fas fa-snowflake",   "color": "#4682B4", "description": "The longest night of the year when Barovians huddle indoors against the darkness."}
-  ],
-  "seasons"       : {
-    "values": [
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 264, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 265, "dayEnd": 354, "abbreviation": "Aut"},
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"}
-    ]
+  "festivals"     : {
+    "blessingofthemor": {"name": "Blessing of the Morninglord", "month":  3, "day": 21, "icon": "fas fa-sun",         "color": "#FFD700", "description": "Spring equinox honoring the Morninglord who once watched over Barovia."           },
+    "harvestfestival0": {"name": "Harvest Festival",            "month":  9, "day": 22, "icon": "fas fa-wheat-awn",   "color": "#8B4513", "description": "A rare moment of joy in the cursed land of Barovia celebrating the harvest."      },
+    "winefestival0000": {"name": "Wine Festival",               "month": 10, "day": 15, "icon": "fas fa-wine-bottle", "color": "#722F37", "description": "Celebration of Barovia's famed wines, honoring the vintners and their craft."     },
+    "nightofthedead00": {"name": "Night of the Dead",           "month": 10, "day": 31, "icon": "fas fa-skull",       "color": "#1C1C1C", "description": "Somber remembrance when the veil between the living and dead grows thin."         },
+    "wintersolstice00": {"name": "Winter Solstice",             "month": 12, "day": 21, "icon": "fas fa-snowflake",   "color": "#4682B4", "description": "The longest night of the year when Barovians huddle indoors against the darkness."}
   },
-  "eras"          : [ {"name": "Barovian Calendar", "abbreviation": "BC", "startYear": 1, "endYear": null} ],
-  "moons"         : [
-    {
+  "seasons"       : {
+    "values": {
+      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
+      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 264, "abbreviation": "Sum"},
+      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 265, "dayEnd": 354, "abbreviation": "Aut"},
+      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"}
+    }
+  },
+  "eras"          : { "baroviancalendar": {"name": "Barovian Calendar", "abbreviation": "BC", "startYear": 1, "endYear": null} },
+  "moons"         : {
+    "luna000000000000": {
       "name"         : "Luna",
       "cycleLength"  : 28,
       "color"        : "#C0C0C0",
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 0, "month": 0, "day": 14}
     }
-  ],
+  },
   "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 355, "summerSolstice": 172},
-  "cycles"        : [],
-  "canonicalHours": [],
-  "weeks"         : {"enabled": false, "type": "year-based", "names": []},
+  "cycles"        : {},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "barovian", "description": "CALENDARIA.Calendar.Barovian.Description", "author": "calendaria", "system": "Ravenloft"}

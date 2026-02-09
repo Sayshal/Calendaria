@@ -91,7 +91,7 @@ export function monthsBetween(startDate, endDate) {
   if (!calendar) return 0;
   const yearDiff = endDate.year - startDate.year;
   const monthDiff = endDate.month - startDate.month;
-  const monthsPerYear = calendar.months?.values?.length || 12;
+  const monthsPerYear = calendar.monthsArray?.length || 12;
   return yearDiff * monthsPerYear + monthDiff;
 }
 
@@ -156,7 +156,7 @@ export function addMonths(date, months) {
   const yearZero = calendar.years?.yearZero ?? 0;
   let newYear = date.year;
   let newMonth = date.month + months;
-  const monthsPerYear = calendar.months?.values?.length || 12;
+  const monthsPerYear = calendar.monthsArray?.length || 12;
   while (newMonth >= monthsPerYear) {
     newMonth -= monthsPerYear;
     newYear++;
@@ -218,7 +218,7 @@ export function isValidDate(date) {
     const maxDays = calendar.getDaysInYear(internalYear);
     if (date.day < 1 || date.day > maxDays) return false;
   } else {
-    if (date.month < 0 || date.month >= calendar.months.values.length) return false;
+    if (date.month < 0 || date.month >= calendar.monthsArray.length) return false;
     const maxDays = calendar.getDaysInMonth(date.month, internalYear);
     if (date.day < 1 || date.day > maxDays) return false;
   }

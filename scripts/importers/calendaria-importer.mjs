@@ -79,7 +79,8 @@ export default class CalendariaImporter extends BaseImporter {
    */
   async transform(data) {
     const calendarData = this.#extractCalendarData(data);
-    if (!calendarData.name || !calendarData.months?.values) throw new Error('Invalid Calendaria export format');
+    const monthValues = calendarData.months?.values;
+    if (!calendarData.name || !monthValues || !Object.values(monthValues).length) throw new Error('Invalid Calendaria export format');
     log(3, `Transforming Calendaria export: ${calendarData.name}`);
     const metadata = { ...calendarData.metadata };
     delete metadata.id;

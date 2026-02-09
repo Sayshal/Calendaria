@@ -19,14 +19,14 @@ import { CalendariaSocket } from '../utils/socket.mjs';
 export function getTimeIncrements() {
   const cal = game.time?.calendar;
   const days = cal?.days ?? {};
-  const seasons = cal?.seasons?.values ?? [];
+  const seasons = cal?.seasonsArray ?? [];
   const secsPerMinute = days.secondsPerMinute ?? 60;
   const minutesPerHour = days.minutesPerHour ?? 60;
   const hoursPerDay = days.hoursPerDay ?? 24;
   const daysPerYear = days.daysPerYear ?? 365;
   const secsPerHour = secsPerMinute * minutesPerHour;
   const secsPerDay = secsPerHour * hoursPerDay;
-  const monthDays = cal?.months?.values?.[0]?.days ?? Math.floor(daysPerYear / 12);
+  const monthDays = cal?.monthsArray?.[0]?.days ?? Math.floor(daysPerYear / 12);
   const secsPerMonth = secsPerDay * monthDays;
   const seasonDays = seasons[0]?.duration ?? Math.floor(daysPerYear / 4);
   const secsPerSeason = secsPerDay * seasonDays;
@@ -482,7 +482,7 @@ export default class TimeClock {
     const cal = game.time?.calendar;
     if (!cal) return '';
     const components = cal.timeToComponents(game.time.worldTime);
-    const monthData = cal.months?.values?.[components.month];
+    const monthData = cal.monthsArray?.[components.month];
     const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
     const monthName = localize(monthNameRaw);
     const day = components.dayOfMonth + 1;

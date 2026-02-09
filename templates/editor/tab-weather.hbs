@@ -54,7 +54,7 @@
           <i class="fas fa-minus-circle" style="color: var(--color-text-tertiary)"></i>
           {{/if}}
         </span>
-        <button type="button" class="season-climate-btn" data-action="editSeasonClimate" data-index="{{this.index}}"
+        <button type="button" class="season-climate-btn" data-action="editSeasonClimate" data-key="{{this.key}}"
           data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.EditSeasonClimate'}}">
           <i class="fas fa-edit"></i>
         </button>
@@ -97,8 +97,8 @@
           </div>
           {{#each category.presets as |preset|}}
           <div class="weather-preset-item" data-preset-id="{{preset.id}}">
-            <input type="hidden" name="weather.presets.{{preset.index}}.id" value="{{preset.id}}">
-            <input type="checkbox" class="preset-enabled" name="weather.presets.{{preset.index}}.enabled"
+            <input type="hidden" name="weather.presets.{{preset.id}}.id" value="{{preset.id}}">
+            <input type="checkbox" class="preset-enabled" name="weather.presets.{{preset.id}}.enabled"
               {{#if preset.enabled}}checked{{/if}}>
             <span class="preset-icon" style="color: {{preset.color}}">
               <i class="fas {{preset.icon}}"></i>
@@ -117,15 +117,15 @@
               {{/if}}
             </div>
             <div class="preset-chance">
-              <input type="number" name="weather.presets.{{preset.index}}.chance" value="{{preset.chance}}" min="0"
+              <input type="number" name="weather.presets.{{preset.id}}.chance" value="{{preset.chance}}" min="0"
                 max="100" step="0.01" placeholder="0.00">
               <span>%</span>
             </div>
             <div class="preset-temp">
-              <input type="number" name="weather.presets.{{preset.index}}.tempMin" value="{{preset.tempMin}}"
+              <input type="number" name="weather.presets.{{preset.id}}.tempMin" value="{{preset.tempMin}}"
                 placeholder="—">
               <span class="temp-separator">–</span>
-              <input type="number" name="weather.presets.{{preset.index}}.tempMax" value="{{preset.tempMax}}"
+              <input type="number" name="weather.presets.{{preset.id}}.tempMax" value="{{preset.tempMax}}"
                 placeholder="—">
               <span class="temp-unit">{{@root.tempUnit}}</span>
             </div>
@@ -140,7 +140,7 @@
               </button>
             </div>
             <div class="description-popover">
-              <textarea name="weather.presets.{{preset.index}}.description"
+              <textarea name="weather.presets.{{preset.id}}.description"
                 placeholder="{{localize preset.description}}">{{preset.customDescription}}</textarea>
             </div>
           </div>

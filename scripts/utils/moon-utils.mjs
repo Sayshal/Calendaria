@@ -126,7 +126,7 @@ function calculateDaysBetween(date1, date2, calendar) {
  */
 function dateToDayNumber(date, calendar) {
   const daysPerYear = calendar.days?.daysPerYear ?? 365;
-  const months = calendar.months?.values ?? [];
+  const months = calendar.monthsArray ?? [];
   let dayNumber = date.year * daysPerYear;
   for (let m = 0; m < date.month && m < months.length; m++) dayNumber += months[m]?.days ?? 30;
   dayNumber += (date.day ?? 1) - 1;
@@ -140,7 +140,7 @@ function dateToDayNumber(date, calendar) {
  * @returns {object} New date
  */
 function addOneDay(date, calendar) {
-  const months = calendar.months?.values ?? [];
+  const months = calendar.monthsArray ?? [];
   let { year, month, day } = date;
   day++;
   const daysInMonth = months[month]?.days ?? 30;

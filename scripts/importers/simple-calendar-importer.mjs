@@ -456,7 +456,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
-    const existingFestivals = calendar.festivals || [];
+    const existingFestivals = calendar.festivalsArray ?? [];
     const newFestivals = [];
     for (const festival of festivals) {
       try {

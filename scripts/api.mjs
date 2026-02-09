@@ -182,7 +182,7 @@ export const CalendariaAPI = {
     if (!calendar?.seasons) return null;
     const components = game.time.components;
     const seasonIndex = components.season ?? 0;
-    return calendar.seasons.values?.[seasonIndex] ?? null;
+    return calendar.seasonsArray?.[seasonIndex] ?? null;
   },
 
   /**
@@ -654,7 +654,7 @@ export const CalendariaAPI = {
     const month = date.month ?? 0;
     const dayOfMonth = date.dayOfMonth ?? (date.day != null ? date.day - 1 : 0);
     let day = dayOfMonth;
-    const months = calendar.months?.values ?? [];
+    const months = calendar.monthsArray ?? [];
     for (let i = 0; i < month; i++) {
       const isLeap = calendar.isLeapYear?.(year);
       day += isLeap && months[i]?.leapDays ? months[i].leapDays : (months[i]?.days ?? 0);

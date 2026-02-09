@@ -3,72 +3,92 @@
   "name"          : "CALENDARIA.Calendar.Athasian.Name",
   "years"         : {"yearZero": 1, "firstWeekday": 0},
   "months"        : {
-    "values": [
-      {"name": "Dominary",  "abbreviation": "Dom", "ordinal":  1, "days": 30                       },
-      {"name": "Sedulous",  "abbreviation": "Sed", "ordinal":  2, "days": 30                       },
-      {"name": "Fortuary",  "abbreviation": "For", "ordinal":  3, "days": 30                       },
-      {"name": "Macro",     "abbreviation": "Mac", "ordinal":  4, "days": 30                       },
-      {"name": "Zenalia",   "abbreviation": "Zen", "ordinal":  5, "days":  5, "type": "intercalary"},
-      {"name": "Fifthover", "abbreviation": "Fif", "ordinal":  6, "days": 30                       },
-      {"name": "Hexameron", "abbreviation": "Hex", "ordinal":  7, "days": 30                       },
-      {"name": "Morrow",    "abbreviation": "Mor", "ordinal":  8, "days": 30                       },
-      {"name": "Octavus",   "abbreviation": "Oct", "ordinal":  9, "days": 30                       },
-      {"name": "Dessalia",  "abbreviation": "Des", "ordinal": 10, "days":  5, "type": "intercalary"},
-      {"name": "Thaumast",  "abbreviation": "Tha", "ordinal": 11, "days": 30                       },
-      {"name": "Anabasis",  "abbreviation": "Ana", "ordinal": 12, "days": 30                       },
-      {"name": "Hoard",     "abbreviation": "Hoa", "ordinal": 13, "days": 30                       },
-      {"name": "Flagstaad", "abbreviation": "Fla", "ordinal": 14, "days": 30                       },
-      {"name": "Assalia",   "abbreviation": "Ass", "ordinal": 15, "days":  5, "type": "intercalary"}
-    ]
+    "values": {
+      "dominary00000000": {"name": "Dominary",  "abbreviation": "Dom", "ordinal":  1, "days": 30                       },
+      "sedulous00000000": {"name": "Sedulous",  "abbreviation": "Sed", "ordinal":  2, "days": 30                       },
+      "fortuary00000000": {"name": "Fortuary",  "abbreviation": "For", "ordinal":  3, "days": 30                       },
+      "macro00000000000": {"name": "Macro",     "abbreviation": "Mac", "ordinal":  4, "days": 30                       },
+      "zenalia000000000": {"name": "Zenalia",   "abbreviation": "Zen", "ordinal":  5, "days":  5, "type": "intercalary"},
+      "fifthover0000000": {"name": "Fifthover", "abbreviation": "Fif", "ordinal":  6, "days": 30                       },
+      "hexameron0000000": {"name": "Hexameron", "abbreviation": "Hex", "ordinal":  7, "days": 30                       },
+      "morrow0000000000": {"name": "Morrow",    "abbreviation": "Mor", "ordinal":  8, "days": 30                       },
+      "octavus000000000": {"name": "Octavus",   "abbreviation": "Oct", "ordinal":  9, "days": 30                       },
+      "dessalia00000000": {"name": "Dessalia",  "abbreviation": "Des", "ordinal": 10, "days":  5, "type": "intercalary"},
+      "thaumast00000000": {"name": "Thaumast",  "abbreviation": "Tha", "ordinal": 11, "days": 30                       },
+      "anabasis00000000": {"name": "Anabasis",  "abbreviation": "Ana", "ordinal": 12, "days": 30                       },
+      "hoard00000000000": {"name": "Hoard",     "abbreviation": "Hoa", "ordinal": 13, "days": 30                       },
+      "flagstaad0000000": {"name": "Flagstaad", "abbreviation": "Fla", "ordinal": 14, "days": 30                       },
+      "assalia000000000": {"name": "Assalia",   "abbreviation": "Ass", "ordinal": 15, "days":  5, "type": "intercalary"}
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "Oneday",    "ordinal": 1, "abbreviation": "1st"                   },
-      {"name": "Twosday",   "ordinal": 2, "abbreviation": "2nd"                   },
-      {"name": "Threesday", "ordinal": 3, "abbreviation": "3rd"                   },
-      {"name": "Foursday",  "ordinal": 4, "abbreviation": "4th"                   },
-      {"name": "Fiveday",   "ordinal": 5, "abbreviation": "5th"                   },
-      {"name": "Sixday",    "ordinal": 6, "abbreviation": "6th", "isRestDay": true}
-    ],
+    "values"          : {
+      "oneday0000000000": {"name": "Oneday",    "ordinal": 1, "abbreviation": "1st"                   },
+      "twosday000000000": {"name": "Twosday",   "ordinal": 2, "abbreviation": "2nd"                   },
+      "threesday0000000": {"name": "Threesday", "ordinal": 3, "abbreviation": "3rd"                   },
+      "foursday00000000": {"name": "Foursday",  "ordinal": 4, "abbreviation": "4th"                   },
+      "fiveday000000000": {"name": "Fiveday",   "ordinal": 5, "abbreviation": "5th"                   },
+      "sixday0000000000": {"name": "Sixday",    "ordinal": 6, "abbreviation": "6th", "isRestDay": true}
+    },
     "daysPerYear"     : 375,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [
-    {"name": "Festival of Zenalia",  "month":  5, "day": 1, "icon": "fas fa-sun",            "color": "#FFD700", "description": "Five-day celebration at the zenith of High Sun, featuring the Starlight Pageants."},
-    {"name": "Festival of Dessalia", "month": 10, "day": 1, "icon": "fas fa-cloud-sun",      "color": "#FF8C00", "description": "Five-day festival marking the midpoint of Sun Descending season."                 },
-    {"name": "Festival of Assalia",  "month": 15, "day": 1, "icon": "fas fa-sun-plant-wilt", "color": "#FFA500", "description": "Five-day festival celebrating the midpoint of Sun Ascending season."              }
-  ],
-  "seasons"       : {
-    "values": [
-      {"name": "High Sun",       "icon": "fas fa-fire",      "color": "#ff0000", "seasonalType": "summer", "dayStart":   0, "dayEnd": 124, "abbreviation": "HSu"},
-      {"name": "Sun Descending", "icon": "fas fa-cloud-sun", "color": "#ff6600", "seasonalType": "autumn", "dayStart": 125, "dayEnd": 249, "abbreviation": "SDe"},
-      {"name": "Sun Ascending",  "icon": "fas fa-sun",       "color": "#ffcc00", "seasonalType": "spring", "dayStart": 250, "dayEnd": 374, "abbreviation": "SAs"}
-    ]
+  "festivals"     : {
+    "festivalofzenali": {"name": "Festival of Zenalia",  "month":  5, "day": 1, "icon": "fas fa-sun",            "color": "#FFD700", "description": "Five-day celebration at the zenith of High Sun, featuring the Starlight Pageants."},
+    "festivalofdessal": {"name": "Festival of Dessalia", "month": 10, "day": 1, "icon": "fas fa-cloud-sun",      "color": "#FF8C00", "description": "Five-day festival marking the midpoint of Sun Descending season."                 },
+    "festivalofassali": {"name": "Festival of Assalia",  "month": 15, "day": 1, "icon": "fas fa-sun-plant-wilt", "color": "#FFA500", "description": "Five-day festival celebrating the midpoint of Sun Ascending season."              }
   },
-  "eras"          : [ {"name": "Free Year", "abbreviation": "FY", "startYear": 1, "endYear": null} ],
-  "moons"         : [ {"name": "Ral", "color": "#228B22", "cycleLength": 33}, {"name": "Guthay", "color": "#DAA520", "cycleLength": 125} ],
+  "seasons"       : {
+    "values": {
+      "highsun000000000": {"name": "High Sun",       "icon": "fas fa-fire",      "color": "#ff0000", "seasonalType": "summer", "dayStart":   0, "dayEnd": 124, "abbreviation": "HSu"},
+      "sundescending000": {"name": "Sun Descending", "icon": "fas fa-cloud-sun", "color": "#ff6600", "seasonalType": "autumn", "dayStart": 125, "dayEnd": 249, "abbreviation": "SDe"},
+      "sunascending0000": {"name": "Sun Ascending",  "icon": "fas fa-sun",       "color": "#ffcc00", "seasonalType": "spring", "dayStart": 250, "dayEnd": 374, "abbreviation": "SAs"}
+    }
+  },
+  "eras"          : { "freeyear00000000": {"name": "Free Year", "abbreviation": "FY", "startYear": 1, "endYear": null} },
+  "moons"         : { "ral0000000000000": {"name": "Ral", "color": "#228B22", "cycleLength": 33}, "guthay0000000000": {"name": "Guthay", "color": "#DAA520", "cycleLength": 125} },
   "daylight"      : {"enabled": true, "shortestDay": 11, "longestDay": 14, "winterSolstice": 310, "summerSolstice": 60},
-  "cycles"        : [
-    {
+  "cycles"        : {
+    "endleancycle0000": {
       "name"   : "Endlean Cycle",
       "length" : 11,
       "offset" : 3,
       "basedOn": "year",
-      "stages" : [ {"name": "Ral"}, {"name": "Friend"}, {"name": "Desert"}, {"name": "Priest"}, {"name": "Wind"}, {"name": "Dragon"}, {"name": "Mountain"}, {"name": "King"}, {"name": "Silt"}, {"name": "Enemy"}, {"name": "Guthay"} ]
+      "stages" : {
+        "ral0000000000000": {"name": "Ral"     },
+        "friend0000000000": {"name": "Friend"  },
+        "desert0000000000": {"name": "Desert"  },
+        "priest0000000000": {"name": "Priest"  },
+        "wind000000000000": {"name": "Wind"    },
+        "dragon0000000000": {"name": "Dragon"  },
+        "mountain00000000": {"name": "Mountain"},
+        "king000000000000": {"name": "King"    },
+        "silt000000000000": {"name": "Silt"    },
+        "enemy00000000000": {"name": "Enemy"   },
+        "guthay0000000000": {"name": "Guthay"  }
+      }
     },
-    {
+    "seofeancycle0000": {
       "name"   : "Seofean Cycle",
       "length" : 7,
       "offset" : 4,
       "basedOn": "year",
-      "stages" : [ {"name": "Fury"}, {"name": "Contemplation"}, {"name": "Vengeance"}, {"name": "Slumber"}, {"name": "Defiance"}, {"name": "Reverence"}, {"name": "Agitation"} ]
+      "stages" : {
+        "fury000000000000": {"name": "Fury"         },
+        "contemplation000": {"name": "Contemplation"},
+        "vengeance0000000": {"name": "Vengeance"    },
+        "slumber000000000": {"name": "Slumber"      },
+        "defiance00000000": {"name": "Defiance"     },
+        "reverence0000000": {"name": "Reverence"    },
+        "agitation0000000": {"name": "Agitation"    }
+      }
     }
-  ],
+  },
   "cycleFormat"   : "[1]'s [2]",
-  "canonicalHours": [],
-  "weeks"         : {"enabled": false, "type": "year-based", "names": []},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "EEEE, MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "athasian", "description": "CALENDARIA.Calendar.Athasian.Description", "author": "calendaria", "system": "Dark Sun"}

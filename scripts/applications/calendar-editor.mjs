@@ -216,26 +216,26 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       name: '',
       years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true, names: [] },
-      months: { values: [{ name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }] },
+      months: { values: { [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 } } },
       days: {
-        values: [{ name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 }],
+        values: { [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 } },
         daysPerYear: 365,
         hoursPerDay: 24,
         minutesPerHour: 60,
         secondsPerMinute: 60
       },
       secondsPerRound: 6,
-      seasons: { type: 'dated', offset: 0, values: [] },
-      eras: [],
-      festivals: [],
-      moons: [],
-      cycles: [],
-      canonicalHours: [],
-      weeks: { enabled: false, type: 'year-based', names: [] },
+      seasons: { type: 'dated', offset: 0, values: {} },
+      eras: {},
+      festivals: {},
+      moons: {},
+      cycles: {},
+      canonicalHours: {},
+      weeks: { enabled: false, type: 'year-based', names: {} },
       amPmNotation: { am: 'AM', pm: 'PM', amAbbr: 'AM', pmAbbr: 'PM' },
       dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
-      weather: { activeZone: null, autoGenerate: false, zones: [] }
+      weather: { activeZone: null, autoGenerate: false, zones: {} }
     };
   }
 
@@ -255,7 +255,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #loadExistingCalendar(calendarId) {
     const calendar = CalendarManager.getCalendar(calendarId);
     if (calendar) {
-      this.#calendarData = foundry.utils.mergeObject(CalendarEditor.#createBlankCalendar(), calendar.toObject());
+      const calObj = calendar.toObject();
+      this.#calendarData = foundry.utils.mergeObject(CalendarEditor.#createBlankCalendar(), calObj);
+      // TypedObjectField collections merge key-by-key, so the blank's default entries
+      // (e.g. "Month 1") persist alongside real data. Replace them entirely.
+      if (calObj.months?.values) this.#calendarData.months.values = calObj.months.values;
+      if (calObj.days?.values) this.#calendarData.days.values = calObj.days.values;
+      if (calObj.seasons?.values) this.#calendarData.seasons.values = calObj.seasons.values;
       preLocalizeCalendar(this.#calendarData);
     } else {
       this.#initializeBlankCalendar();
@@ -270,6 +276,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #loadInitialData(data, suggestedId) {
     this.#calendarData = foundry.utils.mergeObject(CalendarEditor.#createBlankCalendar(), data);
+    // TypedObjectField collections merge key-by-key — replace with source data entirely.
+    if (data.months?.values) this.#calendarData.months.values = data.months.values;
+    if (data.days?.values) this.#calendarData.days.values = data.days.values;
+    if (data.seasons?.values) this.#calendarData.seasons.values = data.seasons.values;
     if (suggestedId) this.#calendarData.metadata.suggestedId = suggestedId;
     if (this.#calendarData.metadata?.pendingNotes?.length > 0) {
       this.#pendingNotes = this.#calendarData.metadata.pendingNotes;
@@ -319,34 +329,38 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       context.daysPerYearDisplay = String(context.calculatedDaysPerYear);
     }
 
-    context.monthOptions = this.#calendarData.months.values.map((month, idx) => ({ value: idx + 1, label: month.name }));
-    const startingWeekdayOptions = this.#calendarData.days.values.map((day, idx) => ({ value: idx, label: day.name }));
-    const monthCount = this.#calendarData.months.values.length;
+    const monthsArr = Object.entries(this.#calendarData.months.values);
+    const daysArr = Object.entries(this.#calendarData.days.values);
+    context.monthOptions = monthsArr.map(([, month], idx) => ({ value: idx + 1, label: month.name }));
+    const startingWeekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name }));
+    const monthCount = monthsArr.length;
     const monthTypeOptions = [
       { value: '', label: 'CALENDARIA.Editor.MonthType.Standard' },
       { value: 'intercalary', label: 'CALENDARIA.Editor.MonthType.Intercalary' }
     ];
-    context.monthsWithNav = this.#calendarData.months.values.map((month, idx) => ({
+    context.monthsWithNav = monthsArr.map(([key, month], idx) => ({
       ...month,
+      key,
       index: idx,
       isFirst: idx === 0,
       isLast: idx === monthCount - 1,
       hasStartingWeekday: month.startingWeekday != null,
-      hasCustomWeekdays: month.weekdays?.length > 0,
-      customWeekdays: month.weekdays ?? [],
+      hasCustomWeekdays: month.weekdays ? Object.keys(month.weekdays).length > 0 : false,
+      customWeekdays: month.weekdays ? Object.entries(month.weekdays).map(([wKey, wd]) => ({ ...wd, key: wKey })) : [],
       startingWeekdayOptions: startingWeekdayOptions.map((opt) => ({ ...opt, selected: opt.value === month.startingWeekday })),
       typeOptions: monthTypeOptions.map((opt) => ({ ...opt, selected: (opt.value || null) === (month.type || null) }))
     }));
-    context.festivalsWithNav = this.#calendarData.festivals.map((festival, idx) => ({
+    const festivalsArr = Object.entries(this.#calendarData.festivals);
+    context.festivalsWithNav = festivalsArr.map(([key, festival]) => ({
       ...festival,
-      index: idx,
+      key,
       monthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === festival.month }))
     }));
 
     const currentFirstWeekday = this.#calendarData.years.firstWeekday ?? 0;
-    context.weekdayOptions = this.#calendarData.days.values.map((day, idx) => ({ value: idx, label: day.name, selected: idx === currentFirstWeekday }));
-    const weekdayCount = this.#calendarData.days.values.length;
-    context.weekdaysWithNav = this.#calendarData.days.values.map((day, idx) => ({ ...day, index: idx, isFirst: idx === 0, isLast: idx === weekdayCount - 1 }));
+    context.weekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name, selected: idx === currentFirstWeekday }));
+    const weekdayCount = daysArr.length;
+    context.weekdaysWithNav = daysArr.map(([key, day], idx) => ({ ...day, key, index: idx, isFirst: idx === 0, isLast: idx === weekdayCount - 1 }));
     const leapYearConfig = this.#calendarData.leapYearConfig;
     const legacyLeapYear = this.#calendarData.years?.leapYear;
     let currentRule = 'none';
@@ -368,36 +382,42 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearNames = this.#calendarData.years.names || [];
     context.namedYears = yearNames.map((entry, idx) => ({ ...entry, index: idx }));
 
-    context.monthOptionsZeroIndexed = this.#calendarData.months.values.map((month, idx) => ({ value: idx, label: month.name }));
+    context.monthOptionsZeroIndexed = monthsArr.map(([, month], idx) => ({ value: idx, label: month.name }));
 
-    context.moonsWithNav = this.#calendarData.moons.map((moon, idx) => ({
-      ...moon,
-      color: moon.color || '',
-      index: idx,
-      referencePhaseOptions: moon.phases.map((phase, pIdx) => ({
-        value: pIdx,
-        label: localize(phase.name),
-        selected: pIdx === (moon.referencePhase ?? 0)
-      })),
-      refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
-      phasesWithIndex: moon.phases.map((phase, pIdx) => {
-        const startPercent = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
-        const endPercent = Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100;
-        const widthPercent = Math.max(0, endPercent - startPercent);
-        return {
-          ...phase,
-          name: localize(phase.name),
-          index: pIdx,
-          moonIndex: idx,
-          moonColor: moon.color || '',
-          isImagePath: phase.icon?.includes('/') ?? false,
-          startPercent,
-          endPercent,
-          widthPercent,
-          widthFormatted: widthPercent.toFixed(1)
-        };
-      })
-    }));
+    const moonsArr = Object.entries(this.#calendarData.moons);
+    context.moonsWithNav = moonsArr.map(([moonKey, moon], idx) => {
+      const phasesArr = moon.phases ? Object.entries(moon.phases) : [];
+      return {
+        ...moon,
+        key: moonKey,
+        color: moon.color || '',
+        index: idx,
+        referencePhaseOptions: phasesArr.map(([, phase], pIdx) => ({
+          value: pIdx,
+          label: localize(phase.name),
+          selected: pIdx === (moon.referencePhase ?? 0)
+        })),
+        refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
+        phasesWithIndex: phasesArr.map(([phaseKey, phase], pIdx) => {
+          const startPercent = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
+          const endPercent = Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100;
+          const widthPercent = Math.max(0, endPercent - startPercent);
+          return {
+            ...phase,
+            key: phaseKey,
+            name: localize(phase.name),
+            index: pIdx,
+            moonKey,
+            moonColor: moon.color || '',
+            isImagePath: phase.icon?.includes('/') ?? false,
+            startPercent,
+            endPercent,
+            widthPercent,
+            widthFormatted: widthPercent.toFixed(1)
+          };
+        })
+      };
+    });
 
     const seasonTypeOptions = [
       { value: 'dated', label: 'CALENDARIA.Editor.Season.Type.Dated' },
@@ -415,7 +435,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'autumn', label: 'CALENDARIA.Season.Autumn' },
       { value: 'winter', label: 'CALENDARIA.Season.Winter' }
     ];
-    context.seasonsWithNav = this.#calendarData.seasons.values.map((season, idx) => {
+    const seasonsArr = Object.entries(this.#calendarData.seasons.values);
+    context.seasonsWithNav = seasonsArr.map(([key, season], idx) => {
       let startMonth, startDay, endMonth, endDay;
       if (season.monthStart != null) {
         startMonth = season.monthStart;
@@ -438,6 +459,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
       return {
         ...season,
+        key,
         index: idx,
         duration: season.duration ?? null,
         displayStartMonth: startMonth,
@@ -449,11 +471,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         seasonalTypeOptions: seasonalTypeOptions.map((opt) => ({ ...opt, selected: opt.value === (season.seasonalType ?? '') }))
       };
     });
-    context.lastSeasonIndex = this.#calendarData.seasons.values.length - 1;
+    context.lastSeasonIndex = seasonsArr.length - 1;
 
-    context.erasWithNav = this.#calendarData.eras.map((era, idx) => ({
+    const erasArr = Object.entries(this.#calendarData.eras);
+    context.erasWithNav = erasArr.map(([key, era]) => ({
       ...era,
-      index: idx
+      key
     }));
     const basedOnOptions = [
       { value: 'year', label: 'CALENDARIA.Editor.Cycle.BasedOn.Year' },
@@ -464,33 +487,39 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'yearDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.YearDay' }
     ];
 
-    context.cyclesWithNav = (this.#calendarData.cycles || []).map((cycle, idx) => ({
-      ...cycle,
-      index: idx,
-      basedOnOptions: basedOnOptions.map((opt) => ({ ...opt, selected: opt.value === (cycle.basedOn || 'month') })),
-      stagesWithIndex: (cycle.stages || cycle.entries || []).map((stage, sIdx) => ({ ...stage, index: sIdx, displayNum: sIdx + 1, cycleIndex: idx }))
-    }));
+    const cyclesArr = Object.entries(this.#calendarData.cycles || {});
+    context.cyclesWithNav = cyclesArr.map(([cycleKey, cycle], idx) => {
+      const stagesArr = cycle.stages ? Object.entries(cycle.stages) : [];
+      return {
+        ...cycle,
+        key: cycleKey,
+        index: idx,
+        basedOnOptions: basedOnOptions.map((opt) => ({ ...opt, selected: opt.value === (cycle.basedOn || 'month') })),
+        stagesWithIndex: stagesArr.map(([stageKey, stage], sIdx) => ({ ...stage, key: stageKey, index: sIdx, displayNum: sIdx + 1, cycleKey }))
+      };
+    });
     context.cycleFormat = this.#calendarData.cycleFormat || '';
     context.basedOnOptions = basedOnOptions;
-    context.canonicalHoursWithNav = (this.#calendarData.canonicalHours || []).map((ch, idx) => ({ ...ch, index: idx }));
+    const chArr = Object.entries(this.#calendarData.canonicalHours || {});
+    context.canonicalHoursWithNav = chArr.map(([key, ch]) => ({ ...ch, key }));
     const currentWeeksType = this.#calendarData.weeks?.type || 'year-based';
     context.isYearBased = currentWeeksType === 'year-based';
     context.weeksTypeOptions = [
       { value: 'year-based', label: 'CALENDARIA.Editor.WeeksType.YearBased', selected: currentWeeksType === 'year-based' },
       { value: 'month-based', label: 'CALENDARIA.Editor.WeeksType.MonthBased', selected: currentWeeksType === 'month-based' }
     ];
-    const daysPerWeek = this.#calendarData.days?.values?.length || 7;
+    const daysPerWeek = daysArr.length || 7;
     context.maxWeeks = Math.ceil(context.calculatedDaysPerYear / daysPerWeek);
-    const weekNames = this.#calendarData.weeks?.names || [];
+    const weekNamesArr = Object.entries(this.#calendarData.weeks?.names || {});
     // Backfill missing weekNumbers sequentially
-    for (let i = 0; i < weekNames.length; i++) {
-      if (weekNames[i].weekNumber == null) weekNames[i].weekNumber = i + 1;
+    for (let i = 0; i < weekNamesArr.length; i++) {
+      if (weekNamesArr[i][1].weekNumber == null) weekNamesArr[i][1].weekNumber = i + 1;
     }
-    const weekNumberCounts = weekNames.reduce((acc, w) => {
+    const weekNumberCounts = weekNamesArr.reduce((acc, [, w]) => {
       acc[w.weekNumber] = (acc[w.weekNumber] || 0) + 1;
       return acc;
     }, {});
-    context.namedWeeksWithNav = weekNames.map((week, idx) => ({ ...week, index: idx, duplicateWeekNumber: weekNumberCounts[week.weekNumber] > 1 }));
+    context.namedWeeksWithNav = weekNamesArr.map(([key, week]) => ({ ...week, key, duplicateWeekNumber: weekNumberCounts[week.weekNumber] > 1 }));
     const daylight = this.#calendarData.daylight || {};
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
     const summerSolstice = this.#dayOfYearToMonthDay(daylight.summerSolstice ?? Math.floor(context.calculatedDaysPerYear / 2));
@@ -738,28 +767,32 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const slider of this.element.querySelectorAll('.moon-phase-slider')) {
       if (slider.dataset.sliderAttached) continue;
       slider.dataset.sliderAttached = 'true';
-      const moonIdx = parseInt(slider.dataset.moonIndex);
-      const moon = this.#calendarData.moons[moonIdx];
+      const moonKey = slider.dataset.moonKey;
+      const moon = this.#calendarData.moons[moonKey];
       if (!moon?.phases) continue;
+      const phaseKeys = Object.keys(moon.phases);
       new RangeSlider({
         container: this.element,
-        sliderSelector: `.moon-phase-slider[data-moon-index="${moonIdx}"]`,
+        sliderSelector: `.moon-phase-slider[data-moon-key="${moonKey}"]`,
         trackSelector: '.slider-track',
         segmentSelector: '.slider-segment',
         handleSelector: '.slider-handle',
         handleIndexAttr: 'data-phase-index',
         segmentIndexAttr: 'data-phase-index',
         labelClass: 'phase-percent',
-        inputStartSelector: `input[name="moons.${moonIdx}.phases.{i}.startPercent"]`,
-        inputEndSelector: `input[name="moons.${moonIdx}.phases.{i}.endPercent"]`,
+        inputStartSelector: `input[name="moons.${moonKey}.phases.{i}.startPercent"]`,
+        inputEndSelector: `input[name="moons.${moonKey}.phases.{i}.endPercent"]`,
         minGap: 1,
         labelMinWidth: 3,
         labelModes: ['percent', 'days'],
-        getData: () => moon.phases.map((p) => ({ start: p.start, end: p.end })),
+        getData: () => Object.values(moon.phases).map((p) => ({ start: p.start, end: p.end })),
         setData: (data) => {
           for (let i = 0; i < data.length; i++) {
-            moon.phases[i].start = data[i].start;
-            moon.phases[i].end = data[i].end;
+            const pKey = phaseKeys[i];
+            if (pKey && moon.phases[pKey]) {
+              moon.phases[pKey].start = data[i].start;
+              moon.phases[pKey].end = data[i].end;
+            }
           }
         },
         formatLabel: (widthPercent, mode) => {
@@ -806,7 +839,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #calculateDaysPerYear(leapYear = false) {
-    return this.#calendarData.months.values.reduce((sum, month) => {
+    return Object.values(this.#calendarData.months.values ?? {}).reduce((sum, month) => {
       if (leapYear && month.leapDays) return sum + month.leapDays;
       return sum + (month.days || 0);
     }, 0);
@@ -819,7 +852,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #dayOfYearToMonthDay(dayOfYear) {
-    const months = this.#calendarData.months.values;
+    const months = Object.values(this.#calendarData.months.values ?? {});
     const totalDays = this.#calculateDaysPerYear();
     let remaining = ((dayOfYear % totalDays) + totalDays) % totalDays;
     for (let i = 0; i < months.length; i++) {
@@ -840,7 +873,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #monthDayToDayOfYear(month, day) {
-    const months = this.#calendarData.months.values;
+    const months = Object.values(this.#calendarData.months.values ?? {});
     let dayOfYear = 0;
     for (let i = 0; i < month - 1 && i < months.length; i++) dayOfYear += months[i].days || 0;
     dayOfYear += (day || 1) - 1;
@@ -854,24 +887,26 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #prepareWeatherContext(context) {
     const weather = this.#calendarData.weather || {};
-    const zones = weather.zones || [];
+    const zonesObj = weather.zones ?? {};
+    const zonesArray = Object.values(zonesObj);
     let activeZoneId = weather.activeZone;
-    if (!activeZoneId || !zones.find((z) => z.id === activeZoneId)) {
-      activeZoneId = zones[0]?.id || null;
+    if (!activeZoneId || !zonesArray.find((z) => z.id === activeZoneId)) {
+      activeZoneId = zonesArray[0]?.id || null;
       if (activeZoneId) weather.activeZone = activeZoneId;
     }
-    context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZoneId }));
+    context.zoneOptions = zonesArray.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZoneId }));
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     if (context.zoneOptions.length === 0) context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
     context.activeZoneId = activeZoneId;
-    const activeZone = zones.find((z) => z.id === activeZoneId) || null;
-    const savedPresets = activeZone?.presets || [];
+    const activeZone = zonesArray.find((z) => z.id === activeZoneId) || null;
+    const savedPresets = activeZone?.presets ? Object.values(activeZone.presets) : [];
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
     context.tempUnit = tempUnit === 'fahrenheit' ? 'F' : 'C';
     let presetIndex = 0;
     let totalChance = 0;
-    const seasons = this.#calendarData.seasons?.values || [];
-    context.seasonClimateList = seasons.map((season, idx) => ({
+    const seasons = Object.values(this.#calendarData.seasons?.values ?? {});
+    context.seasonClimateList = Object.entries(this.#calendarData.seasons?.values ?? {}).map(([key, season], idx) => ({
+      key,
       index: idx,
       name: season.name,
       icon: season.icon,
@@ -987,10 +1022,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const summerDay = parseInt(data['daylight.summerSolsticeDay']) || 1;
     this.#calendarData.daylight.summerSolstice = this.#monthDayToDayOfYear(summerMonth, summerDay);
     this.#updateMonthsFromFormData(data);
-    this.#updateArrayFromFormData(data, 'weekdays', this.#calendarData.days.values, ['name', 'abbreviation', 'isRestDay']);
+    this.#updateObjectFromFormData(data, 'weekdays', this.#calendarData.days.values, ['name', 'abbreviation', 'isRestDay']);
     this.#updateSeasonsFromFormData(data);
     this.#updateErasFromFormData(data);
-    this.#updateArrayFromFormData(data, 'festivals', this.#calendarData.festivals, [
+    this.#updateObjectFromFormData(data, 'festivals', this.#calendarData.festivals, [
       'name',
       'description',
       'color',
@@ -1032,19 +1067,20 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {Array<string>} fields - Field names to extract
    * @private
    */
-  #updateArrayFromFormData(data, prefix, targetArray, fields) {
-    const indices = new Set();
+  #updateObjectFromFormData(data, prefix, targetObj, fields) {
+    const keys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(new RegExp(`^${prefix}\\.(\\d+)\\.`));
-      if (match) indices.add(parseInt(match[1]));
+      const match = key.match(new RegExp(`^${prefix}\\.([^.]+)\\.`));
+      if (match) keys.add(match[1]);
     }
 
-    const sortedIndices = [...indices].sort((a, b) => a - b);
-    targetArray.length = 0;
-    for (const idx of sortedIndices) {
-      const item = { ordinal: targetArray.length + 1 };
+    // Clear existing and rebuild preserving key order from form
+    for (const k of Object.keys(targetObj)) delete targetObj[k];
+    let ordinal = 1;
+    for (const itemKey of keys) {
+      const item = { ordinal: ordinal++ };
       for (const field of fields) {
-        const key = `${prefix}.${idx}.${field}`;
+        const key = `${prefix}.${itemKey}.${field}`;
         if (data[key] !== undefined) {
           if (field === 'leapDays' || field === 'leapDuration' || field === 'startingWeekday') item[field] = isNaN(parseInt(data[key])) ? null : parseInt(data[key]);
           else if (field === 'days' || field === 'day' || field === 'month' || field === 'duration' || field === 'dayStart' || field === 'dayEnd') item[field] = parseInt(data[key]) || 0;
@@ -1054,7 +1090,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           else item[field] = data[key];
         }
       }
-      targetArray.push(item);
+      targetObj[itemKey] = item;
     }
   }
 
@@ -1064,47 +1100,52 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateMonthsFromFormData(data) {
-    const indices = new Set();
+    const monthKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^months\.(\d+)\./);
-      if (match) indices.add(parseInt(match[1]));
+      const match = key.match(/^months\.([^.]+)\./);
+      if (match) monthKeys.add(match[1]);
     }
-    const sortedIndices = [...indices].sort((a, b) => a - b);
-    this.#calendarData.months.values.length = 0;
-    for (const idx of sortedIndices) {
+    const newValues = {};
+    let ordinal = 1;
+    for (const mKey of monthKeys) {
       const month = {
-        name: data[`months.${idx}.name`] || '',
-        abbreviation: data[`months.${idx}.abbreviation`] || '',
-        days: this.#parseOptionalInt(data[`months.${idx}.days`]) ?? 30,
-        leapDays: this.#parseOptionalInt(data[`months.${idx}.leapDays`]),
-        startingWeekday: this.#parseOptionalInt(data[`months.${idx}.startingWeekday`]),
-        ordinal: this.#calendarData.months.values.length + 1
+        name: data[`months.${mKey}.name`] || '',
+        abbreviation: data[`months.${mKey}.abbreviation`] || '',
+        days: this.#parseOptionalInt(data[`months.${mKey}.days`]) ?? 30,
+        leapDays: this.#parseOptionalInt(data[`months.${mKey}.leapDays`]),
+        startingWeekday: this.#parseOptionalInt(data[`months.${mKey}.startingWeekday`]),
+        ordinal: ordinal++
       };
-      const monthType = data[`months.${idx}.type`];
+      const monthType = data[`months.${mKey}.type`];
       if (monthType) month.type = monthType;
-      const hasCustom = data[`months.${idx}.hasCustomWeekdays`] === 'true' || data[`months.${idx}.hasCustomWeekdays`] === true;
+      const hasCustom = data[`months.${mKey}.hasCustomWeekdays`] === 'true' || data[`months.${mKey}.hasCustomWeekdays`] === true;
       if (hasCustom) {
-        const weekdayIndices = new Set();
+        const weekdayKeys = new Set();
         for (const key of Object.keys(data)) {
-          const wdMatch = key.match(new RegExp(`^months\\.${idx}\\.weekdays\\.(\\d+)\\.`));
-          if (wdMatch) weekdayIndices.add(parseInt(wdMatch[1]));
+          const wdMatch = key.match(new RegExp(`^months\\.${mKey}\\.weekdays\\.([^.]+)\\.`));
+          if (wdMatch) weekdayKeys.add(wdMatch[1]);
         }
 
-        if (weekdayIndices.size > 0) {
-          month.weekdays = [...weekdayIndices]
-            .sort((a, b) => a - b)
-            .map((wdIdx) => ({
-              name: data[`months.${idx}.weekdays.${wdIdx}.name`] || '',
-              abbreviation: data[`months.${idx}.weekdays.${wdIdx}.abbreviation`] || '',
-              isRestDay: !!data[`months.${idx}.weekdays.${wdIdx}.isRestDay`]
-            }));
+        if (weekdayKeys.size > 0) {
+          month.weekdays = {};
+          for (const wdKey of weekdayKeys) {
+            month.weekdays[wdKey] = {
+              name: data[`months.${mKey}.weekdays.${wdKey}.name`] || '',
+              abbreviation: data[`months.${mKey}.weekdays.${wdKey}.abbreviation`] || '',
+              isRestDay: !!data[`months.${mKey}.weekdays.${wdKey}.isRestDay`]
+            };
+          }
         } else {
-          month.weekdays = (this.#calendarData.days?.values ?? []).map((wd) => ({ name: wd.name || '', abbreviation: wd.abbreviation || '', isRestDay: !!wd.isRestDay }));
+          month.weekdays = {};
+          for (const [k, wd] of Object.entries(this.#calendarData.days?.values ?? {})) {
+            month.weekdays[k] = { name: wd.name || '', abbreviation: wd.abbreviation || '', isRestDay: !!wd.isRestDay };
+          }
         }
       }
 
-      this.#calendarData.months.values.push(month);
+      newValues[mKey] = month;
     }
+    this.#calendarData.months.values = newValues;
   }
 
   /**
@@ -1115,36 +1156,38 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #updateSeasonsFromFormData(data) {
     this.#calendarData.seasons.type = data['seasons.type'] || 'dated';
     this.#calendarData.seasons.offset = parseInt(data['seasons.offset']) || 0;
-    const indices = new Set();
+    const seasonKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^seasons\.(\d+)\./);
-      if (match) indices.add(parseInt(match[1]));
+      const match = key.match(/^seasons\.([^.]+)\./);
+      if (match && match[1] !== 'type' && match[1] !== 'offset') seasonKeys.add(match[1]);
     }
-    const sortedIndices = [...indices].sort((a, b) => a - b);
     const isPeriodic = this.#calendarData.seasons.type === 'periodic';
-    const existingClimates = this.#calendarData.seasons.values.map((s) => s.climate);
-    this.#calendarData.seasons.values.length = 0;
-    for (const idx of sortedIndices) {
-      const seasonalType = data[`seasons.${idx}.seasonalType`];
+    const existingClimates = {};
+    for (const [k, s] of Object.entries(this.#calendarData.seasons.values)) existingClimates[k] = s.climate;
+    const newValues = {};
+    let ordinal = 1;
+    for (const sKey of seasonKeys) {
+      const seasonalType = data[`seasons.${sKey}.seasonalType`];
       const season = {
-        name: data[`seasons.${idx}.name`] || '',
-        abbreviation: data[`seasons.${idx}.abbreviation`] || '',
-        icon: data[`seasons.${idx}.icon`] || '',
-        color: data[`seasons.${idx}.color`] || '',
+        name: data[`seasons.${sKey}.name`] || '',
+        abbreviation: data[`seasons.${sKey}.abbreviation`] || '',
+        icon: data[`seasons.${sKey}.icon`] || '',
+        color: data[`seasons.${sKey}.color`] || '',
         seasonalType: seasonalType || null,
-        ordinal: this.#calendarData.seasons.values.length + 1,
-        climate: existingClimates[idx] ?? null
+        ordinal: ordinal++,
+        climate: existingClimates[sKey] ?? null
       };
       if (isPeriodic) {
-        season.duration = this.#parseOptionalInt(data[`seasons.${idx}.duration`]) ?? 91;
+        season.duration = this.#parseOptionalInt(data[`seasons.${sKey}.duration`]) ?? 91;
       } else {
-        season.monthStart = parseInt(data[`seasons.${idx}.monthStart`]) || 1;
-        season.monthEnd = parseInt(data[`seasons.${idx}.monthEnd`]) || 1;
-        season.dayStart = this.#parseOptionalInt(data[`seasons.${idx}.dayStart`]);
-        season.dayEnd = this.#parseOptionalInt(data[`seasons.${idx}.dayEnd`]);
+        season.monthStart = parseInt(data[`seasons.${sKey}.monthStart`]) || 1;
+        season.monthEnd = parseInt(data[`seasons.${sKey}.monthEnd`]) || 1;
+        season.dayStart = this.#parseOptionalInt(data[`seasons.${sKey}.dayStart`]);
+        season.dayEnd = this.#parseOptionalInt(data[`seasons.${sKey}.dayEnd`]);
       }
-      this.#calendarData.seasons.values.push(season);
+      newValues[sKey] = season;
     }
+    this.#calendarData.seasons.values = newValues;
   }
 
   /**
@@ -1153,22 +1196,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateErasFromFormData(data) {
-    const indices = new Set();
+    const eraKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^eras\.(\d+)\./);
-      if (match) indices.add(parseInt(match[1]));
+      const match = key.match(/^eras\.([^.]+)\./);
+      if (match) eraKeys.add(match[1]);
     }
-    const sortedIndices = [...indices].sort((a, b) => a - b);
-    this.#calendarData.eras.length = 0;
-    for (const idx of sortedIndices) {
-      const era = {
-        name: data[`eras.${idx}.name`] || '',
-        abbreviation: data[`eras.${idx}.abbreviation`] || '',
-        startYear: parseInt(data[`eras.${idx}.startYear`]) || 1,
-        endYear: this.#parseOptionalInt(data[`eras.${idx}.endYear`])
+    const newEras = {};
+    for (const eKey of eraKeys) {
+      newEras[eKey] = {
+        name: data[`eras.${eKey}.name`] || '',
+        abbreviation: data[`eras.${eKey}.abbreviation`] || '',
+        startYear: parseInt(data[`eras.${eKey}.startYear`]) || 1,
+        endYear: this.#parseOptionalInt(data[`eras.${eKey}.endYear`])
       };
-      this.#calendarData.eras.push(era);
     }
+    this.#calendarData.eras = newEras;
   }
 
   /**
@@ -1189,56 +1231,57 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateMoonsFromFormData(data) {
-    const moonIndices = new Set();
+    const moonKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^moons\.(\d+)\./);
-      if (match) moonIndices.add(parseInt(match[1]));
+      const match = key.match(/^moons\.([^.]+)\./);
+      if (match) moonKeys.add(match[1]);
     }
-    const sortedMoonIndices = [...moonIndices].sort((a, b) => a - b);
-    const newMoons = [];
-    for (const moonIdx of sortedMoonIndices) {
-      const existingMoon = this.#calendarData.moons[moonIdx];
+    const newMoons = {};
+    for (const mKey of moonKeys) {
+      const existingMoon = this.#calendarData.moons[mKey];
       const existingPhases = existingMoon?.phases || DEFAULT_MOON_PHASES;
-      const phaseIndices = new Set();
-      const phasePattern = new RegExp(`^moons\\.${moonIdx}\\.phases\\.(\\d+)\\.`);
+      const existingPhasesArr = Object.values(existingPhases);
+      const phaseKeys = new Set();
+      const phasePattern = new RegExp(`^moons\\.${mKey}\\.phases\\.([^.]+)\\.`);
       for (const key of Object.keys(data)) {
         const match = key.match(phasePattern);
-        if (match) phaseIndices.add(parseInt(match[1]));
+        if (match) phaseKeys.add(match[1]);
       }
-      const sortedPhaseIndices = [...phaseIndices].sort((a, b) => a - b);
-      const phases = [];
-      for (const pIdx of sortedPhaseIndices) {
-        const phaseName = data[`moons.${moonIdx}.phases.${pIdx}.name`];
-        const phaseRisingName = data[`moons.${moonIdx}.phases.${pIdx}.rising`];
-        const phaseFadingName = data[`moons.${moonIdx}.phases.${pIdx}.fading`];
-        const phaseIcon = data[`moons.${moonIdx}.phases.${pIdx}.icon`];
-        const phaseStartPercent = data[`moons.${moonIdx}.phases.${pIdx}.startPercent`];
-        const phaseEndPercent = data[`moons.${moonIdx}.phases.${pIdx}.endPercent`];
-        phases.push({
-          name: phaseName ?? existingPhases[pIdx]?.name ?? '',
-          rising: phaseRisingName ?? existingPhases[pIdx]?.rising ?? '',
-          fading: phaseFadingName ?? existingPhases[pIdx]?.fading ?? '',
-          icon: phaseIcon ?? existingPhases[pIdx]?.icon ?? '',
-          start: phaseStartPercent != null ? parseFloat(phaseStartPercent) / 100 : (existingPhases[pIdx]?.start ?? pIdx * 0.125),
-          end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhases[pIdx]?.end ?? (pIdx + 1) * 0.125)
-        });
+      const phases = {};
+      let pIdx = 0;
+      for (const pKey of phaseKeys) {
+        const phaseName = data[`moons.${mKey}.phases.${pKey}.name`];
+        const phaseRisingName = data[`moons.${mKey}.phases.${pKey}.rising`];
+        const phaseFadingName = data[`moons.${mKey}.phases.${pKey}.fading`];
+        const phaseIcon = data[`moons.${mKey}.phases.${pKey}.icon`];
+        const phaseStartPercent = data[`moons.${mKey}.phases.${pKey}.startPercent`];
+        const phaseEndPercent = data[`moons.${mKey}.phases.${pKey}.endPercent`];
+        const existingPhase = existingPhases[pKey] ?? existingPhasesArr[pIdx];
+        phases[pKey] = {
+          name: phaseName ?? existingPhase?.name ?? '',
+          rising: phaseRisingName ?? existingPhase?.rising ?? '',
+          fading: phaseFadingName ?? existingPhase?.fading ?? '',
+          icon: phaseIcon ?? existingPhase?.icon ?? '',
+          start: phaseStartPercent != null ? parseFloat(phaseStartPercent) / 100 : (existingPhase?.start ?? pIdx * 0.125),
+          end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhase?.end ?? (pIdx + 1) * 0.125)
+        };
+        pIdx++;
       }
-      const rawColor = data[`moons.${moonIdx}.color`] || '';
+      const rawColor = data[`moons.${mKey}.color`] || '';
       const moonColor = rawColor.toLowerCase() === '#b8b8b8' ? '' : rawColor;
-      const moon = {
-        name: data[`moons.${moonIdx}.name`] || '',
-        cycleLength: parseFloat(data[`moons.${moonIdx}.cycleLength`]) || 28,
-        cycleDayAdjust: this.#parseOptionalInt(data[`moons.${moonIdx}.cycleDayAdjust`]) ?? existingMoon?.cycleDayAdjust ?? 0,
-        referencePhase: this.#parseOptionalInt(data[`moons.${moonIdx}.referencePhase`]) ?? existingMoon?.referencePhase ?? 0,
+      newMoons[mKey] = {
+        name: data[`moons.${mKey}.name`] || '',
+        cycleLength: parseFloat(data[`moons.${mKey}.cycleLength`]) || 28,
+        cycleDayAdjust: this.#parseOptionalInt(data[`moons.${mKey}.cycleDayAdjust`]) ?? existingMoon?.cycleDayAdjust ?? 0,
+        referencePhase: this.#parseOptionalInt(data[`moons.${mKey}.referencePhase`]) ?? existingMoon?.referencePhase ?? 0,
         color: moonColor,
         phases,
         referenceDate: {
-          year: parseInt(data[`moons.${moonIdx}.referenceDate.year`]) || 0,
-          month: parseInt(data[`moons.${moonIdx}.referenceDate.month`]) || 0,
-          day: parseInt(data[`moons.${moonIdx}.referenceDate.day`]) || 1
+          year: parseInt(data[`moons.${mKey}.referenceDate.year`]) || 0,
+          month: parseInt(data[`moons.${mKey}.referenceDate.month`]) || 0,
+          day: parseInt(data[`moons.${mKey}.referenceDate.day`]) || 1
         }
       };
-      newMoons.push(moon);
     }
 
     this.#calendarData.moons = newMoons;
@@ -1251,31 +1294,28 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #updateCyclesFromFormData(data) {
     this.#calendarData.cycleFormat = data.cycleFormat || '';
-    const cycleIndices = new Set();
+    const cycleKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^cycles\.(\d+)\./);
-      if (match) cycleIndices.add(parseInt(match[1]));
+      const match = key.match(/^cycles\.([^.]+)\./);
+      if (match) cycleKeys.add(match[1]);
     }
-    const sortedCycleIndices = [...cycleIndices].sort((a, b) => a - b);
-    const newCycles = [];
-    for (const cycleIdx of sortedCycleIndices) {
-      const stageIndices = new Set();
-      const stagePattern = new RegExp(`^cycles\\.${cycleIdx}\\.stages\\.(\\d+)\\.`);
+    const newCycles = {};
+    for (const cKey of cycleKeys) {
+      const stageKeys = new Set();
+      const stagePattern = new RegExp(`^cycles\\.${cKey}\\.stages\\.([^.]+)\\.`);
       for (const key of Object.keys(data)) {
         const match = key.match(stagePattern);
-        if (match) stageIndices.add(parseInt(match[1]));
+        if (match) stageKeys.add(match[1]);
       }
-      const sortedStageIndices = [...stageIndices].sort((a, b) => a - b);
-      const stages = [];
-      for (const sIdx of sortedStageIndices) stages.push({ name: data[`cycles.${cycleIdx}.stages.${sIdx}.name`] || '' });
-      const cycle = {
-        name: data[`cycles.${cycleIdx}.name`] || '',
-        length: parseInt(data[`cycles.${cycleIdx}.length`]) || 12,
-        offset: parseInt(data[`cycles.${cycleIdx}.offset`]) || 0,
-        basedOn: data[`cycles.${cycleIdx}.basedOn`] || 'month',
+      const stages = {};
+      for (const sKey of stageKeys) stages[sKey] = { name: data[`cycles.${cKey}.stages.${sKey}.name`] || '' };
+      newCycles[cKey] = {
+        name: data[`cycles.${cKey}.name`] || '',
+        length: parseInt(data[`cycles.${cKey}.length`]) || 12,
+        offset: parseInt(data[`cycles.${cKey}.offset`]) || 0,
+        basedOn: data[`cycles.${cKey}.basedOn`] || 'month',
         stages
       };
-      newCycles.push(cycle);
     }
     this.#calendarData.cycles = newCycles;
   }
@@ -1286,20 +1326,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateCanonicalHoursFromFormData(data) {
-    const indices = new Set();
+    const chKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^canonicalHours\.(\d+)\./);
-      if (match) indices.add(parseInt(match[1]));
+      const match = key.match(/^canonicalHours\.([^.]+)\./);
+      if (match) chKeys.add(match[1]);
     }
-    const sortedIndices = [...indices].sort((a, b) => a - b);
-    const newCanonicalHours = [];
-    for (const idx of sortedIndices) {
-      newCanonicalHours.push({
-        name: data[`canonicalHours.${idx}.name`] || '',
-        abbreviation: data[`canonicalHours.${idx}.abbreviation`] || '',
-        startHour: parseInt(data[`canonicalHours.${idx}.startHour`]) || 0,
-        endHour: parseInt(data[`canonicalHours.${idx}.endHour`]) || 0
-      });
+    const newCanonicalHours = {};
+    for (const chKey of chKeys) {
+      newCanonicalHours[chKey] = {
+        name: data[`canonicalHours.${chKey}.name`] || '',
+        abbreviation: data[`canonicalHours.${chKey}.abbreviation`] || '',
+        startHour: parseInt(data[`canonicalHours.${chKey}.startHour`]) || 0,
+        endHour: parseInt(data[`canonicalHours.${chKey}.endHour`]) || 0
+      };
     }
     this.#calendarData.canonicalHours = newCanonicalHours;
   }
@@ -1313,23 +1352,22 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#calendarData.weeks) this.#calendarData.weeks = {};
     this.#calendarData.weeks.type = data['weeks.type'] || 'year-based';
     this.#calendarData.weeks.repeat = !!data['weeks.repeat'];
-    const indices = new Set();
+    const wKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^weeks\.names\.(\d+)\./);
-      if (match) indices.add(parseInt(match[1]));
+      const match = key.match(/^weeks\.names\.([^.]+)\./);
+      if (match) wKeys.add(match[1]);
     }
-    const sortedIndices = [...indices].sort((a, b) => a - b);
-    const newNames = [];
+    const newNames = {};
     const usedNumbers = new Set();
-    for (const idx of sortedIndices) {
-      let weekNumber = parseInt(data[`weeks.names.${idx}.weekNumber`]) || 1;
+    for (const wKey of wKeys) {
+      let weekNumber = parseInt(data[`weeks.names.${wKey}.weekNumber`]) || 1;
       if (usedNumbers.has(weekNumber)) {
         let next = weekNumber + 1;
         while (usedNumbers.has(next)) next++;
         weekNumber = next;
       }
       usedNumbers.add(weekNumber);
-      newNames.push({ name: data[`weeks.names.${idx}.name`] || '', abbreviation: data[`weeks.names.${idx}.abbreviation`] || '', weekNumber });
+      newNames[wKey] = { name: data[`weeks.names.${wKey}.name`] || '', abbreviation: data[`weeks.names.${wKey}.abbreviation`] || '', weekNumber };
     }
     this.#calendarData.weeks.names = newNames;
   }
@@ -1340,36 +1378,35 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateWeatherFromFormData(data) {
-    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: [], activeZone: null, autoGenerate: false };
+    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: {}, activeZone: null, autoGenerate: false };
     const oldZoneId = this.#calendarData.weather.activeZone;
     const selectedZone = data['weather.activeZone'];
     const zoneChanged = selectedZone && selectedZone !== oldZoneId;
     if (selectedZone) this.#calendarData.weather.activeZone = selectedZone;
     this.#calendarData.weather.autoGenerate = !!data['weather.autoGenerate'];
     if (zoneChanged) return;
-    const presetIndices = new Set();
+    const presetKeys = new Set();
     for (const key of Object.keys(data)) {
-      const match = key.match(/^weather\.presets\.(\d+)\./);
-      if (match) presetIndices.add(parseInt(match[1]));
+      const match = key.match(/^weather\.presets\.([^.]+)\./);
+      if (match) presetKeys.add(match[1]);
     }
-    const sortedIndices = [...presetIndices].sort((a, b) => a - b);
-    const newPresets = [];
-    for (const idx of sortedIndices) {
-      const id = data[`weather.presets.${idx}.id`];
+    const newPresets = {};
+    for (const pKey of presetKeys) {
+      const id = data[`weather.presets.${pKey}.id`];
       if (!id) continue;
-      const preset = { id, enabled: !!data[`weather.presets.${idx}.enabled`], chance: parseFloat(data[`weather.presets.${idx}.chance`]) || 0 };
-      const tempMin = data[`weather.presets.${idx}.tempMin`];
-      const tempMax = data[`weather.presets.${idx}.tempMax`];
+      const preset = { id, enabled: !!data[`weather.presets.${pKey}.enabled`], chance: parseFloat(data[`weather.presets.${pKey}.chance`]) || 0 };
+      const tempMin = data[`weather.presets.${pKey}.tempMin`];
+      const tempMax = data[`weather.presets.${pKey}.tempMax`];
       if (tempMin !== '' && tempMin != null) preset.tempMin = fromDisplayUnit(parseInt(tempMin));
       if (tempMax !== '' && tempMax != null) preset.tempMax = fromDisplayUnit(parseInt(tempMax));
-      const desc = data[`weather.presets.${idx}.description`]?.trim();
+      const desc = data[`weather.presets.${pKey}.description`]?.trim();
       if (desc) preset.description = desc;
-      newPresets.push(preset);
+      newPresets[pKey] = preset;
     }
 
     const activeZoneId = this.#calendarData.weather.activeZone;
-    const zones = this.#calendarData.weather.zones || [];
-    const activeZone = zones.find((z) => z.id === activeZoneId);
+    const zones = this.#calendarData.weather.zones ?? {};
+    const activeZone = zones[activeZoneId];
     if (activeZone) activeZone.presets = newPresets;
   }
 
@@ -1379,15 +1416,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddMonth(_event, target) {
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.months.values.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalMonths = this.#calendarData.months.values.length + 1;
-    this.#calendarData.months.values.splice(insertIdx, 0, {
+    const afterKey = target.dataset.key;
+    const totalMonths = Object.keys(this.#calendarData.months.values ?? {}).length + 1;
+    const newKey = foundry.utils.randomID();
+    const newMonth = {
       name: format('CALENDARIA.Editor.Default.MonthName', { num: totalMonths }),
       abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: totalMonths }),
-      ordinal: insertIdx + 1,
+      ordinal: totalMonths,
       days: 30
-    });
+    };
+    if (afterKey) {
+      this.#calendarData.months.values = this.#insertAfterKey(this.#calendarData.months.values, afterKey, newKey, newMonth);
+    } else {
+      this.#calendarData.months.values[newKey] = newMonth;
+    }
+    this.#reindexObject(this.#calendarData.months.values);
     this.render();
   }
 
@@ -1397,9 +1440,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveMonth(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.months.values.splice(idx, 1);
-    this.#reindexArray(this.#calendarData.months.values);
+    const key = target.dataset.key;
+    delete this.#calendarData.months.values[key];
+    this.#reindexObject(this.#calendarData.months.values);
     this.render();
   }
 
@@ -1409,11 +1452,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onMoveMonthUp(_event, target) {
-    const idx = parseInt(target.dataset.index);
+    const key = target.dataset.key;
+    const keys = Object.keys(this.#calendarData.months.values);
+    const idx = keys.indexOf(key);
     if (idx > 0) {
-      const months = this.#calendarData.months.values;
-      [months[idx - 1], months[idx]] = [months[idx], months[idx - 1]];
-      this.#reindexArray(months);
+      this.#calendarData.months.values = this.#swapObjectEntries(this.#calendarData.months.values, keys[idx - 1], key);
+      this.#reindexObject(this.#calendarData.months.values);
       this.render();
     }
   }
@@ -1424,11 +1468,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onMoveMonthDown(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const months = this.#calendarData.months.values;
-    if (idx < months.length - 1) {
-      [months[idx], months[idx + 1]] = [months[idx + 1], months[idx]];
-      this.#reindexArray(months);
+    const key = target.dataset.key;
+    const keys = Object.keys(this.#calendarData.months.values);
+    const idx = keys.indexOf(key);
+    if (idx < keys.length - 1) {
+      this.#calendarData.months.values = this.#swapObjectEntries(this.#calendarData.months.values, key, keys[idx + 1]);
+      this.#reindexObject(this.#calendarData.months.values);
       this.render();
     }
   }
@@ -1439,24 +1484,29 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onToggleCustomWeekdays(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const month = this.#calendarData.months.values[idx];
+    const key = target.dataset.key;
+    const month = this.#calendarData.months.values[key];
     if (!month) return;
-    if (!month.weekdays?.length) {
-      month.weekdays = (this.#calendarData.days?.values ?? []).map((wd) => ({
-        name: wd.name || '',
-        abbreviation: wd.abbreviation || '',
-        isRestDay: !!wd.isRestDay
-      }));
+    const weekdayValues = month.weekdays ? Object.values(month.weekdays) : [];
+    if (!weekdayValues.length) {
+      const globalWeekdays = Object.values(this.#calendarData.days?.values ?? {});
+      month.weekdays = {};
+      for (const wd of globalWeekdays) {
+        month.weekdays[foundry.utils.randomID()] = {
+          name: wd.name || '',
+          abbreviation: wd.abbreviation || '',
+          isRestDay: !!wd.isRestDay
+        };
+      }
     }
 
-    const rows = month.weekdays
+    const rows = Object.entries(month.weekdays)
       .map(
-        (wd, i) => `
+        ([wdKey, wd]) => `
       <div class="custom-weekday-row">
-        <input type="text" name="weekday-${i}-name" value="${wd.name}" placeholder="${localize('CALENDARIA.Common.Name')}">
-        <input type="text" name="weekday-${i}-abbr" value="${wd.abbreviation}" placeholder="${localize('CALENDARIA.Common.Abbreviation')}">
-        <input type="checkbox" name="weekday-${i}-rest" ${wd.isRestDay ? 'checked' : ''}>
+        <input type="text" name="weekday-${wdKey}-name" value="${wd.name}" placeholder="${localize('CALENDARIA.Common.Name')}">
+        <input type="text" name="weekday-${wdKey}-abbr" value="${wd.abbreviation}" placeholder="${localize('CALENDARIA.Common.Abbreviation')}">
+        <input type="checkbox" name="weekday-${wdKey}-rest" ${wd.isRestDay ? 'checked' : ''}>
       </div>
     `
       )
@@ -1495,15 +1545,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           default: true,
           callback: (_event, _button, dialog) => {
             const form = dialog.element.querySelector('form');
-            month.weekdays.forEach((wd, i) => {
-              wd.name = form.querySelector(`[name="weekday-${i}-name"]`)?.value || '';
-              wd.abbreviation = form.querySelector(`[name="weekday-${i}-abbr"]`)?.value || '';
-              wd.isRestDay = form.querySelector(`[name="weekday-${i}-rest"]`)?.checked || false;
-            });
-            const globals = editor.#calendarData.days?.values ?? [];
+            for (const [wdKey, wd] of Object.entries(month.weekdays)) {
+              wd.name = form.querySelector(`[name="weekday-${wdKey}-name"]`)?.value || '';
+              wd.abbreviation = form.querySelector(`[name="weekday-${wdKey}-abbr"]`)?.value || '';
+              wd.isRestDay = form.querySelector(`[name="weekday-${wdKey}-rest"]`)?.checked || false;
+            }
+            const globalArr = Object.values(editor.#calendarData.days?.values ?? {});
+            const monthArr = Object.values(month.weekdays);
             const isIdentical =
-              month.weekdays.length === globals.length &&
-              month.weekdays.every((wd, i) => wd.name === (globals[i]?.name || '') && wd.abbreviation === (globals[i]?.abbreviation || '') && wd.isRestDay === !!globals[i]?.isRestDay);
+              monthArr.length === globalArr.length &&
+              monthArr.every((wd, i) => wd.name === (globalArr[i]?.name || '') && wd.abbreviation === (globalArr[i]?.abbreviation || '') && wd.isRestDay === !!globalArr[i]?.isRestDay);
             if (isIdentical) delete month.weekdays;
             editor.render();
           }
@@ -1519,15 +1570,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddWeekday(_event, target) {
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.days.values.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalDays = this.#calendarData.days.values.length + 1;
-    this.#calendarData.days.values.splice(insertIdx, 0, {
+    const afterKey = target.dataset.key;
+    const totalDays = Object.keys(this.#calendarData.days.values ?? {}).length + 1;
+    const newKey = foundry.utils.randomID();
+    const newDay = {
       name: format('CALENDARIA.Editor.Default.DayName', { num: totalDays }),
       abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: totalDays }),
-      ordinal: insertIdx + 1,
+      ordinal: totalDays,
       isRestDay: false
-    });
+    };
+    if (afterKey) {
+      this.#calendarData.days.values = this.#insertAfterKey(this.#calendarData.days.values, afterKey, newKey, newDay);
+    } else {
+      this.#calendarData.days.values[newKey] = newDay;
+    }
+    this.#reindexObject(this.#calendarData.days.values);
     this.render();
   }
 
@@ -1537,10 +1594,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveWeekday(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    if (this.#calendarData.days.values.length > 1) {
-      this.#calendarData.days.values.splice(idx, 1);
-      this.#reindexArray(this.#calendarData.days.values);
+    const key = target.dataset.key;
+    if (Object.keys(this.#calendarData.days.values).length > 1) {
+      delete this.#calendarData.days.values[key];
+      this.#reindexObject(this.#calendarData.days.values);
       this.render();
     } else {
       ui.notifications.warn('CALENDARIA.Editor.Error.MinOneWeekday', { localize: true });
@@ -1553,11 +1610,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onMoveWeekdayUp(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const days = this.#calendarData.days.values;
+    const key = target.dataset.key;
+    const keys = Object.keys(this.#calendarData.days.values);
+    const idx = keys.indexOf(key);
     if (idx > 0) {
-      [days[idx - 1], days[idx]] = [days[idx], days[idx - 1]];
-      this.#reindexArray(days);
+      this.#calendarData.days.values = this.#swapObjectEntries(this.#calendarData.days.values, keys[idx - 1], key);
+      this.#reindexObject(this.#calendarData.days.values);
       this.render();
     }
   }
@@ -1568,11 +1626,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onMoveWeekdayDown(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const days = this.#calendarData.days.values;
-    if (idx < days.length - 1) {
-      [days[idx], days[idx + 1]] = [days[idx + 1], days[idx]];
-      this.#reindexArray(days);
+    const key = target.dataset.key;
+    const keys = Object.keys(this.#calendarData.days.values);
+    const idx = keys.indexOf(key);
+    if (idx < keys.length - 1) {
+      this.#calendarData.days.values = this.#swapObjectEntries(this.#calendarData.days.values, key, keys[idx + 1]);
+      this.#reindexObject(this.#calendarData.days.values);
       this.render();
     }
   }
@@ -1583,14 +1642,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddSeason(_event, target) {
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.seasons.values.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalSeasons = this.#calendarData.seasons.values.length + 1;
+    const afterKey = target.dataset.key;
+    const totalSeasons = Object.keys(this.#calendarData.seasons.values ?? {}).length + 1;
     const isPeriodic = this.#calendarData.seasons.type === 'periodic';
+    const newKey = foundry.utils.randomID();
     const newSeason = {
       name: format('CALENDARIA.Editor.Default.SeasonName', { num: totalSeasons }),
       abbreviation: format('CALENDARIA.Editor.Default.SeasonAbbr', { num: totalSeasons }),
-      ordinal: insertIdx + 1
+      ordinal: totalSeasons
     };
 
     if (isPeriodic) {
@@ -1602,8 +1661,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       newSeason.dayEnd = null;
     }
 
-    this.#calendarData.seasons.values.splice(insertIdx, 0, newSeason);
-    this.#reindexArray(this.#calendarData.seasons.values);
+    if (afterKey) {
+      this.#calendarData.seasons.values = this.#insertAfterKey(this.#calendarData.seasons.values, afterKey, newKey, newSeason);
+    } else {
+      this.#calendarData.seasons.values[newKey] = newSeason;
+    }
+    this.#reindexObject(this.#calendarData.seasons.values);
     this.render();
   }
 
@@ -1613,9 +1676,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveSeason(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.seasons.values.splice(idx, 1);
-    this.#reindexArray(this.#calendarData.seasons.values);
+    const key = target.dataset.key;
+    delete this.#calendarData.seasons.values[key];
+    this.#reindexObject(this.#calendarData.seasons.values);
     this.render();
   }
 
@@ -1625,12 +1688,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onEditSeasonIcon(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const season = this.#calendarData.seasons.values[idx];
+    const key = target.dataset.key;
+    const season = this.#calendarData.seasons.values[key];
     if (!season) return;
 
     const savedCalendar = this.#calendarId ? CalendarManager.getCalendar(this.#calendarId) : null;
-    const savedSeason = savedCalendar?.seasons?.values?.[idx];
+    const savedSeason = savedCalendar?.seasons?.values?.[key];
     const savedIcon = savedSeason?.icon || '';
     const savedColor = savedSeason?.color || '#808080';
 
@@ -1686,8 +1749,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onEditSeasonClimate(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const season = this.#calendarData.seasons.values[idx];
+    const key = target.dataset.key;
+    const season = this.#calendarData.seasons.values[key];
     if (!season) return;
     const climate = season.climate ?? { temperatures: null, presets: [] };
     const displayMin = climate.temperatures?.min != null ? toDisplayUnit(climate.temperatures.min) : '';
@@ -1761,17 +1824,22 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddEra(_event, target) {
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.eras.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalEras = this.#calendarData.eras.length + 1;
-    this.#calendarData.eras.splice(insertIdx, 0, {
+    const afterKey = target.dataset.key;
+    const totalEras = Object.keys(this.#calendarData.eras ?? {}).length + 1;
+    const newKey = foundry.utils.randomID();
+    const newEra = {
       name: format('CALENDARIA.Editor.Default.EraName', { num: totalEras }),
       abbreviation: format('CALENDARIA.Editor.Default.EraAbbr', { num: totalEras }),
       startYear: 1,
       endYear: null,
       format: 'suffix',
       template: null
-    });
+    };
+    if (afterKey) {
+      this.#calendarData.eras = this.#insertAfterKey(this.#calendarData.eras, afterKey, newKey, newEra);
+    } else {
+      this.#calendarData.eras[newKey] = newEra;
+    }
     this.render();
   }
 
@@ -1781,8 +1849,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveEra(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.eras.splice(idx, 1);
+    const key = target.dataset.key;
+    delete this.#calendarData.eras[key];
     this.render();
   }
 
@@ -1792,10 +1860,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddFestival(_event, target) {
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.festivals.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalFestivals = this.#calendarData.festivals.length + 1;
-    this.#calendarData.festivals.splice(insertIdx, 0, { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 1, day: 1, description: '', color: '', icon: '' });
+    const afterKey = target.dataset.key;
+    const totalFestivals = Object.keys(this.#calendarData.festivals ?? {}).length + 1;
+    const newKey = foundry.utils.randomID();
+    const newFestival = { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 1, day: 1, description: '', color: '', icon: '' };
+    if (afterKey) {
+      this.#calendarData.festivals = this.#insertAfterKey(this.#calendarData.festivals, afterKey, newKey, newFestival);
+    } else {
+      this.#calendarData.festivals[newKey] = newFestival;
+    }
     this.render();
   }
 
@@ -1805,8 +1878,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveFestival(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.festivals.splice(idx, 1);
+    const key = target.dataset.key;
+    delete this.#calendarData.festivals[key];
     this.render();
   }
 
@@ -1816,12 +1889,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onEditFestivalIcon(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    const festival = this.#calendarData.festivals[idx];
+    const key = target.dataset.key;
+    const festival = this.#calendarData.festivals[key];
     if (!festival) return;
 
     const savedCalendar = this.#calendarId ? CalendarManager.getCalendar(this.#calendarId) : null;
-    const savedFestival = savedCalendar?.festivals?.[idx];
+    const savedFestival = savedCalendar?.festivals?.[key];
     const savedIcon = savedFestival?.icon || '';
     const savedColor = savedFestival?.color || '#d4af37';
 
@@ -1878,14 +1951,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static async #onAddMoon(_event, _target) {
-    this.#calendarData.moons.push({
+    const newKey = foundry.utils.randomID();
+    this.#calendarData.moons[newKey] = {
       name: localize('CALENDARIA.Common.Moon'),
       cycleLength: 28,
       cycleDayAdjust: 0,
       referencePhase: 0,
-      phases: DEFAULT_MOON_PHASES,
+      phases: foundry.utils.deepClone(DEFAULT_MOON_PHASES),
       referenceDate: { year: 0, month: 0, day: 1 }
-    });
+    };
     this.render();
   }
 
@@ -1895,8 +1969,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveMoon(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.moons.splice(idx, 1);
+    const key = target.dataset.key;
+    delete this.#calendarData.moons[key];
     this.render();
   }
 
@@ -1906,26 +1980,30 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddMoonPhase(_event, target) {
-    const moonIdx = parseInt(target.dataset.moonIndex);
-    const moon = this.#calendarData.moons[moonIdx];
+    const moonKey = target.dataset.moonKey;
+    const moon = this.#calendarData.moons[moonKey];
     if (!moon) return;
-    if (!moon.phases) moon.phases = DEFAULT_MOON_PHASES;
-    const phaseCount = moon.phases.length;
-    const interval = 1 / (phaseCount + 1);
-    moon.phases.push({
+    if (!moon.phases) moon.phases = foundry.utils.deepClone(DEFAULT_MOON_PHASES);
+    const phasesArr = Object.values(moon.phases);
+    const phaseCount = phasesArr.length;
+    const newKey = foundry.utils.randomID();
+    moon.phases[newKey] = {
       name: format('CALENDARIA.Editor.Default.PhaseName', { num: phaseCount + 1 }),
       rising: '',
       fading: '',
       icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`,
-      start: phaseCount * interval,
+      start: 0,
       end: 1
-    });
+    };
 
-    const newCount = moon.phases.length;
+    const allPhases = Object.values(moon.phases);
+    const newCount = allPhases.length;
     const newInterval = 1 / newCount;
-    for (let i = 0; i < newCount; i++) {
-      moon.phases[i].start = i * newInterval;
-      moon.phases[i].end = (i + 1) * newInterval;
+    let i = 0;
+    for (const phase of allPhases) {
+      phase.start = i * newInterval;
+      phase.end = (i + 1) * newInterval;
+      i++;
     }
 
     this.render();
@@ -1937,16 +2015,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveMoonPhase(_event, target) {
-    const moonIdx = parseInt(target.dataset.moonIndex);
-    const phaseIdx = parseInt(target.dataset.phaseIndex);
-    const moon = this.#calendarData.moons[moonIdx];
-    if (!moon?.phases || moon.phases.length <= 1) return;
-    moon.phases.splice(phaseIdx, 1);
-    const count = moon.phases.length;
+    const moonKey = target.dataset.moonKey;
+    const phaseKey = target.dataset.phaseKey;
+    const moon = this.#calendarData.moons[moonKey];
+    if (!moon?.phases || Object.keys(moon.phases).length <= 1) return;
+    delete moon.phases[phaseKey];
+    const allPhases = Object.values(moon.phases);
+    const count = allPhases.length;
     const interval = 1 / count;
-    for (let i = 0; i < count; i++) {
-      moon.phases[i].start = i * interval;
-      moon.phases[i].end = (i + 1) * interval;
+    let i = 0;
+    for (const phase of allPhases) {
+      phase.start = i * interval;
+      phase.end = (i + 1) * interval;
+      i++;
     }
 
     this.render();
@@ -1958,17 +2039,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onPickMoonPhaseIcon(_event, target) {
-    const moonIdx = parseInt(target.dataset.moonIndex);
-    const phaseIdx = parseInt(target.dataset.phaseIndex);
-    const moon = this.#calendarData.moons[moonIdx];
+    const moonKey = target.dataset.moonKey;
+    const phaseKey = target.dataset.phaseKey;
+    const moon = this.#calendarData.moons[moonKey];
     if (!moon) return;
-    const currentIcon = moon.phases?.[phaseIdx]?.icon || '';
+    const currentIcon = moon.phases?.[phaseKey]?.icon || '';
     const picker = new foundry.applications.apps.FilePicker({
       type: 'image',
       current: currentIcon.startsWith('icons/') ? currentIcon : '',
       callback: (path) => {
-        if (!moon.phases) moon.phases = DEFAULT_MOON_PHASES;
-        moon.phases[phaseIdx].icon = path;
+        if (!moon.phases) moon.phases = foundry.utils.deepClone(DEFAULT_MOON_PHASES);
+        moon.phases[phaseKey].icon = path;
         this.render();
       }
     });
@@ -1981,15 +2062,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static async #onAddCycle(_event, _target) {
-    if (!this.#calendarData.cycles) this.#calendarData.cycles = [];
-    const totalCycles = this.#calendarData.cycles.length + 1;
-    this.#calendarData.cycles.push({
+    if (!this.#calendarData.cycles) this.#calendarData.cycles = {};
+    const totalCycles = Object.keys(this.#calendarData.cycles).length + 1;
+    const newKey = foundry.utils.randomID();
+    const stageKey = foundry.utils.randomID();
+    this.#calendarData.cycles[newKey] = {
       name: format('CALENDARIA.Editor.Default.CycleName', { num: totalCycles }),
       length: 12,
       offset: 0,
       basedOn: 'month',
-      stages: [{ name: format('CALENDARIA.Editor.Default.CycleStage', { num: 1 }) }]
-    });
+      stages: { [stageKey]: { name: format('CALENDARIA.Editor.Default.CycleStage', { num: 1 }) } }
+    };
     this.render();
   }
 
@@ -1999,8 +2082,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveCycle(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.cycles.splice(idx, 1);
+    const key = target.dataset.key;
+    delete this.#calendarData.cycles[key];
     this.render();
   }
 
@@ -2010,12 +2093,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddCycleStage(_event, target) {
-    const cycleIdx = parseInt(target.dataset.cycleIndex);
-    const cycle = this.#calendarData.cycles[cycleIdx];
+    const cycleKey = target.dataset.cycleKey;
+    const cycle = this.#calendarData.cycles[cycleKey];
     if (!cycle) return;
-    if (!cycle.stages) cycle.stages = [];
-    const stageCount = cycle.stages.length + 1;
-    cycle.stages.push({ name: format('CALENDARIA.Editor.Default.CycleStage', { num: stageCount }) });
+    if (!cycle.stages) cycle.stages = {};
+    const stageCount = Object.keys(cycle.stages).length + 1;
+    cycle.stages[foundry.utils.randomID()] = { name: format('CALENDARIA.Editor.Default.CycleStage', { num: stageCount }) };
     this.render();
   }
 
@@ -2025,11 +2108,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveCycleStage(_event, target) {
-    const cycleIdx = parseInt(target.dataset.cycleIndex);
-    const stageIdx = parseInt(target.dataset.stageIndex);
-    const cycle = this.#calendarData.cycles[cycleIdx];
-    if (!cycle?.stages?.length) return;
-    cycle.stages.splice(stageIdx, 1);
+    const cycleKey = target.dataset.cycleKey;
+    const stageKey = target.dataset.stageKey;
+    const cycle = this.#calendarData.cycles[cycleKey];
+    if (!cycle?.stages || Object.keys(cycle.stages).length === 0) return;
+    delete cycle.stages[stageKey];
     this.render();
   }
 
@@ -2039,16 +2122,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddCanonicalHour(_event, target) {
-    if (!this.#calendarData.canonicalHours) this.#calendarData.canonicalHours = [];
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.canonicalHours.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalHours = this.#calendarData.canonicalHours.length;
-    this.#calendarData.canonicalHours.splice(insertIdx, 0, {
+    if (!this.#calendarData.canonicalHours) this.#calendarData.canonicalHours = {};
+    const afterKey = target.dataset.key;
+    const totalHours = Object.keys(this.#calendarData.canonicalHours).length;
+    const newKey = foundry.utils.randomID();
+    const newHour = {
       name: format('CALENDARIA.Editor.Default.CanonicalHourName', { num: totalHours + 1 }),
       abbreviation: '',
       startHour: totalHours * 3,
       endHour: (totalHours + 1) * 3
-    });
+    };
+    if (afterKey) {
+      this.#calendarData.canonicalHours = this.#insertAfterKey(this.#calendarData.canonicalHours, afterKey, newKey, newHour);
+    } else {
+      this.#calendarData.canonicalHours[newKey] = newHour;
+    }
     this.render();
   }
 
@@ -2058,8 +2146,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveCanonicalHour(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.canonicalHours.splice(idx, 1);
+    const key = target.dataset.key;
+    delete this.#calendarData.canonicalHours[key];
     this.render();
   }
 
@@ -2069,18 +2157,24 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onAddNamedWeek(_event, target) {
-    if (!this.#calendarData.weeks) this.#calendarData.weeks = { type: 'year-based', repeat: false, names: [] };
-    if (!this.#calendarData.weeks.names) this.#calendarData.weeks.names = [];
-    const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.weeks.names.length - 1;
-    const insertIdx = afterIdx + 1;
-    const totalWeeks = this.#calendarData.weeks.names.length;
-    const existingNumbers = this.#calendarData.weeks.names.map((w) => w.weekNumber).filter((n) => n != null);
+    if (!this.#calendarData.weeks) this.#calendarData.weeks = { type: 'year-based', repeat: false, names: {} };
+    if (!this.#calendarData.weeks.names) this.#calendarData.weeks.names = {};
+    const afterKey = target.dataset.key;
+    const namesObj = this.#calendarData.weeks.names;
+    const totalWeeks = Object.keys(namesObj).length;
+    const existingNumbers = Object.values(namesObj).map((w) => w.weekNumber).filter((n) => n != null);
     const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
-    this.#calendarData.weeks.names.splice(insertIdx, 0, {
+    const newKey = foundry.utils.randomID();
+    const newWeek = {
       name: format('CALENDARIA.Editor.Default.WeekName', { num: totalWeeks + 1 }),
       abbreviation: '',
       weekNumber: maxExisting + 1
-    });
+    };
+    if (afterKey) {
+      this.#calendarData.weeks.names = this.#insertAfterKey(namesObj, afterKey, newKey, newWeek);
+    } else {
+      namesObj[newKey] = newWeek;
+    }
     this.render();
   }
 
@@ -2090,8 +2184,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveNamedWeek(_event, target) {
-    const idx = parseInt(target.dataset.index);
-    this.#calendarData.weeks.names.splice(idx, 1);
+    const key = target.dataset.key;
+    delete this.#calendarData.weeks.names[key];
     this.render();
   }
 
@@ -2161,13 +2255,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Find and reset this preset in the active zone
     const activeZoneId = this.#calendarData.weather?.activeZone;
-    const zones = this.#calendarData.weather?.zones || [];
-    const activeZone = zones.find((z) => z.id === activeZoneId);
+    const zonesObj = this.#calendarData.weather?.zones ?? {};
+    const activeZone = Object.values(zonesObj).find((z) => z.id === activeZoneId);
     if (!activeZone?.presets) return;
 
-    const idx = activeZone.presets.findIndex((p) => p.id === presetId);
-    if (idx >= 0) {
-      activeZone.presets.splice(idx, 1);
+    const presetEntry = Object.entries(activeZone.presets).find(([, p]) => p.id === presetId);
+    if (presetEntry) {
+      delete activeZone.presets[presetEntry[0]];
       this.render();
     }
   }
@@ -2236,19 +2330,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     if (!result) return;
-    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
+    const seasonNames = Object.values(this.#calendarData.seasons?.values ?? {}).map((s) => s.name);
+    if (!seasonNames.length) seasonNames.push('CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter');
     const zoneConfig = getDefaultZoneConfig(result.template, seasonNames);
     if (!zoneConfig) return;
     const baseId = result.name?.toLowerCase().replace(/\s+/g, '-') || result.template;
     let zoneId = baseId;
     let counter = 1;
-    const existingIds = (this.#calendarData.weather?.zones || []).map((z) => z.id);
+    const existingIds = Object.values(this.#calendarData.weather?.zones ?? {}).map((z) => z.id);
     while (existingIds.includes(zoneId)) zoneId = `${baseId}-${counter++}`;
     zoneConfig.id = zoneId;
     zoneConfig.name = result.name || localize(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
-    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: [], activeZone: null, autoGenerate: false };
-    if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = [];
-    this.#calendarData.weather.zones.push(zoneConfig);
+    if (!this.#calendarData.weather) this.#calendarData.weather = { zones: {}, activeZone: null, autoGenerate: false };
+    if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = {};
+    const zoneKey = foundry.utils.randomID();
+    this.#calendarData.weather.zones[zoneKey] = zoneConfig;
     this.#calendarData.weather.activeZone = zoneConfig.id;
     this.render();
   }
@@ -2259,15 +2355,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static async #onEditZone(_event, _target) {
-    const zones = this.#calendarData.weather?.zones || [];
+    const zonesArr = Object.values(this.#calendarData.weather?.zones ?? {});
     const activeZoneId = this.#calendarData.weather?.activeZone;
-    const zone = zones.find((z) => z.id === activeZoneId);
+    const zone = zonesArr.find((z) => z.id === activeZoneId);
     if (!zone) {
       ui.notifications.warn('CALENDARIA.Editor.Weather.Zone.NoZones', { localize: true });
       return;
     }
 
-    const seasonNames = this.#calendarData.seasons?.values?.map((s) => s.name) || ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
+    const seasonNames = Object.values(this.#calendarData.seasons?.values ?? {}).map((s) => s.name);
+    if (!seasonNames.length) seasonNames.push('CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter');
     const tempRows = seasonNames
       .map((season) => {
         const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
@@ -2388,24 +2485,24 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static async #onDeleteZone(_event, _target) {
-    const zones = this.#calendarData.weather?.zones || [];
+    const zonesObj = this.#calendarData.weather?.zones ?? {};
     const activeZoneId = this.#calendarData.weather?.activeZone;
-    const zoneIdx = zones.findIndex((z) => z.id === activeZoneId);
-    if (zoneIdx < 0) {
+    const zoneEntry = Object.entries(zonesObj).find(([, z]) => z.id === activeZoneId);
+    if (!zoneEntry) {
       ui.notifications.warn('CALENDARIA.Editor.Weather.Zone.NoZones', { localize: true });
       return;
     }
 
-    const zone = zones[zoneIdx];
+    const [zoneKey, zone] = zoneEntry;
     const confirm = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Editor.Weather.Zone.Delete') },
       content: `<p>${format('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`
     });
 
     if (!confirm) return;
-    zones.splice(zoneIdx, 1);
-    if (zones.length > 0) this.#calendarData.weather.activeZone = zones[0].id;
-    else this.#calendarData.weather.activeZone = null;
+    delete zonesObj[zoneKey];
+    const remaining = Object.values(zonesObj);
+    this.#calendarData.weather.activeZone = remaining.length > 0 ? remaining[0].id : null;
     this.render();
   }
 
@@ -2468,10 +2565,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData = calendar.toObject();
     preLocalizeCalendar(this.#calendarData);
     this.#calendarData.name = format('CALENDARIA.Editor.CopyOfName', { name: calendarName });
-    if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: [] };
-    if (!this.#calendarData.eras) this.#calendarData.eras = [];
-    if (!this.#calendarData.festivals) this.#calendarData.festivals = [];
-    if (!this.#calendarData.moons) this.#calendarData.moons = [];
+    if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: {} };
+    if (!this.#calendarData.eras) this.#calendarData.eras = {};
+    if (!this.#calendarData.festivals) this.#calendarData.festivals = {};
+    if (!this.#calendarData.moons) this.#calendarData.moons = {};
     if (this.#calendarData.metadata) {
       delete this.#calendarData.metadata.id;
       delete this.#calendarData.metadata.isCustom;
@@ -2740,10 +2837,30 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {Array} arr - Array to reindex
    * @private
    */
-  #reindexArray(arr) {
-    arr.forEach((item, idx) => {
-      item.ordinal = idx + 1;
-    });
+  /** Reindex ordinal values in a keyed object. */
+  #reindexObject(obj) {
+    let idx = 0;
+    for (const key of Object.keys(obj)) {
+      obj[key].ordinal = ++idx;
+    }
+  }
+
+  /** Swap two adjacent entries in a keyed object, preserving insertion order. */
+  #swapObjectEntries(obj, keyA, keyB) {
+    const entries = Object.entries(obj);
+    const idxA = entries.findIndex(([k]) => k === keyA);
+    const idxB = entries.findIndex(([k]) => k === keyB);
+    if (idxA < 0 || idxB < 0) return obj;
+    [entries[idxA], entries[idxB]] = [entries[idxB], entries[idxA]];
+    return Object.fromEntries(entries);
+  }
+
+  /** Insert a new entry into a keyed object after the given key. */
+  #insertAfterKey(obj, afterKey, newKey, newValue) {
+    const entries = Object.entries(obj);
+    const idx = entries.findIndex(([k]) => k === afterKey);
+    entries.splice(idx + 1, 0, [newKey, newValue]);
+    return Object.fromEntries(entries);
   }
 
   /**

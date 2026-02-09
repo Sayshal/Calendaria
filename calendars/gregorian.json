@@ -4,87 +4,101 @@
   "years"         : {"yearZero": 1970, "firstWeekday": 4},
   "leapYearConfig": {"rule": "gregorian", "start": 0},
   "months"        : {
-    "values": [
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.January",   "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JanuaryShort",   "ordinal":  1, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.February",  "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.FebruaryShort",  "ordinal":  2, "days": 28, "leapDays": 29},
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.March",     "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.MarchShort",     "ordinal":  3, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.April",     "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.AprilShort",     "ordinal":  4, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.May",       "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.MayShort",       "ordinal":  5, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.June",      "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JuneShort",      "ordinal":  6, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.July",      "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JulyShort",      "ordinal":  7, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.August",    "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.AugustShort",    "ordinal":  8, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.September", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.SeptemberShort", "ordinal":  9, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.October",   "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.OctoberShort",   "ordinal": 10, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.November",  "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.NovemberShort",  "ordinal": 11, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Gregorian.Month.December",  "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.DecemberShort",  "ordinal": 12, "days": 31                }
-    ]
+    "values": {
+      "january000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.January",   "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JanuaryShort",   "ordinal":  1, "days": 31                },
+      "february00000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.February",  "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.FebruaryShort",  "ordinal":  2, "days": 28, "leapDays": 29},
+      "march00000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.March",     "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.MarchShort",     "ordinal":  3, "days": 31                },
+      "april00000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.April",     "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.AprilShort",     "ordinal":  4, "days": 30                },
+      "may0000000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.May",       "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.MayShort",       "ordinal":  5, "days": 31                },
+      "june000000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.June",      "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JuneShort",      "ordinal":  6, "days": 30                },
+      "july000000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.July",      "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.JulyShort",      "ordinal":  7, "days": 31                },
+      "august0000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.August",    "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.AugustShort",    "ordinal":  8, "days": 31                },
+      "september0000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.September", "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.SeptemberShort", "ordinal":  9, "days": 30                },
+      "october000000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.October",   "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.OctoberShort",   "ordinal": 10, "days": 31                },
+      "november00000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.November",  "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.NovemberShort",  "ordinal": 11, "days": 30                },
+      "december00000000": {"name": "CALENDARIA.Calendar.Gregorian.Month.December",  "abbreviation": "CALENDARIA.Calendar.Gregorian.Month.DecemberShort",  "ordinal": 12, "days": 31                }
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "CALENDARIA.Weekday.Sunday",    "abbreviation": "CALENDARIA.Weekday.SundayShort",    "ordinal": 1, "isRestDay": true},
-      {"name": "CALENDARIA.Weekday.Monday",    "abbreviation": "CALENDARIA.Weekday.MondayShort",    "ordinal": 2                   },
-      {"name": "CALENDARIA.Weekday.Tuesday",   "abbreviation": "CALENDARIA.Weekday.TuesdayShort",   "ordinal": 3                   },
-      {"name": "CALENDARIA.Weekday.Wednesday", "abbreviation": "CALENDARIA.Weekday.WednesdayShort", "ordinal": 4                   },
-      {"name": "CALENDARIA.Weekday.Thursday",  "abbreviation": "CALENDARIA.Weekday.ThursdayShort",  "ordinal": 5                   },
-      {"name": "CALENDARIA.Weekday.Friday",    "abbreviation": "CALENDARIA.Weekday.FridayShort",    "ordinal": 6                   },
-      {"name": "CALENDARIA.Weekday.Saturday",  "abbreviation": "CALENDARIA.Weekday.SaturdayShort",  "ordinal": 7, "isRestDay": true}
-    ],
+    "values"          : {
+      "sunday0000000000": {"name": "CALENDARIA.Weekday.Sunday",    "abbreviation": "CALENDARIA.Weekday.SundayShort",    "ordinal": 1, "isRestDay": true},
+      "monday0000000000": {"name": "CALENDARIA.Weekday.Monday",    "abbreviation": "CALENDARIA.Weekday.MondayShort",    "ordinal": 2                   },
+      "tuesday000000000": {"name": "CALENDARIA.Weekday.Tuesday",   "abbreviation": "CALENDARIA.Weekday.TuesdayShort",   "ordinal": 3                   },
+      "wednesday0000000": {"name": "CALENDARIA.Weekday.Wednesday", "abbreviation": "CALENDARIA.Weekday.WednesdayShort", "ordinal": 4                   },
+      "thursday00000000": {"name": "CALENDARIA.Weekday.Thursday",  "abbreviation": "CALENDARIA.Weekday.ThursdayShort",  "ordinal": 5                   },
+      "friday0000000000": {"name": "CALENDARIA.Weekday.Friday",    "abbreviation": "CALENDARIA.Weekday.FridayShort",    "ordinal": 6                   },
+      "saturday00000000": {"name": "CALENDARIA.Weekday.Saturday",  "abbreviation": "CALENDARIA.Weekday.SaturdayShort",  "ordinal": 7, "isRestDay": true}
+    },
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
   "seasons"       : {
-    "values": [
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 265, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 266, "dayEnd": 354, "abbreviation": "Aut"},
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"}
-    ]
+    "values": {
+      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
+      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 265, "abbreviation": "Sum"},
+      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 266, "dayEnd": 354, "abbreviation": "Aut"},
+      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"}
+    }
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.CommonEra", "abbreviation": "CALENDARIA.Era.CE", "startYear": 1, "endYear": null} ],
-  "moons"         : [
-    {
+  "eras"          : { "commonera0000000": {"name": "CALENDARIA.Era.CommonEra", "abbreviation": "CALENDARIA.Era.CE", "startYear": 1, "endYear": null} },
+  "moons"         : {
+    "luna000000000000": {
       "name"         : "CALENDARIA.Moon.Gregorian.Luna",
       "cycleLength"  : 29.53059,
       "color"        : "#C0C0C0",
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 2025, "month": 0, "day": 29}
     }
-  ],
+  },
   "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 355, "summerSolstice": 172},
-  "festivals"     : [
-    {"name": "New Year's Day", "month": 1, "day": 1, "icon": "fas fa-champagne-glasses", "color": "#FFD700", "description": "The first day of the year, celebrated worldwide with fireworks, gatherings, and new beginnings."},
-    {"name": "Valentine's Day", "month": 2, "day": 14, "icon": "fas fa-heart", "color": "#E91E63", "description": "A celebration of love and affection, marked with gifts, cards, and romantic gestures."},
-    {"name": "International Women's Day", "month": 3, "day": 8, "icon": "fas fa-venus", "color": "#9C27B0", "description": "A global day honoring women's achievements and advocating for gender equality."},
-    {"name": "St. Patrick's Day", "month": 3, "day": 17, "icon": "fas fa-clover", "color": "#4CAF50", "description": "An Irish cultural celebration widely observed with parades, music, and green attire."},
-    {"name": "Vernal Equinox", "month": 3, "day": 20, "icon": "fas fa-scale-balanced", "color": "#8BC34A", "description": "The astronomical start of spring, when day and night are nearly equal."},
-    {"name": "April Fools' Day", "month": 4, "day": 1, "icon": "fas fa-face-grin-wink", "color": "#FF9800", "description": "A lighthearted day of pranks, hoaxes, and playful deception celebrated in many cultures."},
-    {"name": "Earth Day", "month": 4, "day": 22, "icon": "fas fa-earth-americas", "color": "#2196F3", "description": "An annual event dedicated to environmental awareness and protection of the natural world."},
-    {"name": "May Day", "month": 5, "day": 1, "icon": "fas fa-seedling", "color": "#F44336", "description": "International Workers' Day honoring laborers and the labor movement, also celebrated as a spring festival."},
-    {"name": "Summer Solstice", "month": 6, "day": 21, "icon": "fas fa-sun", "color": "#FFC107", "description": "The longest day of the year, celebrated since antiquity with Midsummer festivals and bonfires."},
-    {"name": "Bastille Day", "month": 7, "day": 14, "icon": "fas fa-flag", "color": "#1565C0", "description": "France's national day commemorating the storming of the Bastille and the birth of the French Republic."},
-    {"name": "Autumnal Equinox", "month": 9, "day": 22, "icon": "fas fa-leaf", "color": "#D2691E", "description": "The astronomical start of autumn, when day and night are nearly equal."},
-    {"name": "Halloween", "month": 10, "day": 31, "icon": "fas fa-ghost", "color": "#FF6F00", "description": "An ancient Celtic-rooted festival of costumes, jack-o'-lanterns, and the supernatural."},
-    {"name": "Día de los Muertos", "month": 11, "day": 1, "icon": "fas fa-skull", "color": "#E040FB", "description": "A Mexican tradition honoring deceased loved ones with ofrendas, marigolds, and celebration."},
-    {"name": "Winter Solstice", "month": 12, "day": 21, "icon": "fas fa-snowflake", "color": "#00BCD4", "description": "The shortest day and longest night of the year, celebrated with Yule traditions since ancient times."},
-    {"name": "Christmas Eve", "month": 12, "day": 24, "icon": "fas fa-star", "color": "#1B5E20", "description": "The evening before Christmas, observed with candlelight services, family gatherings, and gift-giving."},
-    {"name": "Christmas Day", "month": 12, "day": 25, "icon": "fas fa-gifts", "color": "#C62828", "description": "A global holiday celebrating the birth of Jesus Christ, marked by gift-giving, feasts, and goodwill."},
-    {"name": "Boxing Day", "month": 12, "day": 26, "icon": "fas fa-gift", "color": "#795548", "description": "A holiday originating in the UK tradition of giving gifts to service workers and those in need."},
-    {"name": "New Year's Eve", "month": 12, "day": 31, "icon": "fas fa-clock", "color": "#311B92", "description": "The final night of the year, celebrated worldwide with countdowns, fireworks, and revelry."}
-  ],
-  "cycles"        : [],
-  "canonicalHours": [],
-  "weeks"         : {"enabled": false, "type": "year-based", "names": []},
+  "festivals"     : {
+    "newyearsday00000": {
+      "name"       : "New Year's Day",
+      "month"      : 1,
+      "day"        : 1,
+      "icon"       : "fas fa-champagne-glasses",
+      "color"      : "#FFD700",
+      "description": "The first day of the year, celebrated worldwide with fireworks, gatherings, and new beginnings."
+    },
+    "valentinesday000": {"name": "Valentine's Day", "month": 2, "day": 14, "icon": "fas fa-heart", "color": "#E91E63", "description": "A celebration of love and affection, marked with gifts, cards, and romantic gestures."},
+    "internationalwom": {"name": "International Women's Day", "month": 3, "day": 8, "icon": "fas fa-venus", "color": "#9C27B0", "description": "A global day honoring women's achievements and advocating for gender equality."},
+    "stpatricksday000": {"name": "St. Patrick's Day", "month": 3, "day": 17, "icon": "fas fa-clover", "color": "#4CAF50", "description": "An Irish cultural celebration widely observed with parades, music, and green attire."},
+    "vernalequinox000": {"name": "Vernal Equinox", "month": 3, "day": 20, "icon": "fas fa-scale-balanced", "color": "#8BC34A", "description": "The astronomical start of spring, when day and night are nearly equal."},
+    "aprilfoolsday000": {"name": "April Fools' Day", "month": 4, "day": 1, "icon": "fas fa-face-grin-wink", "color": "#FF9800", "description": "A lighthearted day of pranks, hoaxes, and playful deception celebrated in many cultures."},
+    "earthday00000000": {"name": "Earth Day", "month": 4, "day": 22, "icon": "fas fa-earth-americas", "color": "#2196F3", "description": "An annual event dedicated to environmental awareness and protection of the natural world."},
+    "mayday0000000000": {"name": "May Day", "month": 5, "day": 1, "icon": "fas fa-seedling", "color": "#F44336", "description": "International Workers' Day honoring laborers and the labor movement, also celebrated as a spring festival."},
+    "summersolstice00": {"name": "Summer Solstice", "month": 6, "day": 21, "icon": "fas fa-sun", "color": "#FFC107", "description": "The longest day of the year, celebrated since antiquity with Midsummer festivals and bonfires."},
+    "bastilleday00000": {"name": "Bastille Day", "month": 7, "day": 14, "icon": "fas fa-flag", "color": "#1565C0", "description": "France's national day commemorating the storming of the Bastille and the birth of the French Republic."},
+    "autumnalequinox0": {"name": "Autumnal Equinox", "month": 9, "day": 22, "icon": "fas fa-leaf", "color": "#D2691E", "description": "The astronomical start of autumn, when day and night are nearly equal."},
+    "halloween0000000": {"name": "Halloween", "month": 10, "day": 31, "icon": "fas fa-ghost", "color": "#FF6F00", "description": "An ancient Celtic-rooted festival of costumes, jack-o'-lanterns, and the supernatural."},
+    "dadelosmuertos00": {"name": "Día de los Muertos", "month": 11, "day": 1, "icon": "fas fa-skull", "color": "#E040FB", "description": "A Mexican tradition honoring deceased loved ones with ofrendas, marigolds, and celebration."},
+    "wintersolstice00": {
+      "name"       : "Winter Solstice",
+      "month"      : 12,
+      "day"        : 21,
+      "icon"       : "fas fa-snowflake",
+      "color"      : "#00BCD4",
+      "description": "The shortest day and longest night of the year, celebrated with Yule traditions since ancient times."
+    },
+    "christmaseve0000": {"name": "Christmas Eve", "month": 12, "day": 24, "icon": "fas fa-star", "color": "#1B5E20", "description": "The evening before Christmas, observed with candlelight services, family gatherings, and gift-giving."},
+    "christmasday0000": {"name": "Christmas Day", "month": 12, "day": 25, "icon": "fas fa-gifts", "color": "#C62828", "description": "A global holiday celebrating the birth of Jesus Christ, marked by gift-giving, feasts, and goodwill."},
+    "boxingday0000000": {"name": "Boxing Day", "month": 12, "day": 26, "icon": "fas fa-gift", "color": "#795548", "description": "A holiday originating in the UK tradition of giving gifts to service workers and those in need."},
+    "newyearseve00000": {"name": "New Year's Eve", "month": 12, "day": 31, "icon": "fas fa-clock", "color": "#311B92", "description": "The final night of the year, celebrated worldwide with countdowns, fireworks, and revelry."}
+  },
+  "cycles"        : {},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "gregorian", "description": "CALENDARIA.Calendar.Gregorian.Description", "author": "calendaria", "system": "Real World"}

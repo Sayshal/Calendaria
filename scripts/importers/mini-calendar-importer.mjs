@@ -66,7 +66,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
-    const months = calendar.months?.values || [];
+    const months = calendar.months?.values ? Object.values(calendar.months.values) : [];
     const regularMonths = months.filter((m) => !m.intercalary);
     const daysPerYear = calendar.days?.daysPerYear ?? (regularMonths.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
     const totalDays = Math.floor(worldTime / secondsPerDay);
@@ -124,8 +124,14 @@ export default class MiniCalendarImporter extends BaseImporter {
     const calendar = data.calendar || data;
     if (!calendar || Object.keys(calendar).length === 0) throw new Error('No calendar data found in import');
     log(3, 'Transforming Mini Calendar data:', calendar.name || calendar.id);
-    const weekdays = this.#transformWeekdays(calendar.days?.values);
-    const months = this.#transformMonths(calendar.months?.values);
+    const rawWeekdays = calendar.days?.values ? Object.values(calendar.days.values) : [];
+    const rawMonths = calendar.months?.values ? Object.values(calendar.months.values) : [];
+    const rawSeasons = calendar.seasons?.values ? Object.values(calendar.seasons.values) : [];
+    const rawMoons = calendar.moons?.values ? Object.values(calendar.moons.values) : [];
+    const rawSun = calendar.sun?.values ? Object.values(calendar.sun.values) : [];
+    const rawWeather = calendar.weather?.values ? Object.values(calendar.weather.values) : [];
+    const weekdays = this.#transformWeekdays(rawWeekdays);
+    const months = this.#transformMonths(rawMonths);
     const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
     return {
       name: calendar.name || 'Imported Calendar',
@@ -139,11 +145,11 @@ export default class MiniCalendarImporter extends BaseImporter {
       months: { values: months },
       years: this.#transformYears(calendar.years),
       leapYearConfig: this.#transformLeapYearConfig(calendar.years?.leapYear),
-      seasons: { values: this.#transformSeasons(calendar.seasons?.values, calendar.months?.values) },
-      moons: this.#transformMoons(calendar.moons?.values),
-      festivals: this.#extractFestivals(calendar.months?.values),
-      daylight: this.#transformDaylight(calendar.sun?.values, calendar.months?.values),
-      weather: this.#transformWeather(data, calendar.weather?.values),
+      seasons: { values: this.#transformSeasons(rawSeasons, rawMonths) },
+      moons: this.#transformMoons(rawMoons),
+      festivals: this.#extractFestivals(rawMonths),
+      daylight: this.#transformDaylight(rawSun, rawMonths),
+      weather: this.#transformWeather(data, rawWeather),
       metadata: {
         description: calendar.description || 'Imported from Mini Calendar',
         system: calendar.name || 'Unknown',
@@ -510,7 +516,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
-    const existingFestivals = calendar.festivals || [];
+    const existingFestivals = calendar.festivalsArray ?? [];
     const newFestivals = [];
     for (const festival of festivals) {
       try {

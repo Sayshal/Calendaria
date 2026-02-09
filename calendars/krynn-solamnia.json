@@ -3,99 +3,107 @@
   "name"          : "CALENDARIA.Calendar.KrynnSolamnia.Name",
   "years"         : {"yearZero": 351, "firstWeekday": 0},
   "months"        : {
-    "values": [
-      {"name": "Newkolt",    "abbreviation": "Nwk", "ordinal":  1, "days": 28}, {"name": "Deepkolt",   "abbreviation": "Dpk", "ordinal":  2, "days": 28}, {"name": "Brookgreen", "abbreviation": "Brk", "ordinal":  3, "days": 28},
-      {"name": "Yurthgreen", "abbreviation": "Yrt", "ordinal":  4, "days": 28}, {"name": "Fleurgreen", "abbreviation": "Flr", "ordinal":  5, "days": 28}, {"name": "Holmswelt",  "abbreviation": "Hlm", "ordinal":  6, "days": 28},
-      {"name": "Fierswelt",  "abbreviation": "Frs", "ordinal":  7, "days": 28}, {"name": "Paleswelt",  "abbreviation": "Pls", "ordinal":  8, "days": 28}, {"name": "Reapember",  "abbreviation": "Rpr", "ordinal":  9, "days": 28},
-      {"name": "Gildember",  "abbreviation": "Gld", "ordinal": 10, "days": 28}, {"name": "Darkember",  "abbreviation": "Drk", "ordinal": 11, "days": 28}, {"name": "Frostkolt",  "abbreviation": "Frk", "ordinal": 12, "days": 28}
-    ]
+    "values": {
+      "newkolt000000000": {"name": "Newkolt",    "abbreviation": "Nwk", "ordinal":  1, "days": 28},
+      "deepkolt00000000": {"name": "Deepkolt",   "abbreviation": "Dpk", "ordinal":  2, "days": 28},
+      "brookgreen000000": {"name": "Brookgreen", "abbreviation": "Brk", "ordinal":  3, "days": 28},
+      "yurthgreen000000": {"name": "Yurthgreen", "abbreviation": "Yrt", "ordinal":  4, "days": 28},
+      "fleurgreen000000": {"name": "Fleurgreen", "abbreviation": "Flr", "ordinal":  5, "days": 28},
+      "holmswelt0000000": {"name": "Holmswelt",  "abbreviation": "Hlm", "ordinal":  6, "days": 28},
+      "fierswelt0000000": {"name": "Fierswelt",  "abbreviation": "Frs", "ordinal":  7, "days": 28},
+      "paleswelt0000000": {"name": "Paleswelt",  "abbreviation": "Pls", "ordinal":  8, "days": 28},
+      "reapember0000000": {"name": "Reapember",  "abbreviation": "Rpr", "ordinal":  9, "days": 28},
+      "gildember0000000": {"name": "Gildember",  "abbreviation": "Gld", "ordinal": 10, "days": 28},
+      "darkember0000000": {"name": "Darkember",  "abbreviation": "Drk", "ordinal": 11, "days": 28},
+      "frostkolt0000000": {"name": "Frostkolt",  "abbreviation": "Frk", "ordinal": 12, "days": 28}
+    }
   },
   "days"          : {
-    "values"          : [
-      {"name": "Gateway",     "ordinal": 1, "abbreviation": "Gat"                   },
-      {"name": "Bright Eye",  "ordinal": 2, "abbreviation": "BrE"                   },
-      {"name": "Night's Eye", "ordinal": 3, "abbreviation": "NiE"                   },
-      {"name": "Dead Eye",    "ordinal": 4, "abbreviation": "DeE"                   },
-      {"name": "Winged",      "ordinal": 5, "abbreviation": "Win"                   },
-      {"name": "Flowered",    "ordinal": 6, "abbreviation": "Flo"                   },
-      {"name": "World",       "ordinal": 7, "abbreviation": "Wor", "isRestDay": true}
-    ],
+    "values"          : {
+      "gateway000000000": {"name": "Gateway",     "ordinal": 1, "abbreviation": "Gat"                   },
+      "brighteye0000000": {"name": "Bright Eye",  "ordinal": 2, "abbreviation": "BrE"                   },
+      "nightseye0000000": {"name": "Night's Eye", "ordinal": 3, "abbreviation": "NiE"                   },
+      "deadeye000000000": {"name": "Dead Eye",    "ordinal": 4, "abbreviation": "DeE"                   },
+      "winged0000000000": {"name": "Winged",      "ordinal": 5, "abbreviation": "Win"                   },
+      "flowered00000000": {"name": "Flowered",    "ordinal": 6, "abbreviation": "Flo"                   },
+      "world00000000000": {"name": "World",       "ordinal": 7, "abbreviation": "Wor", "isRestDay": true}
+    },
     "daysPerYear"     : 336,
     "hoursPerDay"     : 24,
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [
-    {"name": "Yule",                    "month":  1, "day": 14, "icon": "fas fa-holly-berry", "color": "#006400", "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon."     },
-    {"name": "Spring Dawning Festival", "month":  3, "day":  1, "icon": "fas fa-cloud-sun",   "color": "#98FB98", "description": "Vernal equinox celebration marking the awakening of spring."                           },
-    {"name": "Midyear",                 "month":  6, "day": 14, "icon": "fas fa-sun",         "color": "#FFFF00", "description": "Longest day of the year celebrated with dancing and lights."                           },
-    {"name": "Harvest Festival",        "month":  9, "day": 14, "icon": "fas fa-wheat-awn",   "color": "#CD853F", "description": "Autumn celebration of the harvest bounty and thanksgiving."                            },
-    {"name": "Night of the Eye",        "month": 11, "day": 21, "icon": "fas fa-eye",         "color": "#9400D3", "description": "Rare conjunction when all three moons align, celebrated by the Orders of High Sorcery."}
-  ],
-  "seasons"       : {
-    "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 309, "dayEnd":  55, "abbreviation": "Win"},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
-    ]
+  "festivals"     : {
+    "yule000000000000": {"name": "Yule",                    "month":  1, "day": 14, "icon": "fas fa-holly-berry", "color": "#006400", "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon."     },
+    "springdawningfes": {"name": "Spring Dawning Festival", "month":  3, "day":  1, "icon": "fas fa-cloud-sun",   "color": "#98FB98", "description": "Vernal equinox celebration marking the awakening of spring."                           },
+    "midyear000000000": {"name": "Midyear",                 "month":  6, "day": 14, "icon": "fas fa-sun",         "color": "#FFFF00", "description": "Longest day of the year celebrated with dancing and lights."                           },
+    "harvestfestival0": {"name": "Harvest Festival",        "month":  9, "day": 14, "icon": "fas fa-wheat-awn",   "color": "#CD853F", "description": "Autumn celebration of the harvest bounty and thanksgiving."                            },
+    "nightoftheeye000": {"name": "Night of the Eye",        "month": 11, "day": 21, "icon": "fas fa-eye",         "color": "#9400D3", "description": "Rare conjunction when all three moons align, celebrated by the Orders of High Sorcery."}
   },
-  "eras"          : [ {"name": "Alt-Cataclius", "abbreviation": "AC", "startYear": 1, "endYear": null}, {"name": "Pre-Cataclius", "abbreviation": "PC", "startYear": -9999, "endYear": 0} ],
-  "moons"         : [
-    {
+  "seasons"       : {
+    "values": {
+      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 309, "dayEnd":  55, "abbreviation": "Win"},
+      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
+      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
+      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
+    }
+  },
+  "eras"          : { "altcataclius0000": {"name": "Alt-Cataclius", "abbreviation": "AC", "startYear": 1, "endYear": null}, "precataclius0000": {"name": "Pre-Cataclius", "abbreviation": "PC", "startYear": -9999, "endYear": 0} },
+  "moons"         : {
+    "solinari00000000": {
       "name"         : "Solinari",
       "cycleLength"  : 36,
       "color"        : "#FFFFFF",
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     },
-    {
+    "lunitari00000000": {
       "name"         : "Lunitari",
       "cycleLength"  : 28,
       "color"        : "#FF4444",
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     },
-    {
+    "nuitari000000000": {
       "name"         : "Nuitari",
       "cycleLength"  : 8,
       "color"        : "#1a1a1a",
       "hidden"       : true,
-      "phases"       : [
-        {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
-      ],
+      "phases"       : {
+        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      },
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     }
-  ],
+  },
   "daylight"      : {"enabled": true, "shortestDay": 9, "longestDay": 15, "winterSolstice": 322, "summerSolstice": 154},
-  "cycles"        : [],
-  "canonicalHours": [],
-  "weeks"         : {"enabled": false, "type": "year-based", "names": []},
+  "cycles"        : {},
+  "canonicalHours": {},
+  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
   "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
   "metadata"      : {"id": "krynn-solamnia", "description": "CALENDARIA.Calendar.KrynnSolamnia.Description", "author": "calendaria", "system": "Dragonlance"}
