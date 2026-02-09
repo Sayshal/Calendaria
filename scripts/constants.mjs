@@ -198,7 +198,10 @@ export const TEMPLATES = {
     TAB_WEATHER: `modules/${MODULE.ID}/templates/editor/tab-weather.hbs`
   },
   IMPORTER: { APP: `modules/${MODULE.ID}/templates/importers/importer-app.hbs` },
-  WEATHER: { PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs` },
+  WEATHER: {
+    PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`,
+    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`
+  },
   SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },
   SET_DATE_DIALOG: `modules/${MODULE.ID}/templates/set-date-dialog.hbs`
 };

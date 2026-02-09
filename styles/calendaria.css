@@ -2898,23 +2898,32 @@ span.calendaria-moon-icon {
   }
 }
 /* -------------------------------------------- */
-/*  Climate Settings Dialog                     */
+/*  Climate Editor                              */
 /* -------------------------------------------- */
 
-.calendaria.climate-settings-dialog,
-.calendaria.zone-climate-dialog {
+.calendaria.climate-editor {
   max-width: 62.5rem;
-  max-height: 53.125rem;
+  max-height: 50rem;
 
   .window-content {
     overflow-y: auto;
+    padding: 1rem;
   }
 
   .temp-fields {
     gap: 0.5rem;
     display: flex;
     align-items: center;
-    margin-bottom: 0.5rem;
+
+    input[type='number'] {
+      width: 5rem;
+    }
+  }
+
+  .temperature-row {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
 
     input {
       width: 5rem;
@@ -2938,7 +2947,7 @@ span.calendaria-moon-icon {
     align-items: center;
     padding: 0.25rem 0;
 
-    input {
+    input[type='number'] {
       text-align: right;
     }
   }
@@ -2947,24 +2956,29 @@ span.calendaria-moon-icon {
     text-align: center;
   }
 
+  .preset-name {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    input {
+      flex: 1;
+    }
+
+    .preset-reset-alias {
+      flex: none;
+      padding: 0.125rem 0.25rem;
+      font-size: 0.75rem;
+    }
+  }
+
   .units {
     color: var(--color-text-secondary);
     font-size: 0.85rem;
   }
-}
 
-.calendaria.zone-climate-dialog {
-  .temperature-row {
-    gap: 0.5rem;
-    display: flex;
-    align-items: center;
-
-    input {
-      width: 5rem;
-    }
-  }
-
-  .preset-row {
+  /* Zone mode: wider grid with checkbox, alias, and temp columns */
+  &.zone-mode .preset-row {
     grid-template-columns: 1.5rem 1.5rem 1fr 3.75rem 1.25rem 3.75rem 1.25rem 3.75rem 1.25rem;
   }
 
