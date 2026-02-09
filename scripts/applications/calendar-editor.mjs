@@ -310,9 +310,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const { tabGroups, ungroupedTabs } = this.#prepareTabGroups();
     context.tabGroups = tabGroups;
     context.ungroupedTabs = ungroupedTabs;
-    context.showSearch = true;
-    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
-    context.searchLabel = 'CALENDARIA.SettingsPanel.Search.Label';
+    context.showSearch = false;
     context.calendar = this.#calendarData;
     context.isEditing = this.#isEditing;
     context.calendarId = this.#calendarId;
@@ -618,7 +616,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     this.#setupWeatherTotalListener();
-    this.#setupNavSearchListener();
     this.#setupPhaseSliderListeners();
     this.#setupFormatPreviewListeners();
   }
@@ -660,29 +657,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           delete input.dataset.tooltip;
           input.removeAttribute('aria-label');
         }
-      }
-    });
-  }
-
-  /**
-   * Setup nav search input to filter visible tabs by name.
-   * @private
-   */
-  #setupNavSearchListener() {
-    const searchInput = this.element.querySelector('input[name="navSearch"]');
-    if (!searchInput || searchInput.dataset.listenerAttached) return;
-    searchInput.dataset.listenerAttached = 'true';
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.trim().toLowerCase();
-      const nav = this.element.querySelector('nav.sheet-tabs');
-      if (!nav) return;
-      for (const tab of nav.querySelectorAll('[data-tab]')) {
-        const label = tab.textContent.trim().toLowerCase();
-        tab.style.display = !query || label.includes(query) ? '' : 'none';
-      }
-      for (const group of nav.querySelectorAll('.tab-group')) {
-        const visibleTabs = group.querySelectorAll('[data-tab]:not([style*="display: none"])');
-        group.style.display = visibleTabs.length > 0 ? '' : 'none';
       }
     });
   }

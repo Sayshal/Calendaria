@@ -2062,7 +2062,7 @@ span.calendaria-moon-icon {
         color: var(--color-text-dark-secondary);
         font-weight: 500;
         font-size: var(--font-size-18);
-        text-align: right;
+        text-align: left;
       }
     }
 
@@ -2070,19 +2070,19 @@ span.calendaria-moon-icon {
       gap: 0.5rem;
       display: flex;
       flex-direction: row;
-      justify-content: flex-end;
+      justify-content: flex-start;
       align-items: center;
       max-width: 100%;
       padding: 0.5rem;
       border-bottom: none;
       border-left: 0.1875rem solid var(--group-color, transparent);
       border-radius: 0;
-      font-size: var(--font-size-16);
-      text-align: right;
+      font-size: var(--font-size-14);
+      text-align: left;
 
       > span:not(.notification-pip) {
+        flex: 1;
         overflow: hidden;
-        font-size: var(--font-size-13);
         text-overflow: ellipsis;
         white-space: nowrap;
       }
