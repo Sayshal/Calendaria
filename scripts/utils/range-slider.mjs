@@ -15,10 +15,11 @@ export class RangeSlider {
    * @param {string} options.trackSelector - Selector for the track element within slider
    * @param {string} options.segmentSelector - Selector for segment elements
    * @param {string} options.handleSelector - Selector for handle elements
-   * @param {string} options.inputStartSelector - Selector pattern for start inputs (use {i} for index)
-   * @param {string} options.inputEndSelector - Selector pattern for end inputs (use {i} for index)
-   * @param {string} [options.handleIndexAttr] - Attribute for handle index
-   * @param {string} [options.segmentIndexAttr] - Attribute for segment index
+   * @param {string} options.inputStartSelector - Selector pattern for start inputs (use {key} for segment key)
+   * @param {string} options.inputEndSelector - Selector pattern for end inputs (use {key} for segment key)
+   * @param {string[]} options.keys - Array of segment keys matching DOM data attributes
+   * @param {string} [options.handleKeyAttr] - Attribute name for handle keys (default: 'data-handle-key')
+   * @param {string} [options.segmentKeyAttr] - Attribute name for segment keys (default: 'data-segment-key')
    * @param {string} [options.labelClass] - CSS class for labels (default: 'slider-label')
    * @param {number} [options.minGap] - Minimum gap between handles
    * @param {number} [options.labelMinWidth] - Minimum segment width to show label
@@ -35,8 +36,9 @@ export class RangeSlider {
     this.handleSelector = options.handleSelector;
     this.inputStartSelector = options.inputStartSelector;
     this.inputEndSelector = options.inputEndSelector;
-    this.handleIndexAttr = options.handleIndexAttr || 'data-handle-index';
-    this.segmentIndexAttr = options.segmentIndexAttr || 'data-segment-index';
+    this.keys = options.keys;
+    this.handleKeyAttr = options.handleKeyAttr || 'data-handle-key';
+    this.segmentKeyAttr = options.segmentKeyAttr || 'data-segment-key';
     this.labelClass = options.labelClass || 'slider-label';
     this.minGap = options.minGap ?? 1;
     this.labelMinWidth = options.labelMinWidth ?? 3;
@@ -66,6 +68,16 @@ export class RangeSlider {
    */
   #defaultFormatLabel(widthPercent) {
     return `${widthPercent.toFixed(1)}%`;
+  }
+
+  /**
+   * Resolve a key attribute value to a numeric index.
+   * @param {string} key - Key attribute value
+   * @returns {number} Numeric index, or -1 if not found
+   * @private
+   */
+  #keyToIndex(key) {
+    return this.keys.indexOf(key);
   }
 
   /**
@@ -122,7 +134,8 @@ export class RangeSlider {
     for (const segment of track.querySelectorAll(this.segmentSelector)) {
       if (segment.dataset.rangeSliderAttached) continue;
       segment.dataset.rangeSliderAttached = 'true';
-      const segmentIdx = parseInt(segment.getAttribute(this.segmentIndexAttr));
+      const segmentIdx = this.#keyToIndex(segment.getAttribute(this.segmentKeyAttr));
+      if (segmentIdx === -1) continue;
       segment.addEventListener('dblclick', () => this.#onDoubleClick(segmentIdx));
     }
 
@@ -136,8 +149,9 @@ export class RangeSlider {
     }
 
     for (let i = 0; i < this.numSegments; i++) {
-      const startInput = this.container.querySelector(this.inputStartSelector.replace('{i}', i));
-      const endInput = this.container.querySelector(this.inputEndSelector.replace('{i}', i));
+      const key = this.keys[i];
+      const startInput = this.container.querySelector(this.inputStartSelector.replace('{key}', key));
+      const endInput = this.container.querySelector(this.inputEndSelector.replace('{key}', key));
       if (startInput && !startInput.dataset.rangeSliderAttached) {
         startInput.dataset.rangeSliderAttached = 'true';
         startInput.addEventListener('input', () => this.#onInputChange(i, 'start', startInput));
@@ -157,8 +171,8 @@ export class RangeSlider {
    */
   #onDragStart(event, handle) {
     event.preventDefault();
-    const handleIdx = parseInt(handle.getAttribute(this.handleIndexAttr));
-    if (isNaN(handleIdx)) return;
+    const handleIdx = this.#keyToIndex(handle.getAttribute(this.handleKeyAttr));
+    if (handleIdx === -1) return;
 
     this.#loadPositions();
     handle.classList.add('dragging');
@@ -241,7 +255,8 @@ export class RangeSlider {
     if (!track) return;
 
     for (let i = 0; i < this.numSegments; i++) {
-      const segment = track.querySelector(`${this.segmentSelector}[${this.segmentIndexAttr}="${i}"]`);
+      const key = this.keys[i];
+      const segment = track.querySelector(`${this.segmentSelector}[${this.segmentKeyAttr}="${key}"]`);
       const width = boundaries[i].end - boundaries[i].start;
 
       if (segment) {
@@ -267,7 +282,7 @@ export class RangeSlider {
       }
 
       if (i < this.numSegments - 1) {
-        const handle = track.querySelector(`${this.handleSelector}[${this.handleIndexAttr}="${i}"]`);
+        const handle = track.querySelector(`${this.handleSelector}[${this.handleKeyAttr}="${key}"]`);
         if (handle) handle.style.left = `${boundaries[i].end}%`;
       }
     }
@@ -280,8 +295,9 @@ export class RangeSlider {
    */
   #updateInputs(boundaries) {
     for (let i = 0; i < this.numSegments; i++) {
-      const startInput = this.container.querySelector(this.inputStartSelector.replace('{i}', i));
-      const endInput = this.container.querySelector(this.inputEndSelector.replace('{i}', i));
+      const key = this.keys[i];
+      const startInput = this.container.querySelector(this.inputStartSelector.replace('{key}', key));
+      const endInput = this.container.querySelector(this.inputEndSelector.replace('{key}', key));
       if (startInput) startInput.value = boundaries[i].start.toFixed(2);
       if (endInput) endInput.value = boundaries[i].end.toFixed(2);
     }
@@ -402,8 +418,9 @@ export class RangeSlider {
       delete segment.dataset.rangeSliderAttached;
     }
     for (let i = 0; i < this.numSegments; i++) {
-      const startInput = this.container.querySelector(this.inputStartSelector.replace('{i}', i));
-      const endInput = this.container.querySelector(this.inputEndSelector.replace('{i}', i));
+      const key = this.keys[i];
+      const startInput = this.container.querySelector(this.inputStartSelector.replace('{key}', key));
+      const endInput = this.container.querySelector(this.inputEndSelector.replace('{key}', key));
       if (startInput) delete startInput.dataset.rangeSliderAttached;
       if (endInput) delete endInput.dataset.rangeSliderAttached;
     }

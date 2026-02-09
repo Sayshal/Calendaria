@@ -132,8 +132,8 @@
   --calendaria-title-text: rgb(0 0 0);
   --calendaria-today: rgb(230 80 0);
   --calendaria-today-bg: rgb(230 80 0 / 15%);
-  --calendaria-toggle: rgb(202 138 4);
-  --calendaria-toggle-active: rgb(56 142 60);
+  --calendaria-toggle: rgb(161 98 7);
+  --calendaria-toggle-active: rgb(21 128 61);
   --calendaria-warning: rgb(245 180 0);
   --calendaria-weekday-header: rgb(64 64 64);
 }
@@ -2475,11 +2475,6 @@ span.calendaria-moon-icon {
       flex: none;
       margin-top: 0.15rem;
     }
-
-    &.warning {
-      border: 0.0625rem solid color-mix(in srgb, var(--color-level-warning) 40%, transparent);
-      background: color-mix(in srgb, var(--color-level-warning) 15%, transparent);
-    }
   }
 
   .list-header {
@@ -2586,7 +2581,7 @@ span.calendaria-moon-icon {
       margin-top: 0.5rem;
 
       .phases-list {
-        --list-columns: auto 2fr 1fr 1fr 3.5rem 3.5rem auto;
+        --list-columns: auto 1.6fr 1fr 1fr 4.25rem 4.25rem auto;
       }
 
       .empty-phases {
@@ -2788,8 +2783,6 @@ span.calendaria-moon-icon {
     }
 
     .cycle-stages-section {
-      margin-top: 0.75rem;
-
       legend {
         font-weight: bold;
         font-size: var(--font-size-14);
@@ -2799,7 +2792,6 @@ span.calendaria-moon-icon {
         gap: 0.25rem;
         display: flex;
         flex-direction: column;
-        max-height: 12.5rem;
         overflow-y: auto;
       }
 
@@ -2808,10 +2800,6 @@ span.calendaria-moon-icon {
         display: flex;
         align-items: center;
         padding: 0.25rem 0.5rem;
-
-        &:nth-child(even) {
-          background: var(--color-cool-5-50);
-        }
 
         .col-stage-name {
           flex: 1;
@@ -7805,6 +7793,28 @@ span.calendaria-moon-icon {
     font-size: var(--font-size-12);
     font-style: italic;
     text-align: center;
+  }
+}
+
+/* Calendar Editor - Light Theme */
+.theme-light .calendar-editor {
+  footer.form-footer {
+    border-top-color: var(--color-border-light-tertiary);
+    background: var(--color-light-2);
+  }
+
+  .warning {
+    color: var(--color-level-error);
+  }
+
+  .item {
+    border-color: var(--color-border-light-tertiary);
+    background: none;
+  }
+
+  .empty-list {
+    color: unset;
+    background: unset;
   }
 }
 
