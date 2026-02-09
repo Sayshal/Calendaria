@@ -411,6 +411,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (isIntercalary) {
         // Don't add to weekday grid - collect separately
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
+        const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
         intercalaryDays.push({
           day,
           year,
@@ -420,13 +421,17 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           notes: dayNotes,
           isFestival: true,
           festivalName: festivalNameStr,
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalNameStr),
+          festivalColor: festivalDay?.color || '',
+          festivalIcon: festivalDay?.icon || '',
+          festivalDescription: festivalDay?.description || '',
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo),
           moonPhases,
           isIntercalary: true
         });
       } else {
         const weekdayData = calendar.days?.values?.[currentWeek.length];
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
+        const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
         currentWeek.push({
           day,
           year,
@@ -437,7 +442,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isOddDay: dayIndex % 2 === 1,
           isFestival: !!festivalDay,
           festivalName: festivalNameStr,
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalNameStr),
+          festivalColor: festivalDay?.color || '',
+          festivalIcon: festivalDay?.icon || '',
+          festivalDescription: festivalDay?.description || '',
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo),
           isRestDay: weekdayData?.isRestDay || false,
           moonPhases
         });
@@ -584,6 +592,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           notes: dayNotes,
           isFestival: !!festivalDay,
           festivalName: festivalDay ? localize(festivalDay.name) : null,
+          festivalColor: festivalDay?.color || '',
+          festivalIcon: festivalDay?.icon || '',
           moonPhases,
           isRestDay: weekdayData?.isRestDay || false,
           isFromOtherWeek: weekOffset !== 0,

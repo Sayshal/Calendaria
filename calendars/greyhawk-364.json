@@ -34,17 +34,17 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Mummergin",       "month": 0, "day": 4, "duration": 1},
-    {"name": "Walpurgis",       "month": 6, "day": 18, "duration": 1},
-    {"name": "Midsummer Night", "month": 8, "day": 4, "duration": 1}
+    {"name": "Mummergin",       "month": 0, "day":  4, "duration": 1, "icon": "fas fa-masks-theater",    "color": "#9370DB", "description": "Festival of theatrical performances, mummery, and festive celebrations."},
+    {"name": "Walpurgis",       "month": 6, "day": 18, "duration": 1, "icon": "fas fa-skull-crossbones", "color": "#8B0000", "description": "Extremely sacred day to priests of evil, with elaborate ceremonies."    },
+    {"name": "Midsummer Night", "month": 8, "day":  4, "duration": 1, "icon": "fas fa-sun",              "color": "#FFD700", "description": "Evening when both moons are full, holiest day for followers of Pelor."  }
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter",    "icon": "fas fa-snowflake",   "color": "#87ceeb", "seasonalType": "winter", "dayStart": 337, "dayEnd":  35, "abbreviation": "Win"},
-      {"name": "CALENDARIA.Season.Spring",    "icon": "fas fa-seedling",    "color": "#90ee90", "seasonalType": "spring", "dayStart":  36, "dayEnd":  91, "abbreviation": "Spr"},
-      {"name": "Low Summer",                  "icon": "fas fa-cloud-sun",   "color": "#98fb98", "seasonalType": "summer", "dayStart":  92, "dayEnd": 182, "abbreviation": "LSu"},
-      {"name": "High Summer",                 "icon": "fas fa-sun",         "color": "#ffd700", "seasonalType": "summer", "dayStart": 183, "dayEnd": 273, "abbreviation": "HSu"},
-      {"name": "Autumn",                      "icon": "fas fa-leaf",        "color": "#d2691e", "seasonalType": "autumn", "dayStart": 274, "dayEnd": 336, "abbreviation": "Aut"}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 337, "dayEnd":  35, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  36, "dayEnd":  91, "abbreviation": "Spr"},
+      {"name": "Low Summer",               "icon": "fas fa-cloud-sun", "color": "#98fb98", "seasonalType": "summer", "dayStart":  92, "dayEnd": 182, "abbreviation": "LSu"},
+      {"name": "High Summer",              "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 183, "dayEnd": 273, "abbreviation": "HSu"},
+      {"name": "Autumn",                   "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 274, "dayEnd": 336, "abbreviation": "Aut"}
     ]
   },
   "eras"          : [ {"name": "Common Year", "abbreviation": "CY", "startYear": 1, "endYear": null} ],

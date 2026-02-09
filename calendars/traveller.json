@@ -17,7 +17,7 @@
   "seasons"       : {"values": []},
   "eras"          : [ {"name": "Imperial Calendar", "abbreviation": "IC", "startYear": 0, "endYear": null} ],
   "moons"         : [],
-  "festivals"     : [ {"name": "Holiday", "dayOfYear": 1, "countsForWeekday": false} ],
+  "festivals"     : [ {"name": "Holiday", "dayOfYear": 1, "countsForWeekday": false, "icon": "fas fa-rocket", "color": "#4169E1", "description": "Intercalary day commemorating the founding of the Third Imperium, dedicated to leisure."} ],
   "daylight"      : {"enabled": false},
   "cycles"        : [],
   "canonicalHours": [],

@@ -31,12 +31,45 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Midwinter",         "month":  1, "day": 31, "countsForWeekday": false                      },
-    {"name": "Greengrass",        "month":  4, "day": 31, "countsForWeekday": false                      },
-    {"name": "Midsummer",         "month":  7, "day": 31, "countsForWeekday": false                      },
-    {"name": "Shieldmeet",        "month":  7, "day": 32, "countsForWeekday": false, "leapYearOnly": true},
-    {"name": "Highharvestide",    "month":  9, "day": 31, "countsForWeekday": false                      },
-    {"name": "Feast of the Moon", "month": 11, "day": 31, "countsForWeekday": false                      }
+    {
+      "name"            : "Midwinter",
+      "month"           : 1,
+      "day"             : 31,
+      "countsForWeekday": false,
+      "icon"            : "fas fa-snowflake",
+      "color"           : "#B0C4DE",
+      "description"     : "A solemn festival marking winter's midpoint when nobles forge alliances while commoners endure the cold."
+    },
+    {
+      "name"            : "Greengrass",
+      "month"           : 4,
+      "day"             : 31,
+      "countsForWeekday": false,
+      "icon"            : "fas fa-seedling",
+      "color"           : "#90EE90",
+      "description"     : "The first day of spring when wealthy folk distribute flowers and commoners scatter them as offerings."
+    },
+    {"name": "Midsummer", "month": 7, "day": 31, "countsForWeekday": false, "icon": "fas fa-sun", "color": "#FFD700", "description": "A night of feasting, music, and romance at summer's height beneath the stars."},
+    {
+      "name"            : "Shieldmeet",
+      "month"           : 7,
+      "day"             : 32,
+      "countsForWeekday": false,
+      "leapYearOnly"    : true,
+      "icon"            : "fas fa-shield",
+      "color"           : "#CD7F32",
+      "description"     : "A leap year festival of grand tournaments, bazaars, and theatrical performances."
+    },
+    {"name": "Highharvestide", "month": 9, "day": 31, "countsForWeekday": false, "icon": "fas fa-wheat-awn", "color": "#D2691E", "description": "A great harvest feast celebrating autumn's abundance with food contests and blessings."},
+    {
+      "name"            : "Feast of the Moon",
+      "month"           : 11,
+      "day"             : 31,
+      "countsForWeekday": false,
+      "icon"            : "fas fa-moon",
+      "color"           : "#4B0082",
+      "description"     : "The year's final festival honoring ancestors, when families tell stories of the dead until legend and history merge."
+    }
   ],
   "seasons"       : {
     "values": [

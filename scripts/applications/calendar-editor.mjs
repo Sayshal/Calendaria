@@ -56,6 +56,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeEra: CalendarEditor.#onRemoveEra,
       addFestival: CalendarEditor.#onAddFestival,
       removeFestival: CalendarEditor.#onRemoveFestival,
+      editFestivalIcon: CalendarEditor.#onEditFestivalIcon,
       addMoon: CalendarEditor.#onAddMoon,
       removeMoon: CalendarEditor.#onRemoveMoon,
       addMoonPhase: CalendarEditor.#onAddMoonPhase,
@@ -373,6 +374,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       ...moon,
       color: moon.color || '',
       index: idx,
+      referencePhaseOptions: moon.phases.map((phase, pIdx) => ({
+        value: pIdx,
+        label: localize(phase.name),
+        selected: pIdx === (moon.referencePhase ?? 0)
+      })),
       refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
       phasesWithIndex: moon.phases.map((phase, pIdx) => {
         const startPercent = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
@@ -552,12 +558,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         preview.classList.toggle('tinted', !isDefault);
         const match = event.target.name.match(/moons\.(\d+)\.color/);
         if (match) {
-          const moonIdx = match[1];
-          const slider = this.element.querySelector(`.moon-phase-slider[data-moon-index="${moonIdx}"]`);
-          if (slider) {
-            for (const segment of slider.querySelectorAll('.slider-segment')) {
-              segment.style.setProperty('--moon-color', color);
-              segment.classList.toggle('tinted', !isDefault);
+          const moonItem = event.target.closest('.moon-item');
+          if (moonItem) {
+            for (const el of moonItem.querySelectorAll('.slider-segment, .phase-icon-btn')) {
+              el.style.setProperty('--moon-color', color);
+              el.classList.toggle('tinted', !isDefault);
             }
           }
         }
@@ -985,7 +990,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateArrayFromFormData(data, 'weekdays', this.#calendarData.days.values, ['name', 'abbreviation', 'isRestDay']);
     this.#updateSeasonsFromFormData(data);
     this.#updateErasFromFormData(data);
-    this.#updateArrayFromFormData(data, 'festivals', this.#calendarData.festivals, ['name', 'month', 'day', 'leapYearOnly', 'countsForWeekday']);
+    this.#updateArrayFromFormData(data, 'festivals', this.#calendarData.festivals, [
+      'name',
+      'description',
+      'color',
+      'icon',
+      'month',
+      'day',
+      'duration',
+      'leapDuration',
+      'leapYearOnly',
+      'countsForWeekday'
+    ]);
     this.#updateMoonsFromFormData(data);
     this.#updateCyclesFromFormData(data);
     if (!this.#calendarData.amPmNotation) this.#calendarData.amPmNotation = {};
@@ -1030,9 +1046,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const field of fields) {
         const key = `${prefix}.${idx}.${field}`;
         if (data[key] !== undefined) {
-          if (field === 'leapDays' || field === 'startingWeekday') item[field] = isNaN(parseInt(data[key])) ? null : parseInt(data[key]);
-          else if (field === 'days' || field === 'day' || field === 'month' || field === 'dayStart' || field === 'dayEnd') item[field] = parseInt(data[key]) || 0;
-          else if (field === 'isRestDay' || field === 'leapYearOnly' || field === 'countsForWeekday') item[field] = !!data[key];
+          if (field === 'leapDays' || field === 'leapDuration' || field === 'startingWeekday') item[field] = isNaN(parseInt(data[key])) ? null : parseInt(data[key]);
+          else if (field === 'days' || field === 'day' || field === 'month' || field === 'duration' || field === 'dayStart' || field === 'dayEnd') item[field] = parseInt(data[key]) || 0;
+          else if (field === 'color') item[field] = data[key]?.toLowerCase() === '#d4af37' ? '' : data[key] || '';
+          else if (field === 'countsForWeekday') item[field] = !data[key];
+          else if (field === 'isRestDay' || field === 'leapYearOnly') item[field] = !!data[key];
           else item[field] = data[key];
         }
       }
@@ -1211,8 +1229,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         name: data[`moons.${moonIdx}.name`] || '',
         cycleLength: parseFloat(data[`moons.${moonIdx}.cycleLength`]) || 28,
         cycleDayAdjust: this.#parseOptionalInt(data[`moons.${moonIdx}.cycleDayAdjust`]) ?? existingMoon?.cycleDayAdjust ?? 0,
+        referencePhase: this.#parseOptionalInt(data[`moons.${moonIdx}.referencePhase`]) ?? existingMoon?.referencePhase ?? 0,
         color: moonColor,
-        hidden: data[`moons.${moonIdx}.hidden`] === 'true' || data[`moons.${moonIdx}.hidden`] === true || existingMoon?.hidden || false,
         phases,
         referenceDate: {
           year: parseInt(data[`moons.${moonIdx}.referenceDate.year`]) || 0,
@@ -1777,7 +1795,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterIdx = parseInt(target.dataset.index) ?? this.#calendarData.festivals.length - 1;
     const insertIdx = afterIdx + 1;
     const totalFestivals = this.#calendarData.festivals.length + 1;
-    this.#calendarData.festivals.splice(insertIdx, 0, { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 1, day: 1 });
+    this.#calendarData.festivals.splice(insertIdx, 0, { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 1, day: 1, description: '', color: '', icon: '' });
     this.render();
   }
 
@@ -1793,6 +1811,68 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Open icon & color picker dialog for a festival.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onEditFestivalIcon(_event, target) {
+    const idx = parseInt(target.dataset.index);
+    const festival = this.#calendarData.festivals[idx];
+    if (!festival) return;
+
+    const savedCalendar = this.#calendarId ? CalendarManager.getCalendar(this.#calendarId) : null;
+    const savedFestival = savedCalendar?.festivals?.[idx];
+    const savedIcon = savedFestival?.icon || '';
+    const savedColor = savedFestival?.color || '#d4af37';
+
+    const content = `
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Common.Icon')}</label>
+        <div class="form-fields">
+          <input type="text" name="icon" value="${festival.icon || ''}" placeholder="fas fa-star">
+        </div>
+        <p class="hint">${localize('CALENDARIA.Common.IconHint')}</p>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Editor.Festival.Color')}</label>
+        <div class="form-fields">
+          <input type="color" name="color" value="${festival.color || '#d4af37'}">
+        </div>
+      </div>
+    `;
+    const editor = this;
+    new foundry.applications.api.DialogV2({
+      window: { title: format('CALENDARIA.Editor.Festival.IconColorFor', { festival: festival.name }), contentClasses: ['calendaria', 'season-icon-dialog'] },
+      content,
+      buttons: [
+        {
+          action: 'reset',
+          label: localize('CALENDARIA.Common.Reset'),
+          icon: 'fas fa-undo',
+          callback: () => {
+            festival.icon = savedIcon;
+            festival.color = savedColor === '#d4af37' ? '' : savedColor;
+            editor.render();
+          }
+        },
+        {
+          action: 'save',
+          label: localize('CALENDARIA.Common.Save'),
+          icon: 'fas fa-save',
+          default: true,
+          callback: (_event, _button, dialog) => {
+            festival.icon = dialog.element.querySelector('[name="icon"]')?.value || '';
+            const rawColor = dialog.element.querySelector('[name="color"]')?.value || '#d4af37';
+            festival.color = rawColor.toLowerCase() === '#d4af37' ? '' : rawColor;
+            editor.render();
+          }
+        }
+      ],
+      position: { width: 350 }
+    }).render(true);
+  }
+
+  /**
    * Add a new moon.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
@@ -1802,7 +1882,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       name: localize('CALENDARIA.Common.Moon'),
       cycleLength: 28,
       cycleDayAdjust: 0,
-      hidden: false,
+      referencePhase: 0,
       phases: DEFAULT_MOON_PHASES,
       referenceDate: { year: 0, month: 0, day: 1 }
     });

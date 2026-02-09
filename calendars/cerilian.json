@@ -27,12 +27,12 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Day of Rebirth",         "month":  3, "day": 32, "countsForWeekday": false},
-    {"name": "Night of Fire",          "month":  6, "day": 32, "countsForWeekday": false},
-    {"name": "Veneration of the Dead", "month":  9, "day": 32, "countsForWeekday": false},
-    {"name": "Night of Sleeping",      "month": 12, "day": 33, "countsForWeekday": false},
-    {"name": "Haelyn's Day",           "month":  4, "day": 16                           },
-    {"name": "Erik's Moot",            "month":  5, "day":  1                           }
+    {"name": "Day of Rebirth", "month": 3, "day": 32, "countsForWeekday": false, "icon": "fas fa-seedling", "color": "#32CD32", "description": "Vernal equinox marking the new year and the rebirth of spring across Cerilia."},
+    {"name": "Night of Fire", "month": 6, "day": 32, "countsForWeekday": false, "icon": "fas fa-meteor", "color": "#FF4500", "description": "Summer solstice featuring a spectacular display of falling stars from an annual meteor passage."},
+    {"name": "Veneration of the Dead", "month": 9, "day": 32, "countsForWeekday": false, "icon": "fas fa-monument", "color": "#696969", "description": "Autumnal equinox honoring ancestors and the departed."},
+    {"name": "Night of Sleeping", "month": 12, "day": 33, "countsForWeekday": false, "icon": "fas fa-moon", "color": "#191970", "description": "Winter solstice observance when the land enters its deepest slumber."},
+    {"name": "Haelyn's Day", "month": 4, "day": 16, "icon": "fas fa-crown", "color": "#B8860B", "description": "Festival honoring Haelyn, god of courage, justice, and rightful rulership."},
+    {"name": "Erik's Moot", "month": 5, "day": 1, "icon": "fas fa-tree", "color": "#228B22", "description": "Celebration dedicated to Erik, god of forests, hunting, and wild places."}
   ],
   "seasons"       : {
     "values": [
@@ -42,10 +42,7 @@
       {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 291, "dayEnd": 355, "abbreviation": "Aut"}
     ]
   },
-  "eras"          : [
-    {"name": "Michaelae Reckoning", "abbreviation": "MR", "startYear":    1, "endYear": null},
-    {"name": "Haelyn's Count",      "abbreviation": "HC", "startYear": -973, "endYear":    0}
-  ],
+  "eras"          : [ {"name": "Michaelae Reckoning", "abbreviation": "MR", "startYear": 1, "endYear": null}, {"name": "Haelyn's Count", "abbreviation": "HC", "startYear": -973, "endYear": 0} ],
   "moons"         : [
     {
       "name"         : "The Moon",

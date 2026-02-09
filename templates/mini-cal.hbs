@@ -157,7 +157,8 @@
         <div
           class="mini-day intercalary{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}} festival"
           data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-tooltip
-          aria-label="{{festivalName}}">
+          aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"
+          {{#if festivalColor}}style="--festival-color: {{festivalColor}}"{{/if}}>
           <span class="festival-name">{{festivalName}}</span>
           {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
           {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}"
@@ -185,7 +186,8 @@
       <div
         class="mini-day other-week{{#if isToday}} today{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
         data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
-        {{#if festivalName}}data-tooltip aria-label="{{festivalName}}" {{/if}}>
+        {{#if festivalName}}data-tooltip aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}" {{/if}}
+        {{#if festivalColor}}style="--festival-color: {{festivalColor}}"{{/if}}>
         <span class="day-num">{{day}}</span>
         {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
       </div>
@@ -193,7 +195,8 @@
       <div
         class="mini-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
         data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
-        {{#if festivalName}}data-tooltip aria-label="{{festivalName}}" {{/if}}>
+        {{#if festivalName}}data-tooltip aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}" {{/if}}
+        {{#if festivalColor}}style="--festival-color: {{festivalColor}}"{{/if}}>
         <span class="day-num">{{day}}</span>
         {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
         {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}"

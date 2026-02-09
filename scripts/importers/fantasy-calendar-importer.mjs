@@ -251,7 +251,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       cycleLength: moon.cycle,
       cycleDayAdjust: moon.shift ?? 0,
       color: moon.color || '',
-      hidden: moon.hidden ?? false,
       phases: this.#generateMoonPhases(),
       referenceDate: { year: 1, month: 0, day: 1 }
     }));

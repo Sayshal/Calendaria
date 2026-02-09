@@ -437,10 +437,13 @@ function encodeHtmlAttribute(html) {
  * @param {number} year - Display year (with yearZero applied)
  * @param {number} month - Month (0-indexed)
  * @param {number} day - Day of month (1-indexed)
- * @param {string} [festivalName] - Optional festival name to include
+ * @param {object} [festival] - Optional festival data
+ * @param {string} [festival.name] - Festival name
+ * @param {string} [festival.description] - Festival description
+ * @param {string} [festival.color] - Festival color
  * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
  */
-export function generateDayTooltip(calendar, year, month, day, festivalName = null) {
+export function generateDayTooltip(calendar, year, month, day, festival = null) {
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   const internalComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const displayComponents = { year, month, dayOfMonth: day, hour: 12, minute: 0, second: 0 };
@@ -461,7 +464,12 @@ export function generateDayTooltip(calendar, year, month, day, festivalName = nu
 
   const rows = [];
   rows.push(`<div class="calendaria-day-tooltip-date"><strong>${escapeText(fullDate)}</strong></div>`);
-  if (festivalName) rows.push(`<div class="calendaria-day-tooltip-festival"><em>${escapeText(festivalName)}</em></div>`);
+  if (festival?.name) {
+    const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
+    let festivalText = escapeText(festival.name);
+    if (festival.description) festivalText += `: ${escapeText(festival.description)}`;
+    rows.push(`<div class="calendaria-day-tooltip-festival"${colorStyle}><em>${festivalText}</em></div>`);
+  }
   if (seasonName) rows.push(`<div class="calendaria-day-tooltip-season">${escapeText(seasonName)}</div>`);
   rows.push(`<div class="calendaria-day-tooltip-sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
   const rawHtml = `<div class="calendaria-day-tooltip">${rows.join('')}</div>`;

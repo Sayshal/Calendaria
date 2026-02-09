@@ -35,7 +35,11 @@
     "minutesPerHour"  : 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : [ {"name": "Festival of Zenalia", "month": 5, "day": 1}, {"name": "Festival of Dessalia", "month": 10, "day": 1}, {"name": "Festival of Assalia", "month": 15, "day": 1} ],
+  "festivals"     : [
+    {"name": "Festival of Zenalia",  "month":  5, "day": 1, "icon": "fas fa-sun",            "color": "#FFD700", "description": "Five-day celebration at the zenith of High Sun, featuring the Starlight Pageants."},
+    {"name": "Festival of Dessalia", "month": 10, "day": 1, "icon": "fas fa-cloud-sun",      "color": "#FF8C00", "description": "Five-day festival marking the midpoint of Sun Descending season."                 },
+    {"name": "Festival of Assalia",  "month": 15, "day": 1, "icon": "fas fa-sun-plant-wilt", "color": "#FFA500", "description": "Five-day festival celebrating the midpoint of Sun Ascending season."              }
+  ],
   "seasons"       : {
     "values": [
       {"name": "High Sun",       "icon": "fas fa-fire",      "color": "#ff0000", "seasonalType": "summer", "dayStart":   0, "dayEnd": 124, "abbreviation": "HSu"},
@@ -52,14 +56,14 @@
       "length" : 11,
       "offset" : 3,
       "basedOn": "year",
-      "stages": [ {"name": "Ral"}, {"name": "Friend"}, {"name": "Desert"}, {"name": "Priest"}, {"name": "Wind"}, {"name": "Dragon"}, {"name": "Mountain"}, {"name": "King"}, {"name": "Silt"}, {"name": "Enemy"}, {"name": "Guthay"} ]
+      "stages" : [ {"name": "Ral"}, {"name": "Friend"}, {"name": "Desert"}, {"name": "Priest"}, {"name": "Wind"}, {"name": "Dragon"}, {"name": "Mountain"}, {"name": "King"}, {"name": "Silt"}, {"name": "Enemy"}, {"name": "Guthay"} ]
     },
     {
       "name"   : "Seofean Cycle",
       "length" : 7,
       "offset" : 4,
       "basedOn": "year",
-      "stages": [ {"name": "Fury"}, {"name": "Contemplation"}, {"name": "Vengeance"}, {"name": "Slumber"}, {"name": "Defiance"}, {"name": "Reverence"}, {"name": "Agitation"} ]
+      "stages" : [ {"name": "Fury"}, {"name": "Contemplation"}, {"name": "Vengeance"}, {"name": "Slumber"}, {"name": "Defiance"}, {"name": "Reverence"}, {"name": "Agitation"} ]
     }
   ],
   "cycleFormat"   : "[1]'s [2]",

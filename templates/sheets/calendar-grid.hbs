@@ -16,7 +16,8 @@
       <div
         class="calendar-day intercalary festival-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}"
         data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-action="selectDay"
-        data-tooltip-html="{{{dayTooltip}}}">
+        data-tooltip-html="{{{dayTooltip}}}"
+        {{#if festivalColor}}style="--festival-color: {{festivalColor}}"{{/if}}>
         <div class="day-number">
           <span class="festival-name">{{festivalName}}</span>
           {{#if moonPhases}}
@@ -72,11 +73,12 @@
       <div
         class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
         data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-action="selectDay"
-        data-tooltip-html="{{{dayTooltip}}}">
+        data-tooltip-html="{{{dayTooltip}}}"
+        {{#if festivalColor}}style="--festival-color: {{festivalColor}}"{{/if}}>
         <div class="day-number">
           {{day}}
           {{#if isFestival}}
-          <i class="fas fa-star festival-icon" data-tooltip aria-label="{{festivalName}}"></i>
+          <i class="{{#if festivalIcon}}{{festivalIcon}}{{else}}fas fa-star{{/if}} festival-icon" data-tooltip aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"></i>
           {{/if}}
           {{#if moonPhases}}
           <span class="day-moons">

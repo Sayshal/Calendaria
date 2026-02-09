@@ -22,9 +22,18 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Winter Solstice",   "month":  1, "day": 14}, {"name": "Brightblade",       "month":  4, "day":  9}, {"name": "Aureon's Crown",    "month":  5, "day": 26}, {"name": "Sun's Blessing",    "month":  6, "day": 15},
-    {"name": "Baker's Night",     "month":  6, "day":  6}, {"name": "Founder's Day",     "month":  7, "day": 28}, {"name": "Feast of the Moon", "month":  8, "day": 25}, {"name": "Boldrei's Hearth",  "month":  9, "day":  9},
-    {"name": "Thronehold Day",    "month":  9, "day": 11}, {"name": "Long Shadows",      "month": 10, "day": 26}, {"name": "Throne Day",        "month": 11, "day": 28}, {"name": "Forge Fire",        "month": 12, "day": 14}
+    {"name": "Winter Solstice",   "month":  1, "day": 14, "icon": "fas fa-snowflake",     "color": "#B0E0E6", "description": "Longest night of the year, marking the turning point of winter across the Five Nations."},
+    {"name": "Brightblade",       "month":  4, "day":  9, "icon": "fas fa-shield-halved", "color": "#C0C0C0", "description": "Holy day of Dol Dorn, Sovereign Lord of Strength and Steel."                            },
+    {"name": "Aureon's Crown",    "month":  5, "day": 26, "icon": "fas fa-book",          "color": "#4169E1", "description": "Celebration of knowledge where elders share wisdom with the young at evening feasts."   },
+    {"name": "Sun's Blessing",    "month":  6, "day": 15, "icon": "fas fa-sun",           "color": "#FFD700", "description": "Holy day of Dol Arrah when armies traditionally kept the peace."                        },
+    {"name": "Baker's Night",     "month":  6, "day":  6, "icon": "fas fa-bread-slice",   "color": "#D2691E", "description": "Festival celebrating hearth, home, and the simple comforts that sustain communities."   },
+    {"name": "Founder's Day",     "month":  7, "day": 28, "icon": "fas fa-flag",          "color": "#8B0000", "description": "Commemoration of the founding of the Kingdom of Galifar."                               },
+    {"name": "Feast of the Moon", "month":  8, "day": 25, "icon": "fas fa-moon",          "color": "#C0C0C0", "description": "Nighttime celebration honoring the twelve moons of Eberron."                            },
+    {"name": "Boldrei's Hearth",  "month":  9, "day":  9, "icon": "fas fa-house-chimney", "color": "#A0522D", "description": "Holy day honoring Boldrei, goddess of community, family, and the warmth of home."       },
+    {"name": "Thronehold Day",    "month":  9, "day": 11, "icon": "fas fa-scroll",        "color": "#483D8B", "description": "Anniversary of the Treaty of Thronehold that ended the Last War."                       },
+    {"name": "Long Shadows",      "month": 10, "day": 26, "icon": "fas fa-cloud-moon",    "color": "#2F4F4F", "description": "Three nights when dark magic dominates and most people stay indoors."                   },
+    {"name": "Throne Day",        "month": 11, "day": 28, "icon": "fas fa-chess-king",    "color": "#FFD700", "description": "Celebration of rulership and governance, honoring the authority of legitimate monarchs."},
+    {"name": "Forge Fire",        "month": 12, "day": 14, "icon": "fas fa-hammer",        "color": "#FF6347", "description": "Festival celebrating craftsmanship, artifice, and the transformative power of creation."}
   ],
   "seasons"       : {
     "values": [

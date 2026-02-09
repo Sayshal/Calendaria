@@ -22,8 +22,14 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "New Year's Day",    "month":  1, "day":  1}, {"name": "Vaterna's Feast",   "month":  2, "day": 14}, {"name": "Spring Revel",      "month":  3, "day": 28}, {"name": "Mid-Year Festival", "month":  6, "day": 28},
-    {"name": "Harvest Festival",  "month":  9, "day": 14}, {"name": "Day of the Dead",   "month": 10, "day": 28}, {"name": "Coronation Day",    "month": 11, "day":  1}, {"name": "Winter Solstice",   "month": 12, "day": 21}
+    {"name": "New Year's Day",    "month":  1, "day":  1, "icon": "fas fa-glass-cheers", "color": "#FFD700", "description": "First day of Nuwmont celebrating the new year across the Empire."          },
+    {"name": "Vaterna's Feast",   "month":  2, "day": 14, "icon": "fas fa-ship",         "color": "#4169E1", "description": "Start of shipping season with boat launchings and boating competitions."   },
+    {"name": "Spring Revel",      "month":  3, "day": 28, "icon": "fas fa-music",        "color": "#FF69B4", "description": "Springtime festival of music, dancing, and merriment."                     },
+    {"name": "Mid-Year Festival", "month":  6, "day": 28, "icon": "fas fa-sun",          "color": "#FFA500", "description": "Summer solstice celebration marking the halfway point of the year."        },
+    {"name": "Harvest Festival",  "month":  9, "day": 14, "icon": "fas fa-wheat-awn",    "color": "#DAA520", "description": "Autumn gathering to celebrate the harvest and give thanks."                },
+    {"name": "Day of the Dead",   "month": 10, "day": 28, "icon": "fas fa-cross",        "color": "#2F4F4F", "description": "Solemn day of remembrance for the departed and honoring ancestral spirits."},
+    {"name": "Coronation Day",    "month": 11, "day":  1, "icon": "fas fa-crown",        "color": "#B8860B", "description": "Anniversary commemorating the crowning of Emperor Zendrolion."             },
+    {"name": "Winter Solstice",   "month": 12, "day": 21, "icon": "fas fa-snowflake",    "color": "#87CEEB", "description": "Longest night marking winter's deepest point with candlelight vigils."     }
   ],
   "seasons"       : {
     "values": [
@@ -33,10 +39,7 @@
       {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
     ]
   },
-  "eras"          : [
-    {"name": "After Crowning",  "abbreviation": "AC", "startYear":     1, "endYear": null},
-    {"name": "Before Crowning", "abbreviation": "BC", "startYear": -9999, "endYear":    0}
-  ],
+  "eras"          : [ {"name": "After Crowning", "abbreviation": "AC", "startYear": 1, "endYear": null}, {"name": "Before Crowning", "abbreviation": "BC", "startYear": -9999, "endYear": 0} ],
   "moons"         : [
     {
       "name"         : "Matera",

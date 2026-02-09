@@ -26,8 +26,10 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Tarna's Wake",     "month":  1, "day":  1, "duration": 7}, {"name": "Angelmeet",        "month":  7, "day":  1               }, {"name": "All Hallow's Eve", "month": 10, "day": 30               },
-    {"name": "Tarna's Wake",     "month": 12, "day": 25, "duration": 7}
+    {"name": "Tarna's Wake",     "month":  1, "day":  1, "duration": 7, "icon": "fas fa-dove",              "color": "#87CEEB", "description": "Seven-day spring remembrance honoring Saint Tarna's martyrdom and sacrifice."            },
+    {"name": "Angelmeet",        "month":  7, "day":  1,                "icon": "fas fa-hands-praying",     "color": "#DAA520", "description": "Midsummer holy day commemorating divine intervention and the protection of the faithful."},
+    {"name": "All Hallow's Eve", "month": 10, "day": 30,                "icon": "fas fa-ghost",             "color": "#FF6600", "description": "Night when the boundary between the living and dead weakens."                            },
+    {"name": "Tarna's Wake",     "month": 12, "day": 25, "duration": 7, "icon": "fas fa-fire-flame-simple", "color": "#4169E1", "description": "Seven-day winter observance of Saint Tarna's legacy with candlelit vigils."              }
   ],
   "seasons"       : {
     "values": [

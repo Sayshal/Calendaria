@@ -393,6 +393,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       festivals: new ArrayField(
         new SchemaField({
           name: new StringField({ required: true }),
+          description: new StringField({ required: false, initial: '' }),
+          color: new StringField({ required: false, initial: '' }),
+          icon: new StringField({ required: false, initial: '' }),
           month: new NumberField({ required: false, nullable: true, min: 1, integer: true }),
           day: new NumberField({ required: false, nullable: true, min: 1, integer: true }),
           dayOfYear: new NumberField({ required: false, nullable: true, min: 1, max: 400, integer: true }),
@@ -407,8 +410,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           name: new StringField({ required: true }),
           cycleLength: new NumberField({ required: true, nullable: false, min: 1 }),
           cycleDayAdjust: new NumberField({ required: false, nullable: false, initial: 0 }),
+          referencePhase: new NumberField({ required: false, nullable: false, initial: 0, integer: true, min: 0 }),
           color: new StringField({ required: false, initial: '' }),
-          hidden: new BooleanField({ required: false, initial: false }),
           phases: new ArrayField(
             new SchemaField({
               name: new StringField({ required: true }),
@@ -979,8 +982,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!Number.isFinite(daysSinceReference) || !Number.isFinite(moon.cycleLength) || moon.cycleLength <= 0) {
       return moon.phases?.[0] ? { name: moon.phases[0].name, subPhaseName: moon.phases[0].name, icon: moon.phases[0].icon || '', position: 0, dayInCycle: 0 } : null;
     }
+    const refPhase = moon.phases?.[moon.referencePhase ?? 0];
+    const phaseOffset = (refPhase?.start ?? 0) * moon.cycleLength;
     const cycleDayAdjust = Number.isFinite(moon.cycleDayAdjust) ? moon.cycleDayAdjust : 0;
-    const daysIntoCycleRaw = (((daysSinceReference % moon.cycleLength) + moon.cycleLength) % moon.cycleLength) + cycleDayAdjust;
+    const daysIntoCycleRaw = (((daysSinceReference % moon.cycleLength) + moon.cycleLength) % moon.cycleLength) + phaseOffset + cycleDayAdjust;
     const daysIntoCycle = ((daysIntoCycleRaw % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
     const normalizedPosition = daysIntoCycle / moon.cycleLength;
     const dayIndex = Math.floor(daysIntoCycle);

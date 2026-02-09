@@ -31,10 +31,19 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Firstlight Festival", "month":  1, "day": 15}, {"name": "Sowtide",             "month":  2, "day":  7}, {"name": "Firstbloom",          "month":  3, "day": 21}, {"name": "Greenfire",           "month":  4, "day": 14},
-    {"name": "Solstice Crown",      "month":  5, "day": 14}, {"name": "First Reaping",       "month":  6, "day":  8}, {"name": "The Gathering",       "month":  7, "day": 15}, {"name": "The Turning",         "month":  8, "day": 21},
-    {"name": "Lastlight",           "month":  9, "day":  7}, {"name": "Firstfrost Fair",     "month": 10, "day": 14}, {"name": "The Long Night",      "month": 11, "day":  1}, {"name": "Iron Feast",          "month": 12, "day": 28},
-    {"name": "The Veilwalk",        "month": 13, "day": 14}
+    {"name": "Firstlight Festival", "month": 1, "day": 15, "icon": "fas fa-sun", "color": "#F0C75E", "description": "Communities kindle bonfires and lanterns to welcome the new year and banish winter's lingering darkness."},
+    {"name": "Sowtide", "month": 2, "day": 7, "icon": "fas fa-seedling", "color": "#7CB342", "description": "Farmers and druids bless newly sown fields with ritual prayers for a bountiful growing season."},
+    {"name": "Firstbloom", "month": 3, "day": 21, "icon": "fas fa-heart", "color": "#E88AAF", "description": "A spring fertility festival of marriages and courtship, celebrated with flower garlands and dancing."},
+    {"name": "Greenfire", "month": 4, "day": 14, "icon": "fas fa-tree", "color": "#2E7D32", "description": "Forest clans honor the living world with bonfires of green wood, sacred to the Thornborn and all who revere nature."},
+    {"name": "Solstice Crown", "month": 5, "day": 14, "icon": "fas fa-crown", "color": "#FFB300", "description": "The summer solstice sacred to Solarius, when priests crown the sun's golden fire and the longest days are celebrated."},
+    {"name": "First Reaping", "month": 6, "day": 8, "icon": "fas fa-wheat-awn", "color": "#D4A017", "description": "The first sheaves of grain are cut and offered in thanksgiving as the harvest season begins."},
+    {"name": "The Gathering", "month": 7, "day": 15, "icon": "fas fa-utensils", "color": "#E65100", "description": "The great harvest feast where communities gather to share food, stories, and gratitude for the year's bounty."},
+    {"name": "The Turning", "month": 8, "day": 21, "icon": "fas fa-leaf", "color": "#BF6900", "description": "An autumn festival honoring transformation and the beauty of change as leaves turn gold and crimson."},
+    {"name": "Lastlight", "month": 9, "day": 7, "icon": "fas fa-cloud-sun", "color": "#A1887F", "description": "The last great fires are lit as communities make final preparations before winter's dark months descend."},
+    {"name": "Firstfrost Fair", "month": 10, "day": 14, "icon": "fas fa-tent", "color": "#4FC3F7", "description": "Merchants and travelers converge for the last great market before heavy snows close the mountain passes."},
+    {"name": "The Long Night", "month": 11, "day": 1, "icon": "fas fa-moon", "color": "#1A237E", "description": "The longest night of the year, kept as a solemn vigil with bonfires and prayers against the encroaching dark."},
+    {"name": "Iron Feast", "month": 12, "day": 28, "icon": "fas fa-hammer", "color": "#78909C", "description": "Valdris warriors feast in honor of The Iron Wolf, forging ancestor nails and blessing weapons through the night."},
+    {"name": "The Veilwalk", "month": 13, "day": 14, "icon": "fas fa-ghost", "color": "#7E57C2", "description": "The living walk among memories of the dead, leaving offerings at shrines as the veil between worlds grows thin."}
   ],
   "moons"         : [
     {
@@ -161,7 +170,7 @@
       "length" : 5,
       "offset" : 0,
       "basedOn": "year",
-      "stages": [ {"name": "Ferrus"}, {"name": "Verdantis"}, {"name": "Crystallus"}, {"name": "Umbralis"}, {"name": "Temporis"} ]
+      "stages" : [ {"name": "Ferrus"}, {"name": "Verdantis"}, {"name": "Crystallus"}, {"name": "Umbralis"}, {"name": "Temporis"} ]
     }
   ],
   "cycleFormat"   : "Year of [1]",

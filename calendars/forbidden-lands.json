@@ -23,8 +23,11 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Awakening Day",       "month": 2, "day":  1}, {"name": "Springrise Festival", "month": 2, "day": 23}, {"name": "Midsummer Blot",      "month": 4, "day": 23}, {"name": "Harvest Feast",       "month": 6, "day": 23},
-    {"name": "Winter Night",        "month": 8, "day": 23}
+    {"name": "Awakening Day",       "month": 2, "day":  1, "icon": "fas fa-leaf",      "color": "#90EE90", "description": "Spring's arrival and the awakening of the land from winter's grip."                             },
+    {"name": "Springrise Festival", "month": 2, "day": 23, "icon": "fas fa-seedling",  "color": "#FF69B4", "description": "Celebration of spring's full bloom when life returns to the Forbidden Lands."                   },
+    {"name": "Midsummer Blot",      "month": 4, "day": 23, "icon": "fas fa-fire",      "color": "#FF4500", "description": "Sacrificial festival at the height of summer honoring the gods with offerings and sacred rites."},
+    {"name": "Harvest Feast",       "month": 6, "day": 23, "icon": "fas fa-wheat-awn", "color": "#CD853F", "description": "Autumn celebration of the harvest bounty with feasting and thanksgiving."                       },
+    {"name": "Winter Night",        "month": 8, "day": 23, "icon": "fas fa-snowflake", "color": "#4682B4", "description": "Midwinter festival when servants of the gods decree next year's celebrations."                  }
   ],
   "seasons"       : {
     "values": [

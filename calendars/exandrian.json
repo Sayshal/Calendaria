@@ -22,10 +22,22 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "New Dawn",           "month":  1, "day":  1}, {"name": "Hillsgold",          "month":  2, "day": 27}, {"name": "Day of Challenging", "month":  3, "day":  7}, {"name": "Day of Renewal",     "month":  3, "day": 26},
-    {"name": "Wild's Mouth",       "month":  4, "day": 20}, {"name": "Zenith",             "month":  6, "day": 26}, {"name": "Midsummer",          "month":  7, "day": 20}, {"name": "Elvendawn",          "month":  8, "day":  3},
-    {"name": "Highsummer",         "month":  8, "day":  7}, {"name": "Harvest's Close",    "month":  9, "day":  3}, {"name": "Harvest's Rise",     "month": 10, "day": 11}, {"name": "Zan's Cup",          "month": 10, "day": 26},
-    {"name": "The Barren Eve",     "month": 11, "day":  2}, {"name": "Embertide (Start)",  "month": 11, "day":  5}, {"name": "Embertide (End)",    "month": 11, "day":  8}, {"name": "Winter's Close",     "month": 11, "day": 20}
+    {"name": "New Dawn",           "month":  1, "day":  1, "icon": "fas fa-sun",                 "color": "#FFD700", "description": "The first day of the new year, celebrated with renewal and fresh beginnings."            },
+    {"name": "Hillsgold",          "month":  2, "day": 27, "icon": "fas fa-wheat-awn",           "color": "#DAA520", "description": "A harvest festival celebrating the bounty of the hills and early spring crops."          },
+    {"name": "Day of Challenging", "month":  3, "day":  7, "icon": "fas fa-bolt",                "color": "#4169E1", "description": "The Stormlord's holy day where warriors compete in sacred combat and trials of strength."},
+    {"name": "Day of Renewal",     "month":  3, "day": 26, "icon": "fas fa-seedling",            "color": "#32CD32", "description": "The official start of spring celebrated with fresh food, music, and games."              },
+    {"name": "Wild's Mouth",       "month":  4, "day": 20, "icon": "fas fa-tree",                "color": "#228B22", "description": "A celebration honoring the untamed wilds and the power of nature's awakening."           },
+    {"name": "Zenith",             "month":  6, "day": 26, "icon": "fas fa-fire",                "color": "#FF8C00", "description": "The official beginning of summer marked at noon on the longest day of the year."         },
+    {"name": "Midsummer",          "month":  7, "day": 20, "icon": "fas fa-wand-magic-sparkles", "color": "#9370DB", "description": "A fey celebration of the elves' first emergence from the Feywild with wild revelry."     },
+    {"name": "Elvendawn",          "month":  8, "day":  3, "icon": "fas fa-moon",                "color": "#E6E6FA", "description": "The Arch Heart's holy day honoring the elven people and their connection to the Feywild."},
+    {"name": "Highsummer",         "month":  8, "day":  7, "icon": "fas fa-crown",               "color": "#FFD700", "description": "The Dawnfather's holy day marking summer's peak with a week of feasting and gift-giving."},
+    {"name": "Harvest's Close",    "month":  9, "day":  3, "icon": "fas fa-apple-whole",         "color": "#D2691E", "description": "The beginning of autumn marked with feasting in villages and carnivals in the cities."   },
+    {"name": "Harvest's Rise",     "month": 10, "day": 11, "icon": "fas fa-leaf",                "color": "#8B4513", "description": "The celebration of planting season's beginning and preparation for the year's growth."   },
+    {"name": "Zan's Cup",          "month": 10, "day": 26, "icon": "fas fa-wine-glass",          "color": "#CD853F", "description": "A Tal'Dorei festival honoring Zan Tal'Dorei with celebration and remembrance."           },
+    {"name": "The Barren Eve",     "month": 11, "day":  2, "icon": "fas fa-cloud-moon",          "color": "#2F4F4F", "description": "Winter's longest night, a solemn day of mourning for those lost in war."                 },
+    {"name": "Embertide (Start)",  "month": 11, "day":  5, "icon": "fas fa-dragon",              "color": "#C0C0C0", "description": "The beginning of Bahamut's holy observance, a time of remembrance for fallen defenders." },
+    {"name": "Embertide (End)",    "month": 11, "day":  8, "icon": "fas fa-shield-halved",       "color": "#B0C4DE", "description": "The final day of Embertide, concluding the Platinum Dragon's sacred festival of honor."  },
+    {"name": "Winter's Close",     "month": 11, "day": 20, "icon": "fas fa-gift",                "color": "#4682B4", "description": "The waning of winter celebrated with feasts, community games, and the exchange of gifts."}
   ],
   "seasons"       : {
     "values": [

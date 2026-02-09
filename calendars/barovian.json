@@ -30,8 +30,11 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "Blessing of the Morninglord", "month":  3, "day": 21}, {"name": "Harvest Festival",            "month":  9, "day": 22}, {"name": "Wine Festival",               "month": 10, "day": 15},
-    {"name": "Night of the Dead",           "month": 10, "day": 31}, {"name": "Winter Solstice",             "month": 12, "day": 21}
+    {"name": "Blessing of the Morninglord", "month":  3, "day": 21, "icon": "fas fa-sun",         "color": "#FFD700", "description": "Spring equinox honoring the Morninglord who once watched over Barovia."           },
+    {"name": "Harvest Festival",            "month":  9, "day": 22, "icon": "fas fa-wheat-awn",   "color": "#8B4513", "description": "A rare moment of joy in the cursed land of Barovia celebrating the harvest."      },
+    {"name": "Wine Festival",               "month": 10, "day": 15, "icon": "fas fa-wine-bottle", "color": "#722F37", "description": "Celebration of Barovia's famed wines, honoring the vintners and their craft."     },
+    {"name": "Night of the Dead",           "month": 10, "day": 31, "icon": "fas fa-skull",       "color": "#1C1C1C", "description": "Somber remembrance when the veil between the living and dead grows thin."         },
+    {"name": "Winter Solstice",             "month": 12, "day": 21, "icon": "fas fa-snowflake",   "color": "#4682B4", "description": "The longest night of the year when Barovians huddle indoors against the darkness."}
   ],
   "seasons"       : {
     "values": [
