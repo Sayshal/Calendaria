@@ -216,7 +216,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       name: '',
       years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true, names: [] },
-      months: { values: { [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 } } },
+      months: {
+        values: {
+          [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }
+        }
+      },
       days: {
         values: { [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 } },
         daysPerYear: 365,
@@ -904,7 +908,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.tempUnit = tempUnit === 'fahrenheit' ? 'F' : 'C';
     let presetIndex = 0;
     let totalChance = 0;
-    const seasons = Object.values(this.#calendarData.seasons?.values ?? {});
     context.seasonClimateList = Object.entries(this.#calendarData.seasons?.values ?? {}).map(([key, season], idx) => ({
       key,
       index: idx,
@@ -1060,10 +1063,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Update an array field from form data.
+   * Update a keyed object field from form data.
    * @param {object} data - Form data
    * @param {string} prefix - Field prefix
-   * @param {Array} targetArray - Target array to update
+   * @param {object} targetObj - Target keyed object to update
    * @param {Array<string>} fields - Field names to extract
    * @private
    */
@@ -2162,7 +2165,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterKey = target.dataset.key;
     const namesObj = this.#calendarData.weeks.names;
     const totalWeeks = Object.keys(namesObj).length;
-    const existingNumbers = Object.values(namesObj).map((w) => w.weekNumber).filter((n) => n != null);
+    const existingNumbers = Object.values(namesObj)
+      .map((w) => w.weekNumber)
+      .filter((n) => n != null);
     const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
     const newKey = foundry.utils.randomID();
     const newWeek = {
@@ -2833,11 +2838,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reindex ordinal values in an array.
-   * @param {Array} arr - Array to reindex
+   * Reindex ordinal values in a keyed object.
+   * @param {object} obj - Keyed object to reindex
    * @private
    */
-  /** Reindex ordinal values in a keyed object. */
   #reindexObject(obj) {
     let idx = 0;
     for (const key of Object.keys(obj)) {
@@ -2845,7 +2849,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-  /** Swap two adjacent entries in a keyed object, preserving insertion order. */
+  /**
+   * Swap two adjacent entries in a keyed object, preserving insertion order.
+   * @param {object} obj - Keyed object
+   * @param {string} keyA - First key to swap
+   * @param {string} keyB - Second key to swap
+   * @returns {object} New object with swapped entries
+   * @private
+   */
   #swapObjectEntries(obj, keyA, keyB) {
     const entries = Object.entries(obj);
     const idxA = entries.findIndex(([k]) => k === keyA);
@@ -2855,7 +2866,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return Object.fromEntries(entries);
   }
 
-  /** Insert a new entry into a keyed object after the given key. */
+  /**
+   * Insert a new entry into a keyed object after the given key.
+   * @param {object} obj - Keyed object
+   * @param {string} afterKey - Key to insert after
+   * @param {string} newKey - New entry key
+   * @param {*} newValue - New entry value
+   * @returns {object} New object with inserted entry
+   * @private
+   */
   #insertAfterKey(obj, afterKey, newKey, newValue) {
     const entries = Object.entries(obj);
     const idx = entries.findIndex(([k]) => k === afterKey);

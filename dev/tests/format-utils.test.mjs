@@ -18,13 +18,14 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
 }));
 
 import { ordinal, toRomanNumeral, dateFormattingParts, formatShort, formatLong, formatFull, formatTime, formatTime12 } from '../../scripts/utils/format-utils.mjs';
+import { addCalendarGetters } from '../__mocks__/calendar-manager.mjs';
 
 /* -------------------------------------------- */
 /*  Mock Calendar Data                          */
 /* -------------------------------------------- */
 
 // Basic Gregorian-like calendar mock
-const mockCalendar = {
+const mockCalendar = addCalendarGetters({
   months: {
     values: [
       { name: 'January', abbreviation: 'Jan', days: 31 },
@@ -61,10 +62,8 @@ const mockCalendar = {
     firstWeekday: 0
   },
   isMonthless: false,
-  eras: {
-    values: [{ name: 'Common Era', abbreviation: 'CE', startYear: 1 }]
-  }
-};
+  eras: [{ name: 'Common Era', abbreviation: 'CE', startYear: 1 }]
+});
 
 /* -------------------------------------------- */
 /*  ordinal()                                   */
@@ -347,7 +346,7 @@ describe('dateFormattingParts()', () => {
     });
 
     it('returns empty era for calendar without eras', () => {
-      const calWithoutEras = { ...mockCalendar, eras: null };
+      const calWithoutEras = addCalendarGetters({ ...mockCalendar, eras: null });
       const parts = dateFormattingParts(calWithoutEras, components);
       expect(parts.era).toBe('');
       expect(parts.eraAbbr).toBe('');
@@ -356,7 +355,7 @@ describe('dateFormattingParts()', () => {
   });
 
   describe('Monthless calendars', () => {
-    const monthlessCalendar = { ...mockCalendar, isMonthless: true };
+    const monthlessCalendar = addCalendarGetters({ ...mockCalendar, isMonthless: true });
 
     it('returns empty month values', () => {
       const parts = dateFormattingParts(monthlessCalendar, { ...components, dayOfMonth: 100 });

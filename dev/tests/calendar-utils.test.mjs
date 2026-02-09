@@ -18,12 +18,13 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
 }));
 
 import { preLocalizeCalendar, findFestivalDay, getMonthAbbreviation, formatMonthDay, formatMonthDayYear, formatEraTemplate } from '../../scripts/calendar/calendar-utils.mjs';
+import { addCalendarGetters } from '../__mocks__/calendar-manager.mjs';
 
 /* -------------------------------------------- */
 /*  Mock Calendar Data                          */
 /* -------------------------------------------- */
 
-const mockCalendar = {
+const mockCalendar = addCalendarGetters({
   months: {
     values: [
       { name: 'January', abbreviation: 'Jan', days: 31 },
@@ -45,7 +46,7 @@ const mockCalendar = {
     minute: 0,
     second: 0
   }))
-};
+});
 
 /* -------------------------------------------- */
 /*  preLocalizeCalendar()                       */
@@ -108,13 +109,13 @@ describe('findFestivalDay()', () => {
   });
 
   it('returns null for calendar without festivals', () => {
-    const calWithoutFestivals = { ...mockCalendar, festivals: [] };
+    const calWithoutFestivals = addCalendarGetters({ ...mockCalendar, festivals: [] });
     const result = findFestivalDay(calWithoutFestivals, { month: 0, dayOfMonth: 0 });
     expect(result).toBe(null);
   });
 
   it('returns null for undefined festivals', () => {
-    const calWithoutFestivals = { ...mockCalendar, festivals: undefined };
+    const calWithoutFestivals = addCalendarGetters({ ...mockCalendar, festivals: undefined });
     const result = findFestivalDay(calWithoutFestivals, { month: 0, dayOfMonth: 0 });
     expect(result).toBe(null);
   });
@@ -204,7 +205,7 @@ describe('formatMonthDayYear()', () => {
   });
 
   it('returns localization key with yearZero offset applied', () => {
-    const calWithOffset = { ...mockCalendar, years: { yearZero: 1000 } };
+    const calWithOffset = addCalendarGetters({ ...mockCalendar, years: { yearZero: 1000 } });
     const result = formatMonthDayYear(calWithOffset, { year: 24, month: 0, dayOfMonth: 14 });
     // Still returns the localization key - actual year calculation happens internally
     expect(result).toBe('CALENDARIA.Formatters.DayMonthYear');

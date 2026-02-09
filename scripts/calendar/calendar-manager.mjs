@@ -145,11 +145,7 @@ export default class CalendarManager {
 
           if (data._isDelta && bundledData) {
             // Delta format: reconstruct full calendar from bundled + delta
-            const calendarData = foundry.utils.mergeObject(
-              foundry.utils.deepClone(bundledData),
-              data,
-              { performDeletions: true }
-            );
+            const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
             delete calendarData._isDelta;
             const calendar = new CalendariaCalendar(calendarData);
             CalendarRegistry.register(id, calendar);
@@ -275,7 +271,13 @@ export default class CalendarManager {
     }
 
     // Nested collections
-    const nested = [['months', 'values'], ['days', 'values'], ['seasons', 'values'], ['weather', 'zones'], ['weeks', 'names']];
+    const nested = [
+      ['months', 'values'],
+      ['days', 'values'],
+      ['seasons', 'values'],
+      ['weather', 'zones'],
+      ['weeks', 'names']
+    ];
     for (const [parent, child] of nested) {
       if (overrideData[parent]?.[child]) {
         const aligned = alignCollection(overrideData[parent][child], bundledData[parent]?.[child]);
@@ -345,7 +347,13 @@ export default class CalendarManager {
     }
 
     // Nested collections — detect deletions
-    for (const [parent, child] of [['months', 'values'], ['days', 'values'], ['seasons', 'values'], ['weather', 'zones'], ['weeks', 'names']]) {
+    for (const [parent, child] of [
+      ['months', 'values'],
+      ['days', 'values'],
+      ['seasons', 'values'],
+      ['weather', 'zones'],
+      ['weeks', 'names']
+    ]) {
       const bCol = bundledData[parent]?.[child];
       const oCol = overrideData[parent]?.[child];
       if (!bCol || !oCol) continue;

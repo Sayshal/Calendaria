@@ -103,7 +103,9 @@ export default class TimeClock {
     this.setIncrement('minute');
     this.loadSpeedFromSettings();
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
-    Hooks.on('updateWorldTime', () => { this.#accumulatedSeconds = 0; });
+    Hooks.on('updateWorldTime', () => {
+      this.#accumulatedSeconds = 0;
+    });
     Hooks.on('pauseGame', this.#onPauseGame.bind(this));
     Hooks.on('combatStart', this.#onCombatStart.bind(this));
     Hooks.on('deleteCombat', this.#onCombatEnd.bind(this));

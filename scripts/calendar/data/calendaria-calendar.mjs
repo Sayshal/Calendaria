@@ -11,7 +11,7 @@ import { format, localize } from '../../utils/localization.mjs';
 import CalendarRegistry from '../calendar-registry.mjs';
 import * as LeapYearUtils from '../leap-year-utils.mjs';
 
-const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
+const { BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
 
 /**
  * Calendar data model with extended features for fantasy calendars.
@@ -115,37 +115,59 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   set currentDate(_value) {}
 
   /** @returns {Array<object>} Months in calendar order (from keyed `months.values` collection) */
-  get monthsArray() { return this.months?.values ? Object.values(this.months.values) : []; }
+  get monthsArray() {
+    return this.months?.values ? Object.values(this.months.values) : [];
+  }
 
   /** @returns {Array<object>} Weekdays in calendar order (from keyed `days.values` collection) */
-  get weekdaysArray() { return this.days?.values ? Object.values(this.days.values) : []; }
+  get weekdaysArray() {
+    return this.days?.values ? Object.values(this.days.values) : [];
+  }
 
   /** @returns {Array<object>} Seasons in calendar order (from keyed `seasons.values` collection) */
-  get seasonsArray() { return this.seasons?.values ? Object.values(this.seasons.values) : []; }
+  get seasonsArray() {
+    return this.seasons?.values ? Object.values(this.seasons.values) : [];
+  }
 
   /** @returns {Array<object>} Moons in calendar order (from keyed `moons` collection) */
-  get moonsArray() { return this.moons ? Object.values(this.moons) : []; }
+  get moonsArray() {
+    return this.moons ? Object.values(this.moons) : [];
+  }
 
   /** @returns {Array<object>} Cycles in calendar order (from keyed `cycles` collection) */
-  get cyclesArray() { return this.cycles ? Object.values(this.cycles) : []; }
+  get cyclesArray() {
+    return this.cycles ? Object.values(this.cycles) : [];
+  }
 
   /** @returns {Array<object>} Eras in calendar order (from keyed `eras` collection) */
-  get erasArray() { return this.eras ? Object.values(this.eras) : []; }
+  get erasArray() {
+    return this.eras ? Object.values(this.eras) : [];
+  }
 
   /** @returns {Array<object>} Festivals in calendar order (from keyed `festivals` collection) */
-  get festivalsArray() { return this.festivals ? Object.values(this.festivals) : []; }
+  get festivalsArray() {
+    return this.festivals ? Object.values(this.festivals) : [];
+  }
 
   /** @returns {Array<object>} Canonical hours in calendar order (from keyed `canonicalHours` collection) */
-  get canonicalHoursArray() { return this.canonicalHours ? Object.values(this.canonicalHours) : []; }
+  get canonicalHoursArray() {
+    return this.canonicalHours ? Object.values(this.canonicalHours) : [];
+  }
 
   /** @returns {Array<object>} Named weeks in calendar order (from keyed `weeks.names` collection) */
-  get namedWeeksArray() { return this.weeks?.names ? Object.values(this.weeks.names) : []; }
+  get namedWeeksArray() {
+    return this.weeks?.names ? Object.values(this.weeks.names) : [];
+  }
 
   /** @returns {Array<object>} Weather zones in calendar order (from keyed `weather.zones` collection) */
-  get weatherZonesArray() { return this.weather?.zones ? Object.values(this.weather.zones) : []; }
+  get weatherZonesArray() {
+    return this.weather?.zones ? Object.values(this.weather.zones) : [];
+  }
 
   /** @returns {number} Number of days in a week (weekday count, defaults to 7) */
-  get daysInWeek() { return this.weekdaysArray.length || 7; }
+  get daysInWeek() {
+    return this.weekdaysArray.length || 7;
+  }
 
   /**
    * Check if this calendar operates without named months (e.g., Traveller Imperial Calendar).
@@ -226,18 +248,43 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @deprecated Remove in 1.1.0
    */
   static #LEGACY_TOKENS = {
-    '{{y}}': 'YY', '{{yyyy}}': 'YYYY', '{{Y}}': 'YYYY',
-    '{{B}}': 'MMMM', '{{b}}': 'MMM', '{{m}}': 'M', '{{mm}}': 'MM',
-    '{{d}}': 'D', '{{dd}}': 'DD', '{{0}}': 'Do', '{{j}}': 'DDD',
-    '{{w}}': 'd', '{{A}}': 'dddd', '{{a}}': 'ddd',
-    '{{H}}': 'HH', '{{h}}': 'h', '{{hh}}': 'hh', '{{M}}': 'mm', '{{S}}': 'ss',
-    '{{p}}': 'a', '{{P}}': 'A',
-    '{{W}}': 'W', '{{WW}}': 'WW', '{{WN}}': '[namedWeek]', '{{Wn}}': '[namedWeekAbbr]',
-    '{{ch}}': '[ch]', '{{chAbbr}}': '[chAbbr]',
-    '{{E}}': 'GGGG', '{{e}}': '[yearInEra]',
-    '{{season}}': 'QQQQ', '{{moon}}': '[moon]',
-    '{{era}}': 'GGGG', '{{eraYear}}': '[yearInEra]', '{{yearInEra}}': '[yearInEra]',
-    '{{year}}': 'YYYY', '{{abbreviation}}': 'G', '{{short}}': 'G'
+    '{{y}}': 'YY',
+    '{{yyyy}}': 'YYYY',
+    '{{Y}}': 'YYYY',
+    '{{B}}': 'MMMM',
+    '{{b}}': 'MMM',
+    '{{m}}': 'M',
+    '{{mm}}': 'MM',
+    '{{d}}': 'D',
+    '{{dd}}': 'DD',
+    '{{0}}': 'Do',
+    '{{j}}': 'DDD',
+    '{{w}}': 'd',
+    '{{A}}': 'dddd',
+    '{{a}}': 'ddd',
+    '{{H}}': 'HH',
+    '{{h}}': 'h',
+    '{{hh}}': 'hh',
+    '{{M}}': 'mm',
+    '{{S}}': 'ss',
+    '{{p}}': 'a',
+    '{{P}}': 'A',
+    '{{W}}': 'W',
+    '{{WW}}': 'WW',
+    '{{WN}}': '[namedWeek]',
+    '{{Wn}}': '[namedWeekAbbr]',
+    '{{ch}}': '[ch]',
+    '{{chAbbr}}': '[chAbbr]',
+    '{{E}}': 'GGGG',
+    '{{e}}': '[yearInEra]',
+    '{{season}}': 'QQQQ',
+    '{{moon}}': '[moon]',
+    '{{era}}': 'GGGG',
+    '{{eraYear}}': '[yearInEra]',
+    '{{yearInEra}}': '[yearInEra]',
+    '{{year}}': 'YYYY',
+    '{{abbreviation}}': 'G',
+    '{{short}}': 'G'
   };
 
   /**
@@ -246,9 +293,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @deprecated Remove in 1.1.0
    */
   static #DEPRECATED_TOKENS = {
-    dddd: 'EEEE', ddd: 'EEE', dd: 'EE', d: 'e',
-    '[era]': 'GGGG', '[eraAbbr]': 'G', '[year]': 'YYYY',
-    '[short]': 'G', '[season]': 'QQQQ', '[seasonAbbr]': 'QQQ'
+    dddd: 'EEEE',
+    ddd: 'EEE',
+    dd: 'EE',
+    d: 'e',
+    '[era]': 'GGGG',
+    '[eraAbbr]': 'G',
+    '[year]': 'YYYY',
+    '[short]': 'G',
+    '[season]': 'QQQQ',
+    '[seasonAbbr]': 'QQQ'
   };
 
   /**
@@ -273,7 +327,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @deprecated Remove in 1.1.0
    */
   static #migrateCycleStages(source) {
-    const cycles = Array.isArray(source.cycles) ? source.cycles : (source.cycles ? Object.values(source.cycles) : []);
+    const cycles = Array.isArray(source.cycles) ? source.cycles : source.cycles ? Object.values(source.cycles) : [];
     if (!cycles.length) return;
     for (const cycle of cycles) {
       if (cycle.entries && !cycle.stages) {
@@ -549,7 +603,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         },
         { required: false, nullable: true }
       ),
-      amPmNotation: new SchemaField({ am: new StringField({ required: false, initial: 'AM' }), pm: new StringField({ required: false, initial: 'PM' }), amAbbr: new StringField({ required: false, initial: 'AM' }), pmAbbr: new StringField({ required: false, initial: 'PM' }) }, { required: false }),
+      amPmNotation: new SchemaField(
+        {
+          am: new StringField({ required: false, initial: 'AM' }),
+          pm: new StringField({ required: false, initial: 'PM' }),
+          amAbbr: new StringField({ required: false, initial: 'AM' }),
+          pmAbbr: new StringField({ required: false, initial: 'PM' })
+        },
+        { required: false }
+      ),
       canonicalHours: new TypedObjectField(
         new SchemaField({
           name: new StringField({ required: true }),

@@ -44,13 +44,23 @@ Tests live in `dev/tests/` using [Vitest](https://vitest.dev/). Mocks are in `de
 
 Write tests for new utility functions and bug fixes.
 
+## Pre-commit Hook
+
+After `npm install`, a pre-commit hook runs automatically via [Husky](https://typicode.github.io/husky/). It uses [lint-staged](https://github.com/lint-staged/lint-staged) to auto-fix staged files:
+
+- **JS/MJS** — Prettier + ESLint
+- **CSS** — Prettier + Stylelint
+- **YAML** — Prettier
+
+You don't need to remember to run formatters — the hook handles it. If a lint error can't be auto-fixed, the commit is blocked until you fix it manually.
+
 ## Submitting Changes
 
 All pull requests **must** reference an open issue. Open one first if none exists.
 
 1. Fork the repository and create a branch from `main`.
 2. Make your changes in focused, logical commits.
-3. Run `npm run validate` and `npm test` — both must pass.
+3. Run `npm test` — all tests must pass.
 4. Open a pull request against `main` and reference the issue (e.g. `Closes #123`).
 
 ## Reporting Issues

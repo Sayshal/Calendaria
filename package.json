@@ -15,7 +15,19 @@
     "test": "vitest run --config vitest.config.mjs",
     "test:watch": "vitest --config vitest.config.mjs",
     "test:coverage": "vitest run --coverage --config vitest.config.mjs",
-    "validate": "npm run lint && npm run format:check && npm run stylelint"
+    "validate": "npm run lint && npm run format:check && npm run stylelint",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.css": [
+      "prettier --write",
+      "stylelint --fix"
+    ],
+    "*.{yml,yaml}": "prettier --write"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
@@ -23,6 +35,8 @@
     "eslint": "^9.27.0",
     "eslint-plugin-jsdoc": "^50.8.0",
     "globals": "^15.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.3.3",
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^37.0.0",

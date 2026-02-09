@@ -6,8 +6,75 @@
 
 import { vi } from 'vitest';
 
+/**
+ * Add convenience getters matching CalendariaCalendar schema to a plain calendar object.
+ * @param {object} cal - Plain calendar data object
+ * @returns {object} Same object with getters defined
+ */
+export function addCalendarGetters(cal) {
+  Object.defineProperties(cal, {
+    monthsArray: {
+      get() {
+        return this.months?.values ? Object.values(this.months.values) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    weekdaysArray: {
+      get() {
+        return this.days?.values ? Object.values(this.days.values) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    seasonsArray: {
+      get() {
+        return this.seasons?.values ? Object.values(this.seasons.values) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    moonsArray: {
+      get() {
+        return this.moons ? Object.values(this.moons) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    cyclesArray: {
+      get() {
+        return this.cycles ? Object.values(this.cycles) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    erasArray: {
+      get() {
+        return this.eras ? Object.values(this.eras) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    festivalsArray: {
+      get() {
+        return this.festivals ? Object.values(this.festivals) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    daysInWeek: {
+      get() {
+        return this.weekdaysArray?.length || 7;
+      },
+      configurable: true,
+      enumerable: true
+    }
+  });
+  return cal;
+}
+
 // Default Gregorian-like calendar configuration
-const defaultCalendar = {
+const defaultCalendar = addCalendarGetters({
   months: {
     values: [
       { name: 'January', abbreviation: 'Jan', days: 31 },
@@ -159,11 +226,11 @@ const defaultCalendar = {
     let dayOfYear = components.dayOfMonth ?? 0;
     for (let m = 0; m < (components.month || 0); m++) dayOfYear += days[m];
     const totalDays = (components.year || 0) * 365 + dayOfYear;
-    return (((totalDays) % daysInWeek) + daysInWeek) % daysInWeek;
+    return ((totalDays % daysInWeek) + daysInWeek) % daysInWeek;
   }),
   getMoonPhase: vi.fn((moonIndex, components) => {
     // Simple moon phase calculation for testing
-    const moon = defaultCalendar.moons[moonIndex];
+    const moon = defaultCalendar.moonsArray[moonIndex];
     if (!moon) return null;
     // Calculate phase position based on days since reference
     const refDate = moon.referenceDate || { year: 2000, month: 0, day: 6 };
@@ -180,10 +247,11 @@ const defaultCalendar = {
     const position = cyclePosition / moon.cycleLength;
     return { position, phase: moon.phases[Math.floor(position * 8)] };
   })
-};
+});
 
 // Mutable active calendar for test configuration
 let activeCalendar = { ...defaultCalendar };
+addCalendarGetters(activeCalendar);
 
 // CalendarManager mock
 const CalendarManager = {
@@ -194,7 +262,7 @@ const CalendarManager = {
 
   // Helper to reset to default calendar
   _reset: () => {
-    activeCalendar = {
+    activeCalendar = addCalendarGetters({
       ...defaultCalendar,
       getDaysInMonth: vi.fn(defaultCalendar.getDaysInMonth),
       getDaysInYear: vi.fn(defaultCalendar.getDaysInYear),
@@ -206,12 +274,12 @@ const CalendarManager = {
       countIntercalaryDaysBeforeYear: vi.fn(() => 0),
       _computeDayOfWeek: vi.fn(defaultCalendar._computeDayOfWeek),
       getMoonPhase: vi.fn(defaultCalendar.getMoonPhase)
-    };
+    });
   },
 
   // Helper to configure calendar with custom settings
   _configure: (config) => {
-    activeCalendar = {
+    activeCalendar = addCalendarGetters({
       ...activeCalendar,
       ...config,
       getDaysInMonth: config.getDaysInMonth || activeCalendar.getDaysInMonth,
@@ -219,7 +287,7 @@ const CalendarManager = {
       componentsToTime: config.componentsToTime || activeCalendar.componentsToTime,
       timeToComponents: config.timeToComponents || activeCalendar.timeToComponents,
       getMoonPhase: config.getMoonPhase || activeCalendar.getMoonPhase
-    };
+    });
   },
 
   // Helper to get the default calendar config

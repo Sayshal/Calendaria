@@ -115,7 +115,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
-    const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : (calendar.months || []);
+    const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : calendar.months || [];
     const daysPerYear = calendar.days?.daysPerYear ?? (months.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
     const totalDays = Math.floor(worldTime / secondsPerDay);
     let year = Math.floor(totalDays / daysPerYear);
@@ -217,8 +217,8 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   async transform(data) {
     const { calendar, moons, config, isNativeFormat } = data;
     log(3, 'Transforming Simple Timekeeping data:', calendar.name);
-    const rawWeekdays = isNativeFormat ? (calendar.days?.values ? Object.values(calendar.days.values) : []) : (calendar.weekdays || []);
-    const rawMonths = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : (calendar.months || []);
+    const rawWeekdays = isNativeFormat ? (calendar.days?.values ? Object.values(calendar.days.values) : []) : calendar.weekdays || [];
+    const rawMonths = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : calendar.months || [];
     const weekdays = this.#transformWeekdays(rawWeekdays, isNativeFormat);
     const months = this.#transformMonths(rawMonths);
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
@@ -424,7 +424,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const notes = [];
     log(3, `Extracting ${events.length} events from Simple Timekeeping data`);
     const secondsPerDay = (calendar.days?.hoursPerDay ?? 24) * (calendar.days?.minutesPerHour ?? 60) * (calendar.days?.secondsPerMinute ?? 60);
-    const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : (calendar.months || []);
+    const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : calendar.months || [];
     const daysPerYear = calendar.days?.daysPerYear ?? (months.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
     for (const event of events) {
       const startDate = this.#timestampToDate(event.eventTime, calendar, secondsPerDay, daysPerYear, isNativeFormat);
@@ -465,7 +465,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
     let month = 0;
     let remainingDays = dayOfYear;
-    const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : (calendar.months || []);
+    const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : calendar.months || [];
     const regularMonths = months.filter((m) => !m.intercalary);
     for (let i = 0; i < regularMonths.length; i++) {
       if (remainingDays < regularMonths[i].days) {
