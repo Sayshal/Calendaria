@@ -755,13 +755,14 @@ function getCycleName(calendar, components) {
   }
   if (!calendar?.cyclesArray?.length) return '';
   const cycle = calendar.cyclesArray[0];
-  if (!cycle?.entries?.length) return '';
+  const stages = Object.values(cycle?.stages ?? {});
+  if (!stages.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
   const adjustedValue = displayYear + (cycle.offset || 0);
-  let entryIndex = adjustedValue % cycle.entries.length;
-  if (entryIndex < 0) entryIndex += cycle.entries.length;
-  return localize(cycle.entries[entryIndex]?.name ?? '');
+  let entryIndex = adjustedValue % stages.length;
+  if (entryIndex < 0) entryIndex += stages.length;
+  return localize(stages[entryIndex]?.name ?? '');
 }
 
 /**

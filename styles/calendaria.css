@@ -8181,298 +8181,123 @@ span.calendaria-moon-icon {
 /* Set Date Dialog                          */
 /* ======================================== */
 
-.set-date-dialog {
-  .window-content {
-    padding: 0;
-  }
+.set-date-dialog .timepoints-section {
+  border: 0.0625rem solid var(--color-border-light-tertiary);
+  border-radius: 0.25rem;
 
-  .set-date-form {
-    gap: 1rem;
+  .timepoints-header {
+    gap: 0.5rem;
     display: flex;
-    flex-direction: column;
-    padding: 1rem;
-  }
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    user-select: none;
 
-  .set-date-section {
+    i {
+      width: 0.75rem;
+      font-size: var(--font-size-13);
+    }
+
     h3 {
-      margin: 0 0 0.5rem;
-      padding-bottom: 0.25rem;
-      border-bottom: 0.0625rem solid var(--calendaria-border-light);
-      color: var(--calendaria-text-heading);
-      font-weight: 600;
-      font-size: var(--font-size-14);
-    }
-  }
-
-  .form-grid {
-    gap: 0.75rem;
-    grid-template-columns: 1fr 1fr 1fr;
-    display: grid;
-
-    &.time-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .form-group {
-    gap: 0.25rem;
-    display: flex;
-    flex-direction: column;
-
-    > label {
-      color: var(--calendaria-text-dim);
-      font-weight: 500;
-      font-size: var(--font-size-11);
-    }
-
-    input:not([type='checkbox']),
-    select {
-      box-sizing: border-box;
-      height: 1.875rem;
-      padding: 0 0.5rem;
-      border: 0.0625rem solid var(--calendaria-input-border);
-      border-radius: 0.25rem;
-      color: var(--calendaria-text);
-      font-size: var(--font-size-13);
-      line-height: 1.75rem;
-      text-align: center;
-      background: var(--calendaria-input-bg);
-
-      &:focus {
-        border-color: var(--calendaria-primary);
-        outline: none;
-      }
-    }
-
-    select {
-      appearance: none;
-      padding-right: 1.5rem;
-      cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.5rem center;
-      background-size: 0.625rem;
-    }
-
-    input[type='number'] {
-      -moz-appearance: textfield;
-      appearance: textfield;
-
-      &::-webkit-outer-spin-button,
-      &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-    }
-  }
-
-  .checkbox-group {
-    padding: 0.5rem 0;
-
-    .checkbox {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      font-size: var(--font-size-13);
-      cursor: pointer;
-    }
-
-    .hint {
-      margin: 0.25rem 0 0 1.75rem;
-      color: var(--calendaria-text-dim);
-      font-size: var(--font-size-11);
-    }
-  }
-
-  /* Timepoints Section */
-  .timepoints-section {
-    border: 0.0625rem solid var(--calendaria-border-light);
-    border-radius: 0.25rem;
-    background: var(--calendaria-bg-lighter);
-
-    .timepoints-header {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 0.75rem;
-      cursor: pointer;
-      user-select: none;
-
-      &:hover {
-        background: var(--calendaria-bg-hover);
-      }
-
-      i {
-        width: 0.75rem;
-        color: var(--calendaria-text-dim);
-        font-size: var(--font-size-10);
-      }
-
-      h3 {
-        flex: 1;
-        margin: 0;
-        color: var(--calendaria-text);
-        font-weight: 600;
-        font-size: var(--font-size-13);
-      }
-
-      .timepoints-count {
-        padding: 0.125rem 0.5rem;
-        border-radius: 0.625rem;
-        font-size: var(--font-size-11);
-        background: var(--calendaria-primary);
-      }
-    }
-
-    .timepoints-content {
-      padding: 0.5rem;
-      border-top: 0.0625rem solid var(--calendaria-border-light);
-    }
-
-    .timepoints-list {
-      max-height: 11.25rem;
-      margin: 0 0 0.5rem;
-      padding: 0;
-      overflow-y: auto;
-      list-style: none;
-    }
-
-    .timepoint-row {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-
-      &:hover {
-        background: var(--calendaria-bg-hover);
-      }
-
-      .timepoint-info {
-        flex: 1;
-        min-width: 0;
-        cursor: pointer;
-
-        .timepoint-name {
-          display: block;
-          overflow: hidden;
-          color: var(--calendaria-text);
-          font-weight: 500;
-          font-size: var(--font-size-13);
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .timepoint-date {
-          display: block;
-          color: var(--calendaria-text-dim);
-          font-size: var(--font-size-11);
-        }
-      }
-
-      .timepoint-name-input {
-        flex: 1;
-        padding: 0.25rem 0.5rem;
-        border: 0.0625rem solid var(--calendaria-primary);
-        border-radius: 0.1875rem;
-        color: var(--calendaria-text);
-        font-size: var(--font-size-13);
-        background: var(--calendaria-input-bg);
-
-        &:focus {
-          outline: none;
-        }
-      }
-
-      .timepoint-actions {
-        gap: 0.25rem;
-        display: flex;
-      }
-
-      .timepoint-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 1.75rem;
-        height: 1.75rem;
-        padding: 0;
-        border: 0.0625rem solid var(--calendaria-border);
-        border-radius: 0.25rem;
-        color: var(--calendaria-text-dim);
-        font-size: var(--font-size-12);
-        cursor: pointer;
-        background: var(--calendaria-button-bg);
-
-        &:hover {
-          color: var(--calendaria-text);
-          background: var(--calendaria-button-hover);
-        }
-
-        &.jump:hover {
-          border-color: var(--calendaria-primary);
-          color: var(--calendaria-primary);
-        }
-
-        &.delete:hover {
-          border-color: var(--calendaria-error);
-          color: var(--calendaria-error);
-        }
-      }
-    }
-
-    .no-timepoints {
+      flex: 1;
       margin: 0;
-      padding: 1rem;
-      color: var(--calendaria-text-dim);
-      font-size: var(--font-size-12);
-      text-align: center;
+      font-size: var(--font-size-13);
     }
 
-    .save-timepoint-btn {
-      gap: 0.5rem;
+    .timepoints-count {
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.625rem;
+      font-size: var(--font-size-13);
+    }
+  }
+
+  .timepoints-content {
+    padding: 0.5rem;
+    border-top: 0.0625rem solid var(--color-border-light-tertiary);
+  }
+
+  .timepoints-list {
+    max-height: 11.25rem;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .timepoint-row {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+
+    .timepoint-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+
+      .timepoint-name {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .timepoint-date {
+        display: block;
+        font-size: var(--font-size-11);
+        opacity: 0.7;
+      }
+    }
+
+    .timepoint-name-input {
+      flex: 1;
+    }
+
+    .timepoint-actions {
+      gap: 0.25rem;
+      display: flex;
+    }
+
+    .timepoint-btn {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
-      padding: 0.5rem;
-      border: 0.0625rem dashed var(--calendaria-border);
-      border-radius: 0.25rem;
-      color: var(--calendaria-text-dim);
-      font-size: var(--font-size-12);
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
       cursor: pointer;
-      background: transparent;
 
-      &:hover {
-        border-color: var(--calendaria-primary);
-        color: var(--calendaria-primary);
-        background: var(--calendaria-primary);
-        background: rgb(74 144 226 / 10%);
+      &.delete:hover {
+        color: var(--color-level-error);
       }
     }
   }
 
-  /* Form Footer */
-  .form-footer {
+  .no-timepoints {
+    margin: 0;
+    padding: 1rem;
+    font-size: var(--font-size-12);
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .save-timepoint-btn {
+    gap: 0.5rem;
     display: flex;
     justify-content: center;
-    padding-top: 0.5rem;
-    border-top: 0.0625rem solid var(--calendaria-border-light);
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem;
+    border: 0.0625rem dashed var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
+    font-size: var(--font-size-12);
+    cursor: pointer;
+    background: transparent;
 
-    .submit-btn {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.25rem;
-      font-weight: 500;
-      font-size: var(--font-size-13);
-      cursor: pointer;
-      background: var(--calendaria-primary);
-
-      &:hover {
-        background: rgb(60 130 210);
-      }
+    &:hover {
+      border-color: var(--color-warm-1);
+      color: var(--color-warm-1);
     }
   }
 }

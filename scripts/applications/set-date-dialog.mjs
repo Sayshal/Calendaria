@@ -29,8 +29,8 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-set-date-dialog',
     classes: ['calendaria', 'set-date-dialog'],
     tag: 'form',
-    position: { width: 380, height: 'auto' },
-    window: { title: 'CALENDARIA.SetDate.Title', resizable: false },
+    position: { width: 550, height: 'auto' },
+    window: { title: 'CALENDARIA.SetDate.Title', resizable: false, contentClasses: ['standard-form'] },
     form: { handler: SetDateDialog.#onSubmit, closeOnSubmit: true },
     actions: {
       toggleTimepoints: SetDateDialog.#onToggleTimepoints,
@@ -43,7 +43,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    form: { template: TEMPLATES.SET_DATE_DIALOG }
+    form: { template: TEMPLATES.SET_DATE_DIALOG, classes: ['standard-form'] }
   };
 
   /**

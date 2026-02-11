@@ -331,7 +331,7 @@ export default class WeatherManager {
       const max = preset?.tempMax ?? 25;
       return Math.round(min + Math.random() * (max - min));
     }
-    const presetConfig = zoneConfig?.presets?.find((p) => p.id === presetId && p.enabled !== false);
+    const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === presetId && p.enabled !== false);
     if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
     if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
     return Math.round(tempRange.min + Math.random() * (tempRange.max - tempRange.min));

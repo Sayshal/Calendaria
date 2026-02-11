@@ -516,7 +516,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
-    const existingFestivals = calendar.festivalsArray ?? [];
+    const existingFestivals = calendar.festivals ? { ...calendar.festivals } : {};
     const newFestivals = [];
     for (const festival of festivals) {
       try {
@@ -531,8 +531,8 @@ export default class MiniCalendarImporter extends BaseImporter {
 
     if (newFestivals.length > 0) {
       try {
-        const mergedFestivals = [...existingFestivals, ...newFestivals];
-        await CalendarManager.updateCustomCalendar(calendarId, { festivals: mergedFestivals });
+        for (const festival of newFestivals) existingFestivals[foundry.utils.randomID()] = festival;
+        await CalendarManager.updateCustomCalendar(calendarId, { festivals: existingFestivals });
         log(3, `Festival import complete: ${newFestivals.length} festivals added`);
       } catch (error) {
         errors.push(`Error saving festivals: ${error.message}`);

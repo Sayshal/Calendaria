@@ -1,110 +1,115 @@
-<div class="set-date-form">
-  {{!-- Date Section --}}
-  <section class="set-date-section">
-    <h3>{{localize "CALENDARIA.SetDate.DateSection"}}</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>{{dayLabel}}</label>
-        <select name="day">
-          {{#each days}}
-          <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>
-          {{/each}}
-        </select>
-      </div>
-      {{#unless isMonthless}}
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Month"}}</label>
-        <select name="month">
-          {{#each months}}
-          <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-          {{/each}}
-        </select>
-      </div>
-      {{/unless}}
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Year"}}</label>
-        <input type="number" name="year" value="{{year}}" step="1">
-      </div>
-    </div>
-  </section>
-
-  {{!-- Time Section --}}
-  <section class="set-date-section">
-    <h3>{{localize "CALENDARIA.SetDate.TimeSection"}}</h3>
-    <div class="form-grid time-grid">
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Hour"}}</label>
-        <input type="number" name="hour" value="{{hour}}" min="0" max="{{maxHour}}" step="1">
-      </div>
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Minute"}}</label>
-        <input type="number" name="minute" value="{{minute}}" min="0" max="59" step="1">
-      </div>
-    </div>
-  </section>
-
-  {{!-- Skip Triggers Checkbox --}}
-  <div class="form-group checkbox-group">
-    <label class="checkbox">
-      <input type="checkbox" name="skipTriggers" {{#if skipTriggers}}checked{{/if}}>
-      {{localize "CALENDARIA.SetDate.SkipTriggers"}}
-    </label>
-    <p class="hint">{{localize "CALENDARIA.SetDate.SkipTriggersHint"}}</p>
-  </div>
-
-  {{!-- Timepoints Section --}}
-  <section class="timepoints-section {{#if timepointsExpanded}}expanded{{/if}}">
-    <header class="timepoints-header" data-action="toggleTimepoints">
-      <i class="fas fa-chevron-{{#if timepointsExpanded}}down{{else}}right{{/if}}"></i>
-      <h3>{{localize "CALENDARIA.SetDate.Timepoints"}}</h3>
-      <span class="timepoints-count">{{timepoints.length}}</span>
-    </header>
-
-    {{#if timepointsExpanded}}
-    <div class="timepoints-content">
-      {{#if timepoints.length}}
-      <ul class="timepoints-list">
-        {{#each timepoints}}
-        <li class="timepoint-row" data-id="{{id}}">
-          {{#if isEditing}}
-          <input type="text" class="timepoint-name-input" value="{{name}}" maxlength="50">
-          {{else}}
-          <div class="timepoint-info" data-action="editTimepointName" data-tooltip
-            aria-label="{{localize 'CALENDARIA.SetDate.EditName'}}">
-            <span class="timepoint-name">{{name}}</span>
-            <span class="timepoint-date">{{formattedDate}} {{formattedTime}}</span>
-          </div>
-          {{/if}}
-          <div class="timepoint-actions">
-            <button type="button" class="timepoint-btn jump" data-action="jumpToTimepoint" data-tooltip
-              aria-label="{{localize 'CALENDARIA.SetDate.JumpTo'}}">
-              <i class="fas fa-arrow-right"></i>
-            </button>
-            <button type="button" class="timepoint-btn delete" data-action="deleteTimepoint" data-tooltip
-              aria-label="{{localize 'CALENDARIA.SetDate.Delete'}}">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </li>
+<div>
+{{!-- Date Section --}}
+<fieldset>
+  <legend>{{localize "CALENDARIA.SetDate.DateSection"}}</legend>
+  <div class="form-group">
+    <label>{{dayLabel}}</label>
+    <div class="form-fields">
+      <select name="day">
+        {{#each days}}
+        <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>
         {{/each}}
-      </ul>
-      {{else}}
-      <p class="no-timepoints">{{localize "CALENDARIA.SetDate.NoTimepoints"}}</p>
-      {{/if}}
-
-      <button type="button" class="save-timepoint-btn" data-action="saveTimepoint">
-        <i class="fas fa-bookmark"></i>
-        {{localize "CALENDARIA.SetDate.SaveCurrent"}}
-      </button>
+      </select>
     </div>
-    {{/if}}
-  </section>
+  </div>
+  {{#unless isMonthless}}
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.Common.Month"}}</label>
+    <div class="form-fields">
+      <select name="month">
+        {{#each months}}
+        <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+    </div>
+  </div>
+  {{/unless}}
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.Common.Year"}}</label>
+    <div class="form-fields">
+      <input type="number" name="year" value="{{year}}" step="1">
+    </div>
+  </div>
+</fieldset>
 
-  {{!-- Submit Button --}}
-  <footer class="form-footer">
-    <button type="submit" class="submit-btn">
-      <i class="fas fa-calendar-check"></i>
-      {{localize "CALENDARIA.SetDate.SetDate"}}
+{{!-- Time Section --}}
+<fieldset>
+  <legend>{{localize "CALENDARIA.SetDate.TimeSection"}}</legend>
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.Common.Hour"}}</label>
+    <div class="form-fields">
+      <input type="number" name="hour" value="{{hour}}" min="0" max="{{maxHour}}" step="1">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.Common.Minute"}}</label>
+    <div class="form-fields">
+      <input type="number" name="minute" value="{{minute}}" min="0" max="59" step="1">
+    </div>
+  </div>
+</fieldset>
+
+{{!-- Skip Triggers Checkbox --}}
+<div class="form-group">
+  <label>{{localize "CALENDARIA.SetDate.SkipTriggers"}}</label>
+  <div class="form-fields">
+    <input type="checkbox" name="skipTriggers" {{#if skipTriggers}}checked{{/if}}>
+  </div>
+  <p class="hint">{{localize "CALENDARIA.SetDate.SkipTriggersHint"}}</p>
+</div>
+
+{{!-- Timepoints Section --}}
+<section class="timepoints-section {{#if timepointsExpanded}}expanded{{/if}}">
+  <header class="timepoints-header" data-action="toggleTimepoints">
+    <i class="fas fa-chevron-{{#if timepointsExpanded}}down{{else}}right{{/if}}"></i>
+    <h3>{{localize "CALENDARIA.SetDate.Timepoints"}}</h3>
+    <span class="timepoints-count">{{timepoints.length}}</span>
+  </header>
+
+  {{#if timepointsExpanded}}
+  <div class="timepoints-content">
+    {{#if timepoints.length}}
+    <ul class="timepoints-list">
+      {{#each timepoints}}
+      <li class="timepoint-row" data-id="{{id}}">
+        {{#if isEditing}}
+        <input type="text" class="timepoint-name-input" value="{{name}}" maxlength="50">
+        {{else}}
+        <div class="timepoint-info" data-action="editTimepointName" data-tooltip
+          aria-label="{{localize 'CALENDARIA.SetDate.EditName'}}">
+          <span class="timepoint-name">{{name}}</span>
+          <span class="timepoint-date">{{formattedDate}} {{formattedTime}}</span>
+        </div>
+        {{/if}}
+        <div class="timepoint-actions">
+          <button type="button" class="timepoint-btn jump" data-action="jumpToTimepoint" data-tooltip
+            aria-label="{{localize 'CALENDARIA.SetDate.JumpTo'}}">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button type="button" class="timepoint-btn delete" data-action="deleteTimepoint" data-tooltip
+            aria-label="{{localize 'CALENDARIA.SetDate.Delete'}}">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </li>
+      {{/each}}
+    </ul>
+    {{else}}
+    <p class="no-timepoints">{{localize "CALENDARIA.SetDate.NoTimepoints"}}</p>
+    {{/if}}
+
+    <button type="button" class="save-timepoint-btn" data-action="saveTimepoint">
+      <i class="fas fa-bookmark"></i>
+      {{localize "CALENDARIA.SetDate.SaveCurrent"}}
     </button>
-  </footer>
+  </div>
+  {{/if}}
+</section>
+
+<footer class="form-footer">
+  <button type="submit">
+    <i class="fas fa-calendar-check"></i>
+    {{localize "CALENDARIA.SetDate.SetDate"}}
+  </button>
+</footer>
 </div>

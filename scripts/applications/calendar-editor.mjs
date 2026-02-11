@@ -1639,7 +1639,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       seasonKey: key,
       calendarId: this.#calendarId,
       onSave: (result) => {
-        season.climate = result.presets.length || result.temperatures ? result : null;
+        season.climate = Object.keys(result.presets ?? {}).length || result.temperatures ? result : null;
         editor.render({ parts: ['weather'] });
       }
     });

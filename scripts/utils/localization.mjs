@@ -59,7 +59,7 @@ export function preLocalizeCalendar(calendarData) {
   if (calendarData.cycles) {
     for (const cycle of Object.values(calendarData.cycles)) {
       if (cycle.name) cycle.name = localize(cycle.name);
-      if (cycle.entries) for (const entry of Object.values(cycle.entries)) if (entry.name) entry.name = localize(entry.name);
+      if (cycle.stages) for (const entry of Object.values(cycle.stages)) if (entry.name) entry.name = localize(entry.name);
     }
   }
 
