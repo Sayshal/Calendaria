@@ -35,12 +35,12 @@ export function calculateDarknessFromTime(hours, minutes, hoursPerDay = 24, minu
   const nightHours = hoursPerDay - daylightHours;
   if (currentHour >= sunrise && currentHour < sunset) {
     const dayProgress = (currentHour - sunrise) / daylightHours;
-    return Math.max(0, Math.min(1, (Math.cos(dayProgress * Math.PI * 2 - Math.PI) + 1) / 2));
+    return Math.max(0, Math.min(1, (Math.cos(dayProgress * Math.PI * 2) + 1) / 4));
   }
   let nightProgress;
   if (currentHour >= sunset) nightProgress = (currentHour - sunset) / nightHours;
   else nightProgress = (currentHour + hoursPerDay - sunset) / nightHours;
-  return Math.max(0, Math.min(1, ((1 - Math.cos(nightProgress * Math.PI * 2 - Math.PI)) / 2) * 0.5 + 0.5));
+  return Math.max(0, Math.min(1, ((1 - Math.cos(nightProgress * Math.PI * 2)) / 2) * 0.5 + 0.5));
 }
 
 /**
