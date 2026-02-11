@@ -769,17 +769,18 @@ describe('needsRandomRegeneration()', () => {
 
 describe('conditions on events', () => {
   it('repeating event with day modulo condition', () => {
+    // Modulo offsets from startDate.day implicitly (startDate.day=1 here)
+    // So matches when (day - 1) % 5 === 0 → day=1,6,11,16...
     const noteData = {
       startDate: { year: 2024, month: 0, day: 1 },
       repeat: 'daily',
       repeatInterval: 1,
-      conditions: [
-        { field: 'day', op: '%', value: 5, offset: 0 } // Every 5th day
-      ]
+      conditions: [{ field: 'day', op: '%', value: 5 }]
     };
-    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 5 })).toBe(true);
-    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 10 })).toBe(true);
-    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 6 })).toBe(false);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 1 })).toBe(true);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 6 })).toBe(true);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 11 })).toBe(true);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 5 })).toBe(false);
   });
 
   it('repeating event with year condition', () => {
@@ -1318,14 +1319,13 @@ describe('condition operators', () => {
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 16 })).toBe(false);
   });
 
-  it('% operator with offset works correctly', () => {
+  it('% operator offsets from startDate implicitly', () => {
+    // startDate.day=3, so matches when (day - 3) % 7 === 0 → day=3,10,17...
     const noteData = {
-      startDate: { year: 2024, month: 0, day: 1 },
+      startDate: { year: 2024, month: 0, day: 3 },
       repeat: 'daily',
       repeatInterval: 1,
-      conditions: [
-        { field: 'day', op: '%', value: 7, offset: 3 } // (day - 3) % 7 === 0
-      ]
+      conditions: [{ field: 'day', op: '%', value: 7 }]
     };
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 3 })).toBe(true); // (3-3)%7=0
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, day: 10 })).toBe(true); // (10-3)%7=0
