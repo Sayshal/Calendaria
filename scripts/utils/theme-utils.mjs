@@ -134,39 +134,26 @@ export const COMPONENT_CATEGORIES = {
  * @type {Array<{key: string, label: string, category: string, component: string}>}
  */
 export const COLOR_DEFINITIONS = [
-  // Backgrounds
   { key: 'bg', label: 'CALENDARIA.ThemeEditor.Colors.Background', category: 'backgrounds', component: 'common' },
   { key: 'bgLighter', label: 'CALENDARIA.ThemeEditor.Colors.BackgroundLighter', category: 'backgrounds', component: 'common' },
   { key: 'bgHover', label: 'CALENDARIA.ThemeEditor.Colors.BackgroundHover', category: 'backgrounds', component: 'common' },
-
-  // Borders
   { key: 'border', label: 'CALENDARIA.ThemeEditor.Colors.Border', category: 'borders', component: 'common' },
   { key: 'borderLight', label: 'CALENDARIA.ThemeEditor.Colors.BorderLight', category: 'borders', component: 'common' },
-
-  // Text
   { key: 'text', label: 'CALENDARIA.ThemeEditor.Colors.Text', category: 'text', component: 'common' },
   { key: 'textDim', label: 'CALENDARIA.ThemeEditor.Colors.TextDim', category: 'text', component: 'common' },
   { key: 'titleText', label: 'CALENDARIA.ThemeEditor.Colors.TitleText', category: 'text', component: 'common' },
   { key: 'weekdayHeader', label: 'CALENDARIA.ThemeEditor.Colors.WeekdayHeader', category: 'text', component: 'miniCal' },
   { key: 'dayNumber', label: 'CALENDARIA.ThemeEditor.Colors.DayNumber', category: 'text', component: 'miniCal' },
   { key: 'restDay', label: 'CALENDARIA.ThemeEditor.Colors.RestDay', category: 'text', component: 'miniCal' },
-
-  // Buttons
   { key: 'buttonBg', label: 'CALENDARIA.ThemeEditor.Colors.ButtonBackground', category: 'buttons', component: 'common' },
   { key: 'buttonText', label: 'CALENDARIA.ThemeEditor.Colors.ButtonText', category: 'buttons', component: 'common' },
   { key: 'buttonBorder', label: 'CALENDARIA.ThemeEditor.Colors.ButtonBorder', category: 'buttons', component: 'common' },
-
-  // Accents
   { key: 'primary', label: 'CALENDARIA.ThemeEditor.Colors.Primary', category: 'accents', component: 'common' },
   { key: 'today', label: 'CALENDARIA.ThemeEditor.Colors.Today', category: 'accents', component: 'common' },
   { key: 'accent', label: 'CALENDARIA.ThemeEditor.Colors.Accent', category: 'accents', component: 'common' },
   { key: 'success', label: 'CALENDARIA.ThemeEditor.Colors.Success', category: 'accents', component: 'common' },
-
-  // Festivals
   { key: 'festivalBorder', label: 'CALENDARIA.ThemeEditor.Colors.FestivalBorder', category: 'festivals', component: 'common' },
   { key: 'festivalText', label: 'CALENDARIA.ThemeEditor.Colors.FestivalText', category: 'festivals', component: 'common' },
-
-  // Effects
   { key: 'shadow', label: 'CALENDARIA.ThemeEditor.Colors.Shadow', category: 'effects', component: 'common' },
   { key: 'overlay', label: 'CALENDARIA.ThemeEditor.Colors.Overlay', category: 'effects', component: 'common' }
 ];
@@ -178,9 +165,7 @@ export const COLOR_DEFINITIONS = [
 export function getColorsByCategory() {
   const grouped = {};
   for (const cat of Object.keys(COLOR_CATEGORIES)) grouped[cat] = [];
-  for (const def of COLOR_DEFINITIONS) {
-    if (grouped[def.category]) grouped[def.category].push(def);
-  }
+  for (const def of COLOR_DEFINITIONS) if (grouped[def.category]) grouped[def.category].push(def);
   return grouped;
 }
 
@@ -191,9 +176,7 @@ export function getColorsByCategory() {
 export function getColorsByComponent() {
   const grouped = {};
   for (const comp of Object.keys(COMPONENT_CATEGORIES)) grouped[comp] = [];
-  for (const def of COLOR_DEFINITIONS) {
-    if (grouped[def.component]) grouped[def.component].push(def);
-  }
+  for (const def of COLOR_DEFINITIONS) if (grouped[def.component]) grouped[def.component].push(def);
   return grouped;
 }
 
@@ -217,16 +200,7 @@ export class ThemePreset {
    * @returns {string} - JSON string
    */
   toJSON() {
-    return JSON.stringify(
-      {
-        name: this.name,
-        colors: this.colors,
-        version: this.version,
-        createdAt: this.createdAt
-      },
-      null,
-      2
-    );
+    return JSON.stringify({ name: this.name, colors: this.colors, version: this.version, createdAt: this.createdAt }, null, 2);
   }
 
   /**
@@ -235,16 +209,12 @@ export class ThemePreset {
    * @returns {ThemePreset|null} - Preset or null if invalid
    */
   static fromJSON(json) {
-    try {
-      const data = JSON.parse(json);
-      if (!data.name || !data.colors) return null;
-      const preset = new ThemePreset(data.name, data.colors);
-      preset.version = data.version || 1;
-      preset.createdAt = data.createdAt || Date.now();
-      return preset;
-    } catch {
-      return null;
-    }
+    const data = JSON.parse(json);
+    if (!data.name || !data.colors) return null;
+    const preset = new ThemePreset(data.name, data.colors);
+    preset.version = data.version || 1;
+    preset.createdAt = data.createdAt || Date.now();
+    return preset;
   }
 
   /**
@@ -268,12 +238,8 @@ export class ThemePreset {
    * @returns {Promise<ThemePreset|null>} - Preset or null if invalid
    */
   static async fromFile(file) {
-    try {
-      const text = await file.text();
-      return ThemePreset.fromJSON(text);
-    } catch {
-      return null;
-    }
+    const text = await file.text();
+    return ThemePreset.fromJSON(text);
   }
 }
 
@@ -284,11 +250,7 @@ export class ThemePreset {
  */
 export function hexToRgb(hex) {
   const h = hex.replace('#', '');
-  return {
-    r: parseInt(h.substring(0, 2), 16),
-    g: parseInt(h.substring(2, 4), 16),
-    b: parseInt(h.substring(4, 6), 16)
-  };
+  return { r: parseInt(h.substring(0, 2), 16), g: parseInt(h.substring(2, 4), 16), b: parseInt(h.substring(4, 6), 16) };
 }
 
 /**
@@ -421,21 +383,10 @@ export function applyCustomColors(colors) {
   }
 
   const cssVars = [];
-
-  // Apply base colors
-  for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) {
-    if (colors[key]) cssVars.push(`${cssVar}: ${colors[key]};`);
-  }
-
-  // Generate and apply derived colors
+  for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) if (colors[key]) cssVars.push(`${cssVar}: ${colors[key]};`);
   const derived = generateDerivedColors(colors);
-  for (const [cssVar, value] of Object.entries(derived)) {
-    cssVars.push(`${cssVar}: ${value};`);
-  }
-
+  for (const [cssVar, value] of Object.entries(derived)) cssVars.push(`${cssVar}: ${value};`);
   styleEl.textContent = `.calendaria {\n  ${cssVars.join('\n  ')}\n}`;
-
-  // Re-render open Calendaria applications
   const ids = ['calendaria-hud', 'time-keeper', 'mini-calendar', 'calendaria-big-cal', 'calendaria-stopwatch'];
   for (const id of ids) foundry.applications.instances.get(id)?.render();
 }

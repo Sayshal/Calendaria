@@ -6,8 +6,8 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -126,13 +126,10 @@ export default class WeatherManager {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this.#currentWeather;
     }
-
-    // Custom weather requires GM - too complex for socket relay
     if (!game.user.isGM) {
       ui.notifications.warn('CALENDARIA.Weather.Error.CustomRequiresGM', { localize: true });
       return this.#currentWeather;
     }
-
     const weather = {
       id: 'custom',
       label: weatherData.label,
@@ -147,7 +144,6 @@ export default class WeatherManager {
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
-
     await this.#saveWeather(weather, broadcast);
     return weather;
   }
@@ -160,7 +156,6 @@ export default class WeatherManager {
    */
   static async clearWeather(broadcast = true, fromSocket = false) {
     if (!fromSocket && !canChangeWeather()) return;
-    // Non-GM users with permission must request via socket
     if (!fromSocket && !game.user.isGM && canChangeWeather()) {
       CalendariaSocket.emit('weatherRequest', { action: 'clear' });
       return;
@@ -205,19 +200,15 @@ export default class WeatherManager {
       log(1, 'User lacks permission to generate weather');
       return this.#currentWeather;
     }
-
-    // Non-GM users with permission must request via socket
     if (!options.fromSocket && !game.user.isGM && canChangeWeather()) {
       CalendariaSocket.emit('weatherRequest', { action: 'generate', options: { zoneId: options.zoneId, season: options.season } });
       return this.#currentWeather;
     }
-
     const zoneConfig = this.getActiveZone(options.zoneId);
     const seasonData = this.#getCurrentSeason();
     const season = options.season || (seasonData ? localize(seasonData.name) : null);
     const seasonClimate = seasonData?.climate ?? null;
     const customPresets = this.getCustomPresets();
-
     let result;
     if (!zoneConfig && !seasonClimate) {
       log(2, 'No climate zone or season climate configured, using random preset');
@@ -230,7 +221,6 @@ export default class WeatherManager {
     } else {
       result = generateWeather({ seasonClimate, zoneConfig, season, customPresets });
     }
-
     const weather = {
       id: result.preset.id,
       label: result.preset.label,
@@ -244,7 +234,6 @@ export default class WeatherManager {
       setBy: game.user.id,
       generated: true
     };
-
     await this.#saveWeather(weather, options.broadcast !== false);
     return weather;
   }
@@ -368,12 +357,8 @@ export default class WeatherManager {
     const zone = zones.find((z) => z.id === zoneId);
     if (!zone) return;
     calendarData.weather.activeZone = zoneId;
-    // Use isBundledCalendar directly to avoid legacy data issues
-    if (isBundledCalendar(calendarId)) {
-      await CalendarManager.saveDefaultOverride(calendarId, calendarData);
-    } else {
-      await CalendarManager.updateCustomCalendar(calendarId, calendarData);
-    }
+    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, calendarData);
+    else await CalendarManager.updateCustomCalendar(calendarId, calendarData);
     log(3, `Active climate zone set to: ${zoneId}`);
   }
 

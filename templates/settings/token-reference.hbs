@@ -3,17 +3,17 @@
 
   <div class="token-groups">
     {{#each groups}}
-    <div class="token-group">
-      <h3 class="group-header">{{label}}</h3>
-      <div class="token-list">
-        {{#each tokens}}
-        <div class="token-item {{#if highlighted}}highlighted{{/if}} {{#if isCustom}}custom{{/if}}">
-          <code class="token-code">{{token}}</code>
-          <span class="token-description">{{description}}</span>
+      <div class="token-group">
+        <h3 class="group-header">{{label}}</h3>
+        <div class="token-list">
+          {{#each tokens}}
+            <div class="token-item {{#if highlighted}}highlighted{{/if}} {{#if isCustom}}custom{{/if}}">
+              <code class="token-code">{{token}}</code>
+              <span class="token-description">{{description}}</span>
+            </div>
+          {{/each}}
         </div>
-        {{/each}}
       </div>
-    </div>
     {{/each}}
   </div>
 

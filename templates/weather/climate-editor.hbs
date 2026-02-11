@@ -1,190 +1,187 @@
 <div class="standard-form">
 
-{{#if isZoneMode}}
-  <div class="form-group">
-    <label>{{localize "CALENDARIA.Common.Description"}}</label>
-    <div class="form-fields">
-      <textarea name="description">{{description}}</textarea>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label>{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier"}}</label>
-    <div class="form-fields">
-      <input type="range" name="brightnessMultiplier" min="0.5" max="1.5" step="0.1"
-        value="{{brightnessMultiplier}}">
-      <span class="brightness-label">{{brightnessMultiplier}}x</span>
-    </div>
-    <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplierHint"}}</p>
-  </div>
-
-  <fieldset>
-    <legend>{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLighting"}}</legend>
-    <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLightingHint"}}</p>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseHue"}}</label>
-      <div class="form-fields">
-        <input type="number" name="baseHue" min="0" max="360" step="1"
-          value="{{envBase.hue}}" placeholder="{{localize 'CALENDARIA.Common.Default'}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
-    </div>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseSaturation"}}</label>
-      <div class="form-fields">
-        <input type="number" name="baseSaturation" min="0" max="1" step="0.1"
-          value="{{envBase.saturation}}" placeholder="{{localize 'CALENDARIA.Common.Default'}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
-    </div>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkHue"}}</label>
-      <div class="form-fields">
-        <input type="number" name="darkHue" min="0" max="360" step="1"
-          value="{{envDark.hue}}" placeholder="{{localize 'CALENDARIA.Common.Default'}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
-    </div>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkSaturation"}}</label>
-      <div class="form-fields">
-        <input type="number" name="darkSaturation" min="0" max="1" step="0.1"
-          value="{{envDark.saturation}}" placeholder="{{localize 'CALENDARIA.Common.Default'}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
-    </div>
-  </fieldset>
-
-  <fieldset class="daylight-fieldset">
-    <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
-    <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHint"}}</p>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolstice"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="forceSolstice" {{#if hasManualDaylight}}checked{{/if}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolsticeHint"}}</p>
-    </div>
-    <div class="form-group daylight-latitude" {{#if hasManualDaylight}}hidden{{/if}}>
-      <label>{{localize "CALENDARIA.Editor.Weather.Zone.Latitude"}}</label>
-      <div class="form-fields">
-        <input type="number" name="latitude" min="-90" max="90" step="0.1"
-          value="{{latitude}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.LatitudeHint"}}</p>
-    </div>
-    <div class="form-group daylight-manual" {{#unless hasManualDaylight}}hidden{{/unless}}>
-      <label>{{localize "CALENDARIA.Editor.Field.ShortestDaySunlight"}}</label>
-      <div class="form-fields">
-        <input type="number" name="shortestDay" min="0" max="{{hoursPerDay}}" step="0.5"
-          value="{{zoneShortestDay}}" placeholder="{{defaultShortestDay}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHoursHint"}}</p>
-    </div>
-    <div class="form-group daylight-manual" {{#unless hasManualDaylight}}hidden{{/unless}}>
-      <label>{{localize "CALENDARIA.Editor.Field.LongestDaySunlight"}}</label>
-      <div class="form-fields">
-        <input type="number" name="longestDay" min="0" max="{{hoursPerDay}}" step="0.5"
-          value="{{zoneLongestDay}}" placeholder="{{defaultLongestDay}}">
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHoursHint"}}</p>
-    </div>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
-      <div class="form-fields">
-        <span class="solstice-value" data-daylight="shortest">{{shortestDayHours}}</span>
-        <span class="solstice-date">({{shortestDayDate}})</span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
-      <div class="form-fields">
-        <span class="solstice-value" data-daylight="longest">{{longestDayHours}}</span>
-        <span class="solstice-date">({{longestDayDate}})</span>
-      </div>
-    </div>
-  </fieldset>
-{{/if}}
-
-{{!-- Temperatures --}}
-<fieldset>
-  <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
-  <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
   {{#if isZoneMode}}
-  {{#each temperatureRows}}
-  <div class="form-group">
-    <label>{{this.label}}</label>
-    <div class="form-fields temperature">
-      <input type="number" name="temp_{{this.seasonName}}_min" value="{{this.min}}"
-        placeholder="{{localize 'CALENDARIA.Common.Low'}}">
-      <i class="fa-solid fa-right-long"></i>
-      <input type="number" name="temp_{{this.seasonName}}_max" value="{{this.max}}"
-        placeholder="{{localize 'CALENDARIA.Common.High'}}">
-    </div>
-  </div>
-  {{/each}}
-  {{else}}
-  <div class="form-group">
-    <div class="form-fields temperature">
-      <input type="number" name="tempMin" value="{{tempMin}}"
-        placeholder="{{localize 'CALENDARIA.Common.Low'}}">
-      <i class="fa-solid fa-right-long"></i>
-      <input type="number" name="tempMax" value="{{tempMax}}"
-        placeholder="{{localize 'CALENDARIA.Common.High'}}">
-    </div>
-    <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.TemperaturesHint"}}</p>
-  </div>
-  {{/if}}
-</fieldset>
-
-{{!-- Presets --}}
-<fieldset>
-  <legend>{{#if isZoneMode}}{{localize "CALENDARIA.Editor.Weather.ZonePresets"}}{{else}}{{localize "CALENDARIA.Editor.Season.Climate.WeatherChances"}}{{/if}}</legend>
-  {{#unless isZoneMode}}
-  <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.WeatherChancesHint"}}</p>
-  {{/unless}}
-  <div class="preset-list">
-    {{#each categories}}
-    <div class="preset-category">
-      <h4>{{this.label}}</h4>
-      {{#each this.presets}}
-      <div class="preset-row" data-preset-id="{{this.id}}">
-        {{#if ../../isZoneMode}}
-        <input type="checkbox" name="preset_{{this.id}}_enabled" {{#if this.enabled}}checked{{/if}}>
-        {{/if}}
-        <span class="preset-icon" style="color: {{this.color}}"><i class="fas {{this.icon}}"></i></span>
-        <span class="preset-name">
-          {{#if ../../isZoneMode}}
-          <input type="text" class="preset-alias-input" value="{{this.alias}}"
-            placeholder="{{this.label}}" data-preset-id="{{this.id}}" data-zone-id="{{../../zoneKey}}">
-          {{#if this.hasAlias}}
-          <button type="button" class="preset-reset-alias icon-btn" data-action="resetAlias"
-            data-preset-id="{{this.id}}" data-tooltip
-            aria-label="{{localize 'CALENDARIA.Common.Reset'}}">
-            <i class="fas fa-undo"></i>
-          </button>
-          {{/if}}
-          {{else}}
-          <label>{{this.label}}</label>
-          {{/if}}
-        </span>
-        <input type="number" name="preset_{{this.id}}{{#if ../../isZoneMode}}_chance{{/if}}"
-          value="{{this.chance}}" min="0" max="100" step="{{#if ../../isZoneMode}}0.01{{else}}0.1{{/if}}"
-          placeholder="{{#if ../../isZoneMode}}0.00{{else}}—{{/if}}">
-        <span class="units">%</span>
-        {{#if ../../isZoneMode}}
-        <input type="number" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}"
-          placeholder="—" class="preset-temp-input">
-        <span>–</span>
-        <input type="number" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}"
-          placeholder="—" class="preset-temp-input">
-        <span class="units">{{../../../tempLabel}}</span>
-        {{/if}}
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.Description"}}</label>
+      <div class="form-fields">
+        <textarea name="description">{{description}}</textarea>
       </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier"}}</label>
+      <div class="form-fields">
+        <input type="range" name="brightnessMultiplier" min="0.5" max="1.5" step="0.1" value="{{brightnessMultiplier}}">
+        <span class="brightness-label">{{brightnessMultiplier}}x</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplierHint"}}</p>
+    </div>
+
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLighting"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLightingHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="baseHue" min="0" max="360" step="1" value="{{envBase.hue}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseSaturation"}}</label>
+        <div class="form-fields">
+          <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="{{envBase.saturation}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="darkHue" min="0" max="360" step="1" value="{{envDark.hue}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkSaturation"}}</label>
+        <div class="form-fields">
+          <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="{{envDark.saturation}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
+      </div>
+    </fieldset>
+
+    <fieldset class="daylight-fieldset">
+      <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolstice"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="forceSolstice" {{#if hasManualDaylight}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolsticeHint"}}</p>
+      </div>
+      <div class="form-group daylight-latitude" {{#if hasManualDaylight}}hidden{{/if}}>
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.Latitude"}}</label>
+        <div class="form-fields">
+          <input type="number" name="latitude" min="-90" max="90" step="0.1" value="{{latitude}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.LatitudeHint"}}</p>
+      </div>
+      <div class="form-group daylight-manual" {{#unless hasManualDaylight}}hidden{{/unless}}>
+        <label>{{localize "CALENDARIA.Editor.Field.ShortestDaySunlight"}}</label>
+        <div class="form-fields">
+          <input type="number" name="shortestDay" min="0" max="{{hoursPerDay}}" step="0.5" value="{{zoneShortestDay}}"
+            placeholder="{{defaultShortestDay}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHoursHint"}}</p>
+      </div>
+      <div class="form-group daylight-manual" {{#unless hasManualDaylight}}hidden{{/unless}}>
+        <label>{{localize "CALENDARIA.Editor.Field.LongestDaySunlight"}}</label>
+        <div class="form-fields">
+          <input type="number" name="longestDay" min="0" max="{{hoursPerDay}}" step="0.5" value="{{zoneLongestDay}}"
+            placeholder="{{defaultLongestDay}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHoursHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
+        <div class="form-fields">
+          <span class="solstice-value" data-daylight="shortest">{{shortestDayHours}}</span>
+          <span class="solstice-date">({{shortestDayDate}})</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
+        <div class="form-fields">
+          <span class="solstice-value" data-daylight="longest">{{longestDayHours}}</span>
+          <span class="solstice-date">({{longestDayDate}})</span>
+        </div>
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{!-- Temperatures --}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
+    <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
+    {{#if isZoneMode}}
+      {{#each temperatureRows}}
+        <div class="form-group">
+          <label>{{this.label}}</label>
+          <div class="form-fields temperature">
+            <input type="number" name="temp_{{this.seasonName}}_min" value="{{this.min}}"
+              placeholder="{{localize 'CALENDARIA.Common.Low'}}">
+            <i class="fa-solid fa-right-long"></i>
+            <input type="number" name="temp_{{this.seasonName}}_max" value="{{this.max}}"
+              placeholder="{{localize 'CALENDARIA.Common.High'}}">
+          </div>
+        </div>
+      {{/each}}
+    {{else}}
+      <div class="form-group">
+        <div class="form-fields temperature">
+          <input type="number" name="tempMin" value="{{tempMin}}" placeholder="{{localize 'CALENDARIA.Common.Low'}}">
+          <i class="fa-solid fa-right-long"></i>
+          <input type="number" name="tempMax" value="{{tempMax}}" placeholder="{{localize 'CALENDARIA.Common.High'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.TemperaturesHint"}}</p>
+      </div>
+    {{/if}}
+  </fieldset>
+
+  {{!-- Presets --}}
+  <fieldset>
+    <legend>
+      {{#if isZoneMode}}{{localize "CALENDARIA.Editor.Weather.ZonePresets"}}{{else}}{{localize "CALENDARIA.Editor.Season.Climate.WeatherChances"}}{{/if}}
+    </legend>
+    {{#unless isZoneMode}}
+      <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.WeatherChancesHint"}}</p>
+    {{/unless}}
+    <div class="preset-list">
+      {{#each categories}}
+        <div class="preset-category">
+          <h4>{{this.label}}</h4>
+          {{#each this.presets}}
+            <div class="preset-row" data-preset-id="{{this.id}}">
+              {{#if ../../isZoneMode}}
+                <input type="checkbox" name="preset_{{this.id}}_enabled" {{#if this.enabled}}checked{{/if}}>
+              {{/if}}
+              <span class="preset-icon" style="color: {{this.color}}"><i class="fas {{this.icon}}"></i></span>
+              <span class="preset-name">
+                {{#if ../../isZoneMode}}
+                  <input type="text" class="preset-alias-input" value="{{this.alias}}" placeholder="{{this.label}}"
+                    data-preset-id="{{this.id}}" data-zone-id="{{../../zoneKey}}">
+                  {{#if this.hasAlias}}
+                    <button type="button" class="preset-reset-alias icon-btn" data-action="resetAlias"
+                      data-preset-id="{{this.id}}" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Reset'}}">
+                      <i class="fas fa-undo"></i>
+                    </button>
+                  {{/if}}
+                {{else}}
+                  <label>{{this.label}}</label>
+                {{/if}}
+              </span>
+              <input type="number" name="preset_{{this.id}}{{#if ../../isZoneMode}}_chance{{/if}}"
+                value="{{this.chance}}" min="0" max="100" step="{{#if ../../isZoneMode}}0.01{{else}}0.1{{/if}}"
+                placeholder="{{#if ../../isZoneMode}}0.00{{else}}—{{/if}}">
+              <span class="units">%</span>
+              {{#if ../../isZoneMode}}
+                <input type="number" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
+                  class="preset-temp-input">
+                <span>–</span>
+                <input type="number" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
+                  class="preset-temp-input">
+                <span class="units">{{../../../tempLabel}}</span>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
       {{/each}}
     </div>
-    {{/each}}
-  </div>
-</fieldset>
+  </fieldset>
 
 </div>

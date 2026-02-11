@@ -6,9 +6,9 @@
         <select id="editor-calendar-select" name="calendarSelect">
           <option value="">{{localize "CALENDARIA.Editor.SelectCalendar"}}</option>
           {{#each templates}}
-          <option value="{{this.id}}">{{this.name}}{{#if this.isCustom}}
-            ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
-          </option>
+            <option value="{{this.id}}">{{this.name}}{{#if this.isCustom}}
+                ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+            </option>
           {{/each}}
         </select>
       </div>
@@ -26,7 +26,9 @@
   </div>
 
   <fieldset>
-    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.CalendarIdentity'}}">{{localize "CALENDARIA.Editor.Section.CalendarIdentity"}}</legend>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.CalendarIdentity'}}">
+      {{localize "CALENDARIA.Editor.Section.CalendarIdentity"}}
+    </legend>
 
     <div class="form-group">
       <label for="editor-name">{{localize "CALENDARIA.Common.Name"}}</label>

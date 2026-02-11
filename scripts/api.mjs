@@ -17,7 +17,6 @@ import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes } from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
-
 import * as WidgetManager from './utils/widget-manager.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
 

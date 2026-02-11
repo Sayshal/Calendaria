@@ -7,12 +7,12 @@
     </div>
     <svg class="dial-markers" viewBox="0 0 200 200">
       {{#each hourMarkers}}
-      <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" stroke="rgba(255, 255, 255, 0.5)"
-        stroke-width="{{strokeWidth}}"/>
-      {{#if showLabel}}
-      <text x="{{textX}}" y="{{textY}}" text-anchor="middle" dominant-baseline="middle"
-        fill="rgba(255, 255, 255, 0.8)" font-size="12" font-weight="bold">{{hour}}</text>
-      {{/if}}
+        <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" stroke="rgba(255, 255, 255, 0.5)"
+          stroke-width="{{strokeWidth}}" />
+        {{#if showLabel}}
+          <text x="{{textX}}" y="{{textY}}" text-anchor="middle" dominant-baseline="middle"
+            fill="rgba(255, 255, 255, 0.8)" font-size="12" font-weight="bold">{{hour}}</text>
+        {{/if}}
       {{/each}}
     </svg>
     <div class="dial-handle-container">

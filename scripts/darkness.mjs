@@ -26,7 +26,6 @@ let lastHour = null;
  */
 export function calculateDarknessFromTime(hours, minutes, hoursPerDay = 24, minutesPerHour = 60, sunrise = null, sunset = null) {
   const currentHour = hours + minutes / minutesPerHour;
-  // Fallback: symmetric cosine centered on midnight (original behavior)
   if (sunrise == null || sunset == null) {
     const dayProgress = currentHour / hoursPerDay;
     const darkness = (Math.cos(dayProgress * 2 * Math.PI) + 1) / 2;
@@ -34,12 +33,10 @@ export function calculateDarknessFromTime(hours, minutes, hoursPerDay = 24, minu
   }
   const daylightHours = sunset - sunrise;
   const nightHours = hoursPerDay - daylightHours;
-  // Daytime: cosine ramp from 0 at sunrise to 0 at sunset, minimum (brightest) at midday
   if (currentHour >= sunrise && currentHour < sunset) {
     const dayProgress = (currentHour - sunrise) / daylightHours;
     return Math.max(0, Math.min(1, (Math.cos(dayProgress * Math.PI * 2 - Math.PI) + 1) / 2));
   }
-  // Nighttime: cosine ramp from 0 at sunset to 0 at sunrise, maximum (darkest) at midnight
   let nightProgress;
   if (currentHour >= sunset) nightProgress = (currentHour - sunset) / nightHours;
   else nightProgress = (currentHour + hoursPerDay - sunset) / nightHours;
@@ -105,10 +102,7 @@ export function calculateEnvironmentLighting(scene) {
   if (currentWeather?.environmentDark?.hue != null) darkHue = currentWeather.environmentDark.hue;
   if (currentWeather?.environmentDark?.saturation != null) darkSaturation = currentWeather.environmentDark.saturation;
   if (baseHue === null && baseSaturation === null && darkHue === null && darkSaturation === null) return null;
-  return {
-    base: { hue: baseHue, saturation: baseSaturation },
-    dark: { hue: darkHue, saturation: darkSaturation }
-  };
+  return { base: { hue: baseHue, saturation: baseSaturation }, dark: { hue: darkHue, saturation: darkSaturation } };
 }
 
 /**
@@ -209,13 +203,6 @@ export async function updateDarknessFromWorldTime(worldTime, _dt) {
 }
 
 /**
- * Reset darkness tracking state (call on scene change).
- */
-export function resetDarknessState() {
-  lastHour = null;
-}
-
-/**
  * Determine if a scene should have its darkness synced with time.
  * @param {object} scene - The scene to check
  * @returns {boolean} True if darkness should be synced
@@ -235,9 +222,7 @@ function shouldSyncSceneDarkness(scene) {
  * @returns {object[]} Array of scene documents with darkness sync enabled
  */
 function getDarknessScenes() {
-  if (game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES)) {
-    return game.scenes.filter((scene) => shouldSyncSceneDarkness(scene));
-  }
+  if (game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES)) return game.scenes.filter((scene) => shouldSyncSceneDarkness(scene));
   const activeScene = game.scenes.active;
   if (!activeScene || !shouldSyncSceneDarkness(activeScene)) return [];
   return [activeScene];
@@ -274,18 +259,10 @@ export async function onWeatherChange() {
 export async function onUpdateScene(scene, change) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   if (!change.active) return;
-
-  // Hide/show HUD for players based on scene flag
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS)) {
-    CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: false });
-    log(3, `Scene "${scene.name}" activated with HUD hidden for players`);
-  } else {
-    CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: true });
-    log(3, `Scene "${scene.name}" activated, restoring HUD for players`);
-  }
-
+  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS)) CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: false });
+  else CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: true });
   if (!shouldSyncSceneDarkness(scene)) return;
-  resetDarknessState();
+  lastHour = null;
   const calendar = game.time.calendar;
   const components = game.time.components;
   const currentHour = components?.hour ?? 0;

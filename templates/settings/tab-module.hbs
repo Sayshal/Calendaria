@@ -1,67 +1,67 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-  <fieldset data-section="module-sync">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.Sync"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="module-sync" data-tooltip
-        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
-    </legend>
+    <fieldset data-section="module-sync">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Sync"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="module-sync" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+      </legend>
 
-    <div class="form-group">
-      <label for="primaryGM">{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
-      <div class="form-fields">
-        <select id="primaryGM" name="primaryGM">
-          {{#each primaryGMOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-          {{/each}}
-        </select>
+      <div class="form-group">
+        <label for="primaryGM">{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
+        <div class="form-fields">
+          <select id="primaryGM" name="primaryGM">
+            {{#each primaryGMOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
 
-  <fieldset data-section="module-integration">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.Integration"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="module-integration"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-          class="fas fa-undo"></i></button>
-    </legend>
+    <fieldset data-section="module-integration">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Integration"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="module-integration"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
 
-    <div class="form-group">
-      <label for="showToolbarButton">{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="showToolbarButton" name="showToolbarButton"
-          {{#if showToolbarButton}}checked{{/if}}>
+      <div class="form-group">
+        <label for="showToolbarButton">{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="showToolbarButton" name="showToolbarButton"
+            {{#if showToolbarButton}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowToolbarButton.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.ShowToolbarButton.Hint"}}</p>
-    </div>
 
-    <div class="form-group{{#unless showToolbarButton}} disabled{{/unless}}">
-      <label>{{localize "CALENDARIA.Settings.ToolbarApps.Name"}}</label>
-      <div class="form-fields toolbar-apps-checkboxes">
-        {{#each toolbarAppOptions}}
-        <label class="checkbox-inline" data-tooltip aria-label="{{this.label}}">
-          <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}
+      <div class="form-group{{#unless showToolbarButton}} disabled{{/unless}}">
+        <label>{{localize "CALENDARIA.Settings.ToolbarApps.Name"}}</label>
+        <div class="form-fields toolbar-apps-checkboxes">
+          {{#each toolbarAppOptions}}
+            <label class="checkbox-inline" data-tooltip aria-label="{{this.label}}">
+              <input type="checkbox" name="toolbarApps" value="{{this.id}}" {{#if this.checked}}checked{{/if}}
                 {{#unless ../showToolbarButton}}disabled aria-disabled="true" data-tooltip
                 aria-label="{{localize "CALENDARIA.Settings.ToolbarApps.DisabledTitle"}}" {{/unless}}>
-          <i class="fas {{this.icon}}"></i>
-        </label>
-        {{/each}}
+              <i class="fas {{this.icon}}"></i>
+            </label>
+          {{/each}}
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ToolbarApps.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.ToolbarApps.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label for="showJournalFooter">{{localize "CALENDARIA.Settings.ShowJournalFooter.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="showJournalFooter" name="showJournalFooter"
-          {{#if showJournalFooter}}checked{{/if}}>
+      <div class="form-group">
+        <label for="showJournalFooter">{{localize "CALENDARIA.Settings.ShowJournalFooter.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="showJournalFooter" name="showJournalFooter"
+            {{#if showJournalFooter}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowJournalFooter.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.ShowJournalFooter.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
   {{/if}}
 
   <fieldset data-section="module-debugging">
@@ -77,7 +77,7 @@
       <div class="form-fields">
         <select id="loggingLevel" name="loggingLevel">
           {{#each loggingLevelOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -85,42 +85,42 @@
     </div>
 
     {{#if isGM}}
-    <div class="form-group">
-      <label for="devMode">{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="devMode" name="devMode" {{#if devMode}}checked{{/if}}>
+      <div class="form-group">
+        <label for="devMode">{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="devMode" name="devMode" {{#if devMode}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
-    </div>
     {{/if}}
   </fieldset>
 
   {{#if isGM}}
-  <fieldset data-section="module-data">
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Data"}}</legend>
+    <fieldset data-section="module-data">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Data"}}</legend>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.SettingsPanel.ExportSettings.Name"}}</label>
-      <div class="form-fields">
-        <button type="button" data-action="exportSettings" class="link-button">
-          <i class="fas fa-file-export"></i>
-          {{localize "CALENDARIA.SettingsPanel.ExportSettings.Label"}}
-        </button>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.ExportSettings.Name"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="exportSettings" class="link-button">
+            <i class="fas fa-file-export"></i>
+            {{localize "CALENDARIA.SettingsPanel.ExportSettings.Label"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.ExportSettings.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.SettingsPanel.ExportSettings.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.SettingsPanel.ImportSettings.Name"}}</label>
-      <div class="form-fields">
-        <button type="button" data-action="importSettings" class="link-button">
-          <i class="fas fa-file-import"></i>
-          {{localize "CALENDARIA.SettingsPanel.ImportSettings.Label"}}
-        </button>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.ImportSettings.Name"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="importSettings" class="link-button">
+            <i class="fas fa-file-import"></i>
+            {{localize "CALENDARIA.SettingsPanel.ImportSettings.Label"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.ImportSettings.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.SettingsPanel.ImportSettings.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
   {{/if}}
 
   <fieldset data-section="about">
@@ -137,10 +137,10 @@
           <span class="info-value">Tyler</span>
         </div>
         {{#if translations}}
-        <div class="info-row">
-          <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Translations"}}</span>
-          <span class="info-value">{{translations}}</span>
-        </div>
+          <div class="info-row">
+            <span class="info-label">{{localize "CALENDARIA.SettingsPanel.About.Translations"}}</span>
+            <span class="info-value">{{translations}}</span>
+          </div>
         {{/if}}
       </div>
       <a href="https://ko-fi.com/sayshal" target="_blank" class="kofi-button">

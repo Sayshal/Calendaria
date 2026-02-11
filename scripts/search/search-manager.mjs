@@ -6,8 +6,8 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
 import { getAllCategories } from '../notes/note-data.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 

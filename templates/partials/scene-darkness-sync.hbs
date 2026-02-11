@@ -34,14 +34,14 @@
       {{localize "CALENDARIA.Scene.ClimateZoneOverride.Choices.Default"}}
     </option>
     {{#each climateZones}}
-    <option value="{{this.id}}" {{#if (eq this.id ../climateZoneOverride)}}selected{{/if}}>
-      {{this.name}}
-    </option>
+      <option value="{{this.id}}" {{#if (eq this.id ../climateZoneOverride)}}selected{{/if}}>
+        {{this.name}}
+      </option>
     {{/each}}
   </select>
   {{#if climateZones.length}}
-  <p class="hint">{{localize "CALENDARIA.Scene.ClimateZoneOverride.Hint"}}</p>
+    <p class="hint">{{localize "CALENDARIA.Scene.ClimateZoneOverride.Hint"}}</p>
   {{else}}
-  <p class="hint">{{localize "CALENDARIA.Scene.ClimateZoneOverride.NoZones"}}</p>
+    <p class="hint">{{localize "CALENDARIA.Scene.ClimateZoneOverride.NoZones"}}</p>
   {{/if}}
 </div>

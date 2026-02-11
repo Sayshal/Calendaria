@@ -7,9 +7,9 @@
 
     <h2 class="calendar-title">
       {{#if calendarData}} {{#if (eq displayMode 'week')}} {{{calendarData.formattedHeader}}}
-      {{else if (eq displayMode 'year')}}
-      {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
-      {{else}} {{{calendarData.formattedHeader}}} {{/if}}
+        {{else if (eq displayMode 'year')}}
+          {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
+        {{else}} {{{calendarData.formattedHeader}}} {{/if}}
       {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
     </h2>
 
@@ -20,13 +20,13 @@
   </div>
 
   {{#if (or calendarData.currentSeason calendarData.currentEra cycleText weather editable widgets.hasIndicators)}}
-  <div class="calendar-indicators">
-    {{{widgets.weatherIndicator}}}
-    {{{widgets.seasonIndicator}}}
-    {{{widgets.eraIndicator}}}
-    {{{widgets.cycleIndicator}}}
-    {{{widgets.indicators}}}
-  </div>
+    <div class="calendar-indicators">
+      {{{widgets.weatherIndicator}}}
+      {{{widgets.seasonIndicator}}}
+      {{{widgets.eraIndicator}}}
+      {{{widgets.cycleIndicator}}}
+      {{{widgets.indicators}}}
+    </div>
   {{/if}}
   {{#if (eq displayMode 'year')}} {{> "modules/calendaria/templates/sheets/calendar-year.hbs"}}
   {{else if (eq displayMode 'week')}} {{> "modules/calendaria/templates/sheets/calendar-week.hbs"}}

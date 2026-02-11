@@ -1,110 +1,110 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-  <div class="button-row app-controls">
-    <button type="button" data-action="resetPosition" data-target="stopwatch">
-      <i class="fas fa-undo"></i>
-      {{localize "CALENDARIA.Common.ResetPosition"}}
-    </button>
-    <button type="button" data-action="closeStopwatch">
-      <i class="fas fa-times"></i>
-      {{localize "CALENDARIA.SettingsPanel.CloseStopwatch"}}
-    </button>
-    <button type="button" data-action="openStopwatch">
-      <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenStopwatch"}}
-    </button>
-  </div>
-  <p class="hint section-hint">{{openHint}}</p>
-
-  <fieldset data-section="stopwatch-display">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-display"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-          class="fas fa-undo"></i></button>
-    </legend>
-
-    <div class="form-group">
-      <label for="stopwatchAutoStartTime">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="stopwatchAutoStartTime" name="stopwatchAutoStartTime"
-          {{#if stopwatchAutoStartTime}}checked{{/if}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Hint"}}</p>
+    <div class="button-row app-controls">
+      <button type="button" data-action="resetPosition" data-target="stopwatch">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
+      </button>
+      <button type="button" data-action="closeStopwatch">
+        <i class="fas fa-times"></i>
+        {{localize "CALENDARIA.SettingsPanel.CloseStopwatch"}}
+      </button>
+      <button type="button" data-action="openStopwatch">
+        <i class="fas fa-external-link-alt"></i>
+        {{localize "CALENDARIA.SettingsPanel.OpenStopwatch"}}
+      </button>
     </div>
-  </fieldset>
+    <p class="hint section-hint">{{openHint}}</p>
 
-  <fieldset data-section="stopwatch-formats">
-    <legend>
-      {{localize "CALENDARIA.Format.Category.Stopwatch"}}
-      <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="stopwatch"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
-          class="fa-solid fa-question"></i></button>
-    </legend>
-    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+    <fieldset data-section="stopwatch-display">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-display"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
 
-    {{#each formatLocations}}
-    <div class="format-location" data-location="{{id}}">
       <div class="form-group">
-        <label>{{label}}</label>
-      </div>
-
-      <div class="format-row">
-        <div class="format-column">
-          <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
-              data-location="{{id}}" data-role="gm"></span></span>
-          <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-            {{#each gmPresetOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-          <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-            placeholder="HH:mm:ss.SSS" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-            data-location="{{id}}" data-role="gm">
+        <label for="stopwatchAutoStartTime">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="stopwatchAutoStartTime" name="stopwatchAutoStartTime"
+            {{#if stopwatchAutoStartTime}}checked{{/if}}>
         </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Hint"}}</p>
+      </div>
+    </fieldset>
 
-        <div class="format-column">
-          <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
-              data-location="{{id}}" data-role="player"></span></span>
-          <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-            {{#each playerPresetOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-          <input type="text" name="displayFormats.{{id}}.playerCustom"
-            value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="HH:mm:ss.SSS"
-            class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
-            data-role="player">
+    <fieldset data-section="stopwatch-formats">
+      <legend>
+        {{localize "CALENDARIA.Format.Category.Stopwatch"}}
+        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="stopwatch"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+            class="fa-solid fa-question"></i></button>
+      </legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+
+      {{#each formatLocations}}
+        <div class="format-location" data-location="{{id}}">
+          <div class="form-group">
+            <label>{{label}}</label>
+          </div>
+
+          <div class="format-row">
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="gm"></span></span>
+              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+                {{#each gmPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+                placeholder="HH:mm:ss.SSS" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                data-location="{{id}}" data-role="gm">
+            </div>
+
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="player"></span></span>
+              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+                {{#each playerPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.playerCustom"
+                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="HH:mm:ss.SSS"
+                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+                data-role="player">
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    {{/each}}
-  </fieldset>
+      {{/each}}
+    </fieldset>
 
-  <fieldset data-section="stopwatch-sticky">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-sticky"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-          class="fas fa-undo"></i></button>
-    </legend>
-    <input type="hidden" name="stopwatchStickySection" value="1">
+    <fieldset data-section="stopwatch-sticky">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-sticky"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
+      <input type="hidden" name="stopwatchStickySection" value="1">
 
-    <div class="form-group">
-      <label for="stopwatchStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="stopwatchStickyPosition" name="stopwatchStickyPosition"
-          {{#if stopwatchStickyPosition}}checked{{/if}}>
+      <div class="form-group">
+        <label for="stopwatchStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="stopwatchStickyPosition" name="stopwatchStickyPosition"
+            {{#if stopwatchStickyPosition}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
   {{else}}
-  <div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.StopwatchTab.PlayerMessage"}}</p>
-  </div>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.StopwatchTab.PlayerMessage"}}</p>
+    </div>
   {{/if}}
 
 </section>

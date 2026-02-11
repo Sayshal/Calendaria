@@ -18,6 +18,7 @@ import { overrideChatLogTimestamps } from './scripts/chat/chat-timestamp.mjs';
 import { HOOKS, JOURNALS, MODULE, SETTINGS, SHEETS, TEMPLATES } from './scripts/constants.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/index.mjs';
+import { initializeChatCommander } from './scripts/integrations/chat-commander.mjs';
 import NoteManager from './scripts/notes/note-manager.mjs';
 import { registerReadySettings, registerSettings } from './scripts/settings.mjs';
 import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model.mjs';
@@ -26,15 +27,14 @@ import EventScheduler from './scripts/time/event-scheduler.mjs';
 import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
 import TimeClock from './scripts/time/time-clock.mjs';
 import TimeTracker from './scripts/time/time-tracker.mjs';
-import { runAllMigrations } from './scripts/utils/migrations.mjs';
 import { registerKeybindings } from './scripts/utils/keybinds.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
+import { runAllMigrations } from './scripts/utils/migrations.mjs';
 import * as Permissions from './scripts/utils/permissions.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import * as StickyZones from './scripts/utils/sticky-zones.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
-import { initializeChatCommander } from './scripts/integrations/chat-commander.mjs';
 
 const { canViewMiniCal, canViewTimeKeeper } = Permissions;
 

@@ -8,8 +8,8 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendariaCalendar from '../calendar/data/calendaria-calendar.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
-import { fromDisplayUnit, toDisplayUnit } from '../weather/climate-data.mjs';
 import { format, localize } from '../utils/localization.mjs';
+import { fromDisplayUnit, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;

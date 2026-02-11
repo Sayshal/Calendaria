@@ -5,97 +5,97 @@
     <legend>{{localize "CALENDARIA.Note.ComputedChain"}}</legend>
 
     {{#each chain}}
-    <div class="chain-step" data-index="{{index}}">
-      <header class="step-header">
-        <span class="step-label">{{localize "CALENDARIA.Note.ComputedStep" num=(math index "+" 1)}}</span>
-        <button type="button" class="remove-step" data-action="removeStep" data-index="{{index}}" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Note.ComputedRemoveStep'}}">
-          <i class="fas fa-times"></i>
-        </button>
-      </header>
+      <div class="chain-step" data-index="{{index}}">
+        <header class="step-header">
+          <span class="step-label">{{localize "CALENDARIA.Note.ComputedStep" num=(math index "+" 1)}}</span>
+          <button type="button" class="remove-step" data-action="removeStep" data-index="{{index}}" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Note.ComputedRemoveStep'}}">
+            <i class="fas fa-times"></i>
+          </button>
+        </header>
 
-      <div class="step-content">
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Note.ComputedStepType"}}</label>
-          <select name="chain.{{index}}.type">
-            {{#each ../stepTypes}}
-            <option value="{{value}}" {{#if (eq value ../type)}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </div>
+        <div class="step-content">
+          <div class="form-group">
+            <label>{{localize "CALENDARIA.Note.ComputedStepType"}}</label>
+            <select name="chain.{{index}}.type">
+              {{#each ../stepTypes}}
+                <option value="{{value}}" {{#if (eq value ../type)}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </div>
 
-        {{#if isAnchor}}
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Note.ComputedAnchor"}}</label>
-          <select name="chain.{{index}}.value">
-            {{#each ../anchorTypes}}
-            <option value="{{value}}" {{#if (eq value ../value)}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        {{/if}}
+          {{#if isAnchor}}
+            <div class="form-group">
+              <label>{{localize "CALENDARIA.Note.ComputedAnchor"}}</label>
+              <select name="chain.{{index}}.value">
+                {{#each ../anchorTypes}}
+                  <option value="{{value}}" {{#if (eq value ../value)}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+            </div>
+          {{/if}}
 
-        {{#if isFirstAfter}}
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Note.ComputedCondition"}}</label>
-          <select name="chain.{{index}}.condition">
-            {{#each ../conditionTypes}}
-            <option value="{{value}}" {{#if (eq value ../condition)}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </div>
+          {{#if isFirstAfter}}
+            <div class="form-group">
+              <label>{{localize "CALENDARIA.Note.ComputedCondition"}}</label>
+              <select name="chain.{{index}}.condition">
+                {{#each ../conditionTypes}}
+                  <option value="{{value}}" {{#if (eq value ../condition)}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+            </div>
 
-        {{#if isMoonPhase}}
-        <div class="form-group">
-          <label>Moon</label>
-          <select name="chain.{{index}}.params.moon">
-            {{#each ../moons}}
-            <option value="{{index}}" {{#if (eq index ../params.moon)}}selected{{/if}}>{{name}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Phase</label>
-          <select name="chain.{{index}}.params.phase">
-            {{#each ../moonPhases}}
-            <option value="{{this}}" {{#if (eq this ../params.phase)}}selected{{/if}}>{{capitalize this}}
-            </option>
-            {{/each}}
-          </select>
-        </div>
-        {{/if}}
+            {{#if isMoonPhase}}
+              <div class="form-group">
+                <label>Moon</label>
+                <select name="chain.{{index}}.params.moon">
+                  {{#each ../moons}}
+                    <option value="{{index}}" {{#if (eq index ../params.moon)}}selected{{/if}}>{{name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Phase</label>
+                <select name="chain.{{index}}.params.phase">
+                  {{#each ../moonPhases}}
+                    <option value="{{this}}" {{#if (eq this ../params.phase)}}selected{{/if}}>{{capitalize this}}
+                    </option>
+                  {{/each}}
+                </select>
+              </div>
+            {{/if}}
 
-        {{#if isWeekdayCondition}}
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Note.ComputedWeekday"}}</label>
-          <select name="chain.{{index}}.params.weekday">
-            {{#each ../weekdays}}
-            <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
-            {{/each}}
-          </select>
-        </div>
-        {{/if}}
-        {{/if}}
+            {{#if isWeekdayCondition}}
+              <div class="form-group">
+                <label>{{localize "CALENDARIA.Note.ComputedWeekday"}}</label>
+                <select name="chain.{{index}}.params.weekday">
+                  {{#each ../weekdays}}
+                    <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+            {{/if}}
+          {{/if}}
 
-        {{#if isDaysAfter}}
-        <div class="form-group">
-          <label>Days</label>
-          <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}">
-        </div>
-        {{/if}}
+          {{#if isDaysAfter}}
+            <div class="form-group">
+              <label>Days</label>
+              <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}">
+            </div>
+          {{/if}}
 
-        {{#if isWeekdayOnOrAfter}}
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Note.ComputedWeekday"}}</label>
-          <select name="chain.{{index}}.params.weekday">
-            {{#each ../weekdays}}
-            <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
-            {{/each}}
-          </select>
+          {{#if isWeekdayOnOrAfter}}
+            <div class="form-group">
+              <label>{{localize "CALENDARIA.Note.ComputedWeekday"}}</label>
+              <select name="chain.{{index}}.params.weekday">
+                {{#each ../weekdays}}
+                  <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          {{/if}}
         </div>
-        {{/if}}
       </div>
-    </div>
     {{/each}}
 
     <button type="button" class="add-step" data-action="addStep">
@@ -108,18 +108,18 @@
     <p class="hint">{{localize "CALENDARIA.Note.ComputedOverridesHint"}}</p>
 
     {{#each overrides}}
-    <div class="override-row" data-year="{{year}}">
-      <span class="override-year">{{year}}:</span>
-      <select name="override.{{year}}.month">
-        {{#each ../months}}
-        <option value="{{index}}" {{#if (eq index ../month)}}selected{{/if}}>{{name}}</option>
-        {{/each}}
-      </select>
-      <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31">
-      <button type="button" class="remove-override" data-action="removeOverride" data-year="{{year}}">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
+      <div class="override-row" data-year="{{year}}">
+        <span class="override-year">{{year}}:</span>
+        <select name="override.{{year}}.month">
+          {{#each ../months}}
+            <option value="{{index}}" {{#if (eq index ../month)}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+        <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31">
+        <button type="button" class="remove-override" data-action="removeOverride" data-year="{{year}}">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
     {{/each}}
 
     <button type="button" class="add-override" data-action="addOverride">

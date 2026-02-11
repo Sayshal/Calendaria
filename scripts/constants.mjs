@@ -7,16 +7,26 @@
 /** Module identification */
 export const MODULE = {
   ID: 'calendaria',
-  TITLE: 'Calendaria',
-  LOG_LEVEL: 0
+  LOG_LEVEL: 0,
+  TITLE: 'Calendaria'
 };
 
 /** @enum {string} Settings keys for Foundry VTT game settings */
 export const SETTINGS = {
   ACTIVE_CALENDAR: 'activeCalendar',
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
-  AMBIENCE_SYNC: 'ambienceSync',
   ALLOW_SIDEBAR_OVERLAP: 'allowSidebarOverlap',
+  AMBIENCE_SYNC: 'ambienceSync',
+  BIG_CAL_CYCLES_DISPLAY_MODE: 'bigCalCyclesDisplayMode',
+  BIG_CAL_ERA_DISPLAY_MODE: 'bigCalEraDisplayMode',
+  BIG_CAL_HEADER_SHOW_SELECTED: 'bigCalHeaderShowSelected',
+  BIG_CAL_SEASON_DISPLAY_MODE: 'bigCalSeasonDisplayMode',
+  BIG_CAL_SHOW_CYCLES: 'bigCalShowCycles',
+  BIG_CAL_SHOW_ERA: 'bigCalShowEra',
+  BIG_CAL_SHOW_MOON_PHASES: 'bigCalShowMoonPhases',
+  BIG_CAL_SHOW_SEASON: 'bigCalShowSeason',
+  BIG_CAL_SHOW_WEATHER: 'bigCalShowWeather',
+  BIG_CAL_WEATHER_DISPLAY_MODE: 'bigCalWeatherDisplayMode',
   CALENDAR_HUD_LOCKED: 'calendarHUDLocked',
   CALENDAR_HUD_MODE: 'calendarHUDMode',
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
@@ -30,9 +40,8 @@ export const SETTINGS = {
   CUSTOM_THEME_COLORS: 'customThemeColors',
   CUSTOM_TIME_JUMPS: 'customTimeJumps',
   CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
-  WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
-  DARKNESS_SYNC: 'darknessSync',
   DARKNESS_SYNC_ALL_SCENES: 'darknessSyncAllScenes',
+  DARKNESS_SYNC: 'darknessSync',
   DARKNESS_WEATHER_SYNC: 'darknessWeatherSync',
   DEFAULT_BRIGHTNESS_MULTIPLIER: 'defaultBrightnessMultiplier',
   DEFAULT_OVERRIDES: 'defaultOverrides',
@@ -43,64 +52,54 @@ export const SETTINGS = {
   HUD_AUTO_FADE: 'hudAutoFade',
   HUD_COMBAT_COMPACT: 'hudCombatCompact',
   HUD_COMBAT_HIDE: 'hudCombatHide',
+  HUD_CYCLES_DISPLAY_MODE: 'hudCyclesDisplayMode',
   HUD_DIAL_STYLE: 'hudDialStyle',
   HUD_DOME_AUTO_HIDE: 'hudDomeAutoHide',
+  HUD_ERA_DISPLAY_MODE: 'hudEraDisplayMode',
   HUD_IDLE_OPACITY: 'hudIdleOpacity',
   HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode',
+  HUD_SHOW_CYCLES: 'hudShowCycles',
   HUD_SHOW_ERA: 'hudShowEra',
   HUD_SHOW_SEASON: 'hudShowSeason',
   HUD_SHOW_WEATHER: 'hudShowWeather',
-  HUD_SHOW_CYCLES: 'hudShowCycles',
   HUD_STICKY_STATES: 'hudStickyStates',
   HUD_STICKY_ZONES_ENABLED: 'hudStickyZonesEnabled',
   HUD_TRAY_DIRECTION: 'hudTrayDirection',
   HUD_WEATHER_DISPLAY_MODE: 'hudWeatherDisplayMode',
-  HUD_ERA_DISPLAY_MODE: 'hudEraDisplayMode',
-  HUD_CYCLES_DISPLAY_MODE: 'hudCyclesDisplayMode',
   HUD_WIDTH_SCALE: 'hudWidthScale',
-  BIG_CAL_SHOW_WEATHER: 'bigCalShowWeather',
-  BIG_CAL_SHOW_SEASON: 'bigCalShowSeason',
-  BIG_CAL_SHOW_ERA: 'bigCalShowEra',
-  BIG_CAL_SHOW_CYCLES: 'bigCalShowCycles',
-  BIG_CAL_SHOW_MOON_PHASES: 'bigCalShowMoonPhases',
-  BIG_CAL_WEATHER_DISPLAY_MODE: 'bigCalWeatherDisplayMode',
-  BIG_CAL_SEASON_DISPLAY_MODE: 'bigCalSeasonDisplayMode',
-  BIG_CAL_ERA_DISPLAY_MODE: 'bigCalEraDisplayMode',
-  BIG_CAL_CYCLES_DISPLAY_MODE: 'bigCalCyclesDisplayMode',
-  BIG_CAL_HEADER_SHOW_SELECTED: 'bigCalHeaderShowSelected',
   LOGGING_LEVEL: 'loggingLevel',
   MACRO_TRIGGERS: 'macroTriggers',
   MINI_CAL_AUTO_FADE: 'miniCalAutoFade',
   MINI_CAL_CONFIRM_SET_DATE: 'miniCalConfirmSetDate',
   MINI_CAL_CONTROLS_DELAY: 'miniCalControlsDelay',
+  MINI_CAL_CYCLES_DISPLAY_MODE: 'miniCalCyclesDisplayMode',
+  MINI_CAL_ERA_DISPLAY_MODE: 'miniCalEraDisplayMode',
+  MINI_CAL_HEADER_SHOW_SELECTED: 'miniCalHeaderShowSelected',
   MINI_CAL_IDLE_OPACITY: 'miniCalIdleOpacity',
   MINI_CAL_POSITION: 'miniCalPosition',
-  MINI_CAL_SHOW_WEATHER: 'miniCalShowWeather',
-  MINI_CAL_SHOW_SEASON: 'miniCalShowSeason',
-  MINI_CAL_SHOW_ERA: 'miniCalShowEra',
-  MINI_CAL_SHOW_CYCLES: 'miniCalShowCycles',
-  MINI_CAL_SHOW_MOON_PHASES: 'miniCalShowMoonPhases',
-  MINI_CAL_WEATHER_DISPLAY_MODE: 'miniCalWeatherDisplayMode',
   MINI_CAL_SEASON_DISPLAY_MODE: 'miniCalSeasonDisplayMode',
-  MINI_CAL_ERA_DISPLAY_MODE: 'miniCalEraDisplayMode',
-  MINI_CAL_CYCLES_DISPLAY_MODE: 'miniCalCyclesDisplayMode',
-  MINI_CAL_HEADER_SHOW_SELECTED: 'miniCalHeaderShowSelected',
+  MINI_CAL_SHOW_CYCLES: 'miniCalShowCycles',
+  MINI_CAL_SHOW_ERA: 'miniCalShowEra',
+  MINI_CAL_SHOW_MOON_PHASES: 'miniCalShowMoonPhases',
+  MINI_CAL_SHOW_SEASON: 'miniCalShowSeason',
+  MINI_CAL_SHOW_WEATHER: 'miniCalShowWeather',
   MINI_CAL_STICKY_STATES: 'miniCalStickyStates',
   MINI_CAL_TIME_JUMPS: 'miniCalTimeJumps',
+  MINI_CAL_WEATHER_DISPLAY_MODE: 'miniCalWeatherDisplayMode',
   PERMISSIONS: 'permissions',
   POSITION_LOCKED: 'positionLocked',
   PRIMARY_GM: 'primaryGM',
   SAVED_TIMEPOINTS: 'savedTimepoints',
   SHOW_ACTIVE_CALENDAR_TO_PLAYERS: 'showActiveCalendarToPlayers',
   SHOW_CALENDAR_HUD: 'showCalendarHUD',
+  SHOW_JOURNAL_FOOTER: 'showJournalFooter',
   SHOW_MINI_CAL: 'showMiniCal',
   SHOW_TIME_KEEPER: 'showTimeKeeper',
-  SHOW_JOURNAL_FOOTER: 'showJournalFooter',
   SHOW_TOOLBAR_BUTTON: 'showToolbarButton',
   STOPWATCH_AUTO_START_TIME: 'stopwatchAutoStartTime',
-  TOOLBAR_APPS: 'toolbarApps',
   STOPWATCH_POSITION: 'stopwatchPosition',
   STOPWATCH_STATE: 'stopwatchState',
+  STOPWATCH_STICKY_STATES: 'stopwatchStickyStates',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
   TEMPERATURE_UNIT: 'temperatureUnit',
   THEME_MODE: 'themeMode',
@@ -111,7 +110,8 @@ export const SETTINGS = {
   TIMEKEEPER_IDLE_OPACITY: 'timeKeeperIdleOpacity',
   TIMEKEEPER_STICKY_STATES: 'timeKeeperStickyStates',
   TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
-  STOPWATCH_STICKY_STATES: 'stopwatchStickyStates'
+  TOOLBAR_APPS: 'toolbarApps',
+  WEATHER_PRESET_ALIASES: 'weatherPresetAliases'
 };
 
 /**
@@ -120,8 +120,8 @@ export const SETTINGS = {
  * @enum {string}
  */
 export const DISPLAY_LOCATIONS = {
-  CHAT_TIMESTAMP: 'chatTimestamp',
   BIG_CAL_HEADER: 'bigCalHeader',
+  CHAT_TIMESTAMP: 'chatTimestamp',
   HUD_DATE: 'hudDate',
   HUD_TIME: 'hudTime',
   MINI_CAL_HEADER: 'miniCalHeader',
@@ -262,9 +262,9 @@ export const HOOKS = {
   SUNSET: 'calendaria.sunset',
   VISUAL_TICK: 'calendaria.visualTick',
   WEATHER_CHANGE: 'calendaria.weatherChange',
-  WORLD_TIME_UPDATED: 'calendaria.worldTimeUpdated',
   WIDGET_REGISTERED: 'calendaria.widgetRegistered',
   WIDGETS_REFRESH: 'calendaria.widgetsRefresh',
+  WORLD_TIME_UPDATED: 'calendaria.worldTimeUpdated',
   YEAR_CHANGE: 'calendaria.yearChange'
 };
 
@@ -283,8 +283,8 @@ export const SOCKET_TYPES = {
   CALENDAR_REQUEST: 'calendarRequest',
   CALENDAR_SWITCH: 'calendarSwitch',
   CLOCK_UPDATE: 'clockUpdate',
-  CREATE_NOTE: 'createNote',
   CREATE_NOTE_COMPLETE: 'createNoteComplete',
+  CREATE_NOTE: 'createNote',
   DATE_CHANGE: 'dateChange',
   HUD_VISIBILITY: 'hudVisibility',
   MINI_CAL_VISIBILITY: 'miniCalVisibility',
@@ -298,18 +298,18 @@ export const SOCKET_TYPES = {
 
 /** @enum {string} Widget insertion points for external modules */
 export const WIDGET_POINTS = {
+  BIGCAL_ACTIONS: 'bigcal.actions',
   HUD_BUTTONS_LEFT: 'hud.buttons.left',
   HUD_BUTTONS_RIGHT: 'hud.buttons.right',
   HUD_INDICATORS: 'hud.indicators',
   HUD_TRAY: 'hud.tray',
-  MINICAL_SIDEBAR: 'minical.sidebar',
-  BIGCAL_ACTIONS: 'bigcal.actions'
+  MINICAL_SIDEBAR: 'minical.sidebar'
 };
 
 /** @enum {string} Built-in elements that can be replaced by widgets */
 export const REPLACEABLE_ELEMENTS = {
-  WEATHER_INDICATOR: 'weather-indicator',
-  SEASON_INDICATOR: 'season-indicator',
+  CYCLE_INDICATOR: 'cycle-indicator',
   ERA_INDICATOR: 'era-indicator',
-  CYCLE_INDICATOR: 'cycle-indicator'
+  SEASON_INDICATOR: 'season-indicator',
+  WEATHER_INDICATOR: 'weather-indicator'
 };

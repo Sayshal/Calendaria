@@ -462,19 +462,6 @@ export function getPresetsByCategory(category, customPresets = []) {
 }
 
 /**
- * Get all weather preset aliases from world settings.
- * @returns {object} Map of preset ID to alias label
- */
-export function getPresetAliases() {
-  if (!game.settings) return {};
-  try {
-    return game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
-  } catch {
-    return {};
-  }
-}
-
-/**
  * Get the alias for a specific preset if one exists.
  * @param {string} presetId - Weather preset ID
  * @param {string} [calendarId] - Calendar ID for zone-scoped lookup
@@ -482,7 +469,7 @@ export function getPresetAliases() {
  * @returns {string|null} Alias label or null if no alias
  */
 export function getPresetAlias(presetId, calendarId, zoneId) {
-  const aliases = getPresetAliases();
+  const aliases = game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
   if (calendarId && zoneId) return aliases[calendarId]?.[zoneId]?.[presetId] || null;
   return null;
 }
@@ -497,7 +484,7 @@ export function getPresetAlias(presetId, calendarId, zoneId) {
  */
 export async function setPresetAlias(presetId, alias, calendarId, zoneId) {
   if (!calendarId || !zoneId) return;
-  const aliases = getPresetAliases();
+  const aliases = game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
   if (alias && alias.trim()) {
     aliases[calendarId] ??= {};
     aliases[calendarId][zoneId] ??= {};

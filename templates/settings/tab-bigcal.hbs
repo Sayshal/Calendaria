@@ -39,7 +39,7 @@
         <select id="bigCalWeatherDisplayMode" name="bigCalWeatherDisplayMode" {{#unless bigCalShowWeather}}disabled
           aria-disabled="true" {{/unless}}>
           {{#each bigCalWeatherDisplayModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -60,7 +60,7 @@
         <select id="bigCalSeasonDisplayMode" name="bigCalSeasonDisplayMode" {{#unless bigCalShowSeason}}disabled
           aria-disabled="true" {{/unless}}>
           {{#each bigCalSeasonDisplayModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -81,7 +81,7 @@
         <select id="bigCalEraDisplayMode" name="bigCalEraDisplayMode" {{#unless bigCalShowEra}}disabled
           aria-disabled="true" {{/unless}}>
           {{#each bigCalEraDisplayModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -102,7 +102,7 @@
         <select id="bigCalCyclesDisplayMode" name="bigCalCyclesDisplayMode" {{#unless bigCalShowCycles}}disabled
           aria-disabled="true" {{/unless}}>
           {{#each bigCalCyclesDisplayModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -138,40 +138,40 @@
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
     {{#each formatLocations}}
-    <div class="format-location" data-location="{{id}}">
-      <div class="form-group">
-        <label>{{label}}</label>
-      </div>
-
-      <div class="format-row">
-        <div class="format-column">
-          <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
-              data-location="{{id}}" data-role="gm"></span></span>
-          <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-            {{#each gmPresetOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-          <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-            placeholder="EEEE, D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-            data-location="{{id}}" data-role="gm">
+      <div class="format-location" data-location="{{id}}">
+        <div class="form-group">
+          <label>{{label}}</label>
         </div>
 
-        <div class="format-column">
-          <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
-              data-location="{{id}}" data-role="player"></span></span>
-          <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-            {{#each playerPresetOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-          <input type="text" name="displayFormats.{{id}}.playerCustom"
-            value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="EEEE, D MMMM YYYY"
-            class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
-            data-role="player">
+        <div class="format-row">
+          <div class="format-column">
+            <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                data-location="{{id}}" data-role="gm"></span></span>
+            <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+              {{#each gmPresetOptions}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+            <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+              placeholder="EEEE, D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+              data-location="{{id}}" data-role="gm">
+          </div>
+
+          <div class="format-column">
+            <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                data-location="{{id}}" data-role="player"></span></span>
+            <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+              {{#each playerPresetOptions}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+            <input type="text" name="displayFormats.{{id}}.playerCustom"
+              value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="EEEE, D MMMM YYYY"
+              class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+              data-role="player">
+          </div>
         </div>
       </div>
-    </div>
     {{/each}}
   </fieldset>
 

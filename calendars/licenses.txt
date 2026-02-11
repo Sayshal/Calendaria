@@ -27,8 +27,8 @@ the Coast LLC. This content is unofficial Fan Content permitted under
 Wizards of the Coast's Fan Content Policy.
 
 
-EBERRON - Galifar Calendar (galifar.json)
-------------------------------------------
+EBERRON - Galifar & Khorvaire Calendars (galifar.json, khorvaire.json)
+----------------------------------------------------------------------
 Eberron, Khorvaire, and all related content are trademarks of Wizards of
 the Coast LLC and Keith Baker. This content is unofficial Fan Content
 permitted under Wizards of the Coast's Fan Content Policy.
@@ -55,8 +55,8 @@ the Coast LLC. This content is unofficial Fan Content permitted under
 Wizards of the Coast's Fan Content Policy.
 
 
-GREYHAWK - Common Year Calendar (greyhawk.json)
-------------------------------------------------
+GREYHAWK - Common Year Calendars (greyhawk.json, greyhawk-364.json)
+-------------------------------------------------------------------
 Greyhawk, Oerth, and all related content are trademarks of Wizards of the
 Coast LLC. This content is unofficial Fan Content permitted under Wizards
 of the Coast's Fan Content Policy.
@@ -90,6 +90,19 @@ FORBIDDEN LANDS (forbidden-lands.json)
 Forbidden Lands and all related content are trademarks of Fria Ligan AB
 (Free League Publishing). This content is unofficial fan content and is
 not endorsed by Free League Publishing.
+
+
+TRAVELLER - Imperial Calendar (traveller.json)
+-----------------------------------------------
+Traveller and all related content are trademarks of Mongoose Publishing Ltd
+and Far Future Enterprises. This content is unofficial fan content created
+for use with virtual tabletop software.
+
+
+RENESCARA (renescara.json)
+---------------------------
+Renescara is an original setting created by Tyler (Sayshal). This calendar
+is free to use.
 
 
 GREGORIAN CALENDAR (gregorian.json)

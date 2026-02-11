@@ -8,12 +8,12 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { compareDates, getCurrentDate } from '../notes/utils/date-utils.mjs';
 import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
+import { CalendariaSocket } from '../utils/socket.mjs';
 
 /**
  * Event Scheduler class that monitors time changes and triggers event notifications.

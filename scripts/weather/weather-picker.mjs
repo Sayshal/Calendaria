@@ -127,7 +127,6 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     context.temperatureUnit = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
-
     const currentWeather = WeatherManager.getCurrentWeather();
     const currentTemp = WeatherManager.getTemperature();
     context.selectedZoneId = selectedZoneId;
@@ -136,7 +135,6 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     context.customTemp = this.#customTemp ?? (currentTemp != null ? toDisplayUnit(currentTemp) : '');
     context.customIcon = this.#customIcon ?? (currentWeather?.icon || 'fa-question');
     context.customColor = this.#customColor ?? (currentWeather?.color || '#888888');
-
     return context;
   }
 
@@ -150,12 +148,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render();
       });
     }
-    // Track custom field edits to distinguish preset selection from custom weather
     for (const input of this.element.querySelectorAll('.weather-picker-custom input')) {
       input.addEventListener('input', () => {
         this.#customEdited = true;
         this.#selectedPresetId = null;
-        // Remove active state from preset buttons
         for (const btn of this.element.querySelectorAll('.weather-btn.active')) btn.classList.remove('active');
       });
     }
@@ -169,10 +165,8 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async _onSave(_event, _form, formData) {
     if (this.#selectedPresetId && !this.#customEdited) {
-      // Apply selected preset with normal temp generation
       await WeatherManager.setWeather(this.#selectedPresetId);
     } else {
-      // Apply custom weather from form fields
       const data = foundry.utils.expandObject(formData.object);
       const label = data.customLabel?.trim();
       if (!label) return;
