@@ -36,7 +36,7 @@ The setup script creates a symlink to your local Foundry VTT folder for IDE path
 - **JSON** — FracturedJSON (VS Code extension). Prettier ignores JSON files.
 - **Templates** — Handlebars (`.hbs`). Excluded from Prettier.
 - **JSDoc** — Required on all functions. Follow existing patterns.
-- **Localization** — Only add or update keys in `lang/en.json`. Do not modify other language files.
+- **Localization** — Only add or update keys in `lang/en.json`. Do not modify other language files directly; translations are managed through [Weblate](https://hosted.weblate.org/projects/calendaria/).
 
 ## Tests
 
@@ -62,6 +62,10 @@ All pull requests **must** reference an open issue. Open one first if none exist
 2. Make your changes in focused, logical commits.
 3. Run `npm test` — all tests must pass.
 4. Open a pull request against `main` and reference the issue (e.g. `Closes #123`).
+
+## Translations
+
+Translations are managed through [Weblate](https://hosted.weblate.org/projects/calendaria/). To contribute a translation or update an existing one, use the Weblate interface — do not submit PRs that modify language files other than `lang/en.json`.
 
 ## Reporting Issues
 
