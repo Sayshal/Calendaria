@@ -102,6 +102,29 @@ await CALENDARIA.api.advanceTimeToPreset('midnight');
 
 ## Calendar Access
 
+Calendar collections (months, weekdays, seasons, moons, etc.) are stored as keyed objects with string IDs, not arrays. Use the convenience getter arrays for ordered iteration:
+
+| Getter                | Collection       |
+| --------------------- | ---------------- |
+| `monthsArray`         | `months.values`  |
+| `weekdaysArray`       | `days.values`    |
+| `seasonsArray`        | `seasons.values` |
+| `moonsArray`          | `moons`          |
+| `cyclesArray`         | `cycles`         |
+| `erasArray`           | `eras`           |
+| `festivalsArray`      | `festivals`      |
+| `canonicalHoursArray` | `canonicalHours` |
+| `namedWeeksArray`     | `weeks.names`    |
+| `weatherZonesArray`   | `weather.zones`  |
+
+The `daysInWeek` getter returns `weekdaysArray.length || 7`.
+
+```javascript
+const calendar = CALENDARIA.api.getActiveCalendar();
+const months = calendar.monthsArray; // ordered array
+const weekCount = calendar.daysInWeek; // number of weekdays or 7
+```
+
 ### getActiveCalendar()
 
 Get the currently active calendar.
@@ -228,63 +251,93 @@ const cycles = CALENDARIA.api.getCycleValues();
 
 ---
 
-### getSunrise()
+### getSunrise(zone)
 
 Get today's sunrise time in hours.
 
 ```javascript
 const sunrise = CALENDARIA.api.getSunrise();
+// With explicit zone:
+const sunrise = CALENDARIA.api.getSunrise(myZone);
 // Returns: 6.5 (meaning 6:30 AM)
 ```
+
+| Parameter | Type           | Description                                        |
+| --------- | -------------- | -------------------------------------------------- |
+| `zone`    | `object\|null` | Climate zone object (default: active scene's zone) |
 
 **Returns:** `number|null` - Sunrise time in hours.
 
 ---
 
-### getSunset()
+### getSunset(zone)
 
 Get today's sunset time in hours.
 
 ```javascript
 const sunset = CALENDARIA.api.getSunset();
+// With explicit zone:
+const sunset = CALENDARIA.api.getSunset(myZone);
 // Returns: 18.5 (meaning 6:30 PM)
 ```
+
+| Parameter | Type           | Description                                        |
+| --------- | -------------- | -------------------------------------------------- |
+| `zone`    | `object\|null` | Climate zone object (default: active scene's zone) |
 
 **Returns:** `number|null` - Sunset time in hours.
 
 ---
 
-### getDaylightHours()
+### getDaylightHours(zone)
 
 Get hours of daylight today.
 
 ```javascript
 const hours = CALENDARIA.api.getDaylightHours();
+// With explicit zone:
+const hours = CALENDARIA.api.getDaylightHours(myZone);
 ```
+
+| Parameter | Type           | Description                                        |
+| --------- | -------------- | -------------------------------------------------- |
+| `zone`    | `object\|null` | Climate zone object (default: active scene's zone) |
 
 **Returns:** `number|null` - Hours of daylight.
 
 ---
 
-### getProgressDay()
+### getProgressDay(zone)
 
 Get progress through the day period (0 = sunrise, 1 = sunset).
 
 ```javascript
 const progress = CALENDARIA.api.getProgressDay();
+// With explicit zone:
+const progress = CALENDARIA.api.getProgressDay(myZone);
 ```
+
+| Parameter | Type           | Description                                        |
+| --------- | -------------- | -------------------------------------------------- |
+| `zone`    | `object\|null` | Climate zone object (default: active scene's zone) |
 
 **Returns:** `number|null` - Progress value between 0-1.
 
 ---
 
-### getProgressNight()
+### getProgressNight(zone)
 
 Get progress through the night period (0 = sunset, 1 = sunrise).
 
 ```javascript
 const progress = CALENDARIA.api.getProgressNight();
+// With explicit zone:
+const progress = CALENDARIA.api.getProgressNight(myZone);
 ```
+
+| Parameter | Type           | Description                                        |
+| --------- | -------------- | -------------------------------------------------- |
+| `zone`    | `object\|null` | Climate zone object (default: active scene's zone) |
 
 **Returns:** `number|null` - Progress value between 0-1.
 

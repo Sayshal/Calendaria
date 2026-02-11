@@ -2898,26 +2898,6 @@ span.calendaria-moon-icon {
     padding: 1rem;
   }
 
-  .temp-fields {
-    gap: 0.5rem;
-    display: flex;
-    align-items: center;
-
-    input[type='number'] {
-      width: 5rem;
-    }
-  }
-
-  .temperature-row {
-    gap: 0.5rem;
-    display: flex;
-    align-items: center;
-
-    input {
-      width: 5rem;
-    }
-  }
-
   .preset-category {
     margin-bottom: 1rem;
 
@@ -2972,6 +2952,22 @@ span.calendaria-moon-icon {
 
   .preset-temp-input {
     width: 3.75rem;
+  }
+
+  .form-fields.temperature > i {
+    flex: 0 0 0.5rem;
+    text-align: center;
+  }
+
+  .daylight-fieldset {
+    .solstice-value {
+      font-weight: 600;
+    }
+
+    .solstice-date {
+      color: var(--color-text-secondary, hsl(0deg 0% 60%));
+      font-size: 0.85rem;
+    }
   }
 }
 

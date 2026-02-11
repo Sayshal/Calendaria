@@ -18,11 +18,8 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * Weather picker application with selectable presets.
  */
 class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
-  /** @type {string|null} Selected zone ID (null = no filtering) */
-  #selectedZoneId = undefined;
-
-  /** @type {boolean} Whether to set selected zone as calendar's active zone */
-  #setAsActiveZone = false;
+  /** @type {string|null|undefined} Zone override from dropdown (undefined = use calendar default) */
+  #zoneOverride = undefined;
 
   /** @type {string|null} Selected preset ID (null = none selected) */
   #selectedPresetId = null;
@@ -61,15 +58,29 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = { content: { template: TEMPLATES.WEATHER.PICKER } };
 
   /** @override */
+  async close(options) {
+    this.#zoneOverride = undefined;
+    this.#selectedPresetId = null;
+    this.#customEdited = false;
+    this.#customLabel = null;
+    this.#customTemp = null;
+    this.#customIcon = null;
+    this.#customColor = null;
+    return super.close(options);
+  }
+
+  /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const customPresets = WeatherManager.getCustomPresets();
     const zones = WeatherManager.getCalendarZones() || [];
-    if (this.#selectedZoneId === undefined) this.#selectedZoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id ?? null;
-    const selectedZone = this.#selectedZoneId ? zones.find((z) => z.id === this.#selectedZoneId) : null;
-    context.setAsActiveZone = this.#setAsActiveZone;
-    context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !this.#selectedZoneId }];
-    for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === this.#selectedZoneId });
+    const calendar = CalendarManager.getActiveCalendar();
+    const calendarActiveZone = calendar?.weather?.activeZone ?? null;
+    const selectedZoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : calendarActiveZone;
+    const selectedZone = selectedZoneId ? zones.find((z) => z.id === selectedZoneId) : null;
+    context.setAsActiveZone = selectedZoneId === calendarActiveZone && calendarActiveZone != null;
+    context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !selectedZoneId }];
+    for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === selectedZoneId });
     context.zoneOptions.sort((a, b) => {
       if (a.value === '') return -1;
       if (b.value === '') return 1;
@@ -91,7 +102,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         id: categoryId,
         label: localize(category.label),
         presets: presets.map((p) => {
-          const alias = getPresetAlias(p.id, calendarId, this.#selectedZoneId);
+          const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
           const label = alias || localize(p.label);
           return { id: p.id, label, description: p.description ? localize(p.description) : label, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
         })
@@ -106,7 +117,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
           id: 'custom',
           label: localize(WEATHER_CATEGORIES.custom.label),
           presets: filtered.map((p) => {
-            const alias = getPresetAlias(p.id, calendarId, this.#selectedZoneId);
+            const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
             const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
             const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
             return { id: p.id, label, description, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
@@ -119,7 +130,8 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const currentWeather = WeatherManager.getCurrentWeather();
     const currentTemp = WeatherManager.getTemperature();
-    const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id, calendarId, this.#selectedZoneId) : null;
+    context.selectedZoneId = selectedZoneId;
+    const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id, calendarId, selectedZoneId) : null;
     context.customLabel = this.#customLabel ?? (currentWeatherAlias || (currentWeather?.label ? localize(currentWeather.label) : ''));
     context.customTemp = this.#customTemp ?? (currentTemp != null ? toDisplayUnit(currentTemp) : '');
     context.customIcon = this.#customIcon ?? (currentWeather?.icon || 'fa-question');
@@ -134,10 +146,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const zoneSelect = this.element.querySelector('select[name="climateZone"]');
     if (zoneSelect) {
       zoneSelect.addEventListener('change', (e) => {
-        this.#selectedZoneId = e.target.value || null;
-        const checkbox = this.element.querySelector('input[name="setAsActiveZone"]');
-        this.#setAsActiveZone = checkbox?.checked ?? false;
-        if (this.#setAsActiveZone && this.#selectedZoneId) WeatherManager.setActiveZone(this.#selectedZoneId);
+        this.#zoneOverride = e.target.value || null;
         this.render();
       });
     }
@@ -173,6 +182,9 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
       await WeatherManager.setCustomWeather({ label, temperature, icon, color });
     }
+    const setActive = formData.object.setAsActiveZone;
+    const zoneId = formData.object.climateZone || null;
+    if (setActive && zoneId) await WeatherManager.setActiveZone(zoneId);
     Hooks.callAll(HOOKS.WEATHER_CHANGE);
     await this.close();
   }
@@ -189,7 +201,8 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#selectedPresetId = presetId;
     this.#customEdited = false;
     const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
-    const alias = getPresetAlias(presetId, calendarId, this.#selectedZoneId);
+    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    const alias = getPresetAlias(presetId, calendarId, zoneId);
     this.#customLabel = alias || localize(preset.label);
     this.#customTemp = null;
     this.#customIcon = preset.icon || 'fa-question';
@@ -203,7 +216,8 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onRandomWeather(_event, _target) {
-    await WeatherManager.generateAndSetWeather({ zoneId: this.#selectedZoneId });
+    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    await WeatherManager.generateAndSetWeather({ zoneId });
     this.#selectedPresetId = null;
     this.#customEdited = false;
     this.#customLabel = null;

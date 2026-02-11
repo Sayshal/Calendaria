@@ -12,6 +12,7 @@ import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { executeMacroById } from '../utils/macro-utils.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
 
 /**
  * Static class that tracks world time changes and fires threshold hooks.
@@ -266,8 +267,9 @@ export default class TimeTracker {
    * @private
    */
   static #getThresholdsForDay(_components, calendar) {
-    const sunrise = calendar.sunrise();
-    const sunset = calendar.sunset();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const sunrise = calendar.sunrise(undefined, zone);
+    const sunset = calendar.sunset(undefined, zone);
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     return { midnight: 0, sunrise: sunrise, midday: hoursPerDay / 2, sunset: sunset };
   }

@@ -47,6 +47,7 @@
           {{#if calendar.daylight.enabled}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightEnabled"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightZoneOverride"}}</p>
     </div>
 
     <div class="form-group">
@@ -156,10 +157,10 @@
         <input type="text" id="editor-canonical-{{this.key}}-abbr"
           name="canonicalHours.{{this.key}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
         <input type="number" id="editor-canonical-{{this.key}}-start"
-          name="canonicalHours.{{this.key}}.startHour" value="{{this.startHour}}" min="0" max="23"
-          class="col-start">
+          name="canonicalHours.{{this.key}}.startHour" value="{{this.startHour}}" min="0"
+          max="{{calendar.days.hoursPerDay}}" class="col-start">
         <input type="number" id="editor-canonical-{{this.key}}-end" name="canonicalHours.{{this.key}}.endHour"
-          value="{{this.endHour}}" min="0" max="23" class="col-end">
+          value="{{this.endHour}}" min="0" max="{{calendar.days.hoursPerDay}}" class="col-end">
 
         <div class="item-controls col-controls">
           <button type="button" data-action="addCanonicalHour" data-key="{{this.key}}" data-tooltip

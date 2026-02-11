@@ -197,52 +197,62 @@ export const CalendariaAPI = {
 
   /**
    * Get the sunrise time in hours for the current day.
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {number|null} Sunrise time in hours (e.g., 6.5 = 6:30 AM)
    */
-  getSunrise() {
+  getSunrise(zone) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-    return calendar.sunrise();
+    zone ??= WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    return calendar.sunrise(undefined, zone);
   },
 
   /**
    * Get the sunset time in hours for the current day.
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {number|null} Sunset time in hours (e.g., 18.5 = 6:30 PM)
    */
-  getSunset() {
+  getSunset(zone) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-    return calendar.sunset();
+    zone ??= WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    return calendar.sunset(undefined, zone);
   },
 
   /**
    * Get the number of daylight hours for the current day.
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {number|null} Hours of daylight (e.g., 12.5)
    */
-  getDaylightHours() {
+  getDaylightHours(zone) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-    return calendar.daylightHours();
+    zone ??= WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    return calendar.daylightHours(undefined, zone);
   },
 
   /**
    * Get progress through the day period (0 = sunrise, 1 = sunset).
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {number|null} Progress value between 0-1
    */
-  getProgressDay() {
+  getProgressDay(zone) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-    return calendar.progressDay();
+    zone ??= WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    return calendar.progressDay(undefined, zone);
   },
 
   /**
    * Get progress through the night period (0 = sunset, 1 = sunrise).
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {number|null} Progress value between 0-1
    */
-  getProgressNight() {
+  getProgressNight(zone) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-    return calendar.progressNight();
+    zone ??= WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    return calendar.progressNight(undefined, zone);
   },
 
   /**
@@ -266,14 +276,16 @@ export const CalendariaAPI = {
   /** @returns {object|null} Time until sunrise */
   getTimeUntilSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
-    const targetHour = calendar?.sunrise?.();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar?.sunrise?.(undefined, zone);
     return targetHour != null ? this.getTimeUntilTarget(targetHour) : null;
   },
 
   /** @returns {object|null} Time until sunset */
   getTimeUntilSunset() {
     const calendar = CalendarManager.getActiveCalendar();
-    const targetHour = calendar?.sunset?.();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar?.sunset?.(undefined, zone);
     return targetHour != null ? this.getTimeUntilTarget(targetHour) : null;
   },
 
@@ -680,11 +692,12 @@ export const CalendariaAPI = {
 
   /**
    * Check if it's currently daytime.
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {boolean} True if between sunrise and sunset
    */
-  isDaytime() {
-    const sunrise = this.getSunrise();
-    const sunset = this.getSunset();
+  isDaytime(zone) {
+    const sunrise = this.getSunrise(zone);
+    const sunset = this.getSunset(zone);
     if (sunrise === null || sunset === null) return true;
     const components = game.time.components;
     const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
@@ -694,10 +707,11 @@ export const CalendariaAPI = {
 
   /**
    * Check if it's currently nighttime.
+   * @param {object} [zone] - Optional climate zone override. Defaults to active scene zone.
    * @returns {boolean} True if before sunrise or after sunset
    */
-  isNighttime() {
-    return !this.isDaytime();
+  isNighttime(zone) {
+    return !this.isDaytime(zone);
   },
 
   /**
@@ -716,17 +730,18 @@ export const CalendariaAPI = {
     const secondsPerMinute = this.calendar?.days?.secondsPerMinute ?? 60;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const currentHour = components.hour + components.minute / minutesPerHour + components.second / secondsPerHour;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
     let targetHour;
     switch (preset.toLowerCase()) {
       case 'sunrise':
-        targetHour = this.getSunrise() ?? hoursPerDay / 4;
+        targetHour = this.getSunrise(zone) ?? hoursPerDay / 4;
         break;
       case 'midday':
       case 'noon':
         targetHour = hoursPerDay / 2;
         break;
       case 'sunset':
-        targetHour = this.getSunset() ?? (hoursPerDay * 3) / 4;
+        targetHour = this.getSunset(zone) ?? (hoursPerDay * 3) / 4;
         break;
       case 'midnight':
         targetHour = 0;

@@ -4,62 +4,43 @@ The Calendar Editor lets you create custom calendars or modify existing ones. Ac
 
 ## Overview
 
-The editor is organized into tabs, each handling a different aspect of your calendar:
+The editor is organized into 12 tabs across color-coded groups:
 
-| Tab       | Purpose                                                   |
-| --------- | --------------------------------------------------------- |
-| Basic     | Name, description, year settings, leap year configuration |
-| Months    | Define months and their lengths                           |
-| Weekdays  | Set weekday names, rest days, and named weeks             |
-| Time      | Hours per day, daylight, date formats, canonical hours    |
-| Seasons   | Seasonal periods (dated or periodic)                      |
-| Eras      | Historical periods and year formatting                    |
-| Festivals | Holidays and special days                                 |
-| Moons     | Lunar cycles, phases, and reference dates                 |
-| Cycles    | Repeating patterns (zodiac, elements, etc.)               |
-| Weather   | Climate zones and weather presets                         |
+| Group                 | Tabs                                             |
+| --------------------- | ------------------------------------------------ |
+| **Core** (pink)       | Overview, Display                                |
+| **Structure** (green) | Months, Weeks, Years, Time                       |
+| **Features** (orange) | Festivals, Eras, Cycles, Moons, Seasons, Weather |
+
+![Editor Navigation](https://github.com/Sayshal/Calendaria/blob/main/.github/assets/editor-navigation.png)
 
 ---
 
-## Basic Tab
+## Overview Tab
 
-Configure fundamental calendar properties.
+Configure calendar identity and selection.
 
 ### Calendar Selector
 
-- **Calendar** label above the dropdown
 - **Calendar Dropdown** — Select an existing calendar template or custom calendar to edit (auto-loads on selection)
-- **Duplicate Calendar** — Create a copy of the currently loaded calendar (below dropdown, right-aligned)
-- **Create From Scratch** — Start a fresh blank calendar (below dropdown, right-aligned)
+- **Duplicate Calendar** — Create a copy of the currently loaded calendar
+- **Create From Scratch** — Start a fresh blank calendar
 
 ### Calendar Identity
 
 - **Name** — Display name for the calendar (required)
-- **System** — Game system or setting this calendar is for (e.g., "Forgotten Realms", "Golarion")
 - **Description** — Optional notes about the calendar
 
-### Year Settings
+---
 
-- **Year Zero** — The reference year (year 0 in your calendar's internal numbering)
-- **Year Zero Weekday** — Which weekday falls on day 1 of year zero (determines weekday calculations)
+## Display Tab
 
-### Leap Year Configuration
+Configure how dates and times are formatted throughout the UI. Each format field shows a **live preview** below the input using sample data from the calendar being edited. Invalid format strings are highlighted with a red border and an error message.
 
-- **Leap Rule** — Select how leap years are calculated:
-  - **None** — No leap years
-  - **Simple** — Every N years
-  - **Gregorian** — Standard Earth calendar rules (every 4 years, except centuries, except 400-year marks)
-  - **Custom** — Pattern-based rules
+Click the **Token Reference** button to open a dialog listing all available format tokens.
 
-#### Simple Leap Year Fields
-
-- **Leap Interval** — How often leap years occur (e.g., 4 for every 4th year)
-- **Leap Start** — First year with a leap day
-
-#### Custom Leap Year Fields
-
-- **Leap Pattern** — Comma-separated divisibility rules using `!` for exclusions (e.g., `400,!100,4` means divisible by 400, OR divisible by 4 but NOT by 100)
-- **Leap Start** — First year the pattern applies from
+> [!TIP]
+> See [Format Tokens](Format-Tokens) for the full token reference.
 
 ---
 
@@ -103,7 +84,7 @@ Months can have 0 days in their base configuration, making them only appear duri
 
 ---
 
-## Weekdays Tab
+## Weeks Tab
 
 Configure the days of the week and optional named weeks.
 
@@ -129,23 +110,65 @@ Give each week a name (like "Week of the Wolf" or "Tenday of Stars").
 - **Type** — How weeks are numbered:
   - **Year-based** — Week numbers continue through the entire year
   - **Month-based** — Week numbers reset at the start of each month
+- **Repeat Cycling** — When enabled, named weeks cycle through if there are more weeks in the year than named entries
 
 ### Named Weeks List
 
-| Column           | Description    |
-| ---------------- | -------------- |
-| **Week Name**    | Full week name |
-| **Abbreviation** | Short form     |
+| Column           | Description                                                    |
+| ---------------- | -------------------------------------------------------------- |
+| **Week Number**  | Which week number this name targets (with duplicate detection) |
+| **Week Name**    | Full week name                                                 |
+| **Abbreviation** | Short form                                                     |
+
+> [!TIP]
+> Use the `[namedWeek]` and `[namedWeekAbbr]` format tokens to display named week names in date strings.
+
+---
+
+## Years Tab
+
+Configure year settings, leap year rules, and named years.
+
+### Year Settings
+
+- **Year Zero** — The reference year (year 0 in your calendar's internal numbering)
+- **Year Zero Weekday** — Which weekday falls on day 1 of year zero (determines weekday calculations)
+
+### Leap Year Configuration
+
+- **Leap Rule** — Select how leap years are calculated:
+  - **None** — No leap years
+  - **Simple** — Every N years
+  - **Gregorian** — Standard Earth calendar rules (every 4 years, except centuries, except 400-year marks)
+  - **Custom** — Pattern-based rules
+
+#### Simple Leap Year Fields
+
+- **Leap Interval** — How often leap years occur (e.g., 4 for every 4th year)
+- **Leap Start** — First year with a leap day
+
+#### Custom Leap Year Fields
+
+- **Leap Pattern** — Comma-separated divisibility rules using `!` for exclusions (e.g., `400,!100,4` means divisible by 400, OR divisible by 4 but NOT by 100)
+- **Leap Start** — First year the pattern applies from
+
+### Named Years
+
+Assign display names to specific years. When a year has a name, the `[yearName]` format token renders it in date strings. Use pipe fallback syntax `[yearName|YYYY]` to show the year name when defined, or fall back to the numeric year.
+
+| Column   | Description                               |
+| -------- | ----------------------------------------- |
+| **Year** | The year number this name applies to      |
+| **Name** | Display name (e.g., "Year of the Dragon") |
 
 ---
 
 ## Time Tab
 
-Set how time works in your world, including daylight and date formatting.
+Set how time works in your world, including daylight hours.
 
 ### Time Structure
 
-- **Days Per Year** — Calculated automatically from month definitions; displays normal and leap year totals if different
 - **Hours Per Day** — Number of hours in one day (default: 24)
 - **Minutes Per Hour** — Number of minutes per hour (default: 60)
 - **Seconds Per Minute** — Number of seconds per minute (default: 60)
@@ -169,7 +192,7 @@ When using non-standard time:
 - All API time methods respect the calendar's time structure
 - Sunrise/sunset calculations adapt to the day length
 
-### Daylight Configuration
+### Daylight Hours
 
 Control sunrise and sunset times throughout the year.
 
@@ -181,12 +204,19 @@ Control sunrise and sunset times throughout the year.
 
 Calendaria interpolates daylight hours between these solstices using a sinusoidal curve.
 
-### AM/PM Notation
+> [!NOTE]
+> Climate zones can override these global daylight settings with per-zone latitude or manual shortest/longest day values. See [ClimateEditor](#climateeditor) zone mode.
+
+### Meridiem Indicators
 
 Customize 12-hour time labels for your setting.
 
-- **AM Notation** — Text for morning hours (default: "AM")
-- **PM Notation** — Text for afternoon/evening hours (default: "PM")
+- **Ante Meridiem** — Full text for morning hours (default: "AM")
+- **Post Meridiem** — Full text for afternoon/evening hours (default: "PM")
+- **AM Abbreviation** — Abbreviated morning label (default: "AM")
+- **PM Abbreviation** — Abbreviated evening label (default: "PM")
+
+The `A` and `a` format tokens use the abbreviated forms. Use `[meridiemFull]` for the full-length labels.
 
 Examples: "Sunward" / "Moonward", "Before Noon" / "After Noon"
 
@@ -194,27 +224,12 @@ Examples: "Sunward" / "Moonward", "Before Noon" / "After Noon"
 
 Define named time periods like "Dawn", "Midday", or "Dusk".
 
-| Column           | Description                    |
-| ---------------- | ------------------------------ |
-| **Name**         | Period name (e.g., "Matins")   |
-| **Abbreviation** | Short form                     |
-| **Start Hour**   | When this period begins (0-23) |
-| **End Hour**     | When this period ends (0-23)   |
-
-### Date Formats
-
-Customize how dates and times display using template variables.
-
-| Format               | Purpose                           | Example Output                  |
-| -------------------- | --------------------------------- | ------------------------------- |
-| **Short**            | Compact date display              | "15 Jan 1492"                   |
-| **Long**             | Detailed date display             | "15th of January, 1492"         |
-| **Full**             | Complete date with weekday        | "Sunday, 15th of January, 1492" |
-| **Time**             | 24-hour time format               | "14:30"                         |
-| **Time (12-hour)**   | 12-hour time format               | "2:30 PM"                       |
-| **Week View Header** | BigCal week view header           | "Week 3 of January, 1492"       |
-| **Year View Header** | BigCal year view header           | "1492"                          |
-| **Year View Label**  | BigCal year view grid cell labels | "1492 DR"                       |
+| Column           | Description                                |
+| ---------------- | ------------------------------------------ |
+| **Name**         | Period name (e.g., "Matins")               |
+| **Abbreviation** | Short form                                 |
+| **Start Hour**   | When this period begins (0 to hoursPerDay) |
+| **End Hour**     | When this period ends (0 to hoursPerDay)   |
 
 ---
 
@@ -233,12 +248,11 @@ Define seasonal periods with visual styling.
 
 ### Season Fields
 
-| Field            | Description                              |
-| ---------------- | ---------------------------------------- |
-| **Name**         | Season name (e.g., "Spring")             |
-| **Abbreviation** | Short form                               |
-| **Icon**         | Font Awesome class (e.g., `fas fa-leaf`) |
-| **Color**        | Color picker for visual theming          |
+| Field            | Description                                                                  |
+| ---------------- | ---------------------------------------------------------------------------- |
+| **Name**         | Season name (e.g., "Spring")                                                 |
+| **Abbreviation** | Short form                                                                   |
+| **Icon/Color**   | Click the icon button to open an edit dialog for Font Awesome icon and color |
 
 #### Dated Season Fields
 
@@ -253,20 +267,16 @@ Define seasonal periods with visual styling.
 
 - **Add** (+) — Insert a new season after this one
 - **Remove** (trash icon) — Delete this season
-- **Climate** (thermometer icon) — Configure per-season temperature ranges and weather chance overrides
-
-### Season Climate Configuration
-
-Each season can have its own climate settings that override the zone defaults:
-
-- **Temperature Range** — Min/max temperatures for this season (in your configured unit)
-- **Weather Chances** — Per-weather-type probability overrides for this season
+- **Climate** (thermometer icon) — Open the [ClimateEditor](#climateeditor) to configure per-season temperature ranges and weather chance overrides
 
 ---
 
 ## Eras Tab
 
 Define historical periods for your calendar.
+
+> [!TIP]
+> Eras may overlap — use indexed format tokens like `[era=1]`, `[eraAbbr=2]`, `[yearInEra=1]` to reference a specific matching era.
 
 ### Era Fields
 
@@ -276,6 +286,18 @@ Define historical periods for your calendar.
 | **Abbreviation** | Short form (e.g., "AH")                         |
 | **Start Year**   | First year of this era                          |
 | **End Year**     | Last year of this era (leave blank for ongoing) |
+
+### Indexed Era Tokens
+
+When multiple eras overlap, use indexed tokens to reference a specific match:
+
+| Token           | Description                          |
+| --------------- | ------------------------------------ |
+| `[era=N]`       | Full name of the Nth matching era    |
+| `[eraAbbr=N]`   | Abbreviation of the Nth matching era |
+| `[yearInEra=N]` | Year within the Nth matching era     |
+
+Example: If year 1492 falls in both "Dale Reckoning" (era 1) and "Age of Mortals" (era 2), `[era=1]` gives "Dale Reckoning" and `[era=2]` gives "Age of Mortals".
 
 ### Era Controls
 
@@ -290,25 +312,28 @@ Create holidays and special days that appear on the calendar.
 
 ### Festival Fields
 
-| Column                 | Description                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Name**               | Festival name (e.g., "Midwinter")                                                                                      |
-| **Month**              | Which month the festival falls in                                                                                      |
-| **Day**                | Day of the month                                                                                                       |
-| **Duration**           | Number of days the festival lasts (default: 1)                                                                         |
-| **Leap Duration**      | Duration on leap years (leave blank to use standard duration)                                                          |
-| **Leap Year Only**     | Checkbox — festival only occurs in leap years                                                                          |
-| **Counts for Weekday** | Checkbox — whether this day advances weekday counting (uncheck for intercalary days that exist "outside" normal weeks) |
+| Column            | Description                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Icon/Color**    | Click to open icon/color picker dialog (Font Awesome class and hex color; default: `fas fa-star` / gold `#d4af37`)  |
+| **Name**          | Festival name (e.g., "Midwinter")                                                                                   |
+| **Month**         | Which month the festival falls in                                                                                   |
+| **Day**           | Day of the month                                                                                                    |
+| **Duration**      | Number of days the festival lasts (default: 1)                                                                      |
+| **Leap Duration** | Duration on leap years (leave blank to use standard duration)                                                       |
+| **Only Leap**     | Checkbox — festival only occurs in leap years                                                                       |
+| **Non-Weekday**   | Checkbox — this day does NOT count for weekday progression (for intercalary days that exist "outside" normal weeks) |
+
+Each festival also has a **Description** field — lore or flavor text that appears in calendar day tooltips colored with the festival's custom color.
 
 > [!NOTE]
 > For monthless calendars (like Traveller), festival positioning uses the internal `dayOfYear` field (1-365) instead of Month/Day. This is set programmatically when importing calendars.
+
+Festival colors render throughout the calendar UI: BigCal grid cells, MiniCal day cells, and intercalary day rows all use the festival's custom color for borders, backgrounds, day numbers, and the festival icon.
 
 ### Festival Controls
 
 - **Add** (+) — Insert a new festival after this one
 - **Remove** (trash icon) — Delete this festival
-
-Festivals appear as indicators on the calendar grid and in the day detail view.
 
 ---
 
@@ -318,21 +343,21 @@ Add one or more moons with customizable phases.
 
 ### Moon Fields
 
-| Field            | Description                                                                                                                  |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Name**         | Moon name (e.g., "Selûne")                                                                                                   |
-| **Cycle Length** | Days for a complete lunar cycle (new moon to new moon). Accepts decimal values (e.g., `29.53059` for Earth's synodic month). |
-| **Color**        | Tint color for the moon icon                                                                                                 |
+| Field            | Description                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Name**         | Moon name (e.g., "Selûne")                                                                                                |
+| **Cycle Length** | Days for a complete lunar cycle (new moon to new moon). Accepts decimal values (e.g., `29.53` for Earth's synodic month). |
+| **Color**        | Tint color for the moon icon                                                                                              |
 
 ### Reference Date
 
-A known date when the moon was at a specific phase (typically new moon at day 0 of the cycle). The moon's phase on any date is calculated from this reference point.
+A known date when the moon was at a specific phase. The moon's phase on any date is calculated from this reference point.
 
 - **Year** — Reference year
-- **Month** — Reference month (0-indexed internally; displays as month name in dropdown)
+- **Month** — Reference month
 - **Day** — Reference day of the month
+- **Reference Phase** — Which phase the moon is at on the reference date (dropdown)
 - **Cycle Day Adjust** — Offset in days to fine-tune phase alignment (positive or negative)
-- **Hidden** — Checkbox to hide this moon from players (GM-only visibility)
 
 ### Moon Phases
 
@@ -346,6 +371,16 @@ Define the phases of the lunar cycle. Each phase covers a percentage range of th
 | **Fading**  | Name for the transitional sub-phase as the moon leaves this phase     |
 | **Start %** | Percentage through the cycle when this phase begins                   |
 | **End %**   | Percentage through the cycle when this phase ends                     |
+
+### Phase Slider
+
+An interactive visual slider displays all phases as colored segments. The slider syncs bidirectionally with the Start %/End % number inputs.
+
+![Moon Phase Slider](https://github.com/Sayshal/Calendaria/blob/main/.github/assets/editor-moon-phase-slider.png)
+
+- **Drag handles** between phases to adjust boundaries; adjacent phases push to maintain a 1% minimum gap
+- **Double-click** a phase segment to normalize it to an equal share (100% / number of phases)
+- **Click percentage labels** to toggle between percentage and days display
 
 ### Moon & Phase Controls
 
@@ -369,8 +404,8 @@ Create repeating patterns like zodiac signs, elemental weeks, or numbered years.
 | Field        | Description                                    |
 | ------------ | ---------------------------------------------- |
 | **Name**     | Cycle name (e.g., "Zodiac")                    |
-| **Length**   | How many entries before the cycle repeats      |
-| **Offset**   | Starting offset (which entry is "first")       |
+| **Length**   | How many stages before the cycle repeats       |
+| **Offset**   | Starting offset (which stage is "first")       |
 | **Based On** | What unit drives the cycle (see options below) |
 
 #### Based On Options
@@ -382,79 +417,75 @@ Create repeating patterns like zodiac signs, elemental weeks, or numbered years.
 - **Day** — Cycle advances each day (total days since epoch)
 - **Year Day** — Cycle advances each day of the year (resets yearly)
 
-### Cycle Entries
+### Cycle Stages
 
-Each cycle has numbered entries that repeat in order.
+Each cycle has numbered stages that repeat in order.
 
-- **Entry Name** — Name for this position in the cycle (e.g., "Year of the Dragon")
+- **Stage Name** — Name for this position in the cycle (e.g., "Year of the Dragon")
 
 ### Cycle Controls
 
 - **Add Cycle** (+) — Add a new cycle
 - **Remove Cycle** (trash icon) — Delete this cycle
-- **Add Entry** (+) — Add an entry to this cycle
-- **Remove Entry** (trash icon) — Delete this entry
+- **Add Stage** (+) — Add a stage to this cycle
+- **Remove Stage** (trash icon) — Delete this stage
 
 ---
 
 ## Weather Tab
 
-Configure climate zones and weather conditions. A zone could be a region of your world, a city, etc.
-
-### Climate Zone Controls
-
-- **Zone Dropdown** — Select which climate zone to edit
-- **Add Zone** (+) — Create a new climate zone
-- **Edit Zone** (pencil) — Rename or configure the selected zone
-- **Delete Zone** (trash) — Remove the selected zone
+Configure climate zones and weather conditions. The Weather Tab has a two-section layout: **Season Climate** and **Zone Climate**.
 
 ### Auto Generate
 
-- **Auto Generate Weather** — Checkbox to automatically generate daily weather based on season and chance values
+- **Auto Generate Weather** — Checkbox to automatically generate daily weather based on season and chance values (enabled by default for new calendars)
 
-### Weather Categories
+### Season Climate
 
-Weather presets are organized into collapsible categories:
+Lists all defined seasons. Click the edit button on a season row to open the [ClimateEditor](#climateeditor) in season mode, where you can configure temperature ranges and weather preset chance overrides for that season.
 
-- **Standard** — Clear, cloudy, rain, snow, etc.
-- **Severe** — Storms, blizzards, extreme conditions
-- **Environmental** — Fog, heat wave, drought
-- **Fantasy** — Magical weather effects
+### Zone Climate
 
-#### Category Controls
+Lists all climate zones with inline controls:
 
-- **Collapse/Expand** — Click header to toggle visibility
-- **Select All** — Checkbox to enable/disable all presets in this category
-- **Stats** — Shows total chance and enabled count
+- **Active** — Checkbox to set the active zone (mutual exclusion — only one zone active at a time)
+- **Name** — Inline-editable zone name
+- **Edit** (pencil icon) — Open the [ClimateEditor](#climateeditor) in zone mode for full configuration
+- **Add** (+) — Insert a new zone after this row
+- **Remove** (trash icon) — Delete this zone
 
-### Weather Preset Fields
+### ClimateEditor
 
-| Field            | Description                                          |
-| ---------------- | ---------------------------------------------------- |
-| **Enabled**      | Checkbox — include this weather in random generation |
-| **Icon**         | Visual indicator (display only)                      |
-| **Name**         | Weather condition name (display only)                |
-| **Chance**       | Percentage chance when rolling weather (0-100%)      |
-| **Temp Min/Max** | Temperature range modifiers for this condition       |
+A dedicated application for editing climate settings. It operates in two modes:
 
-### Weather Preset Actions
+**Season Mode** (opened from Season Climate):
 
-- **Description** (comment icon) — Toggle description popover for custom flavor text
-- **Reset** (undo icon) — Restore this preset to default values
+- Temperature range (min/max) for this season
+- Preset chance overrides — adjust probability weights for weather conditions in this season
 
-### Total Chance
+**Zone Mode** (opened from Zone Climate):
 
-Displays the sum of all enabled weather chances. Shows a warning if the total doesn't equal 100%.
-
-### Climate Zone Editor
-
-Click the **Edit Zone** (pencil) button to configure zone-specific settings:
-
-- **Name** — Display name for the zone
-- **Description** — Optional notes about this climate zone
+- **Description** — Notes about this climate zone
 - **Brightness Multiplier** — Scene darkness adjustment (0.5x to 1.5x, default 1.0x)
-- **Environment Lighting** — Optional hue and saturation overrides for base and dark lighting
-- **Temperatures** — Per-season temperature ranges (min/max) for this zone
+- **Daylight** — Per-zone daylight configuration (see below)
+- **Environment Lighting** — Hue and saturation overrides for base and dark lighting
+- **Per-Season Temperatures** — Min/max temperature ranges for each season in this zone
+- **Preset Configuration** — Full preset list with enable/disable, chance %, temperature overrides, and preset aliases
+
+#### Zone Daylight
+
+The Daylight fieldset controls how sunrise/sunset times are calculated for scenes using this zone. Two mutually exclusive modes are available:
+
+| Mode                   | Fields                            | Description                                                                          |
+| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------ |
+| **Latitude** (default) | Latitude (-90° to +90°)           | Computes daylight astronomically based on latitude and the calendar's solstice dates |
+| **Override Solstice**  | Shortest Day, Longest Day (hours) | Manually set the daylight extremes for this zone                                     |
+
+Check **Override Solstice** to switch from latitude mode to manual mode. A live preview shows the computed shortest and longest day hours with their calendar dates.
+
+When neither latitude nor manual values are set, the zone falls back to the calendar's global daylight settings.
+
+Preset aliases let you rename any weather preset for this zone (e.g., rename "Rain" to "Monsoon Downpour" in a tropical zone). Aliases appear on the HUD, MiniCal, and Weather Picker. A reset button restores the default name.
 
 ---
 
@@ -467,7 +498,7 @@ Click **Export** to download the current calendar as a JSON file.
 The exported file includes:
 
 - All calendar configuration (months, weekdays, seasons, moons, etc.)
-- Calendar metadata (name, system, description)
+- Calendar metadata (name, description)
 - Export version and timestamp
 - Current date (when exporting the active calendar)
 

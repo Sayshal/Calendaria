@@ -1069,8 +1069,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
       const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
       const midday = hoursPerDay / 2;
-      const sunrise = this.calendar?.sunrise?.() ?? hoursPerDay / 4;
-      const sunset = this.calendar?.sunset?.() ?? (hoursPerDay * 3) / 4;
+      const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+      const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
+      const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
       const dawnStart = sunrise - 0.5;
       const dawnEnd = sunrise + 1;
       const duskStart = sunset - 0.5;
@@ -1143,8 +1144,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const sunSize = isCompact ? 12 : 14;
     const moonSize = isCompact ? 10 : 12;
     const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const sunrise = this.calendar?.sunrise?.() ?? hoursPerDay / 4;
-    const sunset = this.calendar?.sunset?.() ?? (hoursPerDay * 3) / 4;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
+    const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
     const isSunVisible = hour >= sunrise && hour < sunset;
     const sun = slice.querySelector('.calendaria-slice-sun');
     const moon = slice.querySelector('.calendaria-slice-moon');
@@ -2092,7 +2094,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onToSunrise(_event, _target) {
     const calendar = this.calendar;
     if (!calendar?.sunrise) return;
-    const targetHour = calendar.sunrise();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar.sunrise(undefined, zone);
     if (targetHour !== null) await this.#advanceToHour(targetHour);
   }
 
@@ -2103,7 +2106,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onToMidday(_event, _target) {
     const calendar = this.calendar;
-    const targetHour = calendar?.solarMidday?.() ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar?.solarMidday?.(undefined, zone) ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
     await this.#advanceToHour(targetHour);
   }
 
@@ -2115,7 +2119,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onToSunset(_event, _target) {
     const calendar = this.calendar;
     if (!calendar?.sunset) return;
-    const targetHour = calendar.sunset();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar.sunset(undefined, zone);
     if (targetHour !== null) await this.#advanceToHour(targetHour);
   }
 
@@ -2126,8 +2131,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onToMidnight(_event, _target) {
     const calendar = this.calendar;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
     if (calendar?.solarMidnight) {
-      const targetHour = calendar.solarMidnight();
+      const targetHour = calendar.solarMidnight(undefined, zone);
       const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
       if (targetHour >= hoursPerDay) await this.#advanceToHour(targetHour - hoursPerDay, true);
       else await this.#advanceToHour(targetHour);

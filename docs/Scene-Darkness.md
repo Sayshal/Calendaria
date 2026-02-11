@@ -44,7 +44,33 @@ Override settings for individual scenes via **Scene Configuration > Ambiance tab
 
 ## Dynamic Daylight
 
-When **Enable Dynamic Daylight** is enabled in Calendar Editor, daylight hours vary throughout the year based on solstice configuration. Sunrise and sunset times shift to reflect longer summer days and shorter winter days.
+When **Enable Dynamic Daylight** is enabled in Calendar Editor > Time tab, daylight hours vary throughout the year. Sunrise and sunset times shift to reflect longer summer days and shorter winter days.
+
+Darkness is shaped by the actual sunrise and sunset times. The curve transitions smoothly from full darkness at midnight through dawn, stays minimal during daylight, then rises again through dusk.
+
+### Per-Zone Daylight
+
+Climate zones can override the global daylight curve with zone-specific settings. This means different scenes can have different sunrise/sunset times based on their assigned zone.
+
+Daylight is resolved using the following priority (first match wins):
+
+| Priority | Source              | Description                                                                     |
+| -------- | ------------------- | ------------------------------------------------------------------------------- |
+| 1        | **Zone Latitude**   | Astronomical hour-angle calculation based on the zone's latitude (-90° to +90°) |
+| 2        | **Zone Manual**     | Custom shortest/longest day hours set directly on the zone                      |
+| 3        | **Global Daylight** | Calendar-wide solstice settings from the Time tab                               |
+| 4        | **Static Fallback** | 50% of the day (e.g., 12h for a 24h day)                                        |
+
+### Latitude-Based Daylight
+
+When a zone has a latitude set, Calendaria uses an astronomical hour-angle formula to compute daylight hours for each day of the year. This produces realistic seasonal variation:
+
+- **Equator (0°)**: ~12 hours year-round
+- **Mid-latitudes (±45°)**: ~8-16 hours depending on season
+- **Polar regions (±66°+)**: Polar day/night extremes near solstices
+
+> [!NOTE]
+> The formula adapts to the calendar's year length, hours per day, and configured summer solstice date — so it works with non-Earth calendars too.
 
 ---
 

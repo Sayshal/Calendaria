@@ -6,50 +6,50 @@ Calendaria includes a procedural weather generation system with climate zones, s
 
 ### Standard (10 presets)
 
-| ID              | Condition     | Temp Range (C) |
-| --------------- | ------------- | -------------- |
-| `clear`         | Clear         | 18-32          |
-| `partly-cloudy` | Partly Cloudy | 15-28          |
-| `cloudy`        | Cloudy        | 12-24          |
-| `overcast`      | Overcast      | 10-20          |
-| `drizzle`       | Drizzle       | 8-18           |
-| `rain`          | Rain          | 10-22          |
-| `fog`           | Fog           | 5-15           |
-| `mist`          | Mist          | 8-18           |
-| `windy`         | Windy         | 10-25          |
-| `sunshower`     | Sunshower     | 15-26          |
+| ID              | Condition     | Temp Range °C | Temp Range °F |
+| --------------- | ------------- | ------------- | ------------- |
+| `clear`         | Clear         | 18 to 32      | 64 to 90      |
+| `partly-cloudy` | Partly Cloudy | 15 to 28      | 59 to 82      |
+| `cloudy`        | Cloudy        | 12 to 24      | 54 to 75      |
+| `overcast`      | Overcast      | 10 to 20      | 50 to 68      |
+| `drizzle`       | Drizzle       | 8 to 18       | 46 to 64      |
+| `rain`          | Rain          | 10 to 22      | 50 to 72      |
+| `fog`           | Fog           | 5 to 15       | 41 to 59      |
+| `mist`          | Mist          | 8 to 18       | 46 to 64      |
+| `windy`         | Windy         | 10 to 25      | 50 to 77      |
+| `sunshower`     | Sunshower     | 15 to 26      | 59 to 79      |
 
 ### Severe (6 presets)
 
-| ID             | Condition    | Temp Range (C) |
-| -------------- | ------------ | -------------- |
-| `thunderstorm` | Thunderstorm | 15-28          |
-| `blizzard`     | Blizzard     | -20 to -5      |
-| `snow`         | Snow         | -10 to 2       |
-| `hail`         | Hail         | 5-18           |
-| `tornado`      | Tornado      | 18-35          |
-| `hurricane`    | Hurricane    | 22-35          |
+| ID             | Condition    | Temp Range °C | Temp Range °F |
+| -------------- | ------------ | ------------- | ------------- |
+| `thunderstorm` | Thunderstorm | 15 to 28      | 59 to 82      |
+| `blizzard`     | Blizzard     | -20 to -5     | -4 to 23      |
+| `snow`         | Snow         | -10 to 2      | 14 to 36      |
+| `hail`         | Hail         | 5 to 18       | 41 to 64      |
+| `tornado`      | Tornado      | 18 to 35      | 64 to 95      |
+| `hurricane`    | Hurricane    | 22 to 35      | 72 to 95      |
 
 ### Environmental (3 presets)
 
-| ID             | Condition    | Temp Range (C) |
-| -------------- | ------------ | -------------- |
-| `ashfall`      | Ashfall      | 15-40          |
-| `sandstorm`    | Sandstorm    | 25-45          |
-| `luminous-sky` | Luminous Sky | -5 to 10       |
+| ID             | Condition    | Temp Range °C | Temp Range °F |
+| -------------- | ------------ | ------------- | ------------- |
+| `ashfall`      | Ashfall      | 15 to 40      | 59 to 104     |
+| `sandstorm`    | Sandstorm    | 25 to 45      | 77 to 113     |
+| `luminous-sky` | Luminous Sky | -5 to 10      | 23 to 50      |
 
 ### Fantasy (8 presets)
 
-| ID                 | Condition        | Temp Range (C) |
-| ------------------ | ---------------- | -------------- |
-| `black-sun`        | Black Sun        | 5-20           |
-| `ley-surge`        | Ley Surge        | 10-25          |
-| `aether-haze`      | Aether Haze      | 12-22          |
-| `nullfront`        | Nullfront        | 0-15           |
-| `permafrost-surge` | Permafrost Surge | -30 to -10     |
-| `gravewind`        | Gravewind        | 5-18           |
-| `veilfall`         | Veilfall         | 8-20           |
-| `arcane`           | Arcane           | 15-28          |
+| ID                 | Condition        | Temp Range °C | Temp Range °F |
+| ------------------ | ---------------- | ------------- | ------------- |
+| `black-sun`        | Black Sun        | 5 to 20       | 41 to 68      |
+| `ley-surge`        | Ley Surge        | 10 to 25      | 50 to 77      |
+| `aether-haze`      | Aether Haze      | 12 to 22      | 54 to 72      |
+| `nullfront`        | Nullfront        | 0 to 15       | 32 to 59      |
+| `permafrost-surge` | Permafrost Surge | -30 to -10    | -22 to 14     |
+| `gravewind`        | Gravewind        | 5 to 18       | 41 to 64      |
+| `veilfall`         | Veilfall         | 8 to 20       | 46 to 68      |
+| `arcane`           | Arcane           | 15 to 28      | 59 to 82      |
 
 ---
 
@@ -59,15 +59,15 @@ Seven built-in climate zone templates define temperature ranges and weather prob
 
 ### Available Templates
 
-| ID            | Zone        | Temperature Range (C) |
-| ------------- | ----------- | --------------------- |
-| `arctic`      | Arctic      | -45 to 8              |
-| `subarctic`   | Subarctic   | -35 to 18             |
-| `temperate`   | Temperate   | -5 to 30              |
-| `subtropical` | Subtropical | 5 to 35               |
-| `tropical`    | Tropical    | 22 to 35              |
-| `arid`        | Arid        | 5 to 48               |
-| `polar`       | Polar       | -50 to 10             |
+| ID            | Zone        | Temp Range °C | Temp Range °F |
+| ------------- | ----------- | ------------- | ------------- |
+| `arctic`      | Arctic      | -45 to 8      | -49 to 46     |
+| `subarctic`   | Subarctic   | -35 to 18     | -31 to 64     |
+| `temperate`   | Temperate   | -5 to 30      | 23 to 86      |
+| `subtropical` | Subtropical | 5 to 35       | 41 to 95      |
+| `tropical`    | Tropical    | 22 to 35      | 72 to 95      |
+| `arid`        | Arid        | 5 to 48       | 41 to 118     |
+| `polar`       | Polar       | -50 to 10     | -58 to 50     |
 
 ### Zone Configuration
 
@@ -75,13 +75,16 @@ Each zone defines:
 
 - **Seasonal temperatures**: `Spring`, `Summer`, `Autumn`, `Winter`, and `_default` fallback
 - **Weather weights**: Per-season relative probabilities for each weather preset
+- **Daylight**: Optional latitude or manual shortest/longest day overrides (see [Zone Daylight](Calendar-Editor#zone-daylight))
+- **Brightness multiplier**: Per-zone scene darkness scaling
+- **Environment lighting**: Hue and saturation overrides for scene ambience
 
-Climate zones are stored in the calendar's `weather.zones` array. The `weather.activeZone` property determines which zone is used for generation.
+Zone names are inline-editable directly in the Weather Tab zone list. The **active zone** is set via a checkbox on each zone row (mutual exclusion — only one zone active at a time).
 
 ### Auto-Generation
 
 > [!NOTE]
-> When **Auto-generate weather on day change** is enabled, weather regenerates automatically on day change (GM only).
+> **Auto-generate weather on day change** is enabled by default for new calendars. When active, weather regenerates automatically on day change (GM only).
 
 ---
 
@@ -101,10 +104,10 @@ Climate configuration follows a layered approach (first matching value wins):
 
 In Calendar Editor > Weather tab:
 
-1. Select a climate zone
-2. Click the gear icon next to a season name
+1. Click the edit button on a season row in the Season Climate list
+2. The [ClimateEditor](Calendar-Editor#climateeditor) opens in season mode
 3. Configure:
-   - **Temperature Range**: Override min/max for this season in this zone
+   - **Temperature Range**: Override min/max for this season
    - **Preset Chances**: Adjust probability weights for weather conditions
 
 ---
@@ -235,8 +238,11 @@ GMs can manually set weather by clicking the weather indicator on the HUD or Min
 - All weather presets grouped by category (Standard, Severe, Fantasy, Environmental, Custom)
 - Climate zone selector with "None" option (always visible)
 - **Set as Active** checkbox: When checked, selecting a zone also updates the calendar's default climate zone
-- Random generation button to roll new weather based on current zone/season probabilities
-- **Clear Weather** button to remove the current weather condition
+- **Randomize** button to roll new weather based on current zone/season probabilities
+- **Clear** button to remove the current weather condition
+- **Save** button to confirm the selected weather and close the picker
+
+Selecting a preset populates the Custom Weather fields for preview and editing. The selected preset button shows an active highlight (colored border and tinted background). Click **Save** to apply.
 
 ### Custom Weather
 
@@ -252,6 +258,29 @@ Custom weather updates live as you type. This is a one-time override, not a save
 ### Preset Filtering
 
 The Weather Picker only displays presets that are enabled in the current zone's configuration. Disabled presets are excluded from both the picker list and random generation.
+
+---
+
+## Preset Aliases
+
+GMs can rename any weather preset on a per-zone basis with a custom display name. For example, rename "Rain" to "Monsoon Downpour" in a tropical zone, or "Snow" to "Ashfall" in a volcanic region.
+
+### Configuring Aliases
+
+In the [ClimateEditor](Calendar-Editor#climateeditor) (zone mode), each preset row has an alias input field. Type a custom name to override the default label. A reset button (undo icon) next to aliased presets restores the default localized name.
+
+### Where Aliases Appear
+
+Aliases are displayed everywhere the preset name appears:
+
+- HUD weather indicator
+- MiniCal weather display
+- Weather Picker preset buttons
+- ClimateEditor preset list
+
+### Scope
+
+Aliases are **zone-scoped** — each calendar + zone combination can have different names for the same preset. Aliases are stored in world settings and persist across sessions.
 
 ---
 

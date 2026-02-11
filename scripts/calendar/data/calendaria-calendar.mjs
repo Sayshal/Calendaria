@@ -651,6 +651,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               id: new StringField({ required: true }),
               name: new StringField({ required: true }),
               description: new StringField({ required: false }),
+              latitude: new NumberField({ required: false, nullable: true, initial: null, min: -90, max: 90 }),
+              shortestDay: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
+              longestDay: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
               temperatures: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               presets: new TypedObjectField(
                 new SchemaField({
@@ -755,55 +758,86 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Compute daylight hours from latitude using the astronomical hour-angle formula.
+   * Uses Earth's axial tilt (23.44°) as default. Handles polar day/night edge cases.
+   * @param {number} latitude - Latitude in degrees (-90 to 90)
+   * @param {number} dayOfYear - Day of year (0-indexed)
+   * @param {number} daysPerYear - Total days in the calendar year
+   * @param {number} hoursPerDay - Hours per day for this calendar
+   * @param {number} [summerSolsticeDay] - Day of year when summer solstice occurs (declination peaks)
+   * @returns {number} Daylight hours for the given day and latitude
+   */
+  static computeDaylightFromLatitude(latitude, dayOfYear, daysPerYear, hoursPerDay, summerSolsticeDay = null) {
+    const axialTilt = 23.44;
+    const tiltRad = (axialTilt * Math.PI) / 180;
+    const latRad = (latitude * Math.PI) / 180;
+    // Solar declination — cosine peaks at summer solstice day
+    const peak = summerSolsticeDay ?? Math.round(daysPerYear * 0.47);
+    const yearProgress = ((dayOfYear - peak) / daysPerYear) * 2 * Math.PI;
+    const declination = tiltRad * Math.cos(yearProgress);
+    // Hour angle
+    const cosHourAngle = -Math.tan(latRad) * Math.tan(declination);
+    if (cosHourAngle <= -1) return hoursPerDay; // Polar day
+    if (cosHourAngle >= 1) return 0; // Polar night
+    const hourAngle = Math.acos(cosHourAngle);
+    return (hourAngle / Math.PI) * hoursPerDay;
+  }
+
+  /**
    * Get the number of hours in a given day.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Number of hours between sunrise and sunset.
    */
-  daylightHours(time = game.time.components) {
-    return this.sunset(time) - this.sunrise(time);
+  daylightHours(time = game.time.components, zone = null) {
+    return this.sunset(time, zone) - this.sunrise(time, zone);
   }
 
   /**
    * Progress between sunrise and sunset assuming it is daylight half the day duration.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Progress through day period, with 0 representing sunrise and 1 sunset.
    */
-  progressDay(time = game.time.components) {
-    return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time)) / this.daylightHours(time);
+  progressDay(time = game.time.components, zone = null) {
+    return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time, zone)) / this.daylightHours(time, zone);
   }
 
   /**
    * Progress between sunset and sunrise assuming it is night half the day duration.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Progress through night period, with 0 representing sunset and 1 sunrise.
    */
-  progressNight(time = game.time.components) {
-    const daylightHours = this.daylightHours(time);
+  progressNight(time = game.time.components, zone = null) {
+    const daylightHrs = this.daylightHours(time, zone);
     let hour = CalendariaCalendar.hoursOfDay(time, this);
-    if (hour < daylightHours) hour += this.days.hoursPerDay;
-    return (hour - this.sunset(time)) / daylightHours;
+    if (hour < daylightHrs) hour += this.days.hoursPerDay;
+    return (hour - this.sunset(time, zone)) / daylightHrs;
   }
 
   /**
    * Get the sunrise time for a given day.
-   * Uses dynamic daylight calculation if enabled, otherwise static 25% of day.
+   * Uses zone latitude if available, then global daylight curve, then static 25% of day.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Sunrise time in hours.
    */
-  sunrise(time = game.time.components) {
-    const daylightHrs = this._getDaylightHoursForDay(time);
+  sunrise(time = game.time.components, zone = null) {
+    const daylightHrs = this._getDaylightHoursForDay(time, zone);
     const midday = this.days.hoursPerDay / 2;
     return midday - daylightHrs / 2;
   }
 
   /**
    * Get the sunset time for a given day.
-   * Uses dynamic daylight calculation if enabled, otherwise static 75% of day.
+   * Uses zone latitude if available, then global daylight curve, then static 75% of day.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Sunset time in hours.
    */
-  sunset(time = game.time.components) {
-    const daylightHrs = this._getDaylightHoursForDay(time);
+  sunset(time = game.time.components, zone = null) {
+    const daylightHrs = this._getDaylightHoursForDay(time, zone);
     const midday = this.days.hoursPerDay / 2;
     return midday + daylightHrs / 2;
   }
@@ -812,38 +846,77 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * Get solar midday - the midpoint between sunrise and sunset.
    * This varies throughout the year when dynamic daylight is enabled.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Solar midday time in hours.
    */
-  solarMidday(time = game.time.components) {
-    return (this.sunrise(time) + this.sunset(time)) / 2;
+  solarMidday(time = game.time.components, zone = null) {
+    return (this.sunrise(time, zone) + this.sunset(time, zone)) / 2;
   }
 
   /**
    * Get solar midnight - the midpoint of the night period.
    * This is halfway between sunset and the next sunrise.
    * @param {number|object} [time] - The time to use, by default the current world time.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Solar midnight time in hours (may exceed hoursPerDay for next day).
    */
-  solarMidnight(time = game.time.components) {
-    const sunsetHour = this.sunset(time);
-    const nightHours = this.days.hoursPerDay - this.daylightHours(time);
+  solarMidnight(time = game.time.components, zone = null) {
+    const sunsetHour = this.sunset(time, zone);
+    const nightHours = this.days.hoursPerDay - this.daylightHours(time, zone);
     return sunsetHour + nightHours / 2;
   }
 
   /**
-   * Calculate daylight hours for a specific day based on dynamic daylight settings.
+   * Calculate daylight hours for a specific day based on zone latitude, zone manual overrides,
+   * global dynamic daylight settings, or static 50% fallback.
    * @param {number|object} [time] - The time to use.
+   * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Hours of daylight for this day.
    * @private
    */
-  _getDaylightHoursForDay(time = game.time.components) {
-    if (!this.daylight?.enabled) return this.days.hoursPerDay * 0.5;
+  _getDaylightHoursForDay(time = game.time.components, zone = null) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const hoursPerDay = this.days.hoursPerDay;
+    const daysPerYear = this.days.daysPerYear ?? 365;
+
+    // Calculate day of year (shared by multiple branches)
     let dayOfYear = components.dayOfMonth;
     const months = this.monthsArray;
     for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
-    const daysPerYear = this.days.daysPerYear ?? 365;
-    const { shortestDay, longestDay, winterSolstice, summerSolstice } = this.daylight;
+
+    // 1. Zone latitude — astronomical formula
+    if (zone?.latitude != null) {
+      const summerSolsticeDay = this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+      return CalendariaCalendar.computeDaylightFromLatitude(zone.latitude, dayOfYear, daysPerYear, hoursPerDay, summerSolsticeDay);
+    }
+
+    // 2. Zone manual shortestDay/longestDay — sinusoidal with zone-specific extremes
+    if (zone?.shortestDay != null && zone?.longestDay != null) {
+      return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, zone.shortestDay, zone.longestDay);
+    }
+
+    // 3. Global daylight curve
+    if (this.daylight?.enabled) {
+      const { shortestDay, longestDay } = this.daylight;
+      return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay);
+    }
+
+    // 4. Static fallback
+    return hoursPerDay * 0.5;
+  }
+
+  /**
+   * Compute daylight hours using the sinusoidal curve between solstices.
+   * @param {number} dayOfYear - 0-indexed day of year
+   * @param {number} daysPerYear - Total days per year
+   * @param {number} shortestDay - Shortest daylight hours
+   * @param {number} longestDay - Longest daylight hours
+   * @returns {number} Hours of daylight
+   * @private
+   */
+  #computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay) {
+    const winterSolstice = this.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97);
+    const summerSolstice = this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
     const daysSinceWinter = (dayOfYear - winterSolstice + daysPerYear) % daysPerYear;
     const daysBetweenSolstices = (summerSolstice - winterSolstice + daysPerYear) % daysPerYear;
     let progress;

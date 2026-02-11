@@ -1617,7 +1617,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onToSunrise() {
     const calendar = this.calendar;
     if (!calendar?.sunrise) return;
-    const targetHour = calendar.sunrise();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar.sunrise(undefined, zone);
     if (targetHour === null) return;
     await this.#advanceToHour(targetHour);
   }
@@ -1627,7 +1628,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async _onToMidday() {
     const calendar = this.calendar;
-    const targetHour = calendar?.solarMidday?.() ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar?.solarMidday?.(undefined, zone) ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
     await this.#advanceToHour(targetHour);
   }
 
@@ -1637,7 +1639,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onToSunset() {
     const calendar = this.calendar;
     if (!calendar?.sunset) return;
-    const targetHour = calendar.sunset();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar.sunset(undefined, zone);
     if (targetHour === null) return;
     await this.#advanceToHour(targetHour);
   }
@@ -1647,8 +1650,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async _onToMidnight() {
     const calendar = this.calendar;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
     if (calendar?.solarMidnight) {
-      const targetHour = calendar.solarMidnight();
+      const targetHour = calendar.solarMidnight(undefined, zone);
       const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
       if (targetHour >= hoursPerDay) await this.#advanceToHour(targetHour - hoursPerDay, true);
       else await this.#advanceToHour(targetHour);

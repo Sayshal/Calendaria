@@ -8,14 +8,14 @@ Calendaria supports multiple moons with configurable cycle lengths, phases, and 
 
 Configure moons via **Calendar Editor > Moons tab**:
 
-| Setting          | Description                              |
-| ---------------- | ---------------------------------------- |
-| Name             | Moon display name                        |
-| Cycle Length     | Days for one complete cycle              |
-| Color            | Tint color for icon display              |
-| Reference Date   | A known new moon date (year, month, day) |
-| Cycle Day Adjust | Fine-tune phase alignment                |
-| Hidden           | Exclude from UI display                  |
+| Setting          | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| Name             | Moon display name                                |
+| Cycle Length     | Days for one complete cycle                      |
+| Color            | Tint color for icon display                      |
+| Reference Date   | A known new moon date (year, month, day)         |
+| Cycle Day Adjust | Fine-tune phase alignment                        |
+| Reference Phase  | Which phase the moon is at on the reference date |
 
 ### Phase Configuration
 
@@ -25,6 +25,8 @@ Each phase can be customized with:
 - **Rising/Fading**: Optional sub-phase names for multi-day phases
 - **Icon**: SVG path or emoji
 - **Start/End**: Cycle position (0-1)
+
+An interactive **phase slider** in the Moons tab provides a visual way to adjust phase boundaries by dragging handles between segments. See [Calendar Editor — Moon Phases](Calendar-Editor#moon-phases) for details.
 
 ---
 

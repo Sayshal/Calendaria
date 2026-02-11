@@ -397,9 +397,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         })),
         refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
         phasesWithIndex: phasesArr.map(([phaseKey, phase], pIdx) => {
-          const startPercent = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
-          const endPercent = Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100;
-          const widthPercent = Math.max(0, endPercent - startPercent);
+          const rawStart = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
+          const rawEnd = Math.round((phase.end ?? (pIdx + 1) * 0.125) * 10000) / 100;
+          const widthPercent = Math.max(0, rawEnd - rawStart);
           return {
             ...phase,
             phaseKey,
@@ -408,10 +408,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             moonKey,
             moonColor: moon.color || '',
             isImagePath: phase.icon?.includes('/') ?? false,
-            startPercent,
-            endPercent,
+            startPercent: rawStart.toFixed(2),
+            endPercent: rawEnd.toFixed(2),
             widthPercent,
-            widthFormatted: widthPercent.toFixed(1)
+            widthFormatted: widthPercent.toFixed(2)
           };
         })
       };
@@ -775,7 +775,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             const days = (widthPercent / 100) * cycleLength;
             return `${days.toFixed(1)}d`;
           }
-          return `${widthPercent.toFixed(1)}%`;
+          return `${widthPercent.toFixed(2)}%`;
         }
       });
     }
@@ -1638,6 +1638,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       data: season,
       seasonKey: key,
       calendarId: this.#calendarId,
+      calendarData: this.#calendarData,
       onSave: (result) => {
         season.climate = Object.keys(result.presets ?? {}).length || result.temperatures ? result : null;
         editor.render({ parts: ['weather'] });
@@ -2144,10 +2145,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       data: zone,
       zoneKey,
       calendarId: this.#calendarId,
+      calendarData: this.#calendarData,
       seasonNames,
       onSave: (result) => {
         zone.description = result.description;
         zone.brightnessMultiplier = result.brightnessMultiplier;
+        zone.latitude = result.latitude;
+        zone.shortestDay = result.shortestDay;
+        zone.longestDay = result.longestDay;
         zone.environmentBase = result.environmentBase;
         zone.environmentDark = result.environmentDark;
         zone.temperatures = result.temperatures;

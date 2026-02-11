@@ -5,6 +5,8 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
+import CalendariaCalendar from '../calendar/data/calendaria-calendar.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import { fromDisplayUnit, toDisplayUnit } from '../weather/climate-data.mjs';
 import { format, localize } from '../utils/localization.mjs';
@@ -20,8 +22,9 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
-    classes: ['calendaria', 'standard-form', 'climate-editor'],
+    classes: ['calendaria', 'climate-editor'],
     tag: 'form',
+    window: { contentClasses: ['standard-form'] },
     position: { width: 'auto', height: 'auto' },
     form: { handler: ClimateEditor.#onSubmit, submitOnChange: true, closeOnSubmit: false },
     actions: {
@@ -45,6 +48,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {string} Calendar ID */
   #calendarId;
+  #calendarData;
 
   /** @type {string[]} Season names for zone temperature rows */
   #seasonNames;
@@ -59,19 +63,21 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} [options.seasonKey] - Season key (season mode)
    * @param {string} [options.zoneKey] - Zone key (zone mode)
    * @param {string} options.calendarId - Calendar ID
+   * @param {object} [options.calendarData] - In-progress calendar data (unsaved edits from editor)
    * @param {string[]} [options.seasonNames] - Season names (zone mode)
    * @param {Function} options.onSave - Callback with parsed result
    */
   constructor(options = {}) {
     const mode = options.mode;
     const key = mode === 'season' ? options.seasonKey : options.zoneKey;
-    const classes = ['calendaria', 'standard-form', 'climate-editor'];
+    const classes = ['calendaria', 'climate-editor'];
     if (mode === 'zone') classes.push('zone-mode');
     super({
       ...options,
       id: `climate-editor-${mode}-${key}`,
       classes,
       window: {
+        contentClasses: ['standard-form'],
         title:
           mode === 'season'
             ? format('CALENDARIA.Editor.Season.Climate.Title', { name: localize(options.data?.name ?? '') })
@@ -82,6 +88,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#data = foundry.utils.deepClone(options.data);
     this.#zoneKey = options.zoneKey ?? null;
     this.#calendarId = options.calendarId;
+    this.#calendarData = options.calendarData ?? null;
     this.#seasonNames = options.seasonNames ?? [];
     this.#onSave = options.onSave;
   }
@@ -157,6 +164,60 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       })
       .filter(Boolean);
 
+    // Zone daylight preview
+    let latitude = this.#data.latitude ?? null;
+    let shortestDayHours = '';
+    let longestDayHours = '';
+    let hoursPerDay = 24;
+    let zoneShortestDay = this.#data.shortestDay ?? '';
+    let zoneLongestDay = this.#data.longestDay ?? '';
+    let defaultShortestDay = '';
+    let defaultLongestDay = '';
+    const hasManualDaylight = zoneShortestDay !== '' || zoneLongestDay !== '';
+
+    let shortestDayDate = '';
+    let longestDayDate = '';
+
+    if (isZoneMode) {
+      const calendar = this.#calendarData ?? CalendarManager.getCalendar(this.#calendarId) ?? CalendarManager.getActiveCalendar();
+      hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+      const daysPerYear = calendar?.days?.daysPerYear ?? 365;
+      const winterSolstice = calendar?.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97);
+      const summerSolstice = calendar?.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+      const globalShort = calendar?.daylight?.enabled ? (calendar?.daylight?.shortestDay ?? hoursPerDay * 0.5) : hoursPerDay * 0.5;
+      const globalLong = calendar?.daylight?.enabled ? (calendar?.daylight?.longestDay ?? hoursPerDay * 0.5) : hoursPerDay * 0.5;
+      defaultShortestDay = globalShort;
+      defaultLongestDay = globalLong;
+
+      // Resolve day-of-year to "Month Day" date strings
+      const months = calendar?.monthsArray ?? Object.values(calendar?.months?.values ?? {});
+      const dayOfYearToDate = (doy) => {
+        let remaining = ((doy % daysPerYear) + daysPerYear) % daysPerYear;
+        for (const month of months) {
+          const d = month.days || 0;
+          if (remaining < d) return `${month.name} ${remaining + 1}`;
+          remaining -= d;
+        }
+        const last = months[months.length - 1];
+        return `${last?.name ?? '?'} ${last?.days ?? 1}`;
+      };
+      shortestDayDate = dayOfYearToDate(winterSolstice);
+      longestDayDate = dayOfYearToDate(summerSolstice);
+
+      if (hasManualDaylight) {
+        shortestDayHours = `${parseFloat(zoneShortestDay || globalShort).toFixed(1)}h`;
+        longestDayHours = `${parseFloat(zoneLongestDay || globalLong).toFixed(1)}h`;
+      } else if (latitude != null) {
+        const winterHrs = CalendariaCalendar.computeDaylightFromLatitude(latitude, winterSolstice, daysPerYear, hoursPerDay, summerSolstice);
+        const summerHrs = CalendariaCalendar.computeDaylightFromLatitude(latitude, summerSolstice, daysPerYear, hoursPerDay, summerSolstice);
+        shortestDayHours = `${winterHrs.toFixed(1)}h`;
+        longestDayHours = `${summerHrs.toFixed(1)}h`;
+      } else {
+        shortestDayHours = `${globalShort.toFixed(1)}h`;
+        longestDayHours = `${globalLong.toFixed(1)}h`;
+      }
+    }
+
     return {
       ...context,
       isZoneMode,
@@ -170,7 +231,19 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       brightnessMultiplier: this.#data.brightnessMultiplier ?? 1.0,
       envBase: this.#data.environmentBase ?? {},
       envDark: this.#data.environmentDark ?? {},
-      zoneKey: this.#zoneKey
+      zoneKey: this.#zoneKey,
+      // Daylight fields
+      latitude: latitude ?? '',
+      hasManualDaylight,
+      hoursPerDay,
+      zoneShortestDay,
+      zoneLongestDay,
+      defaultShortestDay,
+      defaultLongestDay,
+      shortestDayHours,
+      longestDayHours,
+      shortestDayDate,
+      longestDayDate
     };
   }
 
@@ -184,6 +257,40 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const label = slider.nextElementSibling;
       slider.addEventListener('input', () => {
         label.textContent = `${slider.value}x`;
+      });
+    }
+
+    // Daylight mode toggle — checkbox switches between latitude and manual fields
+    const forceCheckbox = this.element.querySelector('[name="forceSolstice"]');
+    const latGroup = this.element.querySelector('.daylight-latitude');
+    const manualGroups = this.element.querySelectorAll('.daylight-manual');
+    if (forceCheckbox) {
+      forceCheckbox.addEventListener('change', () => {
+        const manual = forceCheckbox.checked;
+        if (latGroup) latGroup.hidden = manual;
+        manualGroups.forEach((g) => (g.hidden = !manual));
+      });
+    }
+
+    // Latitude input — live-update solstice preview
+    const latInput = this.element.querySelector('[name="latitude"]');
+    if (latInput) {
+      const shortestVal = this.element.querySelector('[data-daylight="shortest"]');
+      const longestVal = this.element.querySelector('[data-daylight="longest"]');
+      const calendar = this.#calendarData ?? CalendarManager.getCalendar(this.#calendarId) ?? CalendarManager.getActiveCalendar();
+      const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+      const daysPerYear = calendar?.days?.daysPerYear ?? 365;
+      const winterSolstice = calendar?.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97);
+      const summerSolstice = calendar?.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+
+      latInput.addEventListener('input', () => {
+        const lat = parseFloat(latInput.value);
+        if (Number.isFinite(lat) && lat >= -90 && lat <= 90) {
+          const winterHrs = CalendariaCalendar.computeDaylightFromLatitude(lat, winterSolstice, daysPerYear, hoursPerDay, summerSolstice);
+          const summerHrs = CalendariaCalendar.computeDaylightFromLatitude(lat, summerSolstice, daysPerYear, hoursPerDay, summerSolstice);
+          if (shortestVal) shortestVal.textContent = `${winterHrs.toFixed(1)}h`;
+          if (longestVal) longestVal.textContent = `${summerHrs.toFixed(1)}h`;
+        }
       });
     }
 
@@ -236,9 +343,18 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const darkHue = data.darkHue !== '' && data.darkHue != null ? parseFloat(data.darkHue) : null;
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
 
+    // Parse latitude and daylight overrides — mutually exclusive via checkbox
+    const forceSolstice = data.forceSolstice;
+    const latVal = data.latitude !== '' && data.latitude != null ? parseFloat(data.latitude) : null;
+    const shortDayVal = data.shortestDay !== '' && data.shortestDay != null ? parseFloat(data.shortestDay) : null;
+    const longDayVal = data.longestDay !== '' && data.longestDay != null ? parseFloat(data.longestDay) : null;
+
     const result = {
       description: data.description || '',
       brightnessMultiplier: parseFloat(data.brightnessMultiplier) || 1.0,
+      latitude: forceSolstice ? null : latVal,
+      shortestDay: forceSolstice ? shortDayVal : null,
+      longestDay: forceSolstice ? longDayVal : null,
       environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
       environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null,
       temperatures: {},

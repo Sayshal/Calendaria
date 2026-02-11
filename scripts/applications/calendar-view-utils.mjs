@@ -12,6 +12,7 @@ import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { formatCustom } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -391,8 +392,9 @@ export function injectContextMenuInfo(target, calendar) {
   const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
-  const sunriseHour = calendar.sunrise?.(internalComponents) ?? 6;
-  const sunsetHour = calendar.sunset?.(internalComponents) ?? 18;
+  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
+  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const formatTime = (hours) => {
     let h = Math.floor(hours);
     let m = Math.round((hours - h) * 60);
@@ -450,8 +452,9 @@ export function generateDayTooltip(calendar, year, month, day, festival = null) 
   const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
-  const sunriseHour = calendar.sunrise?.(internalComponents) ?? 6;
-  const sunsetHour = calendar.sunset?.(internalComponents) ?? 18;
+  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
+  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const formatTime = (hours) => {
     let h = Math.floor(hours);
     let m = Math.round((hours - h) * 60);

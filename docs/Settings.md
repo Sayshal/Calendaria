@@ -4,6 +4,8 @@ Calendaria settings are accessed via **Settings > Module Settings > Calendaria >
 
 The settings panel is organized into tabs. GM-only tabs are marked below.
 
+![Settings Navigation](https://github.com/Sayshal/Calendaria/blob/main/.github/assets/settings-navigation.png)
+
 ---
 
 ## Searching Settings

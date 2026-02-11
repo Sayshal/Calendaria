@@ -6,11 +6,12 @@ Format tokens are placeholders used in display format strings.
 
 ## Year
 
-| Token  | Description                  |
-| ------ | ---------------------------- |
-| `Y`    | Year (541, 2026)             |
-| `YY`   | Year, 2-digit (26 from 2026) |
-| `YYYY` | Year, 4-digit (2026)         |
+| Token        | Description                                                        |
+| ------------ | ------------------------------------------------------------------ |
+| `Y`          | Year (541, 2026)                                                   |
+| `YY`         | Year, 2-digit (26 from 2026)                                       |
+| `YYYY`       | Year, 4-digit (2026)                                               |
+| `[yearName]` | Named year (e.g., "Year of the Dragon") — empty if no name defined |
 
 ---
 
@@ -52,40 +53,46 @@ Format tokens are placeholders used in display format strings.
 
 ## Week
 
-| Token | Description                        |
-| ----- | ---------------------------------- |
-| `w`   | Week of year (1, 26, 52)           |
-| `ww`  | Week of year, 2-digit (01, 26, 52) |
-| `W`   | Week of month (1, 2, 3, 4, 5)      |
+| Token             | Description                                |
+| ----------------- | ------------------------------------------ |
+| `w`               | Week of year (1, 26, 52)                   |
+| `ww`              | Week of year, 2-digit (01, 26, 52)         |
+| `W`               | Week of month (1, 2, 3, 4, 5)              |
+| `[namedWeek]`     | Named week name (e.g., "Week of the Wolf") |
+| `[namedWeekAbbr]` | Named week abbreviation                    |
 
 ---
 
 ## Time
 
-| Token | Description                    |
-| ----- | ------------------------------ |
-| `H`   | Hour 24h (0, 14, 23)           |
-| `HH`  | Hour 24h, 2-digit (00, 14, 23) |
-| `h`   | Hour 12h (1, 2, 12)            |
-| `hh`  | Hour 12h, 2-digit (01, 02, 12) |
-| `m`   | Minute (0, 30, 59)             |
-| `mm`  | Minute, 2-digit (00, 30, 59)   |
-| `s`   | Second (0, 30, 59)             |
-| `ss`  | Second, 2-digit (00, 30, 59)   |
-| `A`   | AM/PM uppercase (AM, PM)       |
-| `a`   | am/pm lowercase (am, pm)       |
+| Token            | Description                                            |
+| ---------------- | ------------------------------------------------------ |
+| `H`              | Hour 24h (0, 14, 23)                                   |
+| `HH`             | Hour 24h, 2-digit (00, 14, 23)                         |
+| `h`              | Hour 12h (1, 2, 12)                                    |
+| `hh`             | Hour 12h, 2-digit (01, 02, 12)                         |
+| `m`              | Minute (0, 30, 59)                                     |
+| `mm`             | Minute, 2-digit (00, 30, 59)                           |
+| `s`              | Second (0, 30, 59)                                     |
+| `ss`             | Second, 2-digit (00, 30, 59)                           |
+| `A`              | Meridiem abbreviated uppercase (AM, PM)                |
+| `a`              | Meridiem abbreviated lowercase (am, pm)                |
+| `[meridiemFull]` | Full meridiem label (e.g., "Ante Meridiem", "Sunward") |
 
 ---
 
 ## Era
 
-| Token         | Description              |
-| ------------- | ------------------------ |
-| `GGGG`        | Era full (Anno Domini)   |
-| `GGG`         | Era short (AD, BC)       |
-| `GG`          | Era short (AD, BC)       |
-| `G`           | Era short (AD, BC)       |
-| `[yearInEra]` | Year within era (1, 541) |
+| Token           | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `GGGG`          | Era full (Anno Domini)                                   |
+| `GGG`           | Era short (AD, BC)                                       |
+| `GG`            | Era short (AD, BC)                                       |
+| `G`             | Era short (AD, BC)                                       |
+| `[yearInEra]`   | Year within era (1, 541)                                 |
+| `[era=N]`       | Full name of the Nth matching era (for overlapping eras) |
+| `[eraAbbr=N]`   | Abbreviation of the Nth matching era                     |
+| `[yearInEra=N]` | Year within the Nth matching era                         |
 
 ---
 
@@ -132,6 +139,14 @@ Use square brackets `[]` to include literal text:
 
 - `[Year of] YYYY` → Year of 2026
 - `[The] Do [of] MMMM` → The 5th of January
+
+### Pipe Fallback
+
+Use the pipe `|` **(shift + \)** character inside bracket tokens to define a fallback when the primary value is empty:
+
+- `[yearName|YYYY]` → Shows the year name if defined, otherwise the 4-digit year
+- `[namedWeek|w]` → Shows the named week if defined, otherwise the week number
+- `[era|]` → Shows the era name if defined, otherwise nothing
 
 > [!NOTE]
 > Custom tokens like `[moon]`, `[cycle]`, etc. use brackets but are recognized as tokens, not literals.
@@ -206,4 +221,4 @@ Use square brackets `[]` to include literal text:
 
 ## In-App Reference
 
-This same information is available in-app by clicking the help icon (?) next to any Display Formats section in the Settings Panel.
+This same information is available in-app by clicking the **Token Reference** button on the Calendar Editor's Display tab or the help icon (?) next to any Display Formats section in the Settings Panel. The Display tab also provides live preview feedback as you type format strings.

@@ -7,6 +7,20 @@
 import { format, localize } from './localization.mjs';
 
 /**
+ * Resolve a convenience array getter from a calendar object, falling back to Object.values()
+ * for plain data objects (e.g., in-progress editor data) that lack model getters.
+ * @param {object} calendar - Calendar model or plain data object
+ * @param {string} getter - Getter name (e.g., 'monthsArray')
+ * @param {string} path - Dot-separated path to the keyed object (e.g., 'months.values')
+ * @returns {Array<object>} Ordered array of collection items
+ */
+function resolveArray(calendar, getter, path) {
+  if (calendar?.[getter]) return calendar[getter];
+  const obj = path.split('.').reduce((o, k) => o?.[k], calendar);
+  return obj ? Object.values(obj) : [];
+}
+
+/**
  * Get ordinal suffix for a number.
  * @param {number} n - Number
  * @returns {string} - Number with ordinal suffix (1st, 2nd, 3rd, etc.)
@@ -48,17 +62,18 @@ export function dateFormattingParts(calendar, components) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const internalYear = displayYear - yearZero;
   const isMonthless = calendar?.isMonthless ?? false;
-  const monthData = isMonthless ? null : calendar?.monthsArray?.[month];
+  const months = resolveArray(calendar, 'monthsArray', 'months.values');
+  const monthData = isMonthless ? null : months[month];
   const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: dayOfMonth - 1 });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
   const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
-  const weekdays = calendar?.weekdaysArray ?? [];
+  const weekdays = resolveArray(calendar, 'weekdaysArray', 'days.values');
   let daysInMonthsBefore = 0;
   if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
-  else if (!isMonthless) daysInMonthsBefore = (calendar?.monthsArray ?? []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
+  else if (!isMonthless) daysInMonthsBefore = months.slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
   let totalDaysFromPriorYears = 0;
   if (calendar?.getDaysInYear) {
@@ -84,10 +99,10 @@ export function dateFormattingParts(calendar, components) {
   const isPM = hour >= midday;
   const meridiemFull = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
   const meridiemAbbr = isPM ? amPm.pmAbbr || meridiemFull : amPm.amAbbr || meridiemFull;
-  const erasArray = calendar?.erasArray;
+  const eras = resolveArray(calendar, 'erasArray', 'eras');
   const matchingEras = [];
-  if (erasArray?.length > 0) {
-    for (const era of erasArray) {
+  if (eras.length > 0) {
+    for (const era of eras) {
       if (displayYear >= era.startYear && (era.endYear == null || displayYear <= era.endYear)) {
         const name = localize(era.name);
         const abbr = era.abbreviation ? localize(era.abbreviation) : name.slice(0, 2);
@@ -111,7 +126,7 @@ export function dateFormattingParts(calendar, components) {
   if (currentSeason) {
     seasonName = localize(currentSeason.name);
     seasonAbbr = currentSeason.abbreviation ? localize(currentSeason.abbreviation) : seasonName.slice(0, 3);
-    const allSeasons = calendar?.seasonsArray ?? [];
+    const allSeasons = resolveArray(calendar, 'seasonsArray', 'seasons.values');
     seasonIndex = allSeasons.indexOf(currentSeason);
   }
 
@@ -326,13 +341,14 @@ export function formatDateTime12(calendar, components) {
  * Format time to approximate value (e.g., "Dawn", "Noon", "Night").
  * @param {object} calendar - The calendar data
  * @param {object} components - Time components
+ * @param {object} [zone] - Optional climate zone for latitude-based daylight
  * @returns {string} - Formatted string
  */
-export function formatApproximateTime(calendar, components) {
+export function formatApproximateTime(calendar, components, zone = null) {
   const { hour = 0 } = components;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-  const sunriseHour = calendar?.sunrise?.(components) ?? hoursPerDay * 0.25;
-  const sunsetHour = calendar?.sunset?.(components) ?? hoursPerDay * 0.75;
+  const sunriseHour = calendar?.sunrise?.(components, zone) ?? hoursPerDay * 0.25;
+  const sunsetHour = calendar?.sunset?.(components, zone) ?? hoursPerDay * 0.75;
   const daylightHours = sunsetHour - sunriseHour;
   const dayProgress = (hour - sunriseHour) / daylightHours;
   const nightProgress = hour >= sunsetHour ? (hour - sunsetHour) / (hoursPerDay - daylightHours) : hour < sunriseHour ? (hour + hoursPerDay - sunsetHour) / (hoursPerDay - daylightHours) : -1;
@@ -372,7 +388,7 @@ export function formatApproximateDate(calendar, components) {
 
   // Calculate day of year
   let dayOfYear = components.dayOfMonth;
-  const monthsValues = calendar?.monthsArray ?? [];
+  const monthsValues = resolveArray(calendar, 'monthsArray', 'months.values');
   for (let i = 0; i < components.month; i++) {
     dayOfYear += monthsValues[i]?.days ?? 0;
   }
@@ -380,7 +396,7 @@ export function formatApproximateDate(calendar, components) {
   // Get season bounds - check month-based first (most specific), then periodic, then day-of-year
   let seasonStart = 0;
   let seasonEnd = 365;
-  const seasonsArray = calendar?.seasonsArray ?? [];
+  const seasonsArray = resolveArray(calendar, 'seasonsArray', 'seasons.values');
   const seasonIdx = seasonsArray.indexOf(season);
 
   if (season.monthStart != null && season.monthEnd != null) {
@@ -586,14 +602,15 @@ export function validateFormatString(formatStr, calendar, components) {
  * @returns {string} Moon phase name
  */
 function getMoonPhaseName(calendar, components) {
-  if (!calendar?.moonsArray?.length) return '';
+  const moons = resolveArray(calendar, 'moonsArray', 'moons');
+  if (!moons.length) return '';
   if (calendar.getMoonPhase && calendar.componentsToTime) {
     const worldTime = calendar.componentsToTime(components);
     const phaseData = calendar.getMoonPhase(0, worldTime);
     return phaseData?.subPhaseName || phaseData?.name || '';
   }
   // Fallback for non-CalendariaCalendar objects
-  const moon = calendar.moonsArray[0];
+  const moon = moons[0];
   const phasesArr = Object.values(moon.phases ?? {});
   if (!phasesArr.length) return '';
   const { year, month, dayOfMonth } = components;
@@ -616,14 +633,15 @@ function getMoonPhaseName(calendar, components) {
  * @returns {string} Moon phase icon marker (use renderMoonIcons to convert to HTML)
  */
 function getMoonPhaseIcon(calendar, components, moonSelector) {
-  if (!calendar?.moonsArray?.length) return '';
+  const moons = resolveArray(calendar, 'moonsArray', 'moons');
+  if (!moons.length) return '';
   let moonIndex = 0;
   if (moonSelector !== undefined && moonSelector !== null && moonSelector !== '') {
     if (typeof moonSelector === 'number') moonIndex = moonSelector;
     else if (/^\d+$/.test(moonSelector)) moonIndex = parseInt(moonSelector, 10);
     else {
       const selectorLower = String(moonSelector).toLowerCase();
-      const foundIndex = calendar.moonsArray.findIndex((m) => {
+      const foundIndex = moons.findIndex((m) => {
         const moonName = localize(m.name).toLowerCase();
         const rawName = (m.name || '').toLowerCase();
         return moonName === selectorLower || rawName === selectorLower;
@@ -632,7 +650,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     }
   }
 
-  const moon = calendar.moonsArray[moonIndex];
+  const moon = moons[moonIndex];
   if (!moon) return '';
   let phase;
   if (calendar.getMoonPhase && calendar.componentsToTime) {
@@ -709,8 +727,9 @@ export function stripMoonIconMarkers(str) {
  */
 function getCanonicalHour(calendar, components) {
   const { hour = 0 } = components;
-  if (!calendar?.canonicalHoursArray?.length) return '';
-  for (const ch of calendar.canonicalHoursArray) {
+  const hours = resolveArray(calendar, 'canonicalHoursArray', 'canonicalHours');
+  if (!hours.length) return '';
+  for (const ch of hours) {
     // Handle hours that wrap around midnight (e.g., 21-1 means 21:00 to 01:00)
     if (ch.startHour <= ch.endHour) {
       if (hour >= ch.startHour && hour < ch.endHour) return localize(ch.name);
@@ -730,8 +749,9 @@ function getCanonicalHour(calendar, components) {
  */
 function getCanonicalHourAbbr(calendar, components) {
   const { hour = 0 } = components;
-  if (!calendar?.canonicalHoursArray?.length) return '';
-  for (const ch of calendar.canonicalHoursArray) {
+  const hours = resolveArray(calendar, 'canonicalHoursArray', 'canonicalHours');
+  if (!hours.length) return '';
+  for (const ch of hours) {
     // Handle hours that wrap around midnight (e.g., 21-1 means 21:00 to 01:00)
     let matches = false;
     if (ch.startHour <= ch.endHour) matches = hour >= ch.startHour && hour < ch.endHour;
@@ -753,8 +773,9 @@ function getCycleName(calendar, components) {
     const entry = calendar.getCycleEntry(0, components);
     return entry?.name ? localize(entry.name) : '';
   }
-  if (!calendar?.cyclesArray?.length) return '';
-  const cycle = calendar.cyclesArray[0];
+  const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
+  if (!cycles.length) return '';
+  const cycle = cycles[0];
   const stages = Object.values(cycle?.stages ?? {});
   if (!stages.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
@@ -774,8 +795,9 @@ function getCycleName(calendar, components) {
  */
 function getCycleNumber(calendar, components) {
   if (calendar?.getCurrentCycleNumber) return calendar.getCurrentCycleNumber(0, components);
-  if (!calendar?.cyclesArray?.length) return '';
-  const cycle = calendar.cyclesArray[0];
+  const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
+  if (!cycles.length) return '';
+  const cycle = cycles[0];
   if (!cycle?.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
