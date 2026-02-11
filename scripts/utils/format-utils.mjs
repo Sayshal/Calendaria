@@ -553,6 +553,19 @@ export function formatCustom(calendar, components, formatStr) {
         if (field === 'yearInEra') return era.yearInEra != null ? String(era.yearInEra) : '';
         return '';
       }
+      // Handle cycle index syntax: [cycle=N], [cycleName=N], [cycleRoman=N]
+      const cycleIndexMatch = customToken.match(/^(cycle|cycleName|cycleRoman)=(\d+)$/);
+      if (cycleIndexMatch) {
+        const [, field, idxStr] = cycleIndexMatch;
+        const idx = parseInt(idxStr);
+        if (field === 'cycleName') return getCycleName(calendar, components, idx) || String(getCycleNumber(calendar, components, idx));
+        if (field === 'cycleRoman') {
+          const n = getCycleNumber(calendar, components, idx);
+          return n ? toRomanNumeral(n) : '';
+        }
+        if (field === 'cycle') return String(getCycleNumber(calendar, components, idx));
+        return '';
+      }
       if (customToken.startsWith('moonIcon')) {
         const paramPart = customToken.slice(9);
         let moonSelector;
@@ -766,16 +779,17 @@ function getCanonicalHourAbbr(calendar, components) {
  * Uses calendar's getCycleEntry method if available.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
+ * @param cycleIndex
  * @returns {string} Cycle entry name
  */
-function getCycleName(calendar, components) {
+function getCycleName(calendar, components, cycleIndex = 0) {
   if (calendar?.getCycleEntry) {
-    const entry = calendar.getCycleEntry(0, components);
+    const entry = calendar.getCycleEntry(cycleIndex, components);
     return entry?.name ? localize(entry.name) : '';
   }
   const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
-  if (!cycles.length) return '';
-  const cycle = cycles[0];
+  if (!cycles.length || !cycles[cycleIndex]) return '';
+  const cycle = cycles[cycleIndex];
   const stages = Object.values(cycle?.stages ?? {});
   if (!stages.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
@@ -791,13 +805,14 @@ function getCycleName(calendar, components) {
  * Uses calendar's getCurrentCycleNumber method if available.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
+ * @param cycleIndex
  * @returns {number|string} Cycle number (1-indexed)
  */
-function getCycleNumber(calendar, components) {
-  if (calendar?.getCurrentCycleNumber) return calendar.getCurrentCycleNumber(0, components);
+function getCycleNumber(calendar, components, cycleIndex = 0) {
+  if (calendar?.getCurrentCycleNumber) return calendar.getCurrentCycleNumber(cycleIndex, components);
   const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
-  if (!cycles.length) return '';
-  const cycle = cycles[0];
+  if (!cycles.length || !cycles[cycleIndex]) return '';
+  const cycle = cycles[cycleIndex];
   if (!cycle?.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
@@ -1182,8 +1197,11 @@ export function getAvailableTokens() {
     { token: '[ch]', descriptionKey: 'CALENDARIA.Format.Token.ch', type: 'custom' },
     { token: '[chAbbr]', descriptionKey: 'CALENDARIA.Format.Token.chAbbr', type: 'custom' },
     { token: '[cycle]', descriptionKey: 'CALENDARIA.Format.Token.cycle', type: 'custom' },
+    { token: '[cycle=N]', descriptionKey: 'CALENDARIA.Format.Token.cycleN', type: 'custom' },
     { token: '[cycleName]', descriptionKey: 'CALENDARIA.Format.Token.cycleName', type: 'custom' },
+    { token: '[cycleName=N]', descriptionKey: 'CALENDARIA.Format.Token.cycleNameN', type: 'custom' },
     { token: '[cycleRoman]', descriptionKey: 'CALENDARIA.Format.Token.cycleRoman', type: 'custom' },
+    { token: '[cycleRoman=N]', descriptionKey: 'CALENDARIA.Format.Token.cycleRomanN', type: 'custom' },
     { token: '[approxTime]', descriptionKey: 'CALENDARIA.Format.Token.approxTime', type: 'custom' },
     { token: '[approxDate]', descriptionKey: 'CALENDARIA.Format.Token.approxDate', type: 'custom' }
   ];
