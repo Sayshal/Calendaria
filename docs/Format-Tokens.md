@@ -111,17 +111,20 @@ Format tokens are placeholders used in display format strings.
 
 ## Fantasy
 
-| Token          | Description                                                                   |
-| -------------- | ----------------------------------------------------------------------------- |
-| `[moon]`       | Moon phase (Full Moon, New Moon)                                              |
-| `[moonIcon]`   | Moon phase icon (use `[moonIcon=0]` or `[moonIcon='Name']` for specific moon) |
-| `[ch]`         | Canonical hour (Matins, Vespers)                                              |
-| `[chAbbr]`     | Canonical hour short (Mat, Ves)                                               |
-| `[cycle]`      | Cycle number (1, 2, 3)                                                        |
-| `[cycleName]`  | Cycle name                                                                    |
-| `[cycleRoman]` | Cycle roman numeral (I, II, III)                                              |
-| `[approxTime]` | Approximate time (Dawn, Noon, Dusk)                                           |
-| `[approxDate]` | Approximate date (Early Spring)                                               |
+| Token            | Description                                                                   |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `[moon]`         | Moon phase (Full Moon, New Moon)                                              |
+| `[moonIcon]`     | Moon phase icon (use `[moonIcon=0]` or `[moonIcon='Name']` for specific moon) |
+| `[ch]`           | Canonical hour (Matins, Vespers)                                              |
+| `[chAbbr]`       | Canonical hour short (Mat, Ves)                                               |
+| `[cycle]`        | Cycle number (1, 2, 3)                                                        |
+| `[cycleName]`    | Cycle name                                                                    |
+| `[cycleRoman]`   | Cycle roman numeral (I, II, III)                                              |
+| `[cycle=N]`      | Nth cycle number (0-indexed, for multiple cycles)                             |
+| `[cycleName=N]`  | Nth cycle name (0-indexed)                                                    |
+| `[cycleRoman=N]` | Nth cycle roman numeral (0-indexed)                                           |
+| `[approxTime]`   | Approximate time (Dawn, Noon, Dusk)                                           |
+| `[approxDate]`   | Approximate date (Early Spring)                                               |
 
 ---
 
