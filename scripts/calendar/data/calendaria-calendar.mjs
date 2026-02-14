@@ -1514,7 +1514,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         }
       }
 
-      return seasons[0] ?? null;
+      return null;
     }
 
     for (const season of seasons) {
@@ -1542,7 +1542,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       }
     }
 
-    return seasons[0] ?? null;
+    return null;
   }
 
   /**

@@ -105,19 +105,24 @@ function getFieldValue(field, date, value2 = null) {
       const seasons = calendar?.seasonsArray ?? [];
       if (!seasons.length) return null;
       const dayOfYear = getDayOfYear(date);
-      return getSeasonIndex(dayOfYear, seasons) + 1;
+      const idx = getSeasonIndex(dayOfYear, seasons, date);
+      return idx >= 0 ? idx + 1 : null;
     }
     case 'seasonPercent': {
       const seasons = calendar?.seasonsArray ?? [];
       if (!seasons.length) return null;
       const dayOfYear = getDayOfYear(date);
-      return getSeasonPercent(dayOfYear, seasons, getTotalDaysInYear(date.year));
+      const idx = getSeasonIndex(dayOfYear, seasons, date);
+      if (idx < 0) return null;
+      return getSeasonPercent(dayOfYear, seasons, getTotalDaysInYear(date.year), idx);
     }
     case 'seasonDay': {
       const seasons = calendar?.seasonsArray ?? [];
       if (!seasons.length) return null;
       const dayOfYear = getDayOfYear(date);
-      return getSeasonDay(dayOfYear, seasons, getTotalDaysInYear(date.year));
+      const idx = getSeasonIndex(dayOfYear, seasons, date);
+      if (idx < 0) return null;
+      return getSeasonDay(dayOfYear, seasons, getTotalDaysInYear(date.year), idx);
     }
     case 'isLongestDay': {
       const seasons = calendar?.seasonsArray ?? [];
@@ -259,19 +264,53 @@ function getTotalDaysSinceEpoch(date) {
 }
 
 /**
- * Get current season index for a day of year.
- * @param {number} dayOfYear - Day of year
+ * Get current season index for a date.
+ * Handles day-of-year, month-based, and periodic season types.
+ * @param {number} dayOfYear - Day of year (1-based)
  * @param {object[]} seasons - Seasons array
- * @returns {number} Season index
+ * @param {object} [date] - Full date object with month (0-indexed) and day (1-indexed)
+ * @returns {number} Season index, or -1 if no season matches
  */
-function getSeasonIndex(dayOfYear, seasons) {
+function getSeasonIndex(dayOfYear, seasons, date) {
+  const calendar = CalendarManager.getActiveCalendar();
+
+  // Periodic seasons — use calculated bounds
+  if (calendar?.seasons?.type === 'periodic') {
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const totalDays = calendar.getDaysInYear((date?.year ?? 0) - yearZero);
+    for (let i = 0; i < seasons.length; i++) {
+      const { dayStart, dayEnd } = calendar._calculatePeriodicSeasonBounds(i, totalDays);
+      if (isInSeasonRange(dayOfYear, dayStart, dayEnd)) return i;
+    }
+    return -1;
+  }
+
+  // Dated seasons — month-based or day-of-year
   for (let i = 0; i < seasons.length; i++) {
     const season = seasons[i];
-    const start = season.dayStart ?? 0;
-    const end = season.dayEnd ?? start;
-    if (isInSeasonRange(dayOfYear, start, end)) return i;
+    if (season.monthStart != null && season.monthEnd != null && date) {
+      const currentMonth = date.month + 1;
+      const startDay = season.dayStart ?? 1;
+      const months = calendar?.monthsArray ?? [];
+      const endDay = season.dayEnd ?? months[season.monthEnd - 1]?.days ?? 30;
+      if (season.monthStart === season.monthEnd) {
+        if (currentMonth === season.monthStart && date.day >= startDay && date.day <= endDay) return i;
+      } else if (season.monthStart < season.monthEnd) {
+        if (currentMonth > season.monthStart && currentMonth < season.monthEnd) return i;
+        if (currentMonth === season.monthStart && date.day >= startDay) return i;
+        if (currentMonth === season.monthEnd && date.day <= endDay) return i;
+      } else {
+        if (currentMonth > season.monthStart || currentMonth < season.monthEnd) return i;
+        if (currentMonth === season.monthStart && date.day >= startDay) return i;
+        if (currentMonth === season.monthEnd && date.day <= endDay) return i;
+      }
+    } else {
+      const start = season.dayStart ?? 0;
+      const end = season.dayEnd ?? start;
+      if (isInSeasonRange(dayOfYear, start, end)) return i;
+    }
   }
-  return 0;
+  return -1;
 }
 
 /**
@@ -279,10 +318,10 @@ function getSeasonIndex(dayOfYear, seasons) {
  * @param {number} dayOfYear - Day of year
  * @param {object[]} seasons - Seasons array
  * @param {number} totalDays - Total days in year
+ * @param {number} idx - Season index (from getSeasonIndex)
  * @returns {number} Percentage (0-100)
  */
-function getSeasonPercent(dayOfYear, seasons, totalDays) {
-  const idx = getSeasonIndex(dayOfYear, seasons);
+function getSeasonPercent(dayOfYear, seasons, totalDays, idx) {
   const season = seasons[idx];
   const start = season.dayStart ?? 0;
   const end = season.dayEnd ?? start;
@@ -302,10 +341,10 @@ function getSeasonPercent(dayOfYear, seasons, totalDays) {
  * @param {number} dayOfYear - Day of year
  * @param {object[]} seasons - Seasons array
  * @param {number} totalDays - Total days in year
+ * @param {number} idx - Season index (from getSeasonIndex)
  * @returns {number} Day in season
  */
-function getSeasonDay(dayOfYear, seasons, totalDays) {
-  const idx = getSeasonIndex(dayOfYear, seasons);
+function getSeasonDay(dayOfYear, seasons, totalDays, idx) {
   const season = seasons[idx];
   const start = season.dayStart ?? 0;
   if (dayOfYear >= start) return dayOfYear - start + 1;

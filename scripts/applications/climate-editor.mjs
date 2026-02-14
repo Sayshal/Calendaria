@@ -135,7 +135,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           if (isZoneMode) {
             const savedPresets = this.#data.presets ? Object.values(this.#data.presets) : [];
             const saved = savedPresets.find((s) => s.id === preset.id) || {};
-            const alias = getPresetAlias(preset.id, this.#calendarId, this.#zoneKey) || '';
+            const alias = getPresetAlias(preset.id, this.#calendarId, this.#data.id) || '';
             return {
               id: preset.id,
               icon: preset.icon,
@@ -232,6 +232,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       envBase: this.#data.environmentBase ?? {},
       envDark: this.#data.environmentDark ?? {},
       zoneKey: this.#zoneKey,
+      zoneId: this.#data.id,
       // Daylight fields
       latitude: latitude ?? '',
       hasManualDaylight,
@@ -389,7 +390,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetAlias(_event, target) {
     const presetId = target.dataset.presetId;
-    await setPresetAlias(presetId, null, this.#calendarId, this.#zoneKey);
+    await setPresetAlias(presetId, null, this.#calendarId, this.#data.id);
     this.render();
   }
 

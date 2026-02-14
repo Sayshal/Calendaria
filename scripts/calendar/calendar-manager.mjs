@@ -331,19 +331,31 @@ export default class CalendarManager {
    * at all collection nesting levels using Foundry's `-=key` deletion syntax.
    * @param {object} bundledData - Pristine bundled calendar data
    * @param {object} overrideData - Current override calendar data
+   * @param {object|null} [previousDelta] - Previous delta to detect user-added entry deletions
    * @returns {object} Delta object with `_isDelta: true`
    * @private
    */
-  static #computeOverrideDelta(bundledData, overrideData) {
+  static #computeOverrideDelta(bundledData, overrideData, previousDelta = null) {
     const delta = foundry.utils.diffObject(bundledData, overrideData);
 
     // Top-level keyed collections — detect deletions
     for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) {
-      if (!bundledData[key]) continue;
-      for (const entryKey of Object.keys(bundledData[key])) {
-        if (!overrideData[key]?.[entryKey]) {
-          if (!delta[key]) delta[key] = {};
-          delta[key][`-=${entryKey}`] = null;
+      if (bundledData[key]) {
+        for (const entryKey of Object.keys(bundledData[key])) {
+          if (!overrideData[key]?.[entryKey]) {
+            if (!delta[key]) delta[key] = {};
+            delta[key][`-=${entryKey}`] = null;
+          }
+        }
+      }
+      // Detect deletions of user-added entries (existed in previous delta, not in current data)
+      if (previousDelta?.[key]) {
+        for (const entryKey of Object.keys(previousDelta[key])) {
+          if (entryKey.startsWith('-=')) continue;
+          if (!overrideData[key]?.[entryKey]) {
+            if (!delta[key]) delta[key] = {};
+            delta[key][`-=${entryKey}`] = null;
+          }
         }
       }
     }
@@ -358,12 +370,25 @@ export default class CalendarManager {
     ]) {
       const bCol = bundledData[parent]?.[child];
       const oCol = overrideData[parent]?.[child];
-      if (!bCol || !oCol) continue;
-      for (const entryKey of Object.keys(bCol)) {
-        if (!(entryKey in oCol)) {
-          if (!delta[parent]) delta[parent] = {};
-          if (!delta[parent][child]) delta[parent][child] = {};
-          delta[parent][child][`-=${entryKey}`] = null;
+      if (bCol && oCol) {
+        for (const entryKey of Object.keys(bCol)) {
+          if (!(entryKey in oCol)) {
+            if (!delta[parent]) delta[parent] = {};
+            if (!delta[parent][child]) delta[parent][child] = {};
+            delta[parent][child][`-=${entryKey}`] = null;
+          }
+        }
+      }
+      // Detect deletions of user-added entries from previous delta
+      const pCol = previousDelta?.[parent]?.[child];
+      if (pCol) {
+        for (const entryKey of Object.keys(pCol)) {
+          if (entryKey.startsWith('-=')) continue;
+          if (!overrideData[parent]?.[child]?.[entryKey]) {
+            if (!delta[parent]) delta[parent] = {};
+            if (!delta[parent][child]) delta[parent][child] = {};
+            delta[parent][child][`-=${entryKey}`] = null;
+          }
         }
       }
     }
@@ -387,33 +412,51 @@ export default class CalendarManager {
     if (bundledData.moons && overrideData.moons) {
       if (!delta.moons) delta.moons = {};
       deepDeletionCheck(bundledData.moons, overrideData.moons, delta.moons, 'phases');
-      if (!Object.keys(delta.moons).length) delete delta.moons;
     }
+    if (previousDelta?.moons) {
+      if (!delta.moons) delta.moons = {};
+      deepDeletionCheck(previousDelta.moons, overrideData.moons ?? {}, delta.moons, 'phases');
+    }
+    if (delta.moons && !Object.keys(delta.moons).length) delete delta.moons;
 
     // cycles.*.stages
     if (bundledData.cycles && overrideData.cycles) {
       if (!delta.cycles) delta.cycles = {};
       deepDeletionCheck(bundledData.cycles, overrideData.cycles, delta.cycles, 'stages');
-      if (!Object.keys(delta.cycles).length) delete delta.cycles;
     }
+    if (previousDelta?.cycles) {
+      if (!delta.cycles) delta.cycles = {};
+      deepDeletionCheck(previousDelta.cycles, overrideData.cycles ?? {}, delta.cycles, 'stages');
+    }
+    if (delta.cycles && !Object.keys(delta.cycles).length) delete delta.cycles;
 
     // weather.zones.*.presets
     if (bundledData.weather?.zones && overrideData.weather?.zones) {
       if (!delta.weather) delta.weather = {};
       if (!delta.weather.zones) delta.weather.zones = {};
       deepDeletionCheck(bundledData.weather.zones, overrideData.weather.zones, delta.weather.zones, 'presets');
-      if (!Object.keys(delta.weather.zones).length) delete delta.weather.zones;
-      if (delta.weather && !Object.keys(delta.weather).length) delete delta.weather;
     }
+    if (previousDelta?.weather?.zones) {
+      if (!delta.weather) delta.weather = {};
+      if (!delta.weather.zones) delta.weather.zones = {};
+      deepDeletionCheck(previousDelta.weather.zones, overrideData.weather?.zones ?? {}, delta.weather.zones, 'presets');
+    }
+    if (delta.weather?.zones && !Object.keys(delta.weather.zones).length) delete delta.weather.zones;
+    if (delta.weather && !Object.keys(delta.weather).length) delete delta.weather;
 
     // months.values.*.weekdays
     if (bundledData.months?.values && overrideData.months?.values) {
       if (!delta.months) delta.months = {};
       if (!delta.months.values) delta.months.values = {};
       deepDeletionCheck(bundledData.months.values, overrideData.months.values, delta.months.values, 'weekdays');
-      if (!Object.keys(delta.months.values).length) delete delta.months.values;
-      if (delta.months && !Object.keys(delta.months).length) delete delta.months;
     }
+    if (previousDelta?.months?.values) {
+      if (!delta.months) delta.months = {};
+      if (!delta.months.values) delta.months.values = {};
+      deepDeletionCheck(previousDelta.months.values, overrideData.months?.values ?? {}, delta.months.values, 'weekdays');
+    }
+    if (delta.months?.values && !Object.keys(delta.months.values).length) delete delta.months.values;
+    if (delta.months && !Object.keys(delta.months).length) delete delta.months;
 
     CalendarManager.#stripStaleDefaults(delta, bundledData);
     delta._isDelta = true;
@@ -926,7 +969,7 @@ export default class CalendarManager {
    * @returns {Promise<CalendariaCalendar|null>} The updated calendar or null on error
    */
   static async saveDefaultOverride(id, data) {
-    if (!this.isBundledCalendar(id) && !this.hasDefaultOverride(id)) {
+    if (!isBundledCalendar(id) && !this.hasDefaultOverride(id)) {
       log(2, `Cannot save override: ${id} is not a bundled calendar`);
       return null;
     }
@@ -939,7 +982,8 @@ export default class CalendarManager {
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       const bundledData = this.#bundledData.get(id);
       if (bundledData) {
-        overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, calendar.toObject());
+        const previousDelta = overrides[id] || null;
+        overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, calendar.toObject(), previousDelta);
       } else {
         overrides[id] = calendar.toObject();
       }

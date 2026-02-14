@@ -493,7 +493,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         key: cycleKey,
         index: idx,
         basedOnOptions: basedOnOptions.map((opt) => ({ ...opt, selected: opt.value === (cycle.basedOn || 'month') })),
-        stagesWithIndex: stagesArr.map(([stageKey, stage], sIdx) => ({ ...stage, key: stageKey, index: sIdx, displayNum: sIdx + 1, cycleKey }))
+        stagesWithIndex: stagesArr.map(([stageKey, stage], sIdx) => ({ ...stage, stageKey, index: sIdx, displayNum: sIdx + 1, cycleKey }))
       };
     });
     context.cycleFormat = this.#calendarData.cycleFormat || '';
