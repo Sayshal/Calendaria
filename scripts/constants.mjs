@@ -200,6 +200,7 @@ export const TEMPLATES = {
   IMPORTER: { APP: `modules/${MODULE.ID}/templates/importers/importer-app.hbs` },
   WEATHER: {
     PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`,
+    PICKER_FOOTER: `modules/${MODULE.ID}/templates/weather/weather-picker-footer.hbs`,
     CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`
   },
   SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },

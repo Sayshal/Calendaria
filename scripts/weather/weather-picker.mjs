@@ -55,7 +55,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   /** @override */
-  static PARTS = { content: { template: TEMPLATES.WEATHER.PICKER } };
+  static PARTS = {
+    content: { template: TEMPLATES.WEATHER.PICKER },
+    footer: { template: TEMPLATES.WEATHER.PICKER_FOOTER }
+  };
 
   /** @override */
   async close(options) {

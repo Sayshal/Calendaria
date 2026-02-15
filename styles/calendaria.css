@@ -5041,9 +5041,12 @@ span.calendaria-moon-icon {
   }
 
   .weather-picker-content {
+    max-height: 70vh;
     gap: 1rem;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   .zone-selector {
