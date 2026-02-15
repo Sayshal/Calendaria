@@ -816,9 +816,7 @@ export default class CalendarManager {
     }
 
     try {
-      const existingData = calendar.toObject();
-      const updatedData = foundry.utils.mergeObject(existingData, changes, { inplace: false });
-      const updatedCalendar = new CalendariaCalendar(updatedData);
+      const updatedCalendar = new CalendariaCalendar(changes);
       customCalendars[id] = updatedCalendar.toObject();
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
       CalendarRegistry.register(id, updatedCalendar);

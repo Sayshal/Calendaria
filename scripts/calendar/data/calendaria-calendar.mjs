@@ -43,23 +43,32 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @type {number} Epoch offset in seconds */
   static #epochOffset = 0;
 
+  /** @type {Object<string, string>} Maps PF2e date themes to expected Calendaria calendar IDs */
+  static #pf2eThemeCalendarMap = {
+    AR: 'golarion',
+    IC: 'golarion',
+    AD: 'gregorian',
+    CE: 'gregorian'
+  };
+
   /**
    * Whether PF2e sync is currently active.
-   * @returns {boolean} Is calendar golarian and pf2e system in play
+   * @returns {boolean} True if PF2e worldClock exists and active calendar matches the theme's expected calendar
    */
   static get usePF2eSync() {
     if (!game.pf2e?.worldClock) return false;
     const dateTheme = game.pf2e.worldClock.dateTheme;
-    if (dateTheme !== 'AR' && dateTheme !== 'IC') return false;
+    const expectedCalendar = this.#pf2eThemeCalendarMap[dateTheme];
+    if (!expectedCalendar) return false;
     const activeCalendarId = game.settings.get('calendaria', 'activeCalendar');
-    return activeCalendarId === 'golarion';
+    return activeCalendarId === expectedCalendar;
   }
 
   /**
    * Initialize epoch offset for PF2e sync.
    * Calculates offset by matching PF2e's Luxon date to our internal time.
    * Also adjusts firstWeekday to align weekdays with Luxon.
-   * Only applies when using PF2e with AR/IC theme AND Golarion calendar.
+   * Supports PF2e date themes: AR, IC, AD, CE.
    */
   static initializeEpochOffset() {
     this.#epochOffset = 0;
@@ -74,8 +83,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const secondsPerDay = hoursPerDay * secondsPerHour;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const golarionYear = wc.year;
-    const internalYear = golarionYear - yearZero;
+    const internalYear = wc.year - yearZero;
     let dayOfYear = dt.day - 1;
     for (let m = 0; m < dt.month - 1; m++) dayOfYear += calendar.getDaysInMonth?.(m, internalYear) ?? 30;
     let totalDays = calendar.totalDaysBeforeYear?.(internalYear) ?? 0;
@@ -90,7 +98,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const intercalaryFromPriorYears = calendar.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
     const totalNonCounting = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
     const countingDays = totalDays - totalNonCounting;
-    const expectedWeekday = dt.weekday - 1;
+    // Override firstWeekday to match PF2e's ISO-based weekday.
+    // Golarion: index 0 = Moonday (ISO 1). Gregorian: index 0 = Sunday (ISO 7).
+    const expectedCalendar = this.#pf2eThemeCalendarMap[game.pf2e.worldClock.dateTheme];
+    const isoOfFirstWeekday = expectedCalendar === 'gregorian' ? 7 : 1;
+    const expectedWeekday = (((dt.weekday - isoOfFirstWeekday) % numWeekdays) + numWeekdays) % numWeekdays;
     const correctFirstWeekday = (((expectedWeekday - (countingDays % numWeekdays)) % numWeekdays) + numWeekdays) % numWeekdays;
     if (calendar.years && calendar.years.firstWeekday !== correctFirstWeekday) calendar.years.firstWeekday = correctFirstWeekday;
     this.#correctFirstWeekday = correctFirstWeekday;
