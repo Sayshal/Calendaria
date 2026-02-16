@@ -263,18 +263,21 @@ export default class WeatherManager {
    * @param {object} [options] - Forecast options
    * @param {number} [options.days] - Number of days
    * @param {string} [options.zoneId] - Zone ID override
+   * @param {number} [options.accuracy] - Forecast accuracy 0-100 (default: from setting)
    * @returns {object[]} Forecast array
    */
   static getForecast(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
     const zoneConfig = this.getActiveZone(options.zoneId);
-    const days = options.days || 7;
+    const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
+    const days = Math.min(options.days || maxDays, maxDays);
     const customPresets = this.getCustomPresets();
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
     const currentWeatherId = this.#currentWeather?.id ?? null;
     const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+    const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
     return generateForecast({
       zoneConfig,
       startYear: components.year + yearZero,
@@ -284,6 +287,7 @@ export default class WeatherManager {
       customPresets,
       currentWeatherId,
       inertia,
+      accuracy,
       getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
       getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
     });

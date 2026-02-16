@@ -59,6 +59,29 @@
   {{/if}}
 
   {{#if isGM}}
+    <fieldset data-section="weather-forecast">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Forecast"}}</legend>
+
+      <div class="form-group">
+        <label for="forecastAccuracy">{{localize "CALENDARIA.Settings.ForecastAccuracy.Name"}}</label>
+        <div class="form-fields">
+          <range-picker name="forecastAccuracy" value="{{forecastAccuracy}}" min="0" max="100" step="5"></range-picker>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForecastAccuracy.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="forecastDays">{{localize "CALENDARIA.Settings.ForecastDays.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="forecastDays" name="forecastDays"
+            value="{{forecastDays}}" min="1" max="30" step="1" />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForecastDays.Hint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{#if isGM}}
     <fieldset data-section="climate">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
       <div class="fieldset-header-row">

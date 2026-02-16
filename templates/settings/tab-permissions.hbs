@@ -101,6 +101,18 @@
           <p class="hint">{{localize "CALENDARIA.Permissions.ChangeDateTimeHint"}}</p>
         </li>
 
+        {{!-- View Weather Forecast --}}
+        <li class="permission-row">
+          <label class="permission-name">{{localize "CALENDARIA.Permissions.ViewWeatherForecast"}}</label>
+          <input type="checkbox" name="permissions.viewWeatherForecast.player" data-tooltip
+            aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewWeatherForecast.player}}checked{{/if}} />
+          <input type="checkbox" name="permissions.viewWeatherForecast.trusted" data-tooltip
+            aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewWeatherForecast.trusted}}checked{{/if}} />
+          <input type="checkbox" name="permissions.viewWeatherForecast.assistant" data-tooltip
+            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewWeatherForecast.assistant}}checked{{/if}} />
+          <p class="hint">{{localize "CALENDARIA.Permissions.ViewWeatherForecastHint"}}</p>
+        </li>
+
         {{!-- Change Weather --}}
         <li class="permission-row">
           <label class="permission-name">{{localize "CALENDARIA.Permissions.ChangeWeather"}}</label>
