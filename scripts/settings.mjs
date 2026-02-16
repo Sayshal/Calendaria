@@ -1130,6 +1130,21 @@ export function registerSettings() {
     })
   });
 
+  /** Precipitation unit (mm or inches) */
+  game.settings.register(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, {
+    name: 'CALENDARIA.Settings.PrecipitationUnit.Name',
+    hint: 'CALENDARIA.Settings.PrecipitationUnit.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({
+      choices: {
+        metric: 'CALENDARIA.Settings.PrecipitationUnit.Metric',
+        imperial: 'CALENDARIA.Settings.PrecipitationUnit.Imperial'
+      },
+      initial: 'metric'
+    })
+  });
+
   /** Custom weather presets */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, {
     name: 'Custom Weather Presets',

@@ -304,9 +304,27 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const icon = context.showWeatherIcon ? `<i class="${context.weather.icon}"></i>` : '';
       const label = context.showWeatherLabel ? `<span class="weather-label">${context.weather.label}</span>` : '';
       const temp = context.showWeatherTemp ? `<span class="weather-temp">${context.weather.temp}</span>` : '';
+
+      // Wind arrow (rotated) — only shown in full display mode with wind > 0
+      let windHtml = '';
+      if (context.showWeatherLabel && context.weather.windSpeed > 0) {
+        const rotation = context.weather.windDirection != null ? context.weather.windDirection : 0;
+        windHtml = `<span class="weather-wind">
+          <i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i>
+        </span>`;
+      }
+
+      // Precipitation badge — shown in full mode when precipitation active
+      let precipHtml = '';
+      if (context.showWeatherLabel && context.weather.precipType) {
+        precipHtml = `<span class="weather-precip">
+          <i class="fas fa-droplet"></i>
+        </span>`;
+      }
+
       return `<span class="weather-indicator ${clickable} weather-mode-${context.weatherDisplayMode}"
-        ${action} style="--weather-color: ${context.weather.color}" data-tooltip="${context.weather.tooltip}">
-        ${icon}${label}${temp}
+        ${action} style="--weather-color: ${context.weather.color}" data-tooltip-html="${context.weather.tooltipHtml}">
+        ${icon}${label}${temp}${windHtml}${precipHtml}
       </span>`;
     } else if (context.showWeatherBlock && context.canChangeWeather) {
       return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
@@ -1433,13 +1451,31 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const zoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id;
     const alias = getPresetAlias(weather.id, calendarId, zoneId);
     const label = alias || localize(weather.label);
+    // Wind/precipitation display
+    const windSpeed = weather.wind?.speed ?? 0;
+    const windDirection = weather.wind?.direction;
+    const precipType = weather.precipitation?.type ?? null;
+    const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const tooltipHtml = WeatherManager.buildWeatherTooltip({
+      label,
+      description: weather.description ? localize(weather.description) : null,
+      temp,
+      windSpeed,
+      windDirection,
+      precipType,
+      precipIntensity: weather.precipitation?.intensity
+    });
+
     return {
       id: weather.id,
       label,
       icon,
       color: weather.color,
-      temp: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
-      tooltip: weather.description ? localize(weather.description) : label
+      temp,
+      tooltipHtml,
+      windSpeed,
+      windDirection,
+      precipType
     };
   }
 

@@ -2157,6 +2157,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         zone.environmentDark = result.environmentDark;
         zone.temperatures = result.temperatures;
         zone.presets = result.presets;
+        zone.windDirections = result.windDirections;
+        zone.windSpeedRange = result.windSpeedRange;
         editor.render({ parts: ['weather'] });
       }
     });

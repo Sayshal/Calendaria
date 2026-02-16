@@ -101,6 +101,7 @@ export const SETTINGS = {
   STOPWATCH_STATE: 'stopwatchState',
   STOPWATCH_STICKY_STATES: 'stopwatchStickyStates',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
+  PRECIPITATION_UNIT: 'precipitationUnit',
   TEMPERATURE_UNIT: 'temperatureUnit',
   THEME_MODE: 'themeMode',
   TIME_KEEPER_POSITION: 'timeKeeperPosition',
@@ -222,6 +223,46 @@ export const DEFAULT_MOON_PHASES = {
   waninggibbous000: { name: 'CALENDARIA.MoonPhase.WaningGibbous', icon: `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`, start: 0.625, end: 0.75 },
   lastquarter00000: { name: 'CALENDARIA.MoonPhase.LastQuarter', icon: `${ASSETS.MOON_ICONS}/07_lastquarter.svg`, start: 0.75, end: 0.875 },
   waningcrescent00: { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`, start: 0.875, end: 1 }
+};
+
+/** Wind speed scale (0-5). Canonical values stored in kph; imperial conversion at display time. */
+export const WIND_SPEEDS = {
+  CALM: { id: 'calm', value: 0, label: 'CALENDARIA.Weather.Wind.Calm', kph: 5 },
+  LIGHT: { id: 'light', value: 1, label: 'CALENDARIA.Weather.Wind.Light', kph: 20 },
+  MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Weather.Wind.Moderate', kph: 40 },
+  STRONG: { id: 'strong', value: 3, label: 'CALENDARIA.Weather.Wind.Strong', kph: 60 },
+  SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Weather.Wind.Severe', kph: 90 },
+  EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 999 }
+};
+
+/** Precipitation type identifiers */
+export const PRECIPITATION_TYPES = {
+  NONE: null,
+  DRIZZLE: 'drizzle',
+  RAIN: 'rain',
+  SNOW: 'snow',
+  SLEET: 'sleet',
+  HAIL: 'hail'
+};
+
+/** Compass direction degrees for 16-point wind rose */
+export const COMPASS_DIRECTIONS = {
+  N: 0,
+  NNE: 22.5,
+  NE: 45,
+  ENE: 67.5,
+  E: 90,
+  ESE: 112.5,
+  SE: 135,
+  SSE: 157.5,
+  S: 180,
+  SSW: 202.5,
+  SW: 225,
+  WSW: 247.5,
+  W: 270,
+  WNW: 292.5,
+  NW: 315,
+  NNW: 337.5
 };
 
 /** @enum {string} Custom hook names fired by the module */

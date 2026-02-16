@@ -8,7 +8,7 @@
 
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
@@ -63,6 +63,8 @@ export default class WeatherManager {
    * @param {string} presetId - Weather preset ID
    * @param {object} [options] - Additional options
    * @param {number} [options.temperature] - Optional temperature override
+   * @param {object} [options.wind] - Wind override { speed, direction, forced }
+   * @param {object} [options.precipitation] - Precipitation override { type, intensity }
    * @param {boolean} [options.broadcast] - Whether to broadcast to other clients
    * @param {boolean} [options.fromSocket] - Whether this is a GM executing a socket request
    * @returns {Promise<object>} The set weather
@@ -99,6 +101,8 @@ export default class WeatherManager {
       color: preset.color,
       category: preset.category,
       temperature,
+      wind: options.wind ?? preset.wind ?? { speed: 0, direction: null, forced: false },
+      precipitation: options.precipitation ?? preset.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: preset.darknessPenalty ?? 0,
       environmentBase: preset.environmentBase ?? null,
       environmentDark: preset.environmentDark ?? null,
@@ -138,6 +142,8 @@ export default class WeatherManager {
       color: weatherData.color || '#888888',
       category: 'custom',
       temperature: weatherData.temperature ?? null,
+      wind: weatherData.wind ?? { speed: 0, direction: null, forced: false },
+      precipitation: weatherData.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: weatherData.darknessPenalty ?? 0,
       environmentBase: weatherData.environmentBase ?? null,
       environmentDark: weatherData.environmentDark ?? null,
@@ -229,6 +235,8 @@ export default class WeatherManager {
       color: result.preset.color,
       category: result.preset.category,
       temperature: result.temperature,
+      wind: result.wind ?? { speed: 0, direction: null, forced: false },
+      precipitation: result.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: result.preset.darknessPenalty ?? 0,
       setAt: game.time.worldTime,
       setBy: game.user.id,
@@ -495,5 +503,110 @@ export default class WeatherManager {
     const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
     if (unit === 'fahrenheit') return `${Math.round((celsius * 9) / 5 + 32)}°F`;
     return `${Math.round(celsius)}°C`;
+  }
+
+  /**
+   * Format a wind speed value with the configured unit.
+   * @param {number} kph - Wind speed in kph
+   * @returns {string} Formatted wind speed with unit
+   */
+  static formatWindSpeed(kph) {
+    if (kph == null) return '';
+    const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
+    if (unit === 'fahrenheit') return `${Math.round(kph * 0.621371)} mph`;
+    return `${Math.round(kph)} kph`;
+  }
+
+  /**
+   * Format a precipitation rate with the configured unit.
+   * @param {number} mmhr - Precipitation in mm/hr
+   * @returns {string} Formatted precipitation with unit
+   */
+  static formatPrecipitation(mmhr) {
+    if (mmhr == null || mmhr === 0) return '';
+    const unit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
+    if (unit === 'imperial') return `${(mmhr * 0.03937).toFixed(2)} in/hr`;
+    return `${mmhr.toFixed(1)} mm/hr`;
+  }
+
+  /**
+   * Get the localized label for a wind speed value (0-5 scale).
+   * @param {number} speed - Wind speed on 0-5 scale
+   * @returns {string} Localized wind speed label
+   */
+  static getWindSpeedLabel(speed) {
+    if (speed == null) return '';
+    const entry = Object.values(WIND_SPEEDS).find((w) => w.value === speed);
+    return entry ? localize(entry.label) : '';
+  }
+
+  /**
+   * Get the nearest compass direction abbreviation for a degree value.
+   * @param {number|null} degrees - Direction in degrees (0-360)
+   * @returns {string} Compass abbreviation (e.g. "NNE") or empty string
+   */
+  static getWindDirectionLabel(degrees) {
+    if (degrees == null) return '';
+    const entries = Object.entries(COMPASS_DIRECTIONS);
+    let closest = entries[0];
+    let minDiff = 360;
+    for (const [id, deg] of entries) {
+      const diff = Math.abs(((degrees - deg + 540) % 360) - 180);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = [id, deg];
+      }
+    }
+    return closest[0];
+  }
+
+  /**
+   * Get a randomized kph value for a wind speed scale value (0-5).
+   * Picks a value between the previous tier's kph and this tier's kph.
+   * @param {number} speed - Wind speed on 0-5 scale
+   * @returns {number} Speed in kph
+   */
+  static getWindSpeedKph(speed) {
+    const speeds = Object.values(WIND_SPEEDS);
+    const entry = speeds.find((w) => w.value === speed);
+    if (!entry) return 0;
+    const prevEntry = speeds.find((w) => w.value === speed - 1);
+    const min = prevEntry ? prevEntry.kph + 1 : 0;
+    const max = entry.kph;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  /**
+   * Build a rich HTML tooltip for weather display.
+   * @param {object} opts
+   * @param {string} opts.label - Weather label
+   * @param {string} [opts.description] - Weather description
+   * @param {string} [opts.temp] - Formatted temperature string
+   * @param {number} [opts.windSpeed] - Wind speed (0-5 scale)
+   * @param {number|null} [opts.windDirection] - Wind direction in degrees
+   * @param {string|null} [opts.precipType] - Precipitation type key
+   * @param {number} [opts.precipIntensity] - Precipitation intensity (0-1)
+   * @returns {string} HTML-encoded string for data-tooltip-html
+   */
+  static buildWeatherTooltip({ label, description, temp, windSpeed, windDirection, precipType, precipIntensity }) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const rows = [];
+    const desc = description && description !== label ? esc(description) : '';
+    rows.push(`<div class="calendaria-weather-tooltip-header"><strong>${esc(label)}</strong>${desc ? ` — ${desc}` : ''}</div>`);
+    if (temp) rows.push(`<div class="calendaria-weather-tooltip-row"><i class="fas fa-temperature-half"></i> ${esc(temp)}</div>`);
+    if (windSpeed > 0) {
+      const windLabel = this.getWindSpeedLabel(windSpeed);
+      const windKph = this.getWindSpeedKph(windSpeed);
+      const windFormatted = this.formatWindSpeed(windKph);
+      const dirLabel = this.getWindDirectionLabel(windDirection);
+      rows.push(`<div class="calendaria-weather-tooltip-row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
+    }
+    if (precipType) {
+      const precipLabel = localize(`CALENDARIA.Weather.Precipitation.${precipType.charAt(0).toUpperCase() + precipType.slice(1)}`);
+      const rate = this.formatPrecipitation((precipIntensity ?? 0) * 10);
+      rows.push(`<div class="calendaria-weather-tooltip-row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
+    }
+    const html = `<div class="calendaria-weather-tooltip">${rows.join('')}</div>`;
+    return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 }

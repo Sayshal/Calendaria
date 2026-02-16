@@ -242,9 +242,22 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const icon = showIcon ? `<i class="fas ${weather.icon}"></i>` : '';
       const label = showLabel ? ` ${weather.label}` : '';
       const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+      let windHtml = '';
+      if (showLabel && weather.windSpeed > 0) {
+        const rotation = weather.windDirection != null ? weather.windDirection : 0;
+        windHtml = `<span class="weather-wind">
+          <i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i>
+        </span>`;
+      }
+      let precipHtml = '';
+      if (showLabel && weather.precipType) {
+        precipHtml = `<span class="weather-precip">
+          <i class="fas fa-droplet"></i>
+        </span>`;
+      }
       return `<span class="weather-indicator${clickable}" ${action}
-        style="--weather-color: ${weather.color}" data-tooltip="${weather.tooltip}">
-        ${icon}${label} ${temp}
+        style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">
+        ${icon}${label} ${temp}${windHtml}${precipHtml}
       </span>`;
     } else if (editable) {
       return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
@@ -1730,13 +1743,30 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _getWeatherContext() {
     const weather = WeatherManager.getCurrentWeather();
     if (!weather) return null;
+    const label = localize(weather.label);
+    const windSpeed = weather.wind?.speed ?? 0;
+    const windDirection = weather.wind?.direction;
+    const precipType = weather.precipitation?.type ?? null;
+    const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const tooltipHtml = WeatherManager.buildWeatherTooltip({
+      label,
+      description: weather.description ? localize(weather.description) : null,
+      temp,
+      windSpeed,
+      windDirection,
+      precipType,
+      precipIntensity: weather.precipitation?.intensity
+    });
     return {
       id: weather.id,
-      label: localize(weather.label),
+      label,
       icon: weather.icon,
       color: weather.color,
-      temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
-      tooltip: weather.description ? localize(weather.description) : localize(weather.label)
+      temperature: temp,
+      tooltipHtml,
+      windSpeed,
+      windDirection,
+      precipType
     };
   }
 

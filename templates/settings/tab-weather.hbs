@@ -1,10 +1,10 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset data-section="weather-temperature">
+    <fieldset data-section="weather-units">
       <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-temperature"
+        {{localize "CALENDARIA.SettingsPanel.Section.Units"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-units"
           data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
             class="fas fa-undo"></i></button>
       </legend>
@@ -19,6 +19,18 @@
           </select>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.TemperatureUnit.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="precipitationUnit">{{localize "CALENDARIA.Settings.PrecipitationUnit.Name"}}</label>
+        <div class="form-fields">
+          <select id="precipitationUnit" name="precipitationUnit">
+            {{#each precipitationUnitOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.PrecipitationUnit.Hint"}}</p>
       </div>
     </fieldset>
   {{/if}}

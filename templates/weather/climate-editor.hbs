@@ -104,6 +104,45 @@
     </fieldset>
   {{/if}}
 
+  {{!-- Wind Configuration (zone mode only) --}}
+  {{#if isZoneMode}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Weather.Wind.Title"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Weather.Wind.ZoneHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
+        <div class="form-fields">
+          <select name="windSpeedMin">
+            <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
+            {{#each windSpeedMinOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+          <i class="fa-solid fa-right-long"></i>
+          <select name="windSpeedMax">
+            <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
+            {{#each windSpeedMaxOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Weather.Wind.DirectionWeights"}}</label>
+        <p class="hint">{{localize "CALENDARIA.Weather.Wind.DirectionWeightsHint"}}</p>
+        <div class="form-fields wind-direction-grid">
+          {{#each windDirections}}
+            <div class="wind-dir-input">
+              <label>{{this.id}}</label>
+              <input type="number" name="wind_{{this.id}}" min="0" max="100" step="1"
+                value="{{this.weight}}" placeholder="0">
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </fieldset>
+  {{/if}}
+
   {{!-- Temperatures --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
