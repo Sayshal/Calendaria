@@ -142,13 +142,16 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
  * @param {string} [options.season] - Season name for temperature lookup and zone overrides
  * @param {number} [options.seed] - Random seed for deterministic generation
  * @param {object[]} [options.customPresets] - Custom weather presets
+ * @param {string} [options.currentWeatherId] - Current weather ID for inertia calculation
+ * @param {number} [options.inertia] - How much to favor current weather (0-1)
  * @returns {object} Generated weather { preset, temperature }
  */
-export function generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets = [] }) {
+export function generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets = [], currentWeatherId = null, inertia = 0 }) {
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
   const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
-  const { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
+  let { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
   if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
+  if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig);
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
   let finalTempRange = { ...tempRange };
@@ -192,18 +195,23 @@ export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year
  * @param {number} [options.days] - Number of days to forecast
  * @param {object[]} [options.customPresets] - Custom weather presets
  * @param {Function} [options.getSeasonForDate] - Function to get season data for a date
+ * @param {string} [options.currentWeatherId] - Current weather ID for inertia chain start
+ * @param {number} [options.inertia] - Inertia value (0-1) for path-dependent chaining
  * @returns {object[]} Array of weather forecasts
  */
-export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate }) {
+export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate, currentWeatherId = null, inertia = 0 }) {
   const forecast = [];
   let year = startYear;
   let month = startMonth;
   let day = startDay;
+  let previousWeatherId = currentWeatherId;
   for (let i = 0; i < days; i++) {
     const seasonData = getSeasonForDate ? getSeasonForDate(year, month, day) : null;
     const currentSeason = seasonData?.name ?? season;
     const seasonClimate = seasonData?.climate ?? null;
-    const weather = generateWeatherForDate({ seasonClimate, zoneConfig, season: currentSeason, year, month, day, customPresets });
+    const seed = dateSeed(year, month, day);
+    const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia });
+    previousWeatherId = weather.preset.id;
     forecast.push({ year, month, day, ...weather });
     day++;
   }
@@ -215,7 +223,7 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
  * @param {object} preset - Weather preset with wind defaults
  * @param {object} [zoneConfig] - Zone config (windDirections, windSpeedRange)
  * @param {Function} [randomFn] - Random function
- * @returns {{ speed: number, direction: number|null, forced: boolean }}
+ * @returns {{ speed: number, direction: number|null, forced: boolean }} Wind conditions
  */
 function generateWind(preset, zoneConfig, randomFn = Math.random) {
   const compassValues = Object.values(COMPASS_DIRECTIONS);
@@ -244,7 +252,7 @@ function generateWind(preset, zoneConfig, randomFn = Math.random) {
  * Generate precipitation based on preset defaults with intensity variance.
  * @param {object} preset - Weather preset with precipitation defaults
  * @param {Function} [randomFn] - Random function
- * @returns {{ type: string|null, intensity: number }}
+ * @returns {{ type: string|null, intensity: number }} Precipitation conditions
  */
 function generatePrecipitation(preset, randomFn = Math.random) {
   const type = preset.precipitation?.type ?? null;
@@ -258,20 +266,29 @@ function generatePrecipitation(preset, randomFn = Math.random) {
 /**
  * Apply weather transition smoothing.
  * Reduces jarring weather changes by considering previous weather.
+ * Per-preset `inertiaWeight` scales the effect: 0 = never persists, 1 = normal, 2 = very sticky.
+ * Zone-level overrides take priority over the preset's built-in value.
  * @param {string} currentWeatherId - Current weather ID
  * @param {object} probabilities - Base probabilities
  * @param {number} [inertia] - How much to favor current weather (0-1)
+ * @param {object[]} [customPresets] - Custom presets for weight lookup
+ * @param {object} [zoneConfig] - Zone config for per-preset inertiaWeight overrides
  * @returns {object} Adjusted probabilities
  */
-export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0.3) {
+export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0.3, customPresets = [], zoneConfig = null) {
   if (!currentWeatherId || !probabilities[currentWeatherId]) return probabilities;
+  const zonePreset = zoneConfig?.presets ? Object.values(zoneConfig.presets).find((p) => p.id === currentWeatherId) : null;
+  const preset = getPreset(currentWeatherId, customPresets);
+  const weight = zonePreset?.inertiaWeight ?? preset?.inertiaWeight ?? 1;
+  const effectiveInertia = Math.min(1, inertia * weight);
+  if (effectiveInertia <= 0) return probabilities;
   const adjusted = { ...probabilities };
   const currentWeight = adjusted[currentWeatherId] || 0;
   const totalOther = Object.values(adjusted).reduce((sum, w) => sum + w, 0) - currentWeight;
   if (totalOther > 0) {
-    const boost = totalOther * inertia;
+    const boost = totalOther * effectiveInertia;
     adjusted[currentWeatherId] = currentWeight + boost;
-    for (const id of Object.keys(adjusted)) if (id !== currentWeatherId) adjusted[id] *= 1 - inertia;
+    for (const id of Object.keys(adjusted)) if (id !== currentWeatherId) adjusted[id] *= 1 - effectiveInertia;
   }
   return adjusted;
 }

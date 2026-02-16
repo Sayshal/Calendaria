@@ -36,6 +36,20 @@
   {{/if}}
 
   {{#if isGM}}
+    <fieldset data-section="weather-generation">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherGeneration"}}</legend>
+
+      <div class="form-group">
+        <label for="weatherInertia">{{localize "CALENDARIA.Settings.WeatherInertia.Name"}}</label>
+        <div class="form-fields">
+          <range-picker name="weatherInertia" value="{{weatherInertia}}" min="0" max="1" step="0.05"></range-picker>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WeatherInertia.Hint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{#if isGM}}
     <fieldset data-section="climate">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
       <div class="fieldset-header-row">

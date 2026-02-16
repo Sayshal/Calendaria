@@ -36,7 +36,8 @@ const COMPASS_LABEL_KEYS = {
 
 /**
  * Map a 0-1 intensity to a descriptive label.
- * @param value
+ * @param {number} value - Intensity value (0-1)
+ * @returns {string} Localized intensity label
  */
 function getPrecipIntensityLabel(value) {
   if (value <= 0) return localize('CALENDARIA.Common.None');
