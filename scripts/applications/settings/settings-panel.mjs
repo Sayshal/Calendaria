@@ -1324,6 +1324,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.darknessSyncAllScenes = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES);
     context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
     context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
+    context.colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
     context.defaultBrightnessMultiplier = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
   }
 
@@ -1517,6 +1518,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('darknessSyncAllScenes' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES, data.darknessSyncAllScenes);
     if ('darknessWeatherSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC, data.darknessWeatherSync);
     if ('ambienceSync' in data) await game.settings.set(MODULE.ID, SETTINGS.AMBIENCE_SYNC, data.ambienceSync);
+    if ('colorShiftSync' in data) await game.settings.set(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, data.colorShiftSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);

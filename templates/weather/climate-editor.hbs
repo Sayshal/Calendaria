@@ -104,6 +104,43 @@
     </fieldset>
   {{/if}}
 
+  {{!-- Color Shift (zone mode only) --}}
+  {{#if isZoneMode}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.Weather.Zone.ColorShift"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.ColorShiftHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DawnHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftDawnHue" min="0" max="360" step="1"
+            value="{{colorShift.dawnHue}}" placeholder="30">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DuskHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftDuskHue" min="0" max="360" step="1"
+            value="{{colorShift.duskHue}}" placeholder="15">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.NightHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftNightHue" min="0" max="360" step="1"
+            value="{{colorShift.nightHue}}" placeholder="220">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.TransitionDuration"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftTransitionMinutes" min="0" step="1"
+            value="{{colorShift.transitionMinutes}}" placeholder="60">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TransitionDurationHint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
   {{!-- Wind Configuration (zone mode only) --}}
   {{#if isZoneMode}}
     <fieldset>

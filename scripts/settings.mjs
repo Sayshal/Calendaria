@@ -474,6 +474,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  /** Sync time-of-day color shifting (dawn/dusk/night tinting) */
+  game.settings.register(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, {
+    name: 'CALENDARIA.Settings.ColorShiftSync.Name',
+    hint: 'CALENDARIA.Settings.ColorShiftSync.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Allow Calendaria windows to overlap sidebar area */
   game.settings.register(MODULE.ID, SETTINGS.ALLOW_SIDEBAR_OVERLAP, {
     name: 'CALENDARIA.Settings.AllowSidebarOverlap.Name',

@@ -71,6 +71,14 @@
       </div>
 
       <div class="form-group">
+        <label for="colorShiftSync">{{localize "CALENDARIA.Settings.ColorShiftSync.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="colorShiftSync" name="colorShiftSync" {{#if colorShiftSync}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ColorShiftSync.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
         <label
           for="defaultBrightnessMultiplier">{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Name"}}</label>
         <div class="form-fields range-field">
