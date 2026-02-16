@@ -2947,11 +2947,15 @@ span.calendaria-moon-icon {
 
   /* Zone mode: wider grid with checkbox, alias, and temp columns */
   &.zone-mode .preset-row {
-    grid-template-columns: 1.5rem 1.5rem 1fr 3.75rem 1.25rem 3.75rem 1.25rem 3.75rem 1.25rem;
+    grid-template-columns: 1.5rem 1.5rem 1fr 3.75rem 1.25rem 3.75rem 1.25rem 3.75rem 1.25rem 3rem;
   }
 
   .preset-temp-input {
     width: 3.75rem;
+  }
+
+  .preset-inertia-input {
+    width: 3rem;
   }
 
   .form-fields.temperature > i {

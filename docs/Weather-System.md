@@ -225,9 +225,27 @@ Built-in climate zones include environment lighting defaults (`environmentBase` 
 3. Temperature generated from zone's seasonal range (or preset's `tempMin`/`tempMax` override)
 4. Optional seeded randomness via `dateSeed(year, month, day)` for deterministic forecasts
 
-### Weather Inertia (Coming Soon)
+### Weather Inertia
 
 Weather inertia creates smoother, more realistic transitions by favoring the current weather when generating new conditions. For example, if it's raining, it's more likely to continue raining rather than suddenly becoming clear.
+
+**Setting:** `Weather Inertia` (range 0–1, default 0.3)
+
+- **0** = no inertia (fully random each day)
+- **1** = maximum inertia (strongly favors current weather)
+
+When a season boundary is crossed, inertia is automatically halved to allow the new season's weather profile to take effect faster.
+
+Forecasts use **path-dependent inertia**: each forecast day uses the previous forecast day's result as the "current weather" for the inertia calculation, creating a chain where weather transitions smoothly across the forecast window.
+
+**Per-preset inertia weight:** Each preset has an `inertiaWeight` multiplier (default 1.0) that scales the global inertia setting:
+
+- **0** = never persists (tornado, hurricane, sunshower, most fantasy presets)
+- **0.3–0.5** = low persistence (thunderstorm, blizzard, hail, sandstorm, ashfall)
+- **1.0** = normal persistence (partly cloudy, drizzle, mist, windy)
+- **1.2–1.5** = sticky (clear, cloudy, overcast, fog, rain, snow)
+
+Custom presets can set their own inertia weight in the preset editor (0–2 range). Zone-level overrides can also be configured per-preset in the climate editor.
 
 ---
 

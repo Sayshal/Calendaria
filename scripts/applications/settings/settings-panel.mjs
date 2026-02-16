@@ -1275,6 +1275,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hasZones = zones.length > 0;
     context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZone?.id }));
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+    context.weatherInertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
   }
 
   /**
@@ -1534,6 +1535,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('showActiveCalendarToPlayers' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS, data.showActiveCalendarToPlayers);
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
     if ('precipitationUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, data.precipitationUnit);
+    if ('weatherInertia' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_INERTIA, parseFloat(data.weatherInertia));
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
@@ -2193,7 +2195,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #openWeatherPresetDialog(preset = null) {
     const isNew = !preset;
-    const data = preset || { label: '', icon: 'fa-cloud', color: '#888888', tempMin: 10, tempMax: 25, darknessPenalty: 0, environmentBase: null, environmentDark: null };
+    const data = preset || { label: '', icon: 'fa-cloud', color: '#888888', tempMin: 10, tempMax: 25, darknessPenalty: 0, inertiaWeight: 1, environmentBase: null, environmentDark: null };
     const envBase = data.environmentBase ?? {};
     const envDark = data.environmentDark ?? {};
     const unitSymbol = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
@@ -2228,6 +2230,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenalty')}</label>
           <input type="number" name="darknessPenalty" value="${data.darknessPenalty}" step="0.05" min="-0.5" max="0.5">
           <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenaltyTooltip')}</p>
+        </div>
+        <div class="form-group">
+          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.InertiaWeight')}</label>
+          <input type="number" name="inertiaWeight" value="${data.inertiaWeight ?? 1}" step="0.1" min="0" max="2">
+          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.InertiaWeightTooltip')}</p>
         </div>
         <fieldset>
           <legend>${localize('CALENDARIA.SettingsPanel.WeatherPresets.EnvironmentLighting')}</legend>
@@ -2281,6 +2288,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             tempMin: fromDisplayUnit(Number(form.elements.tempMin.value) || 10),
             tempMax: fromDisplayUnit(Number(form.elements.tempMax.value) || 25),
             darknessPenalty: Number(form.elements.darknessPenalty.value) || 0,
+            inertiaWeight: Number(form.elements.inertiaWeight.value) || 1,
             environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
             environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null
           };
@@ -2308,6 +2316,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       tempMin: result.tempMin,
       tempMax: result.tempMax,
       darknessPenalty: result.darknessPenalty,
+      inertiaWeight: result.inertiaWeight,
       environmentBase: result.environmentBase,
       environmentDark: result.environmentDark,
       description: ''
@@ -2338,6 +2347,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     preset.tempMin = result.tempMin;
     preset.tempMax = result.tempMax;
     preset.darknessPenalty = result.darknessPenalty;
+    preset.inertiaWeight = result.inertiaWeight;
     preset.environmentBase = result.environmentBase;
     preset.environmentDark = result.environmentDark;
 

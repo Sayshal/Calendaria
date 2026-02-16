@@ -26,7 +26,8 @@ export const STANDARD_WEATHER = [
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 0, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.2
   },
   {
     id: 'partly-cloudy',
@@ -42,7 +43,8 @@ export const STANDARD_WEATHER = [
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.0
   },
   {
     id: 'cloudy',
@@ -58,7 +60,8 @@ export const STANDARD_WEATHER = [
     environmentBase: { hue: null, saturation: 0.7 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.2
   },
   {
     id: 'overcast',
@@ -74,7 +77,8 @@ export const STANDARD_WEATHER = [
     environmentBase: { hue: null, saturation: 0.5 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.5
   },
   {
     id: 'drizzle',
@@ -90,7 +94,8 @@ export const STANDARD_WEATHER = [
     environmentBase: { hue: null, saturation: 0.8 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
-    precipitation: { type: 'drizzle', intensity: 0.2 }
+    precipitation: { type: 'drizzle', intensity: 0.2 },
+    inertiaWeight: 1.0
   },
   {
     id: 'rain',
@@ -106,7 +111,8 @@ export const STANDARD_WEATHER = [
     environmentBase: { hue: null, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 2, direction: null },
-    precipitation: { type: 'rain', intensity: 0.6 }
+    precipitation: { type: 'rain', intensity: 0.6 },
+    inertiaWeight: 1.3
   },
   {
     id: 'fog',
@@ -122,7 +128,8 @@ export const STANDARD_WEATHER = [
     environmentBase: { hue: null, saturation: 0.3 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
-    precipitation: { type: 'drizzle', intensity: 0.1 }
+    precipitation: { type: 'drizzle', intensity: 0.1 },
+    inertiaWeight: 1.5
   },
   {
     id: 'mist',
@@ -138,7 +145,8 @@ export const STANDARD_WEATHER = [
     environmentBase: { hue: null, saturation: 0.7 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.0
   },
   {
     id: 'windy',
@@ -154,7 +162,8 @@ export const STANDARD_WEATHER = [
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 3, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.0
   },
   {
     id: 'sunshower',
@@ -170,7 +179,8 @@ export const STANDARD_WEATHER = [
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: 'rain', intensity: 0.3 }
+    precipitation: { type: 'rain', intensity: 0.3 },
+    inertiaWeight: 0
   }
 ];
 
@@ -193,7 +203,8 @@ export const SEVERE_WEATHER = [
     environmentBase: { hue: 220, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 4, direction: null, forced: true },
-    precipitation: { type: 'rain', intensity: 0.9 }
+    precipitation: { type: 'rain', intensity: 0.9 },
+    inertiaWeight: 0.3
   },
   {
     id: 'blizzard',
@@ -209,7 +220,8 @@ export const SEVERE_WEATHER = [
     environmentBase: { hue: 200, saturation: 0.3 },
     environmentDark: { hue: 210, saturation: null },
     wind: { speed: 5, direction: null, forced: true },
-    precipitation: { type: 'snow', intensity: 1.0 }
+    precipitation: { type: 'snow', intensity: 1.0 },
+    inertiaWeight: 0.5
   },
   {
     id: 'snow',
@@ -225,7 +237,8 @@ export const SEVERE_WEATHER = [
     environmentBase: { hue: 200, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: 'snow', intensity: 0.5 }
+    precipitation: { type: 'snow', intensity: 0.5 },
+    inertiaWeight: 1.3
   },
   {
     id: 'hail',
@@ -241,7 +254,8 @@ export const SEVERE_WEATHER = [
     environmentBase: { hue: null, saturation: 0.5 },
     environmentDark: null,
     wind: { speed: 3, direction: null },
-    precipitation: { type: 'hail', intensity: 0.7 }
+    precipitation: { type: 'hail', intensity: 0.7 },
+    inertiaWeight: 0.3
   },
   {
     id: 'tornado',
@@ -257,7 +271,8 @@ export const SEVERE_WEATHER = [
     environmentBase: { hue: 100, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 5, direction: null, forced: true },
-    precipitation: { type: 'rain', intensity: 0.8 }
+    precipitation: { type: 'rain', intensity: 0.8 },
+    inertiaWeight: 0
   },
   {
     id: 'hurricane',
@@ -273,7 +288,8 @@ export const SEVERE_WEATHER = [
     environmentBase: { hue: null, saturation: 0.3 },
     environmentDark: null,
     wind: { speed: 5, direction: null, forced: true },
-    precipitation: { type: 'rain', intensity: 1.0 }
+    precipitation: { type: 'rain', intensity: 1.0 },
+    inertiaWeight: 0
   }
 ];
 
@@ -296,7 +312,8 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentBase: { hue: 30, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0.5
   },
   {
     id: 'sandstorm',
@@ -312,7 +329,8 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentBase: { hue: 35, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 4, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0.3
   },
   {
     id: 'luminous-sky',
@@ -328,7 +346,8 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentBase: null,
     environmentDark: { hue: 280, saturation: 0.8 },
     wind: { speed: 0, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   },
   {
     id: 'sakura-bloom',
@@ -344,7 +363,8 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   }
 ];
 
@@ -367,7 +387,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 270, saturation: 0.3 },
     environmentDark: { hue: 280, saturation: 0.4 },
     wind: { speed: 1, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   },
   {
     id: 'ley-surge',
@@ -383,7 +404,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 180, saturation: 0.9 },
     environmentDark: { hue: 200, saturation: 0.8 },
     wind: { speed: 2, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   },
   {
     id: 'aether-haze',
@@ -399,7 +421,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 280, saturation: 0.6 },
     environmentDark: { hue: 270, saturation: 0.7 },
     wind: { speed: 0, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   },
   {
     id: 'nullfront',
@@ -415,7 +438,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: null, saturation: 0.1 },
     environmentDark: { hue: null, saturation: 0.1 },
     wind: { speed: 0, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   },
   {
     id: 'permafrost-surge',
@@ -431,7 +455,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 190, saturation: 0.7 },
     environmentDark: { hue: 200, saturation: 0.6 },
     wind: { speed: 3, direction: null },
-    precipitation: { type: 'snow', intensity: 0.4 }
+    precipitation: { type: 'snow', intensity: 0.4 },
+    inertiaWeight: 0
   },
   {
     id: 'gravewind',
@@ -447,7 +472,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 250, saturation: 0.5 },
     environmentDark: { hue: 260, saturation: 0.6 },
     wind: { speed: 3, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   },
   {
     id: 'veilfall',
@@ -463,7 +489,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 180, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
-    precipitation: { type: 'rain', intensity: 0.3 }
+    precipitation: { type: 'rain', intensity: 0.3 },
+    inertiaWeight: 0
   },
   {
     id: 'arcane',
@@ -479,7 +506,8 @@ export const FANTASY_WEATHER = [
     environmentBase: { hue: 50, saturation: 0.8 },
     environmentDark: null,
     wind: { speed: 2, direction: null },
-    precipitation: { type: null, intensity: 0 }
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0
   }
 ];
 

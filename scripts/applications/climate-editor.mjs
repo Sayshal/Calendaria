@@ -152,7 +152,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               tempMin: ClimateEditor.#formatTempValue(saved.tempMin),
               tempMax: ClimateEditor.#formatTempValue(saved.tempMax),
               isRelativeTempMin: typeof saved.tempMin === 'string' && /[+-]$/.test(saved.tempMin),
-              isRelativeTempMax: typeof saved.tempMax === 'string' && /[+-]$/.test(saved.tempMax)
+              isRelativeTempMax: typeof saved.tempMax === 'string' && /[+-]$/.test(saved.tempMax),
+              inertiaWeight: saved.inertiaWeight ?? '',
+              defaultInertiaWeight: preset.inertiaWeight ?? 1
             };
           }
           // Season mode
@@ -421,6 +423,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();
       if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
       if (tMaxRaw) pData.tempMax = ClimateEditor.#parseTempInput(tMaxRaw, null);
+      const iwRaw = data[`preset_${preset.id}_inertiaWeight`];
+      if (iwRaw !== '' && iwRaw != null) pData.inertiaWeight = parseFloat(iwRaw);
       result.presets[preset.id] = pData;
     }
 

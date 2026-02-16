@@ -112,6 +112,7 @@ export const SETTINGS = {
   TIMEKEEPER_STICKY_STATES: 'timeKeeperStickyStates',
   TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
   TOOLBAR_APPS: 'toolbarApps',
+  WEATHER_INERTIA: 'weatherInertia',
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases'
 };
 

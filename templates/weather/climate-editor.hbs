@@ -218,6 +218,11 @@
                 <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
                   class="preset-temp-input {{#if this.isRelativeTempMax}}modifier-relative{{/if}}">
                 <span class="units">{{../../../tempLabel}}</span>
+                <input type="number" name="preset_{{this.id}}_inertiaWeight" value="{{this.inertiaWeight}}"
+                  placeholder="{{this.defaultInertiaWeight}}" min="0" max="2" step="0.1"
+                  class="preset-inertia-input" data-tooltip
+                  aria-label="{{localize 'CALENDARIA.Weather.InertiaWeight.Tooltip'}}"
+                  title="{{localize 'CALENDARIA.Weather.InertiaWeight.Tooltip'}}">
               {{/if}}
             </div>
           {{/each}}

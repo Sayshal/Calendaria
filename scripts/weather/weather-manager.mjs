@@ -215,6 +215,9 @@ export default class WeatherManager {
     const season = options.season || (seasonData ? localize(seasonData.name) : null);
     const seasonClimate = seasonData?.climate ?? null;
     const customPresets = this.getCustomPresets();
+    const currentWeatherId = this.#currentWeather?.id ?? null;
+    let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+    if (this.#currentWeather?.season && season !== this.#currentWeather.season) inertia *= 0.5;
     let result;
     if (!zoneConfig && !seasonClimate) {
       log(2, 'No climate zone or season climate configured, using random preset');
@@ -225,7 +228,7 @@ export default class WeatherManager {
       const temperature = Math.round(min + Math.random() * (max - min));
       result = { preset: randomPreset, temperature };
     } else {
-      result = generateWeather({ seasonClimate, zoneConfig, season, customPresets });
+      result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId, inertia });
     }
     const weather = {
       id: result.preset.id,
@@ -240,7 +243,8 @@ export default class WeatherManager {
       darknessPenalty: result.preset.darknessPenalty ?? 0,
       setAt: game.time.worldTime,
       setBy: game.user.id,
-      generated: true
+      generated: true,
+      season
     };
     await this.#saveWeather(weather, options.broadcast !== false);
     return weather;
@@ -262,6 +266,9 @@ export default class WeatherManager {
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
 
+    const currentWeatherId = this.#currentWeather?.id ?? null;
+    const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+
     return generateForecast({
       zoneConfig,
       startYear: components.year + yearZero,
@@ -269,6 +276,8 @@ export default class WeatherManager {
       startDay: (components.dayOfMonth ?? 0) + 1,
       days,
       customPresets,
+      currentWeatherId,
+      inertia,
       getSeasonForDate: (year, month, day) => {
         const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
         if (!season) return null;

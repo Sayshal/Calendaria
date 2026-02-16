@@ -1145,6 +1145,15 @@ export function registerSettings() {
     })
   });
 
+  /** Weather inertia — how much weather tends to persist day-to-day */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_INERTIA, {
+    name: 'CALENDARIA.Settings.WeatherInertia.Name',
+    hint: 'CALENDARIA.Settings.WeatherInertia.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 0.3, min: 0, max: 1, step: 0.05 })
+  });
+
   /** Custom weather presets */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, {
     name: 'Custom Weather Presets',
