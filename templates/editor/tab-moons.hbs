@@ -46,6 +46,26 @@
             </div>
 
             <div class="moon-fields">
+              <fieldset class="moon-brightness standard-form">
+                <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.MoonBrightness'}}">
+                  {{localize "CALENDARIA.Editor.Section.MoonBrightness"}}
+                </legend>
+                <div class="form-group">
+                  <label for="editor-moon-{{this.index}}-brightness" data-tooltip
+                    aria-label="{{localize 'CALENDARIA.Editor.Hint.MoonBrightnessMax'}}">
+                    {{localize "CALENDARIA.Editor.Field.MoonBrightnessMax"}}
+                  </label>
+                  <div class="form-fields range-field">
+                    <input type="range" id="editor-moon-{{this.index}}-brightness"
+                      name="moons.{{this.key}}.moonBrightnessMax"
+                      value="{{this.brightnessDisplay}}"
+                      min="0" max="0.3" step="0.01">
+                    <span class="range-value">{{this.brightnessDisplay}}</span>
+                  </div>
+                  <p class="hint">{{localize "CALENDARIA.Editor.Hint.MoonBrightnessMax"}}</p>
+                </div>
+              </fieldset>
+
               <fieldset class="reference-date standard-form">
                 <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.ReferenceDate'}}">
                   {{localize "CALENDARIA.Common.ReferenceDate"}}

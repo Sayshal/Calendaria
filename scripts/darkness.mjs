@@ -6,6 +6,7 @@
 
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES } from './constants.mjs';
 import { log } from './utils/logger.mjs';
+import { getMoonPhasePosition } from './utils/moon-utils.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
 
@@ -76,6 +77,11 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   const brightness = 1 - baseDarkness;
   const adjustedBrightness = brightness * sceneBrightnessMult * climateBrightnessMult;
   let adjustedDarkness = 1 - adjustedBrightness;
+  const moonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
+  if (moonSync) {
+    const moonResult = calculateMoonIllumination(adjustedDarkness);
+    adjustedDarkness -= moonResult.reduction;
+  }
   const weatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
   if (weatherSync) {
     const currentWeather = WeatherManager.getCurrentWeather?.();
@@ -83,6 +89,56 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
     adjustedDarkness += weatherDarknessPenalty;
   }
   return Math.max(0, Math.min(1, adjustedDarkness));
+}
+
+/**
+ * Calculate moon illumination factor for the current night.
+ * Full moons brighten the scene; new moons have no effect.
+ * @param {number} baseDarkness - Current darkness level (0-1)
+ * @returns {{ reduction: number, hue: number|null, intensity: number|null, luminosity: number|null }}
+ */
+export function calculateMoonIllumination(baseDarkness) {
+  if (baseDarkness < 0.5) return { reduction: 0, hue: null, intensity: null, luminosity: null };
+  const calendar = game.time.calendar;
+  if (!calendar?.moonsArray?.length) return { reduction: 0, hue: null, intensity: null, luminosity: null };
+  let totalReduction = 0;
+  let totalIllumination = 0;
+  const coloredMoons = [];
+  for (const moon of calendar.moonsArray) {
+    const position = getMoonPhasePosition(moon, game.time.components, calendar);
+    const illumination = (1 - Math.cos(position * 2 * Math.PI)) / 2;
+    const moonMax = moon.moonBrightnessMax ?? 0.15;
+    const nightFactor = (baseDarkness - 0.5) / 0.5;
+    totalReduction += illumination * moonMax * nightFactor;
+    totalIllumination += illumination * moonMax;
+    if (illumination > 0.3 && moon.color) {
+      const rgb = foundry.utils.Color.from(moon.color);
+      const hsl = rgb.hsl;
+      if (hsl[1] > 0.1) coloredMoons.push({ hsl, illumination });
+    }
+  }
+
+  let hue = null;
+  let intensity = null;
+  if (coloredMoons.length) {
+    let totalWeight = 0;
+    let weightedHueX = 0;
+    let weightedHueY = 0;
+    let weightedSat = 0;
+    for (const { hsl, illumination } of coloredMoons) {
+      const moonHue = hsl[0] * 360;
+      const rad = (moonHue * Math.PI) / 180;
+      weightedHueX += Math.cos(rad) * illumination;
+      weightedHueY += Math.sin(rad) * illumination;
+      weightedSat += hsl[1] * illumination;
+      totalWeight += illumination;
+    }
+    hue = Math.round(((Math.atan2(weightedHueY, weightedHueX) * 180) / Math.PI + 360) % 360);
+    intensity = Math.min(0.5, (weightedSat / totalWeight) * 0.55);
+  }
+
+  const luminosity = Math.min(0.25, totalIllumination * 0.5);
+  return { reduction: Math.min(0.3, totalReduction), hue, intensity, luminosity };
 }
 
 /**
@@ -173,13 +229,25 @@ export function calculateEnvironmentLighting(scene) {
     dark = { hue: timeColor.hue, intensity: timeColor.intensity, luminosity: timeColor.luminosity };
   }
 
+  const moonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
+  if (moonSync) {
+    const baseDarkness = getCurrentDarkness();
+    if (baseDarkness > 0.5) {
+      const moonResult = calculateMoonIllumination(baseDarkness);
+      if (moonResult.hue != null) {
+        dark.hue = moonResult.hue;
+        dark.intensity = moonResult.intensity;
+      }
+      if (moonResult.luminosity > 0) dark.luminosity = Math.max(dark.luminosity ?? -0.1, (dark.luminosity ?? -0.1) + moonResult.luminosity);
+    }
+  }
+
   if (activeZone?.environmentBase?.hue != null) base.hue = activeZone.environmentBase.hue;
   if (activeZone?.environmentDark?.hue != null) dark.hue = activeZone.environmentDark.hue;
   if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
   if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
   const hasValues = base.hue !== null || base.intensity !== null || dark.hue !== null || dark.intensity !== null;
   if (!hasValues) return null;
-
   return { base, dark };
 }
 
@@ -301,6 +369,15 @@ function getDarknessScenes() {
   const activeScene = game.scenes.active;
   if (!activeScene || !shouldSyncSceneDarkness(activeScene)) return [];
   return [activeScene];
+}
+
+/**
+ * Handle moon phase change to recalculate darkness across synced scenes.
+ */
+export async function onMoonPhaseChange() {
+  if (!CalendariaSocket.isPrimaryGM()) return;
+  lastHour = null;
+  await updateDarknessFromWorldTime(game.time.worldTime, 0);
 }
 
 /**

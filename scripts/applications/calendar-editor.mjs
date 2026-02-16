@@ -389,6 +389,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         ...moon,
         key: moonKey,
         color: moon.color || '',
+        brightnessDisplay: moon.moonBrightnessMax ?? 0.15,
         index: idx,
         referencePhaseOptions: phasesArr.map(([, phase], pIdx) => ({
           value: pIdx,
@@ -593,6 +594,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             }
           }
         }
+      });
+    }
+    for (const rangeInput of this.element.querySelectorAll('input[name$=".moonBrightnessMax"]')) {
+      rangeInput.addEventListener('input', (e) => {
+        const display = e.target.closest('.form-fields')?.querySelector('.range-value');
+        if (display) display.textContent = e.target.value;
       });
     }
     // Disable delete button for unsaved calendars

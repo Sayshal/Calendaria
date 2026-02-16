@@ -591,6 +591,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           cycleDayAdjust: new NumberField({ required: false, nullable: false, initial: 0 }),
           referencePhase: new NumberField({ required: false, nullable: false, initial: 0, integer: true, min: 0 }),
           color: new StringField({ required: false, initial: '' }),
+          moonBrightnessMax: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 0.3 }),
           phases: new TypedObjectField(
             new SchemaField({
               name: new StringField({ required: true }),
