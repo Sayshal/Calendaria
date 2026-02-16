@@ -1097,7 +1097,8 @@ export function registerSettings() {
         changeWeather: { player: false, trusted: false, assistant: true },
         editNotes: { player: false, trusted: true, assistant: true },
         deleteNotes: { player: false, trusted: false, assistant: true },
-        editCalendars: { player: false, trusted: false, assistant: false }
+        editCalendars: { player: false, trusted: false, assistant: false },
+        viewWeatherForecast: { player: false, trusted: true, assistant: true }
       }
     }),
     onChange: () => NoteManager.syncNoteOwnership()
@@ -1160,6 +1161,24 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: new NumberField({ initial: 365, min: 0, max: 3650, integer: true })
+  });
+
+  /** Forecast accuracy — how accurate non-GM forecasts are */
+  game.settings.register(MODULE.ID, SETTINGS.FORECAST_ACCURACY, {
+    name: 'CALENDARIA.Settings.ForecastAccuracy.Name',
+    hint: 'CALENDARIA.Settings.ForecastAccuracy.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 70, min: 0, max: 100, step: 5, integer: true })
+  });
+
+  /** Forecast days — how many days ahead forecasts generate */
+  game.settings.register(MODULE.ID, SETTINGS.FORECAST_DAYS, {
+    name: 'CALENDARIA.Settings.ForecastDays.Name',
+    hint: 'CALENDARIA.Settings.ForecastDays.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 7, min: 1, max: 30, integer: true })
   });
 
   /** Weather inertia — how much weather tends to persist day-to-day */

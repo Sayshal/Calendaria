@@ -15,7 +15,7 @@ import SearchManager from './search/search-manager.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes } from './utils/permissions.mjs';
+import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import * as WidgetManager from './utils/widget-manager.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
@@ -839,13 +839,21 @@ export const CalendariaAPI = {
 
   /**
    * Get a weather forecast for upcoming days.
+   * Non-GM users need `viewWeatherForecast` permission.
+   * GM users always get 100% accurate forecasts.
    * @param {object} [options] - Forecast options
    * @param {number} [options.days] - Number of days to forecast
-   * @param {string} [options.climate] - Climate override
-   * @returns {Promise<object[]>} Array of forecast entries
+   * @param {string} [options.zoneId] - Zone ID override
+   * @param {number} [options.accuracy] - Accuracy override (GM only)
+   * @returns {object[]} Array of forecast entries with `isVaried` flag
    */
-  async getWeatherForecast(options = {}) {
-    return WeatherManager.getForecast(options);
+  getWeatherForecast(options = {}) {
+    if (!game.user.isGM && !canViewWeatherForecast()) {
+      ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return [];
+    }
+    const accuracy = game.user.isGM ? (options.accuracy ?? 100) : undefined;
+    return WeatherManager.getForecast({ ...options, accuracy });
   },
 
   /**

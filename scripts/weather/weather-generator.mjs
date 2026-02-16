@@ -8,7 +8,7 @@
 
 import { COMPASS_DIRECTIONS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
-import { getPreset } from './weather-presets.mjs';
+import { getAllPresets, getPreset } from './weather-presets.mjs';
 
 /**
  * Seeded random number generator (mulberry32).
@@ -185,6 +185,37 @@ export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year
 }
 
 /**
+ * Apply forecast variance to a generated weather result.
+ * @param {object} weather - Generated weather { preset, temperature }
+ * @param {number} dayDistance - Days from today (1 = tomorrow)
+ * @param {number} totalDays - Total forecast window
+ * @param {number} accuracy - 0-100 accuracy setting
+ * @param {Function} randomFn - Random function
+ * @param {object[]} customPresets - Custom presets
+ * @returns {object} Potentially modified weather with `isVaried` flag
+ */
+export function applyForecastVariance(weather, dayDistance, totalDays, accuracy, randomFn, customPresets) {
+  if (accuracy >= 100) return { ...weather, isVaried: false };
+  const distanceFactor = dayDistance / totalDays;
+  const varianceChance = (1 - accuracy / 100) * distanceFactor;
+  let isVaried = false;
+  let temperature = weather.temperature;
+  let preset = weather.preset;
+  const maxTempVariance = 8;
+  const tempVariance = (randomFn() - 0.5) * 2 * maxTempVariance * (1 - accuracy / 100) * distanceFactor;
+  temperature = Math.round(temperature + tempVariance);
+  if (Math.abs(tempVariance) > 1) isVaried = true;
+  if (randomFn() < varianceChance) {
+    const sameCategory = getAllPresets(customPresets).filter((p) => p.category === preset.category && p.id !== preset.id);
+    if (sameCategory.length > 0) {
+      preset = sameCategory[Math.floor(randomFn() * sameCategory.length)];
+      isVaried = true;
+    }
+  }
+  return { preset, temperature, isVaried };
+}
+
+/**
  * Generate a forecast for multiple days using zone config.
  * @param {object} options - Generation options
  * @param {object} options.zoneConfig - Climate zone config
@@ -198,9 +229,23 @@ export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year
  * @param {Function} [options.getDaysInMonth] - Function(month, year) returning days in that month. Set ._monthsPerYear for year rollover (default 12).
  * @param {string} [options.currentWeatherId] - Current weather ID for inertia chain start
  * @param {number} [options.inertia] - Inertia value (0-1) for path-dependent chaining
+ * @param {number} [options.accuracy] - Forecast accuracy 0-100 (100 = perfect)
  * @returns {object[]} Array of weather forecasts
  */
-export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate, getDaysInMonth, currentWeatherId = null, inertia = 0 }) {
+export function generateForecast({
+  zoneConfig,
+  season,
+  startYear,
+  startMonth,
+  startDay,
+  days = 7,
+  customPresets = [],
+  getSeasonForDate,
+  getDaysInMonth,
+  currentWeatherId = null,
+  inertia = 0,
+  accuracy = 100
+}) {
   const forecast = [];
   let year = startYear;
   let month = startMonth;
@@ -213,7 +258,12 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
     const seed = dateSeed(year, month, day);
     const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia });
     previousWeatherId = weather.preset.id;
-    forecast.push({ year, month, day, ...weather });
+    if (accuracy < 100) {
+      const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+      forecast.push({ year, month, day, ...varied });
+    } else {
+      forecast.push({ year, month, day, ...weather, isVaried: false });
+    }
     day++;
     if (getDaysInMonth) {
       const dim = getDaysInMonth(month, year);
