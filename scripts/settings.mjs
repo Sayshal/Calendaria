@@ -1145,6 +1145,23 @@ export function registerSettings() {
     })
   });
 
+  /** Weather history — keyed map of past weather by date */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_HISTORY, {
+    name: 'Weather History',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
+  /** Maximum number of days to retain in weather history */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS, {
+    name: 'CALENDARIA.Settings.WeatherHistoryDays.Name',
+    hint: 'CALENDARIA.Settings.WeatherHistoryDays.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 365, min: 0, max: 3650, integer: true })
+  });
+
   /** Weather inertia — how much weather tends to persist day-to-day */
   game.settings.register(MODULE.ID, SETTINGS.WEATHER_INERTIA, {
     name: 'CALENDARIA.Settings.WeatherInertia.Name',

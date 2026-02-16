@@ -295,7 +295,7 @@
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -18, "max": 10},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "blizzard", "chance": 5} ]
+            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "clear", "chance": 10}, {"id": "partly-cloudy", "chance": 10}, {"id": "snow", "chance": 15}, {"id": "blizzard", "chance": 5} ]
           },
           "Summer": {
             "temperatures": {"min": 10, "max": 41},
@@ -303,11 +303,11 @@
           },
           "Autumn": {
             "temperatures": {"min": -3, "max": 19},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "snow", "chance": 10}, {"id": "fog", "chance": 8} ]
+            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "clear", "chance": 10}, {"id": "overcast", "chance": 20}, {"id": "snow", "chance": 10}, {"id": "fog", "chance": 8} ]
           },
           "Winter": {
             "temperatures": {"min": -35, "max": -4},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 15}, {"id": "permafrost-surge", "chance": 5} ]
+            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "clear", "chance": 5}, {"id": "partly-cloudy", "chance": 5}, {"id": "overcast", "chance": 25}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 15}, {"id": "permafrost-surge", "chance": 5} ]
           }
         }
       },
@@ -379,7 +379,7 @@
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -25, "max": 5},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 20}, {"id": "luminous-sky", "chance": 8} ]
+            "presets"     : [ {"id": "clear", "chance": 5}, {"id": "partly-cloudy", "chance": 5}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 20}, {"id": "luminous-sky", "chance": 8} ]
           },
           "Summer": {
             "temperatures": {"min": -5, "max": 22},
@@ -387,11 +387,11 @@
           },
           "Autumn": {
             "temperatures": {"min": -20, "max": 8},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "nullfront", "chance": 8} ]
+            "presets"     : [ {"id": "clear", "chance": 5}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "nullfront", "chance": 8} ]
           },
           "Winter": {
             "temperatures": {"min": -50, "max": -20},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 20}, {"id": "permafrost-surge", "chance": 10} ]
+            "presets"     : [ {"id": "clear", "chance": 2}, {"id": "partly-cloudy", "chance": 2}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 20}, {"id": "permafrost-surge", "chance": 10} ]
           }
         }
       },

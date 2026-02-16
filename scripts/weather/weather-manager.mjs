@@ -36,6 +36,13 @@ export default class WeatherManager {
     if (this.#initialized) return;
     this.#currentWeather = game.settings.get(MODULE.ID, SETTINGS.CURRENT_WEATHER) || null;
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
+    if (this.#currentWeather && CalendariaSocket.isPrimaryGM()) {
+      const components = game.time.components;
+      const calendar = CalendarManager.getActiveCalendar();
+      const yearZero = calendar?.years?.yearZero ?? 0;
+      const existing = this.getWeatherForDate(components.year + yearZero, components.month, (components.dayOfMonth ?? 0) + 1);
+      if (!existing) await this.#recordWeatherHistory(this.#currentWeather);
+    }
     this.#initialized = true;
     log(3, 'WeatherManager initialized');
   }
@@ -179,6 +186,7 @@ export default class WeatherManager {
     const previous = this.#currentWeather;
     this.#currentWeather = weather;
     await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, weather);
+    if (weather && CalendariaSocket.isPrimaryGM()) await this.#recordWeatherHistory(weather);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous, current: weather });
     if (broadcast) CalendariaSocket.emit('weatherChange', { weather });
     log(3, 'Weather changed:', weather?.id ?? 'cleared');
@@ -265,10 +273,8 @@ export default class WeatherManager {
     const customPresets = this.getCustomPresets();
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
-
     const currentWeatherId = this.#currentWeather?.id ?? null;
     const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
-
     return generateForecast({
       zoneConfig,
       startYear: components.year + yearZero,
@@ -278,23 +284,241 @@ export default class WeatherManager {
       customPresets,
       currentWeatherId,
       inertia,
-      getSeasonForDate: (year, month, day) => {
-        const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
-        if (!season) return null;
-        return { name: localize(season.name), climate: season.climate };
-      }
+      getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
+      getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
     });
   }
 
   /**
    * Handle day change for auto-generation.
+   * @param {object} data - Hook data with previous/current components and calendar
    * @private
    */
-  static async #onDayChange() {
+  static async #onDayChange(data) {
+    if (!CalendariaSocket.isPrimaryGM()) return;
     const calendar = CalendarManager.getActiveCalendar();
     const autoGenerate = calendar?.weather?.autoGenerate ?? false;
-    if (!autoGenerate || !CalendariaSocket.isPrimaryGM()) return;
-    await this.generateAndSetWeather();
+    if (this.#currentWeather) await this.#recordWeatherHistory(this.#currentWeather);
+    if (!autoGenerate) return;
+    const gap = this.#calcDayGap(data, calendar);
+    if (gap > 1) await this.#backfillHistory(data, calendar, gap);
+    else await this.generateAndSetWeather();
+  }
+
+  /**
+   * Calculate the number of days between previous and current date from hook data.
+   * @param {object} data - Hook data with previous/current components
+   * @param {object} calendar - Active calendar
+   * @returns {number} Number of days jumped (1 = normal single day advance)
+   * @private
+   */
+  static #calcDayGap(data, calendar) {
+    if (!data?.previous || !data?.current || !calendar) return 1;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const prevTime = calendar.componentsToTime({ year: data.previous.year - yearZero, month: data.previous.month, dayOfMonth: data.previous.dayOfMonth ?? 0, hour: 0, minute: 0, second: 0 });
+    const currTime = calendar.componentsToTime({ year: data.current.year - yearZero, month: data.current.month, dayOfMonth: data.current.dayOfMonth ?? 0, hour: 0, minute: 0, second: 0 });
+    const secondsPerDay = (calendar.days?.hoursPerDay ?? 24) * (calendar.days?.minutesPerHour ?? 60) * (calendar.days?.secondsPerMinute ?? 60);
+    return Math.max(1, Math.round((currTime - prevTime) / secondsPerDay));
+  }
+
+  /**
+   * Backfill weather history for a multi-day jump.
+   * Generates from (today - daysToFill) forward to today, records each day,
+   * and sets the final day as current weather.
+   * @param {object} data - Hook data with current components
+   * @param {object} calendar - Active calendar
+   * @param {number} gap - Number of days jumped
+   * @private
+   */
+  static async #backfillHistory(data, calendar, gap) {
+    const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
+    if (maxDays === 0) {
+      await this.generateAndSetWeather();
+      return;
+    }
+    const daysToFill = Math.min(gap - 1, maxDays);
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const currentYear = data.current.year;
+    const currentMonth = data.current.month;
+    const zoneConfig = this.getActiveZone();
+    const customPresets = this.getCustomPresets();
+    const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+    const secondsPerDay = (calendar.days?.hoursPerDay ?? 24) * (calendar.days?.minutesPerHour ?? 60) * (calendar.days?.secondsPerMinute ?? 60);
+    const currentTime = calendar.componentsToTime({ year: currentYear - yearZero, month: currentMonth, dayOfMonth: data.current.dayOfMonth ?? 0, hour: 0, minute: 0, second: 0 });
+    const startTime = currentTime - daysToFill * secondsPerDay;
+    const startComponents = calendar.timeToComponents(startTime);
+    const startYear = startComponents.year + yearZero;
+    const startMonth = startComponents.month;
+    const startDay = (startComponents.dayOfMonth ?? 0) + 1;
+    const forecast = generateForecast({
+      zoneConfig,
+      startYear,
+      startMonth,
+      startDay,
+      days: daysToFill + 1,
+      customPresets,
+      currentWeatherId: null,
+      inertia,
+      getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
+      getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
+    });
+
+    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
+    for (let i = 0; i < forecast.length - 1; i++) {
+      const f = forecast[i];
+      history[f.year] ??= {};
+      history[f.year][f.month] ??= {};
+      history[f.year][f.month][f.day] = {
+        id: f.preset.id,
+        label: localize(f.preset.label),
+        icon: f.preset.icon,
+        color: f.preset.color,
+        category: f.preset.category,
+        temperature: f.temperature,
+        wind: f.wind ?? null,
+        precipitation: f.precipitation ?? null,
+        generated: true,
+        zoneId: zoneConfig?.id ?? null
+      };
+    }
+    this.#pruneHistory(history, maxDays);
+    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
+    const today = forecast[forecast.length - 1];
+    const seasonData = calendar.getCurrentSeason?.(game.time.components);
+    const season = seasonData ? localize(seasonData.name) : null;
+    const weather = {
+      id: today.preset.id,
+      label: today.preset.label,
+      description: today.preset.description,
+      icon: today.preset.icon,
+      color: today.preset.color,
+      category: today.preset.category,
+      temperature: today.temperature,
+      wind: today.wind ?? { speed: 0, direction: null, forced: false },
+      precipitation: today.precipitation ?? { type: null, intensity: 0 },
+      darknessPenalty: today.preset.darknessPenalty ?? 0,
+      setAt: game.time.worldTime,
+      setBy: game.user.id,
+      generated: true,
+      season
+    };
+    await this.#saveWeather(weather, true);
+    log(3, `Backfilled ${daysToFill} days of weather history`);
+  }
+
+  /**
+   * Record weather for today into history storage.
+   * @param {object} weather - Weather state to record
+   * @private
+   */
+  static async #recordWeatherHistory(weather) {
+    const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
+    if (maxDays === 0) return;
+    const components = game.time.components;
+    const calendar = CalendarManager.getActiveCalendar();
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const year = components.year + yearZero;
+    const month = components.month;
+    const day = (components.dayOfMonth ?? 0) + 1;
+    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
+    history[year] ??= {};
+    history[year][month] ??= {};
+    const zone = this.getActiveZone();
+    history[year][month][day] = {
+      id: weather.id,
+      label: localize(weather.label),
+      icon: weather.icon,
+      color: weather.color,
+      category: weather.category,
+      temperature: weather.temperature,
+      wind: weather.wind ?? null,
+      precipitation: weather.precipitation ?? null,
+      generated: weather.generated ?? false,
+      zoneId: zone?.id ?? null
+    };
+    this.#pruneHistory(history, maxDays);
+    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
+  }
+
+  /**
+   * Prune history to stay within max day count, removing oldest entries first.
+   * @param {object} history - Nested year→month→day history object (mutated)
+   * @param {number} maxDays - Maximum entries to retain
+   * @private
+   */
+  static #pruneHistory(history, maxDays) {
+    const entries = [];
+    for (const [y, months] of Object.entries(history)) for (const [m, days] of Object.entries(months)) for (const d of Object.keys(days)) entries.push([Number(y), Number(m), Number(d)]);
+    if (entries.length <= maxDays) return;
+    entries.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
+    const toRemove = entries.length - maxDays;
+    for (let i = 0; i < toRemove; i++) {
+      const [y, m, d] = entries[i];
+      delete history[y][m][d];
+      if (!Object.keys(history[y][m]).length) delete history[y][m];
+      if (!Object.keys(history[y]).length) delete history[y];
+    }
+  }
+
+  /**
+   * Build a getDaysInMonth callback for generateForecast.
+   * @param {object} calendar - Active calendar
+   * @param {number} yearZero - Year zero offset
+   * @returns {Function} getDaysInMonth(month, year)
+   * @private
+   */
+  static #makeDaysInMonth(calendar, yearZero) {
+    const fn = (month, year) => calendar.getDaysInMonth?.(month, year - yearZero) ?? 30;
+    fn._monthsPerYear = calendar.monthsArray?.length ?? 12;
+    return fn;
+  }
+
+  /**
+   * Build a getSeasonForDate callback for generateForecast.
+   * @param {object} calendar - Active calendar
+   * @param {number} yearZero - Year zero offset
+   * @returns {Function} getSeasonForDate(year, month, day)
+   * @private
+   */
+  static #makeSeasonResolver(calendar, yearZero) {
+    return (year, month, day) => {
+      const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
+      if (!season) return null;
+      return { name: localize(season.name), climate: season.climate };
+    };
+  }
+
+  /**
+   * Get historical weather for a specific date.
+   * @param {number} year - Display year
+   * @param {number} month - Month (0-indexed)
+   * @param {number} day - Day of month (1-indexed)
+   * @returns {object|null} Historical weather entry or null
+   */
+  static getWeatherForDate(year, month, day) {
+    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
+    return history[year]?.[month]?.[day] ?? null;
+  }
+
+  /**
+   * Get weather history as the raw nested object, or a flat array for a specific year/month.
+   * @param {object} [options] - Filter options
+   * @param {number} [options.year] - Filter to a specific year
+   * @param {number} [options.month] - Filter to a specific month (requires year)
+   * @returns {object|object[]} Nested history object, or array of { year, month, day, ...entry }
+   */
+  static getWeatherHistory(options = {}) {
+    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
+    if (options.year == null) return history;
+    const yearData = history[options.year];
+    if (!yearData) return [];
+    const results = [];
+    const months = options.month != null ? { [options.month]: yearData[options.month] } : yearData;
+    for (const [m, days] of Object.entries(months)) {
+      if (!days) continue;
+      for (const [d, entry] of Object.entries(days)) results.push({ year: options.year, month: Number(m), day: Number(d), ...entry });
+    }
+    return results.sort((a, b) => a.month - b.month || a.day - b.day);
   }
 
   /**

@@ -849,6 +849,28 @@ export const CalendariaAPI = {
   },
 
   /**
+   * Get historical weather for a specific date.
+   * @param {number} year - Display year
+   * @param {number} month - Month (0-indexed)
+   * @param {number} day - Day of month (1-indexed)
+   * @returns {object|null} Historical weather entry or null
+   */
+  getWeatherForDate(year, month, day) {
+    return WeatherManager.getWeatherForDate(year, month, day);
+  },
+
+  /**
+   * Get weather history as the raw nested object, or a flat array for a specific year/month.
+   * @param {object} [options] - Filter options
+   * @param {number} [options.year] - Filter to a specific year
+   * @param {number} [options.month] - Filter to a specific month (requires year)
+   * @returns {object|object[]} Nested history object, or array of { year, month, day, ...entry }
+   */
+  getWeatherHistory(options = {}) {
+    return WeatherManager.getWeatherHistory(options);
+  },
+
+  /**
    * Get the active climate zone.
    * @returns {object|null} Active zone config
    */
