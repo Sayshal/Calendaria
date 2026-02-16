@@ -1506,6 +1506,8 @@
   "CALENDARIA.Settings.TemperatureUnit.Fahrenheit": "Fahrenheit (°F)",
   "CALENDARIA.Settings.TemperatureUnit.Hint": "Display temperatures in Celsius or Fahrenheit.",
   "CALENDARIA.Settings.TemperatureUnit.Name": "Temperature Unit",
+  "CALENDARIA.Settings.WeatherHistoryDays.Hint": "Maximum number of days to retain in weather history. Set to 0 to disable history recording entirely.",
+  "CALENDARIA.Settings.WeatherHistoryDays.Name": "Weather History Days",
   "CALENDARIA.Settings.WeatherInertia.Hint": "How much weather tends to persist day-to-day. 0 = fully random, 1 = strongly favors current weather.",
   "CALENDARIA.Settings.WeatherInertia.Name": "Weather Inertia",
   "CALENDARIA.Settings.TimeKeeper.Hint": "Open the TimeKeeper for controlling game time.",

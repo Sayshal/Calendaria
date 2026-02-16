@@ -46,6 +46,15 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.WeatherInertia.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="weatherHistoryDays">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="weatherHistoryDays" name="weatherHistoryDays"
+            value="{{weatherHistoryDays}}" min="0" max="3650" step="1" />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 

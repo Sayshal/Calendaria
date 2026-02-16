@@ -191,15 +191,16 @@ export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year
  * @param {string} [options.season] - Season name (assumed constant for forecast period)
  * @param {number} options.startYear - Starting year
  * @param {number} options.startMonth - Starting month (0-indexed)
- * @param {number} options.startDay - Starting day
+ * @param {number} options.startDay - Starting day (1-indexed)
  * @param {number} [options.days] - Number of days to forecast
  * @param {object[]} [options.customPresets] - Custom weather presets
  * @param {Function} [options.getSeasonForDate] - Function to get season data for a date
+ * @param {Function} [options.getDaysInMonth] - Function(month, year) returning days in that month. Set ._monthsPerYear for year rollover (default 12).
  * @param {string} [options.currentWeatherId] - Current weather ID for inertia chain start
  * @param {number} [options.inertia] - Inertia value (0-1) for path-dependent chaining
  * @returns {object[]} Array of weather forecasts
  */
-export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate, currentWeatherId = null, inertia = 0 }) {
+export function generateForecast({ zoneConfig, season, startYear, startMonth, startDay, days = 7, customPresets = [], getSeasonForDate, getDaysInMonth, currentWeatherId = null, inertia = 0 }) {
   const forecast = [];
   let year = startYear;
   let month = startMonth;
@@ -214,6 +215,18 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
     previousWeatherId = weather.preset.id;
     forecast.push({ year, month, day, ...weather });
     day++;
+    if (getDaysInMonth) {
+      const dim = getDaysInMonth(month, year);
+      if (day > dim) {
+        day = 1;
+        month++;
+        const monthsPerYear = getDaysInMonth._monthsPerYear ?? 12;
+        if (month >= monthsPerYear) {
+          month = 0;
+          year++;
+        }
+      }
+    }
   }
   return forecast;
 }
@@ -228,15 +241,12 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
 function generateWind(preset, zoneConfig, randomFn = Math.random) {
   const compassValues = Object.values(COMPASS_DIRECTIONS);
   const randomCompass = () => compassValues[Math.floor(randomFn() * compassValues.length)];
-
   if (preset.wind?.forced) return { speed: preset.wind.speed, direction: preset.wind.direction ?? randomCompass(), forced: true };
-
   const baseSpeed = preset.wind?.speed ?? 0;
   const zoneMin = zoneConfig?.windSpeedRange?.min ?? 0;
   const zoneMax = zoneConfig?.windSpeedRange?.max ?? 5;
   const variance = Math.round((randomFn() - 0.5) * 2);
   const speed = Math.max(zoneMin, Math.min(zoneMax, baseSpeed + variance));
-
   let direction;
   const dirWeights = zoneConfig?.windDirections ?? {};
   if (Object.keys(dirWeights).length > 0) {
