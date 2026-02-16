@@ -1998,6 +1998,7 @@
   "CALENDARIA.Weather.Precipitation.IntensityLight": "Light",
   "CALENDARIA.Weather.Precipitation.IntensityModerate": "Moderate",
   "CALENDARIA.Weather.Precipitation.IntensityHeavy": "Heavy",
+  "CALENDARIA.Weather.Modifier.TempHint": "Suffix + or - for relative modifiers (e.g., 5+ = 5 warmer, 4- = 4 cooler than season base). Plain numbers set absolute values.",
   "CALENDARIA.Weather.Precipitation.IntensityTorrential": "Torrential",
   "CALENDARIA.Weekday.Friday": "Friday",
   "CALENDARIA.Weekday.FridayShort": "Fri",

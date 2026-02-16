@@ -7,6 +7,7 @@
  */
 
 import { COMPASS_DIRECTIONS } from '../constants.mjs';
+import { log } from '../utils/logger.mjs';
 import { getPreset } from './weather-presets.mjs';
 
 /**
@@ -54,14 +55,40 @@ function weightedSelect(weights, randomFn = Math.random) {
 }
 
 /**
+ * Apply a temperature value that may be a relative modifier or absolute.
+ * Suffix convention: "5+" = add 5 to base, "5-" = subtract 5 from base.
+ * All other values (numbers, negative strings like "-4") are absolute.
+ * @param {number|string} value - Temperature value or "N+"/"N-" modifier string
+ * @param {number} base - Base temperature to apply modifier against
+ * @returns {number} Resolved temperature
+ */
+export function applyTempModifier(value, base) {
+  if (typeof value === 'string') {
+    if (value.endsWith('+')) {
+      const delta = Number(value.slice(0, -1));
+      return !isNaN(delta) ? base + delta : base;
+    }
+    if (value.endsWith('-')) {
+      const delta = Number(value.slice(0, -1));
+      return !isNaN(delta) ? base - delta : base;
+    }
+    const num = Number(value);
+    return !isNaN(num) ? num : base;
+  }
+  return value ?? base;
+}
+
+/**
  * Merge season climate with zone overrides.
+ * Zone override presets support relative modifiers: "+5" adds to base, "-3" subtracts (chances are always positive).
+ * Zone override temperatures support "N+"/"N-" suffix modifiers (e.g., "5+" adds, "3-" subtracts).
  * @param {object} seasonClimate - Season's base climate { temperatures, presets }
  * @param {object} zoneOverride - Zone's override for this season { temperatures, presets }
  * @param {object} zoneFallback - Zone's default config { temperatures, presets } for backward compat
  * @param {string} season - Season name for temperature lookup
  * @returns {object} Merged config { probabilities, tempRange }
  */
-function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, season) {
+export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, season) {
   const probabilities = {};
   let tempRange = { min: 10, max: 22 };
   const seasonPresets = Object.values(seasonClimate?.presets ?? {});
@@ -69,19 +96,40 @@ function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, season) {
   const zonePresets = Object.values(zoneOverride?.presets ?? {});
   if (zonePresets.length) {
     for (const preset of zonePresets) {
-      if (preset.chance === 0) delete probabilities[preset.id];
-      else if (preset.chance > 0) probabilities[preset.id] = preset.chance;
+      if (typeof preset.chance === 'string' && /^[+-]/.test(preset.chance)) {
+        const delta = Number(preset.chance);
+        if (!isNaN(delta)) {
+          probabilities[preset.id] = Math.max(0, (probabilities[preset.id] ?? 0) + delta);
+          if (probabilities[preset.id] === 0) delete probabilities[preset.id];
+        }
+      } else if (preset.chance === 0) {
+        delete probabilities[preset.id];
+      } else if (preset.chance > 0) {
+        probabilities[preset.id] = preset.chance;
+      }
     }
   } else {
     const fallbackPresets = Object.values(zoneFallback?.presets ?? {});
     if (fallbackPresets.length) for (const preset of fallbackPresets) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
   }
-  if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) tempRange = { min: zoneOverride.temperatures.min ?? 10, max: zoneOverride.temperatures.max ?? 22 };
-  else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) tempRange = { min: seasonClimate.temperatures.min ?? 10, max: seasonClimate.temperatures.max ?? 22 };
-  else if (zoneFallback?.temperatures) {
+  const baseMin = seasonClimate?.temperatures?.min ?? 10;
+  const baseMax = seasonClimate?.temperatures?.max ?? 22;
+  log(3, `[Temp] Season base: ${baseMin} → ${baseMax}`);
+  if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) {
+    tempRange = { min: applyTempModifier(zoneOverride.temperatures.min, baseMin), max: applyTempModifier(zoneOverride.temperatures.max, baseMax) };
+    log(3, `[Temp] Zone seasonOverride (${JSON.stringify(zoneOverride.temperatures)}) → ${tempRange.min} → ${tempRange.max}`);
+  } else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) {
+    tempRange = { min: baseMin, max: baseMax };
+    log(3, '[Temp] Using season base (no zone override)');
+  } else if (zoneFallback?.temperatures) {
     const temps = zoneFallback.temperatures;
-    if (season && temps[season]) tempRange = temps[season];
-    else if (temps._default) tempRange = temps._default;
+    if (season && temps[season]) {
+      tempRange = { min: applyTempModifier(temps[season].min, baseMin), max: applyTempModifier(temps[season].max, baseMax) };
+      log(3, `[Temp] Zone fallback for ${season} (${JSON.stringify(temps[season])}) → ${tempRange.min} → ${tempRange.max}`);
+    } else if (temps._default) {
+      tempRange = temps._default;
+      log(3, `[Temp] Zone fallback _default → ${tempRange.min} → ${tempRange.max}`);
+    }
   }
   return { probabilities, tempRange };
 }
@@ -105,9 +153,10 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   const preset = getPreset(weatherId, customPresets);
   let finalTempRange = { ...tempRange };
   const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
-  if (presetConfig?.tempMin != null) finalTempRange.min = presetConfig.tempMin;
-  if (presetConfig?.tempMax != null) finalTempRange.max = presetConfig.tempMax;
+  if (presetConfig?.tempMin != null) finalTempRange.min = applyTempModifier(presetConfig.tempMin, tempRange.min);
+  if (presetConfig?.tempMax != null) finalTempRange.max = applyTempModifier(presetConfig.tempMax, tempRange.max);
   const temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
+  log(3, `[Temp] Final range: ${finalTempRange.min} → ${finalTempRange.max}, rolled: ${temperature}`);
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
   const precipitation = generatePrecipitation(resolvedPreset, randomFn);

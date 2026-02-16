@@ -2970,6 +2970,10 @@ span.calendaria-moon-icon {
     }
   }
 
+  .modifier-relative {
+    color: var(--color-level-info);
+  }
+
   .wind-direction-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

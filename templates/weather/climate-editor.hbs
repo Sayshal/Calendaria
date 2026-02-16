@@ -148,15 +148,18 @@
     <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
     <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
     {{#if isZoneMode}}
+      <p class="hint">{{localize "CALENDARIA.Weather.Modifier.TempHint"}}</p>
       {{#each temperatureRows}}
         <div class="form-group">
           <label>{{this.label}}</label>
           <div class="form-fields temperature">
-            <input type="number" name="temp_{{this.seasonName}}_min" value="{{this.min}}"
-              placeholder="{{localize 'CALENDARIA.Common.Low'}}">
+            <input type="text" name="temp_{{this.seasonName}}_min" value="{{this.min}}"
+              placeholder="{{localize 'CALENDARIA.Common.Low'}}"
+              {{#if this.isRelativeMin}}class="modifier-relative"{{/if}}>
             <i class="fa-solid fa-right-long"></i>
-            <input type="number" name="temp_{{this.seasonName}}_max" value="{{this.max}}"
-              placeholder="{{localize 'CALENDARIA.Common.High'}}">
+            <input type="text" name="temp_{{this.seasonName}}_max" value="{{this.max}}"
+              placeholder="{{localize 'CALENDARIA.Common.High'}}"
+              {{#if this.isRelativeMax}}class="modifier-relative"{{/if}}>
           </div>
         </div>
       {{/each}}
@@ -209,11 +212,11 @@
                 placeholder="{{#if ../../isZoneMode}}0.00{{else}}—{{/if}}">
               <span class="units">%</span>
               {{#if ../../isZoneMode}}
-                <input type="number" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
-                  class="preset-temp-input">
+                <input type="text" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
+                  class="preset-temp-input {{#if this.isRelativeTempMin}}modifier-relative{{/if}}">
                 <span>–</span>
-                <input type="number" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
-                  class="preset-temp-input">
+                <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
+                  class="preset-temp-input {{#if this.isRelativeTempMax}}modifier-relative{{/if}}">
                 <span class="units">{{../../../tempLabel}}</span>
               {{/if}}
             </div>

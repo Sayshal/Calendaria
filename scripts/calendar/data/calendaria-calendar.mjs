@@ -21,9 +21,7 @@ const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedOb
 function _gcd(a, b) {
   a = Math.abs(a);
   b = Math.abs(b);
-  while (b) {
-    [a, b] = [b, a % b];
-  }
+  while (b) [a, b] = [b, a % b];
   return a;
 }
 
@@ -712,8 +710,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
                   id: new StringField({ required: true }),
                   enabled: new BooleanField({ required: false, initial: false }),
                   chance: new NumberField({ required: false, initial: 0 }),
-                  tempMin: new NumberField({ required: false, nullable: true }),
-                  tempMax: new NumberField({ required: false, nullable: true }),
+                  tempMin: new StringField({ required: false, nullable: true, initial: null }),
+                  tempMax: new StringField({ required: false, nullable: true, initial: null }),
                   description: new StringField({ required: false })
                 })
               ),

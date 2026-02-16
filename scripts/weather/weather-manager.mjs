@@ -14,7 +14,7 @@ import { log } from '../utils/logger.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './climate-data.mjs';
-import { generateForecast, generateWeather } from './weather-generator.mjs';
+import { applyTempModifier, generateForecast, generateWeather, mergeClimateConfig } from './weather-generator.mjs';
 import { ALL_PRESETS, getAllPresets, getPreset, WEATHER_CATEGORIES } from './weather-presets.mjs';
 
 /**
@@ -311,27 +311,20 @@ export default class WeatherManager {
     const seasonData = this.#getCurrentSeason();
     const season = seasonData ? localize(seasonData.name) : null;
     const seasonClimate = seasonData?.climate;
-    let tempRange = { min: 10, max: 22 };
-    const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
-    if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) {
-      tempRange = { min: zoneOverride.temperatures.min ?? 10, max: zoneOverride.temperatures.max ?? 22 };
-    } else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) {
-      tempRange = { min: seasonClimate.temperatures.min ?? 10, max: seasonClimate.temperatures.max ?? 22 };
-    } else if (zoneConfig?.temperatures) {
-      const temps = zoneConfig.temperatures;
-      if (season && temps[season]) tempRange = temps[season];
-      else if (temps._default) tempRange = temps._default;
-    } else {
+    if (!zoneConfig && !seasonClimate) {
       const customPresets = this.getCustomPresets();
       const preset = getPreset(presetId, customPresets);
       const min = preset?.tempMin ?? 10;
       const max = preset?.tempMax ?? 25;
       return Math.round(min + Math.random() * (max - min));
     }
+    const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
+    const { tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
+    let finalRange = { ...tempRange };
     const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === presetId && p.enabled !== false);
-    if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
-    if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
-    return Math.round(tempRange.min + Math.random() * (tempRange.max - tempRange.min));
+    if (presetConfig?.tempMin != null) finalRange.min = applyTempModifier(presetConfig.tempMin, tempRange.min);
+    if (presetConfig?.tempMax != null) finalRange.max = applyTempModifier(presetConfig.tempMax, tempRange.max);
+    return Math.round(finalRange.min + Math.random() * (finalRange.max - finalRange.min));
   }
 
   /**
@@ -578,14 +571,14 @@ export default class WeatherManager {
 
   /**
    * Build a rich HTML tooltip for weather display.
-   * @param {object} opts
-   * @param {string} opts.label - Weather label
-   * @param {string} [opts.description] - Weather description
-   * @param {string} [opts.temp] - Formatted temperature string
-   * @param {number} [opts.windSpeed] - Wind speed (0-5 scale)
-   * @param {number|null} [opts.windDirection] - Wind direction in degrees
-   * @param {string|null} [opts.precipType] - Precipitation type key
-   * @param {number} [opts.precipIntensity] - Precipitation intensity (0-1)
+   * @param {object} options - Paramters for HTML tooltips
+   * @param {string} options.label - Weather label
+   * @param {string} [options.description] - Weather description
+   * @param {string} [options.temp] - Formatted temperature string
+   * @param {number} [options.windSpeed] - Wind speed (0-5 scale)
+   * @param {number|null} [options.windDirection] - Wind direction in degrees
+   * @param {string|null} [options.precipType] - Precipitation type key
+   * @param {number} [options.precipIntensity] - Precipitation intensity (0-1)
    * @returns {string} HTML-encoded string for data-tooltip-html
    */
   static buildWeatherTooltip({ label, description, temp, windSpeed, windDirection, precipType, precipIntensity }) {
