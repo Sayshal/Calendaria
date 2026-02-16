@@ -24,6 +24,17 @@ export default class CalendarManager {
   static #bundledData = new Map();
 
   /**
+   * Patch game.time.calendar to restore Foundry-compatible arrays.
+   * @private
+   */
+  static #patchFoundryCalendar() {
+    const cal = game.time.calendar;
+    if (!cal) return;
+    for (const prop of ['months', 'days', 'seasons']) if (cal[prop]?.values && !Array.isArray(cal[prop].values)) cal[prop].values = Object.values(cal[prop].values);
+    if (cal.months?.values && cal.days) cal.days.daysPerLeapYear = cal.months.values.reduce((sum, m) => sum + (m.leapDays ?? m.days ?? 0), 0);
+  }
+
+  /**
    * Initialize the calendar system.
    * Called during module initialization.
    */
@@ -56,6 +67,7 @@ export default class CalendarManager {
       CONFIG.time.roundTime = activeCalendar.secondsPerRound ?? 6;
       if (CalendariaCalendar.correctFirstWeekday !== null && CONFIG.time.worldCalendarConfig.years) CONFIG.time.worldCalendarConfig.years.firstWeekday = CalendariaCalendar.correctFirstWeekday;
       game.time.initializeCalendar();
+      this.#patchFoundryCalendar();
       log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
 
@@ -543,6 +555,7 @@ export default class CalendarManager {
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
     game.time.initializeCalendar();
+    this.#patchFoundryCalendar();
     if (game.user.isGM) {
       try {
         this.#isSwitchingCalendar = true;
@@ -590,6 +603,7 @@ export default class CalendarManager {
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
     game.time.initializeCalendar();
+    this.#patchFoundryCalendar();
     const calendarName = calendar?.name || id;
     ui.notifications.info(format('CALENDARIA.Info.CalendarSwitched', { name: calendarName }));
     Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
@@ -702,6 +716,7 @@ export default class CalendarManager {
         CONFIG.time.worldCalendarClass = CalendariaCalendar;
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
+        this.#patchFoundryCalendar();
       }
     }
   }
@@ -825,6 +840,7 @@ export default class CalendarManager {
         CONFIG.time.worldCalendarConfig = updatedCalendar.toObject();
         CONFIG.time.roundTime = updatedCalendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
+        this.#patchFoundryCalendar();
       }
 
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, updatedCalendar);
@@ -992,6 +1008,7 @@ export default class CalendarManager {
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
+        this.#patchFoundryCalendar();
       }
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       log(3, `Saved override for bundled calendar: ${id}`);
@@ -1027,6 +1044,7 @@ export default class CalendarManager {
           CONFIG.time.worldCalendarConfig = calendar.toObject();
           CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
           game.time.initializeCalendar();
+          this.#patchFoundryCalendar();
         }
         Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       }
