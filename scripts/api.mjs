@@ -15,6 +15,7 @@ import SearchManager from './search/search-manager.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
+import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/moon-utils.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import * as WidgetManager from './utils/widget-manager.mjs';
@@ -170,6 +171,62 @@ export const CalendariaAPI = {
    */
   getAllMoonPhases() {
     return CalendarManager.getAllCurrentMoonPhases();
+  },
+
+  /**
+   * Get the phase position (0-1) for a moon at a given date.
+   * @param {object} moon - Moon definition with cycleLength and referenceDate
+   * @param {object} [date] - Date to check { year, month, day }. Defaults to current date.
+   * @returns {number} Phase position from 0 (new moon) to 1
+   */
+  getMoonPhasePosition(moon, date = null) {
+    return getMoonPhasePosition(moon, date ?? game.time.components);
+  },
+
+  /**
+   * Check if a moon is in its full phase at a given date.
+   * @param {object} moon - Moon definition
+   * @param {object} [date] - Date to check. Defaults to current date.
+   * @returns {boolean} True if moon is full
+   */
+  isMoonFull(moon, date = null) {
+    return isMoonFull(moon, date ?? game.time.components);
+  },
+
+  /**
+   * Find the next date when all given moons are simultaneously full.
+   * @param {object[]} moons - Array of moon definitions (use calendar.moonsArray)
+   * @param {object} [startDate] - Date to start searching from. Defaults to current date.
+   * @param {object} [options] - Search options
+   * @param {number} [options.maxDays] - Maximum days to search (default: 1000)
+   * @returns {object|null} Next convergence date { year, month, day }, or null if not found
+   */
+  getNextConvergence(moons, startDate = null, options = {}) {
+    return getNextConvergence(moons, startDate ?? game.time.components, options);
+  },
+
+  /**
+   * Find the next full moon date for a single moon.
+   * @param {object} moon - Moon definition
+   * @param {object} [startDate] - Date to start searching from. Defaults to current date.
+   * @param {object} [options] - Search options
+   * @param {number} [options.maxDays] - Maximum days to search (default: 1000)
+   * @returns {object|null} Next full moon date { year, month, day }
+   */
+  getNextFullMoon(moon, startDate = null, options = {}) {
+    return getNextFullMoon(moon, startDate ?? game.time.components, options);
+  },
+
+  /**
+   * Get all convergences (all moons full simultaneously) within a date range.
+   * @param {object[]} moons - Array of moon definitions
+   * @param {object} startDate - Range start { year, month, day }
+   * @param {object} endDate - Range end { year, month, day }
+   * @param {object} [options] - Search options
+   * @returns {object[]} Array of convergence dates
+   */
+  getConvergencesInRange(moons, startDate, endDate, options = {}) {
+    return getConvergencesInRange(moons, startDate, endDate, options);
   },
 
   /**

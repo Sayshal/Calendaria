@@ -559,6 +559,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.DARKNESS_SYNC_ALL_SCENES]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessSyncAllScenes.Name' },
     [SETTINGS.DARKNESS_WEATHER_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessWeatherSync.Name' },
     [SETTINGS.AMBIENCE_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.AmbienceSync.Name' },
+    [SETTINGS.DARKNESS_MOON_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessMoonSync.Name' },
     [SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER]: { tab: 'canvas', label: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name' },
     [SETTINGS.PRIMARY_GM]: { tab: 'module', label: 'CALENDARIA.Settings.PrimaryGM.Name' },
     [SETTINGS.LOGGING_LEVEL]: { tab: 'module', label: 'CALENDARIA.Settings.Logger.Name' },
@@ -1325,6 +1326,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
     context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
     context.colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
+    context.darknessMoonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
     context.defaultBrightnessMultiplier = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
   }
 
@@ -1519,6 +1521,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('darknessWeatherSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC, data.darknessWeatherSync);
     if ('ambienceSync' in data) await game.settings.set(MODULE.ID, SETTINGS.AMBIENCE_SYNC, data.ambienceSync);
     if ('colorShiftSync' in data) await game.settings.set(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, data.colorShiftSync);
+    if ('darknessMoonSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, data.darknessMoonSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);

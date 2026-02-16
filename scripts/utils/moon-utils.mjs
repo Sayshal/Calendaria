@@ -129,7 +129,8 @@ function dateToDayNumber(date, calendar) {
   const months = calendar.monthsArray ?? [];
   let dayNumber = date.year * daysPerYear;
   for (let m = 0; m < date.month && m < months.length; m++) dayNumber += months[m]?.days ?? 30;
-  dayNumber += (date.day ?? 1) - 1;
+  const day = date.day ?? (date.dayOfMonth != null ? date.dayOfMonth + 1 : 1);
+  dayNumber += day - 1;
   return dayNumber;
 }
 
@@ -141,7 +142,8 @@ function dateToDayNumber(date, calendar) {
  */
 function addOneDay(date, calendar) {
   const months = calendar.monthsArray ?? [];
-  let { year, month, day } = date;
+  let { year, month } = date;
+  let day = date.day ?? (date.dayOfMonth != null ? date.dayOfMonth + 1 : 1);
   day++;
   const daysInMonth = months[month]?.days ?? 30;
   if (day > daysInMonth) {

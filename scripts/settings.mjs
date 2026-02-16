@@ -474,6 +474,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  /** Moon illumination reduces nighttime darkness based on moon phases */
+  game.settings.register(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, {
+    name: 'CALENDARIA.Settings.DarknessMoonSync.Name',
+    hint: 'CALENDARIA.Settings.DarknessMoonSync.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Sync time-of-day color shifting (dawn/dusk/night tinting) */
   game.settings.register(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, {
     name: 'CALENDARIA.Settings.ColorShiftSync.Name',
