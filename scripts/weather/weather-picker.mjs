@@ -6,13 +6,45 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, TEMPLATES } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, HOOKS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
 import WeatherManager from './weather-manager.mjs';
 import { WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from './weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
+/** Localization keys for the 16-point compass rose. */
+const COMPASS_LABEL_KEYS = {
+  N: 'CALENDARIA.Weather.Wind.Dir.N',
+  NNE: 'CALENDARIA.Weather.Wind.Dir.NNE',
+  NE: 'CALENDARIA.Weather.Wind.Dir.NE',
+  ENE: 'CALENDARIA.Weather.Wind.Dir.ENE',
+  E: 'CALENDARIA.Weather.Wind.Dir.E',
+  ESE: 'CALENDARIA.Weather.Wind.Dir.ESE',
+  SE: 'CALENDARIA.Weather.Wind.Dir.SE',
+  SSE: 'CALENDARIA.Weather.Wind.Dir.SSE',
+  S: 'CALENDARIA.Weather.Wind.Dir.S',
+  SSW: 'CALENDARIA.Weather.Wind.Dir.SSW',
+  SW: 'CALENDARIA.Weather.Wind.Dir.SW',
+  WSW: 'CALENDARIA.Weather.Wind.Dir.WSW',
+  W: 'CALENDARIA.Weather.Wind.Dir.W',
+  WNW: 'CALENDARIA.Weather.Wind.Dir.WNW',
+  NW: 'CALENDARIA.Weather.Wind.Dir.NW',
+  NNW: 'CALENDARIA.Weather.Wind.Dir.NNW'
+};
+
+/**
+ * Map a 0-1 intensity to a descriptive label.
+ * @param value
+ */
+function getPrecipIntensityLabel(value) {
+  if (value <= 0) return localize('CALENDARIA.Common.None');
+  if (value <= 0.25) return localize('CALENDARIA.Weather.Precipitation.IntensityLight');
+  if (value <= 0.5) return localize('CALENDARIA.Weather.Precipitation.IntensityModerate');
+  if (value <= 0.75) return localize('CALENDARIA.Weather.Precipitation.IntensityHeavy');
+  return localize('CALENDARIA.Weather.Precipitation.IntensityTorrential');
+}
 
 /**
  * Weather picker application with selectable presets.
@@ -38,6 +70,18 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {string|null} Custom weather color input */
   #customColor = null;
+
+  /** @type {number|string|null} Wind speed (0-5 scale or 'random') */
+  #windSpeed = null;
+
+  /** @type {number|null} Wind direction (degrees) */
+  #windDirection = null;
+
+  /** @type {string|null} Precipitation type (or 'random') */
+  #precipType = null;
+
+  /** @type {number|null} Precipitation intensity (0-1) */
+  #precipIntensity = null;
 
   /** @override */
   static DEFAULT_OPTIONS = {
@@ -69,6 +113,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#customTemp = null;
     this.#customIcon = null;
     this.#customColor = null;
+    this.#windSpeed = null;
+    this.#windDirection = null;
+    this.#precipType = null;
+    this.#precipIntensity = null;
     return super.close(options);
   }
 
@@ -138,6 +186,37 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     context.customTemp = this.#customTemp ?? (currentTemp != null ? toDisplayUnit(currentTemp) : '');
     context.customIcon = this.#customIcon ?? (currentWeather?.icon || 'fa-question');
     context.customColor = this.#customColor ?? (currentWeather?.color || '#888888');
+
+    // Wind/precipitation
+    const activeWindSpeed = this.#windSpeed ?? currentWeather?.wind?.speed ?? 0;
+    context.windSpeedRandom = this.#windSpeed === 'random';
+    context.windSpeedOptions = Object.values(WIND_SPEEDS).map((w) => ({
+      value: w.value,
+      label: localize(w.label),
+      kph: w.kph,
+      selected: !context.windSpeedRandom && activeWindSpeed === w.value
+    }));
+    context.compassDirections = Object.entries(COMPASS_DIRECTIONS).map(([id, deg]) => ({
+      id,
+      degrees: deg,
+      label: COMPASS_LABEL_KEYS[id] ? localize(COMPASS_LABEL_KEYS[id]) : id,
+      selected: (this.#windDirection ?? currentWeather?.wind?.direction) === deg
+    }));
+    const activePrecipType = this.#precipType ?? currentWeather?.precipitation?.type ?? null;
+    context.precipTypeRandom = this.#precipType === 'random';
+    context.precipitationTypes = [
+      { value: '', label: localize('CALENDARIA.Common.None'), selected: !context.precipTypeRandom && !activePrecipType },
+      ...Object.entries(PRECIPITATION_TYPES)
+        .filter(([, v]) => v !== null)
+        .map(([, v]) => ({
+          value: v,
+          label: localize(`CALENDARIA.Weather.Precipitation.${v.charAt(0).toUpperCase() + v.slice(1)}`),
+          selected: !context.precipTypeRandom && activePrecipType === v
+        }))
+    ];
+    context.precipIntensity = this.#precipIntensity ?? currentWeather?.precipitation?.intensity ?? 0;
+    context.precipIntensityLabel = getPrecipIntensityLabel(context.precipIntensity);
+
     return context;
   }
 
@@ -158,6 +237,15 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         for (const btn of this.element.querySelectorAll('.weather-btn.active')) btn.classList.remove('active');
       });
     }
+
+    // Precipitation intensity slider live label
+    const precipSlider = this.element.querySelector('[name="precipIntensity"]');
+    if (precipSlider) {
+      const label = precipSlider.nextElementSibling;
+      precipSlider.addEventListener('input', () => {
+        if (label) label.textContent = getPrecipIntensityLabel(parseFloat(precipSlider.value));
+      });
+    }
   }
 
   /**
@@ -167,17 +255,28 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} formData - The form data
    */
   static async _onSave(_event, _form, formData) {
+    const fd = formData.object;
+    const compassValues = Object.values(COMPASS_DIRECTIONS);
+    const windSpeed = fd.windSpeed === 'random' ? Math.floor(Math.random() * 6) : parseInt(fd.windSpeed ?? 0);
+    const windDirCompass = fd.windDirectionCompass;
+    const windDir = windDirCompass !== '' && windDirCompass != null ? parseFloat(windDirCompass) : compassValues[Math.floor(Math.random() * compassValues.length)];
+    const precipTypes = Object.values(PRECIPITATION_TYPES).filter((v) => v !== null);
+    const precipType = fd.precipType === 'random' ? precipTypes[Math.floor(Math.random() * precipTypes.length)] : fd.precipType || null;
+    const precipIntensity = fd.precipType === 'random' ? Math.round(Math.random() * 20) / 20 : parseFloat(fd.precipIntensity ?? 0);
+    const windData = { speed: windSpeed, direction: windDir, forced: false };
+    const precipData = { type: precipType, intensity: precipType ? precipIntensity : 0 };
+
     if (this.#selectedPresetId && !this.#customEdited) {
-      await WeatherManager.setWeather(this.#selectedPresetId);
+      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData });
     } else {
-      const data = foundry.utils.expandObject(formData.object);
+      const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
       if (!label) return;
       const temp = data.customTemp;
       const icon = data.customIcon?.trim() || 'fa-question';
       const color = data.customColor || '#888888';
       const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
-      await WeatherManager.setCustomWeather({ label, temperature, icon, color });
+      await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData });
     }
     const setActive = formData.object.setAsActiveZone;
     const zoneId = formData.object.climateZone || null;
@@ -204,6 +303,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#customTemp = null;
     this.#customIcon = preset.icon || 'fa-question';
     this.#customColor = preset.color || '#888888';
+    this.#windSpeed = preset.wind?.speed ?? 0;
+    this.#windDirection = preset.wind?.direction ?? null;
+    this.#precipType = preset.precipitation?.type ?? null;
+    this.#precipIntensity = preset.precipitation?.intensity ?? 0;
     this.render();
   }
 
@@ -221,6 +324,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#customTemp = null;
     this.#customIcon = null;
     this.#customColor = null;
+    this.#windSpeed = null;
+    this.#windDirection = null;
+    this.#precipType = null;
+    this.#precipIntensity = null;
     Hooks.callAll(HOOKS.WEATHER_CHANGE);
     this.render();
   }
@@ -238,6 +345,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#customTemp = '';
     this.#customIcon = '';
     this.#customColor = '#888888';
+    this.#windSpeed = 0;
+    this.#windDirection = null;
+    this.#precipType = null;
+    this.#precipIntensity = 0;
     Hooks.callAll(HOOKS.WEATHER_CHANGE);
     this.render();
   }

@@ -43,7 +43,8 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="customTemp">{{localize "CALENDARIA.Weather.Picker.CustomTemp"}} ({{temperatureUnit}})</label>
+      <label for="customTemp"
+        data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomTempHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomTemp"}} ({{temperatureUnit}})</label>
       <div class="form-fields">
         <input type="number" id="customTemp" name="customTemp" value="{{customTemp}}">
       </div>
@@ -56,9 +57,62 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="customColor">{{localize "CALENDARIA.Weather.Picker.CustomColor"}}</label>
+      <label for="customColor"
+        data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomColorHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomColor"}}</label>
       <div class="form-fields">
         <input type="color" id="customColor" name="customColor" value="{{customColor}}">
+      </div>
+    </div>
+  </div>
+
+  <div class="weather-category weather-picker-wind standard-form">
+    <span class="category-header">{{localize "CALENDARIA.Weather.Wind.Title"}}</span>
+    <div class="form-group">
+      <label for="windSpeed"
+        data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.Speed"}}</label>
+      <div class="form-fields">
+        <select id="windSpeed" name="windSpeed">
+          <option value="random" {{#if windSpeedRandom}}selected{{/if}}>{{localize "CALENDARIA.Weather.Wind.Random"}}</option>
+          {{#each windSpeedOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.DirectionHint'}}">{{localize "CALENDARIA.Weather.Wind.Direction"}}</label>
+      <div class="form-fields">
+        <select name="windDirectionCompass">
+          <option value="">{{localize "CALENDARIA.Weather.Wind.Random"}}</option>
+          {{#each compassDirections}}
+            <option value="{{this.degrees}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="weather-category weather-picker-precipitation standard-form">
+    <span class="category-header">{{localize "CALENDARIA.Weather.Precipitation.Title"}}</span>
+    <div class="form-group">
+      <label for="precipType"
+        data-tooltip="{{localize 'CALENDARIA.Weather.Precipitation.TypeHint'}}">{{localize "CALENDARIA.Weather.Precipitation.Type"}}</label>
+      <div class="form-fields">
+        <select id="precipType" name="precipType">
+          <option value="random" {{#if precipTypeRandom}}selected{{/if}}>{{localize "CALENDARIA.Weather.Wind.Random"}}</option>
+          {{#each precipitationTypes}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="precipIntensity"
+        data-tooltip="{{localize 'CALENDARIA.Weather.Precipitation.IntensityHint'}}">{{localize "CALENDARIA.Weather.Precipitation.Intensity"}}</label>
+      <div class="form-fields">
+        <input type="range" id="precipIntensity" name="precipIntensity" min="0" max="1" step="0.05"
+          value="{{precipIntensity}}">
+        <span class="precip-intensity-label">{{precipIntensityLabel}}</span>
       </div>
     </div>
   </div>

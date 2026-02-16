@@ -7,7 +7,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendariaCalendar from '../calendar/data/calendaria-calendar.mjs';
-import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
@@ -218,6 +218,20 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
+    // Wind config (zone mode only)
+    let windDirections = [];
+    let windSpeedMin = null;
+    let windSpeedMax = null;
+    if (isZoneMode) {
+      const dirWeights = this.#data.windDirections ?? {};
+      windDirections = Object.entries(COMPASS_DIRECTIONS).map(([id]) => ({
+        id,
+        weight: dirWeights[id] ?? ''
+      }));
+      windSpeedMin = this.#data.windSpeedRange?.min ?? null;
+      windSpeedMax = this.#data.windSpeedRange?.max ?? null;
+    }
+
     return {
       ...context,
       isZoneMode,
@@ -244,7 +258,21 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       shortestDayHours,
       longestDayHours,
       shortestDayDate,
-      longestDayDate
+      longestDayDate,
+      // Wind fields
+      windDirections,
+      windSpeedMin,
+      windSpeedMax,
+      windSpeedMinOptions: Object.values(WIND_SPEEDS).map((w) => ({
+        value: w.value,
+        label: localize(w.label),
+        selected: w.value === windSpeedMin
+      })),
+      windSpeedMaxOptions: Object.values(WIND_SPEEDS).map((w) => ({
+        value: w.value,
+        label: localize(w.label),
+        selected: w.value === windSpeedMax
+      }))
     };
   }
 
@@ -379,6 +407,21 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (tMax !== '' && tMax != null) pData.tempMax = fromDisplayUnit(parseInt(tMax));
       result.presets[preset.id] = pData;
     }
+
+    // Wind configuration
+    const windDirections = {};
+    for (const dir of Object.keys(COMPASS_DIRECTIONS)) {
+      const val = parseInt(data[`wind_${dir}`]);
+      if (val > 0) windDirections[dir] = val;
+    }
+    result.windDirections = windDirections;
+
+    const wsMin = data.windSpeedMin;
+    const wsMax = data.windSpeedMax;
+    result.windSpeedRange = {
+      min: wsMin !== '' && wsMin != null ? parseInt(wsMin) : null,
+      max: wsMax !== '' && wsMax != null ? parseInt(wsMax) : null
+    };
 
     this.#onSave(result);
   }

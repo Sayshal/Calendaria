@@ -2969,6 +2969,84 @@ span.calendaria-moon-icon {
       font-size: 0.85rem;
     }
   }
+
+  .wind-direction-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.25rem;
+
+    .wind-dir-input {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      label {
+        min-width: 1.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: right;
+      }
+
+      input {
+        width: 3.5rem;
+      }
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Weather Picker Wind/Precipitation           */
+/* -------------------------------------------- */
+
+.weather-picker-wind,
+.weather-picker-precipitation {
+  .precip-intensity-label {
+    min-width: 4rem;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+}
+
+/* -------------------------------------------- */
+/*  HUD Weather Wind/Precipitation Badges       */
+/* -------------------------------------------- */
+
+.weather-wind,
+.weather-precip {
+  margin-left: 0.25rem;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.weather-wind i {
+  display: inline-block;
+}
+
+/* Weather Tooltip Styles */
+.calendaria-weather-tooltip {
+  line-height: 1.4;
+  text-align: left;
+
+  .calendaria-weather-tooltip-header {
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+
+    strong {
+      color: var(--color-text-primary, rgb(238 238 238));
+    }
+  }
+
+  .calendaria-weather-tooltip-row {
+    color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
+
+    i {
+      opacity: 0.7;
+      margin-right: 0.25rem;
+      width: 0.9em;
+      text-align: center;
+    }
+  }
 }
 
 /* -------------------------------------------- */

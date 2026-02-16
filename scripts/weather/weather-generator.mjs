@@ -6,6 +6,7 @@
  * @author Tyler
  */
 
+import { COMPASS_DIRECTIONS } from '../constants.mjs';
 import { getPreset } from './weather-presets.mjs';
 
 /**
@@ -107,7 +108,10 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   if (presetConfig?.tempMin != null) finalTempRange.min = presetConfig.tempMin;
   if (presetConfig?.tempMax != null) finalTempRange.max = presetConfig.tempMax;
   const temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
-  return { preset: preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' }, temperature };
+  const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
+  const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
+  const precipitation = generatePrecipitation(resolvedPreset, randomFn);
+  return { preset: resolvedPreset, temperature, wind, precipitation };
 }
 
 /**
@@ -155,6 +159,51 @@ export function generateForecast({ zoneConfig, season, startYear, startMonth, st
     day++;
   }
   return forecast;
+}
+
+/**
+ * Generate wind conditions based on preset, zone config, and forced wind rules.
+ * @param {object} preset - Weather preset with wind defaults
+ * @param {object} [zoneConfig] - Zone config (windDirections, windSpeedRange)
+ * @param {Function} [randomFn] - Random function
+ * @returns {{ speed: number, direction: number|null, forced: boolean }}
+ */
+function generateWind(preset, zoneConfig, randomFn = Math.random) {
+  const compassValues = Object.values(COMPASS_DIRECTIONS);
+  const randomCompass = () => compassValues[Math.floor(randomFn() * compassValues.length)];
+
+  if (preset.wind?.forced) return { speed: preset.wind.speed, direction: preset.wind.direction ?? randomCompass(), forced: true };
+
+  const baseSpeed = preset.wind?.speed ?? 0;
+  const zoneMin = zoneConfig?.windSpeedRange?.min ?? 0;
+  const zoneMax = zoneConfig?.windSpeedRange?.max ?? 5;
+  const variance = Math.round((randomFn() - 0.5) * 2);
+  const speed = Math.max(zoneMin, Math.min(zoneMax, baseSpeed + variance));
+
+  let direction;
+  const dirWeights = zoneConfig?.windDirections ?? {};
+  if (Object.keys(dirWeights).length > 0) {
+    const dirId = weightedSelect(dirWeights, randomFn);
+    direction = COMPASS_DIRECTIONS[dirId] ?? randomCompass();
+  } else {
+    direction = preset.wind?.direction ?? randomCompass();
+  }
+  return { speed, direction, forced: false };
+}
+
+/**
+ * Generate precipitation based on preset defaults with intensity variance.
+ * @param {object} preset - Weather preset with precipitation defaults
+ * @param {Function} [randomFn] - Random function
+ * @returns {{ type: string|null, intensity: number }}
+ */
+function generatePrecipitation(preset, randomFn = Math.random) {
+  const type = preset.precipitation?.type ?? null;
+  if (!type) return { type: null, intensity: 0 };
+  const baseIntensity = preset.precipitation?.intensity ?? 0.5;
+  const variance = (randomFn() - 0.5) * 0.3;
+  const intensity = Math.max(0.1, Math.min(1, baseIntensity + variance));
+  return { type, intensity: Math.round(intensity * 100) / 100 };
 }
 
 /**

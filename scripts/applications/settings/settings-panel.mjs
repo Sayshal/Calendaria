@@ -547,6 +547,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
     [SETTINGS.TEMPERATURE_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.TemperatureUnit.Name' },
+    [SETTINGS.PRECIPITATION_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.PrecipitationUnit.Name' },
     [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.ThemeEditor.PresetSelect' },
     [SETTINGS.CUSTOM_THEME_COLORS]: { tab: 'theme', label: 'CALENDARIA.SettingsPanel.Section.Theme' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
@@ -705,7 +706,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [SETTINGS.DARKNESS_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC, SETTINGS.AMBIENCE_SYNC, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER],
     // Weather tab sections
-    'weather-temperature': [SETTINGS.TEMPERATURE_UNIT],
+    'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.PRECIPITATION_UNIT],
     // Module tab sections
     'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
@@ -1258,6 +1259,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
     context.temperatureUnitSymbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
+    const precipUnit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
+    context.precipitationUnitOptions = [
+      { value: 'metric', label: localize('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
+      { value: 'imperial', label: localize('CALENDARIA.Settings.PrecipitationUnit.Imperial'), selected: precipUnit === 'imperial' }
+    ];
     const rawPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     context.customWeatherPresets = rawPresets.map((p) => ({
       ...p,
@@ -1527,6 +1533,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if ('showActiveCalendarToPlayers' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS, data.showActiveCalendarToPlayers);
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
+    if ('precipitationUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, data.precipitationUnit);
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
