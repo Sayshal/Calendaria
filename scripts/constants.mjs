@@ -34,6 +34,7 @@ export const SETTINGS = {
   CALENDARS: 'calendars',
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
   CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
+  COLOR_SHIFT_SYNC: 'colorShiftSync',
   CURRENT_WEATHER: 'currentWeather',
   CUSTOM_CALENDARS: 'customCalendars',
   CUSTOM_CATEGORIES: 'customCategories',

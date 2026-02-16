@@ -723,6 +723,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
                   max: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 5 })
                 },
                 { required: false }
+              ),
+              colorShift: new SchemaField(
+                {
+                  dawnHue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  duskHue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  nightHue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  transitionMinutes: new NumberField({ required: false, nullable: true, initial: null, min: 0 })
+                },
+                { required: false }
               )
             })
           )

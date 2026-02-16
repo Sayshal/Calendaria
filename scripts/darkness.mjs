@@ -86,54 +86,127 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
 }
 
 /**
- * Calculate environment lighting overrides from climate zone and weather.
+ * Calculate time-of-day environment color based on solar position.
+ * Returns hue/intensity/luminosity values that shift through dawn/day/dusk/night.
+ * @param {number} currentHour - Current hour (decimal)
+ * @param {number} hoursPerDay - Hours per day
+ * @param {number|null} [sunrise] - Sunrise hour (decimal)
+ * @param {number|null} [sunset] - Sunset hour (decimal)
+ * @param {object|null} colorShift - Per-zone color shift overrides
+ * @param {number} [minutesPerHour] - Minutes per hour for transition calculation
+ * @returns {{ hue: number, intensity: number, luminosity: number }} Time-based color values
+ */
+export function calculateTimeOfDayColor(currentHour, hoursPerDay, sunrise = null, sunset = null, colorShift = null, minutesPerHour = 60) {
+  const dawn = { hue: colorShift?.dawnHue ?? 30, intensity: 0.25, luminosity: 0.05 };
+  const midday = { hue: 45, intensity: 0.3, luminosity: 0.15 };
+  const dusk = { hue: colorShift?.duskHue ?? 15, intensity: 0.25, luminosity: 0.0 };
+  const night = { hue: colorShift?.nightHue ?? 220, intensity: 0.12, luminosity: -0.1 };
+  const transitionMinutes = colorShift?.transitionMinutes ?? 60;
+  const transitionHours = transitionMinutes / minutesPerHour;
+  const blend = (a, b, t) => ({ hue: lerpHue(a.hue, b.hue, t), intensity: lerp(a.intensity, b.intensity, t), luminosity: lerp(a.luminosity, b.luminosity, t) });
+  if (sunrise == null || sunset == null) {
+    const mid = hoursPerDay / 2;
+    const quarter = hoursPerDay / 4;
+    if (currentHour >= quarter && currentHour < mid) return blend(dawn, midday, (currentHour - quarter) / (mid - quarter));
+    if (currentHour >= mid && currentHour < mid + quarter) return blend(midday, dusk, (currentHour - mid) / quarter);
+    return { ...night };
+  }
+
+  const preDawn = sunrise - transitionHours;
+  const mid = sunrise + (sunset - sunrise) / 2;
+  const postDusk = sunset + transitionHours;
+  if (currentHour >= preDawn && currentHour < sunrise) return blend(night, dawn, (currentHour - preDawn) / transitionHours);
+  if (currentHour >= sunrise && currentHour < mid) return blend(dawn, midday, (currentHour - sunrise) / (mid - sunrise));
+  if (currentHour >= mid && currentHour < sunset) return blend(midday, dusk, (currentHour - mid) / (sunset - mid));
+  if (currentHour >= sunset && currentHour < postDusk) return blend(dusk, night, (currentHour - sunset) / transitionHours);
+  return { ...night };
+}
+
+/**
+ * Linear interpolation between two values.
+ * @param {number} a - Start value
+ * @param {number} b - End value
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {number} Interpolated value
+ */
+function lerp(a, b, t) {
+  return a + (b - a) * Math.max(0, Math.min(1, t));
+}
+
+/**
+ * Circular hue interpolation — takes shortest path around 360° wheel.
+ * @param {number} a - Start hue (0-360)
+ * @param {number} b - End hue (0-360)
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {number} Interpolated hue (0-360)
+ */
+function lerpHue(a, b, t) {
+  t = Math.max(0, Math.min(1, t));
+  let diff = b - a;
+  if (diff > 180) diff -= 360;
+  else if (diff < -180) diff += 360;
+  return (((a + diff * t) % 360) + 360) % 360;
+}
+
+/**
+ * Calculate environment lighting overrides from time-of-day, climate zone, and weather.
  * @param {object} [scene] - The scene to check for climate zone override
- * @returns {{base: {hue: number|null, saturation: number|null}, dark: {hue: number|null, saturation: number|null}}|null} - environment config
+ * @returns {{base: {hue: number|null, intensity: number|null, luminosity: number|null}, dark: {hue: number|null, intensity: number|null, luminosity: number|null}}|null} - environment config
  */
 export function calculateEnvironmentLighting(scene) {
+  const colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
   const activeZone = WeatherManager.getActiveZone?.(null, scene);
   const currentWeather = WeatherManager.getCurrentWeather?.();
-  let baseHue = activeZone?.environmentBase?.hue ?? null;
-  let baseSaturation = activeZone?.environmentBase?.saturation ?? null;
-  let darkHue = activeZone?.environmentDark?.hue ?? null;
-  let darkSaturation = activeZone?.environmentDark?.saturation ?? null;
-  if (currentWeather?.environmentBase?.hue != null) baseHue = currentWeather.environmentBase.hue;
-  if (currentWeather?.environmentBase?.saturation != null) baseSaturation = currentWeather.environmentBase.saturation;
-  if (currentWeather?.environmentDark?.hue != null) darkHue = currentWeather.environmentDark.hue;
-  if (currentWeather?.environmentDark?.saturation != null) darkSaturation = currentWeather.environmentDark.saturation;
-  if (baseHue === null && baseSaturation === null && darkHue === null && darkSaturation === null) return null;
-  return { base: { hue: baseHue, saturation: baseSaturation }, dark: { hue: darkHue, saturation: darkSaturation } };
+  let base = { hue: null, intensity: null, luminosity: null };
+  let dark = { hue: null, intensity: null, luminosity: null };
+  if (colorShiftSync) {
+    const calendar = game.time.calendar;
+    const components = game.time.components;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+    const currentHour = (components?.hour ?? 0) + (components?.minute ?? 0) / minutesPerHour;
+    const sunrise = calendar?.sunrise?.(components, activeZone) ?? null;
+    const sunset = calendar?.sunset?.(components, activeZone) ?? null;
+    const colorShift = activeZone?.colorShift ?? null;
+    const timeColor = calculateTimeOfDayColor(currentHour, hoursPerDay, sunrise, sunset, colorShift, minutesPerHour);
+    base = { hue: timeColor.hue, intensity: timeColor.intensity, luminosity: timeColor.luminosity };
+    dark = { hue: timeColor.hue, intensity: timeColor.intensity, luminosity: timeColor.luminosity };
+  }
+
+  if (activeZone?.environmentBase?.hue != null) base.hue = activeZone.environmentBase.hue;
+  if (activeZone?.environmentDark?.hue != null) dark.hue = activeZone.environmentDark.hue;
+  if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
+  if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
+  const hasValues = base.hue !== null || base.intensity !== null || dark.hue !== null || dark.intensity !== null;
+  if (!hasValues) return null;
+
+  return { base, dark };
 }
 
 /**
  * Apply environment lighting to a scene.
  * @param {object} scene - The scene to update
- * @param {{base: {hue: number|null, saturation: number|null}, dark: {hue: number|null, saturation: number|null}}|null} lighting - Lighting overrides
+ * @param {{base: {hue: number|null, intensity: number|null, luminosity: number|null}, dark: {hue: number|null, intensity: number|null, luminosity: number|null}}|null} lighting - Lighting overrides from calculateEnvironmentLighting
  */
 async function applyEnvironmentLighting(scene, lighting) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
   if (!ambienceSync) return;
   if (!lighting) {
-    await scene.update({ 'environment.base.intensity': 0, 'environment.dark.intensity': 0 });
+    await scene.update({ 'environment.base.intensity': 0, 'environment.base.luminosity': 0, 'environment.dark.intensity': 0, 'environment.dark.luminosity': -0.25 });
     log(3, 'Reset environment lighting to defaults');
     return;
   }
-  const intensityData = {};
-  if (lighting.base.hue !== null) intensityData['environment.base.intensity'] = 0.5;
-  else intensityData['environment.base.intensity'] = 0;
-  if (lighting.dark.hue !== null) intensityData['environment.dark.intensity'] = 0.5;
-  else intensityData['environment.dark.intensity'] = 0;
-  await scene.update(intensityData);
-  log(3, 'Set environment intensity:', intensityData);
   const updateData = {};
   if (lighting.base.hue !== null) updateData['environment.base.hue'] = lighting.base.hue / 360;
-  if (lighting.base.saturation !== null) updateData['environment.base.saturation'] = lighting.base.saturation * 2 - 1;
+  if (lighting.base.intensity !== null) updateData['environment.base.intensity'] = lighting.base.intensity;
+  if (lighting.base.luminosity !== null) updateData['environment.base.luminosity'] = lighting.base.luminosity;
   if (lighting.dark.hue !== null) updateData['environment.dark.hue'] = lighting.dark.hue / 360;
-  if (lighting.dark.saturation !== null) updateData['environment.dark.saturation'] = lighting.dark.saturation * 2 - 1;
+  if (lighting.dark.intensity !== null) updateData['environment.dark.intensity'] = lighting.dark.intensity;
+  if (lighting.dark.luminosity !== null) updateData['environment.dark.luminosity'] = lighting.dark.luminosity;
   if (Object.keys(updateData).length > 0) {
+    log(3, ` scene update → ${JSON.stringify(updateData)}`);
     await scene.update(updateData);
-    log(3, 'Applied environment lighting:', updateData);
   }
 }
 
@@ -198,6 +271,8 @@ export async function updateDarknessFromWorldTime(worldTime, _dt) {
     const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
+    const lighting = calculateEnvironmentLighting(scene);
+    await applyEnvironmentLighting(scene, lighting);
   }
   log(3, `Hour changed: ${lastHour} → ${currentHour}`);
 }

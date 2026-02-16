@@ -226,6 +226,17 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
+    // Color shift config (zone mode only)
+    let colorShift = {};
+    if (isZoneMode) {
+      colorShift = {
+        dawnHue: this.#data.colorShift?.dawnHue ?? '',
+        duskHue: this.#data.colorShift?.duskHue ?? '',
+        nightHue: this.#data.colorShift?.nightHue ?? '',
+        transitionMinutes: this.#data.colorShift?.transitionMinutes ?? ''
+      };
+    }
+
     // Wind config (zone mode only)
     let windDirections = [];
     let windSpeedMin = null;
@@ -267,6 +278,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       longestDayHours,
       shortestDayDate,
       longestDayDate,
+      // Color shift fields
+      colorShift,
       // Wind fields
       windDirections,
       windSpeedMin,
@@ -427,6 +440,16 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (iwRaw !== '' && iwRaw != null) pData.inertiaWeight = parseFloat(iwRaw);
       result.presets[preset.id] = pData;
     }
+
+    // Color shift configuration
+    const colorShiftResult = {};
+    const csFields = ['dawnHue', 'duskHue', 'nightHue', 'transitionMinutes'];
+    for (const field of csFields) {
+      const key = `colorShift${field.charAt(0).toUpperCase()}${field.slice(1)}`;
+      const val = data[key];
+      colorShiftResult[field] = val !== '' && val != null ? parseFloat(val) : null;
+    }
+    result.colorShift = colorShiftResult;
 
     // Wind configuration
     const windDirections = {};
