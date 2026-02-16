@@ -56,6 +56,26 @@ export function fromDisplayUnit(value) {
 }
 
 /**
+ * Convert a temperature delta from Celsius to user's display unit.
+ * @param {number} celsiusDelta - Temperature delta in Celsius
+ * @returns {number} Delta in user's display unit
+ */
+export function toDisplayDelta(celsiusDelta) {
+  if (celsiusDelta == null) return null;
+  return getTemperatureUnit() === 'fahrenheit' ? Math.round((celsiusDelta * 9) / 5) : celsiusDelta;
+}
+
+/**
+ * Convert a temperature delta from user's display unit to Celsius for storage.
+ * @param {number} displayDelta - Temperature delta in user's display unit
+ * @returns {number} Delta in Celsius
+ */
+export function fromDisplayDelta(displayDelta) {
+  if (displayDelta == null) return null;
+  return getTemperatureUnit() === 'fahrenheit' ? Math.round((displayDelta * 5) / 9) : displayDelta;
+}
+
+/**
  * Climate zone template definitions.
  * Weather probabilities are relative weights (higher = more likely).
  * Temperatures are stored per-season with a _default fallback.

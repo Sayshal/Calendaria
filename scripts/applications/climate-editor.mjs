@@ -9,7 +9,7 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendariaCalendar from '../calendar/data/calendaria-calendar.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
-import { fromDisplayUnit, toDisplayUnit } from '../weather/climate-data.mjs';
+import { fromDisplayDelta, fromDisplayUnit, toDisplayDelta, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -117,11 +117,15 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
       temperatureRows = seasonNames.map((season) => {
         const temp = this.#data.temperatures?.[season] || this.#data.temperatures?._default || { min: 10, max: 22 };
+        const isRelativeMin = typeof temp.min === 'string' && /[+-]$/.test(temp.min);
+        const isRelativeMax = typeof temp.max === 'string' && /[+-]$/.test(temp.max);
         return {
           seasonName: season,
           label: localize(season),
-          min: toDisplayUnit(temp.min),
-          max: toDisplayUnit(temp.max)
+          min: isRelativeMin ? `${toDisplayDelta(Number(temp.min.slice(0, -1)))}${temp.min.slice(-1)}` : toDisplayUnit(temp.min),
+          max: isRelativeMax ? `${toDisplayDelta(Number(temp.max.slice(0, -1)))}${temp.max.slice(-1)}` : toDisplayUnit(temp.max),
+          isRelativeMin,
+          isRelativeMax
         };
       });
     }
@@ -145,8 +149,10 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               hasAlias: !!alias,
               enabled: saved.enabled ?? false,
               chance: saved.chance ? saved.chance.toFixed(2) : '',
-              tempMin: saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '',
-              tempMax: saved.tempMax != null ? toDisplayUnit(saved.tempMax) : ''
+              tempMin: ClimateEditor.#formatTempValue(saved.tempMin),
+              tempMax: ClimateEditor.#formatTempValue(saved.tempMax),
+              isRelativeTempMin: typeof saved.tempMin === 'string' && /[+-]$/.test(saved.tempMin),
+              isRelativeTempMax: typeof saved.tempMax === 'string' && /[+-]$/.test(saved.tempMax)
             };
           }
           // Season mode
@@ -323,6 +329,13 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
 
+    // Temperature modifier styling — toggle blue text for + modifier values
+    for (const input of this.element.querySelectorAll('.form-fields.temperature input[type="text"], .preset-temp-input')) {
+      input.addEventListener('input', () => {
+        input.classList.toggle('modifier-relative', /^\d+(\.\d+)?[+-]$/.test(input.value.trim()));
+      });
+    }
+
     // Alias change listeners (zone mode) — live-save to world settings
     for (const input of this.element.querySelectorAll('.preset-alias-input')) {
       input.addEventListener('change', async (e) => {
@@ -391,9 +404,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     for (const season of seasonNames) {
-      const minVal = parseInt(data[`temp_${season}_min`]) || 0;
-      const maxVal = parseInt(data[`temp_${season}_max`]) || 20;
-      result.temperatures[season] = { min: fromDisplayUnit(minVal), max: fromDisplayUnit(maxVal) };
+      const minRaw = String(data[`temp_${season}_min`] ?? '').trim();
+      const maxRaw = String(data[`temp_${season}_max`] ?? '').trim();
+      result.temperatures[season] = {
+        min: ClimateEditor.#parseTempInput(minRaw, 0),
+        max: ClimateEditor.#parseTempInput(maxRaw, 20)
+      };
     }
 
     for (const preset of allPresets) {
@@ -401,10 +417,10 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const chance = parseFloat(data[`preset_${preset.id}_chance`]) || 0;
       if (!enabled && !chance) continue;
       const pData = { id: preset.id, enabled, chance };
-      const tMin = data[`preset_${preset.id}_tempMin`];
-      const tMax = data[`preset_${preset.id}_tempMax`];
-      if (tMin !== '' && tMin != null) pData.tempMin = fromDisplayUnit(parseInt(tMin));
-      if (tMax !== '' && tMax != null) pData.tempMax = fromDisplayUnit(parseInt(tMax));
+      const tMinRaw = String(data[`preset_${preset.id}_tempMin`] ?? '').trim();
+      const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();
+      if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
+      if (tMaxRaw) pData.tempMax = ClimateEditor.#parseTempInput(tMaxRaw, null);
       result.presets[preset.id] = pData;
     }
 
@@ -435,6 +451,39 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = target.dataset.presetId;
     await setPresetAlias(presetId, null, this.#calendarId, this.#data.id);
     this.render();
+  }
+
+  /**
+   * Format a stored temperature value for display.
+   * Modifier strings ("5+", "3-") are converted to display-unit deltas.
+   * Absolute values (numbers or numeric strings) are converted normally.
+   * @param {number|string|null} value - Stored temperature value
+   * @returns {string} Display value
+   */
+  static #formatTempValue(value) {
+    if (value == null) return '';
+    const str = String(value);
+    if (/[+-]$/.test(str)) {
+      return `${toDisplayDelta(Number(str.slice(0, -1)))}${str.slice(-1)}`;
+    }
+    return String(toDisplayUnit(Number(str)));
+  }
+
+  /**
+   * Parse a temperature input value, preserving +/- relative modifiers as strings.
+   * @param {string} raw - Raw input value
+   * @param {number} fallback - Fallback value if input is empty/invalid
+   * @returns {number|string} Celsius value (number) or "+N"/"-N" modifier (string)
+   */
+  static #parseTempInput(raw, fallback) {
+    if (!raw && raw !== '0') return fallback != null ? fromDisplayUnit(fallback) : null;
+    if (/^\d+(\.\d+)?[+-]$/.test(raw)) {
+      const suffix = raw.slice(-1);
+      const delta = fromDisplayDelta(Number(raw.slice(0, -1)));
+      return `${delta}${suffix}`;
+    }
+    const num = parseFloat(raw);
+    return isNaN(num) ? (fallback != null ? fromDisplayUnit(fallback) : null) : fromDisplayUnit(num);
   }
 
   /**
