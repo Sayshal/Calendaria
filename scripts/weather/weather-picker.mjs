@@ -150,31 +150,29 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       let presets = getPresetsByCategory(categoryId, customPresets);
       if (shouldFilter) presets = presets.filter((p) => enabledPresetIds.has(p.id));
       if (presets.length === 0) continue;
-      context.categories.push({
-        id: categoryId,
-        label: localize(category.label),
-        presets: presets.map((p) => {
+      const mappedPresets = presets
+        .map((p) => {
           const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
           const label = alias || localize(p.label);
           return { id: p.id, label, description: p.description ? localize(p.description) : label, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
         })
-      });
+        .sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+      context.categories.push({ id: categoryId, label: localize(category.label), presets: mappedPresets });
     }
 
     if (customPresets.length > 0) {
       let filtered = customPresets;
       if (shouldFilter) filtered = customPresets.filter((p) => enabledPresetIds.has(p.id));
       if (filtered.length > 0) {
-        context.categories.push({
-          id: 'custom',
-          label: localize(WEATHER_CATEGORIES.custom.label),
-          presets: filtered.map((p) => {
+        const mappedCustom = filtered
+          .map((p) => {
             const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
             const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
             const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
             return { id: p.id, label, description, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
           })
-        });
+          .sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+        context.categories.push({ id: 'custom', label: localize(WEATHER_CATEGORIES.custom.label), presets: mappedCustom });
       }
     }
 

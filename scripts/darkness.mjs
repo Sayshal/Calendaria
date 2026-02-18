@@ -95,7 +95,7 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
  * Calculate moon illumination factor for the current night.
  * Full moons brighten the scene; new moons have no effect.
  * @param {number} baseDarkness - Current darkness level (0-1)
- * @returns {{ reduction: number, hue: number|null, intensity: number|null, luminosity: number|null }}
+ * @returns {{ reduction: number, hue: number|null, intensity: number|null, luminosity: number|null }} Moon illumination data
  */
 export function calculateMoonIllumination(baseDarkness) {
   if (baseDarkness < 0.5) return { reduction: 0, hue: null, intensity: null, luminosity: null };

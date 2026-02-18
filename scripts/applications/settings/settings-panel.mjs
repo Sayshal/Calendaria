@@ -15,7 +15,6 @@ import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
-import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/climate-data.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { BigCal } from '../big-cal.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
@@ -69,9 +68,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
       removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger,
-      addWeatherPreset: SettingsPanel.#onAddWeatherPreset,
-      editWeatherPreset: SettingsPanel.#onEditWeatherPreset,
-      removeWeatherPreset: SettingsPanel.#onRemoveWeatherPreset,
+      openWeatherEditor: SettingsPanel.#onOpenWeatherEditor,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
       resetSection: SettingsPanel.#onResetSection,
@@ -1265,12 +1262,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'metric', label: localize('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
       { value: 'imperial', label: localize('CALENDARIA.Settings.PrecipitationUnit.Imperial'), selected: precipUnit === 'imperial' }
     ];
-    const rawPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    context.customWeatherPresets = rawPresets.map((p) => ({
-      ...p,
-      tempMin: toDisplayUnit(p.tempMin),
-      tempMax: toDisplayUnit(p.tempMax)
-    }));
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
     context.hasZones = zones.length > 0;
@@ -2200,184 +2191,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Open weather preset dialog for adding or editing.
-   * @param {object|null} preset - Existing preset to edit, or null for new
-   * @returns {Promise<object|null>} The preset data or null if cancelled
+   * Open the Weather Editor application.
    */
-  static async #openWeatherPresetDialog(preset = null) {
-    const isNew = !preset;
-    const data = preset || { label: '', icon: 'fa-cloud', color: '#888888', tempMin: 10, tempMax: 25, darknessPenalty: 0, inertiaWeight: 1, environmentBase: null, environmentDark: null };
-    const envBase = data.environmentBase ?? {};
-    const envDark = data.environmentDark ?? {};
-    const unitSymbol = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
-    const displayMin = toDisplayUnit(data.tempMin);
-    const displayMax = toDisplayUnit(data.tempMax);
-
-    const content = `
-      <form class="weather-preset-dialog">
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder')}</label>
-          <input type="text" name="label" value="${data.label}" placeholder="${localize('CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder')}" autofocus>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.Icon')}</label>
-          <input type="text" name="icon" value="${data.icon}" placeholder="fa-cloud">
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.IconTooltip')}</p>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.Color')}</label>
-          <input type="color" name="color" value="${data.color}">
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.TempRange')}</label>
-          <div class="form-fields">
-            <input type="number" name="tempMin" value="${displayMin}" placeholder="0">
-            <span>–</span>
-            <input type="number" name="tempMax" value="${displayMax}" placeholder="25">
-            <span>${unitSymbol}</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenalty')}</label>
-          <input type="number" name="darknessPenalty" value="${data.darknessPenalty}" step="0.05" min="-0.5" max="0.5">
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenaltyTooltip')}</p>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.InertiaWeight')}</label>
-          <input type="number" name="inertiaWeight" value="${data.inertiaWeight ?? 1}" step="0.1" min="0" max="2">
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.InertiaWeightTooltip')}</p>
-        </div>
-        <fieldset>
-          <legend>${localize('CALENDARIA.SettingsPanel.WeatherPresets.EnvironmentLighting')}</legend>
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.EnvironmentLightingHint')}</p>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.BaseHue')}</label>
-            <div class="form-fields">
-              <input type="number" name="baseHue" min="0" max="360" step="1" value="${envBase.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-              <span>°</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.BaseSaturation')}</label>
-            <div class="form-fields">
-              <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="${envBase.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarkHue')}</label>
-            <div class="form-fields">
-              <input type="number" name="darkHue" min="0" max="360" step="1" value="${envDark.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-              <span>°</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarkSaturation')}</label>
-            <div class="form-fields">
-              <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="${envDark.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-            </div>
-          </div>
-        </fieldset>
-      </form>
-    `;
-
-    const title = isNew ? localize('CALENDARIA.SettingsPanel.WeatherPresets.Add') : localize('CALENDARIA.SettingsPanel.WeatherPresets.Edit');
-    return foundry.applications.api.DialogV2.prompt({
-      window: { title },
-      position: { width: 'auto', height: 'auto' },
-      content,
-      ok: {
-        callback: (_event, button, _dialog) => {
-          const form = button.form;
-          const baseHue = form.elements.baseHue.value ? parseFloat(form.elements.baseHue.value) : null;
-          const baseSat = form.elements.baseSaturation.value ? parseFloat(form.elements.baseSaturation.value) : null;
-          const darkHue = form.elements.darkHue.value ? parseFloat(form.elements.darkHue.value) : null;
-          const darkSat = form.elements.darkSaturation.value ? parseFloat(form.elements.darkSaturation.value) : null;
-          return {
-            label: form.elements.label.value.trim(),
-            icon: form.elements.icon.value.trim() || 'fa-cloud',
-            color: form.elements.color.value || '#888888',
-            tempMin: fromDisplayUnit(Number(form.elements.tempMin.value) || 10),
-            tempMax: fromDisplayUnit(Number(form.elements.tempMax.value) || 25),
-            darknessPenalty: Number(form.elements.darknessPenalty.value) || 0,
-            inertiaWeight: Number(form.elements.inertiaWeight.value) || 1,
-            environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
-            environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null
-          };
-        }
-      }
-    });
-  }
-
-  /**
-   * Add a custom weather preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async #onAddWeatherPreset(_event, _target) {
-    const result = await SettingsPanel.#openWeatherPresetDialog();
-    if (!result || !result.label) return;
-
-    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    currentPresets.push({
-      id: foundry.utils.randomID(),
-      label: result.label,
-      icon: result.icon,
-      color: result.color,
-      category: 'custom',
-      tempMin: result.tempMin,
-      tempMax: result.tempMax,
-      darknessPenalty: result.darknessPenalty,
-      inertiaWeight: result.inertiaWeight,
-      environmentBase: result.environmentBase,
-      environmentDark: result.environmentDark,
-      description: ''
-    });
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, currentPresets);
-    this.render({ parts: ['weather'] });
-  }
-
-  /**
-   * Edit an existing custom weather preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async #onEditWeatherPreset(_event, target) {
-    const presetId = target.dataset.presetId;
-    if (!presetId) return;
-
-    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const preset = currentPresets.find((p) => p.id === presetId);
-    if (!preset) return;
-
-    const result = await SettingsPanel.#openWeatherPresetDialog(preset);
-    if (!result || !result.label) return;
-
-    preset.label = result.label;
-    preset.icon = result.icon;
-    preset.color = result.color;
-    preset.tempMin = result.tempMin;
-    preset.tempMax = result.tempMax;
-    preset.darknessPenalty = result.darknessPenalty;
-    preset.inertiaWeight = result.inertiaWeight;
-    preset.environmentBase = result.environmentBase;
-    preset.environmentDark = result.environmentDark;
-
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, currentPresets);
-    this.render({ parts: ['weather'] });
-  }
-
-  /**
-   * Remove a custom weather preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async #onRemoveWeatherPreset(_event, target) {
-    const presetId = target.dataset.presetId;
-    if (!presetId) return;
-    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const filtered = currentPresets.filter((p) => p.id !== presetId);
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, filtered);
-    this.render({ parts: ['weather'] });
+  static async #onOpenWeatherEditor() {
+    const { WeatherEditor } = await import('./weather-editor.mjs');
+    const existing = foundry.applications.instances.get('calendaria-weather-editor');
+    if (existing) {
+      existing.bringToFront();
+      return;
+    }
+    new WeatherEditor().render(true);
   }
 
   /**

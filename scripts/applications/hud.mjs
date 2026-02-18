@@ -19,9 +19,10 @@ import * as StickyZones from '../utils/sticky-zones.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
-import { getPresetAlias } from '../weather/weather-presets.mjs';
+import { getPreset, getPresetAlias } from '../weather/weather-presets.mjs';
 import { BigCal } from './big-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
+import { HudWeatherRenderer } from './hud-weather-renderer.mjs';
 import { SetDateDialog } from './set-date-dialog.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
@@ -48,6 +49,49 @@ const SKY_KEYFRAMES = [
   { hour: 20.5, top: '#151525', mid: '#1a1a35', bottom: '#2a2a45' },
   { hour: 24, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' }
 ];
+
+/**
+ * Per-effect sky color overrides (RGB arrays for top/mid/bottom gradient).
+ */
+export const SKY_OVERRIDES = {
+  'clouds-light': { strength: 0.5, top: [160, 170, 185], mid: [175, 185, 200], bottom: [190, 200, 215] },
+  'clouds-heavy': { strength: 0.7, top: [115, 120, 130], mid: [130, 135, 145], bottom: [150, 155, 165] },
+  'clouds-overcast': { strength: 0.85, top: [95, 95, 100], mid: [110, 110, 115], bottom: [130, 130, 135] },
+  rain: { strength: 0.75, top: [70, 75, 90], mid: [85, 90, 105], bottom: [100, 105, 120] },
+  'rain-heavy': { strength: 0.85, top: [50, 55, 70], mid: [65, 68, 82], bottom: [80, 82, 95] },
+  snow: { strength: 0.6, top: [185, 195, 210], mid: [195, 205, 220], bottom: [210, 218, 230] },
+  'snow-heavy': { strength: 0.7, top: [195, 200, 215], mid: [205, 210, 225], bottom: [215, 220, 235] },
+  fog: { strength: 0.8, top: [175, 178, 180], mid: [185, 188, 190], bottom: [200, 202, 205] },
+  lightning: { strength: 0.9, top: [35, 35, 55], mid: [45, 48, 68], bottom: [60, 62, 80] },
+  sand: { strength: 0.85, top: [185, 160, 100], mid: [200, 175, 115], bottom: [215, 190, 130] },
+  ashfall: { strength: 0.85, top: [90, 70, 50], mid: [120, 95, 70], bottom: [150, 120, 90] },
+  embers: { strength: 0.85, top: [160, 110, 60], mid: [180, 125, 70], bottom: [195, 140, 80] },
+  ice: { strength: 0.6, top: [160, 195, 220], mid: [175, 205, 230], bottom: [190, 215, 240] },
+  hail: { strength: 0.8, top: [70, 75, 95], mid: [90, 95, 115], bottom: [110, 115, 130] },
+  tornado: { strength: 0.9, top: [45, 50, 40], mid: [60, 65, 50], bottom: [75, 78, 65] },
+  hurricane: { strength: 0.9, top: [50, 55, 65], mid: [65, 68, 80], bottom: [80, 82, 95] },
+  nullstatic: { strength: 0.95, top: [12, 10, 16], mid: [18, 15, 22], bottom: [25, 22, 30] },
+  gust: { strength: 0.15, top: [180, 190, 200], mid: [190, 200, 210], bottom: [200, 210, 220] },
+  aurora: { strength: 0.85, top: [10, 8, 35], mid: [20, 60, 50], bottom: [15, 25, 60] },
+  aether: { strength: 0.8, top: [100, 40, 90], mid: [130, 60, 120], bottom: [160, 80, 150] },
+  void: { strength: 0.95, top: [15, 10, 12], mid: [22, 15, 18], bottom: [30, 22, 25] },
+  spectral: { strength: 0.8, top: [30, 40, 50], mid: [45, 60, 50], bottom: [60, 80, 65] },
+  arcane: { strength: 0.7, top: [40, 80, 160], mid: [60, 120, 200], bottom: [100, 180, 230] },
+  'arcane-wind': { strength: 0.8, top: [80, 40, 100], mid: [110, 60, 130], bottom: [140, 80, 160] },
+  veil: { strength: 0.75, top: [80, 70, 110], mid: [110, 100, 140], bottom: [140, 130, 170] },
+  petals: { strength: 0.4, top: [140, 130, 180], mid: [180, 150, 170], bottom: [220, 180, 190] },
+  sleet: { strength: 0.75, top: [80, 85, 100], mid: [95, 100, 115], bottom: [115, 120, 135] },
+  haze: { strength: 0.5, top: [200, 180, 140], mid: [215, 195, 155], bottom: [230, 210, 170] },
+  leaves: { strength: 0.35, top: [160, 130, 90], mid: [180, 150, 100], bottom: [200, 170, 120] },
+  smoke: { strength: 0.9, top: [60, 50, 40], mid: [80, 65, 50], bottom: [100, 85, 65] },
+  'rain-acid': { strength: 0.8, top: [40, 80, 30], mid: [55, 100, 45], bottom: [70, 120, 60] },
+  'rain-blood': { strength: 0.85, top: [80, 20, 25], mid: [100, 30, 35], bottom: [120, 40, 45] },
+  meteors: { strength: 0.6, top: [15, 10, 30], mid: [30, 20, 45], bottom: [50, 35, 60] },
+  spores: { strength: 0.7, top: [60, 80, 40], mid: [75, 100, 55], bottom: [90, 120, 70] },
+  divine: { strength: 0.6, top: [200, 180, 100], mid: [220, 200, 130], bottom: [240, 220, 160] },
+  miasma: { strength: 0.85, top: [50, 60, 30], mid: [65, 78, 40], bottom: [80, 95, 55] },
+  'ley-surge': { strength: 0.75, top: [50, 30, 120], mid: [80, 60, 160], bottom: [120, 100, 200] }
+};
 
 /**
  * Calendar HUD with sundial dome, time controls, and calendar info.
@@ -113,6 +157,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {string|null} ID of zone HUD is currently snapped to */
   #snappedZoneId = null;
+
+  /** @type {HudWeatherRenderer|null} Pixi weather particle renderer */
+  #weatherRenderer = null;
 
   /** @type {string|null} Last tracked mode state for position handling */
   #lastModeState = null;
@@ -410,6 +457,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#lastModeState = currentModeState;
       this.#lastWidth = this.element.getBoundingClientRect().width;
     } else if (this.#lastModeState !== currentModeState) {
+      if (this.#weatherRenderer) {
+        log(3, 'HUD | destroying renderer on mode change', { from: this.#lastModeState, to: currentModeState });
+        this.#weatherRenderer.destroy();
+        this.#weatherRenderer = null;
+      }
       this.#handleModeChange();
       this.#lastModeState = currentModeState;
       this.#lastWidth = this.element.getBoundingClientRect().width;
@@ -432,7 +484,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     await super._onFirstRender(context, options);
     this.#restoreStickyStates();
     this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, () => this.#onClockStateChange()) });
-    this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['bar'] })) });
+    this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['dome', 'bar'] })) });
     this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render({ parts: ['bar'] })) });
     const debouncedRender = foundry.utils.debounce(() => this.render({ parts: ['bar'] }), 100);
     this.#hooks.push({
@@ -537,6 +589,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#searchPanelEl?.parentElement === document.body) {
       this.#searchPanelEl.remove();
       this.#searchPanelEl = null;
+    }
+    if (this.#weatherRenderer) {
+      this.#weatherRenderer.destroy();
+      this.#weatherRenderer = null;
     }
     StickyZones.unregisterFromZoneUpdates(this);
     StickyZones.unpinFromZone(this.element);
@@ -1076,15 +1132,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const components = this.#getPredictedComponents();
     const hour = this.#getDecimalHour(components);
     const useSlice = this.useSliceMode;
-
-    // Update dome elements if in dome mode
     if (!useSlice) {
       const sky = this.element.querySelector('.calendaria-hud-sky');
       if (sky) {
-        const colors = this.#getSkyColors(hour);
+        const colors = this.#applyWeatherSkyTint(this.#getSkyColors(hour));
         sky.style.background = `linear-gradient(to bottom, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
       }
-
       const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
       const midday = hoursPerDay / 2;
       const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
@@ -1094,7 +1147,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const dawnEnd = sunrise + 1;
       const duskStart = sunset - 0.5;
       const duskEnd = sunset + 1;
-
       const stars = this.element.querySelector('.calendaria-hud-stars');
       if (stars) {
         const showStars = hour < dawnStart || hour > duskEnd;
@@ -1107,20 +1159,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
           stars.style.opacity = '';
         }
       }
-
-      const clouds = this.element.querySelector('.calendaria-hud-clouds');
-      if (clouds) {
-        const showClouds = hour >= dawnEnd && hour < sunset;
-        const partialClouds = (hour >= sunrise && hour < dawnEnd) || (hour >= sunset && hour < duskEnd);
-        clouds.classList.toggle('visible', showClouds || partialClouds);
-        if (partialClouds) {
-          const cloudOpacity = hour < midday ? hour - sunrise : 1 - (hour - sunset);
-          clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
-        } else {
-          clouds.style.opacity = '';
-        }
-      }
-
+      this.#updateWeatherRenderer('.calendaria-hud-weather-canvas');
       const isCompact = this.isCompact;
       const trackWidth = isCompact ? 100 : 140;
       const trackHeight = isCompact ? 50 : 70;
@@ -1138,7 +1177,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false, sunrise, sunset);
       }
     } else {
-      // Update slice elements
       this.#updateSliceDisplay(hour);
     }
   }
@@ -1150,13 +1188,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #updateSliceDisplay(hour) {
     const slice = this.element.querySelector('.calendaria-hud-slice');
     if (!slice) return;
-
     const sky = slice.querySelector('.calendaria-slice-sky');
     if (sky) {
-      const colors = this.#getSkyColors(hour);
+      const colors = this.#applyWeatherSkyTint(this.#getSkyColors(hour));
       sky.style.background = `linear-gradient(to right, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
     }
-
+    this.#updateWeatherRenderer('.calendaria-slice-weather-canvas');
     const isCompact = this.isCompact;
     const sliceWidth = isCompact ? 100 : 120;
     const sunSize = isCompact ? 12 : 14;
@@ -1168,7 +1205,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const isSunVisible = hour >= sunrise && hour < sunset;
     const sun = slice.querySelector('.calendaria-slice-sun');
     const moon = slice.querySelector('.calendaria-slice-moon');
-
     if (sun) {
       sun.style.opacity = isSunVisible ? '1' : '0';
       if (isSunVisible) this.#positionSliceBody(sun, hour, sliceWidth, sunSize, true, sunrise, sunset);
@@ -1283,6 +1319,81 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const g = Math.round(g1 + (g2 - g1) * t);
     const b = Math.round(b1 + (b2 - b1) * t);
     return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  /**
+   * Resolve visual and sky overrides for a preset.
+   * @param {object|null} preset - The weather preset object
+   * @returns {{visualOverrides: object|null, skyOverrides: object|null}} Resolved overrides
+   */
+  #resolveOverrides(preset) {
+    if (!preset) return { hudEffect: null, visualOverrides: null, skyOverrides: null };
+    if (preset.category === 'custom') return { hudEffect: preset.hudEffect || null, visualOverrides: preset.visualOverrides || null, skyOverrides: preset.skyOverrides || null };
+    const overrides = game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {};
+    const entry = overrides[preset.id];
+    if (!entry) return { hudEffect: null, visualOverrides: null, skyOverrides: null };
+    return { hudEffect: entry.hudEffect || null, visualOverrides: entry.visualOverrides || null, skyOverrides: entry.skyOverrides || null };
+  }
+
+  /**
+   * Update the weather particle renderer for a given canvas selector.
+   * @param {string} selector - CSS selector for the canvas element
+   */
+  #updateWeatherRenderer(selector) {
+    const canvas = this.element?.querySelector(selector);
+    if (!canvas) return;
+    if (this.#weatherRenderer && this.#weatherRenderer.canvas !== canvas) {
+      log(3, 'HUD | #updateWeatherRenderer — canvas replaced, recreating renderer');
+      this.#weatherRenderer.destroy();
+      this.#weatherRenderer = null;
+    }
+    if (!this.#weatherRenderer) this.#weatherRenderer = new HudWeatherRenderer(canvas);
+    const weather = WeatherManager.getCurrentWeather();
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const preset = weather ? getPreset(weather.id, customPresets) : null;
+    const resolved = this.#resolveOverrides(preset);
+    const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
+    const { visualOverrides } = resolved;
+    this.#weatherRenderer.setEffect(
+      effect,
+      { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
+      visualOverrides
+    );
+  }
+
+  /**
+   * Apply weather-based sky color tint to gradient colors.
+   * Blends override RGB with time-of-day RGB at brightness-adaptive strength.
+   * @param {{top: string, mid: string, bottom: string}} colors - Time-of-day sky colors (rgb() strings)
+   * @returns {{top: string, mid: string, bottom: string}} Tinted colors
+   */
+  #applyWeatherSkyTint(colors) {
+    const weather = WeatherManager.getCurrentWeather();
+    if (!weather) return colors;
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const preset = getPreset(weather.id, customPresets);
+    const resolved = this.#resolveOverrides(preset);
+    const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
+    const { skyOverrides } = resolved;
+    const override = skyOverrides
+      ? {
+          strength: skyOverrides.strength ?? SKY_OVERRIDES[effect]?.strength ?? 0.7,
+          top: skyOverrides.top ?? SKY_OVERRIDES[effect]?.top,
+          mid: skyOverrides.mid ?? SKY_OVERRIDES[effect]?.mid,
+          bottom: skyOverrides.bottom ?? SKY_OVERRIDES[effect]?.bottom
+        }
+      : SKY_OVERRIDES[effect];
+    if (!override || !override.top) return colors;
+    const strength = override.strength ?? 0.7;
+    const blend = (rgbStr, overrideRgb) => {
+      const match = rgbStr.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (!match) return rgbStr;
+      const r = Math.round(parseInt(match[1]) * (1 - strength) + overrideRgb[0] * strength);
+      const g = Math.round(parseInt(match[2]) * (1 - strength) + overrideRgb[1] * strength);
+      const b = Math.round(parseInt(match[3]) * (1 - strength) + overrideRgb[2] * strength);
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+    return { top: blend(colors.top, override.top), mid: blend(colors.mid, override.mid), bottom: blend(colors.bottom, override.bottom) };
   }
 
   /**

@@ -8,6 +8,51 @@
 import { MODULE, SETTINGS } from '../constants.mjs';
 
 /**
+ * Available HUD visual effects for weather overlays (dome and slice modes).
+ * @type {string[]}
+ */
+export const HUD_EFFECTS = [
+  'clear',
+  'clouds-light',
+  'clouds-heavy',
+  'clouds-overcast',
+  'rain',
+  'rain-heavy',
+  'snow',
+  'snow-heavy',
+  'fog',
+  'lightning',
+  'sand',
+  'ashfall',
+  'embers',
+  'ice',
+  'hail',
+  'tornado',
+  'hurricane',
+  'nullstatic',
+  'gust',
+  'aurora',
+  'aether',
+  'void',
+  'spectral',
+  'arcane',
+  'arcane-wind',
+  'veil',
+  'petals',
+  'sleet',
+  'haze',
+  'leaves',
+  'smoke',
+  'rain-acid',
+  'rain-blood',
+  'meteors',
+  'spores',
+  'divine',
+  'miasma',
+  'ley-surge'
+];
+
+/**
  * Standard weather conditions - common everyday weather.
  * @type {object[]}
  */
@@ -27,7 +72,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 1.2
+    inertiaWeight: 1.2,
+    hudEffect: 'clear'
   },
   {
     id: 'partly-cloudy',
@@ -44,7 +90,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 1.0
+    inertiaWeight: 1.0,
+    hudEffect: 'clouds-light'
   },
   {
     id: 'cloudy',
@@ -61,7 +108,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 1.2
+    inertiaWeight: 1.2,
+    hudEffect: 'clouds-heavy'
   },
   {
     id: 'overcast',
@@ -78,7 +126,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 1.5
+    inertiaWeight: 1.5,
+    hudEffect: 'clouds-overcast'
   },
   {
     id: 'drizzle',
@@ -95,7 +144,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 0, direction: null },
     precipitation: { type: 'drizzle', intensity: 0.2 },
-    inertiaWeight: 1.0
+    inertiaWeight: 1.0,
+    hudEffect: 'rain'
   },
   {
     id: 'rain',
@@ -112,7 +162,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 2, direction: null },
     precipitation: { type: 'rain', intensity: 0.6 },
-    inertiaWeight: 1.3
+    inertiaWeight: 1.3,
+    hudEffect: 'rain'
   },
   {
     id: 'fog',
@@ -129,7 +180,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 0, direction: null },
     precipitation: { type: 'drizzle', intensity: 0.1 },
-    inertiaWeight: 1.5
+    inertiaWeight: 1.5,
+    hudEffect: 'fog'
   },
   {
     id: 'mist',
@@ -146,7 +198,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 1.0
+    inertiaWeight: 1.0,
+    hudEffect: 'fog'
   },
   {
     id: 'windy',
@@ -163,7 +216,8 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 3, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 1.0
+    inertiaWeight: 1.0,
+    hudEffect: 'gust'
   },
   {
     id: 'sunshower',
@@ -180,7 +234,62 @@ export const STANDARD_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.3 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'rain'
+  },
+  {
+    id: 'snow',
+    label: 'CALENDARIA.Weather.Snow',
+    description: 'CALENDARIA.Weather.SnowDesc',
+    icon: 'fa-snowflake',
+    color: '#FFFFFF',
+    category: 'standard',
+    chance: 1,
+    tempMin: -10,
+    tempMax: 2,
+    darknessPenalty: 0.1,
+    environmentBase: { hue: 200, saturation: 0.6 },
+    environmentDark: null,
+    wind: { speed: 1, direction: null },
+    precipitation: { type: 'snow', intensity: 0.5 },
+    inertiaWeight: 1.3,
+    hudEffect: 'snow'
+  },
+  {
+    id: 'sleet',
+    label: 'CALENDARIA.Weather.Sleet',
+    description: 'CALENDARIA.Weather.SleetDesc',
+    icon: 'fa-cloud-rain',
+    color: '#C0D8E8',
+    category: 'standard',
+    chance: 1,
+    tempMin: -2,
+    tempMax: 4,
+    darknessPenalty: 0.15,
+    environmentBase: { hue: 200, saturation: 0.5 },
+    environmentDark: null,
+    wind: { speed: 2, direction: null },
+    precipitation: { type: 'sleet', intensity: 0.5 },
+    inertiaWeight: 1.0,
+    hudEffect: 'sleet'
+  },
+  {
+    id: 'heat-wave',
+    label: 'CALENDARIA.Weather.HeatWave',
+    description: 'CALENDARIA.Weather.HeatWaveDesc',
+    icon: 'fa-temperature-arrow-up',
+    color: '#FF9944',
+    category: 'standard',
+    chance: 1,
+    tempMin: 35,
+    tempMax: 48,
+    darknessPenalty: 0,
+    environmentBase: { hue: 30, saturation: 0.4 },
+    environmentDark: null,
+    wind: { speed: 0, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.5,
+    hudEffect: 'haze'
   }
 ];
 
@@ -193,8 +302,8 @@ export const SEVERE_WEATHER = [
     id: 'thunderstorm',
     label: 'CALENDARIA.Weather.Thunderstorm',
     description: 'CALENDARIA.Weather.ThunderstormDesc',
-    icon: 'fa-bolt',
-    color: '#FFD966',
+    icon: 'fa-cloud-bolt',
+    color: '#3D3560',
     category: 'severe',
     chance: 2,
     tempMin: 15,
@@ -204,14 +313,15 @@ export const SEVERE_WEATHER = [
     environmentDark: null,
     wind: { speed: 4, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 0.9 },
-    inertiaWeight: 0.3
+    inertiaWeight: 0.3,
+    hudEffect: 'lightning'
   },
   {
     id: 'blizzard',
     label: 'CALENDARIA.Weather.Blizzard',
     description: 'CALENDARIA.Weather.BlizzardDesc',
-    icon: 'fa-snowman',
-    color: '#E0F7FF',
+    icon: 'fa-snowflake',
+    color: '#C8DCE8',
     category: 'severe',
     chance: 0.5,
     tempMin: -20,
@@ -221,24 +331,8 @@ export const SEVERE_WEATHER = [
     environmentDark: { hue: 210, saturation: null },
     wind: { speed: 5, direction: null, forced: true },
     precipitation: { type: 'snow', intensity: 1.0 },
-    inertiaWeight: 0.5
-  },
-  {
-    id: 'snow',
-    label: 'CALENDARIA.Weather.Snow',
-    description: 'CALENDARIA.Weather.SnowDesc',
-    icon: 'fa-snowflake',
-    color: '#FFFFFF',
-    category: 'severe',
-    chance: 1,
-    tempMin: -10,
-    tempMax: 2,
-    darknessPenalty: 0.1,
-    environmentBase: { hue: 200, saturation: 0.6 },
-    environmentDark: null,
-    wind: { speed: 1, direction: null },
-    precipitation: { type: 'snow', intensity: 0.5 },
-    inertiaWeight: 1.3
+    inertiaWeight: 0.5,
+    hudEffect: 'snow-heavy'
   },
   {
     id: 'hail',
@@ -255,14 +349,15 @@ export const SEVERE_WEATHER = [
     environmentDark: null,
     wind: { speed: 3, direction: null },
     precipitation: { type: 'hail', intensity: 0.7 },
-    inertiaWeight: 0.3
+    inertiaWeight: 0.3,
+    hudEffect: 'hail'
   },
   {
     id: 'tornado',
     label: 'CALENDARIA.Weather.Tornado',
     description: 'CALENDARIA.Weather.TornadoDesc',
-    icon: 'fa-poo-storm',
-    color: '#FFD1DC',
+    icon: 'fa-tornado',
+    color: '#4A5A3A',
     category: 'severe',
     chance: 0.5,
     tempMin: 18,
@@ -272,14 +367,15 @@ export const SEVERE_WEATHER = [
     environmentDark: null,
     wind: { speed: 5, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 0.8 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'tornado'
   },
   {
     id: 'hurricane',
     label: 'CALENDARIA.Weather.Hurricane',
     description: 'CALENDARIA.Weather.HurricaneDesc',
     icon: 'fa-hurricane',
-    color: '#FFE599',
+    color: '#445566',
     category: 'severe',
     chance: 0.5,
     tempMin: 22,
@@ -289,7 +385,44 @@ export const SEVERE_WEATHER = [
     environmentDark: null,
     wind: { speed: 5, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 1.0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'hurricane'
+  },
+  {
+    id: 'ice-storm',
+    label: 'CALENDARIA.Weather.IceStorm',
+    description: 'CALENDARIA.Weather.IceStormDesc',
+    icon: 'fa-icicles',
+    color: '#A0C8E0',
+    category: 'severe',
+    chance: 0.5,
+    tempMin: -10,
+    tempMax: 0,
+    darknessPenalty: 0.25,
+    environmentBase: { hue: 200, saturation: 0.5 },
+    environmentDark: { hue: 210, saturation: 0.4 },
+    wind: { speed: 4, direction: null, forced: true },
+    precipitation: { type: 'hail', intensity: 0.8 },
+    inertiaWeight: 0.3,
+    hudEffect: 'ice'
+  },
+  {
+    id: 'monsoon',
+    label: 'CALENDARIA.Weather.Monsoon',
+    description: 'CALENDARIA.Weather.MonsoonDesc',
+    icon: 'fa-cloud-showers-water',
+    color: '#3A6080',
+    category: 'severe',
+    chance: 0.5,
+    tempMin: 22,
+    tempMax: 35,
+    darknessPenalty: 0.3,
+    environmentBase: { hue: null, saturation: 0.4 },
+    environmentDark: null,
+    wind: { speed: 4, direction: null, forced: true },
+    precipitation: { type: 'rain', intensity: 1.0 },
+    inertiaWeight: 0.5,
+    hudEffect: 'rain-heavy'
   }
 ];
 
@@ -302,8 +435,8 @@ export const ENVIRONMENTAL_WEATHER = [
     id: 'ashfall',
     label: 'CALENDARIA.Weather.Ashfall',
     description: 'CALENDARIA.Weather.AshfallDesc',
-    icon: 'fa-cloud',
-    color: '#DADADA',
+    icon: 'fa-volcano',
+    color: '#8B5A30',
     category: 'environmental',
     chance: 1.5,
     tempMin: 15,
@@ -313,14 +446,15 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0.5
+    inertiaWeight: 0.5,
+    hudEffect: 'ashfall'
   },
   {
     id: 'sandstorm',
     label: 'CALENDARIA.Weather.Sandstorm',
     description: 'CALENDARIA.Weather.SandstormDesc',
-    icon: 'fa-cloud-sun',
-    color: '#F4E1A1',
+    icon: 'fa-wind',
+    color: '#C49A44',
     category: 'environmental',
     chance: 1.5,
     tempMin: 25,
@@ -330,14 +464,15 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentDark: null,
     wind: { speed: 4, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0.3
+    inertiaWeight: 0.3,
+    hudEffect: 'sand'
   },
   {
     id: 'luminous-sky',
     label: 'CALENDARIA.Weather.LuminousSky',
     description: 'CALENDARIA.Weather.LuminousSkyDesc',
     icon: 'fa-star',
-    color: '#E0BBFF',
+    color: '#2E8B57',
     category: 'environmental',
     chance: 1.5,
     tempMin: -5,
@@ -347,13 +482,14 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentDark: { hue: 280, saturation: 0.8 },
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'aurora'
   },
   {
     id: 'sakura-bloom',
     label: 'CALENDARIA.Weather.SakuraBloom',
     description: 'CALENDARIA.Weather.SakuraBloomDesc',
-    icon: 'fa‑flower',
+    icon: 'fa-spa',
     color: '#ffb7c5',
     category: 'environmental',
     chance: 1.5,
@@ -364,7 +500,80 @@ export const ENVIRONMENTAL_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'petals'
+  },
+  {
+    id: 'autumn-leaves',
+    label: 'CALENDARIA.Weather.AutumnLeaves',
+    description: 'CALENDARIA.Weather.AutumnLeavesDesc',
+    icon: 'fa-leaf',
+    color: '#CC7733',
+    category: 'environmental',
+    chance: 1.5,
+    tempMin: 5,
+    tempMax: 18,
+    darknessPenalty: 0,
+    environmentBase: { hue: 30, saturation: 0.6 },
+    environmentDark: null,
+    wind: { speed: 1, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0,
+    hudEffect: 'leaves'
+  },
+  {
+    id: 'rolling-fog',
+    label: 'CALENDARIA.Weather.RollingFog',
+    description: 'CALENDARIA.Weather.RollingFogDesc',
+    icon: 'fa-smog',
+    color: '#D0D0D0',
+    category: 'environmental',
+    chance: 1.5,
+    tempMin: 2,
+    tempMax: 12,
+    darknessPenalty: 0.25,
+    environmentBase: { hue: null, saturation: 0.2 },
+    environmentDark: null,
+    wind: { speed: 0, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 1.5,
+    hudEffect: 'fog'
+  },
+  {
+    id: 'wildfire-smoke',
+    label: 'CALENDARIA.Weather.WildfireSmoke',
+    description: 'CALENDARIA.Weather.WildfireSmokeDesc',
+    icon: 'fa-fire',
+    color: '#8B6040',
+    category: 'environmental',
+    chance: 1,
+    tempMin: 20,
+    tempMax: 40,
+    darknessPenalty: 0.3,
+    environmentBase: { hue: 25, saturation: 0.5 },
+    environmentDark: null,
+    wind: { speed: 1, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0.5,
+    hudEffect: 'smoke'
+  },
+  {
+    id: 'dust-devil',
+    label: 'CALENDARIA.Weather.DustDevil',
+    description: 'CALENDARIA.Weather.DustDevilDesc',
+    icon: 'fa-wind',
+    color: '#C8A060',
+    category: 'environmental',
+    chance: 1,
+    tempMin: 28,
+    tempMax: 45,
+    darknessPenalty: 0.1,
+    environmentBase: { hue: 35, saturation: 0.5 },
+    environmentDark: null,
+    wind: { speed: 3, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0,
+    hudEffect: 'sand'
   }
 ];
 
@@ -377,8 +586,8 @@ export const FANTASY_WEATHER = [
     id: 'black-sun',
     label: 'CALENDARIA.Weather.BlackSun',
     description: 'CALENDARIA.Weather.BlackSunDesc',
-    icon: 'fa-sun',
-    color: '#4A4A4A',
+    icon: 'fa-circle',
+    color: '#1A0E22',
     category: 'fantasy',
     chance: 0.5,
     tempMin: 5,
@@ -388,14 +597,15 @@ export const FANTASY_WEATHER = [
     environmentDark: { hue: 280, saturation: 0.4 },
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'void'
   },
   {
     id: 'ley-surge',
     label: 'CALENDARIA.Weather.LeySurge',
     description: 'CALENDARIA.Weather.LeySurgeDesc',
-    icon: 'fa-bolt',
-    color: '#B3E5FC',
+    icon: 'fa-wand-sparkles',
+    color: '#3A9BDC',
     category: 'fantasy',
     chance: 0,
     tempMin: 10,
@@ -405,14 +615,15 @@ export const FANTASY_WEATHER = [
     environmentDark: { hue: 200, saturation: 0.8 },
     wind: { speed: 2, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'ley-surge'
   },
   {
     id: 'aether-haze',
     label: 'CALENDARIA.Weather.AetherHaze',
     description: 'CALENDARIA.Weather.AetherHazeDesc',
     icon: 'fa-smog',
-    color: '#E6CCFF',
+    color: '#7B3F96',
     category: 'fantasy',
     chance: 0,
     tempMin: 12,
@@ -422,14 +633,15 @@ export const FANTASY_WEATHER = [
     environmentDark: { hue: 270, saturation: 0.7 },
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'aether'
   },
   {
     id: 'nullfront',
     label: 'CALENDARIA.Weather.Nullfront',
     description: 'CALENDARIA.Weather.NullfrontDesc',
     icon: 'fa-ban',
-    color: '#808080',
+    color: '#2A2030',
     category: 'fantasy',
     chance: 0,
     tempMin: 0,
@@ -439,14 +651,15 @@ export const FANTASY_WEATHER = [
     environmentDark: { hue: null, saturation: 0.1 },
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'nullstatic'
   },
   {
     id: 'permafrost-surge',
     label: 'CALENDARIA.Weather.PermafrostSurge',
     description: 'CALENDARIA.Weather.PermafrostSurgeDesc',
     icon: 'fa-icicles',
-    color: '#D0FFFF',
+    color: '#A8D8EA',
     category: 'fantasy',
     chance: 0,
     tempMin: -30,
@@ -456,14 +669,15 @@ export const FANTASY_WEATHER = [
     environmentDark: { hue: 200, saturation: 0.6 },
     wind: { speed: 3, direction: null },
     precipitation: { type: 'snow', intensity: 0.4 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'ice'
   },
   {
     id: 'gravewind',
     label: 'CALENDARIA.Weather.Gravewind',
     description: 'CALENDARIA.Weather.GravewindDesc',
-    icon: 'fa-wind',
-    color: '#C9C9FF',
+    icon: 'fa-ghost',
+    color: '#3A5040',
     category: 'fantasy',
     chance: 0,
     tempMin: 5,
@@ -473,14 +687,15 @@ export const FANTASY_WEATHER = [
     environmentDark: { hue: 260, saturation: 0.6 },
     wind: { speed: 3, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'spectral'
   },
   {
     id: 'veilfall',
     label: 'CALENDARIA.Weather.Veilfall',
     description: 'CALENDARIA.Weather.VeilfallDesc',
-    icon: 'fa-water',
-    color: '#E0F7F9',
+    icon: 'fa-droplet',
+    color: '#6A5A8E',
     category: 'fantasy',
     chance: 0,
     tempMin: 8,
@@ -490,14 +705,15 @@ export const FANTASY_WEATHER = [
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.3 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'veil'
   },
   {
     id: 'arcane',
     label: 'CALENDARIA.Weather.Arcane',
     description: 'CALENDARIA.Weather.ArcaneDesc',
-    icon: 'fa-wind',
-    color: '#FFFACD',
+    icon: 'fa-hat-wizard',
+    color: '#8A40B0',
     category: 'fantasy',
     chance: 0,
     tempMin: 15,
@@ -507,7 +723,116 @@ export const FANTASY_WEATHER = [
     environmentDark: null,
     wind: { speed: 2, direction: null },
     precipitation: { type: null, intensity: 0 },
-    inertiaWeight: 0
+    inertiaWeight: 0,
+    hudEffect: 'arcane-wind'
+  },
+  {
+    id: 'acid-rain',
+    label: 'CALENDARIA.Weather.AcidRain',
+    description: 'CALENDARIA.Weather.AcidRainDesc',
+    icon: 'fa-flask',
+    color: '#55BB33',
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 10,
+    tempMax: 25,
+    darknessPenalty: 0.15,
+    environmentBase: { hue: 100, saturation: 0.6 },
+    environmentDark: null,
+    wind: { speed: 1, direction: null },
+    precipitation: { type: 'rain', intensity: 0.6 },
+    inertiaWeight: 0,
+    hudEffect: 'rain-acid'
+  },
+  {
+    id: 'blood-rain',
+    label: 'CALENDARIA.Weather.BloodRain',
+    description: 'CALENDARIA.Weather.BloodRainDesc',
+    icon: 'fa-droplet',
+    color: '#880022',
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 12,
+    tempMax: 28,
+    darknessPenalty: 0.2,
+    environmentBase: { hue: 0, saturation: 0.7 },
+    environmentDark: { hue: 350, saturation: 0.6 },
+    wind: { speed: 1, direction: null },
+    precipitation: { type: 'rain', intensity: 0.7 },
+    inertiaWeight: 0,
+    hudEffect: 'rain-blood'
+  },
+  {
+    id: 'meteor-shower',
+    label: 'CALENDARIA.Weather.MeteorShower',
+    description: 'CALENDARIA.Weather.MeteorShowerDesc',
+    icon: 'fa-meteor',
+    color: '#FF6622',
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 10,
+    tempMax: 30,
+    darknessPenalty: -0.1,
+    environmentBase: null,
+    environmentDark: { hue: 20, saturation: 0.7 },
+    wind: { speed: 0, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0,
+    hudEffect: 'meteors'
+  },
+  {
+    id: 'spore-cloud',
+    label: 'CALENDARIA.Weather.SporeCloud',
+    description: 'CALENDARIA.Weather.SporeCloudDesc',
+    icon: 'fa-disease',
+    color: '#88AA44',
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 15,
+    tempMax: 28,
+    darknessPenalty: 0.15,
+    environmentBase: { hue: 80, saturation: 0.5 },
+    environmentDark: { hue: 90, saturation: 0.4 },
+    wind: { speed: 0, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0,
+    hudEffect: 'spores'
+  },
+  {
+    id: 'divine-light',
+    label: 'CALENDARIA.Weather.DivineLight',
+    description: 'CALENDARIA.Weather.DivineLightDesc',
+    icon: 'fa-sun',
+    color: '#FFD700',
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 18,
+    tempMax: 30,
+    darknessPenalty: -0.2,
+    environmentBase: { hue: 45, saturation: 0.9 },
+    environmentDark: null,
+    wind: { speed: 0, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0,
+    hudEffect: 'divine'
+  },
+  {
+    id: 'plague-miasma',
+    label: 'CALENDARIA.Weather.PlagueMiasma',
+    description: 'CALENDARIA.Weather.PlagueMiasmaDesc',
+    icon: 'fa-biohazard',
+    color: '#556B2F',
+    category: 'fantasy',
+    chance: 0,
+    tempMin: 10,
+    tempMax: 22,
+    darknessPenalty: 0.25,
+    environmentBase: { hue: 80, saturation: 0.4 },
+    environmentDark: { hue: 90, saturation: 0.3 },
+    wind: { speed: 0, direction: null },
+    precipitation: { type: null, intensity: 0 },
+    inertiaWeight: 0,
+    hudEffect: 'miasma'
   }
 ];
 
