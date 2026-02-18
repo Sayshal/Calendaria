@@ -111,48 +111,15 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-presets">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherEditor"}}</legend>
       <div class="fieldset-header-row">
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.Hint"}}</p>
-        <button type="button" data-action="addWeatherPreset" class="add-button" data-tooltip
-          aria-label="{{localize 'CALENDARIA.SettingsPanel.WeatherPresets.AddTooltip'}}">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Add"}}
+        <p class="hint section-hint">{{localize "CALENDARIA.WeatherEditor.SectionHint"}}</p>
+        <button type="button" data-action="openWeatherEditor" class="add-button" data-tooltip
+          aria-label="{{localize 'CALENDARIA.WeatherEditor.Title'}}">
+          <i class="fas fa-cloud-sun"></i>
+          {{localize "CALENDARIA.WeatherEditor.OpenEditor"}}
         </button>
       </div>
-
-      {{#if customWeatherPresets.length}}
-        <div class="weather-presets-grid">
-          <div class="weather-presets-header">
-            <span></span>
-            <span></span>
-            <span>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder"}}</span>
-            <span>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.TempRange"}}</span>
-            <span>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenalty"}}</span>
-            <span></span>
-          </div>
-          {{#each customWeatherPresets}}
-            <div class="weather-preset-row" data-preset-id="{{this.id}}">
-              <span class="preset-color-swatch" style="background-color: {{this.color}}"></span>
-              <i class="fas {{this.icon}} preset-icon-display"></i>
-              <span class="preset-label">{{this.label}}</span>
-              <span class="preset-temp-display">{{this.tempMin}} – {{this.tempMax}}
-                {{@root.temperatureUnitSymbol}}</span>
-              <span class="preset-darkness-display">{{this.darknessPenalty}}</span>
-              <span class="preset-actions">
-                <button type="button" data-action="editWeatherPreset" data-preset-id="{{this.id}}" class="icon-button"
-                  data-tooltip aria-label="{{localize 'CALENDARIA.Common.Edit'}}">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" data-action="removeWeatherPreset" data-preset-id="{{this.id}}"
-                  class="icon-button danger" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Delete'}}">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </span>
-            </div>
-          {{/each}}
-        </div>
-      {{/if}}
     </fieldset>
   {{/if}}
 

@@ -1224,6 +1224,14 @@ export function registerSettings() {
     type: new ObjectField({ initial: {} })
   });
 
+  /** Visual overrides for built-in weather presets */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, {
+    name: 'Weather Visual Overrides',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
   // ========================================//
   //  Timepoints                             //
   // ========================================//

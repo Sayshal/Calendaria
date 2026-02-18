@@ -2841,18 +2841,6 @@ span.calendaria-moon-icon {
     button {
       flex: none;
       width: fit-content;
-      border: 0.0625rem solid var(--button-border-color);
-
-      &:hover {
-        border-color: var(--button-hover-border-color);
-        color: var(--button-hover-text-color);
-        background: var(--button-hover-background-color);
-      }
-
-      &:focus {
-        outline: 0.0625rem solid var(--button-focus-outline-color);
-        box-shadow: 0 0 0.25rem var(--button-focus-outline-color);
-      }
 
       &[data-action='exportCalendar'] {
         flex: 1;
@@ -2860,16 +2848,6 @@ span.calendaria-moon-icon {
 
       &[data-action='saveCalendar'] {
         flex: 2;
-      }
-
-      &.primary {
-        border: 0.0625rem solid var(--button-border-color);
-        background: var(--button-background-color);
-
-        &:hover {
-          border-color: var(--button-hover-border-color);
-          background: var(--button-hover-background-color);
-        }
       }
     }
   }
@@ -5387,62 +5365,16 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
-/* Clouds                                   */
+/* Weather Canvas (Pixi particle overlay)   */
 /* ======================================== */
-.calendaria-hud-clouds {
+.calendaria-hud-weather-canvas,
+.calendaria-slice-weather-canvas {
+  position: absolute;
   inset: 0;
-  opacity: 0;
   z-index: 2;
-  position: absolute;
-  overflow: hidden;
   pointer-events: none;
-  transition: opacity 1s ease;
-}
-
-.calendaria-hud-clouds.visible {
-  opacity: 1;
-}
-
-.calendaria-hud-clouds::before,
-.calendaria-hud-clouds::after {
-  position: absolute;
-  border-radius: 50%;
-  content: '';
-  background: rgb(255 255 255 / 35%);
-  filter: blur(0.125rem);
-}
-
-.calendaria-hud-clouds::before {
-  top: 1.5625rem;
-  left: -2.5rem;
-  width: 2.1875rem;
-  height: 0.875rem;
-  box-shadow:
-    0.5rem -0.25rem 0 -0.125rem rgb(255 255 255 / 30%),
-    1rem 0 0 -0.0625rem rgb(255 255 255 / 25%);
-  animation: calendaria-clouds-drift 25s linear infinite;
-}
-
-.calendaria-hud-clouds::after {
-  top: 2.8125rem;
-  left: -1.875rem;
-  width: 1.75rem;
-  height: 0.6875rem;
-  box-shadow:
-    0.375rem -0.1875rem 0 -0.0625rem rgb(255 255 255 / 28%),
-    0.75rem 0 0 0 rgb(255 255 255 / 22%);
-  animation: calendaria-clouds-drift 35s linear infinite;
-  animation-delay: 8s;
-}
-
-@keyframes calendaria-clouds-drift {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(13.75rem);
-  }
+  width: 100%;
+  height: 100%;
 }
 
 /* ======================================== */
@@ -7347,89 +7279,11 @@ span.calendaria-moon-icon {
     }
   }
 
-  .weather-presets-grid {
-    margin-bottom: 0.75rem;
-  }
-
-  .weather-presets-header,
-  .weather-preset-row {
-    gap: 0.5rem;
-    grid-template-columns: 2rem 2rem minmax(6rem, 1fr) 5rem 4rem 4rem;
-    display: grid;
-    align-items: center;
-    padding: 0.25rem 0;
-  }
-
-  .weather-presets-header {
-    margin-bottom: 0.25rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    font-size: var(--font-size-13);
-
-    span {
-      text-align: center;
-    }
-  }
-
-  .weather-preset-row {
-    border-bottom: 0.0625rem solid var(--color-border-light-secondary);
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .preset-color-swatch {
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 0.0625rem solid var(--color-border-light-tertiary);
-      border-radius: 0.25rem;
-    }
-
-    .preset-icon-display {
-      color: var(--color-text-secondary);
-      text-align: center;
-    }
-
-    .preset-label {
-      overflow: hidden;
-      font-weight: 500;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .preset-temp-display {
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-13);
-      text-align: center;
-    }
-
-    .preset-darkness-display {
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-13);
-      text-align: center;
-    }
-
-    .preset-actions {
-      gap: 0.25rem;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .icon-button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 1.75rem;
-      height: 1.75rem;
-      padding: 0;
-
-      &.danger:hover {
-        color: var(--color-text-light-highlight);
-        background: var(--color-level-error);
-      }
-    }
+  .preset-color-swatch {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.0625rem solid var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
   }
 
   .automation-info {
@@ -7924,6 +7778,66 @@ span.calendaria-moon-icon {
 
   .no-results {
     color: var(--color-text-dark-5);
+  }
+}
+
+/* ======================================== */
+/* Weather Preset Manager                  */
+/* ======================================== */
+
+#calendaria-weather-editor {
+  footer.form-footer {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-top: 0.0625rem solid var(--color-cool-4);
+    background: var(--color-cool-5);
+
+    button {
+      flex: none;
+      width: fit-content;
+
+      &.primary {
+        flex: 1;
+      }
+    }
+  }
+
+  .form-fields.range > i {
+    flex: 0 0 0.5rem;
+    text-align: center;
+  }
+
+  nav.sheet-tabs {
+    min-width: 8.25rem;
+    max-width: 8.25rem;
+    overflow: hidden auto;
+    scrollbar-gutter: stable;
+  }
+
+  .preset-editor {
+    .readonly-value {
+      color: var(--color-text-secondary);
+      font-style: italic;
+    }
+  }
+
+  .no-preset-selected {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  .preset-color-swatch {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.0625rem solid var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
   }
 }
 

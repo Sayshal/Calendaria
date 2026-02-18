@@ -119,7 +119,8 @@ export const SETTINGS = {
   WEATHER_HISTORY_DAYS: 'weatherHistoryDays',
   WEATHER_HISTORY: 'weatherHistory',
   WEATHER_INERTIA: 'weatherInertia',
-  WEATHER_PRESET_ALIASES: 'weatherPresetAliases'
+  WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
+  WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides'
 };
 
 /**
@@ -168,7 +169,9 @@ export const TEMPLATES = {
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
     PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/settings/tab-stopwatch.hbs`,
-    PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`
+    PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`,
+    WEATHER_EDITOR: `modules/${MODULE.ID}/templates/settings/weather-editor.hbs`,
+    WEATHER_EDITOR_FOOTER: `modules/${MODULE.ID}/templates/settings/weather-editor-footer.hbs`
   },
   PARTIALS: {
     SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,

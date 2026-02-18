@@ -1,0 +1,212 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  {{#if preset}}
+    <div class="preset-editor">
+
+      {{!-- Weather Info --}}
+      <fieldset>
+        <legend>{{localize "CALENDARIA.WeatherEditor.WeatherInfo"}}</legend>
+        <div class="form-group">
+          <label for="{{preset.id}}-label">{{localize "CALENDARIA.WeatherEditor.Name"}}</label>
+          <div class="form-fields">
+            <input type="text" id="{{preset.id}}-label" name="{{preset.id}}.label" value="{{preset.label}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.NameHint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="{{preset.id}}-icon">{{localize "CALENDARIA.WeatherEditor.Icon"}}</label>
+          <div class="form-fields">
+            <input type="text" id="{{preset.id}}-icon" name="{{preset.id}}.icon" value="{{preset.icon}}"
+              placeholder="fa-cloud">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.IconHint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="{{preset.id}}-color">{{localize "CALENDARIA.WeatherEditor.Color"}}</label>
+          <div class="form-fields">
+            <input type="color" id="{{preset.id}}-color" name="{{preset.id}}.color" value="{{preset.color}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.ColorHint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="{{preset.id}}-hudEffect">{{localize "CALENDARIA.WeatherEditor.HudEffect"}}</label>
+          <div class="form-fields">
+            <select id="{{preset.id}}-hudEffect" name="{{preset.id}}.hudEffect">
+              {{#each hudEffectOptions}}
+                <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.HudEffectHint"}}</p>
+        </div>
+      </fieldset>
+
+      {{!-- Environment Lighting --}}
+      <fieldset>
+        <legend>{{localize "CALENDARIA.WeatherEditor.EnvironmentLighting"}}</legend>
+        <p class="hint">{{localize "CALENDARIA.WeatherEditor.EnvironmentLightingHint"}}</p>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.DayHue"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.baseHue" min="0" max="360" step="1" value="{{preset.baseHue}}"
+              placeholder="{{defaults.baseHue}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.DayHueHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.DaySaturation"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.baseSaturation" min="0" max="1" step="0.1"
+              value="{{preset.baseSaturation}}" placeholder="{{defaults.baseSaturation}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.DaySaturationHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.NightHue"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.darkHue" min="0" max="360" step="1" value="{{preset.darkHue}}"
+              placeholder="{{defaults.darkHue}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.NightHueHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.NightSaturation"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.darkSaturation" min="0" max="1" step="0.1"
+              value="{{preset.darkSaturation}}" placeholder="{{defaults.darkSaturation}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.NightSaturationHint"}}</p>
+        </div>
+      </fieldset>
+
+      {{!-- HUD Visuals --}}
+      <fieldset>
+        <legend>{{localize "CALENDARIA.WeatherEditor.HudVisuals"}}</legend>
+        <p class="hint">{{localize "CALENDARIA.WeatherEditor.HudVisualsHint"}}</p>
+
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Count"}}</label>
+          <div class="form-fields range">
+            <input type="number" name="{{preset.id}}.vo-count-min" value="{{visuals.countMin}}"
+              placeholder="{{defaults.countMin}}" min="0" max="500" step="1">
+            <i class="fa-solid fa-right-long"></i>
+            <input type="number" name="{{preset.id}}.vo-count-max" value="{{visuals.countMax}}"
+              placeholder="{{defaults.countMax}}" min="0" max="500" step="1">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.CountHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Scale"}}</label>
+          <div class="form-fields range">
+            <input type="number" name="{{preset.id}}.vo-scale-min" value="{{visuals.scaleMin}}"
+              placeholder="{{defaults.scaleMin}}" min="0" max="10" step="0.1">
+            <i class="fa-solid fa-right-long"></i>
+            <input type="number" name="{{preset.id}}.vo-scale-max" value="{{visuals.scaleMax}}"
+              placeholder="{{defaults.scaleMax}}" min="0" max="10" step="0.1">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.ScaleHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Alpha"}}</label>
+          <div class="form-fields range">
+            <input type="number" name="{{preset.id}}.vo-alpha-min" value="{{visuals.alphaMin}}"
+              placeholder="{{defaults.alphaMin}}" min="0" max="1" step="0.05">
+            <i class="fa-solid fa-right-long"></i>
+            <input type="number" name="{{preset.id}}.vo-alpha-max" value="{{visuals.alphaMax}}"
+              placeholder="{{defaults.alphaMax}}" min="0" max="1" step="0.05">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.AlphaHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedX"}}</label>
+          <div class="form-fields range">
+            <input type="number" name="{{preset.id}}.vo-speedx-min" value="{{visuals.speedXMin}}"
+              placeholder="{{defaults.speedXMin}}" step="0.1">
+            <i class="fa-solid fa-right-long"></i>
+            <input type="number" name="{{preset.id}}.vo-speedx-max" value="{{visuals.speedXMax}}"
+              placeholder="{{defaults.speedXMax}}" step="0.1">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedXHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedY"}}</label>
+          <div class="form-fields range">
+            <input type="number" name="{{preset.id}}.vo-speedy-min" value="{{visuals.speedYMin}}"
+              placeholder="{{defaults.speedYMin}}" step="0.1">
+            <i class="fa-solid fa-right-long"></i>
+            <input type="number" name="{{preset.id}}.vo-speedy-max" value="{{visuals.speedYMax}}"
+              placeholder="{{defaults.speedYMax}}" step="0.1">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedYHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Gravity"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.vo-gravity" value="{{visuals.gravity}}"
+              placeholder="{{defaults.gravity}}" step="0.005">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.GravityHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Wobble"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.vo-wobble" value="{{visuals.wobble}}"
+              placeholder="{{defaults.wobble}}" step="0.005">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.WobbleHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.PrimaryColor"}}</label>
+          <div class="form-fields">
+            <input type="color" name="{{preset.id}}.vo-tint-primary" value="{{visuals.tintPrimary}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.PrimaryColorHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SecondaryColor"}}</label>
+          <div class="form-fields">
+            <input type="color" name="{{preset.id}}.vo-tint-secondary" value="{{visuals.tintSecondary}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SecondaryColorHint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyStrength"}}</label>
+          <div class="form-fields">
+            <input type="number" name="{{preset.id}}.so-strength" value="{{sky.strength}}"
+              placeholder="{{defaults.skyStrength}}" min="0" max="1" step="0.05">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyStrengthHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyTop"}}</label>
+          <div class="form-fields">
+            <input type="color" name="{{preset.id}}.so-top" value="{{sky.top}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyTopHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyMid"}}</label>
+          <div class="form-fields">
+            <input type="color" name="{{preset.id}}.so-mid" value="{{sky.mid}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyMidHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyBottom"}}</label>
+          <div class="form-fields">
+            <input type="color" name="{{preset.id}}.so-bottom" value="{{sky.bottom}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyBottomHint"}}</p>
+        </div>
+      </fieldset>
+
+    </div>
+  {{else}}
+    <div class="no-preset-selected">
+      <p>{{localize "CALENDARIA.WeatherEditor.SelectWeather"}}</p>
+    </div>
+  {{/if}}
+</section>
