@@ -274,12 +274,14 @@ export function buildWeatherLookup() {
   const todayYear = today.year + yz;
   const todayMonth = today.month;
   const todayDay = (today.dayOfMonth ?? 0) + 1;
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+  const zoneId = zone?.id;
   let lookup = null;
   if (canViewWeatherForecast() && calendar?.weather?.autoGenerate) {
-    const forecast = WeatherManager.getForecast();
+    const forecast = WeatherManager.getForecast({ zoneId });
     lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.day}`, f]));
   }
-  return { lookup, todayYear, todayMonth, todayDay };
+  return { lookup, todayYear, todayMonth, todayDay, zoneId };
 }
 
 /**
@@ -296,12 +298,12 @@ export function buildWeatherLookup() {
  * @returns {object|null} Weather data with icon, color, label, temperature, isForecast, isVaried
  */
 export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
-  const { todayYear, todayMonth, todayDay } = todayInfo;
+  const { todayYear, todayMonth, todayDay, zoneId } = todayInfo;
   const isCurrentDay = year === todayYear && month === todayMonth && day === todayDay;
   if (isCurrentDay) {
-    const w = WeatherManager.getCurrentWeather();
+    const w = WeatherManager.getCurrentWeather(zoneId);
     if (!w) return null;
-    const temp = WeatherManager.getTemperature();
+    const temp = WeatherManager.getTemperature(zoneId);
     return {
       icon: w.icon,
       color: w.color,
@@ -315,7 +317,7 @@ export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
     };
   }
   // Past day — check history
-  const hist = WeatherManager.getWeatherForDate(year, month, day);
+  const hist = WeatherManager.getWeatherForDate(year, month, day, zoneId);
   if (hist)
     return {
       icon: hist.icon,

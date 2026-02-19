@@ -1751,7 +1751,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object|null} Weather context or null if no weather set
    */
   _getWeatherContext() {
-    const weather = WeatherManager.getCurrentWeather();
+    const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     if (!weather) return null;
     const label = localize(weather.label);
     const windSpeed = weather.wind?.speed ?? 0;

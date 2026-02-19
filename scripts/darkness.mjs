@@ -84,7 +84,7 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   }
   const weatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
   if (weatherSync) {
-    const currentWeather = WeatherManager.getCurrentWeather?.();
+    const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
     const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
     adjustedDarkness += weatherDarknessPenalty;
   }
@@ -212,7 +212,7 @@ function lerpHue(a, b, t) {
 export function calculateEnvironmentLighting(scene) {
   const colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
   const activeZone = WeatherManager.getActiveZone?.(null, scene);
-  const currentWeather = WeatherManager.getCurrentWeather?.();
+  const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
   let base = { hue: null, intensity: null, luminosity: null };
   let dark = { hue: null, intensity: null, luminosity: null };
   if (colorShiftSync) {
