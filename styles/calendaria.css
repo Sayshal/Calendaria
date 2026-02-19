@@ -8441,3 +8441,9 @@ span.calendaria-moon-icon {
     margin-bottom: 0.25rem;
   }
 }
+
+/* FXMaster disabled state for Plus-only settings */
+.fxmaster-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

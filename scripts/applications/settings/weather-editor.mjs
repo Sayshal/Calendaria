@@ -7,6 +7,7 @@
  */
 
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
+import { isFXMasterActive, getAvailableFxPresets } from '../../integrations/fxmaster.mjs';
 import { ALL_PRESETS, HUD_EFFECTS, WEATHER_CATEGORIES } from '../../weather/weather-presets.mjs';
 import { getEffectDefaults } from '../hud-weather-renderer.mjs';
 import { SKY_OVERRIDES } from '../hud.mjs';
@@ -231,6 +232,18 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       selected: e === effectId
     })).sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
 
+    // FXMaster preset dropdown (only if FXMaster is active)
+    context.hasFXMaster = isFXMasterActive();
+    if (context.hasFXMaster) {
+      const currentFxPreset = isCustom ? preset.fxPreset || '' : overrides.fxPreset !== undefined ? overrides.fxPreset || '' : builtinPreset.fxPreset || '';
+      context.preset.fxPreset = currentFxPreset;
+      const fxPresets = getAvailableFxPresets();
+      context.fxPresetOptions = [
+        { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
+      ];
+    }
+
     // Visual override values (empty string = use placeholder/default)
     context.visuals = {
       countMin: vo.count?.[0] ?? '',
@@ -364,6 +377,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.icon = (data.icon || '').trim() || 'fa-cloud';
       preset.color = data.color || '#888888';
       preset.hudEffect = effectId;
+      preset.fxPreset = data.fxPreset || null;
       preset.environmentBase = environmentBase;
       preset.environmentDark = environmentDark;
       preset.visualOverrides = visualOverrides;
@@ -381,6 +395,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (trimIcon && trimIcon !== builtinPreset.icon) override.icon = trimIcon;
       if (data.color && data.color !== builtinPreset.color) override.color = data.color;
       if (effectId !== (builtinPreset.hudEffect || 'clear')) override.hudEffect = effectId;
+      const fxPresetValue = data.fxPreset || null;
+      if (fxPresetValue !== (builtinPreset.fxPreset ?? null)) override.fxPreset = fxPresetValue;
       if (environmentBase) override.environmentBase = environmentBase;
       if (environmentDark) override.environmentDark = environmentDark;
       if (visualOverrides) override.visualOverrides = visualOverrides;
@@ -415,6 +431,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       darknessPenalty: 0,
       inertiaWeight: 1,
       hudEffect: 'clear',
+      fxPreset: null,
       environmentBase: null,
       environmentDark: null,
       description: ''

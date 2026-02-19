@@ -19,6 +19,7 @@ import { HOOKS, JOURNALS, MODULE, SETTINGS, SHEETS, TEMPLATES } from './scripts/
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/index.mjs';
 import { initializeChatCommander } from './scripts/integrations/chat-commander.mjs';
+import { initializeFXMaster } from './scripts/integrations/fxmaster.mjs';
 import NoteManager from './scripts/notes/note-manager.mjs';
 import { registerReadySettings, registerSettings } from './scripts/settings.mjs';
 import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model.mjs';
@@ -98,6 +99,7 @@ Hooks.once('ready', async () => {
   if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) StickyZones.showDebugZones();
   Hooks.on('renderSceneControls', () => StickyZones.updateZonePositions('below-controls'));
   initializeChatCommander();
+  initializeFXMaster();
   Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
 });
 Hooks.once('setup', () => {

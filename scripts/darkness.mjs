@@ -5,6 +5,7 @@
  */
 
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES } from './constants.mjs';
+import { isFXMasterActive } from './integrations/fxmaster.mjs';
 import { log } from './utils/logger.mjs';
 import { getMoonPhasePosition } from './utils/moon-utils.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
@@ -85,8 +86,11 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   const weatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
   if (weatherSync) {
     const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
-    const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
-    adjustedDarkness += weatherDarknessPenalty;
+    const deferToFx = currentWeather?.fxPreset && isFXMasterActive();
+    if (!deferToFx) {
+      const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
+      adjustedDarkness += weatherDarknessPenalty;
+    }
   }
   return Math.max(0, Math.min(1, adjustedDarkness));
 }
@@ -244,8 +248,11 @@ export function calculateEnvironmentLighting(scene) {
 
   if (activeZone?.environmentBase?.hue != null) base.hue = activeZone.environmentBase.hue;
   if (activeZone?.environmentDark?.hue != null) dark.hue = activeZone.environmentDark.hue;
-  if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
-  if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
+  const deferToFx = currentWeather?.fxPreset && isFXMasterActive();
+  if (!deferToFx) {
+    if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
+    if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
+  }
   const hasValues = base.hue !== null || base.intensity !== null || dark.hue !== null || dark.intensity !== null;
   if (!hasValues) return null;
   return { base, dark };
@@ -289,17 +296,20 @@ export async function onRenderSceneConfig(app, html, _data) {
   const hudHideForPlayers = app.document.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS) ?? false;
   const climateZoneOverride = app.document.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
   const climateZones = WeatherManager.getCalendarZones?.() ?? [];
+  const weatherFxDisabled = app.document.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) ?? false;
   const formGroup = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.SCENE_DARKNESS_SYNC, {
     moduleId: MODULE.ID,
     flagName: SCENE_FLAGS.DARKNESS_SYNC,
     brightnessFlag: SCENE_FLAGS.BRIGHTNESS_MULTIPLIER,
     hudHideFlag: SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS,
     climateZoneFlag: SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE,
+    weatherFxFlag: SCENE_FLAGS.WEATHER_FX_DISABLED,
     value,
     brightnessMultiplier,
     hudHideForPlayers,
     climateZoneOverride,
-    climateZones
+    climateZones,
+    weatherFxDisabled
   });
   const ambientLightField = html.querySelector('[name="environment.globalLight.enabled"]')?.closest('.form-group');
   if (ambientLightField) ambientLightField.insertAdjacentHTML('afterend', formGroup);

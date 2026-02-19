@@ -73,7 +73,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.2,
-    hudEffect: 'clear'
+    hudEffect: 'clear',
+    fxPreset: null
   },
   {
     id: 'partly-cloudy',
@@ -91,7 +92,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
-    hudEffect: 'clouds-light'
+    hudEffect: 'clouds-light',
+    fxPreset: 'partly-cloudy'
   },
   {
     id: 'cloudy',
@@ -109,7 +111,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.2,
-    hudEffect: 'clouds-heavy'
+    hudEffect: 'clouds-heavy',
+    fxPreset: 'cloudy'
   },
   {
     id: 'overcast',
@@ -127,7 +130,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
-    hudEffect: 'clouds-overcast'
+    hudEffect: 'clouds-overcast',
+    fxPreset: 'overcast'
   },
   {
     id: 'drizzle',
@@ -145,7 +149,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: 'drizzle', intensity: 0.2 },
     inertiaWeight: 1.0,
-    hudEffect: 'rain'
+    hudEffect: 'rain',
+    fxPreset: 'drizzle'
   },
   {
     id: 'rain',
@@ -163,7 +168,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 2, direction: null },
     precipitation: { type: 'rain', intensity: 0.6 },
     inertiaWeight: 1.3,
-    hudEffect: 'rain'
+    hudEffect: 'rain',
+    fxPreset: 'rain'
   },
   {
     id: 'fog',
@@ -181,7 +187,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: 'drizzle', intensity: 0.1 },
     inertiaWeight: 1.5,
-    hudEffect: 'fog'
+    hudEffect: 'fog',
+    fxPreset: 'fog'
   },
   {
     id: 'mist',
@@ -199,7 +206,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
-    hudEffect: 'fog'
+    hudEffect: 'fog',
+    fxPreset: 'mist'
   },
   {
     id: 'windy',
@@ -217,7 +225,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 3, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
-    hudEffect: 'gust'
+    hudEffect: 'gust',
+    fxPreset: 'windy'
   },
   {
     id: 'sunshower',
@@ -235,7 +244,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.3 },
     inertiaWeight: 0,
-    hudEffect: 'rain'
+    hudEffect: 'rain',
+    fxPreset: 'sunshower'
   },
   {
     id: 'snow',
@@ -253,7 +263,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: 'snow', intensity: 0.5 },
     inertiaWeight: 1.3,
-    hudEffect: 'snow'
+    hudEffect: 'snow',
+    fxPreset: 'snow'
   },
   {
     id: 'sleet',
@@ -271,7 +282,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 2, direction: null },
     precipitation: { type: 'sleet', intensity: 0.5 },
     inertiaWeight: 1.0,
-    hudEffect: 'sleet'
+    hudEffect: 'sleet',
+    fxPreset: null
   },
   {
     id: 'heat-wave',
@@ -289,7 +301,8 @@ export const STANDARD_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
-    hudEffect: 'haze'
+    hudEffect: 'haze',
+    fxPreset: null
   }
 ];
 
@@ -314,7 +327,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 4, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 0.9 },
     inertiaWeight: 0.3,
-    hudEffect: 'lightning'
+    hudEffect: 'lightning',
+    fxPreset: 'thunderstorm'
   },
   {
     id: 'blizzard',
@@ -332,7 +346,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 5, direction: null, forced: true },
     precipitation: { type: 'snow', intensity: 1.0 },
     inertiaWeight: 0.5,
-    hudEffect: 'snow-heavy'
+    hudEffect: 'snow-heavy',
+    fxPreset: 'blizzard'
   },
   {
     id: 'hail',
@@ -350,7 +365,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 3, direction: null },
     precipitation: { type: 'hail', intensity: 0.7 },
     inertiaWeight: 0.3,
-    hudEffect: 'hail'
+    hudEffect: 'hail',
+    fxPreset: 'hail'
   },
   {
     id: 'tornado',
@@ -368,7 +384,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 5, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 0.8 },
     inertiaWeight: 0,
-    hudEffect: 'tornado'
+    hudEffect: 'tornado',
+    fxPreset: 'tornado'
   },
   {
     id: 'hurricane',
@@ -386,7 +403,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 5, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 1.0 },
     inertiaWeight: 0,
-    hudEffect: 'hurricane'
+    hudEffect: 'hurricane',
+    fxPreset: 'hurricane'
   },
   {
     id: 'ice-storm',
@@ -404,7 +422,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 4, direction: null, forced: true },
     precipitation: { type: 'hail', intensity: 0.8 },
     inertiaWeight: 0.3,
-    hudEffect: 'ice'
+    hudEffect: 'ice',
+    fxPreset: null
   },
   {
     id: 'monsoon',
@@ -422,7 +441,8 @@ export const SEVERE_WEATHER = [
     wind: { speed: 4, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 1.0 },
     inertiaWeight: 0.5,
-    hudEffect: 'rain-heavy'
+    hudEffect: 'rain-heavy',
+    fxPreset: null
   }
 ];
 
@@ -447,7 +467,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.5,
-    hudEffect: 'ashfall'
+    hudEffect: 'ashfall',
+    fxPreset: 'ashfall'
   },
   {
     id: 'sandstorm',
@@ -465,7 +486,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 4, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.3,
-    hudEffect: 'sand'
+    hudEffect: 'sand',
+    fxPreset: 'sandstorm'
   },
   {
     id: 'luminous-sky',
@@ -483,7 +505,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'aurora'
+    hudEffect: 'aurora',
+    fxPreset: 'luminous-sky'
   },
   {
     id: 'sakura-bloom',
@@ -501,7 +524,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'petals'
+    hudEffect: 'petals',
+    fxPreset: 'sakura-bloom'
   },
   {
     id: 'autumn-leaves',
@@ -519,7 +543,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'leaves'
+    hudEffect: 'leaves',
+    fxPreset: null
   },
   {
     id: 'rolling-fog',
@@ -537,7 +562,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
-    hudEffect: 'fog'
+    hudEffect: 'fog',
+    fxPreset: null
   },
   {
     id: 'wildfire-smoke',
@@ -555,7 +581,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.5,
-    hudEffect: 'smoke'
+    hudEffect: 'smoke',
+    fxPreset: null
   },
   {
     id: 'dust-devil',
@@ -573,7 +600,8 @@ export const ENVIRONMENTAL_WEATHER = [
     wind: { speed: 3, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'sand'
+    hudEffect: 'sand',
+    fxPreset: null
   }
 ];
 
@@ -598,7 +626,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'void'
+    hudEffect: 'void',
+    fxPreset: 'black-sun'
   },
   {
     id: 'ley-surge',
@@ -616,7 +645,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 2, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'ley-surge'
+    hudEffect: 'ley-surge',
+    fxPreset: 'ley-surge'
   },
   {
     id: 'aether-haze',
@@ -634,7 +664,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'aether'
+    hudEffect: 'aether',
+    fxPreset: 'aether-haze'
   },
   {
     id: 'nullfront',
@@ -652,7 +683,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'nullstatic'
+    hudEffect: 'nullstatic',
+    fxPreset: 'nullfront'
   },
   {
     id: 'permafrost-surge',
@@ -670,7 +702,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 3, direction: null },
     precipitation: { type: 'snow', intensity: 0.4 },
     inertiaWeight: 0,
-    hudEffect: 'ice'
+    hudEffect: 'ice',
+    fxPreset: 'permafrost-surge'
   },
   {
     id: 'gravewind',
@@ -688,7 +721,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 3, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'spectral'
+    hudEffect: 'spectral',
+    fxPreset: 'gravewind'
   },
   {
     id: 'veilfall',
@@ -706,12 +740,13 @@ export const FANTASY_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.3 },
     inertiaWeight: 0,
-    hudEffect: 'veil'
+    hudEffect: 'veil',
+    fxPreset: 'veilfall'
   },
   {
-    id: 'arcane',
-    label: 'CALENDARIA.Weather.Arcane',
-    description: 'CALENDARIA.Weather.ArcaneDesc',
+    id: 'arcane-winds',
+    label: 'CALENDARIA.Weather.ArcaneWinds',
+    description: 'CALENDARIA.Weather.ArcaneWindsDesc',
     icon: 'fa-hat-wizard',
     color: '#8A40B0',
     category: 'fantasy',
@@ -724,7 +759,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 2, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'arcane-wind'
+    hudEffect: 'arcane-wind',
+    fxPreset: 'arcane-winds'
   },
   {
     id: 'acid-rain',
@@ -742,7 +778,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.6 },
     inertiaWeight: 0,
-    hudEffect: 'rain-acid'
+    hudEffect: 'rain-acid',
+    fxPreset: null
   },
   {
     id: 'blood-rain',
@@ -760,7 +797,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.7 },
     inertiaWeight: 0,
-    hudEffect: 'rain-blood'
+    hudEffect: 'rain-blood',
+    fxPreset: null
   },
   {
     id: 'meteor-shower',
@@ -778,7 +816,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'meteors'
+    hudEffect: 'meteors',
+    fxPreset: null
   },
   {
     id: 'spore-cloud',
@@ -796,7 +835,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'spores'
+    hudEffect: 'spores',
+    fxPreset: null
   },
   {
     id: 'divine-light',
@@ -814,7 +854,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'divine'
+    hudEffect: 'divine',
+    fxPreset: null
   },
   {
     id: 'plague-miasma',
@@ -832,7 +873,8 @@ export const FANTASY_WEATHER = [
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
-    hudEffect: 'miasma'
+    hudEffect: 'miasma',
+    fxPreset: null
   }
 ];
 

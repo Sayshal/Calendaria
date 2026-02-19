@@ -65,6 +65,23 @@
     </div>
   </div>
 
+  {{#if hasFXMaster}}
+  <div class="weather-category weather-picker-fxmaster standard-form">
+    <span class="category-header">{{localize "CALENDARIA.Weather.Picker.FxPreset"}}</span>
+    <div class="form-group">
+      <label for="fxPreset"
+        data-tooltip="{{localize 'CALENDARIA.Weather.Picker.FxPresetHint'}}">{{localize "CALENDARIA.Weather.Picker.FxPreset"}}</label>
+      <div class="form-fields">
+        <select id="fxPreset" name="fxPreset">
+          {{#each fxPresetOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
   <div class="weather-category weather-picker-wind standard-form">
     <span class="category-header">{{localize "CALENDARIA.Weather.Wind.Title"}}</span>
     <div class="form-group">
