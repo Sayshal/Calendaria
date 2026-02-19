@@ -788,12 +788,15 @@ function cmdForecast(_chat, parameters) {
   if (args && isNaN(days)) return { content: wrapContent(localize('CALENDARIA.ChatCommand.InvalidForecastDays')) };
   const forecast = WeatherManager.getForecast({ days: days || undefined });
   if (!forecast.length) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+  const zoneName = zone ? localize(zone.name) : '';
+  const subtitle = zoneName ? `<div class="calendaria-forecast-zone">${zoneName}</div>` : '';
   const lines = forecast.map((f) => {
     const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
     const label = localize(f.preset.label);
     return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.day}</strong> — ${label}${tempStr}`;
   });
-  return { content: wrapContent(`<strong>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</strong><br>${lines.join('<br>')}`) };
+  return { content: wrapContent(`<h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}`) };
 }
 
 /**

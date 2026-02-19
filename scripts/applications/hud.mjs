@@ -486,6 +486,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, () => this.#onClockStateChange()) });
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['dome', 'bar'] })) });
     this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render({ parts: ['bar'] })) });
+    this.#hooks.push({
+      name: 'updateScene',
+      id: Hooks.on('updateScene', (_scene, change) => {
+        if (change.active) this.render({ parts: ['dome', 'bar'] });
+      })
+    });
     const debouncedRender = foundry.utils.debounce(() => this.render({ parts: ['bar'] }), 100);
     this.#hooks.push({
       name: 'updateJournalEntryPage',
@@ -1348,7 +1354,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#weatherRenderer = null;
     }
     if (!this.#weatherRenderer) this.#weatherRenderer = new HudWeatherRenderer(canvas);
-    const weather = WeatherManager.getCurrentWeather();
+    const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
@@ -1368,7 +1374,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {{top: string, mid: string, bottom: string}} Tinted colors
    */
   #applyWeatherSkyTint(colors) {
-    const weather = WeatherManager.getCurrentWeather();
+    const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     if (!weather) return colors;
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = getPreset(weather.id, customPresets);
@@ -1554,19 +1560,20 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object|null} Weather data object or null if no weather
    */
   #getWeatherContext() {
-    const weather = WeatherManager.getCurrentWeather();
+    const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const zoneId = zone?.id;
+    const weather = WeatherManager.getCurrentWeather(zoneId);
     if (!weather) return null;
     let icon = weather.icon || 'fa-cloud';
     if (icon && !icon.includes('fa-solid') && !icon.includes('fa-regular') && !icon.includes('fa-light') && !icon.includes('fas ') && !icon.includes('far ')) icon = `fa-solid ${icon}`;
     const calendarId = this.calendar?.metadata?.id;
-    const zoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id;
     const alias = getPresetAlias(weather.id, calendarId, zoneId);
     const label = alias || localize(weather.label);
     // Wind/precipitation display
     const windSpeed = weather.wind?.speed ?? 0;
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;
-    const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature(zoneId));
     const tooltipHtml = WeatherManager.buildWeatherTooltip({
       label,
       description: weather.description ? localize(weather.description) : null,

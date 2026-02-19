@@ -3061,6 +3061,21 @@ span.calendaria-moon-icon {
 }
 
 /* -------------------------------------------- */
+/*  Chat Command Output                         */
+/* -------------------------------------------- */
+
+.calendaria-chat-output h3 {
+  margin: 0 0 0.15rem;
+  font-size: 1rem;
+}
+
+.calendaria-forecast-zone {
+  font-size: 0.8rem;
+  color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
+  margin-bottom: 0.35rem;
+}
+
+/* -------------------------------------------- */
 /*  Chat Announcements                          */
 /* -------------------------------------------- */
 
@@ -5134,6 +5149,7 @@ span.calendaria-moon-icon {
     flex-direction: column;
     overflow-y: auto;
     scrollbar-gutter: stable;
+    padding-left: 0.25rem;
   }
 
   .zone-selector {

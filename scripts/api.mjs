@@ -844,10 +844,11 @@ export const CalendariaAPI = {
 
   /**
    * Get the current weather.
+   * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @returns {object|null} Current weather state with id, label, icon, color, temperature
    */
-  getCurrentWeather() {
-    return WeatherManager.getCurrentWeather();
+  getCurrentWeather(zoneId) {
+    return WeatherManager.getCurrentWeather(zoneId);
   },
 
   /**
@@ -918,10 +919,11 @@ export const CalendariaAPI = {
    * @param {number} year - Display year
    * @param {number} month - Month (0-indexed)
    * @param {number} day - Day of month (1-indexed)
+   * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @returns {object|null} Historical weather entry or null
    */
-  getWeatherForDate(year, month, day) {
-    return WeatherManager.getWeatherForDate(year, month, day);
+  getWeatherForDate(year, month, day, zoneId) {
+    return WeatherManager.getWeatherForDate(year, month, day, zoneId);
   },
 
   /**

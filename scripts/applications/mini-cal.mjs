@@ -378,10 +378,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object|null} Weather context or null if no weather set
    */
   _getWeatherContext() {
-    const weather = WeatherManager.getCurrentWeather();
+    const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const zoneId = zone?.id;
+    const weather = WeatherManager.getCurrentWeather(zoneId);
     if (!weather) return null;
     const calendarId = this.calendar?.metadata?.id;
-    const zoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id;
     const alias = getPresetAlias(weather.id, calendarId, zoneId);
     const label = alias || localize(weather.label);
     const windSpeed = weather.wind?.speed ?? 0;

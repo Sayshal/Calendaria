@@ -220,7 +220,7 @@ async function cmdWeather(args) {
     return;
   }
 
-  // Current weather
+  // Current weather (resolve zone from active scene)
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return sendChat(localize('CALENDARIA.ChatCommand.NoWeather'));
   const temp = WeatherManager.getTemperature();
@@ -550,11 +550,14 @@ async function cmdForecast(args) {
   if (args && isNaN(days)) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.InvalidForecastDays'));
   const forecast = WeatherManager.getForecast({ days: days || undefined });
   if (!forecast.length) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+  const zoneName = zone ? localize(zone.name) : '';
+  const subtitle = zoneName ? `<div class="calendaria-forecast-zone">${zoneName}</div>` : '';
   const lines = forecast.map((f) => {
     const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
     const label = localize(f.preset.label);
     return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.day}</strong> — ${label}${tempStr}`;
   });
-  const content = `<div class="calendaria-chat-output"><strong>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</strong><br>${lines.join('<br>')}</div>`;
+  const content = `<div class="calendaria-chat-output"><h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}</div>`;
   await ChatMessage.create({ content, speaker: ChatMessage.getSpeaker(), whisper: game.user.isGM ? [game.user.id] : [] });
 }

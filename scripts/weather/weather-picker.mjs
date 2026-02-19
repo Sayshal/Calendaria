@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { COMPASS_DIRECTIONS, HOOKS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
 import WeatherManager from './weather-manager.mjs';
@@ -128,7 +128,9 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const zones = WeatherManager.getCalendarZones() || [];
     const calendar = CalendarManager.getActiveCalendar();
     const calendarActiveZone = calendar?.weather?.activeZone ?? null;
-    const selectedZoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : calendarActiveZone;
+    const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const defaultZoneId = sceneZone?.id ?? calendarActiveZone;
+    const selectedZoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : defaultZoneId;
     const selectedZone = selectedZoneId ? zones.find((z) => z.id === selectedZoneId) : null;
     context.setAsActiveZone = selectedZoneId === calendarActiveZone && calendarActiveZone != null;
     context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !selectedZoneId }];
@@ -177,8 +179,8 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     context.temperatureUnit = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
-    const currentWeather = WeatherManager.getCurrentWeather();
-    const currentTemp = WeatherManager.getTemperature();
+    const currentWeather = WeatherManager.getCurrentWeather(selectedZoneId);
+    const currentTemp = WeatherManager.getTemperature(selectedZoneId);
     context.selectedZoneId = selectedZoneId;
     const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id, calendarId, selectedZoneId) : null;
     context.customLabel = this.#customLabel ?? (currentWeatherAlias || (currentWeather?.label ? localize(currentWeather.label) : ''));
@@ -265,8 +267,9 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const windData = { speed: windSpeed, direction: windDir, forced: false };
     const precipData = { type: precipType, intensity: precipType ? precipIntensity : 0 };
 
+    const zoneId = formData.object.climateZone || null;
     if (this.#selectedPresetId && !this.#customEdited) {
-      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData });
+      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, zoneId });
     } else {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
@@ -275,12 +278,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       const icon = data.customIcon?.trim() || 'fa-question';
       const color = data.customColor || '#888888';
       const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
-      await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData });
+      await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, zoneId });
     }
     const setActive = formData.object.setAsActiveZone;
-    const zoneId = formData.object.climateZone || null;
     if (setActive && zoneId) await WeatherManager.setActiveZone(zoneId);
-    Hooks.callAll(HOOKS.WEATHER_CHANGE);
     await this.close();
   }
 
@@ -295,8 +296,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!preset) return;
     this.#selectedPresetId = presetId;
     this.#customEdited = false;
-    const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
-    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    const calendar = CalendarManager.getActiveCalendar();
+    const calendarId = calendar?.metadata?.id;
+    const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (sceneZone?.id ?? calendar?.weather?.activeZone ?? null);
     const alias = getPresetAlias(presetId, calendarId, zoneId);
     this.#customLabel = alias || localize(preset.label);
     this.#customTemp = null;
@@ -315,19 +318,19 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onRandomWeather(_event, _target) {
-    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
-    await WeatherManager.generateAndSetWeather({ zoneId });
-    this.#selectedPresetId = null;
+    const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (sceneZone?.id ?? CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    const weather = await WeatherManager.generateAndSetWeather({ zoneId });
+    this.#selectedPresetId = weather?.id ?? null;
     this.#customEdited = false;
     this.#customLabel = null;
     this.#customTemp = null;
     this.#customIcon = null;
     this.#customColor = null;
-    this.#windSpeed = null;
-    this.#windDirection = null;
-    this.#precipType = null;
-    this.#precipIntensity = null;
-    Hooks.callAll(HOOKS.WEATHER_CHANGE);
+    this.#windSpeed = weather?.wind?.speed ?? null;
+    this.#windDirection = weather?.wind?.direction ?? null;
+    this.#precipType = weather?.precipitation?.type ?? null;
+    this.#precipIntensity = weather?.precipitation?.intensity ?? null;
     this.render();
   }
 
@@ -348,7 +351,6 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#windDirection = null;
     this.#precipType = null;
     this.#precipIntensity = 0;
-    Hooks.callAll(HOOKS.WEATHER_CHANGE);
     this.render();
   }
 }
