@@ -23,7 +23,7 @@ function getFxApi() {
 
 /**
  * Check if the FXMaster module is installed and active.
- * @returns {boolean}
+ * @returns {boolean} Whether FXMaster is active
  */
 export function isFXMasterActive() {
   return game.modules.get('fxmaster')?.active ?? false;
@@ -31,7 +31,7 @@ export function isFXMasterActive() {
 
 /**
  * Check if FXMaster+ (premium) is installed and active.
- * @returns {boolean}
+ * @returns {boolean} Whether FXMaster+ is active
  */
 export function isFXMasterPlusActive() {
   return game.modules.get('fxmaster-plus')?.active ?? false;
@@ -81,7 +81,6 @@ export function initializeFXMaster() {
   // Restore activeFxName from scene flags (FXMaster already replayed from them)
   const scene = canvas?.scene;
   const restoredName = getPresetFromSceneFlags(scene);
-  log(1, `FXMaster: init — restored "${restoredName}" from scene flags`);
 
   if (restoredName) {
     // FXMaster already restored its own effects from scene flags — just track the name
@@ -91,10 +90,7 @@ export function initializeFXMaster() {
     const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
     const weather = WeatherManager?.getCurrentWeather?.();
     const expectedFx = weather?.fxPreset || weather?.id || null;
-    log(1, `FXMaster: init — expected="${expectedFx}", active="${restoredName}"`);
-
     if (expectedFx !== restoredName) {
-      log(1, `FXMaster: init — mismatch, syncing to current weather`);
       stopThenPlay(weather || null);
     }
   } else {
@@ -137,8 +133,9 @@ function syncWeatherToScene() {
  * Check if a preset's effects exist in the scene's FXMaster flags.
  * @param {string} fxName - FXMaster preset name
  * @param {object} scene - Scene document
- * @returns {boolean}
+ * @returns {boolean} Whether the preset's effects are on the scene
  */
+// eslint-disable-next-line no-unused-vars
 function isPresetOnScene(fxName, scene) {
   const effects = scene.getFlag('fxmaster', 'effects') ?? {};
   const filters = scene.getFlag('fxmaster', 'filters') ?? {};
@@ -159,7 +156,7 @@ function isPresetOnScene(fxName, scene) {
  * @param {string} [payload.zoneId] - Climate zone ID
  * @param {boolean} [payload.bulk] - Bulk weather update (day change, etc.)
  */
-function onWeatherChange({ previous, current, zoneId, bulk } = {}) {
+function onWeatherChange({ previous, current, zoneId: _zoneId, bulk } = {}) {
   if (!CalendariaSocket.isPrimaryGM()) return;
 
   // For bulk updates, resolve current weather from the manager
@@ -198,7 +195,6 @@ async function stopThenPlay(weather) {
   if (!fxApi) return;
 
   if (activeFxName) {
-    log(1, `FXMaster: stopping "${activeFxName}"`);
     await fxApi.stop(activeFxName);
     activeFxName = null;
   }
@@ -208,13 +204,8 @@ async function stopThenPlay(weather) {
   if (!fxName) return;
 
   const options = buildPresetOptions(weather);
-  log(1, `FXMaster: playing "${fxName}"`, options);
   const success = await fxApi.play(fxName, options);
-  if (success) {
-    activeFxName = fxName;
-  } else {
-    log(1, `FXMaster: play("${fxName}") returned falsy`);
-  }
+  if (success) activeFxName = fxName;
 }
 
 /**
