@@ -107,6 +107,14 @@
     </div>
 
     <div class="form-group">
+      <label for="hudShowAllMoons">{{localize "CALENDARIA.Settings.HUDShowAllMoons.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hudShowAllMoons" name="hudShowAllMoons" {{#if hudShowAllMoons}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDShowAllMoons.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="hudAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudAutoFade" name="hudAutoFade" {{#if hudAutoFade}}checked{{/if}}>

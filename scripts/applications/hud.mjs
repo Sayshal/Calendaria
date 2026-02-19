@@ -20,78 +20,17 @@ import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { getPreset, getPresetAlias } from '../weather/weather-presets.mjs';
+import { getMoonPhasePosition } from '../utils/moon-utils.mjs';
 import { BigCal } from './big-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
-import { HudWeatherRenderer } from './hud-weather-renderer.mjs';
+import { HudSceneRenderer, SKY_KEYFRAMES, SKY_OVERRIDES } from './hud-scene-renderer.mjs';
 import { SetDateDialog } from './set-date-dialog.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
+// Re-export for external consumers
+export { SKY_OVERRIDES };
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
-
-/**
- * Sky color keyframes for interpolation throughout the day.
- * Each entry defines top/mid/bottom gradient colors at a specific hour.
- */
-const SKY_KEYFRAMES = [
-  { hour: 0, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' },
-  { hour: 4, top: '#0a0a15', mid: '#151530', bottom: '#1a1a35' },
-  { hour: 5, top: '#1a1a35', mid: '#2d2d50', bottom: '#4a4a6a' },
-  { hour: 6, top: '#4a4a6a', mid: '#7a5a70', bottom: '#ff9966' },
-  { hour: 7, top: '#6a8cba', mid: '#9ec5e0', bottom: '#ffe4b3' },
-  { hour: 8, top: '#4a90d9', mid: '#87ceeb', bottom: '#c9e8f5' },
-  { hour: 10, top: '#3a7fc8', mid: '#6bb5e0', bottom: '#a8d8f0' },
-  { hour: 12, top: '#2e6ab3', mid: '#4a90d9', bottom: '#87ceeb' },
-  { hour: 14, top: '#3a7fc8', mid: '#6bb5e0', bottom: '#a8d8f0' },
-  { hour: 16, top: '#5a8ac0', mid: '#8bb8d8', bottom: '#c5dff0' },
-  { hour: 17.5, top: '#6a6a8a', mid: '#aa7a6a', bottom: '#ffaa66' },
-  { hour: 18.5, top: '#3d3d5a', mid: '#8a5a5a', bottom: '#ff7744' },
-  { hour: 19.5, top: '#25253a', mid: '#4a4a6a', bottom: '#885544' },
-  { hour: 20.5, top: '#151525', mid: '#1a1a35', bottom: '#2a2a45' },
-  { hour: 24, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' }
-];
-
-/**
- * Per-effect sky color overrides (RGB arrays for top/mid/bottom gradient).
- */
-export const SKY_OVERRIDES = {
-  'clouds-light': { strength: 0.5, top: [160, 170, 185], mid: [175, 185, 200], bottom: [190, 200, 215] },
-  'clouds-heavy': { strength: 0.7, top: [115, 120, 130], mid: [130, 135, 145], bottom: [150, 155, 165] },
-  'clouds-overcast': { strength: 0.85, top: [95, 95, 100], mid: [110, 110, 115], bottom: [130, 130, 135] },
-  rain: { strength: 0.75, top: [70, 75, 90], mid: [85, 90, 105], bottom: [100, 105, 120] },
-  'rain-heavy': { strength: 0.85, top: [50, 55, 70], mid: [65, 68, 82], bottom: [80, 82, 95] },
-  snow: { strength: 0.6, top: [185, 195, 210], mid: [195, 205, 220], bottom: [210, 218, 230] },
-  'snow-heavy': { strength: 0.7, top: [195, 200, 215], mid: [205, 210, 225], bottom: [215, 220, 235] },
-  fog: { strength: 0.8, top: [175, 178, 180], mid: [185, 188, 190], bottom: [200, 202, 205] },
-  lightning: { strength: 0.9, top: [35, 35, 55], mid: [45, 48, 68], bottom: [60, 62, 80] },
-  sand: { strength: 0.85, top: [185, 160, 100], mid: [200, 175, 115], bottom: [215, 190, 130] },
-  ashfall: { strength: 0.85, top: [90, 70, 50], mid: [120, 95, 70], bottom: [150, 120, 90] },
-  embers: { strength: 0.85, top: [160, 110, 60], mid: [180, 125, 70], bottom: [195, 140, 80] },
-  ice: { strength: 0.6, top: [160, 195, 220], mid: [175, 205, 230], bottom: [190, 215, 240] },
-  hail: { strength: 0.8, top: [70, 75, 95], mid: [90, 95, 115], bottom: [110, 115, 130] },
-  tornado: { strength: 0.9, top: [45, 50, 40], mid: [60, 65, 50], bottom: [75, 78, 65] },
-  hurricane: { strength: 0.9, top: [50, 55, 65], mid: [65, 68, 80], bottom: [80, 82, 95] },
-  nullstatic: { strength: 0.95, top: [12, 10, 16], mid: [18, 15, 22], bottom: [25, 22, 30] },
-  gust: { strength: 0.15, top: [180, 190, 200], mid: [190, 200, 210], bottom: [200, 210, 220] },
-  aurora: { strength: 0.85, top: [10, 8, 35], mid: [20, 60, 50], bottom: [15, 25, 60] },
-  aether: { strength: 0.8, top: [100, 40, 90], mid: [130, 60, 120], bottom: [160, 80, 150] },
-  void: { strength: 0.95, top: [15, 10, 12], mid: [22, 15, 18], bottom: [30, 22, 25] },
-  spectral: { strength: 0.8, top: [30, 40, 50], mid: [45, 60, 50], bottom: [60, 80, 65] },
-  arcane: { strength: 0.7, top: [40, 80, 160], mid: [60, 120, 200], bottom: [100, 180, 230] },
-  'arcane-wind': { strength: 0.8, top: [80, 40, 100], mid: [110, 60, 130], bottom: [140, 80, 160] },
-  veil: { strength: 0.75, top: [80, 70, 110], mid: [110, 100, 140], bottom: [140, 130, 170] },
-  petals: { strength: 0.4, top: [140, 130, 180], mid: [180, 150, 170], bottom: [220, 180, 190] },
-  sleet: { strength: 0.75, top: [80, 85, 100], mid: [95, 100, 115], bottom: [115, 120, 135] },
-  haze: { strength: 0.5, top: [200, 180, 140], mid: [215, 195, 155], bottom: [230, 210, 170] },
-  leaves: { strength: 0.35, top: [160, 130, 90], mid: [180, 150, 100], bottom: [200, 170, 120] },
-  smoke: { strength: 0.9, top: [60, 50, 40], mid: [80, 65, 50], bottom: [100, 85, 65] },
-  'rain-acid': { strength: 0.8, top: [40, 80, 30], mid: [55, 100, 45], bottom: [70, 120, 60] },
-  'rain-blood': { strength: 0.85, top: [80, 20, 25], mid: [100, 30, 35], bottom: [120, 40, 45] },
-  meteors: { strength: 0.6, top: [15, 10, 30], mid: [30, 20, 45], bottom: [50, 35, 60] },
-  spores: { strength: 0.7, top: [60, 80, 40], mid: [75, 100, 55], bottom: [90, 120, 70] },
-  divine: { strength: 0.6, top: [200, 180, 100], mid: [220, 200, 130], bottom: [240, 220, 160] },
-  miasma: { strength: 0.85, top: [50, 60, 30], mid: [65, 78, 40], bottom: [80, 95, 55] },
-  'ley-surge': { strength: 0.75, top: [50, 30, 120], mid: [80, 60, 160], bottom: [120, 100, 200] }
-};
 
 /**
  * Calendar HUD with sundial dome, time controls, and calendar info.
@@ -158,8 +97,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} ID of zone HUD is currently snapped to */
   #snappedZoneId = null;
 
-  /** @type {HudWeatherRenderer|null} Pixi weather particle renderer */
-  #weatherRenderer = null;
+  /** @type {HudSceneRenderer|null} Pixi scene renderer (sky/stars/weather/sun/moon) */
+  #sceneRenderer = null;
 
   /** @type {string|null} Last tracked mode state for position handling */
   #lastModeState = null;
@@ -246,7 +185,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const calendar = this.calendar;
-    const components = game.time.components;
+    const components = this.#getPredictedComponents();
     context.isGM = game.user.isGM;
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
@@ -457,10 +396,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#lastModeState = currentModeState;
       this.#lastWidth = this.element.getBoundingClientRect().width;
     } else if (this.#lastModeState !== currentModeState) {
-      if (this.#weatherRenderer) {
+      if (this.#sceneRenderer) {
         log(3, 'HUD | destroying renderer on mode change', { from: this.#lastModeState, to: currentModeState });
-        this.#weatherRenderer.destroy();
-        this.#weatherRenderer = null;
+        this.#sceneRenderer.destroy();
+        this.#sceneRenderer = null;
       }
       this.#handleModeChange();
       this.#lastModeState = currentModeState;
@@ -475,7 +414,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     WidgetManager.attachWidgetListeners(this.element);
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
     if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
-    const c = game.time.components;
+    const c = this.#getPredictedComponents();
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
   }
 
@@ -596,9 +535,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#searchPanelEl.remove();
       this.#searchPanelEl = null;
     }
-    if (this.#weatherRenderer) {
-      this.#weatherRenderer.destroy();
-      this.#weatherRenderer = null;
+    if (this.#sceneRenderer) {
+      this.#sceneRenderer.destroy();
+      this.#sceneRenderer = null;
     }
     StickyZones.unregisterFromZoneUpdates(this);
     StickyZones.unpinFromZone(this.element);
@@ -1132,199 +1071,56 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Update the sundial dome display (sky gradient, sun/moon positions, stars).
+   * Update the sundial dome/slice display via the unified scene renderer.
+   * Computes sky colors, star alpha, moon phase, then delegates to HudSceneRenderer.
    */
   #updateCelestialDisplay() {
     const components = this.#getPredictedComponents();
     const hour = this.#getDecimalHour(components);
-    const useSlice = this.useSliceMode;
-    if (!useSlice) {
-      const sky = this.element.querySelector('.calendaria-hud-sky');
-      if (sky) {
-        const colors = this.#applyWeatherSkyTint(this.#getSkyColors(hour));
-        sky.style.background = `linear-gradient(to bottom, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
-      }
-      const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-      const midday = hoursPerDay / 2;
-      const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-      const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
-      const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
-      const dawnStart = sunrise - 0.5;
-      const dawnEnd = sunrise + 1;
-      const duskStart = sunset - 0.5;
-      const duskEnd = sunset + 1;
-      const stars = this.element.querySelector('.calendaria-hud-stars');
-      if (stars) {
-        const showStars = hour < dawnStart || hour > duskEnd;
-        const partialStars = (hour >= dawnStart && hour < dawnEnd) || (hour > duskStart && hour <= duskEnd);
-        stars.classList.toggle('visible', showStars || partialStars);
-        if (partialStars) {
-          const starOpacity = hour < midday ? 1 - (hour - dawnStart) / 1.5 : (hour - duskStart) / 1.5;
-          stars.style.opacity = Math.max(0, Math.min(1, starOpacity));
-        } else {
-          stars.style.opacity = '';
-        }
-      }
-      this.#updateWeatherRenderer('.calendaria-hud-weather-canvas');
-      const isCompact = this.isCompact;
-      const trackWidth = isCompact ? 100 : 140;
-      const trackHeight = isCompact ? 50 : 70;
-      const sunSize = isCompact ? 16 : 20;
-      const moonSize = isCompact ? 14 : 18;
-      const isSunVisible = hour >= sunrise && hour < sunset;
-      const sun = this.element.querySelector('.calendaria-hud-sun');
-      const moon = this.element.querySelector('.calendaria-hud-moon');
-      if (sun) {
-        sun.style.opacity = isSunVisible ? '1' : '0';
-        if (isSunVisible) this.#positionCelestialBody(sun, hour, trackWidth, trackHeight, sunSize, true, sunrise, sunset);
-      }
-      if (moon) {
-        moon.style.opacity = isSunVisible ? '0' : '1';
-        if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false, sunrise, sunset);
-      }
-    } else {
-      this.#updateSliceDisplay(hour);
-    }
-  }
-
-  /**
-   * Update the slice display (horizontal sun/moon strip).
-   * @param {number} hour - Current hour (decimal 0-24)
-   */
-  #updateSliceDisplay(hour) {
-    const slice = this.element.querySelector('.calendaria-hud-slice');
-    if (!slice) return;
-    const sky = slice.querySelector('.calendaria-slice-sky');
-    if (sky) {
-      const colors = this.#applyWeatherSkyTint(this.#getSkyColors(hour));
-      sky.style.background = `linear-gradient(to right, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
-    }
-    this.#updateWeatherRenderer('.calendaria-slice-weather-canvas');
-    const isCompact = this.isCompact;
-    const sliceWidth = isCompact ? 100 : 120;
-    const sunSize = isCompact ? 12 : 14;
-    const moonSize = isCompact ? 10 : 12;
     const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
     const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
     const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
     const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
-    const isSunVisible = hour >= sunrise && hour < sunset;
-    const sun = slice.querySelector('.calendaria-slice-sun');
-    const moon = slice.querySelector('.calendaria-slice-moon');
-    if (sun) {
-      sun.style.opacity = isSunVisible ? '1' : '0';
-      if (isSunVisible) this.#positionSliceBody(sun, hour, sliceWidth, sunSize, true, sunrise, sunset);
-    }
-    if (moon) {
-      moon.style.opacity = isSunVisible ? '0' : '1';
-      if (!isSunVisible) this.#positionSliceBody(moon, hour, sliceWidth, moonSize, false, sunrise, sunset);
-    }
-  }
+    const useSlice = this.useSliceMode;
+    const selector = useSlice ? '.calendaria-slice-scene-canvas' : '.calendaria-hud-scene-canvas';
+    this.#updateSceneRenderer(selector, useSlice ? 'slice' : 'dome');
 
-  /**
-   * Position a celestial body on the horizontal slice track.
-   * @param {HTMLElement} element - The body element
-   * @param {number} hour - Current hour (decimal)
-   * @param {number} sliceWidth - Slice width in pixels
-   * @param {number} bodySize - Body size in pixels
-   * @param {boolean} isSun - Whether this is the sun (vs moon)
-   * @param {number} sunrise - Sunrise hour
-   * @param {number} sunset - Sunset hour
-   */
-  #positionSliceBody(element, hour, sliceWidth, bodySize, isSun, sunrise, sunset) {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const daylightHours = sunset - sunrise;
-    const nightHours = hoursPerDay - daylightHours;
-    let normalizedHour;
-    if (isSun) {
-      normalizedHour = hour - sunrise;
-    } else {
-      if (hour >= sunset) normalizedHour = hour - sunset;
-      else normalizedHour = hoursPerDay - sunset + hour;
-    }
-    const spanHours = isSun ? daylightHours : nightHours;
-    normalizedHour = Math.max(0, Math.min(spanHours, normalizedHour));
-    const padding = bodySize / 2 + 4;
-    const availableWidth = sliceWidth - padding * 2;
-    const x = padding + (normalizedHour / spanHours) * availableWidth - bodySize / 2;
-    element.style.left = `${x}px`;
-  }
+    // Compute sky colors as RGB arrays
+    const skyColors = this.#getSkyColorsRgb(hour);
+    const tintedColors = this.#applyWeatherSkyTint(skyColors);
 
-  /**
-   * Position a celestial body on the semicircular track.
-   * @param {HTMLElement} element - The body element
-   * @param {number} hour - Current hour (decimal)
-   * @param {number} trackWidth - Track width in pixels
-   * @param {number} trackHeight - Track height in pixels
-   * @param {number} bodySize - Body size in pixels
-   * @param {boolean} isSun - Whether this is the sun (vs moon)
-   * @param {number} sunrise - Sunrise hour
-   * @param {number} sunset - Sunset hour
-   */
-  #positionCelestialBody(element, hour, trackWidth, trackHeight, bodySize, isSun, sunrise, sunset) {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const daylightHours = sunset - sunrise;
-    const nightHours = hoursPerDay - daylightHours;
-    let normalizedHour;
-    if (isSun) {
-      normalizedHour = hour - sunrise;
-    } else {
-      if (hour >= sunset) normalizedHour = hour - sunset;
-      else normalizedHour = hoursPerDay - sunset + hour;
+    // Compute star alpha
+    const dawnStart = sunrise - 0.5;
+    const dawnEnd = sunrise + 1;
+    const duskStart = sunset - 0.5;
+    const duskEnd = sunset + 1;
+    let starAlpha = 0;
+    if (hour < dawnStart || hour > duskEnd) {
+      starAlpha = 1;
+    } else if (hour >= dawnStart && hour < dawnEnd) {
+      starAlpha = Math.max(0, Math.min(1, 1 - (hour - dawnStart) / 1.5));
+    } else if (hour > duskStart && hour <= duskEnd) {
+      starAlpha = Math.max(0, Math.min(1, (hour - duskStart) / 1.5));
     }
-    const spanHours = isSun ? daylightHours : nightHours;
-    normalizedHour = Math.max(0, Math.min(spanHours, normalizedHour));
-    const angle = (normalizedHour / spanHours) * Math.PI;
-    const centerX = trackWidth / 2;
-    const centerY = trackHeight;
-    const radius = Math.min(trackWidth / 2, trackHeight) - bodySize / 2 - 4;
-    const x = centerX - radius * Math.cos(angle) - bodySize / 2;
-    const y = centerY - radius * Math.sin(angle) - bodySize / 2;
-    element.style.left = `${x}px`;
-    element.style.top = `${y}px`;
-  }
 
-  /**
-   * Get interpolated sky colors for a given hour.
-   * @param {number} hour - Hour (0-hoursPerDay, decimal)
-   * @returns {{top: string, mid: string, bottom: string}} Sky gradient colors
-   */
-  #getSkyColors(hour) {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    hour = ((hour / hoursPerDay) * 24 + 24) % 24;
-    let kf1 = SKY_KEYFRAMES[0];
-    let kf2 = SKY_KEYFRAMES[1];
-    for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
-      if (hour >= SKY_KEYFRAMES[i].hour && hour < SKY_KEYFRAMES[i + 1].hour) {
-        kf1 = SKY_KEYFRAMES[i];
-        kf2 = SKY_KEYFRAMES[i + 1];
-        break;
+    // Build moons array with phase and color per moon
+    const moons = [];
+    const calendar = this.calendar;
+    if (calendar) {
+      const moonsArray = calendar.moonsArray;
+      const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
+      const moonList = showAll ? moonsArray : (moonsArray?.slice(0, 1) ?? []);
+      for (let mi = 0; mi < moonList.length; mi++) {
+        const moon = moonList[mi];
+        const phase = getMoonPhasePosition(moon, components, calendar);
+        moons.push({ phase, color: moon.color || null, name: moon.name || '' });
       }
     }
 
-    const range = kf2.hour - kf1.hour;
-    const t = range > 0 ? (hour - kf1.hour) / range : 0;
-    return { top: this.#lerpColor(kf1.top, kf2.top, t), mid: this.#lerpColor(kf1.mid, kf2.mid, t), bottom: this.#lerpColor(kf1.bottom, kf2.bottom, t) };
-  }
-
-  /**
-   * Linearly interpolate between two hex colors.
-   * @param {string} color1 - Start color (#RRGGBB)
-   * @param {string} color2 - End color (#RRGGBB)
-   * @param {number} t - Interpolation factor (0-1)
-   * @returns {string} Interpolated color as rgb()
-   */
-  #lerpColor(color1, color2, t) {
-    const r1 = parseInt(color1.slice(1, 3), 16);
-    const g1 = parseInt(color1.slice(3, 5), 16);
-    const b1 = parseInt(color1.slice(5, 7), 16);
-    const r2 = parseInt(color2.slice(1, 3), 16);
-    const g2 = parseInt(color2.slice(3, 5), 16);
-    const b2 = parseInt(color2.slice(5, 7), 16);
-    const r = Math.round(r1 + (r2 - r1) * t);
-    const g = Math.round(g1 + (g2 - g1) * t);
-    const b = Math.round(b1 + (b2 - b1) * t);
-    return `rgb(${r}, ${g}, ${b})`;
+    // Update renderer
+    if (this.#sceneRenderer) {
+      this.#sceneRenderer.update({ hour, sunrise, sunset, hoursPerDay, moons, skyColors: tintedColors, starAlpha });
+    }
   }
 
   /**
@@ -1342,25 +1138,27 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Update the weather particle renderer for a given canvas selector.
+   * Update the scene renderer for a given canvas selector and mode.
+   * Creates or recreates the renderer if the canvas changed.
    * @param {string} selector - CSS selector for the canvas element
+   * @param {string} mode - 'dome' or 'slice'
    */
-  #updateWeatherRenderer(selector) {
+  #updateSceneRenderer(selector, mode) {
     const canvas = this.element?.querySelector(selector);
     if (!canvas) return;
-    if (this.#weatherRenderer && this.#weatherRenderer.canvas !== canvas) {
-      log(3, 'HUD | #updateWeatherRenderer — canvas replaced, recreating renderer');
-      this.#weatherRenderer.destroy();
-      this.#weatherRenderer = null;
+    if (this.#sceneRenderer && this.#sceneRenderer.canvas !== canvas) {
+      log(3, 'HUD | #updateSceneRenderer — canvas replaced, recreating renderer');
+      this.#sceneRenderer.destroy();
+      this.#sceneRenderer = null;
     }
-    if (!this.#weatherRenderer) this.#weatherRenderer = new HudWeatherRenderer(canvas);
+    if (!this.#sceneRenderer) this.#sceneRenderer = new HudSceneRenderer(canvas, mode);
     const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
     const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
     const { visualOverrides } = resolved;
-    this.#weatherRenderer.setEffect(
+    this.#sceneRenderer.setEffect(
       effect,
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
       visualOverrides
@@ -1368,10 +1166,52 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Apply weather-based sky color tint to gradient colors.
-   * Blends override RGB with time-of-day RGB at brightness-adaptive strength.
-   * @param {{top: string, mid: string, bottom: string}} colors - Time-of-day sky colors (rgb() strings)
-   * @returns {{top: string, mid: string, bottom: string}} Tinted colors
+   * Get interpolated sky colors for a given hour as RGB arrays.
+   * @param {number} hour - Hour (0-hoursPerDay, decimal)
+   * @returns {{top: number[], mid: number[], bottom: number[]}} Sky gradient colors as [r,g,b]
+   */
+  #getSkyColorsRgb(hour) {
+    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
+    hour = ((hour / hoursPerDay) * 24 + 24) % 24;
+    let kf1 = SKY_KEYFRAMES[0];
+    let kf2 = SKY_KEYFRAMES[1];
+    for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
+      if (hour >= SKY_KEYFRAMES[i].hour && hour < SKY_KEYFRAMES[i + 1].hour) {
+        kf1 = SKY_KEYFRAMES[i];
+        kf2 = SKY_KEYFRAMES[i + 1];
+        break;
+      }
+    }
+    const range = kf2.hour - kf1.hour;
+    const t = range > 0 ? (hour - kf1.hour) / range : 0;
+    return {
+      top: HUD.#lerpColorRgb(kf1.top, kf2.top, t),
+      mid: HUD.#lerpColorRgb(kf1.mid, kf2.mid, t),
+      bottom: HUD.#lerpColorRgb(kf1.bottom, kf2.bottom, t)
+    };
+  }
+
+  /**
+   * Linearly interpolate between two hex color strings, returning [r,g,b].
+   * @param {string} color1 - Start color (#RRGGBB)
+   * @param {string} color2 - End color (#RRGGBB)
+   * @param {number} t - Interpolation factor (0-1)
+   * @returns {number[]} [r, g, b] array
+   */
+  static #lerpColorRgb(color1, color2, t) {
+    const r1 = parseInt(color1.slice(1, 3), 16);
+    const g1 = parseInt(color1.slice(3, 5), 16);
+    const b1 = parseInt(color1.slice(5, 7), 16);
+    const r2 = parseInt(color2.slice(1, 3), 16);
+    const g2 = parseInt(color2.slice(3, 5), 16);
+    const b2 = parseInt(color2.slice(5, 7), 16);
+    return [Math.round(r1 + (r2 - r1) * t), Math.round(g1 + (g2 - g1) * t), Math.round(b1 + (b2 - b1) * t)];
+  }
+
+  /**
+   * Apply weather-based sky color tint to gradient colors (RGB array form).
+   * @param {{top: number[], mid: number[], bottom: number[]}} colors - Sky colors as [r,g,b]
+   * @returns {{top: number[], mid: number[], bottom: number[]}} Tinted colors
    */
   #applyWeatherSkyTint(colors) {
     const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
@@ -1391,14 +1231,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       : SKY_OVERRIDES[effect];
     if (!override || !override.top) return colors;
     const strength = override.strength ?? 0.7;
-    const blend = (rgbStr, overrideRgb) => {
-      const match = rgbStr.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-      if (!match) return rgbStr;
-      const r = Math.round(parseInt(match[1]) * (1 - strength) + overrideRgb[0] * strength);
-      const g = Math.round(parseInt(match[2]) * (1 - strength) + overrideRgb[1] * strength);
-      const b = Math.round(parseInt(match[3]) * (1 - strength) + overrideRgb[2] * strength);
-      return `rgb(${r}, ${g}, ${b})`;
-    };
+    const blend = (rgb, overrideRgb) => [
+      Math.round(rgb[0] * (1 - strength) + overrideRgb[0] * strength),
+      Math.round(rgb[1] * (1 - strength) + overrideRgb[1] * strength),
+      Math.round(rgb[2] * (1 - strength) + overrideRgb[2] * strength)
+    ];
     return { top: blend(colors.top, override.top), mid: blend(colors.mid, override.mid), bottom: blend(colors.bottom, override.bottom) };
   }
 
@@ -1458,7 +1295,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onWorldTimeUpdated() {
     if (!this.rendered) return;
-    const components = game.time.components;
+    const components = this.#getPredictedComponents();
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     const dayChanged = this.#lastDay !== null && this.#lastDay !== currentDay;
     if (dayChanged) {

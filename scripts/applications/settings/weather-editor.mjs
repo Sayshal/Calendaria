@@ -9,8 +9,7 @@
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { isFXMasterActive, getAvailableFxPresets } from '../../integrations/fxmaster.mjs';
 import { ALL_PRESETS, HUD_EFFECTS, WEATHER_CATEGORIES } from '../../weather/weather-presets.mjs';
-import { getEffectDefaults } from '../hud-weather-renderer.mjs';
-import { SKY_OVERRIDES } from '../hud.mjs';
+import { getEffectDefaults, SKY_OVERRIDES } from '../hud-scene-renderer.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 

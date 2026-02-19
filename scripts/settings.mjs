@@ -708,6 +708,16 @@ export function registerSettings() {
     onChange: () => HUD.instance?.render()
   });
 
+  /** Show all calendar moons in the HUD sky (vs primary only) */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS, {
+    name: 'CALENDARIA.Settings.HUDShowAllMoons.Name',
+    hint: 'CALENDARIA.Settings.HUDShowAllMoons.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => HUD.instance?.render()
+  });
+
   /** Calendar HUD auto-fade on idle */
   game.settings.register(MODULE.ID, SETTINGS.HUD_AUTO_FADE, {
     name: 'CALENDARIA.Settings.AutoFade.Name',
@@ -1075,6 +1085,15 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false })
+  });
+
+  /** How often (in seconds) the clock commits time to the server */
+  game.settings.register(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL, {
+    name: 'CALENDARIA.Settings.TimeAdvanceInterval.Name',
+    hint: 'CALENDARIA.Settings.TimeAdvanceInterval.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 60, min: 1, max: 120, step: 1, integer: true })
   });
 
   /** Real-time clock speed multiplier (game units per real second) */

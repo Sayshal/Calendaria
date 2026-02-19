@@ -7,7 +7,6 @@
  */
 
 import { COMPASS_DIRECTIONS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
 import { getAllPresets, getPreset } from './weather-presets.mjs';
 
 /**
@@ -114,21 +113,16 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   }
   const baseMin = seasonClimate?.temperatures?.min ?? 10;
   const baseMax = seasonClimate?.temperatures?.max ?? 22;
-  log(3, `[Temp] Season base: ${baseMin} → ${baseMax}`);
   if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) {
     tempRange = { min: applyTempModifier(zoneOverride.temperatures.min, baseMin), max: applyTempModifier(zoneOverride.temperatures.max, baseMax) };
-    log(3, `[Temp] Zone seasonOverride (${JSON.stringify(zoneOverride.temperatures)}) → ${tempRange.min} → ${tempRange.max}`);
   } else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) {
     tempRange = { min: baseMin, max: baseMax };
-    log(3, '[Temp] Using season base (no zone override)');
   } else if (zoneFallback?.temperatures) {
     const temps = zoneFallback.temperatures;
     if (season && temps[season]) {
       tempRange = { min: applyTempModifier(temps[season].min, baseMin), max: applyTempModifier(temps[season].max, baseMax) };
-      log(3, `[Temp] Zone fallback for ${season} (${JSON.stringify(temps[season])}) → ${tempRange.min} → ${tempRange.max}`);
     } else if (temps._default) {
       tempRange = temps._default;
-      log(3, `[Temp] Zone fallback _default → ${tempRange.min} → ${tempRange.max}`);
     }
   }
   return { probabilities, tempRange };
@@ -159,7 +153,6 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   if (presetConfig?.tempMin != null) finalTempRange.min = applyTempModifier(presetConfig.tempMin, tempRange.min);
   if (presetConfig?.tempMax != null) finalTempRange.max = applyTempModifier(presetConfig.tempMax, tempRange.max);
   const temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
-  log(3, `[Temp] Final range: ${finalTempRange.min} → ${finalTempRange.max}, rolled: ${temperature}`);
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
   const precipitation = generatePrecipitation(resolvedPreset, randomFn);

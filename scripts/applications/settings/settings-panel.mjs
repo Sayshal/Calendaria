@@ -543,6 +543,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.SYNC_CLOCK_PAUSE]: { tab: 'time', label: 'CALENDARIA.Settings.SyncClockPause.Name' },
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
+    [SETTINGS.TIME_ADVANCE_INTERVAL]: { tab: 'time', label: 'CALENDARIA.Settings.TimeAdvanceInterval.Name' },
     [SETTINGS.TEMPERATURE_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.TemperatureUnit.Name' },
     [SETTINGS.PRECIPITATION_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.PrecipitationUnit.Name' },
     [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.ThemeEditor.PresetSelect' },
@@ -699,7 +700,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
     'stopwatch-sticky': [SETTINGS.STOPWATCH_STICKY_STATES],
     // Time tab sections
-    'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT],
+    'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
     'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.SYNC_CLOCK_PAUSE],
     // Chat tab sections
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
@@ -784,6 +785,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
     context.timeSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER);
+    context.timeAdvanceInterval = game.settings.get(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL);
     const currentIncrement = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT);
     const incrementLabels = {
       second: localize('CALENDARIA.Common.Second'),
@@ -928,6 +930,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hudCombatCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
     context.hudCombatHide = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE);
     context.hudDomeAutoHide = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE);
+    context.hudShowAllMoons = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
     context.hudAutoFade = game.settings.get(MODULE.ID, SETTINGS.HUD_AUTO_FADE);
     context.hudIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY);
     context.hudWidthScale = game.settings.get(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE);
@@ -1479,6 +1482,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if ('timeSpeedIncrement' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT, data.timeSpeedIncrement);
       TimeClock.loadSpeedFromSettings();
     }
+    if ('timeAdvanceInterval' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL, Math.max(1, Math.min(120, Number(data.timeAdvanceInterval) || 60)));
+      TimeClock.restartIntervals();
+    }
 
     if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('toolbarApps' in data) {
@@ -1504,6 +1511,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);
     if ('hudCombatHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE, data.hudCombatHide);
     if ('hudDomeAutoHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE, data.hudDomeAutoHide);
+    if ('hudShowAllMoons' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS, data.hudShowAllMoons);
     if ('hudAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_AUTO_FADE, data.hudAutoFade);
     if ('hudIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY, Number(data.hudIdleOpacity));
     if ('hudWidthScale' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE, Number(data.hudWidthScale));
@@ -1771,6 +1779,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'hudCombatCompact',
       'hudCombatHide',
       'hudDomeAutoHide',
+      'hudShowAllMoons',
       'hudAutoFade',
       'hudIdleOpacity',
       'hudWidthScale',
