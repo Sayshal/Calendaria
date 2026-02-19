@@ -78,6 +78,15 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForecastDays.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="gmOverrideClearsForecast">{{localize "CALENDARIA.Settings.GMOverrideClearsForecast.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="gmOverrideClearsForecast" name="gmOverrideClearsForecast"
+            {{#if gmOverrideClearsForecast}}checked{{/if}} />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.GMOverrideClearsForecast.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 

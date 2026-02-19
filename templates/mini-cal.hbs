@@ -169,6 +169,11 @@
                     <img class="moon-tiny clickable" src="{{moonIcon}}" alt="{{moonPhase}}" data-action="showMoons"
                       data-tooltip aria-label="{{moonPhase}}">
                   {{/if}}{{/if}}
+                {{#if weatherIcon}}
+                  <i class="fas {{weatherIcon}} mini-weather-icon{{#if isForecast}} forecast{{/if}}"
+                    style="color: {{weatherColor}}"
+                    data-tooltip-html="{{{weatherTooltipHtml}}}"></i>
+                {{/if}}
               </div>
             {{/each}}
           </div>
@@ -209,6 +214,11 @@
                     <img class="moon-tiny clickable" src="{{moonIcon}}" alt="{{moonPhase}}" data-action="showMoons"
                       data-tooltip aria-label="{{moonPhase}}">
                   {{/if}}{{/if}}
+                {{#if weatherIcon}}
+                  <i class="fas {{weatherIcon}} mini-weather-icon{{#if isForecast}} forecast{{/if}}"
+                    style="color: {{weatherColor}}"
+                    data-tooltip-html="{{{weatherTooltipHtml}}}"></i>
+                {{/if}}
               </div>
             {{/if}}
           {{/each}}

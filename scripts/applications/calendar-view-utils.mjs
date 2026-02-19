@@ -11,6 +11,7 @@ import NoteManager from '../notes/note-manager.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { formatCustom } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
+import { canViewWeatherForecast } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
@@ -172,6 +173,27 @@ export function hasNotesOnDay(notes, year, month, day) {
 }
 
 /**
+ * Build weather pill template data from a getDayWeather result.
+ * @param {object|null} wd - Weather data from getDayWeather
+ * @returns {object} Template properties for the weather pill
+ */
+export function buildWeatherPillData(wd) {
+  if (!wd) return { weatherIcon: null, weatherColor: null, weatherLabel: null, weatherTemp: null, weatherWindDir: null, weatherTooltipHtml: null, isForecast: false };
+  const temp = wd.temperature != null ? WeatherManager.formatTemperature(wd.temperature) : null;
+  const windDir = wd.wind?.direction != null ? WeatherManager.getWindDirectionLabel(wd.wind.direction) : null;
+  const tooltipHtml = WeatherManager.buildWeatherTooltip({
+    label: wd.label,
+    description: wd.description ?? null,
+    temp,
+    windSpeed: wd.wind?.speed ?? 0,
+    windDirection: wd.wind?.direction,
+    precipType: wd.precipitation?.type ?? null,
+    precipIntensity: wd.precipitation?.intensity
+  });
+  return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };
+}
+
+/**
  * Get notes that start on a specific day.
  * @param {object[]} notes - Notes to filter
  * @param {number} year - Year
@@ -239,6 +261,90 @@ export function getAllMoonPhases(calendar, year, month, day) {
     })
     .filter(Boolean)
     .sort((a, b) => a.moonName.localeCompare(b.moonName));
+}
+
+/**
+ * Build a forecast lookup map for day weather resolution.
+ * @returns {{ lookup: Map|null, todayYear: number, todayMonth: number, todayDay: number }} Forecast data and today info
+ */
+export function buildWeatherLookup() {
+  const today = game.time.components;
+  const calendar = CalendarManager.getActiveCalendar();
+  const yz = calendar?.years?.yearZero ?? 0;
+  const todayYear = today.year + yz;
+  const todayMonth = today.month;
+  const todayDay = (today.dayOfMonth ?? 0) + 1;
+  let lookup = null;
+  if (canViewWeatherForecast() && calendar?.weather?.autoGenerate) {
+    const forecast = WeatherManager.getForecast();
+    lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.day}`, f]));
+  }
+  return { lookup, todayYear, todayMonth, todayDay };
+}
+
+/**
+ * Get weather data for a specific day cell.
+ * Returns current weather for today, history for past days, forecast for future days.
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} day - Day (1-indexed)
+ * @param {object} todayInfo - Today info from buildWeatherLookup
+ * @param {number} todayInfo.todayYear - Today's display year
+ * @param {number} todayInfo.todayMonth - Today's month
+ * @param {number} todayInfo.todayDay - Today's day
+ * @param {Map|null} forecastLookup - Forecast lookup map
+ * @returns {object|null} Weather data with icon, color, label, temperature, isForecast, isVaried
+ */
+export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
+  const { todayYear, todayMonth, todayDay } = todayInfo;
+  const isCurrentDay = year === todayYear && month === todayMonth && day === todayDay;
+  if (isCurrentDay) {
+    const w = WeatherManager.getCurrentWeather();
+    if (!w) return null;
+    const temp = WeatherManager.getTemperature();
+    return {
+      icon: w.icon,
+      color: w.color,
+      label: localize(w.label),
+      description: w.description ? localize(w.description) : null,
+      temperature: temp,
+      wind: w.wind ?? null,
+      precipitation: w.precipitation ?? null,
+      isForecast: false,
+      isVaried: false
+    };
+  }
+  // Past day — check history
+  const hist = WeatherManager.getWeatherForDate(year, month, day);
+  if (hist)
+    return {
+      icon: hist.icon,
+      color: hist.color,
+      label: localize(hist.label),
+      description: null,
+      temperature: hist.temperature ?? null,
+      wind: hist.wind ?? null,
+      precipitation: hist.precipitation ?? null,
+      isForecast: false,
+      isVaried: false
+    };
+  // Future day — check forecast
+  if (forecastLookup) {
+    const f = forecastLookup.get(`${year}-${month}-${day}`);
+    if (f)
+      return {
+        icon: f.preset.icon,
+        color: f.preset.color,
+        label: localize(f.preset.label),
+        description: f.preset.description ? localize(f.preset.description) : null,
+        temperature: f.temperature ?? null,
+        wind: f.wind ?? null,
+        precipitation: f.precipitation ?? null,
+        isForecast: true,
+        isVaried: f.isVaried ?? false
+      };
+  }
+  return null;
 }
 
 /**
@@ -443,9 +549,10 @@ function encodeHtmlAttribute(html) {
  * @param {string} [festival.name] - Festival name
  * @param {string} [festival.description] - Festival description
  * @param {string} [festival.color] - Festival color
+ * @param {object|null} [weatherData] - Weather data from getDayWeather
  * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
  */
-export function generateDayTooltip(calendar, year, month, day, festival = null) {
+export function generateDayTooltip(calendar, year, month, day, festival = null, weatherData = null) {
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   const internalComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const displayComponents = { year, month, dayOfMonth: day, hour: 12, minute: 0, second: 0 };
@@ -475,6 +582,11 @@ export function generateDayTooltip(calendar, year, month, day, festival = null) 
   }
   if (seasonName) rows.push(`<div class="calendaria-day-tooltip-season">${escapeText(seasonName)}</div>`);
   rows.push(`<div class="calendaria-day-tooltip-sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
+  if (weatherData) {
+    const prefix = weatherData.isForecast ? `${localize('CALENDARIA.Weather.Forecast')}: ` : '';
+    const tempStr = weatherData.temperature != null ? ` ${weatherData.isForecast && weatherData.isVaried ? '~' : ''}${WeatherManager.formatTemperature(weatherData.temperature)}` : '';
+    rows.push(`<div class="calendaria-day-tooltip-weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
+  }
   const rawHtml = `<div class="calendaria-day-tooltip">${rows.join('')}</div>`;
   return encodeHtmlAttribute(rawHtml);
 }

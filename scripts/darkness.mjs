@@ -252,18 +252,17 @@ export function calculateEnvironmentLighting(scene) {
 }
 
 /**
- * Apply environment lighting to a scene.
- * @param {object} scene - The scene to update
- * @param {{base: {hue: number|null, intensity: number|null, luminosity: number|null}, dark: {hue: number|null, intensity: number|null, luminosity: number|null}}|null} lighting - Lighting overrides from calculateEnvironmentLighting
+ * Build environment lighting update data for a scene.
+ * @param {object} _scene - The scene to get update data for (unused, kept for future per-scene overrides)
+ * @param {{base: {hue: number|null, intensity: number|null, luminosity: number|null}, dark: {hue: number|null, intensity: number|null, luminosity: number|null}}|null} lighting - Lighting overrides
+ * @returns {object|null} Update data object, or null if no updates needed
  */
-async function applyEnvironmentLighting(scene, lighting) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+function buildEnvironmentUpdateData(_scene, lighting) {
+  if (!CalendariaSocket.isPrimaryGM()) return null;
   const ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
-  if (!ambienceSync) return;
+  if (!ambienceSync) return null;
   if (!lighting) {
-    await scene.update({ 'environment.base.intensity': 0, 'environment.base.luminosity': 0, 'environment.dark.intensity': 0, 'environment.dark.luminosity': -0.25 });
-    log(3, 'Reset environment lighting to defaults');
-    return;
+    return { 'environment.base.intensity': 0, 'environment.base.luminosity': 0, 'environment.dark.intensity': 0, 'environment.dark.luminosity': -0.25 };
   }
   const updateData = {};
   if (lighting.base.hue !== null) updateData['environment.base.hue'] = lighting.base.hue / 360;
@@ -272,10 +271,7 @@ async function applyEnvironmentLighting(scene, lighting) {
   if (lighting.dark.hue !== null) updateData['environment.dark.hue'] = lighting.dark.hue / 360;
   if (lighting.dark.intensity !== null) updateData['environment.dark.intensity'] = lighting.dark.intensity;
   if (lighting.dark.luminosity !== null) updateData['environment.dark.luminosity'] = lighting.dark.luminosity;
-  if (Object.keys(updateData).length > 0) {
-    log(3, ` scene update → ${JSON.stringify(updateData)}`);
-    await scene.update(updateData);
-  }
+  return Object.keys(updateData).length > 0 ? updateData : null;
 }
 
 /**
@@ -340,9 +336,9 @@ export async function updateDarknessFromWorldTime(worldTime, _dt) {
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
     const lighting = calculateEnvironmentLighting(scene);
-    await applyEnvironmentLighting(scene, lighting);
+    const envData = buildEnvironmentUpdateData(scene, lighting);
+    if (envData) await scene.update(envData);
   }
-  log(3, `Hour changed: ${lastHour} → ${currentHour}`);
 }
 
 /**
@@ -398,9 +394,9 @@ export async function onWeatherChange() {
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
     const lighting = calculateEnvironmentLighting(scene);
-    await applyEnvironmentLighting(scene, lighting);
+    const envData = buildEnvironmentUpdateData(scene, lighting);
+    if (envData) await scene.update(envData);
   }
-  log(3, 'Weather changed, updating darkness across viewed scenes');
 }
 
 /**
@@ -425,8 +421,10 @@ export async function onUpdateScene(scene, change) {
   const sunset = calendar?.sunset?.(components, zone) ?? null;
   const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
   const darkness = calculateAdjustedDarkness(baseDarkness, scene);
-  scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
   const lighting = calculateEnvironmentLighting(scene);
-  await applyEnvironmentLighting(scene, lighting);
+  const envData = buildEnvironmentUpdateData(scene, lighting);
+  // Scene activation: animate darkness, apply environment separately (animateDarkness returns early in Foundry)
+  scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
+  if (envData) await scene.update(envData);
   log(3, `Scene activated, transitioning darkness to ${darkness.toFixed(3)}`);
 }

@@ -120,7 +120,9 @@ export const SETTINGS = {
   WEATHER_HISTORY: 'weatherHistory',
   WEATHER_INERTIA: 'weatherInertia',
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
-  WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides'
+  WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
+  WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
+  GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast'
 };
 
 /**

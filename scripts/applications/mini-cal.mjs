@@ -460,6 +460,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: ViewUtils.isToday(pd.year, pd.month, pd.day, calendar) });
     }
 
+    // Weather data for day cells
+    const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
+    let weatherLookup = null;
+    if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
+
     // Collect intercalary days to insert after regular days
     const intercalaryDays = [];
 
@@ -467,6 +472,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const noteCount = this._countNotesOnDay(visibleNotes, year, month, day);
       const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: day - 1 });
       const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, day) : null;
+      const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
 
       // Check if this is a non-counting festival (intercalary day)
       const isIntercalary = festivalDay?.countsForWeekday === false;
@@ -488,7 +494,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
-          isIntercalary: true
+          isIntercalary: true,
+          weatherIcon: wd?.icon ?? null,
+          weatherColor: wd?.color ?? null,
+          weatherTooltipHtml: ViewUtils.buildWeatherPillData(wd).weatherTooltipHtml,
+          isForecast: wd?.isForecast ?? false
         });
       } else {
         currentWeek.push({
@@ -505,7 +515,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalDescription: festivalDay?.description || '',
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
-          moonColor: moonData?.color ?? null
+          moonColor: moonData?.color ?? null,
+          weatherIcon: wd?.icon ?? null,
+          weatherColor: wd?.color ?? null,
+          weatherTooltipHtml: ViewUtils.buildWeatherPillData(wd).weatherTooltipHtml,
+          isForecast: wd?.isForecast ?? false
         });
 
         if (currentWeek.length === daysInWeek) {
@@ -949,7 +963,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       },
       onCreateNote: () => this.render()
     });
-    const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    this._debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    const debouncedRender = this._debouncedRender;
 
     this.#hooks.push({
       name: 'updateJournalEntryPage',
@@ -1297,7 +1312,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const predictedDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (predictedDay !== this.#lastDay) {
       this.#lastDay = predictedDay;
-      this.render();
+      this._debouncedRender();
       return;
     }
 
@@ -1331,7 +1346,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (currentDay !== this.#lastDay) {
       this.#lastDay = currentDay;
-      this.render();
+      this._debouncedRender();
     }
     // Also update display to sync with real world time
     this.#onVisualTick();
