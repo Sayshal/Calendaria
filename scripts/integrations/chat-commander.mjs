@@ -7,7 +7,7 @@
 
 import { CalendariaAPI } from '../api.mjs';
 import { MODULE } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canViewWeatherForecast } from '../utils/permissions.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
@@ -124,7 +124,8 @@ function registerCommands() {
       description: localize('CALENDARIA.ChatCommander.WeatherDesc'),
       icon: '<i class="fas fa-cloud-sun"></i>',
       requiredRole: 'NONE',
-      callback: cmdWeather
+      callback: cmdWeather,
+      autocompleteCallback: autocompleteWeather
     },
     {
       name: '/moon',
@@ -319,18 +320,45 @@ async function cmdNote(_chat, parameters) {
 }
 
 /**
- * /weather - Show current weather.
+ * /weather [year month day] - Show current or historical weather.
+ * @param {object} _chat - Chat log instance
+ * @param {string} parameters - Optional date as "year month day"
  * @returns {object} Chat message data
  */
-function cmdWeather() {
+function cmdWeather(_chat, parameters) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
+  const args = parameters?.trim();
+  if (args) {
+    const match = args.match(/^(\d+)\s+(\d+)\s+(\d+)$/);
+    if (!match) return { content: wrapContent(localize('CALENDARIA.ChatCommand.InvalidDateFormat')) };
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    const weather = WeatherManager.getWeatherForDate(year, month, day);
+    if (!weather) return { content: wrapContent(format('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` })) };
+    const tempStr = weather.temperature != null ? ` (${WeatherManager.formatTemperature(weather.temperature)})` : '';
+    const windStr = weather.wind?.speed > 0 ? ` · ${WeatherManager.getWindSpeedLabel(weather.wind.speed)}` : '';
+    return {
+      content: wrapContent(`<i class="fas ${weather.icon}" style="color:${weather.color}"></i> <strong>${match[1]}/${match[2]}/${match[3]}</strong> — ${localize(weather.label)}${tempStr}${windStr}`)
+    };
+  }
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoWeather')) };
   const temp = WeatherManager.getTemperature();
-  const unit = game.settings.get('calendaria', 'temperatureUnit');
-  const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
+  const tempStr = temp != null ? ` (${WeatherManager.formatTemperature(temp)})` : '';
   return { content: wrapContent(`<i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`) };
+}
+
+/**
+ * Autocomplete for /weather - show usage hint.
+ * @returns {HTMLElement[]} Autocomplete entries
+ */
+function autocompleteWeather() {
+  return [
+    game.chatCommands.createCommandElement('/weather', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherCurrent')}</span>`),
+    game.chatCommands.createCommandElement('/weather [year] [month] [day]', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherHistorical')}</span>`)
+  ];
 }
 
 /**
@@ -779,7 +807,8 @@ function autocompleteForecast(_menu, _alias, _parameters) {
   const maxDays = game.settings.get(MODULE.ID, 'forecastDays') ?? 7;
   const entries = [];
   for (let i = 1; i <= maxDays; i++) {
-    entries.push(game.chatCommands.createCommandElement(`/forecast ${i}`, `<span class="command-title">${i} ${i === 1 ? 'day' : 'days'}</span>`));
+    const label = i === 1 ? format('CALENDARIA.ChatCommander.ForecastDay', { count: i }) : format('CALENDARIA.ChatCommander.ForecastDays', { count: i });
+    entries.push(game.chatCommands.createCommandElement(`/forecast ${i}`, `<span class="command-title">${label}</span>`));
   }
   return entries;
 }
