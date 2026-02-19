@@ -29,6 +29,17 @@ export default class WeatherManager {
   static #initialized = false;
 
   /**
+   * Resolve the effective fxPreset for a preset, checking visual overrides for built-in presets.
+   * @param {object} preset - Weather preset object
+   * @returns {string|null} FXMaster preset name or null
+   */
+  static #resolveFxPreset(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    if (overrides?.fxPreset !== undefined) return overrides.fxPreset;
+    return preset.fxPreset ?? null;
+  }
+
+  /**
    * Initialize the weather manager.
    * Called during module ready hook.
    */
@@ -130,6 +141,7 @@ export default class WeatherManager {
       darknessPenalty: preset.darknessPenalty ?? 0,
       environmentBase: preset.environmentBase ?? null,
       environmentDark: preset.environmentDark ?? null,
+      fxPreset: options.fxPreset ?? this.#resolveFxPreset(preset),
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
@@ -176,6 +188,7 @@ export default class WeatherManager {
       darknessPenalty: weatherData.darknessPenalty ?? 0,
       environmentBase: weatherData.environmentBase ?? null,
       environmentDark: weatherData.environmentDark ?? null,
+      fxPreset: weatherData.fxPreset ?? null,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
@@ -288,6 +301,7 @@ export default class WeatherManager {
       wind: result.wind ?? { speed: 0, direction: null, forced: false },
       precipitation: result.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: result.preset.darknessPenalty ?? 0,
+      fxPreset: this.#resolveFxPreset(result.preset),
       setAt: game.time.worldTime,
       setBy: game.user.id,
       generated: true,
@@ -456,6 +470,7 @@ export default class WeatherManager {
           darknessPenalty: planEntry.darknessPenalty ?? 0,
           environmentBase: planEntry.environmentBase ?? null,
           environmentDark: planEntry.environmentDark ?? null,
+          fxPreset: planEntry.fxPreset ?? null,
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -480,6 +495,7 @@ export default class WeatherManager {
           wind: result.wind ?? { speed: 0, direction: null, forced: false },
           precipitation: result.precipitation ?? { type: null, intensity: 0 },
           darknessPenalty: result.preset.darknessPenalty ?? 0,
+          fxPreset: this.#resolveFxPreset(result.preset),
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -619,6 +635,7 @@ export default class WeatherManager {
           darknessPenalty: todayPlan.darknessPenalty ?? 0,
           environmentBase: todayPlan.environmentBase ?? null,
           environmentDark: todayPlan.environmentDark ?? null,
+          fxPreset: todayPlan.fxPreset ?? null,
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -636,6 +653,7 @@ export default class WeatherManager {
           wind: todayF.wind ?? { speed: 0, direction: null, forced: false },
           precipitation: todayF.precipitation ?? { type: null, intensity: 0 },
           darknessPenalty: todayF.preset.darknessPenalty ?? 0,
+          fxPreset: this.#resolveFxPreset(todayF.preset),
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -825,7 +843,8 @@ export default class WeatherManager {
           precipitation: f.precipitation ?? null,
           darknessPenalty: f.preset.darknessPenalty ?? 0,
           environmentBase: f.preset.environmentBase ?? null,
-          environmentDark: f.preset.environmentDark ?? null
+          environmentDark: f.preset.environmentDark ?? null,
+          fxPreset: this.#resolveFxPreset(f.preset)
         };
       }
 
@@ -1021,7 +1040,8 @@ export default class WeatherManager {
     const zones = calendar?.weatherZonesArray;
     if (!zones?.length) return null;
     const sceneOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) || null;
-    const targetId = zoneId ?? sceneOverride ?? calendar.weather.activeZone ?? 'temperate';
+    const targetId = zoneId ?? sceneOverride ?? calendar.weather.activeZone;
+    if (!targetId) return null;
     return zones.find((z) => z.id === targetId) ?? zones[0] ?? null;
   }
 
@@ -1037,10 +1057,12 @@ export default class WeatherManager {
     if (!calendarId) return;
     const calendarData = CalendarManager.getCalendar(calendarId)?.toObject();
     if (!calendarData?.weather) return;
-    const zones = calendarData.weather.zones ? Object.values(calendarData.weather.zones) : [];
-    const zone = zones.find((z) => z.id === zoneId);
-    if (!zone) return;
-    calendarData.weather.activeZone = zoneId;
+    if (zoneId) {
+      const zones = calendarData.weather.zones ? Object.values(calendarData.weather.zones) : [];
+      const zone = zones.find((z) => z.id === zoneId);
+      if (!zone) return;
+    }
+    calendarData.weather.activeZone = zoneId ?? null;
     if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, calendarData);
     else await CalendarManager.updateCustomCalendar(calendarId, calendarData);
     // No plan invalidation — plans exist for all zones

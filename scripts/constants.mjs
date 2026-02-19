@@ -122,6 +122,9 @@ export const SETTINGS = {
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
   WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
   WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
+  FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
+  FXMASTER_SOUND_FX: 'fxmasterSoundFx',
+  FXMASTER_TOP_DOWN: 'fxmasterTopDown',
   GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast'
 };
 
@@ -148,7 +151,8 @@ export const SCENE_FLAGS = {
   BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
   CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
   DARKNESS_SYNC: 'darknessSync',
-  HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers'
+  HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
+  WEATHER_FX_DISABLED: 'weatherFxDisabled'
 };
 
 /** Template file paths for UI components */

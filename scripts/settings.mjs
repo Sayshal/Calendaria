@@ -1249,6 +1249,33 @@ export function registerSettings() {
     type: new ObjectField({ initial: {} })
   });
 
+  /** FXMaster: use top-down particle view */
+  game.settings.register(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN, {
+    name: 'CALENDARIA.Settings.FXMaster.TopDown.Name',
+    hint: 'CALENDARIA.Settings.FXMaster.TopDown.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
+  /** FXMaster: render effects below token layer */
+  game.settings.register(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, {
+    name: 'CALENDARIA.Settings.FXMaster.BelowTokens.Name',
+    hint: 'CALENDARIA.Settings.FXMaster.BelowTokens.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
+  /** FXMaster: enable weather sound effects (requires FXMaster+) */
+  game.settings.register(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX, {
+    name: 'CALENDARIA.Settings.FXMaster.SoundFx.Name',
+    hint: 'CALENDARIA.Settings.FXMaster.SoundFx.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   // ========================================//
   //  Timepoints                             //
   // ========================================//

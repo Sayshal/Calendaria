@@ -7,6 +7,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
+import { isFXMasterActive, getAvailableFxPresets } from '../integrations/fxmaster.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
 import WeatherManager from './weather-manager.mjs';
@@ -84,6 +85,9 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {number|null} Precipitation intensity (0-1) */
   #precipIntensity = null;
 
+  /** @type {string|null} FXMaster preset override */
+  #fxPreset = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'weather-picker',
@@ -118,6 +122,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#windDirection = null;
     this.#precipType = null;
     this.#precipIntensity = null;
+    this.#fxPreset = null;
     return super.close(options);
   }
 
@@ -132,7 +137,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const defaultZoneId = sceneZone?.id ?? calendarActiveZone;
     const selectedZoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : defaultZoneId;
     const selectedZone = selectedZoneId ? zones.find((z) => z.id === selectedZoneId) : null;
-    context.setAsActiveZone = selectedZoneId === calendarActiveZone && calendarActiveZone != null;
+    context.setAsActiveZone = selectedZoneId === calendarActiveZone;
     context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !selectedZoneId }];
     for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === selectedZoneId });
     context.zoneOptions.sort((a, b) => {
@@ -218,6 +223,18 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     context.precipIntensity = this.#precipIntensity ?? currentWeather?.precipitation?.intensity ?? 0;
     context.precipIntensityLabel = getPrecipIntensityLabel(context.precipIntensity);
 
+    // FXMaster preset dropdown
+    context.hasFXMaster = isFXMasterActive();
+    if (context.hasFXMaster) {
+      const currentFxPreset = this.#fxPreset ?? currentWeather?.fxPreset ?? '';
+      context.fxPreset = currentFxPreset;
+      const fxPresets = getAvailableFxPresets();
+      context.fxPresetOptions = [
+        { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
+      ];
+    }
+
     return context;
   }
 
@@ -268,20 +285,22 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const precipData = { type: precipType, intensity: precipType ? precipIntensity : 0 };
 
     const zoneId = formData.object.climateZone || null;
+    const fxPreset = fd.fxPreset || null;
     if (this.#selectedPresetId && !this.#customEdited) {
-      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, zoneId });
+      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset, zoneId });
     } else {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
-      if (!label) return;
-      const temp = data.customTemp;
-      const icon = data.customIcon?.trim() || 'fa-question';
-      const color = data.customColor || '#888888';
-      const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
-      await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, zoneId });
+      if (label) {
+        const temp = data.customTemp;
+        const icon = data.customIcon?.trim() || 'fa-question';
+        const color = data.customColor || '#888888';
+        const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
+        await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, zoneId });
+      }
     }
     const setActive = formData.object.setAsActiveZone;
-    if (setActive && zoneId) await WeatherManager.setActiveZone(zoneId);
+    if (setActive) await WeatherManager.setActiveZone(zoneId);
     await this.close();
   }
 
@@ -309,6 +328,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#windDirection = preset.wind?.direction ?? null;
     this.#precipType = preset.precipitation?.type ?? null;
     this.#precipIntensity = preset.precipitation?.intensity ?? 0;
+    this.#fxPreset = preset.fxPreset ?? null;
     this.render();
   }
 
@@ -331,6 +351,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#windDirection = weather?.wind?.direction ?? null;
     this.#precipType = weather?.precipitation?.type ?? null;
     this.#precipIntensity = weather?.precipitation?.intensity ?? null;
+    this.#fxPreset = weather?.fxPreset ?? null;
     this.render();
   }
 
@@ -351,6 +372,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#windDirection = null;
     this.#precipType = null;
     this.#precipIntensity = 0;
+    this.#fxPreset = null;
     this.render();
   }
 }
