@@ -126,7 +126,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * keyed by its ID, matching the dynamic PARTS entries.
    * @override
    */
-  _prepareTabs(group, options) {
+  _prepareTabs(_group, _options) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const allPresets = [...ALL_PRESETS, ...customPresets];
     const active = this.tabGroups.primary || allPresets[0]?.id;
@@ -283,9 +283,9 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Re-render footer when switching tabs so the correct button shows.
-   * @param tab
-   * @param group
-   * @param options
+   * @param {string} tab - Tab ID
+   * @param {string} group - Tab group name
+   * @param {object} options - Tab change options
    */
   changeTab(tab, group, options) {
     super.changeTab(tab, group, options);
@@ -318,7 +318,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * to avoid collisions between sections. We extract only the active preset's data.
    * @param {SubmitEvent} _event - The submit event
    * @param {HTMLFormElement} _form - The form element
-   * @param {FormDataExtended} formData - Parsed form data
+   * @param {object} formData - Parsed form data
    */
   static async #onSubmit(_event, _form, formData) {
     const presetId = this.tabGroups.primary;
@@ -531,7 +531,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert hex number (0xRRGGBB) to HTML hex string.
-   * @param hex
+   * @param {number} hex - Hex color number
+   * @returns {string} HTML hex string
    */
   static #numToHex(hex) {
     return `#${hex.toString(16).padStart(6, '0')}`;
@@ -539,7 +540,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert HTML hex string to hex number.
-   * @param str
+   * @param {string} str - HTML hex string
+   * @returns {number} Hex color number
    */
   static #hexToNum(str) {
     return parseInt(str.replace('#', ''), 16);
@@ -547,7 +549,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert [r, g, b] array to HTML hex string.
-   * @param rgb
+   * @param {number[]} rgb - RGB array
+   * @returns {string} HTML hex string
    */
   static #rgbToHex(rgb) {
     return `#${rgb.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
@@ -555,7 +558,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert HTML hex string to [r, g, b] array.
-   * @param str
+   * @param {string} str - HTML hex string
+   * @returns {number[]} RGB array
    */
   static #hexToRgb(str) {
     const n = parseInt(str.replace('#', ''), 16);

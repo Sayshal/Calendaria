@@ -1271,6 +1271,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.weatherHistoryDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
     context.forecastAccuracy = game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
     context.forecastDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
+    context.gmOverrideClearsForecast = game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST) ?? true;
   }
 
   /**
@@ -1436,7 +1437,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       changeWeather: { player: false, trusted: false, assistant: true },
       editNotes: { player: false, trusted: true, assistant: true },
       deleteNotes: { player: false, trusted: false, assistant: true },
-      editCalendars: { player: false, trusted: false, assistant: false }
+      editCalendars: { player: false, trusted: false, assistant: false },
+      viewWeatherForecast: { player: false, trusted: true, assistant: true }
     };
     const saved = game.settings.get(MODULE.ID, SETTINGS.PERMISSIONS) || {};
     context.permissions = {};
@@ -1538,6 +1540,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('weatherHistoryDays' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS, parseInt(data.weatherHistoryDays));
     if ('forecastAccuracy' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_ACCURACY, parseInt(data.forecastAccuracy));
     if ('forecastDays' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_DAYS, parseInt(data.forecastDays));
+    if ('gmOverrideClearsForecast' in data) await game.settings.set(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST, !!data.gmOverrideClearsForecast);
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
@@ -1642,7 +1645,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
     if (data.permissions) {
-      const permissionKeys = ['viewBigCal', 'viewMiniCal', 'viewTimeKeeper', 'addNotes', 'changeDateTime', 'changeActiveCalendar', 'changeWeather', 'editNotes', 'deleteNotes', 'editCalendars'];
+      const permissionKeys = [
+        'viewBigCal',
+        'viewMiniCal',
+        'viewTimeKeeper',
+        'addNotes',
+        'changeDateTime',
+        'changeActiveCalendar',
+        'changeWeather',
+        'editNotes',
+        'deleteNotes',
+        'editCalendars',
+        'viewWeatherForecast'
+      ];
       const permissions = {};
       for (const key of permissionKeys) {
         if (data.permissions[key]) {

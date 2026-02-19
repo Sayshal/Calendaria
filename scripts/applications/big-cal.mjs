@@ -397,6 +397,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day) });
     }
 
+    // Weather data for day cells
+    const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
+    let weatherLookup = null;
+    if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
+
     // Collect intercalary days to insert after regular days
     const intercalaryDays = [];
     let dayIndex = startDayOfWeek;
@@ -426,6 +431,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         // Don't add to weekday grid - collect separately
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
+        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
         intercalaryDays.push({
           day,
           year,
@@ -438,14 +444,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalColor: festivalDay?.color || '',
           festivalIcon: festivalDay?.icon || '',
           festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo),
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo, wd),
           moonPhases,
-          isIntercalary: true
+          isIntercalary: true,
+          ...ViewUtils.buildWeatherPillData(wd)
         });
       } else {
         const weekdayData = calendar.weekdaysArray[currentWeek.length];
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
+        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
         currentWeek.push({
           day,
           year,
@@ -459,9 +467,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalColor: festivalDay?.color || '',
           festivalIcon: festivalDay?.icon || '',
           festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo),
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo, wd),
           isRestDay: weekdayData?.isRestDay || false,
-          moonPhases
+          moonPhases,
+          ...ViewUtils.buildWeatherPillData(wd)
         });
         dayIndex++;
         if (currentWeek.length === daysInWeek) {
@@ -1357,7 +1366,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._hooks = [];
     const c = game.time.components;
     this._lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
-    const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    this._debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    const debouncedRender = this._debouncedRender;
     this._hooks.push({
       name: 'updateJournalEntryPage',
       id: Hooks.on('updateJournalEntryPage', (page, _changes, _options, _userId) => {
@@ -1394,7 +1404,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const predictedDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (predictedDay !== this._lastDay) {
       this._lastDay = predictedDay;
-      this.render();
+      this._debouncedRender();
     }
   }
 
@@ -1407,7 +1417,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (currentDay !== this._lastDay) {
       this._lastDay = currentDay;
-      this.render();
+      this._debouncedRender();
     }
   }
 

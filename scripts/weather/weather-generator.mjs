@@ -15,7 +15,7 @@ import { getAllPresets, getPreset } from './weather-presets.mjs';
  * @param {number} seed - Seed value
  * @returns {Function} Random function returning 0-1
  */
-function seededRandom(seed) {
+export function seededRandom(seed) {
   return function () {
     let t = (seed += 0x6d2b79f5);
     t = Math.imul(t ^ (t >>> 15), t | 1);

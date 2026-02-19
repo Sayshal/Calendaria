@@ -64,6 +64,16 @@
       "lang": "tr",
       "name": "Türkçe",
       "path": "lang/tr.json"
+    },
+    {
+      "lang": "it",
+      "name": "Italian",
+      "path": "lang/it.json"
+    },
+    {
+      "lang": "ru",
+      "name": "Russian",
+      "path": "lang/ru.json"
     }
   ],
   "license": "https://github.com/Sayshal/calendaria?tab=MIT-1-ov-file",

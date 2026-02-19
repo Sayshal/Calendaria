@@ -41,7 +41,6 @@
   --calendaria-positive-bg: rgb(76 175 80 / 20%);
   --calendaria-positive-fg: rgb(76 175 80);
   --calendaria-primary: rgb(74 144 226);
-  --calendaria-selected-bg: rgb(74 144 226 / 15%);
   --calendaria-shadow: rgb(0 0 0 / 40%);
   --calendaria-shadow-light: rgb(0 0 0 / 20%);
   --calendaria-success: rgb(76 175 80);
@@ -118,7 +117,6 @@
   --calendaria-positive-bg: rgb(56 142 60 / 20%);
   --calendaria-positive-fg: rgb(56 142 60);
   --calendaria-primary: rgb(59 130 206);
-  --calendaria-selected-bg: rgb(59 130 206 / 12%);
   --calendaria-shadow: rgb(0 0 0 / 25%);
   --calendaria-shadow-light: rgb(0 0 0 / 12%);
   --calendaria-success: rgb(56 142 60);
@@ -515,7 +513,7 @@
   transform: translateX(-50%);
 }
 
-.big-cal button:not(.view-selector button.active, .add-note-btn) {
+.big-cal button:not(.add-note-btn) {
   border-color: var(--calendaria-button-border);
   color: var(--calendaria-button-text);
   background: var(--calendaria-button-bg);
@@ -533,7 +531,7 @@
 .moon-phase {
   display: inline-flex;
   align-items: center;
-  height: 0.625rem;
+  height: var(--font-size-12);
 
   img {
     width: auto;
@@ -555,15 +553,35 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  min-width: 1rem;
-  height: 0.875rem;
+  min-width: var(--font-size-12);
+  height: var(--font-size-12);
   padding: 0 0.1875rem;
   border-radius: 0.1875rem;
   color: var(--calendaria-text);
   font-weight: 600;
   font-size: 0.625rem;
-  cursor: help;
   background: var(--calendaria-bg-lighter);
+}
+
+/* Day cell weather icons */
+.day-weather-pill i {
+  font-size: var(--font-size-10);
+}
+
+.mini-weather-icon {
+  position: absolute;
+  bottom: 0.125rem;
+  right: 0.125rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.mini-weather-icon.forecast {
+  opacity: 0.4;
 }
 
 /* Moon icon for [moonIcon] format token */
@@ -612,15 +630,6 @@ span.calendaria-moon-icon {
   gap: 0.5rem;
   display: flex;
   align-items: center;
-}
-
-.view-selector {
-  gap: 0.25rem;
-  display: flex;
-
-  button.active {
-    background: var(--calendaria-primary);
-  }
 }
 
 .calendar-grid {
@@ -731,7 +740,6 @@ span.calendaria-moon-icon {
     z-index: 1;
     position: relative;
     border: 0.0625rem solid var(--calendaria-today);
-    background: var(--calendaria-today-bg);
   }
 
   &.selected {
@@ -773,12 +781,31 @@ span.calendaria-moon-icon {
   align-items: center;
   margin-bottom: 0.25rem;
   color: var(--calendaria-day-number);
+  font-size: var(--font-size-14);
   font-weight: bold;
 }
 
 .festival-icon {
   color: var(--festival-color, var(--calendaria-festival-text));
-  font-size: 0.75rem;
+  font-size: var(--font-size-12);
+}
+
+/* Day weather pill */
+.day-weather-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: var(--font-size-12);
+  font-size: var(--font-size-10);
+  line-height: 1;
+  white-space: nowrap;
+  padding: 0 0.25rem;
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 6%);
+}
+
+.day-weather-pill.forecast {
+  opacity: 0.5;
 }
 
 .day-notes {
@@ -1032,13 +1059,11 @@ span.calendaria-moon-icon {
   }
 
   &.current-hour {
-    border-top: 0.1875rem solid var(--calendaria-today);
-    background: var(--calendaria-current-hour);
+    border: 0.05rem solid var(--calendaria-today);
   }
 
   &.selected {
-    border: 0.125rem solid var(--calendaria-primary);
-    background: color-mix(in srgb, var(--calendaria-primary) 30%, transparent);
+    border: 0.05rem solid var(--calendaria-primary);
   }
 }
 
@@ -4192,8 +4217,7 @@ span.calendaria-moon-icon {
     }
 
     &.today {
-      background: var(--calendaria-today-bg);
-      box-shadow: inset 0 0 0 0.125rem var(--calendaria-today);
+      box-shadow: inset 0 0 0 0.05rem var(--calendaria-today);
 
       .day-num {
         color: var(--calendaria-today);
@@ -4202,8 +4226,7 @@ span.calendaria-moon-icon {
     }
 
     &.selected {
-      background: var(--calendaria-selected-bg);
-      box-shadow: inset 0 0 0 0.125rem var(--calendaria-primary);
+      box-shadow: inset 0 0 0 0.05rem var(--calendaria-primary);
     }
 
     &.festival {
@@ -6703,6 +6726,7 @@ span.calendaria-moon-icon {
 
 .calendaria-moons-tooltip .moon-radial-item.selected .moon-name {
   color: var(--calendaria-primary, rgb(123 104 238));
+  margin-bottom: 0.25rem;
 }
 
 /* Clickable moon icons in calendar */

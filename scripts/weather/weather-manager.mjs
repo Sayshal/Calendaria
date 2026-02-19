@@ -14,7 +14,7 @@ import { log } from '../utils/logger.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './climate-data.mjs';
-import { applyTempModifier, generateForecast, generateWeather, mergeClimateConfig } from './weather-generator.mjs';
+import { applyForecastVariance, applyTempModifier, generateForecast, generateWeather, mergeClimateConfig, dateSeed, seededRandom } from './weather-generator.mjs';
 import { ALL_PRESETS, getAllPresets, getPreset, WEATHER_CATEGORIES } from './weather-presets.mjs';
 
 /**
@@ -42,6 +42,7 @@ export default class WeatherManager {
       const yearZero = calendar?.years?.yearZero ?? 0;
       const existing = this.getWeatherForDate(components.year + yearZero, components.month, (components.dayOfMonth ?? 0) + 1);
       if (!existing) await this.#recordWeatherHistory(this.#currentWeather);
+      if (calendar?.weather?.autoGenerate) await this.#ensureForecastPlan();
     }
     this.#initialized = true;
     log(3, 'WeatherManager initialized');
@@ -118,6 +119,10 @@ export default class WeatherManager {
     };
 
     await this.#saveWeather(weather, options.broadcast !== false);
+    if (game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
+      await this.#clearForecastPlan();
+      await this.#ensureForecastPlan();
+    }
     return weather;
   }
 
@@ -158,6 +163,10 @@ export default class WeatherManager {
       setBy: game.user.id
     };
     await this.#saveWeather(weather, broadcast);
+    if (game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
+      await this.#clearForecastPlan();
+      await this.#ensureForecastPlan();
+    }
     return weather;
   }
 
@@ -255,11 +264,16 @@ export default class WeatherManager {
       season
     };
     await this.#saveWeather(weather, options.broadcast !== false);
+    if (!options._fromPlan && game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
+      await this.#clearForecastPlan();
+      await this.#ensureForecastPlan();
+    }
     return weather;
   }
 
   /**
-   * Generate a weather forecast using active calendar's zone config.
+   * Generate a weather forecast using the stored forecast plan.
+   * Falls back to on-demand generation if plan is unavailable.
    * @param {object} [options] - Forecast options
    * @param {number} [options.days] - Number of days
    * @param {string} [options.zoneId] - Zone ID override
@@ -267,6 +281,73 @@ export default class WeatherManager {
    * @returns {object[]} Forecast array
    */
   static getForecast(options = {}) {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return [];
+    const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
+    const days = Math.min(options.days || maxDays, maxDays);
+    const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
+    const isGM = game.user.isGM;
+    const customPresets = this.getCustomPresets();
+
+    // Try reading from stored forecast plan
+    const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
+    const components = game.time.components;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
+
+    // Walk forward from today for `days` entries (matches original behavior)
+    let year = components.year + yearZero;
+    let month = components.month;
+    let day = (components.dayOfMonth ?? 0) + 1;
+
+    const result = [];
+    for (let i = 0; i < days; i++) {
+      const entry = plan[year]?.[month]?.[day];
+      if (!entry) {
+        // Plan is incomplete, fall back to on-demand generation
+        return this.#getForecastLegacy(options);
+      }
+      // Reconstruct forecast entry shape expected by consumers
+      const preset = {
+        id: entry.id,
+        label: entry.label,
+        icon: entry.icon,
+        color: entry.color,
+        category: entry.category,
+        description: entry.description ?? '',
+        darknessPenalty: entry.darknessPenalty ?? 0
+      };
+      let forecastEntry = { year, month, day, preset, temperature: entry.temperature, wind: entry.wind, precipitation: entry.precipitation, isVaried: false };
+
+      // Apply variance for non-GM display
+      if (!isGM && accuracy < 100) {
+        const seed = dateSeed(year, month, day);
+        const varied = applyForecastVariance({ preset, temperature: entry.temperature }, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+        forecastEntry = { year, month, day, ...varied, wind: entry.wind, precipitation: entry.precipitation };
+      }
+
+      result.push(forecastEntry);
+      day++;
+      const dim = getDaysInMonth(month, year);
+      if (day > dim) {
+        day = 1;
+        month++;
+        if (month >= (getDaysInMonth._monthsPerYear ?? 12)) {
+          month = 0;
+          year++;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Legacy on-demand forecast generation (fallback when plan is unavailable).
+   * @param {object} [options] - Forecast options
+   * @returns {object[]} Forecast array
+   * @private
+   */
+  static #getForecastLegacy(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
     const zoneConfig = this.getActiveZone(options.zoneId);
@@ -295,6 +376,7 @@ export default class WeatherManager {
 
   /**
    * Handle day change for auto-generation.
+   * Reads weather from the stored forecast plan when available.
    * @param {object} data - Hook data with previous/current components and calendar
    * @private
    */
@@ -305,8 +387,41 @@ export default class WeatherManager {
     if (this.#currentWeather) await this.#recordWeatherHistory(this.#currentWeather);
     if (!autoGenerate) return;
     const gap = this.#calcDayGap(data, calendar);
-    if (gap > 1) await this.#backfillHistory(data, calendar, gap);
-    else await this.generateAndSetWeather();
+    if (gap > 1) {
+      await this.#backfillHistory(data, calendar, gap);
+      return;
+    }
+
+    // Ensure forecast plan is populated
+    await this.#ensureForecastPlan();
+    const planEntry = this.#getFromForecastPlan(data.current.year, data.current.month, (data.current.dayOfMonth ?? 0) + 1);
+
+    if (planEntry) {
+      const seasonData = calendar.getCurrentSeason?.(data.current);
+      const season = seasonData ? localize(seasonData.name) : null;
+      const weather = {
+        id: planEntry.id,
+        label: planEntry.label,
+        description: planEntry.description ?? '',
+        icon: planEntry.icon,
+        color: planEntry.color,
+        category: planEntry.category,
+        temperature: planEntry.temperature,
+        wind: planEntry.wind ?? { speed: 0, direction: null, forced: false },
+        precipitation: planEntry.precipitation ?? { type: null, intensity: 0 },
+        darknessPenalty: planEntry.darknessPenalty ?? 0,
+        environmentBase: planEntry.environmentBase ?? null,
+        environmentDark: planEntry.environmentDark ?? null,
+        setAt: game.time.worldTime,
+        setBy: game.user.id,
+        generated: true,
+        season
+      };
+      await this.#saveWeather(weather, true);
+    } else {
+      // Safety fallback — plan entry missing
+      await this.generateAndSetWeather({ _fromPlan: true });
+    }
   }
 
   /**
@@ -327,8 +442,8 @@ export default class WeatherManager {
 
   /**
    * Backfill weather history for a multi-day jump.
-   * Generates from (today - daysToFill) forward to today, records each day,
-   * and sets the final day as current weather.
+   * Uses the stored forecast plan for days that have entries;
+   * generates fresh entries for days not in the plan.
    * @param {object} data - Hook data with current components
    * @param {object} calendar - Active calendar
    * @param {number} gap - Number of days jumped
@@ -337,7 +452,7 @@ export default class WeatherManager {
   static async #backfillHistory(data, calendar, gap) {
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
     if (maxDays === 0) {
-      await this.generateAndSetWeather();
+      await this.generateAndSetWeather({ _fromPlan: true });
       return;
     }
     const daysToFill = Math.min(gap - 1, maxDays);
@@ -354,6 +469,11 @@ export default class WeatherManager {
     const startYear = startComponents.year + yearZero;
     const startMonth = startComponents.month;
     const startDay = (startComponents.dayOfMonth ?? 0) + 1;
+
+    // Read the stored forecast plan
+    const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
+
+    // Generate a full forecast chain for the gap window (for any missing plan entries)
     const forecast = generateForecast({
       zoneConfig,
       startYear,
@@ -370,9 +490,9 @@ export default class WeatherManager {
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
     for (let i = 0; i < forecast.length - 1; i++) {
       const f = forecast[i];
-      history[f.year] ??= {};
-      history[f.year][f.month] ??= {};
-      history[f.year][f.month][f.day] = {
+      // Use plan entry if available, otherwise use generated forecast
+      const planEntry = plan[f.year]?.[f.month]?.[f.day];
+      const entry = planEntry ?? {
         id: f.preset.id,
         label: localize(f.preset.label),
         icon: f.preset.icon,
@@ -380,33 +500,75 @@ export default class WeatherManager {
         category: f.preset.category,
         temperature: f.temperature,
         wind: f.wind ?? null,
-        precipitation: f.precipitation ?? null,
+        precipitation: f.precipitation ?? null
+      };
+      history[f.year] ??= {};
+      history[f.year][f.month] ??= {};
+      history[f.year][f.month][f.day] = {
+        id: entry.id,
+        label: planEntry ? entry.label : localize(f.preset.label),
+        icon: entry.icon,
+        color: entry.color,
+        category: entry.category,
+        temperature: entry.temperature,
+        wind: entry.wind ?? null,
+        precipitation: entry.precipitation ?? null,
         generated: true,
         zoneId: zoneConfig?.id ?? null
       };
     }
     this.#pruneHistory(history, maxDays);
     await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
-    const today = forecast[forecast.length - 1];
+
+    // Set today's weather from plan or generated forecast
+    const todayF = forecast[forecast.length - 1];
+    const todayPlan = plan[todayF.year]?.[todayF.month]?.[todayF.day];
     const seasonData = calendar.getCurrentSeason?.(game.time.components);
     const season = seasonData ? localize(seasonData.name) : null;
-    const weather = {
-      id: today.preset.id,
-      label: today.preset.label,
-      description: today.preset.description,
-      icon: today.preset.icon,
-      color: today.preset.color,
-      category: today.preset.category,
-      temperature: today.temperature,
-      wind: today.wind ?? { speed: 0, direction: null, forced: false },
-      precipitation: today.precipitation ?? { type: null, intensity: 0 },
-      darknessPenalty: today.preset.darknessPenalty ?? 0,
-      setAt: game.time.worldTime,
-      setBy: game.user.id,
-      generated: true,
-      season
-    };
-    await this.#saveWeather(weather, true);
+
+    if (todayPlan) {
+      const weather = {
+        id: todayPlan.id,
+        label: todayPlan.label,
+        description: todayPlan.description ?? '',
+        icon: todayPlan.icon,
+        color: todayPlan.color,
+        category: todayPlan.category,
+        temperature: todayPlan.temperature,
+        wind: todayPlan.wind ?? { speed: 0, direction: null, forced: false },
+        precipitation: todayPlan.precipitation ?? { type: null, intensity: 0 },
+        darknessPenalty: todayPlan.darknessPenalty ?? 0,
+        environmentBase: todayPlan.environmentBase ?? null,
+        environmentDark: todayPlan.environmentDark ?? null,
+        setAt: game.time.worldTime,
+        setBy: game.user.id,
+        generated: true,
+        season
+      };
+      await this.#saveWeather(weather, true);
+    } else {
+      const weather = {
+        id: todayF.preset.id,
+        label: todayF.preset.label,
+        description: todayF.preset.description,
+        icon: todayF.preset.icon,
+        color: todayF.preset.color,
+        category: todayF.preset.category,
+        temperature: todayF.temperature,
+        wind: todayF.wind ?? { speed: 0, direction: null, forced: false },
+        precipitation: todayF.precipitation ?? { type: null, intensity: 0 },
+        darknessPenalty: todayF.preset.darknessPenalty ?? 0,
+        setAt: game.time.worldTime,
+        setBy: game.user.id,
+        generated: true,
+        season
+      };
+      await this.#saveWeather(weather, true);
+    }
+
+    // Regenerate forecast plan from new state
+    await this.#clearForecastPlan();
+    await this.#ensureForecastPlan();
     log(3, `Backfilled ${daysToFill} days of weather history`);
   }
 
@@ -461,6 +623,159 @@ export default class WeatherManager {
       delete history[y][m][d];
       if (!Object.keys(history[y][m]).length) delete history[y][m];
       if (!Object.keys(history[y]).length) delete history[y];
+    }
+  }
+
+  /**
+   * Ensure the forecast plan has enough future entries.
+   * Generates and stores entries if the plan is empty or short.
+   * @private
+   */
+  static async #ensureForecastPlan() {
+    if (!CalendariaSocket.isPrimaryGM()) return;
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return;
+    const forecastDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
+    const components = game.time.components;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const todayYear = components.year + yearZero;
+    const todayMonth = components.month;
+    const todayDay = (components.dayOfMonth ?? 0) + 1;
+    const todayKey = todayYear * 10000 + todayMonth * 100 + todayDay;
+    const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
+
+    // Collect all entries and count future ones (>= today)
+    const entries = [];
+    for (const [y, months] of Object.entries(plan)) {
+      for (const [m, days] of Object.entries(months)) {
+        for (const [d, entry] of Object.entries(days)) {
+          const key = Number(y) * 10000 + Number(m) * 100 + Number(d);
+          entries.push({ key, year: Number(y), month: Number(m), day: Number(d), entry });
+        }
+      }
+    }
+    entries.sort((a, b) => a.key - b.key);
+    const futureEntries = entries.filter((e) => e.key >= todayKey);
+    // Need today + forecastDays future days (including today)
+    const needed = forecastDays + 1;
+    if (futureEntries.length >= needed) {
+      // Prune past entries and save if any were removed
+      const pastCount = entries.length - futureEntries.length;
+      if (pastCount > 0) {
+        this.#prunePlanEntries(plan, todayKey);
+        await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, plan);
+      }
+      return;
+    }
+
+    // Determine generation start point
+    const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
+    let startYear, startMonth, startDay, chainWeatherId;
+    const lastFuture = futureEntries[futureEntries.length - 1];
+    if (lastFuture) {
+      // Start from day after last future entry
+      startYear = lastFuture.year;
+      startMonth = lastFuture.month;
+      startDay = lastFuture.day + 1;
+      chainWeatherId = lastFuture.entry.id;
+      const dim = getDaysInMonth(startMonth, startYear);
+      if (startDay > dim) {
+        startDay = 1;
+        startMonth++;
+        if (startMonth >= (getDaysInMonth._monthsPerYear ?? 12)) {
+          startMonth = 0;
+          startYear++;
+        }
+      }
+    } else {
+      // No future entries, start from today
+      startYear = todayYear;
+      startMonth = todayMonth;
+      startDay = todayDay;
+      chainWeatherId = this.#currentWeather?.id ?? null;
+    }
+
+    const toGenerate = needed - futureEntries.length;
+    const zoneConfig = this.getActiveZone();
+    const customPresets = this.getCustomPresets();
+    const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+
+    const forecast = generateForecast({
+      zoneConfig,
+      startYear,
+      startMonth,
+      startDay,
+      days: toGenerate,
+      customPresets,
+      currentWeatherId: chainWeatherId,
+      inertia,
+      accuracy: 100,
+      getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
+      getDaysInMonth
+    });
+
+    // Merge into plan
+    for (const f of forecast) {
+      plan[f.year] ??= {};
+      plan[f.year][f.month] ??= {};
+      plan[f.year][f.month][f.day] = {
+        id: f.preset.id,
+        label: f.preset.label,
+        icon: f.preset.icon,
+        color: f.preset.color,
+        category: f.preset.category,
+        description: f.preset.description ?? '',
+        temperature: f.temperature,
+        wind: f.wind ?? null,
+        precipitation: f.precipitation ?? null,
+        darknessPenalty: f.preset.darknessPenalty ?? 0,
+        environmentBase: f.preset.environmentBase ?? null,
+        environmentDark: f.preset.environmentDark ?? null
+      };
+    }
+
+    this.#prunePlanEntries(plan, todayKey);
+    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, plan);
+    log(3, `Forecast plan updated: ${toGenerate} entries generated`);
+  }
+
+  /**
+   * Look up a forecast plan entry for a specific date.
+   * @param {number} year - Display year
+   * @param {number} month - Month (0-indexed)
+   * @param {number} day - Day of month (1-indexed)
+   * @returns {object|null} Plan entry or null
+   * @private
+   */
+  static #getFromForecastPlan(year, month, day) {
+    const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
+    return plan[year]?.[month]?.[day] ?? null;
+  }
+
+  /**
+   * Clear the stored forecast plan so it regenerates from current state.
+   * @private
+   */
+  static async #clearForecastPlan() {
+    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
+    log(3, 'Forecast plan cleared');
+  }
+
+  /**
+   * Remove plan entries before today.
+   * @param {object} plan - Nested year→month→day plan object (mutated)
+   * @param {number} todayKey - Comparable key for today (year*10000 + month*100 + day)
+   * @private
+   */
+  static #prunePlanEntries(plan, todayKey) {
+    for (const y of Object.keys(plan)) {
+      for (const m of Object.keys(plan[y])) {
+        for (const d of Object.keys(plan[y][m])) {
+          if (Number(y) * 10000 + Number(m) * 100 + Number(d) < todayKey) delete plan[y][m][d];
+        }
+        if (!Object.keys(plan[y][m]).length) delete plan[y][m];
+      }
+      if (!Object.keys(plan[y]).length) delete plan[y];
     }
   }
 

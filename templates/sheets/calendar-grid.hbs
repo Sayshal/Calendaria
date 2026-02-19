@@ -35,6 +35,14 @@
                     </span>
                   {{/if}}
                 </div>
+                {{#if weatherIcon}}
+                  <div class="day-weather-pill{{#if isForecast}} forecast{{/if}}"
+                    data-tooltip-html="{{{weatherTooltipHtml}}}">
+                    <i class="fas {{weatherIcon}}" style="color: {{weatherColor}}"></i>
+                    {{#if weatherTemp}}<span class="pill-temp">{{weatherTemp}}</span>{{/if}}
+                    {{#if weatherWindDir}}<span class="pill-wind">{{weatherWindDir}}</span>{{/if}}
+                  </div>
+                {{/if}}
                 <div class="day-notes">
                   {{#each notes}}
                     <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
@@ -98,6 +106,14 @@
                       </span>
                     {{/if}}
                   </div>
+                  {{#if weatherIcon}}
+                    <div class="day-weather-pill{{#if isForecast}} forecast{{/if}}"
+                      data-tooltip-html="{{{weatherTooltipHtml}}}">
+                      <i class="fas {{weatherIcon}}" style="color: {{weatherColor}}"></i>
+                      {{#if weatherTemp}}<span class="pill-temp">{{weatherTemp}}</span>{{/if}}
+                      {{#if weatherWindDir}}<span class="pill-wind">{{weatherWindDir}}</span>{{/if}}
+                    </div>
+                  {{/if}}
                   <div class="day-notes">
                     {{#each notes}}
                       <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"

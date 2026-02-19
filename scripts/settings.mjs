@@ -1224,6 +1224,23 @@ export function registerSettings() {
     type: new ObjectField({ initial: {} })
   });
 
+  /** Stored forecast plan — source of truth for future weather */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {
+    name: 'Weather Forecast Plan',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
+  /** Whether GM manual weather overrides regenerate the forecast */
+  game.settings.register(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST, {
+    name: 'CALENDARIA.Settings.GMOverrideClearsForecast.Name',
+    hint: 'CALENDARIA.Settings.GMOverrideClearsForecast.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Visual overrides for built-in weather presets */
   game.settings.register(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, {
     name: 'Weather Visual Overrides',
