@@ -288,7 +288,8 @@ export default class WeatherManager {
       const temperature = Math.round(min + Math.random() * (max - min));
       result = { preset: randomPreset, temperature };
     } else {
-      result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId, inertia });
+      const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
+      result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId, inertia, previousWeather: prevWeather });
     }
     const weather = {
       id: result.preset.id,
@@ -405,6 +406,8 @@ export default class WeatherManager {
     const currentWeatherId = this.#currentWeatherByZone[zoneId]?.id ?? null;
     const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
     const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
+    const currentWeather = this.#currentWeatherByZone[zoneId];
+    const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
     return generateForecast({
       zoneConfig,
       startYear: components.year + yearZero,
@@ -415,6 +418,7 @@ export default class WeatherManager {
       currentWeatherId,
       inertia,
       accuracy,
+      previousWeather: prevWeather,
       getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
       getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
     });
@@ -483,7 +487,8 @@ export default class WeatherManager {
         const currentWeather = this.#currentWeatherByZone[zone.id];
         let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
         if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
-        const result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId: currentWeather?.id ?? null, inertia });
+        const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
+        const result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId: currentWeather?.id ?? null, inertia, previousWeather: prevWeather });
         weatherUpdates[zone.id] = {
           id: result.preset.id,
           label: result.preset.label,
@@ -813,6 +818,8 @@ export default class WeatherManager {
       }
 
       const toGenerate = needed - futureEntries.length;
+      const chainWeather = lastFuture?.entry ?? this.#currentWeatherByZone[zone.id];
+      const chainPrevWeather = chainWeather ? { temperature: chainWeather.temperature, wind: chainWeather.wind } : null;
       const forecast = generateForecast({
         zoneConfig: zone,
         startYear,
@@ -823,6 +830,7 @@ export default class WeatherManager {
         currentWeatherId: chainWeatherId,
         inertia,
         accuracy: 100,
+        previousWeather: chainPrevWeather,
         getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
         getDaysInMonth
       });

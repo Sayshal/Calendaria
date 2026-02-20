@@ -5,7 +5,6 @@
  */
 
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES } from './constants.mjs';
-import { isFXMasterActive } from './integrations/fxmaster.mjs';
 import { log } from './utils/logger.mjs';
 import { getMoonPhasePosition } from './utils/moon-utils.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
@@ -86,11 +85,8 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   const weatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
   if (weatherSync) {
     const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
-    const deferToFx = currentWeather?.fxPreset && isFXMasterActive();
-    if (!deferToFx) {
-      const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
-      adjustedDarkness += weatherDarknessPenalty;
-    }
+    const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
+    adjustedDarkness += weatherDarknessPenalty;
   }
   return Math.max(0, Math.min(1, adjustedDarkness));
 }
@@ -248,11 +244,8 @@ export function calculateEnvironmentLighting(scene) {
 
   if (activeZone?.environmentBase?.hue != null) base.hue = activeZone.environmentBase.hue;
   if (activeZone?.environmentDark?.hue != null) dark.hue = activeZone.environmentDark.hue;
-  const deferToFx = currentWeather?.fxPreset && isFXMasterActive();
-  if (!deferToFx) {
-    if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
-    if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
-  }
+  if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
+  if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
   const hasValues = base.hue !== null || base.intensity !== null || dark.hue !== null || dark.intensity !== null;
   if (!hasValues) return null;
   return { base, dark };

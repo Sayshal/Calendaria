@@ -127,7 +127,8 @@ export const SETTINGS = {
   FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
   FXMASTER_SOUND_FX: 'fxmasterSoundFx',
   FXMASTER_TOP_DOWN: 'fxmasterTopDown',
-  GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast'
+  GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast',
+  REST_TO_SUNRISE: 'restToSunrise'
 };
 
 /**

@@ -28,14 +28,25 @@ const MAX_VISIBLE_MOONS = 3;
 
 /**
  * Process moon phases array for display with overflow handling.
+ * Respects the visible moons override from calendar-view-utils.
  * @param {object[]|null} phases - Array of moon phase objects
  * @returns {object|null} Processed object with visible, overflow, and overflowTooltip
  */
 function processMoonPhases(phases) {
   if (!phases?.length) return null;
-  if (phases.length <= MAX_VISIBLE_MOONS) return { visible: phases, overflow: [], overflowTooltip: '', overflowTooltipText: '' };
-  const visible = phases.slice(0, MAX_VISIBLE_MOONS);
-  const overflow = phases.slice(MAX_VISIBLE_MOONS);
+  const override = ViewUtils.getVisibleMoons();
+  let ordered = phases;
+  if (override?.length && phases.length > MAX_VISIBLE_MOONS) {
+    // Place overridden moons first in exact slot order
+    const phaseMap = new Map(phases.map((m) => [m.moonName, m]));
+    const prioritized = override.map((name) => phaseMap.get(name)).filter(Boolean);
+    const prioritizedSet = new Set(override);
+    const rest = phases.filter((m) => !prioritizedSet.has(m.moonName));
+    ordered = [...prioritized, ...rest];
+  }
+  if (ordered.length <= MAX_VISIBLE_MOONS) return { visible: ordered, overflow: [], overflowTooltip: '', overflowTooltipText: '' };
+  const visible = ordered.slice(0, MAX_VISIBLE_MOONS);
+  const overflow = ordered.slice(MAX_VISIBLE_MOONS);
   const overflowTooltip = overflow.map((m) => `<div class='moon-tooltip-row'><img src='${m.icon}'><span>${m.moonName}: ${m.phaseName}</span></div>`).join('');
   const overflowTooltipText = overflow.map((m) => `${m.moonName}: ${m.phaseName}`).join(', ');
   return { visible, overflow, overflowTooltip, overflowTooltipText };
@@ -85,7 +96,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       closeSearch: BigCal._onCloseSearch,
       openSearchResult: BigCal._onOpenSearchResult,
       openSettings: BigCal._onOpenSettings,
-      navigateToMonth: BigCal._onNavigateToMonth
+      navigateToMonth: BigCal._onNavigateToMonth,
+      moonClick: BigCal._onMoonClick
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -1845,6 +1857,37 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const year = parseInt(target.dataset.year);
     this.viewedDate = { year, month, day: 1 };
     await this.render();
+  }
+
+  /**
+   * Handle click on a visible moon icon in the day cell.
+   * Opens radial picker to swap the moon in that slot.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked moon-phase element
+   */
+  static _onMoonClick(_event, target) {
+    _event.stopPropagation();
+    const dayCell = target.closest('[data-year][data-month][data-day]');
+    if (!dayCell) return;
+    const year = parseInt(dayCell.dataset.year);
+    const month = parseInt(dayCell.dataset.month);
+    const day = parseInt(dayCell.dataset.day);
+    const slot = parseInt(target.dataset.moonSlot);
+    const allMoons = ViewUtils.getAllMoonPhases(this.calendar, year, month, day);
+    if (!allMoons?.length || allMoons.length <= MAX_VISIBLE_MOONS) return;
+    const clickedMoon = target.dataset.moonName;
+    ViewUtils.showMoonPicker(target, allMoons, clickedMoon, (moonName) => {
+      const current = ViewUtils.getVisibleMoons() ?? allMoons.slice(0, MAX_VISIBLE_MOONS).map((m) => m.moonName);
+      const updated = [...current];
+      // If selected moon is already visible, swap it with the clicked slot
+      const existingIdx = updated.indexOf(moonName);
+      if (existingIdx !== -1 && existingIdx !== slot) {
+        updated[existingIdx] = updated[slot];
+      }
+      if (slot >= 0 && slot < updated.length) updated[slot] = moonName;
+      ViewUtils.setVisibleMoons(updated);
+      this.render();
+    });
   }
 
   /**

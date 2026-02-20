@@ -95,12 +95,6 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {Function|null} Click-outside handler for search panel */
   #clickOutsideHandler = null;
 
-  /** @type {HTMLElement|null} Active moons tooltip element */
-  #moonsTooltip = null;
-
-  /** @type {Function|null} Click-outside handler for moons tooltip */
-  #moonsClickOutsideHandler = null;
-
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'mini-calendar',
@@ -1889,53 +1883,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const moons = ViewUtils.getAllMoonPhases(this.calendar, year, month, day);
     if (!moons?.length) return;
     const selectedMoon = ViewUtils.getSelectedMoon() || moons[0]?.moonName;
-    const tooltip = document.createElement('div');
-    tooltip.className = 'calendaria-moons-tooltip';
-    const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
-    tooltip.innerHTML = `
-      <div class="moons-radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
-        ${moons
-          .map(
-            (moon, i) => `
-          <div class="moon-radial-item${moon.moonName === selectedMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
-            <span class="moon-name">${moon.moonName}</span>
-            <div class="moon-radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
-              <img src="${moon.icon}" alt="${moon.phaseName}">
-            </div>
-          </div>
-        `
-          )
-          .join('')}
-      </div>
-    `;
-    document.body.appendChild(tooltip);
-    this.#moonsTooltip = tooltip;
-    tooltip.querySelectorAll('.moon-radial-item').forEach((item) => {
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const moonName = item.dataset.moonName;
-        ViewUtils.setSelectedMoon(moonName);
-        this.#closeMoonsTooltip();
-        this.render();
-      });
+    ViewUtils.showMoonPicker(target, moons, selectedMoon, (moonName) => {
+      ViewUtils.setSelectedMoon(moonName);
+      this.render();
     });
-    const targetRect = target.getBoundingClientRect();
-    const tooltipRect = tooltip.getBoundingClientRect();
-    let left = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
-    let top = targetRect.bottom + 8;
-    if (left < 10) left = 10;
-    if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
-    if (top + tooltipRect.height > window.innerHeight - 10) top = targetRect.top - tooltipRect.height - 8;
-    top = Math.max(10, top);
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    this.#setupTooltipDrag(tooltip);
-    setTimeout(() => {
-      this.#moonsClickOutsideHandler = (event) => {
-        if (!tooltip.contains(event.target) && !event.target.closest('[data-action="showMoons"]')) this.#closeMoonsTooltip();
-      };
-      document.addEventListener('mousedown', this.#moonsClickOutsideHandler);
-    }, 100);
   }
 
   /**
@@ -1948,56 +1899,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Set up drag behavior for the moons tooltip.
-   * @param {HTMLElement} tooltip - The tooltip element
-   */
-  #setupTooltipDrag(tooltip) {
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-    const onMouseDown = (e) => {
-      if (e.target.closest('[data-tooltip]')) return;
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      startLeft = parseInt(tooltip.style.left) || 0;
-      startTop = parseInt(tooltip.style.top) || 0;
-      tooltip.style.cursor = 'grabbing';
-      e.preventDefault();
-    };
-    const onMouseMove = (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      tooltip.style.left = `${startLeft + dx}px`;
-      tooltip.style.top = `${startTop + dy}px`;
-    };
-    const onMouseUp = () => {
-      isDragging = false;
-      tooltip.style.cursor = '';
-    };
-    tooltip.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    tooltip._dragCleanup = () => {
-      tooltip.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }
-
-  /**
    * Close moons tooltip and clean up.
    */
   #closeMoonsTooltip() {
-    if (this.#moonsClickOutsideHandler) {
-      document.removeEventListener('mousedown', this.#moonsClickOutsideHandler);
-      this.#moonsClickOutsideHandler = null;
-    }
-    if (this.#moonsTooltip) {
-      this.#moonsTooltip._dragCleanup?.();
-      this.#moonsTooltip.remove();
-      this.#moonsTooltip = null;
-    }
+    ViewUtils.closeMoonPicker();
   }
 
   /**

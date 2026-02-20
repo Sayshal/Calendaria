@@ -547,6 +547,10 @@
       mix-blend-mode: multiply;
     }
   }
+
+  .big-cal & {
+    cursor: pointer;
+  }
 }
 
 .moon-overflow {
@@ -5004,6 +5008,11 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .calendaria.settings-panel {
+  .form-group.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
   nav.sheet-tabs .tab-group:last-child {
     margin-top: auto;
   }
