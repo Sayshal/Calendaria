@@ -24,7 +24,8 @@
                     <span class="day-moons">
                       {{#each moonPhases.visible}}
                         <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
-                          aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}>
+                          aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}
+                          data-action="moonClick" data-moon-slot="{{@index}}" data-moon-name="{{moonName}}">
                           <img src="{{icon}}" alt="{{phaseName}}">
                         </span>
                       {{/each}}
@@ -95,7 +96,8 @@
                         {{#each moonPhases.visible}}
                           <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
                             aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}"
-                            {{/if}}>
+                            {{/if}} data-action="moonClick" data-moon-slot="{{@index}}"
+                            data-moon-name="{{moonName}}">
                             <img src="{{icon}}" alt="{{phaseName}}">
                           </span>
                         {{/each}}

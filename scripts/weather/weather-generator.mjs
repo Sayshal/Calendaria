@@ -138,9 +138,10 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
  * @param {object[]} [options.customPresets] - Custom weather presets
  * @param {string} [options.currentWeatherId] - Current weather ID for inertia calculation
  * @param {number} [options.inertia] - How much to favor current weather (0-1)
+ * @param {object|null} [options.previousWeather] - Previous weather for value-level blending { temperature, wind }
  * @returns {object} Generated weather { preset, temperature }
  */
-export function generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets = [], currentWeatherId = null, inertia = 0 }) {
+export function generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets = [], currentWeatherId = null, inertia = 0, previousWeather = null }) {
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
   const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
   let { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
@@ -152,10 +153,24 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
   if (presetConfig?.tempMin != null) finalTempRange.min = applyTempModifier(presetConfig.tempMin, tempRange.min);
   if (presetConfig?.tempMax != null) finalTempRange.max = applyTempModifier(presetConfig.tempMax, tempRange.max);
-  const temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
+  let temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
   const precipitation = generatePrecipitation(resolvedPreset, randomFn);
+
+  // Blend temperature and wind with previous values using inertia
+  if (previousWeather && inertia > 0) {
+    if (previousWeather.temperature != null) {
+      temperature = Math.round(previousWeather.temperature * inertia + temperature * (1 - inertia));
+    }
+    if (previousWeather.wind && !wind.forced) {
+      wind.speed = Math.round(previousWeather.wind.speed * inertia + wind.speed * (1 - inertia));
+      if (previousWeather.wind.direction != null && wind.direction != null) {
+        wind.direction = lerpAngle(previousWeather.wind.direction, wind.direction, 1 - inertia);
+      }
+    }
+  }
+
   return { preset: resolvedPreset, temperature, wind, precipitation };
 }
 
@@ -223,6 +238,7 @@ export function applyForecastVariance(weather, dayDistance, totalDays, accuracy,
  * @param {string} [options.currentWeatherId] - Current weather ID for inertia chain start
  * @param {number} [options.inertia] - Inertia value (0-1) for path-dependent chaining
  * @param {number} [options.accuracy] - Forecast accuracy 0-100 (100 = perfect)
+ * @param {object|null} [options.previousWeather] - Previous weather for value-level blending { temperature, wind }
  * @returns {object[]} Array of weather forecasts
  */
 export function generateForecast({
@@ -237,20 +253,23 @@ export function generateForecast({
   getDaysInMonth,
   currentWeatherId = null,
   inertia = 0,
-  accuracy = 100
+  accuracy = 100,
+  previousWeather = null
 }) {
   const forecast = [];
   let year = startYear;
   let month = startMonth;
   let day = startDay;
   let previousWeatherId = currentWeatherId;
+  let prevWeather = previousWeather;
   for (let i = 0; i < days; i++) {
     const seasonData = getSeasonForDate ? getSeasonForDate(year, month, day) : null;
     const currentSeason = seasonData?.name ?? season;
     const seasonClimate = seasonData?.climate ?? null;
     const seed = dateSeed(year, month, day);
-    const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia });
+    const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia, previousWeather: prevWeather });
     previousWeatherId = weather.preset.id;
+    prevWeather = { temperature: weather.temperature, wind: weather.wind };
     if (accuracy < 100) {
       const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
       forecast.push({ year, month, day, ...varied });
@@ -314,6 +333,22 @@ function generatePrecipitation(preset, randomFn = Math.random) {
   const variance = (randomFn() - 0.5) * 0.3;
   const intensity = Math.max(0.1, Math.min(1, baseIntensity + variance));
   return { type, intensity: Math.round(intensity * 100) / 100 };
+}
+
+/**
+ * Interpolate between two angles (degrees) taking the shortest path.
+ * @param {number} from - Start angle in degrees
+ * @param {number} to - End angle in degrees
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {number} Interpolated angle snapped to nearest compass point
+ */
+function lerpAngle(from, to, t) {
+  let diff = to - from;
+  if (diff > 180) diff -= 360;
+  else if (diff < -180) diff += 360;
+  const result = (((from + diff * t) % 360) + 360) % 360;
+  // Snap to nearest 22.5° compass point
+  return Math.round(result / 22.5) * 22.5;
 }
 
 /**

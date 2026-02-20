@@ -20,6 +20,12 @@ const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 /** @type {string|null} User-selected moon name override for display */
 let selectedMoonOverride = null;
 
+/** @type {string[]|null} BigCal visible moons override (session state) */
+let visibleMoonsOverride = null;
+
+/** @type {{tooltip: HTMLElement|null, handler: Function|null}} Active moon picker state */
+const moonPickerState = { tooltip: null, handler: null };
+
 /**
  * Set the moon override for display.
  * @param {string|null} moonName - Moon name to display, or null to use default (first alphabetically)
@@ -34,6 +40,93 @@ export function setSelectedMoon(moonName) {
  */
 export function getSelectedMoon() {
   return selectedMoonOverride;
+}
+
+/**
+ * Get the visible moons override for BigCal.
+ * @returns {string[]|null} Array of moon names to display, or null for default
+ */
+export function getVisibleMoons() {
+  return visibleMoonsOverride;
+}
+
+/**
+ * Set the visible moons override for BigCal.
+ * @param {string[]|null} moons - Array of moon names, or null to clear
+ */
+export function setVisibleMoons(moons) {
+  visibleMoonsOverride = moons;
+}
+
+/**
+ * Close any active moon picker tooltip.
+ */
+export function closeMoonPicker() {
+  if (moonPickerState.handler) {
+    document.removeEventListener('mousedown', moonPickerState.handler);
+    moonPickerState.handler = null;
+  }
+  if (moonPickerState.tooltip) {
+    moonPickerState.tooltip.remove();
+    moonPickerState.tooltip = null;
+  }
+}
+
+/**
+ * Show a radial moon picker anchored to a target element.
+ * @param {HTMLElement} anchor - The element to position relative to
+ * @param {object[]} moons - Moon data array (from getAllMoonPhases)
+ * @param {string|null} currentMoon - Currently selected moon name (highlighted)
+ * @param {Function} onSelect - Callback when a moon is selected: (moonName) => void
+ */
+export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
+  closeMoonPicker();
+  if (!moons?.length) return;
+  const tooltip = document.createElement('div');
+  tooltip.className = 'calendaria-moons-tooltip';
+  const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
+  tooltip.innerHTML = `
+    <div class="moons-radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
+      ${moons
+        .map(
+          (moon, i) => `
+        <div class="moon-radial-item${moon.moonName === currentMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
+          <span class="moon-name">${moon.moonName}</span>
+          <div class="moon-radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
+            <img src="${moon.icon}" alt="${moon.phaseName}">
+          </div>
+        </div>
+      `
+        )
+        .join('')}
+    </div>
+  `;
+  document.body.appendChild(tooltip);
+  moonPickerState.tooltip = tooltip;
+  tooltip.querySelectorAll('.moon-radial-item').forEach((item) => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const moonName = item.dataset.moonName;
+      onSelect(moonName);
+      closeMoonPicker();
+    });
+  });
+  const targetRect = anchor.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  let left = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
+  let top = targetRect.bottom + 8;
+  if (left < 10) left = 10;
+  if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
+  if (top + tooltipRect.height > window.innerHeight - 10) top = targetRect.top - tooltipRect.height - 8;
+  top = Math.max(10, top);
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  setTimeout(() => {
+    moonPickerState.handler = (event) => {
+      if (!tooltip.contains(event.target) && !event.target.closest('[data-action="showMoons"], [data-action="moonClick"]')) closeMoonPicker();
+    };
+    document.addEventListener('mousedown', moonPickerState.handler);
+  }, 100);
 }
 
 /**

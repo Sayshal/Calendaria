@@ -1651,6 +1651,8 @@
   "CALENDARIA.Settings.PrimaryGM.Hint": "Select which GM is designated as the primary GM for sync operations. Auto will use the first active GM.",
   "CALENDARIA.Settings.PrimaryGM.Name": "Primary GM",
   "CALENDARIA.Settings.ResetPosition.Success": "Calendar position has been reset.",
+  "CALENDARIA.Settings.RestToSunrise.Hint": "When enabled, long rests advance time to the zone's sunrise hour instead of a fixed 8 AM. Falls back to 8 AM if no sunrise is configured.",
+  "CALENDARIA.Settings.RestToSunrise.Name": "Rest to Sunrise",
   "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint": "Allow players to see the active calendar selection on the Home tab (they cannot change it without the appropriate permission).",
   "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name": "Show Active Calendar to Players",
   "CALENDARIA.Settings.ShowCalendarHUD.Hint": "Display the HUD on world load.",

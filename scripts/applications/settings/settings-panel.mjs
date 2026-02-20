@@ -204,6 +204,26 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#setupSearchListeners();
+    this.#setupDependentFields();
+  }
+
+  /** Wire up data-depends-on fields to toggle disabled state based on a parent checkbox. */
+  #setupDependentFields() {
+    for (const group of this.element.querySelectorAll('[data-depends-on]')) {
+      const parentName = group.dataset.dependsOn;
+      const parentInput = this.element.querySelector(`[name="${parentName}"]`);
+      if (!parentInput) continue;
+      const toggle = () => {
+        const enabled = parentInput.checked;
+        group.classList.toggle('disabled', !enabled);
+        for (const input of group.querySelectorAll('input, select')) input.disabled = !enabled;
+      };
+      toggle();
+      if (!parentInput.dataset.dependencyAttached) {
+        parentInput.dataset.dependencyAttached = 'true';
+        parentInput.addEventListener('change', toggle);
+      }
+    }
   }
 
   /** @override */
@@ -701,7 +721,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'stopwatch-sticky': [SETTINGS.STOPWATCH_STICKY_STATES],
     // Time tab sections
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
-    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.SYNC_CLOCK_PAUSE],
+    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_TO_SUNRISE, SETTINGS.SYNC_CLOCK_PAUSE],
     // Chat tab sections
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     // Canvas tab sections
@@ -782,6 +802,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeContext(context) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+    context.restToSunrise = game.settings.get(MODULE.ID, SETTINGS.REST_TO_SUNRISE);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
     context.timeSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER);
@@ -1533,6 +1554,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('colorShiftSync' in data) await game.settings.set(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, data.colorShiftSync);
     if ('darknessMoonSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, data.darknessMoonSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
+    if ('restToSunrise' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_TO_SUNRISE, data.restToSunrise);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
     if ('chatTimestampShowTime' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, data.chatTimestampShowTime);

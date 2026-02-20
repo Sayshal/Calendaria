@@ -7,6 +7,7 @@
  */
 
 import { MODULE, SETTINGS } from '../constants.mjs';
+import { localize } from '../utils/localization.mjs';
 import { ALL_PRESETS } from './weather-presets.mjs';
 
 /**
@@ -240,7 +241,7 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
   return {
     id: template.id,
     name: template.name,
-    description: template.description ?? '',
+    description: localize(template.description) ?? '',
     brightnessMultiplier: 1.0,
     environmentBase: template.environmentBase ?? null,
     environmentDark: template.environmentDark ?? null,

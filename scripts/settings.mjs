@@ -1078,6 +1078,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Whether long rests advance to sunrise instead of fixed 8 AM */
+  game.settings.register(MODULE.ID, SETTINGS.REST_TO_SUNRISE, {
+    name: 'CALENDARIA.Settings.RestToSunrise.Name',
+    hint: 'CALENDARIA.Settings.RestToSunrise.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   /** Whether to sync clock pause with game pause */
   game.settings.register(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, {
     name: 'CALENDARIA.Settings.SyncClockPause.Name',

@@ -49,6 +49,14 @@
         <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
       </div>
 
+      <div class="form-group" data-depends-on="advanceTimeOnRest">
+        <label for="restToSunrise">{{localize "CALENDARIA.Settings.RestToSunrise.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="restToSunrise" name="restToSunrise" {{#if restToSunrise}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.RestToSunrise.Hint"}}</p>
+      </div>
+
       <div class="form-group">
         <label for="syncClockPause">{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
         <div class="form-fields">

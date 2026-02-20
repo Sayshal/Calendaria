@@ -730,6 +730,9 @@ export class HudSceneRenderer {
   /** @type {number} Global time accumulator for animations */
   #time = 0;
 
+  /** @type {{particleScale: number, enableStarTwinkle: boolean, enableCoronaPulse: boolean, maxFPS: number}} */
+  #perfConfig = null;
+
   /**
    * @param {HTMLCanvasElement} canvas - Target canvas element
    * @param {string} mode - 'dome' or 'slice'
@@ -737,9 +740,11 @@ export class HudSceneRenderer {
   constructor(canvas, mode = 'dome') {
     this.canvas = canvas;
     this.#mode = mode;
+    this.#perfConfig = this.#getPerformanceConfig();
     const parent = canvas.parentElement;
-    log(3, 'HudSceneRenderer | constructor', { mode });
+    log(3, 'HudSceneRenderer | constructor', { mode, perf: this.#perfConfig });
     this.#app = new PIXI.Application({ view: canvas, backgroundAlpha: 0, resizeTo: parent, antialias: true });
+    this.#app.ticker.maxFPS = this.#perfConfig.maxFPS;
 
     // Build layer hierarchy
     this.#buildSkyLayer();
@@ -752,6 +757,23 @@ export class HudSceneRenderer {
 
     this.#generateTextures();
     this.#app.ticker.add(this.#tick, this);
+  }
+
+  /**
+   * Read Foundry performance settings and return a config object.
+   * @returns {{particleScale: number, enableStarTwinkle: boolean, enableCoronaPulse: boolean, maxFPS: number}} Performance config
+   */
+  #getPerformanceConfig() {
+    const mode = game.settings?.get('core', 'performanceMode') ?? 2;
+    const maxFPS = game.settings?.get('core', 'maxFPS') ?? 60;
+    switch (mode) {
+      case 0: // LOW
+        return { particleScale: 0, enableStarTwinkle: false, enableCoronaPulse: false, maxFPS };
+      case 1: // MED
+        return { particleScale: 0.5, enableStarTwinkle: false, enableCoronaPulse: false, maxFPS };
+      default: // HIGH (2) / MAX (3)
+        return { particleScale: 1, enableStarTwinkle: true, enableCoronaPulse: true, maxFPS };
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -788,9 +810,14 @@ export class HudSceneRenderer {
    */
   setEffect(effect, { windSpeed = 0, windDirection = 0, precipIntensity = 0 } = {}, visualOverrides = null) {
     if (this.#destroyed) return;
+    // Re-read perf config to handle mid-session changes
+    const newPerf = this.#getPerformanceConfig();
+    const perfChanged = newPerf.particleScale !== this.#perfConfig.particleScale;
+    this.#perfConfig = newPerf;
+    this.#app.ticker.maxFPS = newPerf.maxFPS;
     this.#weatherOptions = { windSpeed, windDirection, precipIntensity };
     const overridesChanged = JSON.stringify(this.#visualOverrides) !== JSON.stringify(visualOverrides);
-    const changed = effect !== this.#currentEffect || overridesChanged;
+    const changed = effect !== this.#currentEffect || overridesChanged || perfChanged;
     if (!changed) return;
 
     // If particles exist, crossfade; otherwise swap immediately
@@ -1592,12 +1619,13 @@ export class HudSceneRenderer {
   #buildParticles() {
     const baseConfig = EFFECT_CONFIGS[this.#currentEffect];
     if (!baseConfig || baseConfig.particles === 0) return;
+    if (this.#perfConfig.particleScale === 0) return;
     const config = this.#mergeConfig(baseConfig, this.#visualOverrides);
     const w = this.#app.screen.width;
     const h = this.#app.screen.height;
     const intensity = this.#weatherOptions.precipIntensity || 0.5;
     const countRange = config.count;
-    const count = Math.round(countRange[0] + (countRange[1] - countRange[0]) * intensity);
+    const count = Math.round((countRange[0] + (countRange[1] - countRange[0]) * intensity) * this.#perfConfig.particleScale);
     const texture = this.#textures.get(config.texture);
     if (!texture) return;
     const variants = config.textureVariants?.map((name) => this.#textures.get(name)).filter(Boolean) ?? [];
@@ -1688,7 +1716,7 @@ export class HudSceneRenderer {
     this.#time += delta;
 
     // Animate star twinkle
-    if (this.#starAlpha > 0) {
+    if (this.#starAlpha > 0 && this.#perfConfig.enableStarTwinkle) {
       for (let i = 0; i < this.#stars.length; i++) {
         const star = this.#stars[i];
         const state = this.#starStates[i];
@@ -1697,7 +1725,7 @@ export class HudSceneRenderer {
     }
 
     // Animate sun corona pulse
-    if (this.#sunCorona.alpha > 0) {
+    if (this.#sunCorona.alpha > 0 && this.#perfConfig.enableCoronaPulse) {
       this.#sunCorona.alpha = 0.1 + 0.05 * Math.sin(this.#time * 0.02);
     }
 
