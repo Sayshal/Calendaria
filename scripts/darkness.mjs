@@ -327,9 +327,9 @@ export async function onRenderSceneConfig(app, html, _data) {
  * Update scene darkness when world time changes.
  * Computes per-scene darkness based on each scene's active climate zone.
  * @param {number} worldTime - The new world time
- * @param {number} _dt - The time delta
+ * @param {number} dt - The time delta in seconds
  */
-export async function updateDarknessFromWorldTime(worldTime, _dt) {
+export async function updateDarknessFromWorldTime(worldTime, dt) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const calendar = game.time.calendar;
   const components = game.time.components ?? calendar?.timeToComponents(worldTime);
@@ -338,16 +338,18 @@ export async function updateDarknessFromWorldTime(worldTime, _dt) {
   lastHour = currentHour;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+  const secondsPerHour = (calendar?.days?.secondsPerMinute ?? 60) * minutesPerHour;
+  const animateDarkness = Math.abs(dt) < secondsPerHour;
   for (const scene of getDarknessScenes()) {
     const zone = WeatherManager.getActiveZone?.(null, scene);
     const sunrise = calendar?.sunrise?.(components, zone) ?? null;
     const sunset = calendar?.sunset?.(components, zone) ?? null;
     const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
-    scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
-    if (envData) await scene.update(envData);
+    const updateData = { 'environment.darknessLevel': darkness, ...envData };
+    await scene.update(updateData, { animateDarkness });
   }
 }
 
@@ -402,10 +404,10 @@ export async function onWeatherChange() {
     const sunset = calendar?.sunset?.(components, zone) ?? null;
     const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
-    scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
-    if (envData) await scene.update(envData);
+    const updateData = { 'environment.darknessLevel': darkness, ...envData };
+    await scene.update(updateData);
   }
 }
 
@@ -433,8 +435,7 @@ export async function onUpdateScene(scene, change) {
   const darkness = calculateAdjustedDarkness(baseDarkness, scene);
   const lighting = calculateEnvironmentLighting(scene);
   const envData = buildEnvironmentUpdateData(scene, lighting);
-  // Scene activation: animate darkness, apply environment separately (animateDarkness returns early in Foundry)
-  scene.update({ 'environment.darknessLevel': darkness }, { animateDarkness: true });
-  if (envData) await scene.update(envData);
+  const updateData = { 'environment.darknessLevel': darkness, ...envData };
+  await scene.update(updateData, { animateDarkness: true });
   log(3, `Scene activated, transitioning darkness to ${darkness.toFixed(3)}`);
 }

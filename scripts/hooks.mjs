@@ -62,9 +62,9 @@ export function registerHooks() {
  * @param {number} worldTime - The new world time
  * @param {number} dt - The delta time in seconds
  */
-function onUpdateWorldTime(worldTime, dt) {
+async function onUpdateWorldTime(worldTime, dt) {
   EventScheduler.onUpdateWorldTime(worldTime, dt);
-  updateDarknessFromWorldTime(worldTime, dt);
+  await updateDarknessFromWorldTime(worldTime, dt);
   ReminderScheduler.onUpdateWorldTime(worldTime, dt);
   TimeTracker.onUpdateWorldTime(worldTime, dt);
   Hooks.callAll(HOOKS.WORLD_TIME_UPDATED, worldTime, dt);
