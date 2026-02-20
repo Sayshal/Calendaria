@@ -414,11 +414,17 @@ export default class TimeClock {
     log(3, `TimeClock intervals started (speed: ${speed}, advance every ${intervalMs / 1000}s, direct: ${directMode})`);
 
     if (directMode) {
-      // Direct mode — advance every tick, no accumulation/prediction
-      this.#visualIntervalId = setInterval(() => {
-        if (!this.#running || game.combat?.started) return;
-        if (CalendariaSocket.isPrimaryGM()) game.time.advance(speed);
-        Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: game.time.worldTime + speed });
+      // Direct mode — await advance so worldTime is committed before firing visual tick
+      let advancing = false;
+      this.#visualIntervalId = setInterval(async () => {
+        if (!this.#running || game.combat?.started || advancing) return;
+        advancing = true;
+        try {
+          if (CalendariaSocket.isPrimaryGM()) await game.time.advance(speed);
+          Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: game.time.worldTime });
+        } finally {
+          advancing = false;
+        }
       }, 1000);
       return;
     }
