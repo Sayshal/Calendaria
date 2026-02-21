@@ -110,9 +110,9 @@ function syncWeatherToScene() {
 /**
  * Handle weather change events.
  * @param {object} payload - Weather change hook payload
- * @param payload.current
- * @param payload.zoneId
- * @param payload.bulk
+ * @param {object|null} payload.current - Current weather data
+ * @param {string|null} payload.zoneId - Active zone ID
+ * @param {boolean} payload.bulk - Whether this is a bulk weather change
  */
 function onWeatherChange({ current, zoneId: _zoneId, bulk } = {}) {
   if (!CalendariaSocket.isPrimaryGM()) return;

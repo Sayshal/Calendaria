@@ -3,14 +3,14 @@
   {{!-- Temperatures --}}
   <fieldset>
     <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
-    <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
     <div class="form-group">
-      <div class="form-fields temperature">
+      <label>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</label>
+      <div class="form-fields range">
         <input type="number" name="tempMin" value="{{tempMin}}" placeholder="{{localize 'CALENDARIA.Common.Low'}}">
         <i class="fa-solid fa-right-long"></i>
         <input type="number" name="tempMax" value="{{tempMax}}" placeholder="{{localize 'CALENDARIA.Common.High'}}">
       </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.TemperaturesHint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.TemperaturesHint" unit=tempLabel}}</p>
     </div>
   </fieldset>
 
@@ -18,25 +18,22 @@
   <fieldset>
     <legend>{{localize "CALENDARIA.Editor.Season.Climate.WeatherChances"}}</legend>
     <p class="hint">{{localize "CALENDARIA.Editor.Season.Climate.WeatherChancesHint"}}</p>
-    <div class="preset-list">
-      {{#each categories}}
-        <div class="preset-category">
-          <h4>{{this.label}}</h4>
+    {{#each categories}}
+      <div class="weather-category">
+        <span class="category-header">{{this.label}}</span>
+        <div class="weather-weight-grid">
           {{#each this.presets}}
-            <div class="preset-row" data-preset-id="{{this.id}}">
-              <span class="preset-icon" style="color: {{this.color}}"><i class="fas {{this.icon}}"></i></span>
-              <span class="preset-name">
-                <label>{{this.label}}</label>
-              </span>
+            <div class="weather-weight-pill {{#if this.chance}}active{{/if}}" style="--weather-color: {{this.color}}">
+              <i class="fas {{this.icon}}"></i>
+              <span class="weather-label">{{this.label}}</span>
               <input type="number" name="preset_{{this.id}}"
-                value="{{this.chance}}" min="0" max="100" step="0.1"
-                placeholder="—">
-              <span class="units">%</span>
+                value="{{this.chance}}" min="0" step="0.1"
+                placeholder="0">
             </div>
           {{/each}}
         </div>
-      {{/each}}
-    </div>
+      </div>
+    {{/each}}
   </fieldset>
 
 </div>

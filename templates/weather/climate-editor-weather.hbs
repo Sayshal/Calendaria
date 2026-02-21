@@ -1,11 +1,10 @@
-<section class="tab" data-tab="weather" data-group="primary">
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <div class="standard-form">
 
     {{!-- Temperatures --}}
     <fieldset>
       <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
-      <p class="hint">{{localize "CALENDARIA.Weather.Modifier.TempHint"}}</p>
       {{#each temperatureRows}}
         <div class="form-group">
           <label>{{this.label}}</label>
@@ -22,56 +21,13 @@
       {{/each}}
     </fieldset>
 
-    {{!-- Presets --}}
-    <fieldset>
-      <legend>{{localize "CALENDARIA.Editor.Weather.ZonePresets"}}</legend>
-      <div class="preset-list">
-        {{#each categories}}
-          <div class="preset-category">
-            <h4>{{this.label}}</h4>
-            {{#each this.presets}}
-              <div class="preset-row" data-preset-id="{{this.id}}">
-                <input type="checkbox" name="preset_{{this.id}}_enabled" {{#if this.enabled}}checked{{/if}}>
-                <span class="preset-icon" style="color: {{this.color}}"><i class="fas {{this.icon}}"></i></span>
-                <span class="preset-name">
-                  <input type="text" class="preset-alias-input" value="{{this.alias}}" placeholder="{{this.label}}"
-                    data-preset-id="{{this.id}}" data-zone-id="{{../../zoneId}}">
-                  {{#if this.hasAlias}}
-                    <button type="button" class="preset-reset-alias icon-btn" data-action="resetAlias"
-                      data-preset-id="{{this.id}}" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Reset'}}">
-                      <i class="fas fa-undo"></i>
-                    </button>
-                  {{/if}}
-                </span>
-                <input type="number" name="preset_{{this.id}}_chance"
-                  value="{{this.chance}}" min="0" max="100" step="0.01"
-                  placeholder="0.00">
-                <span class="units">%</span>
-                <input type="text" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
-                  class="preset-temp-input {{#if this.isRelativeTempMin}}modifier-relative{{/if}}">
-                <span>–</span>
-                <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
-                  class="preset-temp-input {{#if this.isRelativeTempMax}}modifier-relative{{/if}}">
-                <span class="units">{{../../tempLabel}}</span>
-                <input type="number" name="preset_{{this.id}}_inertiaWeight" value="{{this.inertiaWeight}}"
-                  placeholder="{{this.defaultInertiaWeight}}" min="0" max="2" step="0.1"
-                  class="preset-inertia-input" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Weather.InertiaWeight.Tooltip'}}"
-                  title="{{localize 'CALENDARIA.Weather.InertiaWeight.Tooltip'}}">
-              </div>
-            {{/each}}
-          </div>
-        {{/each}}
-      </div>
-    </fieldset>
-
     {{!-- Wind Configuration --}}
     <fieldset>
       <legend>{{localize "CALENDARIA.Weather.Wind.Title"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Weather.Wind.ZoneHint"}}</p>
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
-        <div class="form-fields">
+        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
+        <div class="form-fields range">
           <select name="windSpeedMin">
             <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
             {{#each windSpeedMinOptions}}
@@ -88,14 +44,15 @@
         </div>
       </div>
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Weather.Wind.DirectionWeights"}}</label>
-        <p class="hint">{{localize "CALENDARIA.Weather.Wind.DirectionWeightsHint"}}</p>
+        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.DirectionWeightsHint'}}">{{localize "CALENDARIA.Weather.Wind.DirectionWeights"}}</label>
         <div class="form-fields wind-direction-grid">
           {{#each windDirections}}
-            <div class="wind-dir-input">
-              <label>{{this.id}}</label>
-              <input type="number" name="wind_{{this.id}}" min="0" max="100" step="1"
-                value="{{this.weight}}" placeholder="0">
+            <div class="form-group">
+              <label for="wind-{{this.id}}">{{this.id}}</label>
+              <div class="form-fields">
+                <input type="number" id="wind-{{this.id}}" name="wind_{{this.id}}" min="0" max="100" step="1"
+                  value="{{this.weight}}" placeholder="0">
+              </div>
             </div>
           {{/each}}
         </div>

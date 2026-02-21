@@ -25,7 +25,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: ['calendaria', 'climate-editor'],
     tag: 'form',
     window: { contentClasses: ['standard-form'] },
-    position: { width: 'auto', height: 'auto' },
+    position: { width: 1100, height: 900 },
     form: { handler: ClimateEditor.#onSubmit, submitOnChange: true, closeOnSubmit: false },
     actions: {
       resetAlias: ClimateEditor.#onResetAlias
@@ -37,7 +37,20 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     form: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR, scrollable: [''] },
     tabs: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_TABS },
     weather: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_WEATHER, scrollable: [''] },
+    presets: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_PRESETS, scrollable: [''] },
     environment: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_ENVIRONMENT, scrollable: [''] }
+  };
+
+  /** @override */
+  static TABS = {
+    primary: {
+      tabs: [
+        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.ClimateEditor.Tab.Weather' },
+        { id: 'presets', group: 'primary', icon: 'fas fa-sliders', label: 'CALENDARIA.ClimateEditor.Tab.Presets' },
+        { id: 'environment', group: 'primary', icon: 'fas fa-tree', label: 'CALENDARIA.ClimateEditor.Tab.Environment' }
+      ],
+      initial: 'weather'
+    }
   };
 
   /** @type {'season'|'zone'} */
@@ -94,17 +107,25 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData = options.calendarData ?? null;
     this.#seasonNames = options.seasonNames ?? [];
     this.#onSave = options.onSave;
-    if (mode === 'zone') this.tabGroups = { primary: 'weather' };
   }
 
   /** @override */
   _configureRenderOptions(options) {
     super._configureRenderOptions(options);
     if (this.#mode === 'zone') {
-      options.parts = ['tabs', 'weather', 'environment'];
+      options.parts = ['tabs', 'weather', 'presets', 'environment'];
     } else {
       options.parts = ['form'];
     }
+  }
+
+  /** @override */
+  async _preparePartContext(partId, context, options) {
+    context = await super._preparePartContext(partId, context, options);
+    if (partId === 'weather' || partId === 'presets' || partId === 'environment') {
+      context.tab = context.tabs?.[partId];
+    }
+    return context;
   }
 
   /** @override */
@@ -321,7 +342,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     // Brightness slider live label
     const slider = this.element.querySelector('[name="brightnessMultiplier"]');
     if (slider) {
-      const label = slider.nextElementSibling;
+      const label = this.element.querySelector('.range-value');
       slider.addEventListener('input', () => {
         label.textContent = `${slider.value}x`;
       });
@@ -533,7 +554,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert a 0-360 degree hue to 0-1 normalized for hue-slider.
-   * @param hue
+   * @param {number|null} hue - Hue in degrees (0-360)
+   * @returns {number} Normalized hue (0-1)
    */
   static #hueToNorm(hue) {
     return hue != null ? hue / 360 : 0;
@@ -541,7 +563,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert a 0-1 normalized hue-slider value back to 0-360 degrees.
-   * @param val
+   * @param {number|string|null} val - Normalized hue value (0-1)
+   * @returns {number|null} Hue in degrees (0-360)
    */
   static #normToHue(val) {
     if (val === '' || val == null) return null;

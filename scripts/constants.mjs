@@ -225,6 +225,7 @@ export const TEMPLATES = {
     CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`,
     CLIMATE_EDITOR_TABS: `modules/${MODULE.ID}/templates/weather/climate-editor-tabs.hbs`,
     CLIMATE_EDITOR_WEATHER: `modules/${MODULE.ID}/templates/weather/climate-editor-weather.hbs`,
+    CLIMATE_EDITOR_PRESETS: `modules/${MODULE.ID}/templates/weather/climate-editor-presets.hbs`,
     CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/weather/climate-editor-environment.hbs`
   },
   SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },

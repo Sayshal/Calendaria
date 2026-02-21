@@ -30,11 +30,7 @@
     </legend>
     {{#if zoneList.length}}
       <div class="items-list zone-climate-list">
-        <div class="list-header flexrow">
-          <span class="col-name">{{localize "CALENDARIA.Editor.Weather.Zone.Name"}}</span>
-          <span class="col-controls"></span>
-        </div>
-        {{#each zoneList}}
+{{#each zoneList}}
           <div class="item flexrow">
             <input type="text" name="weather.zones.{{this.key}}.name" value="{{this.name}}" class="col-name">
             <div class="item-controls col-controls">

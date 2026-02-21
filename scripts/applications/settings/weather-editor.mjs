@@ -575,7 +575,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert a 0-360 degree hue to 0-1 normalized for hue-slider.
-   * @param hue
+   * @param {number|null} hue - Hue in degrees (0-360)
+   * @returns {number} Normalized hue (0-1)
    */
   static #hueToNorm(hue) {
     return hue != null ? hue / 360 : 0;
@@ -583,7 +584,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Convert a 0-1 normalized hue-slider value back to 0-360 degrees.
-   * @param val
+   * @param {number|string|null} val - Normalized hue value (0-1)
+   * @returns {number|null} Hue in degrees (0-360)
    */
   static #normToHue(val) {
     if (val === '' || val == null) return null;

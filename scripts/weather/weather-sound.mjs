@@ -16,7 +16,7 @@ const FADE_MS = 2000;
 /** Target playback volume (before environment gain). */
 const VOLUME = 0.5;
 
-/** @type {Sound|null} Currently playing weather ambient sound. */
+/** @type {object|null} Currently playing weather ambient sound. */
 let activeSound = null;
 
 /** @type {string|null} SoundFx key of the currently playing sound (for dedup). */
@@ -55,8 +55,8 @@ function onCanvasReady() {
 /**
  * Handle weather change hook — play or stop sound.
  * @param {object} payload - Weather change hook payload
- * @param payload.current
- * @param payload.bulk
+ * @param {object|null} payload.current - Current weather data
+ * @param {boolean} payload.bulk - Whether this is a bulk weather change
  */
 function onWeatherChange({ current, bulk } = {}) {
   if (bulk) {
@@ -76,7 +76,7 @@ function onWeatherChange({ current, bulk } = {}) {
 
 /**
  * Fade out and stop a sound, then clean up.
- * @param {Sound} sound - The sound to fade out
+ * @param {object} sound - The sound to fade out
  */
 async function fadeOutAndStop(sound) {
   await sound.fade(0, { duration: FADE_MS });
