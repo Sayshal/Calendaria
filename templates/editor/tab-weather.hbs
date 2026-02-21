@@ -1,14 +1,4 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  <div class="standard-form">
-    <div class="form-group">
-      <label for="editor-weather-auto-generate">{{localize "CALENDARIA.Editor.Weather.AutoGenerate"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="editor-weather-auto-generate" name="weather.autoGenerate"
-          {{#if calendar.weather.autoGenerate}}checked{{/if}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Weather.AutoGenerateHint"}}</p>
-    </div>
-  </div>
 
   <fieldset class="season-climate-section">
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Weather.SeasonClimateHint'}}">
@@ -41,16 +31,11 @@
     {{#if zoneList.length}}
       <div class="items-list zone-climate-list">
         <div class="list-header flexrow">
-          <span class="col-active">{{localize "CALENDARIA.Editor.Weather.Zone.ActiveLabel"}}</span>
           <span class="col-name">{{localize "CALENDARIA.Editor.Weather.Zone.Name"}}</span>
           <span class="col-controls"></span>
         </div>
         {{#each zoneList}}
           <div class="item flexrow">
-            <label class="col-active checkbox">
-              <input type="checkbox" data-action="setActiveZone" data-key="{{this.key}}"
-                {{#if this.isActive}}checked{{/if}}>
-            </label>
             <input type="text" name="weather.zones.{{this.key}}.name" value="{{this.name}}" class="col-name">
             <div class="item-controls col-controls">
               <button type="button" data-action="editZoneClimate" data-key="{{this.key}}"

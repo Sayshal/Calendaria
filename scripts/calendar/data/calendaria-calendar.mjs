@@ -696,7 +696,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       weather: new SchemaField(
         {
           activeZone: new StringField({ required: false, initial: 'temperate' }),
-          autoGenerate: new BooleanField({ required: false, initial: true }),
           zones: new TypedObjectField(
             new SchemaField({
               id: new StringField({ required: true }),

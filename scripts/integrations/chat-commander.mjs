@@ -6,7 +6,7 @@
  */
 
 import { CalendariaAPI } from '../api.mjs';
-import { MODULE } from '../constants.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canViewWeatherForecast } from '../utils/permissions.mjs';
@@ -781,7 +781,7 @@ function cmdCycle() {
 function cmdForecast(_chat, parameters) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
-  if (!calendar.weather?.autoGenerate) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
   if (!canViewWeatherForecast()) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoPermission')) };
   const args = parameters?.trim();
   const days = args ? parseInt(args, 10) : undefined;

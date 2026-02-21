@@ -127,6 +127,7 @@ export const SETTINGS = {
   FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
   FXMASTER_SOUND_FX: 'fxmasterSoundFx',
   FXMASTER_TOP_DOWN: 'fxmasterTopDown',
+  AUTO_GENERATE_WEATHER: 'autoGenerateWeather',
   GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast',
   REST_TO_SUNRISE: 'restToSunrise'
 };
@@ -221,7 +222,10 @@ export const TEMPLATES = {
   WEATHER: {
     PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`,
     PICKER_FOOTER: `modules/${MODULE.ID}/templates/weather/weather-picker-footer.hbs`,
-    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`
+    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`,
+    CLIMATE_EDITOR_TABS: `modules/${MODULE.ID}/templates/weather/climate-editor-tabs.hbs`,
+    CLIMATE_EDITOR_WEATHER: `modules/${MODULE.ID}/templates/weather/climate-editor-weather.hbs`,
+    CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/weather/climate-editor-environment.hbs`
   },
   SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },
   SET_DATE_DIALOG: `modules/${MODULE.ID}/templates/set-date-dialog.hbs`

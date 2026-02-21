@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SCENE_FLAGS, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { isFXMasterActive, getAvailableFxPresets } from '../integrations/fxmaster.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
@@ -52,9 +52,6 @@ function getPrecipIntensityLabel(value) {
  * Weather picker application with selectable presets.
  */
 class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
-  /** @type {string|null|undefined} Zone override from dropdown (undefined = use calendar default) */
-  #zoneOverride = undefined;
-
   /** @type {string|null} Selected preset ID (null = none selected) */
   #selectedPresetId = null;
 
@@ -94,7 +91,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: ['calendaria', 'weather-picker-app', 'standard-form'],
     tag: 'form',
     window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },
-    position: { width: 550, height: 'auto' },
+    position: { width: 'auto', height: 'auto' },
     form: { handler: WeatherPickerApp._onSave, submitOnChange: false, closeOnSubmit: false },
     actions: {
       selectWeather: WeatherPickerApp._onSelectWeather,
@@ -111,7 +108,6 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options) {
-    this.#zoneOverride = undefined;
     this.#selectedPresetId = null;
     this.#customEdited = false;
     this.#customLabel = null;
@@ -131,54 +127,62 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     const customPresets = WeatherManager.getCustomPresets();
     const zones = WeatherManager.getCalendarZones() || [];
-    const calendar = CalendarManager.getActiveCalendar();
-    const calendarActiveZone = calendar?.weather?.activeZone ?? null;
-    const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
-    const defaultZoneId = sceneZone?.id ?? calendarActiveZone;
-    const selectedZoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : defaultZoneId;
-    const selectedZone = selectedZoneId ? zones.find((z) => z.id === selectedZoneId) : null;
-    context.setAsActiveZone = selectedZoneId === calendarActiveZone;
-    context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !selectedZoneId }];
+    const scene = game.scenes?.active;
+    const sceneZone = WeatherManager.getActiveZone(null, scene);
+    const sceneZoneOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) || null;
+    const selectedZoneId = sceneZone?.id ?? null;
+
+    // Scene zone info bar
+    context.sceneZoneName = sceneZone ? localize(sceneZone.name) : localize('CALENDARIA.Weather.Picker.NoZone');
+    context.zoneOptions = [];
     for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === selectedZoneId });
-    context.zoneOptions.sort((a, b) => {
-      if (a.value === '') return -1;
-      if (b.value === '') return 1;
-      return a.label.localeCompare(b.label, game.i18n.lang);
-    });
+    context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+
+    // Build preset categories with zone-enabled flag
     const enabledPresetIds = new Set();
-    if (selectedZone?.presets) for (const p of Object.values(selectedZone.presets)) if (p.enabled !== false) enabledPresetIds.add(p.id);
-    const shouldFilter = selectedZone && enabledPresetIds.size > 0;
+    if (sceneZone?.presets) for (const p of Object.values(sceneZone.presets)) if (p.enabled !== false) enabledPresetIds.add(p.id);
+    const hasZoneFilter = sceneZone && enabledPresetIds.size > 0;
+
     context.categories = [];
     context.selectedPresetId = this.#selectedPresetId;
     const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+    const notActiveLabel = localize('CALENDARIA.Weather.Picker.NotActiveInZone');
     const categoryIds = ['standard', 'severe', 'environmental', 'fantasy'];
     for (const categoryId of categoryIds) {
       const category = WEATHER_CATEGORIES[categoryId];
-      let presets = getPresetsByCategory(categoryId, customPresets);
-      if (shouldFilter) presets = presets.filter((p) => enabledPresetIds.has(p.id));
+      const presets = getPresetsByCategory(categoryId, customPresets);
       if (presets.length === 0) continue;
       const mappedPresets = presets
         .map((p) => {
           const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
           const label = alias || localize(p.label);
-          return { id: p.id, label, description: p.description ? localize(p.description) : label, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
+          const description = p.description ? localize(p.description) : label;
+          const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
+          const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
+          return { id: p.id, label, tooltip, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId, zoneEnabled };
         })
-        .sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+        .sort((a, b) => {
+          if (a.zoneEnabled !== b.zoneEnabled) return a.zoneEnabled ? -1 : 1;
+          return a.label.localeCompare(b.label, game.i18n.lang);
+        });
       context.categories.push({ id: categoryId, label: localize(category.label), presets: mappedPresets });
     }
 
     if (customPresets.length > 0) {
-      let filtered = customPresets;
-      if (shouldFilter) filtered = customPresets.filter((p) => enabledPresetIds.has(p.id));
-      if (filtered.length > 0) {
-        const mappedCustom = filtered
-          .map((p) => {
-            const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
-            const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
-            const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
-            return { id: p.id, label, description, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
-          })
-          .sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+      const mappedCustom = customPresets
+        .map((p) => {
+          const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
+          const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
+          const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
+          const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
+          const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
+          return { id: p.id, label, tooltip, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId, zoneEnabled };
+        })
+        .sort((a, b) => {
+          if (a.zoneEnabled !== b.zoneEnabled) return a.zoneEnabled ? -1 : 1;
+          return a.label.localeCompare(b.label, game.i18n.lang);
+        });
+      if (mappedCustom.length > 0) {
         context.categories.push({ id: 'custom', label: localize(WEATHER_CATEGORIES.custom.label), presets: mappedCustom });
       }
     }
@@ -226,7 +230,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     // FXMaster preset dropdown
     context.hasFXMaster = isFXMasterActive();
     if (context.hasFXMaster) {
-      const currentFxPreset = this.#fxPreset ?? currentWeather?.fxPreset ?? '';
+      const currentFxPreset = this.#fxPreset !== null ? this.#fxPreset : (currentWeather?.fxPreset ?? '');
       context.fxPreset = currentFxPreset;
       const fxPresets = getAvailableFxPresets();
       context.fxPresetOptions = [
@@ -241,14 +245,19 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender?.(context, options);
-    const zoneSelect = this.element.querySelector('select[name="climateZone"]');
+
+    // Scene zone select
+    const zoneSelect = this.element.querySelector('select[name="sceneZone"]');
     if (zoneSelect) {
-      zoneSelect.addEventListener('change', (e) => {
-        this.#zoneOverride = e.target.value || null;
+      zoneSelect.addEventListener('change', async (e) => {
+        const zoneId = e.target.value || null;
+        await WeatherManager.setSceneZoneOverride(game.scenes?.active, zoneId);
         this.render();
       });
     }
-    for (const input of this.element.querySelectorAll('.weather-picker-custom input')) {
+
+    // Custom field editing clears preset selection
+    for (const input of this.element.querySelectorAll('.weather-picker-details input')) {
       input.addEventListener('input', () => {
         this.#customEdited = true;
         this.#selectedPresetId = null;
@@ -284,10 +293,15 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const windData = { speed: windSpeed, direction: windDir, forced: false };
     const precipData = { type: precipType, intensity: precipType ? precipIntensity : 0 };
 
-    const zoneId = formData.object.climateZone || null;
+    const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const zoneId = sceneZone?.id ?? null;
     const fxPreset = fd.fxPreset || null;
     if (this.#selectedPresetId && !this.#customEdited) {
-      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset, zoneId });
+      // Only pass fxPreset if the user explicitly changed the dropdown from the preset's native value.
+      const nativeFx = getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets())?.fxPreset || '';
+      const userPickedFx = this.#fxPreset || '';
+      const fxOverride = userPickedFx !== nativeFx ? userPickedFx || null : undefined;
+      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset: fxOverride, zoneId });
     } else {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
@@ -299,8 +313,31 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, zoneId });
       }
     }
-    const setActive = formData.object.setAsActiveZone;
-    if (setActive) await WeatherManager.setActiveZone(zoneId);
+
+    // Save as custom preset if checkbox is checked
+    if (fd.saveAsPreset) {
+      const data = foundry.utils.expandObject(fd);
+      const label = data.customLabel?.trim();
+      if (label) {
+        const preset = this.#selectedPresetId ? getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets()) : null;
+        await WeatherManager.addCustomPreset({
+          id: `custom-${Date.now()}`,
+          label,
+          description: '',
+          icon: data.customIcon?.trim() || preset?.icon || 'fa-question',
+          color: data.customColor || preset?.color || '#888888',
+          wind: windData,
+          precipitation: precipData,
+          tempMin: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
+          tempMax: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
+          fxPreset,
+          inertiaWeight: preset?.inertiaWeight ?? 1,
+          chance: preset?.chance ?? 1,
+          darknessPenalty: preset?.darknessPenalty ?? 0
+        });
+      }
+    }
+
     await this.close();
   }
 
@@ -318,7 +355,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = CalendarManager.getActiveCalendar();
     const calendarId = calendar?.metadata?.id;
     const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
-    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (sceneZone?.id ?? calendar?.weather?.activeZone ?? null);
+    const zoneId = sceneZone?.id ?? null;
     const alias = getPresetAlias(presetId, calendarId, zoneId);
     this.#customLabel = alias || localize(preset.label);
     this.#customTemp = null;
@@ -328,7 +365,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#windDirection = preset.wind?.direction ?? null;
     this.#precipType = preset.precipitation?.type ?? null;
     this.#precipIntensity = preset.precipitation?.intensity ?? 0;
-    this.#fxPreset = preset.fxPreset ?? null;
+    this.#fxPreset = preset.fxPreset || '';
     this.render();
   }
 
@@ -339,7 +376,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async _onRandomWeather(_event, _target) {
     const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
-    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (sceneZone?.id ?? CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    const zoneId = sceneZone?.id ?? null;
     const weather = await WeatherManager.generateAndSetWeather({ zoneId });
     this.#selectedPresetId = weather?.id ?? null;
     this.#customEdited = false;
