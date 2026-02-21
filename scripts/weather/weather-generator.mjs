@@ -171,6 +171,9 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
     }
   }
 
+  // Clamp final temperature to the seasonal/zone range
+  temperature = Math.max(finalTempRange.min, Math.min(finalTempRange.max, temperature));
+
   return { preset: resolvedPreset, temperature, wind, precipitation };
 }
 

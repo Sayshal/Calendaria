@@ -110,7 +110,7 @@ export function getStickyZones(hudWidth, hudHeight) {
   const hotbar = document.getElementById('hotbar');
   if (hotbar) {
     const rect = hotbar.getBoundingClientRect();
-    zones.push({ id: 'above-hotbar', center: { x: rect.left + rect.width / 2, y: rect.top }, anchor: 'bottom' });
+    zones.push({ id: 'above-hotbar', center: { x: rect.left + rect.width / 2, y: rect.top - 8 }, anchor: 'bottom' });
   }
 
   const players = document.getElementById('players');

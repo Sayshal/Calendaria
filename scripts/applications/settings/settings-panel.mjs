@@ -1546,8 +1546,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('darknessSync' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
       if (data.darknessSync && game.pf2e?.worldClock) {
-        const pf2eWorldClock = game.settings.get('pf2e', 'worldClock');
-        if (pf2eWorldClock?.syncDarkness) await game.settings.set('pf2e', 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+        const systemId = game.system.id;
+        const pf2eWorldClock = game.settings.get(systemId, 'worldClock');
+        if (pf2eWorldClock?.syncDarkness) await game.settings.set(systemId, 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
       }
     }
 

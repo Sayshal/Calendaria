@@ -771,9 +771,15 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (this.#snappedZoneId) {
         const rect = this.element.getBoundingClientRect();
-        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+        const barEl = this.element.querySelector('.calendaria-hud-bar');
+        const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
+        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
         if (zonePos) {
-          this.setPosition({ left: zonePos.left, top: zonePos.top });
+          let newTop = zonePos.top;
+          if (StickyZones.isBottomAnchored(this.#snappedZoneId) && typeof savedPos.anchorY === 'number') {
+            newTop = savedPos.anchorY - barHeight;
+          }
+          this.setPosition({ left: zonePos.left, top: newTop });
           StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
           return;
         }
