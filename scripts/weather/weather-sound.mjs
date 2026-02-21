@@ -39,7 +39,7 @@ export function initializeWeatherSound() {
 
 /**
  * On scene update, re-sync sound if the weather disable flag changed.
- * @param {Scene} scene - Updated scene document
+ * @param {object} scene - Updated scene document
  * @param {object} change - Flattened change data
  */
 function onSceneUpdate(scene, change) {

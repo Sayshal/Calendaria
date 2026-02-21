@@ -92,7 +92,7 @@ function onCanvasReady() {
 
 /**
  * On scene update, re-sync FX if the weather disable flag changed.
- * @param {Scene} scene - Updated scene document
+ * @param {object} scene - Updated scene document
  * @param {object} change - Flattened change data
  */
 function onSceneUpdate(scene, change) {
