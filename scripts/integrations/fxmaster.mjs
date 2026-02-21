@@ -5,13 +5,13 @@
  * @author Tyler
  */
 
-import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 
-/** Currently active FXMaster preset name for stop-before-play. */
-let activeFxName = null;
+/** Reverse lookup: degree value → lowercase cardinal string for FXMaster direction option. */
+const DEGREES_TO_CARDINAL = Object.fromEntries(Object.entries(COMPASS_DIRECTIONS).map(([name, deg]) => [deg, name.toLowerCase()]));
 
 /**
  * Get the FXMaster API object.
@@ -39,33 +39,26 @@ export function isFXMasterPlusActive() {
 
 /**
  * Get the list of available FXMaster presets for dropdown selection.
- * Reads directly from FXMaster's live registry.
- * Returns objects sorted alphabetically by localized label.
- * @returns {{value: string, label: string}[]} Preset options
+ * Uses listValid() to only return presets valid for this world.
+ * @returns {{value: string, label: string}[]} Preset options sorted alphabetically
  */
 export function getAvailableFxPresets() {
   const fxApi = getFxApi();
-  const names = fxApi?.list?.() ?? [];
+  const names = fxApi?.listValid?.() ?? fxApi?.list?.() ?? [];
   return names.map((name) => ({ value: name, label: localize(`CALENDARIA.FxPreset.${name}`) })).sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
 }
 
 /**
- * Extract the Calendaria-managed preset name from scene FXMaster flags.
- * Looks for keys matching `apiPreset_<name>_p<n>` or `apiPreset_<name>_f<n>`.
- * @param {object} [scene] - Scene document (defaults to active scene)
- * @returns {string|null} Preset name or null
+ * Get the currently active FXMaster preset name on a scene.
+ * @param {object} [scene] - Scene document (defaults to canvas scene)
+ * @returns {string|null} Active preset name or null
  */
-function getPresetFromSceneFlags(scene) {
-  scene ??= game.scenes?.active;
-  if (!scene) return null;
-  const effects = scene.getFlag('fxmaster', 'effects') ?? {};
-  const filters = scene.getFlag('fxmaster', 'filters') ?? {};
-  const allKeys = [...Object.keys(effects), ...Object.keys(filters)];
-  for (const key of allKeys) {
-    const match = key.match(/^apiPreset_(.+?)_[pf]\d+$/);
-    if (match) return match[1];
-  }
-  return null;
+function getActivePreset(scene) {
+  const fxApi = getFxApi();
+  if (!fxApi?.listActive) return null;
+  const opts = scene ? { scene: scene.uuid } : {};
+  const active = fxApi.listActive(opts);
+  return active?.[0] ?? null;
 }
 
 /**
@@ -78,154 +71,164 @@ export function initializeFXMaster() {
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
 
-  // Restore activeFxName from scene flags (FXMaster already replayed from them)
-  const scene = canvas?.scene;
-  const restoredName = getPresetFromSceneFlags(scene);
-
+  const restoredName = getActivePreset(canvas?.scene);
+  log(1, `[FXMaster init] restoredName=${restoredName}`);
   if (restoredName) {
-    // FXMaster already restored its own effects from scene flags — just track the name
-    activeFxName = restoredName;
-
-    // Check if it matches current weather; if not, clear and play correct preset
     const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
     const weather = WeatherManager?.getCurrentWeather?.();
-    const expectedFx = weather?.fxPreset || weather?.id || null;
+    const expectedFx = weather?.fxPreset || null;
+    log(1, `[FXMaster init] expectedFx=${expectedFx}, match=${expectedFx === restoredName}`);
     if (expectedFx !== restoredName) {
-      stopThenPlay(weather || null);
+      playWeather(weather || null);
     }
   } else {
-    // No preset on scene — play current weather if any
+    log(1, '[FXMaster init] no active preset, syncing');
     syncWeatherToScene();
   }
 }
 
 /**
  * On canvas ready, sync FXMaster state with current weather.
- * Always clears and replays to ensure a clean state.
  */
 function onCanvasReady() {
+  log(1, '[FXMaster] canvasReady fired');
   syncWeatherToScene();
 }
 
 /**
  * Sync current weather to the active scene's FXMaster state.
- * Stops any active preset and plays the current weather's preset.
  */
 function syncWeatherToScene() {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!CalendariaSocket.isPrimaryGM()) {
+    log(1, '[FXMaster sync] not primary GM, skipping');
+    return;
+  }
   const scene = canvas?.scene;
-  if (!scene) return;
+  if (!scene) {
+    log(1, '[FXMaster sync] no canvas scene');
+    return;
+  }
 
-  // Check scene suppression
   if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-    stopThenPlay(null);
+    log(1, '[FXMaster sync] FX disabled on scene, stopping all');
+    stopAll();
     return;
   }
 
   const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
   const weather = WeatherManager?.getCurrentWeather?.();
-
-  // Always clear and replay — stop previous, start current (or just stop if no weather)
-  stopThenPlay(weather || null);
+  log(1, `[FXMaster sync] weather.id=${weather?.id}, fxPreset=${weather?.fxPreset}`);
+  playWeather(weather || null);
 }
 
 /**
- * Check if a preset's effects exist in the scene's FXMaster flags.
- * @param {string} fxName - FXMaster preset name
- * @param {object} scene - Scene document
- * @returns {boolean} Whether the preset's effects are on the scene
- */
-// eslint-disable-next-line no-unused-vars
-function isPresetOnScene(fxName, scene) {
-  const effects = scene.getFlag('fxmaster', 'effects') ?? {};
-  const filters = scene.getFlag('fxmaster', 'filters') ?? {};
-  const safe = fxName
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9_-]/g, '-');
-  const prefix = `apiPreset_${safe}_`;
-  return Object.keys(effects).some((k) => k.startsWith(prefix)) || Object.keys(filters).some((k) => k.startsWith(prefix));
-}
-
-/**
- * Handle weather change events — stop previous preset, play new one.
+ * Handle weather change events.
  * @param {object} payload - Weather change hook payload
- * @param {object} [payload.previous] - Previous weather state
- * @param {object} [payload.current] - Current weather state
- * @param {string} [payload.zoneId] - Climate zone ID
- * @param {boolean} [payload.bulk] - Bulk weather update (day change, etc.)
+ * @param payload.current
+ * @param payload.zoneId
+ * @param payload.bulk
  */
-function onWeatherChange({ previous, current, zoneId: _zoneId, bulk } = {}) {
+function onWeatherChange({ current, zoneId: _zoneId, bulk } = {}) {
   if (!CalendariaSocket.isPrimaryGM()) return;
 
-  // For bulk updates, resolve current weather from the manager
   if (bulk) {
     const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
     if (!WeatherManager) return;
     const weather = WeatherManager.getCurrentWeather();
-    if (!weather) {
-      stopThenPlay(null);
-      return;
-    }
-    stopThenPlay(weather);
+    log(1, `[FXMaster onChange] bulk=true, weather.id=${weather?.id}, fxPreset=${weather?.fxPreset}`);
+    playWeather(weather || null);
     return;
   }
 
-  // Check scene suppression
   const scene = game.scenes?.active;
   if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-    stopThenPlay(null);
+    log(1, '[FXMaster onChange] FX disabled on scene, stopping all');
+    stopAll();
     return;
   }
 
-  if (previous || !current) {
-    stopThenPlay(current);
-  } else if (current) {
-    stopThenPlay(current);
+  log(1, `[FXMaster onChange] current.id=${current?.id}, fxPreset=${current?.fxPreset}`);
+  playWeather(current || null);
+}
+
+/**
+ * Stop all active presets on the current scene.
+ */
+async function stopAll() {
+  const fxApi = getFxApi();
+  if (!fxApi) {
+    log(1, '[FXMaster stopAll] no fxApi');
+    return;
+  }
+  const active = fxApi.listActive?.() ?? [];
+  log(1, `[FXMaster stopAll] active presets: ${JSON.stringify(active)}`);
+  for (const name of active) {
+    log(1, `[FXMaster stopAll] stopping "${name}"`);
+    await fxApi.stop(name);
   }
 }
 
 /**
- * Stop the active preset (awaiting completion), then play the new one.
+ * Play the weather preset, stopping any others via switch().
  * @param {object|null} weather - Weather to play, or null to just stop
  */
-async function stopThenPlay(weather) {
+async function playWeather(weather) {
   const fxApi = getFxApi();
-  if (!fxApi) return;
-
-  if (activeFxName) {
-    await fxApi.stop(activeFxName);
-    activeFxName = null;
+  if (!fxApi) {
+    log(1, '[FXMaster playWeather] no fxApi');
+    return;
   }
 
-  if (!weather) return;
-  const fxName = weather.fxPreset || weather.id;
-  if (!fxName) return;
+  const fxName = weather?.fxPreset || null;
+  log(1, `[FXMaster playWeather] weather.id=${weather?.id}, fxName=${fxName}`);
+
+  if (!fxName) {
+    log(1, '[FXMaster playWeather] no fxPreset, calling stopAll');
+    await stopAll();
+    return;
+  }
+
+  const available = fxApi.list?.() ?? [];
+  if (!available.includes(fxName)) {
+    log(1, `[FXMaster playWeather] "${fxName}" not in available presets, skipping`);
+    return;
+  }
 
   const options = buildPresetOptions(weather);
-  const success = await fxApi.play(fxName, options);
-  if (success) activeFxName = fxName;
+  log(1, `[FXMaster playWeather] calling switch("${fxName}", ${JSON.stringify(options)})`);
+  await fxApi.switch(fxName, options);
+}
+
+/**
+ * Convert a degree value to the nearest cardinal direction string for FXMaster.
+ * @param {number} degrees - Direction in degrees (0-360)
+ * @returns {string} Lowercase cardinal direction (e.g. "n", "nne", "sw")
+ */
+function degreesToCardinal(degrees) {
+  if (DEGREES_TO_CARDINAL[degrees] !== undefined) return DEGREES_TO_CARDINAL[degrees];
+  let closest = 'n';
+  let minDiff = 360;
+  for (const [deg, name] of Object.entries(DEGREES_TO_CARDINAL)) {
+    const diff = Math.abs(((degrees - Number(deg) + 540) % 360) - 180);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = name;
+    }
+  }
+  return closest;
 }
 
 /**
  * Build options object for FXMaster preset playback.
  * @param {object} weather - Current weather state
- * @returns {object} Options for FXMaster play()
+ * @returns {object} Options for FXMaster play/switch
  */
 function buildPresetOptions(weather) {
   const options = {};
 
-  // Wind direction
-  if (weather.wind?.direction != null) options.direction = weather.wind.direction;
-
-  // Top-down mode from settings
+  if (weather.wind?.direction != null) options.direction = degreesToCardinal(weather.wind.direction);
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN)) options.topDown = true;
-
-  // Below tokens from settings
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
-
-  // Sound FX from settings (requires FXMaster+)
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX) && isFXMasterPlusActive()) options.soundFx = true;
 
   return options;

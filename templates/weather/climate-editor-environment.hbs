@@ -1,0 +1,144 @@
+<section class="tab" data-tab="environment" data-group="primary">
+  <div class="standard-form">
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.Description"}}</label>
+      <div class="form-fields">
+        <textarea name="description">{{description}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier"}}</label>
+      <div class="form-fields">
+        <input type="range" name="brightnessMultiplier" min="0.5" max="1.5" step="0.1" value="{{brightnessMultiplier}}">
+        <span class="brightness-label">{{brightnessMultiplier}}x</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplierHint"}}</p>
+    </div>
+
+    {{!-- Environment Lighting --}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLighting"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLightingHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="baseHue" min="0" max="360" step="1" value="{{envBase.hue}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseSaturation"}}</label>
+        <div class="form-fields">
+          <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="{{envBase.saturation}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="darkHue" min="0" max="360" step="1" value="{{envDark.hue}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkSaturation"}}</label>
+        <div class="form-fields">
+          <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="{{envDark.saturation}}"
+            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
+      </div>
+    </fieldset>
+
+    {{!-- Daylight --}}
+    <fieldset class="daylight-fieldset">
+      <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolstice"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="forceSolstice" {{#if hasManualDaylight}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolsticeHint"}}</p>
+      </div>
+      <div class="form-group daylight-latitude" {{#if hasManualDaylight}}hidden{{/if}}>
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.Latitude"}}</label>
+        <div class="form-fields">
+          <input type="number" name="latitude" min="-90" max="90" step="0.1" value="{{latitude}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.LatitudeHint"}}</p>
+      </div>
+      <div class="form-group daylight-manual" {{#unless hasManualDaylight}}hidden{{/unless}}>
+        <label>{{localize "CALENDARIA.Editor.Field.ShortestDaySunlight"}}</label>
+        <div class="form-fields">
+          <input type="number" name="shortestDay" min="0" max="{{hoursPerDay}}" step="0.5" value="{{zoneShortestDay}}"
+            placeholder="{{defaultShortestDay}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHoursHint"}}</p>
+      </div>
+      <div class="form-group daylight-manual" {{#unless hasManualDaylight}}hidden{{/unless}}>
+        <label>{{localize "CALENDARIA.Editor.Field.LongestDaySunlight"}}</label>
+        <div class="form-fields">
+          <input type="number" name="longestDay" min="0" max="{{hoursPerDay}}" step="0.5" value="{{zoneLongestDay}}"
+            placeholder="{{defaultLongestDay}}">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHoursHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
+        <div class="form-fields">
+          <span class="solstice-value" data-daylight="shortest">{{shortestDayHours}}</span>
+          <span class="solstice-date">({{shortestDayDate}})</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
+        <div class="form-fields">
+          <span class="solstice-value" data-daylight="longest">{{longestDayHours}}</span>
+          <span class="solstice-date">({{longestDayDate}})</span>
+        </div>
+      </div>
+    </fieldset>
+
+    {{!-- Color Shift --}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.Weather.Zone.ColorShift"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.ColorShiftHint"}}</p>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DawnHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftDawnHue" min="0" max="360" step="1"
+            value="{{colorShift.dawnHue}}" placeholder="30">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DuskHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftDuskHue" min="0" max="360" step="1"
+            value="{{colorShift.duskHue}}" placeholder="15">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.NightHue"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftNightHue" min="0" max="360" step="1"
+            value="{{colorShift.nightHue}}" placeholder="220">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Editor.Weather.Zone.TransitionDuration"}}</label>
+        <div class="form-fields">
+          <input type="number" name="colorShiftTransitionMinutes" min="0" step="1"
+            value="{{colorShift.transitionMinutes}}" placeholder="60">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TransitionDurationHint"}}</p>
+      </div>
+    </fieldset>
+
+  </div>
+</section>

@@ -6,6 +6,7 @@
  */
 
 import { CalendariaAPI } from '../api.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canChangeActiveCalendar, canChangeDateTime, canViewWeatherForecast } from '../utils/permissions.mjs';
@@ -544,7 +545,7 @@ async function cmdCycle() {
 async function cmdForecast(args) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
-  if (!calendar.weather?.autoGenerate) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
   if (!canViewWeatherForecast()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
   const days = args ? parseInt(args, 10) : undefined;
   if (args && isNaN(days)) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.InvalidForecastDays'));

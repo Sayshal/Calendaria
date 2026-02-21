@@ -79,7 +79,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       addZone: CalendarEditor.#onAddZone,
       editZoneClimate: CalendarEditor.#onEditZoneClimate,
-      setActiveZone: CalendarEditor.#onSetActiveZone,
       deleteZone: CalendarEditor.#onDeleteZone,
       createNew: CalendarEditor.#onCreateNew,
       showTokenReference: CalendarEditor.#onShowTokenReference
@@ -235,7 +234,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       amPmNotation: { am: 'AM', pm: 'PM', amAbbr: 'AM', pmAbbr: 'PM' },
       dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
-      weather: { activeZone: null, autoGenerate: false, zones: {} }
+      weather: { activeZone: null, zones: {} }
     };
   }
 
@@ -857,12 +856,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       color: season.color,
       hasClimate: !!(season.climate?.temperatures || Object.keys(season.climate?.presets ?? {}).length)
     }));
-    const activeZoneId = weather.activeZone;
     context.zoneList = Object.entries(zonesObj).map(([key, zone]) => ({
       key,
       name: zone.name || '',
       id: zone.id,
-      isActive: zone.id === activeZoneId,
       hasPresets: Object.keys(zone.presets ?? {}).length > 0
     }));
   }
@@ -1286,8 +1283,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateWeatherFromFormData(data) {
-    if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {}, autoGenerate: false };
-    this.#calendarData.weather.autoGenerate = !!data['weather.autoGenerate'];
+    if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {} };
 
     // Update zone names from inline inputs
     const zonesObj = this.#calendarData.weather.zones ?? {};
@@ -2123,7 +2119,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     while (existingIds.includes(zoneId)) zoneId = `${baseId}-${counter++}`;
     zoneConfig.id = zoneId;
     zoneConfig.name = result.name || localize(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
-    if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {}, autoGenerate: false };
+    if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {} };
     if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = {};
     const zoneKey = foundry.utils.randomID();
     const isFirst = !Object.keys(this.#calendarData.weather.zones).length;
@@ -2169,19 +2165,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         editor.render({ parts: ['weather'] });
       }
     });
-  }
-
-  /**
-   * Set the active climate zone (mutual exclusion).
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} target - Checkbox element
-   */
-  static #onSetActiveZone(_event, target) {
-    const zoneKey = target.dataset.key;
-    const zone = this.#calendarData.weather?.zones?.[zoneKey];
-    if (!zone) return;
-    this.#calendarData.weather.activeZone = zone.id;
-    this.render({ parts: ['weather'] });
   }
 
   /**

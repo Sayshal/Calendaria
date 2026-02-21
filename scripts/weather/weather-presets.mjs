@@ -86,7 +86,7 @@ export const STANDARD_WEATHER = [
     chance: 18,
     tempMin: 15,
     tempMax: 28,
-    darknessPenalty: 0.05,
+    darknessPenalty: 0,
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 1, direction: null },
@@ -105,7 +105,7 @@ export const STANDARD_WEATHER = [
     chance: 14,
     tempMin: 12,
     tempMax: 24,
-    darknessPenalty: 0.1,
+    darknessPenalty: 0,
     environmentBase: { hue: null, saturation: 0.7 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
@@ -124,7 +124,7 @@ export const STANDARD_WEATHER = [
     chance: 10,
     tempMin: 10,
     tempMax: 20,
-    darknessPenalty: 0.15,
+    darknessPenalty: 0.05,
     environmentBase: { hue: null, saturation: 0.5 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
@@ -143,7 +143,7 @@ export const STANDARD_WEATHER = [
     chance: 8,
     tempMin: 8,
     tempMax: 18,
-    darknessPenalty: 0.1,
+    darknessPenalty: 0,
     environmentBase: { hue: null, saturation: 0.8 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
@@ -162,7 +162,7 @@ export const STANDARD_WEATHER = [
     chance: 10,
     tempMin: 10,
     tempMax: 22,
-    darknessPenalty: 0.15,
+    darknessPenalty: 0.05,
     environmentBase: { hue: null, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 2, direction: null },
@@ -181,7 +181,7 @@ export const STANDARD_WEATHER = [
     chance: 5,
     tempMin: 5,
     tempMax: 15,
-    darknessPenalty: 0.2,
+    darknessPenalty: 0.05,
     environmentBase: { hue: null, saturation: 0.3 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
@@ -200,7 +200,7 @@ export const STANDARD_WEATHER = [
     chance: 4,
     tempMin: 8,
     tempMax: 18,
-    darknessPenalty: 0.1,
+    darknessPenalty: 0,
     environmentBase: { hue: null, saturation: 0.7 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
@@ -238,7 +238,7 @@ export const STANDARD_WEATHER = [
     chance: 2,
     tempMin: 15,
     tempMax: 26,
-    darknessPenalty: 0.05,
+    darknessPenalty: 0,
     environmentBase: null,
     environmentDark: null,
     wind: { speed: 1, direction: null },
@@ -257,7 +257,7 @@ export const STANDARD_WEATHER = [
     chance: 1,
     tempMin: -10,
     tempMax: 2,
-    darknessPenalty: 0.1,
+    darknessPenalty: 0,
     environmentBase: { hue: 200, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
@@ -276,14 +276,14 @@ export const STANDARD_WEATHER = [
     chance: 1,
     tempMin: -2,
     tempMax: 4,
-    darknessPenalty: 0.15,
+    darknessPenalty: 0.05,
     environmentBase: { hue: 200, saturation: 0.5 },
     environmentDark: null,
     wind: { speed: 2, direction: null },
     precipitation: { type: 'sleet', intensity: 0.5 },
     inertiaWeight: 1.0,
     hudEffect: 'sleet',
-    fxPreset: null
+    fxPreset: 'sleet'
   },
   {
     id: 'heat-wave',
@@ -302,7 +302,7 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
     hudEffect: 'haze',
-    fxPreset: null
+    fxPreset: 'heat-wave'
   }
 ];
 
@@ -321,7 +321,7 @@ export const SEVERE_WEATHER = [
     chance: 2,
     tempMin: 15,
     tempMax: 28,
-    darknessPenalty: 0.25,
+    darknessPenalty: 0.1,
     environmentBase: { hue: 220, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 4, direction: null, forced: true },
@@ -340,7 +340,7 @@ export const SEVERE_WEATHER = [
     chance: 0.5,
     tempMin: -20,
     tempMax: -5,
-    darknessPenalty: 0.3,
+    darknessPenalty: 0.15,
     environmentBase: { hue: 200, saturation: 0.3 },
     environmentDark: { hue: 210, saturation: null },
     wind: { speed: 5, direction: null, forced: true },
@@ -359,7 +359,7 @@ export const SEVERE_WEATHER = [
     chance: 0.5,
     tempMin: 5,
     tempMax: 18,
-    darknessPenalty: 0.2,
+    darknessPenalty: 0.05,
     environmentBase: { hue: null, saturation: 0.5 },
     environmentDark: null,
     wind: { speed: 3, direction: null },
@@ -378,7 +378,7 @@ export const SEVERE_WEATHER = [
     chance: 0.5,
     tempMin: 18,
     tempMax: 35,
-    darknessPenalty: 0.3,
+    darknessPenalty: 0.15,
     environmentBase: { hue: 100, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 5, direction: null, forced: true },
@@ -397,7 +397,7 @@ export const SEVERE_WEATHER = [
     chance: 0.5,
     tempMin: 22,
     tempMax: 35,
-    darknessPenalty: 0.35,
+    darknessPenalty: 0.15,
     environmentBase: { hue: null, saturation: 0.3 },
     environmentDark: null,
     wind: { speed: 5, direction: null, forced: true },
@@ -416,14 +416,14 @@ export const SEVERE_WEATHER = [
     chance: 0.5,
     tempMin: -10,
     tempMax: 0,
-    darknessPenalty: 0.25,
+    darknessPenalty: 0.1,
     environmentBase: { hue: 200, saturation: 0.5 },
     environmentDark: { hue: 210, saturation: 0.4 },
     wind: { speed: 4, direction: null, forced: true },
     precipitation: { type: 'hail', intensity: 0.8 },
     inertiaWeight: 0.3,
     hudEffect: 'ice',
-    fxPreset: null
+    fxPreset: 'ice-storm'
   },
   {
     id: 'monsoon',
@@ -435,14 +435,14 @@ export const SEVERE_WEATHER = [
     chance: 0.5,
     tempMin: 22,
     tempMax: 35,
-    darknessPenalty: 0.3,
+    darknessPenalty: 0.1,
     environmentBase: { hue: null, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 4, direction: null, forced: true },
     precipitation: { type: 'rain', intensity: 1.0 },
     inertiaWeight: 0.5,
     hudEffect: 'rain-heavy',
-    fxPreset: null
+    fxPreset: 'monsoon'
   }
 ];
 
@@ -461,7 +461,7 @@ export const ENVIRONMENTAL_WEATHER = [
     chance: 1.5,
     tempMin: 15,
     tempMax: 40,
-    darknessPenalty: 0.25,
+    darknessPenalty: 0.1,
     environmentBase: { hue: 30, saturation: 0.4 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
@@ -480,7 +480,7 @@ export const ENVIRONMENTAL_WEATHER = [
     chance: 1.5,
     tempMin: 25,
     tempMax: 45,
-    darknessPenalty: 0.2,
+    darknessPenalty: 0.1,
     environmentBase: { hue: 35, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 4, direction: null },
@@ -544,7 +544,7 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'leaves',
-    fxPreset: null
+    fxPreset: 'autumn-leaves'
   },
   {
     id: 'rolling-fog',
@@ -556,14 +556,14 @@ export const ENVIRONMENTAL_WEATHER = [
     chance: 1.5,
     tempMin: 2,
     tempMax: 12,
-    darknessPenalty: 0.25,
+    darknessPenalty: 0.05,
     environmentBase: { hue: null, saturation: 0.2 },
     environmentDark: null,
     wind: { speed: 0, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
     hudEffect: 'fog',
-    fxPreset: null
+    fxPreset: 'rolling-fog'
   },
   {
     id: 'wildfire-smoke',
@@ -575,14 +575,14 @@ export const ENVIRONMENTAL_WEATHER = [
     chance: 1,
     tempMin: 20,
     tempMax: 40,
-    darknessPenalty: 0.3,
+    darknessPenalty: 0.1,
     environmentBase: { hue: 25, saturation: 0.5 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.5,
     hudEffect: 'smoke',
-    fxPreset: null
+    fxPreset: 'wildfire-smoke'
   },
   {
     id: 'dust-devil',
@@ -601,7 +601,7 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'sand',
-    fxPreset: null
+    fxPreset: 'dust-devil'
   }
 ];
 
@@ -620,7 +620,7 @@ export const FANTASY_WEATHER = [
     chance: 0.5,
     tempMin: 5,
     tempMax: 20,
-    darknessPenalty: 0.4,
+    darknessPenalty: 0.3,
     environmentBase: { hue: 270, saturation: 0.3 },
     environmentDark: { hue: 280, saturation: 0.4 },
     wind: { speed: 1, direction: null },
@@ -677,7 +677,7 @@ export const FANTASY_WEATHER = [
     chance: 0,
     tempMin: 0,
     tempMax: 15,
-    darknessPenalty: 0.2,
+    darknessPenalty: 0.15,
     environmentBase: { hue: null, saturation: 0.1 },
     environmentDark: { hue: null, saturation: 0.1 },
     wind: { speed: 0, direction: null },
@@ -772,14 +772,14 @@ export const FANTASY_WEATHER = [
     chance: 0,
     tempMin: 10,
     tempMax: 25,
-    darknessPenalty: 0.15,
+    darknessPenalty: 0.05,
     environmentBase: { hue: 100, saturation: 0.6 },
     environmentDark: null,
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.6 },
     inertiaWeight: 0,
     hudEffect: 'rain-acid',
-    fxPreset: null
+    fxPreset: 'acid-rain'
   },
   {
     id: 'blood-rain',
@@ -791,14 +791,14 @@ export const FANTASY_WEATHER = [
     chance: 0,
     tempMin: 12,
     tempMax: 28,
-    darknessPenalty: 0.2,
+    darknessPenalty: 0.1,
     environmentBase: { hue: 0, saturation: 0.7 },
     environmentDark: { hue: 350, saturation: 0.6 },
     wind: { speed: 1, direction: null },
     precipitation: { type: 'rain', intensity: 0.7 },
     inertiaWeight: 0,
     hudEffect: 'rain-blood',
-    fxPreset: null
+    fxPreset: 'blood-rain'
   },
   {
     id: 'meteor-shower',
@@ -817,7 +817,7 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'meteors',
-    fxPreset: null
+    fxPreset: 'meteor-shower'
   },
   {
     id: 'spore-cloud',
@@ -836,7 +836,7 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'spores',
-    fxPreset: null
+    fxPreset: 'spore-cloud'
   },
   {
     id: 'divine-light',
@@ -855,7 +855,7 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'divine',
-    fxPreset: null
+    fxPreset: 'divine-light'
   },
   {
     id: 'plague-miasma',
@@ -874,7 +874,7 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'miasma',
-    fxPreset: null
+    fxPreset: 'plague-miasma'
   }
 ];
 

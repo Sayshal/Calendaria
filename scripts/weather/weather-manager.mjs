@@ -47,18 +47,29 @@ export default class WeatherManager {
     if (this.#initialized) return;
     this.#currentWeatherByZone = game.settings.get(MODULE.ID, SETTINGS.CURRENT_WEATHER) || {};
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
-    if (Object.keys(this.#currentWeatherByZone).length && CalendariaSocket.isPrimaryGM()) {
-      const components = game.time.components;
+    if (CalendariaSocket.isPrimaryGM()) {
+      // Migrate autoGenerate from calendar data to world setting
       const calendar = CalendarManager.getActiveCalendar();
-      const yearZero = calendar?.years?.yearZero ?? 0;
-      const zones = this.getCalendarZones();
-      for (const zone of zones) {
-        const weather = this.#currentWeatherByZone[zone.id];
-        if (!weather) continue;
-        const existing = this.getWeatherForDate(components.year + yearZero, components.month, (components.dayOfMonth ?? 0) + 1, zone.id);
-        if (!existing) await this.#recordWeatherHistory(weather, zone.id);
+      if (calendar?.weather?.autoGenerate !== undefined) {
+        const calendarId = calendar.metadata?.id;
+        if (calendarId) {
+          await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!calendar.weather.autoGenerate);
+          log(3, `Migrated autoGenerate=${calendar.weather.autoGenerate} to world setting`);
+        }
       }
-      if (calendar?.weather?.autoGenerate) await this.#ensureForecastPlan();
+
+      if (Object.keys(this.#currentWeatherByZone).length) {
+        const components = game.time.components;
+        const yearZero = calendar?.years?.yearZero ?? 0;
+        const zones = this.getCalendarZones();
+        for (const zone of zones) {
+          const weather = this.#currentWeatherByZone[zone.id];
+          if (!weather) continue;
+          const existing = this.getWeatherForDate(components.year + yearZero, components.month, (components.dayOfMonth ?? 0) + 1, zone.id);
+          if (!existing) await this.#recordWeatherHistory(weather, zone.id);
+        }
+        if (game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) await this.#ensureForecastPlan();
+      }
     }
     this.#initialized = true;
     log(3, 'WeatherManager initialized');
@@ -433,7 +444,7 @@ export default class WeatherManager {
   static async #onDayChange(data) {
     if (!CalendariaSocket.isPrimaryGM()) return;
     const calendar = CalendarManager.getActiveCalendar();
-    const autoGenerate = calendar?.weather?.autoGenerate ?? false;
+    const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER) ?? false;
     const zones = this.getCalendarZones();
 
     // Record current weather to history for all zones
@@ -1054,6 +1065,19 @@ export default class WeatherManager {
   }
 
   /**
+   * Set a scene-level climate zone override via scene flag.
+   * @param {object} scene - Scene document to set the flag on
+   * @param {string|null} zoneId - Zone ID to set, or null to clear the override
+   * @returns {Promise<void>}
+   */
+  static async setSceneZoneOverride(scene, zoneId) {
+    if (!scene) return;
+    if (zoneId) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, zoneId);
+    else await scene.unsetFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE);
+    log(3, `Scene zone override ${zoneId ? `set to ${  zoneId}` : 'cleared'} for scene ${scene.name}`);
+  }
+
+  /**
    * Set the active climate zone on the calendar.
    * @param {string} zoneId - Zone ID to set as active
    * @returns {Promise<void>}
@@ -1122,7 +1146,23 @@ export default class WeatherManager {
       return null;
     }
 
-    const newPreset = { id: preset.id, label: preset.label, description: preset.description || '', icon: preset.icon || 'fa-question', color: preset.color || '#888888', category: 'custom' };
+    const newPreset = {
+      id: preset.id,
+      label: preset.label,
+      description: preset.description || '',
+      icon: preset.icon || 'fa-question',
+      color: preset.color || '#888888',
+      category: 'custom',
+      ...(preset.wind && { wind: preset.wind }),
+      ...(preset.precipitation && { precipitation: preset.precipitation }),
+      ...(preset.tempMin != null && { tempMin: preset.tempMin }),
+      ...(preset.tempMax != null && { tempMax: preset.tempMax }),
+      ...(preset.hudEffect && { hudEffect: preset.hudEffect }),
+      ...(preset.fxPreset && { fxPreset: preset.fxPreset }),
+      ...(preset.inertiaWeight != null && { inertiaWeight: preset.inertiaWeight }),
+      ...(preset.chance != null && { chance: preset.chance }),
+      ...(preset.darknessPenalty != null && { darknessPenalty: preset.darknessPenalty })
+    };
     customPresets.push(newPreset);
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
     log(3, `Added custom weather preset: ${preset.id}`);

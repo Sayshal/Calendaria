@@ -34,7 +34,10 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    form: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR, scrollable: [''] }
+    form: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR, scrollable: [''] },
+    tabs: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_TABS },
+    weather: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_WEATHER, scrollable: [''] },
+    environment: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_ENVIRONMENT, scrollable: [''] }
   };
 
   /** @type {'season'|'zone'} */
@@ -91,6 +94,17 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData = options.calendarData ?? null;
     this.#seasonNames = options.seasonNames ?? [];
     this.#onSave = options.onSave;
+    if (mode === 'zone') this.tabGroups = { primary: 'weather' };
+  }
+
+  /** @override */
+  _configureRenderOptions(options) {
+    super._configureRenderOptions(options);
+    if (this.#mode === 'zone') {
+      options.parts = ['tabs', 'weather', 'environment'];
+    } else {
+      options.parts = ['form'];
+    }
   }
 
   /** @override */

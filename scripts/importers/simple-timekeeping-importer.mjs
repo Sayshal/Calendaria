@@ -241,7 +241,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         system: calendar.system || calendar.name || config.calendar,
         importedFrom: 'simple-timekeeping'
       },
-      weather: { activeZone: 'temperate', autoGenerate: false, zones: [getDefaultZoneConfig('temperate')] }
+      weather: { activeZone: 'temperate', zones: [getDefaultZoneConfig('temperate')] }
     };
   }
 

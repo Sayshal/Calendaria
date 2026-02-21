@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { MODULE, SOCKET_TYPES } from '../constants.mjs';
+import { MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { formatCustom } from '../utils/format-utils.mjs';
@@ -370,7 +370,7 @@ export function buildWeatherLookup() {
   const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
   const zoneId = zone?.id;
   let lookup = null;
-  if (canViewWeatherForecast() && calendar?.weather?.autoGenerate) {
+  if (canViewWeatherForecast() && game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) {
     const forecast = WeatherManager.getForecast({ zoneId });
     lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.day}`, f]));
   }

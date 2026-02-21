@@ -1154,6 +1154,15 @@ export function registerSettings() {
   //  Weather System                         //
   // ========================================//
 
+  /** Whether to auto-generate weather on day change */
+  game.settings.register(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, {
+    name: 'CALENDARIA.Settings.AutoGenerate.Name',
+    hint: 'CALENDARIA.Settings.AutoGenerate.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Current weather state */
   game.settings.register(MODULE.ID, SETTINGS.CURRENT_WEATHER, {
     name: 'Current Weather',
