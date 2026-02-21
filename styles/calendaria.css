@@ -5215,6 +5215,7 @@ span.calendaria-moon-icon {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    padding-left: 0.25rem;
   }
 
   .weather-picker-details {
@@ -5224,6 +5225,7 @@ span.calendaria-moon-icon {
     flex-direction: column;
     gap: 0.25rem;
     padding-left: 0.25rem;
+    padding-right: 0.25rem;
     border-left: 0.0625rem solid var(--calendaria-border);
 
     .category-header {
