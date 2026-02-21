@@ -247,6 +247,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         dawnHue: this.#data.colorShift?.dawnHue ?? '',
         duskHue: this.#data.colorShift?.duskHue ?? '',
         nightHue: this.#data.colorShift?.nightHue ?? '',
+        dawnHueNorm: ClimateEditor.#hueToNorm(this.#data.colorShift?.dawnHue),
+        duskHueNorm: ClimateEditor.#hueToNorm(this.#data.colorShift?.duskHue),
+        nightHueNorm: ClimateEditor.#hueToNorm(this.#data.colorShift?.nightHue),
         transitionMinutes: this.#data.colorShift?.transitionMinutes ?? ''
       };
     }
@@ -276,8 +279,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       // Zone-only fields
       description: this.#data.description ?? '',
       brightnessMultiplier: this.#data.brightnessMultiplier ?? 1.0,
-      envBase: this.#data.environmentBase ?? {},
-      envDark: this.#data.environmentDark ?? {},
+      envBase: { ...this.#data.environmentBase, hueNorm: ClimateEditor.#hueToNorm(this.#data.environmentBase?.hue) },
+      envDark: { ...this.#data.environmentDark, hueNorm: ClimateEditor.#hueToNorm(this.#data.environmentDark?.hue) },
       zoneKey: this.#zoneKey,
       zoneId: this.#data.id,
       // Daylight fields
@@ -409,9 +412,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const allPresets = getAllPresets(customPresets);
     const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
 
-    const baseHue = data.baseHue !== '' && data.baseHue != null ? parseFloat(data.baseHue) : null;
+    const baseHue = ClimateEditor.#normToHue(data.baseHue);
     const baseSat = data.baseSaturation !== '' && data.baseSaturation != null ? parseFloat(data.baseSaturation) : null;
-    const darkHue = data.darkHue !== '' && data.darkHue != null ? parseFloat(data.darkHue) : null;
+    const darkHue = ClimateEditor.#normToHue(data.darkHue);
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
 
     // Parse latitude and daylight overrides — mutually exclusive via checkbox
@@ -457,12 +460,13 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Color shift configuration
     const colorShiftResult = {};
-    const csFields = ['dawnHue', 'duskHue', 'nightHue', 'transitionMinutes'];
-    for (const field of csFields) {
+    const csHueFields = ['dawnHue', 'duskHue', 'nightHue'];
+    for (const field of csHueFields) {
       const key = `colorShift${field.charAt(0).toUpperCase()}${field.slice(1)}`;
-      const val = data[key];
-      colorShiftResult[field] = val !== '' && val != null ? parseFloat(val) : null;
+      colorShiftResult[field] = ClimateEditor.#normToHue(data[key]);
     }
+    const tmVal = data.colorShiftTransitionMinutes;
+    colorShiftResult.transitionMinutes = tmVal !== '' && tmVal != null ? parseFloat(tmVal) : null;
     result.colorShift = colorShiftResult;
 
     // Wind configuration
@@ -525,6 +529,24 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const num = parseFloat(raw);
     return isNaN(num) ? (fallback != null ? fromDisplayUnit(fallback) : null) : fromDisplayUnit(num);
+  }
+
+  /**
+   * Convert a 0-360 degree hue to 0-1 normalized for hue-slider.
+   * @param hue
+   */
+  static #hueToNorm(hue) {
+    return hue != null ? hue / 360 : 0;
+  }
+
+  /**
+   * Convert a 0-1 normalized hue-slider value back to 0-360 degrees.
+   * @param val
+   */
+  static #normToHue(val) {
+    if (val === '' || val == null) return null;
+    const num = parseFloat(val);
+    return Number.isFinite(num) ? Math.round(num * 360) : null;
   }
 
   /**

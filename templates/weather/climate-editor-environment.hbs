@@ -24,32 +24,30 @@
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseHue"}}</label>
         <div class="form-fields">
-          <input type="number" name="baseHue" min="0" max="360" step="1" value="{{envBase.hue}}"
-            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+          <hue-slider name="baseHue" value="{{envBase.hueNorm}}"></hue-slider>
         </div>
         <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
       </div>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.BaseSaturation"}}</label>
         <div class="form-fields">
-          <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="{{envBase.saturation}}"
-            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+          <range-picker name="baseSaturation" value="{{envBase.saturation}}"
+            min="0" max="1" step="0.1"></range-picker>
         </div>
         <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
       </div>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkHue"}}</label>
         <div class="form-fields">
-          <input type="number" name="darkHue" min="0" max="360" step="1" value="{{envDark.hue}}"
-            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+          <hue-slider name="darkHue" value="{{envDark.hueNorm}}"></hue-slider>
         </div>
         <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.HueHint"}}</p>
       </div>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.DarkSaturation"}}</label>
         <div class="form-fields">
-          <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="{{envDark.saturation}}"
-            placeholder="{{localize 'CALENDARIA.Common.Default'}}">
+          <range-picker name="darkSaturation" value="{{envDark.saturation}}"
+            min="0" max="1" step="0.1"></range-picker>
         </div>
         <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SaturationHint"}}</p>
       </div>
@@ -112,22 +110,19 @@
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.DawnHue"}}</label>
         <div class="form-fields">
-          <input type="number" name="colorShiftDawnHue" min="0" max="360" step="1"
-            value="{{colorShift.dawnHue}}" placeholder="30">
+          <hue-slider name="colorShiftDawnHue" value="{{colorShift.dawnHueNorm}}"></hue-slider>
         </div>
       </div>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.DuskHue"}}</label>
         <div class="form-fields">
-          <input type="number" name="colorShiftDuskHue" min="0" max="360" step="1"
-            value="{{colorShift.duskHue}}" placeholder="15">
+          <hue-slider name="colorShiftDuskHue" value="{{colorShift.duskHueNorm}}"></hue-slider>
         </div>
       </div>
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.NightHue"}}</label>
         <div class="form-fields">
-          <input type="number" name="colorShiftNightHue" min="0" max="360" step="1"
-            value="{{colorShift.nightHue}}" placeholder="220">
+          <hue-slider name="colorShiftNightHue" value="{{colorShift.nightHueNorm}}"></hue-slider>
         </div>
       </div>
       <div class="form-group">

@@ -246,10 +246,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     // Sound effect dropdown
     const currentSoundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
     context.soundFx = currentSoundFx;
-    context.soundFxOptions = [
-      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx },
-      ...SOUND_FX_OPTIONS.map((key) => ({ value: key, label: localize(`CALENDARIA.SoundFx.${key}`), selected: key === currentSoundFx }))
-    ];
+    const sfxEntries = SOUND_FX_OPTIONS.map((key) => ({ value: key, label: localize(`CALENDARIA.SoundFx.${key}`), selected: key === currentSoundFx })).sort((a, b) =>
+      a.label.localeCompare(b.label, game.i18n.lang)
+    );
+    context.soundFxOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx }, ...sfxEntries];
 
     return context;
   }

@@ -7753,7 +7753,6 @@ span.calendaria-moon-icon {
     min-width: 8.25rem;
     max-width: 8.25rem;
     overflow: hidden auto;
-    scrollbar-gutter: stable;
   }
 
   .preset-editor {

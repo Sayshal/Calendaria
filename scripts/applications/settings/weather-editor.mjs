@@ -31,7 +31,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: 'fas fa-cloud-sun',
       resizable: false
     },
-    position: { width: 750, height: 700 },
+    position: { width: 900, height: 835 },
     form: {
       handler: WeatherEditor.#onSubmit,
       submitOnChange: true,
@@ -68,6 +68,9 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   tabGroups = { primary: ALL_PRESETS[0]?.id ?? 'clear' };
+
+  /** Debounce timer for submit-on-change to avoid excessive saves during slider drags. */
+  #submitTimer = null;
 
   // ─── Context Preparation ───────────────────────────────────────────
 
@@ -205,11 +208,15 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const defWobble = defaults?.wobble ?? 0;
     const defTint = defaults?.tint ?? [0xffffff, 0xffffff];
 
-    // Environment lighting: separate override values from defaults for placeholder pattern
+    // Environment lighting: merge overrides over preset defaults
     const envBaseOverride = isCustom ? (preset.environmentBase ?? {}) : (overrides.environmentBase ?? {});
     const envDarkOverride = isCustom ? (preset.environmentDark ?? {}) : (overrides.environmentDark ?? {});
     const envBaseDefault = builtinPreset?.environmentBase ?? {};
     const envDarkDefault = builtinPreset?.environmentDark ?? {};
+    const effectiveBaseHue = envBaseOverride.hue ?? envBaseDefault.hue ?? null;
+    const effectiveBaseSat = envBaseOverride.saturation ?? envBaseDefault.saturation ?? '';
+    const effectiveDarkHue = envDarkOverride.hue ?? envDarkDefault.hue ?? null;
+    const effectiveDarkSat = envDarkOverride.saturation ?? envDarkDefault.saturation ?? '';
 
     context.isCustom = isCustom;
     context.preset = {
@@ -218,10 +225,12 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       icon,
       color,
       hudEffect: effectId,
-      baseHue: envBaseOverride.hue ?? '',
-      baseSaturation: envBaseOverride.saturation ?? '',
-      darkHue: envDarkOverride.hue ?? '',
-      darkSaturation: envDarkOverride.saturation ?? ''
+      baseHue: effectiveBaseHue ?? '',
+      baseHueNorm: WeatherEditor.#hueToNorm(effectiveBaseHue),
+      baseSaturation: effectiveBaseSat,
+      darkHue: effectiveDarkHue ?? '',
+      darkHueNorm: WeatherEditor.#hueToNorm(effectiveDarkHue),
+      darkSaturation: effectiveDarkSat
     };
 
     // HUD effect dropdown options (alphabetized by label)
@@ -246,53 +255,33 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     // Sound effect dropdown
     const currentSoundFx = isCustom ? preset.soundFx || '' : overrides.soundFx !== undefined ? overrides.soundFx || '' : builtinPreset?.soundFx || '';
     context.preset.soundFx = currentSoundFx;
-    context.soundFxOptions = [
-      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx },
-      ...SOUND_FX_OPTIONS.map((s) => ({ value: s, label: localize(`CALENDARIA.SoundFx.${s}`), selected: s === currentSoundFx }))
-    ];
+    const sfxEntries = SOUND_FX_OPTIONS.map((s) => ({ value: s, label: localize(`CALENDARIA.SoundFx.${s}`), selected: s === currentSoundFx })).sort((a, b) =>
+      a.label.localeCompare(b.label, game.i18n.lang)
+    );
+    context.soundFxOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx }, ...sfxEntries];
 
-    // Visual override values (empty string = use placeholder/default)
+    // Visual values — show effective value (override merged over defaults)
     context.visuals = {
-      countMin: vo.count?.[0] ?? '',
-      countMax: vo.count?.[1] ?? '',
-      scaleMin: vo.scale?.[0] ?? '',
-      scaleMax: vo.scale?.[1] ?? '',
-      alphaMin: vo.alpha?.[0] ?? '',
-      alphaMax: vo.alpha?.[1] ?? '',
-      speedXMin: vo.speedX?.[0] ?? '',
-      speedXMax: vo.speedX?.[1] ?? '',
-      speedYMin: vo.speedY?.[0] ?? '',
-      speedYMax: vo.speedY?.[1] ?? '',
-      gravity: vo.gravity ?? '',
-      wobble: vo.wobble ?? '',
+      countMin: vo.count?.[0] ?? defCount[0],
+      countMax: vo.count?.[1] ?? defCount[1],
+      scaleMin: vo.scale?.[0] ?? defScale[0],
+      scaleMax: vo.scale?.[1] ?? defScale[1],
+      alphaMin: vo.alpha?.[0] ?? defAlpha[0],
+      alphaMax: vo.alpha?.[1] ?? defAlpha[1],
+      speedXMin: vo.speedX?.[0] ?? defSpeedX[0],
+      speedXMax: vo.speedX?.[1] ?? defSpeedX[1],
+      speedYMin: vo.speedY?.[0] ?? defSpeedY[0],
+      speedYMax: vo.speedY?.[1] ?? defSpeedY[1],
+      gravity: vo.gravity ?? defGravity,
+      wobble: vo.wobble ?? defWobble,
       tintPrimary: vo.tint ? WeatherEditor.#numToHex(vo.tint[0]) : WeatherEditor.#numToHex(defTint[0]),
       tintSecondary: vo.tint ? WeatherEditor.#numToHex(vo.tint[1]) : WeatherEditor.#numToHex(defTint[1])
     };
 
-    // Defaults for placeholders
-    context.defaults = {
-      baseHue: envBaseDefault.hue ?? '',
-      baseSaturation: envBaseDefault.saturation ?? '',
-      darkHue: envDarkDefault.hue ?? '',
-      darkSaturation: envDarkDefault.saturation ?? '',
-      countMin: defCount[0],
-      countMax: defCount[1],
-      scaleMin: defScale[0],
-      scaleMax: defScale[1],
-      alphaMin: defAlpha[0],
-      alphaMax: defAlpha[1],
-      speedXMin: defSpeedX[0],
-      speedXMax: defSpeedX[1],
-      speedYMin: defSpeedY[0],
-      speedYMax: defSpeedY[1],
-      gravity: defGravity,
-      wobble: defWobble,
-      skyStrength: skyDefaults?.strength ?? 0.7
-    };
-
-    // Sky override values
+    // Sky values — show effective value (override merged over defaults)
+    const defSkyStrength = skyDefaults?.strength ?? 0.7;
     context.sky = {
-      strength: so.strength ?? '',
+      strength: so.strength ?? defSkyStrength,
       top: so.top ? WeatherEditor.#rgbToHex(so.top) : skyDefaults?.top ? WeatherEditor.#rgbToHex(skyDefaults.top) : '#808080',
       mid: so.mid ? WeatherEditor.#rgbToHex(so.mid) : skyDefaults?.mid ? WeatherEditor.#rgbToHex(skyDefaults.mid) : '#808080',
       bottom: so.bottom ? WeatherEditor.#rgbToHex(so.bottom) : skyDefaults?.bottom ? WeatherEditor.#rgbToHex(skyDefaults.bottom) : '#808080'
@@ -340,7 +329,16 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLFormElement} _form - The form element
    * @param {object} formData - Parsed form data
    */
-  static async #onSubmit(_event, _form, formData) {
+  static #onSubmit(_event, _form, formData) {
+    clearTimeout(this.#submitTimer);
+    this.#submitTimer = setTimeout(() => this.#saveForm(formData), 500);
+  }
+
+  /**
+   * Perform the actual save after debounce.
+   * @param {object} formData - Parsed form data
+   */
+  async #saveForm(formData) {
     const presetId = this.tabGroups.primary;
     if (!presetId) return;
 
@@ -364,13 +362,31 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       effectChanged = prevEffect !== effectId;
     }
 
-    // Parse environment lighting fields
-    const baseHue = data.baseHue !== '' && data.baseHue != null ? parseFloat(data.baseHue) : null;
+    // Parse environment lighting fields — delta against preset defaults for built-in presets
+    const baseHue = WeatherEditor.#normToHue(data.baseHue);
     const baseSat = data.baseSaturation !== '' && data.baseSaturation != null ? parseFloat(data.baseSaturation) : null;
-    const darkHue = data.darkHue !== '' && data.darkHue != null ? parseFloat(data.darkHue) : null;
+    const darkHue = WeatherEditor.#normToHue(data.darkHue);
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
-    const environmentBase = baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null;
-    const environmentDark = darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null;
+    const defEnvBase = builtinPreset?.environmentBase ?? {};
+    const defEnvDark = builtinPreset?.environmentDark ?? {};
+    const baseHueDelta = !isCustom && baseHue === (defEnvBase.hue ?? 0) ? null : baseHue;
+    const baseSatDelta = !isCustom && baseSat === (defEnvBase.saturation ?? null) ? null : baseSat;
+    const darkHueDelta = !isCustom && darkHue === (defEnvDark.hue ?? 0) ? null : darkHue;
+    const darkSatDelta = !isCustom && darkSat === (defEnvDark.saturation ?? null) ? null : darkSat;
+    const environmentBase = isCustom
+      ? baseHue !== null || baseSat !== null
+        ? { hue: baseHue, saturation: baseSat }
+        : null
+      : baseHueDelta !== null || baseSatDelta !== null
+        ? { hue: baseHueDelta, saturation: baseSatDelta }
+        : null;
+    const environmentDark = isCustom
+      ? darkHue !== null || darkSat !== null
+        ? { hue: darkHue, saturation: darkSat }
+        : null
+      : darkHueDelta !== null || darkSatDelta !== null
+        ? { hue: darkHueDelta, saturation: darkSatDelta }
+        : null;
 
     // Extract visual/sky overrides (delta against defaults) — skip if effect just changed
     const { visualOverrides, skyOverrides } = effectChanged ? { visualOverrides: null, skyOverrides: null } : WeatherEditor.#extractVisuals(data, effectId);
@@ -553,6 +569,26 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       visualOverrides: Object.keys(visualOverrides).length ? visualOverrides : null,
       skyOverrides: Object.keys(skyOverrides).length ? skyOverrides : null
     };
+  }
+
+  // ─── Hue Helpers ──────────────────────────────────────────────────
+
+  /**
+   * Convert a 0-360 degree hue to 0-1 normalized for hue-slider.
+   * @param hue
+   */
+  static #hueToNorm(hue) {
+    return hue != null ? hue / 360 : 0;
+  }
+
+  /**
+   * Convert a 0-1 normalized hue-slider value back to 0-360 degrees.
+   * @param val
+   */
+  static #normToHue(val) {
+    if (val === '' || val == null) return null;
+    const num = parseFloat(val);
+    return Number.isFinite(num) ? Math.round(num * 360) : null;
   }
 
   // ─── Color Helpers ─────────────────────────────────────────────────

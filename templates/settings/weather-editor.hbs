@@ -1,6 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   {{#if preset}}
-    <div class="preset-editor">
+    <div class="preset-editor standard-form">
 
       {{!-- Weather Info --}}
       <fieldset>
@@ -76,32 +76,30 @@
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.DayHue"}}</label>
           <div class="form-fields">
-            <input type="number" name="{{preset.id}}.baseHue" min="0" max="360" step="1" value="{{preset.baseHue}}"
-              placeholder="{{defaults.baseHue}}">
+            <hue-slider name="{{preset.id}}.baseHue" value="{{preset.baseHueNorm}}"></hue-slider>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.DayHueHint"}}</p>
         </div>
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.DaySaturation"}}</label>
           <div class="form-fields">
-            <input type="number" name="{{preset.id}}.baseSaturation" min="0" max="1" step="0.1"
-              value="{{preset.baseSaturation}}" placeholder="{{defaults.baseSaturation}}">
+            <range-picker name="{{preset.id}}.baseSaturation" value="{{preset.baseSaturation}}"
+              min="0" max="1" step="0.1"></range-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.DaySaturationHint"}}</p>
         </div>
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.NightHue"}}</label>
           <div class="form-fields">
-            <input type="number" name="{{preset.id}}.darkHue" min="0" max="360" step="1" value="{{preset.darkHue}}"
-              placeholder="{{defaults.darkHue}}">
+            <hue-slider name="{{preset.id}}.darkHue" value="{{preset.darkHueNorm}}"></hue-slider>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.NightHueHint"}}</p>
         </div>
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.NightSaturation"}}</label>
           <div class="form-fields">
-            <input type="number" name="{{preset.id}}.darkSaturation" min="0" max="1" step="0.1"
-              value="{{preset.darkSaturation}}" placeholder="{{defaults.darkSaturation}}">
+            <range-picker name="{{preset.id}}.darkSaturation" value="{{preset.darkSaturation}}"
+              min="0" max="1" step="0.1"></range-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.NightSaturationHint"}}</p>
         </div>
@@ -116,10 +114,10 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Count"}}</label>
           <div class="form-fields range">
             <input type="number" name="{{preset.id}}.vo-count-min" value="{{visuals.countMin}}"
-              placeholder="{{defaults.countMin}}" min="0" max="500" step="1">
+              min="0" max="500" step="1">
             <i class="fa-solid fa-right-long"></i>
             <input type="number" name="{{preset.id}}.vo-count-max" value="{{visuals.countMax}}"
-              placeholder="{{defaults.countMax}}" min="0" max="500" step="1">
+              min="0" max="500" step="1">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.CountHint"}}</p>
         </div>
@@ -127,10 +125,10 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Scale"}}</label>
           <div class="form-fields range">
             <input type="number" name="{{preset.id}}.vo-scale-min" value="{{visuals.scaleMin}}"
-              placeholder="{{defaults.scaleMin}}" min="0" max="10" step="0.1">
+              min="0" max="10" step="0.1">
             <i class="fa-solid fa-right-long"></i>
             <input type="number" name="{{preset.id}}.vo-scale-max" value="{{visuals.scaleMax}}"
-              placeholder="{{defaults.scaleMax}}" min="0" max="10" step="0.1">
+              min="0" max="10" step="0.1">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.ScaleHint"}}</p>
         </div>
@@ -138,10 +136,10 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Alpha"}}</label>
           <div class="form-fields range">
             <input type="number" name="{{preset.id}}.vo-alpha-min" value="{{visuals.alphaMin}}"
-              placeholder="{{defaults.alphaMin}}" min="0" max="1" step="0.05">
+              min="0" max="1" step="0.05">
             <i class="fa-solid fa-right-long"></i>
             <input type="number" name="{{preset.id}}.vo-alpha-max" value="{{visuals.alphaMax}}"
-              placeholder="{{defaults.alphaMax}}" min="0" max="1" step="0.05">
+              min="0" max="1" step="0.05">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.AlphaHint"}}</p>
         </div>
@@ -149,10 +147,10 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedX"}}</label>
           <div class="form-fields range">
             <input type="number" name="{{preset.id}}.vo-speedx-min" value="{{visuals.speedXMin}}"
-              placeholder="{{defaults.speedXMin}}" step="0.1">
+              step="0.1">
             <i class="fa-solid fa-right-long"></i>
             <input type="number" name="{{preset.id}}.vo-speedx-max" value="{{visuals.speedXMax}}"
-              placeholder="{{defaults.speedXMax}}" step="0.1">
+              step="0.1">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedXHint"}}</p>
         </div>
@@ -160,10 +158,10 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedY"}}</label>
           <div class="form-fields range">
             <input type="number" name="{{preset.id}}.vo-speedy-min" value="{{visuals.speedYMin}}"
-              placeholder="{{defaults.speedYMin}}" step="0.1">
+              step="0.1">
             <i class="fa-solid fa-right-long"></i>
             <input type="number" name="{{preset.id}}.vo-speedy-max" value="{{visuals.speedYMax}}"
-              placeholder="{{defaults.speedYMax}}" step="0.1">
+              step="0.1">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SpeedYHint"}}</p>
         </div>
@@ -171,7 +169,7 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Gravity"}}</label>
           <div class="form-fields">
             <input type="number" name="{{preset.id}}.vo-gravity" value="{{visuals.gravity}}"
-              placeholder="{{defaults.gravity}}" step="0.005">
+              step="0.005">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.GravityHint"}}</p>
         </div>
@@ -179,7 +177,7 @@
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.Wobble"}}</label>
           <div class="form-fields">
             <input type="number" name="{{preset.id}}.vo-wobble" value="{{visuals.wobble}}"
-              placeholder="{{defaults.wobble}}" step="0.005">
+              step="0.005">
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.WobbleHint"}}</p>
         </div>
@@ -201,8 +199,8 @@
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyStrength"}}</label>
           <div class="form-fields">
-            <input type="number" name="{{preset.id}}.so-strength" value="{{sky.strength}}"
-              placeholder="{{defaults.skyStrength}}" min="0" max="1" step="0.05">
+            <range-picker name="{{preset.id}}.so-strength" value="{{sky.strength}}"
+              min="0" max="1" step="0.05"></range-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyStrengthHint"}}</p>
         </div>
