@@ -70,6 +70,7 @@ export function initializeFXMaster() {
   log(3, 'FXMaster detected, registering weather change handler');
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
+  Hooks.on('updateScene', onSceneUpdate);
 
   const restoredName = getActivePreset(canvas?.scene);
   if (restoredName) {
@@ -86,6 +87,19 @@ export function initializeFXMaster() {
  * On canvas ready, sync FXMaster state with current weather.
  */
 function onCanvasReady() {
+  syncWeatherToScene();
+}
+
+/**
+ * On scene update, re-sync FX if the weather disable flag changed.
+ * @param {Scene} scene - Updated scene document
+ * @param {object} change - Flattened change data
+ */
+function onSceneUpdate(scene, change) {
+  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (scene !== canvas?.scene) return;
+  const flagKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
+  if (!(flagKey in foundry.utils.flattenObject(change))) return;
   syncWeatherToScene();
 }
 

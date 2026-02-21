@@ -29,11 +29,30 @@ let activeSoundKey = null;
 export function initializeWeatherSound() {
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
+  Hooks.on('updateScene', onSceneUpdate);
 
   // Sync sound to current weather on startup
   const weather = WeatherManager.getCurrentWeather();
   playSound(weather || null);
   log(3, 'WeatherSound initialized');
+}
+
+/**
+ * On scene update, re-sync sound if the weather disable flag changed.
+ * @param {Scene} scene - Updated scene document
+ * @param {object} change - Flattened change data
+ */
+function onSceneUpdate(scene, change) {
+  if (scene !== canvas?.scene) return;
+  const flagKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
+  if (!(flagKey in foundry.utils.flattenObject(change))) return;
+
+  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+    stopSound();
+  } else {
+    const weather = WeatherManager.getCurrentWeather();
+    playSound(weather || null);
+  }
 }
 
 /**
