@@ -29,6 +29,15 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="weatherSoundFx">{{localize "CALENDARIA.Settings.Weather.SoundFx.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="weatherSoundFx" name="weatherSoundFx"
+            {{#if weatherSoundFx}}checked{{/if}} />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.Weather.SoundFx.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 
@@ -137,14 +146,6 @@
           <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.BelowTokens.Hint"}}</p>
         </div>
 
-        <div class="form-group">
-          <label for="fxmasterSoundFx">{{localize "CALENDARIA.Settings.FXMaster.SoundFx.Name"}}</label>
-          <div class="form-fields">
-            <input type="checkbox" id="fxmasterSoundFx" name="fxmasterSoundFx"
-              {{#if fxmasterSoundFx}}checked{{/if}} />
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.SoundFx.Hint"}}</p>
-        </div>
       {{/if}}
     </fieldset>
   {{/if}}

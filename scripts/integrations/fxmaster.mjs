@@ -72,17 +72,12 @@ export function initializeFXMaster() {
   Hooks.on('canvasReady', onCanvasReady);
 
   const restoredName = getActivePreset(canvas?.scene);
-  log(1, `[FXMaster init] restoredName=${restoredName}`);
   if (restoredName) {
     const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
     const weather = WeatherManager?.getCurrentWeather?.();
     const expectedFx = weather?.fxPreset || null;
-    log(1, `[FXMaster init] expectedFx=${expectedFx}, match=${expectedFx === restoredName}`);
-    if (expectedFx !== restoredName) {
-      playWeather(weather || null);
-    }
+    if (expectedFx !== restoredName) playWeather(weather || null);
   } else {
-    log(1, '[FXMaster init] no active preset, syncing');
     syncWeatherToScene();
   }
 }
@@ -91,7 +86,6 @@ export function initializeFXMaster() {
  * On canvas ready, sync FXMaster state with current weather.
  */
 function onCanvasReady() {
-  log(1, '[FXMaster] canvasReady fired');
   syncWeatherToScene();
 }
 
@@ -99,25 +93,17 @@ function onCanvasReady() {
  * Sync current weather to the active scene's FXMaster state.
  */
 function syncWeatherToScene() {
-  if (!CalendariaSocket.isPrimaryGM()) {
-    log(1, '[FXMaster sync] not primary GM, skipping');
-    return;
-  }
+  if (!CalendariaSocket.isPrimaryGM()) return;
   const scene = canvas?.scene;
-  if (!scene) {
-    log(1, '[FXMaster sync] no canvas scene');
-    return;
-  }
+  if (!scene) return;
 
   if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-    log(1, '[FXMaster sync] FX disabled on scene, stopping all');
     stopAll();
     return;
   }
 
   const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
   const weather = WeatherManager?.getCurrentWeather?.();
-  log(1, `[FXMaster sync] weather.id=${weather?.id}, fxPreset=${weather?.fxPreset}`);
   playWeather(weather || null);
 }
 
@@ -135,19 +121,16 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk } = {}) {
     const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
     if (!WeatherManager) return;
     const weather = WeatherManager.getCurrentWeather();
-    log(1, `[FXMaster onChange] bulk=true, weather.id=${weather?.id}, fxPreset=${weather?.fxPreset}`);
     playWeather(weather || null);
     return;
   }
 
   const scene = game.scenes?.active;
   if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-    log(1, '[FXMaster onChange] FX disabled on scene, stopping all');
     stopAll();
     return;
   }
 
-  log(1, `[FXMaster onChange] current.id=${current?.id}, fxPreset=${current?.fxPreset}`);
   playWeather(current || null);
 }
 
@@ -156,16 +139,9 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk } = {}) {
  */
 async function stopAll() {
   const fxApi = getFxApi();
-  if (!fxApi) {
-    log(1, '[FXMaster stopAll] no fxApi');
-    return;
-  }
+  if (!fxApi) return;
   const active = fxApi.listActive?.() ?? [];
-  log(1, `[FXMaster stopAll] active presets: ${JSON.stringify(active)}`);
-  for (const name of active) {
-    log(1, `[FXMaster stopAll] stopping "${name}"`);
-    await fxApi.stop(name);
-  }
+  for (const name of active) await fxApi.stop(name);
 }
 
 /**
@@ -174,28 +150,22 @@ async function stopAll() {
  */
 async function playWeather(weather) {
   const fxApi = getFxApi();
-  if (!fxApi) {
-    log(1, '[FXMaster playWeather] no fxApi');
-    return;
-  }
+  if (!fxApi) return;
 
   const fxName = weather?.fxPreset || null;
-  log(1, `[FXMaster playWeather] weather.id=${weather?.id}, fxName=${fxName}`);
 
   if (!fxName) {
-    log(1, '[FXMaster playWeather] no fxPreset, calling stopAll');
     await stopAll();
     return;
   }
 
   const available = fxApi.list?.() ?? [];
   if (!available.includes(fxName)) {
-    log(1, `[FXMaster playWeather] "${fxName}" not in available presets, skipping`);
+    log(2, `[FXMaster] Preset "${fxName}" not available, skipping`);
     return;
   }
 
   const options = buildPresetOptions(weather);
-  log(1, `[FXMaster playWeather] calling switch("${fxName}", ${JSON.stringify(options)})`);
   await fxApi.switch(fxName, options);
 }
 
@@ -229,7 +199,6 @@ function buildPresetOptions(weather) {
   if (weather.wind?.direction != null) options.direction = degreesToCardinal(weather.wind.direction);
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN)) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
-  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
 
   return options;
 }

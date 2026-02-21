@@ -55,6 +55,18 @@
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.FxPresetHint"}}</p>
         </div>
         {{/if}}
+
+        <div class="form-group">
+          <label for="{{preset.id}}-soundFx">{{localize "CALENDARIA.WeatherEditor.SoundFx"}}</label>
+          <div class="form-fields">
+            <select id="{{preset.id}}-soundFx" name="{{preset.id}}.soundFx">
+              {{#each soundFxOptions}}
+                <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherEditor.SoundFxHint"}}</p>
+        </div>
       </fieldset>
 
       {{!-- Environment Lighting --}}

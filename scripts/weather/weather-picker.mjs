@@ -11,7 +11,7 @@ import { isFXMasterActive, getAvailableFxPresets } from '../integrations/fxmaste
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
 import WeatherManager from './weather-manager.mjs';
-import { WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from './weather-presets.mjs';
+import { SOUND_FX_OPTIONS, WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from './weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -85,6 +85,9 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} FXMaster preset override */
   #fxPreset = null;
 
+  /** @type {string|null} Sound effect override */
+  #soundFx = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'weather-picker',
@@ -119,6 +122,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#precipType = null;
     this.#precipIntensity = null;
     this.#fxPreset = null;
+    this.#soundFx = null;
     return super.close(options);
   }
 
@@ -239,6 +243,14 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       ];
     }
 
+    // Sound effect dropdown
+    const currentSoundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
+    context.soundFx = currentSoundFx;
+    context.soundFxOptions = [
+      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx },
+      ...SOUND_FX_OPTIONS.map((key) => ({ value: key, label: localize(`CALENDARIA.SoundFx.${key}`), selected: key === currentSoundFx }))
+    ];
+
     return context;
   }
 
@@ -296,12 +308,17 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
     const zoneId = sceneZone?.id ?? null;
     const fxPreset = fd.fxPreset || null;
+    const soundFx = fd.soundFx || null;
     if (this.#selectedPresetId && !this.#customEdited) {
-      // Only pass fxPreset if the user explicitly changed the dropdown from the preset's native value.
-      const nativeFx = getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets())?.fxPreset || '';
+      const preset = getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets());
+      // Only pass fxPreset/soundFx if user explicitly changed from the preset's native value.
+      const nativeFx = preset?.fxPreset || '';
       const userPickedFx = this.#fxPreset || '';
       const fxOverride = userPickedFx !== nativeFx ? userPickedFx || null : undefined;
-      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset: fxOverride, zoneId });
+      const nativeSound = preset?.soundFx || '';
+      const userPickedSound = this.#soundFx || '';
+      const soundOverride = userPickedSound !== nativeSound ? userPickedSound || null : undefined;
+      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset: fxOverride, soundFx: soundOverride, zoneId });
     } else {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
@@ -310,7 +327,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const icon = data.customIcon?.trim() || 'fa-question';
         const color = data.customColor || '#888888';
         const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
-        await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, zoneId });
+        await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, soundFx, zoneId });
       }
     }
 
@@ -331,6 +348,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
           tempMin: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
           tempMax: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
           fxPreset,
+          soundFx,
           inertiaWeight: preset?.inertiaWeight ?? 1,
           chance: preset?.chance ?? 1,
           darknessPenalty: preset?.darknessPenalty ?? 0
@@ -366,6 +384,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#precipType = preset.precipitation?.type ?? null;
     this.#precipIntensity = preset.precipitation?.intensity ?? 0;
     this.#fxPreset = preset.fxPreset || '';
+    this.#soundFx = preset.soundFx || '';
     this.render();
   }
 
@@ -389,6 +408,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#precipType = weather?.precipitation?.type ?? null;
     this.#precipIntensity = weather?.precipitation?.intensity ?? null;
     this.#fxPreset = weather?.fxPreset ?? null;
+    this.#soundFx = weather?.soundFx ?? null;
     this.render();
   }
 
@@ -410,6 +430,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#precipType = null;
     this.#precipIntensity = 0;
     this.#fxPreset = null;
+    this.#soundFx = null;
     this.render();
   }
 }

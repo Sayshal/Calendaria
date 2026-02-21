@@ -77,6 +77,18 @@
       </div>
       {{/if}}
 
+      <div class="form-group">
+        <label for="soundFx"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.SoundFxHint'}}">{{localize "CALENDARIA.Weather.Picker.SoundFx"}}</label>
+        <div class="form-fields">
+          <select id="soundFx" name="soundFx">
+            {{#each soundFxOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+
       <span class="category-header">{{localize "CALENDARIA.Weather.Wind.Title"}}</span>
       <div class="form-group">
         <label for="windSpeed"

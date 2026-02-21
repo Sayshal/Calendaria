@@ -8,7 +8,7 @@
 
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { isFXMasterActive, getAvailableFxPresets } from '../../integrations/fxmaster.mjs';
-import { ALL_PRESETS, HUD_EFFECTS, WEATHER_CATEGORIES } from '../../weather/weather-presets.mjs';
+import { ALL_PRESETS, HUD_EFFECTS, SOUND_FX_OPTIONS, WEATHER_CATEGORIES } from '../../weather/weather-presets.mjs';
 import { getEffectDefaults, SKY_OVERRIDES } from '../hud-scene-renderer.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
@@ -243,6 +243,14 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       ];
     }
 
+    // Sound effect dropdown
+    const currentSoundFx = isCustom ? preset.soundFx || '' : overrides.soundFx !== undefined ? overrides.soundFx || '' : builtinPreset?.soundFx || '';
+    context.preset.soundFx = currentSoundFx;
+    context.soundFxOptions = [
+      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx },
+      ...SOUND_FX_OPTIONS.map((s) => ({ value: s, label: localize(`CALENDARIA.SoundFx.${s}`), selected: s === currentSoundFx }))
+    ];
+
     // Visual override values (empty string = use placeholder/default)
     context.visuals = {
       countMin: vo.count?.[0] ?? '',
@@ -377,6 +385,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.color = data.color || '#888888';
       preset.hudEffect = effectId;
       preset.fxPreset = data.fxPreset || null;
+      preset.soundFx = data.soundFx || null;
       preset.environmentBase = environmentBase;
       preset.environmentDark = environmentDark;
       preset.visualOverrides = visualOverrides;
@@ -396,6 +405,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (effectId !== (builtinPreset.hudEffect || 'clear')) override.hudEffect = effectId;
       const fxPresetValue = data.fxPreset || null;
       if (fxPresetValue !== (builtinPreset.fxPreset ?? null)) override.fxPreset = fxPresetValue;
+      const soundFxValue = data.soundFx || null;
+      if (soundFxValue !== (builtinPreset.soundFx ?? null)) override.soundFx = soundFxValue;
       if (environmentBase) override.environmentBase = environmentBase;
       if (environmentDark) override.environmentDark = environmentDark;
       if (visualOverrides) override.visualOverrides = visualOverrides;
@@ -431,6 +442,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       inertiaWeight: 1,
       hudEffect: 'clear',
       fxPreset: null,
+      soundFx: null,
       environmentBase: null,
       environmentDark: null,
       description: ''

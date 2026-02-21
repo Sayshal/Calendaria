@@ -53,6 +53,23 @@ export const HUD_EFFECTS = [
 ];
 
 /**
+ * Available sound effect files for weather ambient loops.
+ * Each value corresponds to an OGG file in assets/sound/.
+ * @type {string[]}
+ */
+export const SOUND_FX_OPTIONS = [
+  'rain-acid-rain-blood-rain',
+  'sunshower-drizzle',
+  'thunderstorm',
+  'sleet-hail',
+  'blizzard-ice-storm',
+  'snow-frost',
+  'hurricane-monsoon-tornado',
+  'sandstorm-dust-devil',
+  'wind'
+];
+
+/**
  * Standard weather conditions - common everyday weather.
  * @type {object[]}
  */
@@ -74,7 +91,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.2,
     hudEffect: 'clear',
-    fxPreset: null
+    fxPreset: null,
+    soundFx: null
   },
   {
     id: 'partly-cloudy',
@@ -93,7 +111,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
     hudEffect: 'clouds-light',
-    fxPreset: 'partly-cloudy'
+    fxPreset: 'partly-cloudy',
+    soundFx: null
   },
   {
     id: 'cloudy',
@@ -112,7 +131,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.2,
     hudEffect: 'clouds-heavy',
-    fxPreset: 'cloudy'
+    fxPreset: 'cloudy',
+    soundFx: null
   },
   {
     id: 'overcast',
@@ -131,7 +151,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
     hudEffect: 'clouds-overcast',
-    fxPreset: 'overcast'
+    fxPreset: 'overcast',
+    soundFx: null
   },
   {
     id: 'drizzle',
@@ -150,7 +171,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: 'drizzle', intensity: 0.2 },
     inertiaWeight: 1.0,
     hudEffect: 'rain',
-    fxPreset: 'drizzle'
+    fxPreset: 'drizzle',
+    soundFx: 'sunshower-drizzle'
   },
   {
     id: 'rain',
@@ -169,7 +191,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.6 },
     inertiaWeight: 1.3,
     hudEffect: 'rain',
-    fxPreset: 'rain'
+    fxPreset: 'rain',
+    soundFx: 'rain-acid-rain-blood-rain'
   },
   {
     id: 'fog',
@@ -188,7 +211,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: 'drizzle', intensity: 0.1 },
     inertiaWeight: 1.5,
     hudEffect: 'fog',
-    fxPreset: 'fog'
+    fxPreset: 'fog',
+    soundFx: null
   },
   {
     id: 'mist',
@@ -207,7 +231,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
     hudEffect: 'fog',
-    fxPreset: 'mist'
+    fxPreset: 'mist',
+    soundFx: null
   },
   {
     id: 'windy',
@@ -226,7 +251,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
     hudEffect: 'gust',
-    fxPreset: 'windy'
+    fxPreset: 'windy',
+    soundFx: 'wind'
   },
   {
     id: 'sunshower',
@@ -245,7 +271,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.3 },
     inertiaWeight: 0,
     hudEffect: 'rain',
-    fxPreset: 'sunshower'
+    fxPreset: 'sunshower',
+    soundFx: 'sunshower-drizzle'
   },
   {
     id: 'snow',
@@ -264,7 +291,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: 'snow', intensity: 0.5 },
     inertiaWeight: 1.3,
     hudEffect: 'snow',
-    fxPreset: 'snow'
+    fxPreset: 'snow',
+    soundFx: 'snow-frost'
   },
   {
     id: 'sleet',
@@ -283,7 +311,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: 'sleet', intensity: 0.5 },
     inertiaWeight: 1.0,
     hudEffect: 'sleet',
-    fxPreset: 'sleet'
+    fxPreset: 'sleet',
+    soundFx: 'sleet-hail'
   },
   {
     id: 'heat-wave',
@@ -302,7 +331,8 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
     hudEffect: 'haze',
-    fxPreset: 'heat-wave'
+    fxPreset: 'heat-wave',
+    soundFx: null
   }
 ];
 
@@ -328,7 +358,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.9 },
     inertiaWeight: 0.3,
     hudEffect: 'lightning',
-    fxPreset: 'thunderstorm'
+    fxPreset: 'thunderstorm',
+    soundFx: 'thunderstorm'
   },
   {
     id: 'blizzard',
@@ -347,7 +378,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'snow', intensity: 1.0 },
     inertiaWeight: 0.5,
     hudEffect: 'snow-heavy',
-    fxPreset: 'blizzard'
+    fxPreset: 'blizzard',
+    soundFx: 'blizzard-ice-storm'
   },
   {
     id: 'hail',
@@ -366,7 +398,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'hail', intensity: 0.7 },
     inertiaWeight: 0.3,
     hudEffect: 'hail',
-    fxPreset: 'hail'
+    fxPreset: 'hail',
+    soundFx: 'sleet-hail'
   },
   {
     id: 'tornado',
@@ -385,7 +418,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.8 },
     inertiaWeight: 0,
     hudEffect: 'tornado',
-    fxPreset: 'tornado'
+    fxPreset: 'tornado',
+    soundFx: 'hurricane-monsoon-tornado'
   },
   {
     id: 'hurricane',
@@ -404,7 +438,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'rain', intensity: 1.0 },
     inertiaWeight: 0,
     hudEffect: 'hurricane',
-    fxPreset: 'hurricane'
+    fxPreset: 'hurricane',
+    soundFx: 'hurricane-monsoon-tornado'
   },
   {
     id: 'ice-storm',
@@ -423,7 +458,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'hail', intensity: 0.8 },
     inertiaWeight: 0.3,
     hudEffect: 'ice',
-    fxPreset: 'ice-storm'
+    fxPreset: 'ice-storm',
+    soundFx: 'blizzard-ice-storm'
   },
   {
     id: 'monsoon',
@@ -442,7 +478,8 @@ export const SEVERE_WEATHER = [
     precipitation: { type: 'rain', intensity: 1.0 },
     inertiaWeight: 0.5,
     hudEffect: 'rain-heavy',
-    fxPreset: 'monsoon'
+    fxPreset: 'monsoon',
+    soundFx: 'hurricane-monsoon-tornado'
   }
 ];
 
@@ -468,7 +505,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.5,
     hudEffect: 'ashfall',
-    fxPreset: 'ashfall'
+    fxPreset: 'ashfall',
+    soundFx: null
   },
   {
     id: 'sandstorm',
@@ -487,7 +525,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.3,
     hudEffect: 'sand',
-    fxPreset: 'sandstorm'
+    fxPreset: 'sandstorm',
+    soundFx: 'sandstorm-dust-devil'
   },
   {
     id: 'luminous-sky',
@@ -506,7 +545,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'aurora',
-    fxPreset: 'luminous-sky'
+    fxPreset: 'luminous-sky',
+    soundFx: null
   },
   {
     id: 'sakura-bloom',
@@ -525,7 +565,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'petals',
-    fxPreset: 'sakura-bloom'
+    fxPreset: 'sakura-bloom',
+    soundFx: null
   },
   {
     id: 'autumn-leaves',
@@ -544,7 +585,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'leaves',
-    fxPreset: 'autumn-leaves'
+    fxPreset: 'autumn-leaves',
+    soundFx: null
   },
   {
     id: 'rolling-fog',
@@ -563,7 +605,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.5,
     hudEffect: 'fog',
-    fxPreset: 'rolling-fog'
+    fxPreset: 'rolling-fog',
+    soundFx: null
   },
   {
     id: 'wildfire-smoke',
@@ -582,7 +625,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0.5,
     hudEffect: 'smoke',
-    fxPreset: 'wildfire-smoke'
+    fxPreset: 'wildfire-smoke',
+    soundFx: null
   },
   {
     id: 'dust-devil',
@@ -601,7 +645,8 @@ export const ENVIRONMENTAL_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'sand',
-    fxPreset: 'dust-devil'
+    fxPreset: 'dust-devil',
+    soundFx: 'sandstorm-dust-devil'
   }
 ];
 
@@ -627,7 +672,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'void',
-    fxPreset: 'black-sun'
+    fxPreset: 'black-sun',
+    soundFx: null
   },
   {
     id: 'ley-surge',
@@ -646,7 +692,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'ley-surge',
-    fxPreset: 'ley-surge'
+    fxPreset: 'ley-surge',
+    soundFx: null
   },
   {
     id: 'aether-haze',
@@ -665,7 +712,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'aether',
-    fxPreset: 'aether-haze'
+    fxPreset: 'aether-haze',
+    soundFx: null
   },
   {
     id: 'nullfront',
@@ -684,7 +732,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'nullstatic',
-    fxPreset: 'nullfront'
+    fxPreset: 'nullfront',
+    soundFx: null
   },
   {
     id: 'permafrost-surge',
@@ -703,7 +752,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: 'snow', intensity: 0.4 },
     inertiaWeight: 0,
     hudEffect: 'ice',
-    fxPreset: 'permafrost-surge'
+    fxPreset: 'permafrost-surge',
+    soundFx: 'snow-frost'
   },
   {
     id: 'gravewind',
@@ -722,7 +772,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'spectral',
-    fxPreset: 'gravewind'
+    fxPreset: 'gravewind',
+    soundFx: 'wind'
   },
   {
     id: 'veilfall',
@@ -741,7 +792,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.3 },
     inertiaWeight: 0,
     hudEffect: 'veil',
-    fxPreset: 'veilfall'
+    fxPreset: 'veilfall',
+    soundFx: null
   },
   {
     id: 'arcane-winds',
@@ -760,7 +812,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'arcane-wind',
-    fxPreset: 'arcane-winds'
+    fxPreset: 'arcane-winds',
+    soundFx: 'wind'
   },
   {
     id: 'acid-rain',
@@ -779,7 +832,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.6 },
     inertiaWeight: 0,
     hudEffect: 'rain-acid',
-    fxPreset: 'acid-rain'
+    fxPreset: 'acid-rain',
+    soundFx: 'rain-acid-rain-blood-rain'
   },
   {
     id: 'blood-rain',
@@ -798,7 +852,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: 'rain', intensity: 0.7 },
     inertiaWeight: 0,
     hudEffect: 'rain-blood',
-    fxPreset: 'blood-rain'
+    fxPreset: 'blood-rain',
+    soundFx: 'rain-acid-rain-blood-rain'
   },
   {
     id: 'meteor-shower',
@@ -817,7 +872,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'meteors',
-    fxPreset: 'meteor-shower'
+    fxPreset: 'meteor-shower',
+    soundFx: null
   },
   {
     id: 'spore-cloud',
@@ -836,7 +892,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'spores',
-    fxPreset: 'spore-cloud'
+    fxPreset: 'spore-cloud',
+    soundFx: null
   },
   {
     id: 'divine-light',
@@ -855,7 +912,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'divine',
-    fxPreset: 'divine-light'
+    fxPreset: 'divine-light',
+    soundFx: null
   },
   {
     id: 'plague-miasma',
@@ -874,7 +932,8 @@ export const FANTASY_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 0,
     hudEffect: 'miasma',
-    fxPreset: 'plague-miasma'
+    fxPreset: 'plague-miasma',
+    soundFx: null
   }
 ];
 

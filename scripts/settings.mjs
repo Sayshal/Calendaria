@@ -1304,10 +1304,10 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
-  /** FXMaster: enable weather sound effects (requires FXMaster+) */
-  game.settings.register(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX, {
-    name: 'CALENDARIA.Settings.FXMaster.SoundFx.Name',
-    hint: 'CALENDARIA.Settings.FXMaster.SoundFx.Hint',
+  /** Weather: enable ambient sound effects */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, {
+    name: 'CALENDARIA.Settings.Weather.SoundFx.Name',
+    hint: 'CALENDARIA.Settings.Weather.SoundFx.Hint',
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false })

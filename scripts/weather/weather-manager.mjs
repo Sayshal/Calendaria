@@ -40,6 +40,17 @@ export default class WeatherManager {
   }
 
   /**
+   * Resolve the effective soundFx for a preset, checking visual overrides for built-in presets.
+   * @param {object} preset - Weather preset object
+   * @returns {string|null} Sound effect filename (without extension) or null
+   */
+  static #resolveSoundFx(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    if (overrides?.soundFx !== undefined) return overrides.soundFx;
+    return preset.soundFx ?? null;
+  }
+
+  /**
    * Initialize the weather manager.
    * Called during module ready hook.
    */
@@ -153,6 +164,7 @@ export default class WeatherManager {
       environmentBase: preset.environmentBase ?? null,
       environmentDark: preset.environmentDark ?? null,
       fxPreset: options.fxPreset ?? this.#resolveFxPreset(preset),
+      soundFx: options.soundFx ?? this.#resolveSoundFx(preset),
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
@@ -200,6 +212,7 @@ export default class WeatherManager {
       environmentBase: weatherData.environmentBase ?? null,
       environmentDark: weatherData.environmentDark ?? null,
       fxPreset: weatherData.fxPreset ?? null,
+      soundFx: weatherData.soundFx ?? null,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
@@ -314,6 +327,7 @@ export default class WeatherManager {
       precipitation: result.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: result.preset.darknessPenalty ?? 0,
       fxPreset: this.#resolveFxPreset(result.preset),
+      soundFx: this.#resolveSoundFx(result.preset),
       setAt: game.time.worldTime,
       setBy: game.user.id,
       generated: true,
@@ -486,6 +500,7 @@ export default class WeatherManager {
           environmentBase: planEntry.environmentBase ?? null,
           environmentDark: planEntry.environmentDark ?? null,
           fxPreset: planEntry.fxPreset ?? null,
+          soundFx: planEntry.soundFx ?? null,
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -512,6 +527,7 @@ export default class WeatherManager {
           precipitation: result.precipitation ?? { type: null, intensity: 0 },
           darknessPenalty: result.preset.darknessPenalty ?? 0,
           fxPreset: this.#resolveFxPreset(result.preset),
+          soundFx: this.#resolveSoundFx(result.preset),
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -652,6 +668,7 @@ export default class WeatherManager {
           environmentBase: todayPlan.environmentBase ?? null,
           environmentDark: todayPlan.environmentDark ?? null,
           fxPreset: todayPlan.fxPreset ?? null,
+          soundFx: todayPlan.soundFx ?? null,
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -670,6 +687,7 @@ export default class WeatherManager {
           precipitation: todayF.precipitation ?? { type: null, intensity: 0 },
           darknessPenalty: todayF.preset.darknessPenalty ?? 0,
           fxPreset: this.#resolveFxPreset(todayF.preset),
+          soundFx: this.#resolveSoundFx(todayF.preset),
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -863,7 +881,8 @@ export default class WeatherManager {
           darknessPenalty: f.preset.darknessPenalty ?? 0,
           environmentBase: f.preset.environmentBase ?? null,
           environmentDark: f.preset.environmentDark ?? null,
-          fxPreset: this.#resolveFxPreset(f.preset)
+          fxPreset: this.#resolveFxPreset(f.preset),
+          soundFx: this.#resolveSoundFx(f.preset)
         };
       }
 
@@ -1074,7 +1093,7 @@ export default class WeatherManager {
     if (!scene) return;
     if (zoneId) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, zoneId);
     else await scene.unsetFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE);
-    log(3, `Scene zone override ${zoneId ? `set to ${  zoneId}` : 'cleared'} for scene ${scene.name}`);
+    log(3, `Scene zone override ${zoneId ? `set to ${zoneId}` : 'cleared'} for scene ${scene.name}`);
   }
 
   /**
@@ -1159,6 +1178,7 @@ export default class WeatherManager {
       ...(preset.tempMax != null && { tempMax: preset.tempMax }),
       ...(preset.hudEffect && { hudEffect: preset.hudEffect }),
       ...(preset.fxPreset && { fxPreset: preset.fxPreset }),
+      ...(preset.soundFx && { soundFx: preset.soundFx }),
       ...(preset.inertiaWeight != null && { inertiaWeight: preset.inertiaWeight }),
       ...(preset.chance != null && { chance: preset.chance }),
       ...(preset.darknessPenalty != null && { darknessPenalty: preset.darknessPenalty })
