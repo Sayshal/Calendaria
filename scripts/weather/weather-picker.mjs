@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SCENE_FLAGS, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { isFXMasterActive, getAvailableFxPresets } from '../integrations/fxmaster.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
@@ -133,7 +133,6 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const zones = WeatherManager.getCalendarZones() || [];
     const scene = game.scenes?.active;
     const sceneZone = WeatherManager.getActiveZone(null, scene);
-    const sceneZoneOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) || null;
     const selectedZoneId = sceneZone?.id ?? null;
 
     // Scene zone info bar
