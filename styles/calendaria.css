@@ -5135,6 +5135,10 @@ span.calendaria-moon-icon {
     }
   }
 
+  .form-group .form-fields > .add-button {
+    margin-right: 0;
+  }
+
   .add-trigger-row {
     gap: 0.5rem;
     display: flex;

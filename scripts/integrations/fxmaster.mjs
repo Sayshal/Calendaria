@@ -229,7 +229,7 @@ function buildPresetOptions(weather) {
   if (weather.wind?.direction != null) options.direction = degreesToCardinal(weather.wind.direction);
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN)) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
-  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX) && isFXMasterPlusActive()) options.soundFx = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
 
   return options;
 }
