@@ -6262,6 +6262,32 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
+/* Dome Below (renders dome under bar)      */
+/* ======================================== */
+.calendaria-hud.dome-below .calendaria-hud-dome {
+  bottom: auto;
+  top: calc(100% - 0.875rem);
+  border: 0.125rem solid rgb(26 26 26);
+  border-top: none;
+  border-radius: 0 0 5rem 5rem;
+}
+
+.calendaria-hud.dome-below .calendaria-hud-dome::before {
+  border: 0.125rem solid rgb(20 20 20 / 90%);
+  border-top: none;
+  border-radius: 0 0 5rem 5rem;
+}
+
+.calendaria-hud.dome-below.compact .calendaria-hud-dome {
+  top: calc(100% - 0.625rem);
+  border-radius: 0 0 3.75rem 3.75rem;
+}
+
+.calendaria-hud.dome-below.compact .calendaria-hud-dome::before {
+  border-radius: 0 0 3.75rem 3.75rem;
+}
+
+/* ======================================== */
 /* Compact Mode                             */
 /* ======================================== */
 .calendaria-hud.compact .calendaria-hud-dome {

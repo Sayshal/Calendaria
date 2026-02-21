@@ -835,6 +835,22 @@ export class HudSceneRenderer {
     }
   }
 
+  /**
+   * Toggle vertical flip for dome-below mode.
+   * Flips the stage upside-down and counter-flips weather/stars so particles stay upright.
+   * @param {boolean} flipped - Whether the dome is rendered below the bar
+   */
+  setFlipped(flipped) {
+    if (this.#destroyed) return;
+    const h = this.#app.renderer.height;
+    this.#app.stage.scale.y = flipped ? -1 : 1;
+    this.#app.stage.y = flipped ? h : 0;
+    this.#weatherContainer.scale.y = flipped ? -1 : 1;
+    this.#weatherContainer.y = flipped ? h : 0;
+    this.#starContainer.scale.y = flipped ? -1 : 1;
+    this.#starContainer.y = flipped ? h : 0;
+  }
+
   /** Destroy application and free all GPU resources. */
   destroy() {
     if (this.#destroyed) return;

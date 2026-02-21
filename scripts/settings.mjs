@@ -698,6 +698,16 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Calendar HUD dome renders below bar instead of above */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_DOME_BELOW, {
+    name: 'CALENDARIA.Settings.HUDDomeBelow.Name',
+    hint: 'CALENDARIA.Settings.HUDDomeBelow.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: false }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
+  });
+
   /** Calendar HUD dome auto-hide when near viewport top */
   game.settings.register(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE, {
     name: 'CALENDARIA.Settings.DomeAutoHide.Name',

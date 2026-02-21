@@ -196,6 +196,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyTray = stickyStates.tray ?? false;
     this.#stickyPosition = stickyStates.position ?? false;
     context.stickyTray = this.#stickyTray;
+    context.domeBelow = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW);
     context.trayUp = game.settings.get(MODULE.ID, SETTINGS.HUD_TRAY_DIRECTION) === 'up';
     const appSettings = TimeClock.getAppSettings('calendaria-hud');
     if (stickyStates.increment && stickyStates.increment !== appSettings.incrementKey) {
@@ -381,6 +382,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     this.element.classList.toggle('compact', this.isCompact);
     this.element.classList.toggle('slice-mode', this.useSliceMode);
+    this.element.classList.toggle('dome-below', game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW));
 
     // Apply width scale (fullsize mode only)
     if (!this.isCompact) {
@@ -1053,8 +1055,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const dome = this.element.querySelector('.calendaria-hud-dome');
     if (!dome) return;
 
-    // If auto-hide is disabled, always show dome at full opacity
-    if (!game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE)) {
+    // If auto-hide is disabled or dome is below the bar, always show dome at full opacity
+    if (!game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE) || game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW)) {
       dome.classList.remove('hidden');
       dome.style.opacity = '';
       return;
@@ -1158,6 +1160,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#sceneRenderer = null;
     }
     if (!this.#sceneRenderer) this.#sceneRenderer = new HudSceneRenderer(canvas, mode);
+    this.#sceneRenderer.setFlipped(game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW));
     const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;

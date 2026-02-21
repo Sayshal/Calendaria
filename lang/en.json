@@ -1623,6 +1623,8 @@
   "CALENDARIA.Settings.HUDDialStyle.Hint": "Choose between the dome (semicircle above bar) or slice (horizontal strip in center).",
   "CALENDARIA.Settings.HUDDialStyle.Name": "Sun/Moon Dial Style",
   "CALENDARIA.Settings.HUDDialStyle.Slice": "Slice (horizontal in bar)",
+  "CALENDARIA.Settings.HUDDomeBelow.Hint": "Render the sundial dome below the HUD bar instead of above.",
+  "CALENDARIA.Settings.HUDDomeBelow.Name": "Dome Below Bar",
   "CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation": "Abbreviation Only",
   "CALENDARIA.Settings.HUDEraDisplayMode.Full": "Icon + Text",
   "CALENDARIA.Settings.HUDEraDisplayMode.Hint": "How to display era information.",

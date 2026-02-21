@@ -104,8 +104,10 @@ const ZONE_CONFIG = {
  */
 export function getStickyZones(hudWidth, hudHeight) {
   const zones = [];
-  const isSliceMode = !!document.querySelector('.calendaria-hud.slice-mode, .calendaria-hud.compact');
-  const topCenterY = isSliceMode ? 16 + hudHeight / 2 : 80 + hudHeight / 2;
+  const hud = document.querySelector('.calendaria-hud');
+  const isSliceMode = hud?.classList.contains('slice-mode') || hud?.classList.contains('compact');
+  const isDomeBelow = hud?.classList.contains('dome-below');
+  const topCenterY = isSliceMode || isDomeBelow ? 16 + hudHeight / 2 : 80 + hudHeight / 2;
   zones.push({ id: 'top-center', center: { x: window.innerWidth / 2, y: topCenterY } });
   const hotbar = document.getElementById('hotbar');
   if (hotbar) {

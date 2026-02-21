@@ -59,6 +59,7 @@ export const SETTINGS = {
   HUD_CYCLES_DISPLAY_MODE: 'hudCyclesDisplayMode',
   HUD_DIAL_STYLE: 'hudDialStyle',
   HUD_DOME_AUTO_HIDE: 'hudDomeAutoHide',
+  HUD_DOME_BELOW: 'hudDomeBelow',
   HUD_SHOW_ALL_MOONS: 'hudShowAllMoons',
   HUD_ERA_DISPLAY_MODE: 'hudEraDisplayMode',
   HUD_IDLE_OPACITY: 'hudIdleOpacity',
