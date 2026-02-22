@@ -69,6 +69,14 @@
     </div>
 
     <div class="form-group">
+      <label for="hudDomeBelow">{{localize "CALENDARIA.Settings.HUDDomeBelow.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hudDomeBelow" name="hudDomeBelow" {{#if hudDomeBelow}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDDomeBelow.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="hudTrayDirection">{{localize "CALENDARIA.Settings.HUDTrayDirection.Name"}}</label>
       <div class="form-fields">
         <select id="hudTrayDirection" name="hudTrayDirection">
@@ -104,6 +112,14 @@
         <input type="checkbox" id="hudDomeAutoHide" name="hudDomeAutoHide" {{#if hudDomeAutoHide}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.DomeAutoHide.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="hudShowAllMoons">{{localize "CALENDARIA.Settings.HUDShowAllMoons.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hudShowAllMoons" name="hudShowAllMoons" {{#if hudShowAllMoons}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDShowAllMoons.Hint"}}</p>
     </div>
 
     <div class="form-group">

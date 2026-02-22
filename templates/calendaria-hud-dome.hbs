@@ -1,10 +1,4 @@
 <div class="calendaria-hud-dome" {{#if canChangeDateTime}}role="button" tabindex="0" data-action="openTimeDial"
   data-tooltip aria-label="{{localize 'CALENDARIA.HUD.ClickToSetTime'}}" {{/if}}>
-  <div class="calendaria-hud-sky"></div>
-  <div class="calendaria-hud-stars"></div>
-  <div class="calendaria-hud-clouds"></div>
-  <div class="calendaria-hud-track">
-    <div class="calendaria-hud-body calendaria-hud-sun"></div>
-    <div class="calendaria-hud-body calendaria-hud-moon"></div>
-  </div>
+  <canvas class="calendaria-hud-scene-canvas"></canvas>
 </div>

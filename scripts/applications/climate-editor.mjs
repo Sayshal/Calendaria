@@ -7,9 +7,9 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendariaCalendar from '../calendar/data/calendaria-calendar.mjs';
-import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
-import { fromDisplayUnit, toDisplayUnit } from '../weather/climate-data.mjs';
+import { fromDisplayDelta, fromDisplayUnit, toDisplayDelta, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -25,7 +25,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: ['calendaria', 'climate-editor'],
     tag: 'form',
     window: { contentClasses: ['standard-form'] },
-    position: { width: 'auto', height: 'auto' },
+    position: { width: 1100, height: 900 },
     form: { handler: ClimateEditor.#onSubmit, submitOnChange: true, closeOnSubmit: false },
     actions: {
       resetAlias: ClimateEditor.#onResetAlias
@@ -34,7 +34,23 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    form: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR, scrollable: [''] }
+    form: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR, scrollable: [''] },
+    tabs: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_TABS },
+    weather: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_WEATHER, scrollable: [''] },
+    presets: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_PRESETS, scrollable: [''] },
+    environment: { template: TEMPLATES.WEATHER.CLIMATE_EDITOR_ENVIRONMENT, scrollable: [''] }
+  };
+
+  /** @override */
+  static TABS = {
+    primary: {
+      tabs: [
+        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.ClimateEditor.Tab.Weather' },
+        { id: 'presets', group: 'primary', icon: 'fas fa-sliders', label: 'CALENDARIA.ClimateEditor.Tab.Presets' },
+        { id: 'environment', group: 'primary', icon: 'fas fa-tree', label: 'CALENDARIA.ClimateEditor.Tab.Environment' }
+      ],
+      initial: 'weather'
+    }
   };
 
   /** @type {'season'|'zone'} */
@@ -94,6 +110,25 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  _configureRenderOptions(options) {
+    super._configureRenderOptions(options);
+    if (this.#mode === 'zone') {
+      options.parts = ['tabs', 'weather', 'presets', 'environment'];
+    } else {
+      options.parts = ['form'];
+    }
+  }
+
+  /** @override */
+  async _preparePartContext(partId, context, options) {
+    context = await super._preparePartContext(partId, context, options);
+    if (partId === 'weather' || partId === 'presets' || partId === 'environment') {
+      context.tab = context.tabs?.[partId];
+    }
+    return context;
+  }
+
+  /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const isZoneMode = this.#mode === 'zone';
@@ -117,11 +152,15 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
       temperatureRows = seasonNames.map((season) => {
         const temp = this.#data.temperatures?.[season] || this.#data.temperatures?._default || { min: 10, max: 22 };
+        const isRelativeMin = typeof temp.min === 'string' && /[+-]$/.test(temp.min);
+        const isRelativeMax = typeof temp.max === 'string' && /[+-]$/.test(temp.max);
         return {
           seasonName: season,
           label: localize(season),
-          min: toDisplayUnit(temp.min),
-          max: toDisplayUnit(temp.max)
+          min: isRelativeMin ? `${toDisplayDelta(Number(temp.min.slice(0, -1)))}${temp.min.slice(-1)}` : toDisplayUnit(temp.min),
+          max: isRelativeMax ? `${toDisplayDelta(Number(temp.max.slice(0, -1)))}${temp.max.slice(-1)}` : toDisplayUnit(temp.max),
+          isRelativeMin,
+          isRelativeMax
         };
       });
     }
@@ -145,8 +184,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               hasAlias: !!alias,
               enabled: saved.enabled ?? false,
               chance: saved.chance ? saved.chance.toFixed(2) : '',
-              tempMin: saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '',
-              tempMax: saved.tempMax != null ? toDisplayUnit(saved.tempMax) : ''
+              tempMin: ClimateEditor.#formatTempValue(saved.tempMin),
+              tempMax: ClimateEditor.#formatTempValue(saved.tempMax),
+              isRelativeTempMin: typeof saved.tempMin === 'string' && /[+-]$/.test(saved.tempMin),
+              isRelativeTempMax: typeof saved.tempMax === 'string' && /[+-]$/.test(saved.tempMax),
+              inertiaWeight: saved.inertiaWeight ?? '',
+              defaultInertiaWeight: preset.inertiaWeight ?? 1
             };
           }
           // Season mode
@@ -218,6 +261,34 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
+    // Color shift config (zone mode only)
+    let colorShift = {};
+    if (isZoneMode) {
+      colorShift = {
+        dawnHue: this.#data.colorShift?.dawnHue ?? '',
+        duskHue: this.#data.colorShift?.duskHue ?? '',
+        nightHue: this.#data.colorShift?.nightHue ?? '',
+        dawnHueNorm: ClimateEditor.#hueToNorm(this.#data.colorShift?.dawnHue),
+        duskHueNorm: ClimateEditor.#hueToNorm(this.#data.colorShift?.duskHue),
+        nightHueNorm: ClimateEditor.#hueToNorm(this.#data.colorShift?.nightHue),
+        transitionMinutes: this.#data.colorShift?.transitionMinutes ?? ''
+      };
+    }
+
+    // Wind config (zone mode only)
+    let windDirections = [];
+    let windSpeedMin = null;
+    let windSpeedMax = null;
+    if (isZoneMode) {
+      const dirWeights = this.#data.windDirections ?? {};
+      windDirections = Object.entries(COMPASS_DIRECTIONS).map(([id]) => ({
+        id,
+        weight: dirWeights[id] ?? ''
+      }));
+      windSpeedMin = this.#data.windSpeedRange?.min ?? null;
+      windSpeedMax = this.#data.windSpeedRange?.max ?? null;
+    }
+
     return {
       ...context,
       isZoneMode,
@@ -229,8 +300,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       // Zone-only fields
       description: this.#data.description ?? '',
       brightnessMultiplier: this.#data.brightnessMultiplier ?? 1.0,
-      envBase: this.#data.environmentBase ?? {},
-      envDark: this.#data.environmentDark ?? {},
+      envBase: { ...this.#data.environmentBase, hueNorm: ClimateEditor.#hueToNorm(this.#data.environmentBase?.hue) },
+      envDark: { ...this.#data.environmentDark, hueNorm: ClimateEditor.#hueToNorm(this.#data.environmentDark?.hue) },
       zoneKey: this.#zoneKey,
       zoneId: this.#data.id,
       // Daylight fields
@@ -244,7 +315,23 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       shortestDayHours,
       longestDayHours,
       shortestDayDate,
-      longestDayDate
+      longestDayDate,
+      // Color shift fields
+      colorShift,
+      // Wind fields
+      windDirections,
+      windSpeedMin,
+      windSpeedMax,
+      windSpeedMinOptions: Object.values(WIND_SPEEDS).map((w) => ({
+        value: w.value,
+        label: localize(w.label),
+        selected: w.value === windSpeedMin
+      })),
+      windSpeedMaxOptions: Object.values(WIND_SPEEDS).map((w) => ({
+        value: w.value,
+        label: localize(w.label),
+        selected: w.value === windSpeedMax
+      }))
     };
   }
 
@@ -255,7 +342,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     // Brightness slider live label
     const slider = this.element.querySelector('[name="brightnessMultiplier"]');
     if (slider) {
-      const label = slider.nextElementSibling;
+      const label = this.element.querySelector('.range-value');
       slider.addEventListener('input', () => {
         label.textContent = `${slider.value}x`;
       });
@@ -292,6 +379,13 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           if (shortestVal) shortestVal.textContent = `${winterHrs.toFixed(1)}h`;
           if (longestVal) longestVal.textContent = `${summerHrs.toFixed(1)}h`;
         }
+      });
+    }
+
+    // Temperature modifier styling — toggle blue text for + modifier values
+    for (const input of this.element.querySelectorAll('.form-fields.temperature input[type="text"], .preset-temp-input')) {
+      input.addEventListener('input', () => {
+        input.classList.toggle('modifier-relative', /^\d+(\.\d+)?[+-]$/.test(input.value.trim()));
       });
     }
 
@@ -339,9 +433,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const allPresets = getAllPresets(customPresets);
     const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
 
-    const baseHue = data.baseHue !== '' && data.baseHue != null ? parseFloat(data.baseHue) : null;
+    const baseHue = ClimateEditor.#normToHue(data.baseHue);
     const baseSat = data.baseSaturation !== '' && data.baseSaturation != null ? parseFloat(data.baseSaturation) : null;
-    const darkHue = data.darkHue !== '' && data.darkHue != null ? parseFloat(data.darkHue) : null;
+    const darkHue = ClimateEditor.#normToHue(data.darkHue);
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
 
     // Parse latitude and daylight overrides — mutually exclusive via checkbox
@@ -363,9 +457,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     for (const season of seasonNames) {
-      const minVal = parseInt(data[`temp_${season}_min`]) || 0;
-      const maxVal = parseInt(data[`temp_${season}_max`]) || 20;
-      result.temperatures[season] = { min: fromDisplayUnit(minVal), max: fromDisplayUnit(maxVal) };
+      const minRaw = String(data[`temp_${season}_min`] ?? '').trim();
+      const maxRaw = String(data[`temp_${season}_max`] ?? '').trim();
+      result.temperatures[season] = {
+        min: ClimateEditor.#parseTempInput(minRaw, 0),
+        max: ClimateEditor.#parseTempInput(maxRaw, 20)
+      };
     }
 
     for (const preset of allPresets) {
@@ -373,12 +470,40 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const chance = parseFloat(data[`preset_${preset.id}_chance`]) || 0;
       if (!enabled && !chance) continue;
       const pData = { id: preset.id, enabled, chance };
-      const tMin = data[`preset_${preset.id}_tempMin`];
-      const tMax = data[`preset_${preset.id}_tempMax`];
-      if (tMin !== '' && tMin != null) pData.tempMin = fromDisplayUnit(parseInt(tMin));
-      if (tMax !== '' && tMax != null) pData.tempMax = fromDisplayUnit(parseInt(tMax));
+      const tMinRaw = String(data[`preset_${preset.id}_tempMin`] ?? '').trim();
+      const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();
+      if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
+      if (tMaxRaw) pData.tempMax = ClimateEditor.#parseTempInput(tMaxRaw, null);
+      const iwRaw = data[`preset_${preset.id}_inertiaWeight`];
+      if (iwRaw !== '' && iwRaw != null) pData.inertiaWeight = parseFloat(iwRaw);
       result.presets[preset.id] = pData;
     }
+
+    // Color shift configuration
+    const colorShiftResult = {};
+    const csHueFields = ['dawnHue', 'duskHue', 'nightHue'];
+    for (const field of csHueFields) {
+      const key = `colorShift${field.charAt(0).toUpperCase()}${field.slice(1)}`;
+      colorShiftResult[field] = ClimateEditor.#normToHue(data[key]);
+    }
+    const tmVal = data.colorShiftTransitionMinutes;
+    colorShiftResult.transitionMinutes = tmVal !== '' && tmVal != null ? parseFloat(tmVal) : null;
+    result.colorShift = colorShiftResult;
+
+    // Wind configuration
+    const windDirections = {};
+    for (const dir of Object.keys(COMPASS_DIRECTIONS)) {
+      const val = parseInt(data[`wind_${dir}`]);
+      if (val > 0) windDirections[dir] = val;
+    }
+    result.windDirections = windDirections;
+
+    const wsMin = data.windSpeedMin;
+    const wsMax = data.windSpeedMax;
+    result.windSpeedRange = {
+      min: wsMin !== '' && wsMin != null ? parseInt(wsMin) : null,
+      max: wsMax !== '' && wsMax != null ? parseInt(wsMax) : null
+    };
 
     this.#onSave(result);
   }
@@ -392,6 +517,59 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = target.dataset.presetId;
     await setPresetAlias(presetId, null, this.#calendarId, this.#data.id);
     this.render();
+  }
+
+  /**
+   * Format a stored temperature value for display.
+   * Modifier strings ("5+", "3-") are converted to display-unit deltas.
+   * Absolute values (numbers or numeric strings) are converted normally.
+   * @param {number|string|null} value - Stored temperature value
+   * @returns {string} Display value
+   */
+  static #formatTempValue(value) {
+    if (value == null) return '';
+    const str = String(value);
+    if (/[+-]$/.test(str)) {
+      return `${toDisplayDelta(Number(str.slice(0, -1)))}${str.slice(-1)}`;
+    }
+    return String(toDisplayUnit(Number(str)));
+  }
+
+  /**
+   * Parse a temperature input value, preserving +/- relative modifiers as strings.
+   * @param {string} raw - Raw input value
+   * @param {number} fallback - Fallback value if input is empty/invalid
+   * @returns {number|string} Celsius value (number) or "+N"/"-N" modifier (string)
+   */
+  static #parseTempInput(raw, fallback) {
+    if (!raw && raw !== '0') return fallback != null ? fromDisplayUnit(fallback) : null;
+    if (/^\d+(\.\d+)?[+-]$/.test(raw)) {
+      const suffix = raw.slice(-1);
+      const delta = fromDisplayDelta(Number(raw.slice(0, -1)));
+      return `${delta}${suffix}`;
+    }
+    const num = parseFloat(raw);
+    return isNaN(num) ? (fallback != null ? fromDisplayUnit(fallback) : null) : fromDisplayUnit(num);
+  }
+
+  /**
+   * Convert a 0-360 degree hue to 0-1 normalized for hue-slider.
+   * @param {number|null} hue - Hue in degrees (0-360)
+   * @returns {number} Normalized hue (0-1)
+   */
+  static #hueToNorm(hue) {
+    return hue != null ? hue / 360 : 0;
+  }
+
+  /**
+   * Convert a 0-1 normalized hue-slider value back to 0-360 degrees.
+   * @param {number|string|null} val - Normalized hue value (0-1)
+   * @returns {number|null} Hue in degrees (0-360)
+   */
+  static #normToHue(val) {
+    if (val === '' || val == null) return null;
+    const num = parseFloat(val);
+    return Number.isFinite(num) ? Math.round(num * 360) : null;
   }
 
   /**

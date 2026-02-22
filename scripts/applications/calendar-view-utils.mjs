@@ -6,11 +6,12 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { MODULE, SOCKET_TYPES } from '../constants.mjs';
+import { MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { formatCustom } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
+import { canViewWeatherForecast } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
@@ -18,6 +19,12 @@ const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
 /** @type {string|null} User-selected moon name override for display */
 let selectedMoonOverride = null;
+
+/** @type {string[]|null} BigCal visible moons override (session state) */
+let visibleMoonsOverride = null;
+
+/** @type {{tooltip: HTMLElement|null, handler: Function|null}} Active moon picker state */
+const moonPickerState = { tooltip: null, handler: null };
 
 /**
  * Set the moon override for display.
@@ -33,6 +40,93 @@ export function setSelectedMoon(moonName) {
  */
 export function getSelectedMoon() {
   return selectedMoonOverride;
+}
+
+/**
+ * Get the visible moons override for BigCal.
+ * @returns {string[]|null} Array of moon names to display, or null for default
+ */
+export function getVisibleMoons() {
+  return visibleMoonsOverride;
+}
+
+/**
+ * Set the visible moons override for BigCal.
+ * @param {string[]|null} moons - Array of moon names, or null to clear
+ */
+export function setVisibleMoons(moons) {
+  visibleMoonsOverride = moons;
+}
+
+/**
+ * Close any active moon picker tooltip.
+ */
+export function closeMoonPicker() {
+  if (moonPickerState.handler) {
+    document.removeEventListener('mousedown', moonPickerState.handler);
+    moonPickerState.handler = null;
+  }
+  if (moonPickerState.tooltip) {
+    moonPickerState.tooltip.remove();
+    moonPickerState.tooltip = null;
+  }
+}
+
+/**
+ * Show a radial moon picker anchored to a target element.
+ * @param {HTMLElement} anchor - The element to position relative to
+ * @param {object[]} moons - Moon data array (from getAllMoonPhases)
+ * @param {string|null} currentMoon - Currently selected moon name (highlighted)
+ * @param {Function} onSelect - Callback when a moon is selected: (moonName) => void
+ */
+export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
+  closeMoonPicker();
+  if (!moons?.length) return;
+  const tooltip = document.createElement('div');
+  tooltip.className = 'calendaria-moons-tooltip';
+  const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
+  tooltip.innerHTML = `
+    <div class="moons-radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
+      ${moons
+        .map(
+          (moon, i) => `
+        <div class="moon-radial-item${moon.moonName === currentMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
+          <span class="moon-name">${moon.moonName}</span>
+          <div class="moon-radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
+            <img src="${moon.icon}" alt="${moon.phaseName}">
+          </div>
+        </div>
+      `
+        )
+        .join('')}
+    </div>
+  `;
+  document.body.appendChild(tooltip);
+  moonPickerState.tooltip = tooltip;
+  tooltip.querySelectorAll('.moon-radial-item').forEach((item) => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const moonName = item.dataset.moonName;
+      onSelect(moonName);
+      closeMoonPicker();
+    });
+  });
+  const targetRect = anchor.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  let left = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
+  let top = targetRect.bottom + 8;
+  if (left < 10) left = 10;
+  if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
+  if (top + tooltipRect.height > window.innerHeight - 10) top = targetRect.top - tooltipRect.height - 8;
+  top = Math.max(10, top);
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  setTimeout(() => {
+    moonPickerState.handler = (event) => {
+      if (!tooltip.contains(event.target) && !event.target.closest('[data-action="showMoons"], [data-action="moonClick"]')) closeMoonPicker();
+    };
+    document.addEventListener('mousedown', moonPickerState.handler);
+  }, 100);
 }
 
 /**
@@ -172,6 +266,27 @@ export function hasNotesOnDay(notes, year, month, day) {
 }
 
 /**
+ * Build weather pill template data from a getDayWeather result.
+ * @param {object|null} wd - Weather data from getDayWeather
+ * @returns {object} Template properties for the weather pill
+ */
+export function buildWeatherPillData(wd) {
+  if (!wd) return { weatherIcon: null, weatherColor: null, weatherLabel: null, weatherTemp: null, weatherWindDir: null, weatherTooltipHtml: null, isForecast: false };
+  const temp = wd.temperature != null ? WeatherManager.formatTemperature(wd.temperature) : null;
+  const windDir = wd.wind?.direction != null ? WeatherManager.getWindDirectionLabel(wd.wind.direction) : null;
+  const tooltipHtml = WeatherManager.buildWeatherTooltip({
+    label: wd.label,
+    description: wd.description ?? null,
+    temp,
+    windSpeed: wd.wind?.speed ?? 0,
+    windDirection: wd.wind?.direction,
+    precipType: wd.precipitation?.type ?? null,
+    precipIntensity: wd.precipitation?.intensity
+  });
+  return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };
+}
+
+/**
  * Get notes that start on a specific day.
  * @param {object[]} notes - Notes to filter
  * @param {number} year - Year
@@ -239,6 +354,92 @@ export function getAllMoonPhases(calendar, year, month, day) {
     })
     .filter(Boolean)
     .sort((a, b) => a.moonName.localeCompare(b.moonName));
+}
+
+/**
+ * Build a forecast lookup map for day weather resolution.
+ * @returns {{ lookup: Map|null, todayYear: number, todayMonth: number, todayDay: number }} Forecast data and today info
+ */
+export function buildWeatherLookup() {
+  const today = game.time.components;
+  const calendar = CalendarManager.getActiveCalendar();
+  const yz = calendar?.years?.yearZero ?? 0;
+  const todayYear = today.year + yz;
+  const todayMonth = today.month;
+  const todayDay = (today.dayOfMonth ?? 0) + 1;
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+  const zoneId = zone?.id;
+  let lookup = null;
+  if (canViewWeatherForecast() && game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) {
+    const forecast = WeatherManager.getForecast({ zoneId });
+    lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.day}`, f]));
+  }
+  return { lookup, todayYear, todayMonth, todayDay, zoneId };
+}
+
+/**
+ * Get weather data for a specific day cell.
+ * Returns current weather for today, history for past days, forecast for future days.
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} day - Day (1-indexed)
+ * @param {object} todayInfo - Today info from buildWeatherLookup
+ * @param {number} todayInfo.todayYear - Today's display year
+ * @param {number} todayInfo.todayMonth - Today's month
+ * @param {number} todayInfo.todayDay - Today's day
+ * @param {Map|null} forecastLookup - Forecast lookup map
+ * @returns {object|null} Weather data with icon, color, label, temperature, isForecast, isVaried
+ */
+export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
+  const { todayYear, todayMonth, todayDay, zoneId } = todayInfo;
+  const isCurrentDay = year === todayYear && month === todayMonth && day === todayDay;
+  if (isCurrentDay) {
+    const w = WeatherManager.getCurrentWeather(zoneId);
+    if (!w) return null;
+    const temp = WeatherManager.getTemperature(zoneId);
+    return {
+      icon: w.icon,
+      color: w.color,
+      label: localize(w.label),
+      description: w.description ? localize(w.description) : null,
+      temperature: temp,
+      wind: w.wind ?? null,
+      precipitation: w.precipitation ?? null,
+      isForecast: false,
+      isVaried: false
+    };
+  }
+  // Past day — check history
+  const hist = WeatherManager.getWeatherForDate(year, month, day, zoneId);
+  if (hist)
+    return {
+      icon: hist.icon,
+      color: hist.color,
+      label: localize(hist.label),
+      description: null,
+      temperature: hist.temperature ?? null,
+      wind: hist.wind ?? null,
+      precipitation: hist.precipitation ?? null,
+      isForecast: false,
+      isVaried: false
+    };
+  // Future day — check forecast
+  if (forecastLookup) {
+    const f = forecastLookup.get(`${year}-${month}-${day}`);
+    if (f)
+      return {
+        icon: f.preset.icon,
+        color: f.preset.color,
+        label: localize(f.preset.label),
+        description: f.preset.description ? localize(f.preset.description) : null,
+        temperature: f.temperature ?? null,
+        wind: f.wind ?? null,
+        precipitation: f.precipitation ?? null,
+        isForecast: true,
+        isVaried: f.isVaried ?? false
+      };
+  }
+  return null;
 }
 
 /**
@@ -443,9 +644,10 @@ function encodeHtmlAttribute(html) {
  * @param {string} [festival.name] - Festival name
  * @param {string} [festival.description] - Festival description
  * @param {string} [festival.color] - Festival color
+ * @param {object|null} [weatherData] - Weather data from getDayWeather
  * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
  */
-export function generateDayTooltip(calendar, year, month, day, festival = null) {
+export function generateDayTooltip(calendar, year, month, day, festival = null, weatherData = null) {
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   const internalComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const displayComponents = { year, month, dayOfMonth: day, hour: 12, minute: 0, second: 0 };
@@ -475,6 +677,11 @@ export function generateDayTooltip(calendar, year, month, day, festival = null) 
   }
   if (seasonName) rows.push(`<div class="calendaria-day-tooltip-season">${escapeText(seasonName)}</div>`);
   rows.push(`<div class="calendaria-day-tooltip-sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
+  if (weatherData) {
+    const prefix = weatherData.isForecast ? `${localize('CALENDARIA.Weather.Forecast')}: ` : '';
+    const tempStr = weatherData.temperature != null ? ` ${weatherData.isForecast && weatherData.isVaried ? '~' : ''}${WeatherManager.formatTemperature(weatherData.temperature)}` : '';
+    rows.push(`<div class="calendaria-day-tooltip-weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
+  }
   const rawHtml = `<div class="calendaria-day-tooltip">${rows.join('')}</div>`;
   return encodeHtmlAttribute(rawHtml);
 }

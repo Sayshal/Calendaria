@@ -6,19 +6,28 @@
 
 import { BigCal } from './applications/big-cal.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
+import { HUD } from './applications/hud.mjs';
 import { MiniCal } from './applications/mini-cal.mjs';
+import { Stopwatch } from './applications/stopwatch.mjs';
+import { TimeKeeper } from './applications/time-keeper.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
+import CalendariaCalendar from './calendar/data/calendaria-calendar.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/utils/date-utils.mjs';
 import SearchManager from './search/search-manager.mjs';
+import TimeClock from './time/time-clock.mjs';
+import TimeTracker from './time/time-tracker.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes } from './utils/permissions.mjs';
+import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/moon-utils.mjs';
+import * as Permissions from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import * as WidgetManager from './utils/widget-manager.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
+
+const { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } = Permissions;
 
 /**
  * Public API for Calendaria module.
@@ -170,6 +179,62 @@ export const CalendariaAPI = {
    */
   getAllMoonPhases() {
     return CalendarManager.getAllCurrentMoonPhases();
+  },
+
+  /**
+   * Get the phase position (0-1) for a moon at a given date.
+   * @param {object} moon - Moon definition with cycleLength and referenceDate
+   * @param {object} [date] - Date to check { year, month, day }. Defaults to current date.
+   * @returns {number} Phase position from 0 (new moon) to 1
+   */
+  getMoonPhasePosition(moon, date = null) {
+    return getMoonPhasePosition(moon, date ?? game.time.components);
+  },
+
+  /**
+   * Check if a moon is in its full phase at a given date.
+   * @param {object} moon - Moon definition
+   * @param {object} [date] - Date to check. Defaults to current date.
+   * @returns {boolean} True if moon is full
+   */
+  isMoonFull(moon, date = null) {
+    return isMoonFull(moon, date ?? game.time.components);
+  },
+
+  /**
+   * Find the next date when all given moons are simultaneously full.
+   * @param {object[]} moons - Array of moon definitions (use calendar.moonsArray)
+   * @param {object} [startDate] - Date to start searching from. Defaults to current date.
+   * @param {object} [options] - Search options
+   * @param {number} [options.maxDays] - Maximum days to search (default: 1000)
+   * @returns {object|null} Next convergence date { year, month, day }, or null if not found
+   */
+  getNextConvergence(moons, startDate = null, options = {}) {
+    return getNextConvergence(moons, startDate ?? game.time.components, options);
+  },
+
+  /**
+   * Find the next full moon date for a single moon.
+   * @param {object} moon - Moon definition
+   * @param {object} [startDate] - Date to start searching from. Defaults to current date.
+   * @param {object} [options] - Search options
+   * @param {number} [options.maxDays] - Maximum days to search (default: 1000)
+   * @returns {object|null} Next full moon date { year, month, day }
+   */
+  getNextFullMoon(moon, startDate = null, options = {}) {
+    return getNextFullMoon(moon, startDate ?? game.time.components, options);
+  },
+
+  /**
+   * Get all convergences (all moons full simultaneously) within a date range.
+   * @param {object[]} moons - Array of moon definitions
+   * @param {object} startDate - Range start { year, month, day }
+   * @param {object} endDate - Range end { year, month, day }
+   * @param {object} [options] - Search options
+   * @returns {object[]} Array of convergence dates
+   */
+  getConvergencesInRange(moons, startDate, endDate, options = {}) {
+    return getConvergencesInRange(moons, startDate, endDate, options);
   },
 
   /**
@@ -761,6 +826,44 @@ export const CalendariaAPI = {
   },
 
   /**
+   * Check if the real-time clock is currently running.
+   * @returns {boolean} True if the clock is running
+   */
+  isClockRunning() {
+    return TimeClock.running;
+  },
+
+  /**
+   * Start the real-time clock.
+   * Requires time-change permission. Blocked during combat or when game is paused with sync enabled.
+   */
+  startClock() {
+    TimeClock.start();
+  },
+
+  /**
+   * Stop the real-time clock.
+   */
+  stopClock() {
+    TimeClock.stop();
+  },
+
+  /**
+   * Toggle the real-time clock on/off.
+   */
+  toggleClock() {
+    TimeClock.toggle();
+  },
+
+  /**
+   * Get the current real-time clock speed (game seconds per real second).
+   * @returns {number} Clock speed multiplier
+   */
+  getClockSpeed() {
+    return TimeClock.realTimeSpeed;
+  },
+
+  /**
    * Check if the current user is the primary GM.
    * The primary GM is responsible for time saves and sync operations.
    * @returns {boolean} True if current user is primary GM
@@ -787,10 +890,11 @@ export const CalendariaAPI = {
 
   /**
    * Get the current weather.
+   * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @returns {object|null} Current weather state with id, label, icon, color, temperature
    */
-  getCurrentWeather() {
-    return WeatherManager.getCurrentWeather();
+  getCurrentWeather(zoneId) {
+    return WeatherManager.getCurrentWeather(zoneId);
   },
 
   /**
@@ -839,13 +943,44 @@ export const CalendariaAPI = {
 
   /**
    * Get a weather forecast for upcoming days.
+   * Non-GM users need `viewWeatherForecast` permission.
+   * GM users always get 100% accurate forecasts.
    * @param {object} [options] - Forecast options
    * @param {number} [options.days] - Number of days to forecast
-   * @param {string} [options.climate] - Climate override
-   * @returns {Promise<object[]>} Array of forecast entries
+   * @param {string} [options.zoneId] - Zone ID override
+   * @param {number} [options.accuracy] - Accuracy override (GM only)
+   * @returns {object[]} Array of forecast entries with `isVaried` flag
    */
-  async getWeatherForecast(options = {}) {
-    return WeatherManager.getForecast(options);
+  getWeatherForecast(options = {}) {
+    if (!game.user.isGM && !canViewWeatherForecast()) {
+      ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return [];
+    }
+    const accuracy = game.user.isGM ? (options.accuracy ?? 100) : undefined;
+    return WeatherManager.getForecast({ ...options, accuracy });
+  },
+
+  /**
+   * Get historical weather for a specific date.
+   * @param {number} year - Display year
+   * @param {number} month - Month (0-indexed)
+   * @param {number} day - Day of month (1-indexed)
+   * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
+   * @returns {object|null} Historical weather entry or null
+   */
+  getWeatherForDate(year, month, day, zoneId) {
+    return WeatherManager.getWeatherForDate(year, month, day, zoneId);
+  },
+
+  /**
+   * Get weather history as the raw nested object, or a flat array for a specific year/month.
+   * @param {object} [options] - Filter options
+   * @param {number} [options.year] - Filter to a specific year
+   * @param {number} [options.month] - Filter to a specific month (requires year)
+   * @returns {object|object[]} Nested history object, or array of { year, month, day, ...entry }
+   */
+  getWeatherHistory(options = {}) {
+    return WeatherManager.getWeatherHistory(options);
   },
 
   /**
@@ -902,6 +1037,43 @@ export const CalendariaAPI = {
    */
   async removeWeatherPreset(presetId) {
     return WeatherManager.removeCustomPreset(presetId);
+  },
+
+  /**
+   * Get the current temperature for a zone.
+   * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
+   * @returns {object|null} Temperature data with celsius, display value, and unit
+   */
+  getTemperature(zoneId) {
+    return WeatherManager.getTemperature(zoneId);
+  },
+
+  /**
+   * Get a specific weather preset by ID.
+   * @param {string} presetId - Preset ID (e.g., 'clear', 'rain', 'thunderstorm')
+   * @returns {object|null} Preset definition or null if not found
+   */
+  getPreset(presetId) {
+    return WeatherManager.getPreset(presetId);
+  },
+
+  /**
+   * Update an existing custom weather preset.
+   * @param {string} presetId - Preset ID to update
+   * @param {object} updates - Properties to update (label, icon, color, etc.)
+   * @returns {Promise<object|null>} Updated preset or null if not found
+   */
+  async updateWeatherPreset(presetId, updates) {
+    return WeatherManager.updateCustomPreset(presetId, updates);
+  },
+
+  /**
+   * Format a temperature value for display using the world's temperature unit setting.
+   * @param {number} celsius - Temperature in Celsius
+   * @returns {string} Formatted temperature string (e.g., "72°F" or "22°C")
+   */
+  formatTemperature(celsius) {
+    return WeatherManager.formatTemperature(celsius);
   },
 
   /**
@@ -1110,3 +1282,68 @@ export const CalendariaAPI = {
     WidgetManager.refreshWidgets();
   }
 };
+
+// --- Global Namespace with Deprecation Proxy ---
+
+// Deprecation map: old flat key → new dotted path
+const DEPRECATION_MAP = {
+  HUD: 'apps.HUD',
+  BigCal: 'apps.BigCal',
+  CalendarEditor: 'apps.CalendarEditor',
+  MiniCal: 'apps.MiniCal',
+  Stopwatch: 'apps.Stopwatch',
+  TimeKeeper: 'apps.TimeKeeper',
+  CalendarManager: 'managers.CalendarManager',
+  WeatherManager: 'managers.WeatherManager',
+  NoteManager: 'managers.NoteManager',
+  TimeClock: 'managers.TimeClock',
+  TimeTracker: 'managers.TimeTracker',
+  CalendariaCalendar: 'models.CalendariaCalendar',
+  CalendariaSocket: 'socket'
+};
+
+// Add all permission functions to the deprecation map
+for (const key of Object.keys(Permissions)) {
+  DEPRECATION_MAP[key] = `permissions.${key}`;
+}
+
+/**
+ * Create and install the global CALENDARIA namespace with deprecation proxy.
+ * Old flat access patterns (e.g. CALENDARIA.HUD) emit a compatibility warning
+ * and redirect to the new structured path (e.g. CALENDARIA.apps.HUD).
+ */
+export function createGlobalNamespace() {
+  const namespace = {
+    apps: { HUD, BigCal, CalendarEditor, MiniCal, Stopwatch, TimeKeeper },
+    managers: { CalendarManager, WeatherManager, NoteManager, TimeClock, TimeTracker },
+    models: { CalendariaCalendar },
+    socket: CalendariaSocket,
+    api: CalendariaAPI,
+    permissions: { ...Permissions }
+  };
+
+  /**
+   * Resolve a dotted path on the namespace object.
+   * @param {string} path - Dot-separated path (e.g. 'apps.HUD')
+   * @returns {*} The resolved value
+   */
+  function resolvePath(path) {
+    return path.split('.').reduce((obj, segment) => obj?.[segment], namespace);
+  }
+
+  globalThis['CALENDARIA'] = new Proxy(namespace, {
+    /**
+     * @param {object} target
+     * @param {string|symbol} key
+     * @param {object} receiver
+     */
+    get(target, key, receiver) {
+      if (typeof key === 'string' && key in DEPRECATION_MAP) {
+        const newPath = DEPRECATION_MAP[key];
+        foundry.utils.logCompatibilityWarning(`CALENDARIA.${key} is deprecated. Use CALENDARIA.${newPath} instead.`, { since: 'Calendaria 0.10', until: 'Calendaria 1.1' });
+        return resolvePath(newPath);
+      }
+      return Reflect.get(target, key, receiver);
+    }
+  });
+}

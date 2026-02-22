@@ -34,12 +34,14 @@ export const SETTINGS = {
   CALENDARS: 'calendars',
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
   CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
+  COLOR_SHIFT_SYNC: 'colorShiftSync',
   CURRENT_WEATHER: 'currentWeather',
   CUSTOM_CALENDARS: 'customCalendars',
   CUSTOM_CATEGORIES: 'customCategories',
   CUSTOM_THEME_COLORS: 'customThemeColors',
   CUSTOM_TIME_JUMPS: 'customTimeJumps',
   CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
+  DARKNESS_MOON_SYNC: 'darknessMoonSync',
   DARKNESS_SYNC_ALL_SCENES: 'darknessSyncAllScenes',
   DARKNESS_SYNC: 'darknessSync',
   DARKNESS_WEATHER_SYNC: 'darknessWeatherSync',
@@ -49,12 +51,16 @@ export const SETTINGS = {
   DISPLAY_FORMATS: 'displayFormats',
   FORCE_HUD: 'forceHUD',
   FORCE_MINI_CAL: 'forceMiniCal',
+  FORECAST_ACCURACY: 'forecastAccuracy',
+  FORECAST_DAYS: 'forecastDays',
   HUD_AUTO_FADE: 'hudAutoFade',
   HUD_COMBAT_COMPACT: 'hudCombatCompact',
   HUD_COMBAT_HIDE: 'hudCombatHide',
   HUD_CYCLES_DISPLAY_MODE: 'hudCyclesDisplayMode',
   HUD_DIAL_STYLE: 'hudDialStyle',
   HUD_DOME_AUTO_HIDE: 'hudDomeAutoHide',
+  HUD_DOME_BELOW: 'hudDomeBelow',
+  HUD_SHOW_ALL_MOONS: 'hudShowAllMoons',
   HUD_ERA_DISPLAY_MODE: 'hudEraDisplayMode',
   HUD_IDLE_OPACITY: 'hudIdleOpacity',
   HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode',
@@ -88,6 +94,7 @@ export const SETTINGS = {
   MINI_CAL_WEATHER_DISPLAY_MODE: 'miniCalWeatherDisplayMode',
   PERMISSIONS: 'permissions',
   POSITION_LOCKED: 'positionLocked',
+  PRECIPITATION_UNIT: 'precipitationUnit',
   PRIMARY_GM: 'primaryGM',
   SAVED_TIMEPOINTS: 'savedTimepoints',
   SHOW_ACTIVE_CALENDAR_TO_PLAYERS: 'showActiveCalendarToPlayers',
@@ -101,6 +108,7 @@ export const SETTINGS = {
   STOPWATCH_STATE: 'stopwatchState',
   STOPWATCH_STICKY_STATES: 'stopwatchStickyStates',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
+  TIME_ADVANCE_INTERVAL: 'timeAdvanceInterval',
   TEMPERATURE_UNIT: 'temperatureUnit',
   THEME_MODE: 'themeMode',
   TIME_KEEPER_POSITION: 'timeKeeperPosition',
@@ -111,7 +119,21 @@ export const SETTINGS = {
   TIMEKEEPER_STICKY_STATES: 'timeKeeperStickyStates',
   TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
   TOOLBAR_APPS: 'toolbarApps',
-  WEATHER_PRESET_ALIASES: 'weatherPresetAliases'
+  WEATHER_HISTORY_DAYS: 'weatherHistoryDays',
+  WEATHER_HISTORY: 'weatherHistory',
+  WEATHER_INERTIA: 'weatherInertia',
+  WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
+  WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
+  WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
+  FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
+  FORCE_THEME: 'forceTheme',
+  FORCED_THEME_COLORS: 'forcedThemeColors',
+  WEATHER_SOUND_FX: 'weatherSoundFx',
+  FXMASTER_TOP_DOWN: 'fxmasterTopDown',
+  AUTO_GENERATE_WEATHER: 'autoGenerateWeather',
+  GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast',
+  REST_TO_SUNRISE: 'restToSunrise',
+  WIND_SPEED_UNIT: 'windSpeedUnit'
 };
 
 /**
@@ -137,7 +159,8 @@ export const SCENE_FLAGS = {
   BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
   CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
   DARKNESS_SYNC: 'darknessSync',
-  HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers'
+  HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
+  WEATHER_FX_DISABLED: 'weatherFxDisabled'
 };
 
 /** Template file paths for UI components */
@@ -160,12 +183,15 @@ export const TEMPLATES = {
     PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
     PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/settings/tab-stopwatch.hbs`,
-    PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`
+    PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`,
+    WEATHER_EDITOR: `modules/${MODULE.ID}/templates/settings/weather-editor.hbs`,
+    WEATHER_EDITOR_FOOTER: `modules/${MODULE.ID}/templates/settings/weather-editor-footer.hbs`
   },
   PARTIALS: {
     SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,
     DATE_PICKER: `modules/${MODULE.ID}/templates/partials/dialog-date-picker.hbs`,
-    CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`
+    CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`,
+    RELEASE_MESSAGE: `modules/${MODULE.ID}/templates/chat/release-message.hbs`
   },
   STOPWATCH: `modules/${MODULE.ID}/templates/stopwatch.hbs`,
   TIME_DIAL: `modules/${MODULE.ID}/templates/time-dial.hbs`,
@@ -201,7 +227,11 @@ export const TEMPLATES = {
   WEATHER: {
     PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`,
     PICKER_FOOTER: `modules/${MODULE.ID}/templates/weather/weather-picker-footer.hbs`,
-    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`
+    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`,
+    CLIMATE_EDITOR_TABS: `modules/${MODULE.ID}/templates/weather/climate-editor-tabs.hbs`,
+    CLIMATE_EDITOR_WEATHER: `modules/${MODULE.ID}/templates/weather/climate-editor-weather.hbs`,
+    CLIMATE_EDITOR_PRESETS: `modules/${MODULE.ID}/templates/weather/climate-editor-presets.hbs`,
+    CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/weather/climate-editor-environment.hbs`
   },
   SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },
   SET_DATE_DIALOG: `modules/${MODULE.ID}/templates/set-date-dialog.hbs`
@@ -222,6 +252,46 @@ export const DEFAULT_MOON_PHASES = {
   waninggibbous000: { name: 'CALENDARIA.MoonPhase.WaningGibbous', icon: `${ASSETS.MOON_ICONS}/06_waninggibbous.svg`, start: 0.625, end: 0.75 },
   lastquarter00000: { name: 'CALENDARIA.MoonPhase.LastQuarter', icon: `${ASSETS.MOON_ICONS}/07_lastquarter.svg`, start: 0.75, end: 0.875 },
   waningcrescent00: { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`, start: 0.875, end: 1 }
+};
+
+/** Wind speed scale (0-5). Canonical values stored in kph; imperial conversion at display time. */
+export const WIND_SPEEDS = {
+  CALM: { id: 'calm', value: 0, label: 'CALENDARIA.Weather.Wind.Calm', kph: 5 },
+  LIGHT: { id: 'light', value: 1, label: 'CALENDARIA.Weather.Wind.Light', kph: 20 },
+  MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Weather.Wind.Moderate', kph: 40 },
+  STRONG: { id: 'strong', value: 3, label: 'CALENDARIA.Weather.Wind.Strong', kph: 60 },
+  SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Weather.Wind.Severe', kph: 90 },
+  EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 999 }
+};
+
+/** Precipitation type identifiers */
+export const PRECIPITATION_TYPES = {
+  NONE: null,
+  DRIZZLE: 'drizzle',
+  RAIN: 'rain',
+  SNOW: 'snow',
+  SLEET: 'sleet',
+  HAIL: 'hail'
+};
+
+/** Compass direction degrees for 16-point wind rose */
+export const COMPASS_DIRECTIONS = {
+  N: 0,
+  NNE: 22.5,
+  NE: 45,
+  ENE: 67.5,
+  E: 90,
+  ESE: 112.5,
+  SE: 135,
+  SSE: 157.5,
+  S: 180,
+  SSW: 202.5,
+  SW: 225,
+  WSW: 247.5,
+  W: 270,
+  WNW: 292.5,
+  NW: 315,
+  NNW: 337.5
 };
 
 /** @enum {string} Custom hook names fired by the module */

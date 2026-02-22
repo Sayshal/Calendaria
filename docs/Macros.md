@@ -153,6 +153,23 @@ await CALENDARIA.api.advanceTimeToPreset('sunrise');
 await CALENDARIA.api.advanceTimeToPreset('sunset');
 ```
 
+### Clock Control
+
+```javascript
+// Toggle the real-time clock on/off
+CALENDARIA.api.toggleClock();
+
+// Start the clock (if not already running)
+if (!CALENDARIA.api.isClockRunning()) CALENDARIA.api.startClock();
+
+// Stop the clock
+CALENDARIA.api.stopClock();
+
+// Check current clock speed (game seconds per real second)
+const speed = CALENDARIA.api.getClockSpeed();
+ui.notifications.info(`Clock speed: ${speed}x`);
+```
+
 ### Display Information
 
 ```javascript

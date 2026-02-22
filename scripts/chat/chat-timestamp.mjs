@@ -14,7 +14,7 @@ const ChatLog = foundry.applications.sidebar.tabs.ChatLog;
 
 /**
  * Hook handler for preCreateChatMessage.
- * Stores current world time and formatted fantasy date in message flags.
+ * Stores current world time in message flags for client-side formatting.
  * @param {ChatMessage} message - The chat message being created
  * @param {object} _data - The creation data
  * @param {object} _options - Creation options
@@ -24,8 +24,7 @@ export function onPreCreateChatMessage(message, _data, _options, _userId) {
   const mode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
   if (mode === 'disabled') return;
   const worldTime = game.time.worldTime;
-  const fantasyDate = formatWorldTime(worldTime);
-  message.updateSource({ [`flags.${MODULE.ID}.worldTime`]: worldTime, [`flags.${MODULE.ID}.fantasyDate`]: fantasyDate });
+  message.updateSource({ [`flags.${MODULE.ID}.worldTime`]: worldTime });
 }
 
 /**
@@ -39,10 +38,10 @@ export function onRenderChatMessageHTML(message, html, _context) {
   const mode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
   if (mode === 'disabled') return;
   const flags = message.flags?.[MODULE.ID];
-  if (!flags?.worldTime && !flags?.fantasyDate) return;
+  if (!flags?.worldTime) return;
   const timestampEl = html.querySelector('.message-timestamp');
   if (!timestampEl) return;
-  const formattedDate = flags.fantasyDate || formatWorldTime(flags.worldTime);
+  const formattedDate = formatWorldTime(flags.worldTime);
   if (!formattedDate) return;
   if (mode === 'replace') {
     if (hasMoonIconMarkers(formattedDate)) timestampEl.innerHTML = renderMoonIcons(formattedDate);
@@ -78,8 +77,8 @@ export function overrideChatLogTimestamps() {
       const stamp = li.querySelector('.message-timestamp');
       if (!stamp) continue;
       const flags = message.flags?.[MODULE.ID];
-      if (flags?.worldTime !== undefined || flags?.fantasyDate) {
-        const formattedDate = flags.fantasyDate || formatWorldTime(flags.worldTime);
+      if (flags?.worldTime !== undefined) {
+        const formattedDate = formatWorldTime(flags.worldTime);
         if (formattedDate) {
           if (mode === 'replace') {
             if (hasMoonIconMarkers(formattedDate)) stamp.innerHTML = renderMoonIcons(formattedDate);

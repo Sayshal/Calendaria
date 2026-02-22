@@ -1,66 +1,146 @@
 <div class="weather-picker-content">
-  <div class="zone-selector standard-form">
+  <div class="zone-info-bar standard-form">
     <div class="form-group">
-      <label for="climateZone">{{localize "CALENDARIA.Weather.Picker.Zone"}}</label>
+      <label data-tooltip="{{localize 'CALENDARIA.Weather.Picker.SceneZoneHint'}}">{{localize "CALENDARIA.Weather.Picker.SceneZone"}}</label>
       <div class="form-fields">
-        <select id="climateZone" name="climateZone">
+        <select name="sceneZone">
+          <option value="">{{localize "CALENDARIA.Weather.Picker.NoZone"}}</option>
           {{#each zoneOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
     </div>
-    <div class="form-group">
-      <label for="setAsActiveZone">{{localize "CALENDARIA.Weather.Picker.SetAsActiveZone"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="setAsActiveZone" name="setAsActiveZone" {{#if setAsActiveZone}}checked{{/if}}>
-      </div>
-    </div>
   </div>
 
-  {{#each categories}}
-    <div class="weather-category">
-      <span class="category-header">{{label}}</span>
-      <div class="weather-buttons">
-        {{#each presets}}
-          <button type="button" class="weather-btn {{#if selected}}active{{/if}}" data-action="selectWeather"
-            data-preset-id="{{id}}" style="--weather-color: {{color}}" data-tooltip aria-label="{{description}}">
-            <i class="fas {{icon}}"></i>
-            <span class="weather-label">{{label}}</span>
-          </button>
-        {{/each}}
-      </div>
+  <div class="weather-picker-columns">
+    <div class="weather-picker-presets">
+      {{#each categories}}
+        <div class="weather-category">
+          <span class="category-header">{{label}}</span>
+          <div class="weather-buttons">
+            {{#each presets}}
+              <button type="button" class="weather-btn {{#if selected}}active{{/if}} {{#unless zoneEnabled}}zone-disabled{{/unless}}"
+                data-action="selectWeather" data-preset-id="{{id}}" style="--weather-color: {{color}}"
+                data-tooltip aria-label="{{tooltip}}">
+                <i class="fas {{icon}}"></i>
+                <span class="weather-label">{{label}}</span>
+              </button>
+            {{/each}}
+          </div>
+        </div>
+      {{/each}}
     </div>
-  {{/each}}
 
-  <div class="weather-category weather-picker-custom standard-form">
-    <span class="category-header">{{localize "CALENDARIA.Weather.Picker.Custom"}}</span>
-    <div class="form-group">
-      <label for="customLabel"
-        data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomLabel"}}</label>
-      <div class="form-fields">
-        <input type="text" id="customLabel" name="customLabel" value="{{customLabel}}">
+    <div class="weather-picker-details standard-form">
+      <span class="category-header">{{localize "CALENDARIA.Weather.Picker.Custom"}}</span>
+      <div class="form-group">
+        <label for="customLabel"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomLabel"}}</label>
+        <div class="form-fields">
+          <input type="text" id="customLabel" name="customLabel" value="{{customLabel}}">
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label for="customTemp">{{localize "CALENDARIA.Weather.Picker.CustomTemp"}} ({{temperatureUnit}})</label>
-      <div class="form-fields">
-        <input type="number" id="customTemp" name="customTemp" value="{{customTemp}}">
+      <div class="form-group">
+        <label for="customTemp"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomTempHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomTemp"}} ({{temperatureUnit}})</label>
+        <div class="form-fields">
+          <input type="number" id="customTemp" name="customTemp" value="{{customTemp}}">
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label for="customIcon"
-        data-tooltip="{{localize 'CALENDARIA.Common.IconHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomIcon"}}</label>
-      <div class="form-fields">
-        <input type="text" id="customIcon" name="customIcon" value="{{customIcon}}" placeholder="fa-cloud-sun">
+      <div class="form-group">
+        <label for="customIcon"
+          data-tooltip="{{localize 'CALENDARIA.Common.IconHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomIcon"}}</label>
+        <div class="form-fields">
+          <input type="text" id="customIcon" name="customIcon" value="{{customIcon}}" placeholder="fa-cloud-sun">
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label for="customColor">{{localize "CALENDARIA.Weather.Picker.CustomColor"}}</label>
-      <div class="form-fields">
-        <input type="color" id="customColor" name="customColor" value="{{customColor}}">
+      <div class="form-group">
+        <label for="customColor"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.CustomColorHint'}}">{{localize "CALENDARIA.Weather.Picker.CustomColor"}}</label>
+        <div class="form-fields">
+          <input type="color" id="customColor" name="customColor" value="{{customColor}}">
+        </div>
       </div>
+
+      {{#if hasFXMaster}}
+      <div class="form-group">
+        <label for="fxPreset"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.FxPresetHint'}}">{{localize "CALENDARIA.Weather.Picker.FxPreset"}}</label>
+        <div class="form-fields">
+          <select id="fxPreset" name="fxPreset">
+            {{#each fxPresetOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      {{/if}}
+
+      <div class="form-group">
+        <label for="soundFx"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.SoundFxHint'}}">{{localize "CALENDARIA.Weather.Picker.SoundFx"}}</label>
+        <div class="form-fields">
+          <select id="soundFx" name="soundFx">
+            {{#each soundFxOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+
+      <span class="category-header">{{localize "CALENDARIA.Weather.Wind.Title"}}</span>
+      <div class="form-group">
+        <label for="windSpeed"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.Speed"}}</label>
+        <div class="form-fields">
+          <select id="windSpeed" name="windSpeed">
+            <option value="random" {{#if windSpeedRandom}}selected{{/if}}>{{localize "CALENDARIA.Weather.Wind.Random"}}</option>
+            {{#each windSpeedOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.DirectionHint'}}">{{localize "CALENDARIA.Weather.Wind.Direction"}}</label>
+        <div class="form-fields">
+          <select name="windDirectionCompass">
+            <option value="">{{localize "CALENDARIA.Weather.Wind.Random"}}</option>
+            {{#each compassDirections}}
+              <option value="{{this.degrees}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+
+      <span class="category-header">{{localize "CALENDARIA.Weather.Precipitation.Title"}}</span>
+      <div class="form-group">
+        <label for="precipType"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Precipitation.TypeHint'}}">{{localize "CALENDARIA.Weather.Precipitation.Type"}}</label>
+        <div class="form-fields">
+          <select id="precipType" name="precipType">
+            <option value="random" {{#if precipTypeRandom}}selected{{/if}}>{{localize "CALENDARIA.Weather.Wind.Random"}}</option>
+            {{#each precipitationTypes}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="precipIntensity"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Precipitation.IntensityHint'}}">{{localize "CALENDARIA.Weather.Precipitation.Intensity"}}</label>
+        <div class="form-fields">
+          <input type="range" id="precipIntensity" name="precipIntensity" min="0" max="1" step="0.05"
+            value="{{precipIntensity}}">
+          <span class="precip-intensity-label">{{precipIntensityLabel}}</span>
+        </div>
+      </div>
+
+      <label class="save-as-preset-toggle" data-tooltip="{{localize 'CALENDARIA.Weather.Picker.SaveAsPresetHint'}}">
+        <input type="checkbox" name="saveAsPreset">
+        {{localize "CALENDARIA.Weather.Picker.SaveAsPreset"}}
+      </label>
     </div>
   </div>
-
 </div>

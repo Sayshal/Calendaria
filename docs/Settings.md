@@ -56,16 +56,19 @@ Configure which user roles can access Calendaria features.
 
 ### Available Permissions
 
-| Permission           | Description                                 |
-| -------------------- | ------------------------------------------- |
-| **View MiniCal**     | Can see the MiniCal widget                  |
-| **View TimeKeeper**  | Can see the TimeKeeper                      |
-| **View HUD**         | Can see the main HUD                        |
-| **Manage Notes**     | Can create, edit, and delete calendar notes |
-| **Change Date/Time** | Can modify the world date and time          |
-| **Change Weather**   | Can set weather conditions                  |
-| **Change Calendar**  | Can switch the active calendar              |
-| **Edit Calendars**   | Can access the Calendar Editor              |
+| Permission                | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| **View BigCal**           | Can see the BigCal                                     |
+| **View MiniCal**          | Can see the MiniCal widget                             |
+| **View TimeKeeper**       | Can see the TimeKeeper                                 |
+| **Manage Notes**          | Can create own calendar notes                          |
+| **Edit Notes**            | Can edit calendar notes owned by other players         |
+| **Delete Notes**          | Can delete own calendar notes                          |
+| **Change Date/Time**      | Can modify the world date and time                     |
+| **Change Weather**        | Can set weather conditions                             |
+| **View Weather Forecast** | Can view weather forecasts and day-cell forecast icons |
+| **Change Calendar**       | Can switch the active calendar                         |
+| **Edit Calendars**        | Can access the Calendar Editor                         |
 
 ### Configurable Roles
 
@@ -111,6 +114,19 @@ Configure how fast the in-game clock advances in real-time mode.
 > [!TIP]
 > Hover over the HUD and press the pause button to stop real-time clock advancement without disabling the feature.
 
+### Update Interval
+
+How frequently the time system processes updates (in seconds).
+
+- Range: `1` to `120`
+- Default: `6`
+
+### Rest to Sunrise
+
+When enabled, long rests advance time to the next sunrise instead of a fixed duration.
+
+- Default: `false`
+
 ### Sync with Game Pause
 
 Clock automatically stops when the game is paused. When enabled, the clock also pauses during active combat.
@@ -124,27 +140,92 @@ Clock automatically stops when the game is paused. When enabled, the clock also 
 
 ## Weather (GM Only)
 
-### Temperature Unit
+### Weather Generation
+
+#### Auto-Generate Weather
+
+Automatically generate weather on day change based on climate zone and season configuration.
+
+- Default: `true`
+
+#### Weather Inertia
+
+Controls how strongly the current weather influences the next day's generation. Higher values produce smoother, more realistic transitions.
+
+- Range: `0` to `1`
+- Default: `0.3`
+
+#### Weather History Days
+
+Maximum number of days of weather history to retain.
+
+- Range: `0` to `3650`
+- Default: `365`
+
+#### Sound Effects
+
+Enable ambient weather sound loops tied to weather presets.
+
+- Default: `false`
+
+### Forecast
+
+#### Forecast Accuracy
+
+How accurately forecasts predict future weather for non-GM users. GMs always see the true forecast.
+
+- Range: `0` to `100`
+- Default: `70`
+
+#### Forecast Days
+
+Number of days to pre-generate in the forecast plan.
+
+- Range: `1` to `30`
+- Default: `7`
+
+#### GM Override Affects Forecast
+
+When enabled, manually setting weather via the Weather Picker clears and regenerates the forecast plan for that zone.
+
+- Default: `true`
+
+### FXMaster Integration
+
+> [!NOTE]
+> These settings only appear when [FXMaster](https://foundryvtt.com/packages/fxmaster) is installed.
+
+#### Top-Down Mode
+
+Render FXMaster weather effects from a top-down perspective.
+
+- Default: `false`
+
+#### Below Tokens
+
+Render FXMaster weather effects below the token layer.
+
+- Default: `false`
+
+### Units
+
+#### Temperature Unit
 
 Choose temperature display format.
 
 - Options: `Celsius`, `Fahrenheit`
 - Default: `Celsius`
 
-### Climate Zone
+#### Precipitation Unit
 
-Select the active climate zone (if defined in the calendar).
+Choose precipitation display format.
 
-### Custom Weather Presets
+- Options: `Metric` (mm), `Imperial` (in)
+- Default: `Metric`
 
-Create custom weather conditions with an inline editor UI:
+### Weather Editor
 
-- **Name**: Condition display name
-- **Icon**: FontAwesome icon class
-- **Color**: Condition color (hex)
-- **Temperature Range**: Min/max temperature for this condition
-
-Custom presets appear in the Calendar Editor Weather tab and Climate dialogs alongside built-in conditions.
+Button to open the [Weather Editor](Weather-Editor) for customizing preset visuals, sounds, and FXMaster mappings.
 
 ---
 
@@ -158,21 +239,39 @@ Automatically adjust scene darkness based on time of day.
 
 - Default: `true`
 
-#### Darkness Weather Sync
+#### Sync All Scenes
+
+Sync darkness across all scenes, not just the active one.
+
+- Default: `false`
+
+#### Weather Affects Darkness
 
 Adjust scene darkness based on current weather conditions.
 
 - Default: `true`
 
-#### Ambience Sync
+#### Sync Scene Ambience with Weather
 
-Automatically update scene environment lighting based on current weather and climate zone.
+Automatically update scene environment lighting (hue/saturation) based on weather and climate zone.
+
+- Default: `true`
+
+#### Sync Scene Ambience with Time of Day
+
+Shift scene ambient color based on time of day — warm tones at dawn/dusk, cool blue at night. Requires "Sync Scene Ambience with Weather" to be enabled.
+
+- Default: `true`
+
+#### Moon Illumination
+
+Allow moon phases to reduce nighttime darkness. Per-moon brightness is configured in Calendar Editor.
 
 - Default: `true`
 
 #### Default Brightness Multiplier
 
-Global default brightness multiplier for scene ambience.
+Global brightness multiplier for scene ambience.
 
 - Range: `0.5` to `1.5`
 - Default: `1.0`
@@ -429,6 +528,18 @@ Display cycle indicators.
 Display moon phase indicators.
 
 - Default: `true`
+
+#### Show All Moons
+
+Display all configured moons in the HUD dome (secondary moons trail with size scaling).
+
+- Default: `false`
+
+#### Dome Below Bar
+
+Render the dome visual below the info bar instead of above it.
+
+- Default: `false`
 
 ### Sticky States
 
@@ -984,3 +1095,9 @@ Automatically hide the Calendaria HUD for players when this scene becomes active
 Override the calendar's default climate zone for this specific scene. Affects weather generation, darkness calculations, and environment lighting.
 
 - Default: Uses calendar's default zone
+
+### Disable Weather FX
+
+Disable all weather effects (FXMaster particles and ambient sound) on this specific scene. Takes effect immediately.
+
+- Default: `false`

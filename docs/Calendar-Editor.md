@@ -267,7 +267,7 @@ Define seasonal periods with visual styling.
 
 - **Add** (+) — Insert a new season after this one
 - **Remove** (trash icon) — Delete this season
-- **Climate** (thermometer icon) — Open the [ClimateEditor](#climateeditor) to configure per-season temperature ranges and weather chance overrides
+- **Climate** (edit icon) — Open the [ClimateEditor](#climateeditor) to configure per-season temperature ranges and weather chance overrides
 
 ---
 
@@ -382,6 +382,15 @@ An interactive visual slider displays all phases as colored segments. The slider
 - **Double-click** a phase segment to normalize it to an equal share (100% / number of phases)
 - **Click percentage labels** to toggle between percentage and days display
 
+### Moon Brightness
+
+A brightness fieldset for each moon controls how much illumination it contributes to nighttime scenes:
+
+- **Brightness Max** — Range slider (0 to 0.3) controlling maximum illumination at full moon
+- Default: `0` (no illumination)
+
+Moon illumination follows a cosine curve based on phase position. Multiple moons sum their contributions, capped at 0.3 total. See [Moon Phases — Moon Brightness](Moon-Phases#moon-brightness) and [Scene Ambience](Scene-Ambience#moon-illumination) for details.
+
 ### Moon & Phase Controls
 
 - **Add Moon** (+) — Add a new moon
@@ -436,56 +445,22 @@ Each cycle has numbered stages that repeat in order.
 
 Configure climate zones and weather conditions. The Weather Tab has a two-section layout: **Season Climate** and **Zone Climate**.
 
-### Auto Generate
-
-- **Auto Generate Weather** — Checkbox to automatically generate daily weather based on season and chance values (enabled by default for new calendars)
-
 ### Season Climate
 
 Lists all defined seasons. Click the edit button on a season row to open the [ClimateEditor](#climateeditor) in season mode, where you can configure temperature ranges and weather preset chance overrides for that season.
 
 ### Zone Climate
 
-Lists all climate zones with inline controls:
+A two-column list of all climate zones with inline controls:
 
-- **Active** — Checkbox to set the active zone (mutual exclusion — only one zone active at a time)
 - **Name** — Inline-editable zone name
-- **Edit** (pencil icon) — Open the [ClimateEditor](#climateeditor) in zone mode for full configuration
+- **Edit** (pencil icon) — Open the [Climate Editor](Climate-Editor) in zone mode for full configuration
 - **Add** (+) — Insert a new zone after this row
 - **Remove** (trash icon) — Delete this zone
 
-### ClimateEditor
+### Climate Editor
 
-A dedicated application for editing climate settings. It operates in two modes:
-
-**Season Mode** (opened from Season Climate):
-
-- Temperature range (min/max) for this season
-- Preset chance overrides — adjust probability weights for weather conditions in this season
-
-**Zone Mode** (opened from Zone Climate):
-
-- **Description** — Notes about this climate zone
-- **Brightness Multiplier** — Scene darkness adjustment (0.5x to 1.5x, default 1.0x)
-- **Daylight** — Per-zone daylight configuration (see below)
-- **Environment Lighting** — Hue and saturation overrides for base and dark lighting
-- **Per-Season Temperatures** — Min/max temperature ranges for each season in this zone
-- **Preset Configuration** — Full preset list with enable/disable, chance %, temperature overrides, and preset aliases
-
-#### Zone Daylight
-
-The Daylight fieldset controls how sunrise/sunset times are calculated for scenes using this zone. Two mutually exclusive modes are available:
-
-| Mode                   | Fields                            | Description                                                                          |
-| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------ |
-| **Latitude** (default) | Latitude (-90° to +90°)           | Computes daylight astronomically based on latitude and the calendar's solstice dates |
-| **Override Solstice**  | Shortest Day, Longest Day (hours) | Manually set the daylight extremes for this zone                                     |
-
-Check **Override Solstice** to switch from latitude mode to manual mode. A live preview shows the computed shortest and longest day hours with their calendar dates.
-
-When neither latitude nor manual values are set, the zone falls back to the calendar's global daylight settings.
-
-Preset aliases let you rename any weather preset for this zone (e.g., rename "Rain" to "Monsoon Downpour" in a tropical zone). Aliases appear on the HUD, MiniCal, and Weather Picker. A reset button restores the default name.
+The Climate Editor is a dedicated application for editing climate settings. See the full [Climate Editor](Climate-Editor) documentation for details on both season mode and zone mode configuration.
 
 ---
 

@@ -139,8 +139,8 @@ export function dateFormattingParts(calendar, components) {
   let namedWeekAbbr = '';
   const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 });
   if (currentWeek) {
-    namedWeek = localize(currentWeek.name) || '';
-    namedWeekAbbr = currentWeek.abbreviation ? localize(currentWeek.abbreviation) : namedWeek.slice(0, 3);
+    namedWeek = currentWeek.weekName || '';
+    namedWeekAbbr = currentWeek.weekAbbr || namedWeek.slice(0, 3);
   }
   let climateZoneName = '';
   let climateZoneAbbr = '';
@@ -781,7 +781,7 @@ function getCanonicalHourAbbr(calendar, components) {
  * Uses calendar's getCycleEntry method if available.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
- * @param cycleIndex
+ * @param {number} cycleIndex - Index of the cycle to look up
  * @returns {string} Cycle entry name
  */
 function getCycleName(calendar, components, cycleIndex = 0) {
@@ -807,7 +807,7 @@ function getCycleName(calendar, components, cycleIndex = 0) {
  * Uses calendar's getCurrentCycleNumber method if available.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
- * @param cycleIndex
+ * @param {number} cycleIndex - Index of the cycle to look up
  * @returns {number|string} Cycle number (1-indexed)
  */
 function getCycleNumber(calendar, components, cycleIndex = 0) {

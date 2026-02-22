@@ -61,19 +61,17 @@
     {{!-- Custom widget actions insertion point --}}
     {{{widgets.actions}}}
 
-    <div class="view-selector">
-      <button type="button" data-action="changeView" data-mode="month"
-        class="{{#if (eq displayMode 'month')}}active{{/if}}">
-        {{localize 'CALENDARIA.Common.Month'}}
-      </button>
-      <button type="button" data-action="changeView" data-mode="week"
-        class="{{#if (eq displayMode 'week')}}active{{/if}}">
-        {{localize 'CALENDARIA.Common.Week'}}
-      </button>
-      <button type="button" data-action="changeView" data-mode="year"
-        class="{{#if (eq displayMode 'year')}}active{{/if}}">
-        {{localize 'CALENDARIA.Common.Year'}}
-      </button>
-    </div>
+    <button type="button" data-action="changeView" data-mode="month"
+      class="{{#if (eq displayMode 'month')}}active{{/if}}">
+      {{localize 'CALENDARIA.Common.Month'}}
+    </button>
+    <button type="button" data-action="changeView" data-mode="week"
+      class="{{#if (eq displayMode 'week')}}active{{/if}}">
+      {{localize 'CALENDARIA.Common.Week'}}
+    </button>
+    <button type="button" data-action="changeView" data-mode="year"
+      class="{{#if (eq displayMode 'year')}}active{{/if}}">
+      {{localize 'CALENDARIA.Common.Year'}}
+    </button>
   </div>
 </header>

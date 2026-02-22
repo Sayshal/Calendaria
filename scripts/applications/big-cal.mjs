@@ -28,14 +28,25 @@ const MAX_VISIBLE_MOONS = 3;
 
 /**
  * Process moon phases array for display with overflow handling.
+ * Respects the visible moons override from calendar-view-utils.
  * @param {object[]|null} phases - Array of moon phase objects
  * @returns {object|null} Processed object with visible, overflow, and overflowTooltip
  */
 function processMoonPhases(phases) {
   if (!phases?.length) return null;
-  if (phases.length <= MAX_VISIBLE_MOONS) return { visible: phases, overflow: [], overflowTooltip: '', overflowTooltipText: '' };
-  const visible = phases.slice(0, MAX_VISIBLE_MOONS);
-  const overflow = phases.slice(MAX_VISIBLE_MOONS);
+  const override = ViewUtils.getVisibleMoons();
+  let ordered = phases;
+  if (override?.length && phases.length > MAX_VISIBLE_MOONS) {
+    // Place overridden moons first in exact slot order
+    const phaseMap = new Map(phases.map((m) => [m.moonName, m]));
+    const prioritized = override.map((name) => phaseMap.get(name)).filter(Boolean);
+    const prioritizedSet = new Set(override);
+    const rest = phases.filter((m) => !prioritizedSet.has(m.moonName));
+    ordered = [...prioritized, ...rest];
+  }
+  if (ordered.length <= MAX_VISIBLE_MOONS) return { visible: ordered, overflow: [], overflowTooltip: '', overflowTooltipText: '' };
+  const visible = ordered.slice(0, MAX_VISIBLE_MOONS);
+  const overflow = ordered.slice(MAX_VISIBLE_MOONS);
   const overflowTooltip = overflow.map((m) => `<div class='moon-tooltip-row'><img src='${m.icon}'><span>${m.moonName}: ${m.phaseName}</span></div>`).join('');
   const overflowTooltipText = overflow.map((m) => `${m.moonName}: ${m.phaseName}`).join(', ');
   return { visible, overflow, overflowTooltip, overflowTooltipText };
@@ -85,7 +96,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       closeSearch: BigCal._onCloseSearch,
       openSearchResult: BigCal._onOpenSearchResult,
       openSettings: BigCal._onOpenSettings,
-      navigateToMonth: BigCal._onNavigateToMonth
+      navigateToMonth: BigCal._onNavigateToMonth,
+      moonClick: BigCal._onMoonClick
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -98,6 +110,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this;
     }
+    Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
     return super.render(options, _options);
   }
 
@@ -242,9 +255,22 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const icon = showIcon ? `<i class="fas ${weather.icon}"></i>` : '';
       const label = showLabel ? ` ${weather.label}` : '';
       const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+      let windHtml = '';
+      if (showLabel && weather.windSpeed > 0) {
+        const rotation = weather.windDirection != null ? weather.windDirection : 0;
+        windHtml = `<span class="weather-wind">
+          <i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i>
+        </span>`;
+      }
+      let precipHtml = '';
+      if (showLabel && weather.precipType) {
+        precipHtml = `<span class="weather-precip">
+          <i class="fas fa-droplet"></i>
+        </span>`;
+      }
       return `<span class="weather-indicator${clickable}" ${action}
-        style="--weather-color: ${weather.color}" data-tooltip="${weather.tooltip}">
-        ${icon}${label} ${temp}
+        style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">
+        ${icon}${label} ${temp}${windHtml}${precipHtml}
       </span>`;
     } else if (editable) {
       return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
@@ -384,6 +410,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day) });
     }
 
+    // Weather data for day cells
+    const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
+    let weatherLookup = null;
+    if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
+
     // Collect intercalary days to insert after regular days
     const intercalaryDays = [];
     let dayIndex = startDayOfWeek;
@@ -413,6 +444,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         // Don't add to weekday grid - collect separately
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
+        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
         intercalaryDays.push({
           day,
           year,
@@ -425,14 +457,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalColor: festivalDay?.color || '',
           festivalIcon: festivalDay?.icon || '',
           festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo),
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo, wd),
           moonPhases,
-          isIntercalary: true
+          isIntercalary: true,
+          ...ViewUtils.buildWeatherPillData(wd)
         });
       } else {
         const weekdayData = calendar.weekdaysArray[currentWeek.length];
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
+        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
         currentWeek.push({
           day,
           year,
@@ -446,9 +480,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalColor: festivalDay?.color || '',
           festivalIcon: festivalDay?.icon || '',
           festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo),
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo, wd),
           isRestDay: weekdayData?.isRestDay || false,
-          moonPhases
+          moonPhases,
+          ...ViewUtils.buildWeatherPillData(wd)
         });
         dayIndex++;
         if (currentWeek.length === daysInWeek) {
@@ -1232,6 +1267,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     WidgetManager.attachWidgetListeners(this.element);
+    Hooks.callAll(HOOKS.RENDER_CALENDAR, { app: this, element: this.element, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
   }
 
   /**
@@ -1344,7 +1380,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._hooks = [];
     const c = game.time.components;
     this._lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
-    const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    this._debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    const debouncedRender = this._debouncedRender;
     this._hooks.push({
       name: 'updateJournalEntryPage',
       id: Hooks.on('updateJournalEntryPage', (page, _changes, _options, _userId) => {
@@ -1381,7 +1418,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const predictedDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (predictedDay !== this._lastDay) {
       this._lastDay = predictedDay;
-      this.render();
+      this._debouncedRender();
     }
   }
 
@@ -1394,7 +1431,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (currentDay !== this._lastDay) {
       this._lastDay = currentDay;
-      this.render();
+      this._debouncedRender();
     }
   }
 
@@ -1728,15 +1765,32 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object|null} Weather context or null if no weather set
    */
   _getWeatherContext() {
-    const weather = WeatherManager.getCurrentWeather();
+    const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     if (!weather) return null;
+    const label = localize(weather.label);
+    const windSpeed = weather.wind?.speed ?? 0;
+    const windDirection = weather.wind?.direction;
+    const precipType = weather.precipitation?.type ?? null;
+    const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const tooltipHtml = WeatherManager.buildWeatherTooltip({
+      label,
+      description: weather.description ? localize(weather.description) : null,
+      temp,
+      windSpeed,
+      windDirection,
+      precipType,
+      precipIntensity: weather.precipitation?.intensity
+    });
     return {
       id: weather.id,
-      label: localize(weather.label),
+      label,
       icon: weather.icon,
       color: weather.color,
-      temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
-      tooltip: weather.description ? localize(weather.description) : localize(weather.label)
+      temperature: temp,
+      tooltipHtml,
+      windSpeed,
+      windDirection,
+      precipType
     };
   }
 
@@ -1805,6 +1859,37 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const year = parseInt(target.dataset.year);
     this.viewedDate = { year, month, day: 1 };
     await this.render();
+  }
+
+  /**
+   * Handle click on a visible moon icon in the day cell.
+   * Opens radial picker to swap the moon in that slot.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked moon-phase element
+   */
+  static _onMoonClick(_event, target) {
+    _event.stopPropagation();
+    const dayCell = target.closest('[data-year][data-month][data-day]');
+    if (!dayCell) return;
+    const year = parseInt(dayCell.dataset.year);
+    const month = parseInt(dayCell.dataset.month);
+    const day = parseInt(dayCell.dataset.day);
+    const slot = parseInt(target.dataset.moonSlot);
+    const allMoons = ViewUtils.getAllMoonPhases(this.calendar, year, month, day);
+    if (!allMoons?.length || allMoons.length <= MAX_VISIBLE_MOONS) return;
+    const clickedMoon = target.dataset.moonName;
+    ViewUtils.showMoonPicker(target, allMoons, clickedMoon, (moonName) => {
+      const current = ViewUtils.getVisibleMoons() ?? allMoons.slice(0, MAX_VISIBLE_MOONS).map((m) => m.moonName);
+      const updated = [...current];
+      // If selected moon is already visible, swap it with the clicked slot
+      const existingIdx = updated.indexOf(moonName);
+      if (existingIdx !== -1 && existingIdx !== slot) {
+        updated[existingIdx] = updated[slot];
+      }
+      if (slot >= 0 && slot < updated.length) updated[slot] = moonName;
+      ViewUtils.setVisibleMoons(updated);
+      this.render();
+    });
   }
 
   /**

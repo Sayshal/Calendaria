@@ -10,7 +10,7 @@
 
       <div class="form-group">
         <label for="timeSpeedMultiplier">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
-        <div class="form-fields time-speed-fields">
+        <div class="form-fields">
           <input type="number" id="timeSpeedMultiplier" name="timeSpeedMultiplier" value="{{timeSpeedMultiplier}}"
             min="0.01" step="any">
           <select id="timeSpeedIncrement" name="timeSpeedIncrement">
@@ -18,9 +18,17 @@
               <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
           </select>
-          <span class="time-speed-suffix">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Suffix"}}</span>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="timeAdvanceInterval">{{localize "CALENDARIA.Settings.TimeAdvanceInterval.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="timeAdvanceInterval" name="timeAdvanceInterval"
+            value="{{timeAdvanceInterval}}" min="1" max="120" step="1">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.TimeAdvanceInterval.Hint"}}</p>
       </div>
     </fieldset>
 
@@ -39,6 +47,14 @@
             {{#if advanceTimeOnRest}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
+      </div>
+
+      <div class="form-group" data-depends-on="advanceTimeOnRest">
+        <label for="restToSunrise">{{localize "CALENDARIA.Settings.RestToSunrise.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="restToSunrise" name="restToSunrise" {{#if restToSunrise}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.RestToSunrise.Hint"}}</p>
       </div>
 
       <div class="form-group">

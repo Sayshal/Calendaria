@@ -273,6 +273,8 @@
         "id"             : "valdris",
         "name"           : "Kingdom of Valdris",
         "description"    : "Northern mountains and iron-rich ranges with harsh winters and extreme temperature swings.",
+        "windSpeedRange" : {"min": 2, "max": 5},
+        "windDirections" : {"N": 25, "NNW": 20, "NW": 15, "NNE": 10, "NE": 5, "W": 5, "E": 5, "S": 3, "SE": 2, "SW": 2, "ENE": 3, "SSW": 2, "SSE": 1, "ESE": 1, "WNW": 1},
         "temperatures"   : { "_default": {"min": -10, "max": 15} },
         "presets"        : {
           "clear00000000000": {"id": "clear",         "enabled": true, "chance": 5},
@@ -280,9 +282,10 @@
           "cloudy0000000000": {"id": "cloudy",        "enabled": true, "chance": 3},
           "overcast00000000": {"id": "overcast",      "enabled": true, "chance": 3},
           "snow000000000000": {"id": "snow",          "enabled": true, "chance": 4},
-          "blizzard00000000": {"id": "blizzard",      "enabled": true, "chance": 2},
+          "blizzard00000000": {"id": "blizzard",      "enabled": true, "chance": 2, "tempMax": "5-"},
           "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 2},
           "windy00000000000": {"id": "windy",         "enabled": true, "chance": 3},
+          "sleet00000000000": {"id": "sleet",         "enabled": true, "chance": 2},
           "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 2},
           "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 3},
           "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 1},
@@ -293,19 +296,19 @@
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -18, "max": 10},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "blizzard", "chance": 5} ]
+            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "clear", "chance": 10}, {"id": "partly-cloudy", "chance": 10}, {"id": "snow", "chance": 15}, {"id": "blizzard", "chance": 5}, {"id": "sleet", "chance": 5} ]
           },
           "Summer": {
-            "temperatures": {"min": 10, "max": 41},
-            "presets"     : [ {"id": "snow", "chance": 0}, {"id": "blizzard", "chance": 0}, {"id": "clear", "chance": 20}, {"id": "windy", "chance": 10} ]
+            "temperatures": {"min": 10, "max": 30},
+            "presets"     : [ {"id": "snow", "chance": 0}, {"id": "blizzard", "chance": 0}, {"id": "sleet", "chance": 0}, {"id": "clear", "chance": 20}, {"id": "windy", "chance": 10}, {"id": "thunderstorm", "chance": 8}, {"id": "rain", "chance": 5}, {"id": "luminous-sky", "chance": 0} ]
           },
           "Autumn": {
             "temperatures": {"min": -3, "max": 19},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "snow", "chance": 10}, {"id": "fog", "chance": 8} ]
+            "presets"     : [ {"id": "clear", "chance": 10}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 8}, {"id": "snow", "chance": 10}, {"id": "sleet", "chance": 8}, {"id": "fog", "chance": 8}, {"id": "gravewind", "chance": 5} ]
           },
           "Winter": {
             "temperatures": {"min": -35, "max": -4},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 15}, {"id": "permafrost-surge", "chance": 5} ]
+            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "sleet", "chance": 0}, {"id": "clear", "chance": 5}, {"id": "partly-cloudy", "chance": 5}, {"id": "overcast", "chance": 25}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 15}, {"id": "permafrost-surge", "chance": 5}, {"id": "luminous-sky", "chance": 8}, {"id": "nullfront", "chance": 5} ]
           }
         }
       },
@@ -313,6 +316,8 @@
         "id"             : "lys",
         "name"           : "Merchant Confederacy of Lys",
         "description"    : "Coastal trading empire with temperate, mild weather year-round.",
+        "windSpeedRange" : {"min": 0, "max": 3},
+        "windDirections" : {"W": 20, "WSW": 25, "SW": 20, "SSW": 10, "WNW": 10, "S": 5, "NW": 3, "N": 2, "NNW": 3, "SE": 1, "E": 1},
         "temperatures"   : { "_default": {"min": 8, "max": 25} },
         "presets"        : {
           "clear00000000000": {"id": "clear",         "enabled": true, "chance": 6},
@@ -320,8 +325,9 @@
           "cloudy0000000000": {"id": "cloudy",        "enabled": true, "chance": 3},
           "rain000000000000": {"id": "rain",          "enabled": true, "chance": 4},
           "drizzle000000000": {"id": "drizzle",       "enabled": true, "chance": 3},
-          "thunderstorm0000": {"id": "thunderstorm",  "enabled": true, "chance": 2},
+          "thunderstorm0000": {"id": "thunderstorm",  "enabled": true, "chance": 2, "tempMin": "3+"},
           "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 3},
+          "mist000000000000": {"id": "mist",          "enabled": true, "chance": 2},
           "windy00000000000": {"id": "windy",         "enabled": true, "chance": 3},
           "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 2},
           "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 1},
@@ -332,20 +338,20 @@
         },
         "seasonOverrides": {
           "Spring": {
-            "temperatures": {"min": 5, "max": 25},
-            "presets"     : [ {"id": "fog", "chance": 0}, {"id": "sunshower", "chance": 8} ]
+            "temperatures": {"max": "7+"},
+            "presets"     : [ {"id": "fog", "chance": 6}, {"id": "mist", "chance": 5}, {"id": "sunshower", "chance": 8} ]
           },
           "Summer": {
-            "temperatures": {"min": 18, "max": 38},
-            "presets"     : [ {"id": "rain", "chance": 5}, {"id": "drizzle", "chance": 0}, {"id": "fog", "chance": 0}, {"id": "clear", "chance": 35}, {"id": "thunderstorm", "chance": 8} ]
+            "temperatures": {"max": "1+"},
+            "presets"     : [ {"id": "rain", "chance": 5}, {"id": "drizzle", "chance": 0}, {"id": "fog", "chance": 0}, {"id": "mist", "chance": 0}, {"id": "clear", "chance": 35}, {"id": "thunderstorm", "chance": 8} ]
           },
           "Autumn": {
-            "temperatures": {"min": 8, "max": 28},
-            "presets"     : [ {"id": "rain", "chance": 12}, {"id": "fog", "chance": 5} ]
+            "temperatures": {"min": "3+", "max": "3+"},
+            "presets"     : [ {"id": "rain", "chance": 12}, {"id": "fog", "chance": 8}, {"id": "mist", "chance": 6}, {"id": "drizzle", "chance": 8} ]
           },
           "Winter": {
-            "temperatures": {"min": -5, "max": 18},
-            "presets"     : [ {"id": "snow", "chance": 0}, {"id": "blizzard", "chance": 0}, {"id": "rain", "chance": 15}, {"id": "drizzle", "chance": 10} ]
+            "temperatures": {"min": 2, "max": 14},
+            "presets"     : [ {"id": "snow", "chance": 0}, {"id": "blizzard", "chance": 0}, {"id": "rain", "chance": 15}, {"id": "drizzle", "chance": 10}, {"id": "fog", "chance": 8}, {"id": "mist", "chance": 5} ]
           }
         }
       },
@@ -353,6 +359,8 @@
         "id"             : "sanctus",
         "name"           : "Theocracy of Sanctus Lumen",
         "description"    : "Mountain highlands with fortress-monasteries enduring harsh, arctic conditions.",
+        "windSpeedRange" : {"min": 1, "max": 5},
+        "windDirections" : {"N": 30, "NNE": 20, "NE": 15, "E": 10, "NW": 10, "NNW": 5, "ENE": 3, "W": 3, "WNW": 2, "S": 1, "SE": 1},
         "temperatures"   : { "_default": {"min": -20, "max": 5} },
         "presets"        : {
           "clear00000000000": {"id": "clear",         "enabled": true, "chance": 4},
@@ -364,7 +372,7 @@
           "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 2},
           "windy00000000000": {"id": "windy",         "enabled": true, "chance": 4},
           "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 3},
-          "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 4},
+          "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 4, "tempMax": "3-"},
           "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 2},
           "gravewind0000000": {"id": "gravewind",     "enabled": true, "chance": 3},
           "nullfront0000000": {"id": "nullfront",     "enabled": true, "chance": 4},
@@ -373,19 +381,19 @@
         "seasonOverrides": {
           "Spring": {
             "temperatures": {"min": -25, "max": 5},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 20}, {"id": "luminous-sky", "chance": 8} ]
+            "presets"     : [ {"id": "clear", "chance": 5}, {"id": "partly-cloudy", "chance": 5}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 20}, {"id": "luminous-sky", "chance": 6} ]
           },
           "Summer": {
             "temperatures": {"min": -5, "max": 22},
-            "presets"     : [ {"id": "snow", "chance": 5}, {"id": "blizzard", "chance": 0}, {"id": "clear", "chance": 20}, {"id": "luminous-sky", "chance": 10} ]
+            "presets"     : [ {"id": "snow", "chance": 5}, {"id": "blizzard", "chance": 0}, {"id": "clear", "chance": 20}, {"id": "luminous-sky", "chance": 3} ]
           },
           "Autumn": {
             "temperatures": {"min": -20, "max": 8},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "nullfront", "chance": 8} ]
+            "presets"     : [ {"id": "clear", "chance": 5}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "nullfront", "chance": 8}, {"id": "luminous-sky", "chance": 6}, {"id": "gravewind", "chance": 5} ]
           },
           "Winter": {
-            "temperatures": {"min": -50, "max": -20},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 20}, {"id": "permafrost-surge", "chance": 10} ]
+            "temperatures": {"min": -42, "max": -18},
+            "presets"     : [ {"id": "clear", "chance": 2}, {"id": "partly-cloudy", "chance": 2}, {"id": "overcast", "chance": 20}, {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "thunderstorm", "chance": 0}, {"id": "snow", "chance": 25}, {"id": "blizzard", "chance": 20}, {"id": "permafrost-surge", "chance": 10}, {"id": "luminous-sky", "chance": 12} ]
           }
         }
       },
@@ -393,6 +401,8 @@
         "id"             : "thornwood",
         "name"           : "Thornwood Marches",
         "description"    : "Ancient primeval forest where Gyre influence is strongest near the crash site.",
+        "windSpeedRange" : {"min": 0, "max": 2},
+        "windDirections" : {"E": 15, "ENE": 12, "NE": 10, "SE": 10, "ESE": 8, "S": 8, "N": 8, "W": 6, "NNE": 5, "SSE": 5, "SW": 4, "NW": 4, "SSW": 2, "NNW": 1, "WNW": 1, "WSW": 1},
         "temperatures"   : { "_default": {"min": 0, "max": 20} },
         "presets"        : {
           "clear00000000000": {"id": "clear",         "enabled": true, "chance": 4},
@@ -403,29 +413,29 @@
           "fog0000000000000": {"id": "fog",           "enabled": true, "chance": 4},
           "mist000000000000": {"id": "mist",          "enabled": true, "chance": 4},
           "thunderstorm0000": {"id": "thunderstorm",  "enabled": true, "chance": 2},
-          "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 4},
+          "aetherhaze000000": {"id": "aether-haze",   "enabled": true, "chance": 4, "tempMin": "2+", "tempMax": "2+"},
           "luminoussky00000": {"id": "luminous-sky",  "enabled": true, "chance": 2},
-          "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 5},
+          "veilfall00000000": {"id": "veilfall",      "enabled": true, "chance": 5, "tempMin": "3-", "tempMax": "3-"},
           "gravewind0000000": {"id": "gravewind",     "enabled": true, "chance": 4},
           "nullfront0000000": {"id": "nullfront",     "enabled": true, "chance": 3},
           "leysurge00000000": {"id": "ley-surge",     "enabled": true, "chance": 5}
         },
         "seasonOverrides": {
           "Spring": {
-            "temperatures": {"min": -8, "max": 22},
-            "presets"     : [ {"id": "mist", "chance": 15}, {"id": "fog", "chance": 10}, {"id": "veilfall", "chance": 8}, {"id": "ley-surge", "chance": 10} ]
+            "temperatures": {"min": -2, "max": 20},
+            "presets"     : [ {"id": "mist", "chance": 15}, {"id": "fog", "chance": "+5"}, {"id": "veilfall", "chance": 8}, {"id": "ley-surge", "chance": 8} ]
           },
           "Summer": {
-            "temperatures": {"min": 12, "max": 35},
-            "presets"     : [ {"id": "fog", "chance": 5}, {"id": "mist", "chance": 8}, {"id": "thunderstorm", "chance": 8}, {"id": "aether-haze", "chance": 10} ]
+            "temperatures": {"min": 12, "max": 30},
+            "presets"     : [ {"id": "fog", "chance": 5}, {"id": "mist", "chance": 8}, {"id": "thunderstorm", "chance": "-2"}, {"id": "aether-haze", "chance": 10} ]
           },
           "Autumn": {
-            "temperatures": {"min": -2, "max": 25},
-            "presets"     : [ {"id": "fog", "chance": 15}, {"id": "mist", "chance": 12}, {"id": "gravewind", "chance": 10}, {"id": "veilfall", "chance": 10} ]
+            "temperatures": {"min": -2, "max": 22},
+            "presets"     : [ {"id": "fog", "chance": "+5"}, {"id": "mist", "chance": 12}, {"id": "gravewind", "chance": 10}, {"id": "veilfall", "chance": 10} ]
           },
           "Winter": {
-            "temperatures": {"min": -25, "max": 5},
-            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "snow", "chance": 15}, {"id": "fog", "chance": 10}, {"id": "gravewind", "chance": 8}, {"id": "nullfront", "chance": 8} ]
+            "temperatures": {"min": -15, "max": 5},
+            "presets"     : [ {"id": "rain", "chance": 0}, {"id": "drizzle", "chance": 0}, {"id": "snow", "chance": "-5"}, {"id": "fog", "chance": "+5"}, {"id": "gravewind", "chance": 8}, {"id": "nullfront", "chance": 8} ]
           }
         }
       }

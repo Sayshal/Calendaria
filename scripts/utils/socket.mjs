@@ -310,7 +310,7 @@ export class CalendariaSocket {
         await WeatherManager.generateAndSetWeather({ ...options, fromSocket: true });
         break;
       case 'clear':
-        await WeatherManager.clearWeather(true, true);
+        await WeatherManager.clearWeather(true, true, options.zoneId);
         break;
     }
   }

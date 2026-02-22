@@ -1,0 +1,55 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  <div class="standard-form">
+
+    <fieldset>
+      <legend>{{localize "CALENDARIA.ClimateEditor.Presets.Instructions"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.ClimateEditor.Presets.InstructionsHint"}}</p>
+    </fieldset>
+
+    {{#each categories}}
+      <fieldset class="preset-category">
+        <legend>{{this.label}}</legend>
+        <div class="preset-list">
+          <div class="preset-row preset-header">
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.EnabledTooltip'}}"><i class="fas fa-check"></i></span>
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.IconTooltip'}}"><i class="fas fa-palette"></i></span>
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.NameTooltip'}}">{{localize "CALENDARIA.WeatherEditor.Name"}}</span>
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.WeightTooltip'}}">{{localize "CALENDARIA.Common.Weight"}}</span>
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.TempMinTooltip'}}">{{localize "CALENDARIA.Common.TempMin"}}</span>
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.TempMaxTooltip'}}">{{localize "CALENDARIA.Common.TempMax"}}</span>
+            <span data-tooltip="{{localize 'CALENDARIA.ClimateEditor.Presets.InertiaTooltip'}}">{{localize "CALENDARIA.Weather.InertiaWeight.Label"}}</span>
+          </div>
+          {{#each this.presets}}
+            <div class="preset-row" data-preset-id="{{this.id}}">
+              <input type="checkbox" name="preset_{{this.id}}_enabled" {{#if this.enabled}}checked{{/if}}>
+              <span class="preset-icon" style="color: {{this.color}}"><i class="fas {{this.icon}}"></i></span>
+              <span class="preset-name">
+                <input type="text" class="preset-alias-input" value="{{this.alias}}" placeholder="{{this.label}}"
+                  data-preset-id="{{this.id}}" data-zone-id="{{../../zoneId}}">
+                {{#if this.hasAlias}}
+                  <button type="button" class="preset-reset-alias icon-btn" data-action="resetAlias"
+                    data-preset-id="{{this.id}}" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Reset'}}">
+                    <i class="fas fa-undo"></i>
+                  </button>
+                {{/if}}
+              </span>
+              <input type="number" name="preset_{{this.id}}_chance"
+                value="{{this.chance}}" min="0" step="0.01"
+                placeholder="0.00">
+              <input type="text" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
+                class="preset-temp-input {{#if this.isRelativeTempMin}}modifier-relative{{/if}}">
+              <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
+                class="preset-temp-input {{#if this.isRelativeTempMax}}modifier-relative{{/if}}">
+              <input type="number" name="preset_{{this.id}}_inertiaWeight" value="{{this.inertiaWeight}}"
+                placeholder="{{this.defaultInertiaWeight}}" min="0" max="2" step="0.1"
+                class="preset-inertia-input" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Weather.InertiaWeight.Tooltip'}}"
+                title="{{localize 'CALENDARIA.Weather.InertiaWeight.Tooltip'}}">
+            </div>
+          {{/each}}
+        </div>
+      </fieldset>
+    {{/each}}
+
+  </div>
+</section>

@@ -1,0 +1,14 @@
+<footer class="form-footer">
+  {{#if isCustom}}
+    <button type="button" data-action="deletePreset">
+      <i class="fas fa-trash"></i> {{localize "CALENDARIA.WeatherEditor.DeleteWeather"}}
+    </button>
+  {{else}}
+    <button type="button" data-action="resetVisuals">
+      <i class="fas fa-undo"></i> {{localize "CALENDARIA.WeatherEditor.ResetDefaults"}}
+    </button>
+  {{/if}}
+  <button type="button" data-action="createPreset" class="primary">
+    <i class="fas fa-plus"></i> {{localize "CALENDARIA.WeatherEditor.CreateNew"}}
+  </button>
+</footer>

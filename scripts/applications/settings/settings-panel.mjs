@@ -14,8 +14,7 @@ import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
-import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
-import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/climate-data.mjs';
+import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset, getForcedTheme, initializeTheme } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { BigCal } from '../big-cal.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
@@ -39,7 +38,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-settings-panel',
     classes: ['calendaria', 'settings-panel', 'standard-form'],
     tag: 'form',
-    window: { icon: 'fas fa-cog', resizable: false, title: 'CALENDARIA.SettingsPanel.Title' },
+    window: {
+      icon: 'fas fa-cog',
+      resizable: false,
+      title: 'CALENDARIA.SettingsPanel.Title',
+      controls: [{ action: 'toggleNavCollapse', icon: 'fa-solid fa-bars', label: 'CALENDARIA.SettingsPanel.NavCollapse.Tooltip' }]
+    },
     position: { width: 900, height: 835 },
     form: {
       handler: SettingsPanel.#onSubmit,
@@ -69,14 +73,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
       removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger,
-      addWeatherPreset: SettingsPanel.#onAddWeatherPreset,
-      editWeatherPreset: SettingsPanel.#onEditWeatherPreset,
-      removeWeatherPreset: SettingsPanel.#onRemoveWeatherPreset,
+      openWeatherEditor: SettingsPanel.#onOpenWeatherEditor,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
       resetSection: SettingsPanel.#onResetSection,
       exportSettings: SettingsPanel.#onExportSettings,
-      importSettings: SettingsPanel.#onImportSettings
+      importSettings: SettingsPanel.#onImportSettings,
+      toggleNavCollapse: SettingsPanel.#onToggleNavCollapse
     }
   };
 
@@ -183,9 +186,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     return { tabGroups, ungroupedTabs };
   }
 
+  /** Whether the nav is collapsed to icon-only mode */
+  #navCollapsed = false;
+
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
+    if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     const themeModeSelect = this.element.querySelector('select[name="themeMode"]');
     if (themeModeSelect && !themeModeSelect.dataset.listenerAttached) {
       themeModeSelect.dataset.listenerAttached = 'true';
@@ -207,12 +214,38 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     this.#setupSearchListeners();
+    this.#setupDependentFields();
+  }
+
+  /** Wire up data-depends-on fields to toggle disabled state based on a parent checkbox. */
+  #setupDependentFields() {
+    for (const group of this.element.querySelectorAll('[data-depends-on]')) {
+      const parentName = group.dataset.dependsOn;
+      const parentInput = this.element.querySelector(`[name="${parentName}"]`);
+      if (!parentInput) continue;
+      const toggle = () => {
+        const enabled = parentInput.checked;
+        group.classList.toggle('disabled', !enabled);
+        for (const input of group.querySelectorAll('input, select')) input.disabled = !enabled;
+      };
+      toggle();
+      if (!parentInput.dataset.dependencyAttached) {
+        parentInput.dataset.dependencyAttached = 'true';
+        parentInput.addEventListener('change', toggle);
+      }
+    }
   }
 
   /** @override */
   _onClose(options) {
     super._onClose(options);
     this.#destroySearchDropdown();
+  }
+
+  /** Toggle nav between full labels and icon-only mode. */
+  static #onToggleNavCollapse() {
+    this.#navCollapsed = !this.#navCollapsed;
+    this.element.classList.toggle('nav-collapsed', this.#navCollapsed);
   }
 
   /** Track save indicator state across re-renders */
@@ -546,7 +579,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.SYNC_CLOCK_PAUSE]: { tab: 'time', label: 'CALENDARIA.Settings.SyncClockPause.Name' },
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
+    [SETTINGS.TIME_ADVANCE_INTERVAL]: { tab: 'time', label: 'CALENDARIA.Settings.TimeAdvanceInterval.Name' },
+    [SETTINGS.AUTO_GENERATE_WEATHER]: { tab: 'weather', label: 'CALENDARIA.Settings.AutoGenerate.Name' },
     [SETTINGS.TEMPERATURE_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.TemperatureUnit.Name' },
+    [SETTINGS.PRECIPITATION_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.PrecipitationUnit.Name' },
+    [SETTINGS.WIND_SPEED_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.WindSpeedUnit.Name' },
+    [SETTINGS.FORCE_THEME]: { tab: 'theme', label: 'CALENDARIA.Settings.ForceTheme.Name' },
     [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.ThemeEditor.PresetSelect' },
     [SETTINGS.CUSTOM_THEME_COLORS]: { tab: 'theme', label: 'CALENDARIA.SettingsPanel.Section.Theme' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
@@ -558,6 +596,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.DARKNESS_SYNC_ALL_SCENES]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessSyncAllScenes.Name' },
     [SETTINGS.DARKNESS_WEATHER_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessWeatherSync.Name' },
     [SETTINGS.AMBIENCE_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.AmbienceSync.Name' },
+    [SETTINGS.DARKNESS_MOON_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessMoonSync.Name' },
     [SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER]: { tab: 'canvas', label: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name' },
     [SETTINGS.PRIMARY_GM]: { tab: 'module', label: 'CALENDARIA.Settings.PrimaryGM.Name' },
     [SETTINGS.LOGGING_LEVEL]: { tab: 'module', label: 'CALENDARIA.Settings.Logger.Name' },
@@ -573,6 +612,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.HUD_TRAY_DIRECTION]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDTrayDirection.Name' },
     [SETTINGS.HUD_COMBAT_COMPACT]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDCombatCompact.Name' },
     [SETTINGS.HUD_COMBAT_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDCombatHide.Name' },
+    [SETTINGS.HUD_DOME_BELOW]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDDomeBelow.Name' },
     [SETTINGS.HUD_DOME_AUTO_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.DomeAutoHide.Name' },
     [SETTINGS.HUD_AUTO_FADE]: { tab: 'hud', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.HUD_IDLE_OPACITY]: { tab: 'hud', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
@@ -621,7 +661,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.STOPWATCH_AUTO_START_TIME]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name' },
     [SETTINGS.CUSTOM_CATEGORIES]: { tab: 'notes', label: 'CALENDARIA.SettingsPanel.Section.Categories' },
     [SETTINGS.MACRO_TRIGGERS]: { tab: 'macros', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
-    [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'CALENDARIA.SettingsPanel.Section.WeatherPresets' }
+    [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'CALENDARIA.SettingsPanel.Section.WeatherPresets' },
+    [SETTINGS.FXMASTER_TOP_DOWN]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.TopDown.Name' },
+    [SETTINGS.FXMASTER_BELOW_TOKENS]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowTokens.Name' },
+    [SETTINGS.WEATHER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundFx.Name' }
   };
 
   /**
@@ -638,6 +681,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.HUD_TRAY_DIRECTION,
       SETTINGS.HUD_COMBAT_COMPACT,
       SETTINGS.HUD_COMBAT_HIDE,
+      SETTINGS.HUD_DOME_BELOW,
       SETTINGS.HUD_DOME_AUTO_HIDE,
       SETTINGS.HUD_AUTO_FADE,
       SETTINGS.HUD_IDLE_OPACITY,
@@ -697,15 +741,17 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
     'stopwatch-sticky': [SETTINGS.STOPWATCH_STICKY_STATES],
     // Time tab sections
-    'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT],
-    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.SYNC_CLOCK_PAUSE],
+    'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
+    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_TO_SUNRISE, SETTINGS.SYNC_CLOCK_PAUSE],
     // Chat tab sections
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     // Canvas tab sections
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [SETTINGS.DARKNESS_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC, SETTINGS.AMBIENCE_SYNC, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER],
     // Weather tab sections
-    'weather-temperature': [SETTINGS.TEMPERATURE_UNIT],
+    'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.PRECIPITATION_UNIT],
+    'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX],
+    fxmaster: [SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_BELOW_TOKENS],
     // Module tab sections
     'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
@@ -778,9 +824,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeContext(context) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+    context.restToSunrise = game.settings.get(MODULE.ID, SETTINGS.REST_TO_SUNRISE);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
     context.timeSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER);
+    context.timeAdvanceInterval = game.settings.get(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL);
     const currentIncrement = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT);
     const incrementLabels = {
       second: localize('CALENDARIA.Common.Second'),
@@ -924,7 +972,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     context.hudCombatCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
     context.hudCombatHide = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE);
+    context.hudDomeBelow = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW);
     context.hudDomeAutoHide = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE);
+    context.hudShowAllMoons = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
     context.hudAutoFade = game.settings.get(MODULE.ID, SETTINGS.HUD_AUTO_FADE);
     context.hudIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY);
     context.hudWidthScale = game.settings.get(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE);
@@ -1252,23 +1302,38 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareWeatherContext(context) {
+    context.autoGenerateWeather = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER);
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
     context.temperatureUnitOptions = [
       { value: 'celsius', label: localize('CALENDARIA.Settings.TemperatureUnit.Celsius'), selected: tempUnit === 'celsius' },
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
     context.temperatureUnitSymbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
-    const rawPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    context.customWeatherPresets = rawPresets.map((p) => ({
-      ...p,
-      tempMin: toDisplayUnit(p.tempMin),
-      tempMax: toDisplayUnit(p.tempMax)
-    }));
+    const precipUnit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
+    context.precipitationUnitOptions = [
+      { value: 'metric', label: localize('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
+      { value: 'imperial', label: localize('CALENDARIA.Settings.PrecipitationUnit.Imperial'), selected: precipUnit === 'imperial' }
+    ];
+    const windUnit = game.settings.get(MODULE.ID, SETTINGS.WIND_SPEED_UNIT);
+    context.windSpeedUnitOptions = [
+      { value: 'kph', label: localize('CALENDARIA.Settings.WindSpeedUnit.Kph'), selected: windUnit === 'kph' },
+      { value: 'mph', label: localize('CALENDARIA.Settings.WindSpeedUnit.Mph'), selected: windUnit === 'mph' }
+    ];
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
     context.hasZones = zones.length > 0;
     context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZone?.id }));
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+    context.weatherInertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+    context.weatherHistoryDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
+    context.forecastAccuracy = game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
+    context.forecastDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
+    context.gmOverrideClearsForecast = game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST) ?? true;
+    context.fxmasterActive = game.modules.get('fxmaster')?.active ?? false;
+    context.fxmasterPlusActive = game.modules.get('fxmaster-plus')?.active ?? false;
+    context.fxmasterTopDown = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN);
+    context.fxmasterBelowTokens = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS);
+    context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
   }
 
   /**
@@ -1278,16 +1343,33 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareThemeContext(context) {
     const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+    const forcedTheme = getForcedTheme();
 
-    // Theme modes dropdown
+    // Force theme dropdown (GM only)
+    if (context.isGM) {
+      const forceTheme = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME) || 'none';
+      context.forceThemeOptions = [
+        { value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' },
+        { value: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: forceTheme === 'dark' },
+        { value: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: forceTheme === 'highContrast' },
+        { value: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: forceTheme === 'custom' }
+      ];
+    }
+
+    // Theme enforcement state
+    context.themeForced = !!forcedTheme;
+    context.forcedThemeName = forcedTheme ? localize(`CALENDARIA.ThemeEditor.Presets.${forcedTheme.charAt(0).toUpperCase() + forcedTheme.slice(1)}`) || forcedTheme : '';
+
+    // Theme modes dropdown — show forced theme when enforced
+    const displayMode = forcedTheme || themeMode;
     context.themeModes = [
-      { key: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: themeMode === 'dark' },
-      { key: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: themeMode === 'highContrast' },
-      { key: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: themeMode === 'custom' }
+      { key: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: displayMode === 'dark' },
+      { key: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: displayMode === 'highContrast' },
+      { key: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: displayMode === 'custom' }
     ];
 
-    // Only show custom color editor when in custom mode
-    context.showCustomColors = themeMode === 'custom';
+    // Only show custom color editor when in custom mode and not forced
+    context.showCustomColors = themeMode === 'custom' && !forcedTheme;
 
     if (context.showCustomColors) {
       const categories = {};
@@ -1314,6 +1396,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.darknessSyncAllScenes = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES);
     context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
     context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
+    context.colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
+    context.darknessMoonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
     context.defaultBrightnessMultiplier = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
   }
 
@@ -1432,7 +1516,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       changeWeather: { player: false, trusted: false, assistant: true },
       editNotes: { player: false, trusted: true, assistant: true },
       deleteNotes: { player: false, trusted: false, assistant: true },
-      editCalendars: { player: false, trusted: false, assistant: false }
+      editCalendars: { player: false, trusted: false, assistant: false },
+      viewWeatherForecast: { player: false, trusted: true, assistant: true }
     };
     const saved = game.settings.get(MODULE.ID, SETTINGS.PERMISSIONS) || {};
     context.permissions = {};
@@ -1464,6 +1549,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if ('timeSpeedIncrement' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT, data.timeSpeedIncrement);
       TimeClock.loadSpeedFromSettings();
     }
+    if ('timeAdvanceInterval' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL, Math.max(1, Math.min(120, Number(data.timeAdvanceInterval) || 60)));
+      TimeClock.restartIntervals();
+    }
 
     if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('toolbarApps' in data) {
@@ -1488,7 +1577,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudTrayDirection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_TRAY_DIRECTION, data.hudTrayDirection);
     if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);
     if ('hudCombatHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE, data.hudCombatHide);
+    if ('hudDomeBelow' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DOME_BELOW, data.hudDomeBelow);
     if ('hudDomeAutoHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE, data.hudDomeAutoHide);
+    if ('hudShowAllMoons' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS, data.hudShowAllMoons);
     if ('hudAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_AUTO_FADE, data.hudAutoFade);
     if ('hudIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY, Number(data.hudIdleOpacity));
     if ('hudWidthScale' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE, Number(data.hudWidthScale));
@@ -1499,15 +1590,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('darknessSync' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
       if (data.darknessSync && game.pf2e?.worldClock) {
-        const pf2eWorldClock = game.settings.get('pf2e', 'worldClock');
-        if (pf2eWorldClock?.syncDarkness) await game.settings.set('pf2e', 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+        const systemId = game.system.id;
+        const pf2eWorldClock = game.settings.get(systemId, 'worldClock');
+        if (pf2eWorldClock?.syncDarkness) await game.settings.set(systemId, 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
       }
     }
 
     if ('darknessSyncAllScenes' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES, data.darknessSyncAllScenes);
     if ('darknessWeatherSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC, data.darknessWeatherSync);
     if ('ambienceSync' in data) await game.settings.set(MODULE.ID, SETTINGS.AMBIENCE_SYNC, data.ambienceSync);
+    if ('colorShiftSync' in data) await game.settings.set(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, data.colorShiftSync);
+    if ('darknessMoonSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, data.darknessMoonSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
+    if ('restToSunrise' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_TO_SUNRISE, data.restToSunrise);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
     if ('chatTimestampShowTime' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, data.chatTimestampShowTime);
@@ -1526,7 +1621,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     if ('showActiveCalendarToPlayers' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS, data.showActiveCalendarToPlayers);
+    if ('autoGenerateWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!data.autoGenerateWeather);
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
+    if ('precipitationUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, data.precipitationUnit);
+    if ('windSpeedUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.WIND_SPEED_UNIT, data.windSpeedUnit);
+    if ('weatherInertia' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_INERTIA, parseFloat(data.weatherInertia));
+    if ('weatherHistoryDays' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS, parseInt(data.weatherHistoryDays));
+    if ('forecastAccuracy' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_ACCURACY, parseInt(data.forecastAccuracy));
+    if ('forecastDays' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_DAYS, parseInt(data.forecastDays));
+    if ('gmOverrideClearsForecast' in data) await game.settings.set(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST, !!data.gmOverrideClearsForecast);
+    if ('fxmasterTopDown' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN, !!data.fxmasterTopDown);
+    if ('fxmasterBelowTokens' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, !!data.fxmasterBelowTokens);
+    if ('weatherSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
@@ -1631,7 +1737,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
     if (data.permissions) {
-      const permissionKeys = ['viewBigCal', 'viewMiniCal', 'viewTimeKeeper', 'addNotes', 'changeDateTime', 'changeActiveCalendar', 'changeWeather', 'editNotes', 'deleteNotes', 'editCalendars'];
+      const permissionKeys = [
+        'viewBigCal',
+        'viewMiniCal',
+        'viewTimeKeeper',
+        'addNotes',
+        'changeDateTime',
+        'changeActiveCalendar',
+        'changeWeather',
+        'editNotes',
+        'deleteNotes',
+        'editCalendars',
+        'viewWeatherForecast'
+      ];
       const permissions = {};
       for (const key of permissionKeys) {
         if (data.permissions[key]) {
@@ -1653,6 +1771,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
       applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
+    }
+
+    if ('forceTheme' in data && game.user.isGM) {
+      const oldForce = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
+      await game.settings.set(MODULE.ID, SETTINGS.FORCE_THEME, data.forceTheme);
+      if (data.forceTheme === 'custom') {
+        const gmColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+        await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, { ...DEFAULT_COLORS, ...gmColors });
+      }
+      if (oldForce !== data.forceTheme) initializeTheme();
     }
 
     if (data.categories) {
@@ -1732,7 +1860,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'hudTrayDirection',
       'hudCombatCompact',
       'hudCombatHide',
+      'hudDomeBelow',
       'hudDomeAutoHide',
+      'hudShowAllMoons',
       'hudAutoFade',
       'hudIdleOpacity',
       'hudWidthScale',
@@ -2180,176 +2310,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Open weather preset dialog for adding or editing.
-   * @param {object|null} preset - Existing preset to edit, or null for new
-   * @returns {Promise<object|null>} The preset data or null if cancelled
+   * Open the Weather Editor application.
    */
-  static async #openWeatherPresetDialog(preset = null) {
-    const isNew = !preset;
-    const data = preset || { label: '', icon: 'fa-cloud', color: '#888888', tempMin: 10, tempMax: 25, darknessPenalty: 0, environmentBase: null, environmentDark: null };
-    const envBase = data.environmentBase ?? {};
-    const envDark = data.environmentDark ?? {};
-    const unitSymbol = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
-    const displayMin = toDisplayUnit(data.tempMin);
-    const displayMax = toDisplayUnit(data.tempMax);
-
-    const content = `
-      <form class="weather-preset-dialog">
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder')}</label>
-          <input type="text" name="label" value="${data.label}" placeholder="${localize('CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder')}" autofocus>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.Icon')}</label>
-          <input type="text" name="icon" value="${data.icon}" placeholder="fa-cloud">
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.IconTooltip')}</p>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.Color')}</label>
-          <input type="color" name="color" value="${data.color}">
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.TempRange')}</label>
-          <div class="form-fields">
-            <input type="number" name="tempMin" value="${displayMin}" placeholder="0">
-            <span>–</span>
-            <input type="number" name="tempMax" value="${displayMax}" placeholder="25">
-            <span>${unitSymbol}</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenalty')}</label>
-          <input type="number" name="darknessPenalty" value="${data.darknessPenalty}" step="0.05" min="-0.5" max="0.5">
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenaltyTooltip')}</p>
-        </div>
-        <fieldset>
-          <legend>${localize('CALENDARIA.SettingsPanel.WeatherPresets.EnvironmentLighting')}</legend>
-          <p class="hint">${localize('CALENDARIA.SettingsPanel.WeatherPresets.EnvironmentLightingHint')}</p>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.BaseHue')}</label>
-            <div class="form-fields">
-              <input type="number" name="baseHue" min="0" max="360" step="1" value="${envBase.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-              <span>°</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.BaseSaturation')}</label>
-            <div class="form-fields">
-              <input type="number" name="baseSaturation" min="0" max="1" step="0.1" value="${envBase.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarkHue')}</label>
-            <div class="form-fields">
-              <input type="number" name="darkHue" min="0" max="360" step="1" value="${envDark.hue ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-              <span>°</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.DarkSaturation')}</label>
-            <div class="form-fields">
-              <input type="number" name="darkSaturation" min="0" max="1" step="0.1" value="${envDark.saturation ?? ''}" placeholder="${localize('CALENDARIA.Common.Default')}">
-            </div>
-          </div>
-        </fieldset>
-      </form>
-    `;
-
-    const title = isNew ? localize('CALENDARIA.SettingsPanel.WeatherPresets.Add') : localize('CALENDARIA.SettingsPanel.WeatherPresets.Edit');
-    return foundry.applications.api.DialogV2.prompt({
-      window: { title },
-      position: { width: 'auto', height: 'auto' },
-      content,
-      ok: {
-        callback: (_event, button, _dialog) => {
-          const form = button.form;
-          const baseHue = form.elements.baseHue.value ? parseFloat(form.elements.baseHue.value) : null;
-          const baseSat = form.elements.baseSaturation.value ? parseFloat(form.elements.baseSaturation.value) : null;
-          const darkHue = form.elements.darkHue.value ? parseFloat(form.elements.darkHue.value) : null;
-          const darkSat = form.elements.darkSaturation.value ? parseFloat(form.elements.darkSaturation.value) : null;
-          return {
-            label: form.elements.label.value.trim(),
-            icon: form.elements.icon.value.trim() || 'fa-cloud',
-            color: form.elements.color.value || '#888888',
-            tempMin: fromDisplayUnit(Number(form.elements.tempMin.value) || 10),
-            tempMax: fromDisplayUnit(Number(form.elements.tempMax.value) || 25),
-            darknessPenalty: Number(form.elements.darknessPenalty.value) || 0,
-            environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
-            environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null
-          };
-        }
-      }
-    });
-  }
-
-  /**
-   * Add a custom weather preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async #onAddWeatherPreset(_event, _target) {
-    const result = await SettingsPanel.#openWeatherPresetDialog();
-    if (!result || !result.label) return;
-
-    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    currentPresets.push({
-      id: foundry.utils.randomID(),
-      label: result.label,
-      icon: result.icon,
-      color: result.color,
-      category: 'custom',
-      tempMin: result.tempMin,
-      tempMax: result.tempMax,
-      darknessPenalty: result.darknessPenalty,
-      environmentBase: result.environmentBase,
-      environmentDark: result.environmentDark,
-      description: ''
-    });
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, currentPresets);
-    this.render({ parts: ['weather'] });
-  }
-
-  /**
-   * Edit an existing custom weather preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async #onEditWeatherPreset(_event, target) {
-    const presetId = target.dataset.presetId;
-    if (!presetId) return;
-
-    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const preset = currentPresets.find((p) => p.id === presetId);
-    if (!preset) return;
-
-    const result = await SettingsPanel.#openWeatherPresetDialog(preset);
-    if (!result || !result.label) return;
-
-    preset.label = result.label;
-    preset.icon = result.icon;
-    preset.color = result.color;
-    preset.tempMin = result.tempMin;
-    preset.tempMax = result.tempMax;
-    preset.darknessPenalty = result.darknessPenalty;
-    preset.environmentBase = result.environmentBase;
-    preset.environmentDark = result.environmentDark;
-
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, currentPresets);
-    this.render({ parts: ['weather'] });
-  }
-
-  /**
-   * Remove a custom weather preset.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async #onRemoveWeatherPreset(_event, target) {
-    const presetId = target.dataset.presetId;
-    if (!presetId) return;
-    const currentPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const filtered = currentPresets.filter((p) => p.id !== presetId);
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, filtered);
-    this.render({ parts: ['weather'] });
+  static async #onOpenWeatherEditor() {
+    const { WeatherEditor } = await import('./weather-editor.mjs');
+    const existing = foundry.applications.instances.get('calendaria-weather-editor');
+    if (existing) {
+      existing.bringToFront();
+      return;
+    }
+    new WeatherEditor().render(true);
   }
 
   /**

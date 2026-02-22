@@ -60,11 +60,7 @@
       {{#if useSliceMode}}
         <div class="calendaria-hud-slice" {{#if canChangeDateTime}}role="button" tabindex="0" data-action="openTimeDial"
           data-tooltip aria-label="{{localize 'CALENDARIA.HUD.ClickToSetTime'}}" {{/if}}>
-          <div class="calendaria-slice-sky"></div>
-          <div class="calendaria-slice-track">
-            <div class="calendaria-slice-body calendaria-slice-sun"></div>
-            <div class="calendaria-slice-body calendaria-slice-moon"></div>
-          </div>
+          <canvas class="calendaria-slice-scene-canvas"></canvas>
           <div class="calendaria-slice-time-overlay">
             <span class="calendaria-hud-time">{{{timeHtml}}}</span>
             {{#if canChangeDateTime}}

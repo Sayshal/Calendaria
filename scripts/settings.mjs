@@ -15,6 +15,7 @@ import NoteManager from './notes/note-manager.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 import * as StickyZones from './utils/sticky-zones.mjs';
+import { initializeTheme } from './utils/theme-utils.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
 
@@ -474,6 +475,24 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  /** Moon illumination reduces nighttime darkness based on moon phases */
+  game.settings.register(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, {
+    name: 'CALENDARIA.Settings.DarknessMoonSync.Name',
+    hint: 'CALENDARIA.Settings.DarknessMoonSync.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
+  /** Sync time-of-day color shifting (dawn/dusk/night tinting) */
+  game.settings.register(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, {
+    name: 'CALENDARIA.Settings.ColorShiftSync.Name',
+    hint: 'CALENDARIA.Settings.ColorShiftSync.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Allow Calendaria windows to overlap sidebar area */
   game.settings.register(MODULE.ID, SETTINGS.ALLOW_SIDEBAR_OVERLAP, {
     name: 'CALENDARIA.Settings.AllowSidebarOverlap.Name',
@@ -680,10 +699,30 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Calendar HUD dome renders below bar instead of above */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_DOME_BELOW, {
+    name: 'CALENDARIA.Settings.HUDDomeBelow.Name',
+    hint: 'CALENDARIA.Settings.HUDDomeBelow.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: false }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
+  });
+
   /** Calendar HUD dome auto-hide when near viewport top */
   game.settings.register(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE, {
     name: 'CALENDARIA.Settings.DomeAutoHide.Name',
     hint: 'CALENDARIA.Settings.DomeAutoHide.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => HUD.instance?.render()
+  });
+
+  /** Show all calendar moons in the HUD sky (vs primary only) */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS, {
+    name: 'CALENDARIA.Settings.HUDShowAllMoons.Name',
+    hint: 'CALENDARIA.Settings.HUDShowAllMoons.Hint',
     scope: 'user',
     config: false,
     type: new BooleanField({ initial: true }),
@@ -930,6 +969,33 @@ export function registerSettings() {
     type: new StringField({ initial: 'dark', choices: ['dark', 'highContrast', 'custom'] })
   });
 
+  /** GM-forced theme mode (none = user choice, or a specific preset) */
+  game.settings.register(MODULE.ID, SETTINGS.FORCE_THEME, {
+    name: 'CALENDARIA.Settings.ForceTheme.Name',
+    hint: 'CALENDARIA.Settings.ForceTheme.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({
+      choices: {
+        none: 'CALENDARIA.Settings.ForceTheme.None',
+        dark: 'CALENDARIA.ThemeEditor.Presets.Dark',
+        highContrast: 'CALENDARIA.ThemeEditor.Presets.HighContrast',
+        custom: 'CALENDARIA.ThemeEditor.Custom'
+      },
+      initial: 'none'
+    }),
+    onChange: () => initializeTheme()
+  });
+
+  /** Snapshot of GM's custom theme colors when forcing custom theme */
+  game.settings.register(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, {
+    name: 'Forced Theme Colors',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} }),
+    onChange: () => initializeTheme()
+  });
+
   /** Stored calendar configurations and active calendar state */
   game.settings.register(MODULE.ID, SETTINGS.CALENDARS, {
     name: 'Calendar Configurations',
@@ -1050,6 +1116,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Whether long rests advance to sunrise instead of fixed 8 AM */
+  game.settings.register(MODULE.ID, SETTINGS.REST_TO_SUNRISE, {
+    name: 'CALENDARIA.Settings.RestToSunrise.Name',
+    hint: 'CALENDARIA.Settings.RestToSunrise.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   /** Whether to sync clock pause with game pause */
   game.settings.register(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, {
     name: 'CALENDARIA.Settings.SyncClockPause.Name',
@@ -1057,6 +1132,15 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false })
+  });
+
+  /** How often (in seconds) the clock commits time to the server */
+  game.settings.register(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL, {
+    name: 'CALENDARIA.Settings.TimeAdvanceInterval.Name',
+    hint: 'CALENDARIA.Settings.TimeAdvanceInterval.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 60, min: 1, max: 120, step: 1, integer: true })
   });
 
   /** Real-time clock speed multiplier (game units per real second) */
@@ -1097,7 +1181,8 @@ export function registerSettings() {
         changeWeather: { player: false, trusted: false, assistant: true },
         editNotes: { player: false, trusted: true, assistant: true },
         deleteNotes: { player: false, trusted: false, assistant: true },
-        editCalendars: { player: false, trusted: false, assistant: false }
+        editCalendars: { player: false, trusted: false, assistant: false },
+        viewWeatherForecast: { player: false, trusted: true, assistant: true }
       }
     }),
     onChange: () => NoteManager.syncNoteOwnership()
@@ -1106,6 +1191,15 @@ export function registerSettings() {
   // ========================================//
   //  Weather System                         //
   // ========================================//
+
+  /** Whether to auto-generate weather on day change */
+  game.settings.register(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, {
+    name: 'CALENDARIA.Settings.AutoGenerate.Name',
+    hint: 'CALENDARIA.Settings.AutoGenerate.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
 
   /** Current weather state */
   game.settings.register(MODULE.ID, SETTINGS.CURRENT_WEATHER, {
@@ -1130,6 +1224,80 @@ export function registerSettings() {
     })
   });
 
+  /** Precipitation unit (mm or inches) */
+  game.settings.register(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, {
+    name: 'CALENDARIA.Settings.PrecipitationUnit.Name',
+    hint: 'CALENDARIA.Settings.PrecipitationUnit.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({
+      choices: {
+        metric: 'CALENDARIA.Settings.PrecipitationUnit.Metric',
+        imperial: 'CALENDARIA.Settings.PrecipitationUnit.Imperial'
+      },
+      initial: 'metric'
+    })
+  });
+
+  /** Wind speed display unit (kph or mph) */
+  game.settings.register(MODULE.ID, SETTINGS.WIND_SPEED_UNIT, {
+    name: 'CALENDARIA.Settings.WindSpeedUnit.Name',
+    hint: 'CALENDARIA.Settings.WindSpeedUnit.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({
+      choices: {
+        kph: 'CALENDARIA.Settings.WindSpeedUnit.Kph',
+        mph: 'CALENDARIA.Settings.WindSpeedUnit.Mph'
+      },
+      initial: 'kph'
+    })
+  });
+
+  /** Weather history — keyed map of past weather by date */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_HISTORY, {
+    name: 'Weather History',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
+  /** Maximum number of days to retain in weather history */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS, {
+    name: 'CALENDARIA.Settings.WeatherHistoryDays.Name',
+    hint: 'CALENDARIA.Settings.WeatherHistoryDays.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 365, min: 0, max: 3650, integer: true })
+  });
+
+  /** Forecast accuracy — how accurate non-GM forecasts are */
+  game.settings.register(MODULE.ID, SETTINGS.FORECAST_ACCURACY, {
+    name: 'CALENDARIA.Settings.ForecastAccuracy.Name',
+    hint: 'CALENDARIA.Settings.ForecastAccuracy.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 70, min: 0, max: 100, step: 5, integer: true })
+  });
+
+  /** Forecast days — how many days ahead forecasts generate */
+  game.settings.register(MODULE.ID, SETTINGS.FORECAST_DAYS, {
+    name: 'CALENDARIA.Settings.ForecastDays.Name',
+    hint: 'CALENDARIA.Settings.ForecastDays.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 7, min: 1, max: 30, integer: true })
+  });
+
+  /** Weather inertia — how much weather tends to persist day-to-day */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_INERTIA, {
+    name: 'CALENDARIA.Settings.WeatherInertia.Name',
+    hint: 'CALENDARIA.Settings.WeatherInertia.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 0.3, min: 0, max: 1, step: 0.05 })
+  });
+
   /** Custom weather presets */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, {
     name: 'Custom Weather Presets',
@@ -1144,6 +1312,58 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: new ObjectField({ initial: {} })
+  });
+
+  /** Stored forecast plan — source of truth for future weather */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {
+    name: 'Weather Forecast Plan',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
+  /** Whether GM manual weather overrides regenerate the forecast */
+  game.settings.register(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST, {
+    name: 'CALENDARIA.Settings.GMOverrideClearsForecast.Name',
+    hint: 'CALENDARIA.Settings.GMOverrideClearsForecast.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
+  /** Visual overrides for built-in weather presets */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, {
+    name: 'Weather Visual Overrides',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} })
+  });
+
+  /** FXMaster: use top-down particle view */
+  game.settings.register(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN, {
+    name: 'CALENDARIA.Settings.FXMaster.TopDown.Name',
+    hint: 'CALENDARIA.Settings.FXMaster.TopDown.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
+  /** FXMaster: render effects below token layer */
+  game.settings.register(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, {
+    name: 'CALENDARIA.Settings.FXMaster.BelowTokens.Name',
+    hint: 'CALENDARIA.Settings.FXMaster.BelowTokens.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
+  /** Weather: enable ambient sound effects */
+  game.settings.register(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, {
+    name: 'CALENDARIA.Settings.Weather.SoundFx.Name',
+    hint: 'CALENDARIA.Settings.Weather.SoundFx.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
   });
 
   // ========================================//

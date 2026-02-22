@@ -59,12 +59,35 @@ When enabled, the HUD hides entirely during combat and automatically reopens whe
 
 ### Dome Display
 
-The dome shows a dynamic sky that changes based on time of day:
+The dome uses a **unified PixiJS scene renderer** that draws all visual elements — sky, sun, moon, stars, and weather particles — in a single canvas.
 
-- Sky gradient interpolates between 15 keyframes throughout the day
-- Sun visible between sunrise and sunset; moon visible outside this range
-- Stars fade in/out during twilight periods
-- Clouds visible during daylight with fade-in/out transitions
+#### Sky and Celestial Bodies
+
+The sky shifts through 14 color keyframes over the course of a day, crossfading smoothly between them. The sun arcs across the dome during daylight hours with a subtle corona pulse, while the moon takes over at night — its phase shadow drawn with bezier curve terminators for accurate crescent shapes. Stars twinkle in the background and fade in and out around twilight.
+
+#### Multi-Moon Rendering
+
+When **Show All Moons** is enabled (Settings > HUD tab), secondary moons trail behind the primary moon with scaled size. Each moon displays its correct phase and color glow based on calendar configuration.
+
+#### Weather Particle Overlay
+
+Weather conditions render as particle effects directly in the dome, replacing the previous CSS cloud animation. Each weather preset maps to a `hudEffect` with unique particle behavior. See [Weather Presets — HUD Effects](Weather-Presets#hud-effects) for the full list.
+
+Weather particles are influenced by current wind speed and direction. Sky gradient colors can be overridden per-weather-effect (e.g., greenish sky for tornado, orange for sandstorm).
+
+#### Performance Mode
+
+Particle rendering scales with Foundry's core performance mode:
+
+| Mode   | Description                     |
+| ------ | ------------------------------- |
+| Low    | Reduced particle count          |
+| Medium | Standard particle count         |
+| High   | Full particle count and effects |
+
+#### Dome Below Bar
+
+When enabled (Settings > HUD tab), the dome renders below the info bar instead of above it.
 
 **GM Only**: Click the dome to open the Time Dial for quick time adjustments.
 

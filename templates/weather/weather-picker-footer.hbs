@@ -1,13 +1,16 @@
 <div class="weather-picker-footer">
-  <button type="button" class="footer-btn clear-btn" data-action="clearWeather">
+  <button type="button" class="footer-btn clear-btn" data-action="clearWeather"
+    data-tooltip="{{localize 'CALENDARIA.Weather.Picker.ClearHint'}}">
     <i class="fas fa-xmark"></i>
     {{localize "CALENDARIA.Weather.Picker.Clear"}}
   </button>
-  <button type="button" class="footer-btn random-btn" data-action="randomWeather">
+  <button type="button" class="footer-btn random-btn" data-action="randomWeather"
+    data-tooltip="{{localize 'CALENDARIA.Weather.Picker.RandomHint'}}">
     <i class="fas fa-dice"></i>
     {{localize "CALENDARIA.Weather.Picker.Random"}}
   </button>
-  <button type="submit" class="footer-btn save-btn">
+  <button type="submit" class="footer-btn save-btn"
+    data-tooltip="{{localize 'CALENDARIA.Weather.Picker.SaveHint'}}">
     <i class="fas fa-save"></i>
     {{localize "CALENDARIA.Weather.Picker.Save"}}
   </button>

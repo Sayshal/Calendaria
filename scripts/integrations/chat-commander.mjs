@@ -6,10 +6,10 @@
  */
 
 import { CalendariaAPI } from '../api.mjs';
-import { MODULE } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
+import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime } from '../utils/permissions.mjs';
+import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canViewWeatherForecast } from '../utils/permissions.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
 /** Time unit aliases mapping to component fields. */
@@ -124,7 +124,8 @@ function registerCommands() {
       description: localize('CALENDARIA.ChatCommander.WeatherDesc'),
       icon: '<i class="fas fa-cloud-sun"></i>',
       requiredRole: 'NONE',
-      callback: cmdWeather
+      callback: cmdWeather,
+      autocompleteCallback: autocompleteWeather
     },
     {
       name: '/moon',
@@ -230,6 +231,15 @@ function registerCommands() {
       icon: '<i class="fas fa-yin-yang"></i>',
       requiredRole: 'NONE',
       callback: cmdCycle
+    },
+    {
+      name: '/forecast',
+      aliases: ['/fc'],
+      description: localize('CALENDARIA.ChatCommander.ForecastDesc'),
+      icon: '<i class="fas fa-cloud-sun-rain"></i>',
+      requiredRole: 'NONE',
+      callback: cmdForecast,
+      autocompleteCallback: autocompleteForecast
     }
   ];
 
@@ -310,18 +320,45 @@ async function cmdNote(_chat, parameters) {
 }
 
 /**
- * /weather - Show current weather.
+ * /weather [year month day] - Show current or historical weather.
+ * @param {object} _chat - Chat log instance
+ * @param {string} parameters - Optional date as "year month day"
  * @returns {object} Chat message data
  */
-function cmdWeather() {
+function cmdWeather(_chat, parameters) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
+  const args = parameters?.trim();
+  if (args) {
+    const match = args.match(/^(\d+)\s+(\d+)\s+(\d+)$/);
+    if (!match) return { content: wrapContent(localize('CALENDARIA.ChatCommand.InvalidDateFormat')) };
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    const weather = WeatherManager.getWeatherForDate(year, month, day);
+    if (!weather) return { content: wrapContent(format('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` })) };
+    const tempStr = weather.temperature != null ? ` (${WeatherManager.formatTemperature(weather.temperature)})` : '';
+    const windStr = weather.wind?.speed > 0 ? ` · ${WeatherManager.getWindSpeedLabel(weather.wind.speed)}` : '';
+    return {
+      content: wrapContent(`<i class="fas ${weather.icon}" style="color:${weather.color}"></i> <strong>${match[1]}/${match[2]}/${match[3]}</strong> — ${localize(weather.label)}${tempStr}${windStr}`)
+    };
+  }
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoWeather')) };
   const temp = WeatherManager.getTemperature();
-  const unit = game.settings.get('calendaria', 'temperatureUnit');
-  const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
+  const tempStr = temp != null ? ` (${WeatherManager.formatTemperature(temp)})` : '';
   return { content: wrapContent(`<i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`) };
+}
+
+/**
+ * Autocomplete for /weather - show usage hint.
+ * @returns {HTMLElement[]} Autocomplete entries
+ */
+function autocompleteWeather() {
+  return [
+    game.chatCommands.createCommandElement('/weather', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherCurrent')}</span>`),
+    game.chatCommands.createCommandElement('/weather [year] [month] [day]', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherHistorical')}</span>`)
+  ];
 }
 
 /**
@@ -733,4 +770,48 @@ function cmdCycle() {
   if (!cycleData?.values?.length) return { content: wrapContent(localize('CALENDARIA.ChatCommander.NoCycles')) };
   const lines = cycleData.values.map((cycle) => `• <strong>${cycle.cycleName}:</strong> ${cycle.entryName}`);
   return { content: wrapContent(lines.join('<br>')) };
+}
+
+/**
+ * /forecast [days] - Show weather forecast.
+ * @param {object} _chat - Chat log instance
+ * @param {string} parameters - Optional day count
+ * @returns {object} Chat message data
+ */
+function cmdForecast(_chat, parameters) {
+  const calendar = CalendariaAPI.getActiveCalendar();
+  if (!calendar) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
+  if (!canViewWeatherForecast()) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoPermission')) };
+  const args = parameters?.trim();
+  const days = args ? parseInt(args, 10) : undefined;
+  if (args && isNaN(days)) return { content: wrapContent(localize('CALENDARIA.ChatCommand.InvalidForecastDays')) };
+  const forecast = WeatherManager.getForecast({ days: days || undefined });
+  if (!forecast.length) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+  const zoneName = zone ? localize(zone.name) : '';
+  const subtitle = zoneName ? `<div class="calendaria-forecast-zone">${zoneName}</div>` : '';
+  const lines = forecast.map((f) => {
+    const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
+    const label = localize(f.preset.label);
+    return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.day}</strong> — ${label}${tempStr}`;
+  });
+  return { content: wrapContent(`<h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}`) };
+}
+
+/**
+ * Autocomplete for /forecast - show day count options.
+ * @param {object} _menu - Autocomplete menu instance
+ * @param {string} _alias - Command alias used
+ * @param {string} _parameters - Current input parameters
+ * @returns {HTMLElement[]} Autocomplete entries
+ */
+function autocompleteForecast(_menu, _alias, _parameters) {
+  const maxDays = game.settings.get(MODULE.ID, 'forecastDays') ?? 7;
+  const entries = [];
+  for (let i = 1; i <= maxDays; i++) {
+    const label = i === 1 ? format('CALENDARIA.ChatCommander.ForecastDay', { count: i }) : format('CALENDARIA.ChatCommander.ForecastDays', { count: i });
+    entries.push(game.chatCommands.createCommandElement(`/forecast ${i}`, `<span class="command-title">${label}</span>`));
+  }
+  return entries;
 }

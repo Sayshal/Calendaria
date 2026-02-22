@@ -1,0 +1,63 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+  <div class="standard-form">
+
+    {{!-- Temperatures --}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.Season.Climate.Temperatures"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
+      {{#each temperatureRows}}
+        <div class="form-group">
+          <label>{{this.label}}</label>
+          <div class="form-fields temperature">
+            <input type="text" name="temp_{{this.seasonName}}_min" value="{{this.min}}"
+              placeholder="{{localize 'CALENDARIA.Common.Low'}}"
+              {{#if this.isRelativeMin}}class="modifier-relative"{{/if}}>
+            <i class="fa-solid fa-right-long"></i>
+            <input type="text" name="temp_{{this.seasonName}}_max" value="{{this.max}}"
+              placeholder="{{localize 'CALENDARIA.Common.High'}}"
+              {{#if this.isRelativeMax}}class="modifier-relative"{{/if}}>
+          </div>
+        </div>
+      {{/each}}
+    </fieldset>
+
+    {{!-- Wind Configuration --}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Weather.Wind.Title"}}</legend>
+      <p class="hint">{{localize "CALENDARIA.Weather.Wind.ZoneHint"}}</p>
+      <div class="form-group">
+        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
+        <div class="form-fields range">
+          <select name="windSpeedMin">
+            <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
+            {{#each windSpeedMinOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+          <i class="fa-solid fa-right-long"></i>
+          <select name="windSpeedMax">
+            <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
+            {{#each windSpeedMaxOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.DirectionWeightsHint'}}">{{localize "CALENDARIA.Weather.Wind.DirectionWeights"}}</label>
+        <div class="form-fields wind-direction-grid">
+          {{#each windDirections}}
+            <div class="form-group">
+              <label for="wind-{{this.id}}">{{this.id}}</label>
+              <div class="form-fields">
+                <input type="number" id="wind-{{this.id}}" name="wind_{{this.id}}" min="0" max="100" step="1"
+                  value="{{this.weight}}" placeholder="0">
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </fieldset>
+
+  </div>
+</section>

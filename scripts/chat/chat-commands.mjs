@@ -6,9 +6,10 @@
  */
 
 import { CalendariaAPI } from '../api.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { canChangeActiveCalendar, canChangeDateTime } from '../utils/permissions.mjs';
+import { canChangeActiveCalendar, canChangeDateTime, canViewWeatherForecast } from '../utils/permissions.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
 /** Command patterns for parsing chat input. */
@@ -17,7 +18,7 @@ const COMMAND_PATTERNS = {
   time: /^\/(?:time|t)(?:\s+(.*))?$/i,
   datetime: /^\/(?:datetime|dt)(?:\s+(.*))?$/i,
   note: /^\/(?:note|n)(?:\s+(.*))?$/i,
-  weather: /^\/(?:weather|w)$/i,
+  weather: /^\/(?:weather|w)(?:\s+(.*))?$/i,
   moon: /^\/moon(?:\s+(.*))?$/i,
   season: /^\/season$/i,
   today: /^\/today$/i,
@@ -31,7 +32,8 @@ const COMMAND_PATTERNS = {
   switchcal: /^\/switchcal\s+(.+)$/i,
   festival: /^\/festival$/i,
   weekday: /^\/weekday$/i,
-  cycle: /^\/(?:cycle|zodiac)$/i
+  cycle: /^\/(?:cycle|zodiac)$/i,
+  forecast: /^\/(?:forecast|fc)(?:\s+(\d+))?$/i
 };
 
 /** Time unit aliases mapping to component fields. */
@@ -100,7 +102,7 @@ function handleCommand(cmd, match) {
     time: () => cmdTime(match[1]?.trim() || ''),
     datetime: () => cmdDateTime(match[1]?.trim() || ''),
     note: () => cmdNote(match[1]?.trim() || ''),
-    weather: cmdWeather,
+    weather: () => cmdWeather(match[1]?.trim() || ''),
     moon: () => cmdMoon(match[1]?.trim() || ''),
     season: cmdSeason,
     today: cmdToday,
@@ -114,7 +116,8 @@ function handleCommand(cmd, match) {
     switchcal: () => cmdSwitchCal(match[1]),
     festival: cmdFestival,
     weekday: cmdWeekday,
-    cycle: cmdCycle
+    cycle: cmdCycle,
+    forecast: () => cmdForecast(match[1]?.trim() || '')
   };
   handlers[cmd]?.();
 }
@@ -195,17 +198,34 @@ async function cmdNote(args) {
 }
 
 /**
- * Handle /weather command - output current weather.
+ * Handle /weather command - output current or historical weather.
+ * @param {string} args - Optional date as "year month day"
  * @returns {Promise<void>}
  */
-async function cmdWeather() {
+async function cmdWeather(args) {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
+
+  // If date args provided, look up weather for that date
+  if (args) {
+    const match = args.match(/^(\d+)\s+(\d+)\s+(\d+)$/);
+    if (!match) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.InvalidDateFormat'));
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    const weather = WeatherManager.getWeatherForDate(year, month, day);
+    if (!weather) return sendChat(format('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` }));
+    const tempStr = weather.temperature != null ? ` (${WeatherManager.formatTemperature(weather.temperature)})` : '';
+    const windStr = weather.wind?.speed > 0 ? ` · ${WeatherManager.getWindSpeedLabel(weather.wind.speed)}` : '';
+    await sendChat(`<i class="fas ${weather.icon}" style="color:${weather.color}"></i> <strong>${match[1]}/${match[2]}/${match[3]}</strong> — ${localize(weather.label)}${tempStr}${windStr}`);
+    return;
+  }
+
+  // Current weather (resolve zone from active scene)
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return sendChat(localize('CALENDARIA.ChatCommand.NoWeather'));
   const temp = WeatherManager.getTemperature();
-  const unit = game.settings.get('calendaria', 'temperatureUnit');
-  const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
+  const tempStr = temp != null ? ` (${WeatherManager.formatTemperature(temp)})` : '';
   await sendChat(`<i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`);
 }
 
@@ -515,4 +535,30 @@ async function cmdCycle() {
   if (!cycleData?.values?.length) return sendChat(localize('CALENDARIA.ChatCommand.NoCycles'));
   const lines = cycleData.values.map((cycle) => `• <strong>${cycle.cycleName}:</strong> ${cycle.entryName}`);
   await sendChat(lines.join('<br>'));
+}
+
+/**
+ * Handle /forecast command - output weather forecast.
+ * @param {string} args - Optional day count
+ * @returns {Promise<void>}
+ */
+async function cmdForecast(args) {
+  const calendar = CalendariaAPI.getActiveCalendar();
+  if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
+  if (!canViewWeatherForecast()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
+  const days = args ? parseInt(args, 10) : undefined;
+  if (args && isNaN(days)) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.InvalidForecastDays'));
+  const forecast = WeatherManager.getForecast({ days: days || undefined });
+  if (!forecast.length) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+  const zoneName = zone ? localize(zone.name) : '';
+  const subtitle = zoneName ? `<div class="calendaria-forecast-zone">${zoneName}</div>` : '';
+  const lines = forecast.map((f) => {
+    const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
+    const label = localize(f.preset.label);
+    return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.day}</strong> — ${label}${tempStr}`;
+  });
+  const content = `<div class="calendaria-chat-output"><h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}</div>`;
+  await ChatMessage.create({ content, speaker: ChatMessage.getSpeaker(), whisper: game.user.isGM ? [game.user.id] : [] });
 }

@@ -19,7 +19,8 @@ const DEFAULTS = {
   changeWeather: { player: false, trusted: false, assistant: true },
   editNotes: { player: false, trusted: true, assistant: true },
   deleteNotes: { player: false, trusted: false, assistant: true },
-  editCalendars: { player: false, trusted: false, assistant: false }
+  editCalendars: { player: false, trusted: false, assistant: false },
+  viewWeatherForecast: { player: false, trusted: true, assistant: true }
 };
 
 /**
@@ -34,7 +35,6 @@ export function hasPermission(permissionKey) {
   if (perms.player) return true;
   if (perms.trusted && game.user.isTrusted) return true;
   if (perms.assistant && game.user.role === CONST.USER_ROLES.ASSISTANT) return true;
-
   return false;
 }
 
@@ -116,6 +116,14 @@ export function canDeleteNotes() {
  */
 export function canEditCalendars() {
   return hasPermission('editCalendars');
+}
+
+/**
+ * Check if the current user can view weather forecasts.
+ * @returns {boolean} True if user has permission
+ */
+export function canViewWeatherForecast() {
+  return hasPermission('viewWeatherForecast');
 }
 
 /**

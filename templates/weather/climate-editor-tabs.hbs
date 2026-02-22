@@ -1,0 +1,8 @@
+<nav class="sheet-tabs tabs" aria-roledescription="{{localize 'SHEETS.FormNavLabel'}}">
+  {{#each tabs}}
+    <a data-action="tab" data-group="{{this.group}}" data-tab="{{this.id}}" class="{{this.cssClass}}">
+      <i class="{{this.icon}}"></i>
+      <span>{{localize this.label}}</span>
+    </a>
+  {{/each}}
+</nav>

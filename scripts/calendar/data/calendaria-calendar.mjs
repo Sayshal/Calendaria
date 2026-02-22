@@ -21,9 +21,7 @@ const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedOb
 function _gcd(a, b) {
   a = Math.abs(a);
   b = Math.abs(b);
-  while (b) {
-    [a, b] = [b, a % b];
-  }
+  while (b) [a, b] = [b, a % b];
   return a;
 }
 
@@ -593,6 +591,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           cycleDayAdjust: new NumberField({ required: false, nullable: false, initial: 0 }),
           referencePhase: new NumberField({ required: false, nullable: false, initial: 0, integer: true, min: 0 }),
           color: new StringField({ required: false, initial: '' }),
+          moonBrightnessMax: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 0.3 }),
           phases: new TypedObjectField(
             new SchemaField({
               name: new StringField({ required: true }),
@@ -697,7 +696,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       weather: new SchemaField(
         {
           activeZone: new StringField({ required: false, initial: 'temperate' }),
-          autoGenerate: new BooleanField({ required: false, initial: true }),
           zones: new TypedObjectField(
             new SchemaField({
               id: new StringField({ required: true }),
@@ -712,12 +710,29 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
                   id: new StringField({ required: true }),
                   enabled: new BooleanField({ required: false, initial: false }),
                   chance: new NumberField({ required: false, initial: 0 }),
-                  tempMin: new NumberField({ required: false, nullable: true }),
-                  tempMax: new NumberField({ required: false, nullable: true }),
+                  tempMin: new StringField({ required: false, nullable: true, initial: null }),
+                  tempMax: new StringField({ required: false, nullable: true, initial: null }),
                   description: new StringField({ required: false })
                 })
               ),
-              seasonOverrides: new foundry.data.fields.ObjectField({ required: false, initial: {} })
+              seasonOverrides: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
+              windDirections: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
+              windSpeedRange: new SchemaField(
+                {
+                  min: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 5 }),
+                  max: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 5 })
+                },
+                { required: false }
+              ),
+              colorShift: new SchemaField(
+                {
+                  dawnHue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  duskHue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  nightHue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  transitionMinutes: new NumberField({ required: false, nullable: true, initial: null, min: 0 })
+                },
+                { required: false }
+              )
             })
           )
         },

@@ -63,7 +63,19 @@ Moon phases display on calendar day cells when **Show Moon Phases** is enabled. 
 
 ### HUD Dome
 
-The HUD dome shows a generic moon during nighttime. This is purely visual and doesn't reflect the actual phase.
+The HUD dome renders moons with phase-accurate shadows and color glow. When **Show All Moons** is enabled (Settings > HUD tab), secondary moons trail behind the primary moon at a smaller size.
+
+---
+
+## Moon Brightness
+
+Moons can reduce nighttime scene darkness based on their phase. Each moon has a **Brightness Max** slider (`0`–`0.3`, default `0`) in **Calendar Editor > Moons tab**.
+
+Illumination follows a cosine curve — maximum at full moon, zero at new moon. When multiple moons are configured, their values are summed (capped at 0.3). Each moon's light is tinted with its configured color.
+
+Enable/disable via **Settings Panel > Canvas tab > Moon Illumination**.
+
+See [Scene Ambience — Moon Illumination](Scene-Ambience#moon-illumination) for how this affects darkness calculations.
 
 ---
 
@@ -91,6 +103,6 @@ See [Notes and Events](Notes-and-Events#recurrence-patterns) for more on recurre
 
 ## For Developers
 
-See [API Reference](API-Reference#moons) for `getMoonPhase()` and `getAllMoonPhases()` methods.
+See [API Reference](API-Reference#moons) for exposed methods.
 
 See [Hooks](Hooks#calendariamoonphasechange) for the `calendaria.moonPhaseChange` hook.

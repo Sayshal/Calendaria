@@ -7,10 +7,33 @@
         aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>
 
+    {{#if isGM}}
+      <div class="form-group">
+        <label for="forceTheme">{{localize "CALENDARIA.Settings.ForceTheme.Name"}}</label>
+        <div class="form-fields">
+          <select id="forceTheme" name="forceTheme">
+            {{#each forceThemeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceTheme.Hint"}}</p>
+      </div>
+    {{/if}}
+
+    {{#if themeForced}}
+      {{#unless isGM}}
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <p>{{localize "CALENDARIA.Settings.ForceTheme.PlayerMessage"}}</p>
+        </div>
+      {{/unless}}
+    {{/if}}
+
     <div class="form-group theme-selector">
       <label for="themeMode">{{localize "CALENDARIA.ThemeEditor.PresetSelect"}}</label>
       <div class="form-fields">
-        <select id="themeMode" name="themeMode">
+        <select id="themeMode" name="themeMode" {{#if themeForced}}disabled{{/if}}>
           {{#each themeModes}}
             <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}

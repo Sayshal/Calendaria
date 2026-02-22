@@ -100,6 +100,69 @@ await CALENDARIA.api.advanceTimeToPreset('midnight');
 
 ---
 
+## Clock Control
+
+### isClockRunning()
+
+Check if the real-time clock is currently running.
+
+```javascript
+const running = CALENDARIA.api.isClockRunning();
+```
+
+**Returns:** `boolean` - True if the clock is running.
+
+---
+
+### startClock()
+
+Start the real-time clock. Requires time-change permission. Blocked during active combat or when the game is paused with sync enabled.
+
+```javascript
+CALENDARIA.api.startClock();
+```
+
+**Returns:** `void`
+
+---
+
+### stopClock()
+
+Stop the real-time clock.
+
+```javascript
+CALENDARIA.api.stopClock();
+```
+
+**Returns:** `void`
+
+---
+
+### toggleClock()
+
+Toggle the real-time clock on or off.
+
+```javascript
+CALENDARIA.api.toggleClock();
+```
+
+**Returns:** `void`
+
+---
+
+### getClockSpeed()
+
+Get the current real-time clock speed (game seconds per real second).
+
+```javascript
+const speed = CALENDARIA.api.getClockSpeed();
+// Returns: 1 (1 game second per real second at default speed)
+```
+
+**Returns:** `number` - Clock speed multiplier.
+
+---
+
 ## Calendar Access
 
 Calendar collections (months, weekdays, seasons, moons, etc.) are stored as keyed objects with string IDs, not arrays. Use the convenience getter arrays for ordered iteration:
@@ -221,6 +284,92 @@ const moons = CALENDARIA.api.getAllMoonPhases();
 ```
 
 **Returns:** `Array<object>` - Array of moon phase data.
+
+---
+
+### getMoonPhasePosition(moonIndex, date)
+
+Get the exact phase position (0–1) for a moon on a given date.
+
+```javascript
+const position = CALENDARIA.api.getMoonPhasePosition(0);
+// Returns: 0.5 (full moon)
+```
+
+| Parameter   | Type     | Description                       |
+| ----------- | -------- | --------------------------------- |
+| `moonIndex` | `number` | Moon index (default: 0)           |
+| `date`      | `object` | Optional date (defaults to today) |
+
+**Returns:** `number` - Phase position from 0 (new moon) to 1.
+
+---
+
+### isMoonFull(moonIndex, date)
+
+Check if a moon is currently in its full phase.
+
+```javascript
+const isFull = CALENDARIA.api.isMoonFull(0);
+```
+
+| Parameter   | Type     | Description             |
+| ----------- | -------- | ----------------------- |
+| `moonIndex` | `number` | Moon index (default: 0) |
+| `date`      | `object` | Optional date           |
+
+**Returns:** `boolean` - True if the moon is in its full phase.
+
+---
+
+### getNextFullMoon(moonIndex, fromDate)
+
+Get the date of the next full moon.
+
+```javascript
+const date = CALENDARIA.api.getNextFullMoon(0);
+// Returns: { year, month, day }
+```
+
+| Parameter   | Type     | Description                    |
+| ----------- | -------- | ------------------------------ |
+| `moonIndex` | `number` | Moon index (default: 0)        |
+| `fromDate`  | `object` | Start date (defaults to today) |
+
+**Returns:** `object` - Date of next full moon.
+
+---
+
+### getNextConvergence(fromDate)
+
+Get the date when all moons are simultaneously full.
+
+```javascript
+const date = CALENDARIA.api.getNextConvergence();
+```
+
+| Parameter  | Type     | Description                    |
+| ---------- | -------- | ------------------------------ |
+| `fromDate` | `object` | Start date (defaults to today) |
+
+**Returns:** `object|null` - Date of next convergence, or null if not found within search range.
+
+---
+
+### getConvergencesInRange(startDate, endDate)
+
+Get all dates within a range where all moons are simultaneously full.
+
+```javascript
+const dates = CALENDARIA.api.getConvergencesInRange({ year: 1492, month: 0, day: 1 }, { year: 1493, month: 0, day: 1 });
+```
+
+| Parameter   | Type     | Description |
+| ----------- | -------- | ----------- |
+| `startDate` | `object` | Range start |
+| `endDate`   | `object` | Range end   |
+
+**Returns:** `object[]` - Array of convergence dates.
 
 ---
 
@@ -1166,7 +1315,7 @@ These static methods provide quick access to toggle UI components.
 Toggle the HUD visibility.
 
 ```javascript
-CALENDARIA.HUD.toggle();
+CALENDARIA.apps.HUD.toggle();
 ```
 
 ---
@@ -1176,23 +1325,29 @@ CALENDARIA.HUD.toggle();
 Toggle the BigCal application.
 
 ```javascript
-CALENDARIA.BigCal.toggle();
+CALENDARIA.apps.BigCal.toggle();
 ```
 
 ---
 
 ## Weather
 
-### getCurrentWeather()
+### getCurrentWeather(zoneId)
 
-Get current weather state.
+Get current weather state, optionally for a specific zone.
 
 ```javascript
 const weather = CALENDARIA.api.getCurrentWeather();
-// Returns: { id, label, icon, color, temperature }
+// With specific zone:
+const weather = CALENDARIA.api.getCurrentWeather('desert');
+// Returns: { id, label, icon, color, temperature, wind, precipitation, ... }
 ```
 
-**Returns:** `object|null` - Current weather state.
+| Parameter | Type     | Description                                        |
+| --------- | -------- | -------------------------------------------------- |
+| `zoneId`  | `string` | Optional zone ID (defaults to active scene's zone) |
+
+**Returns:** `object|null` - Current weather state including wind `{ speed, direction, forced }` and precipitation `{ type, intensity }`.
 
 ---
 
@@ -1274,15 +1429,81 @@ await CALENDARIA.api.generateWeather({ climate: 'tropical', season: 'summer' });
 Get a weather forecast for upcoming days.
 
 ```javascript
-const forecast = await CALENDARIA.api.getWeatherForecast({ days: 7 });
+const forecast = CALENDARIA.api.getWeatherForecast();
+// With options:
+const forecast = CALENDARIA.api.getWeatherForecast({ zoneId: 'desert', accuracy: 100 });
+// Returns: [{ year, month, day, preset, temperature, wind, precipitation, isVaried }, ...]
 ```
 
-| Parameter         | Type     | Description                |
-| ----------------- | -------- | -------------------------- |
-| `options.days`    | `number` | Number of days to forecast |
-| `options.climate` | `string` | Climate override           |
+| Parameter          | Type     | Description                                                |
+| ------------------ | -------- | ---------------------------------------------------------- |
+| `options.zoneId`   | `string` | Zone to get forecast for (defaults to active scene's zone) |
+| `options.accuracy` | `number` | Override forecast accuracy (0–100). GMs default to 100.    |
+| `options.days`     | `number` | Number of days (defaults to Forecast Days setting)         |
 
-**Returns:** `Promise<object[]>` - Array of forecast entries.
+**Returns:** `object[]` - Array of forecast entries. Each entry includes an `isVaried` flag indicating whether variance was applied.
+
+**Permission:** Requires `viewWeatherForecast` permission for non-GM users.
+
+---
+
+### getWeatherForDate(year, month, day, zoneId)
+
+Get recorded weather for a specific historical date.
+
+```javascript
+const weather = CALENDARIA.api.getWeatherForDate(1492, 7, 15);
+// With zone:
+const weather = CALENDARIA.api.getWeatherForDate(1492, 7, 15, 'desert');
+```
+
+| Parameter | Type     | Description                                |
+| --------- | -------- | ------------------------------------------ |
+| `year`    | `number` | Year                                       |
+| `month`   | `number` | Month (0-indexed)                          |
+| `day`     | `number` | Day of month (1-indexed)                   |
+| `zoneId`  | `string` | Optional zone ID (defaults to active zone) |
+
+**Returns:** `object|null` - Historical weather entry or null.
+
+---
+
+### getWeatherHistory(options)
+
+Get the full weather history, optionally filtered by zone.
+
+```javascript
+const history = CALENDARIA.api.getWeatherHistory();
+// Zone-filtered:
+const history = CALENDARIA.api.getWeatherHistory({ zoneId: 'desert' });
+```
+
+| Parameter        | Type     | Description          |
+| ---------------- | -------- | -------------------- |
+| `options.zoneId` | `string` | Optional zone filter |
+
+**Returns:** `object` - Nested history structure.
+
+---
+
+### setSceneZoneOverride(scene, zoneId)
+
+Set a per-scene climate zone override.
+
+```javascript
+await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, 'tropical');
+// Clear override:
+await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, null);
+```
+
+> **Note:** This method is on `WeatherManager`, not on the public API object.
+
+| Parameter | Type           | Description              |
+| --------- | -------------- | ------------------------ |
+| `scene`   | `Scene`        | Scene document           |
+| `zoneId`  | `string\|null` | Zone ID or null to clear |
+
+**Returns:** `Promise<void>`
 
 ---
 
@@ -1348,17 +1569,33 @@ await CALENDARIA.api.addWeatherPreset({
   label: 'Acid Rain',
   icon: 'fas fa-skull',
   color: '#2ecc71',
-  description: 'Corrosive precipitation'
+  description: 'Corrosive precipitation',
+  tempMin: 10,
+  tempMax: 25,
+  wind: { speed: 1, direction: null },
+  precipitation: { type: 'rain', intensity: 0.6 },
+  inertiaWeight: 0,
+  hudEffect: 'rain-acid',
+  fxPreset: 'acid-rain',
+  soundFx: 'rain-acid-rain-blood-rain'
 });
 ```
 
-| Parameter            | Type     | Description   |
-| -------------------- | -------- | ------------- |
-| `preset.id`          | `string` | Unique ID     |
-| `preset.label`       | `string` | Display label |
-| `preset.icon`        | `string` | Icon class    |
-| `preset.color`       | `string` | Display color |
-| `preset.description` | `string` | Description   |
+| Parameter              | Type     | Description                    |
+| ---------------------- | -------- | ------------------------------ |
+| `preset.id`            | `string` | Unique ID                      |
+| `preset.label`         | `string` | Display label                  |
+| `preset.icon`          | `string` | Icon class                     |
+| `preset.color`         | `string` | Display color                  |
+| `preset.description`   | `string` | Description                    |
+| `preset.tempMin`       | `number` | Min temperature (°C)           |
+| `preset.tempMax`       | `number` | Max temperature (°C)           |
+| `preset.wind`          | `object` | `{ speed, direction, forced }` |
+| `preset.precipitation` | `object` | `{ type, intensity }`          |
+| `preset.inertiaWeight` | `number` | Inertia multiplier (0–2)       |
+| `preset.hudEffect`     | `string` | HUD particle effect            |
+| `preset.fxPreset`      | `string` | FXMaster effect name           |
+| `preset.soundFx`       | `string` | Sound loop filename            |
 
 **Returns:** `Promise<object>` - The added preset.
 
@@ -1377,6 +1614,80 @@ await CALENDARIA.api.removeWeatherPreset('acid-rain');
 | `presetId` | `string` | Preset ID to remove |
 
 **Returns:** `Promise<boolean>` - True if removed.
+
+---
+
+### getTemperature(zoneId)
+
+Get the current temperature for a zone.
+
+```javascript
+const temp = CALENDARIA.api.getTemperature();
+// With specific zone:
+const temp = CALENDARIA.api.getTemperature('desert');
+// Returns: { celsius, display, unit }
+```
+
+| Parameter | Type     | Description                                        |
+| --------- | -------- | -------------------------------------------------- |
+| `zoneId`  | `string` | Optional zone ID (defaults to active scene's zone) |
+
+**Returns:** `object|null` - Temperature data with celsius, display value, and unit.
+
+---
+
+### getPreset(presetId)
+
+Get a specific weather preset by ID.
+
+```javascript
+const preset = CALENDARIA.api.getPreset('thunderstorm');
+// Returns: { id, label, icon, color, description, tempMin, tempMax, wind, precipitation, ... }
+```
+
+| Parameter  | Type     | Description                                             |
+| ---------- | -------- | ------------------------------------------------------- |
+| `presetId` | `string` | Preset ID (e.g., `'clear'`, `'rain'`, `'thunderstorm'`) |
+
+**Returns:** `object|null` - Preset definition or null if not found.
+
+---
+
+### updateWeatherPreset(presetId, updates)
+
+Update an existing custom weather preset. Only custom presets can be updated.
+
+```javascript
+await CALENDARIA.api.updateWeatherPreset('acid-rain', {
+  label: 'Caustic Rain',
+  color: '#e74c3c',
+  tempMax: 30
+});
+```
+
+| Parameter  | Type     | Description                                     |
+| ---------- | -------- | ----------------------------------------------- |
+| `presetId` | `string` | Preset ID to update                             |
+| `updates`  | `object` | Properties to update (label, icon, color, etc.) |
+
+**Returns:** `Promise<object|null>` - Updated preset or null if not found.
+
+---
+
+### formatTemperature(celsius)
+
+Format a temperature value for display using the world's temperature unit setting.
+
+```javascript
+const display = CALENDARIA.api.formatTemperature(22);
+// Returns: "72°F" (if unit is Fahrenheit) or "22°C" (if unit is Celsius)
+```
+
+| Parameter | Type     | Description            |
+| --------- | -------- | ---------------------- |
+| `celsius` | `number` | Temperature in Celsius |
+
+**Returns:** `string` - Formatted temperature string.
 
 ---
 
@@ -1470,19 +1781,33 @@ const canManage = CALENDARIA.api.canManageNotes();
 
 ## Permissions
 
+Individual permission checks are available on the `CALENDARIA.permissions` namespace. See [Permissions](Permissions) for the full permission list and defaults.
+
 ### hasPermission(permission)
 
 Check if current user has a specific permission.
 
 ```javascript
-const canChange = CALENDARIA.api.hasPermission('changeDateTime');
+const canChange = CALENDARIA.permissions.hasPermission('changeDateTime');
 ```
 
 | Parameter    | Type     | Description    |
 | ------------ | -------- | -------------- |
 | `permission` | `string` | Permission key |
 
-**Permission Keys:** `viewMiniCal`, `viewTimeKeeper`, `viewHUD`, `manageNotes`, `changeDateTime`, `changeWeather`, `changeCalendar`, `editCalendars`
+**Permission Keys:** `viewBigCal`, `viewMiniCal`, `viewTimeKeeper`, `addNotes`, `editNotes`, `deleteNotes`, `changeDateTime`, `changeWeather`, `viewWeatherForecast`, `changeActiveCalendar`, `editCalendars`
+
+**Returns:** `boolean`
+
+---
+
+### canViewBigCal()
+
+Check if current user can view the BigCal.
+
+```javascript
+const canView = CALENDARIA.permissions.canViewBigCal();
+```
 
 **Returns:** `boolean`
 
@@ -1493,7 +1818,7 @@ const canChange = CALENDARIA.api.hasPermission('changeDateTime');
 Check if current user can view the MiniCal.
 
 ```javascript
-const canView = CALENDARIA.api.canViewMiniCal();
+const canView = CALENDARIA.permissions.canViewMiniCal();
 ```
 
 **Returns:** `boolean`
@@ -1505,7 +1830,43 @@ const canView = CALENDARIA.api.canViewMiniCal();
 Check if current user can view the TimeKeeper.
 
 ```javascript
-const canView = CALENDARIA.api.canViewTimeKeeper();
+const canView = CALENDARIA.permissions.canViewTimeKeeper();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canAddNotes()
+
+Check if current user can create notes.
+
+```javascript
+const canAdd = CALENDARIA.permissions.canAddNotes();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canEditNotes()
+
+Check if current user can edit notes owned by other players.
+
+```javascript
+const canEdit = CALENDARIA.permissions.canEditNotes();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canDeleteNotes()
+
+Check if current user can delete notes.
+
+```javascript
+const canDelete = CALENDARIA.permissions.canDeleteNotes();
 ```
 
 **Returns:** `boolean`
@@ -1517,7 +1878,7 @@ const canView = CALENDARIA.api.canViewTimeKeeper();
 Check if current user can modify date/time.
 
 ```javascript
-const canChange = CALENDARIA.api.canChangeDateTime();
+const canChange = CALENDARIA.permissions.canChangeDateTime();
 ```
 
 **Returns:** `boolean`
@@ -1529,19 +1890,31 @@ const canChange = CALENDARIA.api.canChangeDateTime();
 Check if current user can change weather.
 
 ```javascript
-const canChange = CALENDARIA.api.canChangeWeather();
+const canChange = CALENDARIA.permissions.canChangeWeather();
 ```
 
 **Returns:** `boolean`
 
 ---
 
-### canChangeCalendar()
+### canViewWeatherForecast()
+
+Check if current user can view weather forecasts.
+
+```javascript
+const canView = CALENDARIA.permissions.canViewWeatherForecast();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canChangeActiveCalendar()
 
 Check if current user can switch the active calendar.
 
 ```javascript
-const canChange = CALENDARIA.api.canChangeCalendar();
+const canChange = CALENDARIA.permissions.canChangeActiveCalendar();
 ```
 
 **Returns:** `boolean`
@@ -1553,7 +1926,7 @@ const canChange = CALENDARIA.api.canChangeCalendar();
 Check if current user can access the Calendar Editor.
 
 ```javascript
-const canEdit = CALENDARIA.api.canEditCalendars();
+const canEdit = CALENDARIA.permissions.canEditCalendars();
 ```
 
 **Returns:** `boolean`
@@ -1656,60 +2029,11 @@ CALENDARIA.api.refreshWidgets();
 
 ### hooks
 
-Get all available Calendaria hook names.
+Get all available Calendaria hook name constants. See [Hooks](Hooks) for full documentation, parameters, and examples.
 
 ```javascript
 const hooks = CALENDARIA.api.hooks;
+// Use: Hooks.on(hooks.DAY_CHANGE, (data) => { ... });
 ```
 
-**Returns:** `object` - Hook name constants.
-
-**Available Hooks:**
-
-| Hook                              | Description                                        |
-| --------------------------------- | -------------------------------------------------- |
-| `calendaria.init`                 | Module initialization                              |
-| `calendaria.ready`                | Module ready (provides `{api, calendar, version}`) |
-| `calendaria.calendarSwitched`     | Active calendar changed                            |
-| `calendaria.remoteCalendarSwitch` | Remote calendar switch received                    |
-| `calendaria.calendarAdded`        | New calendar added                                 |
-| `calendaria.calendarUpdated`      | Calendar updated                                   |
-| `calendaria.calendarRemoved`      | Calendar removed                                   |
-| `calendaria.dateTimeChange`       | Date/time changed                                  |
-| `calendaria.dayChange`            | Day changed                                        |
-| `calendaria.monthChange`          | Month changed                                      |
-| `calendaria.yearChange`           | Year changed                                       |
-| `calendaria.seasonChange`         | Season changed                                     |
-| `calendaria.remoteDateChange`     | Remote date change received                        |
-| `calendaria.sunrise`              | Sunrise occurred                                   |
-| `calendaria.sunset`               | Sunset occurred                                    |
-| `calendaria.midnight`             | Midnight occurred                                  |
-| `calendaria.midday`               | Midday occurred                                    |
-| `calendaria.moonPhaseChange`      | Moon phase changed                                 |
-| `calendaria.restDayChange`        | Rest day status changed                            |
-| `calendaria.clockStartStop`       | Clock started/stopped                              |
-| `calendaria.clockUpdate`          | Clock tick                                         |
-| `calendaria.noteCreated`          | Note created                                       |
-| `calendaria.noteUpdated`          | Note updated                                       |
-| `calendaria.noteDeleted`          | Note deleted                                       |
-| `calendaria.eventTriggered`       | Scheduled event triggered                          |
-| `calendaria.eventDayChanged`      | Event day changed                                  |
-| `calendaria.reminderReceived`     | Reminder notification received                     |
-| `calendaria.preRenderCalendar`    | Before calendar render                             |
-| `calendaria.renderCalendar`       | After calendar render                              |
-| `calendaria.importStarted`        | Import started                                     |
-| `calendaria.importComplete`       | Import completed                                   |
-| `calendaria.importFailed`         | Import failed                                      |
-| `calendaria.weatherChange`        | Weather changed                                    |
-
-**Hook Example:**
-
-```javascript
-Hooks.on('calendaria.ready', ({ api, calendar, version }) => {
-  console.log(`Calendaria v${version} ready with calendar: ${calendar?.id}`);
-});
-
-Hooks.on('calendaria.dayChange', (components) => {
-  console.log(`New day: ${components.dayOfMonth}/${components.month}/${components.year}`);
-});
-```
+**Returns:** `object` - Hook name constants (e.g., `DAY_CHANGE`, `WEATHER_CHANGE`, `CLOCK_START_STOP`).

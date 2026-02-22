@@ -95,12 +95,6 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {Function|null} Click-outside handler for search panel */
   #clickOutsideHandler = null;
 
-  /** @type {HTMLElement|null} Active moons tooltip element */
-  #moonsTooltip = null;
-
-  /** @type {Function|null} Click-outside handler for moons tooltip */
-  #moonsClickOutsideHandler = null;
-
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'mini-calendar',
@@ -285,9 +279,22 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const icon = showIcon ? `<i class="fas ${weather.icon}"></i>` : '';
       const label = showLabel ? ` ${weather.label}` : '';
       const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+      let windHtml = '';
+      if (showLabel && weather.windSpeed > 0) {
+        const rotation = weather.windDirection != null ? weather.windDirection : 0;
+        windHtml = `<span class="weather-wind">
+          <i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i>
+        </span>`;
+      }
+      let precipHtml = '';
+      if (showLabel && weather.precipType) {
+        precipHtml = `<span class="weather-precip">
+          <i class="fas fa-droplet"></i>
+        </span>`;
+      }
       return `<span class="weather-indicator${clickable}" ${action}
-        style="--weather-color: ${weather.color}" data-tooltip="${weather.tooltip}">
-        ${icon}${label} ${temp}
+        style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">
+        ${icon}${label} ${temp}${windHtml}${precipHtml}
       </span>`;
     } else if (canChangeWeather) {
       return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
@@ -365,19 +372,36 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object|null} Weather context or null if no weather set
    */
   _getWeatherContext() {
-    const weather = WeatherManager.getCurrentWeather();
+    const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
+    const zoneId = zone?.id;
+    const weather = WeatherManager.getCurrentWeather(zoneId);
     if (!weather) return null;
     const calendarId = this.calendar?.metadata?.id;
-    const zoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id;
     const alias = getPresetAlias(weather.id, calendarId, zoneId);
     const label = alias || localize(weather.label);
+    const windSpeed = weather.wind?.speed ?? 0;
+    const windDirection = weather.wind?.direction;
+    const precipType = weather.precipitation?.type ?? null;
+    const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const tooltipHtml = WeatherManager.buildWeatherTooltip({
+      label,
+      description: weather.description ? localize(weather.description) : null,
+      temp,
+      windSpeed,
+      windDirection,
+      precipType,
+      precipIntensity: weather.precipitation?.intensity
+    });
     return {
       id: weather.id,
       label,
       icon: weather.icon,
       color: weather.color,
-      temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
-      tooltip: weather.description ? localize(weather.description) : label
+      temperature: temp,
+      tooltipHtml,
+      windSpeed,
+      windDirection,
+      precipType
     };
   }
 
@@ -431,6 +455,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: ViewUtils.isToday(pd.year, pd.month, pd.day, calendar) });
     }
 
+    // Weather data for day cells
+    const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
+    let weatherLookup = null;
+    if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
+
     // Collect intercalary days to insert after regular days
     const intercalaryDays = [];
 
@@ -438,6 +467,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const noteCount = this._countNotesOnDay(visibleNotes, year, month, day);
       const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: day - 1 });
       const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, day) : null;
+      const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
 
       // Check if this is a non-counting festival (intercalary day)
       const isIntercalary = festivalDay?.countsForWeekday === false;
@@ -459,7 +489,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
-          isIntercalary: true
+          isIntercalary: true,
+          weatherIcon: wd?.icon ?? null,
+          weatherColor: wd?.color ?? null,
+          weatherTooltipHtml: ViewUtils.buildWeatherPillData(wd).weatherTooltipHtml,
+          isForecast: wd?.isForecast ?? false
         });
       } else {
         currentWeek.push({
@@ -476,7 +510,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalDescription: festivalDay?.description || '',
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
-          moonColor: moonData?.color ?? null
+          moonColor: moonData?.color ?? null,
+          weatherIcon: wd?.icon ?? null,
+          weatherColor: wd?.color ?? null,
+          weatherTooltipHtml: ViewUtils.buildWeatherPillData(wd).weatherTooltipHtml,
+          isForecast: wd?.isForecast ?? false
         });
 
         if (currentWeek.length === daysInWeek) {
@@ -551,7 +589,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays: monthWeekdays.map((wd) => ({ name: localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }))
+      weekdays: monthWeekdays.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }))
     };
   }
 
@@ -633,7 +671,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays: weekdayData.map((wd) => ({ name: localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false })),
+      weekdays: weekdayData.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false })),
       isMonthless: true,
       weekNumber: displayWeek,
       totalWeeks
@@ -920,7 +958,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       },
       onCreateNote: () => this.render()
     });
-    const debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    this._debouncedRender = foundry.utils.debounce(() => this.render(), 100);
+    const debouncedRender = this._debouncedRender;
 
     this.#hooks.push({
       name: 'updateJournalEntryPage',
@@ -1268,7 +1307,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const predictedDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (predictedDay !== this.#lastDay) {
       this.#lastDay = predictedDay;
-      this.render();
+      this._debouncedRender();
       return;
     }
 
@@ -1302,7 +1341,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentDay = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (currentDay !== this.#lastDay) {
       this.#lastDay = currentDay;
-      this.render();
+      this._debouncedRender();
     }
     // Also update display to sync with real world time
     this.#onVisualTick();
@@ -1844,53 +1883,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const moons = ViewUtils.getAllMoonPhases(this.calendar, year, month, day);
     if (!moons?.length) return;
     const selectedMoon = ViewUtils.getSelectedMoon() || moons[0]?.moonName;
-    const tooltip = document.createElement('div');
-    tooltip.className = 'calendaria-moons-tooltip';
-    const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
-    tooltip.innerHTML = `
-      <div class="moons-radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
-        ${moons
-          .map(
-            (moon, i) => `
-          <div class="moon-radial-item${moon.moonName === selectedMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
-            <span class="moon-name">${moon.moonName}</span>
-            <div class="moon-radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
-              <img src="${moon.icon}" alt="${moon.phaseName}">
-            </div>
-          </div>
-        `
-          )
-          .join('')}
-      </div>
-    `;
-    document.body.appendChild(tooltip);
-    this.#moonsTooltip = tooltip;
-    tooltip.querySelectorAll('.moon-radial-item').forEach((item) => {
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const moonName = item.dataset.moonName;
-        ViewUtils.setSelectedMoon(moonName);
-        this.#closeMoonsTooltip();
-        this.render();
-      });
+    ViewUtils.showMoonPicker(target, moons, selectedMoon, (moonName) => {
+      ViewUtils.setSelectedMoon(moonName);
+      this.render();
     });
-    const targetRect = target.getBoundingClientRect();
-    const tooltipRect = tooltip.getBoundingClientRect();
-    let left = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
-    let top = targetRect.bottom + 8;
-    if (left < 10) left = 10;
-    if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
-    if (top + tooltipRect.height > window.innerHeight - 10) top = targetRect.top - tooltipRect.height - 8;
-    top = Math.max(10, top);
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    this.#setupTooltipDrag(tooltip);
-    setTimeout(() => {
-      this.#moonsClickOutsideHandler = (event) => {
-        if (!tooltip.contains(event.target) && !event.target.closest('[data-action="showMoons"]')) this.#closeMoonsTooltip();
-      };
-      document.addEventListener('mousedown', this.#moonsClickOutsideHandler);
-    }, 100);
   }
 
   /**
@@ -1903,56 +1899,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Set up drag behavior for the moons tooltip.
-   * @param {HTMLElement} tooltip - The tooltip element
-   */
-  #setupTooltipDrag(tooltip) {
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-    const onMouseDown = (e) => {
-      if (e.target.closest('[data-tooltip]')) return;
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      startLeft = parseInt(tooltip.style.left) || 0;
-      startTop = parseInt(tooltip.style.top) || 0;
-      tooltip.style.cursor = 'grabbing';
-      e.preventDefault();
-    };
-    const onMouseMove = (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      tooltip.style.left = `${startLeft + dx}px`;
-      tooltip.style.top = `${startTop + dy}px`;
-    };
-    const onMouseUp = () => {
-      isDragging = false;
-      tooltip.style.cursor = '';
-    };
-    tooltip.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    tooltip._dragCleanup = () => {
-      tooltip.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }
-
-  /**
    * Close moons tooltip and clean up.
    */
   #closeMoonsTooltip() {
-    if (this.#moonsClickOutsideHandler) {
-      document.removeEventListener('mousedown', this.#moonsClickOutsideHandler);
-      this.#moonsClickOutsideHandler = null;
-    }
-    if (this.#moonsTooltip) {
-      this.#moonsTooltip._dragCleanup?.();
-      this.#moonsTooltip.remove();
-      this.#moonsTooltip = null;
-    }
+    ViewUtils.closeMoonPicker();
   }
 
   /**

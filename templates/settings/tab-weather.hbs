@@ -1,24 +1,74 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-    <fieldset data-section="weather-temperature">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-temperature"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
+    <fieldset data-section="weather-generation">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherGeneration"}}</legend>
 
       <div class="form-group">
-        <label for="temperatureUnit">{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
+        <label for="autoGenerateWeather">{{localize "CALENDARIA.Settings.AutoGenerate.Name"}}</label>
         <div class="form-fields">
-          <select id="temperatureUnit" name="temperatureUnit">
-            {{#each temperatureUnitOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
+          <input type="checkbox" id="autoGenerateWeather" name="autoGenerateWeather"
+            {{#if autoGenerateWeather}}checked{{/if}} />
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.TemperatureUnit.Hint"}}</p>
+        <p class="hint">{{localize "CALENDARIA.Settings.AutoGenerate.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="weatherInertia">{{localize "CALENDARIA.Settings.WeatherInertia.Name"}}</label>
+        <div class="form-fields">
+          <range-picker name="weatherInertia" value="{{weatherInertia}}" min="0" max="1" step="0.05"></range-picker>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WeatherInertia.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="weatherHistoryDays">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="weatherHistoryDays" name="weatherHistoryDays"
+            value="{{weatherHistoryDays}}" min="0" max="3650" step="1" />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="weatherSoundFx">{{localize "CALENDARIA.Settings.Weather.SoundFx.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="weatherSoundFx" name="weatherSoundFx"
+            {{#if weatherSoundFx}}checked{{/if}} />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.Weather.SoundFx.Hint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{#if isGM}}
+    <fieldset data-section="weather-forecast">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Forecast"}}</legend>
+
+      <div class="form-group">
+        <label for="forecastAccuracy">{{localize "CALENDARIA.Settings.ForecastAccuracy.Name"}}</label>
+        <div class="form-fields">
+          <range-picker name="forecastAccuracy" value="{{forecastAccuracy}}" min="0" max="100" step="5"></range-picker>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForecastAccuracy.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="forecastDays">{{localize "CALENDARIA.Settings.ForecastDays.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="forecastDays" name="forecastDays"
+            value="{{forecastDays}}" min="1" max="30" step="1" />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForecastDays.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="gmOverrideClearsForecast">{{localize "CALENDARIA.Settings.GMOverrideClearsForecast.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="gmOverrideClearsForecast" name="gmOverrideClearsForecast"
+            {{#if gmOverrideClearsForecast}}checked{{/if}} />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.GMOverrideClearsForecast.Hint"}}</p>
       </div>
     </fieldset>
   {{/if}}
@@ -26,13 +76,15 @@
   {{#if isGM}}
     <fieldset data-section="climate">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Climate"}}</legend>
-      <div class="fieldset-header-row">
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.ClimateConfig"}}</p>
-        <button type="button" data-action="openCalendarEditor" class="add-button" data-tooltip
-          aria-label="{{localize 'CALENDARIA.SettingsPanel.Hint.OpenClimateEditor'}}">
-          <i class="fas fa-calendar-plus"></i>
-          {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
-        </button>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.CalendarEditor.Label"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="openCalendarEditor" class="add-button">
+            <i class="fas fa-calendar-plus"></i>
+            {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.ClimateConfig"}}</p>
       </div>
 
       {{#if hasZones}}
@@ -53,48 +105,95 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-presets">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherPresets"}}</legend>
-      <div class="fieldset-header-row">
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.WeatherPresets.Hint"}}</p>
-        <button type="button" data-action="addWeatherPreset" class="add-button" data-tooltip
-          aria-label="{{localize 'CALENDARIA.SettingsPanel.WeatherPresets.AddTooltip'}}">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.SettingsPanel.WeatherPresets.Add"}}
-        </button>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherEditor"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.WeatherEditor.Title"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="openWeatherEditor" class="add-button">
+            <i class="fas fa-cloud-sun"></i>
+            {{localize "CALENDARIA.WeatherEditor.OpenEditor"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.WeatherEditor.SectionHint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
+
+  {{#if isGM}}
+    <fieldset data-section="fxmaster">
+      <legend>{{localize "CALENDARIA.Settings.FXMaster.SectionTitle"}}</legend>
+
+      {{#unless fxmasterActive}}
+        <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.Inactive"}}</p>
+      {{/unless}}
+
+      {{#if fxmasterActive}}
+        <div class="form-group">
+          <label for="fxmasterTopDown">{{localize "CALENDARIA.Settings.FXMaster.TopDown.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterTopDown" name="fxmasterTopDown"
+              {{#if fxmasterTopDown}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.TopDown.Hint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="fxmasterBelowTokens">{{localize "CALENDARIA.Settings.FXMaster.BelowTokens.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterBelowTokens" name="fxmasterBelowTokens"
+              {{#if fxmasterBelowTokens}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.BelowTokens.Hint"}}</p>
+        </div>
+
+      {{/if}}
+    </fieldset>
+  {{/if}}
+
+  {{#if isGM}}
+    <fieldset data-section="weather-units">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Units"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-units"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
+
+      <div class="form-group">
+        <label for="temperatureUnit">{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
+        <div class="form-fields">
+          <select id="temperatureUnit" name="temperatureUnit">
+            {{#each temperatureUnitOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.TemperatureUnit.Hint"}}</p>
       </div>
 
-      {{#if customWeatherPresets.length}}
-        <div class="weather-presets-grid">
-          <div class="weather-presets-header">
-            <span></span>
-            <span></span>
-            <span>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.NamePlaceholder"}}</span>
-            <span>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.TempRange"}}</span>
-            <span>{{localize "CALENDARIA.SettingsPanel.WeatherPresets.DarknessPenalty"}}</span>
-            <span></span>
-          </div>
-          {{#each customWeatherPresets}}
-            <div class="weather-preset-row" data-preset-id="{{this.id}}">
-              <span class="preset-color-swatch" style="background-color: {{this.color}}"></span>
-              <i class="fas {{this.icon}} preset-icon-display"></i>
-              <span class="preset-label">{{this.label}}</span>
-              <span class="preset-temp-display">{{this.tempMin}} – {{this.tempMax}}
-                {{@root.temperatureUnitSymbol}}</span>
-              <span class="preset-darkness-display">{{this.darknessPenalty}}</span>
-              <span class="preset-actions">
-                <button type="button" data-action="editWeatherPreset" data-preset-id="{{this.id}}" class="icon-button"
-                  data-tooltip aria-label="{{localize 'CALENDARIA.Common.Edit'}}">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" data-action="removeWeatherPreset" data-preset-id="{{this.id}}"
-                  class="icon-button danger" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Delete'}}">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </span>
-            </div>
-          {{/each}}
+      <div class="form-group">
+        <label for="precipitationUnit">{{localize "CALENDARIA.Settings.PrecipitationUnit.Name"}}</label>
+        <div class="form-fields">
+          <select id="precipitationUnit" name="precipitationUnit">
+            {{#each precipitationUnitOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
         </div>
-      {{/if}}
+        <p class="hint">{{localize "CALENDARIA.Settings.PrecipitationUnit.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="windSpeedUnit">{{localize "CALENDARIA.Settings.WindSpeedUnit.Name"}}</label>
+        <div class="form-fields">
+          <select id="windSpeedUnit" name="windSpeedUnit">
+            {{#each windSpeedUnitOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WindSpeedUnit.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 

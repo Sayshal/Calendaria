@@ -48,6 +48,9 @@ export default class TimeClock {
   /** @type {number} Game seconds accumulated since last advance */
   static #accumulatedSeconds = 0;
 
+  /** @type {boolean} Guard against re-entrant day-boundary flush */
+  static #flushing = false;
+
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
 
@@ -103,8 +106,9 @@ export default class TimeClock {
     this.setIncrement('minute');
     this.loadSpeedFromSettings();
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
-    Hooks.on('updateWorldTime', () => {
-      this.#accumulatedSeconds = 0;
+    Hooks.on('updateWorldTime', (_worldTime, delta) => {
+      // Subtract committed delta rather than zeroing — preserves seconds accumulated during async advance
+      this.#accumulatedSeconds = Math.max(0, this.#accumulatedSeconds - Math.abs(delta));
     });
     Hooks.on('pauseGame', this.#onPauseGame.bind(this));
     Hooks.on('combatStart', this.#onCombatStart.bind(this));
@@ -310,6 +314,7 @@ export default class TimeClock {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: amount });
       return;
     }
+    if (this.#running) await this.#flushAccumulated();
     await game.time.advance(amount);
     log(3, `Time advanced by ${amount}s for ${appId}`);
   }
@@ -328,6 +333,7 @@ export default class TimeClock {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: -amount });
       return;
     }
+    if (this.#running) await this.#flushAccumulated();
     await game.time.advance(-amount);
     log(3, `Time reversed by ${amount}s for ${appId}`);
   }
@@ -343,6 +349,7 @@ export default class TimeClock {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: amount });
       return;
     }
+    if (this.#running) await this.#flushAccumulated();
     await game.time.advance(amount);
     log(3, `Time advanced by ${amount}s (${multiplier}x)`);
   }
@@ -358,6 +365,7 @@ export default class TimeClock {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: -amount });
       return;
     }
+    if (this.#running) await this.#flushAccumulated();
     await game.time.advance(-amount);
     log(3, `Time reversed by ${amount}s (${multiplier}x)`);
   }
@@ -372,38 +380,87 @@ export default class TimeClock {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: seconds });
       return;
     }
+    if (this.#running) await this.#flushAccumulated();
     await game.time.advance(seconds);
     log(3, `Time advanced by ${seconds}s`);
   }
 
-  /** Advance interval period in milliseconds (60 real seconds). */
-  static ADVANCE_INTERVAL_MS = 60_000;
+  /**
+   * Advance interval period in milliseconds (from setting, default 60s).
+   * @returns {number} Interval in milliseconds
+   */
+  static get ADVANCE_INTERVAL_MS() {
+    return (game.settings?.get(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL) ?? 60) * 1000;
+  }
+
+  /** Restart advance/visual intervals (e.g. after changing advance interval setting). */
+  static restartIntervals() {
+    if (!this.#running) return;
+    this.#stopIntervals();
+    this.#startIntervals();
+  }
 
   /**
-   * Start both the visual tick (1s) and advance (60s) intervals.
+   * Start the visual tick and advance intervals.
+   * When advance interval is 1s, commits directly each tick (no accumulation).
+   * Otherwise, accumulates and commits periodically with day-boundary flush.
    * @private
    */
   static #startIntervals() {
     if (this.#visualIntervalId) return;
     const speed = this.#realTimeSpeed;
-    log(3, `TimeClock intervals started (speed: ${speed}, advance every ${this.ADVANCE_INTERVAL_MS / 1000}s)`);
+    const intervalMs = this.ADVANCE_INTERVAL_MS;
+    const directMode = intervalMs <= 1000;
+    log(3, `TimeClock intervals started (speed: ${speed}, advance every ${intervalMs / 1000}s, direct: ${directMode})`);
 
-    // Visual tick — fires every 1 real second, accumulates and fires hook for UI
+    if (directMode) {
+      // Direct mode — await advance so worldTime is committed before firing visual tick
+      let advancing = false;
+      this.#visualIntervalId = setInterval(async () => {
+        if (!this.#running || game.combat?.started || advancing) return;
+        advancing = true;
+        try {
+          if (CalendariaSocket.isPrimaryGM()) await game.time.advance(speed);
+          Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: game.time.worldTime });
+        } finally {
+          advancing = false;
+        }
+      }, 1000);
+      return;
+    }
+
+    // Buffered mode — accumulate and commit periodically
     this.#visualIntervalId = setInterval(() => {
       if (!this.#running || game.combat?.started) return;
       this.#accumulatedSeconds += speed;
-      Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: this.predictedWorldTime });
+      const predicted = this.predictedWorldTime;
+      Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: predicted });
+
+      // Flush immediately when predicted time crosses a day boundary
+      if (!this.#flushing && CalendariaSocket.isPrimaryGM() && this.#accumulatedSeconds > 0) {
+        const cal = game.time?.calendar;
+        if (cal) {
+          const committed = cal.timeToComponents(game.time.worldTime);
+          const pred = cal.timeToComponents(predicted);
+          if (committed.dayOfMonth !== pred.dayOfMonth || committed.month !== pred.month || committed.year !== pred.year) {
+            this.#flushing = true;
+            const toAdvance = this.#accumulatedSeconds;
+            this.#accumulatedSeconds = 0;
+            game.time.advance(toAdvance).finally(() => {
+              this.#flushing = false;
+            });
+          }
+        }
+      }
     }, 1000);
 
-    // Advance tick — fires every 60 real seconds, calls game.time.advance() once (GM only)
     this.#advanceIntervalId = setInterval(async () => {
       if (!this.#running || game.combat?.started) return;
       if (!CalendariaSocket.isPrimaryGM()) return;
       const toAdvance = this.#accumulatedSeconds;
       if (toAdvance <= 0) return;
-      this.#accumulatedSeconds = 0;
       await game.time.advance(toAdvance);
-    }, this.ADVANCE_INTERVAL_MS);
+    }, intervalMs);
   }
 
   /**

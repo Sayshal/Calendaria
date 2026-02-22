@@ -22,8 +22,13 @@
 - [Moon Phases](Moon-Phases)
 - [Notes and Events](Notes-and-Events)
 - [Reminders](Reminders)
-- [Scene Darkness](Scene-Darkness)
+- [Scene Ambience](Scene-Ambience)
 - [Weather System](Weather-System)
+- [Weather Presets](Weather-Presets)
+- [Weather Picker](Weather-Picker)
+- [Weather Editor](Weather-Editor)
+- [Climate Editor](Climate-Editor)
+- [FXMaster Integration](FXMaster-Integration)
 - [Settings Backup](Settings-Backup)
 
 **Customization**

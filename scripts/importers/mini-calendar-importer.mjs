@@ -400,7 +400,7 @@ export default class MiniCalendarImporter extends BaseImporter {
    */
   #transformWeather(data = {}, weatherValues = []) {
     const biome = data.biome || 'temperate';
-    if (!weatherValues?.length) return { activeZone: biome, autoGenerate: false, zones: [] };
+    if (!weatherValues?.length) return { activeZone: biome, zones: [] };
     const seasonOverrides = {};
     for (const weather of weatherValues) {
       const tempOffset = weather.tempOffset || 0;
@@ -415,7 +415,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       presets: [],
       seasonOverrides: {}
     };
-    return { activeZone: biome, autoGenerate: false, zones: [zone] };
+    return { activeZone: biome, zones: [zone] };
   }
 
   /**
