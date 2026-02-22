@@ -139,39 +139,54 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           RELEASE_BODY: ${{ steps.release.outputs.body }}
+          MODULE_TITLE: ${{ steps.module.outputs.title }}
+          VERSION: ${{ env.VERSION }}
+          COMPAT_MIN: ${{ steps.module.outputs.compat_min }}
+          COMPAT_MAX: ${{ steps.module.outputs.compat_max }}
+          RELEASE_PAGE: ${{ env.REPO_URL }}/releases/tag/${{ env.TAG_NAME }}
         run: |
-          # Get release notes from the release body, or use a default message
-          RELEASE_NOTES="${RELEASE_BODY:-New release available!}"
+          python3 -c "
+          import json, os, sys
 
-          # Truncate to 1500 characters to avoid Discord webhook limits
-          if [ ${#RELEASE_NOTES} -gt 1500 ]; then
-            RELEASE_NOTES="${RELEASE_NOTES:0:1497}..."
-          fi
+          # Read curated release notes from file, fall back to release body
+          notes = ''
+          if os.path.isfile('release_notes.txt') and os.path.getsize('release_notes.txt') > 0:
+              with open('release_notes.txt', 'r', encoding='utf-8') as f:
+                  notes = f.read().strip()
+          if not notes:
+              notes = os.environ.get('RELEASE_BODY', 'New release available!')
 
-          JSON_PAYLOAD=$(jq -n \
-            --arg title "${{ steps.module.outputs.title }} v${{ env.VERSION }}" \
-            --arg version "${{ env.VERSION }}" \
-            --arg foundry_url "https://foundryvtt.com/packages/calendaria" \
-            --arg release_url "${{ env.RELEASE_MANIFEST_URL }}" \
-            --arg download_url "${{ env.RELEASE_DOWNLOAD_URL }}" \
-            --arg release_notes "$RELEASE_NOTES" \
-            --arg compat_min "${{ steps.module.outputs.compat_min }}" \
-            --arg compat_max "${{ steps.module.outputs.compat_max }}" \
-            '{
-              content: "<@&1384920094597185556> <@&1447730718464806973>",
-              embeds: [{
-                title: $title,
-                description: $release_notes,
-                fields: [
-                  {name: "Core Compatibility", value: ($compat_min + " - " + $compat_max), inline: true},
-                  {name: "Foundry Package", value: $foundry_url, inline: false}
-                ]
+          # Truncate to 2000 characters
+          if len(notes) > 2000:
+              notes = notes[:1997] + '...'
+
+          title = os.environ.get('MODULE_TITLE', 'Calendaria') + ' v' + os.environ.get('VERSION', '')
+          compat_min = os.environ.get('COMPAT_MIN', '')
+          compat_max = os.environ.get('COMPAT_MAX', '')
+          release_page = os.environ.get('RELEASE_PAGE', '')
+          foundry_url = os.environ.get('FOUNDRY_URL', 'https://foundryvtt.com/packages/calendaria')
+
+          payload = json.dumps({
+              'content': '<@&1384920094597185556> <@&1447730718464806973>',
+              'embeds': [{
+                  'title': title,
+                  'url': release_page,
+                  'description': notes,
+                  'fields': [
+                      {'name': 'Core Compatibility', 'value': compat_min if compat_min == compat_max else f'{compat_min} - {compat_max}', 'inline': True},
+                      {'name': 'Foundry Package', 'value': f'[Install from Foundry]({foundry_url})', 'inline': True}
+                  ],
+                  'color': 16750848
               }]
-            }')
+          })
 
-          echo "JSON Payload:"
-          echo "$JSON_PAYLOAD" | jq '.'
+          print('JSON Payload:')
+          print(json.dumps(json.loads(payload), indent=2))
 
-          curl -H "Content-Type: application/json" \
-              -d "$JSON_PAYLOAD" \
+          with open('/tmp/discord_payload.json', 'w') as f:
+              f.write(payload)
+          "
+
+          curl -sS -H "Content-Type: application/json" \
+              -d @/tmp/discord_payload.json \
               $DISCORD_WEBHOOK
