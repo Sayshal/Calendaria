@@ -12,6 +12,7 @@ import { TimeKeeper } from './scripts/applications/time-keeper.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
 import { overrideChatLogTimestamps } from './scripts/chat/chat-timestamp.mjs';
+import { checkReleaseMessage } from './scripts/chat/release-message.mjs';
 import { HOOKS, JOURNALS, MODULE, SETTINGS, SHEETS, TEMPLATES } from './scripts/constants.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/index.mjs';
@@ -85,9 +86,10 @@ Hooks.once('ready', async () => {
     }
   }
   if (game.pf2e?.worldClock && game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC)) {
-    const pf2eWorldClock = game.settings.get('pf2e', 'worldClock');
+    const systemId = game.system.id;
+    const pf2eWorldClock = game.settings.get(systemId, 'worldClock');
     if (pf2eWorldClock?.syncDarkness) {
-      await game.settings.set('pf2e', 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+      await game.settings.set(systemId, 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
       ui.notifications.warn('CALENDARIA.Notification.PF2eDarknessSyncDisabled', { localize: true });
     }
   }
@@ -97,6 +99,7 @@ Hooks.once('ready', async () => {
   initializeChatCommander();
   initializeFXMaster();
   initializeWeatherSound();
+  await checkReleaseMessage();
   Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
 });
 Hooks.once('setup', () => {

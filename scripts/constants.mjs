@@ -190,7 +190,8 @@ export const TEMPLATES = {
   PARTIALS: {
     SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,
     DATE_PICKER: `modules/${MODULE.ID}/templates/partials/dialog-date-picker.hbs`,
-    CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`
+    CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`,
+    RELEASE_MESSAGE: `modules/${MODULE.ID}/templates/chat/release-message.hbs`
   },
   STOPWATCH: `modules/${MODULE.ID}/templates/stopwatch.hbs`,
   TIME_DIAL: `modules/${MODULE.ID}/templates/time-dial.hbs`,

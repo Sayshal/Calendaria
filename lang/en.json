@@ -1409,6 +1409,8 @@
   "CALENDARIA.Reminder.StartsIn": "<strong>{name}</strong> starts in {time}",
   "CALENDARIA.Reminder.StartsNow": "<strong>{name}</strong> is today",
   "CALENDARIA.Reminder.Title": "Event Reminder",
+  "CALENDARIA.Release.ReleaseNotes": "Release Notes",
+  "CALENDARIA.Release.Title": "Welcome to Calendaria v{version}!",
   "CALENDARIA.Repeat.computed": "Computed",
   "CALENDARIA.Repeat.daily": "Daily",
   "CALENDARIA.Repeat.linked": "Linked to Event",
