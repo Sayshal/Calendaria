@@ -56,16 +56,19 @@ Configure which user roles can access Calendaria features.
 
 ### Available Permissions
 
-| Permission           | Description                                 |
-| -------------------- | ------------------------------------------- |
-| **View MiniCal**     | Can see the MiniCal widget                  |
-| **View TimeKeeper**  | Can see the TimeKeeper                      |
-| **View HUD**         | Can see the main HUD                        |
-| **Manage Notes**     | Can create, edit, and delete calendar notes |
-| **Change Date/Time** | Can modify the world date and time          |
-| **Change Weather**   | Can set weather conditions                  |
-| **Change Calendar**  | Can switch the active calendar              |
-| **Edit Calendars**   | Can access the Calendar Editor              |
+| Permission                | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| **View BigCal**           | Can see the BigCal                                     |
+| **View MiniCal**          | Can see the MiniCal widget                             |
+| **View TimeKeeper**       | Can see the TimeKeeper                                 |
+| **Manage Notes**          | Can create own calendar notes                          |
+| **Edit Notes**            | Can edit calendar notes owned by other players         |
+| **Delete Notes**          | Can delete own calendar notes                          |
+| **Change Date/Time**      | Can modify the world date and time                     |
+| **Change Weather**        | Can set weather conditions                             |
+| **View Weather Forecast** | Can view weather forecasts and day-cell forecast icons |
+| **Change Calendar**       | Can switch the active calendar                         |
+| **Edit Calendars**        | Can access the Calendar Editor                         |
 
 ### Configurable Roles
 

@@ -4,6 +4,80 @@ Calendaria fires hooks for module integration and automation.
 
 ---
 
+## Lifecycle Hooks
+
+### calendaria.init
+
+Fired during Foundry's `init` hook after the Calendaria global namespace is created.
+
+**Parameters:** None
+
+```javascript
+Hooks.on('calendaria.init', () => {
+  console.log('Calendaria initializing');
+});
+```
+
+### calendaria.ready
+
+Fired during Foundry's `ready` hook after all Calendaria managers are initialized.
+
+**Parameters:**
+
+- `data` (object)
+  - `api` (CalendariaAPI) - The public API object
+  - `calendar` (CalendariaCalendar|null) - The active calendar
+  - `version` (string) - Module version
+
+```javascript
+Hooks.on('calendaria.ready', ({ api, calendar, version }) => {
+  console.log(`Calendaria v${version} ready with calendar: ${calendar?.id}`);
+});
+```
+
+---
+
+## Render Hooks
+
+### calendaria.preRenderCalendar
+
+Fired before BigCal renders.
+
+**Parameters:**
+
+- `data` (object)
+  - `app` (BigCal) - The BigCal application instance
+  - `displayMode` (string) - Current display mode (`"month"`, `"week"`, or `"year"`)
+  - `calendar` (CalendariaCalendar) - Active calendar
+
+```javascript
+Hooks.on('calendaria.preRenderCalendar', (data) => {
+  console.log(`BigCal rendering in ${data.displayMode} mode`);
+});
+```
+
+### calendaria.renderCalendar
+
+Fired after BigCal renders and all DOM setup is complete.
+
+**Parameters:**
+
+- `data` (object)
+  - `app` (BigCal) - The BigCal application instance
+  - `element` (HTMLElement) - The rendered application element
+  - `displayMode` (string) - Current display mode (`"month"`, `"week"`, or `"year"`)
+  - `calendar` (CalendariaCalendar) - Active calendar
+
+```javascript
+Hooks.on('calendaria.renderCalendar', (data) => {
+  // Inject custom content into BigCal after render
+  const dayCell = data.element.querySelector('.day-cell.today');
+  if (dayCell) dayCell.classList.add('my-module-highlight');
+});
+```
+
+---
+
 ## Calendar Hooks
 
 ### calendaria.calendarSwitched
@@ -320,6 +394,103 @@ Fired when clock state is updated from another client. Used to sync real-time cl
 ```javascript
 Hooks.on('calendaria.clockUpdate', (data) => {
   console.log(`Remote clock sync: running=${data.running}, ratio=${data.ratio}`);
+});
+```
+
+### calendaria.visualTick
+
+Fired on each real-time clock render frame. Used internally by HUD, BigCal, MiniCal, TimeKeeper, and Stopwatch for smooth time display updates.
+
+**Parameters:**
+
+- `data` (object)
+  - `predictedWorldTime` (number) - Predicted world time in seconds (may be ahead of actual `game.time.worldTime` due to interpolation)
+
+```javascript
+Hooks.on('calendaria.visualTick', (data) => {
+  console.log(`Predicted time: ${data.predictedWorldTime}`);
+});
+```
+
+### calendaria.worldTimeUpdated
+
+Fired when the Foundry `updateWorldTime` hook fires. Provides the raw world time and delta.
+
+**Parameters:**
+
+- `worldTime` (number) - Current world time in seconds
+- `dt` (number) - Time delta in seconds
+
+```javascript
+Hooks.on('calendaria.worldTimeUpdated', (worldTime, dt) => {
+  console.log(`World time: ${worldTime}, delta: ${dt}`);
+});
+```
+
+---
+
+## Stopwatch Hooks
+
+### calendaria.stopwatchStart
+
+Fired when the stopwatch starts.
+
+**Parameters:**
+
+- `data` (object)
+  - `mode` (string) - Stopwatch mode (`"realtime"` or `"gametime"`)
+
+```javascript
+Hooks.on('calendaria.stopwatchStart', (data) => {
+  console.log(`Stopwatch started in ${data.mode} mode`);
+});
+```
+
+### calendaria.stopwatchPause
+
+Fired when the stopwatch is paused.
+
+**Parameters:**
+
+- `data` (object)
+  - `mode` (string) - Stopwatch mode
+  - `elapsed` (number) - Elapsed time in milliseconds (realtime) or seconds (gametime)
+
+```javascript
+Hooks.on('calendaria.stopwatchPause', (data) => {
+  console.log(`Paused at ${data.elapsed}`);
+});
+```
+
+### calendaria.stopwatchReset
+
+Fired when the stopwatch is reset.
+
+**Parameters:**
+
+- `data` (object)
+  - `mode` (string) - Stopwatch mode
+
+```javascript
+Hooks.on('calendaria.stopwatchReset', (data) => {
+  console.log(`Stopwatch reset (${data.mode})`);
+});
+```
+
+### calendaria.stopwatchLap
+
+Fired when a lap is recorded.
+
+**Parameters:**
+
+- `data` (object)
+  - `mode` (string) - Stopwatch mode
+  - `lap` (number) - Lap number
+  - `elapsed` (number) - Elapsed time at lap
+
+```javascript
+Hooks.on('calendaria.stopwatchLap', (data) => {
+  console.log(`Lap ${data.lap}: ${data.elapsed}`);
 });
 ```
 

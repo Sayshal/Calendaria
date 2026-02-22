@@ -1491,10 +1491,12 @@ const history = CALENDARIA.api.getWeatherHistory({ zoneId: 'desert' });
 Set a per-scene climate zone override.
 
 ```javascript
-await CALENDARIA.api.setSceneZoneOverride(game.scenes.active, 'tropical');
+await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, 'tropical');
 // Clear override:
-await CALENDARIA.api.setSceneZoneOverride(game.scenes.active, null);
+await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, null);
 ```
+
+> **Note:** This method is on `WeatherManager`, not on the public API object.
 
 | Parameter | Type           | Description              |
 | --------- | -------------- | ------------------------ |
@@ -1779,19 +1781,33 @@ const canManage = CALENDARIA.api.canManageNotes();
 
 ## Permissions
 
+Individual permission checks are available on the `CALENDARIA.permissions` namespace. See [Permissions](Permissions) for the full permission list and defaults.
+
 ### hasPermission(permission)
 
 Check if current user has a specific permission.
 
 ```javascript
-const canChange = CALENDARIA.api.hasPermission('changeDateTime');
+const canChange = CALENDARIA.permissions.hasPermission('changeDateTime');
 ```
 
 | Parameter    | Type     | Description    |
 | ------------ | -------- | -------------- |
 | `permission` | `string` | Permission key |
 
-**Permission Keys:** `viewMiniCal`, `viewTimeKeeper`, `viewHUD`, `manageNotes`, `changeDateTime`, `changeWeather`, `changeCalendar`, `editCalendars`
+**Permission Keys:** `viewBigCal`, `viewMiniCal`, `viewTimeKeeper`, `addNotes`, `editNotes`, `deleteNotes`, `changeDateTime`, `changeWeather`, `viewWeatherForecast`, `changeActiveCalendar`, `editCalendars`
+
+**Returns:** `boolean`
+
+---
+
+### canViewBigCal()
+
+Check if current user can view the BigCal.
+
+```javascript
+const canView = CALENDARIA.permissions.canViewBigCal();
+```
 
 **Returns:** `boolean`
 
@@ -1802,7 +1818,7 @@ const canChange = CALENDARIA.api.hasPermission('changeDateTime');
 Check if current user can view the MiniCal.
 
 ```javascript
-const canView = CALENDARIA.api.canViewMiniCal();
+const canView = CALENDARIA.permissions.canViewMiniCal();
 ```
 
 **Returns:** `boolean`
@@ -1814,7 +1830,43 @@ const canView = CALENDARIA.api.canViewMiniCal();
 Check if current user can view the TimeKeeper.
 
 ```javascript
-const canView = CALENDARIA.api.canViewTimeKeeper();
+const canView = CALENDARIA.permissions.canViewTimeKeeper();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canAddNotes()
+
+Check if current user can create notes.
+
+```javascript
+const canAdd = CALENDARIA.permissions.canAddNotes();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canEditNotes()
+
+Check if current user can edit notes owned by other players.
+
+```javascript
+const canEdit = CALENDARIA.permissions.canEditNotes();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canDeleteNotes()
+
+Check if current user can delete notes.
+
+```javascript
+const canDelete = CALENDARIA.permissions.canDeleteNotes();
 ```
 
 **Returns:** `boolean`
@@ -1826,7 +1878,7 @@ const canView = CALENDARIA.api.canViewTimeKeeper();
 Check if current user can modify date/time.
 
 ```javascript
-const canChange = CALENDARIA.api.canChangeDateTime();
+const canChange = CALENDARIA.permissions.canChangeDateTime();
 ```
 
 **Returns:** `boolean`
@@ -1838,19 +1890,31 @@ const canChange = CALENDARIA.api.canChangeDateTime();
 Check if current user can change weather.
 
 ```javascript
-const canChange = CALENDARIA.api.canChangeWeather();
+const canChange = CALENDARIA.permissions.canChangeWeather();
 ```
 
 **Returns:** `boolean`
 
 ---
 
-### canChangeCalendar()
+### canViewWeatherForecast()
+
+Check if current user can view weather forecasts.
+
+```javascript
+const canView = CALENDARIA.permissions.canViewWeatherForecast();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canChangeActiveCalendar()
 
 Check if current user can switch the active calendar.
 
 ```javascript
-const canChange = CALENDARIA.api.canChangeCalendar();
+const canChange = CALENDARIA.permissions.canChangeActiveCalendar();
 ```
 
 **Returns:** `boolean`
@@ -1862,7 +1926,7 @@ const canChange = CALENDARIA.api.canChangeCalendar();
 Check if current user can access the Calendar Editor.
 
 ```javascript
-const canEdit = CALENDARIA.api.canEditCalendars();
+const canEdit = CALENDARIA.permissions.canEditCalendars();
 ```
 
 **Returns:** `boolean`
@@ -1965,60 +2029,11 @@ CALENDARIA.api.refreshWidgets();
 
 ### hooks
 
-Get all available Calendaria hook names.
+Get all available Calendaria hook name constants. See [Hooks](Hooks) for full documentation, parameters, and examples.
 
 ```javascript
 const hooks = CALENDARIA.api.hooks;
+// Use: Hooks.on(hooks.DAY_CHANGE, (data) => { ... });
 ```
 
-**Returns:** `object` - Hook name constants.
-
-**Available Hooks:**
-
-| Hook                              | Description                                                                |
-| --------------------------------- | -------------------------------------------------------------------------- |
-| `calendaria.init`                 | Module initialization                                                      |
-| `calendaria.ready`                | Module ready (provides `{api, calendar, version}`)                         |
-| `calendaria.calendarSwitched`     | Active calendar changed                                                    |
-| `calendaria.remoteCalendarSwitch` | Remote calendar switch received                                            |
-| `calendaria.calendarAdded`        | New calendar added                                                         |
-| `calendaria.calendarUpdated`      | Calendar updated                                                           |
-| `calendaria.calendarRemoved`      | Calendar removed                                                           |
-| `calendaria.dateTimeChange`       | Date/time changed                                                          |
-| `calendaria.dayChange`            | Day changed                                                                |
-| `calendaria.monthChange`          | Month changed                                                              |
-| `calendaria.yearChange`           | Year changed                                                               |
-| `calendaria.seasonChange`         | Season changed                                                             |
-| `calendaria.remoteDateChange`     | Remote date change received                                                |
-| `calendaria.sunrise`              | Sunrise occurred                                                           |
-| `calendaria.sunset`               | Sunset occurred                                                            |
-| `calendaria.midnight`             | Midnight occurred                                                          |
-| `calendaria.midday`               | Midday occurred                                                            |
-| `calendaria.moonPhaseChange`      | Moon phase changed                                                         |
-| `calendaria.restDayChange`        | Rest day status changed                                                    |
-| `calendaria.clockStartStop`       | Clock started/stopped                                                      |
-| `calendaria.clockUpdate`          | Clock tick                                                                 |
-| `calendaria.noteCreated`          | Note created                                                               |
-| `calendaria.noteUpdated`          | Note updated                                                               |
-| `calendaria.noteDeleted`          | Note deleted                                                               |
-| `calendaria.eventTriggered`       | Scheduled event triggered                                                  |
-| `calendaria.eventDayChanged`      | Event day changed                                                          |
-| `calendaria.reminderReceived`     | Reminder notification received                                             |
-| `calendaria.preRenderCalendar`    | Before calendar render                                                     |
-| `calendaria.renderCalendar`       | After calendar render                                                      |
-| `calendaria.importStarted`        | Import started                                                             |
-| `calendaria.importComplete`       | Import completed                                                           |
-| `calendaria.importFailed`         | Import failed                                                              |
-| `calendaria.weatherChange`        | Weather changed (payload includes `zoneId`, `current`, `previous`, `bulk`) |
-
-**Hook Example:**
-
-```javascript
-Hooks.on('calendaria.ready', ({ api, calendar, version }) => {
-  console.log(`Calendaria v${version} ready with calendar: ${calendar?.id}`);
-});
-
-Hooks.on('calendaria.dayChange', (components) => {
-  console.log(`New day: ${components.dayOfMonth}/${components.month}/${components.year}`);
-});
-```
+**Returns:** `object` - Hook name constants (e.g., `DAY_CHANGE`, `WEATHER_CHANGE`, `CLOCK_START_STOP`).

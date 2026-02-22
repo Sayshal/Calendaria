@@ -110,6 +110,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this;
     }
+    Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
     return super.render(options, _options);
   }
 
@@ -1266,6 +1267,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     WidgetManager.attachWidgetListeners(this.element);
+    Hooks.callAll(HOOKS.RENDER_CALENDAR, { app: this, element: this.element, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
   }
 
   /**

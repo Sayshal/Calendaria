@@ -29,23 +29,24 @@ GMs always have full access to all features.
 
 ### UI Visibility Permissions
 
-| Permission          | Description                |
-| ------------------- | -------------------------- |
-| **View MiniCal**    | Can see the MiniCal widget |
-| **View TimeKeeper** | Can see the TimeKeeper     |
-| **View HUD**        | Can see the main HUD       |
+| Permission          | Key              | Description                |
+| ------------------- | ---------------- | -------------------------- |
+| **View BigCal**     | `viewBigCal`     | Can see the BigCal         |
+| **View MiniCal**    | `viewMiniCal`    | Can see the MiniCal widget |
+| **View TimeKeeper** | `viewTimeKeeper` | Can see the TimeKeeper     |
 
 ### Action Permissions
 
-| Permission                | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| **Manage Notes**          | Can create and delete own calendar notes               |
-| **Edit Notes**            | Can edit calendar notes owned by other players         |
-| **Change Date/Time**      | Can modify the world date and time                     |
-| **Change Weather**        | Can set weather conditions                             |
-| **View Weather Forecast** | Can view weather forecasts and day-cell forecast icons |
-| **Change Calendar**       | Can switch the active calendar                         |
-| **Edit Calendars**        | Can access the Calendar Editor                         |
+| Permission                | Key                    | Description                                            |
+| ------------------------- | ---------------------- | ------------------------------------------------------ |
+| **Manage Notes**          | `addNotes`             | Can create own calendar notes                          |
+| **Edit Notes**            | `editNotes`            | Can edit calendar notes owned by other players         |
+| **Delete Notes**          | `deleteNotes`          | Can delete own calendar notes                          |
+| **Change Date/Time**      | `changeDateTime`       | Can modify the world date and time                     |
+| **Change Weather**        | `changeWeather`        | Can set weather conditions                             |
+| **View Weather Forecast** | `viewWeatherForecast`  | Can view weather forecasts and day-cell forecast icons |
+| **Change Calendar**       | `changeActiveCalendar` | Can switch the active calendar                         |
+| **Edit Calendars**        | `editCalendars`        | Can access the Calendar Editor                         |
 
 ---
 
@@ -55,11 +56,12 @@ By default, all non-GM roles have restricted access:
 
 | Permission            | Player | Trusted | Assistant GM |
 | --------------------- | :----: | :-----: | :----------: |
-| View MiniCal          |   ✓    |    ✓    |      ✓       |
-| View TimeKeeper       |   -    |    -    |      ✓       |
-| View HUD              |   ✓    |    ✓    |      ✓       |
-| Manage Notes          |   -    |    ✓    |      ✓       |
-| Edit Notes            |   -    |    -    |      -       |
+| View BigCal           |   -    |    ✓    |      ✓       |
+| View MiniCal          |   -    |    ✓    |      ✓       |
+| View TimeKeeper       |   -    |    ✓    |      ✓       |
+| Manage Notes          |   ✓    |    ✓    |      ✓       |
+| Edit Notes            |   -    |    ✓    |      ✓       |
+| Delete Notes          |   -    |    -    |      ✓       |
 | Change Date/Time      |   -    |    -    |      ✓       |
 | Change Weather        |   -    |    -    |      ✓       |
 | View Weather Forecast |   -    |    ✓    |      ✓       |
