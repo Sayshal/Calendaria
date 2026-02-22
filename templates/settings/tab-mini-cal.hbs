@@ -220,52 +220,54 @@
     </div>
   </fieldset>
 
-  <fieldset data-section="display-formats">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
-      <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
-        aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
-          class="fa-solid fa-question"></i></button>
-    </legend>
-    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+  {{#if isGM}}
+    <fieldset data-section="display-formats">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+            class="fa-solid fa-question"></i></button>
+      </legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
-    {{#each formatLocations}}
-      <div class="format-location" data-location="{{id}}">
-        <div class="form-group">
-          <label>{{label}}</label>
-        </div>
-
-        <div class="format-row">
-          <div class="format-column">
-            <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
-                data-location="{{id}}" data-role="gm"></span></span>
-            <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-              {{#each gmPresetOptions}}
-                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-              {{/each}}
-            </select>
-            <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-              placeholder="D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-              data-location="{{id}}" data-role="gm">
+      {{#each formatLocations}}
+        <div class="format-location" data-location="{{id}}">
+          <div class="form-group">
+            <label>{{label}}</label>
           </div>
 
-          <div class="format-column">
-            <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
-                data-location="{{id}}" data-role="player"></span></span>
-            <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-              {{#each playerPresetOptions}}
-                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-              {{/each}}
-            </select>
-            <input type="text" name="displayFormats.{{id}}.playerCustom"
-              value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMMM YYYY"
-              class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
-              data-role="player">
+          <div class="format-row">
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="gm"></span></span>
+              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+                {{#each gmPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+                placeholder="D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                data-location="{{id}}" data-role="gm">
+            </div>
+
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="player"></span></span>
+              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+                {{#each playerPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.playerCustom"
+                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMMM YYYY"
+                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+                data-role="player">
+            </div>
           </div>
         </div>
-      </div>
-    {{/each}}
-  </fieldset>
+      {{/each}}
+    </fieldset>
+  {{/if}}
 
   {{#if isGM}}
     <fieldset data-section="minical-time-jumps">

@@ -4413,8 +4413,11 @@ span.calendaria-moon-icon {
     padding: 0.5rem 0.625rem;
     border-top: 0.0625rem solid var(--calendaria-border-light);
     border-radius: 0 0 0.875rem 0.875rem;
-    cursor: pointer;
     background: var(--calendaria-bg-lighter);
+
+    &[data-action='toggle'] {
+      cursor: pointer;
+    }
 
     .time-value {
       color: var(--calendaria-title-text);
@@ -4455,11 +4458,11 @@ span.calendaria-moon-icon {
       }
     }
 
-    &:hover .time-value {
+    &[data-action='toggle']:hover .time-value {
       opacity: 0;
     }
 
-    &:hover .time-toggle {
+    &[data-action='toggle']:hover .time-toggle {
       opacity: 1;
       pointer-events: auto;
     }
@@ -5935,12 +5938,12 @@ span.calendaria-moon-icon {
   font-size: 1.25rem;
 }
 
-.calendaria-hud-time-wrapper:hover .calendaria-hud-play-btn {
+.calendaria-hud-time-wrapper:has(.calendaria-hud-play-btn):hover .calendaria-hud-play-btn {
   opacity: 1;
   pointer-events: auto;
 }
 
-.calendaria-hud-time-wrapper:hover .calendaria-hud-time {
+.calendaria-hud-time-wrapper:has(.calendaria-hud-play-btn):hover .calendaria-hud-time {
   opacity: 0.3;
 }
 
@@ -6450,7 +6453,7 @@ span.calendaria-moon-icon {
   transform: translate(-50%, -50%);
 }
 
-.calendaria-hud-slice:hover .calendaria-slice-time-overlay .calendaria-hud-play-btn {
+.calendaria-hud-slice:has(.calendaria-hud-play-btn):hover .calendaria-slice-time-overlay .calendaria-hud-play-btn {
   opacity: 1;
 }
 
