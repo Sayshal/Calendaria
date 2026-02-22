@@ -19,6 +19,7 @@ import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNe
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import * as WidgetManager from './utils/widget-manager.mjs';
+import TimeClock from './time/time-clock.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
 
 /**
@@ -815,6 +816,44 @@ export const CalendariaAPI = {
       return game.time.worldTime;
     }
     return await game.time.advance(secondsUntil);
+  },
+
+  /**
+   * Check if the real-time clock is currently running.
+   * @returns {boolean} True if the clock is running
+   */
+  isClockRunning() {
+    return TimeClock.running;
+  },
+
+  /**
+   * Start the real-time clock.
+   * Requires time-change permission. Blocked during combat or when game is paused with sync enabled.
+   */
+  startClock() {
+    TimeClock.start();
+  },
+
+  /**
+   * Stop the real-time clock.
+   */
+  stopClock() {
+    TimeClock.stop();
+  },
+
+  /**
+   * Toggle the real-time clock on/off.
+   */
+  toggleClock() {
+    TimeClock.toggle();
+  },
+
+  /**
+   * Get the current real-time clock speed (game seconds per real second).
+   * @returns {number} Clock speed multiplier
+   */
+  getClockSpeed() {
+    return TimeClock.realTimeSpeed;
   },
 
   /**

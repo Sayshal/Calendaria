@@ -100,6 +100,69 @@ await CALENDARIA.api.advanceTimeToPreset('midnight');
 
 ---
 
+## Clock Control
+
+### isClockRunning()
+
+Check if the real-time clock is currently running.
+
+```javascript
+const running = CALENDARIA.api.isClockRunning();
+```
+
+**Returns:** `boolean` - True if the clock is running.
+
+---
+
+### startClock()
+
+Start the real-time clock. Requires time-change permission. Blocked during active combat or when the game is paused with sync enabled.
+
+```javascript
+CALENDARIA.api.startClock();
+```
+
+**Returns:** `void`
+
+---
+
+### stopClock()
+
+Stop the real-time clock.
+
+```javascript
+CALENDARIA.api.stopClock();
+```
+
+**Returns:** `void`
+
+---
+
+### toggleClock()
+
+Toggle the real-time clock on or off.
+
+```javascript
+CALENDARIA.api.toggleClock();
+```
+
+**Returns:** `void`
+
+---
+
+### getClockSpeed()
+
+Get the current real-time clock speed (game seconds per real second).
+
+```javascript
+const speed = CALENDARIA.api.getClockSpeed();
+// Returns: 1 (1 game second per real second at default speed)
+```
+
+**Returns:** `number` - Clock speed multiplier.
+
+---
+
 ## Calendar Access
 
 Calendar collections (months, weekdays, seasons, moons, etc.) are stored as keyed objects with string IDs, not arrays. Use the convenience getter arrays for ordered iteration:
