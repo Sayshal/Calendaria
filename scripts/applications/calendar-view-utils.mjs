@@ -622,7 +622,7 @@ export function injectContextMenuInfo(target, calendar) {
  * @returns {string} Escaped text
  */
 function escapeText(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return (str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**

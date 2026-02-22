@@ -71,6 +71,12 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether data was loaded from module */
   #loadedFromModule = false;
 
+  /** @type {Array<{name: string, index: number}>|null} Available source calendars for selection */
+  #sourceCalendars = null;
+
+  /** @type {number} Currently selected calendar index */
+  #selectedCalendarIndex = 0;
+
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
@@ -87,6 +93,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     context.extractedNotes = this.#extractedNotes || [];
     context.loadedFileName = this.#loadedFileName;
     context.loadedFromModule = this.#loadedFromModule;
+    context.sourceCalendars = this.#sourceCalendars?.map((cal, i) => ({ ...cal, selected: i === this.#selectedCalendarIndex })) || null;
     if (context.selectedImporter) {
       context.canUpload = context.selectedImporter.supportsFileUpload;
       context.canImportFromModule = context.selectedImporter.supportsLiveImport && context.selectedImporter.detected;
@@ -109,6 +116,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const fileInput = this.element.querySelector('input[type="file"]');
     if (fileInput) fileInput.addEventListener('change', this.#onFileSelected.bind(this));
+    const calendarSelect = this.element.querySelector('select[name="sourceCalendarIndex"]');
+    if (calendarSelect) calendarSelect.addEventListener('change', this.#onCalendarChoice.bind(this));
   }
 
   /**
@@ -131,7 +140,14 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     try {
       this.#rawData = data;
-      this.#transformedData = await importer.transform(data);
+
+      // Check for multiple calendars in source data
+      const choices = importer.getCalendarChoices(data);
+      if (choices && choices.length > 1) {
+        this.#sourceCalendars = choices;
+      }
+
+      this.#transformedData = await importer.transform(data, this.#selectedCalendarIndex);
       const validation = importer.validate(this.#transformedData);
       if (!validation.valid) {
         this.#errorMessage = validation.errors.join('\n');
@@ -142,7 +158,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       this.#previewData = importer.getPreviewData(this.#rawData, this.#transformedData);
       this.#suggestedId = this.#generateId(this.#transformedData.name);
-      const currentDate = importer.extractCurrentDate(this.#rawData);
+      const currentDate = importer.extractCurrentDate(this.#rawData, this.#selectedCalendarIndex);
       if (currentDate) {
         const month = (currentDate.month ?? 0) + 1;
         const day = currentDate.day ?? 1;
@@ -199,6 +215,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#extractedNotes = null;
     this.#loadedFileName = null;
     this.#loadedFromModule = false;
+    this.#sourceCalendars = null;
+    this.#selectedCalendarIndex = 0;
   }
 
   /**
@@ -212,6 +230,15 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#clearData();
       this.render();
     }
+  }
+
+  /**
+   * Handle calendar selection change (multi-calendar sources).
+   * @param {Event} event - Change event
+   */
+  async #onCalendarChoice(event) {
+    this.#selectedCalendarIndex = Number(event.target.value) || 0;
+    if (this.#rawData) await this.#processData(this.#rawData);
   }
 
   /**

@@ -66,6 +66,19 @@
                 </button>
               {{/if}}
             {{/if}}
+
+            {{#if sourceCalendars}}
+              <div class="form-group">
+                <label>{{localize "CALENDARIA.Importer.SelectCalendar"}}</label>
+                <div class="form-fields">
+                  <select name="sourceCalendarIndex">
+                    {{#each sourceCalendars}}
+                      <option value="{{this.index}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              </div>
+            {{/if}}
           {{/if}}
         </fieldset>
 

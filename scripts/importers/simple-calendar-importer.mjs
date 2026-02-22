@@ -53,15 +53,23 @@ export default class SimpleCalendarImporter extends BaseImporter {
     return { calendars, notes, currentDate, exportVersion: 2 };
   }
 
+  /** @override */
+  getCalendarChoices(data) {
+    const calendars = data.calendars || data;
+    if (!Array.isArray(calendars) || calendars.length <= 1) return null;
+    return calendars.map((cal, index) => ({ name: cal.name || cal.id || `Calendar ${index + 1}`, index }));
+  }
+
   /**
    * Extract current date from SC data for preservation after import.
    * @param {object} data - Raw SC data
+   * @param {number} [calendarIndex] - Index of calendar to extract date from
    * @returns {{year: number, month: number, day: number}|null} Current date
    */
-  extractCurrentDate(data) {
+  extractCurrentDate(data, calendarIndex = 0) {
     if (data.currentDate) return data.currentDate;
     const calendars = data.calendars || data;
-    const calendar = Array.isArray(calendars) ? calendars[0] : calendars;
+    const calendar = Array.isArray(calendars) ? calendars[calendarIndex] : calendars;
     if (calendar?.currentDate) {
       const cd = calendar.currentDate;
       const secondsPerHour = (calendar.time?.minutesInHour ?? 60) * (calendar.time?.secondsInMinute ?? 60);

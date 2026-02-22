@@ -96,12 +96,23 @@ export default class BaseImporter {
   }
 
   /**
+   * Get available calendar choices from source data.
+   * Override in subclasses that support multiple calendars (e.g., Simple Calendar).
+   * @param {object} _data - Raw source data
+   * @returns {Array<{name: string, index: number}>|null} Calendar choices or null if single/unsupported
+   */
+  getCalendarChoices(_data) {
+    return null;
+  }
+
+  /**
    * Extract the current date from source data.
    * Override in subclasses to return the date the source module was displaying.
    * @param {object} _data - Raw source data
+   * @param {number} [_calendarIndex] - Index of calendar to extract date from
    * @returns {{year: number, month: number, day: number, hour: number, minute: number}|null} Current date or null
    */
-  extractCurrentDate(_data) {
+  extractCurrentDate(_data, _calendarIndex = 0) {
     return null;
   }
 

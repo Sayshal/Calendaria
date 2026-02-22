@@ -1,28 +1,6 @@
-## [Now on Patreon!](https://www.patreon.com/c/3DeathSaves)
-All current modules stay free — Patreon funds new premium modules, early access builds, and continued development. First 50 patrons at any tier earn a permanent @Founder role on Discord.
-
-This is the biggest Calendaria update yet — a complete weather overhaul with wind, precipitation, forecasts, weather history, ambient sound, and a full PixiJS particle renderer powering 36 animated effects on the HUD. Huge thanks to [Gambit](https://www.patreon.com/GambitsLounge) (FXMaster+ developer) for collaborating on hand-crafted presets for all 40+ weather types.
-
-## Major Features
-- Wind & Precipitation System
-- Weather Inertia
-- Weather History
-- Forecast System
-- Time-of-Day Color Shifting
-- Moon Illumination
-- HUD Weather Visuals
-- FXMaster Integration
-- Weather Ambient Sound
-- Dome Below Bar option
-
 ## New Features
-- 16 new weather presets (Ice Storm, Monsoon, Sakura Bloom, Acid Rain, and more)
-- `/forecast` and `/weather` chat commands
-- Weather Picker rebuilt
-- Weather Editor for customizing visual properties
-- Calendar day weather icons on BigCal/MiniCal
-- Collapsible nav bars, GM theme enforcement
-- German, Italian, and Russian translations
+- Multi-calendar selection for Simple Calendar imports — users with multiple SC calendars can now choose which one to import via a dropdown
 
 ## Bug Fixes
-- Too many to count!
+- Fix null string crash in escapeText (calendar-view-utils) and weather tooltip builder
+- Shorten HUD dial style setting descriptions
