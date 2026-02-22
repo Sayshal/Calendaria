@@ -14,7 +14,7 @@ import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
-import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
+import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset, getForcedTheme, initializeTheme } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { BigCal } from '../big-cal.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
@@ -38,7 +38,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-settings-panel',
     classes: ['calendaria', 'settings-panel', 'standard-form'],
     tag: 'form',
-    window: { icon: 'fas fa-cog', resizable: false, title: 'CALENDARIA.SettingsPanel.Title' },
+    window: {
+      icon: 'fas fa-cog',
+      resizable: false,
+      title: 'CALENDARIA.SettingsPanel.Title',
+      controls: [{ action: 'toggleNavCollapse', icon: 'fa-solid fa-bars', label: 'CALENDARIA.SettingsPanel.NavCollapse.Tooltip' }]
+    },
     position: { width: 900, height: 835 },
     form: {
       handler: SettingsPanel.#onSubmit,
@@ -73,7 +78,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       showTokenReference: SettingsPanel.#onShowTokenReference,
       resetSection: SettingsPanel.#onResetSection,
       exportSettings: SettingsPanel.#onExportSettings,
-      importSettings: SettingsPanel.#onImportSettings
+      importSettings: SettingsPanel.#onImportSettings,
+      toggleNavCollapse: SettingsPanel.#onToggleNavCollapse
     }
   };
 
@@ -180,9 +186,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     return { tabGroups, ungroupedTabs };
   }
 
+  /** Whether the nav is collapsed to icon-only mode */
+  #navCollapsed = false;
+
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
+    if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     const themeModeSelect = this.element.querySelector('select[name="themeMode"]');
     if (themeModeSelect && !themeModeSelect.dataset.listenerAttached) {
       themeModeSelect.dataset.listenerAttached = 'true';
@@ -230,6 +240,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   _onClose(options) {
     super._onClose(options);
     this.#destroySearchDropdown();
+  }
+
+  /** Toggle nav between full labels and icon-only mode. */
+  static #onToggleNavCollapse() {
+    this.#navCollapsed = !this.#navCollapsed;
+    this.element.classList.toggle('nav-collapsed', this.#navCollapsed);
   }
 
   /** Track save indicator state across re-renders */
@@ -567,6 +583,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.AUTO_GENERATE_WEATHER]: { tab: 'weather', label: 'CALENDARIA.Settings.AutoGenerate.Name' },
     [SETTINGS.TEMPERATURE_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.TemperatureUnit.Name' },
     [SETTINGS.PRECIPITATION_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.PrecipitationUnit.Name' },
+    [SETTINGS.WIND_SPEED_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.WindSpeedUnit.Name' },
+    [SETTINGS.FORCE_THEME]: { tab: 'theme', label: 'CALENDARIA.Settings.ForceTheme.Name' },
     [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.ThemeEditor.PresetSelect' },
     [SETTINGS.CUSTOM_THEME_COLORS]: { tab: 'theme', label: 'CALENDARIA.SettingsPanel.Section.Theme' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
@@ -1296,6 +1314,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'metric', label: localize('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
       { value: 'imperial', label: localize('CALENDARIA.Settings.PrecipitationUnit.Imperial'), selected: precipUnit === 'imperial' }
     ];
+    const windUnit = game.settings.get(MODULE.ID, SETTINGS.WIND_SPEED_UNIT);
+    context.windSpeedUnitOptions = [
+      { value: 'kph', label: localize('CALENDARIA.Settings.WindSpeedUnit.Kph'), selected: windUnit === 'kph' },
+      { value: 'mph', label: localize('CALENDARIA.Settings.WindSpeedUnit.Mph'), selected: windUnit === 'mph' }
+    ];
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
     context.hasZones = zones.length > 0;
@@ -1320,16 +1343,33 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareThemeContext(context) {
     const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+    const forcedTheme = getForcedTheme();
 
-    // Theme modes dropdown
+    // Force theme dropdown (GM only)
+    if (context.isGM) {
+      const forceTheme = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME) || 'none';
+      context.forceThemeOptions = [
+        { value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' },
+        { value: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: forceTheme === 'dark' },
+        { value: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: forceTheme === 'highContrast' },
+        { value: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: forceTheme === 'custom' }
+      ];
+    }
+
+    // Theme enforcement state
+    context.themeForced = !!forcedTheme;
+    context.forcedThemeName = forcedTheme ? localize(`CALENDARIA.ThemeEditor.Presets.${forcedTheme.charAt(0).toUpperCase() + forcedTheme.slice(1)}`) || forcedTheme : '';
+
+    // Theme modes dropdown — show forced theme when enforced
+    const displayMode = forcedTheme || themeMode;
     context.themeModes = [
-      { key: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: themeMode === 'dark' },
-      { key: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: themeMode === 'highContrast' },
-      { key: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: themeMode === 'custom' }
+      { key: 'dark', label: localize('CALENDARIA.ThemeEditor.Presets.Dark'), selected: displayMode === 'dark' },
+      { key: 'highContrast', label: localize('CALENDARIA.ThemeEditor.Presets.HighContrast'), selected: displayMode === 'highContrast' },
+      { key: 'custom', label: localize('CALENDARIA.ThemeEditor.Custom'), selected: displayMode === 'custom' }
     ];
 
-    // Only show custom color editor when in custom mode
-    context.showCustomColors = themeMode === 'custom';
+    // Only show custom color editor when in custom mode and not forced
+    context.showCustomColors = themeMode === 'custom' && !forcedTheme;
 
     if (context.showCustomColors) {
       const categories = {};
@@ -1584,6 +1624,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('autoGenerateWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!data.autoGenerateWeather);
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
     if ('precipitationUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, data.precipitationUnit);
+    if ('windSpeedUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.WIND_SPEED_UNIT, data.windSpeedUnit);
     if ('weatherInertia' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_INERTIA, parseFloat(data.weatherInertia));
     if ('weatherHistoryDays' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS, parseInt(data.weatherHistoryDays));
     if ('forecastAccuracy' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_ACCURACY, parseInt(data.forecastAccuracy));
@@ -1730,6 +1771,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
       applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
+    }
+
+    if ('forceTheme' in data && game.user.isGM) {
+      const oldForce = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
+      await game.settings.set(MODULE.ID, SETTINGS.FORCE_THEME, data.forceTheme);
+      if (data.forceTheme === 'custom') {
+        const gmColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+        await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, { ...DEFAULT_COLORS, ...gmColors });
+      }
+      if (oldForce !== data.forceTheme) initializeTheme();
     }
 
     if (data.categories) {

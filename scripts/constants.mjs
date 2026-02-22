@@ -126,11 +126,14 @@ export const SETTINGS = {
   WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
   WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
   FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
+  FORCE_THEME: 'forceTheme',
+  FORCED_THEME_COLORS: 'forcedThemeColors',
   WEATHER_SOUND_FX: 'weatherSoundFx',
   FXMASTER_TOP_DOWN: 'fxmasterTopDown',
   AUTO_GENERATE_WEATHER: 'autoGenerateWeather',
   GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast',
-  REST_TO_SUNRISE: 'restToSunrise'
+  REST_TO_SUNRISE: 'restToSunrise',
+  WIND_SPEED_UNIT: 'windSpeedUnit'
 };
 
 /**

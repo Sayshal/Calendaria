@@ -31,7 +31,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-editor',
     classes: ['calendaria', 'calendar-editor', 'standard-form'],
     tag: 'form',
-    window: { icon: 'fas fa-calendar-plus', resizable: false },
+    window: {
+      icon: 'fas fa-calendar-plus',
+      resizable: false,
+      controls: [{ action: 'toggleNavCollapse', icon: 'fa-solid fa-bars', label: 'CALENDARIA.SettingsPanel.NavCollapse.Tooltip' }]
+    },
     position: { width: 1100, height: 900 },
     form: {
       handler: CalendarEditor.#onSubmit,
@@ -81,7 +85,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       editZoneClimate: CalendarEditor.#onEditZoneClimate,
       deleteZone: CalendarEditor.#onDeleteZone,
       createNew: CalendarEditor.#onCreateNew,
-      showTokenReference: CalendarEditor.#onShowTokenReference
+      showTokenReference: CalendarEditor.#onShowTokenReference,
+      toggleNavCollapse: CalendarEditor.#onToggleNavCollapse
     }
   };
 
@@ -571,8 +576,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} options - Render options
    * @protected
    */
+  /** Whether the nav is collapsed to icon-only mode */
+  #navCollapsed = false;
+
+  /** @override */
   _onRender(context, options) {
     super._onRender?.(context, options);
+    if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     this.#setupLeapRuleListener();
     this.#setupWeekNumberDuplicateListener();
     for (const colorInput of this.element.querySelectorAll('input[name^="moons."][name$=".color"]')) {
@@ -624,6 +634,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#setupWeatherTotalListener();
     this.#setupPhaseSliderListeners();
     this.#setupFormatPreviewListeners();
+  }
+
+  /** Toggle nav between full labels and icon-only mode. */
+  static #onToggleNavCollapse() {
+    this.#navCollapsed = !this.#navCollapsed;
+    this.element.classList.toggle('nav-collapsed', this.#navCollapsed);
   }
 
   /**

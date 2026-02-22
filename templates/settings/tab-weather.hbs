@@ -182,6 +182,18 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.PrecipitationUnit.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="windSpeedUnit">{{localize "CALENDARIA.Settings.WindSpeedUnit.Name"}}</label>
+        <div class="form-fields">
+          <select id="windSpeedUnit" name="windSpeedUnit">
+            {{#each windSpeedUnitOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WindSpeedUnit.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 

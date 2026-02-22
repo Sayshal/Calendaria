@@ -421,8 +421,20 @@ export async function resetTheme() {
 
 /**
  * Initialize theme colors on module ready.
+ * Checks for GM-forced theme first, then falls back to user preference.
  */
 export function initializeTheme() {
+  const forced = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
+  if (forced && forced !== 'none') {
+    if (forced === 'custom') {
+      const forcedColors = game.settings.get(MODULE.ID, SETTINGS.FORCED_THEME_COLORS) || {};
+      applyCustomColors({ ...DEFAULT_COLORS, ...forcedColors });
+    } else if (THEME_PRESETS[forced]) {
+      applyCustomColors(THEME_PRESETS[forced].colors);
+    }
+    return;
+  }
+
   const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
 
   if (themeMode === 'custom') {
@@ -432,4 +444,13 @@ export function initializeTheme() {
   } else if (THEME_PRESETS[themeMode]) {
     applyCustomColors(THEME_PRESETS[themeMode].colors);
   }
+}
+
+/**
+ * Check if a theme is currently being forced by the GM.
+ * @returns {string|null} Forced theme name or null if not forced
+ */
+export function getForcedTheme() {
+  const forced = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
+  return forced && forced !== 'none' ? forced : null;
 }

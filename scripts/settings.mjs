@@ -15,6 +15,7 @@ import NoteManager from './notes/note-manager.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 import * as StickyZones from './utils/sticky-zones.mjs';
+import { initializeTheme } from './utils/theme-utils.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
 
@@ -968,6 +969,33 @@ export function registerSettings() {
     type: new StringField({ initial: 'dark', choices: ['dark', 'highContrast', 'custom'] })
   });
 
+  /** GM-forced theme mode (none = user choice, or a specific preset) */
+  game.settings.register(MODULE.ID, SETTINGS.FORCE_THEME, {
+    name: 'CALENDARIA.Settings.ForceTheme.Name',
+    hint: 'CALENDARIA.Settings.ForceTheme.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({
+      choices: {
+        none: 'CALENDARIA.Settings.ForceTheme.None',
+        dark: 'CALENDARIA.ThemeEditor.Presets.Dark',
+        highContrast: 'CALENDARIA.ThemeEditor.Presets.HighContrast',
+        custom: 'CALENDARIA.ThemeEditor.Custom'
+      },
+      initial: 'none'
+    }),
+    onChange: () => initializeTheme()
+  });
+
+  /** Snapshot of GM's custom theme colors when forcing custom theme */
+  game.settings.register(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, {
+    name: 'Forced Theme Colors',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({ initial: {} }),
+    onChange: () => initializeTheme()
+  });
+
   /** Stored calendar configurations and active calendar state */
   game.settings.register(MODULE.ID, SETTINGS.CALENDARS, {
     name: 'Calendar Configurations',
@@ -1208,6 +1236,21 @@ export function registerSettings() {
         imperial: 'CALENDARIA.Settings.PrecipitationUnit.Imperial'
       },
       initial: 'metric'
+    })
+  });
+
+  /** Wind speed display unit (kph or mph) */
+  game.settings.register(MODULE.ID, SETTINGS.WIND_SPEED_UNIT, {
+    name: 'CALENDARIA.Settings.WindSpeedUnit.Name',
+    hint: 'CALENDARIA.Settings.WindSpeedUnit.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({
+      choices: {
+        kph: 'CALENDARIA.Settings.WindSpeedUnit.Kph',
+        mph: 'CALENDARIA.Settings.WindSpeedUnit.Mph'
+      },
+      initial: 'kph'
     })
   });
 

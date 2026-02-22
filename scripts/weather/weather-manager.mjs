@@ -1279,8 +1279,8 @@ export default class WeatherManager {
    */
   static formatWindSpeed(kph) {
     if (kph == null) return '';
-    const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
-    if (unit === 'fahrenheit') return `${Math.round(kph * 0.621371)} mph`;
+    const unit = game.settings.get(MODULE.ID, SETTINGS.WIND_SPEED_UNIT);
+    if (unit === 'mph') return `${Math.round(kph * 0.621371)} mph`;
     return `${Math.round(kph)} kph`;
   }
 

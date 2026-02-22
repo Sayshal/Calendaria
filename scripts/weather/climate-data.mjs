@@ -93,6 +93,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
       winter: { blizzard: 6, snow: 5, overcast: 2, windy: 4 },
       default: { snow: 5, blizzard: 4, overcast: 3, windy: 3, clear: 1 }
     },
+    windSpeedRange: { min: 2, max: 5 },
+    windDirections: { N: 25, NNW: 20, NW: 15, NNE: 10, W: 8, NE: 5, E: 5, WNW: 5, S: 2, SW: 2, SE: 1, SSW: 1, SSE: 0, ESE: 0, ENE: 3, WSW: 0 },
+    brightnessMultiplier: 0.8,
+    shortestDay: 4,
+    longestDay: 20,
+    colorShift: { dawnHue: 220, duskHue: 240, nightHue: 230, transitionMinutes: 90 },
     environmentBase: { hue: 200, saturation: 0.6 },
     environmentDark: { hue: 210, saturation: 0.5 }
   },
@@ -107,6 +113,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
       winter: { snow: 6, blizzard: 4, overcast: 3, windy: 3 },
       default: { snow: 4, cloudy: 3, overcast: 3, windy: 2, clear: 2 }
     },
+    windSpeedRange: { min: 1, max: 4 },
+    windDirections: { N: 20, NNW: 15, NW: 12, NNE: 10, W: 10, NE: 8, E: 5, WNW: 5, S: 3, SW: 3, SE: 3, SSW: 2, SSE: 1, ESE: 1, ENE: 1, WSW: 1 },
+    brightnessMultiplier: 0.9,
+    shortestDay: 6,
+    longestDay: 18,
+    colorShift: { dawnHue: 210, duskHue: 230, nightHue: 220, transitionMinutes: 75 },
     environmentBase: { hue: 200, saturation: 0.7 },
     environmentDark: null
   },
@@ -123,6 +135,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
       autumn: { cloudy: 4, rain: 3, fog: 3, 'partly-cloudy': 2, windy: 2 },
       default: { rain: 3, cloudy: 3, mist: 2, drizzle: 2, clear: 3 }
     },
+    windSpeedRange: { min: 0, max: 3 },
+    windDirections: { W: 20, WSW: 15, SW: 12, WNW: 10, NW: 8, S: 8, N: 5, NNW: 5, E: 4, SE: 4, NE: 3, SSW: 3, SSE: 1, ESE: 1, ENE: 1, NNE: 0 },
+    brightnessMultiplier: 1.0,
+    shortestDay: 8,
+    longestDay: 16,
+    colorShift: null,
     environmentBase: null,
     environmentDark: null
   },
@@ -137,6 +155,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
       winter: { clear: 2, cloudy: 4, rain: 3, mist: 2, fog: 1 },
       default: { clear: 4, 'partly-cloudy': 5, cloudy: 3, rain: 2 }
     },
+    windSpeedRange: { min: 0, max: 3 },
+    windDirections: { SW: 18, SSW: 15, S: 12, WSW: 10, W: 8, SE: 8, SSE: 6, E: 5, NW: 4, N: 3, NE: 3, NNE: 2, NNW: 2, WNW: 2, ENE: 1, ESE: 1 },
+    brightnessMultiplier: 1.05,
+    shortestDay: 10,
+    longestDay: 14,
+    colorShift: { dawnHue: 30, duskHue: 20, nightHue: 240, transitionMinutes: 45 },
     environmentBase: null,
     environmentDark: null
   },
@@ -147,6 +171,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.TropicalDesc',
     temperatures: { Spring: { min: 24, max: 32 }, Summer: { min: 26, max: 35 }, Autumn: { min: 24, max: 32 }, Winter: { min: 22, max: 30 }, _default: { min: 24, max: 35 } },
     weather: { default: { clear: 8, 'partly-cloudy': 5, rain: 7, thunderstorm: 3, fog: 2, sunshower: 1 } },
+    windSpeedRange: { min: 0, max: 2 },
+    windDirections: { E: 20, ENE: 15, NE: 12, ESE: 10, SE: 8, N: 5, NNE: 5, S: 5, SSE: 5, SSW: 4, NNW: 3, NW: 3, W: 2, WNW: 1, WSW: 1, SW: 1 },
+    brightnessMultiplier: 1.1,
+    shortestDay: 11,
+    longestDay: 13,
+    colorShift: { dawnHue: 25, duskHue: 15, nightHue: 235, transitionMinutes: 30 },
     environmentBase: { hue: 40, saturation: 0.9 },
     environmentDark: null
   },
@@ -161,6 +191,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
       winter: { clear: 6, 'partly-cloudy': 4, cloudy: 2, drizzle: 1 },
       default: { clear: 8, 'partly-cloudy': 4, sandstorm: 1, windy: 1 }
     },
+    windSpeedRange: { min: 0, max: 4 },
+    windDirections: { W: 12, NW: 10, N: 10, NNW: 8, WNW: 8, SW: 8, NE: 6, E: 6, NNE: 5, S: 5, SE: 5, WSW: 5, SSW: 4, ENE: 3, ESE: 3, SSE: 2 },
+    brightnessMultiplier: 1.15,
+    shortestDay: 10,
+    longestDay: 14,
+    colorShift: { dawnHue: 35, duskHue: 25, nightHue: 250, transitionMinutes: 40 },
     environmentBase: { hue: 35, saturation: 0.8 },
     environmentDark: null
   },
@@ -175,6 +211,12 @@ export const CLIMATE_ZONE_TEMPLATES = {
       winter: { blizzard: 6, snow: 5, overcast: 2, windy: 3 },
       default: { snow: 4, overcast: 3, blizzard: 2, windy: 2, clear: 1 }
     },
+    windSpeedRange: { min: 2, max: 5 },
+    windDirections: { N: 30, NNE: 20, NE: 12, NNW: 10, NW: 8, E: 5, ENE: 5, W: 3, WNW: 3, SE: 1, S: 1, SSE: 1, ESE: 0, SSW: 0, SW: 0, WSW: 1 },
+    brightnessMultiplier: 0.7,
+    shortestDay: 0,
+    longestDay: 24,
+    colorShift: { dawnHue: 230, duskHue: 250, nightHue: 240, transitionMinutes: 120 },
     environmentBase: { hue: 210, saturation: 0.5 },
     environmentDark: { hue: 220, saturation: 0.4 }
   }
@@ -242,9 +284,14 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
     id: template.id,
     name: template.name,
     description: localize(template.description) ?? '',
-    brightnessMultiplier: 1.0,
+    brightnessMultiplier: template.brightnessMultiplier ?? 1.0,
     environmentBase: template.environmentBase ?? null,
     environmentDark: template.environmentDark ?? null,
+    windSpeedRange: template.windSpeedRange ?? null,
+    windDirections: template.windDirections ?? {},
+    shortestDay: template.shortestDay ?? null,
+    longestDay: template.longestDay ?? null,
+    colorShift: template.colorShift ?? null,
     temperatures,
     presets,
     seasonOverrides: Object.keys(seasonOverrides).length > 0 ? seasonOverrides : {}
