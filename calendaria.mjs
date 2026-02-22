@@ -5,12 +5,9 @@
  * @author Tyler
  */
 
-import { CalendariaAPI } from './scripts/api.mjs';
-import { BigCal } from './scripts/applications/big-cal.mjs';
-import { CalendarEditor } from './scripts/applications/calendar-editor.mjs';
+import { CalendariaAPI, createGlobalNamespace } from './scripts/api.mjs';
 import { HUD } from './scripts/applications/hud.mjs';
 import { MiniCal } from './scripts/applications/mini-cal.mjs';
-import { Stopwatch } from './scripts/applications/stopwatch.mjs';
 import { TimeKeeper } from './scripts/applications/time-keeper.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
@@ -20,7 +17,6 @@ import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/index.mjs';
 import { initializeChatCommander } from './scripts/integrations/chat-commander.mjs';
 import { initializeFXMaster } from './scripts/integrations/fxmaster.mjs';
-import { initializeWeatherSound } from './scripts/weather/weather-sound.mjs';
 import NoteManager from './scripts/notes/note-manager.mjs';
 import { registerReadySettings, registerSettings } from './scripts/settings.mjs';
 import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model.mjs';
@@ -32,15 +28,15 @@ import TimeTracker from './scripts/time/time-tracker.mjs';
 import { registerKeybindings } from './scripts/utils/keybinds.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { runAllMigrations } from './scripts/utils/migrations.mjs';
-import * as Permissions from './scripts/utils/permissions.mjs';
+import { canViewMiniCal, canViewTimeKeeper } from './scripts/utils/permissions.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import * as StickyZones from './scripts/utils/sticky-zones.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
-
-const { canViewMiniCal, canViewTimeKeeper } = Permissions;
+import { initializeWeatherSound } from './scripts/weather/weather-sound.mjs';
 
 Hooks.once('init', async () => {
+  createGlobalNamespace();
   Hooks.callAll(HOOKS.INIT);
   registerSettings();
   initializeLogger();
@@ -88,7 +84,6 @@ Hooks.once('ready', async () => {
       await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
     }
   }
-  // Disable PF2e world clock darkness sync if Calendaria darkness sync is enabled
   if (game.pf2e?.worldClock && game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC)) {
     const pf2eWorldClock = game.settings.get('pf2e', 'worldClock');
     if (pf2eWorldClock?.syncDarkness) {
@@ -107,20 +102,3 @@ Hooks.once('ready', async () => {
 Hooks.once('setup', () => {
   CONFIG.time.worldCalendarClass = CalendariaCalendar;
 });
-
-globalThis['CALENDARIA'] = {
-  HUD,
-  CalendariaCalendar,
-  CalendarManager,
-  CalendariaSocket,
-  NoteManager,
-  BigCal,
-  CalendarEditor,
-  MiniCal,
-  Stopwatch,
-  TimeClock,
-  TimeKeeper,
-  WeatherManager,
-  api: CalendariaAPI,
-  ...Permissions
-};

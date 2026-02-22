@@ -1315,7 +1315,7 @@ These static methods provide quick access to toggle UI components.
 Toggle the HUD visibility.
 
 ```javascript
-CALENDARIA.HUD.toggle();
+CALENDARIA.apps.HUD.toggle();
 ```
 
 ---
@@ -1325,7 +1325,7 @@ CALENDARIA.HUD.toggle();
 Toggle the BigCal application.
 
 ```javascript
-CALENDARIA.BigCal.toggle();
+CALENDARIA.apps.BigCal.toggle();
 ```
 
 ---
@@ -1612,6 +1612,80 @@ await CALENDARIA.api.removeWeatherPreset('acid-rain');
 | `presetId` | `string` | Preset ID to remove |
 
 **Returns:** `Promise<boolean>` - True if removed.
+
+---
+
+### getTemperature(zoneId)
+
+Get the current temperature for a zone.
+
+```javascript
+const temp = CALENDARIA.api.getTemperature();
+// With specific zone:
+const temp = CALENDARIA.api.getTemperature('desert');
+// Returns: { celsius, display, unit }
+```
+
+| Parameter | Type     | Description                                        |
+| --------- | -------- | -------------------------------------------------- |
+| `zoneId`  | `string` | Optional zone ID (defaults to active scene's zone) |
+
+**Returns:** `object|null` - Temperature data with celsius, display value, and unit.
+
+---
+
+### getPreset(presetId)
+
+Get a specific weather preset by ID.
+
+```javascript
+const preset = CALENDARIA.api.getPreset('thunderstorm');
+// Returns: { id, label, icon, color, description, tempMin, tempMax, wind, precipitation, ... }
+```
+
+| Parameter  | Type     | Description                                             |
+| ---------- | -------- | ------------------------------------------------------- |
+| `presetId` | `string` | Preset ID (e.g., `'clear'`, `'rain'`, `'thunderstorm'`) |
+
+**Returns:** `object|null` - Preset definition or null if not found.
+
+---
+
+### updateWeatherPreset(presetId, updates)
+
+Update an existing custom weather preset. Only custom presets can be updated.
+
+```javascript
+await CALENDARIA.api.updateWeatherPreset('acid-rain', {
+  label: 'Caustic Rain',
+  color: '#e74c3c',
+  tempMax: 30
+});
+```
+
+| Parameter  | Type     | Description                                     |
+| ---------- | -------- | ----------------------------------------------- |
+| `presetId` | `string` | Preset ID to update                             |
+| `updates`  | `object` | Properties to update (label, icon, color, etc.) |
+
+**Returns:** `Promise<object|null>` - Updated preset or null if not found.
+
+---
+
+### formatTemperature(celsius)
+
+Format a temperature value for display using the world's temperature unit setting.
+
+```javascript
+const display = CALENDARIA.api.formatTemperature(22);
+// Returns: "72°F" (if unit is Fahrenheit) or "22°C" (if unit is Celsius)
+```
+
+| Parameter | Type     | Description            |
+| --------- | -------- | ---------------------- |
+| `celsius` | `number` | Temperature in Celsius |
+
+**Returns:** `string` - Formatted temperature string.
 
 ---
 

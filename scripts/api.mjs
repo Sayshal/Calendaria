@@ -6,21 +6,28 @@
 
 import { BigCal } from './applications/big-cal.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
+import { HUD } from './applications/hud.mjs';
 import { MiniCal } from './applications/mini-cal.mjs';
+import { Stopwatch } from './applications/stopwatch.mjs';
+import { TimeKeeper } from './applications/time-keeper.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
+import CalendariaCalendar from './calendar/data/calendaria-calendar.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/utils/date-utils.mjs';
 import SearchManager from './search/search-manager.mjs';
+import TimeClock from './time/time-clock.mjs';
+import TimeTracker from './time/time-tracker.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/format-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
 import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/moon-utils.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } from './utils/permissions.mjs';
+import * as Permissions from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import * as WidgetManager from './utils/widget-manager.mjs';
-import TimeClock from './time/time-clock.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
+
+const { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } = Permissions;
 
 /**
  * Public API for Calendaria module.
@@ -1033,6 +1040,43 @@ export const CalendariaAPI = {
   },
 
   /**
+   * Get the current temperature for a zone.
+   * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
+   * @returns {object|null} Temperature data with celsius, display value, and unit
+   */
+  getTemperature(zoneId) {
+    return WeatherManager.getTemperature(zoneId);
+  },
+
+  /**
+   * Get a specific weather preset by ID.
+   * @param {string} presetId - Preset ID (e.g., 'clear', 'rain', 'thunderstorm')
+   * @returns {object|null} Preset definition or null if not found
+   */
+  getPreset(presetId) {
+    return WeatherManager.getPreset(presetId);
+  },
+
+  /**
+   * Update an existing custom weather preset.
+   * @param {string} presetId - Preset ID to update
+   * @param {object} updates - Properties to update (label, icon, color, etc.)
+   * @returns {Promise<object|null>} Updated preset or null if not found
+   */
+  async updateWeatherPreset(presetId, updates) {
+    return WeatherManager.updateCustomPreset(presetId, updates);
+  },
+
+  /**
+   * Format a temperature value for display using the world's temperature unit setting.
+   * @param {number} celsius - Temperature in Celsius
+   * @returns {string} Formatted temperature string (e.g., "72°F" or "22°C")
+   */
+  formatTemperature(celsius) {
+    return WeatherManager.formatTemperature(celsius);
+  },
+
+  /**
    * Get available climate zone templates for creating new zones.
    * @returns {object[]} Array of climate zone template objects
    */
@@ -1238,3 +1282,68 @@ export const CalendariaAPI = {
     WidgetManager.refreshWidgets();
   }
 };
+
+// --- Global Namespace with Deprecation Proxy ---
+
+// Deprecation map: old flat key → new dotted path
+const DEPRECATION_MAP = {
+  HUD: 'apps.HUD',
+  BigCal: 'apps.BigCal',
+  CalendarEditor: 'apps.CalendarEditor',
+  MiniCal: 'apps.MiniCal',
+  Stopwatch: 'apps.Stopwatch',
+  TimeKeeper: 'apps.TimeKeeper',
+  CalendarManager: 'managers.CalendarManager',
+  WeatherManager: 'managers.WeatherManager',
+  NoteManager: 'managers.NoteManager',
+  TimeClock: 'managers.TimeClock',
+  TimeTracker: 'managers.TimeTracker',
+  CalendariaCalendar: 'models.CalendariaCalendar',
+  CalendariaSocket: 'socket'
+};
+
+// Add all permission functions to the deprecation map
+for (const key of Object.keys(Permissions)) {
+  DEPRECATION_MAP[key] = `permissions.${key}`;
+}
+
+/**
+ * Create and install the global CALENDARIA namespace with deprecation proxy.
+ * Old flat access patterns (e.g. CALENDARIA.HUD) emit a compatibility warning
+ * and redirect to the new structured path (e.g. CALENDARIA.apps.HUD).
+ */
+export function createGlobalNamespace() {
+  const namespace = {
+    apps: { HUD, BigCal, CalendarEditor, MiniCal, Stopwatch, TimeKeeper },
+    managers: { CalendarManager, WeatherManager, NoteManager, TimeClock, TimeTracker },
+    models: { CalendariaCalendar },
+    socket: CalendariaSocket,
+    api: CalendariaAPI,
+    permissions: { ...Permissions }
+  };
+
+  /**
+   * Resolve a dotted path on the namespace object.
+   * @param {string} path - Dot-separated path (e.g. 'apps.HUD')
+   * @returns {*} The resolved value
+   */
+  function resolvePath(path) {
+    return path.split('.').reduce((obj, segment) => obj?.[segment], namespace);
+  }
+
+  globalThis['CALENDARIA'] = new Proxy(namespace, {
+    /**
+     * @param {object} target
+     * @param {string|symbol} key
+     * @param {object} receiver
+     */
+    get(target, key, receiver) {
+      if (typeof key === 'string' && key in DEPRECATION_MAP) {
+        const newPath = DEPRECATION_MAP[key];
+        foundry.utils.logCompatibilityWarning(`CALENDARIA.${key} is deprecated. Use CALENDARIA.${newPath} instead.`, { since: 'Calendaria 0.10', until: 'Calendaria 1.1' });
+        return resolvePath(newPath);
+      }
+      return Reflect.get(target, key, receiver);
+    }
+  });
+}

@@ -9,6 +9,7 @@ import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../con
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
 
 /** Reverse lookup: degree value → lowercase cardinal string for FXMaster direction option. */
 const DEGREES_TO_CARDINAL = Object.fromEntries(Object.entries(COMPASS_DIRECTIONS).map(([name, deg]) => [deg, name.toLowerCase()]));
@@ -74,8 +75,7 @@ export function initializeFXMaster() {
 
   const restoredName = getActivePreset(canvas?.scene);
   if (restoredName) {
-    const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
-    const weather = WeatherManager?.getCurrentWeather?.();
+    const weather = WeatherManager.getCurrentWeather();
     const expectedFx = weather?.fxPreset || null;
     if (expectedFx !== restoredName) playWeather(weather || null);
   } else {
@@ -116,8 +116,7 @@ function syncWeatherToScene() {
     return;
   }
 
-  const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
-  const weather = WeatherManager?.getCurrentWeather?.();
+  const weather = WeatherManager.getCurrentWeather();
   playWeather(weather || null);
 }
 
@@ -132,8 +131,6 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk } = {}) {
   if (!CalendariaSocket.isPrimaryGM()) return;
 
   if (bulk) {
-    const WeatherManager = game.modules.get(MODULE.ID)?.api?.WeatherManager ?? globalThis.CALENDARIA?.WeatherManager;
-    if (!WeatherManager) return;
     const weather = WeatherManager.getCurrentWeather();
     playWeather(weather || null);
     return;
