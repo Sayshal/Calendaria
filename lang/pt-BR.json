@@ -1855,8 +1855,6 @@
   "CALENDARIA.Warning.CannotDeleteNotesFolder": "Não é possível excluir a pasta Notas do Calendário. Esta pasta contém todos os diários e eventos do calendário.",
   "CALENDARIA.Weather.AetherHaze": "Névoa Etérea",
   "CALENDARIA.Weather.AetherHazeDesc": "Ar saturado de magia que distorce a percepção",
-  "CALENDARIA.Weather.Arcane": "Ventos Arcanos",
-  "CALENDARIA.Weather.ArcaneDesc": "Ventos carregados de magia arcana causando instabilidade mágica",
   "CALENDARIA.Weather.Ashfall": "Queda de Cinzas",
   "CALENDARIA.Weather.AshfallDesc": "Cinzas vulcânicas flutuando no ar",
   "CALENDARIA.Weather.BlackSun": "Sol Negro",
