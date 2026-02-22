@@ -589,7 +589,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays: monthWeekdays.map((wd) => ({ name: localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }))
+      weekdays: monthWeekdays.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }))
     };
   }
 
@@ -671,7 +671,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       currentEra,
       weeks,
       daysInWeek,
-      weekdays: weekdayData.map((wd) => ({ name: localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false })),
+      weekdays: weekdayData.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false })),
       isMonthless: true,
       weekNumber: displayWeek,
       totalWeeks
