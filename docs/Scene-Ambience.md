@@ -1,8 +1,8 @@
-# Scene Darkness
+# Scene Ambience
 
-Calendaria can automatically sync scene darkness levels with the time of day.
+Calendaria can automatically sync scene darkness, lighting, and color with time of day, weather, and moon phases.
 
-## How It Works
+## Darkness Sync
 
 Darkness follows a smooth cosine curve throughout the day:
 
@@ -10,24 +10,13 @@ Darkness follows a smooth cosine curve throughout the day:
 - **Noon**: Minimum darkness (0.0)
 - **Dawn/Dusk**: Gradual transitions
 
-Darkness updates in two scenarios:
-
-1. **Time changes**: When the hour changes, darkness recalculates with smooth transitions
-2. **Scene activation**: When switching to a new scene, darkness is immediately synced to the current time
-
-Only the GM can update scene darkness.
-
----
-
-## Settings
-
-### Global Setting
+Darkness recalculates when the hour changes (with smooth transitions) and immediately syncs when switching to a new scene. Only the GM can update scene darkness.
 
 Enable via **Settings Panel > Canvas tab > Sync Scene Darkness with Time** (default: enabled).
 
-### Default Brightness Multiplier
+### Brightness Multiplier
 
-A global brightness multiplier applied to all scenes unless overridden. Configure in **Settings Panel > Canvas tab** (range 0.5x-1.5x, default 1.0x).
+A global brightness multiplier (0.5x–1.5x, default 1.0x) is applied to all scenes unless overridden per-scene. Configure in **Settings Panel > Canvas tab**.
 
 ### Per-Scene Override
 
@@ -74,6 +63,26 @@ When a zone has a latitude set, Calendaria uses an astronomical hour-angle formu
 
 ---
 
+## Moon Illumination
+
+Moons can reduce nighttime darkness based on their phase. Each moon's `moonBrightnessMax` (0–0.3) is set in Calendar Editor > Moons tab. Illumination follows a cosine curve — maximum at full moon, zero at new moon. Multiple moons sum their contributions (capped at 0.3), each tinted with its configured color.
+
+Enable via **Settings Panel > Canvas tab > Moon Illumination**.
+
+See [Moon Phases — Moon Brightness](Moon-Phases#moon-brightness) for configuration details.
+
+---
+
+## Time-of-Day Color Shifting
+
+Climate zones can define dawn/dusk/night hue values that shift scene environment lighting throughout the day. Five phases control the hue: night, dawn transition, day (neutral), dusk transition, and night transition. Transition durations are configurable per-zone.
+
+Color shifting is independent of darkness — hue changes apply to environment lighting while darkness is controlled separately by time, weather, and moon illumination.
+
+Configure per-zone in the [Climate Editor](Climate-Editor) > Environment tab. Enable globally via **Settings Panel > Canvas tab > Sync Scene Ambience with Time of Day**.
+
+---
+
 ## Darkness Modifiers
 
 The final darkness value combines multiple factors:
@@ -83,6 +92,7 @@ Base darkness (from time of day)
   × Scene brightness multiplier
   × Climate zone brightness multiplier
   + Weather darkness penalty
+  - Moon illumination (capped at 0.3)
 = Final darkness (clamped 0-1)
 ```
 

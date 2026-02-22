@@ -76,13 +76,24 @@ Below the header, contextual indicators display:
 
 Each day cell in month view displays:
 
-| Element         | Description                                            |
-| --------------- | ------------------------------------------------------ |
-| Day number      | The date, with today highlighted                       |
-| Festival star   | Indicates a festival day                               |
-| Moon icons      | Up to 3 visible, hover "+N" badge for additional moons |
-| Note indicators | Custom icons and colors for each note                  |
-| Add button      | Quick note creation (appears on hover)                 |
+| Element         | Description                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------ |
+| Day number      | The date, with today highlighted                                                                       |
+| Festival star   | Indicates a festival day                                                                               |
+| Moon icons      | Up to 3 visible, hover "+N" badge for additional moons; clickable for radial moon picker when >3 moons |
+| Note indicators | Custom icons and colors for each note                                                                  |
+| Weather pill    | Icon + temperature + wind direction for the day's weather                                              |
+| Add button      | Quick note creation (appears on hover)                                                                 |
+
+### Weather Pills
+
+Day cells display weather information as compact pills:
+
+- **Today**: Current weather (full opacity)
+- **Past days**: Historical weather from the weather history
+- **Future days**: Forecast weather (dimmed at 50% opacity)
+
+Each pill shows the weather icon, temperature, and wind direction indicator.
 
 **Hover Tooltip:**
 Hovering over a day cell displays a tooltip with:
@@ -91,6 +102,7 @@ Hovering over a day cell displays a tooltip with:
 - Festival name (if applicable)
 - Season name
 - Sunrise/sunset times
+- Weather conditions (icon, name, temperature, wind, precipitation)
 
 **Interactions:**
 

@@ -39,6 +39,7 @@ Each day cell may show:
 - Note count badge (if notes exist)
 - Festival highlight
 - Moon phase icon
+- Weather icon
 - Today indicator
 - Selected indicator
 

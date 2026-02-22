@@ -1,6 +1,6 @@
 # Chat Commands
 
-Calendaria provides 18 slash commands for interacting with the calendar directly from chat. All commands and aliases work natively without any additional modules.
+Calendaria provides 20 slash commands for interacting with the calendar directly from chat. All commands and aliases work natively without any additional modules.
 
 If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is installed, commands gain enhanced autocomplete with format presets and calendar suggestions.
 
@@ -8,27 +8,28 @@ If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is
 
 ## Available Commands
 
-| Command      | Alias     | Description                     | Permission       |
-| ------------ | --------- | ------------------------------- | ---------------- |
-| `/date`      | `/d`      | Display current date            | Everyone         |
-| `/time`      | `/t`      | Display current time            | Everyone         |
-| `/datetime`  | `/dt`     | Display current date and time   | Everyone         |
-| `/today`     |           | List today's notes              | Everyone         |
-| `/sunrise`   |           | Display today's sunrise time    | Everyone         |
-| `/sunset`    |           | Display today's sunset time     | Everyone         |
-| `/moon`      |           | Display current moon phase(s)   | Everyone         |
-| `/season`    |           | Display current season          | Everyone         |
-| `/weather`   | `/w`      | Display current weather         | Everyone         |
-| `/weekday`   |           | Display current weekday         | Everyone         |
-| `/festival`  |           | Display current festival        | Everyone         |
-| `/cycle`     | `/zodiac` | Display zodiac/cycle values     | Everyone         |
-| `/calendar`  | `/cal`    | Display full calendar summary   | Everyone         |
-| `/calendars` | `/cals`   | List all available calendars    | Everyone         |
-| `/note`      | `/n`      | Create a quick note             | Note permissions |
-| `/advance`   | `/adv`    | Advance time                    | GM only          |
-| `/setdate`   |           | Set date (year month day)       | GM only          |
-| `/settime`   |           | Set time (hour minute [second]) | GM only          |
-| `/switchcal` |           | Switch active calendar          | GM only          |
+| Command      | Alias     | Description                           | Permission       |
+| ------------ | --------- | ------------------------------------- | ---------------- |
+| `/date`      | `/d`      | Display current date                  | Everyone         |
+| `/time`      | `/t`      | Display current time                  | Everyone         |
+| `/datetime`  | `/dt`     | Display current date and time         | Everyone         |
+| `/today`     |           | List today's notes                    | Everyone         |
+| `/sunrise`   |           | Display today's sunrise time          | Everyone         |
+| `/sunset`    |           | Display today's sunset time           | Everyone         |
+| `/moon`      |           | Display current moon phase(s)         | Everyone         |
+| `/season`    |           | Display current season                | Everyone         |
+| `/weather`   | `/w`      | Display current or historical weather | Everyone         |
+| `/forecast`  | `/fc`     | Display weather forecast              | Permission-gated |
+| `/weekday`   |           | Display current weekday               | Everyone         |
+| `/festival`  |           | Display current festival              | Everyone         |
+| `/cycle`     | `/zodiac` | Display zodiac/cycle values           | Everyone         |
+| `/calendar`  | `/cal`    | Display full calendar summary         | Everyone         |
+| `/calendars` | `/cals`   | List all available calendars          | Everyone         |
+| `/note`      | `/n`      | Create a quick note                   | Note permissions |
+| `/advance`   | `/adv`    | Advance time                          | GM only          |
+| `/setdate`   |           | Set date (year month day)             | GM only          |
+| `/settime`   |           | Set time (hour minute [second])       | GM only          |
+| `/switchcal` |           | Switch active calendar                | GM only          |
 
 ---
 
@@ -167,13 +168,47 @@ Display the current season.
 
 ### /weather
 
-Display the current weather conditions.
+Display current or historical weather conditions.
 
 ```text
 /weather
+/weather 1492 7 15
 ```
 
-**Output:** Weather condition, icon, and temperature.
+**Arguments:**
+
+- Optional: `year month day` — look up weather for a specific historical date
+
+**Examples:**
+
+```text
+/weather                # Current weather
+/weather 1492 7 15      # Weather on Flamerule 15, 1492
+```
+
+**Output:** Weather condition with icon, temperature, wind, and precipitation. Historical lookups pull from the weather history.
+
+---
+
+### /forecast
+
+Display weather forecast for upcoming days.
+
+```text
+/forecast
+/forecast 14
+/fc
+```
+
+**Aliases:** `/fc`
+
+**Arguments:**
+
+- Optional: Number of days to forecast (default: configured Forecast Days setting)
+
+**Output:** Forecast entries showing icon, day, weather label, and temperature for each upcoming day. Includes zone name subtitle.
+
+**Permission:** Requires the `viewWeatherForecast` permission (see [Permissions](Permissions)). GMs always see the accurate forecast; non-GM users see variance-adjusted results.
 
 ---
 

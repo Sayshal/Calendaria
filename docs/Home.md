@@ -32,9 +32,9 @@ Schedule [notes and events](Notes-and-Events) with powerful recurrence patternsâ
 
 Track multiple [moons](Moon-Phases) with independent cycle lengths, phases, and colors. Trigger events on specific lunar phases.
 
-### Weather & Darkness
+### Weather & Ambience
 
-[Generate weather](Weather-System) based on climate zones and seasons. [Sync scene darkness](Scene-Darkness) to time of day with smooth transitions at sunrise and sunset.
+[Generate weather](Weather-System) based on climate zones and seasons. [Sync scene ambience](Scene-Ambience) to time of day with smooth transitions at sunrise and sunset.
 
 ### Eras & Cycles
 

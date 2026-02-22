@@ -37,14 +37,15 @@ GMs always have full access to all features.
 
 ### Action Permissions
 
-| Permission           | Description                                    |
-| -------------------- | ---------------------------------------------- |
-| **Manage Notes**     | Can create and delete own calendar notes       |
-| **Edit Notes**       | Can edit calendar notes owned by other players |
-| **Change Date/Time** | Can modify the world date and time             |
-| **Change Weather**   | Can set weather conditions                     |
-| **Change Calendar**  | Can switch the active calendar                 |
-| **Edit Calendars**   | Can access the Calendar Editor                 |
+| Permission                | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| **Manage Notes**          | Can create and delete own calendar notes               |
+| **Edit Notes**            | Can edit calendar notes owned by other players         |
+| **Change Date/Time**      | Can modify the world date and time                     |
+| **Change Weather**        | Can set weather conditions                             |
+| **View Weather Forecast** | Can view weather forecasts and day-cell forecast icons |
+| **Change Calendar**       | Can switch the active calendar                         |
+| **Edit Calendars**        | Can access the Calendar Editor                         |
 
 ---
 
@@ -52,17 +53,18 @@ GMs always have full access to all features.
 
 By default, all non-GM roles have restricted access:
 
-| Permission       | Player | Trusted | Assistant GM |
-| ---------------- | :----: | :-----: | :----------: |
-| View MiniCal     |   ✓    |    ✓    |      ✓       |
-| View TimeKeeper  |   -    |    -    |      ✓       |
-| View HUD         |   ✓    |    ✓    |      ✓       |
-| Manage Notes     |   -    |    ✓    |      ✓       |
-| Edit Notes       |   -    |    -    |      -       |
-| Change Date/Time |   -    |    -    |      ✓       |
-| Change Weather   |   -    |    -    |      ✓       |
-| Change Calendar  |   -    |    -    |      -       |
-| Edit Calendars   |   -    |    -    |      -       |
+| Permission            | Player | Trusted | Assistant GM |
+| --------------------- | :----: | :-----: | :----------: |
+| View MiniCal          |   ✓    |    ✓    |      ✓       |
+| View TimeKeeper       |   -    |    -    |      ✓       |
+| View HUD              |   ✓    |    ✓    |      ✓       |
+| Manage Notes          |   -    |    ✓    |      ✓       |
+| Edit Notes            |   -    |    -    |      -       |
+| Change Date/Time      |   -    |    -    |      ✓       |
+| Change Weather        |   -    |    -    |      ✓       |
+| View Weather Forecast |   -    |    ✓    |      ✓       |
+| Change Calendar       |   -    |    -    |      -       |
+| Edit Calendars        |   -    |    -    |      -       |
 
 ---
 
@@ -120,6 +122,13 @@ The permission UI provides cascade-up behavior for easier configuration:
 - Removing a user from this permission revokes their ownership on all calendar notes (preserving author and GM ownership)
 - When a note's "GM Only" flag is toggled off, users with this permission automatically receive owner-level access
 - Only the original note author or a GM can delete a note (regardless of this permission)
+
+### View Weather Forecast
+
+- Gates access to the `getWeatherForecast()` API method
+- Gates the `/forecast` chat command
+- Controls visibility of forecast weather icons on calendar day cells
+- GMs always have access regardless of this setting
 
 ### Change Date/Time
 
