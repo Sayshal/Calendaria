@@ -1,4 +1,4 @@
-## New Features
+## Enhancements
 - Multi-calendar selection for Simple Calendar imports — users with multiple SC calendars can now choose which one to import via a dropdown
 
 ## Bug Fixes
