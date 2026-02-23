@@ -5,14 +5,23 @@
  * @author Tyler
  */
 
-import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
+import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
-/** Reverse lookup: degree value → lowercase cardinal string for FXMaster direction option. */
-const DEGREES_TO_CARDINAL = Object.fromEntries(Object.entries(COMPASS_DIRECTIONS).map(([name, deg]) => [deg, name.toLowerCase()]));
+/** 8-point cardinal directions accepted by FXMaster, keyed by compass degrees. */
+const FXMASTER_CARDINALS = [
+  [0, 'n'],
+  [45, 'ne'],
+  [90, 'e'],
+  [135, 'se'],
+  [180, 's'],
+  [225, 'sw'],
+  [270, 'w'],
+  [315, 'nw']
+];
 
 /**
  * Get the FXMaster API object.
@@ -183,16 +192,16 @@ async function playWeather(weather) {
 }
 
 /**
- * Convert a degree value to the nearest cardinal direction string for FXMaster.
- * @param {number} degrees - Direction in degrees (0-360)
- * @returns {string} Lowercase cardinal direction (e.g. "n", "nne", "sw")
+ * Convert a degree value to the nearest 8-point cardinal direction for FXMaster.
+ * FXMaster only supports n/ne/e/se/s/sw/w/nw; intermediate 16-point directions are snapped.
+ * @param {number} degrees - Direction in compass degrees (0-360, 0=north)
+ * @returns {string} Lowercase cardinal direction (e.g. "n", "ne", "sw")
  */
 function degreesToCardinal(degrees) {
-  if (DEGREES_TO_CARDINAL[degrees] !== undefined) return DEGREES_TO_CARDINAL[degrees];
   let closest = 'n';
   let minDiff = 360;
-  for (const [deg, name] of Object.entries(DEGREES_TO_CARDINAL)) {
-    const diff = Math.abs(((degrees - Number(deg) + 540) % 360) - 180);
+  for (const [deg, name] of FXMASTER_CARDINALS) {
+    const diff = Math.abs(((degrees - deg + 540) % 360) - 180);
     if (diff < minDiff) {
       minDiff = diff;
       closest = name;

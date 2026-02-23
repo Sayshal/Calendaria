@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../constants.mjs';
+import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
@@ -2228,6 +2228,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static show() {
     if (game.combat?.started && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return null;
+    if (!game.user.isGM && canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS)) return null;
     const instance = this.instance ?? new HUD();
     instance.render({ force: true });
     return instance;
