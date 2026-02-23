@@ -163,7 +163,7 @@ async function stopAll() {
   const fxApi = getFxApi();
   if (!fxApi) return;
   const active = fxApi.listActive?.() ?? [];
-  for (const name of active) await fxApi.stop(name);
+  for (const name of active) await fxApi.stop(name, { silent: true });
 }
 
 /**
@@ -181,13 +181,15 @@ async function playWeather(weather) {
     return;
   }
 
-  const available = fxApi.list?.() ?? [];
+  const available = fxApi.listValid();
   if (!available.includes(fxName)) {
-    log(2, `[FXMaster] Preset "${fxName}" not available, skipping`);
+    log(2, `FXMaster Preset "${fxName}" not available, stopping active effects`);
+    await stopAll();
     return;
   }
 
   const options = buildPresetOptions(weather);
+  options.silent = true;
   await fxApi.switch(fxName, options);
 }
 
