@@ -114,16 +114,16 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   const baseMin = seasonClimate?.temperatures?.min ?? 10;
   const baseMax = seasonClimate?.temperatures?.max ?? 22;
   if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) {
+    // Explicit seasonOverrides entry — apply as modifier to season base
     tempRange = { min: applyTempModifier(zoneOverride.temperatures.min, baseMin), max: applyTempModifier(zoneOverride.temperatures.max, baseMax) };
+  } else if (season && zoneFallback?.temperatures?.[season]) {
+    // Zone per-season temps override season base
+    const temps = zoneFallback.temperatures[season];
+    tempRange = { min: applyTempModifier(temps.min, baseMin), max: applyTempModifier(temps.max, baseMax) };
   } else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) {
     tempRange = { min: baseMin, max: baseMax };
-  } else if (zoneFallback?.temperatures) {
-    const temps = zoneFallback.temperatures;
-    if (season && temps[season]) {
-      tempRange = { min: applyTempModifier(temps[season].min, baseMin), max: applyTempModifier(temps[season].max, baseMax) };
-    } else if (temps._default) {
-      tempRange = temps._default;
-    }
+  } else if (zoneFallback?.temperatures?._default) {
+    tempRange = zoneFallback.temperatures._default;
   }
   // Remove presets explicitly disabled in the zone's base config
   const basePresets = Object.values(zoneFallback?.presets ?? {});

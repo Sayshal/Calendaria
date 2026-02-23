@@ -363,7 +363,7 @@ export default class WeatherManager {
     }
     const zoneConfig = this.getActiveZone(zoneId);
     const seasonData = this.#getCurrentSeason();
-    const season = options.season || (seasonData ? localize(seasonData.name) : null);
+    const season = options.season || (seasonData?.name ?? null);
     const seasonClimate = seasonData?.climate ?? null;
     const customPresets = this.getCustomPresets();
     const currentWeather = this.#currentWeatherByZone[zoneId];
@@ -548,7 +548,7 @@ export default class WeatherManager {
     // Ensure forecast plan is populated for all zones
     await this.#ensureForecastPlan();
     const seasonData = calendar.getCurrentSeason?.(data.current);
-    const season = seasonData ? localize(seasonData.name) : null;
+    const season = seasonData?.name ?? null;
     const customPresets = this.getCustomPresets();
 
     // Build weather for all zones without saving individually
@@ -674,7 +674,7 @@ export default class WeatherManager {
     const fullPlan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
     const seasonData = calendar.getCurrentSeason?.(game.time.components);
-    const season = seasonData ? localize(seasonData.name) : null;
+    const season = seasonData?.name ?? null;
 
     for (const zone of zones) {
       const zoneConfig = zone;
@@ -1047,7 +1047,7 @@ export default class WeatherManager {
     return (year, month, day) => {
       const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
       if (!season) return null;
-      return { name: localize(season.name), climate: season.climate };
+      return { name: season.name, climate: season.climate };
     };
   }
 
@@ -1127,7 +1127,7 @@ export default class WeatherManager {
   static #generateTemperatureForPreset(presetId) {
     const zoneConfig = this.getActiveZone();
     const seasonData = this.#getCurrentSeason();
-    const season = seasonData ? localize(seasonData.name) : null;
+    const season = seasonData?.name ?? null;
     const seasonClimate = seasonData?.climate;
     if (!zoneConfig && !seasonClimate) {
       const customPresets = this.getCustomPresets();
