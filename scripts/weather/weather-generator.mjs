@@ -125,6 +125,12 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
       tempRange = temps._default;
     }
   }
+  // Remove presets explicitly disabled in the zone's base config
+  const basePresets = Object.values(zoneFallback?.presets ?? {});
+  for (const preset of basePresets) {
+    if (preset.enabled === false) delete probabilities[preset.id];
+  }
+
   return { probabilities, tempRange };
 }
 
