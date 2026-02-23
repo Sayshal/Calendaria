@@ -1,6 +1,13 @@
 ## Enhancements
-- Multi-calendar selection for Simple Calendar imports — users with multiple SC calendars can now choose which one to import via a dropdown
+- Expanded Weather Editor environment lighting to all Foundry scene properties: Luminosity, Saturation, Shadows, Hue, and Hue Intensity per channel (Day/Night)
+- Added Blend Ambience checkbox to Day (Base) environment section in Weather Editor
+- Weather Editor changes now update the scene in real-time with 150ms debounce
+- Weather Editor environment fields use Foundry's native localization strings
 
 ## Bug Fixes
-- Fix null string crash in escapeText (calendar-view-utils) and weather tooltip builder
-- Shorten HUD dial style setting descriptions
+- Fixed weather zone key mismatch — use stable _default zone key when no climate zone is configured
+- Fixed disabled weather presets still generating after being toggled off
+- Fixed scene ambience resetting to zero when no lighting overrides apply
+- Fixed negative saturation not allowed in Weather Editor (now matches Foundry's -1 to 1 range)
+- Fixed "No Zone" selection in Weather Picker snapping back to the only available zone
+- Fixed weather changes not applying when "No Zone" is selected
