@@ -53,6 +53,18 @@
       <p class="hint">{{localize "CALENDARIA.Settings.CalendarHUDMode.Hint"}}</p>
     </div>
 
+    <div class="form-group">
+      <label for="hudCalendarButton">{{localize "CALENDARIA.Settings.HUDCalendarButton.Name"}}</label>
+      <div class="form-fields">
+        <select id="hudCalendarButton" name="hudCalendarButton">
+          {{#each hudCalendarButtonOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDCalendarButton.Hint"}}</p>
+    </div>
+
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
       <label for="hudDialStyle">{{localize "CALENDARIA.Settings.HUDDialStyle.Name"}}</label>
       <div class="form-fields">

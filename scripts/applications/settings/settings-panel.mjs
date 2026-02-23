@@ -677,6 +677,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.SHOW_CALENDAR_HUD,
       SETTINGS.FORCE_HUD,
       SETTINGS.CALENDAR_HUD_MODE,
+      SETTINGS.HUD_CALENDAR_BUTTON,
       SETTINGS.HUD_DIAL_STYLE,
       SETTINGS.HUD_TRAY_DIRECTION,
       SETTINGS.HUD_COMBAT_COMPACT,
@@ -955,6 +956,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'compact', label: localize('CALENDARIA.Settings.CalendarHUDMode.Compact'), selected: hudMode === 'compact' }
     ];
     context.isCompactMode = hudMode === 'compact';
+
+    // Calendar button setting
+    const hudCalendarButton = game.settings.get(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON);
+    context.hudCalendarButtonOptions = [
+      { value: 'bigcal', label: localize('CALENDARIA.Settings.HUDCalendarButton.BigCal'), selected: hudCalendarButton === 'bigcal' },
+      { value: 'minical', label: localize('CALENDARIA.Settings.HUDCalendarButton.MiniCal'), selected: hudCalendarButton === 'minical' }
+    ];
 
     // Dial style settings
     const dialStyle = game.settings.get(MODULE.ID, SETTINGS.HUD_DIAL_STYLE);
@@ -1573,6 +1581,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
+    if ('hudCalendarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON, data.hudCalendarButton);
     if ('hudDialStyle' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, data.hudDialStyle);
     if ('hudTrayDirection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_TRAY_DIRECTION, data.hudTrayDirection);
     if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);

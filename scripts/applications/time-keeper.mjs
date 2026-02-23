@@ -69,6 +69,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       .filter(([key]) => !isMonthless || key !== 'month')
       .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeClock.incrementKey }));
     context.running = TimeClock.running;
+    context.clockLocked = TimeClock.locked;
     context.isGM = game.user.isGM;
     context.canChangeDateTime = canChangeDateTime();
     const rawTime = this.#formatTime();
@@ -388,8 +389,15 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     TimeClock.forward(amount);
   }
 
-  /** Toggle clock running state. */
-  static #onToggle() {
+  /**
+   * Toggle clock running state. Shift-click toggles lock.
+   * @param {Event} event - Click event
+   */
+  static #onToggle(event) {
+    if (event.shiftKey) {
+      TimeClock.toggleLock();
+      return;
+    }
     TimeClock.toggle();
     this.render();
   }

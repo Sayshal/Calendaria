@@ -3,9 +3,9 @@
     <div class="time-display-time-wrapper">
       <span class="time-display-time">{{{currentTime}}}</span>
       {{#if canChangeDateTime}}
-        <button type="button" class="time-display-play-btn" data-action="toggle" data-tooltip
-          aria-label="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
-          <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
+        <button type="button" class="time-display-play-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggle" data-tooltip
+          aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+          <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
         </button>
       {{/if}}
       <button type="button" class="time-display-stopwatch-btn" data-action="openStopwatch" data-tooltip

@@ -16,6 +16,7 @@ import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessag
 import { HOOKS, MODULE, SETTINGS } from './constants.mjs';
 import { onMoonPhaseChange, onRenderSceneConfig, onUpdateScene, onWeatherChange, updateDarknessFromWorldTime } from './darkness.mjs';
 import { onLongRest, onPreRest } from './integrations/rest-time.mjs';
+import TimeClock from './time/time-clock.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import EventScheduler from './time/event-scheduler.mjs';
 import ReminderScheduler from './time/reminder-scheduler.mjs';
@@ -37,6 +38,8 @@ export function registerHooks() {
   Hooks.on('dnd5e.longRest', onLongRest);
   Hooks.on('dnd5e.preLongRest', onPreRest);
   Hooks.on('dnd5e.preShortRest', onPreRest);
+  Hooks.on('combatRound', onCombatTimeBlock);
+  Hooks.on('combatTurn', onCombatTimeBlock);
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
   Hooks.on('preDeleteFolder', NoteManager.onPreDeleteFolder.bind(NoteManager));
   Hooks.on('preDeleteJournalEntry', NoteManager.onPreDeleteJournalEntry.bind(NoteManager));
@@ -54,6 +57,18 @@ export function registerHooks() {
   Hooks.once('ready', () => Stopwatch.restore());
   HUD.registerCombatHooks();
   log(3, 'Hooks registered');
+}
+
+/**
+ * Block combat round/turn time advancement when the clock is locked.
+ * @param {object} _combat - The combat document
+ * @param {object} _updateData - The update data
+ * @param {object} updateOptions - The update options containing worldTime delta
+ */
+function onCombatTimeBlock(_combat, _updateData, updateOptions) {
+  if (TimeClock.locked && updateOptions.worldTime) {
+    updateOptions.worldTime.delta = 0;
+  }
 }
 
 /**

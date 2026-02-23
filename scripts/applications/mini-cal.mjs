@@ -171,6 +171,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
     context.running = TimeClock.running;
+    context.clockLocked = TimeClock.locked;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const rawTime = calendar
@@ -1352,18 +1353,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onClockStateChange() {
     if (!this.rendered) return;
-    const running = TimeClock.running;
-    const tooltip = running ? localize('CALENDARIA.TimeKeeper.Stop') : localize('CALENDARIA.TimeKeeper.Start');
-    const timeToggle = this.element.querySelector('.time-toggle');
-    if (timeToggle) {
-      timeToggle.classList.toggle('active', running);
-      timeToggle.dataset.tooltip = tooltip;
-      const icon = timeToggle.querySelector('i');
-      if (icon) {
-        icon.classList.toggle('fa-play', !running);
-        icon.classList.toggle('fa-pause', running);
-      }
-    }
+    MiniCal.#updateClockIcon(this.element);
   }
 
   /**
@@ -1500,22 +1490,39 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Toggle the clock running state.
-   * @param {PointerEvent} _event - The click event
+   * Toggle the clock running state. Shift-click toggles lock.
+   * @param {PointerEvent} event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
-  static _onToggleClock(_event, _target) {
-    TimeClock.toggle();
-    const timeToggle = this.element.querySelector('.time-toggle');
-    if (timeToggle) {
-      timeToggle.classList.toggle('active', TimeClock.running);
-      const icon = timeToggle.querySelector('i');
-      if (icon) {
-        icon.classList.toggle('fa-play', !TimeClock.running);
-        icon.classList.toggle('fa-pause', TimeClock.running);
-      }
-      timeToggle.dataset.tooltip = TimeClock.running ? localize('CALENDARIA.TimeKeeper.Stop') : localize('CALENDARIA.TimeKeeper.Start');
+  static _onToggleClock(event, _target) {
+    if (event.shiftKey) {
+      TimeClock.toggleLock();
+      MiniCal.#updateClockIcon(this.element);
+      return;
     }
+    TimeClock.toggle();
+    MiniCal.#updateClockIcon(this.element);
+  }
+
+  /**
+   * Update the clock toggle button icon/tooltip to reflect current state.
+   * @param {HTMLElement} el - The application element
+   */
+  static #updateClockIcon(el) {
+    const timeToggle = el.querySelector('.time-toggle');
+    if (!timeToggle) return;
+    const locked = TimeClock.locked;
+    const running = TimeClock.running;
+    timeToggle.classList.toggle('active', running);
+    timeToggle.classList.toggle('clock-locked', locked);
+    const icon = timeToggle.querySelector('i');
+    if (icon) {
+      icon.classList.remove('fa-play', 'fa-pause', 'fa-lock');
+      if (locked) icon.classList.add('fa-lock');
+      else if (running) icon.classList.add('fa-pause');
+      else icon.classList.add('fa-play');
+    }
+    timeToggle.dataset.tooltip = locked ? localize('CALENDARIA.TimeClock.Locked') : running ? localize('CALENDARIA.TimeKeeper.Stop') : localize('CALENDARIA.TimeKeeper.Start');
   }
 
   /**

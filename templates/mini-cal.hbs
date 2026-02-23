@@ -231,9 +231,9 @@
     <span class="time-value">{{{currentTime}}}</span>
     <span class="date-value hidden">{{currentDate}}</span>
     {{#if canChangeDateTime}}
-      <div class="time-toggle {{#if running}}active{{/if}}" data-tooltip
-        aria-label="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
-        <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
+      <div class="time-toggle {{#if running}}active{{/if}}{{#if clockLocked}} clock-locked{{/if}}" data-tooltip
+        aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+        <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
       </div>
     {{/if}}
   </div>

@@ -9,6 +9,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { getCurrentDate } from '../notes/utils/date-utils.mjs';
+import TimeClock from '../time/time-clock.mjs';
 import { log } from '../utils/logger.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 
@@ -23,6 +24,10 @@ const NEW_DAY_HOUR = 8;
  * @returns {void}
  */
 export function onPreRest(_actor, config) {
+  if (TimeClock.locked) {
+    log(3, 'Rest time advancement blocked (clock locked)');
+    return;
+  }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (advanceTime) {
     config.advanceTime = true;

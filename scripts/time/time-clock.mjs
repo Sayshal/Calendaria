@@ -54,6 +54,9 @@ export default class TimeClock {
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
 
+  /** @type {boolean} Whether the clock is locked (prevents all time advancement) */
+  static #locked = false;
+
   /** @type {number} Time increment in seconds per tick (for manual advancement) */
   static #increment = 60;
 
@@ -69,6 +72,21 @@ export default class TimeClock {
   /** @returns {boolean} Whether the clock is running */
   static get running() {
     return this.#running;
+  }
+
+  /** @returns {boolean} Whether the clock is locked */
+  static get locked() {
+    return this.#locked;
+  }
+
+  /** Toggle the clock lock state. When locked, all time advancement is blocked. */
+  static async toggleLock() {
+    this.#locked = !this.#locked;
+    if (this.#locked && this.#running) this.stop();
+    await game.settings.set(MODULE.ID, SETTINGS.CLOCK_LOCKED, this.#locked);
+    ui.notifications.info(this.#locked ? 'CALENDARIA.TimeClock.Locked' : 'CALENDARIA.TimeClock.Unlocked', { localize: true });
+    Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: this.#running, increment: this.#increment, locked: this.#locked });
+    log(3, `Clock lock ${this.#locked ? 'engaged' : 'released'}`);
   }
 
   /** @returns {number} Current time increment in seconds (for manual advancement) */
@@ -104,6 +122,7 @@ export default class TimeClock {
    */
   static initialize() {
     this.setIncrement('minute');
+    this.#locked = game.settings.get(MODULE.ID, SETTINGS.CLOCK_LOCKED) ?? false;
     this.loadSpeedFromSettings();
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
     Hooks.on('updateWorldTime', (_worldTime, delta) => {
@@ -124,7 +143,7 @@ export default class TimeClock {
   static #autoStartIfSynced() {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
-    if (game.paused || game.combat?.started) return;
+    if (this.#locked || game.paused || game.combat?.started) return;
     this.start();
     log(3, 'Clock auto-started (sync enabled, game unpaused)');
   }
@@ -160,7 +179,7 @@ export default class TimeClock {
     if (paused) {
       if (this.#running) this.stop();
       log(3, 'Clock stopped (game paused)');
-    } else if (!game.combat?.started) {
+    } else if (!game.combat?.started && !this.#locked) {
       if (!this.#running) this.start();
       log(3, 'Clock started at configured speed (game unpaused)');
     }
@@ -186,7 +205,7 @@ export default class TimeClock {
   static #onCombatEnd(_combat) {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
-    if (!game.paused && !this.#running) {
+    if (!this.#locked && !game.paused && !this.#running) {
       this.start();
       log(3, 'Clock started at configured speed (combat ended)');
     }
@@ -199,6 +218,10 @@ export default class TimeClock {
    */
   static start({ broadcast = true } = {}) {
     if (this.#running) return;
+    if (this.#locked) {
+      log(3, 'Clock start blocked (locked)');
+      return;
+    }
     if (!this.canAdjustTime()) {
       ui.notifications.warn('CALENDARIA.TimeClock.NoPermission', { localize: true });
       return;

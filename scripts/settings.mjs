@@ -661,6 +661,22 @@ export function registerSettings() {
     onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
   });
 
+  /** Which calendar the HUD button opens (bigcal or minical) */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON, {
+    name: 'CALENDARIA.Settings.HUDCalendarButton.Name',
+    hint: 'CALENDARIA.Settings.HUDCalendarButton.Hint',
+    scope: 'client',
+    config: false,
+    type: new StringField({
+      choices: {
+        bigcal: 'CALENDARIA.Settings.HUDCalendarButton.BigCal',
+        minical: 'CALENDARIA.Settings.HUDCalendarButton.MiniCal'
+      },
+      initial: 'bigcal'
+    }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] })
+  });
+
   /** Calendar HUD dial style (dome vs slice) */
   game.settings.register(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, {
     name: 'CALENDARIA.Settings.HUDDialStyle.Name',
@@ -1120,6 +1136,14 @@ export function registerSettings() {
   game.settings.register(MODULE.ID, SETTINGS.REST_TO_SUNRISE, {
     name: 'CALENDARIA.Settings.RestToSunrise.Name',
     hint: 'CALENDARIA.Settings.RestToSunrise.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
+  /** Whether the clock is locked (prevents all time advancement) */
+  game.settings.register(MODULE.ID, SETTINGS.CLOCK_LOCKED, {
+    name: 'Clock Locked',
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false })

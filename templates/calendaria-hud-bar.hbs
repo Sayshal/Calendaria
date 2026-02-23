@@ -64,10 +64,10 @@
           <div class="calendaria-slice-time-overlay">
             <span class="calendaria-hud-time">{{{timeHtml}}}</span>
             {{#if canChangeDateTime}}
-              <button type="button" class="calendaria-hud-play-btn" data-action="toggleTimeFlow"
+              <button type="button" class="calendaria-hud-play-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggleTimeFlow"
                 aria-pressed="{{isPlaying}}" data-tooltip
-                aria-label="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
-                <i class="fa-solid {{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}"></i>
+                aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+                <i class="fa-solid {{#if clockLocked}}fa-lock{{else}}{{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
               </button>
             {{/if}}
           </div>
@@ -76,10 +76,10 @@
         <div class="calendaria-hud-time-wrapper">
           <span class="calendaria-hud-time">{{{timeHtml}}}</span>
           {{#if canChangeDateTime}}
-            <button type="button" class="calendaria-hud-play-btn" data-action="toggleTimeFlow"
+            <button type="button" class="calendaria-hud-play-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggleTimeFlow"
               aria-pressed="{{isPlaying}}" data-tooltip
-              aria-label="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
-              <i class="fa-solid {{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}"></i>
+              aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+              <i class="fa-solid {{#if clockLocked}}fa-lock{{else}}{{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
             </button>
           {{/if}}
         </div>
@@ -103,11 +103,20 @@
       <div class="calendaria-hud-btn-group right" role="group"
         aria-label="{{localize 'CALENDARIA.HUD.CalendarActions'}}">
         {{{widgets.buttonsRight}}}
-        {{#if canViewBigCal}}
-          <button type="button" class="calendaria-hud-btn" data-action="openBigCal" data-tooltip
-            aria-label="{{localize 'CALENDARIA.HUD.OpenBigCal'}}">
-            <i class="fa-solid fa-calendar-days"></i>
-          </button>
+        {{#if (eq hudCalendarButton "minical")}}
+          {{#if canViewMiniCal}}
+            <button type="button" class="calendaria-hud-btn" data-action="openMiniCal" data-tooltip
+              aria-label="{{localize 'CALENDARIA.HUD.OpenMiniCal'}}">
+              <i class="fa-solid fa-calendar"></i>
+            </button>
+          {{/if}}
+        {{else}}
+          {{#if canViewBigCal}}
+            <button type="button" class="calendaria-hud-btn" data-action="openBigCal" data-tooltip
+              aria-label="{{localize 'CALENDARIA.HUD.OpenBigCal'}}">
+              <i class="fa-solid fa-calendar-days"></i>
+            </button>
+          {{/if}}
         {{/if}}
         <button type="button" class="calendaria-hud-btn" data-action="openSettings" data-tooltip
           aria-label="{{localize 'CALENDARIA.HUD.Settings.Name'}}">

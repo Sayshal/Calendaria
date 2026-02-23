@@ -13,7 +13,7 @@ import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers, toRomanNumeral } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { canChangeDateTime, canChangeWeather, canViewBigCal } from '../utils/permissions.mjs';
+import { canChangeDateTime, canChangeWeather, canViewBigCal, canViewMiniCal } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import * as StickyZones from '../utils/sticky-zones.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
@@ -22,6 +22,7 @@ import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { getPreset, getPresetAlias } from '../weather/weather-presets.mjs';
 import { getMoonPhasePosition } from '../utils/moon-utils.mjs';
 import { BigCal } from './big-cal.mjs';
+import { MiniCal } from './mini-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import { HudSceneRenderer, SKY_KEYFRAMES, SKY_OVERRIDES } from './hud-scene-renderer.mjs';
 import { SetDateDialog } from './set-date-dialog.mjs';
@@ -119,6 +120,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       openEvent: HUD.#onOpenEvent,
       toggleTimeFlow: HUD.#onToggleTimeFlow,
       openBigCal: HUD.#onOpenBigCal,
+      openMiniCal: HUD.#onOpenMiniCal,
       openSettings: HUD.#onOpenSettings,
       openWeatherPicker: HUD.#onOpenWeatherPicker,
       toSunrise: HUD.#onToSunrise,
@@ -190,8 +192,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
     context.canViewBigCal = canViewBigCal();
+    context.canViewMiniCal = canViewMiniCal();
+    context.hudCalendarButton = game.settings.get(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON);
     context.locked = this.isLocked;
     context.isPlaying = TimeClock.running;
+    context.clockLocked = TimeClock.locked;
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
     this.#stickyTray = stickyStates.tray ?? false;
     this.#stickyPosition = stickyStates.position ?? false;
@@ -1325,17 +1330,21 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #onClockStateChange() {
     if (!this.rendered) return;
     const running = TimeClock.running;
+    const locked = TimeClock.locked;
     const hud = this.element.querySelector('.calendaria-hud-content');
     if (hud) hud.classList.toggle('time-flowing', running);
     const playBtn = this.element.querySelector('.calendaria-hud-play-btn');
     if (playBtn) {
       playBtn.classList.toggle('playing', running);
+      playBtn.classList.toggle('clock-locked', locked);
       playBtn.setAttribute('aria-pressed', String(running));
-      playBtn.dataset.tooltip = running ? localize('CALENDARIA.HUD.PauseTime') : localize('CALENDARIA.TimeKeeper.Start');
+      playBtn.dataset.tooltip = locked ? localize('CALENDARIA.TimeClock.Locked') : running ? localize('CALENDARIA.HUD.PauseTime') : localize('CALENDARIA.TimeKeeper.Start');
       const icon = playBtn.querySelector('i');
       if (icon) {
-        icon.classList.toggle('fa-play', !running);
-        icon.classList.toggle('fa-pause', running);
+        icon.classList.remove('fa-play', 'fa-pause', 'fa-lock');
+        if (locked) icon.classList.add('fa-lock');
+        else if (running) icon.classList.add('fa-pause');
+        else icon.classList.add('fa-play');
       }
     }
   }
@@ -2062,11 +2071,15 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click on play/pause button to toggle time flow.
-   * @param {Event} _event - Click event
+   * Handle click on play/pause button to toggle time flow. Shift-click toggles lock.
+   * @param {Event} event - Click event
    * @param {HTMLElement} _target - Target element
    */
-  static #onToggleTimeFlow(_event, _target) {
+  static #onToggleTimeFlow(event, _target) {
+    if (event.shiftKey) {
+      TimeClock.toggleLock();
+      return;
+    }
     TimeClock.toggle();
   }
 
@@ -2077,6 +2090,15 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #onOpenBigCal(_event, _target) {
     new BigCal().render(true);
+  }
+
+  /**
+   * Handle click to open MiniCal application.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onOpenMiniCal(_event, _target) {
+    MiniCal.show();
   }
 
   /**
