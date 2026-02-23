@@ -57,6 +57,17 @@ export default class WeatherManager {
   static async initialize() {
     if (this.#initialized) return;
     this.#currentWeatherByZone = game.settings.get(MODULE.ID, SETTINGS.CURRENT_WEATHER) || {};
+
+    // Migrate stale "undefined" zone key to _default
+    if ('undefined' in this.#currentWeatherByZone) {
+      this.#currentWeatherByZone[this.DEFAULT_ZONE] = this.#currentWeatherByZone['undefined'];
+      delete this.#currentWeatherByZone['undefined'];
+      if (CalendariaSocket.isPrimaryGM()) {
+        await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
+        log(3, 'Migrated stale "undefined" weather zone key to _default');
+      }
+    }
+
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
     if (CalendariaSocket.isPrimaryGM()) {
       // Migrate autoGenerate from calendar data to world setting
@@ -93,12 +104,7 @@ export default class WeatherManager {
    * @returns {object|null} Current weather state
    */
   static getCurrentWeather(zoneId, scene) {
-    const resolvedZoneId = zoneId ?? this.getActiveZone(null, scene ?? game.scenes?.active)?.id;
-    if (!resolvedZoneId) {
-      // Fallback: return first available zone's weather
-      const firstKey = Object.keys(this.#currentWeatherByZone)[0];
-      return firstKey ? this.#currentWeatherByZone[firstKey] : null;
-    }
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, scene ?? game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     return this.#currentWeatherByZone[resolvedZoneId] ?? null;
   }
 
@@ -242,6 +248,12 @@ export default class WeatherManager {
   }
 
   /**
+   * Default zone key used when no climate zone is configured.
+   * @type {string}
+   */
+  static DEFAULT_ZONE = '_default';
+
+  /**
    * Save weather to settings and optionally broadcast.
    * @param {object|null} weather - Weather to save
    * @param {boolean} broadcast - Whether to broadcast
@@ -249,6 +261,7 @@ export default class WeatherManager {
    * @private
    */
   static async #saveWeather(weather, broadcast, zoneId) {
+    zoneId ??= this.DEFAULT_ZONE;
     const previous = this.#currentWeatherByZone[zoneId] ?? null;
     if (weather) this.#currentWeatherByZone[zoneId] = weather;
     else delete this.#currentWeatherByZone[zoneId];

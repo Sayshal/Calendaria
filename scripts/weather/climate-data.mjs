@@ -260,7 +260,7 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
   for (const preset of ALL_PRESETS) {
     const weight = defaultWeather[preset.id] ?? 0;
     const chance = totalWeight > 0 ? Math.round((weight / totalWeight) * 100 * 100) / 100 : 0;
-    presets.push({ id: preset.id, enabled: weight > 0, chance, tempMin: preset.tempMin ?? null, tempMax: preset.tempMax ?? null });
+    presets.push({ id: preset.id, enabled: weight > 0, chance, tempMin: null, tempMax: null });
   }
 
   const seasonOverrides = {};
