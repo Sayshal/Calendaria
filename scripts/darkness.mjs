@@ -261,9 +261,7 @@ function buildEnvironmentUpdateData(_scene, lighting) {
   if (!CalendariaSocket.isPrimaryGM()) return null;
   const ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
   if (!ambienceSync) return null;
-  if (!lighting) {
-    return { 'environment.base.intensity': 0, 'environment.base.luminosity': 0, 'environment.dark.intensity': 0, 'environment.dark.luminosity': -0.25 };
-  }
+  if (!lighting) return null;
   const updateData = {};
   if (lighting.base.hue !== null) updateData['environment.base.hue'] = lighting.base.hue / 360;
   if (lighting.base.intensity !== null) updateData['environment.base.intensity'] = lighting.base.intensity;
