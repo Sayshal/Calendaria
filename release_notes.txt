@@ -1,13 +1,14 @@
+## New Features
+- Clock lock: shift-click the play/pause button on HUD, MiniCal, or TimeKeeper to lock the clock — blocks all time advancement (manual, real-time sync, combat, rests) and persists across refresh
+- Calendar Button setting: per-user choice of BigCal or MiniCal for the HUD calendar button
+
 ## Enhancements
-- Expanded Weather Editor environment lighting to all Foundry scene properties: Luminosity, Saturation, Shadows, Hue, and Hue Intensity per channel (Day/Night)
-- Added Blend Ambience checkbox to Day (Base) environment section in Weather Editor
-- Weather Editor changes now update the scene in real-time with 150ms debounce
-- Weather Editor environment fields use Foundry's native localization strings
+- Added 26 Golarion (Pathfinder) festivals including Asmodean, Nethysian, Iomedaean, and Calistrian holy days
+- Added 4 Harptos equinox/solstice festivals
+- Moved Krynn-Elven Yule from month 1 to month 12
 
 ## Bug Fixes
-- Fixed weather zone key mismatch — use stable _default zone key when no climate zone is configured
-- Fixed disabled weather presets still generating after being toggled off
-- Fixed scene ambience resetting to zero when no lighting overrides apply
-- Fixed negative saturation not allowed in Weather Editor (now matches Foundry's -1 to 1 range)
-- Fixed "No Zone" selection in Weather Picker snapping back to the only available zone
-- Fixed weather changes not applying when "No Zone" is selected
+- Fixed zone per-season temperatures ignored during weather generation (priority order in mergeClimateConfig)
+- Fixed HUD not hiding for players when scene "Hide HUD for Players" flag is set
+- Fixed FXMaster wind direction mapping: 16-point compass directions now snap to 8-point cardinals
+- Fixed FXMaster preset switching, suppress UI warnings on stop/switch
