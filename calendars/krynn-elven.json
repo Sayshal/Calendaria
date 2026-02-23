@@ -34,7 +34,7 @@
     "secondsPerMinute": 60
   },
   "festivals"     : {
-    "yule000000000000": {"name": "Yule",                    "month":  1, "day": 14, "icon": "fas fa-holly-berry", "color": "#006400", "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon."     },
+    "yule000000000000": {"name": "Yule",                    "month": 12, "day": 14, "icon": "fas fa-holly-berry", "color": "#006400", "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon."     },
     "springdawningfes": {"name": "Spring Dawning Festival", "month":  3, "day":  1, "icon": "fas fa-cloud-sun",   "color": "#98FB98", "description": "Vernal equinox celebration marking the awakening of spring."                           },
     "midyear000000000": {"name": "Midyear",                 "month":  6, "day": 14, "icon": "fas fa-sun",         "color": "#FFFF00", "description": "Longest day of the year celebrated with dancing and lights."                           },
     "harvestfestival0": {"name": "Harvest Festival",        "month":  9, "day": 14, "icon": "fas fa-wheat-awn",   "color": "#CD853F", "description": "Autumn celebration of the harvest bounty and thanksgiving."                            },

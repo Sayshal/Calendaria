@@ -46,6 +46,13 @@
       "color"           : "#B0C4DE",
       "description"     : "A solemn festival marking winter's midpoint when nobles forge alliances while commoners endure the cold."
     },
+    "springequinox000": {
+      "name"            : "Spring Equinox",
+      "month"           : 3,
+      "day"             : 19,
+      "countsForWeekday": true,
+      "description"     : "A festival marking when the barriers between the Prime Material plane and the Feywild are weakest, nobles host lavish masquerades wearing costumes of fey beings."
+    },
     "greengrass000000": {
       "name"            : "Greengrass",
       "month"           : 4,
@@ -54,6 +61,13 @@
       "icon"            : "fas fa-seedling",
       "color"           : "#90EE90",
       "description"     : "The first day of spring when wealthy folk distribute flowers and commoners scatter them as offerings."
+    },
+    "summersolstice00": {
+      "name"            : "Summer Solstice",
+      "month"           : 6,
+      "day"             : 20,
+      "countsForWeekday": true,
+      "description"     : "The middle of summer marks the longest day of the year, seeing up to 16 hours of daylight."
     },
     "midsummer0000000": {"name": "Midsummer", "month": 7, "day": 31, "countsForWeekday": false, "icon": "fas fa-sun", "color": "#FFD700", "description": "A night of feasting, music, and romance at summer's height beneath the stars."},
     "shieldmeet000000": {
@@ -66,6 +80,13 @@
       "color"           : "#CD7F32",
       "description"     : "A leap year festival of grand tournaments, bazaars, and theatrical performances."
     },
+    "autumnequinox000": {
+      "name"            : "Autumn Equinox",
+      "month"           : 9,
+      "day"             : 21,
+      "countsForWeekday": true,
+      "description"     : "This day is in perfect balance, seeing 12 hours of daylight and 12 hours of darkness as the sun starts to fade for the cold season."
+    },
     "highharvestide00": {
       "name"            : "Highharvestide",
       "month"           : 9,
@@ -74,6 +95,13 @@
       "icon"            : "fas fa-wheat-awn",
       "color"           : "#D2691E",
       "description"     : "A great harvest feast celebrating autumn's abundance with food contests and blessings."
+    },
+    "wintersolstice00": {
+      "name"            : "Winter Solstice",
+      "month"           : 12,
+      "day"             : 20,
+      "countsForWeekday": true,
+      "description"     : "This day marks the longest night of the year, as the sun starts to make its return to warmer weather."
     },
     "feastofthemoon00": {
       "name"            : "Feast of the Moon",
