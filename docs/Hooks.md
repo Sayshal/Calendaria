@@ -373,6 +373,7 @@ Fired when the real-time clock starts or stops.
 
 - `data` (object)
   - `running` (boolean) - Whether clock is running
+  - `locked` (boolean) - Whether the clock is locked
   - `increment` (number) - Time increment in seconds
 
 ```javascript
@@ -625,6 +626,7 @@ Fired when weather changes. Note: This hook is fired with varying payloads depen
   - `previous` (object|null) - Previous weather state
   - `current` (object|null) - Current weather state
   - `remote` (boolean) - True if change originated from another client (optional)
+  - `visualOnly` (boolean) - True when fired from Weather Editor preview (FX and sound handlers should skip processing)
 
 ```javascript
 Hooks.on('calendaria.weatherChange', (data) => {

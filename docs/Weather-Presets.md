@@ -93,6 +93,9 @@ GMs can create custom weather presets that appear alongside built-in ones under 
 
 Custom presets support all the same fields as built-in presets including wind, precipitation, inertia weight, HUD effects, FXMaster integration, and sound effects.
 
+> [!NOTE]
+> Zone preset templates default to null temperatures (inheriting from zone/season configuration). The `enabled` flag in a zone's base preset config acts as a hard gate — disabled presets are excluded from generation regardless of season-level probability overrides.
+
 ## Column Reference
 
 | Column         | Description                                                     |

@@ -8,7 +8,7 @@ A minimal time-only display for GMs who want a smaller footprint.
 
 - Fixed compact width
 - Controls hidden on idle, revealed on hover
-- Play/pause button as hover overlay on time display (GM only)
+- Play/pause button as hover overlay on time display (GM only); shift-click to lock/unlock the clock
 - Stopwatch button to open the Stopwatch application
 - Right-click for context menu (8 options including Settings, visibility toggle, position controls, and more)
 - Four configurable time jump buttons per increment type

@@ -83,6 +83,7 @@ Click "View Notes" to see all notes for the selected date:
 Shows current time. GM can:
 
 - Click to toggle time flow (play/pause)
+- Shift-click to lock/unlock the clock (see [HUD — Clock Lock](HUD#clock-lock))
 - Hover to reveal time controls
 
 ### Time Controls (GM Only)

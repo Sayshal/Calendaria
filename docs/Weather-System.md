@@ -32,7 +32,7 @@ Each zone defines:
 - **Wind**: Speed range and cardinal direction weights
 - **Daylight**: Optional latitude or manual shortest/longest day overrides (see [Climate Editor](Climate-Editor#daylight-hours))
 - **Brightness multiplier**: Per-zone scene darkness scaling
-- **Environment lighting**: Hue and saturation overrides for scene ambience
+- **Environment lighting**: Luminosity, saturation, shadows, hue, and intensity overrides per channel (day/night), plus blend ambience toggle
 - **Color shift**: Dawn/dusk/night hue values for time-of-day atmospheric transitions
 
 Zone configuration is done via the [Climate Editor](Climate-Editor) in zone mode.
@@ -240,6 +240,7 @@ Each climate zone maintains independent weather state:
 - **Current weather**: Separate current conditions per zone
 - **Forecast plan**: Independent forecast chain per zone
 - **Weather history**: Zone-scoped entries
+- **No Zone sentinel**: Scenes with "No Zone" selected store a `"none"` sentinel that persists across reloads, disabling zone-based weather for that scene.
 
 ### Batched Day Change
 
@@ -356,7 +357,7 @@ Weather presets apply additive darkness adjustments to scenes. See [Weather Pres
 
 ### Environment Lighting
 
-Hue and saturation adjustments create atmospheric effects. When both weather preset and climate zone define lighting values, weather takes precedence, with zone values as fallback.
+Weather presets and climate zones can override the full set of Foundry scene environment properties: hue, intensity, luminosity, saturation, and shadows per channel (day/night), plus the blend ambience (cycle) toggle. Weather takes precedence, with zone values as fallback. When no overrides apply, the scene's existing environment settings are preserved.
 
 ### Weather Tooltips
 

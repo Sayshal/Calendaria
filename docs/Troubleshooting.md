@@ -93,6 +93,11 @@ These errors appear when a non-GM user attempts GM-only actions:
 - The real-time clock pauses during combat or when the game is paused
 - **Solution:** End combat or unpause the game to resume clock
 
+### Clock shows a lock icon / time won't advance
+
+- The clock is locked via shift-click on the play/pause button
+- **Solution:** Shift-click the play/pause button (on HUD, MiniCal, or TimeKeeper) to unlock
+
 ---
 
 ## Calendar Editor Issues

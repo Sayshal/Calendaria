@@ -22,7 +22,7 @@ Some canvas effects are enhanced or only available with [FXMaster+](https://foun
 
 ## Wind Direction Passthrough
 
-Calendaria passes the current wind direction (as a cardinal direction string, e.g., `"NW"`) to FXMaster, allowing directional weather effects like angled rain or wind-blown snow.
+Calendaria passes the current wind direction to FXMaster, allowing directional weather effects like angled rain or wind-blown snow.
 
 ---
 

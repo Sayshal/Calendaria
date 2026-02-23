@@ -6,7 +6,7 @@ The Weather Picker is a dialog for manually setting weather conditions. Open it 
 
 ### Zone Info Bar
 
-A bar at the top displays the current climate zone with a dropdown for per-scene zone override. Changing the zone here overrides the active scene's climate zone, affecting weather generation and scene ambience for that scene only.
+A bar at the top displays the current climate zone with a dropdown for per-scene zone override. Changing the zone here overrides the active scene's climate zone, affecting weather generation and scene ambience for that scene only. Select "No Zone" to explicitly disable zone-based weather — this selection persists across scene reloads.
 
 ### Preset Grid
 

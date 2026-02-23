@@ -115,7 +115,14 @@ Climate zones can define a brightness multiplier that scales overall scene brigh
 
 ## Environment Lighting
 
-When **Sync Scene Ambience with Weather** is enabled (default), scene hue and saturation also sync with weather and climate settings.
+When **Sync Scene Ambience with Weather** is enabled (default), Calendaria syncs the full set of Foundry scene environment properties with weather and climate settings:
+
+- **Per channel (Day/Night)**: Hue, intensity, luminosity, saturation, shadows
+- **Global**: Blend ambience (cycle) toggle
+
+Weather preset values take precedence, with climate zone values as fallback. When neither defines overrides, the scene's existing environment settings are preserved — no values are reset.
+
+Configure per-preset in the [Weather Editor](Weather-Editor) and per-zone in the [Climate Editor](Climate-Editor) > Environment tab.
 
 ---
 

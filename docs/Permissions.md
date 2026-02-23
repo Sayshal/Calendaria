@@ -79,6 +79,7 @@ When a user lacks permission for an action, the corresponding UI controls are hi
 - Time control buttons hidden without Change Date/Time permission
 - Weather picker disabled without Change Weather permission
 - Note creation buttons hidden without Manage Notes permission
+- Calendar button visibility gated by `canViewBigCal` or `canViewMiniCal` based on Calendar Button setting
 - Calendar Editor button hidden without Edit Calendars permission
 
 ### Socket Relay

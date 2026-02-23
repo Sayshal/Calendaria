@@ -67,12 +67,30 @@ Each column header has a tooltip explaining the field. Presets are grouped by ca
 
 ### Environment Tab
 
-| Field                   | Description                               |
-| ----------------------- | ----------------------------------------- |
-| **Description**         | Notes about this climate zone             |
-| **Brightness**          | Slider controlling scene darkness scaling |
-| **Base Hue/Saturation** | Environment lighting during daytime       |
-| **Dark Hue/Saturation** | Environment lighting during nighttime     |
+| Field           | Description                               |
+| --------------- | ----------------------------------------- |
+| **Description** | Notes about this climate zone             |
+| **Brightness**  | Slider controlling scene darkness scaling |
+
+#### Base (Day) Lighting
+
+| Field          | Description                |
+| -------------- | -------------------------- |
+| **Hue**        | Hue angle (0–360°)         |
+| **Intensity**  | Hue intensity (0 to 1)     |
+| **Luminosity** | Scene luminosity (-1 to 1) |
+| **Saturation** | Color saturation (-1 to 1) |
+| **Shadows**    | Shadow intensity (0 to 1)  |
+
+#### Dark (Night) Lighting
+
+| Field          | Description                |
+| -------------- | -------------------------- |
+| **Hue**        | Hue angle (0–360°)         |
+| **Intensity**  | Hue intensity (0 to 1)     |
+| **Luminosity** | Scene luminosity (-1 to 1) |
+| **Saturation** | Color saturation (-1 to 1) |
+| **Shadows**    | Shadow intensity (0 to 1)  |
 
 #### Daylight Hours
 

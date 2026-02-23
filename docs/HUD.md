@@ -126,12 +126,12 @@ The bar displays (left to right):
 - **Add Note button** - Creates a new note for today
 - **Events** - Icons for today's notes (up to 5 displayed); click to open note
 - **Date** - Click to open Set Date dialog (GM only)
-- **Time** - Current time with play/pause button (GM only)
+- **Time** — Current time with play/pause button (GM only); shift-click to lock/unlock the clock
 - **Weather** - Current weather; click to open weather picker (GM only). Shows "click to generate" prompt when no weather set.
 - **Season** - Current season name and icon
 - **Era** - Current era indicator (toggle via Show Era setting)
 - **Cycle** - Current cycle value (toggle via Show Cycles setting)
-- **Open Calendar** - Opens the BigCal Application (hidden if user lacks BigCal view permission)
+- **Open Calendar** - Opens BigCal or MiniCal based on Calendar Button setting (hidden if user lacks view permission)
 - **Settings** - Opens the settings panel
 
 ### Block Visibility
@@ -179,6 +179,18 @@ The tray can be configured to open upward or downward via Settings > HUD tab > T
 ### Custom Time Jumps
 
 Configure custom jump buttons (e.g., skip 8 hours) via Settings > HUD tab > Custom Time Jumps. Each increment type can have its own jump values for four buttons (two decrement, two increment). Leave blank to hide the button.
+
+---
+
+### Clock Lock
+
+Shift-click the play/pause button (on the HUD, MiniCal, or TimeKeeper) to lock the clock. When locked:
+
+- All time advancement is blocked (manual toggle, real-time sync, combat time, rest advancement)
+- The play/pause icon changes to a lock icon with updated tooltip
+- Lock state persists across page refresh (stored as a world setting)
+
+Shift-click again to unlock. Requires time-change permission.
 
 ---
 

@@ -33,11 +33,28 @@ Click a preset to load it in the main editor area.
 
 ### Environment Lighting
 
-| Field          | Description                                            |
-| -------------- | ------------------------------------------------------ |
-| **Day Hue**    | Hue slider (0–360°) for daytime environment lighting   |
-| **Night Hue**  | Hue slider (0–360°) for nighttime environment lighting |
-| **Saturation** | Saturation value for environment color intensity       |
+Per-preset overrides for scene environment properties, split into Day (Base) and Night (Dark) sections. Labels use Foundry's native scene property names.
+
+#### Day (Base)
+
+| Field              | Description                                 |
+| ------------------ | ------------------------------------------- |
+| **Hue**            | Hue angle (0–360°) for daytime lighting     |
+| **Intensity**      | Hue intensity (0 to 1)                      |
+| **Luminosity**     | Scene luminosity (-1 to 1)                  |
+| **Saturation**     | Color saturation (-1 to 1)                  |
+| **Shadows**        | Shadow intensity (0 to 1)                   |
+| **Blend Ambience** | Checkbox — enable ambience blending (cycle) |
+
+#### Night (Dark)
+
+| Field          | Description                               |
+| -------------- | ----------------------------------------- |
+| **Hue**        | Hue angle (0–360°) for nighttime lighting |
+| **Intensity**  | Hue intensity (0 to 1)                    |
+| **Luminosity** | Scene luminosity (-1 to 1)                |
+| **Saturation** | Color saturation (-1 to 1)                |
+| **Shadows**    | Shadow intensity (0 to 1)                 |
 
 ### HUD Visuals
 
@@ -79,3 +96,6 @@ Custom presets store all fields directly — there is no delta system since ther
 | **Create New**        | Add a new custom weather preset               |
 | **Reset to Defaults** | Remove visual overrides for a built-in preset |
 | **Delete Weather**    | Remove a custom preset                        |
+
+> [!NOTE]
+> Changes in the Weather Editor update the active scene in real-time. Only visual/lighting changes preview — FX and sound effects are not triggered during editing.

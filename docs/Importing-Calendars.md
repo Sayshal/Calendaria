@@ -25,12 +25,13 @@ Missing your calendar source? [Request a new importer](https://github.com/Saysha
 3. Click **Open Importer** to open the import dialog
 4. Select your import source from the dropdown
 5. Upload a JSON file (drag-and-drop supported) or click **Import from Module** for live import
-6. Review the import preview
-7. For each detected note/event, choose how to import:
+6. If the source contains multiple calendars (e.g., Simple Calendar with more than one calendar configured), select which calendar to import from the dropdown
+7. Review the import preview
+8. For each detected note/event, choose how to import:
    - **Skip** — Do not import this item
    - **Festival** — Import as a recurring festival day
    - **Note** — Import as a calendar note (journal entry)
-8. Click **Import**
+9. Click **Import**
 
 The imported calendar opens in the Calendar Editor for review. Make any needed adjustments, then click **Save** to finalize.
 

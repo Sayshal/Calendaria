@@ -446,6 +446,13 @@ Choose how the sun/moon are displayed:
 > [!NOTE]
 > Compact mode forces slice style. When switching back to fullsize mode, your saved dial style preference is automatically restored.
 
+### Calendar Button
+
+Choose which calendar the HUD button opens.
+
+- Options: `BigCal`, `MiniCal`
+- Default: `bigcal`
+
 ### Compact During Combat
 
 Automatically switch to slice style during combat to reduce screen space.
@@ -1092,7 +1099,7 @@ Automatically hide the Calendaria HUD for players when this scene becomes active
 
 ### Climate Zone Override
 
-Override the calendar's default climate zone for this specific scene. Affects weather generation, darkness calculations, and environment lighting.
+Override the calendar's default climate zone for this specific scene. Affects weather generation, darkness calculations, and environment lighting. Select "No Zone" to explicitly disable zone-based weather and ambience for this scene.
 
 - Default: Uses calendar's default zone
 

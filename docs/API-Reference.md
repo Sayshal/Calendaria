@@ -150,6 +150,30 @@ CALENDARIA.api.toggleClock();
 
 ---
 
+### isClockLocked()
+
+Check if the clock is currently locked. When locked, all time advancement is blocked.
+
+```javascript
+const locked = CALENDARIA.api.isClockLocked();
+```
+
+**Returns:** `boolean` - True if the clock is locked.
+
+---
+
+### toggleClockLock()
+
+Toggle the clock lock state. GM only.
+
+```javascript
+await CALENDARIA.api.toggleClockLock();
+```
+
+**Returns:** `Promise<void>`
+
+---
+
 ### getClockSpeed()
 
 Get the current real-time clock speed (game seconds per real second).
@@ -1492,18 +1516,56 @@ Set a per-scene climate zone override.
 
 ```javascript
 await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, 'tropical');
-// Clear override:
+// Explicitly disable zone (No Zone):
 await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, null);
+// Clear override (revert to calendar default):
+await CALENDARIA.managers.WeatherManager.setSceneZoneOverride(game.scenes.active, undefined);
 ```
 
 > **Note:** This method is on `WeatherManager`, not on the public API object.
 
-| Parameter | Type           | Description              |
-| --------- | -------------- | ------------------------ |
-| `scene`   | `Scene`        | Scene document           |
-| `zoneId`  | `string\|null` | Zone ID or null to clear |
+| Parameter | Type                      | Description                                            |
+| --------- | ------------------------- | ------------------------------------------------------ |
+| `scene`   | `Scene`                   | Scene document                                         |
+| `zoneId`  | `string\|null\|undefined` | Zone ID, `null` for "No Zone", or `undefined` to clear |
 
 **Returns:** `Promise<void>`
+
+---
+
+### isZoneDisabled(scene)
+
+Check if a scene has explicitly disabled zone-based weather ("No Zone" selected).
+
+```javascript
+const disabled = CALENDARIA.managers.WeatherManager.isZoneDisabled(game.scenes.active);
+```
+
+> **Note:** This method is on `WeatherManager`, not on the public API object.
+
+| Parameter | Type    | Description    |
+| --------- | ------- | -------------- |
+| `scene`   | `Scene` | Scene document |
+
+**Returns:** `boolean` - True if the scene has "No Zone" set.
+
+---
+
+### refreshEnvironmentOverrides(presetId)
+
+Invalidate cached environment overrides for a preset. Called internally by the Weather Editor after saving changes.
+
+```javascript
+CALENDARIA.managers.WeatherManager.refreshEnvironmentOverrides('thunderstorm');
+```
+
+> **Note:** This method is on `WeatherManager`, not on the public API object.
+
+| Parameter  | Type     | Description       |
+| ---------- | -------- | ----------------- |
+| `presetId` | `string` | Weather preset ID |
+
+**Returns:** `void`
 
 ---
 
