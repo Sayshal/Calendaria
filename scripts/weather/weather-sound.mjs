@@ -76,8 +76,10 @@ function onCanvasReady() {
  * @param {object} payload - Weather change hook payload
  * @param {object|null} payload.current - Current weather data
  * @param {boolean} payload.bulk - Whether this is a bulk weather change
+ * @param {boolean} payload.visualOnly - Whether this is a visual-only refresh (skip sound)
  */
-function onWeatherChange({ current, bulk } = {}) {
+function onWeatherChange({ current, bulk, visualOnly } = {}) {
+  if (visualOnly) return;
   if (bulk) {
     const weather = WeatherManager.getCurrentWeather();
     playSound(weather || null);

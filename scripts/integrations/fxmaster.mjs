@@ -126,8 +126,10 @@ function syncWeatherToScene() {
  * @param {object|null} payload.current - Current weather data
  * @param {string|null} payload.zoneId - Active zone ID
  * @param {boolean} payload.bulk - Whether this is a bulk weather change
+ * @param {boolean} payload.visualOnly - Whether this is a visual-only refresh (skip FX)
  */
-function onWeatherChange({ current, zoneId: _zoneId, bulk } = {}) {
+function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
+  if (visualOnly) return;
   if (!CalendariaSocket.isPrimaryGM()) return;
 
   if (bulk) {

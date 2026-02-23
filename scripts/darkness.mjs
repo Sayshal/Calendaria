@@ -207,14 +207,14 @@ function lerpHue(a, b, t) {
 /**
  * Calculate environment lighting overrides from time-of-day, climate zone, and weather.
  * @param {object} [scene] - The scene to check for climate zone override
- * @returns {{base: {hue: number|null, intensity: number|null, luminosity: number|null}, dark: {hue: number|null, intensity: number|null, luminosity: number|null}}|null} - environment config
+ * @returns {{base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} - environment config
  */
 export function calculateEnvironmentLighting(scene) {
   const colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
   const activeZone = WeatherManager.getActiveZone?.(null, scene);
   const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
-  let base = { hue: null, intensity: null, luminosity: null };
-  let dark = { hue: null, intensity: null, luminosity: null };
+  let base = { hue: null, intensity: null, saturation: null, luminosity: null, shadows: null };
+  let dark = { hue: null, intensity: null, saturation: null, luminosity: null, shadows: null };
   if (colorShiftSync) {
     const calendar = game.time.calendar;
     const components = game.time.components;
@@ -225,8 +225,8 @@ export function calculateEnvironmentLighting(scene) {
     const sunset = calendar?.sunset?.(components, activeZone) ?? null;
     const colorShift = activeZone?.colorShift ?? null;
     const timeColor = calculateTimeOfDayColor(currentHour, hoursPerDay, sunrise, sunset, colorShift, minutesPerHour);
-    base = { hue: timeColor.hue, intensity: timeColor.intensity, luminosity: timeColor.luminosity };
-    dark = { hue: timeColor.hue, intensity: timeColor.intensity, luminosity: timeColor.luminosity };
+    base = { hue: timeColor.hue, intensity: timeColor.intensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
+    dark = { hue: timeColor.hue, intensity: timeColor.intensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
   }
 
   const moonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
@@ -242,19 +242,46 @@ export function calculateEnvironmentLighting(scene) {
     }
   }
 
-  if (activeZone?.environmentBase?.hue != null) base.hue = activeZone.environmentBase.hue;
-  if (activeZone?.environmentDark?.hue != null) dark.hue = activeZone.environmentDark.hue;
-  if (currentWeather?.environmentBase?.hue != null) base.hue = currentWeather.environmentBase.hue;
-  if (currentWeather?.environmentDark?.hue != null) dark.hue = currentWeather.environmentDark.hue;
-  const hasValues = base.hue !== null || base.intensity !== null || dark.hue !== null || dark.intensity !== null;
+  // Apply zone-level environment overrides
+  const applyOverrides = (target, source) => {
+    if (!source) return;
+    if (source.hue != null) target.hue = source.hue;
+    if (source.saturation != null) target.intensity = source.saturation;
+    if (source.colorSaturation != null) target.saturation = source.colorSaturation;
+    if (source.luminosity != null) target.luminosity = source.luminosity;
+    if (source.shadows != null) target.shadows = source.shadows;
+  };
+  applyOverrides(base, activeZone?.environmentBase);
+  applyOverrides(dark, activeZone?.environmentDark);
+  // Weather overrides win over zone overrides
+  applyOverrides(base, currentWeather?.environmentBase);
+  applyOverrides(dark, currentWeather?.environmentDark);
+
+  // Blend ambience (environment.cycle) — weather wins over zone
+  let cycle = null;
+  if (activeZone?.environmentCycle != null) cycle = activeZone.environmentCycle;
+  if (currentWeather?.environmentCycle != null) cycle = currentWeather.environmentCycle;
+
+  const hasValues =
+    cycle !== null ||
+    base.hue !== null ||
+    base.intensity !== null ||
+    base.saturation !== null ||
+    base.luminosity !== null ||
+    base.shadows !== null ||
+    dark.hue !== null ||
+    dark.intensity !== null ||
+    dark.saturation !== null ||
+    dark.luminosity !== null ||
+    dark.shadows !== null;
   if (!hasValues) return null;
-  return { base, dark };
+  return { cycle, base, dark };
 }
 
 /**
  * Build environment lighting update data for a scene.
  * @param {object} _scene - The scene to get update data for (unused, kept for future per-scene overrides)
- * @param {{base: {hue: number|null, intensity: number|null, luminosity: number|null}, dark: {hue: number|null, intensity: number|null, luminosity: number|null}}|null} lighting - Lighting overrides
+ * @param {{base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} lighting - Lighting overrides
  * @returns {object|null} Update data object, or null if no updates needed
  */
 function buildEnvironmentUpdateData(_scene, lighting) {
@@ -263,12 +290,17 @@ function buildEnvironmentUpdateData(_scene, lighting) {
   if (!ambienceSync) return null;
   if (!lighting) return null;
   const updateData = {};
+  if (lighting.cycle !== null) updateData['environment.cycle'] = lighting.cycle;
   if (lighting.base.hue !== null) updateData['environment.base.hue'] = lighting.base.hue / 360;
   if (lighting.base.intensity !== null) updateData['environment.base.intensity'] = lighting.base.intensity;
+  if (lighting.base.saturation !== null) updateData['environment.base.saturation'] = lighting.base.saturation;
   if (lighting.base.luminosity !== null) updateData['environment.base.luminosity'] = lighting.base.luminosity;
+  if (lighting.base.shadows !== null) updateData['environment.base.shadows'] = lighting.base.shadows;
   if (lighting.dark.hue !== null) updateData['environment.dark.hue'] = lighting.dark.hue / 360;
   if (lighting.dark.intensity !== null) updateData['environment.dark.intensity'] = lighting.dark.intensity;
+  if (lighting.dark.saturation !== null) updateData['environment.dark.saturation'] = lighting.dark.saturation;
   if (lighting.dark.luminosity !== null) updateData['environment.dark.luminosity'] = lighting.dark.luminosity;
+  if (lighting.dark.shadows !== null) updateData['environment.dark.shadows'] = lighting.dark.shadows;
   return Object.keys(updateData).length > 0 ? updateData : null;
 }
 

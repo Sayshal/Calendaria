@@ -73,36 +73,96 @@
       <fieldset>
         <legend>{{localize "CALENDARIA.WeatherEditor.EnvironmentLighting"}}</legend>
         <p class="hint">{{localize "CALENDARIA.WeatherEditor.EnvironmentLightingHint"}}</p>
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.WeatherEditor.DayHue"}}</label>
-          <div class="form-fields">
-            <hue-slider name="{{preset.id}}.baseHue" value="{{preset.baseHueNorm}}"></hue-slider>
+
+        {{!-- Day (Base) --}}
+        <fieldset>
+          <legend>{{localize "SCENE.Ambience.Base"}}</legend>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.luminosity.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.baseLuminosity" value="{{preset.baseLuminosity}}"
+                min="-1" max="1" step="0.05"></range-picker>
+            </div>
+            <p class="hint">{{localize "SCENE.FIELDS.environment.base.luminosity.hint"}}</p>
           </div>
-          <p class="hint">{{localize "CALENDARIA.WeatherEditor.DayHueHint"}}</p>
-        </div>
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.WeatherEditor.DaySaturation"}}</label>
-          <div class="form-fields">
-            <range-picker name="{{preset.id}}.baseSaturation" value="{{preset.baseSaturation}}"
-              min="-1" max="1" step="0.1"></range-picker>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.saturation.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.baseColorSaturation" value="{{preset.baseColorSaturation}}"
+                min="-1" max="1" step="0.05"></range-picker>
+            </div>
+            <p class="hint">{{localize "SCENE.FIELDS.environment.base.saturation.hint"}}</p>
           </div>
-          <p class="hint">{{localize "CALENDARIA.WeatherEditor.DaySaturationHint"}}</p>
-        </div>
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.WeatherEditor.NightHue"}}</label>
-          <div class="form-fields">
-            <hue-slider name="{{preset.id}}.darkHue" value="{{preset.darkHueNorm}}"></hue-slider>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.shadows.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.baseShadows" value="{{preset.baseShadows}}"
+                min="0" max="1" step="0.05"></range-picker>
+            </div>
+            <p class="hint">{{localize "SCENE.FIELDS.environment.base.shadows.hint"}}</p>
           </div>
-          <p class="hint">{{localize "CALENDARIA.WeatherEditor.NightHueHint"}}</p>
-        </div>
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.WeatherEditor.NightSaturation"}}</label>
-          <div class="form-fields">
-            <range-picker name="{{preset.id}}.darkSaturation" value="{{preset.darkSaturation}}"
-              min="-1" max="1" step="0.1"></range-picker>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.hue.label"}}</label>
+            <div class="form-fields">
+              <hue-slider name="{{preset.id}}.baseHue" value="{{preset.baseHueNorm}}"></hue-slider>
+            </div>
+            <p class="hint">{{localize "SCENE.FIELDS.environment.base.hue.hint"}}</p>
           </div>
-          <p class="hint">{{localize "CALENDARIA.WeatherEditor.NightSaturationHint"}}</p>
-        </div>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.intensity.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.baseSaturation" value="{{preset.baseSaturation}}"
+                min="0" max="1" step="0.05"></range-picker>
+            </div>
+            <p class="hint">{{localize "SCENE.FIELDS.environment.base.intensity.hint"}}</p>
+          </div>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.cycle.label"}}</label>
+            <div class="form-fields">
+              <input type="checkbox" name="{{preset.id}}.environmentCycle" {{#if preset.environmentCycle}}checked{{/if}}>
+            </div>
+            <p class="hint">{{localize "SCENE.FIELDS.environment.cycle.hint"}}</p>
+          </div>
+        </fieldset>
+
+        {{!-- Night (Dark) --}}
+        <fieldset>
+          <legend>{{localize "SCENE.Ambience.Dark"}}</legend>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.luminosity.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.darkLuminosity" value="{{preset.darkLuminosity}}"
+                min="-1" max="1" step="0.05"></range-picker>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.saturation.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.darkColorSaturation" value="{{preset.darkColorSaturation}}"
+                min="-1" max="1" step="0.05"></range-picker>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.shadows.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.darkShadows" value="{{preset.darkShadows}}"
+                min="0" max="1" step="0.05"></range-picker>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.hue.label"}}</label>
+            <div class="form-fields">
+              <hue-slider name="{{preset.id}}.darkHue" value="{{preset.darkHueNorm}}"></hue-slider>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{localize "SCENE.FIELDS.environment.base.intensity.label"}}</label>
+            <div class="form-fields">
+              <range-picker name="{{preset.id}}.darkSaturation" value="{{preset.darkSaturation}}"
+                min="0" max="1" step="0.05"></range-picker>
+            </div>
+          </div>
+        </fieldset>
       </fieldset>
 
       {{!-- HUD Visuals --}}

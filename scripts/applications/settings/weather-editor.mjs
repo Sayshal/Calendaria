@@ -12,6 +12,7 @@ import { ALL_PRESETS, HUD_EFFECTS, SOUND_FX_OPTIONS, WEATHER_CATEGORIES } from '
 import { getEffectDefaults, SKY_OVERRIDES } from '../hud-scene-renderer.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
+import WeatherManager from '../../weather/weather-manager.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -209,14 +210,23 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const defTint = defaults?.tint ?? [0xffffff, 0xffffff];
 
     // Environment lighting: merge overrides over preset defaults
+    const envCycleOverride = isCustom ? preset.environmentCycle : overrides.environmentCycle;
+    const envCycleDefault = builtinPreset?.environmentCycle;
+    const effectiveCycle = envCycleOverride ?? envCycleDefault ?? null;
     const envBaseOverride = isCustom ? (preset.environmentBase ?? {}) : (overrides.environmentBase ?? {});
     const envDarkOverride = isCustom ? (preset.environmentDark ?? {}) : (overrides.environmentDark ?? {});
     const envBaseDefault = builtinPreset?.environmentBase ?? {};
     const envDarkDefault = builtinPreset?.environmentDark ?? {};
     const effectiveBaseHue = envBaseOverride.hue ?? envBaseDefault.hue ?? null;
     const effectiveBaseSat = envBaseOverride.saturation ?? envBaseDefault.saturation ?? '';
+    const effectiveBaseColorSat = envBaseOverride.colorSaturation ?? envBaseDefault.colorSaturation ?? '';
+    const effectiveBaseLum = envBaseOverride.luminosity ?? envBaseDefault.luminosity ?? '';
+    const effectiveBaseShd = envBaseOverride.shadows ?? envBaseDefault.shadows ?? '';
     const effectiveDarkHue = envDarkOverride.hue ?? envDarkDefault.hue ?? null;
     const effectiveDarkSat = envDarkOverride.saturation ?? envDarkDefault.saturation ?? '';
+    const effectiveDarkColorSat = envDarkOverride.colorSaturation ?? envDarkDefault.colorSaturation ?? '';
+    const effectiveDarkLum = envDarkOverride.luminosity ?? envDarkDefault.luminosity ?? '';
+    const effectiveDarkShd = envDarkOverride.shadows ?? envDarkDefault.shadows ?? '';
 
     context.isCustom = isCustom;
     context.preset = {
@@ -225,12 +235,19 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       icon,
       color,
       hudEffect: effectId,
+      environmentCycle: effectiveCycle ?? true,
       baseHue: effectiveBaseHue ?? '',
       baseHueNorm: WeatherEditor.#hueToNorm(effectiveBaseHue),
       baseSaturation: effectiveBaseSat,
+      baseColorSaturation: effectiveBaseColorSat,
+      baseLuminosity: effectiveBaseLum,
+      baseShadows: effectiveBaseShd,
       darkHue: effectiveDarkHue ?? '',
       darkHueNorm: WeatherEditor.#hueToNorm(effectiveDarkHue),
-      darkSaturation: effectiveDarkSat
+      darkSaturation: effectiveDarkSat,
+      darkColorSaturation: effectiveDarkColorSat,
+      darkLuminosity: effectiveDarkLum,
+      darkShadows: effectiveDarkShd
     };
 
     // HUD effect dropdown options (alphabetized by label)
@@ -331,7 +348,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #onSubmit(_event, _form, formData) {
     clearTimeout(this.#submitTimer);
-    this.#submitTimer = setTimeout(() => this.#saveForm(formData), 500);
+    this.#submitTimer = setTimeout(() => this.#saveForm(formData), 150);
   }
 
   /**
@@ -362,30 +379,46 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       effectChanged = prevEffect !== effectId;
     }
 
+    // Parse blend ambience (environment.cycle)
+    const environmentCycle = data.environmentCycle ?? true;
+
     // Parse environment lighting fields — delta against preset defaults for built-in presets
+    const parseEnvField = (val) => (val !== '' && val != null ? parseFloat(val) : null);
     const baseHue = WeatherEditor.#normToHue(data.baseHue);
-    const baseSat = data.baseSaturation !== '' && data.baseSaturation != null ? parseFloat(data.baseSaturation) : null;
+    const baseSat = parseEnvField(data.baseSaturation);
+    const baseColorSat = parseEnvField(data.baseColorSaturation);
+    const baseLum = parseEnvField(data.baseLuminosity);
+    const baseShd = parseEnvField(data.baseShadows);
     const darkHue = WeatherEditor.#normToHue(data.darkHue);
-    const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
+    const darkSat = parseEnvField(data.darkSaturation);
+    const darkColorSat = parseEnvField(data.darkColorSaturation);
+    const darkLum = parseEnvField(data.darkLuminosity);
+    const darkShd = parseEnvField(data.darkShadows);
     const defEnvBase = builtinPreset?.environmentBase ?? {};
     const defEnvDark = builtinPreset?.environmentDark ?? {};
     const baseHueDelta = !isCustom && baseHue === (defEnvBase.hue ?? 0) ? null : baseHue;
     const baseSatDelta = !isCustom && baseSat === (defEnvBase.saturation ?? null) ? null : baseSat;
+    const baseColorSatDelta = !isCustom && baseColorSat === (defEnvBase.colorSaturation ?? null) ? null : baseColorSat;
+    const baseLumDelta = !isCustom && baseLum === (defEnvBase.luminosity ?? null) ? null : baseLum;
+    const baseShdDelta = !isCustom && baseShd === (defEnvBase.shadows ?? null) ? null : baseShd;
     const darkHueDelta = !isCustom && darkHue === (defEnvDark.hue ?? 0) ? null : darkHue;
     const darkSatDelta = !isCustom && darkSat === (defEnvDark.saturation ?? null) ? null : darkSat;
+    const darkColorSatDelta = !isCustom && darkColorSat === (defEnvDark.colorSaturation ?? null) ? null : darkColorSat;
+    const darkLumDelta = !isCustom && darkLum === (defEnvDark.luminosity ?? null) ? null : darkLum;
+    const darkShdDelta = !isCustom && darkShd === (defEnvDark.shadows ?? null) ? null : darkShd;
     const environmentBase = isCustom
-      ? baseHue !== null || baseSat !== null
-        ? { hue: baseHue, saturation: baseSat }
+      ? baseHue !== null || baseSat !== null || baseColorSat !== null || baseLum !== null || baseShd !== null
+        ? { hue: baseHue, saturation: baseSat, colorSaturation: baseColorSat, luminosity: baseLum, shadows: baseShd }
         : null
-      : baseHueDelta !== null || baseSatDelta !== null
-        ? { hue: baseHueDelta, saturation: baseSatDelta }
+      : baseHueDelta !== null || baseSatDelta !== null || baseColorSatDelta !== null || baseLumDelta !== null || baseShdDelta !== null
+        ? { hue: baseHueDelta, saturation: baseSatDelta, colorSaturation: baseColorSatDelta, luminosity: baseLumDelta, shadows: baseShdDelta }
         : null;
     const environmentDark = isCustom
-      ? darkHue !== null || darkSat !== null
-        ? { hue: darkHue, saturation: darkSat }
+      ? darkHue !== null || darkSat !== null || darkColorSat !== null || darkLum !== null || darkShd !== null
+        ? { hue: darkHue, saturation: darkSat, colorSaturation: darkColorSat, luminosity: darkLum, shadows: darkShd }
         : null
-      : darkHueDelta !== null || darkSatDelta !== null
-        ? { hue: darkHueDelta, saturation: darkSatDelta }
+      : darkHueDelta !== null || darkSatDelta !== null || darkColorSatDelta !== null || darkLumDelta !== null || darkShdDelta !== null
+        ? { hue: darkHueDelta, saturation: darkSatDelta, colorSaturation: darkColorSatDelta, luminosity: darkLumDelta, shadows: darkShdDelta }
         : null;
 
     // Extract visual/sky overrides (delta against defaults) — skip if effect just changed
@@ -402,6 +435,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.hudEffect = effectId;
       preset.fxPreset = data.fxPreset || null;
       preset.soundFx = data.soundFx || null;
+      preset.environmentCycle = environmentCycle;
       preset.environmentBase = environmentBase;
       preset.environmentDark = environmentDark;
       preset.visualOverrides = visualOverrides;
@@ -423,6 +457,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (fxPresetValue !== (builtinPreset.fxPreset ?? null)) override.fxPreset = fxPresetValue;
       const soundFxValue = data.soundFx || null;
       if (soundFxValue !== (builtinPreset.soundFx ?? null)) override.soundFx = soundFxValue;
+      if (environmentCycle !== (builtinPreset.environmentCycle ?? null)) override.environmentCycle = environmentCycle;
       if (environmentBase) override.environmentBase = environmentBase;
       if (environmentDark) override.environmentDark = environmentDark;
       if (visualOverrides) override.visualOverrides = visualOverrides;
@@ -437,8 +472,9 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       log(3, `Weather Editor: saved overrides for built-in "${presetId}"`);
     }
 
-    // Refresh HUD weather canvas so changes are visible immediately
-    Hooks.callAll(HOOKS.WEATHER_CHANGE);
+    // Patch cached weather with fresh overrides so scene updates immediately
+    WeatherManager.refreshEnvironmentOverrides(presetId);
+    Hooks.callAll(HOOKS.WEATHER_CHANGE, { visualOnly: true });
   }
 
   // ─── Action Handlers ───────────────────────────────────────────────

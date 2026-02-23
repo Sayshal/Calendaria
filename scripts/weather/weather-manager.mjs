@@ -51,6 +51,43 @@ export default class WeatherManager {
   }
 
   /**
+   * Resolve effective environmentBase, merging visual overrides for built-in presets.
+   * @param {object} preset - Weather preset object
+   * @returns {object|null} Merged environment base config or null
+   */
+  static #resolveEnvironmentBase(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    const base = preset.environmentBase ?? {};
+    const ov = overrides?.environmentBase ?? {};
+    const merged = { ...base, ...Object.fromEntries(Object.entries(ov).filter(([, v]) => v != null)) };
+    return Object.keys(merged).length ? merged : null;
+  }
+
+  /**
+   * Resolve effective environmentDark, merging visual overrides for built-in presets.
+   * @param {object} preset - Weather preset object
+   * @returns {object|null} Merged environment dark config or null
+   */
+  static #resolveEnvironmentDark(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    const base = preset.environmentDark ?? {};
+    const ov = overrides?.environmentDark ?? {};
+    const merged = { ...base, ...Object.fromEntries(Object.entries(ov).filter(([, v]) => v != null)) };
+    return Object.keys(merged).length ? merged : null;
+  }
+
+  /**
+   * Resolve effective environmentCycle, checking visual overrides for built-in presets.
+   * @param {object} preset - Weather preset object
+   * @returns {boolean|null} Blend ambience override or null
+   */
+  static #resolveEnvironmentCycle(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    if (overrides?.environmentCycle != null) return overrides.environmentCycle;
+    return preset.environmentCycle ?? null;
+  }
+
+  /**
    * Initialize the weather manager.
    * Called during module ready hook.
    */
@@ -98,6 +135,23 @@ export default class WeatherManager {
   }
 
   /**
+   * Re-resolve environment overrides for a preset in all cached weather zones.
+   * Called when the Weather Editor saves overrides so the in-memory weather reflects changes immediately.
+   * @param {string} presetId - The preset ID whose overrides changed
+   */
+  static refreshEnvironmentOverrides(presetId) {
+    const customPresets = this.getCustomPresets();
+    const preset = getPreset(presetId, customPresets);
+    if (!preset) return;
+    for (const weather of Object.values(this.#currentWeatherByZone)) {
+      if (weather?.id !== presetId) continue;
+      weather.environmentBase = this.#resolveEnvironmentBase(preset);
+      weather.environmentDark = this.#resolveEnvironmentDark(preset);
+      weather.environmentCycle = this.#resolveEnvironmentCycle(preset);
+    }
+  }
+
+  /**
    * Get the current weather for a zone.
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @param {object} [scene] - Scene to resolve zone from
@@ -132,7 +186,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} The set weather
    */
   static async setWeather(presetId, options = {}) {
-    const zoneId = options.zoneId ?? this.getActiveZone()?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone()?.id;
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to set weather');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
@@ -167,8 +221,9 @@ export default class WeatherManager {
       wind: options.wind ?? preset.wind ?? { speed: 0, direction: null, forced: false },
       precipitation: options.precipitation ?? preset.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: preset.darknessPenalty ?? 0,
-      environmentBase: preset.environmentBase ?? null,
-      environmentDark: preset.environmentDark ?? null,
+      environmentBase: this.#resolveEnvironmentBase(preset),
+      environmentDark: this.#resolveEnvironmentDark(preset),
+      environmentCycle: this.#resolveEnvironmentCycle(preset),
       fxPreset: options.fxPreset ?? this.#resolveFxPreset(preset),
       soundFx: options.soundFx ?? this.#resolveSoundFx(preset),
       setAt: game.time.worldTime,
@@ -297,7 +352,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} Generated weather
    */
   static async generateAndSetWeather(options = {}) {
-    const zoneId = options.zoneId ?? this.getActiveZone()?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone()?.id;
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to generate weather');
       return this.getCurrentWeather(zoneId);
@@ -339,6 +394,9 @@ export default class WeatherManager {
       wind: result.wind ?? { speed: 0, direction: null, forced: false },
       precipitation: result.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: result.preset.darknessPenalty ?? 0,
+      environmentBase: this.#resolveEnvironmentBase(result.preset),
+      environmentDark: this.#resolveEnvironmentDark(result.preset),
+      environmentCycle: this.#resolveEnvironmentCycle(result.preset),
       fxPreset: this.#resolveFxPreset(result.preset),
       soundFx: this.#resolveSoundFx(result.preset),
       setAt: game.time.worldTime,
@@ -366,7 +424,7 @@ export default class WeatherManager {
   static getForecast(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
-    const zoneId = options.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
     const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
@@ -434,7 +492,7 @@ export default class WeatherManager {
   static #getForecastLegacy(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
-    const zoneId = options.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
     const zoneConfig = this.getActiveZone(zoneId);
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
@@ -539,6 +597,9 @@ export default class WeatherManager {
           wind: result.wind ?? { speed: 0, direction: null, forced: false },
           precipitation: result.precipitation ?? { type: null, intensity: 0 },
           darknessPenalty: result.preset.darknessPenalty ?? 0,
+          environmentBase: this.#resolveEnvironmentBase(result.preset),
+          environmentDark: this.#resolveEnvironmentDark(result.preset),
+          environmentCycle: this.#resolveEnvironmentCycle(result.preset),
           fxPreset: this.#resolveFxPreset(result.preset),
           soundFx: this.#resolveSoundFx(result.preset),
           setAt: game.time.worldTime,
@@ -699,6 +760,9 @@ export default class WeatherManager {
           wind: todayF.wind ?? { speed: 0, direction: null, forced: false },
           precipitation: todayF.precipitation ?? { type: null, intensity: 0 },
           darknessPenalty: todayF.preset.darknessPenalty ?? 0,
+          environmentBase: this.#resolveEnvironmentBase(todayF.preset),
+          environmentDark: this.#resolveEnvironmentDark(todayF.preset),
+          environmentCycle: this.#resolveEnvironmentCycle(todayF.preset),
           fxPreset: this.#resolveFxPreset(todayF.preset),
           soundFx: this.#resolveSoundFx(todayF.preset),
           setAt: game.time.worldTime,
@@ -892,8 +956,9 @@ export default class WeatherManager {
           wind: f.wind ?? null,
           precipitation: f.precipitation ?? null,
           darknessPenalty: f.preset.darknessPenalty ?? 0,
-          environmentBase: f.preset.environmentBase ?? null,
-          environmentDark: f.preset.environmentDark ?? null,
+          environmentBase: this.#resolveEnvironmentBase(f.preset),
+          environmentDark: this.#resolveEnvironmentDark(f.preset),
+          environmentCycle: this.#resolveEnvironmentCycle(f.preset),
           fxPreset: this.#resolveFxPreset(f.preset),
           soundFx: this.#resolveSoundFx(f.preset)
         };
@@ -1023,7 +1088,7 @@ export default class WeatherManager {
     if (options.year == null) return history;
     const yearData = history[options.year];
     if (!yearData) return [];
-    const resolvedZoneId = options.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const resolvedZoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
     const results = [];
     const months = options.month != null ? { [options.month]: yearData[options.month] } : yearData;
     for (const [m, days] of Object.entries(months)) {
@@ -1091,9 +1156,20 @@ export default class WeatherManager {
     const zones = calendar?.weatherZonesArray;
     if (!zones?.length) return null;
     const sceneOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) || null;
+    // "none" sentinel = explicitly no zone for this scene
+    if (sceneOverride === 'none' && zoneId == null) return null;
     const targetId = zoneId ?? sceneOverride ?? calendar.weather.activeZone;
     if (!targetId) return null;
     return zones.find((z) => z.id === targetId) ?? zones[0] ?? null;
+  }
+
+  /**
+   * Check if a scene has explicitly opted out of climate zones.
+   * @param {object} [scene] - Scene to check (defaults to active scene)
+   * @returns {boolean} True if the scene has "No Zone" set
+   */
+  static isZoneDisabled(scene) {
+    return (scene ?? game.scenes?.active)?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) === 'none';
   }
 
   /**
@@ -1104,9 +1180,11 @@ export default class WeatherManager {
    */
   static async setSceneZoneOverride(scene, zoneId) {
     if (!scene) return;
-    if (zoneId) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, zoneId);
+    // Store "none" sentinel to explicitly disable zone (distinct from unset/default)
+    if (zoneId === null) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, 'none');
+    else if (zoneId) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, zoneId);
     else await scene.unsetFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE);
-    log(3, `Scene zone override ${zoneId ? `set to ${zoneId}` : 'cleared'} for scene ${scene.name}`);
+    log(3, `Scene zone override ${zoneId !== null ? `set to ${zoneId || 'default'}` : 'set to none'} for scene ${scene.name}`);
   }
 
   /**
