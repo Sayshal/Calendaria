@@ -1855,8 +1855,6 @@
   "CALENDARIA.Warning.CannotDeleteNotesFolder": "Не удается удалить папку «Заметки календаря». Эта папка содержит все записи календаря и события.",
   "CALENDARIA.Weather.AetherHaze": "Эфирная дымка",
   "CALENDARIA.Weather.AetherHazeDesc": "Воздух, пропитанный магией, искажающий восприятие",
-  "CALENDARIA.Weather.Arcane": "Магические ветры",
-  "CALENDARIA.Weather.ArcaneDesc": "Ветры наполнены магией и вызывают магическую нестабильность",
   "CALENDARIA.Weather.Ashfall": "Пеплопад",
   "CALENDARIA.Weather.AshfallDesc": "Вулканический пепел летает в воздухе",
   "CALENDARIA.Weather.BlackSun": "Чёрное солнце",
