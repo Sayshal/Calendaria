@@ -669,7 +669,7 @@
   "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier": "Множитель яркости",
   "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplierHint": "Измените интенсивность солнечного света в соответствии с климатом. Ниже = тусклее (например, арктические сумерки), выше = ярче.",
   "CALENDARIA.Editor.Weather.Zone.ColorShift": "Время суток",
-  "CALENDARIA.Editor.Weather.Zone.ColorShiftFieldHint": "Оттенок  (0–360°). Оставьте пустым, чтобы использовать значения по умолчанию.",
+  "CALENDARIA.Editor.Weather.Zone.ColorShiftFieldHint": "Оттенок (0–360°). Оставьте пустым, чтобы использовать значения по умолчанию.",
   "CALENDARIA.Editor.Weather.Zone.ColorShiftHint": "Замените стандартные цвета зари/сумерек/ночи для этой зоны. Оставьте поле пустым, чтобы использовать глобальные значения по умолчанию.",
   "CALENDARIA.Editor.Weather.Zone.CopyFrom": "Копировать из шаблона",
   "CALENDARIA.Editor.Weather.Zone.DarkHue": "Оттенок ночью",
