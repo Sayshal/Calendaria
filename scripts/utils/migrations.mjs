@@ -3,7 +3,8 @@
  * @module Utils/Migrations
  */
 
-import { MODULE } from '../constants.mjs';
+import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 import { log } from './logger.mjs';
 
 const LEGACY_TOKENS = {
@@ -72,6 +73,8 @@ const HARPTOS = [
 
 /**
  * Check if format uses legacy {{var}} syntax
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @param {string} str - Format string to check
  * @returns {boolean} True if legacy format
  */
@@ -81,6 +84,8 @@ function isLegacyFormat(str) {
 
 /**
  * Convert legacy {{var}} format to new tokens
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @param {string} str - Format string to convert
  * @returns {string} Converted format string
  */
@@ -92,6 +97,8 @@ function migrateLegacyFormat(str) {
 
 /**
  * Replace deprecated tokens in format string
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @param {string} str - Format string to migrate
  * @returns {{migrated: string, changes: Array}} Migrated string and list of changes
  */
@@ -118,6 +125,8 @@ function migrateDeprecatedTokens(str) {
 
 /**
  * Migrate deprecated tokens in calendar data object
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @param {object} cal - Calendar data object
  * @returns {Array} List of changes made
  */
@@ -146,6 +155,8 @@ function migrateCalTokens(cal) {
 
 /**
  * Migrate display format deprecated tokens
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<Array>} List of changes made
  */
 async function migrateDisplayTokens() {
@@ -179,6 +190,8 @@ async function migrateDisplayTokens() {
 
 /**
  * Migrate legacy preset names
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<Array>} List of changes made
  */
 async function migratePresets() {
@@ -210,6 +223,8 @@ async function migratePresets() {
 
 /**
  * Migrate all deprecated tokens in calendars
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<Array>} List of changes made
  */
 async function migrateAllTokens() {
@@ -251,6 +266,8 @@ async function migrateAllTokens() {
 
 /**
  * Migrate legacy {{var}} format in custom calendars
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<void>}
  */
 async function migrateLegacyFormats() {
@@ -289,6 +306,8 @@ async function migrateLegacyFormats() {
 
 /**
  * Migrate Harptos intercalary festivals
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<void>}
  */
 async function migrateHarptos() {
@@ -330,6 +349,8 @@ async function migrateHarptos() {
 
 /**
  * Migrate setting keys
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<void>}
  */
 async function migrateKeys() {
@@ -351,6 +372,8 @@ async function migrateKeys() {
 
 /**
  * Migrate weather zone configuration to ensure all required fields exist.
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<number>} Number of calendars migrated
  */
 async function migrateWeatherZones() {
@@ -427,18 +450,6 @@ async function migrateWeatherZones() {
     }
   }
   if (overridesModified) await game.settings.set(MODULE.ID, 'defaultOverrides', overrides);
-  const legacy = game.settings.get(MODULE.ID, 'calendars') || {};
-  if (legacy.calendars) {
-    let legacyModified = false;
-    for (const [id, cal] of Object.entries(legacy.calendars)) {
-      if (migrateCalendarWeather(cal)) {
-        log(3, `Migrated weather zones in legacy calendar: ${id}`);
-        legacyModified = true;
-        migratedCount++;
-      }
-    }
-    if (legacyModified) await game.settings.set(MODULE.ID, 'calendars', legacy);
-  }
   await game.settings.set(MODULE.ID, KEY, true);
   if (migratedCount > 0) log(3, `Weather zone migration complete: ${migratedCount} calendar(s) updated`);
   return migratedCount;
@@ -464,13 +475,6 @@ export async function diagnoseWeatherConfig(showDialog = true) {
   for (const [id, cal] of Object.entries(customs)) {
     const zones = getZonesArray(cal?.weather?.zones);
     if (zones.length) results.push({ source: 'customCalendars', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
-  }
-  const legacy = game.settings.get(MODULE.ID, 'calendars') || {};
-  if (legacy.calendars) {
-    for (const [id, cal] of Object.entries(legacy.calendars)) {
-      const zones = getZonesArray(cal?.weather?.zones);
-      if (zones.length) results.push({ source: 'calendars (legacy)', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
-    }
   }
   const active = game.time.calendar;
   const activeWeather = active?.weather || null;
@@ -506,6 +510,40 @@ export async function diagnoseWeatherConfig(showDialog = true) {
 }
 
 /**
+ * Migrate legacy SETTINGS.CALENDARS data to customCalendars, then clear the legacy setting.
+ * @since 0.10.0
+ * @deprecated Remove in 1.1.0 — all legacy data will have been migrated by then.
+ * @returns {Promise<void>}
+ */
+async function migrateLegacyCalendars() {
+  const KEY = 'legacyCalendarMigrationComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  if (!game.user?.isGM) return;
+  const legacyData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
+  if (!legacyData?.calendars || Object.keys(legacyData.calendars).length === 0) {
+    await game.settings.set(MODULE.ID, KEY, true);
+    return;
+  }
+  const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
+  let migrated = 0;
+  for (const [id, calendarData] of Object.entries(legacyData.calendars)) {
+    if (isBundledCalendar(id)) continue;
+    if (customCalendars[id]) continue;
+    calendarData.metadata = calendarData.metadata || {};
+    calendarData.metadata.isCustom = true;
+    customCalendars[id] = calendarData;
+    migrated++;
+  }
+  if (migrated > 0) {
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
+    log(3, `Migrated ${migrated} legacy calendar(s) to customCalendars`);
+  }
+  await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, null);
+  await game.settings.set(MODULE.ID, KEY, true);
+  log(3, 'Legacy calendar migration complete');
+}
+
+/**
  * Run all migrations
  * @returns {Promise<void>}
  */
@@ -515,6 +553,7 @@ export async function runAllMigrations() {
   await migrateHarptos();
   await migrateKeys();
   await migrateWeatherZones();
+  await migrateLegacyCalendars();
   const changes = await migrateAllTokens();
   if (changes.length) {
     const list = [...new Map(changes.map((c) => [`${c.from}→${c.to}`, c])).values()].map((c) => `${c.from} → ${c.to}`).join(', ');

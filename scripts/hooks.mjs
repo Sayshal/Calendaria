@@ -25,7 +25,6 @@ import { onGetSceneControlButtons } from './utils/ui/toolbar-buttons.mjs';
 export function registerHooks() {
   Hooks.on(HOOKS.CALENDAR_SWITCHED, NoteManager.onCalendarSwitched.bind(NoteManager));
   Hooks.on('chatMessage', onChatMessage);
-  Hooks.on('closeGame', CalendarManager.onCloseGame.bind(CalendarManager));
   Hooks.on('combatRound', TimeClock.onCombatTimeBlock);
   Hooks.on('combatTurn', TimeClock.onCombatTimeBlock);
   Hooks.on('createJournalEntryPage', NoteManager.onCreateJournalEntryPage.bind(NoteManager));

@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
@@ -630,7 +631,10 @@ export default class NoteManager {
     if (calendar.metadata) calendar.metadata.description = newDescription;
     else calendar.description = newDescription;
     log(3, `Synced description from journal to calendar ${calendarId}`);
-    if (game.user.isGM) await CalendarManager.saveCalendars();
+    if (game.user.isGM) {
+      if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, calendar.toObject());
+      else await CalendarManager.updateCustomCalendar(calendarId, calendar.toObject());
+    }
   }
 
   /**

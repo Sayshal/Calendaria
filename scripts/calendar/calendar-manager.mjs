@@ -43,7 +43,6 @@ export default class CalendarManager {
     }
     await this.#loadDefaultOverrides();
     await this.#loadCustomCalendars();
-    await this.loadCalendars();
     const activeId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR) || DEFAULT_CALENDAR;
     if (CalendarRegistry.has(activeId)) {
       CalendarRegistry.setActive(activeId);
@@ -64,34 +63,6 @@ export default class CalendarManager {
       log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
     log(3, 'Calendar Manager initialized');
-  }
-
-  /**
-   * Load calendars from game settings.
-   * @private
-   */
-  static async loadCalendars() {
-    try {
-      const savedData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
-      const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
-      const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-      if (savedData?.calendars && Object.keys(savedData.calendars).length > 0) {
-        let count = 0;
-        for (const [id, calendarData] of Object.entries(savedData.calendars)) {
-          if (overrides[id] || customCalendars[id] || isBundledCalendar(id)) continue;
-          const existing = CalendarRegistry.get(id);
-          if (existing?.metadata?.isCustom) {
-            calendarData.metadata = calendarData.metadata || {};
-            calendarData.metadata.isCustom = true;
-          }
-          CalendarRegistry.register(id, calendarData);
-          count++;
-        }
-        log(3, `Merged ${count} calendars from settings (total: ${CalendarRegistry.size})`);
-      }
-    } catch (error) {
-      log(1, 'Error loading calendars from settings:', error);
-    }
   }
 
   /**
@@ -428,13 +399,6 @@ export default class CalendarManager {
   }
 
   /**
-   * Save calendars to game settings.
-   */
-  static async saveCalendars() {
-    await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, CalendarRegistry.toObject());
-  }
-
-  /**
    * Get a calendar by ID.
    * @param {string} id  Calendar ID
    * @returns {object|null} - Calendar instance or null
@@ -489,7 +453,6 @@ export default class CalendarManager {
         this.#isSwitchingCalendar = false;
       }
     }
-    await this.saveCalendars();
     Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
     this.rerenderCalendarUIs();
     log(3, `Switched to calendar: ${id}`);
@@ -542,7 +505,6 @@ export default class CalendarManager {
     }
     try {
       const calendar = CalendarRegistry.register(id, definition);
-      await this.saveCalendars();
       Hooks.callAll(HOOKS.CALENDAR_ADDED, id, calendar);
       log(3, `Added calendar: ${id}`);
       return calendar;
@@ -570,7 +532,6 @@ export default class CalendarManager {
     }
     const removed = CalendarRegistry.unregister(id);
     if (removed) {
-      await this.saveCalendars();
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
       log(3, `Removed calendar: ${id}`);
     }
@@ -626,14 +587,6 @@ export default class CalendarManager {
         this.#patchFoundryCalendar();
       }
     }
-  }
-
-  /**
-   * Handle closeGame hook to save calendars.
-   * @private
-   */
-  static onCloseGame() {
-    if (game.user.isGM) CalendarManager.saveCalendars();
   }
 
   /**
@@ -760,11 +713,7 @@ export default class CalendarManager {
    */
   static async deleteCustomCalendar(id) {
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-    const legacyData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS) || {};
-    const legacyCalendars = legacyData.calendars || {};
-    const inCustom = !!customCalendars[id];
-    const inLegacy = !!legacyCalendars[id];
-    if (!inCustom && !inLegacy) {
+    if (!customCalendars[id]) {
       log(2, `Cannot delete calendar: ${id} is not a custom calendar`);
       return false;
     }
@@ -773,14 +722,8 @@ export default class CalendarManager {
       return false;
     }
     try {
-      if (inCustom) {
-        delete customCalendars[id];
-        await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
-      }
-      if (inLegacy) {
-        delete legacyCalendars[id];
-        await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, { ...legacyData, calendars: legacyCalendars });
-      }
+      delete customCalendars[id];
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
       CalendarRegistry.unregister(id);
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
       log(3, `Deleted custom calendar: ${id}`);
@@ -844,11 +787,9 @@ export default class CalendarManager {
    * @returns {boolean} True if the calendar is custom
    */
   static isCustomCalendar(id) {
+    if (isBundledCalendar(id)) return false;
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-    if (customCalendars[id]) return true;
-    const legacyData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS) || {};
-    const legacyCalendars = legacyData.calendars || {};
-    return !!legacyCalendars[id];
+    return !!customCalendars[id];
   }
 
   /**
@@ -857,7 +798,7 @@ export default class CalendarManager {
    * @returns {boolean} True if the calendar is a bundled calendar
    */
   static isBundledCalendar(id) {
-    return isBundledCalendar(id) && !this.isCustomCalendar(id);
+    return isBundledCalendar(id);
   }
 
   /**
