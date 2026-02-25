@@ -1,8 +1,5 @@
 /**
  * Time Tracker
- * Monitors world time changes and fires hooks when specific time thresholds are crossed.
- * Fires hooks for: dateTimeChange, dayChange, monthChange, yearChange, seasonChange,
- * and time-of-day thresholds (sunrise, sunset, midnight, midday).
  * @module Time/TimeTracker
  * @author Tyler
  */
@@ -38,7 +35,6 @@ export default class TimeTracker {
 
   /**
    * Skip threshold and period hooks on the next time update.
-   * Used when jumping to timepoints to prevent re-triggering events.
    */
   static skipNextHooks() {
     this.#skipNextHooks = true;
@@ -46,7 +42,6 @@ export default class TimeTracker {
 
   /**
    * Initialize the time tracker.
-   * Called during module initialization.
    */
   static initialize() {
     this.#lastWorldTime = game.time.worldTime;
@@ -59,8 +54,6 @@ export default class TimeTracker {
 
   /**
    * Handle world time updates.
-   * Called by the updateWorldTime hook.
-   * Fires dateTimeChange hook and checks for period/threshold crossings.
    * @param {number} worldTime - The new world time in seconds
    * @param {number} delta - The time delta in seconds
    */
@@ -74,7 +67,6 @@ export default class TimeTracker {
       this.#lastSeason = currentComponents?.season ?? null;
       return;
     }
-
     if (this.#skipNextHooks) {
       this.#skipNextHooks = false;
       log(3, 'Skipping threshold/period hooks (timepoint jump)');
@@ -86,7 +78,6 @@ export default class TimeTracker {
       this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
       return;
     }
-
     this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
     this.#checkPeriodChanges(this.#lastComponents, currentComponents, calendar);
     this.#checkThresholds(this.#lastWorldTime, worldTime, calendar);
@@ -101,7 +92,6 @@ export default class TimeTracker {
 
   /**
    * Fire the dateTimeChange hook with comprehensive time change data.
-   * This is the primary hook other modules should listen to for time changes.
    * @param {object} previousComponents - Previous time components
    * @param {object} currentComponents - Current time components
    * @param {number} delta - Time delta in seconds
@@ -117,7 +107,6 @@ export default class TimeTracker {
       calendar: calendar,
       worldTime: game.time.worldTime
     };
-
     Hooks.callAll(HOOKS.DATE_TIME_CHANGE, hookData);
   }
 
@@ -135,23 +124,19 @@ export default class TimeTracker {
       current: { ...currentComponents, year: currentComponents.year + yearZero },
       calendar: calendar
     };
-
     if (previousComponents.year !== currentComponents.year) {
       log(3, `Year changed: ${previousComponents.year + yearZero} -> ${currentComponents.year + yearZero}`);
       Hooks.callAll(HOOKS.YEAR_CHANGE, hookData);
     }
-
     if (previousComponents.month !== currentComponents.month) {
       log(3, `Month changed: ${previousComponents.month} -> ${currentComponents.month}`);
       Hooks.callAll(HOOKS.MONTH_CHANGE, hookData);
     }
-
     if (previousComponents.dayOfMonth !== currentComponents.dayOfMonth || previousComponents.month !== currentComponents.month || previousComponents.year !== currentComponents.year) {
       log(3, `Day changed`);
       Hooks.callAll(HOOKS.DAY_CHANGE, hookData);
       this.#executePeriodMacro('day', hookData);
     }
-
     const previousSeason = previousComponents.season ?? this.#lastSeason;
     const currentSeason = currentComponents.season;
     if (previousSeason !== null && currentSeason !== null && previousSeason !== currentSeason) {
@@ -174,7 +159,6 @@ export default class TimeTracker {
       log(3, 'Time went backwards, skipping threshold checks');
       return;
     }
-
     const previousComponents = this.#getComponentsForTime(previousTime);
     const currentComponents = game.time.components;
     const thresholds = this.#getAllThresholdsCrossed(previousComponents, currentComponents, calendar);
@@ -186,7 +170,6 @@ export default class TimeTracker {
 
   /**
    * Get all thresholds crossed between two time points.
-   * Limits threshold firing to MAX_THRESHOLD_DAYS to prevent hook spam on large time advances.
    * @param {object} startComponents - Starting time components
    * @param {object} endComponents - Ending time components
    * @param {object} calendar - The active calendar
@@ -201,7 +184,6 @@ export default class TimeTracker {
     const startHour = startComponents.hour + startComponents.minute / minutesPerHour + (startComponents.second || 0) / secondsPerHour;
     const endHour = endComponents.hour + endComponents.minute / minutesPerHour + (endComponents.second || 0) / secondsPerHour;
     const totalDays = this.#calculateDaysBetween(startComponents, endComponents, calendar);
-
     if (totalDays === 0) {
       const dayThresholds = this.#getThresholdsForDay(endComponents, calendar);
       for (const [name, hour] of Object.entries(dayThresholds)) {
@@ -212,20 +194,14 @@ export default class TimeTracker {
       for (const [name, hour] of Object.entries(dayThresholds)) {
         if (hour !== null && startHour < hour) thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
       }
-
-      // Cap intermediate days to prevent hook spam on large time advances
       const intermediateDays = Math.min(totalDays - 1, this.#MAX_THRESHOLD_DAYS);
-      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) {
-        log(3, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
-      }
+      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) log(3, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
       for (let day = 0; day < intermediateDays; day++) {
         for (const [name, hour] of Object.entries(dayThresholds)) if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }
-
       const endDayThresholds = this.#getThresholdsForDay(endComponents, calendar);
       for (const [name, hour] of Object.entries(endDayThresholds)) if (hour !== null && endHour >= hour) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
     }
-
     return thresholds;
   }
 
@@ -355,7 +331,6 @@ export default class TimeTracker {
     const currentPhases = this.#getCurrentMoonPhases();
     if (!currentPhases) return;
     const changedMoons = [];
-
     for (const [moonIndex, currentPhaseIndex] of currentPhases) {
       const lastPhaseIndex = this.#lastMoonPhases.get(moonIndex);
       if (lastPhaseIndex !== undefined && lastPhaseIndex !== currentPhaseIndex) {
@@ -373,7 +348,6 @@ export default class TimeTracker {
         });
       }
     }
-
     if (changedMoons.length > 0) {
       log(3, `Moon phase changed for ${changedMoons.length} moon(s)`);
       Hooks.callAll(HOOKS.MOON_PHASE_CHANGE, { moons: changedMoons, calendar, worldTime: game.time.worldTime });
@@ -460,7 +434,6 @@ export default class TimeTracker {
         const phaseMatches = t.phaseIndex === -1 || t.phaseIndex === changed.currentPhaseIndex;
         return moonMatches && phaseMatches;
       });
-
       for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'moonPhaseChange', moon: changed });
     }
   }
@@ -487,7 +460,6 @@ export default class TimeTracker {
     const currentRestDay = this.#isCurrentDayRestDay();
     if (this.#lastRestDay !== currentRestDay) {
       const weekdayInfo = calendar?.getWeekdayForDate?.();
-
       const hookData = {
         isRestDay: currentRestDay,
         wasRestDay: this.#lastRestDay,
@@ -495,7 +467,6 @@ export default class TimeTracker {
         worldTime: game.time.worldTime,
         calendar
       };
-
       log(3, `Rest day status changed: ${this.#lastRestDay} -> ${currentRestDay}`);
       Hooks.callAll(HOOKS.REST_DAY_CHANGE, hookData);
     }

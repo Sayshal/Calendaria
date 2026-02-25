@@ -36,7 +36,7 @@ import {
   generateRandomOccurrences,
   needsRandomRegeneration,
   matchesCachedOccurrence
-} from '../../scripts/notes/utils/recurrence.mjs';
+} from '../../scripts/notes/recurrence.mjs';
 
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 

@@ -1,6 +1,5 @@
 /**
  * Mini Calendar Importer
- * Imports calendar data from the Mini Calendar (wgtgm-mini-calendar) module.
  * @module Importers/MiniCalendarImporter
  * @author Tyler
  */
@@ -14,7 +13,6 @@ import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Mini Calendar (wgtgm-mini-calendar) module data.
- * Handles both file uploads and live import from installed module.
  * @extends BaseImporter
  */
 export default class MiniCalendarImporter extends BaseImporter {
@@ -76,7 +74,6 @@ export default class MiniCalendarImporter extends BaseImporter {
       year = Math.floor(totalDays / daysPerYear);
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
-
     let month = 0;
     let remainingDays = dayOfYear;
     for (let i = 0; i < regularMonths.length; i++) {
@@ -88,7 +85,6 @@ export default class MiniCalendarImporter extends BaseImporter {
       remainingDays -= monthDays;
       month = i + 1;
     }
-
     const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
@@ -110,7 +106,6 @@ export default class MiniCalendarImporter extends BaseImporter {
       const pageNotes = page.flags?.['wgtgm-mini-calendar']?.notes || [];
       for (const note of pageNotes) notes.push({ ...note, pageId: page.id, pageName: page.name, isJournalNote: true });
     }
-
     log(3, `Extracted ${notes.length} notes from Mini Calendar journal`);
     return notes;
   }
@@ -150,12 +145,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       festivals: this.#extractFestivals(rawMonths),
       daylight: this.#transformDaylight(rawSun, rawMonths),
       weather: this.#transformWeather(data, rawWeather),
-      metadata: {
-        description: calendar.description || 'Imported from Mini Calendar',
-        system: calendar.name || 'Unknown',
-        importedFrom: 'mini-calendar',
-        originalId: calendar.id
-      }
+      metadata: { description: calendar.description || 'Imported from Mini Calendar', system: calendar.name || 'Unknown', importedFrom: 'mini-calendar', originalId: calendar.id }
     };
   }
 
@@ -196,7 +186,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         startingWeekday: month.startingWeekday ?? null
       }));
     }
-
     return months
       .filter((m) => !m.intercalary)
       .map((month, index) => ({
@@ -278,7 +267,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         { name: 'CALENDARIA.MoonPhase.WaningCrescent', icon: `${ASSETS.MOON_ICONS}/08_waningcrescent.svg`, start: 0.875, end: 1 }
       ];
     }
-
     const result = [];
     let currentPosition = 0;
     for (const phase of phases) {
@@ -288,7 +276,6 @@ export default class MiniCalendarImporter extends BaseImporter {
       result.push({ name: phase.name, icon: this.#mapMoonPhaseIcon(phase.name, phase.icon), start: Math.min(start, 0.999), end: Math.min(end, 1) });
       currentPosition += length;
     }
-
     return result;
   }
 
@@ -337,7 +324,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         regularMonthIndex++;
       }
     }
-
     return festivals;
   }
 
@@ -364,7 +350,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         longestMonthStart = sun.monthStart || 6;
       }
     }
-
     if (shortestDaylight === Infinity || longestDaylight === 0) return { enabled: false };
     const winterSolstice = this.#estimateSolsticeDay(shortestMonthStart, months);
     const summerSolstice = this.#estimateSolsticeDay(longestMonthStart, months);
@@ -379,7 +364,6 @@ export default class MiniCalendarImporter extends BaseImporter {
    */
   #estimateSolsticeDay(monthOrdinal, months = []) {
     let dayOfYear = 0;
-
     for (const month of months) {
       if (month.ordinal < monthOrdinal) {
         dayOfYear += month.days || 30;
@@ -388,7 +372,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         break;
       }
     }
-
     return dayOfYear;
   }
 
@@ -444,7 +427,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         suggestedType: note.content?.trim() ? 'note' : 'festival'
       });
     }
-
     const journalNotes = data.notes || [];
     for (const note of journalNotes) {
       const dateObj = note.startDate || note.date;
@@ -452,7 +434,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         this._undatedEvents.push({ name: note.title || note.name || 'Untitled', content: note.content || '' });
         continue;
       }
-
       allNotes.push({
         name: note.title || note.name || 'Untitled',
         content: note.content || '',
@@ -467,7 +448,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         suggestedType: note.content?.trim() ? 'note' : 'festival'
       });
     }
-
     log(3, `Extracted ${allNotes.length} notes from Mini Calendar data`);
     return allNotes;
   }
@@ -504,7 +484,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
       }
     }
-
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`, { errors });
     return { success: errors.length === 0, count, errors };
   }
@@ -528,7 +507,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         log(1, `Error processing festival "${festival.name}":`, error);
       }
     }
-
     if (newFestivals.length > 0) {
       try {
         for (const festival of newFestivals) existingFestivals[foundry.utils.randomID()] = festival;
@@ -539,7 +517,6 @@ export default class MiniCalendarImporter extends BaseImporter {
         log(1, 'Error saving festivals:', error);
       }
     }
-
     return { success: errors.length === 0, count: newFestivals.length, errors };
   }
 

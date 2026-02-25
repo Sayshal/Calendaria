@@ -1,6 +1,5 @@
 /**
  * Theme utilities for Calendaria custom color theming.
- * Handles application and initialization of user-customized theme colors.
  * @module Utils/ThemeUtils
  * @author Tyler
  */
@@ -130,7 +129,6 @@ export const COMPONENT_CATEGORIES = {
 
 /**
  * Color variable definitions with display names and categories.
- * Organized by element type and component.
  * @type {Array<{key: string, label: string, category: string, component: string}>}
  */
 export const COLOR_DEFINITIONS = [
@@ -296,28 +294,20 @@ export function darkenColor(hex, percent) {
  */
 export function generateDerivedColors(colors) {
   const derived = {};
-
-  // Today variations
   if (colors.today) {
     const { r, g, b } = hexToRgb(colors.today);
     derived['--calendaria-today-bg'] = `rgb(${r} ${g} ${b} / 20%)`;
     derived['--calendaria-current-hour'] = `rgb(${r} ${g} ${b} / 12%)`;
   }
-
-  // Primary variations
   if (colors.primary) {
     const { r, g, b } = hexToRgb(colors.primary);
     derived['--calendaria-selected-bg'] = `rgb(${r} ${g} ${b} / 15%)`;
     derived['--calendaria-primary-hover'] = lightenColor(colors.primary, 10);
   }
-
-  // Festival variations
   if (colors.festivalBorder) {
     const { r, g, b } = hexToRgb(colors.festivalBorder);
     derived['--calendaria-festival-bg'] = `rgb(${r} ${g} ${b} / 15%)`;
   }
-
-  // Shadow/overlay variations
   if (colors.shadow) {
     const { r, g, b } = hexToRgb(colors.shadow);
     derived['--calendaria-shadow'] = `rgb(${r} ${g} ${b} / 40%)`;
@@ -327,17 +317,8 @@ export function generateDerivedColors(colors) {
     const { r, g, b } = hexToRgb(colors.overlay);
     derived['--calendaria-overlay'] = `rgb(${r} ${g} ${b} / 50%)`;
   }
-
-  // Background hover (auto-generate if not set)
-  if (colors.bg && !colors.bgHover) {
-    derived['--calendaria-bg-hover'] = lightenColor(colors.bg, 8);
-  }
-
-  // Button hover
-  if (colors.buttonBg) {
-    derived['--calendaria-button-hover'] = lightenColor(colors.buttonBg, 10);
-  }
-
+  if (colors.bg && !colors.bgHover) derived['--calendaria-bg-hover'] = lightenColor(colors.bg, 8);
+  if (colors.buttonBg) derived['--calendaria-button-hover'] = lightenColor(colors.buttonBg, 10);
   return derived;
 }
 
@@ -381,7 +362,6 @@ export function applyCustomColors(colors) {
     styleEl.id = 'calendaria-custom-theme';
     document.head.appendChild(styleEl);
   }
-
   const cssVars = [];
   for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) if (colors[key]) cssVars.push(`${cssVar}: ${colors[key]};`);
   const derived = generateDerivedColors(colors);
@@ -434,9 +414,7 @@ export function initializeTheme() {
     }
     return;
   }
-
   const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-
   if (themeMode === 'custom') {
     const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
     const colors = { ...DEFAULT_COLORS, ...customColors };

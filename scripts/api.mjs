@@ -4,25 +4,25 @@
  * @author Tyler
  */
 
-import { BigCal } from './applications/big-cal.mjs';
-import { CalendarEditor } from './applications/calendar-editor.mjs';
-import { HUD } from './applications/hud.mjs';
-import { MiniCal } from './applications/mini-cal.mjs';
-import { Stopwatch } from './applications/stopwatch.mjs';
-import { TimeKeeper } from './applications/time-keeper.mjs';
+import { BigCal } from './applications/calendar/big-cal.mjs';
+import { CalendarEditor } from './applications/calendar/calendar-editor.mjs';
+import { MiniCal } from './applications/calendar/mini-cal.mjs';
+import { HUD } from './applications/hud/hud.mjs';
+import { Stopwatch } from './applications/time/stopwatch.mjs';
+import { TimeKeeper } from './applications/time/time-keeper.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
-import CalendariaCalendar from './calendar/data/calendaria-calendar.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
+import CalendariaCalendar from './data/calendaria-calendar.mjs';
+import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/date-utils.mjs';
 import NoteManager from './notes/note-manager.mjs';
-import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/utils/date-utils.mjs';
-import SearchManager from './search/search-manager.mjs';
 import TimeClock from './time/time-clock.mjs';
 import TimeTracker from './time/time-tracker.mjs';
-import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/format-utils.mjs';
+import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/formatting/format-utils.mjs';
+import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/formatting/moon-utils.mjs';
 import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
-import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/moon-utils.mjs';
 import * as Permissions from './utils/permissions.mjs';
+import SearchManager from './utils/search-manager.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import * as WidgetManager from './utils/widget-manager.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
@@ -368,7 +368,6 @@ export const CalendariaAPI = {
 
   /**
    * Get the current weekday information including rest day status.
-   * Respects per-month custom weekdays if defined.
    * @returns {{index: number, name: string, abbreviation: string, isRestDay: boolean}|null}
    */
   getCurrentWeekday() {
@@ -489,7 +488,6 @@ export const CalendariaAPI = {
 
   /**
    * Search all content including notes and dates.
-   * Returns results with type information for categorized display.
    * @param {string} term - Search term (minimum 2 characters)
    * @param {object} [options] - Search options
    * @param {boolean} [options.searchContent] - Search note content
@@ -615,7 +613,6 @@ export const CalendariaAPI = {
 
   /**
    * Search notes only, with simple filtering options.
-   * Unlike search(), this returns raw note stubs without type metadata.
    * @param {string} searchTerm - Text to search for
    * @param {object} [options] - Search options
    * @param {boolean} [options.caseSensitive] - Case-sensitive search (default: false)
@@ -818,7 +815,6 @@ export const CalendariaAPI = {
     let hoursUntil = targetHour - currentHour;
     if (hoursUntil <= 0) hoursUntil += hoursPerDay;
     const secondsUntil = Math.floor(hoursUntil * secondsPerHour);
-    // Non-GM users with permission must request via socket
     if (!game.user.isGM) {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: secondsUntil });
       return game.time.worldTime;
@@ -836,7 +832,6 @@ export const CalendariaAPI = {
 
   /**
    * Start the real-time clock.
-   * Requires time-change permission. Blocked during combat or when game is paused with sync enabled.
    */
   startClock() {
     TimeClock.start();
@@ -866,7 +861,6 @@ export const CalendariaAPI = {
 
   /**
    * Check if the current user is the primary GM.
-   * The primary GM is responsible for time saves and sync operations.
    * @returns {boolean} True if current user is primary GM
    */
   isPrimaryGM() {
@@ -944,8 +938,6 @@ export const CalendariaAPI = {
 
   /**
    * Get a weather forecast for upcoming days.
-   * Non-GM users need `viewWeatherForecast` permission.
-   * GM users always get 100% accurate forecasts.
    * @param {object} [options] - Forecast options
    * @param {number} [options.days] - Number of days to forecast
    * @param {string} [options.zoneId] - Zone ID override
@@ -1096,7 +1088,6 @@ export const CalendariaAPI = {
 
   /**
    * Diagnose weather configuration issues.
-   * Inspects raw settings to find weather data that may not be loading properly.
    * @param {boolean} [showDialog] - Whether to show a dialog with results
    * @returns {Promise<object>} Diagnostic results with settingsData and activeCalendar info
    */
@@ -1276,17 +1267,12 @@ export const CalendariaAPI = {
     return WidgetManager.getWidgetByReplacement(elementId);
   },
 
-  /**
-   * Refresh all widget displays. Call after dynamic content changes.
-   */
+  /** Refresh all widget displays. Call after dynamic content changes. */
   refreshWidgets() {
     WidgetManager.refreshWidgets();
   }
 };
 
-// --- Global Namespace with Deprecation Proxy ---
-
-// Deprecation map: old flat key → new dotted path
 const DEPRECATION_MAP = {
   HUD: 'apps.HUD',
   BigCal: 'apps.BigCal',
@@ -1302,16 +1288,10 @@ const DEPRECATION_MAP = {
   CalendariaCalendar: 'models.CalendariaCalendar',
   CalendariaSocket: 'socket'
 };
-
-// Add all permission functions to the deprecation map
-for (const key of Object.keys(Permissions)) {
-  DEPRECATION_MAP[key] = `permissions.${key}`;
-}
+for (const key of Object.keys(Permissions)) DEPRECATION_MAP[key] = `permissions.${key}`;
 
 /**
  * Create and install the global CALENDARIA namespace with deprecation proxy.
- * Old flat access patterns (e.g. CALENDARIA.HUD) emit a compatibility warning
- * and redirect to the new structured path (e.g. CALENDARIA.apps.HUD).
  */
 export function createGlobalNamespace() {
   const namespace = {

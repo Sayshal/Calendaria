@@ -1,7 +1,5 @@
 /**
  * Simple Timekeeping Importer
- * Imports calendar data from the Simple Timekeeping module.
- * Live import only - STK does not export to files.
  * @module Importers/SimpleTimekeepingImporter
  * @author Tyler
  */
@@ -11,13 +9,12 @@ import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
+import { getDefaultZoneConfig } from '../weather/data/climate-data.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Simple Timekeeping module data.
- * Live import only - reads directly from STK settings and journal entries.
  * @extends BaseImporter
  */
 export default class SimpleTimekeepingImporter extends BaseImporter {
@@ -38,23 +35,16 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {Promise<object[]|null>} Array of STK calendar configs or null.
    */
   static async importSTKCalendars() {
-    // Return cached result if already loaded
     if (this.#stkCalendarsCache) return this.#stkCalendarsCache;
-
-    try {
-      const module = game.modules.get('simple-timekeeping');
-      if (!module?.active) return null;
-      const modulePath = `modules/simple-timekeeping/scripts/calendars.js`;
-      const { CALENDARS } = await import(`/${modulePath}`);
-      if (CALENDARS?.length) {
-        log(3, `Imported ${CALENDARS.length} calendars from Simple Timekeeping module`);
-        this.#stkCalendarsCache = CALENDARS;
-        return CALENDARS;
-      }
-    } catch (error) {
-      log(2, 'Failed to import STK calendars:', error.message);
+    const module = game.modules.get('simple-timekeeping');
+    if (!module?.active) return null;
+    const modulePath = `modules/simple-timekeeping/scripts/calendars.js`;
+    const { CALENDARS } = await import(`/${modulePath}`);
+    if (CALENDARS?.length) {
+      log(3, `Imported ${CALENDARS.length} calendars from Simple Timekeeping module`);
+      this.#stkCalendarsCache = CALENDARS;
+      return CALENDARS;
     }
-
     return null;
   }
 
@@ -92,7 +82,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         log(1, `Could not find STK preset: ${config.calendar}`);
       }
     }
-
     let moons = isNativeFormat ? (calendarData.moons?.values ? Object.values(calendarData.moons.values) : []) : calendarData.moons || [];
     if (config.useCustomMoons && config.customMoons) moons = JSON.parse(config.customMoons);
     const events = await this.#loadEvents();
@@ -124,7 +113,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       year = Math.floor(totalDays / daysPerYear);
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
-
     let month = 0;
     let remainingDays = dayOfYear;
     const regularMonths = (months || []).filter((m) => !m.intercalary);
@@ -137,7 +125,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       remainingDays -= monthDays;
       month = i + 1;
     }
-
     const timeOfDay = worldTime % secondsPerDay;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
@@ -191,7 +178,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       const darknessSync = scene.getFlag('simple-timekeeping', 'darknessSync');
       if (darknessSync && darknessSync !== 'default') sceneFlags.push({ sceneId: scene.id, sceneName: scene.name, darknessSync });
     }
-
     return sceneFlags;
   }
 
@@ -200,12 +186,8 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {object|null} Weather state or null
    */
   #loadWeatherState() {
-    try {
-      const config = game.settings.get('simple-timekeeping', 'configuration');
-      if (config.weatherLabel && config.weatherLabel !== 'Click Me') return { label: config.weatherLabel, color: config.weatherColor || '#ffffff' };
-    } catch {
-      log(2, 'No STK weather state found');
-    }
+    const config = game.settings.get('simple-timekeeping', 'configuration');
+    if (config.weatherLabel && config.weatherLabel !== 'Click Me') return { label: config.weatherLabel, color: config.weatherColor || '#ffffff' };
     return null;
   }
 
@@ -263,7 +245,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
-
     if (isNativeFormat && typeof weekdays[0] === 'object') {
       return weekdays.map((day, index) => ({
         name: this.#localizeString(day.name),
@@ -272,13 +253,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         isRestDay: day.isRestDay || false
       }));
     }
-
     return weekdays.map((name, index) => ({ name, abbreviation: name.substring(0, 2), ordinal: index + 1 }));
   }
 
   /**
    * Transform STK months to Calendaria format.
-   * Filters out intercalary months (they become festivals).
    * @param {object[]} months - STK months array.
    * @returns {object[]} Calendaria months array.
    */
@@ -386,31 +365,19 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       if (month.intercalary) {
         const monthName = this.#localizeString(month.name);
         for (let day = 1; day <= month.days; day++) {
-          const festival = {
-            name: month.days === 1 ? monthName : `${monthName} (Day ${day})`,
-            month: regularMonthIndex + 1,
-            day,
-            countsForWeekday: false
-          };
+          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day, countsForWeekday: false };
           if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
         }
         if (month.days === 0 && month.leapDays > 0) {
           for (let day = 1; day <= month.leapDays; day++) {
-            festivals.push({
-              name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`,
-              month: regularMonthIndex + 1,
-              day,
-              leapYearOnly: true,
-              countsForWeekday: false
-            });
+            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day, leapYearOnly: true, countsForWeekday: false });
           }
         }
       } else {
         regularMonthIndex++;
       }
     }
-
     return festivals;
   }
 
@@ -440,7 +407,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         suggestedType: event.content?.trim() ? 'note' : 'festival'
       });
     }
-
     return notes;
   }
 
@@ -462,7 +428,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       year = Math.floor(totalDays / daysPerYear);
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
-
     let month = 0;
     let remainingDays = dayOfYear;
     const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : calendar.months || [];
@@ -475,7 +440,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       remainingDays -= regularMonths[i].days;
       month = i + 1;
     }
-
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
@@ -526,7 +490,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
@@ -539,7 +502,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   async importSceneDarkness(sceneFlags) {
     const errors = [];
     let count = 0;
-
     for (const { sceneId, darknessSync } of sceneFlags) {
       try {
         const scene = game.scenes.get(sceneId);
@@ -553,7 +515,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         log(1, `Error importing scene darkness:`, error);
       }
     }
-
     return { success: errors.length === 0, count, errors };
   }
 

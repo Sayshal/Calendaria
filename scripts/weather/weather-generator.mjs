@@ -1,13 +1,11 @@
 /**
  * Procedural weather generation based on climate zones and seasons.
- * Uses weighted random selection with optional seeded randomness.
- * Uses zone-based config from calendar for generation.
  * @module Weather/WeatherGenerator
  * @author Tyler
  */
 
 import { COMPASS_DIRECTIONS } from '../constants.mjs';
-import { getAllPresets, getPreset } from './weather-presets.mjs';
+import { getAllPresets, getPreset } from './data/weather-presets.mjs';
 
 /**
  * Seeded random number generator (mulberry32).
@@ -55,8 +53,6 @@ function weightedSelect(weights, randomFn = Math.random) {
 
 /**
  * Apply a temperature value that may be a relative modifier or absolute.
- * Suffix convention: "5+" = add 5 to base, "5-" = subtract 5 from base.
- * All other values (numbers, negative strings like "-4") are absolute.
  * @param {number|string} value - Temperature value or "N+"/"N-" modifier string
  * @param {number} base - Base temperature to apply modifier against
  * @returns {number} Resolved temperature
@@ -79,8 +75,6 @@ export function applyTempModifier(value, base) {
 
 /**
  * Merge season climate with zone overrides.
- * Zone override presets support relative modifiers: "+5" adds to base, "-3" subtracts (chances are always positive).
- * Zone override temperatures support "N+"/"N-" suffix modifiers (e.g., "5+" adds, "3-" subtracts).
  * @param {object} seasonClimate - Season's base climate { temperatures, presets }
  * @param {object} zoneOverride - Zone's override for this season { temperatures, presets }
  * @param {object} zoneFallback - Zone's default config { temperatures, presets } for backward compat
@@ -114,10 +108,8 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   const baseMin = seasonClimate?.temperatures?.min ?? 10;
   const baseMax = seasonClimate?.temperatures?.max ?? 22;
   if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) {
-    // Explicit seasonOverrides entry — apply as modifier to season base
     tempRange = { min: applyTempModifier(zoneOverride.temperatures.min, baseMin), max: applyTempModifier(zoneOverride.temperatures.max, baseMax) };
   } else if (season && zoneFallback?.temperatures?.[season]) {
-    // Zone per-season temps override season base
     const temps = zoneFallback.temperatures[season];
     tempRange = { min: applyTempModifier(temps.min, baseMin), max: applyTempModifier(temps.max, baseMax) };
   } else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) {
@@ -125,12 +117,8 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   } else if (zoneFallback?.temperatures?._default) {
     tempRange = zoneFallback.temperatures._default;
   }
-  // Remove presets explicitly disabled in the zone's base config
   const basePresets = Object.values(zoneFallback?.presets ?? {});
-  for (const preset of basePresets) {
-    if (preset.enabled === false) delete probabilities[preset.id];
-  }
-
+  for (const preset of basePresets) if (preset.enabled === false) delete probabilities[preset.id];
   return { probabilities, tempRange };
 }
 
@@ -163,29 +151,19 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
   const precipitation = generatePrecipitation(resolvedPreset, randomFn);
-
-  // Blend temperature and wind with previous values using inertia
   if (previousWeather && inertia > 0) {
-    if (previousWeather.temperature != null) {
-      temperature = Math.round(previousWeather.temperature * inertia + temperature * (1 - inertia));
-    }
+    if (previousWeather.temperature != null) temperature = Math.round(previousWeather.temperature * inertia + temperature * (1 - inertia));
     if (previousWeather.wind && !wind.forced) {
       wind.speed = Math.round(previousWeather.wind.speed * inertia + wind.speed * (1 - inertia));
-      if (previousWeather.wind.direction != null && wind.direction != null) {
-        wind.direction = lerpAngle(previousWeather.wind.direction, wind.direction, 1 - inertia);
-      }
+      if (previousWeather.wind.direction != null && wind.direction != null) wind.direction = lerpAngle(previousWeather.wind.direction, wind.direction, 1 - inertia);
     }
   }
-
-  // Clamp final temperature to the seasonal/zone range
   temperature = Math.max(finalTempRange.min, Math.min(finalTempRange.max, temperature));
-
   return { preset: resolvedPreset, temperature, wind, precipitation };
 }
 
 /**
  * Generate weather for a specific date using zone config.
- * Uses date-based seeding for consistent results.
  * @param {object} options - Generation options
  * @param {object} [options.seasonClimate] - Season's base climate
  * @param {object} options.zoneConfig - Climate zone config
@@ -356,15 +334,11 @@ function lerpAngle(from, to, t) {
   if (diff > 180) diff -= 360;
   else if (diff < -180) diff += 360;
   const result = (((from + diff * t) % 360) + 360) % 360;
-  // Snap to nearest 22.5° compass point
   return Math.round(result / 22.5) * 22.5;
 }
 
 /**
  * Apply weather transition smoothing.
- * Reduces jarring weather changes by considering previous weather.
- * Per-preset `inertiaWeight` scales the effect: 0 = never persists, 1 = normal, 2 = very sticky.
- * Zone-level overrides take priority over the preset's built-in value.
  * @param {string} currentWeatherId - Current weather ID
  * @param {object} probabilities - Base probabilities
  * @param {number} [inertia] - How much to favor current weather (0-1)

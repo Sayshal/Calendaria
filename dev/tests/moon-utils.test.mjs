@@ -11,7 +11,7 @@ vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
   return { default: CalendarManager };
 });
 
-import { getMoonPhasePosition, isMoonFull, getNextFullMoon, getNextConvergence, getConvergencesInRange } from '../../scripts/utils/moon-utils.mjs';
+import { getMoonPhasePosition, isMoonFull, getNextFullMoon, getNextConvergence, getConvergencesInRange } from '../../scripts/utils/formatting/moon-utils.mjs';
 
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 

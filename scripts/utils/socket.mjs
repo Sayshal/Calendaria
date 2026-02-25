@@ -4,9 +4,9 @@
  * @author Tyler
  */
 
-import { HUD } from '../applications/hud.mjs';
-import { MiniCal } from '../applications/mini-cal.mjs';
-import { TimeKeeper } from '../applications/time-keeper.mjs';
+import { MiniCal } from '../applications/calendar/mini-cal.mjs';
+import { HUD } from '../applications/hud/hud.mjs';
+import { TimeKeeper } from '../applications/time/time-keeper.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
@@ -15,7 +15,6 @@ import { log } from './logger.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
- * Manages socket communication and determines the primary GM for authoritative updates.
  */
 export class CalendariaSocket {
   /**
@@ -110,7 +109,6 @@ export class CalendariaSocket {
    */
   static #onMessage({ type, data }) {
     log(3, `Socket message received: ${type}`, data);
-
     switch (type) {
       case SOCKET_TYPES.CLOCK_UPDATE:
         this.#handleClockUpdate(data);
@@ -201,7 +199,6 @@ export class CalendariaSocket {
     if (!action || !id) return;
     log(3, `Handling remote note ${action}: ${id}`);
     foundry.applications.instances.get('calendaria-big-cal')?.render();
-
     switch (action) {
       case 'created':
         Hooks.callAll(HOOKS.NOTE_CREATED, data);
@@ -245,16 +242,9 @@ export class CalendariaSocket {
     if (!this.isPrimaryGM()) return;
     const { name, content, noteData, calendarId, journalData, requesterId, openSheet = 'edit' } = data;
     log(3, `Primary GM handling note creation request: ${name}`);
-    try {
-      // Set the author to the requester, not the GM
-      const noteDataWithAuthor = { ...noteData, author: requesterId };
-      const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId, openSheet: false });
-      if (page && requesterId) {
-        this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId, openSheet });
-      }
-    } catch (error) {
-      log(1, 'Error creating note via socket:', error);
-    }
+    const noteDataWithAuthor = { ...noteData, author: requesterId };
+    const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId });
+    if (page && requesterId) this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId });
   }
 
   /**
@@ -302,7 +292,6 @@ export class CalendariaSocket {
     if (!this.isPrimaryGM()) return;
     const { action, presetId, options = {} } = data;
     log(3, `Primary GM handling weather request: ${action}`, data);
-
     switch (action) {
       case 'set':
         await WeatherManager.setWeather(presetId, { ...options, fromSocket: true });
@@ -330,7 +319,6 @@ export class CalendariaSocket {
     if (!this.isPrimaryGM()) return;
     const { action, delta, components, date } = data;
     log(3, `Primary GM handling time request: ${action}`, data);
-
     switch (action) {
       case 'advance':
         await game.time.advance(delta);
@@ -394,12 +382,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling HUD visibility: ${visible}`);
-    if (visible) {
-      // Only show if user has "Show HUD on load" enabled
-      if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
-    } else {
-      HUD.hide();
-    }
+    if (visible && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
+    else HUD.hide();
   }
 
   /**

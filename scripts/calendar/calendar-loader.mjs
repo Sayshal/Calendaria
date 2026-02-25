@@ -1,6 +1,5 @@
 /**
  * Calendar Loader
- * Loads bundled JSON calendar files and registers them with the CalendarRegistry.
  * @module Calendar/CalendarLoader
  * @author Tyler
  */
@@ -77,7 +76,6 @@ export async function loadBundledCalendars() {
       loaded.push(id);
     }
   }
-
   log(3, `Loaded ${loaded.length}/${BUNDLED_CALENDARS.length} bundled calendars`);
   return loaded;
 }

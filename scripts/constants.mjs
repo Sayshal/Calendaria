@@ -11,6 +11,17 @@ export const MODULE = {
   TITLE: 'Calendaria'
 };
 
+/** @enum {string} Keybinding action IDs */
+export const KEYBINDS = {
+  TOGGLE_BIGCAL: 'toggle-bigcal',
+  TOGGLE_MINICAL: 'toggle-minical',
+  TOGGLE_HUD: 'toggle-hud',
+  TOGGLE_TIMEKEEPER: 'toggle-timekeeper',
+  TOGGLE_STOPWATCH: 'toggle-stopwatch',
+  STOPWATCH_START_PAUSE: 'stopwatch-start-pause',
+  STOPWATCH_RESET: 'stopwatch-reset'
+};
+
 /** @enum {string} Settings keys for Foundry VTT game settings */
 export const SETTINGS = {
   ACTIVE_CALENDAR: 'activeCalendar',
@@ -170,24 +181,25 @@ export const TEMPLATES = {
   FORM_FOOTER: 'templates/generic/form-footer.hbs',
   TAB_NAVIGATION: `modules/${MODULE.ID}/templates/partials/tab-navigation.hbs`,
   SETTINGS: {
-    PANEL_HOME: `modules/${MODULE.ID}/templates/settings/tab-home.hbs`,
-    PANEL_NOTES: `modules/${MODULE.ID}/templates/settings/tab-notes.hbs`,
-    PANEL_TIME: `modules/${MODULE.ID}/templates/settings/tab-time.hbs`,
-    PANEL_WEATHER: `modules/${MODULE.ID}/templates/settings/tab-weather.hbs`,
-    PANEL_THEME: `modules/${MODULE.ID}/templates/settings/tab-theme.hbs`,
-    PANEL_MACROS: `modules/${MODULE.ID}/templates/settings/tab-macros.hbs`,
-    PANEL_CHAT: `modules/${MODULE.ID}/templates/settings/tab-chat.hbs`,
-    PANEL_PERMISSIONS: `modules/${MODULE.ID}/templates/settings/tab-permissions.hbs`,
-    PANEL_CANVAS: `modules/${MODULE.ID}/templates/settings/tab-canvas.hbs`,
-    PANEL_MODULE: `modules/${MODULE.ID}/templates/settings/tab-module.hbs`,
-    PANEL_BIGCAL: `modules/${MODULE.ID}/templates/settings/tab-bigcal.hbs`,
-    PANEL_MINI_CAL: `modules/${MODULE.ID}/templates/settings/tab-mini-cal.hbs`,
-    PANEL_HUD: `modules/${MODULE.ID}/templates/settings/tab-hud.hbs`,
-    PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/settings/tab-timekeeper.hbs`,
-    PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/settings/tab-stopwatch.hbs`,
-    PANEL_FOOTER: `modules/${MODULE.ID}/templates/settings/form-footer.hbs`,
-    WEATHER_EDITOR: `modules/${MODULE.ID}/templates/settings/weather-editor.hbs`,
-    WEATHER_EDITOR_FOOTER: `modules/${MODULE.ID}/templates/settings/weather-editor-footer.hbs`
+    PANEL_HOME: `modules/${MODULE.ID}/templates/applications/settings/tab-home.hbs`,
+    PANEL_NOTES: `modules/${MODULE.ID}/templates/applications/settings/tab-notes.hbs`,
+    PANEL_TIME: `modules/${MODULE.ID}/templates/applications/settings/tab-time.hbs`,
+    PANEL_WEATHER: `modules/${MODULE.ID}/templates/applications/settings/tab-weather.hbs`,
+    PANEL_THEME: `modules/${MODULE.ID}/templates/applications/settings/tab-theme.hbs`,
+    PANEL_MACROS: `modules/${MODULE.ID}/templates/applications/settings/tab-macros.hbs`,
+    PANEL_CHAT: `modules/${MODULE.ID}/templates/applications/settings/tab-chat.hbs`,
+    PANEL_PERMISSIONS: `modules/${MODULE.ID}/templates/applications/settings/tab-permissions.hbs`,
+    PANEL_CANVAS: `modules/${MODULE.ID}/templates/applications/settings/tab-canvas.hbs`,
+    PANEL_MODULE: `modules/${MODULE.ID}/templates/applications/settings/tab-module.hbs`,
+    PANEL_BIGCAL: `modules/${MODULE.ID}/templates/applications/settings/tab-bigcal.hbs`,
+    PANEL_MINI_CAL: `modules/${MODULE.ID}/templates/applications/settings/tab-mini-cal.hbs`,
+    PANEL_HUD: `modules/${MODULE.ID}/templates/applications/settings/tab-hud.hbs`,
+    PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/applications/settings/tab-timekeeper.hbs`,
+    PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/applications/settings/tab-stopwatch.hbs`,
+    PANEL_FOOTER: `modules/${MODULE.ID}/templates/applications/settings/form-footer.hbs`,
+    WEATHER_EDITOR: `modules/${MODULE.ID}/templates/applications/weather/weather-editor.hbs`,
+    WEATHER_EDITOR_FOOTER: `modules/${MODULE.ID}/templates/applications/weather/weather-editor-footer.hbs`,
+    TOKEN_REFERENCE: `modules/${MODULE.ID}/templates/applications/dialogs/token-reference.hbs`
   },
   PARTIALS: {
     SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,
@@ -195,21 +207,21 @@ export const TEMPLATES = {
     CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`,
     RELEASE_MESSAGE: `modules/${MODULE.ID}/templates/chat/release-message.hbs`
   },
-  STOPWATCH: `modules/${MODULE.ID}/templates/stopwatch.hbs`,
-  TIME_DIAL: `modules/${MODULE.ID}/templates/time-dial.hbs`,
-  TIME_KEEPER: `modules/${MODULE.ID}/templates/time-keeper.hbs`,
-  MINI_CAL: `modules/${MODULE.ID}/templates/mini-cal.hbs`,
-  CALENDAR_HUD: `modules/${MODULE.ID}/templates/calendaria-hud.hbs`,
-  CALENDAR_HUD_DOME: `modules/${MODULE.ID}/templates/calendaria-hud-dome.hbs`,
-  CALENDAR_HUD_BAR: `modules/${MODULE.ID}/templates/calendaria-hud-bar.hbs`,
+  STOPWATCH: `modules/${MODULE.ID}/templates/applications/time/stopwatch.hbs`,
+  TIME_DIAL: `modules/${MODULE.ID}/templates/applications/time/time-dial.hbs`,
+  TIME_KEEPER: `modules/${MODULE.ID}/templates/applications/time/time-keeper.hbs`,
+  MINI_CAL: `modules/${MODULE.ID}/templates/applications/calendar/mini-cal.hbs`,
+  CALENDAR_HUD: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud.hbs`,
+  CALENDAR_HUD_DOME: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud-dome.hbs`,
+  CALENDAR_HUD_BAR: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud-bar.hbs`,
   SHEETS: {
-    CALENDAR_HEADER: `modules/${MODULE.ID}/templates/sheets/calendar-header.hbs`,
-    CALENDAR_GRID: `modules/${MODULE.ID}/templates/sheets/calendar-grid.hbs`,
-    CALENDAR_CONTENT: `modules/${MODULE.ID}/templates/sheets/calendar-content.hbs`,
-    CALENDAR_WEEK: `modules/${MODULE.ID}/templates/sheets/calendar-week.hbs`,
-    CALENDAR_YEAR: `modules/${MODULE.ID}/templates/sheets/calendar-year.hbs`,
-    CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`,
-    CALENDAR_NOTE_VIEW: `modules/${MODULE.ID}/templates/sheets/calendar-note-view.hbs`
+    CALENDAR_HEADER: `modules/${MODULE.ID}/templates/applications/sheets/calendar-header.hbs`,
+    CALENDAR_GRID: `modules/${MODULE.ID}/templates/applications/sheets/calendar-grid.hbs`,
+    CALENDAR_CONTENT: `modules/${MODULE.ID}/templates/applications/sheets/calendar-content.hbs`,
+    CALENDAR_WEEK: `modules/${MODULE.ID}/templates/applications/sheets/calendar-week.hbs`,
+    CALENDAR_YEAR: `modules/${MODULE.ID}/templates/applications/sheets/calendar-year.hbs`,
+    CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/applications/sheets/calendar-note-form.hbs`,
+    CALENDAR_NOTE_VIEW: `modules/${MODULE.ID}/templates/applications/sheets/calendar-note-view.hbs`
   },
   EDITOR: {
     TAB_OVERVIEW: `modules/${MODULE.ID}/templates/editor/tab-overview.hbs`,
@@ -227,16 +239,20 @@ export const TEMPLATES = {
   },
   IMPORTER: { APP: `modules/${MODULE.ID}/templates/importers/importer-app.hbs` },
   WEATHER: {
-    PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`,
-    PICKER_FOOTER: `modules/${MODULE.ID}/templates/weather/weather-picker-footer.hbs`,
-    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/weather/climate-editor.hbs`,
-    CLIMATE_EDITOR_TABS: `modules/${MODULE.ID}/templates/weather/climate-editor-tabs.hbs`,
-    CLIMATE_EDITOR_WEATHER: `modules/${MODULE.ID}/templates/weather/climate-editor-weather.hbs`,
-    CLIMATE_EDITOR_PRESETS: `modules/${MODULE.ID}/templates/weather/climate-editor-presets.hbs`,
-    CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/weather/climate-editor-environment.hbs`
+    PICKER: `modules/${MODULE.ID}/templates/applications/weather/weather-picker.hbs`,
+    PICKER_FOOTER: `modules/${MODULE.ID}/templates/applications/weather/weather-picker-footer.hbs`,
+    CLIMATE_EDITOR: `modules/${MODULE.ID}/templates/applications/weather/climate-editor.hbs`,
+    CLIMATE_EDITOR_TABS: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-tabs.hbs`,
+    CLIMATE_EDITOR_WEATHER: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-weather.hbs`,
+    CLIMATE_EDITOR_PRESETS: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-presets.hbs`,
+    CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-environment.hbs`
+  },
+  DIALOGS: {
+    SET_DATE: `modules/${MODULE.ID}/templates/applications/dialogs/set-date-dialog.hbs`,
+    COMPUTED_EVENT_BUILDER: `modules/${MODULE.ID}/templates/applications/dialogs/computed-event-builder.hbs`
   },
   SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },
-  SET_DATE_DIALOG: `modules/${MODULE.ID}/templates/set-date-dialog.hbs`
+  SET_DATE_DIALOG: `modules/${MODULE.ID}/templates/applications/dialogs/set-date-dialog.hbs`
 };
 
 /** Asset paths */
@@ -305,6 +321,7 @@ export const HOOKS = {
   CLOCK_START_STOP: 'calendaria.clockStartStop',
   CLOCK_UPDATE: 'calendaria.clockUpdate',
   DATE_TIME_CHANGE: 'calendaria.dateTimeChange',
+  DISPLAY_FORMATS_CHANGED: 'calendaria.displayFormatsChanged',
   DAY_CHANGE: 'calendaria.dayChange',
   EVENT_DAY_CHANGED: 'calendaria.eventDayChanged',
   EVENT_TRIGGERED: 'calendaria.eventTriggered',

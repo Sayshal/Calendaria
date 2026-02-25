@@ -1,7 +1,5 @@
 /**
  * Base Importer Class
- * Abstract foundation for all calendar importers.
- * Subclasses must implement transform() at minimum.
  * @module Importers/BaseImporter
  * @author Tyler
  */
@@ -13,7 +11,6 @@ import { log } from '../utils/logger.mjs';
 
 /**
  * Abstract base class for calendar importers.
- * Provides common functionality for parsing, transforming, and importing calendars.
  */
 export default class BaseImporter {
   /** @type {string} Unique importer identifier */
@@ -54,7 +51,6 @@ export default class BaseImporter {
 
   /**
    * Load calendar data from an installed module's settings.
-   * Must be overridden by subclasses that support live import.
    * @returns {Promise<object>} Raw calendar data from module
    * @throws {Error} If not implemented or module not available
    */
@@ -74,7 +70,6 @@ export default class BaseImporter {
 
   /**
    * Transform raw source data into CalendariaCalendar format.
-   * Must be overridden by subclasses.
    * @param {object} data - Raw source data
    * @returns {Promise<object>} CalendariaCalendar-compatible data object
    * @throws {Error} If not implemented
@@ -86,7 +81,6 @@ export default class BaseImporter {
 
   /**
    * Extract notes/events from source data.
-   * Override in subclasses that support note import.
    * @param {object} data - Raw source data
    * @returns {Promise<object[]>} Array of note data objects
    */
@@ -97,7 +91,6 @@ export default class BaseImporter {
 
   /**
    * Get available calendar choices from source data.
-   * Override in subclasses that support multiple calendars (e.g., Simple Calendar).
    * @param {object} _data - Raw source data
    * @returns {Array<{name: string, index: number}>|null} Calendar choices or null if single/unsupported
    */
@@ -107,7 +100,6 @@ export default class BaseImporter {
 
   /**
    * Extract the current date from source data.
-   * Override in subclasses to return the date the source module was displaying.
    * @param {object} _data - Raw source data
    * @param {number} [_calendarIndex] - Index of calendar to extract date from
    * @returns {{year: number, month: number, day: number, hour: number, minute: number}|null} Current date or null
@@ -118,7 +110,6 @@ export default class BaseImporter {
 
   /**
    * Apply a date to the imported calendar by setting worldTime.
-   * Uses the calendar's jumpToDate method to set the correct time.
    * @param {{year: number, month: number, day: number, hour: number, minute: number}} dateComponents - Date to apply
    * @param {string} calendarId - Calendar ID to apply the date to
    * @returns {Promise<boolean>} True if date was applied successfully
@@ -134,11 +125,7 @@ export default class BaseImporter {
       const yearZero = calendar.years?.yearZero ?? 0;
       const displayYear = dateComponents.year + yearZero;
       log(3, `Applying imported date: ${displayYear}/${dateComponents.month + 1}/${dateComponents.day}`);
-      await calendar.jumpToDate({
-        year: displayYear,
-        month: dateComponents.month,
-        day: dateComponents.day
-      });
+      await calendar.jumpToDate({ year: displayYear, month: dateComponents.month, day: dateComponents.day });
       return true;
     } catch (error) {
       log(2, `Failed to apply current date:`, error);
@@ -167,7 +154,6 @@ export default class BaseImporter {
       if (!month.name) errors.push(format('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
       if (!month.days || month.days < 1) errors.push(format('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
     }
-
     return { valid: errors.length === 0, errors };
   }
 
@@ -205,7 +191,6 @@ export default class BaseImporter {
 
   /**
    * Import notes from source data.
-   * Override in subclasses that support note import.
    * @param {object[]} notes - Extracted note data
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
@@ -218,7 +203,6 @@ export default class BaseImporter {
 
   /**
    * Import festivals (fixed calendar events) from source data.
-   * Override in subclasses that support festival import.
    * @param {object[]} festivals - Extracted festival data
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
@@ -231,7 +215,6 @@ export default class BaseImporter {
 
   /**
    * Migrate undated events to Foundry journal entries.
-   * Creates folder hierarchy: Calendaria Imports/[Calendar Name]/Undated Events
    * @param {string} calendarName - Name of the calendar for folder organization
    * @returns {Promise<{count: number}>} - Migration result with count
    */
@@ -292,7 +275,6 @@ export default class BaseImporter {
 
   /**
    * Count notes in raw data.
-   * Override in subclasses for accurate counts.
    * @param {object} _data - Raw source data
    * @returns {number} Note count
    * @private

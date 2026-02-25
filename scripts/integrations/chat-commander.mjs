@@ -1,6 +1,5 @@
 /**
  * Chat Commander Integration
- * Registers Calendaria commands with the Chat Commander module.
  * @module Integrations/ChatCommander
  * @author Tyler
  */
@@ -70,7 +69,6 @@ function wrapContent(content) {
 
 /**
  * Initialize Chat Commander integration.
- * Should be called in the ready hook.
  */
 export function initializeChatCommander() {
   if (!game.modules.get('_chatcommands')?.active) return;
@@ -242,12 +240,9 @@ function registerCommands() {
       autocompleteCallback: autocompleteForecast
     }
   ];
-
   for (const cmd of commands) game.chatCommands.register({ ...cmd, module: MODULE.ID });
   log(3, `Registered ${commands.length} Chat Commander commands`);
 }
-
-// --- Command Handlers ---
 
 /**
  * /date [format] - Display current date.
@@ -489,12 +484,7 @@ async function cmdAdvance(_chat, parameters) {
     month: { month: dt.month + value },
     year: { year: dt.year + value }
   };
-  try {
-    await CalendariaAPI.setDateTime({ ...dt, ...updates[baseUnit] });
-    log(3, `Advanced time by ${value} ${unitInput}`);
-  } catch (error) {
-    log(1, 'Error advancing time:', error);
-  }
+  await CalendariaAPI.setDateTime({ ...dt, ...updates[baseUnit] });
   return {};
 }
 
@@ -513,12 +503,8 @@ async function cmdSetDate(_chat, parameters) {
   const year = parseInt(match[1], 10);
   const month = parseInt(match[2], 10) - 1;
   const day = parseInt(match[3], 10);
-  try {
-    await CalendariaAPI.jumpToDate({ year, month, day });
-    log(3, `Set date to ${year}-${month + 1}-${day}`);
-  } catch (error) {
-    log(1, 'Error setting date:', error);
-  }
+  await CalendariaAPI.jumpToDate({ year, month, day });
+  log(3, `Set date to ${year}-${month + 1}-${day}`);
   return {};
 }
 
@@ -538,12 +524,8 @@ async function cmdSetTime(_chat, parameters) {
   const minute = parseInt(match[2], 10);
   const second = match[3] ? parseInt(match[3], 10) : 0;
   const dt = CalendariaAPI.getCurrentDateTime();
-  try {
-    await CalendariaAPI.setDateTime({ ...dt, hour, minute, second });
-    log(3, `Set time to ${hour}:${minute}:${second}`);
-  } catch (error) {
-    log(1, 'Error setting time:', error);
-  }
+  await CalendariaAPI.setDateTime({ ...dt, hour, minute, second });
+  log(3, `Set time to ${hour}:${minute}:${second}`);
   return {};
 }
 
@@ -610,12 +592,7 @@ async function cmdSwitchCal(_chat, parameters) {
   if (!calendarId) return {};
   const calendar = CalendariaAPI.getCalendar(calendarId);
   if (!calendar) return {};
-  try {
-    await CalendariaAPI.switchCalendar(calendarId);
-    log(3, `Switched calendar to ${calendarId}`);
-  } catch (error) {
-    log(1, 'Error switching calendar:', error);
-  }
+  await CalendariaAPI.switchCalendar(calendarId);
   return {};
 }
 

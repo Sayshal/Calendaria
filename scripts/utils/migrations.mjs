@@ -75,7 +75,7 @@ const HARPTOS = [
  * @param {string} str - Format string to check
  * @returns {boolean} True if legacy format
  */
-export function isLegacyFormat(str) {
+function isLegacyFormat(str) {
   return /{{[^}]+}}/.test(str);
 }
 
@@ -84,7 +84,7 @@ export function isLegacyFormat(str) {
  * @param {string} str - Format string to convert
  * @returns {string} Converted format string
  */
-export function migrateLegacyFormat(str) {
+function migrateLegacyFormat(str) {
   let out = str.replace(/{{c\d+}}/g, '[cycle]').replace(/{{(\d+)}}/g, '[$1]');
   for (const [old, neu] of Object.entries(LEGACY_TOKENS)) out = out.replace(new RegExp(old.replace(/[{}]/g, '\\$&'), 'g'), neu);
   return out;
@@ -95,7 +95,7 @@ export function migrateLegacyFormat(str) {
  * @param {string} str - Format string to migrate
  * @returns {{migrated: string, changes: Array}} Migrated string and list of changes
  */
-export function migrateDeprecatedTokens(str) {
+function migrateDeprecatedTokens(str) {
   if (!str || typeof str !== 'string') return { migrated: str, changes: [] };
   let out = str;
   const changes = [];
@@ -114,16 +114,6 @@ export function migrateDeprecatedTokens(str) {
     }
   }
   return { migrated: out, changes };
-}
-
-/**
- * Ensure calendar data has required fields.
- * @param {object} data - Calendar data object to migrate
- * @deprecated since 1.0.0 — Now handled by CalendariaCalendar.migrateData
- */
-export function migrateCalendarDataStructure(data) {
-  if (!data.seasons) data.seasons = { values: [] };
-  if (!data.months) data.months = { values: [] };
 }
 
 /**
@@ -236,7 +226,6 @@ async function migrateAllTokens() {
   } catch (e) {
     log(2, 'Token migration failed', e);
   }
-
   try {
     const ovr = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
     let mod = false;
@@ -252,7 +241,6 @@ async function migrateAllTokens() {
   } catch (e) {
     log(2, 'Override token migration failed', e);
   }
-
   changes.push(...(await migrateDisplayTokens()), ...(await migratePresets()));
   return changes;
 }
@@ -265,7 +253,6 @@ async function migrateLegacyFormats() {
   const KEY = 'formatMigrationComplete';
   if (game.settings.get(MODULE.ID, KEY)) return;
   if (!game.user.isGM) return;
-
   const cals = game.settings.get(MODULE.ID, 'customCalendars');
   if (!cals || typeof cals !== 'object') {
     await game.settings.set(MODULE.ID, KEY, true);
@@ -360,29 +347,19 @@ async function migrateKeys() {
 
 /**
  * Migrate weather zone configuration to ensure all required fields exist.
- * Adds missing seasonOverrides and validates zone structure.
  * @returns {Promise<number>} Number of calendars migrated
  */
 async function migrateWeatherZones() {
   const KEY = 'weatherZoneMigrationComplete';
-  try {
-    if (game.settings.get(MODULE.ID, KEY)) return 0;
-  } catch {}
+  if (game.settings.get(MODULE.ID, KEY)) return 0;
   if (!game.user?.isGM) return 0;
-
   let migratedCount = 0;
-
-  // Helper to validate and fix a single zone
   const fixZone = (zone) => {
     if (!zone || typeof zone !== 'object') return null;
     const fixed = { ...zone };
     let changed = false;
-
-    // Ensure required fields
     if (!fixed.id || typeof fixed.id !== 'string') return null;
     if (!fixed.name || typeof fixed.name !== 'string') return null;
-
-    // Add missing optional fields with defaults
     if (!fixed.temperatures || typeof fixed.temperatures !== 'object') {
       fixed.temperatures = {};
       changed = true;
@@ -395,26 +372,20 @@ async function migrateWeatherZones() {
       fixed.seasonOverrides = {};
       changed = true;
     }
-
-    // Validate presets (array or keyed object)
     const presetsArr = Array.isArray(fixed.presets) ? fixed.presets : Object.values(fixed.presets);
     for (const preset of presetsArr) {
       if (preset.enabled === undefined) preset.enabled = false;
       if (preset.chance === undefined) preset.chance = 0;
     }
     if (Array.isArray(fixed.presets)) fixed.presets = fixed.presets.filter((p) => p && typeof p === 'object' && p.id);
-
     return changed ? fixed : zone;
   };
-
-  // Helper to migrate weather in a calendar
   const migrateCalendarWeather = (cal) => {
     if (!cal?.weather) return false;
     const zones = cal.weather.zones;
     if (!zones || typeof zones !== 'object') return false;
     const zonesArray = Array.isArray(zones) ? zones : Object.values(zones);
     if (zonesArray.length === 0) return false;
-
     let modified = false;
     const fixedZones = [];
     for (const zone of zonesArray) {
@@ -423,145 +394,82 @@ async function migrateWeatherZones() {
         fixedZones.push(fixed);
         if (fixed !== zone) modified = true;
       } else {
-        modified = true; // Dropped invalid zone
+        modified = true;
       }
     }
-
     if (modified) {
       cal.weather.zones = fixedZones;
-      // Ensure activeZone still exists
-      if (cal.weather.activeZone && !fixedZones.find((z) => z.id === cal.weather.activeZone)) {
-        cal.weather.activeZone = fixedZones[0]?.id || null;
-      }
+      if (cal.weather.activeZone && !fixedZones.find((z) => z.id === cal.weather.activeZone)) cal.weather.activeZone = fixedZones[0]?.id || null;
     }
     return modified;
   };
-
-  try {
-    // Migrate custom calendars
-    const customCalendars = game.settings.get(MODULE.ID, 'customCalendars') || {};
-    let customModified = false;
-    for (const [id, cal] of Object.entries(customCalendars)) {
-      if (migrateCalendarWeather(cal)) {
-        log(3, `Migrated weather zones in custom calendar: ${id}`);
-        customModified = true;
-        migratedCount++;
-      }
+  const customCalendars = game.settings.get(MODULE.ID, 'customCalendars') || {};
+  let customModified = false;
+  for (const [id, cal] of Object.entries(customCalendars)) {
+    if (migrateCalendarWeather(cal)) {
+      log(3, `Migrated weather zones in custom calendar: ${id}`);
+      customModified = true;
+      migratedCount++;
     }
-    if (customModified) {
-      await game.settings.set(MODULE.ID, 'customCalendars', customCalendars);
-    }
-
-    // Migrate default overrides
-    const overrides = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
-    let overridesModified = false;
-    for (const [id, cal] of Object.entries(overrides)) {
-      if (migrateCalendarWeather(cal)) {
-        log(3, `Migrated weather zones in override: ${id}`);
-        overridesModified = true;
-        migratedCount++;
-      }
-    }
-    if (overridesModified) {
-      await game.settings.set(MODULE.ID, 'defaultOverrides', overrides);
-    }
-
-    // Migrate legacy calendars
-    const legacy = game.settings.get(MODULE.ID, 'calendars') || {};
-    if (legacy.calendars) {
-      let legacyModified = false;
-      for (const [id, cal] of Object.entries(legacy.calendars)) {
-        if (migrateCalendarWeather(cal)) {
-          log(3, `Migrated weather zones in legacy calendar: ${id}`);
-          legacyModified = true;
-          migratedCount++;
-        }
-      }
-      if (legacyModified) {
-        await game.settings.set(MODULE.ID, 'calendars', legacy);
-      }
-    }
-
-    await game.settings.set(MODULE.ID, KEY, true);
-    if (migratedCount > 0) {
-      log(2, `Weather zone migration complete: ${migratedCount} calendar(s) updated`);
-    }
-  } catch (e) {
-    log(2, 'Weather zone migration failed:', e);
   }
-
+  if (customModified) await game.settings.set(MODULE.ID, 'customCalendars', customCalendars);
+  const overrides = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
+  let overridesModified = false;
+  for (const [id, cal] of Object.entries(overrides)) {
+    if (migrateCalendarWeather(cal)) {
+      log(3, `Migrated weather zones in override: ${id}`);
+      overridesModified = true;
+      migratedCount++;
+    }
+  }
+  if (overridesModified) await game.settings.set(MODULE.ID, 'defaultOverrides', overrides);
+  const legacy = game.settings.get(MODULE.ID, 'calendars') || {};
+  if (legacy.calendars) {
+    let legacyModified = false;
+    for (const [id, cal] of Object.entries(legacy.calendars)) {
+      if (migrateCalendarWeather(cal)) {
+        log(3, `Migrated weather zones in legacy calendar: ${id}`);
+        legacyModified = true;
+        migratedCount++;
+      }
+    }
+    if (legacyModified) await game.settings.set(MODULE.ID, 'calendars', legacy);
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
+  if (migratedCount > 0) log(2, `Weather zone migration complete: ${migratedCount} calendar(s) updated`);
   return migratedCount;
 }
 
 /**
  * Diagnose weather configuration - inspects raw settings to find any weather data.
- * Use this if weather zones appear missing after an update.
  * @param {boolean} [showDialog] - Whether to show a dialog with results
  * @returns {object} Diagnostic results
  */
 export async function diagnoseWeatherConfig(showDialog = true) {
   const results = [];
-
-  // Helper to get zones array from either array or object format
   const getZonesArray = (zones) => {
     if (!zones || typeof zones !== 'object') return [];
     return Array.isArray(zones) ? zones : Object.values(zones);
   };
-
-  // Check defaultOverrides (customized bundled calendars)
   const overrides = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
   for (const [id, cal] of Object.entries(overrides)) {
     const zones = getZonesArray(cal?.weather?.zones);
-    if (zones.length) {
-      results.push({
-        source: 'defaultOverrides',
-        calendarId: id,
-        calendarName: cal.name || id,
-        zones,
-        activeZone: cal.weather.activeZone,
-        autoGenerate: cal.weather.autoGenerate
-      });
-    }
+    if (zones.length) results.push({ source: 'defaultOverrides', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
   }
-
-  // Check customCalendars
   const customs = game.settings.get(MODULE.ID, 'customCalendars') || {};
   for (const [id, cal] of Object.entries(customs)) {
     const zones = getZonesArray(cal?.weather?.zones);
-    if (zones.length) {
-      results.push({
-        source: 'customCalendars',
-        calendarId: id,
-        calendarName: cal.name || id,
-        zones,
-        activeZone: cal.weather.activeZone,
-        autoGenerate: cal.weather.autoGenerate
-      });
-    }
+    if (zones.length) results.push({ source: 'customCalendars', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
   }
-
-  // Check legacy calendars setting
   const legacy = game.settings.get(MODULE.ID, 'calendars') || {};
   if (legacy.calendars) {
     for (const [id, cal] of Object.entries(legacy.calendars)) {
       const zones = getZonesArray(cal?.weather?.zones);
-      if (zones.length) {
-        results.push({
-          source: 'calendars (legacy)',
-          calendarId: id,
-          calendarName: cal.name || id,
-          zones,
-          activeZone: cal.weather.activeZone,
-          autoGenerate: cal.weather.autoGenerate
-        });
-      }
+      if (zones.length) results.push({ source: 'calendars (legacy)', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
     }
   }
-
-  // Get active calendar info
   const active = game.time.calendar;
   const activeWeather = active?.weather || null;
-
   const diagnostic = {
     activeCalendar: active?.name || null,
     activeCalendarId: active?.metadata?.id || null,
@@ -569,15 +477,12 @@ export async function diagnoseWeatherConfig(showDialog = true) {
     settingsData: results,
     migrationComplete: game.settings.get(MODULE.ID, 'weatherZoneMigrationComplete')
   };
-
   log(2, 'Weather diagnostic:', diagnostic);
   console.log('Calendaria Weather Diagnostic:', diagnostic);
-
   if (showDialog) {
     let report = '<h3>Active Calendar</h3>';
     report += `<p><strong>${active?.name || 'None'}</strong></p>`;
     report += `<p>Weather zones loaded: ${getZonesArray(activeWeather?.zones).length}</p>`;
-
     if (results.length > 0) {
       report += '<h3>Weather Data in Settings</h3>';
       for (const r of results) {
@@ -585,24 +490,15 @@ export async function diagnoseWeatherConfig(showDialog = true) {
         report += `<p><strong>${r.calendarName}</strong> (${r.source})</p>`;
         report += `<p>Zones: ${r.zones.length} | Active: ${r.activeZone || 'none'}</p>`;
         report += '<ul>';
-        for (const z of r.zones) {
-          report += `<li>${z.name} (${z.id}) - ${z.presets?.length || 0} presets</li>`;
-        }
+        for (const z of r.zones) report += `<li>${z.name} (${z.id}) - ${z.presets?.length || 0} presets</li>`;
         report += '</ul></div>';
       }
     } else {
       report += '<p style="color:#c66;">No weather configuration found in settings.</p>';
     }
-
     report += '<p><em>Full data logged to browser console (F12).</em></p>';
-
-    await foundry.applications.api.DialogV2.prompt({
-      window: { title: 'Weather Diagnostic', width: 500 },
-      content: report,
-      ok: { label: 'Close' }
-    });
+    await foundry.applications.api.DialogV2.prompt({ window: { title: 'Weather Diagnostic', width: 500 }, content: report, ok: { label: 'Close' } });
   }
-
   return diagnostic;
 }
 

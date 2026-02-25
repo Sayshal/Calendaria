@@ -1,17 +1,15 @@
 /**
  * Calendar Manager
- * Main entry point for calendar system management.
- * Handles calendar initialization, switching, and persistence.
  * @module Calendar/CalendarManager
  * @author Tyler
  */
 
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
+import CalendariaCalendar from '../data/calendaria-calendar.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { BUNDLED_CALENDARS, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
-import CalendariaCalendar from './data/calendaria-calendar.mjs';
 
 /**
  * Main entry point for calendar system management.
@@ -36,17 +34,13 @@ export default class CalendarManager {
 
   /**
    * Initialize the calendar system.
-   * Called during module initialization.
    */
   static async initialize() {
     await loadBundledCalendars();
-
-    // Store pristine bundled data before overrides are applied
     for (const id of BUNDLED_CALENDARS) {
       const bundled = CalendarRegistry.get(id);
       if (bundled) this.#bundledData.set(id, bundled.toObject());
     }
-
     await this.#loadDefaultOverrides();
     await this.#loadCustomCalendars();
     await this.loadCalendars();
@@ -58,7 +52,6 @@ export default class CalendarManager {
       CalendarRegistry.setActive(firstId);
       log(2, `Active calendar "${activeId}" not found, using "${firstId}"`);
     }
-
     const activeCalendar = CalendarRegistry.getActive();
     if (activeCalendar) {
       CalendariaCalendar.initializeEpochOffset();
@@ -70,7 +63,6 @@ export default class CalendarManager {
       this.#patchFoundryCalendar();
       log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
-
     log(3, 'Calendar Manager initialized');
   }
 
@@ -116,175 +108,152 @@ export default class CalendarManager {
    * @private
    */
   static async #loadCustomCalendars() {
-    try {
-      const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-      const ids = Object.keys(customCalendars);
-      if (ids.length === 0) return;
-      for (const id of ids) {
-        const data = customCalendars[id];
-        try {
-          const calendar = new CalendariaCalendar(data);
-          CalendarRegistry.register(id, calendar);
-          log(3, `Loaded custom calendar: ${id}`);
-        } catch (error) {
-          log(1, `Error loading custom calendar ${id}:`, error);
-        }
-      }
-      log(3, `Loaded ${ids.length} custom calendars`);
-    } catch (error) {
-      log(1, 'Error loading custom calendars:', error);
+    const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
+    const ids = Object.keys(customCalendars);
+    if (ids.length === 0) return;
+    for (const id of ids) {
+      const data = customCalendars[id];
+      const calendar = new CalendariaCalendar(data);
+      CalendarRegistry.register(id, calendar);
+      log(3, `Loaded custom calendar: ${id}`);
     }
+    log(3, `Loaded ${ids.length} custom calendars`);
   }
 
   /**
    * Load and apply user overrides for bundled calendars.
-   * Supports both delta format (_isDelta flag) and legacy full-object format.
-   * Legacy overrides are aligned, loaded, then re-saved as deltas on first GM load.
    * @private
    */
   static async #loadDefaultOverrides() {
-    try {
-      const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
-      const ids = Object.keys(overrides);
-      if (ids.length === 0) return;
-
-      let needsSave = false;
-
-      for (const id of ids) {
-        const data = overrides[id];
-        try {
-          const bundledData = this.#bundledData.get(id);
-
-          if (data._isDelta && bundledData) {
-            // Strip stale defaults before merging so bundled improvements flow through
-            CalendarManager.#stripStaleDefaults(data, bundledData);
-            // Delta format: reconstruct full calendar from bundled + delta
-            const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
-            delete calendarData._isDelta;
-            const calendar = new CalendariaCalendar(calendarData);
-            CalendarRegistry.register(id, calendar);
-            log(3, `Applied delta override for bundled calendar: ${id}`);
-          } else if (bundledData) {
-            // Legacy full format: align keys, load, then migrate to delta
-            if (CalendarManager.#alignOverrideKeys(data, bundledData)) {
-              needsSave = true;
-            }
-            const calendar = new CalendariaCalendar(data);
-            CalendarRegistry.register(id, calendar);
-            needsSave = true; // Re-save as delta
-            log(3, `Applied legacy override for bundled calendar: ${id}`);
-          } else {
-            const calendar = new CalendariaCalendar(data);
-            CalendarRegistry.register(id, calendar);
-            log(3, `Applied override for calendar: ${id}`);
-          }
-        } catch (error) {
-          log(1, `Error applying override for ${id}:`, error);
-        }
+    const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
+    const ids = Object.keys(overrides);
+    if (ids.length === 0) return;
+    let needsSave = false;
+    for (const id of ids) {
+      const data = overrides[id];
+      const bundledData = this.#bundledData.get(id);
+      if (data._isDelta && bundledData) {
+        CalendarManager.#stripStaleDefaults(data, bundledData);
+        const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
+        delete calendarData._isDelta;
+        const calendar = new CalendariaCalendar(calendarData);
+        CalendarRegistry.register(id, calendar);
+        log(3, `Applied delta override for bundled calendar: ${id}`);
+      } else if (bundledData) {
+        if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
+        const calendar = new CalendariaCalendar(data);
+        CalendarRegistry.register(id, calendar);
+        needsSave = true;
+        log(3, `Applied legacy override for bundled calendar: ${id}`);
+      } else {
+        const calendar = new CalendariaCalendar(data);
+        CalendarRegistry.register(id, calendar);
+        log(3, `Applied override for calendar: ${id}`);
       }
-
-      // Re-save all overrides as deltas (migration from full → delta)
-      if (needsSave && game.user?.isGM) {
-        for (const id of ids) {
-          const cal = CalendarRegistry.get(id);
-          const bundledData = this.#bundledData.get(id);
-          if (cal && bundledData) {
-            overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, cal.toObject());
-          }
-        }
-        await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-        log(3, 'Persisted override deltas');
-      }
-
-      log(3, `Applied ${ids.length} default calendar overrides`);
-    } catch (error) {
-      log(1, 'Error loading default overrides:', error);
     }
+    if (needsSave && game.user?.isGM) {
+      for (const id of ids) {
+        const cal = CalendarRegistry.get(id);
+        const bundledData = this.#bundledData.get(id);
+        if (cal && bundledData) overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, cal.toObject());
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
+      log(3, 'Persisted override deltas');
+    }
+    log(3, `Applied ${ids.length} default calendar overrides`);
   }
 
   /**
-   * Align override collection keys with bundled calendar keys.
-   * Two-pass: name match first, then positional assignment for unmatched items.
-   * Handles both array-format (pre-conversion) and mismatched object keys.
-   * @param {object} overrideData - Raw override data (mutated in place)
-   * @param {object} bundledData - Bundled calendar toObject() data
-   * @returns {boolean} True if any changes were made
+   * Align a single collection's keys to match bundled keys.
+   * @param {Array|object} collection - Override collection (array or keyed object)
+   * @param {object} bundled - Bundled collection (keyed object)
+   * @returns {object|null} Aligned keyed object, or null if already aligned
+   * @private
+   */
+  static #alignCollection(collection, bundled) {
+    if (!bundled || typeof bundled !== 'object') return null;
+    const bundledKeys = Object.keys(bundled);
+    if (bundledKeys.length === 0) return null;
+    let items;
+    if (Array.isArray(collection)) {
+      items = collection;
+    } else if (typeof collection === 'object') {
+      const overrideKeys = Object.keys(collection);
+      const bundledKeySet = new Set(bundledKeys);
+      const matchCount = overrideKeys.filter((k) => bundledKeySet.has(k)).length;
+      if (matchCount === Math.min(overrideKeys.length, bundledKeys.length)) return null;
+      items = Object.values(collection);
+    } else {
+      return null;
+    }
+    if (items.length === 0) return null;
+    const nameToKey = new Map();
+    for (const [key, val] of Object.entries(bundled)) if (val?.name) nameToKey.set(val.name, key);
+    const result = {};
+    const usedKeys = new Set();
+    const unmatchedIndices = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item?.name && nameToKey.has(item.name)) {
+        const key = nameToKey.get(item.name);
+        if (!usedKeys.has(key)) {
+          result[key] = item;
+          usedKeys.add(key);
+          continue;
+        }
+      }
+      unmatchedIndices.push(i);
+    }
+    const remainingKeys = bundledKeys.filter((k) => !usedKeys.has(k));
+    for (let j = 0; j < unmatchedIndices.length; j++) {
+      const item = items[unmatchedIndices[j]];
+      const key = j < remainingKeys.length ? remainingKeys[j] : foundry.utils.randomID();
+      result[key] = item;
+    }
+    return result;
+  }
+
+  /**
+   * Align deeply nested collection keys within a parent object.
+   * @param {object} parentObj - Override parent object
+   * @param {object} bundledParent - Bundled parent object
+   * @param {string} childKey - Key of the nested collection to align
+   * @returns {boolean} Whether any changes were made
+   * @private
+   */
+  static #alignDeeplyNested(parentObj, bundledParent, childKey) {
+    if (!parentObj || typeof parentObj !== 'object' || Array.isArray(parentObj)) return false;
+    let changed = false;
+    for (const [key, entry] of Object.entries(parentObj)) {
+      if (entry?.[childKey] && bundledParent?.[key]?.[childKey]) {
+        const aligned = CalendarManager.#alignCollection(entry[childKey], bundledParent[key][childKey]);
+        if (aligned) {
+          entry[childKey] = aligned;
+          changed = true;
+        }
+      }
+    }
+    return changed;
+  }
+
+  /**
+   * Align override data keys to match bundled calendar data keys.
+   * @param {object} overrideData - Override data to align
+   * @param {object} bundledData - Bundled calendar data
+   * @returns {boolean} Whether any changes were made
+   * @private
    */
   static #alignOverrideKeys(overrideData, bundledData) {
     let changed = false;
-
-    /**
-     * Align a single collection's keys to match bundled keys.
-     * @param {Array|object} collection - Override collection (array or keyed object)
-     * @param {object} bundled - Bundled collection (keyed object)
-     * @returns {object|null} Aligned keyed object, or null if already aligned
-     */
-    const alignCollection = (collection, bundled) => {
-      if (!bundled || typeof bundled !== 'object') return null;
-      const bundledKeys = Object.keys(bundled);
-      if (bundledKeys.length === 0) return null;
-
-      let items;
-      if (Array.isArray(collection)) {
-        items = collection;
-      } else if (typeof collection === 'object') {
-        const overrideKeys = Object.keys(collection);
-        const bundledKeySet = new Set(bundledKeys);
-        const matchCount = overrideKeys.filter((k) => bundledKeySet.has(k)).length;
-        if (matchCount === Math.min(overrideKeys.length, bundledKeys.length)) return null;
-        items = Object.values(collection);
-      } else {
-        return null;
-      }
-
-      if (items.length === 0) return null;
-
-      const nameToKey = new Map();
-      for (const [key, val] of Object.entries(bundled)) {
-        if (val?.name) nameToKey.set(val.name, key);
-      }
-
-      const result = {};
-      const usedKeys = new Set();
-      const unmatchedIndices = [];
-
-      // Pass 1: name matching
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item?.name && nameToKey.has(item.name)) {
-          const key = nameToKey.get(item.name);
-          if (!usedKeys.has(key)) {
-            result[key] = item;
-            usedKeys.add(key);
-            continue;
-          }
-        }
-        unmatchedIndices.push(i);
-      }
-
-      // Pass 2: positional assignment for unmatched items
-      const remainingKeys = bundledKeys.filter((k) => !usedKeys.has(k));
-      for (let j = 0; j < unmatchedIndices.length; j++) {
-        const item = items[unmatchedIndices[j]];
-        const key = j < remainingKeys.length ? remainingKeys[j] : foundry.utils.randomID();
-        result[key] = item;
-      }
-
-      return result;
-    };
-
-    // Top-level collections
     for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) {
       if (overrideData[key]) {
-        const aligned = alignCollection(overrideData[key], bundledData[key]);
+        const aligned = CalendarManager.#alignCollection(overrideData[key], bundledData[key]);
         if (aligned) {
           overrideData[key] = aligned;
           changed = true;
         }
       }
     }
-
-    // Nested collections
     const nested = [
       ['months', 'values'],
       ['days', 'values'],
@@ -294,38 +263,21 @@ export default class CalendarManager {
     ];
     for (const [parent, child] of nested) {
       if (overrideData[parent]?.[child]) {
-        const aligned = alignCollection(overrideData[parent][child], bundledData[parent]?.[child]);
+        const aligned = CalendarManager.#alignCollection(overrideData[parent][child], bundledData[parent]?.[child]);
         if (aligned) {
           overrideData[parent][child] = aligned;
           changed = true;
         }
       }
     }
-
-    // Deeply nested collections (after parent keys are aligned)
-    const alignDeeplyNested = (parentObj, bundledParent, childKey) => {
-      if (!parentObj || typeof parentObj !== 'object' || Array.isArray(parentObj)) return;
-      for (const [key, entry] of Object.entries(parentObj)) {
-        if (entry?.[childKey] && bundledParent?.[key]?.[childKey]) {
-          const aligned = alignCollection(entry[childKey], bundledParent[key][childKey]);
-          if (aligned) {
-            entry[childKey] = aligned;
-            changed = true;
-          }
-        }
-      }
-    };
-
-    alignDeeplyNested(overrideData.moons, bundledData.moons, 'phases');
-    alignDeeplyNested(overrideData.cycles, bundledData.cycles, 'stages');
-    alignDeeplyNested(overrideData.weather?.zones, bundledData.weather?.zones, 'presets');
-    alignDeeplyNested(overrideData.months?.values, bundledData.months?.values, 'weekdays');
-
-    // seasons.*.climate.presets (extra nesting level)
+    if (CalendarManager.#alignDeeplyNested(overrideData.moons, bundledData.moons, 'phases')) changed = true;
+    if (CalendarManager.#alignDeeplyNested(overrideData.cycles, bundledData.cycles, 'stages')) changed = true;
+    if (CalendarManager.#alignDeeplyNested(overrideData.weather?.zones, bundledData.weather?.zones, 'presets')) changed = true;
+    if (CalendarManager.#alignDeeplyNested(overrideData.months?.values, bundledData.months?.values, 'weekdays')) changed = true;
     if (overrideData.seasons?.values && typeof overrideData.seasons.values === 'object') {
       for (const [key, season] of Object.entries(overrideData.seasons.values)) {
         if (season?.climate?.presets && bundledData.seasons?.values?.[key]?.climate?.presets) {
-          const aligned = alignCollection(season.climate.presets, bundledData.seasons.values[key].climate.presets);
+          const aligned = CalendarManager.#alignCollection(season.climate.presets, bundledData.seasons.values[key].climate.presets);
           if (aligned) {
             season.climate.presets = aligned;
             changed = true;
@@ -333,14 +285,11 @@ export default class CalendarManager {
         }
       }
     }
-
     return changed;
   }
 
   /**
    * Compute a delta between bundled and override calendar data.
-   * Uses Foundry's diffObject for additions/changes, then detects deletions
-   * at all collection nesting levels using Foundry's `-=key` deletion syntax.
    * @param {object} bundledData - Pristine bundled calendar data
    * @param {object} overrideData - Current override calendar data
    * @param {object|null} [previousDelta] - Previous delta to detect user-added entry deletions
@@ -349,8 +298,6 @@ export default class CalendarManager {
    */
   static #computeOverrideDelta(bundledData, overrideData, previousDelta = null) {
     const delta = foundry.utils.diffObject(bundledData, overrideData);
-
-    // Top-level keyed collections — detect deletions
     for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) {
       if (bundledData[key]) {
         for (const entryKey of Object.keys(bundledData[key])) {
@@ -360,7 +307,6 @@ export default class CalendarManager {
           }
         }
       }
-      // Detect deletions of user-added entries (existed in previous delta, not in current data)
       if (previousDelta?.[key]) {
         for (const entryKey of Object.keys(previousDelta[key])) {
           if (entryKey.startsWith('-=')) continue;
@@ -371,8 +317,6 @@ export default class CalendarManager {
         }
       }
     }
-
-    // Nested collections — detect deletions
     for (const [parent, child] of [
       ['months', 'values'],
       ['days', 'values'],
@@ -391,7 +335,6 @@ export default class CalendarManager {
           }
         }
       }
-      // Detect deletions of user-added entries from previous delta
       const pCol = previousDelta?.[parent]?.[child];
       if (pCol) {
         for (const entryKey of Object.keys(pCol)) {
@@ -404,8 +347,6 @@ export default class CalendarManager {
         }
       }
     }
-
-    // Deeply nested collections — detect deletions within entries
     const deepDeletionCheck = (bParent, oParent, deltaRef, childKey) => {
       if (!bParent || !oParent) return;
       for (const [pKey, pVal] of Object.entries(bParent)) {
@@ -419,8 +360,6 @@ export default class CalendarManager {
         }
       }
     };
-
-    // moons.*.phases
     if (bundledData.moons && overrideData.moons) {
       if (!delta.moons) delta.moons = {};
       deepDeletionCheck(bundledData.moons, overrideData.moons, delta.moons, 'phases');
@@ -430,8 +369,6 @@ export default class CalendarManager {
       deepDeletionCheck(previousDelta.moons, overrideData.moons ?? {}, delta.moons, 'phases');
     }
     if (delta.moons && !Object.keys(delta.moons).length) delete delta.moons;
-
-    // cycles.*.stages
     if (bundledData.cycles && overrideData.cycles) {
       if (!delta.cycles) delta.cycles = {};
       deepDeletionCheck(bundledData.cycles, overrideData.cycles, delta.cycles, 'stages');
@@ -441,8 +378,6 @@ export default class CalendarManager {
       deepDeletionCheck(previousDelta.cycles, overrideData.cycles ?? {}, delta.cycles, 'stages');
     }
     if (delta.cycles && !Object.keys(delta.cycles).length) delete delta.cycles;
-
-    // weather.zones.*.presets
     if (bundledData.weather?.zones && overrideData.weather?.zones) {
       if (!delta.weather) delta.weather = {};
       if (!delta.weather.zones) delta.weather.zones = {};
@@ -455,8 +390,6 @@ export default class CalendarManager {
     }
     if (delta.weather?.zones && !Object.keys(delta.weather.zones).length) delete delta.weather.zones;
     if (delta.weather && !Object.keys(delta.weather).length) delete delta.weather;
-
-    // months.values.*.weekdays
     if (bundledData.months?.values && overrideData.months?.values) {
       if (!delta.months) delta.months = {};
       if (!delta.months.values) delta.months.values = {};
@@ -469,16 +402,13 @@ export default class CalendarManager {
     }
     if (delta.months?.values && !Object.keys(delta.months.values).length) delete delta.months.values;
     if (delta.months && !Object.keys(delta.months).length) delete delta.months;
-
     CalendarManager.#stripStaleDefaults(delta, bundledData);
     delta._isDelta = true;
     return delta;
   }
 
   /**
-   * Recursively strip empty-string values from a delta where the bundled data has
-   * a non-empty string. Prevents DataModel defaults (e.g. `icon: ''`) from
-   * suppressing enriched bundled values (e.g. `icon: 'fas fa-sun'`).
+   * Recursively strip empty-string values from a delta.
    * @param {object} delta - Delta object (mutated in place)
    * @param {object} bundled - Pristine bundled data to compare against
    * @private
@@ -501,13 +431,7 @@ export default class CalendarManager {
    * Save calendars to game settings.
    */
   static async saveCalendars() {
-    try {
-      const data = CalendarRegistry.toObject();
-      await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, data);
-      log(3, 'Calendars saved to settings');
-    } catch (error) {
-      log(1, 'Error saving calendars to settings:', error);
-    }
+    await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, CalendarRegistry.toObject());
   }
 
   /**
@@ -537,7 +461,6 @@ export default class CalendarManager {
 
   /**
    * Switch to a different calendar.
-   * Uses game.time.initializeCalendar() to switch without reload.
    * @param {string} id  Calendar ID to switch to
    * @returns {Promise<boolean>}  True if calendar was switched
    */
@@ -547,7 +470,6 @@ export default class CalendarManager {
       ui.notifications.error(format('CALENDARIA.Error.CalendarNotFound', { id }));
       return false;
     }
-
     const calendar = CalendarRegistry.get(id);
     CalendarRegistry.setActive(id);
     CalendariaCalendar.initializeEpochOffset();
@@ -562,13 +484,11 @@ export default class CalendarManager {
         await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, id);
         log(3, `Updated active calendar setting to: ${id}`);
       } catch (error) {
-        // Suppress validation errors for newly created custom calendars (will persist after reload)
         if (error.name !== 'DataModelValidationError') log(1, `Error updating active calendar setting:`, error);
       } finally {
         this.#isSwitchingCalendar = false;
       }
     }
-
     await this.saveCalendars();
     Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
     this.rerenderCalendarUIs();
@@ -586,7 +506,6 @@ export default class CalendarManager {
 
   /**
    * Handle a remote calendar switch from another client.
-   * Updates the local registry and reinitializes the calendar.
    * @param {string} id  Calendar ID to switch to
    */
   static handleRemoteSwitch(id) {
@@ -594,7 +513,6 @@ export default class CalendarManager {
       log(2, `Cannot handle remote switch: calendar ${id} not found`);
       return;
     }
-
     log(3, `Handling remote calendar switch to: ${id}`);
     CalendarRegistry.setActive(id);
     const calendar = CalendarRegistry.get(id);
@@ -622,13 +540,11 @@ export default class CalendarManager {
       ui.notifications.error(format('CALENDARIA.Error.CalendarAlreadyExists', { id }));
       return null;
     }
-
     try {
       const calendar = CalendarRegistry.register(id, definition);
       await this.saveCalendars();
       Hooks.callAll(HOOKS.CALENDAR_ADDED, id, calendar);
       log(3, `Added calendar: ${id}`);
-
       return calendar;
     } catch (error) {
       log(1, `Error adding calendar ${id}:`, error);
@@ -647,20 +563,17 @@ export default class CalendarManager {
       log(2, `Cannot remove calendar: ${id} not found`);
       return false;
     }
-
     if (CalendarRegistry.getActiveId() === id) {
       log(1, `Cannot remove active calendar: ${id}`);
       ui.notifications.warn('CALENDARIA.Error.CannotRemoveActiveCalendar', { localize: true });
       return false;
     }
-
     const removed = CalendarRegistry.unregister(id);
     if (removed) {
       await this.saveCalendars();
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
       log(3, `Removed calendar: ${id}`);
     }
-
     return removed;
   }
 
@@ -672,7 +585,6 @@ export default class CalendarManager {
   static getCalendarMetadata(id) {
     const calendar = CalendarRegistry.get(id);
     if (!calendar) return null;
-
     return {
       id: calendar.metadata?.id ?? id,
       name: calendar.name ? localize(calendar.name) : id,
@@ -701,12 +613,7 @@ export default class CalendarManager {
   static onUpdateSetting(setting, changes) {
     if (setting.key === `${MODULE.ID}.${SETTINGS.ACTIVE_CALENDAR}`) {
       const newCalendarId = changes.value;
-
-      if (this.#isSwitchingCalendar) {
-        log(3, 'Active calendar updated (by Calendaria)');
-        return;
-      }
-
+      if (this.#isSwitchingCalendar) return;
       log(3, 'Active calendar updated (externally)');
       if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
         CalendarRegistry.setActive(newCalendarId);
@@ -762,7 +669,6 @@ export default class CalendarManager {
 
   /**
    * Get the current calendar date and time.
-   * Uses game.time.components and applies calendar year offset.
    * @returns {object}  Current date/time object with year, month, day, hour, minute
    */
   static getCurrentDateTime() {
@@ -774,7 +680,6 @@ export default class CalendarManager {
 
   /**
    * Create a new custom calendar from a definition.
-   * Saves to the CUSTOM_CALENDARS setting and registers in the system.
    * @param {string} id - Unique calendar ID (will be prefixed with 'custom-' if not already)
    * @param {object} definition - Calendar definition object
    * @returns {Promise<CalendariaCalendar|null>} The created calendar or null on error
@@ -786,12 +691,10 @@ export default class CalendarManager {
       log(2, `Cannot create calendar: ${calendarId} already exists`);
       return null;
     }
-
     if (CalendarRegistry.has(calendarId)) {
       log(3, `Cleaning up stale registry entry for: ${calendarId}`);
       CalendarRegistry.unregister(calendarId);
     }
-
     try {
       if (!definition.metadata) definition.metadata = {};
       definition.metadata.id = calendarId;
@@ -823,13 +726,11 @@ export default class CalendarManager {
       ui.notifications.error(format('CALENDARIA.Error.CalendarNotFound', { id }));
       return null;
     }
-
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (!customCalendars[id]) {
       log(2, `Cannot update calendar: ${id} is not a custom calendar`);
       return null;
     }
-
     try {
       const updatedCalendar = new CalendariaCalendar(changes);
       customCalendars[id] = updatedCalendar.toObject();
@@ -842,7 +743,6 @@ export default class CalendarManager {
         game.time.initializeCalendar();
         this.#patchFoundryCalendar();
       }
-
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, updatedCalendar);
       log(3, `Updated custom calendar: ${id}`);
       return updatedCalendar;
@@ -863,17 +763,14 @@ export default class CalendarManager {
     const legacyCalendars = legacyData.calendars || {};
     const inCustom = !!customCalendars[id];
     const inLegacy = !!legacyCalendars[id];
-
     if (!inCustom && !inLegacy) {
       log(2, `Cannot delete calendar: ${id} is not a custom calendar`);
       return false;
     }
-
     if (CalendarRegistry.getActiveId() === id) {
       log(2, `Cannot delete active calendar: ${id}`);
       return false;
     }
-
     try {
       if (inCustom) {
         delete customCalendars[id];
@@ -895,7 +792,6 @@ export default class CalendarManager {
 
   /**
    * Get available calendar templates for "Start from..." feature.
-   * Returns all registered calendars that can be used as templates.
    * @returns {Array<{id: string, name: string, description: string}>} - Template options
    */
   static getCalendarTemplates() {
@@ -903,7 +799,6 @@ export default class CalendarManager {
     for (const [id, calendar] of CalendarRegistry.getAll()) {
       let name;
       if (isBundledCalendar(id)) {
-        // For bundled calendars, construct fresh localization key to avoid stale cached values
         const key = id
           .split('-')
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -931,7 +826,6 @@ export default class CalendarManager {
       log(2, `Cannot duplicate calendar: ${sourceId} not found`);
       return null;
     }
-
     const newData = sourceCalendar.toObject();
     newData.name = newName || `Copy of ${sourceCalendar.name || sourceId}`;
     if (newData.metadata) {
@@ -977,7 +871,6 @@ export default class CalendarManager {
 
   /**
    * Save a user override for a bundled calendar.
-   * Stores as a delta against the pristine bundled data when possible.
    * @param {string} id - Calendar ID to override
    * @param {object} data - Full calendar data to save as override
    * @returns {Promise<CalendariaCalendar|null>} The updated calendar or null on error
@@ -987,7 +880,6 @@ export default class CalendarManager {
       log(2, `Cannot save override: ${id} is not a bundled calendar`);
       return null;
     }
-
     try {
       if (!data.metadata) data.metadata = {};
       data.metadata.id = id;
@@ -1029,12 +921,10 @@ export default class CalendarManager {
       log(2, `Cannot reset: ${id} has no override`);
       return false;
     }
-
     try {
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       delete overrides[id];
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-
       const bundledData = this.#bundledData.get(id);
       if (bundledData) {
         const calendar = new CalendariaCalendar(foundry.utils.deepClone(bundledData));

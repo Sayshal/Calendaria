@@ -1,16 +1,14 @@
 /**
  * Event Scheduler
- * Monitors world time changes and triggers notifications when events/notes are reached.
- * Handles multi-day event progress tracking and reminder notifications.
  * @module Time/EventScheduler
  * @author Tyler
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
+import { compareDates, getCurrentDate } from '../notes/date-utils.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { compareDates, getCurrentDate } from '../notes/utils/date-utils.mjs';
-import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
+import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/recurrence.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -42,7 +40,6 @@ export default class EventScheduler {
 
   /**
    * Handle world time updates.
-   * Called by the updateWorldTime hook.
    * @param {number} worldTime - The new world time in seconds
    * @param {number} _delta - The time delta in seconds
    * @returns {void}
@@ -57,12 +54,10 @@ export default class EventScheduler {
       this.#updateMultiDayEventProgress(currentDate);
       this.#checkRandomEventRegeneration(currentDate);
     }
-
     if (worldTime - this.#lastTriggerCheckTime >= this.TRIGGER_CHECK_INTERVAL) {
       this.#checkEventTriggers(this.#lastDate, currentDate);
       this.#lastTriggerCheckTime = worldTime;
     }
-
     this.#lastDate = { ...currentDate };
   }
 
@@ -103,7 +98,6 @@ export default class EventScheduler {
       hour: note.flagData.allDay ? 0 : (startDate.hour ?? 0),
       minute: note.flagData.allDay ? 0 : (startDate.minute ?? 0)
     };
-
     const prevComparison = this.#compareDateTimes(previousDate, eventStart);
     const currComparison = this.#compareDateTimes(currentDate, eventStart);
     return prevComparison < 0 && currComparison >= 0;
@@ -196,7 +190,6 @@ export default class EventScheduler {
 
   /**
    * Send a chat announcement for an event.
-   * Respects gmOnly visibility setting.
    * @param {object} note - The note stub
    * @private
    */
@@ -219,7 +212,6 @@ export default class EventScheduler {
     } else {
       iconHtml = '<i class="fas fa-calendar"></i>';
     }
-
     const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.CHAT_ANNOUNCEMENT, {
       dateRange,
       content: plainContent,
@@ -227,7 +219,6 @@ export default class EventScheduler {
       journalId: note.journalId,
       iconHtml
     });
-
     let whisper = [];
     if (flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
     await ChatMessage.create({
@@ -237,7 +228,6 @@ export default class EventScheduler {
       flavor: `<span style="color: ${color};">${iconHtml}</span> ${localize('CALENDARIA.Event.CalendarEvent')}`,
       flags: { [MODULE.ID]: { isAnnouncement: true, noteId: note.id, journalId: note.journalId } }
     });
-
     log(3, `Chat announcement sent for event: ${note.name}`, { gmOnly: flagData.gmOnly });
   }
 
@@ -276,7 +266,6 @@ export default class EventScheduler {
 
   /**
    * Check and regenerate random event occurrences when approaching year end.
-   * Regenerates occurrences for next year during the last week of the last month.
    * @param {object} currentDate - Current date components
    * @private
    */

@@ -1,7 +1,5 @@
 /**
  * Note Manager
- * Main entry point for calendar notes system management.
- * Handles note creation, indexing, and retrieval with JournalEntry integration.
  * @module Notes/NoteManager
  * @author Tyler
  */
@@ -12,13 +10,12 @@ import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canAddNotes, canDeleteNotes, getUsersWithPermission } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
+import { compareDates } from './date-utils.mjs';
 import { createNoteStub, getCategoryDefinition, getDefaultNoteData, getPredefinedCategories, sanitizeNoteData, validateNoteData } from './note-data.mjs';
-import { compareDates } from './utils/date-utils.mjs';
-import { getOccurrencesInRange, getRecurrenceDescription, isRecurringMatch } from './utils/recurrence.mjs';
+import { getOccurrencesInRange, getRecurrenceDescription, isRecurringMatch } from './recurrence.mjs';
 
 /**
  * Main entry point for calendar notes system management.
- * Handles note creation, indexing, and retrieval with JournalEntry integration.
  */
 export default class NoteManager {
   /** @type {Map<string, object>} In-memory index of note stubs */
@@ -35,7 +32,6 @@ export default class NoteManager {
 
   /**
    * Initialize the note manager.
-   * Called during module initialization.
    */
   static async initialize() {
     await this.#buildIndex();
@@ -45,7 +41,6 @@ export default class NoteManager {
       await this.#migrateCalendarJournalsToFolders();
       await this.#syncNoteOwnership();
     }
-
     this.#initialized = true;
     log(3, 'Note Manager initialized');
   }
@@ -60,7 +55,6 @@ export default class NoteManager {
 
   /**
    * Sync ownership for all calendar notes based on editNotes permission.
-   * Grants OWNER to all users with editNotes permission for non-GM-only notes.
    * @returns {Promise<void>}
    * @private
    */
@@ -75,11 +69,7 @@ export default class NoteManager {
       const currentOwnership = journal.ownership || {};
       const authorId = page.system?.author?._id;
       const updateData = {};
-      // Grant OWNER to users with editNotes permission
-      for (const id of permittedIds) {
-        if (currentOwnership[id] !== 3) updateData[`ownership.${id}`] = 3;
-      }
-      // Revoke OWNER from users who no longer have editNotes permission
+      for (const id of permittedIds) if (currentOwnership[id] !== 3) updateData[`ownership.${id}`] = 3;
       for (const [userId, level] of Object.entries(currentOwnership)) {
         if (userId === 'default') continue;
         if (level !== 3) continue;
@@ -98,7 +88,6 @@ export default class NoteManager {
 
   /**
    * Initialize the calendar folder for the active calendar.
-   * Creates the folder if it doesn't exist.
    * @returns {Promise<void>}
    * @private
    */
@@ -109,7 +98,6 @@ export default class NoteManager {
         log(2, 'No active calendar found during initialization');
         return;
       }
-
       const calendarId = activeCalendar.metadata.id;
       const folder = await this.getCalendarFolder(calendarId, activeCalendar);
       if (folder) log(3, `Initialized calendar folder for: ${calendarId}`);
@@ -133,7 +121,6 @@ export default class NoteManager {
         }
       }
     }
-
     log(3, `Built note index with ${this.#noteIndex.size} notes`);
   }
 
@@ -165,15 +152,11 @@ export default class NoteManager {
       NoteManager.#noteIndex.set(page.id, stub);
       log(3, `Updated note in index: ${page.name}`);
       Hooks.callAll(HOOKS.NOTE_UPDATED, stub);
-
       if (game.user.isGM) {
         if (changes.name !== undefined) {
           const journal = page.parent;
-          if (journal?.getFlag(MODULE.ID, 'isCalendarNote') && journal.name !== page.name) {
-            await journal.update({ name: page.name });
-          }
+          if (journal?.getFlag(MODULE.ID, 'isCalendarNote') && journal.name !== page.name) await journal.update({ name: page.name });
         }
-
         if (changes.system?.gmOnly !== undefined) {
           const journal = page.parent;
           if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
@@ -195,7 +178,6 @@ export default class NoteManager {
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
-
     if (game.user.isGM && page.getFlag(MODULE.ID, 'isDescriptionPage')) NoteManager.#syncDescriptionToCalendar(page);
   }
 
@@ -215,7 +197,6 @@ export default class NoteManager {
 
   /**
    * Handle deleteJournalEntry hook.
-   * Cleans up index when parent journal is deleted (pages may not fire individual hooks).
    * @param {JournalEntry} journal - The deleted journal
    * @param {object} _options - Deletion options
    * @param {string} _userId - User ID who deleted the journal
@@ -308,14 +289,11 @@ export default class NoteManager {
       if (!activeCalendar?.metadata?.id) throw new Error('No active calendar found');
       calendarId = activeCalendar.metadata.id;
     }
-
-    // If user lacks JournalEntry create permission, socket to GM
     if (!game.user.isGM && !game.user.can('JOURNAL_CREATE')) {
       CalendariaSocket.emit(SOCKET_TYPES.CREATE_NOTE, { name, content, noteData: sanitized, calendarId, journalData, requesterId: game.user.id, openSheet });
       log(3, `Note creation requested via GM: ${name}`);
       return null;
     }
-
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) throw new Error(`Calendar not found: ${calendarId}`);
     const folder = await this.getCalendarFolder(calendarId, calendar);
@@ -348,7 +326,6 @@ export default class NoteManager {
       page = journal.pages.get(pageId);
       if (page) break;
     }
-
     if (!page) throw new Error(`Journal entry page not found: ${pageId}`);
     const updateData = {};
     if (updates.name !== undefined) {
@@ -363,14 +340,9 @@ export default class NoteManager {
       if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
       updateData.system = sanitizeNoteData(mergedNoteData);
     }
-
-    try {
-      await page.update(updateData);
-      log(3, `Updated calendar note: ${page.name}`);
-      return page;
-    } catch (error) {
-      log(1, `Error updating calendar note:`, error);
-    }
+    await page.update(updateData);
+    log(3, `Updated calendar note: ${page.name}`);
+    return page;
   }
 
   /**
@@ -388,9 +360,7 @@ export default class NoteManager {
         break;
       }
     }
-
     if (!page) throw new Error(`Journal entry page not found: ${pageId}`);
-
     try {
       if (parentJournal?.getFlag(MODULE.ID, 'isCalendarNote')) {
         await parentJournal.delete();
@@ -453,13 +423,11 @@ export default class NoteManager {
       const page = this.getFullNote(note.id);
       if (page) pagesToDelete.push(page);
     }
-
     let deletedCount = 0;
     for (const page of pagesToDelete) {
       await page.delete();
       deletedCount++;
     }
-
     log(3, `Deleted ${deletedCount} calendar notes`);
     return deletedCount;
   }
@@ -481,14 +449,12 @@ export default class NoteManager {
       if (targetCalendarId && stub.calendarId !== targetCalendarId) continue;
       if (this.#matchesDate(stub, targetDate)) matchingNotes.push(stub);
     }
-
     const minutesPerHour = CalendarManager.getActiveCalendar()?.days?.minutesPerHour ?? 60;
     matchingNotes.sort((a, b) => {
       const aTime = a.flagData.allDay ? 0 : a.flagData.startDate.hour * minutesPerHour + a.flagData.startDate.minute;
       const bTime = b.flagData.allDay ? 0 : b.flagData.startDate.hour * minutesPerHour + b.flagData.startDate.minute;
       return aTime - bTime;
     });
-
     return matchingNotes;
   }
 
@@ -516,7 +482,6 @@ export default class NoteManager {
         if (occurrences.length > 0) matchingNotes.push(stub);
       }
     }
-
     return matchingNotes;
   }
 
@@ -571,7 +536,6 @@ export default class NoteManager {
 
   /**
    * Get or create the Folder for a specific calendar's notes.
-   * Each calendar has its own subfolder inside the Calendar Notes folder.
    * @param {string} calendarId  Calendar ID
    * @param {object} calendar  Calendar data
    * @returns {Promise<Folder|null>}  Calendar folder or null
@@ -581,14 +545,12 @@ export default class NoteManager {
       log(2, `Cannot get calendar folder: calendar ${calendarId} not found`);
       return null;
     }
-
     const parentFolder = await this.getCalendarNotesFolder();
     if (!parentFolder) return null;
     const existing = game.folders.find((f) => {
       const flagId = f.getFlag(MODULE.ID, 'calendarId');
       return f.type === 'JournalEntry' && flagId === calendarId;
     });
-
     if (existing) return existing;
     if (game.user.isGM) {
       try {
@@ -602,13 +564,11 @@ export default class NoteManager {
         return null;
       }
     }
-
     return null;
   }
 
   /**
    * Migrate legacy calendar journals to new folder-based structure.
-   * Converts each note page in a calendar journal to its own JournalEntry.
    * @returns {Promise<void>}
    * @private
    */
@@ -621,7 +581,6 @@ export default class NoteManager {
       if (!calendarId) continue;
       const calendar = CalendarManager.getCalendar(calendarId);
       if (!calendar) {
-        // Delete orphaned legacy journals whose calendar no longer exists
         if (game.user.isGM) {
           log(3, `Deleting orphaned legacy journal "${journal.name}" - calendar ${calendarId} no longer exists`);
           this.#bypassDeleteProtection = true;
@@ -635,35 +594,19 @@ export default class NoteManager {
       const notePages = journal.pages.filter((p) => p.type === 'calendaria.calendarnote');
       log(3, `Migrating ${notePages.length} notes from ${journal.name}`);
       for (const page of notePages) {
-        try {
-          const noteData = page.system;
-          const ownership = noteData?.gmOnly ? { default: 0 } : { default: 2 };
-          const newJournal = await JournalEntry.create({ name: page.name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } } });
-          await JournalEntryPage.create(
-            {
-              name: page.name,
-              type: 'calendaria.calendarnote',
-              system: noteData,
-              text: { content: page.text?.content || '' },
-              title: { level: 1, show: true },
-              flags: { [MODULE.ID]: { calendarId } }
-            },
-            { parent: newJournal }
-          );
-
-          log(3, `Migrated note: ${page.name}`);
-        } catch (error) {
-          log(1, `Error migrating note ${page.name}:`, error);
-        }
+        const noteData = page.system;
+        const ownership = noteData?.gmOnly ? { default: 0 } : { default: 2 };
+        const newJournal = await JournalEntry.create({ name: page.name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } } });
+        await JournalEntryPage.create(
+          { name: page.name, type: 'calendaria.calendarnote', system: noteData, text: { content: page.text?.content || '' }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
+          { parent: newJournal }
+        );
+        log(3, `Migrated note: ${page.name}`);
       }
-      try {
-        const originalName = journal.name;
-        await journal.update({ name: `(DELETEME) - ${originalName}` });
-        await journal.unsetFlag(MODULE.ID, 'isCalendarJournal');
-        log(2, `Renamed legacy calendar journal: ${originalName} → (DELETEME) - ${originalName}`);
-      } catch (error) {
-        log(1, `Error renaming legacy journal ${journal.name}:`, error);
-      }
+      const originalName = journal.name;
+      await journal.update({ name: `(DELETEME) - ${originalName}` });
+      await journal.unsetFlag(MODULE.ID, 'isCalendarJournal');
+      log(2, `Renamed legacy calendar journal: ${originalName} → (DELETEME) - ${originalName}`);
     }
     await this.#buildIndex();
     log(3, 'Calendar journal migration complete');
@@ -671,7 +614,6 @@ export default class NoteManager {
 
   /**
    * Sync description page content to calendar.metadata.description.
-   * Legacy support for old calendar journals.
    * @param {object} page  Description page
    * @returns {Promise<void>}
    * @private
@@ -701,29 +643,20 @@ export default class NoteManager {
       const folder = game.folders.get(this.#notesFolderId);
       if (folder) return folder;
     }
-
     const existing = game.folders.find((f) => {
       const isCalendarFolder = f.getFlag(MODULE.ID, 'isCalendarNotesFolder');
       return f.type === 'JournalEntry' && isCalendarFolder;
     });
-
     if (existing) {
       this.#notesFolderId = existing.id;
       return existing;
     }
-
     if (game.user.isGM) {
-      try {
-        const folder = await Folder.create({ name: localize('CALENDARIA.Note.CalendarNotesFolder'), type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
-        this.#notesFolderId = folder.id;
-        log(3, 'Created Calendar Notes folder');
-        return folder;
-      } catch (error) {
-        log(1, 'Error creating Calendar Notes folder:', error);
-        return null;
-      }
+      const folder = await Folder.create({ name: localize('CALENDARIA.Note.CalendarNotesFolder'), type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
+      this.#notesFolderId = folder.id;
+      log(3, 'Created Calendar Notes folder');
+      return folder;
     }
-
     return null;
   }
 

@@ -1,6 +1,5 @@
 /**
  * Calendarium (Obsidian) Importer
- * Imports calendar data from Calendarium Obsidian plugin data.json exports.
  * @module Importers/CalendariumImporter
  * @author Tyler
  */
@@ -47,22 +46,18 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {boolean} - Is valid export
    */
   static isCalendariumExport(data) {
-    // Check for wrapped calendars array format
     if (data.calendars && Array.isArray(data.calendars) && data.calendars[0]?.static?.months && data.calendars[0]?.static?.weekdays) return true;
-    // Check for single calendar object format (direct export)
     if (data.static?.months && data.static?.weekdays) return true;
     return false;
   }
 
   /**
    * Normalize Calendarium data to expected format.
-   * Wraps single calendar exports in a calendars array.
    * @param {object} data - Raw Calendarium data
    * @returns {object} - Normalized data with calendars array
    */
   static normalizeData(data) {
     if (data.calendars && Array.isArray(data.calendars)) return data;
-    // Wrap single calendar object in calendars array
     return { calendars: [data] };
   }
 
@@ -120,7 +115,6 @@ export default class CalendariumImporter extends BaseImporter {
 
   /**
    * Transform Calendarium months to Calendaria format.
-   * Includes per-month custom weekdays if present.
    * @param {object[]} months - Calendarium months array
    * @returns {object[]} - Transformed months array
    */
@@ -135,15 +129,7 @@ export default class CalendariumImporter extends BaseImporter {
         startingWeekday: null,
         leapDays: null
       };
-
-      if (m.week && Array.isArray(m.week) && m.week.length > 0) {
-        month.weekdays = m.week.map((wd) => ({
-          name: wd.name,
-          abbreviation: wd.name?.substring(0, 2) || '',
-          isRestDay: false
-        }));
-      }
-
+      if (m.week && Array.isArray(m.week) && m.week.length > 0) month.weekdays = m.week.map((wd) => ({ name: wd.name, abbreviation: wd.name?.substring(0, 2) || '', isRestDay: false }));
       return month;
     });
   }
@@ -160,7 +146,6 @@ export default class CalendariumImporter extends BaseImporter {
       const details = monthsWithCustomWeeks.map((m) => m.name).join(', ');
       log(3, `Imported custom weekdays for months: ${details}`);
     }
-
     return weekdays.map((wd, idx) => ({ name: wd.name, abbreviation: wd.name.substring(0, 2), ordinal: idx + 1 }));
   }
 
@@ -246,7 +231,6 @@ export default class CalendariumImporter extends BaseImporter {
       monthDayStarts.push(dayCount);
       dayCount += m.days || 0;
     }
-
     const isDated = seasons[0]?.date != null;
     if (isDated) return { type: 'dated', offset: 0, values: this.#transformDatedSeasons(seasons, monthDayStarts, daysPerYear) };
     else return { type: 'periodic', offset: seasonal.offset || 0, values: this.#transformPeriodicSeasons(seasons, daysPerYear) };
@@ -265,7 +249,6 @@ export default class CalendariumImporter extends BaseImporter {
       const bDay = (monthDayStarts[b.date?.month] ?? 0) + (b.date?.day ?? 0);
       return aDay - bDay;
     });
-
     return sortedSeasons.map((season, index) => {
       const dayStart = (monthDayStarts[season.date?.month] ?? 0) + (season.date?.day ?? 0);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
@@ -303,12 +286,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed eras array
    */
   #transformEras(eras = []) {
-    return eras.map((era) => ({
-      name: era.name || localize('CALENDARIA.Common.Era'),
-      abbreviation: era.name?.substring(0, 3) || 'E',
-      startYear: era.date?.year ?? 0,
-      endYear: era.end?.year ?? null
-    }));
+    return eras.map((era) => ({ name: era.name || localize('CALENDARIA.Common.Era'), abbreviation: era.name?.substring(0, 3) || 'E', startYear: era.date?.year ?? 0, endYear: era.end?.year ?? null }));
   }
 
   /**
@@ -362,14 +340,9 @@ export default class CalendariumImporter extends BaseImporter {
     this._undatedEvents = [];
     log(3, `Extracting ${events.length} events from Calendarium`);
     for (const event of events) {
-      try {
-        const note = this.#transformEvent(event);
-        if (note) notes.push(note);
-      } catch (error) {
-        log(1, `Error transforming event "${event.name}":`, error);
-      }
+      const note = this.#transformEvent(event);
+      if (note) notes.push(note);
     }
-
     log(3, `Extracted ${notes.length} notes from Calendarium`);
     return notes;
   }
@@ -386,7 +359,6 @@ export default class CalendariumImporter extends BaseImporter {
       this._undatedEvents.push({ name, content: description || '', category: categoryData?.name || 'default' });
       return null;
     }
-
     if (type === 'Date') {
       return {
         name,
@@ -399,7 +371,6 @@ export default class CalendariumImporter extends BaseImporter {
         suggestedType: 'note'
       };
     }
-
     if (type === 'Range') {
       return {
         name,
@@ -413,7 +384,6 @@ export default class CalendariumImporter extends BaseImporter {
         suggestedType: 'note'
       };
     }
-
     if (type === 'Recurring') {
       const pattern = this.#detectRecurringPattern(date);
       return {
@@ -430,7 +400,6 @@ export default class CalendariumImporter extends BaseImporter {
         importWarnings: pattern.warnings
       };
     }
-
     return {
       name,
       content: description || '',
@@ -479,7 +448,6 @@ export default class CalendariumImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-
     for (const note of notes) {
       try {
         const noteData = {
@@ -491,9 +459,7 @@ export default class CalendariumImporter extends BaseImporter {
           rangePattern: note.rangePattern || null,
           gmOnly: note.gmOnly
         };
-
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
           log(3, `Created note: ${note.name}`);
@@ -505,7 +471,6 @@ export default class CalendariumImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Calendarium Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };

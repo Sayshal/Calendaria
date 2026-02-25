@@ -11,7 +11,7 @@ vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
   return { default: CalendarManager, defaultCalendar };
 });
 
-import { compareDates, isSameDay, compareDays, monthsBetween, addMonths, addYears, isValidDate } from '../../scripts/notes/utils/date-utils.mjs';
+import { compareDates, isSameDay, compareDays, monthsBetween, addMonths, addYears, isValidDate } from '../../scripts/notes/date-utils.mjs';
 
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 

@@ -1,6 +1,5 @@
 /**
  * Macro Utility Functions
- * Helpers for executing macros from various trigger points.
  * @module Utils/MacroUtils
  * @author Tyler
  */

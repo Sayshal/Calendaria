@@ -17,7 +17,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   }
 }));
 
-import { ordinal, toRomanNumeral, dateFormattingParts, formatShort, formatLong, formatFull, formatTime, formatTime12 } from '../../scripts/utils/format-utils.mjs';
+import { ordinal, toRomanNumeral, dateFormattingParts, formatShort, formatLong, formatFull, formatTime, formatTime12 } from '../../scripts/utils/formatting/format-utils.mjs';
 import { addCalendarGetters } from '../__mocks__/calendar-manager.mjs';
 
 /* -------------------------------------------- */

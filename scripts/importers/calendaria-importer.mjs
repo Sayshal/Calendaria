@@ -1,6 +1,5 @@
 /**
  * Calendaria Importer
- * Imports calendar data exported from Calendaria.
  * @module Importers/CalendariaImporter
  * @author Tyler
  */
@@ -10,8 +9,6 @@ import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Calendaria JSON exports.
- * Since exported data is already in Calendaria format, minimal transformation is needed.
- * Also accepts settings export files that contain calendarData.
  * @extends BaseImporter
  */
 export default class CalendariaImporter extends BaseImporter {
@@ -29,7 +26,6 @@ export default class CalendariaImporter extends BaseImporter {
    * @returns {object} Calendar data (extracted from settings export or original)
    */
   #extractCalendarData(data) {
-    // Detect settings export format: has settings object and calendarData
     if (data.settings && data.calendarData?.name) {
       log(3, 'Detected settings export file, extracting calendarData');
       return data.calendarData;
@@ -72,8 +68,6 @@ export default class CalendariaImporter extends BaseImporter {
 
   /**
    * Transform Calendaria export data.
-   * Validates structure and passes through with minimal changes.
-   * Also handles settings export files by extracting calendarData.
    * @param {object} data - Raw Calendaria export data or settings export
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */

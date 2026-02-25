@@ -1,19 +1,21 @@
 /**
  * TimeClock - Real-time clock controller for Calendaria.
- * Manages automatic time advancement with configurable intervals and increments.
  * @module Time/TimeClock
  * @author Tyler
  */
 
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
+import { updateDarknessFromWorldTime } from '../time/darkness.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canChangeDateTime } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
+import EventScheduler from './event-scheduler.mjs';
+import ReminderScheduler from './reminder-scheduler.mjs';
+import TimeTracker from './time-tracker.mjs';
 
 /**
  * Get calendar-aware time increment presets in seconds.
- * Values for day, week, month, and year are calculated from the active calendar.
  * @returns {Object<string, number>} Time increment presets
  */
 export function getTimeIncrements() {
@@ -69,17 +71,25 @@ export default class TimeClock {
   /** @type {Map<string, {incrementKey: string, multiplier: number}>} Per-app settings */
   static #appSettings = new Map();
 
-  /** @returns {boolean} Whether the clock is running */
+  /**
+   * Whether the clock is running.
+   * @returns {boolean} True if running
+   */
   static get running() {
     return this.#running;
   }
 
-  /** @returns {boolean} Whether the clock is locked */
+  /**
+   * Whether the clock is locked.
+   * @returns {boolean} True if locked
+   */
   static get locked() {
     return this.#locked;
   }
 
-  /** Toggle the clock lock state. When locked, all time advancement is blocked. */
+  /**
+   * Toggle the clock lock state. When locked, all time advancement is blocked.
+   */
   static async toggleLock() {
     this.#locked = !this.#locked;
     if (this.#locked && this.#running) this.stop();
@@ -89,22 +99,34 @@ export default class TimeClock {
     log(3, `Clock lock ${this.#locked ? 'engaged' : 'released'}`);
   }
 
-  /** @returns {number} Current time increment in seconds (for manual advancement) */
+  /**
+   * Current time increment in seconds (for manual advancement).
+   * @returns {number} Increment in seconds
+   */
   static get increment() {
     return this.#increment;
   }
 
-  /** @returns {string} Current increment key (for manual advancement) */
+  /**
+   * Current increment key (for manual advancement).
+   * @returns {string} Increment key
+   */
   static get incrementKey() {
     return this.#incrementKey;
   }
 
-  /** @returns {number} Real-time clock speed (game seconds per real second) */
+  /**
+   * Real-time clock speed (game seconds per real second).
+   * @returns {number} Speed multiplier
+   */
   static get realTimeSpeed() {
     return this.#realTimeSpeed;
   }
 
-  /** @returns {number} Predicted world time including accumulated seconds for UI display */
+  /**
+   * Predicted world time including accumulated seconds for UI display.
+   * @returns {number} Predicted world time in seconds
+   */
   static get predictedWorldTime() {
     return game.time.worldTime + this.#accumulatedSeconds;
   }
@@ -126,7 +148,6 @@ export default class TimeClock {
     this.loadSpeedFromSettings();
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
     Hooks.on('updateWorldTime', (_worldTime, delta) => {
-      // Subtract committed delta rather than zeroing — preserves seconds accumulated during async advance
       this.#accumulatedSeconds = Math.max(0, this.#accumulatedSeconds - Math.abs(delta));
     });
     Hooks.on('pauseGame', this.#onPauseGame.bind(this));
@@ -138,7 +159,6 @@ export default class TimeClock {
 
   /**
    * Auto-start clock if sync enabled and game unpaused.
-   * Called during initialization (which happens on ready).
    */
   static #autoStartIfSynced() {
     if (!CalendariaSocket.isPrimaryGM()) return;
@@ -150,7 +170,6 @@ export default class TimeClock {
 
   /**
    * Load real-time clock speed from settings.
-   * Called on init and when settings change.
    */
   static loadSpeedFromSettings() {
     const multiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER) || 1;
@@ -159,8 +178,6 @@ export default class TimeClock {
     const incrementSeconds = increments[incrementKey] || 1;
     this.#realTimeSpeed = multiplier * incrementSeconds;
     log(3, `TimeClock real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
-
-    // Restart intervals if running to apply new speed
     if (this.#running) {
       this.#stopIntervals();
       this.#startIntervals();
@@ -169,13 +186,11 @@ export default class TimeClock {
 
   /**
    * Handle game pause/unpause to sync clock state.
-   * When sync is enabled, clock resumes at settings-configured speed on unpause.
    * @param {boolean} paused - Whether the game is paused
    */
   static #onPauseGame(paused) {
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
     if (!CalendariaSocket.isPrimaryGM()) return;
-
     if (paused) {
       if (this.#running) this.stop();
       log(3, 'Clock stopped (game paused)');
@@ -199,7 +214,6 @@ export default class TimeClock {
 
   /**
    * Handle combat end to resume clock.
-   * Only auto-resumes if sync-with-pause is enabled.
    * @param {object} _combat - The combat that ended
    */
   static #onCombatEnd(_combat) {
@@ -226,23 +240,18 @@ export default class TimeClock {
       ui.notifications.warn('CALENDARIA.TimeClock.NoPermission', { localize: true });
       return;
     }
-
-    // Always prevent start during combat
     if (game.combat?.started) {
       log(3, 'Clock start blocked (combat active)');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
       return;
     }
-
-    // When sync is enabled, prevent start if game is paused
     if (game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE) && game.paused) {
       log(3, 'Clock start blocked (sync active, game paused)');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
       return;
     }
-
     this.#running = true;
     this.#accumulatedSeconds = 0;
     this.#startIntervals();
@@ -275,7 +284,6 @@ export default class TimeClock {
 
   /**
    * Set the time increment for manual advancement.
-   * Does not affect real-time clock speed (controlled by settings).
    * @param {string} key - Increment key from getTimeIncrements()
    */
   static setIncrement(key) {
@@ -416,7 +424,9 @@ export default class TimeClock {
     return (game.settings?.get(MODULE.ID, SETTINGS.TIME_ADVANCE_INTERVAL) ?? 60) * 1000;
   }
 
-  /** Restart advance/visual intervals (e.g. after changing advance interval setting). */
+  /**
+   * Restart advance/visual intervals (e.g. after changing advance interval setting).
+   */
   static restartIntervals() {
     if (!this.#running) return;
     this.#stopIntervals();
@@ -425,8 +435,6 @@ export default class TimeClock {
 
   /**
    * Start the visual tick and advance intervals.
-   * When advance interval is 1s, commits directly each tick (no accumulation).
-   * Otherwise, accumulates and commits periodically with day-boundary flush.
    * @private
    */
   static #startIntervals() {
@@ -435,9 +443,7 @@ export default class TimeClock {
     const intervalMs = this.ADVANCE_INTERVAL_MS;
     const directMode = intervalMs <= 1000;
     log(3, `TimeClock intervals started (speed: ${speed}, advance every ${intervalMs / 1000}s, direct: ${directMode})`);
-
     if (directMode) {
-      // Direct mode — await advance so worldTime is committed before firing visual tick
       let advancing = false;
       this.#visualIntervalId = setInterval(async () => {
         if (!this.#running || game.combat?.started || advancing) return;
@@ -451,15 +457,11 @@ export default class TimeClock {
       }, 1000);
       return;
     }
-
-    // Buffered mode — accumulate and commit periodically
     this.#visualIntervalId = setInterval(() => {
       if (!this.#running || game.combat?.started) return;
       this.#accumulatedSeconds += speed;
       const predicted = this.predictedWorldTime;
       Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: predicted });
-
-      // Flush immediately when predicted time crosses a day boundary
       if (!this.#flushing && CalendariaSocket.isPrimaryGM() && this.#accumulatedSeconds > 0) {
         const cal = game.time?.calendar;
         if (cal) {
@@ -476,7 +478,6 @@ export default class TimeClock {
         }
       }
     }, 1000);
-
     this.#advanceIntervalId = setInterval(async () => {
       if (!this.#running || game.combat?.started) return;
       if (!CalendariaSocket.isPrimaryGM()) return;
@@ -529,7 +530,6 @@ export default class TimeClock {
       this.#incrementKey = key;
       this.#increment = ratio;
     }
-
     if (running && !this.#running) {
       this.#running = true;
       this.#accumulatedSeconds = 0;
@@ -571,5 +571,28 @@ export default class TimeClock {
     const yearZero = cal.years?.yearZero ?? 0;
     const year = components.year + yearZero;
     return `${day} ${monthName}, ${year}`;
+  }
+
+  /**
+   * Block combat round/turn time advancement when the clock is locked.
+   * @param {object} _combat - The combat document
+   * @param {object} _updateData - The update data
+   * @param {object} updateOptions - The update options containing worldTime delta
+   */
+  static onCombatTimeBlock(_combat, _updateData, updateOptions) {
+    if (TimeClock.locked && updateOptions.worldTime) updateOptions.worldTime.delta = 0;
+  }
+
+  /**
+   * Unified updateWorldTime handler — dispatches to all time subsystems.
+   * @param {number} worldTime - The new world time
+   * @param {number} dt - The delta time in seconds
+   */
+  static async onUpdateWorldTime(worldTime, dt) {
+    EventScheduler.onUpdateWorldTime(worldTime, dt);
+    await updateDarknessFromWorldTime(worldTime, dt);
+    ReminderScheduler.onUpdateWorldTime(worldTime, dt);
+    TimeTracker.onUpdateWorldTime(worldTime, dt);
+    Hooks.callAll(HOOKS.WORLD_TIME_UPDATED, worldTime, dt);
   }
 }

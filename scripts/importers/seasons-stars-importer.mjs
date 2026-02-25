@@ -1,6 +1,5 @@
 /**
  * Seasons & Stars Importer
- * Imports calendar data from the Seasons & Stars module.
  * @module Importers/SeasonsStarsImporter
  * @author Tyler
  */
@@ -14,7 +13,6 @@ import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Seasons & Stars module data.
- * Handles both file uploads and live import from installed module.
  * @extends BaseImporter
  */
 export default class SeasonsStarsImporter extends BaseImporter {
@@ -45,12 +43,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendarData = game.settings.get('seasons-and-stars', 'activeCalendarData');
     if (!calendarData) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NoCalendar'));
     let worldEvents = [];
-    try {
-      worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
-    } catch (e) {
-      log(1, 'No world events found in S&S settings', e);
-    }
-
+    worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
     let currentDate = null;
     if (game.seasonsStars?.api?.getCurrentDate) {
       const ssDate = game.seasonsStars.api.getCurrentDate();
@@ -106,7 +99,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
       remainingDays -= monthDays;
       month = i + 1;
     }
-
     const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
@@ -127,7 +119,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const months = this.#transformMonths(calendar.months);
     const daysPerYear = months.reduce((sum, m) => sum + m.days, 0);
-
     return {
       name: label,
       days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
@@ -165,7 +156,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
-
     return weekdays.map((day, index) => ({ name: day.name, abbreviation: day.abbreviation || day.name.substring(0, 2), ordinal: index + 1 }));
   }
 
@@ -333,7 +323,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
       } else {
         continue;
       }
-
       const dayCount = item.days ?? 1;
       for (let d = 0; d < dayCount; d++) {
         const festival = { name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name, month: monthIndex + 1, day: dayInMonth + d };
@@ -342,7 +331,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         festivals.push(festival);
       }
     }
-
     return festivals;
   }
 
@@ -361,7 +349,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const [h, m] = (timeStr || '0:0').split(':').map(Number);
       return h + m / 60;
     };
-
     const winterDaylight = parseTime(winterSolstice.sunset) - parseTime(winterSolstice.sunrise);
     const summerDaylight = parseTime(summerSolstice.sunset) - parseTime(summerSolstice.sunrise);
     let dayIndex = 0;
@@ -460,7 +447,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
       icon: event.icon || 'fas fa-calendar-day',
       suggestedType: 'note'
     };
-
     const rec = event.recurrence;
     if (rec) {
       if (rec.type === 'fixed') {
@@ -481,7 +467,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.startDate = { year: rec.anchorYear ?? 1, month: (rec.month ?? 1) - 1, day: rec.day ?? 1 };
       }
     }
-
     if (!note.startDate && event.startDate) note.startDate = { year: event.startDate.year ?? 1, month: (event.startDate.month ?? 1) - 1, day: event.startDate.day ?? 1 };
     if (event.duration) {
       const match = event.duration.match(/^(\d+)([dhmsw])$/);
@@ -491,7 +476,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.duration = parseInt(value) * (durationMap[unit] || 1);
       }
     }
-
     return note;
   }
 
@@ -515,7 +499,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, day: 1 };
         const noteData = { startDate, allDay: true, repeat: note.repeat || 'never' };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
           log(3, `Successfully created note: ${note.name}`);
@@ -527,7 +510,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }

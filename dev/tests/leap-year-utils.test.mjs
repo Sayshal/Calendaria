@@ -17,7 +17,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   }
 }));
 
-import { parseInterval, parsePattern, voteOnYear, intersectsYear, isLeapYear, getLeapYearDescription } from '../../scripts/calendar/leap-year-utils.mjs';
+import { parseInterval, parsePattern, voteOnYear, intersectsYear, isLeapYear, getLeapYearDescription } from '../../scripts/calendar/calendar-utils.mjs';
 
 /* -------------------------------------------- */
 /*  parseInterval()                             */

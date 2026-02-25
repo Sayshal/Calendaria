@@ -1,6 +1,5 @@
 /**
  * Fantasy-Calendar.com Importer
- * Imports calendar data from Fantasy-Calendar.com JSON exports.
  * @module Importers/FantasyCalendarImporter
  * @author Tyler
  */
@@ -90,7 +89,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const daysInWeek = weekdays.length || 7;
     const year0FirstWeekday = ((yearData.first_day ?? 1) - 1 + daysInWeek) % daysInWeek;
     log(3, `FC first_day: ${yearData.first_day}, converted firstWeekday: ${year0FirstWeekday}, yearZero: 1`);
-
     return {
       name: data.name || localize('CALENDARIA.Importer.Fallback.CalendarName'),
       days: { values: weekdays, ...this.#transformTime(staticData.clock), daysPerYear },
@@ -151,7 +149,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       const current = leapDaysByMonth.get(ld.timespan) || 0;
       leapDaysByMonth.set(ld.timespan, current + 1);
     }
-
     return timespans.map((ts, index) => {
       const extraLeapDays = leapDaysByMonth.get(index) || 0;
       return {
@@ -183,7 +180,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
-
     return weekdays.map((name, index) => ({ name, abbreviation: name.substring(0, 2), ordinal: index + 1 }));
   }
 
@@ -205,7 +201,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       const num = parseInt(interval, 10);
       if (num > 0) return { rule: 'simple', interval: num, start: ld.offset ?? 0 };
     }
-
     return null;
   }
 
@@ -229,7 +224,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       const bDay = (monthDayStarts[b.timespan] ?? 0) + (b.day ?? 0);
       return aDay - bDay;
     });
-
     return sortedSeasons.map((season, index) => {
       const dayStart = (monthDayStarts[season.timespan] ?? 0) + (season.day ?? 0);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
@@ -357,7 +351,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         log(1, `Error transforming event "${event.name}":`, error);
       }
     }
-
     log(3, `Extracted ${notes.length} notes from Fantasy-Calendar`);
     return notes;
   }
@@ -375,7 +368,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       const note = this.#transformEvent(event, data);
       return note ? [note] : [];
     }
-
     log(3, `Splitting event "${event.name}" into ${orBranches.length} notes (OR conditions)`);
     const notes = [];
     for (let i = 0; i < orBranches.length; i++) {
@@ -387,7 +379,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         notes.push(note);
       }
     }
-
     return notes;
   }
 
@@ -414,7 +405,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         }
       }
     };
-
     processLevel(conditions);
     if (currentBranch.length > 0) branches.push(currentBranch);
     return branches.length > 0 ? branches : [conditions];
@@ -435,7 +425,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       this._undatedEvents.push({ name: event.name, content: event.description || '', category: category?.name || 'default' });
       return null;
     }
-
     const eventType = this.#detectEventType(conditions, data);
     if (eventType.warnings?.length) for (const warning of eventType.warnings) log(2, `Event "${event.name}": ${warning}`);
     const category = this._categories?.get(event.event_category_id);
@@ -444,7 +433,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const isOneTimeEvent = Array.isArray(event.data?.date) && event.data.date.length >= 3;
     const isRandomEvent = eventType.repeat === 'random';
     const suggestedType = isOneTimeEvent || isRandomEvent ? 'note' : 'festival';
-
     const noteData = {
       name: event.name,
       content: event.description || '',
@@ -458,7 +446,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       originalId: event.id,
       suggestedType
     };
-
     if (eventType.moonConditions?.length) noteData.moonConditions = eventType.moonConditions;
     if (eventType.randomConfig) noteData.randomConfig = eventType.randomConfig;
     if (event.data?.limited_repeat && event.data?.limited_repeat_num > 0) noteData.maxOccurrences = event.data.limited_repeat_num;
@@ -492,12 +479,10 @@ export default class FantasyCalendarImporter extends BaseImporter {
       }
       return result;
     }
-
     if (types.has('Date') && !types.has('Month') && !types.has('Day')) {
       result.repeat = 'never';
       return result;
     }
-
     if (types.has('Weekday') && !types.has('Month') && !types.has('Day')) {
       const weekdayCond = flatConditions.find((c) => c[0] === 'Weekday');
       if (weekdayCond) {
@@ -509,7 +494,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       }
       return result;
     }
-
     if (types.has('Season') && !types.has('Month') && !types.has('Day')) {
       const seasonCond = flatConditions.find((c) => c[0] === 'Season');
       const conditionType = parseInt(seasonCond?.[1]) || 0;
@@ -520,7 +504,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       result.seasonalConfig = { seasonIndex, trigger };
       return result;
     }
-
     if (types.has('Weekday')) {
       const weekdayCond = flatConditions.find((c) => c[0] === 'Weekday');
       const conditionType = parseInt(weekdayCond?.[1]) || 0;
@@ -534,7 +517,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         result.weekday = weekdayIndex >= 0 ? weekdayIndex : 0;
         return result;
       }
-
       if (conditionType >= 14 && conditionType <= 19) {
         const weekdayName = weekdayCond?.[2]?.[0];
         const inverseNum = parseInt(weekdayCond?.[2]?.[1]) || 1;
@@ -546,7 +528,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         return result;
       }
     }
-
     if (types.has('Week') && !types.has('Day')) {
       const weekCond = flatConditions.find((c) => c[0] === 'Week');
       result.repeat = 'weekOfMonth';
@@ -560,7 +541,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       }
       return result;
     }
-
     if (types.has('Year') && !types.has('Month') && !types.has('Day')) {
       const yearCond = flatConditions.find((c) => c[0] === 'Year');
       const years = yearCond?.[2] || [];
@@ -571,7 +551,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         result.repeat = 'never';
       }
     }
-
     if (types.has('Moons')) {
       const moonCond = flatConditions.find((c) => c[0] === 'Moons');
       if (moonCond) {
@@ -582,7 +561,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         if (!types.has('Month') && !types.has('Day')) result.repeat = 'moon';
       }
     }
-
     if (types.has('Month') && types.has('Day')) result.repeat = 'yearly';
     else if (types.has('Day') && !types.has('Month')) result.repeat = 'monthly';
     return result;
@@ -624,7 +602,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
 
   /**
    * Extract advanced conditions from FC flat conditions.
-   * Converts FC condition format to Calendaria conditions array.
    * @param {Array} flatConditions - Flattened FC conditions
    * @param {object} data - Full FC data for context
    * @returns {object[]} Array of condition objects
@@ -670,7 +647,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
           break;
       }
     }
-
     return conditions;
   }
 
@@ -707,43 +683,36 @@ export default class FantasyCalendarImporter extends BaseImporter {
 
   /**
    * Map FC Day condition to Calendaria condition format.
-   * Handles day of month, day of year, days before month end, and intercalary checks.
    * @param {number} ti - Type index determining field and comparison operator
    * @param {Array} values - Condition values [day, offset?]
    * @returns {object[]} - Array of condition objects
    */
   #mapDayCondition(ti, values) {
     const value = parseInt(values?.[0]) || 0;
-
     if (ti <= 6) {
       const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
       const op = ops[ti] || '==';
       if (op === '%') return [{ field: 'day', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'day', op, value }];
     }
-
     if (ti >= 7 && ti <= 13) {
       const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
       const op = ops[ti - 7] || '==';
       if (op === '%') return [{ field: 'dayOfYear', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'dayOfYear', op, value }];
     }
-
     if (ti >= 14 && ti <= 19) {
       const ops = ['==', '!=', '>=', '<=', '>', '<'];
       const op = ops[ti - 14] || '==';
       return [{ field: 'daysBeforeMonthEnd', op, value }];
     }
-
     if (ti === 20) return [{ field: 'intercalary', op: '==', value: true }];
     if (ti === 21) return [{ field: 'intercalary', op: '==', value: false }];
-
     return [];
   }
 
   /**
    * Map FC Weekday condition to Calendaria condition format.
-   * Handles weekday matching, week number in month, and inverse week number.
    * @param {number} ti - Type index determining field and comparison operator
    * @param {Array} values - Condition values [weekdayName, weekNumber?]
    * @param {string[]} weekdays - Calendar weekday names for index lookup
@@ -753,36 +722,30 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const weekdayName = values?.[0];
     const weekdayIdx = weekdays.findIndex((w) => w.toLowerCase() === weekdayName?.toLowerCase());
     const weekdayValue = weekdayIdx >= 0 ? weekdayIdx : parseInt(values?.[0]) || 0;
-
     if (ti <= 1) {
       const op = ti === 0 ? '==' : '!=';
       return [{ field: 'weekday', op, value: weekdayValue }];
     }
-
     if (ti >= 2 && ti <= 7) {
       const ops = ['==', '!=', '>=', '<=', '>', '<'];
       const op = ops[ti - 2] || '==';
       return [{ field: 'weekday', op, value: parseInt(values?.[0]) || 0 }];
     }
-
     if (ti >= 8 && ti <= 13) {
       const ops = ['==', '!=', '>=', '<=', '>', '<'];
       const op = ops[ti - 8] || '==';
       return [{ field: 'weekNumberInMonth', op, value: parseInt(values?.[1]) || 1 }];
     }
-
     if (ti >= 14 && ti <= 19) {
       const ops = ['==', '!=', '>=', '<=', '>', '<'];
       const op = ops[ti - 14] || '==';
       return [{ field: 'inverseWeekNumber', op, value: parseInt(values?.[1]) || 1 }];
     }
-
     return [];
   }
 
   /**
    * Map FC Week condition to Calendaria condition format.
-   * Handles week in month, week in year, weeks before month/year end, and total week.
    * @param {number} ti - Type index determining field and comparison operator
    * @param {Array} values - Condition values [week, offset?]
    * @returns {object[]} - Array of condition objects
@@ -790,41 +753,34 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #mapWeekCondition(ti, values) {
     const value = parseInt(values?.[0]) || 0;
     const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
-
     if (ti <= 6) {
       const op = ops[ti] || '==';
       if (op === '%') return [{ field: 'weekInMonth', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'weekInMonth', op, value }];
     }
-
     if (ti >= 7 && ti <= 13) {
       const op = ops[ti - 7] || '==';
       if (op === '%') return [{ field: 'weekInYear', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'weekInYear', op, value }];
     }
-
     if (ti >= 14 && ti <= 19) {
       const op = ops[ti - 14] || '==';
       return [{ field: 'weeksBeforeMonthEnd', op, value }];
     }
-
     if (ti >= 20 && ti <= 25) {
       const op = ops[ti - 20] || '==';
       return [{ field: 'weeksBeforeYearEnd', op, value }];
     }
-
     if (ti >= 26 && ti <= 32) {
       const op = ops[ti - 26] || '==';
       if (op === '%') return [{ field: 'totalWeek', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'totalWeek', op, value }];
     }
-
     return [];
   }
 
   /**
    * Map FC Season condition to Calendaria condition format.
-   * Handles season index, season percent, season day, and solstice/equinox checks.
    * @param {number} ti - Type index determining field and comparison operator
    * @param {Array} values - Condition values [seasonIndex/value, offset?]
    * @returns {object[]} - Array of condition objects
@@ -832,34 +788,28 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #mapSeasonCondition(ti, values) {
     const value = parseInt(values?.[0]) || 0;
     const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
-
     if (ti <= 1) {
       const op = ti === 0 ? '==' : '!=';
       return [{ field: 'season', op, value }];
     }
-
     if (ti >= 2 && ti <= 7) {
       const op = ops[ti - 2] || '==';
       return [{ field: 'seasonPercent', op, value }];
     }
-
     if (ti >= 8 && ti <= 14) {
       const op = ops[ti - 8] || '==';
       if (op === '%') return [{ field: 'seasonDay', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'seasonDay', op, value }];
     }
-
     if (ti === 15) return [{ field: 'isLongestDay', op: '==', value: true }];
     if (ti === 16) return [{ field: 'isShortestDay', op: '==', value: true }];
     if (ti === 17) return [{ field: 'isSpringEquinox', op: '==', value: true }];
     if (ti === 18) return [{ field: 'isAutumnEquinox', op: '==', value: true }];
-
     return [];
   }
 
   /**
    * Map FC Moons condition to Calendaria condition format.
-   * Handles moon phase index, phase count per month, and phase count per year.
    * @param {number} ti - Type index determining field and comparison operator
    * @param {Array} values - Condition values [moonIndex, phaseValue]
    * @returns {object[]} - Array of condition objects
@@ -868,22 +818,18 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const moonIdx = parseInt(values?.[0]) || 0;
     const value = parseInt(values?.[1]) || 0;
     const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
-
     if (ti <= 6) {
       const op = ops[ti] || '==';
       return [{ field: 'moonPhaseIndex', op, value, value2: moonIdx }];
     }
-
     if (ti >= 7 && ti <= 13) {
       const op = ops[ti - 7] || '==';
       return [{ field: 'moonPhaseCountMonth', op, value, value2: moonIdx }];
     }
-
     if (ti >= 14 && ti <= 20) {
       const op = ops[ti - 14] || '==';
       return [{ field: 'moonPhaseCountYear', op, value, value2: moonIdx }];
     }
-
     return [];
   }
 
@@ -953,7 +899,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
           break;
       }
     }
-
     return date;
   }
 
@@ -974,7 +919,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         const startDate = { ...note.startDate };
         let endDate = null;
         if (note.duration > 1) endDate = this.#addDaysToDate(startDate, note.duration - 1, calendar);
-
         const noteData = {
           startDate,
           endDate,
@@ -990,9 +934,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
           conditions: note.conditions || [],
           gmOnly: note.gmOnly
         };
-
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
           log(3, `Created note: ${note.name}`);
@@ -1004,7 +946,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Fantasy-Calendar Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
@@ -1039,7 +980,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         }
       }
     }
-
     return { year, month, day };
   }
 

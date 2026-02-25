@@ -6,22 +6,22 @@
  */
 
 import { CalendariaAPI, createGlobalNamespace } from './scripts/api.mjs';
-import { HUD } from './scripts/applications/hud.mjs';
-import { MiniCal } from './scripts/applications/mini-cal.mjs';
-import { TimeKeeper } from './scripts/applications/time-keeper.mjs';
+import { HUD } from './scripts/applications/hud/hud.mjs';
+import { MiniCal } from './scripts/applications/calendar/mini-cal.mjs';
+import { TimeKeeper } from './scripts/applications/time/time-keeper.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
-import CalendariaCalendar from './scripts/calendar/data/calendaria-calendar.mjs';
-import { overrideChatLogTimestamps } from './scripts/chat/chat-timestamp.mjs';
-import { checkReleaseMessage } from './scripts/chat/release-message.mjs';
+import CalendariaCalendar from './scripts/data/calendaria-calendar.mjs';
+import { overrideChatLogTimestamps } from './scripts/utils/chat/chat-timestamp.mjs';
+import { checkReleaseMessage } from './scripts/utils/chat/release-message.mjs';
 import { HOOKS, JOURNALS, MODULE, SETTINGS, SHEETS, TEMPLATES } from './scripts/constants.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
-import { initializeImporters } from './scripts/importers/index.mjs';
+import { initializeImporters } from './scripts/importers/_module.mjs';
 import { initializeChatCommander } from './scripts/integrations/chat-commander.mjs';
 import { initializeFXMaster } from './scripts/integrations/fxmaster.mjs';
 import NoteManager from './scripts/notes/note-manager.mjs';
-import { registerReadySettings, registerSettings } from './scripts/settings.mjs';
-import { CalendarNoteDataModel } from './scripts/sheets/calendar-note-data-model.mjs';
-import { CalendarNoteSheet } from './scripts/sheets/calendar-note-sheet.mjs';
+import CalendariaSettings from './scripts/settings-handler.mjs';
+import { CalendarNoteDataModel } from './scripts/data/calendar-note-data-model.mjs';
+import { CalendarNoteSheet } from './scripts/applications/sheets/calendar-note-sheet.mjs';
 import EventScheduler from './scripts/time/event-scheduler.mjs';
 import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
 import TimeClock from './scripts/time/time-clock.mjs';
@@ -31,7 +31,7 @@ import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { runAllMigrations } from './scripts/utils/migrations.mjs';
 import { canViewMiniCal, canViewTimeKeeper } from './scripts/utils/permissions.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
-import * as StickyZones from './scripts/utils/sticky-zones.mjs';
+import * as StickyZones from './scripts/utils/ui/sticky-zones.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
 import { initializeWeatherSound } from './scripts/weather/weather-sound.mjs';
@@ -39,7 +39,7 @@ import { initializeWeatherSound } from './scripts/weather/weather-sound.mjs';
 Hooks.once('init', async () => {
   createGlobalNamespace();
   Hooks.callAll(HOOKS.INIT);
-  registerSettings();
+  CalendariaSettings.registerSettings();
   initializeLogger();
   registerKeybindings();
   registerHooks();
@@ -61,7 +61,7 @@ Hooks.once('dnd5e.setupCalendar', () => {
 });
 
 Hooks.once('ready', async () => {
-  registerReadySettings();
+  CalendariaSettings.registerReadySettings();
   await CalendarManager.initialize();
   await runAllMigrations();
   await NoteManager.initialize();

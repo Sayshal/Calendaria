@@ -7,7 +7,7 @@
 
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
-import { isValidDate } from './utils/date-utils.mjs';
+import { isValidDate } from './date-utils.mjs';
 
 /**
  * Default note data structure.
@@ -15,7 +15,6 @@ import { isValidDate } from './utils/date-utils.mjs';
  */
 export function getDefaultNoteData() {
   const currentDate = game.time.components;
-
   return {
     startDate: { year: currentDate.year, month: currentDate.month, day: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
     endDate: null,
@@ -57,7 +56,6 @@ export function validateNoteData(noteData) {
     errors.push('Note data is required');
     return { valid: false, errors };
   }
-
   if (!noteData.startDate) errors.push('Start date is required');
   else if (!isValidDate(noteData.startDate)) errors.push('Start date is invalid');
   if (noteData.endDate && !isValidDate(noteData.endDate)) errors.push('End date is invalid');
