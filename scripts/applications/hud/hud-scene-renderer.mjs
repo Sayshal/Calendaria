@@ -4,8 +4,6 @@
  * @module Applications/HudSceneRenderer
  */
 
-import { log } from '../../utils/logger.mjs';
-
 /**
  * Sky color keyframes for interpolation throughout the day.
  */
@@ -686,7 +684,7 @@ export class HudSceneRenderer {
     this.#mode = mode;
     this.#perfConfig = this.#getPerformanceConfig();
     const parent = canvas.parentElement;
-    log(3, 'HudSceneRenderer | constructor', { mode, perf: this.#perfConfig });
+
     this.#app = new PIXI.Application({ view: canvas, backgroundAlpha: 0, resizeTo: parent, antialias: true });
     this.#app.ticker.maxFPS = this.#perfConfig.maxFPS;
     this.#buildSkyLayer();
@@ -786,7 +784,7 @@ export class HudSceneRenderer {
   /** Destroy application and free all GPU resources. */
   destroy() {
     if (this.#destroyed) return;
-    log(3, 'HudSceneRenderer | destroy');
+
     this.#destroyed = true;
     this.#app.ticker.remove(this.#tick, this);
     this.#clearParticles();

@@ -193,7 +193,7 @@ export default class TimeClock {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (paused) {
       if (this.#running) this.stop();
-      log(3, 'Clock stopped (game paused)');
+      log(3, 'Clock stopped: game paused');
     } else if (!game.combat?.started && !this.#locked) {
       if (!this.#running) this.start();
       log(3, 'Clock started at configured speed (game unpaused)');
@@ -208,7 +208,7 @@ export default class TimeClock {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (this.#running) {
       this.stop();
-      log(3, 'Clock stopped (combat started)');
+      log(3, 'Clock stopped: combat started');
     }
   }
 
@@ -233,7 +233,7 @@ export default class TimeClock {
   static start({ broadcast = true } = {}) {
     if (this.#running) return;
     if (this.#locked) {
-      log(3, 'Clock start blocked (locked)');
+      log(3, 'Clock start blocked: locked');
       return;
     }
     if (!this.canAdjustTime()) {
@@ -241,13 +241,13 @@ export default class TimeClock {
       return;
     }
     if (game.combat?.started) {
-      log(3, 'Clock start blocked (combat active)');
+      log(3, 'Clock start blocked: combat active');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
       return;
     }
     if (game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE) && game.paused) {
-      log(3, 'Clock start blocked (sync active, game paused)');
+      log(3, 'Clock start blocked: game paused');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
       return;
@@ -317,7 +317,6 @@ export default class TimeClock {
     }
     const settings = this.getAppSettings(appId);
     settings.incrementKey = key;
-    log(3, `TimeClock[${appId}] increment set to: ${key}`);
   }
 
   /**
@@ -328,7 +327,6 @@ export default class TimeClock {
   static setAppMultiplier(appId, multiplier) {
     const settings = this.getAppSettings(appId);
     settings.multiplier = Math.max(0.25, Math.min(10, multiplier));
-    log(3, `TimeClock[${appId}] multiplier set to: ${settings.multiplier}x`);
   }
 
   /**

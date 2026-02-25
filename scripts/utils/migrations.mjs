@@ -171,7 +171,9 @@ async function migrateDisplayTokens() {
       await game.settings.set(MODULE.ID, 'displayFormats', fmts);
       log(3, `Migrated display format tokens: ${[...new Set(changes.map((c) => `${c.from}→${c.to}`))].join(', ')}`);
     }
-  } catch {}
+  } catch {
+    log(3, 'No display token settings to migrate');
+  }
   return changes;
 }
 
@@ -200,7 +202,9 @@ async function migratePresets() {
       await game.settings.set(MODULE.ID, 'displayFormats', fmts);
       log(3, `Migrated presets: ${changes.map((c) => `${c.loc}/${c.role}: ${c.from}→${c.to}`).join(', ')}`);
     }
-  } catch {}
+  } catch {
+    log(3, 'No preset settings to migrate');
+  }
   return changes;
 }
 
@@ -224,7 +228,7 @@ async function migrateAllTokens() {
     }
     if (mod) await game.settings.set(MODULE.ID, 'customCalendars', cals);
   } catch (e) {
-    log(2, 'Token migration failed', e);
+    log(1, 'Token migration failed', e);
   }
   try {
     const ovr = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
@@ -239,7 +243,7 @@ async function migrateAllTokens() {
     }
     if (mod) await game.settings.set(MODULE.ID, 'defaultOverrides', ovr);
   } catch (e) {
-    log(2, 'Override token migration failed', e);
+    log(1, 'Override token migration failed', e);
   }
   changes.push(...(await migrateDisplayTokens()), ...(await migratePresets()));
   return changes;
@@ -320,7 +324,7 @@ async function migrateHarptos() {
     }
     await game.settings.set(MODULE.ID, KEY, true);
   } catch (e) {
-    log(2, 'Harptos migration failed', e);
+    log(1, 'Harptos migration failed', e);
   }
 }
 
@@ -337,11 +341,11 @@ async function migrateKeys() {
     const oldS = storage.getSetting(`${MODULE.ID}.${old}`);
     if (oldS && !storage.getSetting(`${MODULE.ID}.${neu}`)) {
       await game.settings.set(MODULE.ID, neu, oldS.value);
-      log(2, `Migrated setting: ${old} -> ${neu}`);
+      log(3, `Migrated setting: ${old} -> ${neu}`);
       n++;
     }
   }
-  if (n) log(2, `Setting migration complete: ${n} migrated`);
+  if (n) log(3, `Setting migration complete: ${n} migrated`);
   await game.settings.set(MODULE.ID, 'settingKeyMigrationComplete', true);
 }
 
@@ -436,7 +440,7 @@ async function migrateWeatherZones() {
     if (legacyModified) await game.settings.set(MODULE.ID, 'calendars', legacy);
   }
   await game.settings.set(MODULE.ID, KEY, true);
-  if (migratedCount > 0) log(2, `Weather zone migration complete: ${migratedCount} calendar(s) updated`);
+  if (migratedCount > 0) log(3, `Weather zone migration complete: ${migratedCount} calendar(s) updated`);
   return migratedCount;
 }
 
@@ -478,7 +482,6 @@ export async function diagnoseWeatherConfig(showDialog = true) {
     migrationComplete: game.settings.get(MODULE.ID, 'weatherZoneMigrationComplete')
   };
   log(2, 'Weather diagnostic:', diagnostic);
-  console.log('Calendaria Weather Diagnostic:', diagnostic);
   if (showDialog) {
     let report = '<h3>Active Calendar</h3>';
     report += `<p><strong>${active?.name || 'None'}</strong></p>`;
@@ -515,6 +518,6 @@ export async function runAllMigrations() {
   const changes = await migrateAllTokens();
   if (changes.length) {
     const list = [...new Map(changes.map((c) => [`${c.from}→${c.to}`, c])).values()].map((c) => `${c.from} → ${c.to}`).join(', ');
-    log(2, `Auto-migrated deprecated format tokens: ${list}`);
+    log(3, `Auto-migrated deprecated format tokens: ${list}`);
   }
 }

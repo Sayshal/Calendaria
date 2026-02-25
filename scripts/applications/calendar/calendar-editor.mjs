@@ -284,7 +284,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     preLocalizeCalendar(this.#calendarData);
     log(3, `Loaded initial data for calendar: ${this.#calendarData.name}`);
-    log(3, `pendingNotes (instance): ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, pendingCurrentDate: ${this.#pendingCurrentDate ? 'yes' : 'no'}`);
   }
 
   /** @override */

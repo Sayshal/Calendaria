@@ -230,7 +230,7 @@ export async function importSettings(onComplete) {
       }
       if (onComplete) onComplete();
     } catch (error) {
-      log(2, 'Settings import failed:', error);
+      log(1, 'Settings import failed:', error);
       ui.notifications.error('CALENDARIA.SettingsPanel.ImportSettings.Error', { localize: true });
     }
   });

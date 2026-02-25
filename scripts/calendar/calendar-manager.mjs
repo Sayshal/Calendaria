@@ -747,6 +747,7 @@ export default class CalendarManager {
       log(3, `Updated custom calendar: ${id}`);
       return updatedCalendar;
     } catch (error) {
+      log(1, 'Calendar update failed:', error);
       ui.notifications.error(format('CALENDARIA.Error.CalendarUpdateFailed', { message: error.message }));
       return null;
     }

@@ -6,6 +6,7 @@
 
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
+import { log } from '../../utils/logger.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/fxmaster.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/data/climate-data.mjs';
@@ -274,6 +275,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, soundFx, zoneId });
       }
     }
+    log(3, `Weather applied: ${this.#selectedPresetId ?? 'custom'}`);
     if (fd.saveAsPreset) {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
@@ -350,6 +352,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = weather?.precipitation?.intensity ?? null;
     this.#fxPreset = weather?.fxPreset ?? null;
     this.#soundFx = weather?.soundFx ?? null;
+    log(3, 'Random weather generated');
     this.render();
   }
 
@@ -360,6 +363,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
    */
   static async _onClearWeather(_event, _target) {
     await WeatherManager.clearWeather();
+    log(3, 'Weather cleared');
     this.#selectedPresetId = null;
     this.#customEdited = false;
     this.#customLabel = '';

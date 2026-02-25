@@ -365,7 +365,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#lastWidth = this.element.getBoundingClientRect().width;
     } else if (this.#lastModeState !== currentModeState) {
       if (this.#sceneRenderer) {
-        log(3, 'HUD | destroying renderer on mode change', { from: this.#lastModeState, to: currentModeState });
         this.#sceneRenderer.destroy();
         this.#sceneRenderer = null;
       }
@@ -862,12 +861,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onViewportResize() {
     if (!this.rendered || !this.element) return;
-    log(3, 'HUD resize triggered', { viewport: { w: window.innerWidth, h: window.innerHeight }, zone: this.#snappedZoneId });
+
     if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) return;
     const rect = this.element.getBoundingClientRect();
     const barEl = this.element.querySelector('.calendaria-hud-bar');
     const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-    const beforePos = { left: this.position.left, top: this.position.top };
+
     if (this.#snappedZoneId) {
       const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
       if (zonePos) {
@@ -883,7 +882,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
           }
         }
         this.setPosition({ left: zonePos.left, top: newTop });
-        log(3, 'HUD resize - zone repositioned', { zone: this.#snappedZoneId, from: beforePos, to: { left: zonePos.left, top: newTop } });
       }
     } else {
       const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
@@ -891,7 +889,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         const newLeft = savedPos.centerX - rect.width / 2;
         const newTop = savedPos.centerY - rect.height / 2;
         this.setPosition({ left: newLeft, top: newTop });
-        log(3, 'HUD resize - center repositioned', { center: { x: savedPos.centerX, y: savedPos.centerY }, from: beforePos, to: { left: newLeft, top: newTop } });
       }
     }
     this.#clampToViewport();
@@ -1067,7 +1064,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const canvas = this.element?.querySelector(selector);
     if (!canvas) return;
     if (this.#sceneRenderer && this.#sceneRenderer.canvas !== canvas) {
-      log(3, 'HUD | #updateSceneRenderer — canvas replaced, recreating renderer');
       this.#sceneRenderer.destroy();
       this.#sceneRenderer = null;
     }

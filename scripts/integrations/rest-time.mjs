@@ -22,7 +22,7 @@ const NEW_DAY_HOUR = 8;
  */
 export function onPreRest(_actor, config) {
   if (TimeClock.locked) {
-    log(3, 'Rest time advancement blocked (clock locked)');
+    log(2, 'Rest time advancement blocked (clock locked)');
     return;
   }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);

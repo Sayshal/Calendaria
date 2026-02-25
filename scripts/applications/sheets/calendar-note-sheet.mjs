@@ -98,7 +98,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       if (hasDefaultName && hasNoContent) {
         if (journal.pages?.size === 1) await journal.delete();
         else await this.document.delete();
-        log(3, 'Deleted empty note on close');
       }
     }
     return super._onClose(options);
@@ -1031,7 +1030,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const noteData = { startDate: this.document.system.startDate, randomConfig: this.document.system.randomConfig, repeatEndDate: this.document.system.repeatEndDate };
     const occurrences = generateRandomOccurrences(noteData, targetYear);
     await this.document.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
-    log(2, `Generated ${occurrences.length} random occurrences for ${this.document.name} until year ${targetYear}`);
+    log(3, `Generated ${occurrences.length} random occurrences for ${this.document.name} until year ${targetYear}`);
   }
 
   /** @override */

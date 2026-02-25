@@ -11,7 +11,6 @@ import { Stopwatch } from '../../applications/time/stopwatch.mjs';
 import { TimeKeeper } from '../../applications/time/time-keeper.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../localization.mjs';
-import { log } from '../logger.mjs';
 
 /**
  * Handle Journal Directory activation.
@@ -57,7 +56,6 @@ function replaceFooter({ element }) {
     buttons.appendChild(btn);
   }
   footer.appendChild(buttons);
-  log(3, 'Journal footer replaced with Calendaria controls');
 }
 
 /**

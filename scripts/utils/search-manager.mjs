@@ -8,7 +8,6 @@ import CalendarManager from '../calendar/calendar-manager.mjs';
 import { getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from './localization.mjs';
-import { log } from './logger.mjs';
 
 /**
  * Provides note search functionality.
@@ -29,7 +28,7 @@ export default class SearchManager {
     const searchContent = options.searchContent !== false;
     const limit = options.limit || 50;
     const results = this.#searchNotes(searchTerm, limit, searchContent);
-    log(3, `Search for "${term}" returned ${results.length} results`);
+
     return results;
   }
 

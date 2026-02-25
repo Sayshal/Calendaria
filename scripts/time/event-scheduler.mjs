@@ -284,7 +284,7 @@ export default class EventScheduler {
       const noteData = { startDate: fullNote.system.startDate, randomConfig: fullNote.system.randomConfig, repeatEndDate: fullNote.system.repeatEndDate };
       const occurrences = generateRandomOccurrences(noteData, targetYear);
       await fullNote.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
-      log(2, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
+      log(3, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
     }
   }
 

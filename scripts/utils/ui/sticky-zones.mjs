@@ -5,7 +5,6 @@
  */
 
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import { log } from '../logger.mjs';
 
 /** Snap detection radius in pixels */
 export const SNAP_DISTANCE = 50;
@@ -70,7 +69,6 @@ export function showDebugZones(hudWidth = 200, hudHeight = 100) {
     document.body.appendChild(el);
     debugIndicators.push(el);
   }
-  log(3, 'Sticky zones:', zones);
 }
 
 /**

@@ -937,7 +937,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {
           count++;
-          log(3, `Created note: ${note.name}`);
         } else {
           errors.push(`Failed to create note: ${note.name}`);
         }

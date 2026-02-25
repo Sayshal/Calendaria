@@ -286,6 +286,7 @@ export default class WeatherManager {
       return;
     }
     await this.#saveWeather(null, broadcast, resolvedZoneId);
+    log(3, `Weather cleared for zone ${resolvedZoneId}`);
   }
 
   /**
@@ -385,6 +386,7 @@ export default class WeatherManager {
       season
     };
     await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+    log(3, `Weather generated for zone ${zoneId}: ${weather.preset}`);
     if (!options._fromPlan && game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
       await this.#clearForecastPlan(zoneId);
       await this.#ensureForecastPlan();

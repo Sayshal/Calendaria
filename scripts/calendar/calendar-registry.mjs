@@ -26,7 +26,7 @@ export default class CalendarRegistry {
   static register(id, calendar) {
     if (!(calendar instanceof CalendariaCalendar)) calendar = new CalendariaCalendar(calendar);
     this.#calendars.set(id, calendar);
-    log(3, `Registered calendar: ${id}`);
+
     return calendar;
   }
 
@@ -37,7 +37,7 @@ export default class CalendarRegistry {
    */
   static unregister(id) {
     const result = this.#calendars.delete(id);
-    if (result) log(3, `Unregistered calendar: ${id}`);
+
     return result;
   }
 
@@ -110,7 +110,6 @@ export default class CalendarRegistry {
   static clear() {
     this.#calendars.clear();
     this.#activeId = null;
-    log(3, 'Calendar registry cleared');
   }
 
   /**

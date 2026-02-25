@@ -73,6 +73,10 @@ export const CalendariaAPI = {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return game.time.worldTime;
     }
+    if (!CalendarManager.getActiveCalendar()) {
+      log(1, 'setDateTime failed: no active calendar');
+      return game.time.worldTime;
+    }
     const internalComponents = { ...components };
     if (components.year !== undefined) {
       const calendar = CalendarManager.getActiveCalendar();
@@ -102,6 +106,7 @@ export const CalendariaAPI = {
     }
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
+      log(1, 'jumpToDate failed: no active calendar');
       ui.notifications.warn('CALENDARIA.Error.NoActiveCalendar', { localize: true });
       return;
     }
@@ -153,6 +158,7 @@ export const CalendariaAPI = {
    */
   async switchCalendar(id) {
     if (!canChangeActiveCalendar()) {
+      log(1, 'switchCalendar denied: insufficient permissions');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return false;
     }

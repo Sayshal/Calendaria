@@ -8,7 +8,7 @@ import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeClock from '../../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatDuration, formatGameDuration, getDisplayFormat } from '../../utils/formatting/format-utils.mjs';
 import { localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
+
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -866,7 +866,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   static restore() {
     const state = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STATE);
     if (!state?.running) return;
-    log(3, 'Restoring running stopwatch');
+
     this.show();
   }
 }

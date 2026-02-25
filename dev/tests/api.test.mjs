@@ -261,6 +261,7 @@ describe('setDateTime', () => {
 
   it('emits socket for non-GM users', async () => {
     canChangeDateTime.mockReturnValue(true);
+    CalendarManager.getActiveCalendar.mockReturnValue({ years: { yearZero: 0 } });
     game.user.isGM = false;
     game.time.worldTime = 50;
     await CalendariaAPI.setDateTime({ year: 5 });

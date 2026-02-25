@@ -111,11 +111,15 @@ async function playSound(weather) {
   activeSoundKey = null;
   if (!soundKey) return;
   const src = `modules/${MODULE.ID}/assets/sound/${soundKey}.ogg`;
-  const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
-  sound.fade(VOLUME, { duration: FADE_MS });
-  activeSound = sound;
-  activeSoundKey = soundKey;
-  log(3, `Playing "${soundKey}"`);
+  try {
+    const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
+    sound.fade(VOLUME, { duration: FADE_MS });
+    activeSound = sound;
+    activeSoundKey = soundKey;
+    log(3, `Playing "${soundKey}"`);
+  } catch (error) {
+    log(1, 'Weather sound playback failed:', error);
+  }
 }
 
 /**
@@ -123,10 +127,15 @@ async function playSound(weather) {
  */
 async function stopSound() {
   if (activeSound) {
+    const stoppingKey = activeSoundKey;
     const sound = activeSound;
     activeSound = null;
     activeSoundKey = null;
-    log(3, `Stopping "${activeSoundKey}"`);
-    await fadeOutAndStop(sound);
+    log(3, `Stopping "${stoppingKey}"`);
+    try {
+      await fadeOutAndStop(sound);
+    } catch (error) {
+      log(1, 'Weather sound stop failed:', error);
+    }
   }
 }

@@ -21,7 +21,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.ToggleBigCal.Hint',
     editable: [],
     onDown: () => {
-      log(3, 'Toggle BigCal keybinding triggered');
       BigCal.toggle();
       return true;
     },
@@ -32,7 +31,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.ToggleMiniCal.Hint',
     editable: [],
     onDown: () => {
-      log(3, 'Toggle MiniCal keybinding triggered');
       MiniCal.toggle();
       return true;
     },
@@ -43,7 +41,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.ToggleHUD.Hint',
     editable: [{ key: 'KeyC', modifiers: ['Alt'] }],
     onDown: () => {
-      log(3, 'Toggle HUD keybinding triggered');
       HUD.toggle();
       return true;
     },
@@ -54,7 +51,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.ToggleTimeKeeper.Hint',
     editable: [],
     onDown: () => {
-      log(3, 'Toggle TimeKeeper keybinding triggered');
       TimeKeeper.toggle();
       return true;
     },
@@ -65,7 +61,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.ToggleStopwatch.Hint',
     editable: [{ key: 'KeyW', modifiers: ['Alt'] }],
     onDown: () => {
-      log(3, 'Toggle stopwatch keybinding triggered');
       Stopwatch.toggle();
       return true;
     },
@@ -76,7 +71,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.StopwatchStartPause.Hint',
     editable: [],
     onDown: () => {
-      log(3, 'Stopwatch start/pause keybinding triggered');
       Stopwatch.toggleStartPause();
       return true;
     },
@@ -87,7 +81,6 @@ export function registerKeybindings() {
     hint: 'CALENDARIA.Keybinds.StopwatchReset.Hint',
     editable: [],
     onDown: () => {
-      log(3, 'Stopwatch reset keybinding triggered');
       Stopwatch.reset();
       return true;
     },

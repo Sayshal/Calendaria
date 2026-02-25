@@ -5,6 +5,7 @@
  */
 
 import { COMPASS_DIRECTIONS } from '../constants.mjs';
+import { log } from '../utils/logger.mjs';
 import { getAllPresets, getPreset } from './data/weather-presets.mjs';
 
 /**
@@ -42,7 +43,10 @@ function weightedSelect(weights, randomFn = Math.random) {
   const entries = Object.entries(weights);
   if (entries.length === 0) return null;
   const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
-  if (totalWeight <= 0) return entries[0][0];
+  if (totalWeight <= 0) {
+    log(2, 'Weather selection: all weights zero, using random fallback');
+    return entries[0][0];
+  }
   let roll = randomFn() * totalWeight;
   for (const [id, weight] of entries) {
     roll -= weight;

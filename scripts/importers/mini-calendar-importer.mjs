@@ -500,7 +500,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     for (const festival of festivals) {
       try {
         const festivalData = { name: festival.name, month: (festival.startDate.month ?? 0) + 1, day: (festival.startDate.day ?? 0) + 1 };
-        log(3, `Adding festival: ${festivalData.name} on ${festivalData.month}/${festivalData.day}`);
+
         newFestivals.push(festivalData);
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);

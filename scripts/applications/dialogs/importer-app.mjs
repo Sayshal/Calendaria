@@ -166,7 +166,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
           note.displayDate = `${month}/${day}`;
         });
       }
-      log(3, 'Data processed successfully:', this.#previewData);
+      log(3, 'Import data processed successfully');
     } catch (error) {
       log(1, 'Error processing import data:', error);
       this.#errorMessage = error.message;
@@ -373,19 +373,16 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#transformedData.name = calendarName;
     const pendingNotes = [];
     if (this.#extractedNotes?.length > 0) {
-      log(3, `Processing ${this.#extractedNotes.length} extracted notes for pending import`);
       this.#extractedNotes.forEach((note, index) => {
         const noteType = noteTypes[index] || note.suggestedType;
-        log(3, `Note ${index} "${note.name}": type=${noteType}, suggestedType=${note.suggestedType}`);
         if (noteType === 'note') pendingNotes.push(note);
       });
     }
-    log(3, `Pending notes to import: ${pendingNotes.length}`);
     if (pendingNotes.length > 0) {
+      log(3, `${pendingNotes.length} notes queued for pending import`);
       if (!this.#transformedData.metadata) this.#transformedData.metadata = {};
       this.#transformedData.metadata.pendingNotes = pendingNotes;
       this.#transformedData.metadata.importerId = this.#selectedImporterId;
-      log(3, `Stored ${pendingNotes.length} pending notes with importerId: ${this.#selectedImporterId}`);
     }
     await this.close();
     CalendarEditor.createFromData(this.#transformedData, { suggestedId: calendarId });

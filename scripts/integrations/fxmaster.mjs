@@ -155,6 +155,7 @@ async function stopAll() {
   if (!fxApi) return;
   const active = fxApi.listActive?.() ?? [];
   for (const name of active) await fxApi.stop(name, { silent: true });
+  log(3, 'FXMaster effects stopped');
 }
 
 /**
@@ -178,6 +179,7 @@ async function playWeather(weather) {
   const options = buildPresetOptions(weather);
   options.silent = true;
   await fxApi.switch(fxName, options);
+  log(3, `FXMaster playing weather: ${fxName}`);
 }
 
 /**

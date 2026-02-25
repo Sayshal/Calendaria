@@ -414,15 +414,13 @@ export default class SimpleCalendarImporter extends BaseImporter {
     log(3, `Calendar yearZero: ${yearZero}`);
     for (const note of notes) {
       try {
-        log(3, `Importing note: ${note.name}`, note);
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
-        log(3, `Note data prepared:`, noteData);
+
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {
           count++;
-          log(3, `Successfully created note: ${note.name} (${page.id})`);
         } else {
           errors.push(`Failed to create note: ${note.name}`);
           log(1, `Failed to create note: ${note.name}`);

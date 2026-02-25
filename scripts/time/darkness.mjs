@@ -357,7 +357,11 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
     const updateData = { 'environment.darknessLevel': darkness, ...envData };
-    await scene.update(updateData, { animateDarkness });
+    try {
+      await scene.update(updateData, { animateDarkness });
+    } catch (error) {
+      log(1, `Darkness update failed for scene ${scene.name}:`, error);
+    }
   }
 }
 
@@ -413,7 +417,11 @@ export async function onWeatherChange() {
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
     const updateData = { 'environment.darknessLevel': darkness, ...envData };
-    await scene.update(updateData);
+    try {
+      await scene.update(updateData);
+    } catch (error) {
+      log(1, `Weather darkness update failed for scene ${scene.name}:`, error);
+    }
   }
 }
 

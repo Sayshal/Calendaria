@@ -50,7 +50,6 @@ export class CalendariaSocket {
    */
   static emit(type, data) {
     game.socket.emit(`module.${MODULE.ID}`, { type, data });
-    log(3, `Socket message emitted: ${type}`, data);
   }
 
   /**
@@ -108,7 +107,6 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static #onMessage({ type, data }) {
-    log(3, `Socket message received: ${type}`, data);
     switch (type) {
       case SOCKET_TYPES.CLOCK_UPDATE:
         this.#handleClockUpdate(data);

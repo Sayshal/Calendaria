@@ -77,19 +77,20 @@ export default class ReminderScheduler {
     if (!calendar) return;
     const activeCalendarId = calendar.metadata?.id || CalendarRegistry.getActiveId() || 'unknown';
     const allNotes = NoteManager.getAllNotes();
-    log(3, `Checking ${allNotes.length} notes for reminders at ${currentDate.year}-${currentDate.month}-${currentDate.day} ${currentDate.hour}:${currentDate.minute}`);
+    let fired = 0;
     for (const note of allNotes) {
       if (note.calendarId && note.calendarId !== activeCalendarId) continue;
       if (note.flagData.reminderOffset == null || note.flagData.reminderOffset < 0) continue;
       if (note.flagData.silent) continue;
       const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.day}`;
       if (this.#firedToday.has(reminderKey)) continue;
-      log(3, `Evaluating reminder for "${note.name}" (offset: ${note.flagData.reminderOffset}h, allDay: ${note.flagData.allDay}, repeat: ${note.flagData.repeat})`);
       if (this.#shouldFireReminder(note, worldTime, calendar, currentDate)) {
         this.#fireReminder(note, currentDate);
         this.#firedToday.add(reminderKey);
+        fired++;
       }
     }
+    if (fired > 0) log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.day} ${currentDate.hour}:${currentDate.minute}`);
   }
 
   /**
@@ -115,25 +116,18 @@ export default class ReminderScheduler {
       if (note.flagData.allDay) {
         const tomorrow = this.#getNextDay(currentDate, calendar);
         occursTomorrow = isRecurringMatch(note.flagData, tomorrow);
-        log(3, `  Tomorrow check: ${tomorrow.year}-${tomorrow.month}-${tomorrow.day}, occursTomorrow=${occursTomorrow}`);
       }
-      log(3, `  Recurring: occursToday=${occursToday}, occursTomorrow=${occursTomorrow}, allDay=${note.flagData.allDay}`);
       if (!occursToday && !occursTomorrow) return false;
       if (occursTomorrow && note.flagData.allDay && offsetMinutes > 0) {
         const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
         const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
         const minutesInDay = hoursPerDay * minutesPerHour;
         const reminderMinutes = minutesInDay - offsetMinutes;
-        log(3, `  Day-before check: currentMinutes=${currentMinutes}, reminderMinutes=${reminderMinutes}, shouldFire=${currentMinutes >= reminderMinutes}`);
         if (currentMinutes >= reminderMinutes) return true;
       }
       if (occursToday && note.flagData.allDay) {
-        if (offsetMinutes === 0) {
-          log(3, `  All-day today (0-offset): shouldFire=true`);
-          return true;
-        }
+        if (offsetMinutes === 0) return true;
         const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-        log(3, `  All-day today check: currentMinutes=${currentMinutes}, offsetMinutes=${offsetMinutes}, shouldFire=${currentMinutes <= offsetMinutes}`);
         if (currentMinutes <= offsetMinutes) return true;
       }
       if (occursToday && !note.flagData.allDay) {
@@ -142,7 +136,6 @@ export default class ReminderScheduler {
         const eventMinute = startDate.minute ?? 0;
         const eventMinutes = eventHour * minutesPerHour + eventMinute;
         const reminderMinutes = eventMinutes - offsetMinutes;
-        log(3, `  Same-day check: currentMinutes=${currentMinutes}, eventMinutes=${eventMinutes}, reminderMinutes=${reminderMinutes}`);
         return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
       }
       return false;
@@ -151,13 +144,11 @@ export default class ReminderScheduler {
     const tomorrow = this.#getNextDay(currentDate, calendar);
     const tomorrowInRange = this.#isDateInRange(tomorrow, startDate, endDate);
     const todayInRange = this.#isDateInRange(currentDate, startDate, endDate);
-    log(3, `  Non-recurring: todayInRange=${todayInRange}, tomorrowInRange=${tomorrowInRange}, allDay=${note.flagData.allDay}`);
     if (note.flagData.allDay && offsetMinutes > 0 && tomorrowInRange) {
       const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
       const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
       const minutesInDay = hoursPerDay * minutesPerHour;
       const reminderMinutes = minutesInDay - offsetMinutes;
-      log(3, `  Multi-day before check: currentMinutes=${currentMinutes}, reminderMinutes=${reminderMinutes}, shouldFire=${currentMinutes >= reminderMinutes}`);
       return currentMinutes >= reminderMinutes;
     }
     if (todayInRange) {

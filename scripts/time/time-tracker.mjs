@@ -156,7 +156,7 @@ export default class TimeTracker {
    */
   static #checkThresholds(previousTime, currentTime, calendar) {
     if (currentTime <= previousTime) {
-      log(3, 'Time went backwards, skipping threshold checks');
+      log(2, 'Time went backwards, skipping threshold checks');
       return;
     }
     const previousComponents = this.#getComponentsForTime(previousTime);
@@ -195,7 +195,7 @@ export default class TimeTracker {
         if (hour !== null && startHour < hour) thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
       }
       const intermediateDays = Math.min(totalDays - 1, this.#MAX_THRESHOLD_DAYS);
-      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) log(3, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
+      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) log(2, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
       for (let day = 0; day < intermediateDays; day++) {
         for (const [name, hour] of Object.entries(dayThresholds)) if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }

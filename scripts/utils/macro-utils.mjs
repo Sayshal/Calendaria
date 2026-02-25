@@ -4,8 +4,6 @@
  * @author Tyler
  */
 
-import { log } from './logger.mjs';
-
 /**
  * Execute a macro by its ID.
  * @param {string} macroId - The ID of the macro to execute
@@ -16,7 +14,7 @@ export async function executeMacroById(macroId, context = {}) {
   if (!macroId) return;
   const macro = game.macros.get(macroId);
   if (!macro) return;
-  log(3, `Executing macro: ${macro.name}`, context);
+
   return macro.execute(context);
 }
 

@@ -117,7 +117,6 @@ export default class NoteManager {
         const stub = createNoteStub(page);
         if (stub) {
           this.#noteIndex.set(page.id, stub);
-          log(3, `Indexed calendar note: ${page.name}`);
         }
       }
     }
@@ -134,7 +133,7 @@ export default class NoteManager {
     const stub = createNoteStub(page);
     if (stub) {
       NoteManager.#noteIndex.set(page.id, stub);
-      log(3, `Added note to index: ${page.name}`);
+
       Hooks.callAll(HOOKS.NOTE_CREATED, stub);
     }
   }
@@ -150,7 +149,7 @@ export default class NoteManager {
     const stub = createNoteStub(page);
     if (stub) {
       NoteManager.#noteIndex.set(page.id, stub);
-      log(3, `Updated note in index: ${page.name}`);
+
       Hooks.callAll(HOOKS.NOTE_UPDATED, stub);
       if (game.user.isGM) {
         if (changes.name !== undefined) {
@@ -174,7 +173,7 @@ export default class NoteManager {
     } else {
       if (NoteManager.#noteIndex.has(page.id)) {
         NoteManager.#noteIndex.delete(page.id);
-        log(3, `Removed note from index: ${page.name}`);
+
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
@@ -190,7 +189,7 @@ export default class NoteManager {
   static onDeleteJournalEntryPage(page, _options, _userId) {
     if (NoteManager.#noteIndex.has(page.id)) {
       NoteManager.#noteIndex.delete(page.id);
-      log(3, `Deleted note from index: ${page.name}`);
+
       Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
     }
   }
@@ -205,7 +204,7 @@ export default class NoteManager {
     for (const page of journal.pages) {
       if (NoteManager.#noteIndex.has(page.id)) {
         NoteManager.#noteIndex.delete(page.id);
-        log(3, `Deleted note from index (parent deleted): ${page.name}`);
+
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }

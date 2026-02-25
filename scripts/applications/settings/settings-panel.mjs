@@ -10,7 +10,6 @@ import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS, validateFormatString } from '../../utils/formatting/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset, getForcedTheme, initializeTheme } from '../../utils/theme-utils.mjs';
@@ -1415,7 +1414,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onSubmit(_event, _form, formData) {
     const data = foundry.utils.expandObject(formData.object);
-    log(3, 'Settings panel form data:', data);
     const beforeSnapshot = SettingsPanel.#snapshotSettings();
     if ('showTimeKeeper' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, data.showTimeKeeper);
     if ('timeKeeperAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, data.timeKeeperAutoFade);
@@ -1932,7 +1930,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         ui.notifications.info('CALENDARIA.ThemeEditor.ImportSuccess', { localize: true });
         app?.render();
       } catch (err) {
-        log(2, 'Theme import failed:', err);
+        log(1, 'Theme import failed:', err);
         ui.notifications.error('CALENDARIA.ThemeEditor.ImportError', { localize: true });
       }
     });
