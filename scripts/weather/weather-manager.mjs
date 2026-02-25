@@ -179,7 +179,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} The set weather
    */
   static async setWeather(presetId, options = {}) {
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone()?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to set weather');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
@@ -236,7 +236,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} The set weather
    */
   static async setCustomWeather(weatherData, broadcast = true) {
-    const zoneId = weatherData.zoneId ?? this.getActiveZone()?.id;
+    const zoneId = weatherData.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
     if (!canChangeWeather()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this.getCurrentWeather(zoneId);
@@ -280,7 +280,7 @@ export default class WeatherManager {
    */
   static async clearWeather(broadcast = true, fromSocket = false, zoneId) {
     if (!fromSocket && !canChangeWeather()) return;
-    const resolvedZoneId = zoneId ?? this.getActiveZone()?.id;
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
     if (!fromSocket && !game.user.isGM && canChangeWeather()) {
       CalendariaSocket.emit('weatherRequest', { action: 'clear', options: { zoneId: resolvedZoneId } });
       return;
@@ -332,7 +332,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} Generated weather
    */
   static async generateAndSetWeather(options = {}) {
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone()?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to generate weather');
       return this.getCurrentWeather(zoneId);

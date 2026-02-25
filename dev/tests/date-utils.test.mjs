@@ -11,7 +11,7 @@ vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
   return { default: CalendarManager, defaultCalendar };
 });
 
-import { compareDates, isSameDay, compareDays, monthsBetween, addMonths, addYears, isValidDate } from '../../scripts/notes/date-utils.mjs';
+import { compareDates, isSameDay, compareDays, daysBetween, addDays, dayOfWeek, getCurrentDate, monthsBetween, addMonths, addYears, isValidDate } from '../../scripts/notes/date-utils.mjs';
 
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 
@@ -339,5 +339,139 @@ describe('isValidDate()', () => {
   it('returns true when no calendar (basic validation only)', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
     expect(isValidDate({ year: 2021, month: 6, day: 15 })).toBe(true);
+  });
+});
+
+/* -------------------------------------------- */
+/*  addDays() - Needs CalendarManager            */
+/* -------------------------------------------- */
+
+describe('addDays()', () => {
+  it('adds positive days within same month', () => {
+    const date = { year: 2021, month: 0, day: 10 };
+    const result = addDays(date, 5);
+    expect(result.year).toBe(2021);
+    expect(result.month).toBe(0);
+    expect(result.day).toBe(15);
+  });
+
+  it('adds negative days within same month', () => {
+    const date = { year: 2021, month: 0, day: 15 };
+    const result = addDays(date, -5);
+    expect(result.year).toBe(2021);
+    expect(result.month).toBe(0);
+    expect(result.day).toBe(10);
+  });
+
+  it('crosses month boundary when adding days', () => {
+    const date = { year: 2021, month: 0, day: 30 };
+    const result = addDays(date, 5);
+    // Jan 30 + 5 days = Feb 4 (month 1, day 4)
+    expect(result.month).toBe(1);
+    expect(result.day).toBe(4);
+  });
+
+  it('preserves time components', () => {
+    const date = { year: 2021, month: 0, day: 10, hour: 14, minute: 30 };
+    const result = addDays(date, 1);
+    expect(result.hour).toBe(14);
+    expect(result.minute).toBe(30);
+  });
+
+  it('returns original date when no calendar', () => {
+    CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
+    const date = { year: 2021, month: 0, day: 10 };
+    const result = addDays(date, 5);
+    expect(result).toEqual(date);
+  });
+});
+
+/* -------------------------------------------- */
+/*  daysBetween() - Needs CalendarManager        */
+/* -------------------------------------------- */
+
+describe('daysBetween()', () => {
+  it('returns 0 for same day', () => {
+    const date = { year: 2021, month: 6, day: 15 };
+    expect(daysBetween(date, date)).toBe(0);
+  });
+
+  it('returns 1 for adjacent days', () => {
+    const date1 = { year: 2021, month: 0, day: 1 };
+    const date2 = { year: 2021, month: 0, day: 2 };
+    expect(daysBetween(date1, date2)).toBe(1);
+  });
+
+  it('returns negative for reversed dates', () => {
+    const date1 = { year: 2021, month: 0, day: 10 };
+    const date2 = { year: 2021, month: 0, day: 5 };
+    expect(daysBetween(date1, date2)).toBe(-5);
+  });
+
+  it('counts days across month boundary', () => {
+    const date1 = { year: 2021, month: 0, day: 30 };
+    const date2 = { year: 2021, month: 1, day: 2 };
+    // Jan 30 to Feb 2 = 3 days
+    expect(daysBetween(date1, date2)).toBe(3);
+  });
+
+  it('returns 0 when no calendar', () => {
+    CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
+    const date1 = { year: 2021, month: 0, day: 1 };
+    const date2 = { year: 2021, month: 0, day: 10 };
+    expect(daysBetween(date1, date2)).toBe(0);
+  });
+});
+
+/* -------------------------------------------- */
+/*  dayOfWeek() - Needs CalendarManager          */
+/* -------------------------------------------- */
+
+describe('dayOfWeek()', () => {
+  it('returns a number', () => {
+    const date = { year: 2021, month: 0, day: 1 };
+    const result = dayOfWeek(date);
+    expect(typeof result).toBe('number');
+  });
+
+  it('returns value within 0..6 for 7-day week', () => {
+    const date = { year: 2021, month: 3, day: 15 };
+    const result = dayOfWeek(date);
+    expect(result).toBeGreaterThanOrEqual(0);
+    expect(result).toBeLessThan(7);
+  });
+
+  it('consecutive days have consecutive weekday indices', () => {
+    const day1 = dayOfWeek({ year: 2021, month: 0, day: 1 });
+    const day2 = dayOfWeek({ year: 2021, month: 0, day: 2 });
+    expect(day2).toBe((day1 + 1) % 7);
+  });
+
+  it('returns 0 when no calendar', () => {
+    CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
+    const date = { year: 2021, month: 0, day: 1 };
+    expect(dayOfWeek(date)).toBe(0);
+  });
+});
+
+/* -------------------------------------------- */
+/*  getCurrentDate() - Needs game.time mock      */
+/* -------------------------------------------- */
+
+describe('getCurrentDate()', () => {
+  it('returns object with expected shape', () => {
+    // game.time.components is set up by the foundry mock
+    const result = getCurrentDate();
+    expect(result).toHaveProperty('year');
+    expect(result).toHaveProperty('month');
+    expect(result).toHaveProperty('day');
+    expect(typeof result.year).toBe('number');
+    expect(typeof result.month).toBe('number');
+    expect(typeof result.day).toBe('number');
+  });
+
+  it('day is 1-indexed', () => {
+    const result = getCurrentDate();
+    expect(result.day).toBeGreaterThanOrEqual(1);
   });
 });

@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { registerBatches } from '../dev/quench/index.mjs';
 import { HUD } from './applications/hud/hud.mjs';
 import { Stopwatch } from './applications/time/stopwatch.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
@@ -22,7 +23,7 @@ import { onGetSceneControlButtons } from './utils/ui/toolbar-buttons.mjs';
  * Register all hooks for the Calendaria module.
  */
 export function registerHooks() {
-  Hooks.on('calendaria.calendarSwitched', NoteManager.onCalendarSwitched.bind(NoteManager));
+  Hooks.on(HOOKS.CALENDAR_SWITCHED, NoteManager.onCalendarSwitched.bind(NoteManager));
   Hooks.on('chatMessage', onChatMessage);
   Hooks.on('closeGame', CalendarManager.onCloseGame.bind(CalendarManager));
   Hooks.on('combatRound', TimeClock.onCombatTimeBlock);
@@ -37,6 +38,7 @@ export function registerHooks() {
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
   Hooks.on('preDeleteFolder', NoteManager.onPreDeleteFolder.bind(NoteManager));
   Hooks.on('preDeleteJournalEntry', NoteManager.onPreDeleteJournalEntry.bind(NoteManager));
+  Hooks.on('quenchReady', (quench) => registerBatches(quench));
   Hooks.on('renderChatMessageHTML', onRenderAnnouncementMessage);
   Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);
   Hooks.on('renderDocumentDirectory', onRenderDocumentDirectory);
@@ -45,8 +47,8 @@ export function registerHooks() {
   Hooks.on('updateScene', onUpdateScene);
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
   Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime);
-  Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on(HOOKS.MOON_PHASE_CHANGE, onMoonPhaseChange);
+  Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());
   HUD.registerCombatHooks();
   log(3, 'Hooks registered');

@@ -6,7 +6,7 @@
 
 import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
+import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS, validateFormatString } from '../../utils/formatting/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
