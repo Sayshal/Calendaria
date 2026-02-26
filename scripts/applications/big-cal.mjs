@@ -1571,7 +1571,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const endHour = (parseInt(hour) + 1) % hoursPerDay;
     const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
-    const page = await NoteManager.createNote({
+    await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: 0 },
@@ -1579,7 +1579,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     this._selectedTimeSlot = null;
-    if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
   /**
@@ -1610,7 +1609,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const endHour = (parseInt(hour) + 1) % hoursPerDay;
     const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
-    const page = await NoteManager.createNote({
+    await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: parseInt(minute) },
@@ -1618,7 +1617,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     this._selectedTimeSlot = null;
-    if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
   /**

@@ -292,9 +292,10 @@ export default class NoteManager {
    * @param {string} [options.calendarId]  Calendar ID (defaults to active calendar)
    * @param {object} [options.journalData]  Additional journal entry data
    * @param {string} [options.creatorId]  User ID of creator (for socket-created notes)
+   * @param {false|'edit'|'view'} [options.openSheet]  Open the note sheet after creation in the given mode, or false to skip (default 'edit')
    * @returns {Promise<object>} Created journal entry page
    */
-  static async createNote({ name, content = '', noteData, calendarId, journalData = {}, creatorId }) {
+  static async createNote({ name, content = '', noteData, calendarId, journalData = {}, creatorId, openSheet = 'edit' }) {
     if (!canAddNotes()) {
       ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
@@ -310,7 +311,7 @@ export default class NoteManager {
 
     // If user lacks JournalEntry create permission, socket to GM
     if (!game.user.isGM && !game.user.can('JOURNAL_CREATE')) {
-      CalendariaSocket.emit(SOCKET_TYPES.CREATE_NOTE, { name, content, noteData: sanitized, calendarId, journalData, requesterId: game.user.id });
+      CalendariaSocket.emit(SOCKET_TYPES.CREATE_NOTE, { name, content, noteData: sanitized, calendarId, journalData, requesterId: game.user.id, openSheet });
       log(3, `Note creation requested via GM: ${name}`);
       return null;
     }
@@ -329,6 +330,7 @@ export default class NoteManager {
       { parent: journal }
     );
     log(3, `Created calendar note: ${name}`);
+    if (openSheet) page.sheet.render(true, { mode: openSheet });
     return page;
   }
 

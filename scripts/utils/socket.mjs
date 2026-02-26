@@ -243,14 +243,14 @@ export class CalendariaSocket {
    */
   static async #handleCreateNote(data) {
     if (!this.isPrimaryGM()) return;
-    const { name, content, noteData, calendarId, journalData, requesterId } = data;
+    const { name, content, noteData, calendarId, journalData, requesterId, openSheet = 'edit' } = data;
     log(3, `Primary GM handling note creation request: ${name}`);
     try {
       // Set the author to the requester, not the GM
       const noteDataWithAuthor = { ...noteData, author: requesterId };
-      const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId });
+      const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId, openSheet: false });
       if (page && requesterId) {
-        this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId });
+        this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId, openSheet });
       }
     } catch (error) {
       log(1, 'Error creating note via socket:', error);
@@ -267,12 +267,13 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static #handleCreateNoteComplete(data) {
-    const { pageId, journalId, requesterId } = data;
+    const { pageId, journalId, requesterId, openSheet = 'edit' } = data;
     if (game.user.id !== requesterId) return;
+    if (!openSheet) return;
     log(3, `Note creation complete, opening editor for: ${pageId}`);
     const journal = game.journal.get(journalId);
     const page = journal?.pages.get(pageId);
-    if (page) page.sheet.render(true, { mode: 'edit' });
+    if (page) page.sheet.render(true, { mode: openSheet });
   }
 
   /**

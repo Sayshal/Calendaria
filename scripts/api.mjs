@@ -513,9 +513,10 @@ export const CalendariaAPI = {
    * @param {string} [options.icon] - Icon path or class
    * @param {string} [options.color] - Event color (hex)
    * @param {boolean} [options.gmOnly] - Whether note is GM-only
+   * @param {false|'edit'|'view'} [options.openSheet] - Open the note sheet after creation in the given mode, or false to skip (default 'edit')
    * @returns {Promise<object>} Created note page
    */
-  async createNote({ name, content = '', startDate, endDate, allDay = true, repeat = 'never', categories = [], icon, color, gmOnly = false }) {
+  async createNote({ name, content = '', startDate, endDate, allDay = true, repeat = 'never', categories = [], icon, color, gmOnly = false, openSheet = 'edit' }) {
     if (!canAddNotes()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
@@ -530,7 +531,7 @@ export const CalendariaAPI = {
       color: color || '#4a90e2',
       gmOnly
     };
-    return await NoteManager.createNote({ name, content, noteData });
+    return await NoteManager.createNote({ name, content, noteData, openSheet });
   },
 
   /**

@@ -2047,14 +2047,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const today = game.time.components;
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const page = await NoteManager.createNote({
+    await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, day: (today.dayOfMonth ?? 0) + 1, hour: 12, minute: 0 },
         endDate: { year: today.year + yearZero, month: today.month, day: (today.dayOfMonth ?? 0) + 1, hour: 13, minute: 0 }
       }
     });
-    if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
   /**

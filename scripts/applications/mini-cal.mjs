@@ -1469,14 +1469,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       day = (today.dayOfMonth ?? 0) + 1;
     }
 
-    const page = await NoteManager.createNote({
+    await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 12, minute: 0 },
         endDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 13, minute: 0 }
       }
     });
-    if (page) page.sheet.render(true, { mode: 'edit' });
   }
 
   /**

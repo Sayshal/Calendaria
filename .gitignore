@@ -4,3 +4,5 @@ README.html
 /coverage/
 /node_modules/
 /foundry/
+/dist
+/dnd5e

@@ -508,7 +508,6 @@ export async function createNoteOnDate(year, month, day) {
     name: localize('CALENDARIA.Note.NewNote'),
     noteData: { startDate: { year, month, day, hour: 12, minute: 0 }, endDate: { year, month, day, hour: 13, minute: 0 } }
   });
-  if (page) page.sheet.render(true, { mode: 'edit' });
   return page;
 }
 
