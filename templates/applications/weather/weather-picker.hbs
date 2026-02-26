@@ -1,4 +1,4 @@
-<div class="weather-picker-content">
+<div class="content">
   <div class="zone-info-bar standard-form">
     <div class="form-group">
       <label data-tooltip="{{localize 'CALENDARIA.Weather.Picker.SceneZoneHint'}}">{{localize "CALENDARIA.Weather.Picker.SceneZone"}}</label>
@@ -13,8 +13,8 @@
     </div>
   </div>
 
-  <div class="weather-picker-columns">
-    <div class="weather-picker-presets">
+  <div class="columns">
+    <div class="presets">
       {{#each categories}}
         <div class="weather-category">
           <span class="category-header">{{label}}</span>
@@ -32,7 +32,7 @@
       {{/each}}
     </div>
 
-    <div class="weather-picker-details standard-form">
+    <div class="details standard-form">
       <span class="category-header">{{localize "CALENDARIA.Weather.Picker.Custom"}}</span>
       <div class="form-group">
         <label for="customLabel"

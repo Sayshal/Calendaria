@@ -1,0 +1,242 @@
+.calendaria {
+  &.weather-picker {
+    &.standard-form {
+      gap: 0;
+    }
+
+    .content {
+      gap: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      max-height: 70vh;
+      padding-left: 0.25rem;
+      overflow-y: auto;
+    }
+
+    .zone-info-bar {
+      padding: 0.5rem 0.75rem;
+      border: 0.0625rem solid var(--calendaria-border);
+      border-radius: 0.25rem;
+      background: var(--calendaria-bg-lighter);
+    }
+
+    .columns {
+      gap: 0.25rem;
+      display: flex;
+      min-height: 0;
+      padding-bottom: 0.75rem;
+    }
+
+    .presets {
+      gap: 0.75rem;
+      display: flex;
+      flex: 0 0 fit-content;
+      flex-direction: column;
+      padding-left: 0.25rem;
+      overflow-y: auto;
+    }
+
+    .details {
+      gap: 0.25rem;
+      display: flex;
+      flex: 0 0 22rem;
+      flex-direction: column;
+      padding-right: 0.25rem;
+      padding-left: 0.25rem;
+      border-left: 0.0625rem solid var(--calendaria-border);
+      overflow-y: auto;
+
+      .precip-intensity-label {
+        flex: 0 0 auto;
+        width: 4.5rem;
+      }
+
+      .save-as-preset-toggle {
+        gap: 0.4rem;
+        display: flex;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 0.5rem;
+        color: var(--calendaria-text-dim);
+        font-size: var(--font-size-13);
+        cursor: pointer;
+
+        input[type='checkbox'] {
+          margin: 0;
+        }
+      }
+    }
+
+    .category-header {
+      display: block;
+      margin: 0.5rem 0;
+      padding-bottom: 0.25rem;
+      border-bottom: 0.0625rem solid var(--calendaria-border);
+      color: var(--calendaria-text-dim);
+      font-weight: 600;
+      font-size: var(--font-size-15);
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    .weather-category {
+      .weather-buttons {
+        gap: 0.4rem;
+        grid-template-columns: repeat(3, 1fr);
+        display: grid;
+      }
+    }
+
+    .weather-btn {
+      gap: 0.4rem;
+      display: flex;
+      align-items: center;
+      padding: 0.4rem 0.6rem;
+      border: 0.0625rem solid color-mix(in srgb, var(--weather-color) 50%, transparent);
+      border-radius: 0.25rem;
+      color: var(--calendaria-text);
+      text-align: left;
+      cursor: pointer;
+      background: color-mix(in srgb, var(--weather-color) 20%, var(--calendaria-bg-lighter));
+      transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        transform 0.15s ease;
+
+      &:hover {
+        border-color: var(--weather-color);
+        background: color-mix(in srgb, var(--weather-color) 35%, var(--calendaria-bg-lighter));
+        transform: translateY(-0.0625rem);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &.active {
+        border-color: var(--weather-color);
+        background: color-mix(in srgb, var(--weather-color) 40%, var(--calendaria-bg-lighter));
+        box-shadow: 0 0 0 0.0625rem var(--weather-color);
+      }
+
+      &.zone-disabled {
+        opacity: 0.4;
+        order: 1;
+      }
+
+      i {
+        flex-shrink: 0;
+        width: 1rem;
+        color: var(--weather-color);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .weather-label {
+        overflow: hidden;
+        font-size: 0.8rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .footer {
+      gap: 0.5rem;
+      display: flex;
+      padding-top: 0.5rem;
+      border-top: 0.0625rem solid var(--calendaria-border);
+
+      .footer-btn {
+        gap: 0.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem 1.5rem;
+        border: none;
+        border-radius: 0.25rem;
+        color: var(--calendaria-text-on-color);
+        font-weight: 500;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+
+        &:hover {
+          opacity: 0.85;
+        }
+
+        i {
+          font-size: 1rem;
+        }
+      }
+
+      .clear-btn {
+        flex-shrink: 0;
+        background: var(--calendaria-error);
+      }
+
+      .random-btn {
+        flex-shrink: 0;
+        background: var(--calendaria-primary);
+      }
+
+      .save-btn {
+        flex: 1;
+        background: var(--calendaria-success);
+      }
+    }
+  }
+
+  .weather-editor {
+    footer.form-footer {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      padding: 0.5rem 1rem;
+      border-top: 0.0625rem solid var(--color-cool-4);
+      background: var(--color-cool-5);
+
+      button {
+        flex: none;
+        width: fit-content;
+
+        &.primary {
+          flex: 1;
+        }
+      }
+    }
+
+    .form-fields.range > i {
+      flex: 0 0 0.5rem;
+      text-align: center;
+    }
+
+    nav.sheet-tabs {
+      min-width: 8.25rem;
+      max-width: 8.25rem;
+      overflow: hidden auto;
+    }
+
+    .no-preset-selected {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--color-text-secondary);
+      font-style: italic;
+    }
+  }
+
+  .weather-wind,
+  .weather-precip {
+    opacity: 0.7;
+    margin-left: 0.25rem;
+    font-size: 0.8em;
+  }
+
+  .weather-wind {
+    i {
+      display: inline-block;
+    }
+  }
+}

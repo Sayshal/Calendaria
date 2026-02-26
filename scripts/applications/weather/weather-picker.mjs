@@ -6,9 +6,9 @@
 
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
-import { log } from '../../utils/logger.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/fxmaster.mjs';
 import { localize } from '../../utils/localization.mjs';
+import { log } from '../../utils/logger.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/data/climate-data.mjs';
 import { SOUND_FX_OPTIONS, WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from '../../weather/data/weather-presets.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
@@ -71,7 +71,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'weather-picker',
-    classes: ['calendaria', 'weather-picker-app', 'standard-form'],
+    classes: ['calendaria', 'weather-picker', 'standard-form'],
     tag: 'form',
     window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },
     position: { width: 'auto', height: 'auto' },
@@ -218,7 +218,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         this.render();
       });
     }
-    for (const input of this.element.querySelectorAll('.weather-picker-details input')) {
+    for (const input of this.element.querySelectorAll('.details input')) {
       input.addEventListener('input', () => {
         this.#customEdited = true;
         this.#selectedPresetId = null;
