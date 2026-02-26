@@ -1,6 +1,6 @@
 {
   "extends": ["stylelint-config-standard"],
-  "ignoreFiles": ["coverage/**"],
+  "ignoreFiles": ["coverage/**", "dist/**", "dnd5e/**", "foundry/**"],
   "rules"  : {
     "color-function-notation": "modern",
     "color-named": "never",

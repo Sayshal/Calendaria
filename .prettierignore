@@ -1,3 +1,6 @@
+dist
+dnd5e
+foundry
 **/*.hbs
 **/*.handlebars
 **/*.json

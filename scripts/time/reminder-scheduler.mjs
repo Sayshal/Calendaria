@@ -300,9 +300,9 @@ export default class ReminderScheduler {
     if (note.flagData.reminderTargets !== 'all') whisper = targets;
     if (note.flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
     const content = `
-      <div class="calendaria-reminder">
+      <div class="calendaria chat-reminder">
         <div class="reminder-message">${message}</div>
-        <a class="announcement-open" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
+        <a class="open-note" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
           ${icon} ${localize('CALENDARIA.Reminder.OpenNote')}
         </a>
       </div>

@@ -16,6 +16,10 @@
     "test:watch": "vitest --config vitest.config.mjs",
     "test:coverage": "vitest run --coverage --config vitest.config.mjs",
     "validate": "npm run lint && npm run format:check && npm run stylelint",
+    "build": "rollup -c rollup.config.mjs",
+    "build:watch": "rollup -c rollup.config.mjs --watch",
+    "dev": "rollup -c rollup.config.mjs --environment BUILD:development",
+    "clean": "node -e \"import('fs').then(f=>f.rmSync('dist',{recursive:true,force:true}))\"",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -31,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@rollup/plugin-terser": "^0.4.4",
     "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^9.27.0",
     "eslint-plugin-jsdoc": "^50.8.0",
@@ -38,6 +43,9 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.3.3",
+    "rollup": "^4.59.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-postcss": "^4.0.2",
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^37.0.0",
     "vitest": "^4.0.16"

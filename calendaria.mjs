@@ -5,6 +5,23 @@
  * @author Tyler
  */
 
+import './styles/theme.css';
+import './styles/global.css';
+import './styles/rotation-dial.css';
+import './styles/bigcal.css';
+import './styles/calendar-editor.css';
+import './styles/climate-editor.css';
+import './styles/time-keeper.css';
+import './styles/mini-cal.css';
+import './styles/importer.css';
+import './styles/weather-picker.css';
+import './styles/weather-editor.css';
+import './styles/hud.css';
+import './styles/chat.css';
+import './styles/search.css';
+import './styles/tooltips.css';
+import './styles/settings.css';
+import './styles/dialogs.css';
 import { CalendariaAPI, createGlobalNamespace } from './scripts/api.mjs';
 import { HUD } from './scripts/applications/hud/hud.mjs';
 import { MiniCal } from './scripts/applications/calendar/mini-cal.mjs';

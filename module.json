@@ -81,9 +81,6 @@
   "readme": "https://github.com/Sayshal/calendaria?tab=readme-ov-file",
   "relationships": {},
   "socket": true,
-  "styles": [
-    "styles/calendaria.css"
-  ],
   "title": "Calendaria",
   "url": "https://github.com/Sayshal/calendaria",
   "version": ""

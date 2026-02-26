@@ -23,7 +23,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-weather-editor',
-    classes: ['calendaria', 'settings-panel', 'standard-form'],
+    classes: ['calendaria', 'weather-editor', 'settings-panel', 'standard-form'],
     tag: 'form',
     window: { title: 'CALENDARIA.WeatherEditor.Title', icon: 'fas fa-cloud-sun', resizable: false },
     position: { width: 900, height: 835 },

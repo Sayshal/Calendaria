@@ -45,13 +45,13 @@ export function onRenderChatMessageHTML(message, html, _context) {
     else timestampEl.textContent = formattedDate;
   } else if (mode === 'augment') {
     const wrapper = document.createElement('span');
-    wrapper.className = 'calendaria-timestamp-wrapper';
+    wrapper.className = 'cal-timestamp';
     const gameDate = document.createElement('span');
-    gameDate.className = 'calendaria-timestamp';
+    gameDate.className = 'cal-date';
     if (hasMoonIconMarkers(formattedDate)) gameDate.innerHTML = `${renderMoonIcons(formattedDate)} `;
     else gameDate.textContent = `${formattedDate} `;
     const realDate = document.createElement('span');
-    realDate.className = 'calendaria-timestamp-real';
+    realDate.className = 'cal-real';
     realDate.textContent = timestampEl.textContent;
     wrapper.appendChild(gameDate);
     wrapper.appendChild(realDate);
@@ -81,12 +81,12 @@ export function overrideChatLogTimestamps() {
             else stamp.textContent = formattedDate;
             stamp.dataset.tooltip = foundry.utils.timeSince(message.timestamp);
           } else if (mode === 'augment') {
-            const gameDate = stamp.querySelector('.calendaria-timestamp');
+            const gameDate = stamp.querySelector('.cal-date');
             if (gameDate) {
               if (hasMoonIconMarkers(formattedDate)) gameDate.innerHTML = `${renderMoonIcons(formattedDate)} `;
               else gameDate.textContent = `${formattedDate} `;
             }
-            const realDate = stamp.querySelector('.calendaria-timestamp-real');
+            const realDate = stamp.querySelector('.cal-real');
             if (realDate) realDate.textContent = foundry.utils.timeSince(message.timestamp);
           }
         }
@@ -119,7 +119,7 @@ export function formatWorldTime(worldTime) {
 export function onRenderAnnouncementMessage(message, html, _context) {
   const flags = message.flags?.[MODULE.ID];
   if (!flags?.isAnnouncement && !flags?.isReminder) return;
-  const openLink = html.querySelector('.announcement-open');
+  const openLink = html.querySelector('.open-note');
   if (!openLink) return;
   openLink.addEventListener('click', async (event) => {
     event.preventDefault();

@@ -1,0 +1,586 @@
+/* ======================================== */
+/* TimeKeeper Styles                       */
+/* ======================================== */
+
+.time-keeper {
+  opacity: var(--calendaria-timekeeper-idle-opacity, 0.4);
+  position: fixed;
+  width: 12.5rem;
+  padding: 0.375rem;
+  border: 0.0625rem solid var(--calendaria-border);
+  border-radius: 0.375rem;
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--calendaria-bg) 95%, transparent);
+  box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow);
+  transition: opacity 0.3s ease-in-out 2s;
+
+  &:hover {
+    opacity: 1;
+    transition-delay: 0s;
+
+    .time-keeper-controls {
+      opacity: 1;
+      max-height: 1.875rem;
+      margin-top: 0.375rem;
+    }
+
+    .time-keeper-readonly {
+      opacity: 1;
+      max-height: 1.875rem;
+      margin-top: 0.375rem;
+      padding: 0.25rem 0;
+    }
+  }
+
+  .time-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: move;
+
+    &:hover .time-display-stopwatch-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  .time-display-time-wrapper {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      .time-display-play-btn {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .time-display-time {
+        opacity: 0.3;
+      }
+    }
+  }
+
+  .time-display-time {
+    color: var(--calendaria-text);
+    font-weight: bold;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    font-family: monospace;
+    letter-spacing: 0.0625rem;
+    transition: opacity 0.15s ease;
+  }
+
+  .time-display-play-btn {
+    display: flex;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem;
+    border: none;
+    color: var(--calendaria-text-dim);
+    cursor: pointer;
+    pointer-events: none;
+    background: transparent;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease;
+    transform: translate(-50%, -50%);
+
+    i {
+      font-size: 1.25rem;
+    }
+
+    &:hover {
+      color: var(--calendaria-text);
+    }
+  }
+
+  .time-display-date {
+    color: var(--calendaria-text-dim);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+  }
+
+  .time-keeper-controls {
+    gap: 0.25rem;
+    display: flex;
+    opacity: 0;
+    justify-content: center;
+    align-items: center;
+    max-height: 0;
+    overflow: hidden;
+    transition:
+      opacity 0.2s ease-out,
+      max-height 0.2s ease-out;
+  }
+
+  .time-btn {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    height: 1.5rem;
+    padding: 0;
+    border: 0.0625rem solid var(--calendaria-button-border);
+    border-radius: 0.1875rem;
+    color: var(--calendaria-button-text);
+    cursor: pointer;
+    background: var(--calendaria-button-bg);
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--calendaria-button-hover);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    i {
+      font-size: 0.625rem;
+    }
+  }
+
+  .increment-select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    width: 3.25rem;
+    min-width: 3.25rem;
+    height: 1.75rem;
+    margin: 0;
+    padding: 0 0.375rem;
+    border: 0.0625rem solid var(--calendaria-button-border);
+    border-radius: 0.1875rem;
+    color: var(--calendaria-button-text);
+    font-size: 0.75rem;
+    line-height: calc(1.75rem - 0.125rem);
+    text-align: center;
+    cursor: pointer;
+    background: var(--calendaria-button-bg);
+    background-image: none;
+
+    &:hover {
+      background: var(--calendaria-button-hover);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  .time-keeper-readonly {
+    gap: 0.25rem;
+    display: flex;
+    opacity: 0;
+    justify-content: center;
+    align-items: center;
+    max-height: 0;
+    padding: 0;
+    overflow: hidden;
+    color: var(--calendaria-text-dim);
+    font-size: 0.6875rem;
+    transition:
+      opacity 0.2s ease-out,
+      max-height 0.2s ease-out,
+      margin-top 0.2s ease-out,
+      padding 0.2s ease-out;
+
+    i {
+      font-size: 0.6875rem;
+    }
+  }
+
+  .time-display-stopwatch-btn {
+    display: flex;
+    opacity: 0;
+    position: absolute;
+    right: -4rem;
+    justify-content: center;
+    align-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.25rem;
+    color: var(--calendaria-text-dim);
+    font-size: 0.75rem;
+    cursor: pointer;
+    pointer-events: none;
+    background: transparent;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      color: var(--calendaria-text);
+    }
+  }
+}
+
+/* ======================================== */
+/* Stopwatch                               */
+/* ======================================== */
+
+.stopwatch {
+  --stopwatch-size: 12.5rem;
+
+  position: fixed;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+
+  &:hover .stopwatch-resize-handle {
+    opacity: 1;
+  }
+
+  .stopwatch-wrapper {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    width: var(--stopwatch-size);
+  }
+
+  .stopwatch-face {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: var(--stopwatch-size);
+    height: var(--stopwatch-size);
+    border: 0.25rem solid var(--calendaria-border);
+    border-radius: 50%;
+    cursor: grab;
+    background: var(--calendaria-bg);
+    box-shadow:
+      0 0.25rem 1rem var(--calendaria-shadow),
+      inset 0 0 1.25rem rgb(0 0 0 / 20%);
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .stopwatch-dial {
+    inset: 0.5rem;
+    position: absolute;
+    border: 0.125rem solid var(--calendaria-border-light);
+    border-radius: 50%;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--calendaria-bg-lighter) 0%, var(--calendaria-bg-darker) 100%);
+  }
+
+  .stopwatch-ticks {
+    inset: 0;
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+
+    &::before {
+      -webkit-mask: radial-gradient(circle, transparent 88%, rgb(0 0 0) 88%);
+      inset: 0.125rem;
+      mask: radial-gradient(circle, transparent 88%, rgb(0 0 0) 88%);
+      position: absolute;
+      border-radius: 50%;
+      content: '';
+      background: repeating-conic-gradient(from 0deg, var(--calendaria-text-dim) 0deg 1deg, transparent 1deg 6deg);
+    }
+  }
+
+  .stopwatch-hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    border-radius: 0.125rem;
+    pointer-events: none;
+    transform-origin: bottom center;
+
+    &.second-hand {
+      z-index: 3;
+      width: 0.125rem;
+      height: 42%;
+      margin-left: -0.0625rem;
+      background: var(--calendaria-error);
+      box-shadow: 0 0 0.5rem color-mix(in srgb, var(--calendaria-error) 80%, transparent);
+    }
+
+    &.minute-hand {
+      z-index: 2;
+      width: 0.3125rem;
+      height: 32%;
+      margin-left: -0.1562rem;
+      background: var(--calendaria-text);
+      box-shadow: 0 0 0.1875rem rgb(0 0 0 / 40%);
+    }
+  }
+
+  .stopwatch-center-dot {
+    z-index: 4;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin: -0.375rem 0 0 -0.375rem;
+    border: 0.125rem solid var(--calendaria-border);
+    border-radius: 50%;
+    pointer-events: none;
+    background: var(--calendaria-text);
+    box-shadow: 0 0.0625rem 0.1875rem rgb(0 0 0 / 30%);
+  }
+
+  .stopwatch-display {
+    display: flex;
+    z-index: 10;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--calendaria-bg) 85%, transparent);
+    transform: translate(-50%, -50%);
+  }
+
+  .stopwatch-time {
+    padding: 0.25rem 0.5rem;
+    border: 0.0625rem solid var(--calendaria-border);
+    border-radius: 0.25rem;
+    color: var(--calendaria-text);
+    font-weight: bold;
+    font-size: calc(var(--stopwatch-size) * 0.09);
+    line-height: 1;
+    font-family: monospace;
+    letter-spacing: 0.0313rem;
+    user-select: none;
+    pointer-events: none;
+    background: var(--calendaria-bg);
+  }
+
+  .stopwatch-controls {
+    inset: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .stopwatch-btn {
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    color: var(--calendaria-text-dim);
+    font-size: 1.125rem;
+    line-height: 1;
+    cursor: pointer;
+    pointer-events: auto;
+    background: none;
+    box-shadow: none;
+    transition:
+      color 0.15s ease,
+      transform 0.1s ease;
+    transform: translateX(-50%);
+
+    &:focus,
+    &:active {
+      outline: none;
+      box-shadow: none;
+    }
+
+    i {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 2rem;
+      height: 2rem;
+      margin: 0;
+      padding: 0;
+      font-size: inherit;
+      line-height: 1;
+    }
+
+    &:hover:not(:disabled) {
+      color: var(--calendaria-text);
+      transform: translateX(-50%) scale(1.15);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    &.notification {
+      top: 87%;
+      left: 10%;
+
+      &.active {
+        color: var(--calendaria-primary);
+      }
+    }
+
+    &.lap {
+      top: 97%;
+      left: 30%;
+    }
+
+    &.start,
+    &.pause {
+      top: 100%;
+      left: 50%;
+    }
+
+    &.start {
+      color: var(--calendaria-success);
+    }
+
+    &.pause {
+      color: var(--calendaria-warning);
+    }
+
+    &.reset {
+      top: 97%;
+      left: 70%;
+      color: var(--calendaria-error);
+    }
+
+    &.mode {
+      top: 87%;
+      left: 90%;
+      color: var(--calendaria-primary);
+    }
+  }
+
+  .stopwatch-laps {
+    width: var(--stopwatch-size);
+    margin-top: 1.5625rem;
+    border: 0.0625rem solid var(--calendaria-border);
+    border-radius: 0.5rem;
+    background: var(--calendaria-bg);
+    box-shadow: 0 0.125rem 0.375rem var(--calendaria-shadow);
+  }
+
+  .stopwatch-laps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 0.0625rem solid var(--calendaria-border-light);
+    color: var(--calendaria-text-dim);
+    font-weight: 600;
+    font-size: 0.5625rem;
+    text-transform: uppercase;
+
+    .stopwatch-clear-laps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 0.875rem;
+      height: 0.875rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.1875rem;
+      color: var(--calendaria-text-dim);
+      font-size: 0.5rem;
+      cursor: pointer;
+      background: transparent;
+      transition: color 0.15s ease;
+
+      &:hover {
+        color: var(--calendaria-error);
+      }
+    }
+  }
+
+  .stopwatch-lap-list {
+    max-height: 3.75rem;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .stopwatch-lap {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.125rem 0;
+    color: var(--calendaria-text);
+    font-size: 0.625rem;
+    font-family: monospace;
+
+    .lap-index {
+      color: var(--calendaria-text-dim);
+    }
+  }
+
+  .stopwatch-resize-handle {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0.875rem;
+    height: 0.875rem;
+    cursor: nesw-resize;
+    transition: opacity 0.15s ease;
+
+    &::after {
+      position: absolute;
+      top: 0.125rem;
+      right: 0.125rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-top: 0.125rem solid var(--calendaria-text-dim);
+      border-right: 0.125rem solid var(--calendaria-text-dim);
+      content: '';
+    }
+
+    &:hover::after {
+      border-color: var(--calendaria-primary);
+    }
+  }
+}
+
+.stopwatch-notification-form {
+  .form-group {
+    margin-bottom: 0.75rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 0.375rem 0.5rem;
+      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border-radius: 0.25rem;
+    }
+
+    .hint {
+      margin-top: 0.25rem;
+      color: var(--color-text-dark-secondary);
+      font-size: 0.6875rem;
+    }
+  }
+}

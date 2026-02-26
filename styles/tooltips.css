@@ -1,0 +1,165 @@
+/* ======================================== */
+/* Moons Radial View Tooltip               */
+/* ======================================== */
+
+.calendaria-moons-tooltip {
+  z-index: 100001;
+  position: fixed;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--calendaria-border, rgb(58 58 94));
+  border-radius: 0.625rem;
+  cursor: grab;
+  background: var(--calendaria-bg, rgb(26 26 46));
+  box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 60%);
+
+  .moons-radial {
+    position: relative;
+    width: var(--radial-size);
+    height: var(--radial-size);
+    margin: 0.5rem auto;
+  }
+
+  .moon-radial-item {
+    --angle: calc(360deg / var(--moon-count) * var(--moon-index));
+    --radius: calc(var(--radial-size) / 2 - 1rem);
+
+    display: flex;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--angle) * -1));
+
+    &:hover {
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--angle) * -1)) scale(1.1);
+    }
+
+    &.selected {
+      .moon-radial-icon {
+        outline: 0.125rem solid var(--calendaria-primary, rgb(123 104 238));
+        outline-offset: 0.125rem;
+      }
+
+      .moon-name {
+        color: var(--calendaria-primary, rgb(123 104 238));
+        margin-bottom: 0.25rem;
+      }
+    }
+  }
+
+  .moon-radial-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0.1875rem;
+    border-radius: 50%;
+    background: var(--calendaria-bg-hover, rgb(40 40 70));
+    box-shadow: 0 0.125rem 0.375rem rgb(0 0 0 / 40%);
+
+    &.tinted {
+      background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(40 40 70));
+
+      img {
+        mix-blend-mode: multiply;
+        filter: brightness(1.2) contrast(1.1);
+      }
+    }
+
+    img {
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .moon-name {
+    color: var(--calendaria-text);
+    font-weight: 500;
+    font-size: var(--font-size-10, 0.625rem);
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+/* ======================================== */
+/* Day Cell Tooltip                        */
+/* ======================================== */
+
+.calendaria-day-tooltip {
+  line-height: 1.4;
+  text-align: center;
+
+  .calendaria-day-tooltip-date {
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+
+    strong {
+      color: var(--color-text-primary, rgb(238 238 238));
+    }
+  }
+
+  .calendaria-day-tooltip-festival {
+    color: var(--calendaria-primary, rgb(74 158 255));
+    font-size: 0.85rem;
+  }
+
+  .calendaria-day-tooltip-season {
+    color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
+  }
+
+  .calendaria-day-tooltip-sun {
+    margin-top: 0.25rem;
+    color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
+
+    i {
+      opacity: 0.7;
+      margin: 0 0.125rem;
+    }
+
+    .fa-sun {
+      color: rgb(251 191 36);
+    }
+
+    .fa-moon {
+      color: rgb(167 139 250);
+    }
+  }
+}
+
+/* ======================================== */
+/* Weather Tooltip                         */
+/* ======================================== */
+
+.calendaria-weather-tooltip {
+  line-height: 1.4;
+  text-align: left;
+
+  .calendaria-weather-tooltip-header {
+    margin-bottom: 0.125rem;
+    font-size: 0.9rem;
+
+    strong {
+      color: var(--color-text-primary, rgb(238 238 238));
+    }
+  }
+
+  .calendaria-weather-tooltip-row {
+    color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
+
+    i {
+      opacity: 0.7;
+      margin-right: 0.25rem;
+      width: 0.9em;
+      text-align: center;
+    }
+  }
+}

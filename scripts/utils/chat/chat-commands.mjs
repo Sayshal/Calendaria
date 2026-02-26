@@ -126,7 +126,7 @@ function handleCommand(cmd, match) {
  * @param {string} content - HTML content
  */
 async function sendChat(content) {
-  await ChatMessage.create({ content: `<div class="calendaria-chat-output">${content}</div>`, speaker: ChatMessage.getSpeaker() });
+  await ChatMessage.create({ content: `<div class="calendaria chat-output">${content}</div>`, speaker: ChatMessage.getSpeaker() });
 }
 
 /**
@@ -545,12 +545,12 @@ async function cmdForecast(args) {
   if (!forecast.length) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
   const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
   const zoneName = zone ? localize(zone.name) : '';
-  const subtitle = zoneName ? `<div class="calendaria-forecast-zone">${zoneName}</div>` : '';
+  const subtitle = zoneName ? `<div class="forecast-zone">${zoneName}</div>` : '';
   const lines = forecast.map((f) => {
     const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
     const label = localize(f.preset.label);
     return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.dayOfMonth + 1}</strong> — ${label}${tempStr}`;
   });
-  const content = `<div class="calendaria-chat-output"><h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}</div>`;
+  const content = `<div class="calendaria chat-output"><h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}</div>`;
   await ChatMessage.create({ content, speaker: ChatMessage.getSpeaker(), whisper: game.user.isGM ? [game.user.id] : [] });
 }

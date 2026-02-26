@@ -1,0 +1,111 @@
+.calendaria {
+  input[type='color'] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 1.75rem;
+    padding: 0;
+    border: 0.0625rem solid var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
+    cursor: pointer;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+      border: none;
+      border-radius: 0.1875rem;
+    }
+
+    &::-moz-color-swatch {
+      border: none;
+      border-radius: 0.1875rem;
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+}
+
+#chat-log {
+  .message-metadata:has(.cal-timestamp) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .message-timestamp {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .cal-timestamp {
+    display: inline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .cal-real {
+      opacity: 0.7;
+
+      &::before {
+        content: '(';
+      }
+
+      &::after {
+        content: ')';
+      }
+    }
+  }
+}
+
+#context-menu {
+  .context-item {
+    &.sticky-active {
+      color: var(--color-text-light-highlight, rgb(255 255 255));
+      background: var(--calendaria-primary);
+
+      &:hover {
+        background: var(--calendaria-primary);
+      }
+    }
+
+    &:has(.note-row) {
+      display: flex;
+      align-items: center;
+    }
+
+    .note-row {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .note-name {
+      max-width: 9.375rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .note-actions {
+      gap: 0.5rem;
+      display: inline-flex;
+      margin-left: auto;
+      padding-left: 0.5rem;
+
+      i {
+        opacity: 0.6;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

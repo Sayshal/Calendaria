@@ -1,0 +1,132 @@
+.calendaria {
+  &.chat-announcement,
+  &.chat-reminder {
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .open-note {
+    gap: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-text-hyperlink, var(--calendaria-link));
+    font-size: 0.85em;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    i,
+    img {
+      font-size: 1em;
+    }
+
+    img {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  &.chat-announcement {
+    .announcement-date {
+      color: var(--color-text-dark-primary, var(--calendaria-text));
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+
+    .announcement-content {
+      color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
+      font-size: 0.85em;
+      line-height: 1.4;
+    }
+  }
+
+  &.chat-reminder {
+    .reminder-message {
+      color: var(--color-text-dark-primary, var(--calendaria-text));
+      font-size: 0.9em;
+
+      strong {
+        color: var(--color-text-dark-heading, var(--calendaria-text));
+      }
+    }
+  }
+
+  &.chat-release {
+    .release-header {
+      gap: 0.5rem;
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+
+      i {
+        color: rgb(233 30 140);
+        font-size: 1.25rem;
+      }
+
+      strong {
+        color: var(--color-text-dark-heading, var(--calendaria-text));
+      }
+    }
+
+    .release-body {
+      h4 {
+        margin: 1rem 0 0.25rem;
+      }
+
+      .release-patreon {
+        padding: 0.5rem;
+        border: 0.0625rem solid var(--color-border-light-2, var(--calendaria-border));
+        border-radius: 0.25rem;
+
+        strong {
+          display: block;
+          margin-bottom: 0.25rem;
+
+          a {
+            color: var(--color-text-hyperlink, var(--calendaria-link));
+            text-decoration: none;
+
+            &:hover {
+              text-decoration: underline;
+            }
+
+            i {
+              margin-right: 0.25rem;
+            }
+          }
+        }
+      }
+
+      .release-blurb {
+        a {
+          color: var(--color-text-hyperlink, var(--calendaria-link));
+        }
+      }
+
+      code {
+        font-size: 0.9em;
+      }
+    }
+
+    .open-note {
+      margin-top: 0.5rem;
+    }
+  }
+
+  &.chat-output {
+    h3 {
+      margin: 0 0 0.15rem;
+      font-size: 1rem;
+    }
+
+    .forecast-zone {
+      font-size: 0.8rem;
+      color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
+      margin-bottom: 0.35rem;
+    }
+  }
+}

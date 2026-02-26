@@ -1,0 +1,42 @@
+.calendaria {
+  .weather-editor {
+    footer.form-footer {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-top: 0.0625rem solid var(--color-cool-4);
+      background: var(--color-cool-5);
+
+      button {
+        flex: none;
+        width: fit-content;
+
+        &.primary {
+          flex: 1;
+        }
+      }
+    }
+
+    .form-fields.range > i {
+      flex: 0 0 0.5rem;
+      text-align: center;
+    }
+
+    nav.sheet-tabs {
+      min-width: 8.25rem;
+      max-width: 8.25rem;
+      overflow: hidden auto;
+    }
+
+    .no-preset-selected {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--color-text-secondary);
+      font-style: italic;
+    }
+  }
+}

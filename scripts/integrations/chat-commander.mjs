@@ -64,7 +64,7 @@ function formatHours(hours) {
  * @returns {string} Styled content
  */
 function wrapContent(content) {
-  return `<div class="calendaria-chat-output">${content}</div>`;
+  return `<div class="calendaria chat-output">${content}</div>`;
 }
 
 /**
@@ -767,7 +767,7 @@ function cmdForecast(_chat, parameters) {
   if (!forecast.length) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
   const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
   const zoneName = zone ? localize(zone.name) : '';
-  const subtitle = zoneName ? `<div class="calendaria-forecast-zone">${zoneName}</div>` : '';
+  const subtitle = zoneName ? `<div class="forecast-zone">${zoneName}</div>` : '';
   const lines = forecast.map((f) => {
     const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
     const label = localize(f.preset.label);
