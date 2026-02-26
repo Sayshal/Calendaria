@@ -1,5 +1,5 @@
-<div class="mini-cal-container">
-  <div class="mini-sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
+<div class="container">
+  <div class="sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
     <button type="button" class="sidebar-btn" data-action="close" data-tooltip
       aria-label="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>
@@ -40,7 +40,7 @@
     {{{widgets.sidebar}}}
   </div>
 
-  <div class="mini-notes-panel{{#if notesPanelVisible}} visible{{/if}}">
+  <div class="notes-panel{{#if notesPanelVisible}} visible{{/if}}">
     <div class="notes-panel-header">
       <span class="notes-panel-title">{{selectedDateLabel}}</span>
       <button type="button" class="notes-panel-close" data-action="closeNotesPanel" data-tooltip
@@ -118,13 +118,13 @@
     </div>
   </div>
 
-  <div class="mini-top-row{{#if stickyPosition}} position-locked{{/if}}">
+  <div class="top-row{{#if stickyPosition}} position-locked{{/if}}">
     <button type="button" class="nav-btn" data-action="navigate" data-direction="prev" data-tooltip
       aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.PreviousWeek'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
-    <div class="mini-title-group">
-      <span class="mini-title">{{{calendarData.formattedHeader}}}</span>
+    <div class="title-group">
+      <span class="title">{{{calendarData.formattedHeader}}}</span>
     </div>
     <button type="button" class="nav-btn" data-action="navigate" data-direction="next" data-tooltip
       aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
@@ -142,20 +142,20 @@
     </div>
   {{/if}}
 
-  <div class="mini-grid" style="--mini-weekday-count: {{calendarData.daysInWeek}}">
-    <div class="mini-weekdays">
+  <div class="grid" style="--mini-weekday-count: {{calendarData.daysInWeek}}">
+    <div class="weekdays">
       {{#each calendarData.weekdays}}
         <div class="weekday{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
       {{/each}}
     </div>
-    <div class="mini-days">
+    <div class="days">
       {{#each calendarData.weeks}}
         {{#if this.isIntercalaryRow}}
           {{!-- Intercalary row: full width, centered, no weekday alignment --}}
-          <div class="mini-intercalary-row">
+          <div class="intercalary-row">
             {{#each this.days}}
               <div
-                class="mini-day intercalary{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}} festival"
+                class="day intercalary{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}} festival"
                 data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
                 aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>
@@ -181,15 +181,15 @@
           {{!-- Regular week row --}}
           {{#each this}}
             {{#if empty}}
-              <div class="mini-day empty"></div>
+              <div class="day empty"></div>
             {{else if isFromOtherMonth}}
-              <div class="mini-day other-month{{#if isToday}} today{{/if}}" data-action="navigateToMonth"
+              <div class="day other-month{{#if isToday}} today{{/if}}" data-action="navigateToMonth"
                 data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}">
                 <span class="day-num">{{day}}</span>
               </div>
             {{else if isFromOtherWeek}}
               <div
-                class="mini-day other-week{{#if isToday}} today{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
+                class="day other-week{{#if isToday}} today{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
                 data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}"
                 {{#if festivalName}}data-tooltip
                 aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}" {{/if}}
@@ -199,7 +199,7 @@
               </div>
             {{else}}
               <div
-                class="mini-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
+                class="day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
                 data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}"
                 {{#if festivalName}}data-tooltip
                 aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}" {{/if}}
@@ -227,7 +227,7 @@
     </div>
   </div>
 
-  <div class="mini-time-display" {{#if canChangeDateTime}}data-action="toggle" {{/if}}>
+  <div class="time-display" {{#if canChangeDateTime}}data-action="toggle" {{/if}}>
     <span class="time-value">{{{currentTime}}}</span>
     <span class="date-value hidden">{{currentDate}}</span>
     {{#if canChangeDateTime}}
@@ -239,7 +239,7 @@
   </div>
 
   {{#if canChangeDateTime}}
-    <div class="mini-time-controls{{#if controlsVisible}} visible{{/if}}">
+    <div class="time-controls{{#if controlsVisible}} visible{{/if}}">
       <div class="controls-group">
         <button type="button" class="time-btn time-shortcut" data-action="toSunrise" data-tooltip
           aria-label="{{localize 'CALENDARIA.Common.Sunrise'}}">

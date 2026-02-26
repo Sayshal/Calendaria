@@ -782,8 +782,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
     if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
     if (!this.#hooks.some((h) => h.name === HOOKS.CLOCK_START_STOP)) this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this)) });
-    const container = this.element.querySelector('.mini-cal-container');
-    const sidebar = this.element.querySelector('.mini-sidebar');
+    const container = this.element.querySelector('.container');
+    const sidebar = this.element.querySelector('.sidebar');
     container?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-badge')) return;
       e.preventDefault();
@@ -791,10 +791,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       new BigCal().render(true);
     });
     container?.addEventListener('contextmenu', (e) => {
-      if (e.target.closest('#context-menu, .mini-day')) return;
+      if (e.target.closest('#context-menu, .day')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.mini-cal-container', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', this.#getContextMenuItems(), { fixed: true, jQuery: false });
       menu._onActivate(e);
     });
     if (container && sidebar) {
@@ -838,8 +838,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }, 100);
       }
     }
-    const timeDisplay = this.element.querySelector('.mini-time-display');
-    const timeControls = this.element.querySelector('.mini-time-controls');
+    const timeDisplay = this.element.querySelector('.time-display');
+    const timeControls = this.element.querySelector('.time-controls');
     if (timeDisplay && timeControls) {
       const showControls = () => {
         clearTimeout(this.#hideTimeout);
@@ -868,7 +868,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#restoreStickyStates();
     const c = game.time.components;
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
-    ViewUtils.setupDayContextMenu(this.element, '.mini-day:not(.empty)', this.calendar, {
+    ViewUtils.setupDayContextMenu(this.element, '.day:not(.empty)', this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
         this.render();
@@ -898,12 +898,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
     this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render()) });
     this.#hooks.push({ name: HOOKS.DISPLAY_FORMATS_CHANGED, id: Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.render()) });
-    new foundry.applications.ux.ContextMenu.implementation(
-      this.element,
-      '.mini-cal-container',
-      [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() }],
-      { fixed: true, jQuery: false }
-    );
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() }], {
+      fixed: true,
+      jQuery: false
+    });
   }
 
   /** @override */
@@ -993,8 +991,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
     let rightBuffer = StickyZones.getSidebarBuffer();
-    const miniSidebar = this.element.querySelector('.mini-sidebar');
-    if (miniSidebar) rightBuffer += miniSidebar.offsetWidth;
+    const sidebarEl = this.element.querySelector('.sidebar');
+    if (sidebarEl) rightBuffer += sidebarEl.offsetWidth;
     let { left, top } = this.position;
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
@@ -1027,8 +1025,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickySidebar = states.sidebar ?? false;
     this.#stickyPosition = states.position ?? false;
     if (!this.element) return;
-    const timeControls = this.element.querySelector('.mini-time-controls');
-    const sidebar = this.element.querySelector('.mini-sidebar');
+    const timeControls = this.element.querySelector('.time-controls');
+    const sidebar = this.element.querySelector('.sidebar');
     if (this.#stickyTimeControls) {
       timeControls?.classList.add('visible');
       this.#controlsVisible = true;
@@ -1122,7 +1120,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Enable dragging on the top row.
    */
   #enableDragging() {
-    const dragHandle = this.element.querySelector('.mini-top-row');
+    const dragHandle = this.element.querySelector('.top-row');
     if (!dragHandle) return;
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
     let dragStartX = 0;
@@ -1161,8 +1159,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
       let rightBuffer = StickyZones.getSidebarBuffer();
-      const miniSidebar = this.element.querySelector('.mini-sidebar');
-      if (miniSidebar) rightBuffer += miniSidebar.offsetWidth;
+      const sidebarEl = this.element.querySelector('.sidebar');
+      if (sidebarEl) rightBuffer += sidebarEl.offsetWidth;
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));

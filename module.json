@@ -28,6 +28,9 @@
   "esmodules": [
     "calendaria.mjs"
   ],
+  "styles": [
+    "styles/calendaria.css"
+  ],
   "flags": {
     "hotReload": {
       "extensions": [

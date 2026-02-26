@@ -1006,7 +1006,7 @@
 
 .calendaria-hud-bar.near-snap,
 .time-keeper .time-display.near-snap,
-.mini-cal .mini-top-row.near-snap {
+.mini-cal .top-row.near-snap {
   border-color: var(--calendaria-primary);
   box-shadow:
     0 0 0.625rem var(--calendaria-shadow),
