@@ -2,7 +2,7 @@
 /* Search Functionality                    */
 /* ======================================== */
 
-.calendaria-hud-search-panel {
+.calendaria-search {
   display: none;
   z-index: 100000;
   position: fixed;

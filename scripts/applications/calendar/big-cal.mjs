@@ -1178,7 +1178,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if (this._searchOpen) {
       this._positionSearchPanel();
-      const panel = this.element.querySelector('.calendaria-hud-search-panel');
+      const panel = this.element.querySelector('.calendaria-search');
       const button = this.element.querySelector('.search-toggle');
       if (panel && !this._clickOutsideHandler) {
         setTimeout(() => {
@@ -1225,7 +1225,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update search results without full re-render.
    */
   _updateSearchResults() {
-    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const panel = this.element.querySelector('.calendaria-search');
     if (!panel) return;
     const resultsContainer = panel.querySelector('.search-panel-results');
     if (!resultsContainer) return;
@@ -1262,7 +1262,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Position search panel - CSS handles positioning, this just sets dimensions.
    */
   _positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const panel = this.element.querySelector('.calendaria-search');
     if (!panel) return;
     panel.style.width = '17.5rem';
     panel.style.maxHeight = '21.875rem';

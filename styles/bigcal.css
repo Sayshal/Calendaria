@@ -144,7 +144,7 @@
     border-bottom: 0.125rem solid var(--calendaria-border);
   }
 
-  .calendaria-hud-search-panel {
+  .calendaria-search {
     position: absolute;
     top: 100%;
     left: 50%;

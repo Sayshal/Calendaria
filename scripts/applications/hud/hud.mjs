@@ -562,7 +562,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         { passive: false }
       );
     }
-    const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
+    const searchInput = this.element.querySelector('.calendaria-search .search-input');
     if (searchInput) {
       if (this.#searchOpen) searchInput.focus();
       const debouncedSearch = foundry.utils.debounce((term) => {
@@ -1782,7 +1782,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update search results without full re-render.
    */
   #updateSearchResults() {
-    const panel = this.#searchPanelEl || this.element.querySelector('.calendaria-hud-search-panel');
+    const panel = this.#searchPanelEl || this.element.querySelector('.calendaria-search');
     if (!panel) return;
     const resultsContainer = panel.querySelector('.search-panel-results');
     if (!resultsContainer) return;
@@ -1834,7 +1834,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Position search panel with edge awareness.
    */
   #positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const panel = this.element.querySelector('.calendaria-search');
     const bar = this.element.querySelector('.calendaria-hud-bar');
     if (!panel || !bar) return;
     if (panel.parentElement !== document.body) {

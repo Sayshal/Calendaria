@@ -812,7 +812,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }, delay);
       });
     }
-    const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
+    const searchInput = this.element.querySelector('.calendaria-search .search-input');
     if (searchInput) {
       if (this.#searchOpen) searchInput.focus();
       const debouncedSearch = foundry.utils.debounce((term) => {
@@ -828,7 +828,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if (this.#searchOpen) {
       this.#positionSearchPanel();
-      const panel = this.element.querySelector('.calendaria-hud-search-panel');
+      const panel = this.element.querySelector('.calendaria-search');
       if (panel && !this.#clickOutsideHandler) {
         setTimeout(() => {
           this.#clickOutsideHandler = (event) => {
@@ -1691,7 +1691,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update search results without full re-render.
    */
   #updateSearchResults() {
-    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const panel = this.element.querySelector('.calendaria-search');
     if (!panel) return;
     const resultsContainer = panel.querySelector('.search-panel-results');
     if (!resultsContainer) return;
@@ -1728,7 +1728,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Position search panel with edge awareness.
    */
   #positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-hud-search-panel');
+    const panel = this.element.querySelector('.calendaria-search');
     const button = this.element.querySelector('[data-action="toggleSearch"]');
     if (!panel || !button) return;
     const buttonRect = button.getBoundingClientRect();
