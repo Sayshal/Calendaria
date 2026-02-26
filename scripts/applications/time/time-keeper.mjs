@@ -120,12 +120,12 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
     if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onVisualTick.bind(this));
     if (!this.#formatsHookId) this.#formatsHookId = Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.render());
-    const container = this.element.querySelector('.time-keeper-content');
+    const container = this.element.querySelector('.content');
     container?.addEventListener('contextmenu', (e) => {
       if (e.target.closest('#context-menu')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.time-keeper-content', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.content', this.#getContextMenuItems(), { fixed: true, jQuery: false });
       menu._onActivate(e);
     });
   }
@@ -415,8 +415,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onVisualTick() {
     if (!this.rendered) return;
-    const timeEl = this.element.querySelector('.time-display-time');
-    const dateEl = this.element.querySelector('.time-display-date');
+    const timeEl = this.element.querySelector('.time');
+    const dateEl = this.element.querySelector('.date');
     if (timeEl) {
       const timeFormatted = this.#formatTime();
       if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);

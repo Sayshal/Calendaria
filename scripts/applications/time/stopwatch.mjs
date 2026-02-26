@@ -318,7 +318,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onOpenNotification() {
     const currentSound = this.#notification?.sound || 'sounds/notify.wav';
     const content = `
-      <form class="stopwatch-notification-form">
+      <form class="standard-form">
         <div class="form-group">
           <label>${localize('CALENDARIA.Stopwatch.NotificationThreshold')}</label>
           <input type="number" name="threshold" value="${this.#notificationThreshold ?? ''}" min="1" placeholder="${localize('CALENDARIA.Stopwatch.ThresholdPlaceholder')}" />
@@ -423,7 +423,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #updateDisplay() {
     if (!this.rendered) return;
-    const timeEl = this.element.querySelector('.stopwatch-time');
+    const timeEl = this.element.querySelector('.time');
     if (timeEl) timeEl.textContent = this.#getDisplayTime();
     this.#updateDialHands();
   }
@@ -644,7 +644,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #enableDragging() {
-    const dragHandle = this.element.querySelector('.stopwatch-face');
+    const dragHandle = this.element.querySelector('.face');
     if (!dragHandle) return;
     let isDragging = false;
     let dragStartX = 0;
@@ -681,7 +681,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       await this.#savePosition();
     };
     dragHandle.addEventListener('mousedown', (event) => {
-      if (event.target.closest('.stopwatch-btn')) return;
+      if (event.target.closest('.btn')) return;
       event.preventDefault();
       isDragging = true;
       previousZoneId = this.#snappedZoneId;
@@ -708,7 +708,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #enableResizing() {
-    const handle = this.element.querySelector('.stopwatch-resize-handle');
+    const handle = this.element.querySelector('.resize-handle');
     if (!handle) return;
     let startX = 0;
     let startY = 0;
@@ -751,12 +751,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #setupContextMenu() {
-    const container = this.element.querySelector('.stopwatch-face');
+    const container = this.element.querySelector('.face');
     container?.addEventListener('contextmenu', (e) => {
       if (e.target.closest('#context-menu')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.stopwatch-face', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.face', this.#getContextMenuItems(), { fixed: true, jQuery: false });
       menu._onActivate(e);
     });
   }

@@ -1,23 +1,23 @@
-<div class="time-keeper-content">
+<div class="content">
   <div class="time-display">
-    <div class="time-display-time-wrapper">
-      <span class="time-display-time">{{{currentTime}}}</span>
+    <div class="time-wrapper">
+      <span class="time">{{{currentTime}}}</span>
       {{#if canChangeDateTime}}
-        <button type="button" class="time-display-play-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggle" data-tooltip
+        <button type="button" class="play-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggle" data-tooltip
           aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
           <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
         </button>
       {{/if}}
-      <button type="button" class="time-display-stopwatch-btn" data-action="openStopwatch" data-tooltip
+      <button type="button" class="stopwatch-btn" data-action="openStopwatch" data-tooltip
         aria-label="{{localize 'CALENDARIA.Stopwatch.Title'}}">
         <i class="fas fa-stopwatch"></i>
       </button>
     </div>
-    {{#if showDate}}<span class="time-display-date">{{{currentDate}}}</span>{{/if}}
+    {{#if showDate}}<span class="date">{{{currentDate}}}</span>{{/if}}
   </div>
 
   {{#if canChangeDateTime}}
-    <div class="time-keeper-controls">
+    <div class="controls">
       {{#if showDec2}}
         <button type="button" class="time-btn" data-action="dec2" data-tooltip aria-label="{{dec2Tooltip}}">
           <i class="fa-solid fa-backward-fast"></i>
@@ -45,8 +45,8 @@
       {{/if}}
     </div>
   {{else}}
-    <div class="time-keeper-controls">
-      <span class="time-keeper-readonly">
+    <div class="controls">
+      <span class="readonly">
         <i class="fas fa-clock"></i>
         {{localize "CALENDARIA.TimeKeeper.ReadOnly"}}
       </span>

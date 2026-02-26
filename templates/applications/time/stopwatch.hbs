@@ -1,56 +1,56 @@
-<div class="stopwatch-wrapper">
-  <div class="stopwatch-face">
-    <div class="stopwatch-dial">
-      <div class="stopwatch-ticks"></div>
+<div class="wrapper">
+  <div class="face">
+    <div class="dial">
+      <div class="ticks"></div>
     </div>
-    <div class="stopwatch-hand second-hand"></div>
-    <div class="stopwatch-hand minute-hand"></div>
-    <div class="stopwatch-center-dot"></div>
-    <div class="stopwatch-display">
-      <div class="stopwatch-time">{{elapsed}}</div>
+    <div class="hand second-hand"></div>
+    <div class="hand minute-hand"></div>
+    <div class="center-dot"></div>
+    <div class="display">
+      <div class="time">{{elapsed}}</div>
     </div>
-    <div class="stopwatch-controls">
-      <button type="button" class="stopwatch-btn notification {{#if hasNotification}}active{{/if}}"
+    <div class="controls">
+      <button type="button" class="btn notification {{#if hasNotification}}active{{/if}}"
         data-action="openNotification" data-tooltip
         aria-label="{{localize 'CALENDARIA.Stopwatch.ConfigureNotification'}}">
         <i class="fas fa-bell"></i>
       </button>
-      <button type="button" class="stopwatch-btn lap" data-action="lap" data-tooltip
+      <button type="button" class="btn lap" data-action="lap" data-tooltip
         aria-label="{{localize 'CALENDARIA.Stopwatch.RecordLap'}}" {{#unless running}}disabled{{/unless}}>
         <i class="fas fa-flag"></i>
       </button>
       {{#if running}}
-        <button type="button" class="stopwatch-btn pause" data-action="pause" data-tooltip
+        <button type="button" class="btn pause" data-action="pause" data-tooltip
           aria-label="{{localize 'CALENDARIA.Stopwatch.Pause'}}">
           <i class="fas fa-pause"></i>
         </button>
       {{else}}
-        <button type="button" class="stopwatch-btn start" data-action="start" data-tooltip
+        <button type="button" class="btn start" data-action="start" data-tooltip
           aria-label="{{localize 'CALENDARIA.Stopwatch.Start'}}">
           <i class="fas fa-play"></i>
         </button>
       {{/if}}
-      <button type="button" class="stopwatch-btn reset" data-action="reset" data-tooltip
+      <button type="button" class="btn reset" data-action="reset" data-tooltip
         aria-label="{{localize 'CALENDARIA.Stopwatch.Reset'}}">
         <i class="fas fa-undo"></i>
       </button>
-      <button type="button" class="stopwatch-btn mode" data-action="toggleMode" data-tooltip aria-label="{{modeLabel}}">
+      <button type="button" class="btn mode" data-action="toggleMode" data-tooltip aria-label="{{modeLabel}}">
         <i class="fas {{#if (eq mode 'realtime')}}fa-clock{{else}}fa-hourglass-half{{/if}}"></i>
       </button>
     </div>
   </div>
   {{#if hasLaps}}
-    <div class="stopwatch-laps">
-      <div class="stopwatch-laps-header">
+    <div class="laps">
+      <div class="laps-header">
         <span>{{localize "CALENDARIA.Stopwatch.Laps"}}</span>
-        <button type="button" class="stopwatch-clear-laps" data-action="clearLaps" data-tooltip
+        <button type="button" class="clear-laps" data-action="clearLaps" data-tooltip
           aria-label="{{localize 'CALENDARIA.Stopwatch.ClearLaps'}}">
           <i class="fas fa-trash"></i>
         </button>
       </div>
-      <ul class="stopwatch-lap-list">
+      <ul class="lap-list">
         {{#each laps}}
-          <li class="stopwatch-lap">
+          <li class="lap">
             <span class="lap-index">#{{index}}</span>
             <span class="lap-time">{{elapsed}}</span>
           </li>
@@ -58,5 +58,5 @@
       </ul>
     </div>
   {{/if}}
-  <div class="stopwatch-resize-handle"></div>
+  <div class="resize-handle"></div>
 </div>
