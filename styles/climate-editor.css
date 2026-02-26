@@ -1,207 +1,173 @@
-.calendaria.climate-editor {
-  .window-content {
-    padding: 1rem;
-    overflow-y: auto;
-  }
-
-  .form-group .form-fields:has(input[type='range']) {
-    align-items: center;
-
-    input[type='range'] {
-      flex: 1;
+.calendaria {
+  .climate-editor {
+    .window-content {
+      overflow-y: auto;
     }
 
-    .range-value {
-      flex: 0;
-      min-width: 2.5em;
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-13);
-      text-align: center;
-    }
-  }
-
-  .slider-with-ticks {
-    gap: 0.125rem;
-    display: flex;
-    position: relative;
-    flex: 1;
-    flex-direction: column;
-
-    input[type='range'] {
-      width: 100%;
-    }
-
-    .slider-ticks {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 0.5rem;
-
-      span {
-        width: 0.0625rem;
-        height: 0.375rem;
-        background: var(--color-border-light-tertiary);
+    .form-group .form-fields:has(input[type='range']) {
+      input[type='range'] {
+        flex: 1;
       }
     }
-  }
 
-  .weather-weight-grid {
-    gap: 0.4rem;
-    grid-template-columns: repeat(4, 1fr);
-    display: grid;
-  }
-
-  .weather-weight-pill {
-    gap: 0.4rem;
-    display: flex;
-    align-items: center;
-    padding: 0.4rem 0.6rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--weather-color) 50%, transparent);
-    border-radius: 0.25rem;
-    background: color-mix(in srgb, var(--weather-color) 15%, var(--color-cool-5));
-    transition:
-      border-color 0.15s ease,
-      background 0.15s ease;
-
-    &.active {
-      border-color: var(--weather-color);
-      background: color-mix(in srgb, var(--weather-color) 35%, var(--color-cool-5));
+    .weather-weight-grid {
+      gap: 0.4rem;
+      grid-template-columns: repeat(4, 1fr);
+      display: grid;
     }
 
-    i {
-      flex-shrink: 0;
-      width: 1rem;
-      color: var(--weather-color);
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    .weather-label {
-      flex: 1;
-      overflow: hidden;
-      font-size: var(--font-size-14);
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    input {
-      width: 3.5rem;
-      height: 1.125rem;
-      padding: 0 0.25rem;
-      border: 0.0625rem solid var(--color-cool-4);
-      font-size: var(--font-size-14);
-      text-align: right;
-    }
-  }
-
-  .preset-row {
-    gap: 0.5rem;
-    grid-template-columns: 1.5rem 1fr 3.75rem 1.25rem;
-    display: grid;
-    align-items: center;
-    padding: 0.25rem 0;
-
-    input[type='number'] {
-      text-align: right;
-    }
-  }
-
-  .preset-icon {
-    text-align: center;
-  }
-
-  .preset-name {
-    gap: 0.25rem;
-    display: flex;
-    align-items: center;
-
-    input {
-      flex: 1;
-    }
-
-    .preset-reset-alias {
-      flex: none;
-      padding: 0.125rem 0.25rem;
-      font-size: 0.75rem;
-    }
-  }
-
-  .units {
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
-  }
-
-  &.zone-mode .preset-row {
-    grid-template-columns: 1.5rem 1.5rem 1fr 5rem 5rem 5rem 4rem;
-  }
-
-  .preset-temp-input {
-    text-align: right;
-  }
-
-  .preset-header {
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    font-size: var(--font-size-14);
-    border-bottom: 0.0625rem solid var(--color-cool-4);
-
-    span {
-      text-align: center;
-    }
-  }
-
-  .form-fields.temperature > i,
-  .form-fields.range > i {
-    flex: 0 0 0.5rem;
-    text-align: center;
-  }
-
-  .daylight-fieldset {
-    .solstice-value {
-      font-weight: 600;
-    }
-
-    .solstice-date {
-      color: var(--color-text-secondary, hsl(0deg 0% 60%));
-      font-size: 0.85rem;
-    }
-  }
-
-  .modifier-relative {
-    color: var(--color-level-info);
-  }
-
-  .wind-direction-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.25rem 0.75rem;
-  }
-
-  &.zone-mode .sheet-tabs.tabs {
-    gap: 0;
-    display: flex;
-    border-bottom: 0.0625rem solid var(--color-cool-4);
-    margin-bottom: 0.5rem;
-
-    a {
+    .weather-weight-pill {
       gap: 0.4rem;
       display: flex;
       align-items: center;
-      padding: 0.5rem 1rem;
-      border-bottom: 0.125rem solid transparent;
-      color: var(--color-text-secondary);
-      font-weight: 500;
-      cursor: pointer;
+      padding: 0.4rem 0.6rem;
+      border: 0.0625rem solid color-mix(in srgb, var(--weather-color) 50%, transparent);
+      border-radius: 0.25rem;
+      background: color-mix(in srgb, var(--weather-color) 15%, var(--color-cool-5));
       transition:
-        color 0.15s ease,
-        border-color 0.15s ease;
-
-      &:hover {
-        color: var(--color-text-primary);
-      }
+        border-color 0.15s ease,
+        background 0.15s ease;
 
       &.active {
-        color: var(--color-text-primary);
-        border-bottom-color: var(--color-warm-2);
+        border-color: var(--weather-color);
+        background: color-mix(in srgb, var(--weather-color) 35%, var(--color-cool-5));
+      }
+
+      i {
+        flex-shrink: 0;
+        width: 1rem;
+        color: var(--weather-color);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .weather-label {
+        flex: 1;
+        overflow: hidden;
+        font-size: var(--font-size-14);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      input {
+        width: 3.5rem;
+        height: 1.125rem;
+        padding: 0 0.25rem;
+        border: 0.0625rem solid var(--color-cool-4);
+        font-size: var(--font-size-14);
+        text-align: right;
+      }
+    }
+
+    .preset-row {
+      gap: 0.5rem;
+      grid-template-columns: 1.5rem 1fr 3.75rem 1.25rem;
+      display: grid;
+      align-items: center;
+      padding: 0.25rem 0;
+
+      input[type='number'] {
+        text-align: right;
+      }
+    }
+
+    .preset-icon {
+      text-align: center;
+    }
+
+    .preset-name {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+
+      input {
+        flex: 1;
+      }
+
+      .preset-reset-alias {
+        flex: none;
+        padding: 0.125rem 0.25rem;
+        font-size: 0.75rem;
+      }
+    }
+
+    .units {
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+    }
+
+    &.zone-mode .preset-row {
+      grid-template-columns: 1.5rem 1.5rem 1fr 5rem 5rem 5rem 4rem;
+    }
+
+    .preset-temp-input {
+      text-align: right;
+    }
+
+    .preset-header {
+      color: var(--color-text-secondary);
+      font-weight: 600;
+      font-size: var(--font-size-14);
+      border-bottom: 0.0625rem solid var(--color-cool-4);
+
+      span {
+        text-align: center;
+      }
+    }
+
+    .form-fields.temperature > i,
+    .form-fields.range > i {
+      flex: 0 0 0.5rem;
+      text-align: center;
+    }
+
+    .daylight-fieldset {
+      .solstice-value {
+        font-weight: 600;
+      }
+
+      .solstice-date {
+        color: var(--color-text-secondary, hsl(0deg 0% 60%));
+        font-size: 0.85rem;
+      }
+    }
+
+    .modifier-relative {
+      color: var(--color-level-info);
+    }
+
+    .wind-direction-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.25rem 0.75rem;
+    }
+
+    &.zone-mode .sheet-tabs.tabs {
+      gap: 0;
+      border-bottom: 0.0625rem solid var(--color-cool-4);
+      margin-bottom: 0.5rem;
+
+      a {
+        gap: 0.4rem;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-bottom: 0.125rem solid transparent;
+        color: var(--color-text-secondary);
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          color 0.15s ease,
+          border-color 0.15s ease;
+
+        &:hover {
+          color: var(--color-text-primary);
+        }
+
+        &.active {
+          color: var(--color-text-primary);
+          border-bottom-color: var(--color-warm-2);
+        }
       }
     }
   }
