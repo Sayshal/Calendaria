@@ -1405,21 +1405,21 @@ export default class WeatherManager {
     const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const rows = [];
     const desc = description && description !== label ? esc(description) : '';
-    rows.push(`<div class="calendaria-weather-tooltip-header"><strong>${esc(label)}</strong>${desc ? ` — ${desc}` : ''}</div>`);
-    if (temp) rows.push(`<div class="calendaria-weather-tooltip-row"><i class="fas fa-temperature-half"></i> ${esc(temp)}</div>`);
+    rows.push(`<div class="header"><strong>${esc(label)}</strong>${desc ? ` — ${desc}` : ''}</div>`);
+    if (temp) rows.push(`<div class="row"><i class="fas fa-temperature-half"></i> ${esc(temp)}</div>`);
     if (windSpeed > 0) {
       const windLabel = this.getWindSpeedLabel(windSpeed);
       const windKph = this.getWindSpeedKph(windSpeed);
       const windFormatted = this.formatWindSpeed(windKph);
       const dirLabel = this.getWindDirectionLabel(windDirection);
-      rows.push(`<div class="calendaria-weather-tooltip-row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
+      rows.push(`<div class="row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
     }
     if (precipType) {
       const precipLabel = localize(`CALENDARIA.Weather.Precipitation.${precipType.charAt(0).toUpperCase() + precipType.slice(1)}`);
       const rate = this.formatPrecipitation((precipIntensity ?? 0) * 10);
-      rows.push(`<div class="calendaria-weather-tooltip-row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
+      rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
     }
-    const html = `<div class="calendaria-weather-tooltip">${rows.join('')}</div>`;
+    const html = `<div class="calendaria"><div class="weather-tooltip">${rows.join('')}</div></div>`;
     return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 }

@@ -82,16 +82,16 @@ export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
   closeMoonPicker();
   if (!moons?.length) return;
   const tooltip = document.createElement('div');
-  tooltip.className = 'calendaria-moons-tooltip';
+  tooltip.className = 'calendaria-moon-picker';
   const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
   tooltip.innerHTML = `
-    <div class="moons-radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
+    <div class="radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
       ${moons
         .map(
           (moon, i) => `
-        <div class="moon-radial-item${moon.moonName === currentMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
-          <span class="moon-name">${moon.moonName}</span>
-          <div class="moon-radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
+        <div class="radial-item${moon.moonName === currentMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
+          <span class="name">${moon.moonName}</span>
+          <div class="radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
             <img src="${moon.icon}" alt="${moon.phaseName}">
           </div>
         </div>
@@ -102,7 +102,7 @@ export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
   `;
   document.body.appendChild(tooltip);
   moonPickerState.tooltip = tooltip;
-  tooltip.querySelectorAll('.moon-radial-item').forEach((item) => {
+  tooltip.querySelectorAll('.radial-item').forEach((item) => {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
       const moonName = item.dataset.moonName;
@@ -647,21 +647,21 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   };
   const rows = [];
-  rows.push(`<div class="calendaria-day-tooltip-date"><strong>${escapeText(fullDate)}</strong></div>`);
+  rows.push(`<div class="date"><strong>${escapeText(fullDate)}</strong></div>`);
   if (festival?.name) {
     const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
     let festivalText = escapeText(festival.name);
     if (festival.description) festivalText += `: ${escapeText(festival.description)}`;
-    rows.push(`<div class="calendaria-day-tooltip-festival"${colorStyle}><em>${festivalText}</em></div>`);
+    rows.push(`<div class="festival"${colorStyle}><em>${festivalText}</em></div>`);
   }
-  if (seasonName) rows.push(`<div class="calendaria-day-tooltip-season">${escapeText(seasonName)}</div>`);
-  rows.push(`<div class="calendaria-day-tooltip-sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
+  if (seasonName) rows.push(`<div class="season">${escapeText(seasonName)}</div>`);
+  rows.push(`<div class="sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
   if (weatherData) {
     const prefix = weatherData.isForecast ? `${localize('CALENDARIA.Weather.Forecast')}: ` : '';
     const tempStr = weatherData.temperature != null ? ` ${weatherData.isForecast && weatherData.isVaried ? '~' : ''}${WeatherManager.formatTemperature(weatherData.temperature)}` : '';
-    rows.push(`<div class="calendaria-day-tooltip-weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
+    rows.push(`<div class="weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
   }
-  const rawHtml = `<div class="calendaria-day-tooltip">${rows.join('')}</div>`;
+  const rawHtml = `<div class="calendaria"><div class="day-tooltip">${rows.join('')}</div></div>`;
   return encodeHtmlAttribute(rawHtml);
 }
 
