@@ -156,7 +156,7 @@
             {{#each this.days}}
               <div
                 class="mini-day intercalary{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}} festival"
-                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-tooltip
+                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
                 aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>
                 <span class="festival-name">{{festivalName}}</span>
@@ -184,13 +184,13 @@
               <div class="mini-day empty"></div>
             {{else if isFromOtherMonth}}
               <div class="mini-day other-month{{#if isToday}} today{{/if}}" data-action="navigateToMonth"
-                data-year="{{year}}" data-month="{{month}}" data-day="{{day}}">
+                data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}">
                 <span class="day-num">{{day}}</span>
               </div>
             {{else if isFromOtherWeek}}
               <div
                 class="mini-day other-week{{#if isToday}} today{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
-                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
+                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}"
                 {{#if festivalName}}data-tooltip
                 aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}" {{/if}}
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>
@@ -200,7 +200,7 @@
             {{else}}
               <div
                 class="mini-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}}{{#if isFestival}} festival{{/if}}"
-                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
+                data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}"
                 {{#if festivalName}}data-tooltip
                 aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}" {{/if}}
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>

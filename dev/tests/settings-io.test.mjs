@@ -188,7 +188,7 @@ describe('exportSettings()', () => {
       yearZero: 0,
       toObject: () => ({ name: 'Test Calendar', months: [] })
     });
-    CalendarManager.getCurrentDateTime.mockReturnValue({ year: 5, month: 2, day: 10 });
+    CalendarManager.getCurrentDateTime.mockReturnValue({ year: 5, month: 2, dayOfMonth: 10 });
 
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => ({ checked: true })) } });
@@ -200,7 +200,7 @@ describe('exportSettings()', () => {
     const data = JSON.parse(foundry.utils.saveDataToFile.mock.calls[0][0]);
     expect(data).toHaveProperty('calendarData');
     expect(data.calendarData.name).toBe('Test Calendar');
-    expect(data.calendarData.currentDate).toEqual({ year: 5, month: 2, day: 10 });
+    expect(data.calendarData.currentDate).toEqual({ year: 5, month: 2, dayOfMonth: 10 });
   });
 
   it('skips CALENDAR_DATA_SETTINGS keys when including calendar data', async () => {

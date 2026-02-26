@@ -1,103 +1,458 @@
 {
-  "id"            : "exandrian",
-  "name"          : "CALENDARIA.Calendar.Exandrian.Name",
-  "years"         : {"yearZero": 836, "firstWeekday": 0},
-  "months"        : {
+  "id": "exandrian",
+  "name": "CALENDARIA.Calendar.Exandrian.Name",
+  "years": {
+    "yearZero": 836,
+    "firstWeekday": 0
+  },
+  "months": {
     "values": {
-      "horisal000000000": {"name": "Horisal",     "abbreviation": "Hor", "ordinal":  1, "days": 29},
-      "misuthar00000000": {"name": "Misuthar",    "abbreviation": "Mis", "ordinal":  2, "days": 30},
-      "dualahei00000000": {"name": "Dualahei",    "abbreviation": "Dua", "ordinal":  3, "days": 30},
-      "thunsheer0000000": {"name": "Thunsheer",   "abbreviation": "Thu", "ordinal":  4, "days": 31},
-      "unndilar00000000": {"name": "Unndilar",    "abbreviation": "Unn", "ordinal":  5, "days": 28},
-      "brussendar000000": {"name": "Brussendar",  "abbreviation": "Bru", "ordinal":  6, "days": 31},
-      "sydenstar0000000": {"name": "Sydenstar",   "abbreviation": "Syd", "ordinal":  7, "days": 32},
-      "fessuran00000000": {"name": "Fessuran",    "abbreviation": "Fes", "ordinal":  8, "days": 29},
-      "quenpillar000000": {"name": "Quen'pillar", "abbreviation": "Que", "ordinal":  9, "days": 27},
-      "cuersaar00000000": {"name": "Cuersaar",    "abbreviation": "Cue", "ordinal": 10, "days": 29},
-      "duscar0000000000": {"name": "Duscar",      "abbreviation": "Dus", "ordinal": 11, "days": 32}
+      "horisal000000000": {
+        "name": "Horisal",
+        "abbreviation": "Hor",
+        "ordinal": 1,
+        "days": 29
+      },
+      "misuthar00000000": {
+        "name": "Misuthar",
+        "abbreviation": "Mis",
+        "ordinal": 2,
+        "days": 30
+      },
+      "dualahei00000000": {
+        "name": "Dualahei",
+        "abbreviation": "Dua",
+        "ordinal": 3,
+        "days": 30
+      },
+      "thunsheer0000000": {
+        "name": "Thunsheer",
+        "abbreviation": "Thu",
+        "ordinal": 4,
+        "days": 31
+      },
+      "unndilar00000000": {
+        "name": "Unndilar",
+        "abbreviation": "Unn",
+        "ordinal": 5,
+        "days": 28
+      },
+      "brussendar000000": {
+        "name": "Brussendar",
+        "abbreviation": "Bru",
+        "ordinal": 6,
+        "days": 31
+      },
+      "sydenstar0000000": {
+        "name": "Sydenstar",
+        "abbreviation": "Syd",
+        "ordinal": 7,
+        "days": 32
+      },
+      "fessuran00000000": {
+        "name": "Fessuran",
+        "abbreviation": "Fes",
+        "ordinal": 8,
+        "days": 29
+      },
+      "quenpillar000000": {
+        "name": "Quen'pillar",
+        "abbreviation": "Que",
+        "ordinal": 9,
+        "days": 27
+      },
+      "cuersaar00000000": {
+        "name": "Cuersaar",
+        "abbreviation": "Cue",
+        "ordinal": 10,
+        "days": 29
+      },
+      "duscar0000000000": {
+        "name": "Duscar",
+        "abbreviation": "Dus",
+        "ordinal": 11,
+        "days": 32
+      }
     }
   },
-  "days"          : {
-    "values"          : {
-      "miresen000000000": {"name": "Miresen",  "ordinal": 1, "abbreviation": "Mir"                   },
-      "grissen000000000": {"name": "Grissen",  "ordinal": 2, "abbreviation": "Gri"                   },
-      "whelsen000000000": {"name": "Whelsen",  "ordinal": 3, "abbreviation": "Whe"                   },
-      "conthsen00000000": {"name": "Conthsen", "ordinal": 4, "abbreviation": "Con"                   },
-      "folsen0000000000": {"name": "Folsen",   "ordinal": 5, "abbreviation": "Fol"                   },
-      "yulisen000000000": {"name": "Yulisen",  "ordinal": 6, "abbreviation": "Yul"                   },
-      "dapsen0000000000": {"name": "Dapsen",   "ordinal": 7, "abbreviation": "Dap", "isRestDay": true}
+  "days": {
+    "values": {
+      "miresen000000000": {
+        "name": "Miresen",
+        "ordinal": 1,
+        "abbreviation": "Mir"
+      },
+      "grissen000000000": {
+        "name": "Grissen",
+        "ordinal": 2,
+        "abbreviation": "Gri"
+      },
+      "whelsen000000000": {
+        "name": "Whelsen",
+        "ordinal": 3,
+        "abbreviation": "Whe"
+      },
+      "conthsen00000000": {
+        "name": "Conthsen",
+        "ordinal": 4,
+        "abbreviation": "Con"
+      },
+      "folsen0000000000": {
+        "name": "Folsen",
+        "ordinal": 5,
+        "abbreviation": "Fol"
+      },
+      "yulisen000000000": {
+        "name": "Yulisen",
+        "ordinal": 6,
+        "abbreviation": "Yul"
+      },
+      "dapsen0000000000": {
+        "name": "Dapsen",
+        "ordinal": 7,
+        "abbreviation": "Dap",
+        "isRestDay": true
+      }
     },
-    "daysPerYear"     : 328,
-    "hoursPerDay"     : 24,
-    "minutesPerHour"  : 60,
+    "daysPerYear": 328,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : {
-    "newdawn000000000": {"name": "New Dawn", "month": 1, "day": 1, "icon": "fas fa-sun", "color": "#FFD700", "description": "The first day of the new year, celebrated with renewal and fresh beginnings."},
-    "hillsgold0000000": {"name": "Hillsgold", "month": 2, "day": 27, "icon": "fas fa-wheat-awn", "color": "#DAA520", "description": "A harvest festival celebrating the bounty of the hills and early spring crops."},
-    "dayofchallenging": {"name": "Day of Challenging", "month": 3, "day": 7, "icon": "fas fa-bolt", "color": "#4169E1", "description": "The Stormlord's holy day where warriors compete in sacred combat and trials of strength."},
-    "dayofrenewal0000": {"name": "Day of Renewal", "month": 3, "day": 26, "icon": "fas fa-seedling", "color": "#32CD32", "description": "The official start of spring celebrated with fresh food, music, and games."},
-    "wildsmouth000000": {"name": "Wild's Mouth", "month": 4, "day": 20, "icon": "fas fa-tree", "color": "#228B22", "description": "A celebration honoring the untamed wilds and the power of nature's awakening."},
-    "zenith0000000000": {"name": "Zenith", "month": 6, "day": 26, "icon": "fas fa-fire", "color": "#FF8C00", "description": "The official beginning of summer marked at noon on the longest day of the year."},
-    "midsummer0000000": {"name": "Midsummer", "month": 7, "day": 20, "icon": "fas fa-wand-magic-sparkles", "color": "#9370DB", "description": "A fey celebration of the elves' first emergence from the Feywild with wild revelry."},
-    "elvendawn0000000": {"name": "Elvendawn", "month": 8, "day": 3, "icon": "fas fa-moon", "color": "#E6E6FA", "description": "The Arch Heart's holy day honoring the elven people and their connection to the Feywild."},
-    "highsummer000000": {"name": "Highsummer", "month": 8, "day": 7, "icon": "fas fa-crown", "color": "#FFD700", "description": "The Dawnfather's holy day marking summer's peak with a week of feasting and gift-giving."},
-    "harvestsclose000": {"name": "Harvest's Close", "month": 9, "day": 3, "icon": "fas fa-apple-whole", "color": "#D2691E", "description": "The beginning of autumn marked with feasting in villages and carnivals in the cities."},
-    "harvestsrise0000": {"name": "Harvest's Rise", "month": 10, "day": 11, "icon": "fas fa-leaf", "color": "#8B4513", "description": "The celebration of planting season's beginning and preparation for the year's growth."},
-    "zanscup000000000": {"name": "Zan's Cup", "month": 10, "day": 26, "icon": "fas fa-wine-glass", "color": "#CD853F", "description": "A Tal'Dorei festival honoring Zan Tal'Dorei with celebration and remembrance."},
-    "thebarreneve0000": {"name": "The Barren Eve", "month": 11, "day": 2, "icon": "fas fa-cloud-moon", "color": "#2F4F4F", "description": "Winter's longest night, a solemn day of mourning for those lost in war."},
-    "embertidestart00": {"name": "Embertide (Start)", "month": 11, "day": 5, "icon": "fas fa-dragon", "color": "#C0C0C0", "description": "The beginning of Bahamut's holy observance, a time of remembrance for fallen defenders."},
-    "embertideend0000": {"name": "Embertide (End)", "month": 11, "day": 8, "icon": "fas fa-shield-halved", "color": "#B0C4DE", "description": "The final day of Embertide, concluding the Platinum Dragon's sacred festival of honor."},
-    "wintersclose0000": {"name": "Winter's Close", "month": 11, "day": 20, "icon": "fas fa-gift", "color": "#4682B4", "description": "The waning of winter celebrated with feasts, community games, and the exchange of gifts."}
-  },
-  "seasons"       : {
-    "values": {
-      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 296, "dayEnd":  58, "abbreviation": "Win"},
-      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  59, "dayEnd": 148, "abbreviation": "Spr"},
-      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 149, "dayEnd": 237, "abbreviation": "Sum"},
-      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 238, "dayEnd": 295, "abbreviation": "Aut"}
+  "festivals": {
+    "newdawn000000000": {
+      "name": "New Dawn",
+      "month": 0,
+      "icon": "fas fa-sun",
+      "color": "#FFD700",
+      "description": "The first day of the new year, celebrated with renewal and fresh beginnings.",
+      "dayOfMonth": 0
+    },
+    "hillsgold0000000": {
+      "name": "Hillsgold",
+      "month": 1,
+      "icon": "fas fa-wheat-awn",
+      "color": "#DAA520",
+      "description": "A harvest festival celebrating the bounty of the hills and early spring crops.",
+      "dayOfMonth": 26
+    },
+    "dayofchallenging": {
+      "name": "Day of Challenging",
+      "month": 2,
+      "icon": "fas fa-bolt",
+      "color": "#4169E1",
+      "description": "The Stormlord's holy day where warriors compete in sacred combat and trials of strength.",
+      "dayOfMonth": 6
+    },
+    "dayofrenewal0000": {
+      "name": "Day of Renewal",
+      "month": 2,
+      "icon": "fas fa-seedling",
+      "color": "#32CD32",
+      "description": "The official start of spring celebrated with fresh food, music, and games.",
+      "dayOfMonth": 25
+    },
+    "wildsmouth000000": {
+      "name": "Wild's Mouth",
+      "month": 3,
+      "icon": "fas fa-tree",
+      "color": "#228B22",
+      "description": "A celebration honoring the untamed wilds and the power of nature's awakening.",
+      "dayOfMonth": 19
+    },
+    "zenith0000000000": {
+      "name": "Zenith",
+      "month": 5,
+      "icon": "fas fa-fire",
+      "color": "#FF8C00",
+      "description": "The official beginning of summer marked at noon on the longest day of the year.",
+      "dayOfMonth": 25
+    },
+    "midsummer0000000": {
+      "name": "Midsummer",
+      "month": 6,
+      "icon": "fas fa-wand-magic-sparkles",
+      "color": "#9370DB",
+      "description": "A fey celebration of the elves' first emergence from the Feywild with wild revelry.",
+      "dayOfMonth": 19
+    },
+    "elvendawn0000000": {
+      "name": "Elvendawn",
+      "month": 7,
+      "icon": "fas fa-moon",
+      "color": "#E6E6FA",
+      "description": "The Arch Heart's holy day honoring the elven people and their connection to the Feywild.",
+      "dayOfMonth": 2
+    },
+    "highsummer000000": {
+      "name": "Highsummer",
+      "month": 7,
+      "icon": "fas fa-crown",
+      "color": "#FFD700",
+      "description": "The Dawnfather's holy day marking summer's peak with a week of feasting and gift-giving.",
+      "dayOfMonth": 6
+    },
+    "harvestsclose000": {
+      "name": "Harvest's Close",
+      "month": 8,
+      "icon": "fas fa-apple-whole",
+      "color": "#D2691E",
+      "description": "The beginning of autumn marked with feasting in villages and carnivals in the cities.",
+      "dayOfMonth": 2
+    },
+    "harvestsrise0000": {
+      "name": "Harvest's Rise",
+      "month": 9,
+      "icon": "fas fa-leaf",
+      "color": "#8B4513",
+      "description": "The celebration of planting season's beginning and preparation for the year's growth.",
+      "dayOfMonth": 10
+    },
+    "zanscup000000000": {
+      "name": "Zan's Cup",
+      "month": 9,
+      "icon": "fas fa-wine-glass",
+      "color": "#CD853F",
+      "description": "A Tal'Dorei festival honoring Zan Tal'Dorei with celebration and remembrance.",
+      "dayOfMonth": 25
+    },
+    "thebarreneve0000": {
+      "name": "The Barren Eve",
+      "month": 10,
+      "icon": "fas fa-cloud-moon",
+      "color": "#2F4F4F",
+      "description": "Winter's longest night, a solemn day of mourning for those lost in war.",
+      "dayOfMonth": 1
+    },
+    "embertidestart00": {
+      "name": "Embertide (Start)",
+      "month": 10,
+      "icon": "fas fa-dragon",
+      "color": "#C0C0C0",
+      "description": "The beginning of Bahamut's holy observance, a time of remembrance for fallen defenders.",
+      "dayOfMonth": 4
+    },
+    "embertideend0000": {
+      "name": "Embertide (End)",
+      "month": 10,
+      "icon": "fas fa-shield-halved",
+      "color": "#B0C4DE",
+      "description": "The final day of Embertide, concluding the Platinum Dragon's sacred festival of honor.",
+      "dayOfMonth": 7
+    },
+    "wintersclose0000": {
+      "name": "Winter's Close",
+      "month": 10,
+      "icon": "fas fa-gift",
+      "color": "#4682B4",
+      "description": "The waning of winter celebrated with feasts, community games, and the exchange of gifts.",
+      "dayOfMonth": 19
     }
   },
-  "eras"          : { "postdivergence00": {"name": "Post-Divergence", "abbreviation": "PD", "startYear": 1, "endYear": null} },
-  "moons"         : {
-    "catha00000000000": {
-      "name"         : "Catha",
-      "cycleLength"  : 33,
-      "color"        : "#E8E8E8",
-      "phases"       : {
-        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+  "seasons": {
+    "values": {
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "dayStart": 296,
+        "dayEnd": 58,
+        "abbreviation": "Win"
       },
-      "referenceDate": {"year": 0, "month": 0, "day": 1}
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "dayStart": 59,
+        "dayEnd": 148,
+        "abbreviation": "Spr"
+      },
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "dayStart": 149,
+        "dayEnd": 237,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "dayStart": 238,
+        "dayEnd": 295,
+        "abbreviation": "Aut"
+      }
+    }
+  },
+  "eras": {
+    "postdivergence00": {
+      "name": "Post-Divergence",
+      "abbreviation": "PD",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "catha00000000000": {
+      "name": "Catha",
+      "cycleLength": 33,
+      "color": "#E8E8E8",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 0
+      }
     },
     "ruidus0000000000": {
-      "name"         : "Ruidus",
-      "cycleLength"  : 328,
-      "color"        : "#8B0000",
-      "phases"       : {
-        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      "name": "Ruidus",
+      "cycleLength": 328,
+      "color": "#8B0000",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
       },
-      "referenceDate": {"year": 0, "month": 0, "day": 1}
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 0
+      }
     }
   },
-  "daylight"      : {"enabled": true, "shortestDay": 9, "longestDay": 15, "winterSolstice": 312, "summerSolstice": 148},
-  "cycles"        : {},
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 9,
+    "longestDay": 15,
+    "winterSolstice": 312,
+    "summerSolstice": 148
+  },
+  "cycles": {},
   "canonicalHours": {},
-  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
-  "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
-  "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
-  "metadata"      : {"id": "exandrian", "description": "CALENDARIA.Calendar.Exandrian.Description", "author": "calendaria", "system": "Exandria"}
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y",
+    "full": "MMMM D, Y",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "exandrian",
+    "description": "CALENDARIA.Calendar.Exandrian.Description",
+    "author": "calendaria",
+    "system": "Exandria"
+  }
 }

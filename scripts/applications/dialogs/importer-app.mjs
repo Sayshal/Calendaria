@@ -151,7 +151,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       const currentDate = importer.extractCurrentDate(this.#rawData, this.#selectedCalendarIndex);
       if (currentDate) {
         const month = (currentDate.month ?? 0) + 1;
-        const day = currentDate.day ?? 1;
+        const day = (currentDate.dayOfMonth ?? 0) + 1;
         const year = currentDate.year ?? 1;
         this.#previewData.currentDate = `${month}/${day}/${year}`;
         this.#transformedData._pendingCurrentDate = currentDate;
@@ -162,7 +162,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (this.#extractedNotes) {
         this.#extractedNotes.forEach((note) => {
           const month = (note.startDate?.month ?? 0) + 1;
-          const day = (note.startDate?.day ?? 0) + 1;
+          const day = (note.startDate?.dayOfMonth ?? 0) + 1;
           note.displayDate = `${month}/${day}`;
         });
       }

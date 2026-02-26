@@ -107,7 +107,7 @@ export function formatWorldTime(worldTime) {
   if (!calendar) return '';
   const components = calendar.timeToComponents(worldTime);
   const yearZero = calendar.years?.yearZero ?? 0;
-  return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'chatTimestamp');
+  return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'chatTimestamp');
 }
 
 /**

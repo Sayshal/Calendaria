@@ -224,7 +224,7 @@ describe('calculateAdjustedDarkness()', () => {
     });
     // Set up moon data for illumination calculation
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 2000, month: 0, day: 6 } }],
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 2000, month: 0, dayOfMonth: 5 } }],
       days: { hoursPerDay: 24, minutesPerHour: 60 }
     };
     game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
@@ -301,7 +301,7 @@ describe('calculateMoonIllumination()', () => {
   it('calculates reduction for a full moon at night', () => {
     getMoonPhasePosition.mockReturnValue(0.5); // full moon position
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const result = calculateMoonIllumination(0.8);
     expect(result.reduction).toBeGreaterThan(0);
@@ -313,9 +313,9 @@ describe('calculateMoonIllumination()', () => {
     // Multiple bright moons
     game.time.calendar = {
       moonsArray: [
-        { name: 'Moon1', cycleLength: 29.5, moonBrightnessMax: 0.5, referenceDate: { year: 0, month: 0, day: 0 } },
-        { name: 'Moon2', cycleLength: 20, moonBrightnessMax: 0.5, referenceDate: { year: 0, month: 0, day: 0 } },
-        { name: 'Moon3', cycleLength: 15, moonBrightnessMax: 0.5, referenceDate: { year: 0, month: 0, day: 0 } }
+        { name: 'Moon1', cycleLength: 29.5, moonBrightnessMax: 0.5, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } },
+        { name: 'Moon2', cycleLength: 20, moonBrightnessMax: 0.5, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } },
+        { name: 'Moon3', cycleLength: 15, moonBrightnessMax: 0.5, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }
       ]
     };
     const result = calculateMoonIllumination(1.0);
@@ -325,7 +325,7 @@ describe('calculateMoonIllumination()', () => {
   it('uses default moonBrightnessMax of 0.15 when not specified', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const result = calculateMoonIllumination(0.8);
     expect(result.reduction).toBeGreaterThan(0);
@@ -334,7 +334,7 @@ describe('calculateMoonIllumination()', () => {
   it('scales reduction with nightFactor (deeper night = more moon effect)', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const resultLight = calculateMoonIllumination(0.6);
     const resultDark = calculateMoonIllumination(1.0);
@@ -344,7 +344,7 @@ describe('calculateMoonIllumination()', () => {
   it('returns no reduction for new moon (position 0)', () => {
     getMoonPhasePosition.mockReturnValue(0); // new moon
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const result = calculateMoonIllumination(0.8);
     expect(result.reduction).toBeCloseTo(0, 5);
@@ -353,7 +353,7 @@ describe('calculateMoonIllumination()', () => {
   it('calculates hue from colored moons', () => {
     getMoonPhasePosition.mockReturnValue(0.5); // full illumination
     game.time.calendar = {
-      moonsArray: [{ name: 'Red Moon', cycleLength: 29.5, moonBrightnessMax: 0.15, color: '#ff0000', referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Red Moon', cycleLength: 29.5, moonBrightnessMax: 0.15, color: '#ff0000', referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const result = calculateMoonIllumination(0.8);
     // Red hue → hue should be around 0
@@ -364,7 +364,7 @@ describe('calculateMoonIllumination()', () => {
   it('returns null hue when moons have no color', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const result = calculateMoonIllumination(0.8);
     expect(result.hue).toBeNull();
@@ -374,7 +374,7 @@ describe('calculateMoonIllumination()', () => {
   it('calculates luminosity based on total illumination', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = {
-      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, day: 0 } }]
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }]
     };
     const result = calculateMoonIllumination(0.8);
     expect(result.luminosity).toBeGreaterThanOrEqual(0);

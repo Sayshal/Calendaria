@@ -149,10 +149,10 @@ export default class SearchManager {
     const flagData = note.flagData;
     if (!flagData?.startDate) return '';
     const calendar = CalendarManager.getActiveCalendar();
-    const { year, month, day } = flagData.startDate;
+    const { year, month, dayOfMonth } = flagData.startDate;
     const monthData = calendar?.monthsArray?.[month];
     const monthName = monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
-    return `${day} ${monthName}, ${year}`;
+    return `${(dayOfMonth ?? 0) + 1} ${monthName}, ${year}`;
   }
 
   /**

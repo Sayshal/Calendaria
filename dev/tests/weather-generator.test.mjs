@@ -318,9 +318,10 @@ describe('generateWeather()', () => {
     expect(result.precipitation).toBeDefined();
   });
 
-  it('falls back to clear when no presets configured', () => {
+  it('selects from all available presets when no config provided', () => {
     const result = generateWeather({ seed: 42 });
-    expect(result.preset.id).toBe('clear');
+    expect(result.preset).toBeDefined();
+    expect(result.preset.id).toBeTruthy();
   });
 
   it('produces deterministic results with same seed', () => {
@@ -390,7 +391,7 @@ describe('generateForecast()', () => {
       zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 50 }, 1: { id: 'rain', enabled: true, chance: 50 } } },
       startYear: 1,
       startMonth: 0,
-      startDay: 1,
+      startDayOfMonth: 0,
       days: 7,
       getDaysInMonth
     });
@@ -402,11 +403,11 @@ describe('generateForecast()', () => {
       zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 100 } } },
       startYear: 1,
       startMonth: 0,
-      startDay: 28,
+      startDayOfMonth: 27,
       days: 5,
       getDaysInMonth
     });
-    expect(forecast.map((f) => f.day)).toEqual([28, 29, 30, 1, 2]);
+    expect(forecast.map((f) => f.dayOfMonth)).toEqual([27, 28, 29, 0, 1]);
     expect(forecast[3].month).toBe(1); // rolled over
   });
 
@@ -415,13 +416,13 @@ describe('generateForecast()', () => {
       zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 100 } } },
       startYear: 1,
       startMonth: 11,
-      startDay: 30,
+      startDayOfMonth: 29,
       days: 3,
       getDaysInMonth
     });
-    expect(forecast[0]).toMatchObject({ year: 1, month: 11, day: 30 });
-    expect(forecast[1]).toMatchObject({ year: 2, month: 0, day: 1 });
-    expect(forecast[2]).toMatchObject({ year: 2, month: 0, day: 2 });
+    expect(forecast[0]).toMatchObject({ year: 1, month: 11, dayOfMonth: 29 });
+    expect(forecast[1]).toMatchObject({ year: 2, month: 0, dayOfMonth: 0 });
+    expect(forecast[2]).toMatchObject({ year: 2, month: 0, dayOfMonth: 1 });
   });
 
   it('produces deterministic results (seeded)', () => {
@@ -429,7 +430,7 @@ describe('generateForecast()', () => {
       zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 50 }, 1: { id: 'rain', enabled: true, chance: 50 } } },
       startYear: 1,
       startMonth: 0,
-      startDay: 1,
+      startDayOfMonth: 0,
       days: 7,
       getDaysInMonth
     };
@@ -447,7 +448,7 @@ describe('generateForecast()', () => {
       zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 30 }, 1: { id: 'rain', enabled: true, chance: 30 }, 2: { id: 'snow', enabled: true, chance: 30 } } },
       startYear: 1,
       startMonth: 0,
-      startDay: 1,
+      startDayOfMonth: 0,
       days: 10,
       currentWeatherId: 'clear',
       inertia: 0.8,
@@ -459,19 +460,19 @@ describe('generateForecast()', () => {
   });
 
   it('applies season changes mid-forecast via getSeasonForDate', () => {
-    const getSeasonForDate = (_year, _month, day) => {
-      if (day <= 3) return { name: 'Summer', climate: { presets: { 0: { id: 'clear', chance: 100 } }, temperatures: { min: 25, max: 35 } } };
+    const getSeasonForDate = (_year, _month, dayOfMonth) => {
+      if (dayOfMonth <= 2) return { name: 'Summer', climate: { presets: { 0: { id: 'clear', chance: 100 } }, temperatures: { min: 25, max: 35 } } };
       return { name: 'Winter', climate: { presets: { 0: { id: 'snow', chance: 100 } }, temperatures: { min: -10, max: 0 } } };
     };
     const forecast = generateForecast({
       startYear: 1,
       startMonth: 0,
-      startDay: 1,
+      startDayOfMonth: 0,
       days: 7,
       getDaysInMonth,
       getSeasonForDate
     });
-    // Days 1-3: clear (summer), Days 4-7: snow (winter)
+    // Days 0-2: clear (summer), Days 3-6: snow (winter)
     expect(forecast[0].preset.id).toBe('clear');
     expect(forecast[1].preset.id).toBe('clear');
     expect(forecast[2].preset.id).toBe('clear');

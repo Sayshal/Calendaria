@@ -313,6 +313,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const monthsArr = Object.entries(this.#calendarData.months.values);
     const daysArr = Object.entries(this.#calendarData.days.values);
     context.monthOptions = monthsArr.map(([, month], idx) => ({ value: idx + 1, label: month.name }));
+    context.monthOptionsZeroIndexed = monthsArr.map(([, month], idx) => ({ value: idx, label: month.name }));
     const startingWeekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name }));
     const monthCount = monthsArr.length;
     const monthTypeOptions = [
@@ -335,7 +336,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.festivalsWithNav = festivalsArr.map(([key, festival]) => ({
       ...festival,
       key,
-      monthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === festival.month }))
+      displayDay: (festival.dayOfMonth ?? 0) + 1,
+      monthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === festival.month }))
     }));
     const currentFirstWeekday = this.#calendarData.years.firstWeekday ?? 0;
     context.weekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name, selected: idx === currentFirstWeekday }));
@@ -360,7 +362,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.leapPattern = leapYearConfig?.pattern ?? '';
     const yearNames = this.#calendarData.years.names || [];
     context.namedYears = yearNames.map((entry, idx) => ({ ...entry, index: idx }));
-    context.monthOptionsZeroIndexed = monthsArr.map(([, month], idx) => ({ value: idx, label: month.name }));
     const moonsArr = Object.entries(this.#calendarData.moons);
     context.moonsWithNav = moonsArr.map(([moonKey, moon], idx) => {
       const phasesArr = moon.phases ? Object.entries(moon.phases) : [];
@@ -369,6 +370,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         key: moonKey,
         color: moon.color || '',
         brightnessDisplay: moon.moonBrightnessMax ?? 0.15,
+        displayRefDay: (moon.referenceDate?.dayOfMonth ?? 0) + 1,
         index: idx,
         referencePhaseOptions: phasesArr.map(([, phase], pIdx) => ({ value: pIdx, label: localize(phase.name), selected: pIdx === (moon.referencePhase ?? 0) })),
         refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
@@ -419,13 +421,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const startConverted = this.#dayOfYearToMonthDay(season.dayStart);
         const endConverted = this.#dayOfYearToMonthDay(season.dayEnd);
         startMonth = startConverted.month;
-        startDay = startConverted.day;
+        startDay = startConverted.dayOfMonth;
         endMonth = endConverted.month;
-        endDay = endConverted.day;
+        endDay = endConverted.dayOfMonth;
       } else {
-        startMonth = 1;
+        startMonth = 0;
         startDay = null;
-        endMonth = 3;
+        endMonth = 2;
         endDay = null;
       }
       return {
@@ -433,12 +435,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         key,
         index: idx,
         duration: season.duration ?? null,
-        displayStartMonth: startMonth,
-        displayStartDay: startDay,
-        displayEndMonth: endMonth,
-        displayEndDay: endDay,
-        startMonthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === startMonth })),
-        endMonthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === endMonth })),
+        displayStartDay: startDay != null ? startDay + 1 : null,
+        displayEndDay: endDay != null ? endDay + 1 : null,
+        startMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === startMonth })),
+        endMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === endMonth })),
         seasonalTypeOptions: seasonalTypeOptions.map((opt) => ({ ...opt, selected: opt.value === (season.seasonalType ?? '') }))
       };
     });
@@ -487,11 +487,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
     const summerSolstice = this.#dayOfYearToMonthDay(daylight.summerSolstice ?? Math.floor(context.calculatedDaysPerYear / 2));
     context.winterSolsticeMonth = winterSolstice.month;
-    context.winterSolsticeDay = winterSolstice.day;
+    context.winterSolsticeDay = winterSolstice.dayOfMonth + 1;
     context.summerSolsticeMonth = summerSolstice.month;
-    context.summerSolsticeDay = summerSolstice.day;
-    context.winterSolsticeMonthOptions = context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === winterSolstice.month }));
-    context.summerSolsticeMonthOptions = context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === summerSolstice.month }));
+    context.summerSolsticeDay = summerSolstice.dayOfMonth + 1;
+    context.winterSolsticeMonthOptions = context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === winterSolstice.month }));
+    context.summerSolsticeMonthOptions = context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === summerSolstice.month }));
     this.#prepareWeatherContext(context);
     context.buttons = [
       { type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Common.Delete', cssClass: 'delete-button' },
@@ -754,9 +754,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Convert a day-of-year (0-indexed) to month and day.
+   * Convert a day-of-year (0-indexed) to month and day (0-indexed).
    * @param {number} dayOfYear - Day of year (0-indexed)
-   * @returns {{month: number, day: number}} Month (1-indexed) and day (1-indexed)
+   * @returns {{month: number, dayOfMonth: number}} Month (0-indexed) and dayOfMonth (0-indexed)
    * @private
    */
   #dayOfYearToMonthDay(dayOfYear) {
@@ -765,26 +765,26 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let remaining = ((dayOfYear % totalDays) + totalDays) % totalDays;
     for (let i = 0; i < months.length; i++) {
       const monthDays = months[i].days || 0;
-      if (remaining < monthDays) return { month: i + 1, day: remaining + 1 };
+      if (remaining < monthDays) return { month: i, dayOfMonth: remaining };
       remaining -= monthDays;
     }
-    const lastMonth = months.length;
-    const lastDay = months[lastMonth - 1]?.days || 1;
-    return { month: lastMonth, day: lastDay };
+    const lastMonthIdx = months.length - 1;
+    const lastDay = (months[lastMonthIdx]?.days || 1) - 1;
+    return { month: lastMonthIdx, dayOfMonth: lastDay };
   }
 
   /**
    * Convert month and day to day-of-year (0-indexed).
-   * @param {number} month - Month (1-indexed)
-   * @param {number} day - Day of month (1-indexed)
+   * @param {number} month - Month (0-indexed)
+   * @param {number} dayOfMonth - Day of month (0-indexed)
    * @returns {number} Day of year (0-indexed)
    * @private
    */
-  #monthDayToDayOfYear(month, day) {
+  #monthDayToDayOfYear(month, dayOfMonth) {
     const months = Object.values(this.#calendarData.months.values ?? {});
     let dayOfYear = 0;
-    for (let i = 0; i < month - 1 && i < months.length; i++) dayOfYear += months[i].days || 0;
-    dayOfYear += (day || 1) - 1;
+    for (let i = 0; i < month && i < months.length; i++) dayOfYear += months[i].days || 0;
+    dayOfYear += dayOfMonth || 0;
     return dayOfYear;
   }
 
@@ -862,11 +862,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.daylight.enabled = data['daylight.enabled'] ?? false;
     this.#calendarData.daylight.shortestDay = parseFloat(data['daylight.shortestDay']) || 8;
     this.#calendarData.daylight.longestDay = parseFloat(data['daylight.longestDay']) || 16;
-    const winterMonth = parseInt(data['daylight.winterSolsticeMonth']) || 1;
-    const winterDay = parseInt(data['daylight.winterSolsticeDay']) || 1;
+    const winterMonth = parseInt(data['daylight.winterSolsticeMonth']) || 0;
+    const winterDay = (parseInt(data['daylight.winterSolsticeDay']) || 1) - 1;
     this.#calendarData.daylight.winterSolstice = this.#monthDayToDayOfYear(winterMonth, winterDay);
-    const summerMonth = parseInt(data['daylight.summerSolsticeMonth']) || 1;
-    const summerDay = parseInt(data['daylight.summerSolsticeDay']) || 1;
+    const summerMonth = parseInt(data['daylight.summerSolsticeMonth']) || 0;
+    const summerDay = (parseInt(data['daylight.summerSolsticeDay']) || 1) - 1;
     this.#calendarData.daylight.summerSolstice = this.#monthDayToDayOfYear(summerMonth, summerDay);
     this.#updateMonthsFromFormData(data);
     this.#updateObjectFromFormData(data, 'weekdays', this.#calendarData.days.values, ['name', 'abbreviation', 'isRestDay']);
@@ -878,7 +878,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       'color',
       'icon',
       'month',
-      'day',
+      'dayOfMonth',
       'duration',
       'leapDuration',
       'leapYearOnly',
@@ -928,6 +928,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const key = `${prefix}.${itemKey}.${field}`;
         if (data[key] !== undefined) {
           if (field === 'leapDays' || field === 'leapDuration' || field === 'startingWeekday') item[field] = isNaN(parseInt(data[key])) ? null : parseInt(data[key]);
+          else if (field === 'dayOfMonth') item[field] = (parseInt(data[key]) || 1) - 1;
           else if (field === 'days' || field === 'day' || field === 'month' || field === 'duration' || field === 'dayStart' || field === 'dayEnd') item[field] = parseInt(data[key]) || 0;
           else if (field === 'color') item[field] = data[key]?.toLowerCase() === '#d4af37' ? '' : data[key] || '';
           else if (field === 'countsForWeekday') item[field] = !data[key];
@@ -1021,10 +1022,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (isPeriodic) {
         season.duration = this.#parseOptionalInt(data[`seasons.${sKey}.duration`]) ?? 91;
       } else {
-        season.monthStart = parseInt(data[`seasons.${sKey}.monthStart`]) || 1;
-        season.monthEnd = parseInt(data[`seasons.${sKey}.monthEnd`]) || 1;
-        season.dayStart = this.#parseOptionalInt(data[`seasons.${sKey}.dayStart`]);
-        season.dayEnd = this.#parseOptionalInt(data[`seasons.${sKey}.dayEnd`]);
+        season.monthStart = parseInt(data[`seasons.${sKey}.monthStart`]) || 0;
+        season.monthEnd = parseInt(data[`seasons.${sKey}.monthEnd`]) || 0;
+        const rawDayStart = this.#parseOptionalInt(data[`seasons.${sKey}.dayStart`]);
+        season.dayStart = rawDayStart != null ? rawDayStart - 1 : null;
+        const rawDayEnd = this.#parseOptionalInt(data[`seasons.${sKey}.dayEnd`]);
+        season.dayEnd = rawDayEnd != null ? rawDayEnd - 1 : null;
       }
       newValues[sKey] = season;
     }
@@ -1120,7 +1123,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         referenceDate: {
           year: parseInt(data[`moons.${mKey}.referenceDate.year`]) || 0,
           month: parseInt(data[`moons.${mKey}.referenceDate.month`]) || 0,
-          day: parseInt(data[`moons.${mKey}.referenceDate.day`]) || 1
+          dayOfMonth: (parseInt(data[`moons.${mKey}.referenceDate.dayOfMonth`]) || 1) - 1
         }
       };
     }
@@ -1455,8 +1458,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (isPeriodic) {
       newSeason.duration = 91;
     } else {
-      newSeason.monthStart = 1;
-      newSeason.monthEnd = 3;
+      newSeason.monthStart = 0;
+      newSeason.monthEnd = 2;
       newSeason.dayStart = null;
       newSeason.dayEnd = null;
     }
@@ -1602,7 +1605,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterKey = target.dataset.key;
     const totalFestivals = Object.keys(this.#calendarData.festivals ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
-    const newFestival = { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 1, day: 1, description: '', color: '', icon: '' };
+    const newFestival = { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 0, dayOfMonth: 0, description: '', color: '', icon: '' };
     if (afterKey) this.#calendarData.festivals = this.#insertAfterKey(this.#calendarData.festivals, afterKey, newKey, newFestival);
     else this.#calendarData.festivals[newKey] = newFestival;
     this.render();
@@ -1692,7 +1695,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       cycleDayAdjust: 0,
       referencePhase: 0,
       phases: foundry.utils.deepClone(DEFAULT_MOON_PHASES),
-      referenceDate: { year: 0, month: 0, day: 1 }
+      referenceDate: { year: 0, month: 0, dayOfMonth: 0 }
     };
     this.render();
   }

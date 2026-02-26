@@ -28,7 +28,7 @@ vi.mock('../../scripts/constants.mjs', () => ({
   SOCKET_TYPES: { REMINDER_NOTIFY: 'reminderNotify' }
 }));
 vi.mock('../../scripts/notes/date-utils.mjs', () => {
-  let currentDate = { year: 1, month: 0, day: 1, hour: 12, minute: 0 };
+  let currentDate = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 };
   return {
     getCurrentDate: vi.fn(() => currentDate),
     _setCurrentDate: (d) => {
@@ -105,9 +105,9 @@ beforeEach(() => {
   NoteManager.getAllNotes.mockReturnValue([]);
   isRecurringMatch.mockReturnValue(false);
   // Force a day change to clear #firedToday (static state persists between tests)
-  _setCurrentDate({ year: 0, month: 0, day: 99, hour: 0, minute: 0 });
+  _setCurrentDate({ year: 0, month: 0, dayOfMonth: 98, hour: 0, minute: 0 });
   ReminderScheduler.initialize();
-  _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+  _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
   ReminderScheduler.onUpdateWorldTime(worldTimeBase, 0);
   // Clear mocks after priming so tests start clean
   Hooks.callAll.mockClear();
@@ -135,29 +135,29 @@ describe('ReminderScheduler.onUpdateWorldTime()', () => {
   });
 
   it('checks reminders after CHECK_INTERVAL', () => {
-    const note = makeNote('r1', 'Reminder', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Reminder', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
     // At hour 13, 1 hour before 14:00 event → should fire
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).toHaveBeenCalled();
   });
 
   it('clears fired set on date change', () => {
-    const note = makeNote('r1', 'Reminder', { year: 1, month: 0, day: 2, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Reminder', { year: 1, month: 0, dayOfMonth: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 23, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 23, minute: 0 });
     ReminderScheduler.initialize();
     // Change day
-    _setCurrentDate({ year: 1, month: 0, day: 2, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 1, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).toHaveBeenCalled();
   });
 
   it('clears fired set on time reversal', () => {
-    const note = makeNote('r1', 'Reminder', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Reminder', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     const wt = WT();
     ReminderScheduler.onUpdateWorldTime(wt, 100);
     // Time goes backwards — triggers the reversal path
@@ -172,41 +172,41 @@ describe('ReminderScheduler.onUpdateWorldTime()', () => {
 describe('ReminderScheduler — non-recurring timed events', () => {
   it('fires reminder when current time is within offset window', () => {
     // Event at 14:00, offset 1 hour → remind at 13:00
-    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).toHaveBeenCalled();
   });
 
   it('does not fire before offset window', () => {
-    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 10, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 10, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });
 
   it('does not fire after event time', () => {
-    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 15, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 15, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });
 
   it('skips silent events', () => {
-    const note = makeNote('r1', 'Silent', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1, silent: true });
+    const note = makeNote('r1', 'Silent', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1, silent: true });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });
 
   it('skips notes with negative reminderOffset', () => {
-    const note = makeNote('r1', 'No Remind', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: -1 });
+    const note = makeNote('r1', 'No Remind', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: -1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });
@@ -217,7 +217,7 @@ describe('ReminderScheduler — all-day non-recurring', () => {
     const note = makeNote(
       'r1',
       'Holiday',
-      { year: 1, month: 0, day: 1 },
+      { year: 1, month: 0, dayOfMonth: 0 },
       {
         allDay: true,
         reminderOffset: 0,
@@ -225,7 +225,7 @@ describe('ReminderScheduler — all-day non-recurring', () => {
       }
     );
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 8, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 8, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     // Non-recurring with todayInRange, allDay=true, offset=0
     // #isDateInRange should match, timed check: currentMinutes >= reminderMinutes (0) && < eventMinutes (0) = false
@@ -239,14 +239,14 @@ describe('ReminderScheduler — recurring events', () => {
     const note = makeNote(
       'r1',
       'Weekly Meeting',
-      { year: 1, month: 0, day: 1, hour: 14, minute: 0 },
+      { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 },
       {
         repeat: 'weekly',
         reminderOffset: 1
       }
     );
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 30 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 30 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).toHaveBeenCalled();
   });
@@ -256,7 +256,7 @@ describe('ReminderScheduler — recurring events', () => {
     const note = makeNote(
       'r1',
       'Monthly Holiday',
-      { year: 1, month: 0, day: 1 },
+      { year: 1, month: 0, dayOfMonth: 0 },
       {
         repeat: 'monthly',
         allDay: true,
@@ -264,7 +264,7 @@ describe('ReminderScheduler — recurring events', () => {
       }
     );
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 8, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 8, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).toHaveBeenCalled();
   });
@@ -274,14 +274,14 @@ describe('ReminderScheduler — recurring events', () => {
     const note = makeNote(
       'r1',
       'Weekly',
-      { year: 1, month: 0, day: 3, hour: 14, minute: 0 },
+      { year: 1, month: 0, dayOfMonth: 2, hour: 14, minute: 0 },
       {
         repeat: 'weekly',
         reminderOffset: 1
       }
     );
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });
@@ -323,10 +323,10 @@ describe('ReminderScheduler.handleReminderNotify()', () => {
 
 describe('ReminderScheduler — calendar filtering', () => {
   it('skips notes from a different calendar', () => {
-    const note = makeNote('r1', 'Note', { year: 1, month: 0, day: 1, hour: 14, minute: 0 }, { reminderOffset: 1 });
+    const note = makeNote('r1', 'Note', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { reminderOffset: 1 });
     note.calendarId = 'other-calendar';
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });

@@ -25,74 +25,74 @@ beforeEach(() => {
 
 describe('compareDates()', () => {
   it('returns -1 when date1 is earlier by year', () => {
-    const date1 = { year: 2020, month: 6, day: 15 };
-    const date2 = { year: 2021, month: 1, day: 1 };
+    const date1 = { year: 2020, month: 6, dayOfMonth: 14 };
+    const date2 = { year: 2021, month: 1, dayOfMonth: 0 };
     expect(compareDates(date1, date2)).toBe(-1);
   });
 
   it('returns 1 when date1 is later by year', () => {
-    const date1 = { year: 2022, month: 1, day: 1 };
-    const date2 = { year: 2021, month: 12, day: 31 };
+    const date1 = { year: 2022, month: 1, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 12, dayOfMonth: 30 };
     expect(compareDates(date1, date2)).toBe(1);
   });
 
   it('returns -1 when date1 is earlier by month (same year)', () => {
-    const date1 = { year: 2021, month: 3, day: 15 };
-    const date2 = { year: 2021, month: 6, day: 1 };
+    const date1 = { year: 2021, month: 3, dayOfMonth: 14 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 0 };
     expect(compareDates(date1, date2)).toBe(-1);
   });
 
   it('returns 1 when date1 is later by month (same year)', () => {
-    const date1 = { year: 2021, month: 9, day: 1 };
-    const date2 = { year: 2021, month: 6, day: 30 };
+    const date1 = { year: 2021, month: 9, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 29 };
     expect(compareDates(date1, date2)).toBe(1);
   });
 
   it('returns -1 when date1 is earlier by day (same month)', () => {
-    const date1 = { year: 2021, month: 6, day: 10 };
-    const date2 = { year: 2021, month: 6, day: 20 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 9 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 19 };
     expect(compareDates(date1, date2)).toBe(-1);
   });
 
   it('returns 1 when date1 is later by day (same month)', () => {
-    const date1 = { year: 2021, month: 6, day: 25 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 24 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(compareDates(date1, date2)).toBe(1);
   });
 
   it('returns -1 when date1 is earlier by hour (same day)', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 10 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 14 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 10 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14 };
     expect(compareDates(date1, date2)).toBe(-1);
   });
 
   it('returns 1 when date1 is later by hour (same day)', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 18 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 9 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 18 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 9 };
     expect(compareDates(date1, date2)).toBe(1);
   });
 
   it('returns -1 when date1 is earlier by minute (same hour)', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 14, minute: 15 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 14, minute: 45 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14, minute: 15 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14, minute: 45 };
     expect(compareDates(date1, date2)).toBe(-1);
   });
 
   it('returns 0 when dates are equal', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 14, minute: 30 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 14, minute: 30 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14, minute: 30 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14, minute: 30 };
     expect(compareDates(date1, date2)).toBe(0);
   });
 
   it('treats missing hour as 0', () => {
-    const date1 = { year: 2021, month: 6, day: 15 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 0 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 0 };
     expect(compareDates(date1, date2)).toBe(0);
   });
 
   it('treats missing minute as 0', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 14 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 14, minute: 0 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 14, minute: 0 };
     expect(compareDates(date1, date2)).toBe(0);
   });
 });
@@ -103,32 +103,32 @@ describe('compareDates()', () => {
 
 describe('isSameDay()', () => {
   it('returns true for same day', () => {
-    const date1 = { year: 2021, month: 6, day: 15 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(isSameDay(date1, date2)).toBe(true);
   });
 
   it('returns true for same day with different times', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 9, minute: 0 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 18, minute: 30 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 9, minute: 0 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 18, minute: 30 };
     expect(isSameDay(date1, date2)).toBe(true);
   });
 
   it('returns false for different years', () => {
-    const date1 = { year: 2020, month: 6, day: 15 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2020, month: 6, dayOfMonth: 14 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(isSameDay(date1, date2)).toBe(false);
   });
 
   it('returns false for different months', () => {
-    const date1 = { year: 2021, month: 5, day: 15 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2021, month: 5, dayOfMonth: 14 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(isSameDay(date1, date2)).toBe(false);
   });
 
   it('returns false for different days', () => {
-    const date1 = { year: 2021, month: 6, day: 14 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 13 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(isSameDay(date1, date2)).toBe(false);
   });
 });
@@ -139,32 +139,32 @@ describe('isSameDay()', () => {
 
 describe('compareDays()', () => {
   it('returns 0 for same day (ignoring time)', () => {
-    const date1 = { year: 2021, month: 6, day: 15, hour: 9 };
-    const date2 = { year: 2021, month: 6, day: 15, hour: 18 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 14, hour: 9 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14, hour: 18 };
     expect(compareDays(date1, date2)).toBe(0);
   });
 
   it('returns -1 when date1 is earlier', () => {
-    const date1 = { year: 2021, month: 6, day: 14 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 13 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(compareDays(date1, date2)).toBe(-1);
   });
 
   it('returns 1 when date1 is later', () => {
-    const date1 = { year: 2021, month: 6, day: 16 };
-    const date2 = { year: 2021, month: 6, day: 15 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 15 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(compareDays(date1, date2)).toBe(1);
   });
 
   it('compares by year first', () => {
-    const date1 = { year: 2020, month: 12, day: 31 };
-    const date2 = { year: 2021, month: 1, day: 1 };
+    const date1 = { year: 2020, month: 12, dayOfMonth: 30 };
+    const date2 = { year: 2021, month: 1, dayOfMonth: 0 };
     expect(compareDays(date1, date2)).toBe(-1);
   });
 
   it('compares by month second', () => {
-    const date1 = { year: 2021, month: 5, day: 31 };
-    const date2 = { year: 2021, month: 6, day: 1 };
+    const date1 = { year: 2021, month: 5, dayOfMonth: 30 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 0 };
     expect(compareDays(date1, date2)).toBe(-1);
   });
 });
@@ -175,34 +175,34 @@ describe('compareDays()', () => {
 
 describe('monthsBetween()', () => {
   it('returns 0 for same month', () => {
-    const date1 = { year: 2021, month: 6, day: 1 };
-    const date2 = { year: 2021, month: 6, day: 30 };
+    const date1 = { year: 2021, month: 6, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 6, dayOfMonth: 29 };
     expect(monthsBetween(date1, date2)).toBe(0);
   });
 
   it('returns positive for later month same year', () => {
-    const date1 = { year: 2021, month: 3, day: 1 };
-    const date2 = { year: 2021, month: 9, day: 1 };
+    const date1 = { year: 2021, month: 3, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 9, dayOfMonth: 0 };
     expect(monthsBetween(date1, date2)).toBe(6);
   });
 
   it('returns negative for earlier month same year', () => {
-    const date1 = { year: 2021, month: 9, day: 1 };
-    const date2 = { year: 2021, month: 3, day: 1 };
+    const date1 = { year: 2021, month: 9, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 3, dayOfMonth: 0 };
     expect(monthsBetween(date1, date2)).toBe(-6);
   });
 
   it('accounts for year difference', () => {
-    const date1 = { year: 2020, month: 10, day: 1 };
-    const date2 = { year: 2021, month: 2, day: 1 };
+    const date1 = { year: 2020, month: 10, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 2, dayOfMonth: 0 };
     // 12 months/year + (2 - 10) = 12 - 8 = 4
     expect(monthsBetween(date1, date2)).toBe(4);
   });
 
   it('returns 0 when no calendar available', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    const date1 = { year: 2021, month: 3, day: 1 };
-    const date2 = { year: 2021, month: 9, day: 1 };
+    const date1 = { year: 2021, month: 3, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 9, dayOfMonth: 0 };
     expect(monthsBetween(date1, date2)).toBe(0);
   });
 });
@@ -213,43 +213,43 @@ describe('monthsBetween()', () => {
 
 describe('addMonths()', () => {
   it('adds months within same year', () => {
-    const date = { year: 2021, month: 3, day: 15 };
+    const date = { year: 2021, month: 3, dayOfMonth: 14 };
     const result = addMonths(date, 2);
     expect(result.year).toBe(2021);
     expect(result.month).toBe(5);
-    expect(result.day).toBe(15);
+    expect(result.dayOfMonth).toBe(14);
   });
 
   it('wraps to next year when adding', () => {
-    const date = { year: 2021, month: 10, day: 15 };
+    const date = { year: 2021, month: 10, dayOfMonth: 14 };
     const result = addMonths(date, 3);
     expect(result.year).toBe(2022);
     expect(result.month).toBe(1);
   });
 
   it('subtracts months within same year', () => {
-    const date = { year: 2021, month: 6, day: 15 };
+    const date = { year: 2021, month: 6, dayOfMonth: 14 };
     const result = addMonths(date, -2);
     expect(result.year).toBe(2021);
     expect(result.month).toBe(4);
   });
 
   it('wraps to previous year when subtracting', () => {
-    const date = { year: 2021, month: 2, day: 15 };
+    const date = { year: 2021, month: 2, dayOfMonth: 14 };
     const result = addMonths(date, -4);
     expect(result.year).toBe(2020);
     expect(result.month).toBe(10);
   });
 
   it('clamps day to max days in new month', () => {
-    const date = { year: 2021, month: 0, day: 31 }; // Jan 31
+    const date = { year: 2021, month: 0, dayOfMonth: 30 }; // Jan day index 30 (31st)
     const result = addMonths(date, 1); // -> Feb
-    expect(result.day).toBeLessThanOrEqual(28);
+    expect(result.dayOfMonth).toBeLessThanOrEqual(27);
   });
 
   it('returns original date when no calendar', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    const date = { year: 2021, month: 3, day: 15 };
+    const date = { year: 2021, month: 3, dayOfMonth: 14 };
     const result = addMonths(date, 2);
     expect(result).toEqual(date);
   });
@@ -261,21 +261,21 @@ describe('addMonths()', () => {
 
 describe('addYears()', () => {
   it('adds years', () => {
-    const date = { year: 2021, month: 6, day: 15 };
+    const date = { year: 2021, month: 6, dayOfMonth: 14 };
     const result = addYears(date, 5);
     expect(result.year).toBe(2026);
     expect(result.month).toBe(6);
-    expect(result.day).toBe(15);
+    expect(result.dayOfMonth).toBe(14);
   });
 
   it('subtracts years', () => {
-    const date = { year: 2021, month: 6, day: 15 };
+    const date = { year: 2021, month: 6, dayOfMonth: 14 };
     const result = addYears(date, -10);
     expect(result.year).toBe(2011);
   });
 
   it('preserves time components', () => {
-    const date = { year: 2021, month: 6, day: 15, hour: 14, minute: 30 };
+    const date = { year: 2021, month: 6, dayOfMonth: 14, hour: 14, minute: 30 };
     const result = addYears(date, 1);
     expect(result.hour).toBe(14);
     expect(result.minute).toBe(30);
@@ -283,7 +283,7 @@ describe('addYears()', () => {
 
   it('returns original date when no calendar', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    const date = { year: 2021, month: 6, day: 15 };
+    const date = { year: 2021, month: 6, dayOfMonth: 14 };
     const result = addYears(date, 5);
     expect(result).toEqual(date);
   });
@@ -308,37 +308,37 @@ describe('isValidDate()', () => {
   });
 
   it('returns false for missing year', () => {
-    expect(isValidDate({ month: 6, day: 15 })).toBe(false);
+    expect(isValidDate({ month: 6, dayOfMonth: 14 })).toBe(false);
   });
 
   it('returns false for missing month', () => {
-    expect(isValidDate({ year: 2021, day: 15 })).toBe(false);
+    expect(isValidDate({ year: 2021, dayOfMonth: 14 })).toBe(false);
   });
 
-  it('returns false for missing day', () => {
+  it('returns false for missing dayOfMonth', () => {
     expect(isValidDate({ year: 2021, month: 6 })).toBe(false);
   });
 
   it('returns true for valid date', () => {
-    expect(isValidDate({ year: 2021, month: 6, day: 15 })).toBe(true);
+    expect(isValidDate({ year: 2021, month: 6, dayOfMonth: 14 })).toBe(true);
   });
 
   it('returns false for invalid month', () => {
-    expect(isValidDate({ year: 2021, month: 13, day: 15 })).toBe(false);
-    expect(isValidDate({ year: 2021, month: -1, day: 15 })).toBe(false);
+    expect(isValidDate({ year: 2021, month: 13, dayOfMonth: 14 })).toBe(false);
+    expect(isValidDate({ year: 2021, month: -1, dayOfMonth: 14 })).toBe(false);
   });
 
-  it('returns false for day < 1', () => {
-    expect(isValidDate({ year: 2021, month: 6, day: 0 })).toBe(false);
+  it('returns false for dayOfMonth < 0', () => {
+    expect(isValidDate({ year: 2021, month: 6, dayOfMonth: -1 })).toBe(false);
   });
 
-  it('returns false for day > days in month', () => {
-    expect(isValidDate({ year: 2021, month: 1, day: 32 })).toBe(false);
+  it('returns false for dayOfMonth >= days in month', () => {
+    expect(isValidDate({ year: 2021, month: 1, dayOfMonth: 31 })).toBe(false);
   });
 
   it('returns true when no calendar (basic validation only)', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    expect(isValidDate({ year: 2021, month: 6, day: 15 })).toBe(true);
+    expect(isValidDate({ year: 2021, month: 6, dayOfMonth: 14 })).toBe(true);
   });
 });
 
@@ -348,31 +348,31 @@ describe('isValidDate()', () => {
 
 describe('addDays()', () => {
   it('adds positive days within same month', () => {
-    const date = { year: 2021, month: 0, day: 10 };
+    const date = { year: 2021, month: 0, dayOfMonth: 9 };
     const result = addDays(date, 5);
     expect(result.year).toBe(2021);
     expect(result.month).toBe(0);
-    expect(result.day).toBe(15);
+    expect(result.dayOfMonth).toBe(14);
   });
 
   it('adds negative days within same month', () => {
-    const date = { year: 2021, month: 0, day: 15 };
+    const date = { year: 2021, month: 0, dayOfMonth: 14 };
     const result = addDays(date, -5);
     expect(result.year).toBe(2021);
     expect(result.month).toBe(0);
-    expect(result.day).toBe(10);
+    expect(result.dayOfMonth).toBe(9);
   });
 
   it('crosses month boundary when adding days', () => {
-    const date = { year: 2021, month: 0, day: 30 };
+    const date = { year: 2021, month: 0, dayOfMonth: 29 };
     const result = addDays(date, 5);
-    // Jan 30 + 5 days = Feb 4 (month 1, day 4)
+    // Jan index 29 (30th) + 5 days = Feb index 3 (4th)
     expect(result.month).toBe(1);
-    expect(result.day).toBe(4);
+    expect(result.dayOfMonth).toBe(3);
   });
 
   it('preserves time components', () => {
-    const date = { year: 2021, month: 0, day: 10, hour: 14, minute: 30 };
+    const date = { year: 2021, month: 0, dayOfMonth: 9, hour: 14, minute: 30 };
     const result = addDays(date, 1);
     expect(result.hour).toBe(14);
     expect(result.minute).toBe(30);
@@ -380,7 +380,7 @@ describe('addDays()', () => {
 
   it('returns original date when no calendar', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    const date = { year: 2021, month: 0, day: 10 };
+    const date = { year: 2021, month: 0, dayOfMonth: 9 };
     const result = addDays(date, 5);
     expect(result).toEqual(date);
   });
@@ -392,33 +392,33 @@ describe('addDays()', () => {
 
 describe('daysBetween()', () => {
   it('returns 0 for same day', () => {
-    const date = { year: 2021, month: 6, day: 15 };
+    const date = { year: 2021, month: 6, dayOfMonth: 14 };
     expect(daysBetween(date, date)).toBe(0);
   });
 
   it('returns 1 for adjacent days', () => {
-    const date1 = { year: 2021, month: 0, day: 1 };
-    const date2 = { year: 2021, month: 0, day: 2 };
+    const date1 = { year: 2021, month: 0, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 0, dayOfMonth: 1 };
     expect(daysBetween(date1, date2)).toBe(1);
   });
 
   it('returns negative for reversed dates', () => {
-    const date1 = { year: 2021, month: 0, day: 10 };
-    const date2 = { year: 2021, month: 0, day: 5 };
+    const date1 = { year: 2021, month: 0, dayOfMonth: 9 };
+    const date2 = { year: 2021, month: 0, dayOfMonth: 4 };
     expect(daysBetween(date1, date2)).toBe(-5);
   });
 
   it('counts days across month boundary', () => {
-    const date1 = { year: 2021, month: 0, day: 30 };
-    const date2 = { year: 2021, month: 1, day: 2 };
-    // Jan 30 to Feb 2 = 3 days
+    const date1 = { year: 2021, month: 0, dayOfMonth: 29 };
+    const date2 = { year: 2021, month: 1, dayOfMonth: 1 };
+    // Jan index 29 (30th) to Feb index 1 (2nd) = 3 days
     expect(daysBetween(date1, date2)).toBe(3);
   });
 
   it('returns 0 when no calendar', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    const date1 = { year: 2021, month: 0, day: 1 };
-    const date2 = { year: 2021, month: 0, day: 10 };
+    const date1 = { year: 2021, month: 0, dayOfMonth: 0 };
+    const date2 = { year: 2021, month: 0, dayOfMonth: 9 };
     expect(daysBetween(date1, date2)).toBe(0);
   });
 });
@@ -429,27 +429,27 @@ describe('daysBetween()', () => {
 
 describe('dayOfWeek()', () => {
   it('returns a number', () => {
-    const date = { year: 2021, month: 0, day: 1 };
+    const date = { year: 2021, month: 0, dayOfMonth: 0 };
     const result = dayOfWeek(date);
     expect(typeof result).toBe('number');
   });
 
   it('returns value within 0..6 for 7-day week', () => {
-    const date = { year: 2021, month: 3, day: 15 };
+    const date = { year: 2021, month: 3, dayOfMonth: 14 };
     const result = dayOfWeek(date);
     expect(result).toBeGreaterThanOrEqual(0);
     expect(result).toBeLessThan(7);
   });
 
   it('consecutive days have consecutive weekday indices', () => {
-    const day1 = dayOfWeek({ year: 2021, month: 0, day: 1 });
-    const day2 = dayOfWeek({ year: 2021, month: 0, day: 2 });
+    const day1 = dayOfWeek({ year: 2021, month: 0, dayOfMonth: 0 });
+    const day2 = dayOfWeek({ year: 2021, month: 0, dayOfMonth: 1 });
     expect(day2).toBe((day1 + 1) % 7);
   });
 
   it('returns 0 when no calendar', () => {
     CalendarManager.getActiveCalendar.mockReturnValueOnce(null);
-    const date = { year: 2021, month: 0, day: 1 };
+    const date = { year: 2021, month: 0, dayOfMonth: 0 };
     expect(dayOfWeek(date)).toBe(0);
   });
 });
@@ -464,14 +464,14 @@ describe('getCurrentDate()', () => {
     const result = getCurrentDate();
     expect(result).toHaveProperty('year');
     expect(result).toHaveProperty('month');
-    expect(result).toHaveProperty('day');
+    expect(result).toHaveProperty('dayOfMonth');
     expect(typeof result.year).toBe('number');
     expect(typeof result.month).toBe('number');
-    expect(typeof result.day).toBe('number');
+    expect(typeof result.dayOfMonth).toBe('number');
   });
 
-  it('day is 1-indexed', () => {
+  it('dayOfMonth is 0-indexed', () => {
     const result = getCurrentDate();
-    expect(result.day).toBeGreaterThanOrEqual(1);
+    expect(result.dayOfMonth).toBeGreaterThanOrEqual(0);
   });
 });

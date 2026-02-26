@@ -143,7 +143,10 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
   const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
   let { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
-  if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
+  if (Object.keys(probabilities).length === 0) {
+    for (const preset of getAllPresets(customPresets)) probabilities[preset.id] = 1;
+    if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
+  }
   if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig);
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
@@ -174,12 +177,12 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
  * @param {string} [options.season] - Season name
  * @param {number} options.year - Year
  * @param {number} options.month - Month (0-indexed)
- * @param {number} options.day - Day of month
+ * @param {number} options.dayOfMonth - Day of month (0-indexed)
  * @param {object[]} [options.customPresets] - Custom weather presets
  * @returns {object} Generated weather
  */
-export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year, month, day, customPresets = [] }) {
-  const seed = dateSeed(year, month, day);
+export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year, month, dayOfMonth, customPresets = [] }) {
+  const seed = dateSeed(year, month, dayOfMonth);
   return generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets });
 }
 
@@ -221,7 +224,7 @@ export function applyForecastVariance(weather, dayDistance, totalDays, accuracy,
  * @param {string} [options.season] - Season name (assumed constant for forecast period)
  * @param {number} options.startYear - Starting year
  * @param {number} options.startMonth - Starting month (0-indexed)
- * @param {number} options.startDay - Starting day (1-indexed)
+ * @param {number} options.startDayOfMonth - Starting day of month (0-indexed)
  * @param {number} [options.days] - Number of days to forecast
  * @param {object[]} [options.customPresets] - Custom weather presets
  * @param {Function} [options.getSeasonForDate] - Function to get season data for a date
@@ -237,7 +240,7 @@ export function generateForecast({
   season,
   startYear,
   startMonth,
-  startDay,
+  startDayOfMonth,
   days = 7,
   customPresets = [],
   getSeasonForDate,
@@ -250,28 +253,28 @@ export function generateForecast({
   const forecast = [];
   let year = startYear;
   let month = startMonth;
-  let day = startDay;
+  let dayOfMonth = startDayOfMonth;
   let previousWeatherId = currentWeatherId;
   let prevWeather = previousWeather;
   for (let i = 0; i < days; i++) {
-    const seasonData = getSeasonForDate ? getSeasonForDate(year, month, day) : null;
+    const seasonData = getSeasonForDate ? getSeasonForDate(year, month, dayOfMonth) : null;
     const currentSeason = seasonData?.name ?? season;
     const seasonClimate = seasonData?.climate ?? null;
-    const seed = dateSeed(year, month, day);
+    const seed = dateSeed(year, month, dayOfMonth);
     const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia, previousWeather: prevWeather });
     previousWeatherId = weather.preset.id;
     prevWeather = { temperature: weather.temperature, wind: weather.wind };
     if (accuracy < 100) {
       const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
-      forecast.push({ year, month, day, ...varied });
+      forecast.push({ year, month, dayOfMonth, ...varied });
     } else {
-      forecast.push({ year, month, day, ...weather, isVaried: false });
+      forecast.push({ year, month, dayOfMonth, ...weather, isVaried: false });
     }
-    day++;
+    dayOfMonth++;
     if (getDaysInMonth) {
       const dim = getDaysInMonth(month, year);
-      if (day > dim) {
-        day = 1;
+      if (dayOfMonth >= dim) {
+        dayOfMonth = 0;
         month++;
         const monthsPerYear = getDaysInMonth._monthsPerYear ?? 12;
         if (month >= monthsPerYear) {

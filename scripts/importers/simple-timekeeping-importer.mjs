@@ -97,7 +97,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @param {number} worldTime - Raw world time in seconds
    * @param {object} calendar - STK calendar data
    * @param {boolean} isNativeFormat - Whether calendar is in native STK format
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
    */
   #worldTimeToDate(worldTime, calendar, isNativeFormat) {
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
@@ -129,13 +129,13 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
    * Extract current date from STK data for preservation after import.
    * @param {object} data - Raw STK data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     return data.currentDate || null;
@@ -349,7 +349,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.offset ?? 0,
       phases: DEFAULT_MOON_PHASES,
-      referenceDate: { year: 0, month: 0, day: 0 }
+      referenceDate: { year: 0, month: 0, dayOfMonth: 0 }
     }));
   }
 
@@ -365,13 +365,13 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       if (month.intercalary) {
         const monthName = this.#localizeString(month.name);
         for (let day = 1; day <= month.days; day++) {
-          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day, countsForWeekday: false };
+          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex, dayOfMonth: day - 1, countsForWeekday: false };
           if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
         }
         if (month.days === 0 && month.leapDays > 0) {
           for (let day = 1; day <= month.leapDays; day++) {
-            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day, leapYearOnly: true, countsForWeekday: false });
+            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex, dayOfMonth: day - 1, leapYearOnly: true, countsForWeekday: false });
           }
         }
       } else {
@@ -445,7 +445,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**

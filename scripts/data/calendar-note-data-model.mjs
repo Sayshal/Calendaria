@@ -16,7 +16,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         {
           year: new fields.NumberField({ required: true, integer: true, initial: 1492 }),
           month: new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
-          day: new fields.NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+          dayOfMonth: new fields.NumberField({ required: true, integer: true, min: 0, initial: 0 }),
           hour: new fields.NumberField({ integer: true, min: 0, initial: 12 }),
           minute: new fields.NumberField({ integer: true, min: 0, max: 59, initial: 0 })
         },
@@ -26,7 +26,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         {
           year: new fields.NumberField({ integer: true }),
           month: new fields.NumberField({ integer: true, min: 0 }),
-          day: new fields.NumberField({ integer: true, min: 1 }),
+          dayOfMonth: new fields.NumberField({ integer: true, min: 0 }),
           hour: new fields.NumberField({ integer: true, min: 0 }),
           minute: new fields.NumberField({ integer: true, min: 0, max: 59 })
         },
@@ -36,7 +36,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       repeat: new fields.StringField({ choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'], initial: 'never' }),
       repeatInterval: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       repeatEndDate: new fields.SchemaField(
-        { year: new fields.NumberField({ integer: true }), month: new fields.NumberField({ integer: true, min: 0 }), day: new fields.NumberField({ integer: true, min: 1 }) },
+        { year: new fields.NumberField({ integer: true }), month: new fields.NumberField({ integer: true, min: 0 }), dayOfMonth: new fields.NumberField({ integer: true, min: 0 }) },
         { nullable: true }
       ),
       maxOccurrences: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
@@ -59,7 +59,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       ),
       linkedEvent: new fields.SchemaField({ noteId: new fields.StringField({ required: true, blank: false }), offset: new fields.NumberField({ integer: true, initial: 0 }) }, { nullable: true }),
       rangePattern: new fields.SchemaField(
-        { year: new fields.JSONField({ nullable: true }), month: new fields.JSONField({ nullable: true }), day: new fields.JSONField({ nullable: true }) },
+        { year: new fields.JSONField({ nullable: true }), month: new fields.JSONField({ nullable: true }), dayOfMonth: new fields.JSONField({ nullable: true }) },
         { nullable: true }
       ),
       weekday: new fields.NumberField({ integer: true, min: 0, nullable: true }),

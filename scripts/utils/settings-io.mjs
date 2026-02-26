@@ -141,7 +141,7 @@ export async function exportSettings() {
   if (includeCalendar && activeCalendar) {
     const calendarData = activeCalendar.toObject();
     const currentDate = CalendarManager.getCurrentDateTime();
-    calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, day: currentDate.day };
+    calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
     log(3, `Included active calendar data: ${calendarData.name}`);
   }

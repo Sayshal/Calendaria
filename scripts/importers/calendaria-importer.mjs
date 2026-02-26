@@ -36,7 +36,7 @@ export default class CalendariaImporter extends BaseImporter {
   /**
    * Extract current date from Calendaria data for preservation after import.
    * @param {object} data - Raw Calendaria data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     const calendarData = this.#extractCalendarData(data);

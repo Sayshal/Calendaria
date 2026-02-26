@@ -27,13 +27,13 @@ vi.mock('../../scripts/constants.mjs', () => ({
   TEMPLATES: { PARTIALS: { CHAT_ANNOUNCEMENT: 'chat-announcement.hbs' } }
 }));
 vi.mock('../../scripts/notes/date-utils.mjs', () => {
-  let currentDate = { year: 1, month: 0, day: 1, hour: 12, minute: 0 };
+  let currentDate = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 };
   return {
     getCurrentDate: vi.fn(() => currentDate),
     compareDates: vi.fn((a, b) => {
       if (a.year !== b.year) return a.year < b.year ? -1 : 1;
       if (a.month !== b.month) return a.month < b.month ? -1 : 1;
-      if (a.day !== b.day) return a.day < b.day ? -1 : 1;
+      if (a.dayOfMonth !== b.dayOfMonth) return a.dayOfMonth < b.dayOfMonth ? -1 : 1;
       return 0;
     }),
     _setCurrentDate: (d) => {
@@ -99,9 +99,9 @@ beforeEach(() => {
   NoteManager.getAllNotes.mockReturnValue([]);
   NoteManager.getFullNote.mockReturnValue(null);
   // Force a day change to clear #triggeredToday (static state persists between tests)
-  _setCurrentDate({ year: 0, month: 0, day: 99, hour: 0, minute: 0 });
+  _setCurrentDate({ year: 0, month: 0, dayOfMonth: 99, hour: 0, minute: 0 });
   EventScheduler.initialize();
-  _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+  _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
   EventScheduler.onUpdateWorldTime(worldTimeBase, 0);
   // Clear mocks after priming so tests start clean
   Hooks.callAll.mockClear();
@@ -129,9 +129,9 @@ describe('EventScheduler.onUpdateWorldTime()', () => {
   });
 
   it('checks triggers after TRIGGER_CHECK_INTERVAL', () => {
-    const note = makeNote('e1', 'Event', { year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    const note = makeNote('e1', 'Event', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).toHaveBeenCalled();
   });
@@ -143,32 +143,32 @@ describe('EventScheduler.onUpdateWorldTime()', () => {
 
 describe('EventScheduler — trigger detection', () => {
   it('triggers event when time crosses start time', () => {
-    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).toHaveBeenCalled();
   });
 
   it('does not trigger event when time has not reached start', () => {
-    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, day: 1, hour: 20, minute: 0 });
+    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 20, minute: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).not.toHaveBeenCalled();
   });
 
   it('does not trigger same event twice in same day', () => {
-    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
     // First trigger
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     const wt1 = WT();
     EventScheduler.onUpdateWorldTime(wt1, EventScheduler.TRIGGER_CHECK_INTERVAL);
     // Second call (same day, already triggered) — use wt1 + interval to pass threshold
@@ -177,41 +177,41 @@ describe('EventScheduler — trigger detection', () => {
   });
 
   it('clears triggered set on date change', () => {
-    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, day: 2, hour: 10, minute: 0 });
+    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, dayOfMonth: 1, hour: 10, minute: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 23, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 23, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 2, hour: 11, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 1, hour: 11, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).toHaveBeenCalled();
   });
 
   it('triggers all-day event at start of day', () => {
-    const note = makeNote('e1', 'Holiday', { year: 1, month: 0, day: 2 }, { allDay: true });
+    const note = makeNote('e1', 'Holiday', { year: 1, month: 0, dayOfMonth: 1 }, { allDay: true });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 23, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 23, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 2, hour: 1, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 1, hour: 1, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).toHaveBeenCalled();
   });
 
   it('skips silent events', () => {
-    const note = makeNote('e1', 'Silent Event', { year: 1, month: 0, day: 1, hour: 13, minute: 0 }, { silent: true });
+    const note = makeNote('e1', 'Silent Event', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 }, { silent: true });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).not.toHaveBeenCalled();
   });
 
   it('fires EVENT_TRIGGERED hook', () => {
-    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, day: 1, hour: 13, minute: 0 });
+    const note = makeNote('e1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.eventTriggered', expect.objectContaining({ id: 'e1', name: 'Meeting' }));
   });
@@ -223,31 +223,31 @@ describe('EventScheduler — trigger detection', () => {
 
 describe('EventScheduler — notification types', () => {
   it('uses warn for deadline category', () => {
-    const note = makeNote('e1', 'Due Date', { year: 1, month: 0, day: 1, hour: 13, minute: 0 }, { categories: ['deadline'] });
+    const note = makeNote('e1', 'Due Date', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 }, { categories: ['deadline'] });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.warn).toHaveBeenCalled();
   });
 
   it('uses warn for combat category', () => {
-    const note = makeNote('e1', 'Battle', { year: 1, month: 0, day: 1, hour: 13, minute: 0 }, { categories: ['combat'] });
+    const note = makeNote('e1', 'Battle', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 }, { categories: ['combat'] });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.warn).toHaveBeenCalled();
   });
 
   it('uses info for regular categories', () => {
-    const note = makeNote('e1', 'Quest', { year: 1, month: 0, day: 1, hour: 13, minute: 0 }, { categories: ['quest'] });
+    const note = makeNote('e1', 'Quest', { year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 }, { categories: ['quest'] });
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 12, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     EventScheduler.initialize();
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 14, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).toHaveBeenCalled();
   });
@@ -262,17 +262,17 @@ describe('EventScheduler — multi-day events', () => {
     const note = makeNote(
       'e1',
       'Festival',
-      { year: 1, month: 0, day: 1 },
+      { year: 1, month: 0, dayOfMonth: 0 },
       {
-        endDate: { year: 1, month: 0, day: 5 },
+        endDate: { year: 1, month: 0, dayOfMonth: 4 },
         allDay: true
       }
     );
     NoteManager.getAllNotes.mockReturnValue([note]);
-    _setCurrentDate({ year: 1, month: 0, day: 1, hour: 23, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 23, minute: 0 });
     EventScheduler.initialize();
     // Day 2 of 5
-    _setCurrentDate({ year: 1, month: 0, day: 2, hour: 8, minute: 0 });
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 1, hour: 8, minute: 0 });
     EventScheduler.onUpdateWorldTime(WT(), EventScheduler.TRIGGER_CHECK_INTERVAL);
     expect(ui.notifications.info).toHaveBeenCalled();
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.eventDayChanged', expect.objectContaining({ id: 'e1' }));

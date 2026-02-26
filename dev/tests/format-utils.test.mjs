@@ -191,7 +191,7 @@ describe('toRomanNumeral()', () => {
 /* -------------------------------------------- */
 
 describe('dateFormattingParts()', () => {
-  const components = { year: 2024, month: 0, dayOfMonth: 15, hour: 14, minute: 30, second: 45 };
+  const components = { year: 2024, month: 0, dayOfMonth: 14, hour: 14, minute: 30, second: 45 };
 
   describe('Year tokens', () => {
     it('returns year parts correctly', () => {
@@ -242,21 +242,21 @@ describe('dateFormattingParts()', () => {
     });
 
     it('pads single-digit days', () => {
-      const parts = dateFormattingParts(mockCalendar, { ...components, dayOfMonth: 5 });
+      const parts = dateFormattingParts(mockCalendar, { ...components, dayOfMonth: 4 });
       expect(parts.DD).toBe('05');
     });
 
     it('calculates day of year', () => {
-      // January 15 = day 15 of year
+      // January 15 = day 14 of year (0-indexed)
       const parts = dateFormattingParts(mockCalendar, components);
-      expect(parts.dayOfYear).toBe(15);
+      expect(parts.dayOfYear).toBe(14);
       expect(parts.DDD).toBe('015');
     });
 
     it('calculates day of year for later months', () => {
-      // March 1 = 31 (Jan) + 28 (Feb) + 1 = day 60
-      const parts = dateFormattingParts(mockCalendar, { ...components, month: 2, dayOfMonth: 1 });
-      expect(parts.dayOfYear).toBe(60);
+      // March 1 = 31 (Jan) + 28 (Feb) + 0 = day 59 (0-indexed)
+      const parts = dateFormattingParts(mockCalendar, { ...components, month: 2, dayOfMonth: 0 });
+      expect(parts.dayOfYear).toBe(59);
     });
   });
 
@@ -358,7 +358,7 @@ describe('dateFormattingParts()', () => {
     const monthlessCalendar = addCalendarGetters({ ...mockCalendar, isMonthless: true });
 
     it('returns empty month values', () => {
-      const parts = dateFormattingParts(monthlessCalendar, { ...components, dayOfMonth: 100 });
+      const parts = dateFormattingParts(monthlessCalendar, { ...components, dayOfMonth: 99 });
       expect(parts.M).toBe('');
       expect(parts.MM).toBe('');
       expect(parts.MMM).toBe('');
@@ -367,7 +367,7 @@ describe('dateFormattingParts()', () => {
     });
 
     it('uses dayOfMonth as day of year for D', () => {
-      const parts = dateFormattingParts(monthlessCalendar, { ...components, dayOfMonth: 100 });
+      const parts = dateFormattingParts(monthlessCalendar, { ...components, dayOfMonth: 99 });
       expect(parts.D).toBe(100);
       expect(parts.Do).toBe('100th');
     });
@@ -375,7 +375,7 @@ describe('dateFormattingParts()', () => {
 
   describe('Default values', () => {
     it('defaults hour, minute, second to 0', () => {
-      const parts = dateFormattingParts(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1 });
+      const parts = dateFormattingParts(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0 });
       expect(parts.H).toBe(0);
       expect(parts.m).toBe(0);
       expect(parts.s).toBe(0);
@@ -396,55 +396,55 @@ describe('dateFormattingParts()', () => {
 
 describe('formatShort()', () => {
   it('formats as "D MMM"', () => {
-    const result = formatShort(mockCalendar, { year: 2024, month: 0, dayOfMonth: 5 });
+    const result = formatShort(mockCalendar, { year: 2024, month: 0, dayOfMonth: 4 });
     expect(result).toBe('5 Jan');
   });
 });
 
 describe('formatLong()', () => {
   it('formats as "D MMMM, y"', () => {
-    const result = formatLong(mockCalendar, { year: 1492, month: 0, dayOfMonth: 5 });
+    const result = formatLong(mockCalendar, { year: 1492, month: 0, dayOfMonth: 4 });
     expect(result).toBe('5 January, 1492');
   });
 });
 
 describe('formatFull()', () => {
   it('formats as "dddd, D MMMM y"', () => {
-    const result = formatFull(mockCalendar, { year: 1492, month: 0, dayOfMonth: 5 });
+    const result = formatFull(mockCalendar, { year: 1492, month: 0, dayOfMonth: 4 });
     expect(result).toMatch(/^\w+, 5 January 1492$/);
   });
 });
 
 describe('formatTime()', () => {
   it('formats as "HH:mm"', () => {
-    const result = formatTime(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1, hour: 14, minute: 30 });
+    const result = formatTime(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 14, minute: 30 });
     expect(result).toBe('14:30');
   });
 
   it('pads single digits', () => {
-    const result = formatTime(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1, hour: 9, minute: 5 });
+    const result = formatTime(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 9, minute: 5 });
     expect(result).toBe('09:05');
   });
 });
 
 describe('formatTime12()', () => {
   it('formats as "h:mm A"', () => {
-    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1, hour: 14, minute: 30 });
+    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 14, minute: 30 });
     expect(result).toBe('2:30 PM');
   });
 
   it('handles AM times', () => {
-    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1, hour: 9, minute: 30 });
+    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 9, minute: 30 });
     expect(result).toBe('9:30 AM');
   });
 
   it('handles midnight', () => {
-    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1, hour: 0, minute: 0 });
+    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 0, minute: 0 });
     expect(result).toBe('12:00 AM');
   });
 
   it('handles noon', () => {
-    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 1, hour: 12, minute: 0 });
+    const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     expect(result).toBe('12:00 PM');
   });
 });

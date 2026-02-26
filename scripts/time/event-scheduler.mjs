@@ -94,7 +94,7 @@ export default class EventScheduler {
     const eventStart = {
       year: startDate.year,
       month: startDate.month,
-      day: startDate.day,
+      dayOfMonth: startDate.dayOfMonth,
       hour: note.flagData.allDay ? 0 : (startDate.hour ?? 0),
       minute: note.flagData.allDay ? 0 : (startDate.minute ?? 0)
     };
@@ -113,7 +113,7 @@ export default class EventScheduler {
   static #compareDateTimes(a, b) {
     if (a.year !== b.year) return a.year < b.year ? -1 : 1;
     if (a.month !== b.month) return a.month < b.month ? -1 : 1;
-    if (a.day !== b.day) return a.day < b.day ? -1 : 1;
+    if (a.dayOfMonth !== b.dayOfMonth) return a.dayOfMonth < b.dayOfMonth ? -1 : 1;
     const aHour = a.hour ?? 0;
     const bHour = b.hour ?? 0;
     if (aHour !== bHour) return aHour < bHour ? -1 : 1;
@@ -243,7 +243,7 @@ export default class EventScheduler {
     const formatDate = (date) => {
       const monthData = calendar.monthsArray?.[date.month];
       const monthName = monthData?.name ? localize(monthData.name) : `Month ${date.month + 1}`;
-      return `${date.day} ${monthName}, ${date.year}`;
+      return `${(date.dayOfMonth ?? 0) + 1} ${monthName}, ${date.year}`;
     };
     const formatTime = (date) => {
       if (flagData.allDay) return '';
@@ -253,8 +253,8 @@ export default class EventScheduler {
     };
     let result = formatDate(flagData.startDate) + formatTime(flagData.startDate);
     if (flagData.endDate && flagData.endDate.year) {
-      const startKey = `${flagData.startDate.year}-${flagData.startDate.month}-${flagData.startDate.day}`;
-      const endKey = `${flagData.endDate.year}-${flagData.endDate.month}-${flagData.endDate.day}`;
+      const startKey = `${flagData.startDate.year}-${flagData.startDate.month}-${flagData.startDate.dayOfMonth}`;
+      const endKey = `${flagData.endDate.year}-${flagData.endDate.month}-${flagData.endDate.dayOfMonth}`;
       if (startKey !== endKey) {
         result += ` — ${formatDate(flagData.endDate)}`;
         if (!flagData.allDay && flagData.endDate.hour !== undefined) result += formatTime(flagData.endDate);
@@ -296,7 +296,7 @@ export default class EventScheduler {
    * @private
    */
   static #hasDateChanged(previous, current) {
-    return previous.year !== current.year || previous.month !== current.month || previous.day !== current.day;
+    return previous.year !== current.year || previous.month !== current.month || previous.dayOfMonth !== current.dayOfMonth;
   }
 
   /**
@@ -325,9 +325,9 @@ export default class EventScheduler {
     const startDate = note.flagData.startDate;
     const endDate = note.flagData.endDate;
     if (!startDate || !endDate) return null;
-    const start = { year: startDate.year, month: startDate.month, day: startDate.day };
-    const end = { year: endDate.year, month: endDate.month, day: endDate.day };
-    const current = { year: currentDate.year, month: currentDate.month, day: currentDate.day };
+    const start = { year: startDate.year, month: startDate.month, dayOfMonth: startDate.dayOfMonth };
+    const end = { year: endDate.year, month: endDate.month, dayOfMonth: endDate.dayOfMonth };
+    const current = { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     if (compareDates(current, start) < 0 || compareDates(current, end) > 0) return null;
     const totalDays = this.#daysBetween(start, end) + 1;
     const currentDay = this.#daysBetween(start, current) + 1;
@@ -344,8 +344,8 @@ export default class EventScheduler {
    */
   static #daysBetween(start, end) {
     const calendar = CalendarManager.getActiveCalendar();
-    const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.day - 1, hour: 0, minute: 0, second: 0 });
-    const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.day - 1, hour: 0, minute: 0, second: 0 });
+    const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.dayOfMonth, hour: 0, minute: 0, second: 0 });
+    const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.dayOfMonth, hour: 0, minute: 0, second: 0 });
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar?.days?.secondsPerMinute ?? 60;

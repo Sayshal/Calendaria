@@ -452,7 +452,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!calendar) return TimeClock.getFormattedTime();
     const components = this.#getComponents();
     const yearZero = calendar.years?.yearZero ?? 0;
-    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperTime');
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'timekeeperTime');
   }
 
   /**
@@ -465,7 +465,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!calendar) return TimeClock.getFormattedDate();
     const components = this.#getComponents();
     const yearZero = calendar.years?.yearZero ?? 0;
-    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperDate');
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'timekeeperDate');
   }
 
   /**

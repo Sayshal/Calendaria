@@ -174,9 +174,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.clockLocked = TimeClock.locked;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const rawTime = calendar
-      ? formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalTime')
-      : TimeClock.getFormattedTime();
+    const rawTime = calendar ? formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'miniCalTime') : TimeClock.getFormattedTime();
     context.currentTime = hasMoonIconMarkers(rawTime) ? renderMoonIcons(rawTime) : rawTime;
     context.currentDate = TimeClock.getFormattedDate();
     const isMonthless = calendar?.isMonthless ?? false;
@@ -193,7 +191,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showSetCurrentDate = false;
     if (game.user.isGM && this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(calendar);
-      context.showSetCurrentDate = this._selectedDate.year !== today.year || this._selectedDate.month !== today.month || this._selectedDate.day !== today.day;
+      context.showSetCurrentDate = this._selectedDate.year !== today.year || this._selectedDate.month !== today.month || this._selectedDate.dayOfMonth !== today.dayOfMonth;
     }
     context.sidebarVisible = this.#sidebarVisible || this.#sidebarLocked || this.#stickySidebar;
     context.controlsVisible = this.#controlsVisible || this.#stickyTimeControls;
@@ -211,7 +209,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showViewNotes = false;
     const checkDate = this._selectedDate || ViewUtils.getCurrentViewedDate(calendar);
     if (checkDate) {
-      const noteCount = this._countNotesOnDay(visibleNotes, checkDate.year, checkDate.month, checkDate.day);
+      const noteCount = this._countNotesOnDay(visibleNotes, checkDate.year, checkDate.month, checkDate.dayOfMonth);
       context.showViewNotes = noteCount > 0;
     }
     context.weather = this._getWeatherContext();
@@ -229,7 +227,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE);
     if (calendar && calendar.cyclesArray?.length && context.showCycles) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
-      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
+      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: viewedDate.dayOfMonth ?? 0, hour: 12, minute: 0, second: 0 };
       const cycleResult = calendar.getCycleValues(viewedComponents);
       context.cycleText = cycleResult.text;
       context.cycleValues = cycleResult.values;
@@ -390,7 +388,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
-    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
+    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     if (startDayOfWeek > 0) {
       const totalMonths = calendar.monthsArray.length ?? 12;
       let prevDays = [];
@@ -402,7 +400,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: checkDay - 1 });
         const isIntercalary = festivalDay?.countsForWeekday === false;
         if (!isIntercalary) {
-          prevDays.unshift({ day: checkDay, year: checkYear, month: checkMonth });
+          prevDays.unshift({ day: checkDay, dayOfMonth: checkDay - 1, year: checkYear, month: checkMonth });
           remainingSlots--;
         }
         checkDay--;
@@ -412,25 +410,28 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
         }
       }
-      for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: ViewUtils.isToday(pd.year, pd.month, pd.day, calendar) });
+      for (const pd of prevDays)
+        currentWeek.push({ day: pd.day, dayOfMonth: pd.dayOfMonth, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: ViewUtils.isToday(pd.year, pd.month, pd.dayOfMonth, calendar) });
     }
     const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
     let weatherLookup = null;
     if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
     const intercalaryDays = [];
-    for (let day = 1; day <= daysInMonth; day++) {
-      const noteCount = this._countNotesOnDay(visibleNotes, year, month, day);
-      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: day - 1 });
-      const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, day) : null;
-      const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
+    for (let dayOfMonth = 0; dayOfMonth < daysInMonth; dayOfMonth++) {
+      const displayDay = dayOfMonth + 1;
+      const noteCount = this._countNotesOnDay(visibleNotes, year, month, dayOfMonth);
+      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth });
+      const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, dayOfMonth) : null;
+      const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
       const isIntercalary = festivalDay?.countsForWeekday === false;
       if (isIntercalary) {
         intercalaryDays.push({
-          day,
+          day: displayDay,
+          dayOfMonth,
           year,
           month,
-          isToday: ViewUtils.isToday(year, month, day, calendar),
-          isSelected: this._isSelected(year, month, day),
+          isToday: ViewUtils.isToday(year, month, dayOfMonth, calendar),
+          isSelected: this._isSelected(year, month, dayOfMonth),
           hasNotes: noteCount > 0,
           noteCount,
           isFestival: true,
@@ -448,11 +449,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       } else {
         currentWeek.push({
-          day,
+          day: displayDay,
+          dayOfMonth,
           year,
           month,
-          isToday: ViewUtils.isToday(year, month, day, calendar),
-          isSelected: this._isSelected(year, month, day),
+          isToday: ViewUtils.isToday(year, month, dayOfMonth, calendar),
+          isSelected: this._isSelected(year, month, dayOfMonth),
           hasNotes: noteCount > 0,
           noteCount,
           isFestival: !!festivalDay,
@@ -499,7 +501,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: dayInMonth - 1 });
         const isIntercalary = festivalDay?.countsForWeekday === false;
         if (!isIntercalary) {
-          currentWeek.push({ day: dayInMonth, year: checkYear, month: checkMonth, isFromOtherMonth: true, isToday: ViewUtils.isToday(checkYear, checkMonth, dayInMonth, calendar) });
+          currentWeek.push({
+            day: dayInMonth,
+            dayOfMonth: dayInMonth - 1,
+            year: checkYear,
+            month: checkMonth,
+            isFromOtherMonth: true,
+            isToday: ViewUtils.isToday(checkYear, checkMonth, dayInMonth - 1, calendar)
+          });
           remainingSlots--;
         }
         dayInMonth++;
@@ -517,8 +526,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED);
-    const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, day: date.day };
-    const headerComponents = { year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.day };
+    const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, dayOfMonth: date.dayOfMonth ?? 0 };
+    const headerComponents = { year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.dayOfMonth ?? 0 };
     const rawHeader = formatForLocation(calendar, headerComponents, 'miniCalHeader');
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     const weekdays = monthWeekdays.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }));
@@ -534,11 +543,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _generateWeekViewData(calendar, date, visibleNotes) {
     const { year } = date;
-    const viewedDay = date.day || 1;
+    const viewedDayOfMonth = date.dayOfMonth ?? 0;
     const daysInWeek = calendar.daysInWeek;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
-    const weekNumber = Math.floor((viewedDay - 1) / daysInWeek);
+    const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
@@ -557,16 +566,18 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           dayNum += prevYearDays;
           dayYear--;
         }
-        const noteCount = this._countNotesOnDay(visibleNotes, dayYear, 0, dayNum);
-        const festivalDay = calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth: dayNum - 1 });
-        const moonData = ViewUtils.getFirstMoonPhase(calendar, dayYear, 0, dayNum);
+        const dayOfMonth = dayNum - 1;
+        const noteCount = this._countNotesOnDay(visibleNotes, dayYear, 0, dayOfMonth);
+        const festivalDay = calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
+        const moonData = ViewUtils.getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth);
         const isIntercalary = festivalDay?.countsForWeekday === false;
         const dayData = {
           day: dayNum,
+          dayOfMonth,
           year: dayYear,
           month: 0,
-          isToday: ViewUtils.isToday(dayYear, 0, dayNum, calendar),
-          isSelected: this._isSelected(dayYear, 0, dayNum),
+          isToday: ViewUtils.isToday(dayYear, 0, dayOfMonth, calendar),
+          isSelected: this._isSelected(dayYear, 0, dayOfMonth),
           hasNotes: noteCount > 0,
           noteCount,
           isFestival: !!festivalDay,
@@ -583,7 +594,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       weeks.push(currentWeek);
     }
-    const viewedComponents = { month: 0, dayOfMonth: viewedDay - 1 };
+    const viewedComponents = { month: 0, dayOfMonth: viewedDayOfMonth };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const weekdayData = calendar.weekdaysArray ?? [];
@@ -598,12 +609,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Check if a date is selected.
    * @param {number} year - Display year
    * @param {number} month - Month
-   * @param {number} day - Day (1-indexed)
+   * @param {number} dayOfMonth - Day (0-indexed)
    * @returns {boolean} True if the date matches the selected date
    */
-  _isSelected(year, month, day) {
+  _isSelected(year, month, dayOfMonth) {
     if (!this._selectedDate) return false;
-    return this._selectedDate.year === year && this._selectedDate.month === month && this._selectedDate.day === day;
+    return this._selectedDate.year === year && this._selectedDate.month === month && this._selectedDate.dayOfMonth === dayOfMonth;
   }
 
   /**
@@ -611,11 +622,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object[]} notes - Visible notes
    * @param {number} year - Year
    * @param {number} month - Month
-   * @param {number} day - Day (1-indexed)
+   * @param {number} dayOfMonth - Day (0-indexed)
    * @returns {number} Number of notes on the specified day
    */
-  _countNotesOnDay(notes, year, month, day) {
-    const targetDate = { year, month, day };
+  _countNotesOnDay(notes, year, month, dayOfMonth) {
+    const targetDate = { year, month, dayOfMonth };
     return notes.filter((page) => {
       const noteData = {
         startDate: page.system.startDate,
@@ -644,8 +655,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _getSelectedDateNotes(visibleNotes) {
     if (!this._selectedDate) return [];
-    const { year, month, day } = this._selectedDate;
-    const targetDate = { year, month, day };
+    const { year, month, dayOfMonth } = this._selectedDate;
+    const targetDate = { year, month, dayOfMonth };
     const notes = visibleNotes.filter((page) => {
       const noteData = {
         startDate: page.system.startDate,
@@ -710,12 +721,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _formatSelectedDate() {
     if (!this._selectedDate) return '';
-    const { year, month, day } = this._selectedDate;
+    const { year, month, dayOfMonth } = this._selectedDate;
     const calendar = this.calendar;
     const monthData = calendar.monthsArray[month];
     const monthName = monthData ? localize(monthData.name) : '';
     const yearDisplay = String(year);
-    return `${monthName} ${day}, ${yearDisplay}`;
+    return `${monthName} ${dayOfMonth + 1}, ${yearDisplay}`;
   }
 
   /**
@@ -731,7 +742,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const m = (minute ?? 0).toString().padStart(2, '0');
       return `${h}:${m}`;
     }
-    const components = { year: 0, month: 0, dayOfMonth: 1, hour: hour ?? 0, minute: minute ?? 0, second: 0 };
+    const components = { year: 0, month: 0, dayOfMonth: 0, hour: hour ?? 0, minute: minute ?? 0, second: 0 };
     return formatForLocation(calendar, components, 'miniCalTime');
   }
 
@@ -1202,7 +1213,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     if (timeEl && calendar) {
       const yearZero = calendar.years?.yearZero ?? 0;
-      const timeFormatted = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalTime');
+      const timeFormatted = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'miniCalTime');
       if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);
       else timeEl.textContent = timeFormatted;
     }
@@ -1252,17 +1263,17 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const daysInWeek = calendar.daysInWeek;
       const yearZero = calendar.years?.yearZero ?? 0;
       const daysInYear = calendar.getDaysInYear(current.year - yearZero);
-      let newDay = (current.day || 1) + direction * daysInWeek;
+      let newDayOfMonth = (current.dayOfMonth ?? 0) + direction * daysInWeek;
       let newYear = current.year;
-      if (newDay > daysInYear) {
-        newDay -= daysInYear;
+      if (newDayOfMonth >= daysInYear) {
+        newDayOfMonth -= daysInYear;
         newYear++;
-      } else if (newDay < 1) {
+      } else if (newDayOfMonth < 0) {
         const prevYearDays = calendar.getDaysInYear(newYear - yearZero - 1);
-        newDay += prevYearDays;
+        newDayOfMonth += prevYearDays;
         newYear--;
       }
-      this.viewedDate = { year: newYear, month: 0, day: newDay };
+      this.viewedDate = { year: newYear, month: 0, dayOfMonth: newDayOfMonth };
       await this.render();
       return;
     }
@@ -1289,7 +1300,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       attempts++;
     }
-    this.viewedDate = { year: newYear, month: newMonth, day: 1 };
+    this.viewedDate = { year: newYear, month: newMonth, dayOfMonth: 0 };
     await this.render();
   }
 
@@ -1301,7 +1312,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onNavigateToMonth(_event, target) {
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
-    this.viewedDate = { year, month, day: 1 };
+    this.viewedDate = { year, month, dayOfMonth: 0 };
     await this.render();
   }
 
@@ -1322,11 +1333,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element
    */
   static async _onSelectDay(_event, target) {
-    const day = parseInt(target.dataset.day);
+    const dayOfMonth = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
-    if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.day === day) this._selectedDate = null;
-    else this._selectedDate = { year, month, day };
+    if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.dayOfMonth === dayOfMonth) this._selectedDate = null;
+    else this._selectedDate = { year, month, dayOfMonth };
     await this.render();
   }
 
@@ -1336,22 +1347,22 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onAddNote(_event, _target) {
-    let day, month, year;
+    let dayOfMonth, month, year;
     if (this._selectedDate) {
-      ({ day, month, year } = this._selectedDate);
+      ({ dayOfMonth, month, year } = this._selectedDate);
     } else {
       const today = game.time.components;
       const calendar = this.calendar;
       const yearZero = calendar?.years?.yearZero ?? 0;
       year = today.year + yearZero;
       month = today.month;
-      day = (today.dayOfMonth ?? 0) + 1;
+      dayOfMonth = today.dayOfMonth ?? 0;
     }
     const page = await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 12, minute: 0 },
-        endDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: 13, minute: 0 }
+        startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 12, minute: 0 },
+        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 13, minute: 0 }
       }
     });
   }
@@ -1480,8 +1491,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       });
       if (!confirmed) return;
     }
-    const { year, month, day } = this._selectedDate;
-    await ViewUtils.setDateTo(year, month, day, this.calendar);
+    const { year, month, dayOfMonth } = this._selectedDate;
+    await ViewUtils.setDateTo(year, month, dayOfMonth, this.calendar);
     this._selectedDate = null;
     await this.render();
   }
@@ -1494,7 +1505,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onViewNotes(_event, _target) {
     if (!this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(this.calendar);
-      if (today) this._selectedDate = { year: today.year, month: today.month, day: today.day };
+      if (today) this._selectedDate = { year: today.year, month: today.month, dayOfMonth: today.dayOfMonth };
     }
     if (!this._selectedDate) return;
     this.#notesPanelVisible = true;
@@ -1760,8 +1771,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!dayCell) return;
     const year = parseInt(dayCell.dataset.year);
     const month = parseInt(dayCell.dataset.month);
-    const day = parseInt(dayCell.dataset.day);
-    const moons = ViewUtils.getAllMoonPhases(this.calendar, year, month, day);
+    const dayOfMonth = parseInt(dayCell.dataset.day);
+    const moons = ViewUtils.getAllMoonPhases(this.calendar, year, month, dayOfMonth);
     if (!moons?.length) return;
     const selectedMoon = ViewUtils.getSelectedMoon() || moons[0]?.moonName;
     ViewUtils.showMoonPicker(target, moons, selectedMoon, (moonName) => {

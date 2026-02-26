@@ -31,12 +31,12 @@ function seededRandom(seed, year, dayOfYear) {
  */
 function getDayOfYear(date) {
   const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return date.day;
+  if (!calendar) return date.dayOfMonth + 1;
   const yearZero = calendar.years?.yearZero ?? 0;
   const internalYear = date.year - yearZero;
   let dayOfYear = 0;
   for (let m = 0; m < date.month; m++) dayOfYear += calendar.getDaysInMonth(m, internalYear);
-  return dayOfYear + date.day;
+  return dayOfYear + date.dayOfMonth + 1;
 }
 
 /**
@@ -54,27 +54,27 @@ function getFieldValue(field, date, value2 = null) {
     case 'month':
       return date.month + 1;
     case 'day':
-      return date.day;
+      return date.dayOfMonth + 1;
     case 'dayOfYear':
       return getDayOfYear(date);
     case 'daysBeforeMonthEnd': {
       const lastDay = getLastDayOfMonth(date);
-      return lastDay - date.day;
+      return lastDay - (date.dayOfMonth + 1);
     }
     case 'weekday':
       return dayOfWeek(date) + 1;
     case 'weekNumberInMonth': {
       const daysInWeek = calendar?.daysInWeek ?? 7;
-      return Math.ceil(date.day / daysInWeek);
+      return Math.ceil((date.dayOfMonth + 1) / daysInWeek);
     }
     case 'inverseWeekNumber': {
       const daysInWeek = calendar?.daysInWeek ?? 7;
       const lastDay = getLastDayOfMonth(date);
-      return Math.floor((lastDay - date.day) / daysInWeek) + 1;
+      return Math.floor((lastDay - (date.dayOfMonth + 1)) / daysInWeek) + 1;
     }
     case 'weekInMonth': {
       const daysInWeek = calendar?.daysInWeek ?? 7;
-      return Math.ceil(date.day / daysInWeek);
+      return Math.ceil((date.dayOfMonth + 1) / daysInWeek);
     }
     case 'weekInYear': {
       const daysInWeek = calendar?.daysInWeek ?? 7;
@@ -89,7 +89,7 @@ function getFieldValue(field, date, value2 = null) {
     case 'weeksBeforeMonthEnd': {
       const daysInWeek = calendar?.daysInWeek ?? 7;
       const lastDay = getLastDayOfMonth(date);
-      return Math.floor((lastDay - date.day) / daysInWeek);
+      return Math.floor((lastDay - (date.dayOfMonth + 1)) / daysInWeek);
     }
     case 'weeksBeforeYearEnd': {
       const daysInWeek = calendar?.daysInWeek ?? 7;
@@ -145,7 +145,7 @@ function getFieldValue(field, date, value2 = null) {
       const moonIndex = value2 ?? 0;
       if (moonIndex >= moons.length) return null;
       const yearZero = calendar.years?.yearZero ?? 0;
-      const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.day - 1, hour: 12, minute: 0, second: 0 };
+      const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth, hour: 12, minute: 0, second: 0 };
       const moonPhaseInfo = calendar.getMoonPhase(moonIndex, components);
       return moonPhaseInfo?.position ?? null;
     }
@@ -249,7 +249,7 @@ function getTotalDaysSinceEpoch(date) {
   if (!calendar) return 0;
   const yearZero = calendar.years?.yearZero ?? 0;
   const internalYear = date.year - yearZero;
-  const dayOfMonth = date.day - 1;
+  const dayOfMonth = date.dayOfMonth ?? 0;
   const components = { year: internalYear, month: date.month, dayOfMonth, hour: 0, minute: 0, second: 0 };
   const time = calendar.componentsToTime(components);
   const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
@@ -280,20 +280,20 @@ function getSeasonIndex(dayOfYear, seasons, date) {
   for (let i = 0; i < seasons.length; i++) {
     const season = seasons[i];
     if (season.monthStart != null && season.monthEnd != null && date) {
-      const currentMonth = date.month + 1;
-      const startDay = season.dayStart ?? 1;
+      const currentMonth = date.month;
+      const startDay = season.dayStart ?? 0;
       const months = calendar?.monthsArray ?? [];
-      const endDay = season.dayEnd ?? months[season.monthEnd - 1]?.days ?? 30;
+      const endDay = season.dayEnd ?? (months[season.monthEnd]?.days ?? 30) - 1;
       if (season.monthStart === season.monthEnd) {
-        if (currentMonth === season.monthStart && date.day >= startDay && date.day <= endDay) return i;
+        if (currentMonth === season.monthStart && date.dayOfMonth >= startDay && date.dayOfMonth <= endDay) return i;
       } else if (season.monthStart < season.monthEnd) {
         if (currentMonth > season.monthStart && currentMonth < season.monthEnd) return i;
-        if (currentMonth === season.monthStart && date.day >= startDay) return i;
-        if (currentMonth === season.monthEnd && date.day <= endDay) return i;
+        if (currentMonth === season.monthStart && date.dayOfMonth >= startDay) return i;
+        if (currentMonth === season.monthEnd && date.dayOfMonth <= endDay) return i;
       } else {
         if (currentMonth > season.monthStart || currentMonth < season.monthEnd) return i;
-        if (currentMonth === season.monthStart && date.day >= startDay) return i;
-        if (currentMonth === season.monthEnd && date.day <= endDay) return i;
+        if (currentMonth === season.monthStart && date.dayOfMonth >= startDay) return i;
+        if (currentMonth === season.monthEnd && date.dayOfMonth <= endDay) return i;
       }
     } else {
       const start = season.dayStart ?? 0;
@@ -413,7 +413,7 @@ function getCalendarMoonPhaseIndex(date, moonIndex) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const yearZero = calendar.years?.yearZero ?? 0;
-  const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.day - 1, hour: 12, minute: 0, second: 0 };
+  const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth, hour: 12, minute: 0, second: 0 };
   const moonPhaseInfo = calendar.getMoonPhase(moonIndex, components);
   return moonPhaseInfo?.phaseIndex ?? null;
 }
@@ -430,8 +430,8 @@ function getMoonPhaseCountInMonth(date, _moon, moonIndex = 0) {
   if (currentPhaseIndex === null) return 0;
   let count = 0;
   let wasInPhase = false;
-  for (let day = 1; day <= date.day; day++) {
-    const checkDate = { ...date, day };
+  for (let d = 0; d <= date.dayOfMonth; d++) {
+    const checkDate = { ...date, dayOfMonth: d };
     const phaseIndex = getCalendarMoonPhaseIndex(checkDate, moonIndex);
     const isInPhase = phaseIndex === currentPhaseIndex;
     if (isInPhase && !wasInPhase) count++;
@@ -458,9 +458,9 @@ function getMoonPhaseCountInYear(date, _moon, moonIndex = 0) {
   const months = calendar?.monthsArray ?? [];
   for (let m = 0; m < months.length && dayCounter < targetDayOfYear; m++) {
     const daysInMonth = months[m]?.days || 30;
-    for (let d = 1; d <= daysInMonth && dayCounter < targetDayOfYear; d++) {
+    for (let d = 0; d < daysInMonth && dayCounter < targetDayOfYear; d++) {
       dayCounter++;
-      const checkDate = { year: date.year, month: m, day: d };
+      const checkDate = { year: date.year, month: m, dayOfMonth: d };
       const phaseIndex = getCalendarMoonPhaseIndex(checkDate, moonIndex);
       const isInPhase = phaseIndex === currentPhaseIndex;
       if (isInPhase && !wasInPhase) count++;
@@ -490,7 +490,7 @@ function getCycleValue(date, cycle) {
       value = date.month;
       break;
     case 'monthDay':
-      value = date.day;
+      value = date.dayOfMonth + 1;
       break;
     case 'yearDay':
       value = getDayOfYear(date);
@@ -541,7 +541,7 @@ export function resolveComputedDate(computedConfig, year) {
   const { chain, yearOverrides } = computedConfig;
   if (yearOverrides?.[year]) {
     const override = yearOverrides[year];
-    return { year, month: override.month, day: override.day };
+    return { year, month: override.month, dayOfMonth: override.dayOfMonth ?? override.day };
   }
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
@@ -631,7 +631,7 @@ function resolveAnchor(anchorType, year, calendar) {
         if (linkedNote?.flagData) {
           const linkedData = linkedNote.flagData;
           if (linkedData.repeat === 'computed' && linkedData.computedConfig) return resolveComputedDate(linkedData.computedConfig, year);
-          const occurrences = getOccurrencesInRange(linkedData, { year, month: 0, day: 1 }, { year, month: 11, day: 31 }, 1);
+          const occurrences = getOccurrencesInRange(linkedData, { year, month: 0, dayOfMonth: 0 }, { year, month: 11, dayOfMonth: 30 }, 1);
           if (occurrences.length > 0) return occurrences[0];
         }
       }
@@ -697,17 +697,17 @@ function resolveWeekdayOnOrAfter(startDate, targetWeekday, calendar) {
  * @param {number} dayOfYear - Day of year (1-based)
  * @param {number} year - Year
  * @param {object} calendar - Calendar instance
- * @returns {object} Date { year, month, day }
+ * @returns {object} Date { year, month, dayOfMonth }
  */
 function dayOfYearToDate(dayOfYear, year, calendar) {
   const months = calendar?.monthsArray ?? [];
   let remaining = dayOfYear;
   for (let m = 0; m < months.length; m++) {
     const daysInMonth = months[m]?.days || 30;
-    if (remaining <= daysInMonth) return { year, month: m, day: remaining };
+    if (remaining <= daysInMonth) return { year, month: m, dayOfMonth: remaining - 1 };
     remaining -= daysInMonth;
   }
-  return { year, month: months.length - 1, day: months[months.length - 1]?.days || 1 };
+  return { year, month: months.length - 1, dayOfMonth: (months[months.length - 1]?.days || 1) - 1 };
 }
 
 /**
@@ -949,7 +949,7 @@ function matchesMoonConditions(moonConditions, targetDate) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar?.moonsArray?.length) return false;
   const yearZero = calendar.years?.yearZero ?? 0;
-  const components = { year: targetDate.year - yearZero, month: targetDate.month, dayOfMonth: targetDate.day - 1, hour: 12, minute: 0, second: 0 };
+  const components = { year: targetDate.year - yearZero, month: targetDate.month, dayOfMonth: targetDate.dayOfMonth, hour: 12, minute: 0, second: 0 };
   for (const cond of moonConditions) {
     const moonPhaseInfo = calendar.getMoonPhase(cond.moonIndex, components);
     if (!moonPhaseInfo) continue;
@@ -1042,7 +1042,7 @@ function matchesRandom(randomConfig, targetDate, startDate) {
     const targetDOW = dayOfWeek(targetDate);
     if (startDOW !== targetDOW) return false;
   } else if (checkInterval === 'monthly') {
-    if (startDate.day !== targetDate.day) return false;
+    if (startDate.dayOfMonth !== targetDate.dayOfMonth) return false;
   }
   const dayOfYearValue = getDayOfYear(targetDate);
   const randomValue = seededRandom(seed, targetDate.year, dayOfYearValue);
@@ -1091,8 +1091,8 @@ function matchesMonthly(startDate, targetDate, interval) {
   const monthsDiff = monthsBetween(startDate, targetDate);
   if (monthsDiff < 0 || monthsDiff % interval !== 0) return false;
   const targetMonthLastDay = getLastDayOfMonth(targetDate);
-  const effectiveStartDay = Math.min(startDate.day, targetMonthLastDay);
-  return targetDate.day === effectiveStartDay;
+  const effectiveStartDay = Math.min(startDate.dayOfMonth, targetMonthLastDay - 1);
+  return targetDate.dayOfMonth === effectiveStartDay;
 }
 
 /**
@@ -1107,8 +1107,8 @@ function matchesYearly(startDate, targetDate, interval) {
   if (yearsDiff < 0 || yearsDiff % interval !== 0) return false;
   if (startDate.month !== targetDate.month) return false;
   const targetMonthLastDay = getLastDayOfMonth(targetDate);
-  const effectiveStartDay = Math.min(startDate.day, targetMonthLastDay);
-  return targetDate.day === effectiveStartDay;
+  const effectiveStartDay = Math.min(startDate.dayOfMonth, targetMonthLastDay - 1);
+  return targetDate.dayOfMonth === effectiveStartDay;
 }
 
 /**
@@ -1137,7 +1137,7 @@ function matchesWeekOfMonth(startDate, targetDate, interval, weekday, weekNumber
   const daysInWeek = calendar?.daysInWeek ?? 7;
   const targetWeekday = weekday ?? dayOfWeek(startDate);
   let targetWeekNumber = weekNumber;
-  if (targetWeekNumber == null) targetWeekNumber = Math.ceil(startDate.day / daysInWeek);
+  if (targetWeekNumber == null) targetWeekNumber = Math.ceil((startDate.dayOfMonth + 1) / daysInWeek);
   const currentWeekday = dayOfWeek(targetDate);
   if (currentWeekday !== targetWeekday) return false;
   const monthsDiff = monthsBetween(startDate, targetDate);
@@ -1158,7 +1158,7 @@ function matchesWeekOfMonth(startDate, targetDate, interval, weekday, weekNumber
  * @returns {number} Week ordinal (1-5)
  */
 function getWeekNumberInMonth(date, daysInWeek) {
-  return Math.ceil(date.day / daysInWeek);
+  return Math.ceil((date.dayOfMonth + 1) / daysInWeek);
 }
 
 /**
@@ -1169,7 +1169,7 @@ function getWeekNumberInMonth(date, daysInWeek) {
  */
 function getInverseWeekNumberInMonth(date, daysInWeek) {
   const lastDayOfMonth = getLastDayOfMonth(date);
-  const daysUntilEndOfMonth = lastDayOfMonth - date.day;
+  const daysUntilEndOfMonth = lastDayOfMonth - (date.dayOfMonth + 1);
   const weeksRemaining = Math.floor(daysUntilEndOfMonth / daysInWeek);
   return weeksRemaining + 1;
 }
@@ -1241,8 +1241,8 @@ function findWeekdayInMonth(year, month, weekday, weekNumber) {
   const yearZero = calendar.years?.yearZero ?? 0;
   const daysInMonth = calendar.getDaysInMonth(month, year - yearZero);
   const occurrences = [];
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = { year, month, day };
+  for (let day = 0; day < daysInMonth; day++) {
+    const date = { year, month, dayOfMonth: day };
     if (dayOfWeek(date) === weekday) occurrences.push(day);
   }
   if (occurrences.length === 0) return null;
@@ -1264,12 +1264,12 @@ function findWeekdayInMonth(year, month, weekday, weekNumber) {
  * @returns {boolean} True if matches
  */
 function matchesRangePattern(pattern, targetDate, startDate, repeatEndDate) {
-  const { year, month, day } = pattern;
+  const { year, month, dayOfMonth } = pattern;
   if (compareDays(targetDate, startDate) < 0) return false;
   if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
   if (!matchesRangeBit(year, targetDate.year)) return false;
   if (!matchesRangeBit(month, targetDate.month)) return false;
-  if (!matchesRangeBit(day, targetDate.day)) return false;
+  if (!matchesRangeBit(dayOfMonth, targetDate.dayOfMonth + 1)) return false;
   return true;
 }
 
@@ -1378,14 +1378,14 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
     const daysInWeek = calendar?.daysInWeek ?? 7;
     const interval = noteData.repeatInterval || 1;
     const targetWeekday = noteData.weekday ?? dayOfWeek(startDate);
-    const weekNumber = noteData.weekNumber ?? Math.ceil(startDate.day / daysInWeek);
+    const weekNumber = noteData.weekNumber ?? Math.ceil((startDate.dayOfMonth + 1) / daysInWeek);
     let currentMonth = compareDays(startDate, rangeStart) >= 0 ? { year: startDate.year, month: startDate.month } : { year: rangeStart.year, month: rangeStart.month };
     let iterations = 0;
     const maxIterations = 1000;
     while (iterations < maxIterations) {
       const matchingDay = findWeekdayInMonth(currentMonth.year, currentMonth.month, targetWeekday, weekNumber);
       if (matchingDay) {
-        const date = { year: currentMonth.year, month: currentMonth.month, day: matchingDay };
+        const date = { year: currentMonth.year, month: currentMonth.month, dayOfMonth: matchingDay };
         if (compareDays(date, rangeEnd) > 0) break; // Past end of range
         if (compareDays(date, rangeStart) >= 0 && compareDays(date, startDate) >= 0) {
           if (!noteData.repeatEndDate || compareDays(date, noteData.repeatEndDate) <= 0) {
@@ -1394,7 +1394,7 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
           }
         }
       }
-      currentMonth = addMonths({ ...currentMonth, day: 1 }, interval);
+      currentMonth = addMonths({ ...currentMonth, dayOfMonth: 0 }, interval);
       iterations++;
     }
     return occurrences;
@@ -1466,7 +1466,7 @@ function advanceDate(date, repeat, interval) {
  */
 export function getRecurrenceDescription(noteData) {
   const { repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, linkedEvent, maxOccurrences } = noteData;
-  const formatDate = (d) => `${d.month + 1}/${d.day}/${d.year}`;
+  const formatDate = (d) => `${d.month + 1}/${d.dayOfMonth + 1}/${d.year}`;
   const appendUntil = (desc) => (repeatEndDate ? `${desc} ${format('CALENDARIA.Recurrence.Until', { date: formatDate(repeatEndDate) })}` : desc);
   const appendMaxOccurrences = (desc) => {
     if (maxOccurrences > 0) {
@@ -1567,7 +1567,7 @@ export function generateRandomOccurrences(noteData, targetYear) {
   const maxOccurrences = 500;
   const lastMonthIndex = calendar.monthsArray.length - 1;
   const lastMonthDays = calendar.monthsArray[lastMonthIndex]?.days || 30;
-  const yearEnd = { year: targetYear, month: lastMonthIndex, day: lastMonthDays };
+  const yearEnd = { year: targetYear, month: lastMonthIndex, dayOfMonth: lastMonthDays - 1 };
   let currentDate = { ...startDate };
   if (currentDate.year > targetYear) return [];
   const rangeStart = { ...startDate };
@@ -1579,7 +1579,7 @@ export function generateRandomOccurrences(noteData, targetYear) {
   while (compareDays(currentDate, rangeEnd) <= 0 && iterations < maxIterations) {
     if (compareDays(currentDate, rangeStart) >= 0) {
       if (matchesRandom(randomConfig, currentDate, startDate)) {
-        occurrences.push({ year: currentDate.year, month: currentDate.month, day: currentDate.day });
+        occurrences.push({ year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth });
         if (occurrences.length >= maxOccurrences) break;
       }
     }
@@ -1604,12 +1604,12 @@ export function needsRandomRegeneration(cachedData) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const currentYear = (components.year ?? 0) + yearZero;
   const currentMonth = components.month ?? 0;
-  const currentDay = (components.dayOfMonth ?? 0) + 1;
+  const currentDay = components.dayOfMonth ?? 0;
   const lastMonthIndex = calendar.monthsArray.length - 1;
   const lastMonthDays = calendar.monthsArray[lastMonthIndex]?.days || 30;
   const daysInWeek = calendar?.daysInWeek ?? 7;
   if (cachedData.year < currentYear) return true;
-  if (currentMonth === lastMonthIndex && currentDay > lastMonthDays - daysInWeek) return cachedData.year <= currentYear;
+  if (currentMonth === lastMonthIndex && currentDay > lastMonthDays - daysInWeek - 1) return cachedData.year <= currentYear;
   return false;
 }
 
@@ -1621,7 +1621,7 @@ export function needsRandomRegeneration(cachedData) {
  */
 export function matchesCachedOccurrence(cachedOccurrences, targetDate) {
   if (!cachedOccurrences?.length) return false;
-  return cachedOccurrences.some((occ) => occ.year === targetDate.year && occ.month === targetDate.month && occ.day === targetDate.day);
+  return cachedOccurrences.some((occ) => occ.year === targetDate.year && occ.month === targetDate.month && occ.dayOfMonth === targetDate.dayOfMonth);
 }
 
 /**
@@ -1709,10 +1709,10 @@ function getMoonConditionsDescription(moonConditions) {
  */
 function describeRangePattern(pattern) {
   if (!pattern) return 'Custom range pattern';
-  const { year, month, day } = pattern;
+  const { year, month, dayOfMonth } = pattern;
   const yearDesc = describeRangeBit(year, 'year');
   const monthDesc = describeRangeBit(month, 'month');
-  const dayDesc = describeRangeBit(day, 'day');
+  const dayDesc = describeRangeBit(dayOfMonth, 'day');
   const parts = [yearDesc, monthDesc, dayDesc].filter(Boolean);
   return parts.length > 0 ? `Range: ${parts.join(', ')}` : 'Custom range pattern';
 }

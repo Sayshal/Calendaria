@@ -40,10 +40,10 @@ vi.mock('../../scripts/notes/date-utils.mjs', () => ({
     if (!date || typeof date !== 'object') return false;
     if (typeof date.year !== 'number') return false;
     if (typeof date.month !== 'number') return false;
-    if (typeof date.day !== 'number') return false;
+    if (typeof date.dayOfMonth !== 'number') return false;
     return true;
   }),
-  getCurrentDate: vi.fn(() => ({ year: 1, month: 0, day: 1, hour: 12, minute: 0 }))
+  getCurrentDate: vi.fn(() => ({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 }))
 }));
 
 import {
@@ -102,7 +102,7 @@ describe('getDefaultNoteData()', () => {
     const data = getDefaultNoteData();
     expect(data.startDate.year).toBe(5);
     expect(data.startDate.month).toBe(3);
-    expect(data.startDate.day).toBe(10);
+    expect(data.startDate.dayOfMonth).toBe(10);
     expect(data.startDate.hour).toBe(14);
     expect(data.startDate.minute).toBe(30);
   });
@@ -122,7 +122,7 @@ describe('getDefaultNoteData()', () => {
 
 describe('validateNoteData()', () => {
   const validNote = {
-    startDate: { year: 1, month: 0, day: 1 },
+    startDate: { year: 1, month: 0, dayOfMonth: 0 },
     allDay: true,
     repeat: 'never',
     categories: ['quest'],
@@ -160,7 +160,7 @@ describe('validateNoteData()', () => {
   });
 
   it('accepts valid endDate', () => {
-    const result = validateNoteData({ ...validNote, endDate: { year: 1, month: 0, day: 5 } });
+    const result = validateNoteData({ ...validNote, endDate: { year: 1, month: 0, dayOfMonth: 4 } });
     expect(result.valid).toBe(true);
   });
 

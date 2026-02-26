@@ -294,6 +294,8 @@ export default class CalendariaSettings {
       settingKeyMigrationComplete: { name: 'Setting Key Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       intercalaryMigrationComplete: { name: 'Intercalary Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       weatherZoneMigrationComplete: { name: 'Weather Zone Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      legacyCalendarMigrationComplete: { name: 'Legacy Calendar Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      dateIndexingMigrationComplete: { name: 'Date Indexing Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -853,6 +855,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({ choices: { kph: 'CALENDARIA.Settings.WindSpeedUnit.Kph', mph: 'CALENDARIA.Settings.WindSpeedUnit.Mph' }, initial: 'kph' })
       },
+      [SETTINGS.WEATHER_DAY_INDEX_MIGRATED]: { name: 'Weather Day Index Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.WEATHER_HISTORY]: { name: 'Weather History', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
       [SETTINGS.WEATHER_HISTORY_DAYS]: {
         name: 'CALENDARIA.Settings.WeatherHistoryDays.Name',

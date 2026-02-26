@@ -207,30 +207,28 @@ export function getVisibleNotes(notes) {
  * Check if a date is today.
  * @param {number} year - Display year (with yearZero applied)
  * @param {number} month - Month (0-indexed)
- * @param {number} day - Day of month (1-indexed)
+ * @param {number} dayOfMonth - Day of month (0-indexed)
  * @param {object} [calendar] - Calendar to use (defaults to active)
  * @returns {boolean} True if the given date matches today's date
  */
-export function isToday(year, month, day, calendar = null) {
+export function isToday(year, month, dayOfMonth, calendar = null) {
   const today = game.time.components;
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = today.year + yearZero;
-  const todayDay = (today.dayOfMonth ?? 0) + 1;
-  return displayYear === year && today.month === month && todayDay === day;
+  return displayYear === year && today.month === month && (today.dayOfMonth ?? 0) === dayOfMonth;
 }
 
 /**
  * Get the current viewed date based on game time.
  * @param {object} [calendar] - Calendar to use
- * @returns {object} Date object with year, month, day
+ * @returns {object} Date object with year, month, dayOfMonth (0-indexed)
  */
 export function getCurrentViewedDate(calendar = null) {
   const components = game.time.components;
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
-  const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
-  return { ...components, year: components.year + yearZero, day: dayOfMonth };
+  return { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 };
 }
 
 /**
@@ -238,11 +236,11 @@ export function getCurrentViewedDate(calendar = null) {
  * @param {object[]} notes - Notes to check
  * @param {number} year - Year
  * @param {number} month - Month
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {boolean} True if at least one note exists on the specified day
  */
-export function hasNotesOnDay(notes, year, month, day) {
-  const targetDate = { year, month, day };
+export function hasNotesOnDay(notes, year, month, dayOfMonth) {
+  const targetDate = { year, month, dayOfMonth };
   return notes.some((page) => {
     const noteData = {
       startDate: page.system.startDate,
@@ -290,17 +288,17 @@ export function buildWeatherPillData(wd) {
  * @param {object[]} notes - Notes to filter
  * @param {number} year - Year
  * @param {number} month - Month
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {object[]} Notes that start on the specified day
  */
-export function getNotesForDay(notes, year, month, day) {
+export function getNotesForDay(notes, year, month, dayOfMonth) {
   return notes.filter((page) => {
     const start = page.system.startDate;
     const end = page.system.endDate;
-    if (start.year !== year || start.month !== month || start.day !== day) return false;
-    const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
+    if (start.year !== year || start.month !== month || start.dayOfMonth !== dayOfMonth) return false;
+    const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
     if (!hasValidEndDate) return true;
-    if (end.year !== start.year || end.month !== start.month || end.day !== start.day) return false;
+    if (end.year !== start.year || end.month !== start.month || end.dayOfMonth !== start.dayOfMonth) return false;
     return true;
   });
 }
@@ -310,10 +308,10 @@ export function getNotesForDay(notes, year, month, day) {
  * @param {object} calendar - The calendar
  * @param {number} year - Display year
  * @param {number} month - Month
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {object|null} Moon phase data with icon and tooltip
  */
-export function getFirstMoonPhase(calendar, year, month, day) {
+export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
   if (!calendar?.moonsArray?.length) return null;
   const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
   let moon = sortedMoons[0];
@@ -322,7 +320,7 @@ export function getFirstMoonPhase(calendar, year, month, day) {
     if (overrideMoon) moon = overrideMoon;
   }
   const internalYear = year - (calendar.years?.yearZero ?? 0);
-  const dayComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
+  const dayComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   const phase = calendar.getMoonPhase(moon.originalIndex, dayWorldTime);
   if (!phase) return null;
@@ -335,13 +333,13 @@ export function getFirstMoonPhase(calendar, year, month, day) {
  * @param {object} calendar - The calendar
  * @param {number} year - Display year
  * @param {number} month - Month
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {Array|null} Array of moon phase data sorted alphabetically by moon name
  */
-export function getAllMoonPhases(calendar, year, month, day) {
+export function getAllMoonPhases(calendar, year, month, dayOfMonth) {
   if (!calendar?.moonsArray?.length) return null;
   const internalYear = year - (calendar.years?.yearZero ?? 0);
-  const dayComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
+  const dayComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   return calendar.moonsArray
     .map((moon, index) => {
@@ -356,7 +354,7 @@ export function getAllMoonPhases(calendar, year, month, day) {
 
 /**
  * Build a forecast lookup map for day weather resolution.
- * @returns {{ lookup: Map|null, todayYear: number, todayMonth: number, todayDay: number }} Forecast data and today info
+ * @returns {{ lookup: Map|null, todayYear: number, todayMonth: number, todayDayOfMonth: number }} Forecast data and today info
  */
 export function buildWeatherLookup() {
   const today = game.time.components;
@@ -364,32 +362,32 @@ export function buildWeatherLookup() {
   const yz = calendar?.years?.yearZero ?? 0;
   const todayYear = today.year + yz;
   const todayMonth = today.month;
-  const todayDay = (today.dayOfMonth ?? 0) + 1;
-  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
-  const zoneId = zone?.id;
+  const todayDayOfMonth = today.dayOfMonth ?? 0;
+  const zoneId = WeatherManager.getActiveZone(null, game.scenes?.active)?.id ?? null;
   let lookup = null;
   if (canViewWeatherForecast() && game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) {
-    const forecast = WeatherManager.getForecast({ zoneId });
-    lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.day}`, f]));
+    const forecastOpts = zoneId ? { zoneId } : {};
+    const forecast = WeatherManager.getForecast(forecastOpts);
+    lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.dayOfMonth}`, f]));
   }
-  return { lookup, todayYear, todayMonth, todayDay, zoneId };
+  return { lookup, todayYear, todayMonth, todayDayOfMonth, zoneId };
 }
 
 /**
  * Get weather data for a specific day cell.
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @param {object} todayInfo - Today info from buildWeatherLookup
  * @param {number} todayInfo.todayYear - Today's display year
  * @param {number} todayInfo.todayMonth - Today's month
- * @param {number} todayInfo.todayDay - Today's day
+ * @param {number} todayInfo.todayDayOfMonth - Today's day (0-indexed)
  * @param {Map|null} forecastLookup - Forecast lookup map
  * @returns {object|null} Weather data with icon, color, label, temperature, isForecast, isVaried
  */
-export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
-  const { todayYear, todayMonth, todayDay, zoneId } = todayInfo;
-  const isCurrentDay = year === todayYear && month === todayMonth && day === todayDay;
+export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup) {
+  const { todayYear, todayMonth, todayDayOfMonth, zoneId } = todayInfo;
+  const isCurrentDay = year === todayYear && month === todayMonth && dayOfMonth === todayDayOfMonth;
   if (isCurrentDay) {
     const w = WeatherManager.getCurrentWeather(zoneId);
     if (!w) return null;
@@ -406,7 +404,7 @@ export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
       isVaried: false
     };
   }
-  const hist = WeatherManager.getWeatherForDate(year, month, day, zoneId);
+  const hist = WeatherManager.getWeatherForDate(year, month, dayOfMonth, zoneId);
   if (hist)
     return {
       icon: hist.icon,
@@ -420,7 +418,7 @@ export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
       isVaried: false
     };
   if (forecastLookup) {
-    const f = forecastLookup.get(`${year}-${month}-${day}`);
+    const f = forecastLookup.get(`${year}-${month}-${dayOfMonth}`);
     if (f)
       return {
         icon: f.preset.icon,
@@ -441,13 +439,13 @@ export function getDayWeather(year, month, day, todayInfo, forecastLookup) {
  * Get notes on a specific day for context menu display.
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {object[]} Notes on this day
  */
-export function getNotesOnDay(year, month, day) {
+export function getNotesOnDay(year, month, dayOfMonth) {
   const allNotes = getCalendarNotes();
   const visibleNotes = getVisibleNotes(allNotes);
-  const targetDate = { year, month, day };
+  const targetDate = { year, month, dayOfMonth };
   return visibleNotes.filter((page) => {
     const noteData = {
       startDate: page.system.startDate,
@@ -473,15 +471,15 @@ export function getNotesOnDay(year, month, day) {
  * Set the game time to a specific date.
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @param {object} [calendar] - Calendar to use
  */
-export async function setDateTo(year, month, day, calendar = null) {
+export async function setDateTo(year, month, dayOfMonth, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
   const internalYear = year - yearZero;
   const currentComponents = game.time.components;
-  const newComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
+  const newComponents = { year: internalYear, month, dayOfMonth, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
   const newWorldTime = calendar.componentsToTime(newComponents);
   const delta = newWorldTime - game.time.worldTime;
   if (!game.user.isGM) {
@@ -495,13 +493,13 @@ export async function setDateTo(year, month, day, calendar = null) {
  * Create a new note on a specific date.
  * @param {number} year - Display year
  * @param {number} month - Month (0-indexed)
- * @param {number} day - Day (1-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {Promise<object|null>} The created note page, or null if creation failed
  */
-export async function createNoteOnDate(year, month, day) {
+export async function createNoteOnDate(year, month, dayOfMonth) {
   const page = await NoteManager.createNote({
     name: localize('CALENDARIA.Note.NewNote'),
-    noteData: { startDate: { year, month, day, hour: 12, minute: 0 }, endDate: { year, month, day, hour: 13, minute: 0 } }
+    noteData: { startDate: { year, month, dayOfMonth, hour: 12, minute: 0 }, endDate: { year, month, dayOfMonth, hour: 13, minute: 0 } }
   });
   return page;
 }
@@ -519,25 +517,25 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
   return (target) => {
     const year = parseInt(target.dataset.year);
     const month = parseInt(target.dataset.month);
-    const day = parseInt(target.dataset.day);
-    const notes = getNotesOnDay(year, month, day);
+    const dayOfMonth = parseInt(target.dataset.day);
+    const notes = getNotesOnDay(year, month, dayOfMonth);
     const today = getCurrentViewedDate(calendar);
-    const isToday = year === today.year && month === today.month && day === today.day;
+    const isTodayDate = year === today.year && month === today.month && dayOfMonth === today.dayOfMonth;
     const items = [];
     items.push({
       name: 'CALENDARIA.Common.AddNote',
       icon: '<i class="fas fa-plus"></i>',
       callback: async () => {
-        await createNoteOnDate(year, month, day);
+        await createNoteOnDate(year, month, dayOfMonth);
         onCreateNote?.();
       }
     });
-    if (game.user.isGM && !isToday) {
+    if (game.user.isGM && !isTodayDate) {
       items.push({
         name: 'CALENDARIA.MiniCal.SetCurrentDate',
         icon: '<i class="fas fa-calendar-check"></i>',
         callback: async () => {
-          await setDateTo(year, month, day, calendar);
+          await setDateTo(year, month, dayOfMonth, calendar);
           onSetDate?.();
         }
       });
@@ -570,11 +568,10 @@ export function injectContextMenuInfo(target, calendar) {
   if (!menu) return;
   const year = parseInt(target.dataset.year);
   const month = parseInt(target.dataset.month);
-  const day = parseInt(target.dataset.day);
+  const dayOfMonth = parseInt(target.dataset.day);
   const internalYear = year - (calendar.years?.yearZero ?? 0);
-  const internalComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
-  const displayComponents = { year, month, dayOfMonth: day, hour: 12, minute: 0, second: 0 };
-  const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
+  const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
@@ -623,7 +620,7 @@ function encodeHtmlAttribute(html) {
  * @param {object} calendar - The calendar
  * @param {number} year - Display year (with yearZero applied)
  * @param {number} month - Month (0-indexed)
- * @param {number} day - Day of month (1-indexed)
+ * @param {number} dayOfMonth - Day of month (0-indexed)
  * @param {object} [festival] - Optional festival data
  * @param {string} [festival.name] - Festival name
  * @param {string} [festival.description] - Festival description
@@ -631,11 +628,10 @@ function encodeHtmlAttribute(html) {
  * @param {object|null} [weatherData] - Weather data from getDayWeather
  * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
  */
-export function generateDayTooltip(calendar, year, month, day, festival = null, weatherData = null) {
+export function generateDayTooltip(calendar, year, month, dayOfMonth, festival = null, weatherData = null) {
   const internalYear = year - (calendar.years?.yearZero ?? 0);
-  const internalComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
-  const displayComponents = { year, month, dayOfMonth: day, hour: 12, minute: 0, second: 0 };
-  const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
+  const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);

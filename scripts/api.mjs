@@ -30,19 +30,48 @@ import WeatherManager from './weather/weather-manager.mjs';
 const { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } = Permissions;
 
 /**
+ * Convert a public API date {month, day} (1-indexed) to internal {month, dayOfMonth} (0-indexed).
+ * @param {object} date - Public API date object
+ * @returns {object} Internal date object
+ */
+function toInternal(date) {
+  const d = { ...date };
+  if (d.month != null) d.month -= 1;
+  if (d.day != null) {
+    d.dayOfMonth = d.day - 1;
+    delete d.day;
+  }
+  return d;
+}
+
+/**
+ * Convert an internal date {month, dayOfMonth} (0-indexed) to public API {month, day} (1-indexed).
+ * @param {object} date - Internal date object
+ * @returns {object} Public API date object
+ */
+function toPublic(date) {
+  const d = { ...date };
+  d.month = (d.month ?? 0) + 1;
+  d.day = (d.dayOfMonth ?? 0) + 1;
+  delete d.dayOfMonth;
+  return d;
+}
+
+/**
  * Public API for Calendaria module.
  * Provides access to calendar data, time management, moon phases, and more.
  */
 export const CalendariaAPI = {
   /**
    * Get the current date and time components.
-   * @returns {object} Current time components (year, month, day, hour, minute, second, etc.)
+   * @returns {object} Current time components with month (1-indexed), day (1-indexed)
    */
   getCurrentDateTime() {
     const components = game.time.components;
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
-    return { ...components, year: components.year + yearZero };
+    const { dayOfMonth: _dom, ...rest } = components;
+    return { ...rest, year: components.year + yearZero, month: components.month + 1, day: _dom + 1 };
   },
 
   /**
@@ -65,7 +94,7 @@ export const CalendariaAPI = {
 
   /**
    * Set the current date and time to specific components.
-   * @param {object} components - Time components to set (year, month, day, hour, minute, second)
+   * @param {object} components - Time components (month: 1-indexed, day: 1-indexed)
    * @returns {Promise<number>} New world time after setting
    */
   async setDateTime(components) {
@@ -77,11 +106,14 @@ export const CalendariaAPI = {
       log(1, 'setDateTime failed: no active calendar');
       return game.time.worldTime;
     }
+    const calendar = CalendarManager.getActiveCalendar();
+    const yearZero = calendar?.years?.yearZero ?? 0;
     const internalComponents = { ...components };
-    if (components.year !== undefined) {
-      const calendar = CalendarManager.getActiveCalendar();
-      const yearZero = calendar?.years?.yearZero ?? 0;
-      internalComponents.year = components.year - yearZero;
+    if (components.year !== undefined) internalComponents.year = components.year - yearZero;
+    if (components.month !== undefined) internalComponents.month = components.month - 1;
+    if (components.day !== undefined) {
+      internalComponents.dayOfMonth = components.day - 1;
+      delete internalComponents.day;
     }
     // Non-GM users with permission must request via socket
     if (!game.user.isGM) {
@@ -95,8 +127,8 @@ export const CalendariaAPI = {
    * Jump to a specific date while preserving the current time of day.
    * @param {object} options - Date to jump to
    * @param {number} [options.year] - Target year
-   * @param {number} [options.month] - Target month (0-indexed)
-   * @param {number} [options.day] - Target day of month
+   * @param {number} [options.month] - Target month (1-indexed)
+   * @param {number} [options.day] - Target day of month (1-indexed)
    * @returns {Promise<void>}
    */
   async jumpToDate({ year, month, day }) {
@@ -110,12 +142,14 @@ export const CalendariaAPI = {
       ui.notifications.warn('CALENDARIA.Error.NoActiveCalendar', { localize: true });
       return;
     }
+    const dayOfMonth = day != null ? day - 1 : undefined;
+    const monthIdx = month != null ? month - 1 : undefined;
     // Non-GM users with permission must request via socket
     if (!game.user.isGM) {
-      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'jump', date: { year, month, day } });
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'jump', date: { year, month: monthIdx, dayOfMonth } });
       return;
     }
-    await calendar.jumpToDate({ year, month, day });
+    await calendar.jumpToDate({ year, month: monthIdx, dayOfMonth });
   },
 
   /**
@@ -413,7 +447,7 @@ export const CalendariaAPI = {
 
   /**
    * Format date and time components as a string.
-   * @param {object} [components] - Time components to format (defaults to current time)
+   * @param {object} [components] - Time components to format with month (1-indexed), day (1-indexed). Defaults to current time.
    * @param {string} [formatOrPreset] - Format string with tokens OR preset name (dateLong, dateFull, time24, etc.)
    * @returns {string} Formatted date/time string
    */
@@ -424,8 +458,10 @@ export const CalendariaAPI = {
     const formatted = {
       ...raw,
       year: components ? raw.year : raw.year + (calendar.years?.yearZero ?? 0),
-      dayOfMonth: components ? raw.day || 1 : (raw.dayOfMonth ?? 0) + 1
+      month: components ? (raw.month ?? 1) - 1 : raw.month,
+      dayOfMonth: components ? (raw.day ?? 1) - 1 : (raw.dayOfMonth ?? 0)
     };
+    delete formatted.day;
     if (PRESET_FORMATTERS[formatOrPreset]) return PRESET_FORMATTERS[formatOrPreset](calendar, formatted);
     const formatStr = resolveFormatString(formatOrPreset);
     return formatCustom(calendar, formatted, formatStr);
@@ -509,8 +545,8 @@ export const CalendariaAPI = {
    * @param {object} options - Note creation options
    * @param {string} options.name - Note title
    * @param {string} [options.content] - Note content (HTML)
-   * @param {object} options.startDate - Start date {year, month, day, hour?, minute?}
-   * @param {object} [options.endDate] - End date {year, month, day, hour?, minute?}
+   * @param {object} options.startDate - Start date {year, month (1-indexed), day (1-indexed), hour?, minute?}
+   * @param {object} [options.endDate] - End date {year, month (1-indexed), day (1-indexed), hour?, minute?}
    * @param {boolean} [options.allDay] - Whether this is an all-day event
    * @param {string} [options.repeat] - Repeat pattern: 'never', 'daily', 'weekly', 'monthly', 'yearly'
    * @param {string[]} [options.categories] - Category IDs
@@ -526,8 +562,8 @@ export const CalendariaAPI = {
       return null;
     }
     const noteData = {
-      startDate: { year: startDate.year, month: startDate.month, day: startDate.day, hour: startDate.hour ?? 0, minute: startDate.minute ?? 0 },
-      endDate: endDate ? { year: endDate.year, month: endDate.month, day: endDate.day, hour: endDate.hour ?? 23, minute: endDate.minute ?? 59 } : null,
+      startDate: { year: startDate.year, month: (startDate.month ?? 1) - 1, dayOfMonth: (startDate.day ?? 1) - 1, hour: startDate.hour ?? 0, minute: startDate.minute ?? 0 },
+      endDate: endDate ? { year: endDate.year, month: (endDate.month ?? 1) - 1, dayOfMonth: (endDate.day ?? 1) - 1, hour: endDate.hour ?? 23, minute: endDate.minute ?? 59 } : null,
       allDay,
       repeat,
       categories,
@@ -586,35 +622,39 @@ export const CalendariaAPI = {
   /**
    * Get all notes for a specific date.
    * @param {number} year - Year (display year, not internal)
-   * @param {number} month - Month (0-indexed)
-   * @param {number} day - Day of month
+   * @param {number} month - Month (1-indexed)
+   * @param {number} day - Day of month (1-indexed)
    * @returns {object[]} Array of note stubs
    */
   getNotesForDate(year, month, day) {
-    return NoteManager.getNotesForDate(year, month, day);
+    return NoteManager.getNotesForDate(year, month - 1, day - 1);
   },
 
   /**
    * Get all notes for a specific month.
    * @param {number} year - Year (display year)
-   * @param {number} month - Month (0-indexed)
+   * @param {number} month - Month (1-indexed)
    * @returns {object[]} Array of note stubs
    */
   getNotesForMonth(year, month) {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const daysInMonth = calendar?.getDaysInMonth(month, year - yearZero) ?? 30;
-    return NoteManager.getNotesInRange({ year, month, day: 1 }, { year, month, day: daysInMonth });
+    const internalMonth = month - 1;
+    const daysInMonth = calendar?.getDaysInMonth(internalMonth, year - yearZero) ?? 30;
+    return NoteManager.getNotesInRange({ year, month: internalMonth, dayOfMonth: 0 }, { year, month: internalMonth, dayOfMonth: daysInMonth - 1 });
   },
 
   /**
    * Get all notes within a date range.
-   * @param {object} startDate - Start date {year, month, day}
-   * @param {object} endDate - End date {year, month, day}
+   * @param {object} startDate - Start date {year, month (1-indexed), day (1-indexed)}
+   * @param {object} endDate - End date {year, month (1-indexed), day (1-indexed)}
    * @returns {object[]} Array of note stubs
    */
   getNotesInRange(startDate, endDate) {
-    return NoteManager.getNotesInRange(startDate, endDate);
+    return NoteManager.getNotesInRange(
+      { ...startDate, month: startDate.month - 1, dayOfMonth: (startDate.day ?? 1) - 1 },
+      { ...endDate, month: endDate.month - 1, dayOfMonth: (endDate.day ?? 1) - 1 }
+    );
   },
 
   /**
@@ -711,19 +751,19 @@ export const CalendariaAPI = {
   /**
    * Convert a timestamp (world time in seconds) to date components.
    * @param {number} timestamp - World time in seconds
-   * @returns {object} Date components {year, month, day, hour, minute}
+   * @returns {object} Date components {year, month (1-indexed), day (1-indexed), hour, minute}
    */
   timestampToDate(timestamp) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
     const components = calendar.timeToComponents(timestamp);
     const yearZero = calendar.years?.yearZero ?? 0;
-    return { year: components.year + yearZero, month: components.month, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
+    return { year: components.year + yearZero, month: components.month + 1, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
   },
 
   /**
    * Convert date components to a timestamp (world time in seconds).
-   * @param {object} date - Date components {year, month, day, hour?, minute?, second?}
+   * @param {object} date - Date components {year, month (1-indexed), day (1-indexed), hour?, minute?, second?}
    * @returns {number} World time in seconds
    */
   dateToTimestamp(date) {
@@ -731,15 +771,9 @@ export const CalendariaAPI = {
     if (!calendar) return 0;
     const yearZero = calendar.years?.yearZero ?? 0;
     const year = date.year - yearZero;
-    const month = date.month ?? 0;
-    const dayOfMonth = date.dayOfMonth ?? (date.day != null ? date.day - 1 : 0);
-    let day = dayOfMonth;
-    const months = calendar.monthsArray ?? [];
-    for (let i = 0; i < month; i++) {
-      const isLeap = calendar.isLeapYear?.(year);
-      day += isLeap && months[i]?.leapDays ? months[i].leapDays : (months[i]?.days ?? 0);
-    }
-    return calendar.componentsToTime({ year, month, day, dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.second ?? 0 });
+    const month = (date.month ?? 1) - 1;
+    const dayOfMonth = (date.day ?? 1) - 1;
+    return calendar.componentsToTime({ year, month, dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.second ?? 0 });
   },
 
   /**
@@ -750,7 +784,7 @@ export const CalendariaAPI = {
    */
   chooseRandomDate(startDate, endDate) {
     const current = this.getCurrentDateTime();
-    if (!startDate) startDate = { year: current.year, month: current.month, day: current.dayOfMonth + 1 };
+    if (!startDate) startDate = { year: current.year, month: current.month, day: current.day };
     if (!endDate) endDate = { year: startDate.year + 1, month: startDate.month, day: startDate.day };
     const startTimestamp = this.dateToTimestamp(startDate);
     const endTimestamp = this.dateToTimestamp(endDate);
@@ -962,24 +996,26 @@ export const CalendariaAPI = {
   /**
    * Get historical weather for a specific date.
    * @param {number} year - Display year
-   * @param {number} month - Month (0-indexed)
+   * @param {number} month - Month (1-indexed)
    * @param {number} day - Day of month (1-indexed)
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @returns {object|null} Historical weather entry or null
    */
   getWeatherForDate(year, month, day, zoneId) {
-    return WeatherManager.getWeatherForDate(year, month, day, zoneId);
+    return WeatherManager.getWeatherForDate(year, month - 1, day - 1, zoneId);
   },
 
   /**
    * Get weather history as the raw nested object, or a flat array for a specific year/month.
    * @param {object} [options] - Filter options
    * @param {number} [options.year] - Filter to a specific year
-   * @param {number} [options.month] - Filter to a specific month (requires year)
+   * @param {number} [options.month] - Filter to a specific month (1-indexed, requires year)
    * @returns {object|object[]} Nested history object, or array of { year, month, day, ...entry }
    */
   getWeatherHistory(options = {}) {
-    return WeatherManager.getWeatherHistory(options);
+    const converted = { ...options };
+    if (converted.month != null) converted.month = converted.month - 1;
+    return WeatherManager.getWeatherHistory(converted);
   },
 
   /**
@@ -1116,7 +1152,7 @@ export const CalendariaAPI = {
    * @returns {object} New date object
    */
   addDays(date, days) {
-    return addDays(date, days);
+    return toPublic(addDays(toInternal(date), days));
   },
 
   /**
@@ -1126,7 +1162,7 @@ export const CalendariaAPI = {
    * @returns {object} New date object
    */
   addMonths(date, months) {
-    return addMonths(date, months);
+    return toPublic(addMonths(toInternal(date), months));
   },
 
   /**
@@ -1136,7 +1172,7 @@ export const CalendariaAPI = {
    * @returns {object} New date object
    */
   addYears(date, years) {
-    return addYears(date, years);
+    return toPublic(addYears(toInternal(date), years));
   },
 
   /**
@@ -1146,7 +1182,7 @@ export const CalendariaAPI = {
    * @returns {number} Number of days (can be negative)
    */
   daysBetween(startDate, endDate) {
-    return daysBetween(startDate, endDate);
+    return daysBetween(toInternal(startDate), toInternal(endDate));
   },
 
   /**
@@ -1156,7 +1192,7 @@ export const CalendariaAPI = {
    * @returns {number} Number of months (can be negative)
    */
   monthsBetween(startDate, endDate) {
-    return monthsBetween(startDate, endDate);
+    return monthsBetween(toInternal(startDate), toInternal(endDate));
   },
 
   /**
@@ -1166,7 +1202,7 @@ export const CalendariaAPI = {
    * @returns {number} -1 if date1 < date2, 0 if equal, 1 if date1 > date2
    */
   compareDates(date1, date2) {
-    return compareDates(date1, date2);
+    return compareDates(toInternal(date1), toInternal(date2));
   },
 
   /**
@@ -1176,7 +1212,7 @@ export const CalendariaAPI = {
    * @returns {number} -1 if date1 < date2, 0 if same day, 1 if date1 > date2
    */
   compareDays(date1, date2) {
-    return compareDays(date1, date2);
+    return compareDays(toInternal(date1), toInternal(date2));
   },
 
   /**
@@ -1186,7 +1222,7 @@ export const CalendariaAPI = {
    * @returns {boolean} True if same day
    */
   isSameDay(date1, date2) {
-    return isSameDay(date1, date2);
+    return isSameDay(toInternal(date1), toInternal(date2));
   },
 
   /**
@@ -1195,7 +1231,7 @@ export const CalendariaAPI = {
    * @returns {number} Day of week index
    */
   dayOfWeek(date) {
-    return dayOfWeek(date);
+    return dayOfWeek(toInternal(date));
   },
 
   /**
@@ -1204,7 +1240,7 @@ export const CalendariaAPI = {
    * @returns {boolean} True if valid
    */
   isValidDate(date) {
-    return isValidDate(date);
+    return isValidDate(toInternal(date));
   },
 
   /**

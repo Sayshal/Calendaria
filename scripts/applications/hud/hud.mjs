@@ -1268,7 +1268,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       return `${h}:${m}:${s}`;
     }
     const yearZero = calendar.years?.yearZero ?? 0;
-    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudTime');
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'hudTime');
   }
 
   /**
@@ -1280,7 +1280,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     if (!calendar) return '';
     const yearZero = calendar.years?.yearZero ?? 0;
-    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudDate');
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'hudDate');
   }
 
   /**
@@ -1344,8 +1344,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const year = components.year + yearZero;
     const month = components.month;
-    const day = (components.dayOfMonth ?? 0) + 1;
-    const notes = ViewUtils.getNotesOnDay(year, month, day);
+    const dayOfMonth = components.dayOfMonth ?? 0;
+    const notes = ViewUtils.getNotesOnDay(year, month, dayOfMonth);
     if (!notes.length) return [];
     return notes.slice(0, 5).map((note) => {
       let tooltip = note.name;

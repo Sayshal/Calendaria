@@ -1,72 +1,291 @@
 {
-  "id"            : "forbidden-lands",
-  "name"          : "CALENDARIA.Calendar.ForbiddenLands.Name",
-  "years"         : {"yearZero": 1165, "firstWeekday": 0},
-  "months"        : {
+  "id": "forbidden-lands",
+  "name": "CALENDARIA.Calendar.ForbiddenLands.Name",
+  "years": {
+    "yearZero": 1165,
+    "firstWeekday": 0
+  },
+  "months": {
     "values": {
-      "winterwane000000": {"name": "Winterwane",  "abbreviation": "WWn", "ordinal": 1, "days": 45},
-      "springrise000000": {"name": "Springrise",  "abbreviation": "SpR", "ordinal": 2, "days": 45},
-      "springwane000000": {"name": "Springwane",  "abbreviation": "SpW", "ordinal": 3, "days": 45},
-      "summermaze000000": {"name": "Summermaze",  "abbreviation": "SMz", "ordinal": 4, "days": 45},
-      "summerend0000000": {"name": "Summerend",   "abbreviation": "SEn", "ordinal": 5, "days": 45},
-      "harvestfall00000": {"name": "Harvestfall", "abbreviation": "HvF", "ordinal": 6, "days": 45},
-      "fallwane00000000": {"name": "Fallwane",    "abbreviation": "FlW", "ordinal": 7, "days": 45},
-      "winterdeep000000": {"name": "Winterdeep",  "abbreviation": "WDp", "ordinal": 8, "days": 45}
+      "winterwane000000": {
+        "name": "Winterwane",
+        "abbreviation": "WWn",
+        "ordinal": 1,
+        "days": 45
+      },
+      "springrise000000": {
+        "name": "Springrise",
+        "abbreviation": "SpR",
+        "ordinal": 2,
+        "days": 45
+      },
+      "springwane000000": {
+        "name": "Springwane",
+        "abbreviation": "SpW",
+        "ordinal": 3,
+        "days": 45
+      },
+      "summermaze000000": {
+        "name": "Summermaze",
+        "abbreviation": "SMz",
+        "ordinal": 4,
+        "days": 45
+      },
+      "summerend0000000": {
+        "name": "Summerend",
+        "abbreviation": "SEn",
+        "ordinal": 5,
+        "days": 45
+      },
+      "harvestfall00000": {
+        "name": "Harvestfall",
+        "abbreviation": "HvF",
+        "ordinal": 6,
+        "days": 45
+      },
+      "fallwane00000000": {
+        "name": "Fallwane",
+        "abbreviation": "FlW",
+        "ordinal": 7,
+        "days": 45
+      },
+      "winterdeep000000": {
+        "name": "Winterdeep",
+        "abbreviation": "WDp",
+        "ordinal": 8,
+        "days": 45
+      }
     }
   },
-  "days"          : {
-    "values"          : {
-      "sunday0000000000": {"name": "Sunday",    "ordinal": 1, "abbreviation": "Sun"                   },
-      "moonday000000000": {"name": "Moonday",   "ordinal": 2, "abbreviation": "Moo"                   },
-      "bladeday00000000": {"name": "Bladeday",  "ordinal": 3, "abbreviation": "Bla"                   },
-      "spiritday0000000": {"name": "Spiritday", "ordinal": 4, "abbreviation": "Spi"                   },
-      "stillday00000000": {"name": "Stillday",  "ordinal": 5, "abbreviation": "Sti", "isRestDay": true}
+  "days": {
+    "values": {
+      "sunday0000000000": {
+        "name": "Sunday",
+        "ordinal": 1,
+        "abbreviation": "Sun"
+      },
+      "moonday000000000": {
+        "name": "Moonday",
+        "ordinal": 2,
+        "abbreviation": "Moo"
+      },
+      "bladeday00000000": {
+        "name": "Bladeday",
+        "ordinal": 3,
+        "abbreviation": "Bla"
+      },
+      "spiritday0000000": {
+        "name": "Spiritday",
+        "ordinal": 4,
+        "abbreviation": "Spi"
+      },
+      "stillday00000000": {
+        "name": "Stillday",
+        "ordinal": 5,
+        "abbreviation": "Sti",
+        "isRestDay": true
+      }
     },
-    "daysPerYear"     : 360,
-    "hoursPerDay"     : 24,
-    "minutesPerHour"  : 60,
+    "daysPerYear": 360,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : {
-    "awakeningday0000": {"name": "Awakening Day", "month": 2, "day": 1, "icon": "fas fa-leaf", "color": "#90EE90", "description": "Spring's arrival and the awakening of the land from winter's grip."},
-    "springrisefestiv": {"name": "Springrise Festival", "month": 2, "day": 23, "icon": "fas fa-seedling", "color": "#FF69B4", "description": "Celebration of spring's full bloom when life returns to the Forbidden Lands."},
-    "midsummerblot000": {"name": "Midsummer Blot", "month": 4, "day": 23, "icon": "fas fa-fire", "color": "#FF4500", "description": "Sacrificial festival at the height of summer honoring the gods with offerings and sacred rites."},
-    "harvestfeast0000": {"name": "Harvest Feast", "month": 6, "day": 23, "icon": "fas fa-wheat-awn", "color": "#CD853F", "description": "Autumn celebration of the harvest bounty with feasting and thanksgiving."},
-    "winternight00000": {"name": "Winter Night", "month": 8, "day": 23, "icon": "fas fa-snowflake", "color": "#4682B4", "description": "Midwinter festival when servants of the gods decree next year's celebrations."}
+  "festivals": {
+    "awakeningday0000": {
+      "name": "Awakening Day",
+      "month": 1,
+      "icon": "fas fa-leaf",
+      "color": "#90EE90",
+      "description": "Spring's arrival and the awakening of the land from winter's grip.",
+      "dayOfMonth": 0
+    },
+    "springrisefestiv": {
+      "name": "Springrise Festival",
+      "month": 1,
+      "icon": "fas fa-seedling",
+      "color": "#FF69B4",
+      "description": "Celebration of spring's full bloom when life returns to the Forbidden Lands.",
+      "dayOfMonth": 22
+    },
+    "midsummerblot000": {
+      "name": "Midsummer Blot",
+      "month": 3,
+      "icon": "fas fa-fire",
+      "color": "#FF4500",
+      "description": "Sacrificial festival at the height of summer honoring the gods with offerings and sacred rites.",
+      "dayOfMonth": 22
+    },
+    "harvestfeast0000": {
+      "name": "Harvest Feast",
+      "month": 5,
+      "icon": "fas fa-wheat-awn",
+      "color": "#CD853F",
+      "description": "Autumn celebration of the harvest bounty with feasting and thanksgiving.",
+      "dayOfMonth": 22
+    },
+    "winternight00000": {
+      "name": "Winter Night",
+      "month": 7,
+      "icon": "fas fa-snowflake",
+      "color": "#4682B4",
+      "description": "Midwinter festival when servants of the gods decree next year's celebrations.",
+      "dayOfMonth": 22
+    }
   },
-  "seasons"       : {
+  "seasons": {
     "values": {
-      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart":   0, "dayEnd":  44, "abbreviation": "Win"},
-      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  45, "dayEnd": 134, "abbreviation": "Spr"},
-      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 135, "dayEnd": 224, "abbreviation": "Sum"},
-      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 225, "dayEnd": 314, "abbreviation": "Aut"},
-      "winter0000000002": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 315, "dayEnd": 359, "abbreviation": "Win"}
-    }
-  },
-  "eras"          : { "alderlandreckoni": {"name": "Alderland Reckoning", "abbreviation": "AS", "startYear": 1, "endYear": null} },
-  "moons"         : {
-    "themoon000000000": {
-      "name"         : "The Moon",
-      "cycleLength"  : 30,
-      "color"        : "#E8E8E8",
-      "phases"       : {
-        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "dayStart": 0,
+        "dayEnd": 44,
+        "abbreviation": "Win"
       },
-      "referenceDate": {"year": 0, "month": 0, "day": 15}
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "dayStart": 45,
+        "dayEnd": 134,
+        "abbreviation": "Spr"
+      },
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "dayStart": 135,
+        "dayEnd": 224,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "dayStart": 225,
+        "dayEnd": 314,
+        "abbreviation": "Aut"
+      },
+      "winter0000000002": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "dayStart": 315,
+        "dayEnd": 359,
+        "abbreviation": "Win"
+      }
     }
   },
-  "daylight"      : {"enabled": true, "shortestDay": 6, "longestDay": 18, "winterSolstice": 338, "summerSolstice": 158},
-  "cycles"        : {},
+  "eras": {
+    "alderlandreckoni": {
+      "name": "Alderland Reckoning",
+      "abbreviation": "AS",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "themoon000000000": {
+      "name": "The Moon",
+      "cycleLength": 30,
+      "color": "#E8E8E8",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 14
+      }
+    }
+  },
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 6,
+    "longestDay": 18,
+    "winterSolstice": 338,
+    "summerSolstice": 158
+  },
+  "cycles": {},
   "canonicalHours": {},
-  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
-  "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
-  "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
-  "metadata"      : {"id": "forbidden-lands", "description": "CALENDARIA.Calendar.ForbiddenLands.Description", "author": "calendaria", "system": "Forbidden Lands"}
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y",
+    "full": "MMMM D, Y",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "forbidden-lands",
+    "description": "CALENDARIA.Calendar.ForbiddenLands.Description",
+    "author": "calendaria",
+    "system": "Forbidden Lands"
+  }
 }

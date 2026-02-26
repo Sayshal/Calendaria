@@ -49,7 +49,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const ssDate = game.seasonsStars.api.getCurrentDate();
       if (ssDate) {
         const dateObj = ssDate.toObject?.() ?? ssDate;
-        currentDate = { year: dateObj.year, month: dateObj.month ?? 0, day: (dateObj.day ?? 0) + 1, hour: dateObj.time?.hour ?? 0, minute: dateObj.time?.minute ?? 0 };
+        currentDate = { year: dateObj.year, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: dateObj.time?.hour ?? 0, minute: dateObj.time?.minute ?? 0 };
       }
     }
     if (!currentDate) currentDate = this.#worldTimeToDate(game.time.worldTime, calendarData);
@@ -59,12 +59,12 @@ export default class SeasonsStarsImporter extends BaseImporter {
   /**
    * Extract current date from S&S data for preservation after import.
    * @param {object} data - Raw S&S data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     if (data.currentDate) return data.currentDate;
     const calendar = data.calendar || data;
-    if (calendar.year?.currentYear !== undefined) return { year: calendar.year.currentYear, month: 0, day: 1, hour: 0, minute: 0 };
+    if (calendar.year?.currentYear !== undefined) return { year: calendar.year.currentYear, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
     return null;
   }
 
@@ -72,7 +72,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * Convert worldTime to date components using S&S calendar data.
    * @param {number} worldTime - Raw world time in seconds
    * @param {object} calendar - S&S calendar data
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
    */
   #worldTimeToDate(worldTime, calendar) {
     const hoursPerDay = calendar.time?.hoursInDay ?? 24;
@@ -103,7 +103,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
@@ -245,7 +245,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       color: moon.color || '',
       hidden: false,
       phases: this.#convertPhasesToPercentages(moon.phases || [], moon.cycleLength),
-      referenceDate: { year: moon.firstNewMoon?.year ?? 1, month: (moon.firstNewMoon?.month ?? 1) - 1, day: moon.firstNewMoon?.day ?? 1 }
+      referenceDate: { year: moon.firstNewMoon?.year ?? 1, month: (moon.firstNewMoon?.month ?? 1) - 1, dayOfMonth: (moon.firstNewMoon?.day ?? 1) - 1 }
     }));
   }
 
@@ -325,7 +325,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       }
       const dayCount = item.days ?? 1;
       for (let d = 0; d < dayCount; d++) {
-        const festival = { name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name, month: monthIndex + 1, day: dayInMonth + d };
+        const festival = { name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name, month: monthIndex, dayOfMonth: dayInMonth + d - 1 };
         if (item.leapYearOnly) festival.leapYearOnly = true;
         if (item.countsForWeekdays === false) festival.countsForWeekday = false;
         festivals.push(festival);
@@ -454,20 +454,20 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.startDate = {
           year: event.startYear ?? 1,
           month: (rec.month ?? 1) - 1,
-          day: rec.day ?? 1
+          dayOfMonth: (rec.day ?? 1) - 1
         };
       } else if (rec.type === 'ordinal') {
         note.repeat = 'yearly';
-        note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, day: 1 };
+        note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, dayOfMonth: 0 };
         note.importWarnings = [`Ordinal recurrence (${rec.occurrence} ${rec.weekday} of month) imported as first of month`];
         log(2, localize('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
       } else if (rec.type === 'interval') {
         note.repeat = 'yearly';
         note.interval = rec.intervalYears;
-        note.startDate = { year: rec.anchorYear ?? 1, month: (rec.month ?? 1) - 1, day: rec.day ?? 1 };
+        note.startDate = { year: rec.anchorYear ?? 1, month: (rec.month ?? 1) - 1, dayOfMonth: (rec.day ?? 1) - 1 };
       }
     }
-    if (!note.startDate && event.startDate) note.startDate = { year: event.startDate.year ?? 1, month: (event.startDate.month ?? 1) - 1, day: event.startDate.day ?? 1 };
+    if (!note.startDate && event.startDate) note.startDate = { year: event.startDate.year ?? 1, month: (event.startDate.month ?? 1) - 1, dayOfMonth: (event.startDate.day ?? 1) - 1 };
     if (event.duration) {
       const match = event.duration.match(/^(\d+)([dhmsw])$/);
       if (match) {
@@ -496,7 +496,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const yearZero = calendar?.years?.yearZero ?? 0;
     for (const note of notes) {
       try {
-        const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, day: 1 };
+        const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, dayOfMonth: 0 };
         const noteData = { startDate, allDay: true, repeat: note.repeat || 'never' };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {

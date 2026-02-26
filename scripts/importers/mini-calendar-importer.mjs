@@ -47,7 +47,7 @@ export default class MiniCalendarImporter extends BaseImporter {
   /**
    * Extract current date from MC data for preservation after import.
    * @param {object} data - Raw MC data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     return data.currentDate || null;
@@ -57,7 +57,7 @@ export default class MiniCalendarImporter extends BaseImporter {
    * Convert worldTime to date components using MC calendar data.
    * @param {number} worldTime - Raw world time in seconds
    * @param {object} calendar - MC calendar data
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
    */
   #worldTimeToDate(worldTime, calendar) {
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
@@ -89,7 +89,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
@@ -305,7 +305,7 @@ export default class MiniCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria reference date
    */
   #transformMoonReference(firstNewMoon = {}) {
-    return { year: firstNewMoon.year ?? 0, month: firstNewMoon.month ?? 0, day: (firstNewMoon.day ?? 0) + 1 };
+    return { year: firstNewMoon.year ?? 0, month: firstNewMoon.month ?? 0, dayOfMonth: firstNewMoon.day ?? 0 };
   }
 
   /**
@@ -319,7 +319,8 @@ export default class MiniCalendarImporter extends BaseImporter {
     let regularMonthIndex = 0;
     for (const month of months) {
       if (month.intercalary) {
-        for (let day = 1; day <= month.days; day++) festivals.push({ name: month.days === 1 ? month.name : `${month.name} (Day ${day})`, month: regularMonthIndex + 1, day, countsForWeekday: false });
+        for (let day = 0; day < month.days; day++)
+          festivals.push({ name: month.days === 1 ? month.name : `${month.name} (Day ${day + 1})`, month: regularMonthIndex, dayOfMonth: day, countsForWeekday: false });
       } else {
         regularMonthIndex++;
       }
@@ -416,7 +417,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       allNotes.push({
         name: note.title || note.name || 'Untitled',
         content: note.content || '',
-        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, day: dateObj.day ?? 0, hour: 0, minute: 0, second: 0 },
+        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: 0, minute: 0, second: 0 },
         endDate: null,
         allDay: true,
         repeat: this.#transformRepeatRule(note.repeatUnit, note.repeatInterval),
@@ -437,7 +438,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       allNotes.push({
         name: note.title || note.name || 'Untitled',
         content: note.content || '',
-        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, day: dateObj.day ?? 0, hour: 0, minute: 0, second: 0 },
+        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: 0, minute: 0, second: 0 },
         endDate: null,
         allDay: true,
         repeat: this.#transformRepeatRule(note.repeatUnit, note.repeatInterval),
@@ -499,7 +500,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     const newFestivals = [];
     for (const festival of festivals) {
       try {
-        const festivalData = { name: festival.name, month: (festival.startDate.month ?? 0) + 1, day: (festival.startDate.day ?? 0) + 1 };
+        const festivalData = { name: festival.name, month: festival.startDate.month ?? 0, dayOfMonth: festival.startDate.day ?? 0 };
 
         newFestivals.push(festivalData);
       } catch (error) {

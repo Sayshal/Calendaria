@@ -82,7 +82,7 @@ export default class ReminderScheduler {
       if (note.calendarId && note.calendarId !== activeCalendarId) continue;
       if (note.flagData.reminderOffset == null || note.flagData.reminderOffset < 0) continue;
       if (note.flagData.silent) continue;
-      const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.day}`;
+      const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth}`;
       if (this.#firedToday.has(reminderKey)) continue;
       if (this.#shouldFireReminder(note, worldTime, calendar, currentDate)) {
         this.#fireReminder(note, currentDate);
@@ -90,7 +90,7 @@ export default class ReminderScheduler {
         fired++;
       }
     }
-    if (fired > 0) log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.day} ${currentDate.hour}:${currentDate.minute}`);
+    if (fired > 0) log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth} ${currentDate.hour}:${currentDate.minute}`);
   }
 
   /**
@@ -152,7 +152,7 @@ export default class ReminderScheduler {
       return currentMinutes >= reminderMinutes;
     }
     if (todayInRange) {
-      const isFirstDay = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.day === startDate.day;
+      const isFirstDay = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.dayOfMonth === startDate.dayOfMonth;
       const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
       const eventHour = note.flagData.allDay ? 0 : isFirstDay ? (startDate.hour ?? 0) : 0;
       const eventMinute = note.flagData.allDay ? 0 : isFirstDay ? (startDate.minute ?? 0) : 0;
@@ -172,11 +172,11 @@ export default class ReminderScheduler {
    * @private
    */
   static #isDateInRange(date, startDate, endDate) {
-    const dateVal = date.year * 10000 + date.month * 100 + date.day;
-    const startVal = startDate.year * 10000 + startDate.month * 100 + startDate.day;
+    const dateVal = date.year * 10000 + date.month * 100 + date.dayOfMonth;
+    const startVal = startDate.year * 10000 + startDate.month * 100 + startDate.dayOfMonth;
     if (dateVal < startVal) return false;
     if (!endDate || !endDate.year) return dateVal === startVal;
-    const endVal = endDate.year * 10000 + endDate.month * 100 + endDate.day;
+    const endVal = endDate.year * 10000 + endDate.month * 100 + endDate.dayOfMonth;
     return dateVal <= endVal;
   }
 
@@ -190,18 +190,18 @@ export default class ReminderScheduler {
   static #getNextDay(currentDate, calendar) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInMonth = calendar.getDaysInMonth(currentDate.month, currentDate.year - yearZero);
-    let nextDay = currentDate.day + 1;
+    let nextDayOfMonth = currentDate.dayOfMonth + 1;
     let nextMonth = currentDate.month;
     let nextYear = currentDate.year;
-    if (nextDay > daysInMonth) {
-      nextDay = 1;
+    if (nextDayOfMonth >= daysInMonth) {
+      nextDayOfMonth = 0;
       nextMonth++;
       if (nextMonth >= calendar.monthsArray.length) {
         nextMonth = 0;
         nextYear++;
       }
     }
-    return { year: nextYear, month: nextMonth, day: nextDay };
+    return { year: nextYear, month: nextMonth, dayOfMonth: nextDayOfMonth };
   }
 
   /**
@@ -347,7 +347,7 @@ export default class ReminderScheduler {
    * @private
    */
   static #hasDateChanged(previous, current) {
-    return previous.year !== current.year || previous.month !== current.month || previous.day !== current.day;
+    return previous.year !== current.year || previous.month !== current.month || previous.dayOfMonth !== current.dayOfMonth;
   }
 
   /**

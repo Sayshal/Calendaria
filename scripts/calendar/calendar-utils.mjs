@@ -166,7 +166,7 @@ export function preLocalizeCalendar(calendarData) {
 export function findFestivalDay(calendar, time = game.time.worldTime) {
   if (!calendar.festivalsArray?.length) return null;
   const components = typeof time === 'number' ? calendar.timeToComponents(time) : time;
-  return calendar.festivalsArray.find((f) => f.month === components.month + 1 && f.day === components.dayOfMonth + 1) ?? null;
+  return calendar.festivalsArray.find((f) => f.month === components.month && f.dayOfMonth === components.dayOfMonth) ?? null;
 }
 
 /**

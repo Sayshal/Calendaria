@@ -52,7 +52,7 @@ export function toRomanNumeral(n) {
 /**
  * Prepared date parts passed to formatters.
  * @param {object} calendar - The calendar data
- * @param {object} components - Time components { year, month, dayOfMonth, hour, minute, second }
+ * @param {object} components - Time components { year, month, dayOfMonth (0-indexed), hour, minute, second }
  * @returns {object} - Object with all formatting parts
  */
 export function dateFormattingParts(calendar, components) {
@@ -63,7 +63,7 @@ export function dateFormattingParts(calendar, components) {
   const isMonthless = calendar?.isMonthless ?? false;
   const months = resolveArray(calendar, 'monthsArray', 'months.values');
   const monthData = isMonthless ? null : months[month];
-  const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: dayOfMonth - 1 });
+  const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
@@ -81,11 +81,11 @@ export function dateFormattingParts(calendar, components) {
     if (internalYear > 0) for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
     else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
   }
-  const totalDays = totalDaysFromPriorYears + dayOfYear - 1;
+  const totalDays = totalDaysFromPriorYears + dayOfYear;
   const firstWeekday = calendar?.years?.firstWeekday ?? 0;
-  const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
+  const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
   const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
-  const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
+  const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
   const intercalaryFromPriorYears = calendar?.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
   const nonCountingTotal = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
   const countingDays = totalDays - nonCountingTotal;
@@ -129,11 +129,11 @@ export function dateFormattingParts(calendar, components) {
     seasonIndex = allSeasons.indexOf(currentSeason);
   }
   const daysPerWeek = weekdays.length || 7;
-  const weekOfYear = Math.ceil(dayOfYear / daysPerWeek);
-  const weekOfMonth = Math.ceil(dayOfMonth / daysPerWeek);
+  const weekOfYear = Math.ceil((dayOfYear + 1) / daysPerWeek);
+  const weekOfMonth = Math.ceil((dayOfMonth + 1) / daysPerWeek);
   let namedWeek = '';
   let namedWeekAbbr = '';
-  const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 });
+  const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth });
   if (currentWeek) {
     namedWeek = currentWeek.weekName || '';
     namedWeekAbbr = currentWeek.weekAbbr || namedWeek.slice(0, 3);
@@ -155,10 +155,10 @@ export function dateFormattingParts(calendar, components) {
     MMM: monthAbbr,
     MMMM: monthName,
     Mo: isIntercalaryFestival || isMonthless ? '' : ordinal(month + 1),
-    D: isIntercalaryFestival ? '' : isMonthless ? dayOfYear : dayOfMonth,
-    DD: isIntercalaryFestival ? '' : isMonthless ? String(dayOfYear).padStart(2, '0') : String(dayOfMonth).padStart(2, '0'),
-    Do: isIntercalaryFestival ? '' : isMonthless ? ordinal(dayOfYear) : ordinal(dayOfMonth),
-    DDD: String(dayOfYear).padStart(3, '0'),
+    D: isIntercalaryFestival ? '' : isMonthless ? dayOfYear + 1 : dayOfMonth + 1,
+    DD: isIntercalaryFestival ? '' : isMonthless ? String(dayOfYear + 1).padStart(2, '0') : String(dayOfMonth + 1).padStart(2, '0'),
+    Do: isIntercalaryFestival ? '' : isMonthless ? ordinal(dayOfYear + 1) : ordinal(dayOfMonth + 1),
+    DDD: String(dayOfYear + 1).padStart(3, '0'),
     E: weekdayAbbr,
     EE: weekdayAbbr,
     EEE: weekdayAbbr,
@@ -357,10 +357,10 @@ export function formatApproximateDate(calendar, components) {
   const seasonsArray = resolveArray(calendar, 'seasonsArray', 'seasons.values');
   const seasonIdx = seasonsArray.indexOf(season);
   if (season.monthStart != null && season.monthEnd != null) {
-    seasonStart = (season.dayStart ?? 1) - 1;
-    for (let i = 0; i < season.monthStart - 1; i++) seasonStart += monthsValues[i]?.days ?? 0;
-    seasonEnd = (season.dayEnd ?? monthsValues[season.monthEnd - 1]?.days ?? 30) - 1;
-    for (let i = 0; i < season.monthEnd - 1; i++) seasonEnd += monthsValues[i]?.days ?? 0;
+    seasonStart = season.dayStart ?? 0;
+    for (let i = 0; i < season.monthStart; i++) seasonStart += monthsValues[i]?.days ?? 0;
+    seasonEnd = season.dayEnd ?? (monthsValues[season.monthEnd]?.days ?? 30) - 1;
+    for (let i = 0; i < season.monthEnd; i++) seasonEnd += monthsValues[i]?.days ?? 0;
   } else if (seasonIdx >= 0 && calendar?.seasons?.type === 'periodic' && calendar?._calculatePeriodicSeasonBounds) {
     const bounds = calendar._calculatePeriodicSeasonBounds(seasonIdx);
     seasonStart = bounds.dayStart;
@@ -562,8 +562,8 @@ function getMoonPhaseName(calendar, components) {
   if (!phasesArr.length) return '';
   const { year, month, dayOfMonth } = components;
   const cycleLength = moon.cycleLength || 29;
-  const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
-  const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
+  const refDate = moon.referenceDate || { year: 0, month: 0, dayOfMonth: 0 };
+  const refDays = refDate.year * 365 + refDate.month * 30 + (refDate.dayOfMonth ?? 0);
   const currentDays = year * 365 + month * 30 + dayOfMonth;
   const daysSinceRef = currentDays - refDays;
   const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
@@ -603,8 +603,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalComponents = {
       ...components,
-      year: components.year - yearZero,
-      dayOfMonth: (components.dayOfMonth ?? 1) - 1
+      year: components.year - yearZero
     };
     const worldTime = calendar.componentsToTime(internalComponents);
     const phaseData = calendar.getMoonPhase(moonIndex, worldTime);
@@ -615,8 +614,8 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     if (phasesArr.length) {
       const { year, month, dayOfMonth } = components;
       const cycleLength = moon.cycleLength || 29;
-      const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
-      const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
+      const refDate = moon.referenceDate || { year: 0, month: 0, dayOfMonth: 0 };
+      const refDays = refDate.year * 365 + refDate.month * 30 + (refDate.dayOfMonth ?? 0);
       const currentDays = year * 365 + month * 30 + dayOfMonth;
       const daysSinceRef = currentDays - refDays;
       const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;

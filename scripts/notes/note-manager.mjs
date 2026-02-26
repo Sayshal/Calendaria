@@ -436,12 +436,12 @@ export default class NoteManager {
    * Get all notes for a specific date.
    * @param {number} year  Year
    * @param {number} month  Month (0-indexed)
-   * @param {number} day  Day of month
+   * @param {number} dayOfMonth  Day of month (0-indexed)
    * @param {string} [calendarId]  Optional calendar ID filter (defaults to active calendar)
    * @returns {object[]}  Array of note stubs
    */
-  static getNotesForDate(year, month, day, calendarId = null) {
-    const targetDate = { year, month, day };
+  static getNotesForDate(year, month, dayOfMonth, calendarId = null) {
+    const targetDate = { year, month, dayOfMonth };
     const matchingNotes = [];
     const targetCalendarId = calendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
     for (const stub of this.#noteIndex.values()) {
@@ -667,14 +667,14 @@ export default class NoteManager {
    * Get default note data for a specific date.
    * @param {number} year  Year
    * @param {number} month  Month (0-indexed)
-   * @param {number} day  Day
+   * @param {number} dayOfMonth  Day of month (0-indexed)
    * @param {number} [hour]  Hour (optional)
    * @param {number} [minute]  Minute (optional)
    * @returns {object}  Default note data
    */
-  static getDefaultNoteDataForDate(year, month, day, hour, minute) {
+  static getDefaultNoteDataForDate(year, month, dayOfMonth, hour, minute) {
     const defaults = getDefaultNoteData();
-    defaults.startDate = { year, month, day, hour: hour ?? 0, minute: minute ?? 0 };
+    defaults.startDate = { year, month, dayOfMonth, hour: hour ?? 0, minute: minute ?? 0 };
     return defaults;
   }
 

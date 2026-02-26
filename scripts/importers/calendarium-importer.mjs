@@ -165,7 +165,7 @@ export default class CalendariumImporter extends BaseImporter {
         else if (intervals.length === 1 && !intervals[0].ignore) leapYearConfig = { rule: 'simple', interval: intervals[0].interval, start: ld.offset || 0 };
         else leapYearConfig = { rule: 'custom', pattern: this.#serializeIntervals(intervals), start: ld.offset || 0 };
       }
-      if (ld.intercalary && ld.name) festivals.push({ name: ld.name, month: (ld.timespan || 0) + 1, day: (ld.after || 0) + 1, leapYearOnly: true, countsForWeekday: !ld.numbered });
+      if (ld.intercalary && ld.name) festivals.push({ name: ld.name, month: ld.timespan || 0, dayOfMonth: ld.after || 0, leapYearOnly: true, countsForWeekday: !ld.numbered });
     }
     return { config: leapYearConfig, festivals };
   }
@@ -202,7 +202,7 @@ export default class CalendariumImporter extends BaseImporter {
       color: moon.faceColor || '',
       hidden: false,
       phases: this.#generateMoonPhases(),
-      referenceDate: { year: 1, month: 0, day: 1 }
+      referenceDate: { year: 1, month: 0, dayOfMonth: 0 }
     }));
   }
 
@@ -307,14 +307,14 @@ export default class CalendariumImporter extends BaseImporter {
   /**
    * Extract current date from Calendarium data for preservation after import.
    * @param {object} data - Raw Calendarium data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     const normalizedData = CalendariumImporter.normalizeData(data);
     const calendar = normalizedData.calendars?.[0];
     const current = calendar?.current;
     if (!current || (current.year === undefined && current.year !== 0)) return null;
-    return { year: current.year, month: current.month ?? 0, day: current.day ?? 1, hour: 0, minute: 0 };
+    return { year: current.year, month: current.month ?? 0, dayOfMonth: current.day ?? 0, hour: 0, minute: 0 };
   }
 
   /**
@@ -324,7 +324,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #transformCurrentDate(current = {}) {
     if (!current.year && current.year !== 0) return null;
-    return { year: current.year, month: current.month ?? 0, day: current.day ?? 1, hour: 0, minute: 0 };
+    return { year: current.year, month: current.month ?? 0, dayOfMonth: current.day ?? 0, hour: 0, minute: 0 };
   }
 
   /**
@@ -363,7 +363,7 @@ export default class CalendariumImporter extends BaseImporter {
       return {
         name,
         content: description || '',
-        startDate: { year: date.year, month: date.month ?? 0, day: date.day ?? 1 },
+        startDate: { year: date.year, month: date.month ?? 0, dayOfMonth: date.day ?? 0 },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -375,8 +375,8 @@ export default class CalendariumImporter extends BaseImporter {
       return {
         name,
         content: description || '',
-        startDate: { year: date.start?.year ?? date.year ?? 0, month: date.start?.month ?? date.month ?? 0, day: date.start?.day ?? date.day ?? 1 },
-        endDate: { year: date.end?.year ?? date.year ?? 0, month: date.end?.month ?? date.month ?? 0, day: date.end?.day ?? date.day ?? 1 },
+        startDate: { year: date.start?.year ?? date.year ?? 0, month: date.start?.month ?? date.month ?? 0, dayOfMonth: (date.start?.day ?? date.day ?? 1) - 1 },
+        endDate: { year: date.end?.year ?? date.year ?? 0, month: date.end?.month ?? date.month ?? 0, dayOfMonth: (date.end?.day ?? date.day ?? 1) - 1 },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -403,7 +403,7 @@ export default class CalendariumImporter extends BaseImporter {
     return {
       name,
       content: description || '',
-      startDate: { year: date?.year ?? 0, month: date?.month ?? 0, day: date?.day ?? 1 },
+      startDate: { year: date?.year ?? 0, month: date?.month ?? 0, dayOfMonth: (date?.day ?? 1) - 1 },
       repeat: 'never',
       gmOnly: false,
       category: categoryData?.name || 'default',
@@ -422,9 +422,13 @@ export default class CalendariumImporter extends BaseImporter {
     const yearIsRange = Array.isArray(year);
     const monthIsRange = Array.isArray(month);
     const dayIsRange = Array.isArray(day);
-    if (yearIsRange && year[0] === null && year[1] === null && !monthIsRange && !dayIsRange) return { repeat: 'yearly', startDate: { year: 1, month: month ?? 0, day: day ?? 1 } };
-    if (yearIsRange && monthIsRange && !dayIsRange && year[0] === null && month[0] === null) return { repeat: 'monthly', startDate: { year: 1, month: 0, day: day ?? 1 } };
-    return { repeat: 'range', rangePattern: { year, month, day }, startDate: { year: this.#extractFirst(year), month: this.#extractFirst(month), day: this.#extractFirst(day) } };
+    if (yearIsRange && year[0] === null && year[1] === null && !monthIsRange && !dayIsRange) return { repeat: 'yearly', startDate: { year: 1, month: month ?? 0, dayOfMonth: (day ?? 1) - 1 } };
+    if (yearIsRange && monthIsRange && !dayIsRange && year[0] === null && month[0] === null) return { repeat: 'monthly', startDate: { year: 1, month: 0, dayOfMonth: (day ?? 1) - 1 } };
+    return {
+      repeat: 'range',
+      rangePattern: { year, month, dayOfMonth: day },
+      startDate: { year: this.#extractFirst(year), month: this.#extractFirst(month), dayOfMonth: (this.#extractFirst(day) ?? 1) - 1 }
+    };
   }
 
   /**

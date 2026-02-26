@@ -15,7 +15,7 @@
             {{#each this.days}}
               <div
                 class="calendar-day intercalary festival-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}"
-                data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-action="selectDay"
+                data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}" data-action="selectDay"
                 data-tooltip-html="{{{dayTooltip}}}" {{#if festivalColor}}style="--festival-color: {{festivalColor}}"
                 {{/if}}>
                 <div class="day-number">
@@ -57,7 +57,7 @@
                   {{/each}}
                   {{#if ../../canAddNotes}}
                     <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                      data-month="{{month}}" data-day="{{day}}" data-tooltip
+                      data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
                       aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
                       <i class="fas fa-plus"></i>
                     </button>
@@ -75,13 +75,13 @@
                 <div class="calendar-day empty"></div>
               {{else if isFromOtherMonth}}
                 <div class="calendar-day other-month{{#if isToday}} today{{/if}}" data-action="navigateToMonth"
-                  data-year="{{year}}" data-month="{{month}}" data-day="{{day}}">
+                  data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}">
                   <div class="day-number">{{day}}</div>
                 </div>
               {{else}}
                 <div
                   class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
-                  data-year="{{year}}" data-month="{{month}}" data-day="{{day}}" data-action="selectDay"
+                  data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}" data-action="selectDay"
                   data-tooltip-html="{{{dayTooltip}}}" {{#if festivalColor}}style="--festival-color: {{festivalColor}}"
                   {{/if}}>
                   <div class="day-number">
@@ -129,7 +129,7 @@
                     {{/each}}
                     {{#if ../../canAddNotes}}
                       <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                        data-month="{{month}}" data-day="{{day}}" data-tooltip
+                        data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
                         aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
                         <i class="fas fa-plus"></i>
                       </button>

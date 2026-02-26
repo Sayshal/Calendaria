@@ -97,8 +97,8 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     return timepoints.map((tp) => {
       const components = calendar.timeToComponents(tp.worldTime);
       const yearZero = calendar.years?.yearZero ?? 0;
-      const formattedDate = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudDate');
-      const formattedTime = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'hudTime');
+      const formattedDate = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'hudDate');
+      const formattedTime = formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'hudTime');
       return { ...tp, formattedDate, formattedTime, isEditing: tp.id === this.#editingTimepointId };
     });
   }

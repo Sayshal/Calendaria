@@ -61,7 +61,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * Extract current date from SC data for preservation after import.
    * @param {object} data - Raw SC data
    * @param {number} [calendarIndex] - Index of calendar to extract date from
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data, calendarIndex = 0) {
     if (data.currentDate) return data.currentDate;
@@ -72,7 +72,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       const secondsPerHour = (calendar.time?.minutesInHour ?? 60) * (calendar.time?.secondsInMinute ?? 60);
       const hour = Math.floor((cd.seconds ?? 0) / secondsPerHour);
       const minute = Math.floor(((cd.seconds ?? 0) % secondsPerHour) / (calendar.time?.secondsInMinute ?? 60));
-      return { year: cd.year, month: cd.month, day: (cd.day ?? 0) + 1, hour, minute };
+      return { year: cd.year, month: cd.month, dayOfMonth: cd.day ?? 0, hour, minute };
     }
     return null;
   }
@@ -81,7 +81,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * Convert worldTime to date components using SC calendar data.
    * @param {number} worldTime - Raw world time in seconds
    * @param {object} calendar - SC calendar data
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
    */
   #worldTimeToDate(worldTime, calendar) {
     const hoursPerDay = calendar.time?.hoursInDay ?? 24;
@@ -113,7 +113,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
@@ -310,7 +310,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria reference date
    */
   #transformMoonReference(firstNewMoon = {}) {
-    return { year: firstNewMoon.year ?? 0, month: firstNewMoon.month ?? 0, day: firstNewMoon.day ?? 0 };
+    return { year: firstNewMoon.year ?? 0, month: firstNewMoon.month ?? 0, dayOfMonth: firstNewMoon.day ?? 0 };
   }
 
   /**
@@ -324,8 +324,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
     for (const month of months) {
       if (month.intercalary) {
         const countsForWeekday = month.intercalaryInclude === true;
-        for (let day = 1; day <= month.numberOfDays; day++) {
-          festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, month: regularMonthIndex + 1, day, countsForWeekday });
+        for (let day = 0; day < month.numberOfDays; day++) {
+          festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day + 1})`, month: regularMonthIndex, dayOfMonth: day, countsForWeekday });
         }
       } else {
         regularMonthIndex++;
@@ -445,8 +445,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const newFestivals = [];
     for (const festival of festivals) {
       try {
-        const festivalData = { name: festival.name, month: (festival.startDate.month ?? 0) + 1, day: (festival.startDate.day ?? 0) + 1 };
-        log(3, `Adding festival: ${festivalData.name} on ${festivalData.month}/${festivalData.day}`);
+        const festivalData = { name: festival.name, month: festival.startDate.month ?? 0, dayOfMonth: festival.startDate.day ?? 0 };
+        log(3, `Adding festival: ${festivalData.name} on ${festivalData.month}/${festivalData.dayOfMonth}`);
         newFestivals.push(festivalData);
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);
@@ -472,7 +472,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object} Calendaria date object
    */
   #transformNoteDate(date = {}) {
-    return { year: date.year ?? 0, month: date.month ?? 0, day: date.day ?? 0, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 };
+    return { year: date.year ?? 0, month: date.month ?? 0, dayOfMonth: date.day ?? 0, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 };
   }
 
   /**

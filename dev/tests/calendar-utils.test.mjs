@@ -35,8 +35,8 @@ const mockCalendar = addCalendarGetters({
     yearZero: 0
   },
   festivals: [
-    { name: 'New Year', month: 1, day: 1 },
-    { name: 'Festival Day', month: 2, day: 15 }
+    { name: 'New Year', month: 0, dayOfMonth: 0 },
+    { name: 'Festival Day', month: 1, dayOfMonth: 14 }
   ],
   timeToComponents: vi.fn((_time) => ({
     year: 2024,
@@ -110,10 +110,9 @@ describe('findFestivalDay()', () => {
   });
 
   it('finds matching festival by components', () => {
-    // Festival is month: 1 (1-indexed), day: 1 (1-indexed)
-    // Components are month: 0 (0-indexed), dayOfMonth: 0 (0-indexed)
+    // Festival and components are both 0-indexed
     const result = findFestivalDay(mockCalendar, { month: 0, dayOfMonth: 0 });
-    expect(result).toEqual({ name: 'New Year', month: 1, day: 1 });
+    expect(result).toEqual({ name: 'New Year', month: 0, dayOfMonth: 0 });
   });
 
   it('returns null when no festival matches', () => {
@@ -122,9 +121,9 @@ describe('findFestivalDay()', () => {
   });
 
   it('finds festival in later month', () => {
-    // Festival is month: 2 (Feb), day: 15
+    // Festival is month: 1 (Feb, 0-indexed), dayOfMonth: 14 (0-indexed)
     const result = findFestivalDay(mockCalendar, { month: 1, dayOfMonth: 14 });
-    expect(result).toEqual({ name: 'Festival Day', month: 2, day: 15 });
+    expect(result).toEqual({ name: 'Festival Day', month: 1, dayOfMonth: 14 });
   });
 });
 

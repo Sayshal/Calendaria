@@ -185,10 +185,12 @@ beforeEach(() => {
 /* -------------------------------------------- */
 
 describe('getCurrentDateTime', () => {
-  it('returns components with yearZero = 0 when no calendar', () => {
+  it('returns 1-indexed month and day with yearZero = 0 when no calendar', () => {
     CalendarManager.getActiveCalendar.mockReturnValue(null);
     const result = CalendariaAPI.getCurrentDateTime();
     expect(result.year).toBe(1);
+    expect(result.month).toBe(1); // internal month 0 → API month 1
+    expect(result.day).toBe(1); // internal dayOfMonth 0 → API day 1
     expect(result.hour).toBe(12);
   });
 
@@ -196,12 +198,16 @@ describe('getCurrentDateTime', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({ years: { yearZero: 1000 } });
     const result = CalendariaAPI.getCurrentDateTime();
     expect(result.year).toBe(1001);
+    expect(result.month).toBe(1);
+    expect(result.day).toBe(1);
   });
 
   it('defaults yearZero to 0 when calendar.years is undefined', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({});
     const result = CalendariaAPI.getCurrentDateTime();
     expect(result.year).toBe(1);
+    expect(result.month).toBe(1);
+    expect(result.day).toBe(1);
   });
 });
 
@@ -249,14 +255,16 @@ describe('setDateTime', () => {
     expect(result).toBe(42);
   });
 
-  it('subtracts yearZero from year for internal components', async () => {
+  it('subtracts yearZero from year and converts 1-indexed month/day to 0-indexed', async () => {
     canChangeDateTime.mockReturnValue(true);
     CalendarManager.getActiveCalendar.mockReturnValue({ years: { yearZero: 1000 } });
     game.time.set.mockResolvedValue(999);
-    await CalendariaAPI.setDateTime({ year: 1005, month: 2 });
+    await CalendariaAPI.setDateTime({ year: 1005, month: 3, day: 15 });
     const args = game.time.set.mock.calls[0][0];
     expect(args.year).toBe(5);
-    expect(args.month).toBe(2);
+    expect(args.month).toBe(2); // API month 3 → internal month 2
+    expect(args.dayOfMonth).toBe(14); // API day 15 → internal dayOfMonth 14
+    expect(args.day).toBeUndefined(); // day property deleted in favor of dayOfMonth
   });
 
   it('emits socket for non-GM users', async () => {
@@ -276,14 +284,14 @@ describe('setDateTime', () => {
 describe('jumpToDate', () => {
   it('shows error when permission denied', async () => {
     canChangeDateTime.mockReturnValue(false);
-    await CalendariaAPI.jumpToDate({ year: 5, month: 0, day: 1 });
+    await CalendariaAPI.jumpToDate({ year: 5, month: 1, day: 1 });
     expect(ui.notifications.error).toHaveBeenCalled();
   });
 
   it('warns when no active calendar', async () => {
     canChangeDateTime.mockReturnValue(true);
     CalendarManager.getActiveCalendar.mockReturnValue(null);
-    await CalendariaAPI.jumpToDate({ year: 5, month: 0, day: 1 });
+    await CalendariaAPI.jumpToDate({ year: 5, month: 1, day: 1 });
     expect(ui.notifications.warn).toHaveBeenCalled();
   });
 
@@ -291,16 +299,22 @@ describe('jumpToDate', () => {
     canChangeDateTime.mockReturnValue(true);
     CalendarManager.getActiveCalendar.mockReturnValue({});
     game.user.isGM = false;
-    await CalendariaAPI.jumpToDate({ year: 5, month: 0, day: 1 });
-    expect(CalendariaSocket.emit).toHaveBeenCalledWith('timeRequest', expect.objectContaining({ action: 'jump' }));
+    await CalendariaAPI.jumpToDate({ year: 1492, month: 1, day: 1 });
+    expect(CalendariaSocket.emit).toHaveBeenCalledWith(
+      'timeRequest',
+      expect.objectContaining({
+        action: 'jump',
+        date: { year: 1492, month: 0, dayOfMonth: 0 }
+      })
+    );
   });
 
-  it('calls calendar.jumpToDate for GM users', async () => {
+  it('calls calendar.jumpToDate with 0-indexed month and dayOfMonth', async () => {
     canChangeDateTime.mockReturnValue(true);
     const cal = { jumpToDate: vi.fn() };
     CalendarManager.getActiveCalendar.mockReturnValue(cal);
-    await CalendariaAPI.jumpToDate({ year: 5, month: 0, day: 1 });
-    expect(cal.jumpToDate).toHaveBeenCalledWith({ year: 5, month: 0, day: 1 });
+    await CalendariaAPI.jumpToDate({ year: 1492, month: 1, day: 1 });
+    expect(cal.jumpToDate).toHaveBeenCalledWith({ year: 1492, month: 0, dayOfMonth: 0 });
   });
 });
 
@@ -713,11 +727,15 @@ describe('formatDate', () => {
     expect(result).toBe('1 January 1000');
   });
 
-  it('uses formatCustom when a custom format string is given', () => {
+  it('uses formatCustom with 1-indexed input converted to 0-indexed', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({ years: { yearZero: 0 } });
-    const result = CalendariaAPI.formatDate({ year: 5, month: 2, day: 10 }, '{YYYY}-{MM}-{DD}');
+    const result = CalendariaAPI.formatDate({ year: 5, month: 3, day: 10 }, '{YYYY}-{MM}-{DD}');
     expect(resolveFormatString).toHaveBeenCalledWith('{YYYY}-{MM}-{DD}');
     expect(formatCustom).toHaveBeenCalled();
+    // Verify formatCustom received 0-indexed values
+    const formattedArg = formatCustom.mock.calls[0][1];
+    expect(formattedArg.month).toBe(2); // API month 3 → internal month 2
+    expect(formattedArg.dayOfMonth).toBe(9); // API day 10 → internal dayOfMonth 9
     expect(result).toBe('formatted');
   });
 });
@@ -790,27 +808,27 @@ describe('note operations', () => {
     expect(result).toHaveLength(1);
   });
 
-  it('getNotesForDate delegates to NoteManager', () => {
+  it('getNotesForDate converts 1-indexed month and day to 0-indexed', () => {
     NoteManager.getNotesForDate.mockReturnValue([{ id: '1' }]);
-    CalendariaAPI.getNotesForDate(1000, 2, 15);
-    expect(NoteManager.getNotesForDate).toHaveBeenCalledWith(1000, 2, 15);
+    CalendariaAPI.getNotesForDate(2024, 1, 15);
+    expect(NoteManager.getNotesForDate).toHaveBeenCalledWith(2024, 0, 14);
   });
 
-  it('getNotesForMonth calls getNotesInRange with month bounds', () => {
+  it('getNotesForMonth converts 1-indexed month and uses dayOfMonth bounds', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({
       years: { yearZero: 0 },
       getDaysInMonth: vi.fn(() => 31),
       monthsArray: [{ days: 31 }]
     });
-    CalendariaAPI.getNotesForMonth(1000, 0);
-    expect(NoteManager.getNotesInRange).toHaveBeenCalledWith({ year: 1000, month: 0, day: 1 }, { year: 1000, month: 0, day: 31 });
+    CalendariaAPI.getNotesForMonth(2024, 1);
+    expect(NoteManager.getNotesInRange).toHaveBeenCalledWith({ year: 2024, month: 0, dayOfMonth: 0 }, { year: 2024, month: 0, dayOfMonth: 30 });
   });
 
-  it('getNotesInRange delegates to NoteManager', () => {
-    const start = { year: 1, month: 0, day: 1 };
-    const end = { year: 1, month: 0, day: 30 };
+  it('getNotesInRange converts 1-indexed month and day to 0-indexed', () => {
+    const start = { year: 1, month: 1, day: 1 };
+    const end = { year: 1, month: 1, day: 30 };
     CalendariaAPI.getNotesInRange(start, end);
-    expect(NoteManager.getNotesInRange).toHaveBeenCalledWith(start, end);
+    expect(NoteManager.getNotesInRange).toHaveBeenCalledWith({ year: 1, month: 0, day: 1, dayOfMonth: 0 }, { year: 1, month: 0, day: 30, dayOfMonth: 29 });
   });
 
   it('getNotesByCategory delegates to NoteManager', () => {
@@ -839,19 +857,21 @@ describe('note operations', () => {
 describe('createNote', () => {
   it('returns null when permission denied', async () => {
     canAddNotes.mockReturnValue(false);
-    const result = await CalendariaAPI.createNote({ name: 'Test', startDate: { year: 1, month: 0, day: 1 } });
+    const result = await CalendariaAPI.createNote({ name: 'Test', startDate: { year: 1, month: 1, day: 1 } });
     expect(result).toBeNull();
     expect(ui.notifications.error).toHaveBeenCalled();
   });
 
-  it('creates note with defaults', async () => {
+  it('creates note with defaults, converting 1-indexed month/day to 0-indexed', async () => {
     canAddNotes.mockReturnValue(true);
     NoteManager.createNote.mockResolvedValue({ id: 'new' });
-    const result = await CalendariaAPI.createNote({ name: 'Test', startDate: { year: 1, month: 0, day: 1 } });
+    const result = await CalendariaAPI.createNote({ name: 'Test', startDate: { year: 1, month: 1, day: 1 } });
     expect(result).toEqual({ id: 'new' });
     const call = NoteManager.createNote.mock.calls[0][0];
     expect(call.name).toBe('Test');
     expect(call.content).toBe('');
+    expect(call.noteData.startDate.month).toBe(0); // API month 1 → internal 0
+    expect(call.noteData.startDate.dayOfMonth).toBe(0); // API day 1 → internal 0
     expect(call.noteData.allDay).toBe(true);
     expect(call.noteData.repeat).toBe('never');
     expect(call.noteData.icon).toBe('fas fa-calendar-day');
@@ -859,14 +879,14 @@ describe('createNote', () => {
     expect(call.noteData.gmOnly).toBe(false);
   });
 
-  it('passes all custom options', async () => {
+  it('passes all custom options with 1-indexed to 0-indexed conversion', async () => {
     canAddNotes.mockReturnValue(true);
     NoteManager.createNote.mockResolvedValue({});
     await CalendariaAPI.createNote({
       name: 'Event',
       content: '<p>Details</p>',
-      startDate: { year: 1, month: 0, day: 1, hour: 10, minute: 30 },
-      endDate: { year: 1, month: 0, day: 2, hour: 14, minute: 0 },
+      startDate: { year: 1, month: 3, day: 15, hour: 10, minute: 30 },
+      endDate: { year: 1, month: 3, day: 16, hour: 14, minute: 0 },
       allDay: false,
       repeat: 'weekly',
       categories: ['quest'],
@@ -875,7 +895,11 @@ describe('createNote', () => {
       gmOnly: true
     });
     const call = NoteManager.createNote.mock.calls[0][0];
+    expect(call.noteData.startDate.month).toBe(2); // API month 3 → internal 2
+    expect(call.noteData.startDate.dayOfMonth).toBe(14); // API day 15 → internal 14
     expect(call.noteData.startDate.hour).toBe(10);
+    expect(call.noteData.endDate.month).toBe(2); // API month 3 → internal 2
+    expect(call.noteData.endDate.dayOfMonth).toBe(15); // API day 16 → internal 15
     expect(call.noteData.endDate.hour).toBe(14);
     expect(call.noteData.allDay).toBe(false);
     expect(call.noteData.repeat).toBe('weekly');
@@ -1054,7 +1078,7 @@ describe('timestampToDate', () => {
     expect(CalendariaAPI.timestampToDate(1000)).toBeNull();
   });
 
-  it('converts timestamp with yearZero adjustment', () => {
+  it('converts timestamp with yearZero adjustment and returns 1-indexed month/day', () => {
     const cal = {
       years: { yearZero: 1000 },
       timeToComponents: vi.fn(() => ({ year: 5, month: 2, dayOfMonth: 9, hour: 14, minute: 30 }))
@@ -1063,17 +1087,18 @@ describe('timestampToDate', () => {
     const result = CalendariaAPI.timestampToDate(86400);
     expect(cal.timeToComponents).toHaveBeenCalledWith(86400);
     expect(result.year).toBe(1005);
-    expect(result.day).toBe(10);
+    expect(result.month).toBe(3); // internal month 2 → API month 3
+    expect(result.day).toBe(10); // internal dayOfMonth 9 → API day 10
   });
 });
 
 describe('dateToTimestamp', () => {
   it('returns 0 when no calendar is active', () => {
     CalendarManager.getActiveCalendar.mockReturnValue(null);
-    expect(CalendariaAPI.dateToTimestamp({ year: 1000, month: 0, day: 1 })).toBe(0);
+    expect(CalendariaAPI.dateToTimestamp({ year: 1000, month: 1, day: 1 })).toBe(0);
   });
 
-  it('calls componentsToTime with yearZero subtracted', () => {
+  it('converts 1-indexed month/day to 0-indexed and subtracts yearZero', () => {
     const cal = {
       years: { yearZero: 1000 },
       monthsArray: [{ days: 30 }, { days: 28 }],
@@ -1081,10 +1106,12 @@ describe('dateToTimestamp', () => {
       componentsToTime: vi.fn(() => 999)
     };
     CalendarManager.getActiveCalendar.mockReturnValue(cal);
-    const result = CalendariaAPI.dateToTimestamp({ year: 1005, month: 1, day: 15 });
+    const result = CalendariaAPI.dateToTimestamp({ year: 1005, month: 2, day: 15 });
     expect(cal.componentsToTime).toHaveBeenCalled();
     const args = cal.componentsToTime.mock.calls[0][0];
     expect(args.year).toBe(5);
+    expect(args.month).toBe(1); // API month 2 → internal month 1
+    expect(args.dayOfMonth).toBe(14); // API day 15 → internal dayOfMonth 14
     expect(result).toBe(999);
   });
 });
@@ -1094,7 +1121,7 @@ describe('dateToTimestamp', () => {
 /* -------------------------------------------- */
 
 describe('chooseRandomDate', () => {
-  it('generates a date between start and end timestamps', () => {
+  it('generates a date between start and end timestamps using 1-indexed input', () => {
     const cal = {
       years: { yearZero: 0 },
       monthsArray: [{ days: 30 }],
@@ -1103,7 +1130,7 @@ describe('chooseRandomDate', () => {
       timeToComponents: vi.fn(() => ({ year: 1, month: 5, dayOfMonth: 14, hour: 0, minute: 0 }))
     };
     CalendarManager.getActiveCalendar.mockReturnValue(cal);
-    const result = CalendariaAPI.chooseRandomDate({ year: 1, month: 0, day: 1 }, { year: 2, month: 0, day: 1 });
+    const result = CalendariaAPI.chooseRandomDate({ year: 1, month: 1, day: 1 }, { year: 2, month: 1, day: 1 });
     expect(result).toHaveProperty('year');
     expect(result).toHaveProperty('month');
     expect(result).toHaveProperty('day');
@@ -1349,14 +1376,14 @@ describe('weather methods', () => {
     expect(WeatherManager.getForecast).toHaveBeenCalledWith({ days: 3, accuracy: undefined });
   });
 
-  it('getWeatherForDate delegates to WeatherManager', () => {
-    CalendariaAPI.getWeatherForDate(1000, 2, 15, 'zone-1');
-    expect(WeatherManager.getWeatherForDate).toHaveBeenCalledWith(1000, 2, 15, 'zone-1');
+  it('getWeatherForDate converts 1-indexed month and day to 0-indexed', () => {
+    CalendariaAPI.getWeatherForDate(2024, 1, 15, 'zone-1');
+    expect(WeatherManager.getWeatherForDate).toHaveBeenCalledWith(2024, 0, 14, 'zone-1');
   });
 
-  it('getWeatherHistory delegates to WeatherManager', () => {
+  it('getWeatherHistory converts 1-indexed month to 0-indexed', () => {
     CalendariaAPI.getWeatherHistory({ year: 1000, month: 2 });
-    expect(WeatherManager.getWeatherHistory).toHaveBeenCalledWith({ year: 1000, month: 2 });
+    expect(WeatherManager.getWeatherHistory).toHaveBeenCalledWith({ year: 1000, month: 1 });
   });
 
   it('getActiveZone delegates to WeatherManager', () => {
@@ -1475,58 +1502,62 @@ describe('getters', () => {
 /*  Date arithmetic delegations                  */
 /* -------------------------------------------- */
 
-describe('date arithmetic delegations', () => {
-  const d1 = { year: 1, month: 0, day: 1 };
-  const d2 = { year: 1, month: 0, day: 10 };
+describe('date arithmetic delegations (converts 1-indexed API to 0-indexed internal)', () => {
+  // Public API format: month/day are 1-indexed
+  const d1 = { year: 1, month: 1, day: 1 };
+  const d2 = { year: 1, month: 1, day: 10 };
+  // Expected internal format after toInternal(): month/dayOfMonth 0-indexed
+  const d1Internal = { year: 1, month: 0, dayOfMonth: 0 };
+  const d2Internal = { year: 1, month: 0, dayOfMonth: 9 };
 
-  it('addDays delegates to date-utils', () => {
+  it('addDays converts to internal before delegating', () => {
     CalendariaAPI.addDays(d1, 5);
-    expect(addDays).toHaveBeenCalledWith(d1, 5);
+    expect(addDays).toHaveBeenCalledWith(d1Internal, 5);
   });
 
-  it('addMonths delegates to date-utils', () => {
+  it('addMonths converts to internal before delegating', () => {
     CalendariaAPI.addMonths(d1, 3);
-    expect(addMonths).toHaveBeenCalledWith(d1, 3);
+    expect(addMonths).toHaveBeenCalledWith(d1Internal, 3);
   });
 
-  it('addYears delegates to date-utils', () => {
+  it('addYears converts to internal before delegating', () => {
     CalendariaAPI.addYears(d1, 2);
-    expect(addYears).toHaveBeenCalledWith(d1, 2);
+    expect(addYears).toHaveBeenCalledWith(d1Internal, 2);
   });
 
-  it('daysBetween delegates to date-utils', () => {
+  it('daysBetween converts to internal before delegating', () => {
     CalendariaAPI.daysBetween(d1, d2);
-    expect(daysBetween).toHaveBeenCalledWith(d1, d2);
+    expect(daysBetween).toHaveBeenCalledWith(d1Internal, d2Internal);
   });
 
-  it('monthsBetween delegates to date-utils', () => {
+  it('monthsBetween converts to internal before delegating', () => {
     CalendariaAPI.monthsBetween(d1, d2);
-    expect(monthsBetween).toHaveBeenCalledWith(d1, d2);
+    expect(monthsBetween).toHaveBeenCalledWith(d1Internal, d2Internal);
   });
 
-  it('compareDates delegates to date-utils', () => {
+  it('compareDates converts to internal before delegating', () => {
     CalendariaAPI.compareDates(d1, d2);
-    expect(compareDates).toHaveBeenCalledWith(d1, d2);
+    expect(compareDates).toHaveBeenCalledWith(d1Internal, d2Internal);
   });
 
-  it('compareDays delegates to date-utils', () => {
+  it('compareDays converts to internal before delegating', () => {
     CalendariaAPI.compareDays(d1, d2);
-    expect(compareDays).toHaveBeenCalledWith(d1, d2);
+    expect(compareDays).toHaveBeenCalledWith(d1Internal, d2Internal);
   });
 
-  it('isSameDay delegates to date-utils', () => {
+  it('isSameDay converts to internal before delegating', () => {
     CalendariaAPI.isSameDay(d1, d2);
-    expect(isSameDay).toHaveBeenCalledWith(d1, d2);
+    expect(isSameDay).toHaveBeenCalledWith(d1Internal, d2Internal);
   });
 
-  it('dayOfWeek delegates to date-utils', () => {
+  it('dayOfWeek converts to internal before delegating', () => {
     CalendariaAPI.dayOfWeek(d1);
-    expect(dayOfWeek).toHaveBeenCalledWith(d1);
+    expect(dayOfWeek).toHaveBeenCalledWith(d1Internal);
   });
 
-  it('isValidDate delegates to date-utils', () => {
+  it('isValidDate converts to internal before delegating', () => {
     CalendariaAPI.isValidDate(d1);
-    expect(isValidDate).toHaveBeenCalledWith(d1);
+    expect(isValidDate).toHaveBeenCalledWith(d1Internal);
   });
 });
 

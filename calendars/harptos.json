@@ -1,150 +1,378 @@
 {
-  "id"            : "harptos",
-  "name"          : "CALENDARIA.Calendar.Harptos.Name",
-  "years"         : { "yearZero": 1501, "firstWeekday": 0, "leapYear": {"leapStart": 0, "leapInterval": 4} },
-  "months"        : {
-    "values": {
-      "hammer0000000000": {"name": "Hammer",    "abbreviation": "Ham",  "ordinal":  1, "days": 31                },
-      "alturiak00000000": {"name": "Alturiak",  "abbreviation": "Alt",  "ordinal":  2, "days": 30                },
-      "ches000000000000": {"name": "Ches",      "abbreviation": "Ches", "ordinal":  3, "days": 30                },
-      "tarsakh000000000": {"name": "Tarsakh",   "abbreviation": "Tar",  "ordinal":  4, "days": 31                },
-      "mirtul0000000000": {"name": "Mirtul",    "abbreviation": "Mirt", "ordinal":  5, "days": 30                },
-      "kythorn000000000": {"name": "Kythorn",   "abbreviation": "Kyth", "ordinal":  6, "days": 30                },
-      "flamerule0000000": {"name": "Flamerule", "abbreviation": "Flam", "ordinal":  7, "days": 31, "leapDays": 32},
-      "eleasis000000000": {"name": "Eleasis",   "abbreviation": "Ele",  "ordinal":  8, "days": 30                },
-      "eleint0000000000": {"name": "Eleint",    "abbreviation": "Elei", "ordinal":  9, "days": 31                },
-      "marpenoth0000000": {"name": "Marpenoth", "abbreviation": "Marp", "ordinal": 10, "days": 30                },
-      "uktar00000000000": {"name": "Uktar",     "abbreviation": "Ukt",  "ordinal": 11, "days": 31                },
-      "nightal000000000": {"name": "Nightal",   "abbreviation": "Nigh", "ordinal": 12, "days": 30                }
+  "id": "harptos",
+  "name": "CALENDARIA.Calendar.Harptos.Name",
+  "years": {
+    "yearZero": 1501,
+    "firstWeekday": 0,
+    "leapYear": {
+      "leapStart": 0,
+      "leapInterval": 4
     }
   },
-  "days"          : {
-    "values"          : {
-      "onesday000000000": {"name": "Onesday",   "ordinal":  1, "abbreviation": "1" },
-      "twosday000000000": {"name": "Twosday",   "ordinal":  2, "abbreviation": "2" },
-      "threesday0000000": {"name": "Threesday", "ordinal":  3, "abbreviation": "3" },
-      "foursday00000000": {"name": "Foursday",  "ordinal":  4, "abbreviation": "4" },
-      "fivesday00000000": {"name": "Fivesday",  "ordinal":  5, "abbreviation": "5" },
-      "sixday0000000000": {"name": "Sixday",    "ordinal":  6, "abbreviation": "6" },
-      "sevensday0000000": {"name": "Sevensday", "ordinal":  7, "abbreviation": "7" },
-      "eightsday0000000": {"name": "Eightsday", "ordinal":  8, "abbreviation": "8" },
-      "ninesday00000000": {"name": "Ninesday",  "ordinal":  9, "abbreviation": "9" },
-      "tensday000000000": {"name": "Tensday",   "ordinal": 10, "abbreviation": "10"}
+  "months": {
+    "values": {
+      "hammer0000000000": {
+        "name": "Hammer",
+        "abbreviation": "Ham",
+        "ordinal": 1,
+        "days": 31
+      },
+      "alturiak00000000": {
+        "name": "Alturiak",
+        "abbreviation": "Alt",
+        "ordinal": 2,
+        "days": 30
+      },
+      "ches000000000000": {
+        "name": "Ches",
+        "abbreviation": "Ches",
+        "ordinal": 3,
+        "days": 30
+      },
+      "tarsakh000000000": {
+        "name": "Tarsakh",
+        "abbreviation": "Tar",
+        "ordinal": 4,
+        "days": 31
+      },
+      "mirtul0000000000": {
+        "name": "Mirtul",
+        "abbreviation": "Mirt",
+        "ordinal": 5,
+        "days": 30
+      },
+      "kythorn000000000": {
+        "name": "Kythorn",
+        "abbreviation": "Kyth",
+        "ordinal": 6,
+        "days": 30
+      },
+      "flamerule0000000": {
+        "name": "Flamerule",
+        "abbreviation": "Flam",
+        "ordinal": 7,
+        "days": 31,
+        "leapDays": 32
+      },
+      "eleasis000000000": {
+        "name": "Eleasis",
+        "abbreviation": "Ele",
+        "ordinal": 8,
+        "days": 30
+      },
+      "eleint0000000000": {
+        "name": "Eleint",
+        "abbreviation": "Elei",
+        "ordinal": 9,
+        "days": 31
+      },
+      "marpenoth0000000": {
+        "name": "Marpenoth",
+        "abbreviation": "Marp",
+        "ordinal": 10,
+        "days": 30
+      },
+      "uktar00000000000": {
+        "name": "Uktar",
+        "abbreviation": "Ukt",
+        "ordinal": 11,
+        "days": 31
+      },
+      "nightal000000000": {
+        "name": "Nightal",
+        "abbreviation": "Nigh",
+        "ordinal": 12,
+        "days": 30
+      }
+    }
+  },
+  "days": {
+    "values": {
+      "onesday000000000": {
+        "name": "Onesday",
+        "ordinal": 1,
+        "abbreviation": "1"
+      },
+      "twosday000000000": {
+        "name": "Twosday",
+        "ordinal": 2,
+        "abbreviation": "2"
+      },
+      "threesday0000000": {
+        "name": "Threesday",
+        "ordinal": 3,
+        "abbreviation": "3"
+      },
+      "foursday00000000": {
+        "name": "Foursday",
+        "ordinal": 4,
+        "abbreviation": "4"
+      },
+      "fivesday00000000": {
+        "name": "Fivesday",
+        "ordinal": 5,
+        "abbreviation": "5"
+      },
+      "sixday0000000000": {
+        "name": "Sixday",
+        "ordinal": 6,
+        "abbreviation": "6"
+      },
+      "sevensday0000000": {
+        "name": "Sevensday",
+        "ordinal": 7,
+        "abbreviation": "7"
+      },
+      "eightsday0000000": {
+        "name": "Eightsday",
+        "ordinal": 8,
+        "abbreviation": "8"
+      },
+      "ninesday00000000": {
+        "name": "Ninesday",
+        "ordinal": 9,
+        "abbreviation": "9"
+      },
+      "tensday000000000": {
+        "name": "Tensday",
+        "ordinal": 10,
+        "abbreviation": "10"
+      }
     },
-    "daysPerYear"     : 365,
-    "hoursPerDay"     : 24,
-    "minutesPerHour"  : 60,
+    "daysPerYear": 365,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : {
+  "festivals": {
     "midwinter0000000": {
-      "name"            : "Midwinter",
-      "month"           : 1,
-      "day"             : 31,
+      "name": "Midwinter",
+      "month": 0,
       "countsForWeekday": false,
-      "icon"            : "fas fa-snowflake",
-      "color"           : "#B0C4DE",
-      "description"     : "A solemn festival marking winter's midpoint when nobles forge alliances while commoners endure the cold."
+      "icon": "fas fa-snowflake",
+      "color": "#B0C4DE",
+      "description": "A solemn festival marking winter's midpoint when nobles forge alliances while commoners endure the cold.",
+      "dayOfMonth": 30
     },
     "springequinox000": {
-      "name"            : "Spring Equinox",
-      "month"           : 3,
-      "day"             : 19,
+      "name": "Spring Equinox",
+      "month": 2,
       "countsForWeekday": true,
-      "description"     : "A festival marking when the barriers between the Prime Material plane and the Feywild are weakest, nobles host lavish masquerades wearing costumes of fey beings."
+      "description": "A festival marking when the barriers between the Prime Material plane and the Feywild are weakest, nobles host lavish masquerades wearing costumes of fey beings.",
+      "dayOfMonth": 18
     },
     "greengrass000000": {
-      "name"            : "Greengrass",
-      "month"           : 4,
-      "day"             : 31,
+      "name": "Greengrass",
+      "month": 3,
       "countsForWeekday": false,
-      "icon"            : "fas fa-seedling",
-      "color"           : "#90EE90",
-      "description"     : "The first day of spring when wealthy folk distribute flowers and commoners scatter them as offerings."
+      "icon": "fas fa-seedling",
+      "color": "#90EE90",
+      "description": "The first day of spring when wealthy folk distribute flowers and commoners scatter them as offerings.",
+      "dayOfMonth": 30
     },
     "summersolstice00": {
-      "name"            : "Summer Solstice",
-      "month"           : 6,
-      "day"             : 20,
+      "name": "Summer Solstice",
+      "month": 5,
       "countsForWeekday": true,
-      "description"     : "The middle of summer marks the longest day of the year, seeing up to 16 hours of daylight."
+      "description": "The middle of summer marks the longest day of the year, seeing up to 16 hours of daylight.",
+      "dayOfMonth": 19
     },
-    "midsummer0000000": {"name": "Midsummer", "month": 7, "day": 31, "countsForWeekday": false, "icon": "fas fa-sun", "color": "#FFD700", "description": "A night of feasting, music, and romance at summer's height beneath the stars."},
-    "shieldmeet000000": {
-      "name"            : "Shieldmeet",
-      "month"           : 7,
-      "day"             : 32,
+    "midsummer0000000": {
+      "name": "Midsummer",
+      "month": 6,
       "countsForWeekday": false,
-      "leapYearOnly"    : true,
-      "icon"            : "fas fa-shield",
-      "color"           : "#CD7F32",
-      "description"     : "A leap year festival of grand tournaments, bazaars, and theatrical performances."
+      "icon": "fas fa-sun",
+      "color": "#FFD700",
+      "description": "A night of feasting, music, and romance at summer's height beneath the stars.",
+      "dayOfMonth": 30
+    },
+    "shieldmeet000000": {
+      "name": "Shieldmeet",
+      "month": 6,
+      "countsForWeekday": false,
+      "leapYearOnly": true,
+      "icon": "fas fa-shield",
+      "color": "#CD7F32",
+      "description": "A leap year festival of grand tournaments, bazaars, and theatrical performances.",
+      "dayOfMonth": 31
     },
     "autumnequinox000": {
-      "name"            : "Autumn Equinox",
-      "month"           : 9,
-      "day"             : 21,
+      "name": "Autumn Equinox",
+      "month": 8,
       "countsForWeekday": true,
-      "description"     : "This day is in perfect balance, seeing 12 hours of daylight and 12 hours of darkness as the sun starts to fade for the cold season."
+      "description": "This day is in perfect balance, seeing 12 hours of daylight and 12 hours of darkness as the sun starts to fade for the cold season.",
+      "dayOfMonth": 20
     },
     "highharvestide00": {
-      "name"            : "Highharvestide",
-      "month"           : 9,
-      "day"             : 31,
+      "name": "Highharvestide",
+      "month": 8,
       "countsForWeekday": false,
-      "icon"            : "fas fa-wheat-awn",
-      "color"           : "#D2691E",
-      "description"     : "A great harvest feast celebrating autumn's abundance with food contests and blessings."
+      "icon": "fas fa-wheat-awn",
+      "color": "#D2691E",
+      "description": "A great harvest feast celebrating autumn's abundance with food contests and blessings.",
+      "dayOfMonth": 30
     },
     "wintersolstice00": {
-      "name"            : "Winter Solstice",
-      "month"           : 12,
-      "day"             : 20,
+      "name": "Winter Solstice",
+      "month": 11,
       "countsForWeekday": true,
-      "description"     : "This day marks the longest night of the year, as the sun starts to make its return to warmer weather."
+      "description": "This day marks the longest night of the year, as the sun starts to make its return to warmer weather.",
+      "dayOfMonth": 19
     },
     "feastofthemoon00": {
-      "name"            : "Feast of the Moon",
-      "month"           : 11,
-      "day"             : 31,
+      "name": "Feast of the Moon",
+      "month": 10,
       "countsForWeekday": false,
-      "icon"            : "fas fa-moon",
-      "color"           : "#4B0082",
-      "description"     : "The year's final festival honoring ancestors, when families tell stories of the dead until legend and history merge."
+      "icon": "fas fa-moon",
+      "color": "#4B0082",
+      "description": "The year's final festival honoring ancestors, when families tell stories of the dead until legend and history merge.",
+      "dayOfMonth": 30
     }
   },
-  "seasons"       : {
+  "seasons": {
     "values": {
-      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
-      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 263, "abbreviation": "Sum"},
-      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 264, "dayEnd": 353, "abbreviation": "Aut"},
-      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 354, "dayEnd":  78, "abbreviation": "Win"}
-    }
-  },
-  "eras"          : { "dalereckoning000": {"name": "Dale Reckoning", "abbreviation": "DR", "startYear": 1, "endYear": null} },
-  "moons"         : {
-    "selne00000000000": {
-      "name"         : "Selûne",
-      "cycleLength"  : 30.4375,
-      "color"        : "#C0C0C0",
-      "phases"       : {
-        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "dayStart": 79,
+        "dayEnd": 171,
+        "abbreviation": "Spr"
       },
-      "referenceDate": {"year": 0, "month": 0, "day": 15}
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "dayStart": 172,
+        "dayEnd": 263,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "dayStart": 264,
+        "dayEnd": 353,
+        "abbreviation": "Aut"
+      },
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "dayStart": 354,
+        "dayEnd": 78,
+        "abbreviation": "Win"
+      }
     }
   },
-  "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 355, "summerSolstice": 172},
-  "cycles"        : {},
+  "eras": {
+    "dalereckoning000": {
+      "name": "Dale Reckoning",
+      "abbreviation": "DR",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "selne00000000000": {
+      "name": "Selûne",
+      "cycleLength": 30.4375,
+      "color": "#C0C0C0",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 14
+      }
+    }
+  },
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 355,
+    "summerSolstice": 172
+  },
+  "cycles": {},
   "canonicalHours": {},
-  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
-  "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
-  "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
-  "metadata"      : {"id": "harptos", "description": "CALENDARIA.Calendar.Harptos.Description", "author": "calendaria", "system": "Forgotten Realms"}
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y",
+    "full": "MMMM D, Y",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "harptos",
+    "description": "CALENDARIA.Calendar.Harptos.Description",
+    "author": "calendaria",
+    "system": "Forgotten Realms"
+  }
 }

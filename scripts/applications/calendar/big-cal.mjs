@@ -129,15 +129,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Get the date being viewed/displayed in the calendar
-   * @returns {object} The currently viewed date with year, month, day
+   * @returns {object} The currently viewed date with year, month, dayOfMonth (0-indexed)
    */
   get viewedDate() {
     if (this._viewedDate) return this._viewedDate;
     const components = game.time.components;
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
-    return { ...components, year: components.year + yearZero, day: dayOfMonth };
+    return { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 };
   }
 
   /**
@@ -169,9 +168,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar?.years?.yearZero ?? 0;
     const todayYear = today.year + yearZero;
     const todayMonth = today.month;
-    const todayDay = (today.dayOfMonth ?? 0) + 1;
-    if (this._selectedDate) context.isToday = this._selectedDate.year === todayYear && this._selectedDate.month === todayMonth && this._selectedDate.day === todayDay;
-    else context.isToday = viewedDate.year === todayYear && viewedDate.month === todayMonth && viewedDate.day === todayDay;
+    const todayDayOfMonth = today.dayOfMonth ?? 0;
+    if (this._selectedDate) context.isToday = this._selectedDate.year === todayYear && this._selectedDate.month === todayMonth && this._selectedDate.dayOfMonth === todayDayOfMonth;
+    else context.isToday = viewedDate.year === todayYear && viewedDate.month === todayMonth && viewedDate.dayOfMonth === todayDayOfMonth;
     const allNotes = ViewUtils.getCalendarNotes();
     context.notes = allNotes;
     context.visibleNotes = ViewUtils.getVisibleNotes(allNotes);
@@ -201,7 +200,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE);
     if (calendar.cyclesArray?.length && context.showCycles) {
       const yearZeroOffset = calendar.years?.yearZero ?? 0;
-      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
+      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: viewedDate.dayOfMonth ?? 0, hour: 12, minute: 0, second: 0 };
       const cycleResult = calendar.getCycleValues(viewedComponents);
       context.cycleText = cycleResult.text;
       context.cycleValues = cycleResult.values;
@@ -352,7 +351,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
-    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
+    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     if (startDayOfWeek > 0) {
       const totalMonths = calendar.monthsArray.length ?? 12;
       let prevDays = [];
@@ -374,19 +373,21 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
         }
       }
-      for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day) });
+      for (const pd of prevDays)
+        currentWeek.push({ day: pd.day, dayOfMonth: pd.day - 1, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day - 1) });
     }
     const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
     let weatherLookup = null;
     if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
     const intercalaryDays = [];
     let dayIndex = startDayOfWeek;
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dayNotes = this._getNotesForDay(notes, year, month, day);
-      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: day - 1 });
+    for (let dayOfMonth = 0; dayOfMonth < daysInMonth; dayOfMonth++) {
+      const displayDay = dayOfMonth + 1;
+      const dayNotes = this._getNotesForDay(notes, year, month, dayOfMonth);
+      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth });
       let moonPhases = null;
       if (showMoons) {
-        const dayComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
+        const dayComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moonsArray
           .map((moon, index) => {
@@ -402,20 +403,21 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (isIntercalary) {
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
-        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
+        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         intercalaryDays.push({
-          day,
+          day: displayDay,
+          dayOfMonth,
           year,
           month,
-          isToday: this._isToday(year, month, day),
-          isSelected: this._isSelected(year, month, day),
+          isToday: this._isToday(year, month, dayOfMonth),
+          isSelected: this._isSelected(year, month, dayOfMonth),
           notes: dayNotes,
           isFestival: true,
           festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
           festivalIcon: festivalDay?.icon || '',
           festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo, wd),
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd),
           moonPhases,
           isIntercalary: true,
           ...ViewUtils.buildWeatherPillData(wd)
@@ -424,13 +426,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const weekdayData = calendar.weekdaysArray[currentWeek.length];
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
-        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, day, weatherLookup, weatherLookup.lookup) : null;
+        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         currentWeek.push({
-          day,
+          day: displayDay,
+          dayOfMonth,
           year,
           month,
-          isToday: this._isToday(year, month, day),
-          isSelected: this._isSelected(year, month, day),
+          isToday: this._isToday(year, month, dayOfMonth),
+          isSelected: this._isSelected(year, month, dayOfMonth),
           notes: dayNotes,
           isOddDay: dayIndex % 2 === 1,
           isFestival: !!festivalDay,
@@ -438,7 +441,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalColor: festivalDay?.color || '',
           festivalIcon: festivalDay?.icon || '',
           festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, day, festivalInfo, wd),
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd),
           isRestDay: weekdayData?.isRestDay || false,
           moonPhases,
           ...ViewUtils.buildWeatherPillData(wd)
@@ -476,7 +479,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: dayInMonth - 1 });
         const isIntercalary = festivalDay?.countsForWeekday === false;
         if (!isIntercalary) {
-          currentWeek.push({ day: dayInMonth, year: checkYear, month: checkMonth, isFromOtherMonth: true, isToday: this._isToday(checkYear, checkMonth, dayInMonth) });
+          currentWeek.push({ day: dayInMonth, dayOfMonth: dayInMonth - 1, year: checkYear, month: checkMonth, isFromOtherMonth: true, isToday: this._isToday(checkYear, checkMonth, dayInMonth - 1) });
           remainingSlots--;
         }
         dayInMonth++;
@@ -499,8 +502,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
-    const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, day: date.day };
-    const headerComponents = { year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.day };
+    const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, dayOfMonth: date.dayOfMonth };
+    const headerComponents = { year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.dayOfMonth ?? 0 };
     const rawHeader = formatForLocation(calendar, headerComponents, 'bigCalHeader');
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     return {
@@ -527,12 +530,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _generateMonthlessWeekData(calendar, date, notes) {
     const { year } = date;
-    const viewedDay = date.day || 1;
+    const viewedDayOfMonth = date.dayOfMonth ?? 0;
     const daysInWeek = calendar.daysInWeek;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
-    const weekNumber = Math.floor((viewedDay - 1) / daysInWeek);
+    const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
@@ -552,12 +555,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           dayYear--;
         }
         const dayInternalYear = dayYear - yearZero;
-        const dayNotes = this._getNotesForDay(notes, dayYear, 0, dayNum);
-        const festivalDay = calendar.findFestivalDay({ year: dayInternalYear, month: 0, dayOfMonth: dayNum - 1 });
+        const dayOfMonth = dayNum - 1;
+        const dayNotes = this._getNotesForDay(notes, dayYear, 0, dayOfMonth);
+        const festivalDay = calendar.findFestivalDay({ year: dayInternalYear, month: 0, dayOfMonth });
         const isIntercalary = festivalDay?.countsForWeekday === false;
         let moonPhases = null;
         if (showMoons) {
-          const dayComponents = { year: dayInternalYear, month: 0, dayOfMonth: dayNum - 1, hour: 12, minute: 0, second: 0 };
+          const dayComponents = { year: dayInternalYear, month: 0, dayOfMonth, hour: 12, minute: 0, second: 0 };
           const dayWorldTime = calendar.componentsToTime(dayComponents);
           moonPhases = calendar.moonsArray
             .map((moon, index) => {
@@ -572,10 +576,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const weekdayData = calendar.weekdaysArray[i % daysInWeek];
         const dayData = {
           day: dayNum,
+          dayOfMonth,
           year: dayYear,
           month: 0,
-          isToday: this._isToday(dayYear, 0, dayNum),
-          isSelected: this._isSelected(dayYear, 0, dayNum),
+          isToday: this._isToday(dayYear, 0, dayOfMonth),
+          isSelected: this._isSelected(dayYear, 0, dayOfMonth),
           notes: dayNotes,
           isFestival: !!festivalDay,
           festivalName: festivalDay ? localize(festivalDay.name) : null,
@@ -590,7 +595,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       weeks.push(currentWeek);
     }
-    const viewedComponents = { month: 0, dayOfMonth: viewedDay - 1 };
+    const viewedComponents = { month: 0, dayOfMonth: viewedDayOfMonth };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const weekdayData = calendar.weekdaysArray ?? [];
@@ -622,28 +627,29 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object} Week view data for rendering
    */
   _generateWeekData(calendar, date, notes) {
-    const { year, month, day } = date;
+    const { year, month } = date;
+    const viewedDayOfMonth = date.dayOfMonth ?? 0;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const currentDayOfWeek = dayOfWeek({ year, month, day });
-    let weekStartDay = day - currentDayOfWeek;
+    const currentDayOfWeek = dayOfWeek({ year, month, dayOfMonth: viewedDayOfMonth });
+    let weekStartDayOfMonth = viewedDayOfMonth - currentDayOfWeek;
     let weekStartMonth = month;
     let weekStartYear = year;
     const monthsInYear = calendar.monthsArray.length ?? 12;
-    if (weekStartDay < 1) {
+    if (weekStartDayOfMonth < 0) {
       weekStartMonth--;
       if (weekStartMonth < 0) {
         weekStartMonth = monthsInYear - 1;
         weekStartYear--;
       }
       const prevMonthDays = calendar.getDaysInMonth(weekStartMonth, weekStartYear - yearZero);
-      weekStartDay = prevMonthDays + weekStartDay;
+      weekStartDayOfMonth = prevMonthDays + weekStartDayOfMonth;
     }
     while (true) {
-      const festivalDay = calendar.findFestivalDay({ year: weekStartYear - yearZero, month: weekStartMonth, dayOfMonth: weekStartDay - 1 });
+      const festivalDay = calendar.findFestivalDay({ year: weekStartYear - yearZero, month: weekStartMonth, dayOfMonth: weekStartDayOfMonth });
       if (festivalDay?.countsForWeekday === false) {
-        weekStartDay++;
-        if (weekStartDay > calendar.getDaysInMonth(weekStartMonth, weekStartYear - yearZero)) {
-          weekStartDay = 1;
+        weekStartDayOfMonth++;
+        if (weekStartDayOfMonth >= calendar.getDaysInMonth(weekStartMonth, weekStartYear - yearZero)) {
+          weekStartDayOfMonth = 0;
           weekStartMonth++;
           if (weekStartMonth >= monthsInYear) {
             weekStartMonth = 0;
@@ -658,19 +664,19 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentHour = currentTime.hour ?? 0;
     const daysInWeek = calendar.daysInWeek;
     const days = [];
-    let currentDay = weekStartDay;
+    let currentDayOfMonth = weekStartDayOfMonth;
     let currentMonth = weekStartMonth;
     let currentYear = weekStartYear;
     let weekdayIndex = 0;
     while (weekdayIndex < daysInWeek) {
       const monthData = calendar.monthsArray[currentMonth];
       if (!monthData) break;
-      const festivalDay = calendar.findFestivalDay({ year: currentYear - yearZero, month: currentMonth, dayOfMonth: currentDay - 1 });
+      const festivalDay = calendar.findFestivalDay({ year: currentYear - yearZero, month: currentMonth, dayOfMonth: currentDayOfMonth });
       const isIntercalary = festivalDay?.countsForWeekday === false;
       if (isIntercalary) {
-        currentDay++;
-        if (currentDay > calendar.getDaysInMonth(currentMonth, currentYear - yearZero)) {
-          currentDay = 1;
+        currentDayOfMonth++;
+        if (currentDayOfMonth >= calendar.getDaysInMonth(currentMonth, currentYear - yearZero)) {
+          currentDayOfMonth = 0;
           currentMonth++;
           if (currentMonth >= calendar.monthsArray.length) {
             currentMonth = 0;
@@ -679,16 +685,17 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         continue;
       }
-      const dayNotes = this._getNotesForDay(notes, currentYear, currentMonth, currentDay);
+      const dayNotes = this._getNotesForDay(notes, currentYear, currentMonth, currentDayOfMonth);
       const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.weekdaysArray ?? [];
       const weekdayData = monthWeekdays[weekdayIndex];
       const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
       const monthName = calendar.monthsArray[currentMonth]?.name ? localize(calendar.monthsArray[currentMonth].name) : '';
-      const isToday = this._isToday(currentYear, currentMonth, currentDay);
+      const isToday = this._isToday(currentYear, currentMonth, currentDayOfMonth);
       const selectedHour =
-        this._selectedTimeSlot?.year === currentYear && this._selectedTimeSlot?.month === currentMonth && this._selectedTimeSlot?.day === currentDay ? this._selectedTimeSlot.hour : null;
+        this._selectedTimeSlot?.year === currentYear && this._selectedTimeSlot?.month === currentMonth && this._selectedTimeSlot?.dayOfMonth === currentDayOfMonth ? this._selectedTimeSlot.hour : null;
       days.push({
-        day: currentDay,
+        day: currentDayOfMonth + 1,
+        dayOfMonth: currentDayOfMonth,
         year: currentYear,
         month: currentMonth,
         monthName: monthName,
@@ -700,9 +707,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         notes: dayNotes
       });
       weekdayIndex++;
-      currentDay++;
-      if (currentDay > calendar.getDaysInMonth(currentMonth, currentYear - yearZero)) {
-        currentDay = 1;
+      currentDayOfMonth++;
+      if (currentDayOfMonth >= calendar.getDaysInMonth(currentMonth, currentYear - yearZero)) {
+        currentDayOfMonth = 0;
         currentMonth++;
         if (currentMonth >= calendar.monthsArray.length) {
           currentMonth = 0;
@@ -715,19 +722,19 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     for (let hour = 0; hour < hoursPerDay; hour++) timeSlots.push({ label: hour.toString(), hour: hour });
     const eventBlocks = this._createEventBlocks(notes, days);
     days.forEach((day) => {
-      day.eventBlocks = eventBlocks.filter((block) => block.year === day.year && block.month === day.month && block.day === day.day);
+      day.eventBlocks = eventBlocks.filter((block) => block.year === day.year && block.month === day.month && block.dayOfMonth === day.dayOfMonth);
     });
-    let dayOfYear = day;
+    let dayOfYear = viewedDayOfMonth + 1;
     for (let m = 0; m < month; m++) dayOfYear += calendar.getDaysInMonth(m, year - yearZero);
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
     const midWeekDay = days[Math.floor(days.length / 2)];
-    const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: (midWeekDay?.day ?? day) - 1 };
+    const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: midWeekDay?.dayOfMonth ?? date.dayOfMonth ?? 0 };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.weekdaysArray ?? [];
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
-    const weekHeaderDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year: weekStartYear, month: weekStartMonth, day: weekStartDay };
-    const weekHeaderComponents = { year: weekHeaderDate.year, month: weekHeaderDate.month, dayOfMonth: weekHeaderDate.day };
+    const weekHeaderDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year: weekStartYear, month: weekStartMonth, dayOfMonth: weekStartDayOfMonth };
+    const weekHeaderComponents = { year: weekHeaderDate.year, month: weekHeaderDate.month, dayOfMonth: weekHeaderDate.dayOfMonth ?? 0 };
     const rawHeader = formatForLocation(calendar, weekHeaderComponents, 'bigCalWeekHeader');
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     return {
@@ -764,7 +771,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const yearRow = [];
       for (let col = 0; col < 3; col++) {
         const displayYear = startYear + row * 3 + col;
-        const yearComponents = { year: displayYear, month: 0, dayOfMonth: 1 };
+        const yearComponents = { year: displayYear, month: 0, dayOfMonth: 0 };
         yearRow.push({
           year: displayYear,
           yearDisplay: formatForLocation(calendar, yearComponents, 'bigCalYearLabel'),
@@ -792,8 +799,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedComponents = { month: 0, dayOfMonth: 0 };
     const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-    const startYearComponents = { year: startYear, month: 0, dayOfMonth: 1 };
-    const endYearComponents = { year: startYear + 8, month: 0, dayOfMonth: 1 };
+    const startYearComponents = { year: startYear, month: 0, dayOfMonth: 0 };
+    const endYearComponents = { year: startYear + 8, month: 0, dayOfMonth: 0 };
     return {
       year,
       startYear,
@@ -811,28 +818,28 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Check if a date is today
    * @param {number} year - Display year (with yearZero applied)
    * @param {number} month - Month index (0-indexed)
-   * @param {number} day - Day of month (1-indexed)
+   * @param {number} dayOfMonth - Day of month (0-indexed)
    * @returns {boolean} True if the date matches today
    */
-  _isToday(year, month, day) {
+  _isToday(year, month, dayOfMonth) {
     const today = game.time.components;
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const displayYear = today.year + yearZero;
-    const todayDayOfMonth = (today.dayOfMonth ?? 0) + 1;
-    return displayYear === year && today.month === month && todayDayOfMonth === day;
+    const todayDayOfMonth = today.dayOfMonth ?? 0;
+    return displayYear === year && today.month === month && todayDayOfMonth === dayOfMonth;
   }
 
   /**
    * Check if a date is the selected date
    * @param {number} year - Display year (with yearZero applied)
    * @param {number} month - Month index (0-indexed)
-   * @param {number} day - Day of month (1-indexed)
+   * @param {number} dayOfMonth - Day of month (0-indexed)
    * @returns {boolean} True if the date is selected
    */
-  _isSelected(year, month, day) {
+  _isSelected(year, month, dayOfMonth) {
     if (!this._selectedDate) return false;
-    return this._selectedDate.year === year && this._selectedDate.month === month && this._selectedDate.day === day;
+    return this._selectedDate.year === year && this._selectedDate.month === month && this._selectedDate.dayOfMonth === dayOfMonth;
   }
 
   /**
@@ -840,17 +847,17 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object[]} notePages - All note pages to filter
    * @param {number} year - The year to match
    * @param {number} month - The month to match
-   * @param {number} day - The day to match
+   * @param {number} dayOfMonth - The day to match (0-indexed)
    * @returns {Array} Notes matching the specified date
    */
-  _getNotesForDay(notePages, year, month, day) {
-    const targetDate = { year, month, day };
+  _getNotesForDay(notePages, year, month, dayOfMonth) {
+    const targetDate = { year, month, dayOfMonth };
     return notePages
       .filter((page) => {
         const start = page.system.startDate;
         const end = page.system.endDate;
-        const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
-        if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) return false;
+        const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
+        if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.dayOfMonth !== start.dayOfMonth)) return false;
         const noteData = {
           startDate: start,
           endDate: end,
@@ -913,9 +920,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const note of notes) {
       const start = note.system.startDate;
       const end = note.system.endDate;
-      const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
+      const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
       if (!hasValidEndDate) continue;
-      const isSameDay = end.year === start.year && end.month === start.month && end.day === start.day;
+      const isSameDay = end.year === start.year && end.month === start.month && end.dayOfMonth === start.dayOfMonth;
       if (isSameDay) continue;
       const repeat = note.system.repeat;
       const duration = daysBetween(start, end);
@@ -947,21 +954,21 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const prevMonthDays = calendar?.getDaysInMonth(prevMonth, prevYear - yearZero) || 30;
         const checkFromDay = Math.max(1, prevMonthDays - duration);
         for (let d = checkFromDay; d <= prevMonthDays; d++) {
-          const checkDate = { year: prevYear, month: prevMonth, day: d };
+          const checkDate = { year: prevYear, month: prevMonth, dayOfMonth: d - 1 };
           if (isRecurringMatch(noteData, checkDate)) {
             const occEnd = addDays(checkDate, duration);
             if (occEnd.year > year || (occEnd.year === year && occEnd.month >= month)) {
-              const endDay = occEnd.month === month && occEnd.year === year ? occEnd.day : daysInMonth;
-              multiDayEvents.push({ note, start: checkDate, end: occEnd, startDay: 1, endDay, priority, isContinuation: true });
+              const endDayOfMonth = occEnd.month === month && occEnd.year === year ? occEnd.dayOfMonth : daysInMonth - 1;
+              multiDayEvents.push({ note, start: checkDate, end: occEnd, startDayOfMonth: 0, endDayOfMonth, priority, isContinuation: true });
             }
           }
         }
         for (let d = 1; d <= daysInMonth; d++) {
-          const checkDate = { year, month, day: d };
+          const checkDate = { year, month, dayOfMonth: d - 1 };
           if (isRecurringMatch(noteData, checkDate)) {
             const occEnd = addDays(checkDate, duration);
-            const endDay = occEnd.month === month && occEnd.year === year ? occEnd.day : daysInMonth;
-            multiDayEvents.push({ note, start: checkDate, end: occEnd, startDay: d, endDay, priority, isContinuation: false });
+            const endDayOfMonth = occEnd.month === month && occEnd.year === year ? occEnd.dayOfMonth : daysInMonth - 1;
+            multiDayEvents.push({ note, start: checkDate, end: occEnd, startDayOfMonth: checkDate.dayOfMonth, endDayOfMonth, priority, isContinuation: false });
           }
         }
       } else {
@@ -969,16 +976,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const endInOrAfterMonth = end.year > year || (end.year === year && end.month >= month);
         if (!startBeforeOrInMonth || !endInOrAfterMonth) continue;
         const isContinuation = start.year < year || (start.year === year && start.month < month);
-        const startDay = isContinuation ? 1 : start.day;
-        const endDay = end.month === month && end.year === year ? end.day : daysInMonth;
-        if (endDay < startDay) continue;
-        multiDayEvents.push({ note, start, end, startDay, endDay, priority, isContinuation });
+        const startDayOfMonth = isContinuation ? 0 : start.dayOfMonth;
+        const endDayOfMonth = end.month === month && end.year === year ? end.dayOfMonth : daysInMonth - 1;
+        if (endDayOfMonth < startDayOfMonth) continue;
+        multiDayEvents.push({ note, start, end, startDayOfMonth, endDayOfMonth, priority, isContinuation });
       }
     }
     multiDayEvents.sort((a, b) => a.priority - b.priority);
-    multiDayEvents.forEach(({ note, startDay, endDay, isContinuation }) => {
-      const startPosition = startDay - 1 + startDayOfWeek;
-      const endPosition = endDay - 1 + startDayOfWeek;
+    multiDayEvents.forEach(({ note, startDayOfMonth, endDayOfMonth, isContinuation }) => {
+      const startPosition = startDayOfMonth + startDayOfWeek;
+      const endPosition = endDayOfMonth + startDayOfWeek;
       const startWeekIndex = Math.floor(startPosition / daysInWeek);
       const endWeekIndex = Math.floor(endPosition / daysInWeek);
       let eventRow = rows.length;
@@ -1056,10 +1063,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const start = note.system.startDate;
       const end = note.system.endDate;
       const allDay = note.system.allDay;
-      const hasValidEnd = end && end.year != null && end.month != null && end.day != null;
-      const isSameDay = !hasValidEnd || (end.year === start.year && end.month === start.month && end.day === start.day);
+      const hasValidEnd = end && end.year != null && end.month != null && end.dayOfMonth != null;
+      const isSameDay = !hasValidEnd || (end.year === start.year && end.month === start.month && end.dayOfMonth === start.dayOfMonth);
       if (isSameDay) {
-        const dayMatch = days.find((d) => d.year === start.year && d.month === start.month && d.day === start.day);
+        const dayMatch = days.find((d) => d.year === start.year && d.month === start.month && d.dayOfMonth === start.dayOfMonth);
         if (!dayMatch) return;
         const startHour = allDay ? 0 : (start.hour ?? 0);
         let hourSpan = 1;
@@ -1077,7 +1084,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           color: note.system.color || '#4a86e8',
           icon: note.system.icon,
           iconType: note.system.iconType,
-          day: start.day,
+          day: start.dayOfMonth + 1,
+          dayOfMonth: start.dayOfMonth,
           month: start.month,
           year: start.year,
           startHour,
@@ -1093,10 +1101,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const eventStartTime = allDay ? 'All Day' : `${eventStartHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
         const eventEndTime = allDay ? null : `${eventEndHour.toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}`;
         for (const dayData of days) {
-          const dayDate = { year: dayData.year, month: dayData.month, day: dayData.day };
           const afterStart =
-            dayDate.year > start.year || (dayDate.year === start.year && dayDate.month > start.month) || (dayDate.year === start.year && dayDate.month === start.month && dayDate.day >= start.day);
-          const beforeEnd = dayDate.year < end.year || (dayDate.year === end.year && dayDate.month < end.month) || (dayDate.year === end.year && dayDate.month === end.month && dayDate.day <= end.day);
+            dayData.year > start.year ||
+            (dayData.year === start.year && dayData.month > start.month) ||
+            (dayData.year === start.year && dayData.month === start.month && dayData.dayOfMonth >= start.dayOfMonth);
+          const beforeEnd =
+            dayData.year < end.year || (dayData.year === end.year && dayData.month < end.month) || (dayData.year === end.year && dayData.month === end.month && dayData.dayOfMonth <= end.dayOfMonth);
           if (!afterStart || !beforeEnd) continue;
           blocks.push({
             id: note.id,
@@ -1105,6 +1115,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: note.system.icon,
             iconType: note.system.iconType,
             day: dayData.day,
+            dayOfMonth: dayData.dayOfMonth,
             month: dayData.month,
             year: dayData.year,
             startHour: eventStartHour,
@@ -1377,26 +1388,26 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     switch (this._displayMode) {
       case 'week': {
         const daysInWeek = calendar.daysInWeek;
-        let newDay = current.day + direction * daysInWeek;
+        let newDayOfMonth = (current.dayOfMonth ?? 0) + direction * daysInWeek;
         let newMonth = current.month;
         let newYear = current.year;
         const daysInCurrentMonth = calendar.getDaysInMonth(newMonth, newYear - yearZero);
-        if (newDay > daysInCurrentMonth) {
-          newDay -= daysInCurrentMonth;
+        if (newDayOfMonth >= daysInCurrentMonth) {
+          newDayOfMonth -= daysInCurrentMonth;
           newMonth++;
           if (newMonth >= calendar.monthsArray.length) {
             newMonth = 0;
             newYear++;
           }
-        } else if (newDay < 1) {
+        } else if (newDayOfMonth < 0) {
           newMonth--;
           if (newMonth < 0) {
             newMonth = calendar.monthsArray.length - 1;
             newYear--;
           }
-          newDay += calendar.getDaysInMonth(newMonth, newYear - yearZero);
+          newDayOfMonth += calendar.getDaysInMonth(newMonth, newYear - yearZero);
         }
-        this.viewedDate = { year: newYear, month: newMonth, day: newDay };
+        this.viewedDate = { year: newYear, month: newMonth, dayOfMonth: newDayOfMonth };
         break;
       }
       case 'year': {
@@ -1407,17 +1418,17 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         if (calendar.isMonthless) {
           const daysInWeek = calendar.daysInWeek;
           const daysInYear = calendar.getDaysInYear(current.year - yearZero);
-          let newDay = (current.day || 1) + direction * daysInWeek;
+          let newDayOfMonth = (current.dayOfMonth ?? 0) + direction * daysInWeek;
           let newYear = current.year;
-          if (newDay > daysInYear) {
-            newDay -= daysInYear;
+          if (newDayOfMonth >= daysInYear) {
+            newDayOfMonth -= daysInYear;
             newYear++;
-          } else if (newDay < 1) {
+          } else if (newDayOfMonth < 0) {
             const prevYearDays = calendar.getDaysInYear(newYear - 1 - yearZero);
-            newDay += prevYearDays;
+            newDayOfMonth += prevYearDays;
             newYear--;
           }
-          this.viewedDate = { year: newYear, month: 0, day: newDay };
+          this.viewedDate = { year: newYear, month: 0, dayOfMonth: newDayOfMonth };
           break;
         }
         let newMonth = current.month + direction;
@@ -1442,7 +1453,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           }
           attempts++;
         }
-        this.viewedDate = { year: newYear, month: newMonth, day: 1 };
+        this.viewedDate = { year: newYear, month: newMonth, dayOfMonth: 0 };
         break;
       }
     }
@@ -1465,11 +1476,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element with date data
    */
   static async _onAddNote(_event, target) {
-    let day, month, year, hour;
+    let dayOfMonth, month, year, hour;
     if (this._selectedTimeSlot) {
-      ({ day, month, year, hour } = this._selectedTimeSlot);
+      ({ dayOfMonth, month, year, hour } = this._selectedTimeSlot);
     } else {
-      day = target.dataset.day;
+      dayOfMonth = target.dataset.day;
       month = target.dataset.month;
       year = target.dataset.year;
       hour = target.dataset.hour ?? 12;
@@ -1481,8 +1492,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: 0 },
-        endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: 0 }
+        startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: 0 },
+        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: endDayOfMonth, hour: endHour, minute: 0 }
       }
     });
     this._selectedTimeSlot = null;
@@ -1494,22 +1505,22 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onAddNoteToday(_event, _target) {
-    let day, month, year, hour, minute;
+    let dayOfMonth, month, year, hour, minute;
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     if (this._selectedTimeSlot) {
-      ({ day, month, year, hour } = this._selectedTimeSlot);
+      ({ dayOfMonth, month, year, hour } = this._selectedTimeSlot);
       minute = 0;
     } else if (this._selectedDate) {
-      ({ day, month, year } = this._selectedDate);
+      ({ dayOfMonth, month, year } = this._selectedDate);
       hour = 12;
       minute = 0;
     } else {
       const today = game.time.components;
       year = today.year + yearZero;
       month = today.month;
-      day = (today.dayOfMonth ?? 0) + 1;
+      dayOfMonth = today.dayOfMonth ?? 0;
       hour = today.hour ?? 12;
       minute = today.minute ?? 0;
     }
@@ -1518,8 +1529,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: parseInt(minute) },
-        endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: parseInt(minute) }
+        startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: parseInt(minute) },
+        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: endDayOfMonth, hour: endHour, minute: parseInt(minute) }
       }
     });
     this._selectedTimeSlot = null;
@@ -1594,7 +1605,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       attempts++;
     }
     this._displayMode = 'month';
-    this.viewedDate = { year, month, day: 1 };
+    this.viewedDate = { year, month, dayOfMonth: 0 };
     await this.render();
     this._adjustSizeForView();
   }
@@ -1605,11 +1616,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element with date data
    */
   static async _onSelectDay(_event, target) {
-    const day = parseInt(target.dataset.day);
+    const dayOfMonth = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
-    if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.day === day) this._selectedDate = null;
-    else this._selectedDate = { year, month, day };
+    if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.dayOfMonth === dayOfMonth) this._selectedDate = null;
+    else this._selectedDate = { year, month, dayOfMonth };
     await this.render();
   }
 
@@ -1621,7 +1632,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onSetAsCurrentDate(_event, _target) {
     const calendar = this.calendar;
     const dateToSet = this._selectedDate || this.viewedDate;
-    await calendar.jumpToDate({ year: dateToSet.year, month: dateToSet.month, day: dateToSet.day });
+    await calendar.jumpToDate({ year: dateToSet.year, month: dateToSet.month, dayOfMonth: dateToSet.dayOfMonth ?? 0 });
     this._selectedDate = null;
     await this.render();
   }
@@ -1632,12 +1643,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element with time data
    */
   static async _onSelectTimeSlot(_event, target) {
-    const day = parseInt(target.dataset.day);
+    const dayOfMonth = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
     const hour = parseInt(target.dataset.hour);
-    if (this._selectedTimeSlot?.year === year && this._selectedTimeSlot?.month === month && this._selectedTimeSlot?.day === day && this._selectedTimeSlot?.hour === hour) this._selectedTimeSlot = null;
-    else this._selectedTimeSlot = { year, month, day, hour };
+    if (this._selectedTimeSlot?.year === year && this._selectedTimeSlot?.month === month && this._selectedTimeSlot?.dayOfMonth === dayOfMonth && this._selectedTimeSlot?.hour === hour)
+      this._selectedTimeSlot = null;
+    else this._selectedTimeSlot = { year, month, dayOfMonth, hour };
     await this.render();
   }
 
@@ -1759,7 +1771,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onNavigateToMonth(_event, target) {
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
-    this.viewedDate = { year, month, day: 1 };
+    this.viewedDate = { year, month, dayOfMonth: 0 };
     await this.render();
   }
 
@@ -1775,9 +1787,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!dayCell) return;
     const year = parseInt(dayCell.dataset.year);
     const month = parseInt(dayCell.dataset.month);
-    const day = parseInt(dayCell.dataset.day);
+    const dayOfMonth = parseInt(dayCell.dataset.day);
     const slot = parseInt(target.dataset.moonSlot);
-    const allMoons = ViewUtils.getAllMoonPhases(this.calendar, year, month, day);
+    const allMoons = ViewUtils.getAllMoonPhases(this.calendar, year, month, dayOfMonth);
     if (!allMoons?.length || allMoons.length <= MAX_VISIBLE_MOONS) return;
     const clickedMoon = target.dataset.moonName;
     ViewUtils.showMoonPicker(target, allMoons, clickedMoon, (moonName) => {

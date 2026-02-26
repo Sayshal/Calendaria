@@ -182,7 +182,7 @@ async function cmdNote(args) {
     const page = await CalendariaAPI.createNote({
       name: title,
       content: description,
-      startDate: { year: dt.year, month: dt.month, day: (dt.dayOfMonth ?? 0) + 1, hour: dt.hour, minute: dt.minute },
+      startDate: { year: dt.year, month: dt.month, day: dt.day, hour: dt.hour, minute: dt.minute },
       allDay: false,
       categories: ['event']
     });
@@ -209,7 +209,7 @@ async function cmdWeather(args) {
     if (!match) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.InvalidDateFormat'));
     const year = parseInt(match[1], 10);
     const month = parseInt(match[2], 10) - 1;
-    const day = parseInt(match[3], 10);
+    const day = parseInt(match[3], 10) - 1;
     const weather = WeatherManager.getWeatherForDate(year, month, day);
     if (!weather) return sendChat(format('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` }));
     const tempStr = weather.temperature != null ? ` (${WeatherManager.formatTemperature(weather.temperature)})` : '';
@@ -275,7 +275,7 @@ async function cmdToday() {
   const calendar = CalendariaAPI.getActiveCalendar();
   if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
   const dt = CalendariaAPI.getCurrentDateTime();
-  const notes = CalendariaAPI.getNotesForDate(dt.year, dt.month, (dt.dayOfMonth ?? 0) + 1);
+  const notes = CalendariaAPI.getNotesForDate(dt.year, dt.month, dt.day);
   if (!notes?.length) return sendChat(localize('CALENDARIA.ChatCommand.NoNotesToday'));
   const lines = notes.map((n) => {
     const time = n.flagData.allDay ? '' : ` (${String(n.flagData.startDate.hour).padStart(2, '0')}:${String(n.flagData.startDate.minute).padStart(2, '0')})`;
@@ -342,8 +342,8 @@ async function cmdAdvance(args) {
     round: { second: (dt.second ?? 0) + value * secondsPerRound },
     minute: { minute: dt.minute + value },
     hour: { hour: dt.hour + value },
-    day: { dayOfMonth: dt.dayOfMonth + value },
-    week: { dayOfMonth: dt.dayOfMonth + value * daysPerWeek },
+    day: { day: dt.day + value },
+    week: { day: dt.day + value * daysPerWeek },
     month: { month: dt.month + value },
     year: { year: dt.year + value }
   };
@@ -416,12 +416,12 @@ async function cmdSetDate(args) {
   const match = args?.trim().match(/^(\d+)\s+(\d+)\s+(\d+)$/);
   if (!match) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.InvalidDateFormat'));
   const year = parseInt(match[1], 10);
-  const month = parseInt(match[2], 10) - 1;
+  const month = parseInt(match[2], 10);
   const day = parseInt(match[3], 10);
   try {
     await CalendariaAPI.jumpToDate({ year, month, day });
     ui.notifications.info(localize('CALENDARIA.ChatCommand.DateSet'));
-    log(3, `Set date to ${year}-${month + 1}-${day}`);
+    log(3, `Set date to ${year}-${month}-${day}`);
   } catch (error) {
     log(1, 'Error setting date:', error);
     ui.notifications.error(localize('CALENDARIA.ChatCommand.SetDateError'));
@@ -549,7 +549,7 @@ async function cmdForecast(args) {
   const lines = forecast.map((f) => {
     const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
     const label = localize(f.preset.label);
-    return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.day}</strong> — ${label}${tempStr}`;
+    return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.dayOfMonth + 1}</strong> — ${label}${tempStr}`;
   });
   const content = `<div class="calendaria-chat-output"><h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}</div>`;
   await ChatMessage.create({ content, speaker: ChatMessage.getSpeaker(), whisper: game.user.isGM ? [game.user.id] : [] });

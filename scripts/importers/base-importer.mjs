@@ -102,7 +102,7 @@ export default class BaseImporter {
    * Extract the current date from source data.
    * @param {object} _data - Raw source data
    * @param {number} [_calendarIndex] - Index of calendar to extract date from
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}|null} Current date or null
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}|null} Current date or null
    */
   extractCurrentDate(_data, _calendarIndex = 0) {
     return null;
@@ -110,7 +110,7 @@ export default class BaseImporter {
 
   /**
    * Apply a date to the imported calendar by setting worldTime.
-   * @param {{year: number, month: number, day: number, hour: number, minute: number}} dateComponents - Date to apply
+   * @param {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} dateComponents - Date to apply
    * @param {string} calendarId - Calendar ID to apply the date to
    * @returns {Promise<boolean>} True if date was applied successfully
    */
@@ -124,8 +124,8 @@ export default class BaseImporter {
       }
       const yearZero = calendar.years?.yearZero ?? 0;
       const displayYear = dateComponents.year + yearZero;
-      log(3, `Applying imported date: ${displayYear}/${dateComponents.month + 1}/${dateComponents.day}`);
-      await calendar.jumpToDate({ year: displayYear, month: dateComponents.month, day: dateComponents.day });
+      log(3, `Applying imported date: ${displayYear}/${dateComponents.month + 1}/${(dateComponents.dayOfMonth ?? 0) + 1}`);
+      await calendar.jumpToDate({ year: displayYear, month: dateComponents.month, dayOfMonth: dateComponents.dayOfMonth });
       return true;
     } catch (error) {
       log(2, `Failed to apply current date:`, error);

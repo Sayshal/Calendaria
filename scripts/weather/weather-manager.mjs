@@ -102,6 +102,9 @@ export default class WeatherManager {
       }
     }
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
+    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) {
+      await this.#migrateWeatherDayIndex();
+    }
     if (CalendariaSocket.isPrimaryGM()) {
       const calendar = CalendarManager.getActiveCalendar();
       if (calendar?.weather?.autoGenerate !== undefined) {
@@ -114,11 +117,11 @@ export default class WeatherManager {
       if (Object.keys(this.#currentWeatherByZone).length) {
         const components = game.time.components;
         const yearZero = calendar?.years?.yearZero ?? 0;
-        const zones = this.getCalendarZones();
+        const zones = this.#getEffectiveZones();
         for (const zone of zones) {
           const weather = this.#currentWeatherByZone[zone.id];
           if (!weather) continue;
-          const existing = this.getWeatherForDate(components.year + yearZero, components.month, (components.dayOfMonth ?? 0) + 1, zone.id);
+          const existing = this.getWeatherForDate(components.year + yearZero, components.month, components.dayOfMonth ?? 0, zone.id);
           if (!existing) await this.#recordWeatherHistory(weather, zone.id);
         }
         if (game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) await this.#ensureForecastPlan();
@@ -351,19 +354,8 @@ export default class WeatherManager {
     const currentWeatherId = currentWeather?.id ?? null;
     let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
     if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
-    let result;
-    if (!zoneConfig && !seasonClimate) {
-      log(2, 'No climate zone or season climate configured, using random preset');
-      const allPresets = getAllPresets(customPresets);
-      const randomPreset = allPresets[Math.floor(Math.random() * allPresets.length)];
-      const min = randomPreset.tempMin ?? 10;
-      const max = randomPreset.tempMax ?? 25;
-      const temperature = Math.round(min + Math.random() * (max - min));
-      result = { preset: randomPreset, temperature };
-    } else {
-      const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
-      result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId, inertia, previousWeather: prevWeather });
-    }
+    const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
+    const result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId, inertia, previousWeather: prevWeather });
     const weather = {
       id: result.preset.id,
       label: result.preset.label,
@@ -405,7 +397,7 @@ export default class WeatherManager {
   static getForecast(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
     const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
@@ -418,10 +410,10 @@ export default class WeatherManager {
     const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
     let year = components.year + yearZero;
     let month = components.month;
-    let day = (components.dayOfMonth ?? 0) + 1;
+    let dayOfMonth = components.dayOfMonth ?? 0;
     const result = [];
     for (let i = 0; i < days; i++) {
-      const entry = plan[year]?.[month]?.[day];
+      const entry = plan[year]?.[month]?.[dayOfMonth];
       if (!entry) return this.#getForecastLegacy({ ...options, zoneId });
       const preset = {
         id: entry.id,
@@ -432,17 +424,17 @@ export default class WeatherManager {
         description: entry.description ?? '',
         darknessPenalty: entry.darknessPenalty ?? 0
       };
-      let forecastEntry = { year, month, day, preset, temperature: entry.temperature, wind: entry.wind, precipitation: entry.precipitation, isVaried: false };
+      let forecastEntry = { year, month, dayOfMonth, preset, temperature: entry.temperature, wind: entry.wind, precipitation: entry.precipitation, isVaried: false };
       if (!isGM && accuracy < 100) {
-        const seed = dateSeed(year, month, day);
+        const seed = dateSeed(year, month, dayOfMonth);
         const varied = applyForecastVariance({ preset, temperature: entry.temperature }, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
-        forecastEntry = { year, month, day, ...varied, wind: entry.wind, precipitation: entry.precipitation };
+        forecastEntry = { year, month, dayOfMonth, ...varied, wind: entry.wind, precipitation: entry.precipitation };
       }
       result.push(forecastEntry);
-      day++;
+      dayOfMonth++;
       const dim = getDaysInMonth(month, year);
-      if (day > dim) {
-        day = 1;
+      if (dayOfMonth >= dim) {
+        dayOfMonth = 0;
         month++;
         if (month >= (getDaysInMonth._monthsPerYear ?? 12)) {
           month = 0;
@@ -462,7 +454,7 @@ export default class WeatherManager {
   static #getForecastLegacy(options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     const zoneConfig = this.getActiveZone(zoneId);
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
@@ -478,7 +470,7 @@ export default class WeatherManager {
       zoneConfig,
       startYear: components.year + yearZero,
       startMonth: components.month,
-      startDay: (components.dayOfMonth ?? 0) + 1,
+      startDayOfMonth: components.dayOfMonth ?? 0,
       days,
       customPresets,
       currentWeatherId,
@@ -499,7 +491,7 @@ export default class WeatherManager {
     if (!CalendariaSocket.isPrimaryGM()) return;
     const calendar = CalendarManager.getActiveCalendar();
     const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER) ?? false;
-    const zones = this.getCalendarZones();
+    const zones = this.#getEffectiveZones();
     for (const zone of zones) {
       const weather = this.#currentWeatherByZone[zone.id];
       if (weather) await this.#recordWeatherHistory(weather, zone.id);
@@ -516,7 +508,7 @@ export default class WeatherManager {
     const customPresets = this.getCustomPresets();
     const weatherUpdates = {};
     for (const zone of zones) {
-      const planEntry = this.#getFromForecastPlan(data.current.year, data.current.month, (data.current.dayOfMonth ?? 0) + 1, zone.id);
+      const planEntry = this.#getFromForecastPlan(data.current.year, data.current.month, data.current.dayOfMonth ?? 0, zone.id);
       if (planEntry) {
         weatherUpdates[zone.id] = {
           id: planEntry.id,
@@ -601,7 +593,7 @@ export default class WeatherManager {
    */
   static async #backfillHistory(data, calendar, gap) {
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
-    const zones = this.getCalendarZones();
+    const zones = this.#getEffectiveZones();
     if (maxDays === 0) {
       for (const zone of zones) await this.generateAndSetWeather({ zoneId: zone.id, _fromPlan: true });
       return;
@@ -618,7 +610,7 @@ export default class WeatherManager {
     const startComponents = calendar.timeToComponents(startTime);
     const startYear = startComponents.year + yearZero;
     const startMonth = startComponents.month;
-    const startDay = (startComponents.dayOfMonth ?? 0) + 1;
+    const startDayOfMonth = startComponents.dayOfMonth ?? 0;
     const fullPlan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
     const seasonData = calendar.getCurrentSeason?.(game.time.components);
@@ -630,7 +622,7 @@ export default class WeatherManager {
         zoneConfig,
         startYear,
         startMonth,
-        startDay,
+        startDayOfMonth,
         days: daysToFill + 1,
         customPresets,
         currentWeatherId: null,
@@ -640,7 +632,7 @@ export default class WeatherManager {
       });
       for (let i = 0; i < forecast.length - 1; i++) {
         const f = forecast[i];
-        const planEntry = zonePlan[f.year]?.[f.month]?.[f.day];
+        const planEntry = zonePlan[f.year]?.[f.month]?.[f.dayOfMonth];
         const entry = planEntry ?? {
           id: f.preset.id,
           label: localize(f.preset.label),
@@ -653,8 +645,8 @@ export default class WeatherManager {
         };
         history[f.year] ??= {};
         history[f.year][f.month] ??= {};
-        history[f.year][f.month][f.day] ??= {};
-        history[f.year][f.month][f.day][zone.id] = {
+        history[f.year][f.month][f.dayOfMonth] ??= {};
+        history[f.year][f.month][f.dayOfMonth][zone.id] = {
           id: entry.id,
           label: planEntry ? entry.label : localize(f.preset.label),
           icon: entry.icon,
@@ -668,7 +660,7 @@ export default class WeatherManager {
         };
       }
       const todayF = forecast[forecast.length - 1];
-      const todayPlan = zonePlan[todayF.year]?.[todayF.month]?.[todayF.day];
+      const todayPlan = zonePlan[todayF.year]?.[todayF.month]?.[todayF.dayOfMonth];
       if (todayPlan) {
         this.#currentWeatherByZone[zone.id] = {
           id: todayPlan.id,
@@ -733,18 +725,18 @@ export default class WeatherManager {
   static async #recordWeatherHistory(weather, zoneId) {
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
     if (maxDays === 0) return;
-    const resolvedZoneId = zoneId ?? this.getActiveZone()?.id;
+    const resolvedZoneId = zoneId ?? this.getActiveZone()?.id ?? this.DEFAULT_ZONE;
     const components = game.time.components;
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
     const year = components.year + yearZero;
     const month = components.month;
-    const day = (components.dayOfMonth ?? 0) + 1;
+    const dayOfMonth = components.dayOfMonth ?? 0;
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
     history[year] ??= {};
     history[year][month] ??= {};
-    history[year][month][day] ??= {};
-    history[year][month][day][resolvedZoneId] = {
+    history[year][month][dayOfMonth] ??= {};
+    history[year][month][dayOfMonth][resolvedZoneId] = {
       id: weather.id,
       label: localize(weather.label),
       icon: weather.icon,
@@ -782,6 +774,50 @@ export default class WeatherManager {
   }
 
   /**
+   * Migrate weather history and forecast plan day keys from 1-indexed to 0-indexed.
+   * @private
+   */
+  static async #migrateWeatherDayIndex() {
+    let changed = false;
+    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
+    if (Object.keys(history).length) {
+      const migrated = this.#shiftDayKeys(history);
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, migrated);
+      changed = true;
+      log(3, 'Migrated weather history day keys from 1-indexed to 0-indexed');
+    }
+    const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
+    if (Object.keys(plan).length) {
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
+      changed = true;
+      log(3, 'Cleared forecast plan for 0-indexed day migration');
+    }
+    if (changed) log(3, 'Weather day index migration complete');
+    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED, true);
+  }
+
+  /**
+   * Shift all day-level keys in a nested year→month→day object by -1.
+   * @param {object} data - Nested object (year → month → day → value)
+   * @returns {object} New object with shifted day keys
+   * @private
+   */
+  static #shiftDayKeys(data) {
+    const result = {};
+    for (const [year, months] of Object.entries(data)) {
+      result[year] = {};
+      for (const [month, days] of Object.entries(months)) {
+        result[year][month] = {};
+        for (const [day, value] of Object.entries(days)) {
+          const newDay = Math.max(0, Number(day) - 1);
+          result[year][month][newDay] = value;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
    * Ensure the forecast plan has enough future entries.
    * @private
    */
@@ -789,15 +825,14 @@ export default class WeatherManager {
     if (!CalendariaSocket.isPrimaryGM()) return;
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return;
-    const zones = this.getCalendarZones();
-    if (!zones.length) return;
+    const zones = this.#getEffectiveZones();
     const forecastDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
     const todayYear = components.year + yearZero;
     const todayMonth = components.month;
-    const todayDay = (components.dayOfMonth ?? 0) + 1;
-    const todayKey = todayYear * 10000 + todayMonth * 100 + todayDay;
+    const todayDayOfMonth = components.dayOfMonth ?? 0;
+    const todayKey = todayYear * 10000 + todayMonth * 100 + todayDayOfMonth;
     const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
     const customPresets = this.getCustomPresets();
@@ -811,7 +846,7 @@ export default class WeatherManager {
         for (const [m, days] of Object.entries(months)) {
           for (const [d, entry] of Object.entries(days)) {
             const key = Number(y) * 10000 + Number(m) * 100 + Number(d);
-            entries.push({ key, year: Number(y), month: Number(m), day: Number(d), entry });
+            entries.push({ key, year: Number(y), month: Number(m), dayOfMonth: Number(d), entry });
           }
         }
       }
@@ -826,16 +861,16 @@ export default class WeatherManager {
         }
         continue;
       }
-      let startYear, startMonth, startDay, chainWeatherId;
+      let startYear, startMonth, startDayOfMonth, chainWeatherId;
       const lastFuture = futureEntries[futureEntries.length - 1];
       if (lastFuture) {
         startYear = lastFuture.year;
         startMonth = lastFuture.month;
-        startDay = lastFuture.day + 1;
+        startDayOfMonth = lastFuture.dayOfMonth + 1;
         chainWeatherId = lastFuture.entry.id;
         const dim = getDaysInMonth(startMonth, startYear);
-        if (startDay > dim) {
-          startDay = 1;
+        if (startDayOfMonth >= dim) {
+          startDayOfMonth = 0;
           startMonth++;
           if (startMonth >= (getDaysInMonth._monthsPerYear ?? 12)) {
             startMonth = 0;
@@ -845,7 +880,7 @@ export default class WeatherManager {
       } else {
         startYear = todayYear;
         startMonth = todayMonth;
-        startDay = todayDay;
+        startDayOfMonth = todayDayOfMonth;
         chainWeatherId = this.#currentWeatherByZone[zone.id]?.id ?? null;
       }
       const toGenerate = needed - futureEntries.length;
@@ -855,7 +890,7 @@ export default class WeatherManager {
         zoneConfig: zone,
         startYear,
         startMonth,
-        startDay,
+        startDayOfMonth,
         days: toGenerate,
         customPresets,
         currentWeatherId: chainWeatherId,
@@ -868,7 +903,7 @@ export default class WeatherManager {
       for (const f of forecast) {
         zonePlan[f.year] ??= {};
         zonePlan[f.year][f.month] ??= {};
-        zonePlan[f.year][f.month][f.day] = {
+        zonePlan[f.year][f.month][f.dayOfMonth] = {
           id: f.preset.id,
           label: f.preset.label,
           icon: f.preset.icon,
@@ -898,15 +933,15 @@ export default class WeatherManager {
    * Look up a forecast plan entry for a specific date and zone.
    * @param {number} year - Display year
    * @param {number} month - Month (0-indexed)
-   * @param {number} day - Day of month (1-indexed)
+   * @param {number} dayOfMonth - Day of month (0-indexed)
    * @param {string} [zoneId] - Zone ID
    * @returns {object|null} Plan entry or null
    * @private
    */
-  static #getFromForecastPlan(year, month, day, zoneId) {
+  static #getFromForecastPlan(year, month, dayOfMonth, zoneId) {
     const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
-    return plan[resolvedZoneId]?.[year]?.[month]?.[day] ?? null;
+    return plan[resolvedZoneId]?.[year]?.[month]?.[dayOfMonth] ?? null;
   }
 
   /**
@@ -966,8 +1001,8 @@ export default class WeatherManager {
    * @private
    */
   static #makeSeasonResolver(calendar, yearZero) {
-    return (year, month, day) => {
-      const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
+    return (year, month, dayOfMonth) => {
+      const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth });
       if (!season) return null;
       return { name: season.name, climate: season.climate };
     };
@@ -977,17 +1012,17 @@ export default class WeatherManager {
    * Get historical weather for a specific date.
    * @param {number} year - Display year
    * @param {number} month - Month (0-indexed)
-   * @param {number} day - Day of month (1-indexed)
+   * @param {number} dayOfMonth - Day of month (0-indexed)
    * @param {string} [zoneId] - Zone ID filter (resolves from active scene if omitted)
    * @returns {object|null} Historical weather entry or null
    */
-  static getWeatherForDate(year, month, day, zoneId) {
+  static getWeatherForDate(year, month, dayOfMonth, zoneId) {
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
-    const dayData = history[year]?.[month]?.[day];
+    const dayData = history[year]?.[month]?.[dayOfMonth];
     if (!dayData) return null;
     if (dayData.id !== undefined) return !zoneId || dayData.zoneId === zoneId ? dayData : null;
-    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
-    if (resolvedZoneId && dayData[resolvedZoneId]) return dayData[resolvedZoneId];
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
+    if (dayData[resolvedZoneId]) return dayData[resolvedZoneId];
     const firstKey = Object.keys(dayData)[0];
     return firstKey ? dayData[firstKey] : null;
   }
@@ -998,28 +1033,28 @@ export default class WeatherManager {
    * @param {number} [options.year] - Filter to a specific year
    * @param {number} [options.month] - Filter to a specific month (requires year)
    * @param {string} [options.zoneId] - Zone ID filter (resolves from active scene if omitted)
-   * @returns {object|object[]} Nested history object, or array of { year, month, day, ...entry }
+   * @returns {object|object[]} Nested history object, or array of { year, month, dayOfMonth, ...entry }
    */
   static getWeatherHistory(options = {}) {
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
     if (options.year == null) return history;
     const yearData = history[options.year];
     if (!yearData) return [];
-    const resolvedZoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const resolvedZoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     const results = [];
     const months = options.month != null ? { [options.month]: yearData[options.month] } : yearData;
     for (const [m, days] of Object.entries(months)) {
       if (!days) continue;
       for (const [d, dayData] of Object.entries(days)) {
         if (dayData.id !== undefined) {
-          if (!resolvedZoneId || dayData.zoneId === resolvedZoneId) results.push({ year: options.year, month: Number(m), day: Number(d), ...dayData });
+          if (!resolvedZoneId || dayData.zoneId === resolvedZoneId) results.push({ year: options.year, month: Number(m), dayOfMonth: Number(d), ...dayData });
         } else {
-          const entry = resolvedZoneId ? dayData[resolvedZoneId] : dayData[Object.keys(dayData)[0]];
-          if (entry) results.push({ year: options.year, month: Number(m), day: Number(d), ...entry });
+          const entry = dayData[resolvedZoneId] ?? dayData[Object.keys(dayData)[0]];
+          if (entry) results.push({ year: options.year, month: Number(m), dayOfMonth: Number(d), ...entry });
         }
       }
     }
-    return results.sort((a, b) => a.month - b.month || a.day - b.day);
+    return results.sort((a, b) => a.month - b.month || a.dayOfMonth - b.dayOfMonth);
   }
 
   /**
@@ -1130,6 +1165,17 @@ export default class WeatherManager {
   static getCalendarZones() {
     const calendar = CalendarManager.getActiveCalendar();
     return calendar?.weatherZonesArray ?? [];
+  }
+
+  /**
+   * Get effective zones for weather operations, always returning at least a default entry.
+   * @returns {object[]} Array of zone-like objects with at least an `id` property
+   * @private
+   */
+  static #getEffectiveZones() {
+    const zones = this.getCalendarZones();
+    if (zones.length) return zones;
+    return [{ id: this.DEFAULT_ZONE }];
   }
 
   /**

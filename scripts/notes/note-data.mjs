@@ -16,7 +16,7 @@ import { isValidDate } from './date-utils.mjs';
 export function getDefaultNoteData() {
   const currentDate = game.time.components;
   return {
-    startDate: { year: currentDate.year, month: currentDate.month, day: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
+    startDate: { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
     endDate: null,
     allDay: false,
     repeat: 'never',
@@ -100,7 +100,7 @@ export function validateNoteData(noteData) {
     if (typeof noteData.rangePattern !== 'object') {
       errors.push('rangePattern must be an object or null');
     } else {
-      for (const field of ['year', 'month', 'day']) {
+      for (const field of ['year', 'month', 'dayOfMonth']) {
         const bit = noteData.rangePattern[field];
         if (bit !== undefined && bit !== null) {
           if (typeof bit === 'number') {

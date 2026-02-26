@@ -9,7 +9,7 @@ import CalendarManager from '../../calendar/calendar-manager.mjs';
 /**
  * Get the current phase position (0-1) for a moon at a given date.
  * @param {object} moon - Moon definition with cycleLength and referenceDate
- * @param {object} date - Date to check { year, month, day }
+ * @param {object} date - Date to check { year, month, dayOfMonth }
  * @param {object} calendar - Calendar instance (optional, uses active if not provided)
  * @returns {number} Phase position from 0 to 1
  */
@@ -36,11 +36,11 @@ export function isMoonFull(moon, date, calendar = null) {
 /**
  * Find the next date when all moons are simultaneously full (Convergence).
  * @param {Array} moons - Array of moon definitions
- * @param {object} startDate - Date to start searching from { year, month, day }
+ * @param {object} startDate - Date to start searching from { year, month, dayOfMonth }
  * @param {object} options - Search options
  * @param {number} options.maxDays - Maximum days to search (default: 1000)
  * @param {object} options.calendar - Calendar instance (optional)
- * @returns {object|null} Next convergence date, or null if not found within maxDays
+ * @returns {object|null} Next convergence date { year, month, dayOfMonth }, or null if not found within maxDays
  */
 export function getNextConvergence(moons, startDate, options = {}) {
   const { maxDays = 1000, calendar: providedCalendar } = options;
@@ -61,7 +61,7 @@ export function getNextConvergence(moons, startDate, options = {}) {
  * @param {object} moon - Moon definition
  * @param {object} startDate - Date to start searching from
  * @param {object} options - Search options
- * @returns {object|null} Next full moon date
+ * @returns {object|null} Next full moon date { year, month, dayOfMonth }
  */
 export function getNextFullMoon(moon, startDate, options = {}) {
   const { maxDays = 1000, calendar: providedCalendar } = options;
@@ -81,7 +81,7 @@ export function getNextFullMoon(moon, startDate, options = {}) {
  * @param {object} startDate - Range start date
  * @param {object} endDate - Range end date
  * @param {object} options - Search options
- * @returns {Array} Array of convergence dates
+ * @returns {Array} Array of convergence dates { year, month, dayOfMonth }
  */
 export function getConvergencesInRange(moons, startDate, endDate, options = {}) {
   const calendar = options.calendar || CalendarManager.getActiveCalendar();
@@ -103,8 +103,8 @@ export function getConvergencesInRange(moons, startDate, endDate, options = {}) 
 
 /**
  * Calculate days between two dates.
- * @param {object} date1 - First date { year, month, day }
- * @param {object} date2 - Second date { year, month, day }
+ * @param {object} date1 - First date { year, month, dayOfMonth }
+ * @param {object} date2 - Second date { year, month, dayOfMonth }
  * @param {object} calendar - Calendar instance
  * @returns {number} Days between dates (negative if date1 > date2)
  */
@@ -116,7 +116,7 @@ function calculateDaysBetween(date1, date2, calendar) {
 
 /**
  * Convert a date to an absolute day number for comparison.
- * @param {object} date - Date { year, month, day }
+ * @param {object} date - Date { year, month, dayOfMonth }
  * @param {object} calendar - Calendar instance
  * @returns {number} Absolute day number
  */
@@ -125,32 +125,30 @@ function dateToDayNumber(date, calendar) {
   const months = calendar.monthsArray ?? [];
   let dayNumber = date.year * daysPerYear;
   for (let m = 0; m < date.month && m < months.length; m++) dayNumber += months[m]?.days ?? 30;
-  const day = date.day ?? (date.dayOfMonth != null ? date.dayOfMonth + 1 : 1);
-  dayNumber += day - 1;
+  dayNumber += date.dayOfMonth ?? 0;
   return dayNumber;
 }
 
 /**
  * Add one day to a date.
- * @param {object} date - Date to increment
+ * @param {object} date - Date to increment { year, month, dayOfMonth }
  * @param {object} calendar - Calendar instance
- * @returns {object} New date
+ * @returns {object} New date { year, month, dayOfMonth }
  */
 function addOneDay(date, calendar) {
   const months = calendar.monthsArray ?? [];
   let { year, month } = date;
-  let day = date.day ?? (date.dayOfMonth != null ? date.dayOfMonth + 1 : 1);
-  day++;
+  let dayOfMonth = (date.dayOfMonth ?? 0) + 1;
   const daysInMonth = months[month]?.days ?? 30;
-  if (day > daysInMonth) {
-    day = 1;
+  if (dayOfMonth >= daysInMonth) {
+    dayOfMonth = 0;
     month++;
     if (month >= months.length) {
       month = 0;
       year++;
     }
   }
-  return { year, month, day };
+  return { year, month, dayOfMonth };
 }
 
 /**
@@ -162,6 +160,6 @@ function addOneDay(date, calendar) {
 function compareDates(date1, date2) {
   if (date1.year !== date2.year) return date1.year < date2.year ? -1 : 1;
   if (date1.month !== date2.month) return date1.month < date2.month ? -1 : 1;
-  if (date1.day !== date2.day) return date1.day < date2.day ? -1 : 1;
+  if (date1.dayOfMonth !== date2.dayOfMonth) return date1.dayOfMonth < date2.dayOfMonth ? -1 : 1;
   return 0;
 }

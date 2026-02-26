@@ -156,7 +156,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         if (type === 'any') {
           rangePattern[component] = [null, null];
         } else if (type === 'exact') {
-          const defaults = { year: new Date().getFullYear(), month: 0, day: 1 };
+          const defaults = { year: new Date().getFullYear(), month: 0, dayOfMonth: 1 };
           rangePattern[component] = defaults[component];
         } else if (type === 'range') {
           rangePattern[component] = [0, 0];
@@ -309,11 +309,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     else context.iconType = context.system.iconType || 'image';
     const startYear = this.document.system.startDate.year || currentYear;
     const startMonth = this.document.system.startDate.month ?? currentMonth;
-    const startDay = this.document.system.startDate.day || currentDay;
+    const startDay = (this.document.system.startDate.dayOfMonth ?? 0) + 1 || currentDay;
     context.startDateDisplay = this._formatDateDisplay(calendar, startYear, startMonth, startDay);
     const endYear = this.document.system.endDate?.year || startYear;
     const endMonth = this.document.system.endDate?.month ?? startMonth;
-    const endDay = this.document.system.endDate?.day || startDay;
+    const endDay = (this.document.system.endDate?.dayOfMonth ?? 0) + 1 || startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     context.maxHour = hoursPerDay - 1;
@@ -399,13 +399,13 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const rangeMonthMax = monthType === 'range' ? rangePattern.month[1] : null;
     const months = calendar?.monthsArray ?? [];
     context.monthOptions = months.map((m, idx) => ({ index: idx, name: localize(m.name), selected: rangeMonthValue === idx, selectedMin: rangeMonthMin === idx, selectedMax: rangeMonthMax === idx }));
-    const dayType = getRangeType(rangePattern.day);
+    const dayType = getRangeType(rangePattern.dayOfMonth);
     context.rangeDayAny = dayType === 'any';
     context.rangeDayExact = dayType === 'exact';
     context.rangeDayRange = dayType === 'range';
-    context.rangeDayValue = dayType === 'exact' ? rangePattern.day : '';
-    context.rangeDayMin = dayType === 'range' ? (rangePattern.day[0] ?? '') : '';
-    context.rangeDayMax = dayType === 'range' ? (rangePattern.day[1] ?? '') : '';
+    context.rangeDayValue = dayType === 'exact' ? rangePattern.dayOfMonth : '';
+    context.rangeDayMin = dayType === 'range' ? (rangePattern.dayOfMonth[0] ?? '') : '';
+    context.rangeDayMax = dayType === 'range' ? (rangePattern.dayOfMonth[1] ?? '') : '';
     context.showWeekOfMonthConfig = this.document.system.repeat === 'weekOfMonth';
     context.weekNumber = this.document.system.weekNumber ?? 1;
     const weekdays = calendar?.weekdaysArray ?? [];
@@ -617,7 +617,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       };
       rangePattern.year = getRangeValue('year');
       rangePattern.month = getRangeValue('month');
-      rangePattern.day = getRangeValue('day');
+      rangePattern.dayOfMonth = getRangeValue('day');
       data.system.rangePattern = rangePattern;
     } else {
       data.system.rangePattern = null;
@@ -743,16 +743,16 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const fallbackDay = (components.dayOfMonth ?? 0) + 1;
     const yearInput = form.querySelector(`input[name="system.${dateField}.year"]`);
     const monthInput = form.querySelector(`input[name="system.${dateField}.month"]`);
-    const dayInput = form.querySelector(`input[name="system.${dateField}.day"]`);
+    const dayInput = form.querySelector(`input[name="system.${dateField}.dayOfMonth"]`);
     const currentYear = parseInt(yearInput?.value) || fallbackYear;
     const parsedMonth = parseInt(monthInput?.value);
     const currentMonth = !isNaN(parsedMonth) ? parsedMonth : fallbackMonth;
-    const currentDay = parseInt(dayInput?.value) || fallbackDay;
+    const currentDay = dayInput ? parseInt(dayInput.value) + 1 : fallbackDay;
     const result = await CalendarNoteSheet._showDatePickerDialog(calendar, currentYear, currentMonth, currentDay);
     if (!result) return;
     if (yearInput) yearInput.value = result.year;
     if (monthInput) monthInput.value = result.month;
-    if (dayInput) dayInput.value = result.day;
+    if (dayInput) dayInput.value = result.day - 1;
     const displaySpan = target.querySelector('.date-display');
     if (displaySpan) {
       const isMonthless = calendar?.isMonthless ?? false;
@@ -859,7 +859,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const currentDateTime = CalendarManager.getCurrentDateTime();
     const currentYear = currentDateTime.year;
     const currentMonth = currentDateTime.month;
-    const currentDay = currentDateTime.day;
+    const currentDay = currentDateTime.dayOfMonth;
     const currentHour = currentDateTime.hour;
     const currentMinute = currentDateTime.minute;
     const form = this.element;
@@ -889,17 +889,17 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (gmOnlyInput) gmOnlyInput.checked = game.user.isGM;
     const startYearInput = form.querySelector('input[name="system.startDate.year"]');
     const startMonthInput = form.querySelector('input[name="system.startDate.month"]');
-    const startDayInput = form.querySelector('input[name="system.startDate.day"]');
+    const startDayInput = form.querySelector('input[name="system.startDate.dayOfMonth"]');
     if (startYearInput) startYearInput.value = currentYear;
     if (startMonthInput) startMonthInput.value = currentMonth;
     if (startDayInput) startDayInput.value = currentDay;
     const endYearInput = form.querySelector('input[name="system.endDate.year"]');
     const endMonthInput = form.querySelector('input[name="system.endDate.month"]');
-    const endDayInput = form.querySelector('input[name="system.endDate.day"]');
+    const endDayInput = form.querySelector('input[name="system.endDate.dayOfMonth"]');
     if (endYearInput) endYearInput.value = currentYear;
     if (endMonthInput) endMonthInput.value = currentMonth;
     if (endDayInput) endDayInput.value = currentDay;
-    const dateDisplay = this._formatDateDisplay(calendar, currentYear, currentMonth, currentDay);
+    const dateDisplay = this._formatDateDisplay(calendar, currentYear, currentMonth, currentDay + 1);
     const startDateDisplay = form.querySelector('[data-date-field="startDate"] .date-display');
     const endDateDisplay = form.querySelector('[data-date-field="endDate"] .date-display');
     if (startDateDisplay) startDateDisplay.textContent = dateDisplay;
