@@ -445,7 +445,7 @@
       }
 
       .day-num {
-        color: var(--calendaria-day-number);
+        color: var(--calendaria-text);
       }
     }
 
@@ -471,7 +471,7 @@
     }
 
     .day-num {
-      color: var(--calendaria-day-number);
+      color: var(--calendaria-text);
       font-weight: 500;
       font-size: 0.9rem;
     }
@@ -641,9 +641,9 @@
       width: 1.75rem;
       height: 1.75rem;
       padding: 0;
-      border: 0.0625rem solid var(--calendaria-button-border);
+      border: 0.0625rem solid var(--calendaria-border);
       border-radius: 0.25rem;
-      color: var(--calendaria-button-text);
+      color: var(--calendaria-text);
       cursor: pointer;
       background: var(--calendaria-button-bg);
       transition:
@@ -679,9 +679,9 @@
       height: 1.75rem;
       margin: 0;
       padding: 0 0.375rem;
-      border: 0.0625rem solid var(--calendaria-button-border);
+      border: 0.0625rem solid var(--calendaria-border);
       border-radius: 0.25rem;
-      color: var(--calendaria-button-text);
+      color: var(--calendaria-text);
       font-size: 0.75rem;
       line-height: 1.625rem;
       text-align: center;

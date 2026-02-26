@@ -114,7 +114,7 @@
       background: transparent;
 
       &:hover {
-        border-color: var(--color-positive-fg, var(--calendaria-positive-fg));
+        border-color: var(--color-positive-fg, var(--calendaria-success));
         background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
       }
     }
@@ -153,8 +153,8 @@
   }
 
   button:not(.add-note-btn) {
-    border-color: var(--calendaria-button-border);
-    color: var(--calendaria-button-text);
+    border-color: var(--calendaria-border);
+    color: var(--calendaria-text);
     background: var(--calendaria-button-bg);
   }
 
@@ -440,7 +440,7 @@
     display: flex;
     align-items: center;
     margin-bottom: 0.25rem;
-    color: var(--calendaria-day-number);
+    color: var(--calendaria-text);
     font-size: var(--font-size-14);
     font-weight: bold;
   }
@@ -996,7 +996,7 @@
 
     .category-tag {
       padding: 0.25rem 0.75rem;
-      border: 0.0625rem solid var(--color-cool-3, var(--calendaria-cool-3));
+      border: 0.0625rem solid var(--color-cool-3, var(--calendaria-divider));
       border-radius: 1rem;
       font-size: 0.85rem;
       background: var(--color-cool-4);
@@ -1352,7 +1352,7 @@
     align-items: center;
     max-width: 100%;
     padding: 0.25rem 0.5rem;
-    border: 0.0625rem solid var(--color-cool-3, var(--calendaria-cool-3));
+    border: 0.0625rem solid var(--color-cool-3, var(--calendaria-divider));
     border-radius: 1rem;
     font-size: var(--font-size-11);
     background: var(--color-cool-4);
@@ -1648,7 +1648,7 @@
         cursor: pointer;
 
         &:hover {
-          background: var(--color-cool-3, var(--calendaria-cool-3));
+          background: var(--color-cool-3, var(--calendaria-divider));
         }
       }
     }

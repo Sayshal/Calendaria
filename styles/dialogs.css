@@ -152,7 +152,7 @@
       box-sizing: border-box;
       height: 1.875rem;
       padding: 0 0.5rem;
-      border: 0.0625rem solid var(--calendaria-input-border);
+      border: 0.0625rem solid var(--calendaria-border);
       border-radius: 0.25rem;
       color: var(--calendaria-text);
       font-size: var(--font-size-13);

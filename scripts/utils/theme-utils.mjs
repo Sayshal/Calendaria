@@ -311,7 +311,6 @@ export function generateDerivedColors(colors) {
   if (colors.shadow) {
     const { r, g, b } = hexToRgb(colors.shadow);
     derived['--calendaria-shadow'] = `rgb(${r} ${g} ${b} / 40%)`;
-    derived['--calendaria-event-shadow'] = `rgb(${r} ${g} ${b} / 20%)`;
   }
   if (colors.overlay) {
     const { r, g, b } = hexToRgb(colors.overlay);
@@ -336,11 +335,8 @@ const CSS_VAR_MAP = {
   textDim: '--calendaria-text-dim',
   titleText: '--calendaria-title-text',
   weekdayHeader: '--calendaria-weekday-header',
-  dayNumber: '--calendaria-day-number',
   restDay: '--calendaria-rest-day',
   buttonBg: '--calendaria-button-bg',
-  buttonText: '--calendaria-button-text',
-  buttonBorder: '--calendaria-button-border',
   primary: '--calendaria-primary',
   today: '--calendaria-today',
   accent: '--calendaria-accent',
