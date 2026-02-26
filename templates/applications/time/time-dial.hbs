@@ -1,11 +1,11 @@
-<div class="dial-backdrop"></div>
-<div class="dial-container">
-  <div class="dial-sky">
-    <div class="dial-stars"></div>
-    <div class="dial-sun">
-      <div class="dial-moon-orb"></div>
+<div class="backdrop"></div>
+<div class="container">
+  <div class="sky">
+    <div class="stars"></div>
+    <div class="sun">
+      <div class="moon-orb"></div>
     </div>
-    <svg class="dial-markers" viewBox="0 0 200 200">
+    <svg class="markers" viewBox="0 0 200 200">
       {{#each hourMarkers}}
         <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" stroke="rgba(255, 255, 255, 0.5)"
           stroke-width="{{strokeWidth}}" />
@@ -15,11 +15,11 @@
         {{/if}}
       {{/each}}
     </svg>
-    <div class="dial-handle-container">
-      <div class="dial-handle"></div>
+    <div class="handle-container">
+      <div class="handle"></div>
     </div>
   </div>
-  <div class="dial-time-display">
-    <input type="text" class="dial-time" value="{{currentTime}}">
+  <div class="time-display">
+    <input type="text" class="time" value="{{currentTime}}">
   </div>
 </div>

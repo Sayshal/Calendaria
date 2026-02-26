@@ -1376,10 +1376,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const html = await foundry.applications.handlebars.renderTemplate(TEMPLATES.TIME_DIAL, templateData);
     const dial = document.createElement('div');
     dial.id = 'calendaria-time-dial';
-    dial.className = 'calendaria-time-dial';
+    dial.className = 'calendaria time-dial';
     dial.innerHTML = html;
     document.body.appendChild(dial);
-    const dialContainer = dial.querySelector('.dial-container');
+    const dialContainer = dial.querySelector('.container');
     const dialRect = dialContainer.getBoundingClientRect();
     const hudRect = this.element.getBoundingClientRect();
     let left = hudRect.left + hudRect.width / 2 - dialRect.width / 2;
@@ -1478,12 +1478,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} angle - Rotation angle in degrees
    */
   #updateDialRotation(dial, angle) {
-    const handleContainer = dial.querySelector('.dial-handle-container');
-    const sky = dial.querySelector('.dial-sky');
-    const sunContainer = dial.querySelector('.dial-sun');
+    const handleContainer = dial.querySelector('.handle-container');
+    const sky = dial.querySelector('.sky');
+    const sunContainer = dial.querySelector('.sun');
     if (!handleContainer || !sky || !sunContainer) return;
     const time = this.#angleToTime(angle);
-    const timeDisplay = dial.querySelector('.dial-time');
+    const timeDisplay = dial.querySelector('.time');
     if (timeDisplay && document.activeElement !== timeDisplay) timeDisplay.value = this.#formatDialTime(time.hours, time.minutes);
     const normalizedAngle = ((angle % 360) + 360) % 360;
     let sunOpacity;
@@ -1533,9 +1533,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} dial - The dial container element
    */
   #setupDialInteraction(dial) {
-    const sky = dial.querySelector('.dial-sky');
-    const backdrop = dial.querySelector('.dial-backdrop');
-    const handle = dial.querySelector('.dial-handle');
+    const sky = dial.querySelector('.sky');
+    const backdrop = dial.querySelector('.backdrop');
+    const handle = dial.querySelector('.handle');
     let isDragging = false;
     let initialAngle = 0;
     let initialMouseAngle = 0;
@@ -1574,7 +1574,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const onBackdropClick = () => {
       dial.remove();
     };
-    const timeInput = dial.querySelector('.dial-time');
+    const timeInput = dial.querySelector('.time');
     const applyTimeFromInput = async () => {
       const parsed = this.#parseTimeInput(timeInput.value);
       if (parsed) {

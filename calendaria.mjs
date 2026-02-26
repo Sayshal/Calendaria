@@ -7,7 +7,7 @@
 
 import './styles/theme.css';
 import './styles/global.css';
-import './styles/rotation-dial.css';
+import './styles/time-dial.css';
 import './styles/bigcal.css';
 import './styles/calendar-editor.css';
 import './styles/climate-editor.css';
