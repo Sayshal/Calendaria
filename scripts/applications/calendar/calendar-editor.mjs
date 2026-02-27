@@ -1333,7 +1333,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     `;
     const editor = this;
     new foundry.applications.api.DialogV2({
-      window: { title: format('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }), contentClasses: ['custom-weekdays-dialog'] },
+      window: { title: format('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }), contentClasses: ['calendaria', 'custom-weekdays-dialog'] },
       content,
       buttons: [
         {

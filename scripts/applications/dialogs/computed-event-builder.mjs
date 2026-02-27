@@ -35,7 +35,7 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'computed-event-builder',
-    classes: ['calendaria', 'computed-event-builder'],
+    classes: ['calendaria', 'computed-event-builder', 'standard-form'],
     tag: 'form',
     window: { title: 'CALENDARIA.Note.Computed', icon: 'fas fa-calculator', resizable: true },
     position: { width: 500, height: 'auto' },

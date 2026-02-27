@@ -89,6 +89,25 @@
   }
 }
 
+.directory-footer {
+  .calendaria-footer {
+    gap: 0.125rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-top: 0.0625rem solid var(--color-border-light-tertiary);
+
+    .calendaria-footer-buttons {
+      gap: 0.25rem;
+      display: flex;
+    }
+
+    i {
+      font-size: var(--font-size-10);
+    }
+  }
+}
+
 #context-menu {
   .context-item {
     &.sticky-active {

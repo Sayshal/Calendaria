@@ -318,30 +318,28 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onOpenNotification() {
     const currentSound = this.#notification?.sound || 'sounds/notify.wav';
     const content = `
-      <form class="standard-form">
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Stopwatch.NotificationThreshold')}</label>
-          <input type="number" name="threshold" value="${this.#notificationThreshold ?? ''}" min="1" placeholder="${localize('CALENDARIA.Stopwatch.ThresholdPlaceholder')}" />
-          <p class="hint">${this.#mode === 'realtime' ? localize('CALENDARIA.Stopwatch.ThresholdHintRealtime') : localize('CALENDARIA.Stopwatch.ThresholdHintGametime')}</p>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Stopwatch.NotificationThreshold')}</label>
+        <input type="number" name="threshold" value="${this.#notificationThreshold ?? ''}" min="1" placeholder="${localize('CALENDARIA.Stopwatch.ThresholdPlaceholder')}" />
+        <p class="hint">${this.#mode === 'realtime' ? localize('CALENDARIA.Stopwatch.ThresholdHintRealtime') : localize('CALENDARIA.Stopwatch.ThresholdHintGametime')}</p>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Stopwatch.NotificationType')}</label>
+        <select name="type">
+          <option value="toast" ${this.#notification?.type === 'toast' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationToast')}</option>
+          <option value="sound" ${this.#notification?.type === 'sound' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationSound')}</option>
+          <option value="both" ${this.#notification?.type === 'both' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationBoth')}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Stopwatch.NotificationSoundFile')}</label>
+        <div class="form-fields">
+          <input type="text" name="sound" value="${currentSound}" placeholder="sounds/notify.wav" />
+          <button type="button" class="file-picker" data-type="audio" data-target="sound" data-tooltip="${localize('FILES.BrowseTooltip')}">
+            <i class="fas fa-file-audio"></i>
+          </button>
         </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Stopwatch.NotificationType')}</label>
-          <select name="type">
-            <option value="toast" ${this.#notification?.type === 'toast' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationToast')}</option>
-            <option value="sound" ${this.#notification?.type === 'sound' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationSound')}</option>
-            <option value="both" ${this.#notification?.type === 'both' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationBoth')}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>${localize('CALENDARIA.Stopwatch.NotificationSoundFile')}</label>
-          <div class="form-fields">
-            <input type="text" name="sound" value="${currentSound}" placeholder="sounds/notify.wav" />
-            <button type="button" class="file-picker" data-type="audio" data-target="sound" data-tooltip="${localize('FILES.BrowseTooltip')}">
-              <i class="fas fa-file-audio"></i>
-            </button>
-          </div>
-        </div>
-      </form>
+      </div>
     `;
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: localize('CALENDARIA.Stopwatch.ConfigureNotification'), icon: 'fas fa-bell' },
