@@ -21,6 +21,7 @@ import { ImporterApp } from '../dialogs/importer-app.mjs';
 import { TokenReferenceDialog } from '../dialogs/token-reference-dialog.mjs';
 import { HUD } from '../hud/hud.mjs';
 import { Stopwatch } from '../time/stopwatch.mjs';
+import { SunDial } from '../time/sun-dial.mjs';
 import { TimeKeeper } from '../time/time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -64,6 +65,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       closeBigCal: SettingsPanel.#onCloseBigCal,
       openStopwatch: SettingsPanel.#onOpenStopwatch,
       closeStopwatch: SettingsPanel.#onCloseStopwatch,
+      openSunDial: SettingsPanel.#onOpenSunDial,
+      closeSunDial: SettingsPanel.#onCloseSunDial,
       addMoonTrigger: SettingsPanel.#onAddMoonTrigger,
       removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
@@ -96,6 +99,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     hud: { template: TEMPLATES.SETTINGS.PANEL_HUD, scrollable: [''] },
     timekeeper: { template: TEMPLATES.SETTINGS.PANEL_TIMEKEEPER, scrollable: [''] },
     stopwatch: { template: TEMPLATES.SETTINGS.PANEL_STOPWATCH, scrollable: [''] },
+    sunDial: { template: TEMPLATES.SETTINGS.PANEL_SUN_DIAL, scrollable: [''] },
     footer: { template: TEMPLATES.SETTINGS.PANEL_FOOTER }
   };
 
@@ -122,9 +126,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'module', group: 'primary', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Module', tabGroup: 'technical' },
         { id: 'bigcal', group: 'primary', icon: 'fas fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', tabGroup: 'apps' },
         { id: 'miniCal', group: 'primary', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCal', tabGroup: 'apps' },
-        { id: 'hud', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', tabGroup: 'apps' },
+        { id: 'hud', group: 'primary', icon: 'fas fa-landmark-dome', label: 'CALENDARIA.SettingsPanel.Tab.HUD', tabGroup: 'apps' },
         { id: 'timekeeper', group: 'primary', icon: 'fas fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', tabGroup: 'apps', gmOnly: true },
-        { id: 'stopwatch', group: 'primary', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', tabGroup: 'apps', gmOnly: true }
+        { id: 'stopwatch', group: 'primary', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', tabGroup: 'apps', gmOnly: true },
+        { id: 'sunDial', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.SunDial', tabGroup: 'apps', gmOnly: true }
       ],
       initial: 'home'
     }
@@ -541,6 +546,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       case 'stopwatch':
         await this.#prepareStopwatchContext(context);
         break;
+      case 'sunDial':
+        await this.#prepareSunDialContext(context);
+        break;
       case 'footer':
         await this.#prepareFooterContext(context);
         break;
@@ -664,6 +672,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.TIMEKEEPER_AUTO_FADE]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.TIMEKEEPER_IDLE_OPACITY]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.TIMEKEEPER_TIME_JUMPS]: { tab: 'timekeeper', label: 'CALENDARIA.SettingsPanel.Section.CustomTimeJumps' },
+    [SETTINGS.SHOW_SUN_DIAL]: { tab: 'sunDial', label: 'CALENDARIA.Settings.ShowSunDial.Name' },
+    [SETTINGS.SUN_DIAL_AUTO_FADE]: { tab: 'sunDial', label: 'CALENDARIA.Settings.AutoFade.Name' },
+    [SETTINGS.SUN_DIAL_IDLE_OPACITY]: { tab: 'sunDial', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
+    [SETTINGS.SUN_DIAL_CRANK_MODE]: { tab: 'sunDial', label: 'CALENDARIA.SettingsPanel.CrankMode' },
     [SETTINGS.STOPWATCH_AUTO_START_TIME]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name' },
     [SETTINGS.CUSTOM_CATEGORIES]: { tab: 'notes', label: 'CALENDARIA.SettingsPanel.Section.Categories' },
     [SETTINGS.MACRO_TRIGGERS]: { tab: 'macros', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
@@ -742,6 +754,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'timekeeper-time-jumps': [SETTINGS.TIMEKEEPER_TIME_JUMPS],
     'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
     'stopwatch-sticky': [SETTINGS.STOPWATCH_STICKY_STATES],
+    'sunDial-options': [SETTINGS.SHOW_SUN_DIAL, SETTINGS.SUN_DIAL_AUTO_FADE, SETTINGS.SUN_DIAL_IDLE_OPACITY, SETTINGS.SUN_DIAL_CRANK_MODE],
+    'sunDial-sticky': [SETTINGS.SUN_DIAL_STICKY_STATES],
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
     'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_TO_SUNRISE, SETTINGS.SYNC_CLOCK_PAUSE],
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
@@ -1098,6 +1112,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'bigCalYearHeader', label: localize('CALENDARIA.Format.Location.BigCalYearHeader'), category: 'bigcal', contextType: 'date' },
       { id: 'bigCalYearLabel', label: localize('CALENDARIA.Format.Location.BigCalYearLabel'), category: 'bigcal', contextType: 'date' },
       { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat', contextType: 'date' },
+      { id: 'sundialTime', label: localize('CALENDARIA.Format.Location.SunDialTime'), category: 'sunDial', contextType: 'time' },
       { id: 'stopwatchRealtime', label: localize('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true },
       { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true }
     ];
@@ -1112,6 +1127,17 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         knownPresets = stopwatchGametimeKnown;
         locationPresets = stopwatchGametimePresets;
         defaultFormat = 'stopwatchGametimeFull';
+      } else if (loc.id === 'sundialTime') {
+        knownPresets = ['calendarDefault', 'time12', 'time12Sec', 'time24', 'time24Sec', 'custom'];
+        locationPresets = [
+          { value: 'calendarDefault', label: calendarDefaultLabel },
+          { value: 'time12', label: localize('CALENDARIA.Format.Preset.Time12') },
+          { value: 'time12Sec', label: localize('CALENDARIA.Format.Preset.Time12Sec') },
+          { value: 'time24', label: localize('CALENDARIA.Format.Preset.Time24') },
+          { value: 'time24Sec', label: localize('CALENDARIA.Format.Preset.Time24Sec') },
+          { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
+        ];
+        defaultFormat = 'time24';
       } else {
         knownPresets = [
           'off',
@@ -1170,6 +1196,21 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.stopwatchStickyPosition = stopwatchSticky?.position ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stopwatch' });
+  }
+
+  /**
+   * Prepare context for the Sun Dial tab.
+   * @param {object} context - The context object
+   */
+  async #prepareSunDialContext(context) {
+    context.showSunDial = game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL);
+    context.sunDialAutoFade = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_AUTO_FADE);
+    context.sunDialIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_IDLE_OPACITY);
+    context.sunDialCrankMode = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE);
+    const sunDialSticky = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES);
+    context.sunDialStickyPosition = sunDialSticky?.position ?? false;
+    context.formatLocations = this.#prepareFormatLocationsForCategory('sunDial');
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Sun Dial' });
   }
 
   /**
@@ -1378,8 +1419,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.toolbarAppOptions = [
       { id: 'bigcal', icon: 'fa-calendar-days', label: localize('CALENDARIA.SettingsPanel.Tab.BigCal'), checked: toolbarApps.has('bigcal') },
       { id: 'minical', icon: 'fa-compress', label: localize('CALENDARIA.SettingsPanel.Tab.MiniCal'), checked: toolbarApps.has('minical') },
-      { id: 'hud', icon: 'fa-sun', label: localize('CALENDARIA.SettingsPanel.Tab.HUD'), checked: toolbarApps.has('hud') },
+      { id: 'hud', icon: 'fa-landmark-dome', label: localize('CALENDARIA.SettingsPanel.Tab.HUD'), checked: toolbarApps.has('hud') },
       { id: 'timekeeper', icon: 'fa-gauge', label: localize('CALENDARIA.SettingsPanel.Tab.TimeKeeper'), checked: toolbarApps.has('timekeeper') },
+      { id: 'sundial', icon: 'fa-sun', label: localize('CALENDARIA.SettingsPanel.Tab.SunDial'), checked: toolbarApps.has('sundial') },
       { id: 'stopwatch', icon: 'fa-stopwatch', label: localize('CALENDARIA.SettingsPanel.Tab.Stopwatch'), checked: toolbarApps.has('stopwatch') }
     ];
     context.showJournalFooter = game.settings.get(MODULE.ID, SETTINGS.SHOW_JOURNAL_FOOTER);
@@ -1523,6 +1565,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if ('timeKeeperStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: !!data.timeKeeperStickyPosition });
     if ('stopwatchStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, { position: !!data.stopwatchStickyPosition });
+    if ('sunDialOptionsSection' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, !!data.showSunDial);
+      await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_AUTO_FADE, !!data.sunDialAutoFade);
+      if (data.sunDialIdleOpacity != null) await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_IDLE_OPACITY, Math.round(Number(data.sunDialIdleOpacity)));
+      await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE, !!data.sunDialCrankMode);
+    }
+    if ('sunDialStickySection' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES, { position: !!data.sunDialStickyPosition });
+      SunDial.refreshStickyStates();
+    }
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
     if ('stickyZonesEnabled' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_ZONES_ENABLED, data.stickyZonesEnabled);
@@ -1790,7 +1842,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const config = {
       miniCal: { setting: SETTINGS.MINI_CAL_POSITION, appId: 'calendaria-mini-cal' },
       hud: { setting: SETTINGS.CALENDAR_HUD_POSITION, appId: 'calendaria-hud' },
-      timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'calendaria-timekeeper' }
+      timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'calendaria-timekeeper' },
+      sunDial: { setting: SETTINGS.SUN_DIAL_POSITION, appId: 'calendaria-sun-dial' }
     };
     const { setting, appId } = config[targetType] || {};
     if (!setting) return;
@@ -2110,6 +2163,24 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Open the Sun Dial.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onOpenSunDial(_event, _target) {
+    SunDial.open();
+  }
+
+  /**
+   * Close the Sun Dial.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onCloseSunDial(_event, _target) {
+    SunDial.hide();
+  }
+
+  /**
    * Add a new moon phase trigger.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
@@ -2332,6 +2403,29 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           opacityInput.disabled = !autoFadeCheckbox.checked;
           opacityNumber.disabled = !autoFadeCheckbox.checked;
           opacityGroup.classList.toggle('disabled', !autoFadeCheckbox.checked);
+        });
+      }
+    }
+    if (partId === 'sunDial') {
+      const rangeInput = htmlElement.querySelector('input[name="sunDialIdleOpacity"]');
+      const rangeGroup = rangeInput?.closest('.form-group');
+      const numberInput = rangeGroup?.querySelector('.range-value');
+      if (rangeInput && numberInput) {
+        rangeInput.addEventListener('input', (e) => {
+          numberInput.value = e.target.value;
+        });
+        numberInput.addEventListener('input', (e) => {
+          const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+          rangeInput.value = val;
+          rangeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+      const autoFadeCheckbox = htmlElement.querySelector('input[name="sunDialAutoFade"]');
+      if (autoFadeCheckbox && rangeInput && rangeGroup && numberInput) {
+        autoFadeCheckbox.addEventListener('change', () => {
+          rangeInput.disabled = !autoFadeCheckbox.checked;
+          numberInput.disabled = !autoFadeCheckbox.checked;
+          rangeGroup.classList.toggle('disabled', !autoFadeCheckbox.checked);
         });
       }
     }

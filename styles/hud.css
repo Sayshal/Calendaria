@@ -170,16 +170,6 @@
     }
   }
 
-  .calendaria-pinned {
-    z-index: 1000 !important;
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    width: max-content;
-    margin-bottom: 0.5rem;
-    pointer-events: auto !important;
-  }
-
   .section {
     gap: 0.625rem;
     display: flex;

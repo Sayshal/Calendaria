@@ -1,0 +1,216 @@
+.calendaria {
+  &.sun-dial {
+    --dial-sun-size: 0.9375rem;
+    --dial-size: 18.75rem;
+
+    z-index: 100;
+    position: fixed;
+    opacity: var(--calendaria-sundial-idle-opacity, 0.4);
+    transition: opacity 0.3s ease-in-out 2s;
+
+    &:hover {
+      opacity: 1;
+      transition-delay: 0s;
+    }
+
+    .container {
+      position: relative;
+      width: var(--dial-size);
+      height: var(--dial-size);
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    .sky {
+      isolation: isolate;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: 0.1875rem solid rgb(201 170 113);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .scene-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+
+    .markers {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .handle-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 0;
+      height: 50%;
+      pointer-events: none;
+      transform-origin: bottom center;
+    }
+
+    .handle {
+      clip-path: polygon(50% 100%, 0% 0%, 50% 15%, 100% 0%);
+      position: absolute;
+      top: -0.625rem;
+      left: -0.75rem;
+      width: 1.5rem;
+      height: 1.875rem;
+      cursor: grab;
+      pointer-events: all;
+      background: rgb(255 100 0);
+      box-shadow:
+        0 0 0.625rem rgb(0 0 0 / 50%),
+        0 0 0.3125rem rgb(255 100 0 / 50%);
+      filter: drop-shadow(0 0 0.125rem rgb(255 255 255));
+
+      &:hover {
+        background: rgb(255 132 51);
+        box-shadow:
+          0 0 0.9375rem rgb(0 0 0 / 70%),
+          0 0 0.5rem rgb(255 100 0 / 80%);
+        transform: scale(1.1);
+      }
+
+      &:active {
+        cursor: grabbing;
+        transform: scale(1.05);
+      }
+    }
+
+    .time-display {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .day-offset {
+      color: rgb(255 100 0);
+      font-weight: bold;
+      font-size: calc(var(--dial-size) * 0.047);
+      line-height: 1;
+      font-family: 'Modesto Condensed', 'Palatino Linotype', serif;
+      text-align: center;
+      text-shadow: 0 0 0.5rem rgb(255 100 0 / 80%);
+      min-height: calc(var(--dial-size) * 0.053);
+    }
+
+    .time {
+      width: calc(var(--dial-size) * 0.45);
+      padding: 0;
+      border: none;
+      outline: none;
+      color: rgb(255 100 0);
+      font-weight: bold;
+      font-size: calc(var(--dial-size) * 0.12);
+      height: auto;
+      line-height: 1.2;
+      font-family: 'Modesto Condensed', 'Palatino Linotype', serif;
+      text-align: center;
+      text-shadow: 0 0 0.625rem rgb(255 100 0 / 80%);
+      cursor: text;
+      background: transparent;
+      pointer-events: all;
+
+      &:focus {
+        text-shadow: 0 0 0.9375rem rgb(255 100 0);
+      }
+    }
+
+    .dial-controls {
+      display: flex;
+      gap: 0.25rem;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: all;
+    }
+
+    .container:hover .dial-controls {
+      opacity: 1;
+    }
+
+    .dial-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(var(--dial-size) * 0.09);
+      height: calc(var(--dial-size) * 0.09);
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: rgb(0 0 0 / 40%);
+      color: rgb(255 100 0);
+      font-size: calc(var(--dial-size) * 0.04);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      box-shadow: none;
+
+      &:hover,
+      &:focus {
+        background: rgb(0 0 0 / 60%);
+        color: rgb(255 132 51);
+        border: none;
+        box-shadow: none;
+      }
+
+      &:active {
+        border: none;
+        box-shadow: none;
+      }
+
+      &.clock-locked {
+        color: rgb(180 180 180);
+      }
+    }
+
+    .resize-handle {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 1rem;
+      height: 1rem;
+      cursor: nwse-resize;
+      opacity: 0;
+      transition: opacity 0.2s;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0.125rem;
+        right: 0.125rem;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-right: 0.125rem solid rgb(201 170 113);
+        border-bottom: 0.125rem solid rgb(201 170 113);
+      }
+    }
+
+    .container:hover .resize-handle {
+      opacity: 0.6;
+    }
+
+    .resize-handle:hover {
+      opacity: 1 !important;
+    }
+  }
+}

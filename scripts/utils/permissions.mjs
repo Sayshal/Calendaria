@@ -13,6 +13,7 @@ const DEFAULTS = {
   viewBigCal: { player: false, trusted: true, assistant: true },
   viewMiniCal: { player: false, trusted: true, assistant: true },
   viewTimeKeeper: { player: false, trusted: true, assistant: true },
+  viewSunDial: { player: false, trusted: true, assistant: true },
   addNotes: { player: true, trusted: true, assistant: true },
   changeDateTime: { player: false, trusted: false, assistant: true },
   changeActiveCalendar: { player: false, trusted: false, assistant: false },
@@ -60,6 +61,14 @@ export function canViewMiniCal() {
  */
 export function canViewTimeKeeper() {
   return hasPermission('viewTimeKeeper');
+}
+
+/**
+ * Check if the current user can view the Sun Dial.
+ * @returns {boolean} True if user has permission
+ */
+export function canViewSunDial() {
+  return hasPermission('viewSunDial');
 }
 
 /**

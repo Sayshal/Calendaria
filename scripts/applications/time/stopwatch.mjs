@@ -713,11 +713,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     let startSize = 0;
     const onMouseMove = (event) => {
       event.preventDefault();
-      const deltaX = event.clientX - startX;
-      const deltaY = startY - event.clientY;
-      const delta = Math.max(deltaX, deltaY);
-      const newSize = startSize + delta;
-      this.#setSize(newSize);
+      const delta = event.clientX - startX;
+      this.#setSize(startSize + delta);
     };
     const onMouseUp = async (event) => {
       event.preventDefault();

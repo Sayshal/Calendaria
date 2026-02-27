@@ -6,6 +6,7 @@
 
 import { MiniCal } from '../applications/calendar/mini-cal.mjs';
 import { HUD } from '../applications/hud/hud.mjs';
+import { SunDial } from '../applications/time/sun-dial.mjs';
 import { TimeKeeper } from '../applications/time/time-keeper.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
@@ -149,6 +150,9 @@ export class CalendariaSocket {
         break;
       case SOCKET_TYPES.TIME_KEEPER_VISIBILITY:
         this.#handleTimeKeeperVisibility(data);
+        break;
+      case SOCKET_TYPES.SUN_DIAL_VISIBILITY:
+        this.#handleSunDialVisibility(data);
         break;
       default:
         log(1, `Unknown socket message type: ${type}`);
@@ -412,6 +416,21 @@ export class CalendariaSocket {
     log(3, `Handling TimeKeeper visibility: ${visible}`);
     if (visible) TimeKeeper.show();
     else TimeKeeper.hide();
+  }
+
+  /**
+   * Handle Sun Dial visibility commands from GM.
+   * @private
+   * @param {object} data - The Sun Dial visibility data
+   * @param {boolean} data.visible - Whether Sun Dial should be visible
+   * @returns {void}
+   */
+  static #handleSunDialVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling Sun Dial visibility: ${visible}`);
+    if (visible) SunDial.open({ silent: true });
+    else SunDial.hide();
   }
 
   /**

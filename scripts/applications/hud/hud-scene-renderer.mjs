@@ -677,7 +677,7 @@ export class HudSceneRenderer {
 
   /**
    * @param {HTMLCanvasElement} canvas - Target canvas element
-   * @param {string} mode - 'dome' or 'slice'
+   * @param {string} mode - 'dome', 'slice', or 'dial'
    */
   constructor(canvas, mode = 'dome') {
     this.canvas = canvas;
@@ -729,7 +729,7 @@ export class HudSceneRenderer {
     if (this.#destroyed) return;
     this.#updateSky(skyColors);
     this.#updateStars(starAlpha);
-    this.#updateSun(hour, sunrise, sunset);
+    this.#updateSun(hour, sunrise, sunset, hoursPerDay);
     this.#updateMoons(hour, sunrise, sunset, hoursPerDay, moons);
   }
 
@@ -960,12 +960,15 @@ export class HudSceneRenderer {
     }
     this.#targetSkyRgb = target;
     const texture = this.#generateSkyTexture(target);
-    if (!this.#currentSkyRgb) {
+    // In dial mode, apply sky instantly (no crossfade) for real-time drag feedback
+    if (!this.#currentSkyRgb || this.#mode === 'dial') {
       this.#currentSkyRgb = [...target];
       if (this.#skyTextureBg) this.#skyTextureBg.destroy(true);
       this.#skyTextureBg = texture;
       this.#skySpriteBg.texture = texture;
       this.#skySpriteBg.alpha = 1;
+      this.#skySpriteFg.alpha = 0;
+      this.#skyFading = false;
       this.#resizeSkySprites();
       return;
     }
@@ -1028,9 +1031,42 @@ export class HudSceneRenderer {
    * @param {number} hour - Current decimal hour
    * @param {number} sunrise - Sunrise hour
    * @param {number} sunset - Sunset hour
+   * @param {number} [hoursPerDay] - Total hours per day
    * @private
    */
-  #updateSun(hour, sunrise, sunset) {
+  #updateSun(hour, sunrise, sunset, hoursPerDay = 24) {
+    const w = this.#app.screen.width;
+    const h = this.#app.screen.height;
+
+    if (this.#mode === 'dial') {
+      // Fade sun in at sunrise, out at sunset
+      const fadeDuration = 0.5;
+      let sunAlpha = 0;
+      if (hour >= sunrise && hour < sunset) {
+        if (hour < sunrise + fadeDuration) sunAlpha = (hour - sunrise) / fadeDuration;
+        else if (hour > sunset - fadeDuration) sunAlpha = (sunset - hour) / fadeDuration;
+        else sunAlpha = 1;
+      }
+      sunAlpha = Math.max(0, Math.min(1, sunAlpha));
+      this.#sunSprite.alpha = sunAlpha;
+      this.#sunCorona.alpha = sunAlpha > 0 ? sunAlpha * 0.12 : 0;
+      // Sun orbits sunrise→noon→sunset arc, position mapped to daytime progress
+      const daylightHours = sunset - sunrise;
+      const sunProgress = Math.max(0, Math.min(1, (hour - sunrise) / daylightHours));
+      const sunHour = sunrise + sunProgress * daylightHours;
+      const angleDegs = sunHour * (360 / hoursPerDay) + 90;
+      const angleRads = (angleDegs * Math.PI) / 180;
+      const sunSize = 20;
+      const orbitRadius = w * 0.28;
+      this.#sunSprite.x = w / 2 + Math.cos(angleRads) * orbitRadius;
+      this.#sunSprite.y = h / 2 + Math.sin(angleRads) * orbitRadius;
+      this.#sunSprite.scale.set(sunSize / 32);
+      this.#sunCorona.x = this.#sunSprite.x;
+      this.#sunCorona.y = this.#sunSprite.y;
+      this.#sunCorona.scale.set((sunSize * 2) / 32);
+      return;
+    }
+
     const isSunVisible = hour >= sunrise && hour < sunset;
     const sunAlpha = isSunVisible ? 1 : 0;
     this.#sunSprite.alpha = sunAlpha;
@@ -1038,8 +1074,6 @@ export class HudSceneRenderer {
     if (!isSunVisible) return;
     const daylightHours = sunset - sunrise;
     const normalizedHour = Math.max(0, Math.min(daylightHours, hour - sunrise));
-    const w = this.#app.screen.width;
-    const h = this.#app.screen.height;
     if (this.#mode === 'dome') {
       const sunSize = w > 120 ? 20 : 16;
       const trackWidth = w > 120 ? 140 : 100;
@@ -1081,7 +1115,7 @@ export class HudSceneRenderer {
    */
   #updateMoons(hour, sunrise, sunset, hoursPerDay, moons) {
     this.#syncMoonPool(moons.length);
-    const fadeDuration = 0.25;
+    const fadeDuration = this.#mode === 'dial' ? 0.5 : 0.25;
     let moonAlpha = 1;
     if (hour >= sunrise && hour < sunset) {
       if (hour < sunrise + fadeDuration) moonAlpha = 1 - (hour - sunrise) / fadeDuration;
@@ -1107,11 +1141,14 @@ export class HudSceneRenderer {
     const w = this.#app.screen.width;
     const h = this.#app.screen.height;
     const count = moons.length;
-    const baseMoonSize = this.#mode === 'dome' ? (w > 120 ? 18 : 14) : w > 110 ? 12 : 10;
+    const isDial = this.#mode === 'dial';
+    const baseMoonSize = isDial ? 20 : this.#mode === 'dome' ? (w > 120 ? 18 : 14) : w > 110 ? 12 : 10;
     const secondaryScale = Math.max(0.6, 0.92 - Math.max(0, count - 3) * 0.03);
     const trailSpacing = baseMoonSize * secondaryScale * 1.3;
     let arcPixels;
-    if (this.#mode === 'dome') {
+    if (isDial) {
+      arcPixels = Math.PI * (w / 4);
+    } else if (this.#mode === 'dome') {
       const trackWidth = w > 120 ? 140 : 100;
       const trackHeight = w > 120 ? 70 : 50;
       const arcRadius = Math.min(trackWidth / 2, trackHeight) - baseMoonSize / 2 - 4;
@@ -1131,7 +1168,18 @@ export class HudSceneRenderer {
       let moonSize = i === 0 ? baseMoonSize : baseMoonSize * secondaryScale;
       const trailingHour = normalizedHour - i * trailHours;
       let moonX, moonY;
-      if (this.#mode === 'dome') {
+      if (isDial) {
+        // Moon rises at sunrise position (6am/west), arcs over the top (like the sky),
+        // sets at sunset position (6pm/east). Same upper arc as sun, visible at night.
+        const moonProgress = trailingHour / nightHours;
+        const daylightHours = sunset - sunrise;
+        const moonHour = sunrise + moonProgress * daylightHours;
+        const angleDegs = moonHour * (360 / hoursPerDay) + 90;
+        const angleRads = (angleDegs * Math.PI) / 180;
+        const orbitRadius = w * 0.28;
+        moonX = w / 2 + Math.cos(angleRads) * orbitRadius;
+        moonY = h / 2 + Math.sin(angleRads) * orbitRadius;
+      } else if (this.#mode === 'dome') {
         const trackWidth = w > 120 ? 140 : 100;
         const trackHeight = w > 120 ? 70 : 50;
         const angle = (trailingHour / nightHours) * Math.PI;

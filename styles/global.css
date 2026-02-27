@@ -156,8 +156,21 @@
         display: flex;
       }
 
+      .calendaria-footer-btn {
+        border: none;
+        box-shadow: none;
+        background: none;
+
+        &:hover,
+        &:active,
+        &:focus {
+          border: none;
+          box-shadow: none;
+        }
+      }
+
       i {
-        font-size: var(--font-size-10);
+        font-size: var(--font-size-16);
       }
     }
   }
@@ -191,6 +204,17 @@
     content: '';
     background: var(--calendaria-primary);
   }
+}
+
+.calendaria-pinned {
+  z-index: 1000 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: max-content;
+  margin-bottom: 0.5rem;
+  pointer-events: auto !important;
+  cursor: grab;
 }
 
 #context-menu.calendaria {

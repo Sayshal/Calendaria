@@ -25,7 +25,9 @@ import { MiniCal } from '../calendar/mini-cal.mjs';
 import { SetDateDialog } from '../dialogs/set-date-dialog.mjs';
 import { SettingsPanel } from '../settings/settings-panel.mjs';
 import WeatherPickerApp from '../weather/weather-picker.mjs';
-import { HudSceneRenderer, SKY_KEYFRAMES, SKY_OVERRIDES } from './hud-scene-renderer.mjs';
+import { getSkyColorsRgb, applyWeatherSkyTint, computeStarAlpha } from '../../utils/ui/sky-utils.mjs';
+import { SunDial } from '../time/sun-dial.mjs';
+import { HudSceneRenderer } from './hud-scene-renderer.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -44,9 +46,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {Array} Hook references for cleanup */
   #hooks = [];
-
-  /** @type {object|null} Dial state for time rotation */
-  _dialState = null;
 
   /** @type {boolean} Sticky tray (always visible) */
   #stickyTray = false;
@@ -109,7 +108,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },
     actions: {
-      openTimeDial: HUD.#onOpenTimeDial,
+      openSunDial: HUD.#onOpenSunDial,
       searchNotes: HUD.#onSearchNotes,
       addNote: HUD.#onAddNote,
       openEvent: HUD.#onOpenEvent,
@@ -550,7 +549,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       dome.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          this.#openTimeRotationDial();
+          SunDial.open();
         }
       });
     }
@@ -984,16 +983,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const useSlice = this.useSliceMode;
     const selector = useSlice ? '.slice-canvas' : '.scene-canvas';
     this.#updateSceneRenderer(selector, useSlice ? 'slice' : 'dome');
-    const skyColors = this.#getSkyColorsRgb(hour);
-    const tintedColors = this.#applyWeatherSkyTint(skyColors);
-    const dawnStart = sunrise - 0.5;
-    const dawnEnd = sunrise + 1;
-    const duskStart = sunset - 0.5;
-    const duskEnd = sunset + 1;
-    let starAlpha = 0;
-    if (hour < dawnStart || hour > duskEnd) starAlpha = 1;
-    else if (hour >= dawnStart && hour < dawnEnd) starAlpha = Math.max(0, Math.min(1, 1 - (hour - dawnStart) / 1.5));
-    else if (hour > duskStart && hour <= duskEnd) starAlpha = Math.max(0, Math.min(1, (hour - duskStart) / 1.5));
+    const skyColors = getSkyColorsRgb(hour, this.calendar);
+    const tintedColors = applyWeatherSkyTint(skyColors);
+    const starAlpha = computeStarAlpha(hour, sunrise, sunset);
     const moons = [];
     const calendar = this.calendar;
     if (calendar) {
@@ -1048,76 +1040,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
       visualOverrides
     );
-  }
-
-  /**
-   * Get interpolated sky colors for a given hour as RGB arrays.
-   * @param {number} hour - Hour (0-hoursPerDay, decimal)
-   * @returns {{top: number[], mid: number[], bottom: number[]}} Sky gradient colors as [r,g,b]
-   */
-  #getSkyColorsRgb(hour) {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    hour = ((hour / hoursPerDay) * 24 + 24) % 24;
-    let kf1 = SKY_KEYFRAMES[0];
-    let kf2 = SKY_KEYFRAMES[1];
-    for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
-      if (hour >= SKY_KEYFRAMES[i].hour && hour < SKY_KEYFRAMES[i + 1].hour) {
-        kf1 = SKY_KEYFRAMES[i];
-        kf2 = SKY_KEYFRAMES[i + 1];
-        break;
-      }
-    }
-    const range = kf2.hour - kf1.hour;
-    const t = range > 0 ? (hour - kf1.hour) / range : 0;
-    return { top: HUD.#lerpColorRgb(kf1.top, kf2.top, t), mid: HUD.#lerpColorRgb(kf1.mid, kf2.mid, t), bottom: HUD.#lerpColorRgb(kf1.bottom, kf2.bottom, t) };
-  }
-
-  /**
-   * Linearly interpolate between two hex color strings, returning [r,g,b].
-   * @param {string} color1 - Start color (#RRGGBB)
-   * @param {string} color2 - End color (#RRGGBB)
-   * @param {number} t - Interpolation factor (0-1)
-   * @returns {number[]} [r, g, b] array
-   */
-  static #lerpColorRgb(color1, color2, t) {
-    const r1 = parseInt(color1.slice(1, 3), 16);
-    const g1 = parseInt(color1.slice(3, 5), 16);
-    const b1 = parseInt(color1.slice(5, 7), 16);
-    const r2 = parseInt(color2.slice(1, 3), 16);
-    const g2 = parseInt(color2.slice(3, 5), 16);
-    const b2 = parseInt(color2.slice(5, 7), 16);
-    return [Math.round(r1 + (r2 - r1) * t), Math.round(g1 + (g2 - g1) * t), Math.round(b1 + (b2 - b1) * t)];
-  }
-
-  /**
-   * Apply weather-based sky color tint to gradient colors (RGB array form).
-   * @param {{top: number[], mid: number[], bottom: number[]}} colors - Sky colors as [r,g,b]
-   * @returns {{top: number[], mid: number[], bottom: number[]}} Tinted colors
-   */
-  #applyWeatherSkyTint(colors) {
-    const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
-    if (!weather) return colors;
-    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const preset = getPreset(weather.id, customPresets);
-    const resolved = this.#resolveOverrides(preset);
-    const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
-    const { skyOverrides } = resolved;
-    const override = skyOverrides
-      ? {
-          strength: skyOverrides.strength ?? SKY_OVERRIDES[effect]?.strength ?? 0.7,
-          top: skyOverrides.top ?? SKY_OVERRIDES[effect]?.top,
-          mid: skyOverrides.mid ?? SKY_OVERRIDES[effect]?.mid,
-          bottom: skyOverrides.bottom ?? SKY_OVERRIDES[effect]?.bottom
-        }
-      : SKY_OVERRIDES[effect];
-    if (!override || !override.top) return colors;
-    const strength = override.strength ?? 0.7;
-    const blend = (rgb, overrideRgb) => [
-      Math.round(rgb[0] * (1 - strength) + overrideRgb[0] * strength),
-      Math.round(rgb[1] * (1 - strength) + overrideRgb[1] * strength),
-      Math.round(rgb[2] * (1 - strength) + overrideRgb[2] * strength)
-    ];
-    return { top: blend(colors.top, override.top), mid: blend(colors.mid, override.mid), bottom: blend(colors.bottom, override.bottom) };
   }
 
   /**
@@ -1330,331 +1252,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Open the circular time rotation dial.
-   */
-  async #openTimeRotationDial() {
-    log(3, 'Opening time rotation dial');
-    const existingDial = document.getElementById('calendaria-time-dial');
-    if (existingDial) existingDial.remove();
-    const currentTime = game.time.worldTime;
-    const components = game.time.components;
-    const hours = components.hour ?? 0;
-    const minutes = components.minute ?? 0;
-    const templateData = { currentTime: this.#formatDialTime(hours, minutes), hourMarkers: this.#generateHourMarkers() };
-    const html = await foundry.applications.handlebars.renderTemplate(TEMPLATES.TIME_DIAL, templateData);
-    const dial = document.createElement('div');
-    dial.id = 'calendaria-time-dial';
-    dial.className = 'calendaria time-dial';
-    dial.innerHTML = html;
-    document.body.appendChild(dial);
-    const dialContainer = dial.querySelector('.container');
-    const dialRect = dialContainer.getBoundingClientRect();
-    const hudRect = this.element.getBoundingClientRect();
-    let left = hudRect.left + hudRect.width / 2 - dialRect.width / 2;
-    left = Math.min(Math.max(left, 0), window.innerWidth - dialRect.width);
-    let top;
-    const spaceBelow = window.innerHeight - hudRect.bottom;
-    const spaceAbove = hudRect.top;
-    if (spaceBelow >= dialRect.height + 20) top = hudRect.bottom + 20;
-    else if (spaceAbove >= dialRect.height + 20) top = hudRect.top - dialRect.height - 20;
-    else top = hudRect.bottom + 20;
-    dial.style.left = `${left}px`;
-    dial.style.top = `${top}px`;
-    this._dialState = { currentHours: hours, currentMinutes: minutes, initialTime: currentTime };
-    const initialAngle = this.#timeToAngle(hours, minutes);
-    this.#updateDialRotation(dial, initialAngle);
-    this.#setupDialInteraction(dial);
-  }
-
-  /**
-   * Generate hour marker data for the dial template.
-   * @returns {Array} Array of hour marker objects with position data
-   */
-  #generateHourMarkers() {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const degreesPerHour = 360 / hoursPerDay;
-    const labelInterval = Math.max(1, Math.floor(hoursPerDay / 4));
-    const markers = [];
-    for (let hour = 0; hour < hoursPerDay; hour++) {
-      const angle = hour * degreesPerHour + 90;
-      const radians = (angle * Math.PI) / 180;
-      const x1 = 100 + Math.cos(radians) * 80;
-      const y1 = 100 + Math.sin(radians) * 80;
-      const x2 = 100 + Math.cos(radians) * 90;
-      const y2 = 100 + Math.sin(radians) * 90;
-      const textX = 100 + Math.cos(radians) * 70;
-      const textY = 100 + Math.sin(radians) * 70;
-      markers.push({
-        hour,
-        x1: x1.toFixed(2),
-        y1: y1.toFixed(2),
-        x2: x2.toFixed(2),
-        y2: y2.toFixed(2),
-        textX: textX.toFixed(2),
-        textY: textY.toFixed(2),
-        strokeWidth: hour % labelInterval === 0 ? 2 : 1,
-        showLabel: hour % labelInterval === 0
-      });
-    }
-    return markers;
-  }
-
-  /**
-   * Format time for dial display.
-   * @param {number} hours - Hour value (0-23)
-   * @param {number} minutes - Minute value (0-59)
-   * @returns {string} Formatted time string (HH:MM)
-   */
-  #formatDialTime(hours, minutes) {
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-  }
-
-  /**
-   * Convert time to angle in degrees.
-   * @param {number} hours - Hour value (0 to hoursPerDay-1)
-   * @param {number} minutes - Minute value (0 to minutesPerHour-1)
-   * @returns {number} Angle in degrees (0-360)
-   */
-  #timeToAngle(hours, minutes) {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
-    const totalMinutes = hours * minutesPerHour + minutes;
-    let angle = (totalMinutes / (hoursPerDay * minutesPerHour)) * 360;
-    angle = (angle + 180) % 360;
-    return angle;
-  }
-
-  /**
-   * Convert angle to time.
-   * @param {number} angle - Angle in degrees (0-360)
-   * @returns {{hours: number, minutes: number}} Time object with hours and minutes
-   */
-  #angleToTime(angle) {
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
-    angle = ((angle % 360) + 360) % 360;
-    angle = (angle - 180 + 360) % 360;
-    const totalMinutes = Math.round((angle / 360) * (hoursPerDay * minutesPerHour));
-    const hours = Math.floor(totalMinutes / minutesPerHour) % hoursPerDay;
-    const minutes = totalMinutes % minutesPerHour;
-    return { hours, minutes };
-  }
-
-  /**
-   * Update the dial's visual rotation.
-   * @param {HTMLElement} dial - The dial container element
-   * @param {number} angle - Rotation angle in degrees
-   */
-  #updateDialRotation(dial, angle) {
-    const handleContainer = dial.querySelector('.handle-container');
-    const sky = dial.querySelector('.sky');
-    const sunContainer = dial.querySelector('.sun');
-    if (!handleContainer || !sky || !sunContainer) return;
-    const time = this.#angleToTime(angle);
-    const timeDisplay = dial.querySelector('.time');
-    if (timeDisplay && document.activeElement !== timeDisplay) timeDisplay.value = this.#formatDialTime(time.hours, time.minutes);
-    const normalizedAngle = ((angle % 360) + 360) % 360;
-    let sunOpacity;
-    let adjustedAngle;
-    if (normalizedAngle >= 270) adjustedAngle = normalizedAngle - 360;
-    else if (normalizedAngle <= 90) adjustedAngle = normalizedAngle;
-    else adjustedAngle = null;
-    if (adjustedAngle !== null) {
-      const radians = (adjustedAngle * Math.PI) / 180;
-      sunOpacity = Math.max(0, Math.cos(radians));
-    } else {
-      sunOpacity = 0;
-    }
-    const moonPosition = (normalizedAngle + 180) % 360;
-    let moonAdjustedAngle;
-    if (moonPosition >= 270) moonAdjustedAngle = moonPosition - 360;
-    else if (moonPosition <= 90) moonAdjustedAngle = moonPosition;
-    else moonAdjustedAngle = null;
-    let moonOpacity;
-    if (moonAdjustedAngle !== null) {
-      const radians = (moonAdjustedAngle * Math.PI) / 180;
-      moonOpacity = Math.max(0, Math.cos(radians));
-    } else {
-      moonOpacity = 0;
-    }
-    const sunPosition = normalizedAngle;
-    if (sunPosition >= 91 && sunPosition <= 269) sunOpacity = 0;
-    if (moonPosition >= 91 && moonPosition <= 269) moonOpacity = 0;
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
-    const totalMinutes = time.hours * minutesPerHour + time.minutes;
-    const dayProgress = ((totalMinutes / (hoursPerDay * minutesPerHour)) * 2 + 1.5) % 2;
-    sky.style.setProperty('--calendar-day-progress', dayProgress);
-    sky.style.setProperty('--calendar-night-progress', dayProgress);
-    sky.style.setProperty('--sun-opacity', sunOpacity);
-    sky.style.setProperty('--moon-opacity', moonOpacity);
-    sunContainer.style.transform = `rotate(${angle - 84}deg)`;
-    handleContainer.style.transform = `rotate(${angle}deg)`;
-    if (this._dialState) {
-      this._dialState.currentHours = time.hours;
-      this._dialState.currentMinutes = time.minutes;
-    }
-  }
-
-  /**
-   * Setup interaction handlers for the dial.
-   * @param {HTMLElement} dial - The dial container element
-   */
-  #setupDialInteraction(dial) {
-    const sky = dial.querySelector('.sky');
-    const backdrop = dial.querySelector('.backdrop');
-    const handle = dial.querySelector('.handle');
-    let isDragging = false;
-    let initialAngle = 0;
-    let initialMouseAngle = 0;
-    const getAngleFromEvent = (event) => {
-      const rect = sky.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const deltaX = event.clientX - centerX;
-      const deltaY = event.clientY - centerY;
-      return (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90;
-    };
-    const onMouseDown = (event) => {
-      if (event.button !== 0) return;
-      isDragging = true;
-      initialAngle = this.#timeToAngle(this._dialState.currentHours, this._dialState.currentMinutes);
-      initialMouseAngle = getAngleFromEvent(event);
-      handle.style.cursor = 'grabbing';
-      event.preventDefault();
-      event.stopPropagation();
-    };
-    const onMouseMove = (event) => {
-      if (!isDragging) return;
-      const currentMouseAngle = getAngleFromEvent(event);
-      const deltaAngle = currentMouseAngle - initialMouseAngle;
-      const newAngle = initialAngle + deltaAngle;
-      this.#updateDialRotation(dial, newAngle);
-      event.preventDefault();
-    };
-    const onMouseUp = async (event) => {
-      if (!isDragging) return;
-      isDragging = false;
-      handle.style.cursor = 'grab';
-      await this.#applyTimeChange();
-      event.preventDefault();
-    };
-    const onBackdropClick = () => {
-      dial.remove();
-    };
-    const timeInput = dial.querySelector('.time');
-    const applyTimeFromInput = async () => {
-      const parsed = this.#parseTimeInput(timeInput.value);
-      if (parsed) {
-        this._dialState.currentHours = parsed.hours;
-        this._dialState.currentMinutes = parsed.minutes;
-        const newAngle = this.#timeToAngle(parsed.hours, parsed.minutes);
-        this.#updateDialRotation(dial, newAngle);
-        await this.#applyTimeChange();
-      } else {
-        timeInput.value = this.#formatDialTime(this._dialState.currentHours, this._dialState.currentMinutes);
-      }
-    };
-    const onTimeInputKeydown = (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        timeInput.blur();
-      } else if (event.key === 'Escape') {
-        timeInput.value = this.#formatDialTime(this._dialState.currentHours, this._dialState.currentMinutes);
-        timeInput.blur();
-      }
-    };
-    const onTimeInputBlur = async () => {
-      await applyTimeFromInput();
-    };
-    const onTimeInputFocus = () => {
-      timeInput.select();
-    };
-    handle.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    backdrop.addEventListener('click', onBackdropClick);
-    timeInput.addEventListener('keydown', onTimeInputKeydown);
-    timeInput.addEventListener('blur', onTimeInputBlur);
-    timeInput.addEventListener('focus', onTimeInputFocus);
-    dial._cleanup = () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-  }
-
-  /**
-   * Parse flexible time input string.
-   * @param {string} input - Time input string (e.g., "14:30", "2:30pm")
-   * @returns {{hours: number, minutes: number}|null} Parsed time object or null if invalid
-   */
-  #parseTimeInput(input) {
-    if (!input) return null;
-    const str = input.trim().toLowerCase();
-    if (!str) return null;
-    const isPM = /p/.test(str);
-    const isAM = /a/.test(str);
-    const cleaned = str.replace(/[ap]\.?m?\.?/gi, '').trim();
-    let hours = 0;
-    let minutes = 0;
-    if (cleaned.includes(':')) {
-      const [h, m] = cleaned.split(':').map((s) => parseInt(s, 10));
-      if (isNaN(h)) return null;
-      hours = h;
-      minutes = isNaN(m) ? 0 : m;
-    } else {
-      const h = parseInt(cleaned, 10);
-      if (isNaN(h)) return null;
-      hours = h;
-      minutes = 0;
-    }
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
-    const midday = Math.floor(hoursPerDay / 2);
-    if (isPM && hours < midday) hours += midday;
-    else if (isAM && hours === midday) hours = 0;
-    if (hours < 0 || hours >= hoursPerDay) return null;
-    if (minutes < 0 || minutes >= minutesPerHour) return null;
-    return { hours, minutes };
-  }
-
-  /**
-   * Apply the time change from the dial.
-   */
-  async #applyTimeChange() {
-    if (!this._dialState) return;
-    const { currentHours, currentMinutes, initialTime } = this._dialState;
-    const cal = game.time.calendar;
-    const days = cal?.days ?? {};
-    const secondsPerMinute = days.secondsPerMinute ?? 60;
-    const minutesPerHour = days.minutesPerHour ?? 60;
-    const hoursPerDay = days.hoursPerDay ?? 24;
-    const secondsPerHour = secondsPerMinute * minutesPerHour;
-    const secondsPerDay = secondsPerHour * hoursPerDay;
-    const initialComponents = cal?.timeToComponents?.(initialTime) ?? game.time.components;
-    const initialHours = initialComponents.hour ?? 0;
-    const initialMinutes = initialComponents.minute ?? 0;
-    const initialSeconds = initialComponents.second ?? 0;
-    const initialDaySeconds = initialHours * secondsPerHour + initialMinutes * secondsPerMinute + initialSeconds;
-    const newDaySeconds = currentHours * secondsPerHour + currentMinutes * secondsPerMinute;
-    let timeDiff = newDaySeconds - initialDaySeconds;
-    if (Math.abs(timeDiff) > secondsPerDay / 2) {
-      if (timeDiff > 0) timeDiff -= secondsPerDay;
-      else timeDiff += secondsPerDay;
-    }
-    if (timeDiff !== 0) {
-      if (!game.user.isGM) {
-        CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: timeDiff });
-        this._dialState.initialTime = initialTime + timeDiff;
-        return;
-      }
-      await game.time.advance(timeDiff);
-      log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatDialTime(currentHours, currentMinutes)}`);
-    }
-    this._dialState.initialTime = initialTime + timeDiff;
-  }
-
-  /**
    * Advance time to a specific hour of day.
    * @param {number} targetHour - Target hour (fractional)
    * @param {boolean} [nextDay] - Always advance to next day
@@ -1684,13 +1281,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click on dome to open time dial.
+   * Handle click on dome to open sun dial.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
-  static async #onOpenTimeDial(_event, _target) {
+  static async #onOpenSunDial(_event, _target) {
     if (!canChangeDateTime()) return;
-    await this.#openTimeRotationDial();
+    SunDial.open();
   }
 
   /**
@@ -1882,8 +1479,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: { year: today.year + yearZero, month: today.month, day: (today.dayOfMonth ?? 0) + 1, hour: 12, minute: 0 },
-        endDate: { year: today.year + yearZero, month: today.month, day: (today.dayOfMonth ?? 0) + 1, hour: 13, minute: 0 }
+        startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
+        endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
       }
     });
   }

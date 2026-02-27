@@ -8,6 +8,7 @@ import { BigCal } from '../../applications/calendar/big-cal.mjs';
 import { MiniCal } from '../../applications/calendar/mini-cal.mjs';
 import { HUD } from '../../applications/hud/hud.mjs';
 import { Stopwatch } from '../../applications/time/stopwatch.mjs';
+import { SunDial } from '../../applications/time/sun-dial.mjs';
 import { TimeKeeper } from '../../applications/time/time-keeper.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../localization.mjs';
@@ -16,8 +17,9 @@ import { localize } from '../localization.mjs';
 const TOOLBAR_APP_DEFS = {
   bigcal: { icon: 'fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', toggle: () => BigCal.toggle() },
   minical: { icon: 'fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCal', toggle: () => MiniCal.toggle() },
-  hud: { icon: 'fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
+  hud: { icon: 'fa-landmark-dome', label: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
   timekeeper: { icon: 'fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', toggle: () => TimeKeeper.toggle() },
+  sundial: { icon: 'fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.SunDial', toggle: () => SunDial.toggle() },
   stopwatch: { icon: 'fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', toggle: () => Stopwatch.toggle() }
 };
 

@@ -1,0 +1,147 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  {{#if isGM}}
+    <div class="button-row app-controls">
+      <button type="button" data-action="resetPosition" data-target="sunDial">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
+      </button>
+      <button type="button" data-action="closeSunDial">
+        <i class="fas fa-times"></i>
+        {{localize "CALENDARIA.SettingsPanel.CloseSunDial"}}
+      </button>
+      <button type="button" data-action="openSunDial">
+        <i class="fas fa-external-link-alt"></i>
+        {{localize "CALENDARIA.SettingsPanel.OpenSunDial"}}
+      </button>
+    </div>
+    <p class="hint section-hint">{{openHint}}</p>
+
+    <fieldset data-section="sunDial-options">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Options"}}
+      </legend>
+      <input type="hidden" name="sunDialOptionsSection" value="1">
+
+      <div class="form-group">
+        <label for="showSunDial">{{localize "CALENDARIA.Settings.ShowSunDial.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="showSunDial" name="showSunDial" {{#if showSunDial}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowSunDial.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="sunDialAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="sunDialAutoFade" name="sunDialAutoFade"
+            {{#if sunDialAutoFade}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+      </div>
+
+      <div class="form-group{{#unless sunDialAutoFade}} disabled{{/unless}}">
+        <label for="sunDialIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+        <div class="form-fields">
+          <div class="slider-with-ticks">
+            <input type="range" id="sunDialIdleOpacity" name="sunDialIdleOpacity" min="0" max="100"
+              value="{{sunDialIdleOpacity}}" list="opacity-ticks" {{#unless sunDialAutoFade}}disabled
+              aria-disabled="true" data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"
+              {{/unless}}>
+            <div class="slider-ticks">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <input type="number" class="range-value" min="0" max="100" value="{{sunDialIdleOpacity}}"
+            style="width: 3rem; flex: none" {{#unless sunDialAutoFade}}disabled aria-disabled="true" data-tooltip
+            aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
+          <span class="input-suffix">%</span>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="sunDialCrankMode">{{localize "CALENDARIA.SettingsPanel.CrankMode"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="sunDialCrankMode" name="sunDialCrankMode"
+            {{#if sunDialCrankMode}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.CrankMode"}}</p>
+      </div>
+    </fieldset>
+
+    {{#if isGM}}
+      <fieldset data-section="display-formats">
+        <legend>
+          {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+          <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="time" data-tooltip
+            aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+              class="fa-solid fa-question"></i></button>
+        </legend>
+        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+
+        {{#each formatLocations}}
+          <div class="format-location" data-location="{{id}}">
+            <div class="form-group">
+              <label>{{label}}</label>
+            </div>
+
+            <div class="format-row">
+              <div class="format-column">
+                <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                    data-location="{{id}}" data-role="gm"></span></span>
+                <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+                  {{#each gmPresetOptions}}
+                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                  {{/each}}
+                </select>
+                <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+                  placeholder="HH:mm" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                  data-location="{{id}}" data-role="gm">
+              </div>
+
+              <div class="format-column">
+                <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                    data-location="{{id}}" data-role="player"></span></span>
+                <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+                  {{#each playerPresetOptions}}
+                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                  {{/each}}
+                </select>
+                <input type="text" name="displayFormats.{{id}}.playerCustom"
+                  value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="HH:mm"
+                  class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+                  data-role="player">
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </fieldset>
+    {{/if}}
+
+    <fieldset data-section="sunDial-sticky">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="sunDial-sticky"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
+      <input type="hidden" name="sunDialStickySection" value="1">
+
+      <div class="form-group">
+        <label for="sunDialStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="sunDialStickyPosition" name="sunDialStickyPosition"
+            {{#if sunDialStickyPosition}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+      </div>
+    </fieldset>
+  {{else}}
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.SunDialTab.PlayerMessage"}}</p>
+    </div>
+  {{/if}}
+
+</section>

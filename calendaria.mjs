@@ -7,7 +7,7 @@
 
 import './styles/theme.css';
 import './styles/global.css';
-import './styles/time-dial.css';
+import './styles/sun-dial.css';
 import './styles/big-cal.css';
 import './styles/note-sheet.css';
 import './styles/calendar-editor.css';
@@ -25,6 +25,7 @@ import './styles/dialogs.css';
 import { CalendariaAPI, createGlobalNamespace } from './scripts/api.mjs';
 import { HUD } from './scripts/applications/hud/hud.mjs';
 import { MiniCal } from './scripts/applications/calendar/mini-cal.mjs';
+import { SunDial } from './scripts/applications/time/sun-dial.mjs';
 import { TimeKeeper } from './scripts/applications/time/time-keeper.mjs';
 import CalendarManager from './scripts/calendar/calendar-manager.mjs';
 import CalendariaCalendar from './scripts/data/calendaria-calendar.mjs';
@@ -46,7 +47,7 @@ import TimeTracker from './scripts/time/time-tracker.mjs';
 import { registerKeybindings } from './scripts/utils/keybinds.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import { runAllMigrations } from './scripts/utils/migrations.mjs';
-import { canViewMiniCal, canViewTimeKeeper } from './scripts/utils/permissions.mjs';
+import { canViewMiniCal, canViewSunDial, canViewTimeKeeper } from './scripts/utils/permissions.mjs';
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import * as StickyZones from './scripts/utils/ui/sticky-zones.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
@@ -91,7 +92,9 @@ Hooks.once('ready', async () => {
   TimeKeeper.updateIdleOpacity();
   HUD.updateIdleOpacity();
   MiniCal.updateIdleOpacity();
+  SunDial.updateIdleOpacity();
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL) && canViewSunDial()) SunDial.open({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CAL) && canViewMiniCal()) MiniCal.show({ silent: true });

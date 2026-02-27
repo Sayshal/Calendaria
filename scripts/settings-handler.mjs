@@ -9,6 +9,7 @@ import { MiniCal } from './applications/calendar/mini-cal.mjs';
 import { ImporterApp } from './applications/dialogs/importer-app.mjs';
 import { HUD } from './applications/hud/hud.mjs';
 import { SettingsPanel } from './applications/settings/settings-panel.mjs';
+import { SunDial } from './applications/time/sun-dial.mjs';
 import { TimeKeeper } from './applications/time/time-keeper.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
@@ -36,6 +37,9 @@ export default class CalendariaSettings {
       [SETTINGS.MINI_CAL_POSITION]: { name: 'MiniCal Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.TIME_KEEPER_POSITION]: { name: 'TimeKeeper Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.STOPWATCH_POSITION]: { name: 'Stopwatch Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
+      [SETTINGS.SUN_DIAL_POSITION]: { name: 'Sun Dial Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
+      [SETTINGS.SUN_DIAL_CRANK_MODE]: { name: 'Sun Dial Crank Mode', scope: 'user', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.SUN_DIAL_STICKY_STATES]: { name: 'Sun Dial Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { position: false } }) },
       [SETTINGS.STOPWATCH_STATE]: { name: 'Stopwatch State', scope: 'client', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.STOPWATCH_AUTO_START_TIME]: {
         name: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name',
@@ -375,6 +379,22 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
         onChange: () => TimeKeeper.updateIdleOpacity()
       },
+      [SETTINGS.SUN_DIAL_AUTO_FADE]: {
+        name: 'CALENDARIA.Settings.AutoFade.Name',
+        hint: 'CALENDARIA.Settings.AutoFade.Hint',
+        scope: 'user',
+        config: false,
+        type: new BooleanField({ initial: true }),
+        onChange: () => SunDial.updateIdleOpacity()
+      },
+      [SETTINGS.SUN_DIAL_IDLE_OPACITY]: {
+        name: 'CALENDARIA.Settings.IdleOpacity.Name',
+        hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
+        scope: 'user',
+        config: false,
+        type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
+        onChange: () => SunDial.updateIdleOpacity()
+      },
       [SETTINGS.TIMEKEEPER_TIME_JUMPS]: {
         name: 'TimeKeeper Time Jumps',
         scope: 'world',
@@ -457,6 +477,13 @@ export default class CalendariaSettings {
           if (value) TimeKeeper.show();
           else TimeKeeper.hide();
         }
+      },
+      [SETTINGS.SHOW_SUN_DIAL]: {
+        name: 'CALENDARIA.Settings.ShowSunDial.Name',
+        hint: 'CALENDARIA.Settings.ShowSunDial.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.CALENDAR_HUD_MODE]: {
         name: 'CALENDARIA.Settings.CalendarHUDMode.Name',

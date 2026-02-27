@@ -53,6 +53,18 @@
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewTimeKeeperHint"}}</p>
         </li>
 
+        {{!-- View Sun Dial --}}
+        <li class="permission-row">
+          <label class="permission-name">{{localize "CALENDARIA.Permissions.ViewSunDial"}}</label>
+          <input type="checkbox" name="permissions.viewSunDial.player" data-tooltip
+            aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewSunDial.player}}checked{{/if}} />
+          <input type="checkbox" name="permissions.viewSunDial.trusted" data-tooltip
+            aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewSunDial.trusted}}checked{{/if}} />
+          <input type="checkbox" name="permissions.viewSunDial.assistant" data-tooltip
+            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewSunDial.assistant}}checked{{/if}} />
+          <p class="hint">{{localize "CALENDARIA.Permissions.ViewSunDialHint"}}</p>
+        </li>
+
         {{!-- Add Notes --}}
         <li class="permission-row">
           <label class="permission-name">{{localize "CALENDARIA.Permissions.AddNotes"}}</label>

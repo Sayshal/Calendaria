@@ -1,0 +1,37 @@
+<div class="container">
+  <div class="sky">
+    <canvas class="scene-canvas"></canvas>
+    <svg class="markers" viewBox="0 0 200 200">
+      {{#each hourMarkers}}
+        <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}" stroke="rgba(255, 255, 255, 0.5)"
+          stroke-width="{{strokeWidth}}" />
+        {{#if showLabel}}
+          <text x="{{textX}}" y="{{textY}}" text-anchor="middle" dominant-baseline="middle"
+            fill="rgba(255, 255, 255, 0.8)" font-size="12" font-weight="bold">{{hour}}</text>
+        {{/if}}
+      {{/each}}
+    </svg>
+    <div class="handle-container">
+      <div class="handle"></div>
+    </div>
+  </div>
+  <div class="time-display">
+    <div class="day-offset"></div>
+    <input type="text" class="time" value="{{currentTime}}">
+    <div class="dial-controls">
+      <button type="button" class="dial-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggleClock" data-tooltip
+        aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+        <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
+      </button>
+      <button type="button" class="dial-btn" data-action="addNote" data-tooltip
+        aria-label="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}">
+        <i class="fas fa-plus"></i>
+      </button>
+      <button type="button" class="dial-btn" data-action="openSettings" data-tooltip
+        aria-label="{{localize 'CALENDARIA.SettingsPanel.Title'}}">
+        <i class="fas fa-cog"></i>
+      </button>
+    </div>
+  </div>
+  <div class="resize-handle"></div>
+</div>

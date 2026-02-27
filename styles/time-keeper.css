@@ -41,7 +41,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      cursor: move;
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
 
       &:hover .stopwatch-btn {
         opacity: 1;
