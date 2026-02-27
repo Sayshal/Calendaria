@@ -1,70 +1,68 @@
-#tooltip {
-  .calendaria {
-    .day-tooltip {
-      line-height: 1.4;
-      text-align: center;
+.calendaria {
+  .day-tooltip {
+    line-height: 1.4;
+    text-align: center;
 
-      .date {
-        margin-bottom: 0.125rem;
-        font-size: 0.9rem;
+    .date {
+      margin-bottom: 0.125rem;
+      font-size: 0.9rem;
 
-        strong {
-          color: var(--color-text-primary, rgb(238 238 238));
-        }
-      }
-
-      .festival {
-        color: var(--calendaria-primary, rgb(74 158 255));
-        font-size: 0.85rem;
-      }
-
-      .season {
-        color: var(--color-text-secondary, rgb(170 170 170));
-        font-size: 0.8rem;
-      }
-
-      .sun {
-        margin-top: 0.25rem;
-        color: var(--color-text-secondary, rgb(170 170 170));
-        font-size: 0.8rem;
-
-        i {
-          opacity: 0.7;
-          margin: 0 0.125rem;
-        }
-
-        .fa-sun {
-          color: rgb(251 191 36);
-        }
-
-        .fa-moon {
-          color: rgb(167 139 250);
-        }
+      strong {
+        color: var(--color-text-primary, rgb(238 238 238));
       }
     }
 
-    .weather-tooltip {
-      line-height: 1.4;
+    .festival {
+      color: var(--calendaria-primary, rgb(74 158 255));
+      font-size: 0.85rem;
+    }
 
-      .header {
-        margin-bottom: 0.125rem;
-        font-size: 0.9rem;
+    .season {
+      color: var(--color-text-secondary, rgb(170 170 170));
+      font-size: 0.8rem;
+    }
 
-        strong {
-          color: var(--color-text-primary, rgb(238 238 238));
-        }
+    .sun {
+      margin-top: 0.25rem;
+      color: var(--color-text-secondary, rgb(170 170 170));
+      font-size: 0.8rem;
+
+      i {
+        opacity: 0.7;
+        margin: 0 0.125rem;
       }
 
-      .row {
-        color: var(--color-text-secondary, rgb(170 170 170));
-        font-size: 0.8rem;
+      .fa-sun {
+        color: rgb(251 191 36);
+      }
 
-        i {
-          opacity: 0.7;
-          margin-right: 0.25rem;
-          width: 0.9em;
-          text-align: center;
-        }
+      .fa-moon {
+        color: rgb(167 139 250);
+      }
+    }
+  }
+
+  .weather-tooltip {
+    line-height: 1.4;
+
+    .header {
+      margin-bottom: 0.125rem;
+      font-size: 0.9rem;
+
+      strong {
+        color: var(--color-text-primary, rgb(238 238 238));
+      }
+    }
+
+    .row {
+      color: var(--color-text-secondary, rgb(170 170 170));
+      font-size: 0.8rem;
+
+      i {
+        opacity: 0.7;
+        margin-right: 0.25rem;
+        width: 0.9em;
+        text-align: center;
       }
     }
   }

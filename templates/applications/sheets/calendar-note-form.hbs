@@ -383,6 +383,22 @@
             </div>
           </fieldset>
         {{/if}}
+
+        {{#if showComputedConfig}}
+          <fieldset>
+            <legend>{{localize "CALENDARIA.Note.ComputedSettings"}}</legend>
+            <p class="hint">{{localize "CALENDARIA.Note.ComputedSettingsHint"}}</p>
+            <div class="inline-form">
+              <button type="button" data-action="openComputedBuilder">
+                <i class="fas fa-calculator"></i> {{localize "CALENDARIA.Note.OpenComputedBuilder"}}
+              </button>
+              <span class="hint">
+                {{computedStepCount}} {{localize "CALENDARIA.Note.ComputedSteps"}}{{#if computedOverrideCount}},
+                {{computedOverrideCount}} {{localize "CALENDARIA.Note.ComputedOverridesLabel"}}{{/if}}
+              </span>
+            </div>
+          </fieldset>
+        {{/if}}
       </div>
 
       {{#if showConditionsUI}}

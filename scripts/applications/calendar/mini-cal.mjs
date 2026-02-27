@@ -97,7 +97,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static DEFAULT_OPTIONS = {
-    id: 'mini-calendar',
+    id: 'calendaria-mini-cal',
     classes: ['calendaria', 'mini-cal'],
     position: { width: 'auto', height: 'auto' },
     window: { frame: false, positioned: true },

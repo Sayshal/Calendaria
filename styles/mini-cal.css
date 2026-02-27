@@ -349,9 +349,13 @@
 
     .calendar-indicators {
       gap: 0.5rem;
+      display: flex;
       flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
       margin: 0 0.5rem 0.25rem;
       padding: 0.25rem 0;
+      color: var(--calendaria-text-dim);
       font-size: var(--font-size-12, 0.75rem);
     }
 
@@ -496,6 +500,22 @@
         font-weight: 700;
         font-size: 0.85rem;
         background: var(--calendaria-note-badge-bg);
+      }
+
+      .mini-weather-icon {
+        position: absolute;
+        bottom: 0.125rem;
+        right: 0.125rem;
+        width: 0.75rem;
+        height: 0.75rem;
+        font-size: 0.625rem;
+        line-height: 0.75rem;
+        text-align: center;
+        opacity: 0.7;
+
+        &.forecast {
+          opacity: 0.4;
+        }
       }
 
       .moon-tint {

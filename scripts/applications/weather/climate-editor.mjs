@@ -87,7 +87,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (mode === 'zone') classes.push('zone-mode');
     super({
       ...options,
-      id: `climate-editor-${mode}-${key}`,
+      id: `calendaria-climate-editor-${mode}-${key}`,
       classes,
       window: {
         contentClasses: ['standard-form'],
@@ -503,7 +503,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static open(options) {
     const key = options.mode === 'season' ? options.seasonKey : options.zoneKey;
-    const appId = `climate-editor-${options.mode}-${key}`;
+    const appId = `calendaria-climate-editor-${options.mode}-${key}`;
     const existing = foundry.applications.instances.get(appId);
     if (existing) {
       existing.bringToFront();

@@ -347,7 +347,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   #getOrCreateSearchDropdown() {
     if (!this.#searchDropdown) {
       this.#searchDropdown = document.createElement('div');
-      this.#searchDropdown.className = 'calendaria-search';
+      this.#searchDropdown.className = 'calendaria-settings-search';
       document.body.appendChild(this.#searchDropdown);
     }
     return this.#searchDropdown;
@@ -1574,7 +1574,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       }
       await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS, jumps);
-      foundry.applications.instances.get('time-keeper')?.render();
+      foundry.applications.instances.get('calendaria-timekeeper')?.render();
     }
     if (data.miniCalTimeJumps) {
       const jumps = {};
@@ -1587,7 +1587,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       }
       await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS, jumps);
-      foundry.applications.instances.get('mini-cal')?.render();
+      foundry.applications.instances.get('calendaria-mini-cal')?.render();
     }
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
@@ -1692,7 +1692,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (settingsPanel?.rendered && affectedParts.size > 0) settingsPanel.render({ parts: [...affectedParts] });
     }
     const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity', 'timeKeeperStickyPosition'];
-    if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('time-keeper')?.render();
+    if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-timekeeper')?.render();
     const hudKeys = [
       'hudDialStyle',
       'hudTrayDirection',
@@ -1733,7 +1733,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'miniCalCyclesDisplayMode',
       'miniCalShowMoonPhases'
     ];
-    if (miniCalKeys.some((k) => k in data)) foundry.applications.instances.get('mini-cal')?.render();
+    if (miniCalKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-mini-cal')?.render();
     const bigCalKeys = [
       'bigCalShowWeather',
       'bigCalWeatherDisplayMode',
@@ -1782,9 +1782,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onResetPosition(_event, target) {
     const targetType = target.dataset.target;
     const config = {
-      miniCal: { setting: SETTINGS.MINI_CAL_POSITION, appId: 'mini-cal' },
+      miniCal: { setting: SETTINGS.MINI_CAL_POSITION, appId: 'calendaria-mini-cal' },
       hud: { setting: SETTINGS.CALENDAR_HUD_POSITION, appId: 'calendaria-hud' },
-      timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'time-keeper' }
+      timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'calendaria-timekeeper' }
     };
     const { setting, appId } = config[targetType] || {};
     if (!setting) return;

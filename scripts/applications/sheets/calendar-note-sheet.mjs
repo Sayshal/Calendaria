@@ -9,6 +9,7 @@ import { MODULE, TEMPLATES } from '../../constants.mjs';
 import { addCustomCategory, deleteCustomCategory, getAllCategories, getRepeatOptions, isCustomCategory } from '../../notes/note-data.mjs';
 import NoteManager from '../../notes/note-manager.mjs';
 import { generateRandomOccurrences, getRecurrenceDescription, needsRandomRegeneration } from '../../notes/recurrence.mjs';
+import { ComputedEventBuilder } from '../dialogs/computed-event-builder.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 
@@ -36,7 +37,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       regenerateSeed: this._onRegenerateSeed,
       clearLinkedEvent: this._onClearLinkedEvent,
       addCondition: this._onAddCondition,
-      removeCondition: this._onRemoveCondition
+      removeCondition: this._onRemoveCondition,
+      openComputedBuilder: this._onOpenComputedBuilder
     },
     form: { submitOnChange: true, closeOnSubmit: false }
   };
@@ -461,6 +463,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
           context.seasonalDescription = `Occurs every day during ${seasonName}`;
       }
     }
+    context.showComputedConfig = this.document.system.repeat === 'computed';
+    const computedConfig = this.document.system.computedConfig;
+    context.computedStepCount = computedConfig?.chain?.length ?? 0;
+    context.computedOverrideCount = Object.keys(computedConfig?.yearOverrides ?? {}).length;
     context.showConditionsUI = repeatType !== 'never';
     context.hasCycles = (calendar?.cyclesArray?.length ?? 0) > 0;
     context.hasEras = (calendar?.erasArray?.length ?? 0) > 0;
@@ -471,6 +477,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.showRangeConfig ||
       context.showWeekOfMonthConfig ||
       context.showSeasonalConfig ||
+      context.showComputedConfig ||
       context.showConditionsUI;
     const rawConditions = this.document.system.conditions || [];
     context.conditions = rawConditions.map((cond, idx) => ({ ...cond, index: idx, description: this.#getConditionDescription(cond, calendar) }));
@@ -588,6 +595,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       data.system.weekNumber = null;
     }
     if (repeatType !== 'seasonal') data.system.seasonalConfig = null;
+    if (repeatType !== 'computed') data.system.computedConfig = null;
     if (repeatType === 'range') {
       const rangePattern = {};
       const getRangeValue = (component) => {
@@ -1050,6 +1058,22 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   static async _onClearLinkedEvent(_event, _target) {
     await this.document.update({ 'system.linkedEvent': null });
+  }
+
+  /**
+   * Open the computed event builder dialog.
+   * @param _event
+   * @param _target
+   */
+  static async _onOpenComputedBuilder(_event, _target) {
+    const config = this.document.system.computedConfig || { chain: [], yearOverrides: {} };
+    new ComputedEventBuilder({
+      config,
+      onChange: async (updated) => {
+        await this.document.update({ 'system.computedConfig': updated });
+        this.render();
+      }
+    }).render(true);
   }
 
   /**

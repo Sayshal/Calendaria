@@ -363,7 +363,7 @@ export function applyCustomColors(colors) {
   const derived = generateDerivedColors(colors);
   for (const [cssVar, value] of Object.entries(derived)) cssVars.push(`${cssVar}: ${value};`);
   styleEl.textContent = `.calendaria {\n  ${cssVars.join('\n  ')}\n}`;
-  const ids = ['calendaria-hud', 'time-keeper', 'mini-calendar', 'calendaria-big-cal', 'calendaria-stopwatch'];
+  const ids = ['calendaria-hud', 'calendaria-timekeeper', 'calendaria-mini-cal', 'calendaria-big-cal', 'calendaria-stopwatch'];
   for (const id of ids) foundry.applications.instances.get(id)?.render();
 }
 

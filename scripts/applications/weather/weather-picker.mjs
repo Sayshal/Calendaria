@@ -70,7 +70,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
 
   /** @override */
   static DEFAULT_OPTIONS = {
-    id: 'weather-picker',
+    id: 'calendaria-weather-picker',
     classes: ['calendaria', 'weather-picker', 'standard-form'],
     tag: 'form',
     window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },

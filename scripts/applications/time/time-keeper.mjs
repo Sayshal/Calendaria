@@ -42,7 +42,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static DEFAULT_OPTIONS = {
-    id: 'time-keeper',
+    id: 'calendaria-timekeeper',
     classes: ['calendaria', 'time-keeper'],
     position: { width: 200, height: 'auto', zIndex: 100 },
     window: { frame: false, positioned: true },

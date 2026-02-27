@@ -19,7 +19,7 @@ import * as StickyZones from './utils/ui/sticky-zones.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
 
-const renderMiniCal = () => foundry.applications.instances.get('mini-cal')?.render();
+const renderMiniCal = () => foundry.applications.instances.get('calendaria-mini-cal')?.render();
 const renderBigCal = () => foundry.applications.instances.get('calendaria')?.render();
 const renderHUD = () => foundry.applications.instances.get('calendaria-hud')?.render();
 const renderHUDBar = () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] });

@@ -836,7 +836,7 @@
   }
 }
 
-.calendaria-search {
+.calendaria-settings-search {
   display: flex;
   z-index: 10000;
   position: fixed;
@@ -894,7 +894,7 @@
 }
 
 .theme-light {
-  .calendaria-search {
+  .calendaria-settings-search {
     border: 0.0625rem solid var(--color-border-light-tertiary);
     background: var(--color-light-2);
 

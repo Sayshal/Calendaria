@@ -388,13 +388,14 @@
       margin: 0;
       padding: 0;
       border: none;
+      border-radius: 50%;
       outline: none;
       color: var(--calendaria-text-dim);
       font-size: 1.125rem;
       line-height: 1;
       cursor: pointer;
       pointer-events: auto;
-      background: none;
+      background: rgb(0 0 0 / 30%);
       box-shadow: none;
       transition:
         color 0.15s ease,
