@@ -129,7 +129,7 @@ function resolveValue(value) {
 function getButtonClass(location) {
   switch (location) {
     case 'hud':
-      return 'calendaria-hud-btn';
+      return 'btn';
     case 'minical':
       return 'sidebar-btn';
     default:

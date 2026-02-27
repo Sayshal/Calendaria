@@ -8,7 +8,8 @@
 import './styles/theme.css';
 import './styles/global.css';
 import './styles/time-dial.css';
-import './styles/bigcal.css';
+import './styles/big-cal.css';
+import './styles/note-sheet.css';
 import './styles/calendar-editor.css';
 import './styles/climate-editor.css';
 import './styles/time-keeper.css';

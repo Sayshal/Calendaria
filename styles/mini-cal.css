@@ -51,6 +51,14 @@
       cursor: pointer;
       background: var(--calendaria-bg-lighter);
 
+      &.near-snap {
+        border-color: var(--calendaria-primary);
+        box-shadow:
+          0 0 0.625rem var(--calendaria-shadow),
+          0 0 0.5rem var(--calendaria-primary);
+        animation: calendaria-wobble 0.15s ease-in-out infinite;
+      }
+
       .title-group {
         gap: 0;
         display: flex;

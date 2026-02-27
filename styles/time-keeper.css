@@ -29,6 +29,14 @@
       }
     }
 
+    .time-display.near-snap {
+      border-color: var(--calendaria-primary);
+      box-shadow:
+        0 0 0.625rem var(--calendaria-shadow),
+        0 0 0.5rem var(--calendaria-primary);
+      animation: calendaria-wobble 0.15s ease-in-out infinite;
+    }
+
     .time-display {
       display: flex;
       flex-direction: column;

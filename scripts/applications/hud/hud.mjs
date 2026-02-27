@@ -137,8 +137,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static PARTS = {
     container: { template: TEMPLATES.CALENDAR_HUD },
-    dome: { template: TEMPLATES.CALENDAR_HUD_DOME, container: '.calendaria-hud-content' },
-    bar: { template: TEMPLATES.CALENDAR_HUD_BAR, container: '.calendaria-hud-content' }
+    dome: { template: TEMPLATES.CALENDAR_HUD_DOME, container: '.content' },
+    bar: { template: TEMPLATES.CALENDAR_HUD_BAR, container: '.content' }
   };
 
   /**
@@ -512,7 +512,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Setup event listeners for the HUD.
    */
   #setupEventListeners() {
-    const incrementSelect = this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]');
+    const incrementSelect = this.element.querySelector('.select[data-action="setIncrement"]');
     incrementSelect?.addEventListener('change', async (event) => {
       TimeClock.setAppIncrement('calendaria-hud', event.target.value);
       TimeClock.setIncrement(event.target.value);
@@ -540,7 +540,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         { passive: false }
       );
     }
-    const timeDisplay = this.element.querySelector('.calendaria-hud-time');
+    const timeDisplay = this.element.querySelector('.time');
     if (timeDisplay && canChangeDateTime()) {
       timeDisplay.addEventListener(
         'wheel',
@@ -577,7 +577,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     if (this.#searchOpen) requestAnimationFrame(() => this.#positionSearchPanel());
-    const dome = this.element.querySelector('.calendaria-hud-dome');
+    const dome = this.element.querySelector('.dome');
     if (dome) {
       dome.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -586,7 +586,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    const bar = this.element.querySelector('.calendaria-hud-bar');
+    const bar = this.element.querySelector('.bar');
     bar?.addEventListener('dblclick', (e) => {
       e.preventDefault();
       game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, this.isCompact ? 'fullsize' : 'compact');
@@ -595,7 +595,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (e.target.closest('#context-menu')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.calendaria-hud-bar', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.bar', this.#getContextMenuItems(), { fixed: true, jQuery: false });
       menu._onActivate(e);
     });
   }
@@ -659,7 +659,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       TimeClock.setIncrement(states.increment);
     }
     if (this.#stickyTray) {
-      const tray = this.element.querySelector('.calendaria-hud-tray');
+      const tray = this.element.querySelector('.tray');
       tray?.classList.add('visible');
     }
   }
@@ -676,7 +676,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _toggleStickyTray() {
     this.#stickyTray = !this.#stickyTray;
-    const tray = this.element.querySelector('.calendaria-hud-tray');
+    const tray = this.element.querySelector('.tray');
     tray?.classList.toggle('visible', this.#stickyTray);
     this._updatePinButtonState();
     this.#saveStickyStates();
@@ -687,7 +687,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _toggleStickyPosition() {
     this.#stickyPosition = !this.#stickyPosition;
-    const bar = this.element.querySelector('.calendaria-hud-bar');
+    const bar = this.element.querySelector('.bar');
     bar?.classList.toggle('locked', this.#stickyPosition);
     this._updatePinButtonState();
     this.#saveStickyStates();
@@ -718,7 +718,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (this.#snappedZoneId) {
         const rect = this.element.getBoundingClientRect();
-        const barEl = this.element.querySelector('.calendaria-hud-bar');
+        const barEl = this.element.querySelector('.bar');
         const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
         const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
         if (zonePos) {
@@ -752,7 +752,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
         const posData = { left: this.position.left, top: this.position.top, zoneId: this.#snappedZoneId };
         if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
-          const barEl = this.element.querySelector('.calendaria-hud-bar');
+          const barEl = this.element.querySelector('.bar');
           if (barEl) posData.anchorY = barEl.getBoundingClientRect().bottom;
         }
         game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, posData);
@@ -766,7 +766,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #detectCurrentZone() {
     const rect = this.element.getBoundingClientRect();
-    const barEl = this.element.querySelector('.calendaria-hud-bar');
+    const barEl = this.element.querySelector('.bar');
     const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + barHeight / 2;
@@ -782,7 +782,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) return;
     const rect = this.element.getBoundingClientRect();
     if (this.#snappedZoneId) {
-      const barEl = this.element.querySelector('.calendaria-hud-bar');
+      const barEl = this.element.querySelector('.bar');
       const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
       const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
       if (zonePos) {
@@ -820,7 +820,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#lastWidth !== null && Math.abs(currentWidth - this.#lastWidth) > 1) {
       if (this.#snappedZoneId) {
         const rect = this.element.getBoundingClientRect();
-        const barEl = this.element.querySelector('.calendaria-hud-bar');
+        const barEl = this.element.querySelector('.bar');
         const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
         const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, currentWidth, barHeight);
         if (zonePos) {
@@ -864,7 +864,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) return;
     const rect = this.element.getBoundingClientRect();
-    const barEl = this.element.querySelector('.calendaria-hud-bar');
+    const barEl = this.element.querySelector('.bar');
     const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
 
     if (this.#snappedZoneId) {
@@ -899,7 +899,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Enable dragging on the main bar.
    */
   #enableDragging() {
-    const dragHandle = this.element.querySelector('.calendaria-hud-bar');
+    const dragHandle = this.element.querySelector('.bar');
     if (!dragHandle) return;
     const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
     let dragStartX = 0;
@@ -940,7 +940,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
       this.#updateDomeVisibility();
-      const barEl = this.element.querySelector('.calendaria-hud-bar');
+      const barEl = this.element.querySelector('.bar');
       const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
       this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, barHeight);
     };
@@ -957,7 +957,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         return;
       }
       const rect = this.element.getBoundingClientRect();
-      const barEl = this.element.querySelector('.calendaria-hud-bar');
+      const barEl = this.element.querySelector('.bar');
       const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
       const result = StickyZones.finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, barHeight, previousZoneId);
       this.#snappedZoneId = result.zoneId;
@@ -969,7 +969,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         posData.centerX = this.position.left + rect.width / 2;
         posData.centerY = this.position.top + rect.height / 2;
       } else if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
-        const barEl = this.element.querySelector('.calendaria-hud-bar');
+        const barEl = this.element.querySelector('.bar');
         if (barEl) posData.anchorY = barEl.getBoundingClientRect().bottom;
       }
       await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, posData);
@@ -980,7 +980,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Update dome visibility based on viewport position.
    */
   #updateDomeVisibility() {
-    const dome = this.element.querySelector('.calendaria-hud-dome');
+    const dome = this.element.querySelector('.dome');
     if (!dome) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE) || game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW)) {
       dome.classList.remove('hidden');
@@ -1014,7 +1014,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
     const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
     const useSlice = this.useSliceMode;
-    const selector = useSlice ? '.calendaria-slice-scene-canvas' : '.calendaria-hud-scene-canvas';
+    const selector = useSlice ? '.slice-canvas' : '.scene-canvas';
     this.#updateSceneRenderer(selector, useSlice ? 'slice' : 'dome');
     const skyColors = this.#getSkyColorsRgb(hour);
     const tintedColors = this.#applyWeatherSkyTint(skyColors);
@@ -1179,13 +1179,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ parts: ['bar'] });
       }, 200);
     }
-    const timeEl = this.element.querySelector('.calendaria-hud-time');
+    const timeEl = this.element.querySelector('.time');
     if (timeEl) {
       const timeFormatted = this.#formatTime(components);
       if (hasMoonIconMarkers(timeFormatted)) timeEl.innerHTML = renderMoonIcons(timeFormatted);
       else timeEl.textContent = timeFormatted;
     }
-    const dateEl = this.element.querySelector('.calendaria-hud-date');
+    const dateEl = this.element.querySelector('.date');
     if (dateEl) {
       const dateFormatted = this.#formatDateDisplay(components);
       const dateText = stripMoonIconMarkers(dateFormatted);
@@ -1193,7 +1193,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       else dateEl.textContent = dateFormatted;
       dateEl.classList.toggle('compressed', dateText.length > 35);
     }
-    const hud = this.element.querySelector('.calendaria-hud-content');
+    const hud = this.element.querySelector('.content');
     if (hud) hud.classList.toggle('time-flowing', TimeClock.running);
     this.#updateCelestialDisplay();
   }
@@ -1224,9 +1224,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.rendered) return;
     const running = TimeClock.running;
     const locked = TimeClock.locked;
-    const hud = this.element.querySelector('.calendaria-hud-content');
+    const hud = this.element.querySelector('.content');
     if (hud) hud.classList.toggle('time-flowing', running);
-    const playBtn = this.element.querySelector('.calendaria-hud-play-btn');
+    const playBtn = this.element.querySelector('.play-btn');
     if (playBtn) {
       playBtn.classList.toggle('playing', running);
       playBtn.classList.toggle('clock-locked', locked);
@@ -1835,7 +1835,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #positionSearchPanel() {
     const panel = this.element.querySelector('.calendaria-search');
-    const bar = this.element.querySelector('.calendaria-hud-bar');
+    const bar = this.element.querySelector('.bar');
     if (!panel || !bar) return;
     if (panel.parentElement !== document.body) {
       document.body.appendChild(panel);
