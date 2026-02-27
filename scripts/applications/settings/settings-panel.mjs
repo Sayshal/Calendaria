@@ -347,7 +347,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   #getOrCreateSearchDropdown() {
     if (!this.#searchDropdown) {
       this.#searchDropdown = document.createElement('div');
-      this.#searchDropdown.className = 'calendaria-search-results';
+      this.#searchDropdown.className = 'calendaria-search';
       document.body.appendChild(this.#searchDropdown);
     }
     return this.#searchDropdown;
