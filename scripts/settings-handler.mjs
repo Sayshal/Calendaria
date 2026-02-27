@@ -53,6 +53,13 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: () => MiniCal.updateIdleOpacity()
       },
+      [SETTINGS.MINI_CAL_AUTO_OPEN_NOTES]: {
+        name: 'CALENDARIA.Settings.AutoOpenNotes.Name',
+        hint: 'CALENDARIA.Settings.AutoOpenNotes.Hint',
+        scope: 'user',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
       [SETTINGS.MINI_CAL_IDLE_OPACITY]: {
         name: 'CALENDARIA.Settings.IdleOpacity.Name',
         hint: 'CALENDARIA.Settings.IdleOpacity.Hint',

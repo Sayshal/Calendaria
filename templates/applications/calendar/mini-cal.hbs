@@ -1,38 +1,47 @@
 <div class="container">
   <div class="sidebar{{#if sidebarVisible}} visible{{/if}}{{#if sidebarLocked}} locked{{/if}}">
-    <button type="button" class="sidebar-btn" data-action="close" data-tooltip
+    {{!-- Navigation group --}}
+    <button type="button" class="sidebar-btn" data-action="close" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>
     </button>
-    <button type="button" class="sidebar-btn" data-action="openFull" data-tooltip
+    <button type="button" class="sidebar-btn" data-action="openFull" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.MiniCal.OpenFull'}}">
       <i class="fas fa-expand"></i>
     </button>
-    <button type="button" class="sidebar-btn" data-action="today" data-tooltip
+    <button type="button" class="sidebar-btn" data-action="today" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.Today'}}">
       <i class="fas fa-calendar-day"></i>
     </button>
-    {{#if showSetCurrentDate}}
-      <button type="button" class="sidebar-btn set-current-date" data-action="setCurrentDate" data-tooltip
-        aria-label="{{localize 'CALENDARIA.MiniCal.SetCurrentDate'}}">
-        <i class="fas fa-calendar-check"></i>
-      </button>
-    {{/if}}
-    <button type="button" class="sidebar-btn" data-action="addNote" data-tooltip
+
+    <div class="sidebar-separator"></div>
+
+    {{!-- Date management group --}}
+    <button type="button" class="sidebar-btn" data-action="setCurrentDate" {{#if disableSetCurrentDate}}disabled{{/if}}
+      data-tooltip data-tooltip-direction="RIGHT" aria-label="{{localize 'CALENDARIA.MiniCal.SetCurrentDate'}}">
+      <i class="fas fa-thumbtack"></i>
+    </button>
+
+    <div class="sidebar-separator"></div>
+
+    {{!-- Notes group --}}
+    <button type="button" class="sidebar-btn" data-action="addNote" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
       <i class="fas fa-plus"></i>
     </button>
-    <button type="button" class="sidebar-btn" data-action="toggleSearch" data-tooltip
+    <button type="button" class="sidebar-btn" data-action="toggleSearch" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.SearchNotes'}}">
       <i class="fas fa-search"></i>
     </button>
-    {{#if showViewNotes}}
-      <button type="button" class="sidebar-btn" data-action="viewNotes" data-tooltip
-        aria-label="{{localize 'CALENDARIA.MiniCal.ViewNotes'}}">
-        <i class="fas fa-list"></i>
-      </button>
-    {{/if}}
-    <button type="button" class="sidebar-btn" data-action="openSettings" data-tooltip
+    <button type="button" class="sidebar-btn" data-action="viewNotes" {{#if disableViewNotes}}disabled{{/if}}
+      data-tooltip data-tooltip-direction="RIGHT" aria-label="{{localize 'CALENDARIA.MiniCal.ViewNotes'}}">
+      <i class="fas fa-list"></i>
+    </button>
+
+    <div class="sidebar-separator"></div>
+
+    {{!-- System group --}}
+    <button type="button" class="sidebar-btn" data-action="openSettings" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.Settings'}}">
       <i class="fas fa-cog"></i>
     </button>
@@ -160,7 +169,7 @@
                 data-tooltip-html="{{{dayTooltip}}}"
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>
                 <span class="festival-name">{{festivalName}}</span>
-                {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
+                {{#if hasNotes}}<span class="note-badge" {{#if noteBadgeColor}}style="background: {{noteBadgeColor}}; color: {{noteBadgeTextColor}}"{{/if}}>{{noteCount}}</span>{{/if}}
                 {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}"
                       data-action="showMoons" data-tooltip aria-label="{{moonPhase}}">
                       <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}">
@@ -194,7 +203,7 @@
                 {{#if dayTooltip}}data-tooltip-html="{{{dayTooltip}}}"{{/if}}
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>
                 <span class="day-num">{{day}}</span>
-                {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
+                {{#if hasNotes}}<span class="note-badge" {{#if noteBadgeColor}}style="background: {{noteBadgeColor}}; color: {{noteBadgeTextColor}}"{{/if}}>{{noteCount}}</span>{{/if}}
               </div>
             {{else}}
               <div
@@ -203,7 +212,7 @@
                 data-tooltip-html="{{{dayTooltip}}}"
                 {{#if festivalColor}}style="--festival-color: {{festivalColor}}" {{/if}}>
                 <span class="day-num">{{day}}</span>
-                {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
+                {{#if hasNotes}}<span class="note-badge" {{#if noteBadgeColor}}style="background: {{noteBadgeColor}}; color: {{noteBadgeTextColor}}"{{/if}}>{{noteCount}}</span>{{/if}}
                 {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint clickable" style="--moon-color: {{moonColor}}"
                       data-action="showMoons" data-tooltip aria-label="{{moonPhase}}">
                       <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}">

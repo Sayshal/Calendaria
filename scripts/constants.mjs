@@ -88,6 +88,7 @@ export const SETTINGS = {
   LOGGING_LEVEL: 'loggingLevel',
   MACRO_TRIGGERS: 'macroTriggers',
   MINI_CAL_AUTO_FADE: 'miniCalAutoFade',
+  MINI_CAL_AUTO_OPEN_NOTES: 'miniCalAutoOpenNotes',
   MINI_CAL_CONFIRM_SET_DATE: 'miniCalConfirmSetDate',
   MINI_CAL_CONTROLS_DELAY: 'miniCalControlsDelay',
   MINI_CAL_CYCLES_DISPLAY_MODE: 'miniCalCyclesDisplayMode',

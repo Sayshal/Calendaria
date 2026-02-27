@@ -639,6 +639,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.MINI_CAL_IDLE_OPACITY]: { tab: 'miniCal', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.MINI_CAL_CONTROLS_DELAY]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalControlsDelay.Name' },
     [SETTINGS.MINI_CAL_CONFIRM_SET_DATE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ConfirmSetDate.Name' },
+    [SETTINGS.MINI_CAL_AUTO_OPEN_NOTES]: { tab: 'miniCal', label: 'CALENDARIA.Settings.AutoOpenNotes.Name' },
     [SETTINGS.MINI_CAL_SHOW_WEATHER]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalShowWeather.Name' },
     [SETTINGS.MINI_CAL_SHOW_SEASON]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalShowSeason.Name' },
     [SETTINGS.MINI_CAL_SHOW_ERA]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalShowEra.Name' },
@@ -709,7 +710,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.MINI_CAL_AUTO_FADE,
       SETTINGS.MINI_CAL_IDLE_OPACITY,
       SETTINGS.MINI_CAL_CONTROLS_DELAY,
-      SETTINGS.MINI_CAL_CONFIRM_SET_DATE
+      SETTINGS.MINI_CAL_CONFIRM_SET_DATE,
+      SETTINGS.MINI_CAL_AUTO_OPEN_NOTES
     ],
     'minical-block-visibility': [
       SETTINGS.MINI_CAL_SHOW_WEATHER,
@@ -856,6 +858,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_IDLE_OPACITY);
     context.miniCalControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY);
     context.miniCalConfirmSetDate = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE);
+    context.miniCalAutoOpenNotes = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES);
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
     context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
@@ -1462,6 +1465,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('miniCalIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_IDLE_OPACITY, Number(data.miniCalIdleOpacity));
     if ('miniCalControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY, Number(data.miniCalControlsDelay));
     if ('miniCalConfirmSetDate' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE, data.miniCalConfirmSetDate);
+    if ('miniCalAutoOpenNotes' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES, data.miniCalAutoOpenNotes);
     if ('darknessSync' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
       if (data.darknessSync && game.pf2e?.worldClock) {
@@ -1721,6 +1725,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'miniCalIdleOpacity',
       'miniCalControlsDelay',
       'miniCalConfirmSetDate',
+      'miniCalAutoOpenNotes',
       'miniCalStickyTimeControls',
       'miniCalStickySidebar',
       'miniCalStickyPosition',

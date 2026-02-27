@@ -314,6 +314,13 @@
       opacity: 1;
     }
 
+    .sidebar-separator {
+      width: 1rem;
+      height: 0.125rem;
+      margin: 0.125rem auto;
+      background: color-mix(in srgb, var(--calendaria-text-dim) 50%, var(--calendaria-border));
+    }
+
     .sidebar-btn {
       display: flex;
       justify-content: center;
@@ -334,16 +341,18 @@
         background: var(--calendaria-bg-hover);
       }
 
+      &[disabled] {
+        opacity: 0.3;
+        cursor: default;
+        pointer-events: none;
+      }
+
       &.pin-btn.has-sticky {
         color: var(--calendaria-primary);
       }
 
       &.pin-btn.sticky-position {
         color: var(--calendaria-error);
-      }
-
-      &.set-current-date {
-        color: var(--calendaria-primary);
       }
     }
 
@@ -479,20 +488,18 @@
       }
 
       .note-badge {
-        display: flex;
+        display: grid;
+        place-items: center;
         position: absolute;
         bottom: 0.1563rem;
         left: 0.15rem;
-        justify-content: center;
-        align-items: center;
-        width: 0.9375rem;
-        height: 0.9375rem;
-        padding: 0 0.125rem;
+        width: 1rem;
+        height: 1rem;
+        padding: 0;
         border-radius: 0.25rem;
-        color: var(--calendaria-note-badge-text);
         font-weight: 700;
         font-size: 0.85rem;
-        background: var(--calendaria-note-badge-bg);
+        line-height: 1;
       }
 
       .mini-weather-icon {

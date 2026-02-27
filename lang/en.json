@@ -1571,6 +1571,8 @@
   "CALENDARIA.Settings.ChatTimestampMode.Replace": "Replace real time",
   "CALENDARIA.Settings.ChatTimestampShowTime.Hint": "Include the in-game time (hours:minutes) alongside the date in chat timestamps.",
   "CALENDARIA.Settings.ChatTimestampShowTime.Name": "Show Time in Chat Timestamps",
+  "CALENDARIA.Settings.AutoOpenNotes.Hint": "Automatically open the notes panel when selecting a day that has notes.",
+  "CALENDARIA.Settings.AutoOpenNotes.Name": "Auto-Open Notes Panel",
   "CALENDARIA.Settings.ConfirmSetDate.Hint": "Show a confirmation dialog before changing the current world date.",
   "CALENDARIA.Settings.ConfirmSetDate.Name": "Confirm Set Current Date",
   "CALENDARIA.Settings.DarknessSync.Hint": "Automatically sync scene darkness levels with the position of the sun based on the current time. This is the default for new scenes.",

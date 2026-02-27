@@ -188,10 +188,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const allNotes = ViewUtils.getCalendarNotes();
     const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
     if (calendar) context.calendarData = this._generateMiniCalData(calendar, viewedDate, visibleNotes);
-    context.showSetCurrentDate = false;
+    context.disableSetCurrentDate = true;
     if (game.user.isGM && this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(calendar);
-      context.showSetCurrentDate = this._selectedDate.year !== today.year || this._selectedDate.month !== today.month || this._selectedDate.dayOfMonth !== today.dayOfMonth;
+      context.disableSetCurrentDate = this._selectedDate.year === today.year && this._selectedDate.month === today.month && this._selectedDate.dayOfMonth === today.dayOfMonth;
     }
     context.sidebarVisible = this.#sidebarVisible || this.#sidebarLocked || this.#stickySidebar;
     context.controlsVisible = this.#controlsVisible || this.#stickyTimeControls;
@@ -206,11 +206,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       context.selectedDateNotes = this._getSelectedDateNotes(visibleNotes);
       context.selectedDateLabel = this._formatSelectedDate();
     }
-    context.showViewNotes = false;
+    context.disableViewNotes = true;
     const checkDate = this._selectedDate || ViewUtils.getCurrentViewedDate(calendar);
     if (checkDate) {
-      const noteCount = this._countNotesOnDay(visibleNotes, checkDate.year, checkDate.month, checkDate.dayOfMonth);
-      context.showViewNotes = noteCount > 0;
+      const { count } = this._getNotesOnDay(visibleNotes, checkDate.year, checkDate.month, checkDate.dayOfMonth);
+      context.disableViewNotes = count === 0;
     }
     context.weather = this._getWeatherContext();
     context.searchOpen = this.#searchOpen;
@@ -385,7 +385,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const intercalaryDays = [];
     for (let dayOfMonth = 0; dayOfMonth < daysInMonth; dayOfMonth++) {
       const displayDay = dayOfMonth + 1;
-      const noteCount = this._countNotesOnDay(visibleNotes, year, month, dayOfMonth);
+      const noteInfo = this._getNotesOnDay(visibleNotes, year, month, dayOfMonth);
+      const noteCount = noteInfo.count;
+      const noteBadgeColor = noteInfo.color;
+      const noteBadgeTextColor = noteBadgeColor ? MiniCal._getContrastTextColor(noteBadgeColor) : null;
       const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth });
       const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, dayOfMonth) : null;
       const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
@@ -403,6 +406,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isSelected: this._isSelected(year, month, dayOfMonth),
           hasNotes: noteCount > 0,
           noteCount,
+          noteBadgeColor,
+          noteBadgeTextColor,
           isFestival: true,
           festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
@@ -427,6 +432,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isSelected: this._isSelected(year, month, dayOfMonth),
           hasNotes: noteCount > 0,
           noteCount,
+          noteBadgeColor,
+          noteBadgeTextColor,
           isFestival: !!festivalDay,
           festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
@@ -538,7 +545,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           dayYear--;
         }
         const dayOfMonth = dayNum - 1;
-        const noteCount = this._countNotesOnDay(visibleNotes, dayYear, 0, dayOfMonth);
+        const noteInfo = this._getNotesOnDay(visibleNotes, dayYear, 0, dayOfMonth);
+        const noteCount = noteInfo.count;
+        const noteBadgeColor = noteInfo.color;
+        const noteBadgeTextColor = noteBadgeColor ? MiniCal._getContrastTextColor(noteBadgeColor) : null;
         const festivalDay = calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
         const moonData = ViewUtils.getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth);
         const isIntercalary = festivalDay?.countsForWeekday === false;
@@ -553,6 +563,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isSelected: this._isSelected(dayYear, 0, dayOfMonth),
           hasNotes: noteCount > 0,
           noteCount,
+          noteBadgeColor,
+          noteBadgeTextColor,
           isFestival: !!festivalDay,
           festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
@@ -592,16 +604,28 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Count notes on a specific day.
-   * @param {object[]} notes - Visible notes
-   * @param {number} year - Year
-   * @param {number} month - Month
-   * @param {number} dayOfMonth - Day (0-indexed)
-   * @returns {number} Number of notes on the specified day
+   * Get contrasting text color (black or white) for a given hex background.
+   * @param {string} hex - Hex color string (e.g. "#ff0000")
+   * @returns {string} "#000000" or "#ffffff"
    */
-  _countNotesOnDay(notes, year, month, dayOfMonth) {
+  static _getContrastTextColor(hex) {
+    const c = foundry.utils.Color.from(hex);
+    const [r, g, b] = [c.r, c.g, c.b];
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 0.5 ? '#000000' : '#ffffff';
+  }
+
+  /**
+   * Get note info for a specific day (count and first note's color).
+   * @param {object[]} notes - Array of visible note pages
+   * @param {number} year - Year
+   * @param {number} month - Month index
+   * @param {number} dayOfMonth - Day of month index
+   * @returns {{ count: number, color: string|null }} Note count and first note's color
+   */
+  _getNotesOnDay(notes, year, month, dayOfMonth) {
     const targetDate = { year, month, dayOfMonth };
-    return notes.filter((page) => {
+    const matching = notes.filter((page) => {
       const noteData = {
         startDate: page.system.startDate,
         endDate: page.system.endDate,
@@ -619,7 +643,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         conditions: page.system.conditions
       };
       return isRecurringMatch(noteData, targetDate);
-    }).length;
+    });
+    return { count: matching.length, color: matching[0]?.system?.color || null };
   }
 
   /**
@@ -1315,6 +1340,19 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const year = parseInt(target.dataset.year);
     if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.dayOfMonth === dayOfMonth) this._selectedDate = null;
     else this._selectedDate = { year, month, dayOfMonth };
+    if (this._selectedDate && game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES)) {
+      const allNotes = ViewUtils.getCalendarNotes();
+      const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
+      const { count } = this._getNotesOnDay(visibleNotes, year, month, dayOfMonth);
+      if (count > 0) {
+        this.#notesPanelVisible = true;
+        this.#sidebarLocked = true;
+        this.#sidebarVisible = true;
+      } else {
+        this.#notesPanelVisible = false;
+      }
+    }
+
     await this.render();
   }
 
@@ -1335,7 +1373,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       month = today.month;
       dayOfMonth = today.dayOfMonth ?? 0;
     }
-    const page = await NoteManager.createNote({
+    await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 12, minute: 0 },
@@ -1453,10 +1491,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Set the current world date to the selected date.
    * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
+   * @param {HTMLElement} target - The clicked element
    */
-  static async _onSetCurrentDate(_event, _target) {
-    if (!this._selectedDate) return;
+  static async _onSetCurrentDate(_event, target) {
+    if (target.disabled || !this._selectedDate) return;
     const confirmEnabled = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE);
     if (confirmEnabled) {
       const dateStr = this._formatSelectedDate();
@@ -1477,9 +1515,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Open the notes panel for the selected date.
    * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
+   * @param {HTMLElement} target - The clicked element
    */
-  static async _onViewNotes(_event, _target) {
+  static async _onViewNotes(_event, target) {
+    if (target.disabled) return;
     if (!this._selectedDate) {
       const today = ViewUtils.getCurrentViewedDate(this.calendar);
       if (today) this._selectedDate = { year: today.year, month: today.month, dayOfMonth: today.dayOfMonth };

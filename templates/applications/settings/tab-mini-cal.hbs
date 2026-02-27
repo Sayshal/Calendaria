@@ -105,6 +105,15 @@
         <p class="hint">{{localize "CALENDARIA.Settings.ConfirmSetDate.Hint"}}</p>
       </div>
     {{/if}}
+
+    <div class="form-group">
+      <label for="miniCalAutoOpenNotes">{{localize "CALENDARIA.Settings.AutoOpenNotes.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalAutoOpenNotes" name="miniCalAutoOpenNotes"
+          {{#if miniCalAutoOpenNotes}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoOpenNotes.Hint"}}</p>
+    </div>
   </fieldset>
 
   <fieldset data-section="minical-block-visibility">
