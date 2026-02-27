@@ -1,28 +1,4 @@
 .calendaria {
-  input[type='color'] {
-    -webkit-appearance: none;
-    appearance: none;
-    height: 1.75rem;
-    padding: 0;
-    border: 0.0625rem solid var(--color-border-light-tertiary);
-    border-radius: 0.25rem;
-    cursor: pointer;
-
-    &::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
-
-    &::-webkit-color-swatch {
-      border: none;
-      border-radius: 0.1875rem;
-    }
-
-    &::-moz-color-swatch {
-      border: none;
-      border-radius: 0.1875rem;
-    }
-  }
-
   .hidden {
     display: none !important;
   }

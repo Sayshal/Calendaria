@@ -687,7 +687,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const typeInput = target.querySelector('input[name="system.iconType"]');
     if (typeInput) typeInput.value = newType;
     const form = target.closest('form');
-    const colorInput = form?.querySelector('input[name="system.color"]');
+    const colorInput = form?.querySelector('color-picker[name="system.color"]');
     const color = colorInput?.value || '#4a9eff';
     if (newType === 'fontawesome') {
       const img = target.querySelector('img');
@@ -875,7 +875,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (titleInput) titleInput.value = localize('CALENDARIA.Note.NewNote');
     const iconInput = form.querySelector('input[name="system.icon"]');
     const iconTypeInput = form.querySelector('input[name="system.iconType"]');
-    const colorInput = form.querySelector('input[name="system.color"]');
+    const colorInput = form.querySelector('color-picker[name="system.color"]');
     if (iconInput) iconInput.value = 'icons/svg/book.svg';
     if (iconTypeInput) iconTypeInput.value = 'image';
     if (colorInput) colorInput.value = '#4a9eff';

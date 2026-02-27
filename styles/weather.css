@@ -188,7 +188,7 @@
     }
   }
 
-  .weather-editor {
+  &.weather-editor {
     footer.form-footer {
       grid-column: 1 / -1;
       grid-row: 2;

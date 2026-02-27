@@ -12,22 +12,19 @@
       </div>
 
       <div class="categories-list">
-        {{#if categories.length}}
-          <div class="category-header">
-            <span class="col-color">{{localize "CALENDARIA.Common.Color"}}</span>
-            <span class="col-name">{{localize "CALENDARIA.Common.Name"}}</span>
-            <span class="col-icon">{{localize "CALENDARIA.Common.Icon"}}</span>
-            <span class="col-actions"></span>
-          </div>
-        {{/if}}
         {{#each categories}}
           <div class="category-row" data-category-id="{{this.id}}">
             <input type="hidden" name="categories.{{@index}}.id" value="{{this.id}}">
-            <input type="color" name="categories.{{@index}}.color" value="{{this.color}}">
+            <input type="hidden" name="categories.{{@index}}.color" value="{{this.color}}">
+            <input type="hidden" name="categories.{{@index}}.icon" value="{{this.icon}}">
+            <button type="button" class="category-icon-display" data-action="editCategoryIcon"
+              data-index="{{@index}}" data-tooltip
+              aria-label="{{localize 'CALENDARIA.SettingsPanel.Category.EditIconColor'}}"
+              style="color: {{this.color}}">
+              <i class="{{#if this.icon}}{{this.icon}}{{else}}fas fa-bookmark{{/if}}"></i>
+            </button>
             <input type="text" name="categories.{{@index}}.name" value="{{this.name}}"
               placeholder="{{localize 'CALENDARIA.SettingsPanel.Category.NamePlaceholder'}}">
-            <input type="text" name="categories.{{@index}}.icon" value="{{this.icon}}" placeholder="fas fa-bookmark"
-              class="icon-input" data-tooltip="{{localize 'CALENDARIA.Common.IconHint'}}">
             <button type="button" data-action="removeCategory" data-category-id="{{this.id}}"
               class="icon-button danger">
               <i class="fas fa-trash"></i>

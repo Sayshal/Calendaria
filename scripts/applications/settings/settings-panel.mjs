@@ -50,6 +50,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       resetPosition: SettingsPanel.#onResetPosition,
       addCategory: SettingsPanel.#onAddCategory,
       removeCategory: SettingsPanel.#onRemoveCategory,
+      editCategoryIcon: SettingsPanel.#onEditCategoryIcon,
       resetColor: SettingsPanel.#onResetColor,
       exportTheme: SettingsPanel.#onExportTheme,
       importTheme: SettingsPanel.#onImportTheme,
@@ -1840,6 +1841,63 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Edit a category's icon and color via dialog.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static #onEditCategoryIcon(_event, target) {
+    const index = target.dataset.index;
+    const row = target.closest('.category-row');
+    if (!row) return;
+    const colorInput = row.querySelector('input[name$=".color"]');
+    const iconInput = row.querySelector('input[name$=".icon"]');
+    const currentColor = colorInput?.value || '#4a90e2';
+    const currentIcon = iconInput?.value || 'fas fa-bookmark';
+    const content = `
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Common.Icon')}</label>
+        <div class="form-fields">
+          <input type="text" name="icon" value="${currentIcon}" placeholder="fas fa-bookmark">
+        </div>
+        <p class="hint">${localize('CALENDARIA.Common.IconHint')}</p>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Common.Color')}</label>
+        <div class="form-fields">
+          <color-picker name="color" value="${currentColor}"></color-picker>
+        </div>
+      </div>
+    `;
+    const panel = this;
+    new foundry.applications.api.DialogV2({
+      window: { title: localize('CALENDARIA.SettingsPanel.Category.EditIconColor'), contentClasses: ['calendaria', 'season-icon-dialog'] },
+      content,
+      buttons: [
+        {
+          action: 'save',
+          label: localize('CALENDARIA.Common.Save'),
+          icon: 'fas fa-save',
+          default: true,
+          callback: (_event, _button, dialog) => {
+            const newIcon = dialog.element.querySelector('[name="icon"]')?.value || 'fas fa-bookmark';
+            const newColor = dialog.element.querySelector('[name="color"]')?.value || '#4a90e2';
+            if (colorInput) colorInput.value = newColor;
+            if (iconInput) iconInput.value = newIcon;
+            const btn = row.querySelector('.category-icon-display');
+            if (btn) {
+              btn.style.color = newColor;
+              const i = btn.querySelector('i');
+              if (i) i.className = newIcon;
+            }
+            panel.submit();
+          }
+        }
+      ],
+      position: { width: 350 }
+    }).render(true);
+  }
+
+  /**
    * Reset a single color to default.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
@@ -2180,7 +2238,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
     if (partId === 'theme') {
-      const colorInputs = htmlElement.querySelectorAll('input[type="color"][data-key]');
+      const colorInputs = htmlElement.querySelectorAll('color-picker[data-key]');
       colorInputs.forEach((input) => {
         input.addEventListener('change', () => {
           const resetBtn = input.closest('.color-table-row')?.querySelector('.reset-color');

@@ -25,7 +25,7 @@
         <div class="form-group">
           <label for="{{preset.id}}-color">{{localize "CALENDARIA.WeatherEditor.Color"}}</label>
           <div class="form-fields">
-            <input type="color" id="{{preset.id}}-color" name="{{preset.id}}.color" value="{{preset.color}}">
+            <color-picker name="{{preset.id}}.color" value="{{preset.color}}"></color-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.ColorHint"}}</p>
         </div>
@@ -244,14 +244,14 @@
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.PrimaryColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="{{preset.id}}.vo-tint-primary" value="{{visuals.tintPrimary}}">
+            <color-picker name="{{preset.id}}.vo-tint-primary" value="{{visuals.tintPrimary}}"></color-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.PrimaryColorHint"}}</p>
         </div>
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SecondaryColor"}}</label>
           <div class="form-fields">
-            <input type="color" name="{{preset.id}}.vo-tint-secondary" value="{{visuals.tintSecondary}}">
+            <color-picker name="{{preset.id}}.vo-tint-secondary" value="{{visuals.tintSecondary}}"></color-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SecondaryColorHint"}}</p>
         </div>
@@ -267,21 +267,21 @@
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyTop"}}</label>
           <div class="form-fields">
-            <input type="color" name="{{preset.id}}.so-top" value="{{sky.top}}">
+            <color-picker name="{{preset.id}}.so-top" value="{{sky.top}}"></color-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyTopHint"}}</p>
         </div>
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyMid"}}</label>
           <div class="form-fields">
-            <input type="color" name="{{preset.id}}.so-mid" value="{{sky.mid}}">
+            <color-picker name="{{preset.id}}.so-mid" value="{{sky.mid}}"></color-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyMidHint"}}</p>
         </div>
         <div class="form-group">
           <label>{{localize "CALENDARIA.WeatherEditor.Visuals.SkyBottom"}}</label>
           <div class="form-fields">
-            <input type="color" name="{{preset.id}}.so-bottom" value="{{sky.bottom}}">
+            <color-picker name="{{preset.id}}.so-bottom" value="{{sky.bottom}}"></color-picker>
           </div>
           <p class="hint">{{localize "CALENDARIA.WeatherEditor.Visuals.SkyBottomHint"}}</p>
         </div>

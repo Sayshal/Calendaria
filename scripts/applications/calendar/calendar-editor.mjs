@@ -533,8 +533,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     this.#setupLeapRuleListener();
     this.#setupWeekNumberDuplicateListener();
-    for (const colorInput of this.element.querySelectorAll('input[name^="moons."][name$=".color"]')) {
-      colorInput.addEventListener('input', (event) => {
+    for (const colorInput of this.element.querySelectorAll('color-picker[name^="moons."][name$=".color"]')) {
+      colorInput.addEventListener('change', (event) => {
         const preview = event.target.closest('.color-input-wrapper')?.querySelector('.moon-color-preview');
         if (!preview) return;
         const color = event.target.value;
@@ -1505,7 +1505,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       <div class="form-group">
         <label>${localize('CALENDARIA.Editor.Season.Color')}</label>
         <div class="form-fields">
-          <input type="color" name="color" value="${season.color || '#808080'}">
+          <color-picker name="color" value="${season.color || '#808080'}"></color-picker>
         </div>
       </div>
     `;
@@ -1646,7 +1646,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       <div class="form-group">
         <label>${localize('CALENDARIA.Editor.Festival.Color')}</label>
         <div class="form-fields">
-          <input type="color" name="color" value="${festival.color || '#d4af37'}">
+          <color-picker name="color" value="${festival.color || '#d4af37'}"></color-picker>
         </div>
       </div>
     `;

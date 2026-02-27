@@ -62,8 +62,6 @@
                   aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.UsageHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Usage"}}</span>
                 <span class="col-color" data-tooltip
                   aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ColorHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Color"}}</span>
-                <span class="col-hex" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ColorCodeHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.ColorCode"}}</span>
                 <span class="col-reset" data-tooltip
                   aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ResetHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Reset"}}</span>
               </div>
@@ -71,9 +69,8 @@
                 <div class="color-table-row">
                   <span class="col-location">{{localize this.componentLabel}}</span>
                   <span class="col-usage">{{localize this.label}}</span>
-                  <input type="color" class="col-color" name="colors.{{this.key}}" value="{{this.value}}"
-                    data-key="{{this.key}}">
-                  <input type="text" class="col-hex color-hex" value="{{this.value}}" readonly>
+                  <color-picker class="col-color" name="colors.{{this.key}}" value="{{this.value}}"
+                    data-key="{{this.key}}"></color-picker>
                   <button type="button" class="col-reset reset-color" data-action="resetColor" data-key="{{this.key}}"
                     data-tooltip aria-label="{{localize 'CALENDARIA.Common.Reset'}}" {{#unless this.isCustom}}disabled
                     aria-disabled="true" data-tooltip
