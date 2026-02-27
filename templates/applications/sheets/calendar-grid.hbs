@@ -23,8 +23,7 @@
                   {{#if moonPhases}}
                     <span class="day-moons">
                       {{#each moonPhases.visible}}
-                        <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
-                          aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}
+                        <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}
                           data-action="moonClick" data-moon-slot="{{@index}}" data-moon-name="{{moonName}}">
                           <img src="{{icon}}" alt="{{phaseName}}">
                         </span>
@@ -57,8 +56,7 @@
                   {{/each}}
                   {{#if ../../canAddNotes}}
                     <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                      data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
-                      aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
+                      data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
                       <i class="fas fa-plus"></i>
                     </button>
                   {{/if}}
@@ -88,8 +86,7 @@
                     {{day}}
                     {{#if isFestival}}
                       <i class="{{#if festivalIcon}}{{festivalIcon}}{{else}}fas fa-star{{/if}} festival-icon"
-                        data-tooltip
-                        aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"></i>
+                        data-tooltip aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"></i>
                     {{/if}}
                     {{#if moonPhases}}
                       <span class="day-moons">

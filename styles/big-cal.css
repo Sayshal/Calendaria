@@ -97,6 +97,7 @@
       img {
         width: auto;
         height: 100%;
+        pointer-events: none;
       }
     }
 
@@ -136,6 +137,11 @@
       line-height: 1;
       white-space: nowrap;
       background: rgb(255 255 255 / 6%);
+
+      i,
+      span {
+        pointer-events: none;
+      }
 
       i {
         font-size: var(--font-size-10);
@@ -389,6 +395,11 @@
       cursor: pointer;
       transition: transform 0.1s ease;
 
+      i,
+      img {
+        pointer-events: none;
+      }
+
       i {
         font-size: 0.875rem;
       }
@@ -458,6 +469,13 @@
       overflow: hidden;
       color: var(--calendaria-text-on-color);
       font-weight: 600;
+
+      i,
+      span,
+      img {
+        pointer-events: none;
+      }
+
       font-size: 0.625rem;
       text-overflow: ellipsis;
       text-shadow:

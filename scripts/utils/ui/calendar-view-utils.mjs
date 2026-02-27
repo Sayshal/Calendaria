@@ -9,7 +9,7 @@ import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
 import NoteManager from '../../notes/note-manager.mjs';
 import { isRecurringMatch } from '../../notes/recurrence.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
-import { formatCustom } from '../formatting/format-utils.mjs';
+import { formatCustom, toRomanNumeral } from '../formatting/format-utils.mjs';
 import { format, localize } from '../localization.mjs';
 import { canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
@@ -281,6 +281,94 @@ export function buildWeatherPillData(wd) {
     precipIntensity: wd.precipitation?.intensity
   });
   return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };
+}
+
+/**
+ * Render weather indicator HTML.
+ * @param {object} params - Normalized weather params
+ * @param {object|null} params.weather - Weather data { icon, label, color, temperature, tooltipHtml, windSpeed, windDirection, precipType }
+ * @param {string} params.displayMode - Display mode ('full', 'icon', 'iconTemp', 'temp')
+ * @param {boolean} params.canInteract - Whether user can open weather picker
+ * @param {boolean} [params.showBlock] - Whether to show empty-state block when no weather
+ * @returns {string} HTML string
+ */
+export function renderWeatherIndicator({ weather, displayMode, canInteract, showBlock = true }) {
+  if (weather) {
+    const clickable = canInteract ? ' clickable' : '';
+    const action = canInteract ? 'data-action="openWeatherPicker"' : '';
+    const showIcon = displayMode === 'full' || displayMode === 'icon' || displayMode === 'iconTemp';
+    const showLabel = displayMode === 'full';
+    const showTemp = displayMode === 'full' || displayMode === 'temp' || displayMode === 'iconTemp';
+    const icon = showIcon ? `<i class="${weather.icon}"></i>` : '';
+    const label = showLabel ? `<span class="weather-label">${weather.label}</span>` : '';
+    const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+    let windHtml = '';
+    if (showLabel && weather.windSpeed > 0) {
+      const rotation = weather.windDirection != null ? weather.windDirection : 0;
+      windHtml = `<span class="weather-wind"><i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i></span>`;
+    }
+    let precipHtml = '';
+    if (showLabel && weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
+    return `<span class="weather-indicator${clickable} weather-mode-${displayMode}" ${action} style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">${icon}${label}${temp}${windHtml}${precipHtml}</span>`;
+  } else if (showBlock && canInteract) {
+    return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
+  }
+  return '';
+}
+
+/**
+ * Render season indicator HTML.
+ * @param {object} params - Normalized season params
+ * @param {object|null} params.season - Season data { name, icon, color }
+ * @param {string} params.displayMode - Display mode ('full', 'icon', 'text')
+ * @returns {string} HTML string
+ */
+export function renderSeasonIndicator({ season, displayMode }) {
+  if (!season) return '';
+  const showIcon = displayMode === 'full' || displayMode === 'icon';
+  const showLabel = displayMode === 'full' || displayMode === 'text';
+  const icon = showIcon ? `<i class="${season.icon}"></i>` : '';
+  const label = showLabel ? `<span class="season-label">${season.name}</span>` : '';
+  return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${season.name}">${icon}${label}</span>`;
+}
+
+/**
+ * Render era indicator HTML.
+ * @param {object} params - Normalized era params
+ * @param {object|null} params.era - Era data { name, abbreviation }
+ * @param {string} params.displayMode - Display mode ('full', 'icon', 'text', 'abbr')
+ * @returns {string} HTML string
+ */
+export function renderEraIndicator({ era, displayMode }) {
+  if (!era) return '';
+  const showIcon = displayMode === 'full' || displayMode === 'icon';
+  const showLabel = displayMode === 'full' || displayMode === 'text';
+  const showAbbr = displayMode === 'abbr';
+  const icon = showIcon ? '<i class="fas fa-hourglass-half"></i>' : '';
+  let label = '';
+  if (showLabel) label = `<span class="era-label">${era.name}</span>`;
+  else if (showAbbr) label = `<span class="era-label">${era.abbreviation || era.name}</span>`;
+  return `<span class="era-indicator" data-tooltip="${era.name}">${icon}${label}</span>`;
+}
+
+/**
+ * Render cycle indicator HTML.
+ * @param {object} params - Normalized cycle params
+ * @param {object|null} params.cycleData - Cycle data { values: [{ index, entryName }] }
+ * @param {string} params.displayMode - Display mode ('icon', 'number', 'roman', 'name')
+ * @param {string} [params.cycleText] - Tooltip text
+ * @returns {string} HTML string
+ */
+export function renderCycleIndicator({ cycleData, displayMode, cycleText }) {
+  if (!cycleData?.values?.length) return '';
+  const icon = '<i class="fas fa-arrows-rotate"></i>';
+  if (displayMode === 'icon') return `<span class="cycle-indicator" data-tooltip="${cycleText}">${icon}</span>`;
+  let displayText = '';
+  if (displayMode === 'number') displayText = cycleData.values.map((v) => v.index + 1).join(', ');
+  else if (displayMode === 'roman') displayText = cycleData.values.map((v) => toRomanNumeral(v.index + 1)).join(', ');
+  else displayText = cycleData.values.map((v) => v.entryName).join(', ');
+  const label = `<span class="cycle-label">${displayText}</span>`;
+  return `<span class="cycle-indicator" data-tooltip="${cycleText || displayText}">${icon}${label}</span>`;
 }
 
 /**

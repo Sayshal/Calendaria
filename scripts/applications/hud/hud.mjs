@@ -8,7 +8,7 @@ import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
 import NoteManager from '../../notes/note-manager.mjs';
 import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers, toRomanNumeral } from '../../utils/formatting/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers } from '../../utils/formatting/format-utils.mjs';
 import { getMoonPhasePosition } from '../../utils/formatting/moon-utils.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
@@ -215,11 +215,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const isCompact = this.isCompact;
     const weatherDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
     const seasonDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
+    context.seasonDisplayMode = seasonDisplayMode;
     const season = calendar?.getCurrentSeason?.();
     context.currentSeason = showSeasonBlock && season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
     context.showSeasonIcon = seasonDisplayMode === 'full' || seasonDisplayMode === 'icon';
     context.showSeasonLabel = seasonDisplayMode === 'full' || seasonDisplayMode === 'text';
     const eraDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_ERA_DISPLAY_MODE);
+    context.eraDisplayMode = eraDisplayMode;
     const era = calendar?.getCurrentEra?.();
     context.currentEra = showEraBlock && era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name), icon: 'fas fa-hourglass-half' } : null;
     context.showEraIcon = eraDisplayMode === 'full' || eraDisplayMode === 'icon';
@@ -270,84 +272,28 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     widgets.buttonsRight = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_RIGHT, 'hud');
     widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'hud');
     widgets.tray = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_TRAY, 'hud');
-    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this.#renderWeatherIndicator(context), 'hud');
-    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this.#renderSeasonIndicator(context), 'hud');
-    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this.#renderEraIndicator(context), 'hud');
-    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this.#renderCycleIndicator(context), 'hud');
+    const weatherObj = context.weather ? { ...context.weather, temperature: context.weather.temp } : null;
+    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.WEATHER_INDICATOR,
+      ViewUtils.renderWeatherIndicator({ weather: weatherObj, displayMode: context.weatherDisplayMode, canInteract: context.canChangeWeather, showBlock: context.showWeatherBlock }),
+      'hud'
+    );
+    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.SEASON_INDICATOR,
+      ViewUtils.renderSeasonIndicator({ season: context.currentSeason, displayMode: context.seasonDisplayMode }),
+      'hud'
+    );
+    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.ERA_INDICATOR,
+      ViewUtils.renderEraIndicator({ era: context.currentEra, displayMode: context.eraDisplayMode }),
+      'hud'
+    );
+    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.CYCLE_INDICATOR,
+      ViewUtils.renderCycleIndicator({ cycleData: context.cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
+      'hud'
+    );
     return widgets;
-  }
-
-  /**
-   * Render the built-in weather indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
-   */
-  #renderWeatherIndicator(context) {
-    if (context.weather) {
-      const clickable = context.canChangeWeather ? 'clickable' : '';
-      const action = context.canChangeWeather ? 'data-action="openWeatherPicker"' : '';
-      const icon = context.showWeatherIcon ? `<i class="${context.weather.icon}"></i>` : '';
-      const label = context.showWeatherLabel ? `<span class="weather-label">${context.weather.label}</span>` : '';
-      const temp = context.showWeatherTemp ? `<span class="weather-temp">${context.weather.temp}</span>` : '';
-      let windHtml = '';
-      if (context.showWeatherLabel && context.weather.windSpeed > 0) {
-        const rotation = context.weather.windDirection != null ? context.weather.windDirection : 0;
-        windHtml = `<span class="weather-wind"><i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i></span>`;
-      }
-      let precipHtml = '';
-      if (context.showWeatherLabel && context.weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
-      return `<span class="weather-indicator ${clickable} weather-mode-${context.weatherDisplayMode}"
-        ${action} style="--weather-color: ${context.weather.color}" data-tooltip-html="${context.weather.tooltipHtml}">
-        ${icon}${label}${temp}${windHtml}${precipHtml}
-      </span>`;
-    } else if (context.showWeatherBlock && context.canChangeWeather) {
-      return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
-    }
-    return '';
-  }
-
-  /**
-   * Render the built-in season indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
-   */
-  #renderSeasonIndicator(context) {
-    if (!context.currentSeason) return '';
-    const icon = context.showSeasonIcon ? `<i class="${context.currentSeason.icon}"></i>` : '';
-    const label = context.showSeasonLabel ? `<span class="season-label">${context.currentSeason.name}</span>` : '';
-    return `<span class="season-indicator" style="--season-color: ${context.currentSeason.color}" data-tooltip="${context.currentSeason.name}">${icon}${label}</span>`;
-  }
-
-  /**
-   * Render the built-in era indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
-   */
-  #renderEraIndicator(context) {
-    if (!context.currentEra) return '';
-    const icon = context.showEraIcon ? `<i class="${context.currentEra.icon}"></i>` : '';
-    let label = '';
-    if (context.showEraLabel) label = `<span class="era-label">${context.currentEra.name}</span>`;
-    else if (context.showEraAbbr) label = `<span class="era-label">${context.currentEra.abbreviation}</span>`;
-    return `<span class="era-indicator" data-tooltip="${context.currentEra.name}">${icon}${label}</span>`;
-  }
-
-  /**
-   * Render the built-in cycle indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
-   */
-  #renderCycleIndicator(context) {
-    if (!context.cycleData?.values?.length) return '';
-    const mode = context.cyclesDisplayMode;
-    const icon = '<i class="fas fa-arrows-rotate"></i>';
-    if (mode === 'icon') return `<span class="cycle-indicator" data-tooltip="${context.cycleText}">${icon}</span>`;
-    let displayText = '';
-    if (mode === 'number') displayText = context.cycleData.values.map((v) => v.index + 1).join(', ');
-    else if (mode === 'roman') displayText = context.cycleData.values.map((v) => toRomanNumeral(v.index + 1)).join(', ');
-    else displayText = context.cycleData.values.map((v) => v.entryName).join(', ');
-    const label = `<span class="cycle-label">${displayText}</span>`;
-    return `<span class="cycle-indicator" data-tooltip="${context.cycleText || displayText}">${icon}${label}</span>`;
   }
 
   /** @override */
@@ -378,11 +324,33 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateCelestialDisplay();
     this.#updateDomeVisibility();
     this.#setupEventListeners();
+    this.#updateTooltipDirections();
     WidgetManager.attachWidgetListeners(this.element);
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
     if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
     const c = this.#getPredictedComponents();
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
+  }
+
+  /**
+   * Update tooltip directions based on HUD position.
+   * When the HUD bar is in the lower half of the viewport, tooltips should point UP.
+   */
+  #updateTooltipDirections() {
+    const bar = this.element.querySelector('.bar');
+    if (!bar) return;
+    const barRect = bar.getBoundingClientRect();
+    const inBottomHalf = barRect.top > window.innerHeight / 2;
+    const direction = inBottomHalf ? 'UP' : null;
+    bar.querySelectorAll('[data-tooltip], [data-tooltip-html]').forEach((el) => {
+      if (direction) el.setAttribute('data-tooltip-direction', direction);
+      else el.removeAttribute('data-tooltip-direction');
+    });
+    const dome = this.element.querySelector('.dome[data-tooltip]');
+    if (dome) {
+      if (direction) dome.setAttribute('data-tooltip-direction', direction);
+      else dome.removeAttribute('data-tooltip-direction');
+    }
   }
 
   /** @override */

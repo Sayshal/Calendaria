@@ -359,13 +359,6 @@
       font-size: var(--font-size-12, 0.75rem);
     }
 
-    .weather-indicator .weather-temp {
-      margin-left: 0.15rem;
-      padding-left: 0.25rem;
-      border-left: 0.0625rem solid var(--calendaria-border);
-      font-size: 0.85em;
-    }
-
     .grid {
       z-index: 1;
       position: relative;
@@ -527,6 +520,10 @@
         border-radius: 50%;
         overflow: hidden;
         background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
+
+        img {
+          pointer-events: none;
+        }
 
         &.clickable {
           cursor: pointer;

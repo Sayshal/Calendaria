@@ -11,7 +11,7 @@ import { dayOfWeek } from '../../notes/date-utils.mjs';
 import NoteManager from '../../notes/note-manager.mjs';
 import { isRecurringMatch } from '../../notes/recurrence.mjs';
 import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, toRomanNumeral } from '../../utils/formatting/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../../utils/formatting/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { canChangeDateTime, canChangeWeather, canViewMiniCal } from '../../utils/permissions.mjs';
 import SearchManager from '../../utils/search-manager.mjs';
@@ -245,99 +245,65 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   #prepareWidgetContext(context) {
     const widgets = {};
     widgets.sidebar = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.MINICAL_SIDEBAR, 'minical');
-    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this.#renderWeatherIndicator(context), 'minical');
-    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this.#renderSeasonIndicator(context), 'minical');
-    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this.#renderEraIndicator(context), 'minical');
-    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this.#renderCycleIndicator(context), 'minical');
+    const weatherObj = context.showWeather && context.weather ? { ...context.weather, icon: this.#normalizeWeatherIcon(context.weather.icon) } : null;
+    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.WEATHER_INDICATOR,
+      ViewUtils.renderWeatherIndicator({
+        weather: weatherObj,
+        displayMode: context.weatherDisplayMode,
+        canInteract: context.canChangeWeather,
+        showBlock: context.showWeather && context.canChangeWeather
+      }),
+      'minical'
+    );
+    const season = context.showSeason ? this.#normalizeSeasonData(context.calendarData?.currentSeason) : null;
+    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.SEASON_INDICATOR,
+      ViewUtils.renderSeasonIndicator({ season, displayMode: context.seasonDisplayMode }),
+      'minical'
+    );
+    const era = context.showEra ? this.#normalizeEraData(context.calendarData?.currentEra) : null;
+    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, ViewUtils.renderEraIndicator({ era, displayMode: context.eraDisplayMode }), 'minical');
+    const cycleData = context.showCycles ? context.cycleData : null;
+    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(
+      REPLACEABLE_ELEMENTS.CYCLE_INDICATOR,
+      ViewUtils.renderCycleIndicator({ cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
+      'minical'
+    );
     widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'minical');
     widgets.hasIndicators = WidgetManager.hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
     return widgets;
   }
 
   /**
-   * Render weather indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
+   * Normalize weather icon to include font-awesome class prefix.
+   * @param {string} icon - Raw icon class
+   * @returns {string} Normalized icon class
    */
-  #renderWeatherIndicator(context) {
-    if (!context.showWeather) return '';
-    const { weather, canChangeWeather, weatherDisplayMode } = context;
-    if (weather) {
-      const clickable = canChangeWeather ? ' clickable' : '';
-      const action = canChangeWeather ? 'data-action="openWeatherPicker"' : '';
-      const showIcon = weatherDisplayMode === 'full' || weatherDisplayMode === 'icon' || weatherDisplayMode === 'iconTemp';
-      const showLabel = weatherDisplayMode === 'full';
-      const showTemp = weatherDisplayMode === 'full' || weatherDisplayMode === 'temp' || weatherDisplayMode === 'iconTemp';
-      const icon = showIcon ? `<i class="fas ${weather.icon}"></i>` : '';
-      const label = showLabel ? ` ${weather.label}` : '';
-      const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
-      let windHtml = '';
-      if (showLabel && weather.windSpeed > 0) {
-        const rotation = weather.windDirection != null ? weather.windDirection : 0;
-        windHtml = `<span class="weather-wind"><i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i></span>`;
-      }
-      let precipHtml = '';
-      if (showLabel && weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
-      return `<span class="weather-indicator${clickable}" ${action} style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">${icon}${label} ${temp}${windHtml}${precipHtml}</span>`;
-    } else if (canChangeWeather) {
-      return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i> ${localize('CALENDARIA.Weather.None')}</span>`;
-    }
-    return '';
+  #normalizeWeatherIcon(icon) {
+    if (!icon) return 'fas fa-cloud';
+    if (icon.includes('fa-solid') || icon.includes('fa-regular') || icon.includes('fa-light') || icon.includes('fas ') || icon.includes('far ')) return icon;
+    return `fas ${icon}`;
   }
 
   /**
-   * Render season indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
+   * Normalize season data for shared indicator function.
+   * @param {object|null} season - Raw season data
+   * @returns {object|null} Normalized season with localized name
    */
-  #renderSeasonIndicator(context) {
-    if (!context.showSeason) return '';
-    const season = context.calendarData?.currentSeason;
-    if (!season) return '';
-    const mode = context.seasonDisplayMode;
-    const showIcon = mode === 'full' || mode === 'icon';
-    const showLabel = mode === 'full' || mode === 'text';
-    const icon = showIcon ? `<i class="${season.icon}"></i>` : '';
-    const label = showLabel ? ` ${localize(season.name)}` : '';
-    return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${localize(season.name)}">${icon}${label}</span>`;
+  #normalizeSeasonData(season) {
+    if (!season) return null;
+    return { name: localize(season.name), icon: season.icon || 'fas fa-sun', color: season.color || '#888' };
   }
 
   /**
-   * Render era indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
+   * Normalize era data for shared indicator function.
+   * @param {object|null} era - Raw era data
+   * @returns {object|null} Normalized era with localized name and abbreviation
    */
-  #renderEraIndicator(context) {
-    if (!context.showEra) return '';
-    const era = context.calendarData?.currentEra;
-    if (!era) return '';
-    const mode = context.eraDisplayMode;
-    const showIcon = mode === 'full' || mode === 'icon';
-    const showLabel = mode === 'full' || mode === 'text';
-    const showAbbr = mode === 'abbr';
-    const icon = showIcon ? '<i class="fas fa-hourglass-half"></i>' : '';
-    let label = '';
-    if (showLabel) label = ` ${localize(era.name)}`;
-    else if (showAbbr) label = ` ${localize(era.abbreviation || era.name)}`;
-    return `<span class="era-indicator" data-tooltip="${localize(era.name)}">${icon}${label}</span>`;
-  }
-
-  /**
-   * Render cycle indicator HTML.
-   * @param {object} context - Template context
-   * @returns {string} HTML string
-   */
-  #renderCycleIndicator(context) {
-    if (!context.showCycles || !context.cycleData?.values?.length) return '';
-    const mode = context.cyclesDisplayMode;
-    const icon = '<i class="fas fa-arrows-rotate"></i>';
-    if (mode === 'icon') return `<span class="cycle-indicator" data-tooltip="${context.cycleText}">${icon}</span>`;
-    let displayText = '';
-    if (mode === 'number') displayText = context.cycleData.values.map((v) => v.index + 1).join(', ');
-    else if (mode === 'roman') displayText = context.cycleData.values.map((v) => toRomanNumeral(v.index + 1)).join(', ');
-    else displayText = context.cycleData.values.map((v) => v.entryName).join(', ');
-    const label = `<span class="cycle-label">${displayText}</span>`;
-    return `<span class="cycle-indicator" data-tooltip="${context.cycleText || displayText}">${icon}${label}</span>`;
+  #normalizeEraData(era) {
+    if (!era) return null;
+    return { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) };
   }
 
   /**
@@ -424,6 +390,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, dayOfMonth) : null;
       const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
       const isIntercalary = festivalDay?.countsForWeekday === false;
+      const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
+      const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
+      const dayTooltip = ViewUtils.generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd);
       if (isIntercalary) {
         intercalaryDays.push({
           day: displayDay,
@@ -435,9 +404,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           hasNotes: noteCount > 0,
           noteCount,
           isFestival: true,
-          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
           festivalDescription: festivalDay?.description || '',
+          dayTooltip,
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
@@ -458,9 +428,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           hasNotes: noteCount > 0,
           noteCount,
           isFestival: !!festivalDay,
-          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
           festivalDescription: festivalDay?.description || '',
+          dayTooltip,
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
@@ -571,6 +542,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const festivalDay = calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
         const moonData = ViewUtils.getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth);
         const isIntercalary = festivalDay?.countsForWeekday === false;
+        const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
+        const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
         const dayData = {
           day: dayNum,
           dayOfMonth,
@@ -581,9 +554,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           hasNotes: noteCount > 0,
           noteCount,
           isFestival: !!festivalDay,
-          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          festivalName: festivalNameStr,
           festivalColor: festivalDay?.color || '',
           festivalDescription: festivalDay?.description || '',
+          dayTooltip: ViewUtils.generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo),
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,

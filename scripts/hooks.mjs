@@ -49,6 +49,22 @@ export function registerHooks() {
   Hooks.on(HOOKS.MOON_PHASE_CHANGE, onMoonPhaseChange);
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());
+  Hooks.once('ready', patchTooltipActivate);
   HUD.registerCombatHooks();
   log(3, 'Hooks registered');
+}
+
+/**
+ * Patch TooltipManager#activate to work around a Foundry core bug where nested
+ * tooltip elements (parent with data-tooltip-html, child with data-tooltip + aria-label)
+ * produce blank tooltips on first hover due to a stale activation timeout race condition.
+ * @see https://github.com/foundryvtt/foundryvtt/issues/13865
+ */
+function patchTooltipActivate() {
+  const tm = game.tooltip;
+  const orig = tm.activate.bind(tm);
+  tm.activate = function (element, options = {}) {
+    if (!options.text && !options.html && element?.ariaLabel && element?.dataset?.tooltip === '') options.text = element.ariaLabel;
+    return orig(element, options);
+  };
 }
