@@ -687,6 +687,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
       ui.context.menuItems = currentItems;
       setTimeout(() => {
         const menu = document.getElementById('context-menu');
+        menu?.classList.add('calendaria');
         if (!menu) return;
         const menuItems = menu.querySelectorAll('.context-item');
         menuItems.forEach((li, idx) => {

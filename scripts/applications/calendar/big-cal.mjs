@@ -1299,7 +1299,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       onCreateNote: () => this.render(),
       extraItems: this.#getContextMenuItems()
     });
-    new foundry.applications.ux.ContextMenu.implementation(this.element, '.window-header', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.window-header', this.#getContextMenuItems(), {
+      fixed: true,
+      jQuery: false,
+      onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
+    });
     this._hooks = [];
     const c = game.time.components;
     this._lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;

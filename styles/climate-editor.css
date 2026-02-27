@@ -105,10 +105,10 @@
     }
 
     .preset-header {
+      border-bottom: 0.0625rem solid var(--color-cool-4);
       color: var(--color-text-secondary);
       font-weight: 600;
       font-size: var(--font-size-14);
-      border-bottom: 0.0625rem solid var(--color-cool-4);
 
       span {
         text-align: center;
@@ -137,15 +137,15 @@
     }
 
     .wind-direction-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
       gap: 0.25rem 0.75rem;
+      grid-template-columns: repeat(4, 1fr);
+      display: grid;
     }
 
     &.zone-mode .sheet-tabs.tabs {
       gap: 0;
-      border-bottom: 0.0625rem solid var(--color-cool-4);
       margin-bottom: 0.5rem;
+      border-bottom: 0.0625rem solid var(--color-cool-4);
 
       a {
         gap: 0.4rem;
@@ -165,8 +165,8 @@
         }
 
         &.active {
-          color: var(--color-text-primary);
           border-bottom-color: var(--color-warm-2);
+          color: var(--color-text-primary);
         }
       }
     }

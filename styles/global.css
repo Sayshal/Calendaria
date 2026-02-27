@@ -54,169 +54,132 @@
       }
     }
   }
-}
 
-/* ======================================== */
-/* Shared Indicator Styles                  */
-/* ======================================== */
-.weather-indicator,
-.season-indicator,
-.era-indicator,
-.cycle-indicator {
-  gap: 0.25rem;
-  display: inline-flex;
-  align-items: center;
-
-  i {
+  .weather-indicator,
+  .season-indicator,
+  .era-indicator,
+  .cycle-indicator {
+    gap: 0.25rem;
     display: inline-flex;
-    justify-content: center;
     align-items: center;
-    font-size: 0.85em;
-  }
-}
-
-.weather-indicator {
-  padding: 0.25rem 0.5rem;
-  border: 0.0625rem solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
-  border-radius: 0.25rem;
-  color: var(--calendaria-text);
-  background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
-
-  i {
-    color: var(--weather-color, var(--calendaria-text-dim));
-  }
-
-  &.clickable {
-    cursor: pointer;
-    transition:
-      background 0.15s ease,
-      border-color 0.15s ease;
-
-    &:hover {
-      border-color: var(--weather-color, var(--calendaria-text-dim));
-      background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
-    }
-  }
-
-  &.no-weather {
-    border: 0.0625rem dashed var(--calendaria-border);
-    color: var(--calendaria-text-dim);
-    background: transparent;
-
-    &:hover {
-      border-color: var(--color-positive-fg, var(--calendaria-success));
-      background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
-    }
-  }
-
-  .weather-temp {
-    opacity: 0.8;
-    margin-left: 0.25rem;
-    font-size: 0.85em;
-  }
-}
-
-.season-indicator {
-  color: var(--season-color, var(--calendaria-text-dim));
-
-  i {
-    color: var(--season-color, var(--calendaria-text-dim));
-  }
-}
-
-/* ======================================== */
-/* Widget Indicators (shared)               */
-/* ======================================== */
-.calendaria-widget-indicator {
-  gap: 0.25rem;
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-  cursor: default;
-
-  i {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.75em;
-    line-height: 1;
-  }
-
-  .widget-label {
-    line-height: 1;
-  }
-
-  &.clickable {
-    cursor: pointer;
-  }
-}
-
-.calendar-indicators .calendaria-widget-indicator {
-  color: var(--widget-color, var(--calendaria-text-dim));
-
-  i {
-    color: var(--widget-color, var(--calendaria-text-dim));
-  }
-}
-
-.calendaria-widget-custom {
-  display: flex;
-  align-items: center;
-}
-
-#chat-log {
-  .message-metadata:has(.cal-timestamp) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    .message-timestamp {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-
-  .cal-timestamp {
-    display: inline;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    .cal-real {
-      opacity: 0.7;
-
-      &::before {
-        content: '(';
-      }
-
-      &::after {
-        content: ')';
-      }
-    }
-  }
-}
-
-.directory-footer {
-  .calendaria-footer {
-    gap: 0.125rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-top: 0.0625rem solid var(--color-border-light-tertiary);
-
-    .calendaria-footer-buttons {
-      gap: 0.25rem;
-      display: flex;
-    }
 
     i {
-      font-size: var(--font-size-10);
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.85em;
+    }
+  }
+
+  .weather-indicator {
+    padding: 0.25rem 0.5rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+    border-radius: 0.25rem;
+    color: var(--calendaria-text);
+    background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
+
+    i {
+      color: var(--weather-color, var(--calendaria-text-dim));
+    }
+
+    &.clickable {
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+      &:hover {
+        border-color: var(--weather-color, var(--calendaria-text-dim));
+        background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+      }
+    }
+
+    &.no-weather {
+      border: 0.0625rem dashed var(--calendaria-border);
+      color: var(--calendaria-text-dim);
+      background: transparent;
+
+      &:hover {
+        border-color: var(--color-positive-fg, var(--calendaria-success));
+        background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
+      }
+    }
+
+    .weather-temp {
+      opacity: 0.8;
+      margin-left: 0.25rem;
+      font-size: 0.85em;
+    }
+  }
+
+  .season-indicator {
+    color: var(--season-color, var(--calendaria-text-dim));
+
+    i {
+      color: var(--season-color, var(--calendaria-text-dim));
+    }
+  }
+
+  .calendaria-widget-indicator {
+    gap: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    cursor: default;
+
+    i {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.75em;
+      line-height: 1;
+    }
+
+    .widget-label {
+      line-height: 1;
+    }
+
+    &.clickable {
+      cursor: pointer;
+    }
+  }
+
+  .calendar-indicators .calendaria-widget-indicator {
+    color: var(--widget-color, var(--calendaria-text-dim));
+
+    i {
+      color: var(--widget-color, var(--calendaria-text-dim));
+    }
+  }
+
+  .calendaria-widget-custom {
+    display: flex;
+    align-items: center;
+  }
+}
+
+#journal {
+  .directory-footer {
+    &.calendaria-footer {
+      gap: 0.125rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-top: 0.0625rem solid var(--color-border-light-tertiary);
+
+      .footer-buttons {
+        gap: 0.25rem;
+        display: flex;
+      }
+
+      i {
+        font-size: var(--font-size-10);
+      }
     }
   }
 }
 
-#context-menu {
+#context-menu.calendaria {
   .context-item {
     &.sticky-active {
       color: var(--color-text-light-highlight, rgb(255 255 255));

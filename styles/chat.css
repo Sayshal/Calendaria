@@ -1,33 +1,42 @@
+#chat-log {
+  .message-metadata:has(.cal-timestamp) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .message-timestamp {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .cal-timestamp {
+    display: inline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .cal-real {
+      opacity: 0.7;
+
+      &::before {
+        content: '(';
+      }
+
+      &::after {
+        content: ')';
+      }
+    }
+  }
+}
+
 .calendaria {
   &.chat-announcement,
   &.chat-reminder {
     gap: 0.5rem;
     display: flex;
     flex-direction: column;
-  }
-
-  .open-note {
-    gap: 0.35rem;
-    display: inline-flex;
-    align-items: center;
-    color: var(--color-text-hyperlink, var(--calendaria-link));
-    font-size: 0.85em;
-    text-decoration: none;
-    cursor: pointer;
-
-    &:hover {
-      text-decoration: underline;
-    }
-
-    i,
-    img {
-      font-size: 1em;
-    }
-
-    img {
-      width: 1em;
-      height: 1em;
-    }
   }
 
   &.chat-announcement {
@@ -124,9 +133,33 @@
     }
 
     .forecast-zone {
-      font-size: 0.8rem;
-      color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
       margin-bottom: 0.35rem;
+      color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
+      font-size: 0.8rem;
+    }
+  }
+
+  .open-note {
+    gap: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-text-hyperlink, var(--calendaria-link));
+    font-size: 0.85em;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    i,
+    img {
+      font-size: 1em;
+    }
+
+    img {
+      width: 1em;
+      height: 1em;
     }
   }
 }

@@ -1871,8 +1871,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       .filter((label) => label);
     const listHtml = settingLabels.map((label) => `<li>${label}</li>`).join('');
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria'] },
-      content: `<p>${localize('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-section-list">${listHtml}</ul>`,
+      window: { title: localize('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria', 'reset-section-dialog'] },
+      content: `<p>${localize('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-list">${listHtml}</ul>`,
       yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
       no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     });

@@ -36,7 +36,7 @@ function replaceFooter({ element }) {
   footer.innerHTML = '';
   footer.classList.add('calendaria-footer');
   const buttons = document.createElement('div');
-  buttons.className = 'calendaria-footer-buttons';
+  buttons.className = 'footer-buttons';
   const apps = [
     { id: 'bigcal', icon: 'fa-calendar-days', tooltip: 'CALENDARIA.SettingsPanel.Tab.BigCal', toggle: () => BigCal.toggle() },
     { id: 'minical', icon: 'fa-compress', tooltip: 'CALENDARIA.SettingsPanel.Tab.MiniCal', toggle: () => MiniCal.toggle() },

@@ -1,7 +1,3 @@
-/* ======================================== */
-/* HUD - Sundial Widget                     */
-/* ======================================== */
-
 .calendaria-hud {
   display: inline-flex;
   opacity: var(--calendaria-hud-idle-opacity, 1);
@@ -18,9 +14,6 @@
     transition-delay: 0s;
   }
 
-  /* ======================================== */
-  /* Content                                  */
-  /* ======================================== */
   .content {
     display: flex;
     position: relative;
@@ -28,9 +21,6 @@
     align-items: center;
   }
 
-  /* ======================================== */
-  /* Sundial Dome                             */
-  /* ======================================== */
   .dome {
     z-index: 1;
     position: absolute;
@@ -70,22 +60,16 @@
     }
   }
 
-  /* ======================================== */
-  /* Scene Canvas (unified Pixi renderer)    */
-  /* ======================================== */
   .scene-canvas,
   .slice-canvas {
-    position: absolute;
     inset: 0;
     z-index: 1;
-    pointer-events: none;
+    position: absolute;
     width: 100%;
     height: 100%;
+    pointer-events: none;
   }
 
-  /* ======================================== */
-  /* Bar Wrapper                              */
-  /* ======================================== */
   .bar-wrapper {
     display: contents;
 
@@ -106,9 +90,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Main Bar                                 */
-  /* ======================================== */
   .bar {
     grid-template-columns: 1fr auto 1fr;
     display: inline-grid;
@@ -138,7 +119,6 @@
     }
   }
 
-  /* Width scale for fullsize mode */
   &:not(.compact) {
     .bar {
       display: grid;
@@ -190,9 +170,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Snap indicator ghost preview             */
-  /* ======================================== */
   .calendaria-snap-indicator {
     display: flex;
     opacity: 0;
@@ -223,7 +200,6 @@
     }
   }
 
-  /* DOM-parented pinned state */
   .calendaria-pinned {
     z-index: 1000 !important;
     position: relative !important;
@@ -234,9 +210,6 @@
     pointer-events: auto !important;
   }
 
-  /* ======================================== */
-  /* HUD Sections                             */
-  /* ======================================== */
   .section {
     gap: 0.625rem;
     display: flex;
@@ -252,9 +225,6 @@
     }
   }
 
-  /* ======================================== */
-  /* HUD Buttons                              */
-  /* ======================================== */
   .btn {
     display: flex;
     flex-shrink: 0;
@@ -307,9 +277,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Left Info Panel                          */
-  /* ======================================== */
   .info-panel {
     gap: 0.5rem;
     display: flex;
@@ -378,9 +345,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Center Section                           */
-  /* ======================================== */
   .center {
     display: flex;
     flex-shrink: 0;
@@ -449,9 +413,6 @@
     animation: calendaria-time-pulse 2s ease-in-out infinite;
   }
 
-  /* ======================================== */
-  /* Right Section - Indicators               */
-  /* ======================================== */
   .indicators {
     gap: 0.5rem;
     display: flex;
@@ -466,7 +427,6 @@
       cursor: default;
     }
 
-    /* HUD-specific weather display modes */
     .weather-indicator {
       &.weather-mode-temp,
       &.weather-mode-icon {
@@ -503,9 +463,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Hover Tray                               */
-  /* ======================================== */
   .tray {
     gap: 0.25rem;
     display: flex;
@@ -538,9 +495,6 @@
     padding: 0.375rem 0.625rem;
   }
 
-  /* ======================================== */
-  /* Tray Buttons                             */
-  /* ======================================== */
   .time-btn {
     display: flex;
     flex-shrink: 0;
@@ -590,9 +544,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Tray Dropdown                            */
-  /* ======================================== */
   .select {
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -636,13 +587,10 @@
     }
   }
 
-  /* ======================================== */
-  /* Dome Below (renders dome under bar)      */
-  /* ======================================== */
   &.dome-below {
     .dome {
-      bottom: auto;
       top: calc(100% - 0.875rem);
+      bottom: auto;
       border: 0.125rem solid rgb(26 26 26);
       border-top: none;
       border-radius: 0 0 5rem 5rem;
@@ -664,9 +612,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Compact Mode                             */
-  /* ======================================== */
   &.compact {
     .dome {
       bottom: calc(100% - 0.625rem);
@@ -749,7 +694,6 @@
       font-size: var(--font-size-10, 0.625rem);
     }
 
-    /* Slice mode - compact */
     .slice {
       min-width: 6.25rem;
       min-height: 1.25rem;
@@ -770,9 +714,6 @@
     }
   }
 
-  /* ======================================== */
-  /* Slice Mode                               */
-  /* ======================================== */
   &.slice-mode .dome {
     display: none;
   }
@@ -856,7 +797,6 @@
     }
   }
 
-  /* Near-snap wobble */
   .bar.near-snap {
     border-color: var(--calendaria-primary);
     box-shadow:
@@ -865,10 +805,6 @@
     animation: calendaria-wobble 0.15s ease-in-out infinite;
   }
 }
-
-/* ======================================== */
-/* Keyframes                                */
-/* ======================================== */
 
 @keyframes calendaria-wobble {
   0%,

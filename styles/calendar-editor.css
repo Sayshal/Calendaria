@@ -817,24 +817,26 @@
 }
 
 .theme-light {
-  .calendar-editor {
-    footer.form-footer {
-      border-top-color: var(--color-border-light-tertiary);
-      background: var(--color-light-2);
-    }
+  .calendaria {
+    &.calendar-editor {
+      footer.form-footer {
+        border-top-color: var(--color-border-light-tertiary);
+        background: var(--color-light-2);
+      }
 
-    .warning {
-      color: var(--color-level-error);
-    }
+      .warning {
+        color: var(--color-level-error);
+      }
 
-    .item {
-      border-color: var(--color-border-light-tertiary);
-      background: none;
-    }
+      .item {
+        border-color: var(--color-border-light-tertiary);
+        background: none;
+      }
 
-    .empty-list {
-      color: unset;
-      background: unset;
+      .empty-list {
+        color: unset;
+        background: unset;
+      }
     }
   }
 }

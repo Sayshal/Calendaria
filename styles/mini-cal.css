@@ -503,15 +503,15 @@
       }
 
       .mini-weather-icon {
+        opacity: 0.7;
         position: absolute;
-        bottom: 0.125rem;
         right: 0.125rem;
+        bottom: 0.125rem;
         width: 0.75rem;
         height: 0.75rem;
         font-size: 0.625rem;
         line-height: 0.75rem;
         text-align: center;
-        opacity: 0.7;
 
         &.forecast {
           opacity: 0.4;

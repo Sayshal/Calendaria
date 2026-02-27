@@ -917,34 +917,36 @@
     }
   }
 
-  .settings-panel {
-    .settings-footer {
-      border-top-color: var(--color-border-light-tertiary);
-      background: var(--color-light-2);
+  .calendaria {
+    &.settings-panel {
+      .settings-footer {
+        border-top-color: var(--color-border-light-tertiary);
+        background: var(--color-light-2);
 
-      .save-indicator {
-        color: rgb(21 128 61);
+        .save-indicator {
+          color: rgb(21 128 61);
 
-        &[data-state='saving'] {
-          color: var(--color-warm-2);
+          &[data-state='saving'] {
+            color: var(--color-warm-2);
+          }
+        }
+
+        .version-link {
+          color: var(--color-text-dark-5);
+
+          &:hover {
+            color: var(--color-text-dark-primary);
+          }
         }
       }
 
-      .version-link {
+      .recent-settings .recent-item:hover {
+        background: rgb(0 0 0 / 8%);
+      }
+
+      .format-preview {
         color: var(--color-text-dark-5);
-
-        &:hover {
-          color: var(--color-text-dark-primary);
-        }
       }
-    }
-
-    .recent-settings .recent-item:hover {
-      background: rgb(0 0 0 / 8%);
-    }
-
-    .format-preview {
-      color: var(--color-text-dark-5);
     }
   }
 }

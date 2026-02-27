@@ -794,7 +794,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (e.target.closest('#context-menu, .day')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', this.#getContextMenuItems(), { fixed: true, jQuery: false });
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', this.#getContextMenuItems(), {
+        fixed: true,
+        jQuery: false,
+        onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
+      });
       menu._onActivate(e);
     });
     if (container && sidebar) {
@@ -900,7 +904,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({ name: HOOKS.DISPLAY_FORMATS_CHANGED, id: Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.render()) });
     new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() }], {
       fixed: true,
-      jQuery: false
+      jQuery: false,
+      onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
     });
   }
 

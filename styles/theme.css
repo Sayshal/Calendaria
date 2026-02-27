@@ -7,12 +7,10 @@
   --calendaria-border-light: rgb(58 58 58);
   --calendaria-button-bg: rgb(58 58 58);
   --calendaria-button-hover: rgb(74 74 74);
-  --calendaria-divider: rgb(65 65 65);
-  --calendaria-surface-dim: rgb(45 45 45);
-  --calendaria-surface-dim-75: rgb(45 45 45 / 75%);
   --calendaria-current-hour: rgb(255 100 0 / 12%);
   --calendaria-day-gap: 0.125rem;
   --calendaria-day-size: 5.625rem;
+  --calendaria-divider: rgb(65 65 65);
   --calendaria-error: rgb(244 67 54);
   --calendaria-festival-bg: rgb(212 175 55 / 15%);
   --calendaria-festival-border: rgb(212 175 55);
@@ -27,6 +25,8 @@
   --calendaria-shadow: rgb(0 0 0 / 40%);
   --calendaria-shadow-light: rgb(0 0 0 / 20%);
   --calendaria-success: rgb(76 175 80);
+  --calendaria-surface-dim: rgb(45 45 45);
+  --calendaria-surface-dim-75: rgb(45 45 45 / 75%);
   --calendaria-text: rgb(224 224 224);
   --calendaria-text-dim: rgb(153 153 153);
   --calendaria-text-heading: rgb(238 238 238);
@@ -61,10 +61,8 @@
   --calendaria-border-light: rgb(220 220 220);
   --calendaria-button-bg: rgb(230 230 230);
   --calendaria-button-hover: rgb(215 215 215);
-  --calendaria-divider: rgb(210 210 210);
-  --calendaria-surface-dim: rgb(240 240 240);
-  --calendaria-surface-dim-75: rgb(240 240 240 / 75%);
   --calendaria-current-hour: rgb(230 80 0 / 10%);
+  --calendaria-divider: rgb(210 210 210);
   --calendaria-error: rgb(211 47 47);
   --calendaria-festival-bg: rgb(212 175 55 / 12%);
   --calendaria-festival-border: rgb(180 145 25);
@@ -79,6 +77,8 @@
   --calendaria-shadow: rgb(0 0 0 / 25%);
   --calendaria-shadow-light: rgb(0 0 0 / 12%);
   --calendaria-success: rgb(56 142 60);
+  --calendaria-surface-dim: rgb(240 240 240);
+  --calendaria-surface-dim-75: rgb(240 240 240 / 75%);
   --calendaria-text: rgb(32 32 32);
   --calendaria-text-dim: rgb(100 100 100);
   --calendaria-text-heading: rgb(32 32 32);
