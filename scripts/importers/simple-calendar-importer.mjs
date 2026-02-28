@@ -6,10 +6,22 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { ASSETS } from '../constants.mjs';
+import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
+
+/** Both module IDs to support original SC and SC Reborn. */
+const SC_MODULE_IDS = ['foundryvtt-simple-calendar', 'foundryvtt-simple-calendar-reborn'];
+
+/** Map SC season icon strings to FontAwesome classes. */
+const SEASON_ICON_MAP = {
+  spring: 'fa-seedling',
+  summer: 'fa-sun',
+  fall: 'fa-leaf',
+  winter: 'fa-snowflake'
+};
 
 /**
  * Importer for Simple Calendar module data.
@@ -25,19 +37,65 @@ export default class SimpleCalendarImporter extends BaseImporter {
   static moduleId = 'foundryvtt-simple-calendar';
   static fileExtensions = ['.json'];
 
+  /** @type {object[]} SC note categories extracted during load/transform. */
+  #scNoteCategories = [];
+
+  /**
+   * Detect either SC or SC Reborn.
+   * @returns {boolean} True if either module is active
+   */
+  static detect() {
+    return SC_MODULE_IDS.some((id) => game.modules.get(id)?.active);
+  }
+
+  /**
+   * Read a setting from whichever SC module is active.
+   * @param {string} key - Setting key
+   * @returns {*} Setting value
+   */
+  static #getSetting(key) {
+    for (const id of SC_MODULE_IDS) {
+      try {
+        return game.settings.get(id, key);
+      } catch {
+        // Module not registered, try next
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get a flag value from a document, checking both SC module IDs.
+   * @param {object} doc - Foundry document
+   * @param {string} flagKey - Flag key
+   * @returns {*} Flag value or undefined
+   */
+  static #getFlag(doc, flagKey) {
+    for (const id of SC_MODULE_IDS) {
+      const value = doc.getFlag?.(id, flagKey) ?? doc.flags?.[id]?.[flagKey];
+      if (value !== undefined) return value;
+    }
+    return undefined;
+  }
+
   /**
    * Load calendar data from installed Simple Calendar module.
    * @returns {Promise<object>} Raw SC calendar data
    */
   async loadFromModule() {
     if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.SimpleCalendar.NotInstalled'));
-    const calendars = game.settings.get('foundryvtt-simple-calendar', 'calendar-configuration') || [];
+    const calendars = SimpleCalendarImporter.#getSetting('calendar-configuration') || [];
     if (!calendars.length) throw new Error(localize('CALENDARIA.Importer.SimpleCalendar.NoCalendars'));
-    const notesFolder = game.folders.find((f) => f.getFlag('foundryvtt-simple-calendar', 'root') === true);
+    const notesFolder = game.folders.find((f) => {
+      for (const id of SC_MODULE_IDS) {
+        if (f.getFlag(id, 'root') === true) return true;
+      }
+      return false;
+    });
     const notes = {};
     if (notesFolder) {
       for (const entry of notesFolder.contents) {
-        const noteData = entry.getFlag('foundryvtt-simple-calendar', 'noteData');
+        const noteData = SimpleCalendarImporter.#getFlag(entry, 'noteData');
         if (noteData) {
           const calId = noteData.calendarId || 'default';
           if (!notes[calId]) notes[calId] = [];
@@ -45,6 +103,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         }
       }
     }
+    this.#scNoteCategories = this.#extractNoteCategories(calendars);
     const worldTime = game.time.worldTime;
     const currentDate = this.#worldTimeToDate(worldTime, calendars[0]);
     return { calendars, notes, currentDate, exportVersion: 2 };
@@ -127,6 +186,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const calendar = Array.isArray(calendars) ? calendars[calendarIndex] : calendars;
     if (!calendar) throw new Error('No calendar found in import data');
     log(3, 'Transforming Simple Calendar data:', calendar.name || calendar.id);
+    this.#scNoteCategories = this.#extractNoteCategories(Array.isArray(calendars) ? calendars : [calendars]);
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const weekdayNumericToIndex = new Map();
     (calendar.weekdays || []).forEach((wd, idx) => {
@@ -194,19 +254,28 @@ export default class SimpleCalendarImporter extends BaseImporter {
         { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
-    return weekdays.map((day, index) => ({ name: day.name, abbreviation: day.abbreviation || day.name.substring(0, 2), ordinal: day.numericRepresentation || index + 1 }));
+    return weekdays.map((day, index) => ({
+      name: day.name,
+      abbreviation: day.abbreviation || day.name.substring(0, 2),
+      ordinal: day.numericRepresentation || index + 1,
+      isRestDay: day.restday === true
+    }));
   }
 
   /**
-   * Transform SC year and leap year config to Foundry format.
+   * Transform SC year and leap year config to Calendaria format.
    * @param {object} year - SC year config
    * @param {object} leapYear - SC leap year config
-   * @returns {object} Calendaria years config (Foundry format)
+   * @returns {object} Calendaria years config
    */
   #transformYears(year = {}, leapYear = {}) {
-    const result = { yearZero: year.yearZero ?? 0, firstWeekday: year.firstWeekday ?? 0, leapYear: null };
+    const result = { yearZero: year.yearZero ?? 0, firstWeekday: year.firstWeekday ?? 0, leapYear: null, names: [] };
     if (leapYear.rule === 'gregorian') result.leapYear = { leapStart: 0, leapInterval: 4 };
     else if (leapYear.rule === 'custom' && leapYear.customMod > 0) result.leapYear = { leapStart: 0, leapInterval: leapYear.customMod };
+    if (year.yearNames?.length) {
+      const start = year.yearNamesStart ?? 0;
+      result.names = year.yearNames.map((name, i) => ({ year: start + i, name }));
+    }
     return result;
   }
 
@@ -229,25 +298,45 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   #transformSeasons(seasons = [], scMonths = []) {
     if (!seasons.length) return [];
+    const regularMonths = scMonths.filter((m) => !m.intercalary);
     const monthDayStarts = [];
     let dayCount = 0;
-    for (const month of scMonths) {
+    for (const month of regularMonths) {
       monthDayStarts.push(dayCount);
       dayCount += month.numberOfDays || 0;
     }
     const totalDays = dayCount;
+    // Map SC month indices (which include intercalary) to regular-month-only indices
+    const scToRegularIndex = new Map();
+    let regularIdx = 0;
+    for (let i = 0; i < scMonths.length; i++) {
+      if (!scMonths[i].intercalary) {
+        scToRegularIndex.set(i, regularIdx);
+        regularIdx++;
+      }
+    }
     const sortedSeasons = [...seasons].sort((a, b) => {
-      const aDay = monthDayStarts[a.startingMonth] + (a.startingDay ?? 0);
-      const bDay = monthDayStarts[b.startingMonth] + (b.startingDay ?? 0);
+      const aRegIdx = scToRegularIndex.get(a.startingMonth) ?? 0;
+      const bRegIdx = scToRegularIndex.get(b.startingMonth) ?? 0;
+      const aDay = (monthDayStarts[aRegIdx] ?? 0) + (a.startingDay ?? 0);
+      const bDay = (monthDayStarts[bRegIdx] ?? 0) + (b.startingDay ?? 0);
       return aDay - bDay;
     });
     return sortedSeasons.map((season, index) => {
-      const dayStart = monthDayStarts[season.startingMonth] + (season.startingDay ?? 0);
+      const regIdx = scToRegularIndex.get(season.startingMonth) ?? 0;
+      const dayStart = (monthDayStarts[regIdx] ?? 0) + (season.startingDay ?? 0);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
-      let dayEnd = monthDayStarts[nextSeason.startingMonth] + (nextSeason.startingDay ?? 0) - 1;
+      const nextRegIdx = scToRegularIndex.get(nextSeason.startingMonth) ?? 0;
+      let dayEnd = (monthDayStarts[nextRegIdx] ?? 0) + (nextSeason.startingDay ?? 0) - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
       if (dayEnd < 0) dayEnd = totalDays - 1;
-      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd };
+      return {
+        name: season.name,
+        dayStart,
+        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
+        color: season.color || '',
+        icon: SEASON_ICON_MAP[season.icon] || ''
+      };
     });
   }
 
@@ -261,6 +350,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       name: moon.name,
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.cycleDayAdjust ?? 0,
+      color: moon.color || '',
       phases: this.#transformMoonPhases(moon.phases, moon.cycleLength),
       referenceDate: this.#transformMoonReference(moon.firstNewMoon)
     }));
@@ -315,20 +405,32 @@ export default class SimpleCalendarImporter extends BaseImporter {
 
   /**
    * Extract festivals from SC intercalary months.
+   * Intercalary months are placed relative to the preceding regular month.
    * @param {object[]} months - SC months array
    * @returns {object[]} Calendaria festivals array
    */
   #extractFestivals(months = []) {
     const festivals = [];
-    let regularMonthIndex = 0;
+    let lastRegularMonthIndex = 0;
+    let lastRegularMonthDays = 0;
+    let regularCount = 0;
     for (const month of months) {
       if (month.intercalary) {
+        // Place festival at end of the last regular month seen (or month 0 day 0 if none yet)
+        const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
         const countsForWeekday = month.intercalaryInclude === true;
         for (let day = 0; day < month.numberOfDays; day++) {
-          festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day + 1})`, month: regularMonthIndex, dayOfMonth: day, countsForWeekday });
+          festivals.push({
+            name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day + 1})`,
+            month: targetMonth,
+            dayOfMonth: regularCount > 0 ? lastRegularMonthDays - 1 : 0,
+            countsForWeekday
+          });
         }
       } else {
-        regularMonthIndex++;
+        lastRegularMonthIndex = regularCount;
+        lastRegularMonthDays = month.numberOfDays || 30;
+        regularCount++;
       }
     }
     return festivals;
@@ -367,6 +469,25 @@ export default class SimpleCalendarImporter extends BaseImporter {
   }
 
   /**
+   * Extract note category definitions from SC calendar data.
+   * @param {object[]} calendars - SC calendars array
+   * @returns {object[]} Array of {id, name, color, textColor}
+   */
+  #extractNoteCategories(calendars) {
+    const categories = [];
+    const seen = new Set();
+    for (const cal of calendars) {
+      for (const cat of cal.noteCategories || []) {
+        if (!seen.has(cat.id ?? cat.name)) {
+          seen.add(cat.id ?? cat.name);
+          categories.push({ id: cat.id ?? cat.name, name: cat.name, color: cat.color || '#868e96', textColor: cat.textColor || '#FFFFFF' });
+        }
+      }
+    }
+    return categories;
+  }
+
+  /**
    * Extract notes from SC export data.
    * @param {object} data - Raw SC export data
    * @returns {Promise<object[]>} Array of note data objects
@@ -378,7 +499,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     for (const [calId, calendarNotes] of Object.entries(notes)) {
       log(3, `Processing notes from SC calendar: ${calId} (${calendarNotes?.length || 0} notes)`);
       for (const note of calendarNotes) {
-        const noteData = note.flags?.['foundryvtt-simple-calendar']?.noteData;
+        const noteData = SimpleCalendarImporter.#getFlag(note, 'noteData');
         if (!noteData) {
           log(3, `Skipping note without noteData flag: ${note.name}`);
           continue;
@@ -409,6 +530,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    // Import SC note categories as custom categories
+    if (this.#scNoteCategories.length) await this.#importNoteCategories(this.#scNoteCategories);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     log(3, `Calendar yearZero: ${yearZero}`);
@@ -417,7 +540,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
-
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {
           count++;
@@ -432,6 +554,25 @@ export default class SimpleCalendarImporter extends BaseImporter {
     }
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
+  }
+
+  /**
+   * Import SC note categories as Calendaria custom categories.
+   * @param {object[]} scCategories - SC note category definitions
+   */
+  async #importNoteCategories(scCategories) {
+    const existing = getAllCategories();
+    const existingIds = new Set(existing.map((c) => c.id));
+    for (const cat of scCategories) {
+      const id = cat.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\da-z-]/g, '');
+      if (!existingIds.has(id)) {
+        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        log(3, `Imported SC note category: ${cat.name}`);
+      }
+    }
   }
 
   /** @override */
