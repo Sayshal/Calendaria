@@ -6,6 +6,7 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { ASSETS } from '../constants.mjs';
+import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -62,6 +63,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
   static supportsLiveImport = false;
   static fileExtensions = ['.json'];
 
+  /** @type {object[]} FC event categories to import as Calendaria note categories. */
+  #fcCategories = [];
+
   /**
    * Check if data is a Fantasy-Calendar export.
    * @param {object} data - Parsed JSON data
@@ -114,7 +118,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
   extractCurrentDate(data) {
     const dynamicData = data.dynamic_data;
     if (!dynamicData || (dynamicData.year === undefined && dynamicData.year !== 0)) return null;
-    return { year: dynamicData.year, month: dynamicData.timespan ?? 0, dayOfMonth: dynamicData.day ?? 0, hour: dynamicData.hour ?? 0, minute: dynamicData.minute ?? 0 };
+    return { year: dynamicData.year, month: dynamicData.timespan ?? 0, dayOfMonth: Math.max(0, (dynamicData.day ?? 1) - 1), hour: dynamicData.hour ?? 0, minute: dynamicData.minute ?? 0 };
   }
 
   /**
@@ -124,7 +128,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   #transformCurrentDate(dynamicData = {}) {
     if (!dynamicData.year && dynamicData.year !== 0) return null;
-    return { year: dynamicData.year, month: dynamicData.timespan ?? 0, dayOfMonth: dynamicData.day ?? 0, hour: dynamicData.hour ?? 0, minute: dynamicData.minute ?? 0 };
+    return { year: dynamicData.year, month: dynamicData.timespan ?? 0, dayOfMonth: Math.max(0, (dynamicData.day ?? 1) - 1), hour: dynamicData.hour ?? 0, minute: dynamicData.minute ?? 0 };
   }
 
   /**
@@ -321,10 +325,29 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   #buildCategoryMap(categories = []) {
     const map = new Map();
+    this.#fcCategories = [];
     for (const cat of categories) {
-      map.set(cat.id, { name: cat.name, color: FC_COLORS[cat.event_settings?.color] || '#2196f3', hidden: cat.event_settings?.hide ?? false, gmOnly: cat.category_settings?.hide ?? false });
+      const color = FC_COLORS[cat.event_settings?.color] || '#2196f3';
+      map.set(cat.id, { name: cat.name, color, hidden: cat.event_settings?.hide ?? false, gmOnly: cat.category_settings?.hide ?? false });
+      this.#fcCategories.push({ name: cat.name, color });
     }
     return map;
+  }
+
+  /**
+   * Import FC event categories as Calendaria note categories.
+   */
+  async #importNoteCategories() {
+    const existing = getAllCategories().map((c) => c.name.toLowerCase());
+    for (const cat of this.#fcCategories) {
+      if (existing.includes(cat.name.toLowerCase())) continue;
+      try {
+        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        log(3, `Imported FC category: ${cat.name}`);
+      } catch (error) {
+        log(1, `Failed to import FC category "${cat.name}":`, error);
+      }
+    }
   }
 
   /**
@@ -880,8 +903,10 @@ export default class FantasyCalendarImporter extends BaseImporter {
    * @returns {{year: number, month: number, day: number}} - Current date
    */
   #extractDate(eventData, conditions, fullData) {
-    if (Array.isArray(eventData?.date) && eventData.date.length >= 3) return { year: eventData.date[0], month: eventData.date[1], day: eventData.date[2] };
-    const date = { year: fullData.dynamic_data?.year || 0, month: 0, day: 1 };
+    if (Array.isArray(eventData?.date) && eventData.date.length >= 3) {
+      return { year: eventData.date[0], month: eventData.date[1], dayOfMonth: Math.max(0, (eventData.date[2] ?? 1) - 1) };
+    }
+    const date = { year: fullData.dynamic_data?.year || 0, month: 0, dayOfMonth: 0 };
     for (const cond of conditions) {
       if (!Array.isArray(cond) || cond.length < 3) continue;
       const [type, , values] = cond;
@@ -889,13 +914,13 @@ export default class FantasyCalendarImporter extends BaseImporter {
         case 'Date':
           date.year = values[0] ?? date.year;
           date.month = values[1] ?? 0;
-          date.day = values[2] ?? 1;
+          date.dayOfMonth = Math.max(0, (values[2] ?? 1) - 1);
           break;
         case 'Month':
           date.month = parseInt(values[0]) || 0;
           break;
         case 'Day':
-          date.day = parseInt(values[0]) || 1;
+          date.dayOfMonth = Math.max(0, (parseInt(values[0]) || 1) - 1);
           break;
       }
     }
@@ -913,6 +938,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    if (this.#fcCategories.length) await this.#importNoteCategories();
     const calendar = CalendarManager.getCalendar(calendarId);
     for (const note of notes) {
       try {
@@ -958,20 +984,20 @@ export default class FantasyCalendarImporter extends BaseImporter {
    * @returns {object} New date {year, month, day}
    */
   #addDaysToDate(date, daysToAdd, calendar) {
-    let { year, month, day } = { ...date };
+    let { year, month, dayOfMonth } = { ...date };
     let remaining = daysToAdd;
     const months = calendar?.monthsArray || [];
-    if (!months.length) return { year, month, day: day + daysToAdd };
+    if (!months.length) return { year, month, dayOfMonth: dayOfMonth + daysToAdd };
     while (remaining > 0) {
       const monthData = months[month];
       const daysInMonth = monthData?.days || 30;
-      const daysLeftInMonth = daysInMonth - day;
+      const daysLeftInMonth = daysInMonth - 1 - dayOfMonth;
       if (remaining <= daysLeftInMonth) {
-        day += remaining;
+        dayOfMonth += remaining;
         remaining = 0;
       } else {
         remaining -= daysLeftInMonth + 1;
-        day = 1;
+        dayOfMonth = 0;
         month++;
         if (month >= months.length) {
           month = 0;
@@ -979,7 +1005,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
         }
       }
     }
-    return { year, month, day };
+    return { year, month, dayOfMonth };
   }
 
   /** @override */

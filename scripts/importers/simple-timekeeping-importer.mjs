@@ -277,7 +277,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   /**
    * Transform STK seasons to Calendaria format.
    * @param {object[]} seasons - STK seasons array.
-   * @param config
+   * @param {object} config - STK configuration object with season colors.
    * @returns {object[]} Calendaria seasons array.
    */
   #transformSeasons(seasons = [], config = {}) {
