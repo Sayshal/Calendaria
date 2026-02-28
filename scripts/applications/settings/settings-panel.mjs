@@ -643,6 +643,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.HUD_STICKY_STATES]: { tab: 'hud', label: 'CALENDARIA.SettingsPanel.Section.StickyStates' },
     [SETTINGS.CUSTOM_TIME_JUMPS]: { tab: 'hud', label: 'CALENDARIA.SettingsPanel.Section.CustomTimeJumps' },
     [SETTINGS.DISPLAY_FORMATS]: { tab: 'hud', label: 'CALENDARIA.SettingsPanel.Section.DisplayFormats' },
+    [SETTINGS.MINI_CAL_COMPACT_MODE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalCompactMode.Name' },
     [SETTINGS.SHOW_MINI_CAL]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ShowMiniCal.Name' },
     [SETTINGS.FORCE_MINI_CAL]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ForceMiniCal.Name' },
     [SETTINGS.MINI_CAL_AUTO_FADE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.AutoFade.Name' },
@@ -736,7 +737,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.MINI_CAL_IDLE_OPACITY,
       SETTINGS.MINI_CAL_CONTROLS_DELAY,
       SETTINGS.MINI_CAL_CONFIRM_SET_DATE,
-      SETTINGS.MINI_CAL_AUTO_OPEN_NOTES
+      SETTINGS.MINI_CAL_AUTO_OPEN_NOTES,
+      SETTINGS.MINI_CAL_COMPACT_MODE
     ],
     'minical-block-visibility': [
       SETTINGS.MINI_CAL_SHOW_WEATHER,
@@ -894,6 +896,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY);
     context.miniCalConfirmSetDate = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE);
     context.miniCalAutoOpenNotes = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES);
+    context.miniCalCompactMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE);
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
     context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
@@ -1082,6 +1085,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'calendarDefault', label: calendarDefaultLabel },
       { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') },
       { value: 'approxDate', label: localize('CALENDARIA.Format.Preset.ApproxDate') },
+      { value: 'approxDateTime', label: localize('CALENDARIA.Format.Preset.ApproxDateTime') },
       { value: 'approxTime', label: localize('CALENDARIA.Format.Preset.ApproxTime') },
       { value: 'dateShort', label: localize('CALENDARIA.Format.Preset.DateShort') },
       { value: 'dateMedium', label: localize('CALENDARIA.Format.Preset.DateMedium') },
@@ -1130,6 +1134,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud', contextType: 'time' },
       { id: 'timekeeperDate', label: localize('CALENDARIA.Format.Location.TimeKeeperDate'), category: 'timekeeper', contextType: 'date' },
       { id: 'timekeeperTime', label: localize('CALENDARIA.Format.Location.TimeKeeperTime'), category: 'timekeeper', contextType: 'time' },
+      { id: 'microCalHeader', label: localize('CALENDARIA.Format.Location.MicroCalHeader'), category: 'miniCal', contextType: 'date' },
       { id: 'miniCalHeader', label: localize('CALENDARIA.Format.Location.MiniCalHeader'), category: 'miniCal', contextType: 'date' },
       { id: 'miniCalTime', label: localize('CALENDARIA.Format.Location.MiniCalTime'), category: 'miniCal', contextType: 'time' },
       { id: 'bigCalHeader', label: localize('CALENDARIA.Format.Location.BigCalHeader'), category: 'bigcal', contextType: 'date' },
@@ -1544,6 +1549,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('miniCalControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_CONTROLS_DELAY, Number(data.miniCalControlsDelay));
     if ('miniCalConfirmSetDate' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_CONFIRM_SET_DATE, data.miniCalConfirmSetDate);
     if ('miniCalAutoOpenNotes' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES, data.miniCalAutoOpenNotes);
+    if ('miniCalCompactMode' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE, data.miniCalCompactMode);
     if ('darknessSync' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
       if (data.darknessSync && game.pf2e?.worldClock) {
@@ -1757,6 +1763,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         hudTime: 'hud',
         timekeeperDate: 'timekeeper',
         timekeeperTime: 'timekeeper',
+        microCalHeader: 'miniCal',
         miniCalHeader: 'miniCal',
         miniCalTime: 'miniCal',
         bigCalHeader: 'bigcal',
@@ -1828,7 +1835,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'miniCalEraDisplayMode',
       'miniCalShowCycles',
       'miniCalCyclesDisplayMode',
-      'miniCalShowMoonPhases'
+      'miniCalShowMoonPhases',
+      'miniCalCompactMode'
     ];
     if (miniCalKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-mini-cal')?.render();
     const bigCalKeys = [
@@ -2570,6 +2578,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
                   hudTime: 'time24',
                   timekeeperDate: 'dateLong',
                   timekeeperTime: 'time24',
+                  microCalHeader: 'approxDateTime',
                   miniCalHeader: 'dateLong',
                   miniCalTime: 'time24',
                   bigCalHeader: 'dateFull',
@@ -2636,6 +2645,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         hudTime: 'time24',
         timekeeperDate: 'dateLong',
         timekeeperTime: 'time24',
+        microCalHeader: 'approxDateTime',
         miniCalHeader: 'dateLong',
         miniCalTime: 'time24',
         bigCalHeader: 'dateFull',

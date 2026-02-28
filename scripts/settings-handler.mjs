@@ -66,6 +66,14 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
+      [SETTINGS.MINI_CAL_COMPACT_MODE]: {
+        name: 'CALENDARIA.Settings.MiniCalCompactMode.Name',
+        hint: 'CALENDARIA.Settings.MiniCalCompactMode.Hint',
+        scope: 'client',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: renderMiniCal
+      },
       [SETTINGS.MINI_CAL_IDLE_OPACITY]: {
         name: 'CALENDARIA.Settings.IdleOpacity.Name',
         hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
@@ -897,6 +905,7 @@ export default class CalendariaSettings {
           initial: {
             hudDate: { gm: 'ordinal', player: 'ordinal' },
             hudTime: { gm: 'time24', player: 'time24' },
+            microCalHeader: { gm: 'approxDateTime', player: 'approxDateTime' },
             miniCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
             miniCalTime: { gm: 'time24', player: 'time24' },
             bigCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },

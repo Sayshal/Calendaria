@@ -68,6 +68,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {string|null} ID of zone the dial is snapped to */
   #snappedZoneId = null;
+  #lastSize = 300;
 
   /** @override */
   static DEFAULT_OPTIONS = {
@@ -864,8 +865,11 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {number} Current size in pixels
    */
   #getSize() {
+    if (!this.element) return this.#lastSize || 300;
     const computed = getComputedStyle(this.element).getPropertyValue('--dial-size');
-    return parseInt(computed) || 300;
+    const size = parseInt(computed) || 300;
+    this.#lastSize = size;
+    return size;
   }
 
   // ---------------------------------------------------------------------------

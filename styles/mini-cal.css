@@ -728,5 +728,245 @@
         }
       }
     }
+
+    /* MicroCal: compact mode overrides */
+    &.micro {
+      --mini-day-size: 2.25rem;
+      --mini-gap: 0;
+
+      .container {
+        border-radius: 0.5rem;
+
+        /* Sidebar visible: flatten right corners */
+        &:has(.sidebar:is(.visible, .locked)) {
+          border-radius: 0.5rem 0 0 0.5rem;
+
+          .top-row {
+            border-radius: 0.5rem 0 0;
+          }
+
+          .grid {
+            border-radius: 0 0 0 0.5rem;
+          }
+
+          .time-controls {
+            border-radius: 0 0 0 0.5rem;
+          }
+        }
+
+        /* Time controls visible: grid loses bottom radius */
+        &:has(.time-controls.visible) .grid {
+          border-radius: 0;
+        }
+      }
+
+      cursor: grab;
+
+      .top-row {
+        padding: 0.25rem 0.375rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        position: relative;
+
+        .title {
+          font-size: 0.8rem;
+        }
+
+        .nav-btn {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+
+        .title-group {
+          position: relative;
+        }
+
+        .time-toggle {
+          inset: 0;
+          display: flex;
+          opacity: 0;
+          position: absolute;
+          justify-content: center;
+          align-items: center;
+          pointer-events: none;
+          border-radius: 0.25rem;
+          background: var(--calendaria-bg-lighter);
+          transition: opacity 0.15s;
+          cursor: pointer;
+
+          i {
+            color: var(--calendaria-text);
+            font-size: 0.85rem;
+          }
+
+          &.active i {
+            color: var(--calendaria-primary);
+          }
+
+          &.clock-locked i {
+            color: var(--calendaria-warning);
+          }
+        }
+
+        .title-group:hover .time-toggle {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+
+      .calendar-indicators {
+        gap: 0.375rem;
+        margin: 0 0.375rem 0.125rem;
+        padding: 0.125rem 0;
+        font-size: var(--font-size-11, 0.6875rem);
+      }
+
+      .grid {
+        padding: 0.375rem;
+        border-radius: 0 0 0.5rem 0.5rem;
+      }
+
+      .weekdays {
+        display: none;
+      }
+
+      .day {
+        border-radius: 50%;
+
+        .day-num {
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+
+        .note-badge {
+          width: 0.75rem;
+          height: 0.75rem;
+          bottom: 0.0625rem;
+          left: 0.0625rem;
+          border-radius: 50%;
+          font-size: 0;
+        }
+
+        .moon-tiny:not(.tinted) {
+          bottom: 0.0625rem;
+          right: 0.0625rem;
+          top: auto;
+          width: 0.75rem;
+          height: 0.75rem;
+        }
+
+        .moon-tint {
+          bottom: 0.0625rem;
+          right: 0.0625rem;
+          top: auto;
+          width: 0.75rem;
+          height: 0.75rem;
+        }
+
+        .mini-weather-icon {
+          display: none;
+        }
+      }
+
+      .intercalary-row .day.intercalary .festival-name {
+        font-size: 0.7rem;
+      }
+
+      .time-display {
+        display: none;
+      }
+
+      .time-controls {
+        border-radius: 0 0 0.5rem 0.5rem;
+
+        .time-shortcut,
+        [data-action='reverse'],
+        [data-action='forward'] {
+          display: none;
+        }
+      }
+
+      .sidebar {
+        gap: 0.125rem;
+        top: -0.0625rem;
+        bottom: -0.0625rem;
+        width: 1.5rem;
+        padding: 0.25rem 0;
+        border-radius: 0 0.5rem 0.5rem 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+
+        &.visible,
+        &.locked {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+
+      .sidebar-btn {
+        width: 1.25rem;
+        height: 1.25rem;
+        font-size: 0.75rem;
+      }
+
+      .sidebar-separator {
+        display: none;
+      }
+
+      .notes-panel {
+        left: calc(100% + 1.5rem);
+        width: 8rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+      }
+
+      .notes-panel-header {
+        display: none;
+      }
+
+      .notes-panel-list {
+        gap: 0.125rem;
+        padding: 0.25rem;
+      }
+
+      .notes-panel-item {
+        gap: 0.25rem;
+        padding: 0.25rem 0.375rem;
+      }
+
+      .note-item-icon {
+        width: 1rem;
+        height: 1rem;
+
+        i {
+          font-size: 0.75rem;
+        }
+
+        img {
+          width: 0.875rem;
+          height: 0.875rem;
+        }
+      }
+
+      .note-item-title {
+        font-size: 0.7rem;
+      }
+
+      .note-item-author {
+        display: none;
+      }
+
+      .note-item-meta {
+        font-size: 0.6rem;
+      }
+
+      .note-item-edit {
+        width: 1.125rem;
+        height: 1.125rem;
+      }
+
+      .container:has(.notes-panel.visible) .sidebar {
+        border-radius: 0;
+      }
+    }
   }
 }

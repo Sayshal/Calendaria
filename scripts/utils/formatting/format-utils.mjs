@@ -828,6 +828,7 @@ export const PRESET_FORMATTERS = {
  */
 export const DEFAULT_FORMAT_PRESETS = {
   approxDate: '[approxDate]',
+  approxDateTime: '[approxDate], [approxTime]',
   approxTime: '[approxTime]',
   dateShort: 'D MMM',
   dateMedium: 'D MMMM',
@@ -871,6 +872,7 @@ const LOCATION_FORMAT_KEYS = {
   hudTime: 'time24',
   timekeeperDate: 'dateLong',
   timekeeperTime: 'time24',
+  microCalHeader: 'approxDateTime',
   miniCalHeader: 'dateLong',
   miniCalTime: 'time24',
   bigCalHeader: 'dateFull',
@@ -889,6 +891,7 @@ export const LOCATION_DEFAULTS = {
   hudTime: 'time24',
   timekeeperDate: 'dateLong',
   timekeeperTime: 'time24',
+  microCalHeader: 'approxDateTime',
   miniCalHeader: 'dateLong',
   miniCalTime: 'time24',
   bigCalHeader: 'dateFull',
@@ -964,6 +967,7 @@ export function getDisplayLocationDefinitions() {
   return [
     { id: 'hudDate', label: 'CALENDARIA.Format.Location.HudDate', category: 'hud' },
     { id: 'hudTime', label: 'CALENDARIA.Format.Location.HudTime', category: 'hud' },
+    { id: 'microCalHeader', label: 'CALENDARIA.Format.Location.MicroCalHeader', category: 'miniCal' },
     { id: 'miniCalHeader', label: 'CALENDARIA.Format.Location.MiniCalHeader', category: 'miniCal' },
     { id: 'miniCalTime', label: 'CALENDARIA.Format.Location.MiniCalTime', category: 'miniCal' },
     { id: 'bigCalHeader', label: 'CALENDARIA.Format.Location.BigCalHeader', category: 'bigcal' },

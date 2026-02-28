@@ -42,6 +42,14 @@
     {{/if}}
 
     <div class="form-group">
+      <label for="miniCalCompactMode">{{localize "CALENDARIA.Settings.MiniCalCompactMode.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalCompactMode" name="miniCalCompactMode" {{#if miniCalCompactMode}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalCompactMode.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="miniCalControlsDelay">{{localize "CALENDARIA.Settings.MiniCalControlsDelay.Name"}}</label>
       <div class="form-fields">
         <div class="slider-with-ticks">

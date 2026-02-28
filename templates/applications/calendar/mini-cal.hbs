@@ -134,6 +134,15 @@
     </button>
     <div class="title-group">
       <span class="title">{{{calendarData.formattedHeader}}}</span>
+      {{#if compact}}
+        {{#if canChangeDateTime}}
+          <div class="time-toggle {{#if running}}active{{/if}}{{#if clockLocked}} clock-locked{{/if}}"
+            data-action="toggle" data-tooltip
+            aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+            <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
+          </div>
+        {{/if}}
+      {{/if}}
     </div>
     <button type="button" class="nav-btn" data-action="navigate" data-direction="next" data-tooltip
       aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
