@@ -208,7 +208,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const daysPerYear = calendar.days?.daysPerYear ?? months.reduce((sum, m) => sum + (m.days || 0), 0);
     const seasons = isNativeFormat ? (calendar.seasons?.values ? Object.values(calendar.seasons.values) : []) : [];
-    const transformedSeasons = this.#transformSeasons(seasons);
+    const transformedSeasons = this.#transformSeasons(seasons, config);
     return {
       name: calendar.name || 'Imported Calendar',
       days: { values: weekdays, hoursPerDay, minutesPerHour, secondsPerMinute, daysPerYear },
@@ -277,10 +277,12 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   /**
    * Transform STK seasons to Calendaria format.
    * @param {object[]} seasons - STK seasons array.
+   * @param config
    * @returns {object[]} Calendaria seasons array.
    */
-  #transformSeasons(seasons = []) {
+  #transformSeasons(seasons = [], config = {}) {
     if (!seasons?.length) return [];
+    const seasonColors = [config.season0, config.season1, config.season2, config.season3].filter(Boolean);
     return seasons.map((season, index) => ({
       name: this.#localizeString(season.name),
       abbreviation: this.#localizeString(season.abbreviation) || this.#localizeString(season.name).substring(0, 3),
@@ -288,6 +290,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       monthEnd: season.monthEnd,
       dayStart: season.dayStart,
       dayEnd: season.dayEnd,
+      color: seasonColors[index] || '',
       ordinal: index + 1
     }));
   }
@@ -348,9 +351,25 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       name: this.#localizeString(moon.name),
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.offset ?? 0,
-      phases: DEFAULT_MOON_PHASES,
+      phases: this.#buildMoonPhases(moon.phaseNames),
       referenceDate: { year: 0, month: 0, dayOfMonth: 0 }
     }));
+  }
+
+  /**
+   * Build moon phases, mapping custom STK phase names if provided.
+   * @param {string[]} [phaseNames] - Optional array of 8 phase name strings.
+   * @returns {object} Keyed phases object matching Calendaria format.
+   */
+  #buildMoonPhases(phaseNames) {
+    if (!phaseNames?.length) return DEFAULT_MOON_PHASES;
+    const keys = Object.keys(DEFAULT_MOON_PHASES);
+    const phases = {};
+    for (let i = 0; i < keys.length; i++) {
+      const base = DEFAULT_MOON_PHASES[keys[i]];
+      phases[keys[i]] = { ...base, name: phaseNames[i] ? this.#localizeString(phaseNames[i]) : base.name };
+    }
+    return phases;
   }
 
   /**
@@ -360,22 +379,25 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #extractFestivals(months = []) {
     const festivals = [];
-    let regularMonthIndex = 0;
+    let lastRegularMonthIndex = 0;
+    let regularCount = 0;
     for (const month of months) {
       if (month.intercalary) {
         const monthName = this.#localizeString(month.name);
+        const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
         for (let day = 1; day <= month.days; day++) {
-          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex, dayOfMonth: day - 1, countsForWeekday: false };
+          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: targetMonth, dayOfMonth: day - 1, countsForWeekday: false };
           if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
         }
         if (month.days === 0 && month.leapDays > 0) {
           for (let day = 1; day <= month.leapDays; day++) {
-            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex, dayOfMonth: day - 1, leapYearOnly: true, countsForWeekday: false });
+            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: targetMonth, dayOfMonth: day - 1, leapYearOnly: true, countsForWeekday: false });
           }
         }
       } else {
-        regularMonthIndex++;
+        lastRegularMonthIndex = regularCount;
+        regularCount++;
       }
     }
     return festivals;
