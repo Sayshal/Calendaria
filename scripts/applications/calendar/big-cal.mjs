@@ -77,7 +77,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     id: 'calendaria-big-cal',
     classes: ['calendaria', 'big-cal'],
     tag: 'div',
-    window: { contentClasses: ['big-cal'], icon: 'fas fa-calendar', resizable: false },
+    window: { frame: false, positioned: true },
     actions: {
       navigate: BigCal._onNavigate,
       today: BigCal._onToday,
@@ -1107,13 +1107,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Adjust window size to exactly fit rendered content.
    */
   _adjustSizeForView() {
-    const windowContent = this.element.querySelector('.window-content');
-    const windowHeader = this.element.querySelector('.window-header');
-    if (!windowContent) return;
-    const contentRect = windowContent.scrollWidth;
-    const contentHeight = windowContent.scrollHeight;
-    const headerHeight = windowHeader?.offsetHeight || 30;
-    this.setPosition({ width: contentRect + 2, height: contentHeight + headerHeight + 2 });
+    if (!this.element) return;
+    const content = this.element.querySelector('.calendar-main-content');
+    const header = this.element.querySelector('.calendar-header');
+    if (!content) return;
+    const width = Math.max(content.scrollWidth, header?.scrollWidth || 0);
+    const height = (header?.offsetHeight || 0) + content.scrollHeight;
+    this.setPosition({ width: width + 2, height: height + 2 });
   }
 
   /**
@@ -1126,8 +1126,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     this.element.classList.remove('view-month', 'view-week', 'view-year');
     this.element.classList.add(`view-${this._displayMode}`);
-    const content = this.element.querySelector('.window-content');
-    content?.addEventListener('dblclick', (e) => {
+    this.#enableDragging();
+    const viewSelect = this.element.querySelector('.view-select');
+    viewSelect?.addEventListener('change', (e) => {
+      this._displayMode = e.target.value;
+      this.render();
+    });
+    const header = this.element.querySelector('.calendar-header');
+    header?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-item, .event-block, .multi-day-event')) return;
       e.preventDefault();
       this.close();
@@ -1274,6 +1280,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
     this._adjustSizeForView();
+    const rect = this.element.getBoundingClientRect();
+    const left = Math.max(0, (window.innerWidth - rect.width) / 2);
+    const top = Math.max(0, (window.innerHeight - rect.height) / 2);
+    this.setPosition({ left, top });
     ViewUtils.setupDayContextMenu(this.element, '.calendar-day:not(.empty)', this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
@@ -1282,11 +1292,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       onCreateNote: () => this.render(),
       extraItems: this.#getContextMenuItems()
     });
-    new foundry.applications.ux.ContextMenu.implementation(this.element, '.window-header', this.#getContextMenuItems(), {
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.calendar-header', this.#getContextMenuItems(), {
       fixed: true,
       jQuery: false,
       onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
     });
+    this.#enableDragging();
     this._hooks = [];
     const c = game.time.components;
     this._lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
@@ -1315,6 +1326,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._hooks.push({ name: HOOKS.DISPLAY_FORMATS_CHANGED, id: Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => debouncedRender()) });
     this._hooks.push({ name: HOOKS.WORLD_TIME_UPDATED, id: Hooks.on(HOOKS.WORLD_TIME_UPDATED, this._onUpdateWorldTime.bind(this)) });
     this._hooks.push({ name: HOOKS.VISUAL_TICK, id: Hooks.on(HOOKS.VISUAL_TICK, this._onVisualTick.bind(this)) });
+  }
+
+  /** Enable header-based dragging for the frameless window. */
+  #enableDragging() {
+    const dragHandle = this.element.querySelector('.calendar-header');
+    if (!dragHandle) return;
+    const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
+    const originalMouseDown = drag._onDragMouseDown.bind(drag);
+    drag._onDragMouseDown = (event) => {
+      if (event.target.closest('button, a, input, select, [data-action]')) return;
+      originalMouseDown(event);
+    };
   }
 
   /**

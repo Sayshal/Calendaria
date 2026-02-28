@@ -1,4 +1,5 @@
 <header class="calendar-header">
+  {{!-- Search panel (absolute dropdown) --}}
   <div class="calendaria-search{{#if searchOpen}} visible{{/if}}">
     <div class="search-panel-header">
       <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
@@ -22,7 +23,33 @@
     </div>
   </div>
 
-  <div class="calendar-actions">
+  {{!-- Row 1: < | Search | Note | Date | SwitchView | Settings | > --}}
+  <div class="header-row header-row-top">
+    <button type="button" data-action="navigate" data-direction="previous" data-tooltip
+      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <button type="button" class="search-toggle" data-action="toggleSearch" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.SearchNotes'}}">
+      <i class="fas fa-search"></i>
+    </button>
+
+    {{#if canAddNotes}}
+      <button type="button" data-action="addNoteToday" data-tooltip
+        aria-label="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}" class="add-note-today-btn">
+        <i class="fas fa-plus"></i>
+      </button>
+    {{/if}}
+
+    <h2 class="calendar-title">
+      {{#if calendarData}} {{#if (eq displayMode 'week')}} {{{calendarData.formattedHeader}}}
+        {{else if (eq displayMode 'year')}}
+          {{calendarData.startYearDisplay}} - {{calendarData.endYearDisplay}}
+        {{else}} {{{calendarData.formattedHeader}}} {{/if}}
+      {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
+    </h2>
+
     <button type="button" data-action="toggleCompact" data-tooltip
       aria-label="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
       <i class="fas fa-compress"></i>
@@ -33,45 +60,43 @@
       <i class="fas fa-gear"></i>
     </button>
 
-    <button type="button" class="search-toggle" data-action="toggleSearch" data-tooltip
-      aria-label="{{localize 'CALENDARIA.Common.SearchNotes'}}">
-      <i class="fas fa-search"></i>
+    <button type="button" data-action="navigate" data-direction="next" data-tooltip
+      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
+      <i class="fas fa-chevron-right"></i>
     </button>
+  </div>
 
-    <button type="button" data-action="today" data-tooltip aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
-      <i class="fas fa-calendar-day"></i> {{localize 'CALENDARIA.Common.Today'}}
-    </button>
+  {{!-- Row 2: MWY Select | Indicators (flex) | Today + SetDate --}}
+  <div class="header-row header-row-bottom">
+    <select class="view-select">
+      <option value="month" {{#if (eq displayMode 'month')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Month'}}</option>
+      <option value="week" {{#if (eq displayMode 'week')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Week'}}</option>
+      <option value="year" {{#if (eq displayMode 'year')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Year'}}</option>
+    </select>
 
-    {{#if canAddNotes}}
-      <button type="button" data-action="addNoteToday" data-tooltip
-        aria-label="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}" class="add-note-today-btn">
-        <i class="fas fa-plus"></i> {{localize 'CALENDARIA.Common.AddNote'}}
+    <div class="calendar-indicators">
+      {{{widgets.weatherIndicator}}}
+      {{{widgets.seasonIndicator}}}
+      {{{widgets.eraIndicator}}}
+      {{{widgets.cycleIndicator}}}
+      {{{widgets.indicators}}}
+    </div>
+
+    <div class="calendar-actions">
+      <button type="button" data-action="today" data-tooltip aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
+        <i class="fas fa-calendar-day"></i>
       </button>
-    {{/if}}
 
-    {{#if editable}}
-      <button type="button" data-action="setAsCurrentDate" data-tooltip
-        aria-label="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
-        class="set-current-date-btn" {{#if isToday}}disabled{{/if}}>
-        <i class="fas fa-calendar-check"></i>
-        {{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrentBtn'}}{{/if}}
-      </button>
-    {{/if}}
+      {{#if editable}}
+        <button type="button" data-action="setAsCurrentDate" data-tooltip
+          aria-label="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
+          class="set-current-date-btn" {{#if isToday}}disabled{{/if}}>
+          <i class="fas fa-calendar-check"></i>
+        </button>
+      {{/if}}
 
-    {{!-- Custom widget actions insertion point --}}
-    {{{widgets.actions}}}
-
-    <button type="button" data-action="changeView" data-mode="month"
-      class="{{#if (eq displayMode 'month')}}active{{/if}}">
-      {{localize 'CALENDARIA.Common.Month'}}
-    </button>
-    <button type="button" data-action="changeView" data-mode="week"
-      class="{{#if (eq displayMode 'week')}}active{{/if}}">
-      {{localize 'CALENDARIA.Common.Week'}}
-    </button>
-    <button type="button" data-action="changeView" data-mode="year"
-      class="{{#if (eq displayMode 'year')}}active{{/if}}">
-      {{localize 'CALENDARIA.Common.Year'}}
-    </button>
+      {{!-- Custom widget actions insertion point --}}
+      {{{widgets.actions}}}
+    </div>
   </div>
 </header>

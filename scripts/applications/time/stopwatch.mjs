@@ -1182,7 +1182,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       await this.#savePosition();
     };
     dragHandle.addEventListener('mousedown', (event) => {
-      if (event.target.closest('.btn')) return;
+      if (event.target.closest('.sw-btn')) return;
       event.preventDefault();
       isDragging = true;
       previousZoneId = this.#snappedZoneId;

@@ -22,6 +22,7 @@ export default {
         format: { comments: false }
       }),
     copy({
+      copyOnce: false,
       targets: [
         { src: 'templates', dest: 'dist' },
         { src: 'lang', dest: 'dist' },
