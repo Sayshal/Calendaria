@@ -1805,11 +1805,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     document.documentElement.style.setProperty('--calendaria-bigcal-idle-opacity', opacity);
   }
 
-  /** Refresh sticky states from settings. */
-  static refreshStickyStates() {
-    // Sticky states are read by the app instance on position restore
-  }
-
   /**
    * Show the BigCal application.
    * @static

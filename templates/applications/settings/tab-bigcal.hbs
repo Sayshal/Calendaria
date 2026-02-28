@@ -26,6 +26,14 @@
 
     {{#if isGM}}
       <div class="form-group">
+        <label for="showBigCal">{{localize "CALENDARIA.Settings.ShowBigCal.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="showBigCal" name="showBigCal" {{#if showBigCal}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowBigCal.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
         <label for="forceBigCal">{{localize "CALENDARIA.Settings.ForceBigCal.Name"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceBigCal" name="forceBigCal" {{#if forceBigCal}}checked{{/if}}>
@@ -164,16 +172,6 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalHeaderShowSelected.Hint"}}</p>
     </div>
-  </fieldset>
-
-  <fieldset data-section="bigcal-sticky">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="bigcal-sticky"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-          class="fas fa-undo"></i></button>
-    </legend>
-    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
   </fieldset>
 
   {{#if isGM}}

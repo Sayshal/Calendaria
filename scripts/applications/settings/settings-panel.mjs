@@ -661,10 +661,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Name' },
     [SETTINGS.MINI_CAL_STICKY_STATES]: { tab: 'miniCal', label: 'CALENDARIA.SettingsPanel.Section.StickyStates' },
     [SETTINGS.MINI_CAL_TIME_JUMPS]: { tab: 'miniCal', label: 'CALENDARIA.SettingsPanel.Section.CustomTimeJumps' },
+    [SETTINGS.SHOW_BIG_CAL]: { tab: 'bigcal', label: 'CALENDARIA.Settings.ShowBigCal.Name' },
     [SETTINGS.FORCE_BIG_CAL]: { tab: 'bigcal', label: 'CALENDARIA.Settings.ForceBigCal.Name' },
     [SETTINGS.BIG_CAL_AUTO_FADE]: { tab: 'bigcal', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.BIG_CAL_IDLE_OPACITY]: { tab: 'bigcal', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
-    [SETTINGS.BIG_CAL_STICKY_STATES]: { tab: 'bigcal', label: 'CALENDARIA.SettingsPanel.Section.StickyStates' },
     [SETTINGS.BIG_CAL_SHOW_WEATHER]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalShowWeather.Name' },
     [SETTINGS.BIG_CAL_SHOW_SEASON]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalShowSeason.Name' },
     [SETTINGS.BIG_CAL_SHOW_ERA]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalShowEra.Name' },
@@ -751,7 +751,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ],
     'minical-sticky': [SETTINGS.MINI_CAL_STICKY_STATES],
     'minical-time-jumps': [SETTINGS.MINI_CAL_TIME_JUMPS],
-    'bigcal-display': [SETTINGS.FORCE_BIG_CAL, SETTINGS.BIG_CAL_AUTO_FADE, SETTINGS.BIG_CAL_IDLE_OPACITY],
+    'bigcal-display': [SETTINGS.SHOW_BIG_CAL, SETTINGS.FORCE_BIG_CAL, SETTINGS.BIG_CAL_AUTO_FADE, SETTINGS.BIG_CAL_IDLE_OPACITY],
     'bigcal-block-visibility': [
       SETTINGS.BIG_CAL_SHOW_WEATHER,
       SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE,
@@ -763,7 +763,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE,
       SETTINGS.BIG_CAL_SHOW_MOON_PHASES
     ],
-    'bigcal-sticky': [SETTINGS.BIG_CAL_STICKY_STATES],
     'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.FORCE_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY],
     'timekeeper-sticky': [SETTINGS.TIMEKEEPER_STICKY_STATES],
     'timekeeper-time-jumps': [SETTINGS.TIMEKEEPER_TIME_JUMPS],
@@ -1022,6 +1021,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareBigCalContext(context) {
     context.formatLocations = this.#prepareFormatLocationsForCategory('bigcal');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'BigCal' });
+    context.showBigCal = game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL);
     context.forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
     context.bigCalAutoFade = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_AUTO_FADE);
     context.bigCalIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_IDLE_OPACITY);
@@ -1642,6 +1642,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('bigCalSeasonDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE, data.bigCalSeasonDisplayMode);
     if ('bigCalEraDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_ERA_DISPLAY_MODE, data.bigCalEraDisplayMode);
     if ('bigCalCyclesDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE, data.bigCalCyclesDisplayMode);
+    if ('showBigCal' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, data.showBigCal);
     if ('forceBigCal' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_BIG_CAL, data.forceBigCal);
     if ('bigCalAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_AUTO_FADE, data.bigCalAutoFade);
     if ('bigCalIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_IDLE_OPACITY, Number(data.bigCalIdleOpacity));

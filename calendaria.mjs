@@ -100,7 +100,8 @@ Hooks.once('ready', async () => {
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL) && canViewSunDial()) SunDial.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_STOPWATCH)) Stopwatch.show();
-  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) BigCal.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL)) BigCal.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);

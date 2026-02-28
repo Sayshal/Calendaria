@@ -319,7 +319,6 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
         onChange: () => BigCal.updateIdleOpacity()
       },
-      [SETTINGS.BIG_CAL_STICKY_STATES]: { name: 'BigCal Sticky States', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       formatMigrationComplete: { name: 'Format Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       settingKeyMigrationComplete: { name: 'Setting Key Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       intercalaryMigrationComplete: { name: 'Intercalary Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
@@ -523,6 +522,18 @@ export default class CalendariaSettings {
           if (!game.user.isGM) return;
           if (value) Stopwatch.show();
           else Stopwatch.hide();
+        }
+      },
+      [SETTINGS.SHOW_BIG_CAL]: {
+        name: 'CALENDARIA.Settings.ShowBigCal.Name',
+        hint: 'CALENDARIA.Settings.ShowBigCal.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: (value) => {
+          if (!game.user.isGM) return;
+          if (value) BigCal.show();
+          else BigCal.hide();
         }
       },
       [SETTINGS.SHOW_SUN_DIAL]: {
@@ -765,7 +776,10 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false }),
         onChange: async (value) => {
-          if (value) BigCal.show();
+          if (value) {
+            await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
+            BigCal.show();
+          }
         }
       },
       [SETTINGS.FORCE_MINI_CAL]: {

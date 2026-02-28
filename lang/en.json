@@ -1724,6 +1724,8 @@
   "CALENDARIA.Settings.RestToSunrise.Name": "Rest to Sunrise",
   "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint": "Allow players to see the active calendar selection on the Home tab (they cannot change it without the appropriate permission).",
   "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name": "Show Active Calendar to Players",
+  "CALENDARIA.Settings.ShowBigCal.Hint": "Display the BigCal on world load.",
+  "CALENDARIA.Settings.ShowBigCal.Name": "Show BigCal on Load",
   "CALENDARIA.Settings.ShowCalendarHUD.Hint": "Display the HUD on world load.",
   "CALENDARIA.Settings.ShowCalendarHUD.Name": "Show HUD on Load",
   "CALENDARIA.Settings.ShowJournalFooter.Hint": "Replace the Journal sidebar footer with quick-access buttons for Calendaria apps. Requires reload.",
