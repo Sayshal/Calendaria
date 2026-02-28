@@ -693,6 +693,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CUSTOM_CATEGORIES]: { tab: 'notes', label: 'CALENDARIA.SettingsPanel.Section.Categories' },
     [SETTINGS.MACRO_TRIGGERS]: { tab: 'macros', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
     [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'CALENDARIA.SettingsPanel.Section.WeatherPresets' },
+    [SETTINGS.FXMASTER_ENABLED]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.Enabled.Name' },
     [SETTINGS.FXMASTER_TOP_DOWN]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.TopDown.Name' },
     [SETTINGS.FXMASTER_BELOW_TOKENS]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowTokens.Name' },
     [SETTINGS.WEATHER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundFx.Name' }
@@ -786,7 +787,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ],
     'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.PRECIPITATION_UNIT],
     'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX],
-    fxmaster: [SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_BELOW_TOKENS],
+    fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_BELOW_TOKENS],
     'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
     'module-debugging': [SETTINGS.DEV_MODE, SETTINGS.LOGGING_LEVEL],
@@ -1311,6 +1312,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.gmOverrideClearsForecast = game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST) ?? true;
     context.fxmasterActive = game.modules.get('fxmaster')?.active ?? false;
     context.fxmasterPlusActive = game.modules.get('fxmaster-plus')?.active ?? false;
+    context.fxmasterEnabled = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED);
     context.fxmasterTopDown = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN);
     context.fxmasterBelowTokens = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS);
     context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
@@ -1591,6 +1593,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('forecastAccuracy' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_ACCURACY, parseInt(data.forecastAccuracy));
     if ('forecastDays' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_DAYS, parseInt(data.forecastDays));
     if ('gmOverrideClearsForecast' in data) await game.settings.set(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST, !!data.gmOverrideClearsForecast);
+    if ('fxmasterEnabled' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_ENABLED, !!data.fxmasterEnabled);
     if ('fxmasterTopDown' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN, !!data.fxmasterTopDown);
     if ('fxmasterBelowTokens' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, !!data.fxmasterBelowTokens);
     if ('weatherSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);

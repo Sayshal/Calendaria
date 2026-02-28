@@ -1049,6 +1049,13 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: true })
       },
       [SETTINGS.WEATHER_VISUAL_OVERRIDES]: { name: 'Weather Visual Overrides', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
+      [SETTINGS.FXMASTER_ENABLED]: {
+        name: 'CALENDARIA.Settings.FXMaster.Enabled.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.Enabled.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
       [SETTINGS.FXMASTER_TOP_DOWN]: {
         name: 'CALENDARIA.Settings.FXMaster.TopDown.Name',
         hint: 'CALENDARIA.Settings.FXMaster.TopDown.Hint',

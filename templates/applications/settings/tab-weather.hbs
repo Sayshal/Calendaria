@@ -129,6 +129,15 @@
 
       {{#if fxmasterActive}}
         <div class="form-group">
+          <label for="fxmasterEnabled">{{localize "CALENDARIA.Settings.FXMaster.Enabled.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterEnabled" name="fxmasterEnabled"
+              {{#if fxmasterEnabled}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.Enabled.Hint"}}</p>
+        </div>
+
+        <div class="form-group">
           <label for="fxmasterTopDown">{{localize "CALENDARIA.Settings.FXMaster.TopDown.Name"}}</label>
           <div class="form-fields">
             <input type="checkbox" id="fxmasterTopDown" name="fxmasterTopDown"

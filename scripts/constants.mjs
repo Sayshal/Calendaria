@@ -158,6 +158,7 @@ export const SETTINGS = {
   WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
   WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
   FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
+  FXMASTER_ENABLED: 'fxmasterEnabled',
   FORCE_THEME: 'forceTheme',
   FORCED_THEME_COLORS: 'forcedThemeColors',
   WEATHER_SOUND_FX: 'weatherSoundFx',

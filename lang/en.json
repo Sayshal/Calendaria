@@ -1612,6 +1612,8 @@
   "CALENDARIA.Settings.ForecastDays.Name": "Forecast Days",
   "CALENDARIA.Settings.FXMaster.BelowTokens.Hint": "Render weather effects below the token layer.",
   "CALENDARIA.Settings.FXMaster.BelowTokens.Name": "Below Tokens",
+  "CALENDARIA.Settings.FXMaster.Enabled.Hint": "Enable FXMaster weather effects and sounds globally. Disable to stop all weather FX on every scene.",
+  "CALENDARIA.Settings.FXMaster.Enabled.Name": "Enable Weather FX",
   "CALENDARIA.Settings.FXMaster.Inactive": "FXMaster module is not installed or enabled.",
   "CALENDARIA.Settings.FXMaster.SectionTitle": "FXMaster Integration",
   "CALENDARIA.Settings.Weather.SoundFx.Hint": "Play ambient sound loops when weather is active.",

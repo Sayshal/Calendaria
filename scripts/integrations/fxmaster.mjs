@@ -115,7 +115,7 @@ function syncWeatherToScene() {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const scene = canvas?.scene;
   if (!scene) return;
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
     stopAll();
     return;
   }
@@ -137,6 +137,10 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
   if (bulk) {
     const weather = WeatherManager.getCurrentWeather();
     playWeather(weather || null);
+    return;
+  }
+  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
+    stopAll();
     return;
   }
   const scene = game.scenes?.active;

@@ -99,7 +99,7 @@ async function fadeOutAndStop(sound) {
  * @param {object|null} weather - Current weather state
  */
 async function playSound(weather) {
-  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX) || !game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
     stopSound();
     return;
   }
