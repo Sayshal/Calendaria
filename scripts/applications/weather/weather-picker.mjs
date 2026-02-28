@@ -68,6 +68,15 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
   /** @type {string|null} Sound effect override */
   #soundFx = null;
 
+  /** @type {string|null} FXMaster density override */
+  #fxDensity = null;
+
+  /** @type {string|null} FXMaster speed override */
+  #fxSpeed = null;
+
+  /** @type {string|null} FXMaster color override (hex) */
+  #fxColor = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-weather-picker',
@@ -100,6 +109,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = null;
     this.#fxPreset = null;
     this.#soundFx = null;
+    this.#fxDensity = null;
+    this.#fxSpeed = null;
+    this.#fxColor = null;
     return super.close(options);
   }
 
@@ -197,6 +209,18 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxPreset },
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
+      const fxLevels = ['very-low', 'low', 'medium', 'high', 'very-high'];
+      const currentFxDensity = this.#fxDensity !== null ? this.#fxDensity : (currentWeather?.fxDensity ?? '');
+      context.fxDensityOptions = [
+        { value: '', label: localize('CALENDARIA.FxParam.Default'), selected: !currentFxDensity },
+        ...fxLevels.map((v) => ({ value: v, label: localize(`CALENDARIA.FxParam.${v}`), selected: v === currentFxDensity }))
+      ];
+      const currentFxSpeed = this.#fxSpeed !== null ? this.#fxSpeed : (currentWeather?.fxSpeed ?? '');
+      context.fxSpeedOptions = [
+        { value: '', label: localize('CALENDARIA.FxParam.Default'), selected: !currentFxSpeed },
+        ...fxLevels.map((v) => ({ value: v, label: localize(`CALENDARIA.FxParam.${v}`), selected: v === currentFxSpeed }))
+      ];
+      context.fxColor = this.#fxColor !== null ? this.#fxColor : (currentWeather?.fxColor ?? '');
     }
     const currentSoundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
     context.soundFx = currentSoundFx;
@@ -255,6 +279,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const zoneId = sceneZone?.id ?? null;
     const fxPreset = fd.fxPreset || null;
     const soundFx = fd.soundFx || null;
+    const fxDensity = fd.fxDensity || null;
+    const fxSpeed = fd.fxSpeed || null;
+    const fxColor = fd.fxColor || null;
     if (this.#selectedPresetId && !this.#customEdited) {
       const preset = getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets());
       const nativeFx = preset?.fxPreset || '';
@@ -263,7 +290,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const nativeSound = preset?.soundFx || '';
       const userPickedSound = this.#soundFx || '';
       const soundOverride = userPickedSound !== nativeSound ? userPickedSound || null : undefined;
-      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset: fxOverride, soundFx: soundOverride, zoneId });
+      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset: fxOverride, soundFx: soundOverride, fxDensity, fxSpeed, fxColor, zoneId });
     } else {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
@@ -272,7 +299,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         const icon = data.customIcon?.trim() || 'fa-question';
         const color = data.customColor || '#888888';
         const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
-        await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, soundFx, zoneId });
+        await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, soundFx, fxDensity, fxSpeed, fxColor, zoneId });
       }
     }
     log(3, `Weather applied: ${this.#selectedPresetId ?? 'custom'}`);
@@ -293,6 +320,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           tempMax: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
           fxPreset,
           soundFx,
+          fxDensity,
+          fxSpeed,
+          fxColor,
           inertiaWeight: preset?.inertiaWeight ?? 1,
           chance: preset?.chance ?? 1,
           darknessPenalty: preset?.darknessPenalty ?? 0
@@ -328,6 +358,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = preset.precipitation?.intensity ?? 0;
     this.#fxPreset = preset.fxPreset || '';
     this.#soundFx = preset.soundFx || '';
+    this.#fxDensity = preset.fxDensity || '';
+    this.#fxSpeed = preset.fxSpeed || '';
+    this.#fxColor = preset.fxColor || '';
     this.render();
   }
 
@@ -352,6 +385,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = weather?.precipitation?.intensity ?? null;
     this.#fxPreset = weather?.fxPreset ?? null;
     this.#soundFx = weather?.soundFx ?? null;
+    this.#fxDensity = weather?.fxDensity ?? null;
+    this.#fxSpeed = weather?.fxSpeed ?? null;
+    this.#fxColor = weather?.fxColor ?? null;
     log(3, 'Random weather generated');
     this.render();
   }
@@ -376,6 +412,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = 0;
     this.#fxPreset = null;
     this.#soundFx = null;
+    this.#fxDensity = null;
+    this.#fxSpeed = null;
+    this.#fxColor = null;
     this.render();
   }
 }

@@ -75,6 +75,35 @@
           </select>
         </div>
       </div>
+      <div class="form-group">
+        <label for="fxDensity"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.FxDensityHint'}}">{{localize "CALENDARIA.Weather.Picker.FxDensity"}}</label>
+        <div class="form-fields">
+          <select id="fxDensity" name="fxDensity">
+            {{#each fxDensityOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fxSpeed"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.FxSpeedHint'}}">{{localize "CALENDARIA.Weather.Picker.FxSpeed"}}</label>
+        <div class="form-fields">
+          <select id="fxSpeed" name="fxSpeed">
+            {{#each fxSpeedOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fxColor"
+          data-tooltip="{{localize 'CALENDARIA.Weather.Picker.FxColorHint'}}">{{localize "CALENDARIA.Weather.Picker.FxColor"}}</label>
+        <div class="form-fields">
+          <input type="text" id="fxColor" name="fxColor" value="{{fxColor}}" placeholder="#RRGGBB">
+        </div>
+      </div>
       {{/if}}
 
       <div class="form-group">

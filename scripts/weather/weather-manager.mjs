@@ -216,6 +216,9 @@ export default class WeatherManager {
       environmentCycle: this.#resolveEnvironmentCycle(preset),
       fxPreset: options.fxPreset ?? this.#resolveFxPreset(preset),
       soundFx: options.soundFx ?? this.#resolveSoundFx(preset),
+      fxDensity: options.fxDensity ?? preset.fxDensity ?? null,
+      fxSpeed: options.fxSpeed ?? preset.fxSpeed ?? null,
+      fxColor: options.fxColor ?? preset.fxColor ?? null,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
@@ -263,6 +266,9 @@ export default class WeatherManager {
       environmentDark: weatherData.environmentDark ?? null,
       fxPreset: weatherData.fxPreset ?? null,
       soundFx: weatherData.soundFx ?? null,
+      fxDensity: weatherData.fxDensity ?? null,
+      fxSpeed: weatherData.fxSpeed ?? null,
+      fxColor: weatherData.fxColor ?? null,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };

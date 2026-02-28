@@ -90,6 +90,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.2,
     hudEffect: 'clear',
     fxPreset: null,
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -110,6 +113,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.0,
     hudEffect: 'clouds-light',
     fxPreset: 'partly-cloudy',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -130,6 +136,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.2,
     hudEffect: 'clouds-heavy',
     fxPreset: 'cloudy',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -150,6 +159,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.5,
     hudEffect: 'clouds-overcast',
     fxPreset: 'overcast',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -170,6 +182,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.0,
     hudEffect: 'rain',
     fxPreset: 'drizzle',
+    fxDensity: 'low',
+    fxSpeed: 'low',
+    fxColor: null,
     soundFx: 'sunshower-drizzle'
   },
   {
@@ -190,6 +205,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.3,
     hudEffect: 'rain',
     fxPreset: 'rain',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'rain-acid-rain-blood-rain'
   },
   {
@@ -210,6 +228,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.5,
     hudEffect: 'fog',
     fxPreset: 'fog',
+    fxDensity: null,
+    fxSpeed: 'low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -230,6 +251,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.0,
     hudEffect: 'fog',
     fxPreset: 'mist',
+    fxDensity: 'low',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -250,6 +274,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.0,
     hudEffect: 'gust',
     fxPreset: 'windy',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'wind'
   },
   {
@@ -270,6 +297,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'rain',
     fxPreset: 'sunshower',
+    fxDensity: 'low',
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'sunshower-drizzle'
   },
   {
@@ -290,6 +320,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.3,
     hudEffect: 'snow',
     fxPreset: 'snow',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'snow-frost'
   },
   {
@@ -310,6 +343,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.0,
     hudEffect: 'sleet',
     fxPreset: 'sleet',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'sleet-hail'
   },
   {
@@ -330,6 +366,9 @@ export const STANDARD_WEATHER = [
     inertiaWeight: 1.5,
     hudEffect: 'haze',
     fxPreset: 'heat-wave',
+    fxDensity: 'low',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   }
 ];
@@ -357,6 +396,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0.3,
     hudEffect: 'lightning',
     fxPreset: 'thunderstorm',
+    fxDensity: 'high',
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'thunderstorm'
   },
   {
@@ -377,6 +419,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0.5,
     hudEffect: 'snow-heavy',
     fxPreset: 'blizzard',
+    fxDensity: 'very-high',
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'blizzard-ice-storm'
   },
   {
@@ -397,6 +442,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0.3,
     hudEffect: 'hail',
     fxPreset: 'hail',
+    fxDensity: null,
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'sleet-hail'
   },
   {
@@ -417,6 +465,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'tornado',
     fxPreset: 'tornado',
+    fxDensity: 'very-high',
+    fxSpeed: 'very-high',
+    fxColor: null,
     soundFx: 'hurricane-monsoon-tornado'
   },
   {
@@ -437,6 +488,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'hurricane',
     fxPreset: 'hurricane',
+    fxDensity: 'very-high',
+    fxSpeed: 'very-high',
+    fxColor: null,
     soundFx: 'hurricane-monsoon-tornado'
   },
   {
@@ -457,6 +511,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0.3,
     hudEffect: 'ice',
     fxPreset: 'ice-storm',
+    fxDensity: 'high',
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'blizzard-ice-storm'
   },
   {
@@ -477,6 +534,9 @@ export const SEVERE_WEATHER = [
     inertiaWeight: 0.5,
     hudEffect: 'rain-heavy',
     fxPreset: 'monsoon',
+    fxDensity: 'very-high',
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'hurricane-monsoon-tornado'
   }
 ];
@@ -504,6 +564,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0.5,
     hudEffect: 'ashfall',
     fxPreset: 'ashfall',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -524,6 +587,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0.3,
     hudEffect: 'sand',
     fxPreset: 'sandstorm',
+    fxDensity: 'high',
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'sandstorm-dust-devil'
   },
   {
@@ -544,6 +610,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'aurora',
     fxPreset: 'luminous-sky',
+    fxDensity: 'low',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -564,6 +633,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'petals',
     fxPreset: 'sakura-bloom',
+    fxDensity: 'low',
+    fxSpeed: 'low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -584,6 +656,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'leaves',
     fxPreset: 'autumn-leaves',
+    fxDensity: 'low',
+    fxSpeed: 'low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -604,6 +679,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 1.5,
     hudEffect: 'fog',
     fxPreset: 'rolling-fog',
+    fxDensity: 'high',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -624,6 +702,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0.5,
     hudEffect: 'smoke',
     fxPreset: 'wildfire-smoke',
+    fxDensity: null,
+    fxSpeed: 'low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -644,6 +725,9 @@ export const ENVIRONMENTAL_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'sand',
     fxPreset: 'dust-devil',
+    fxDensity: null,
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'sandstorm-dust-devil'
   }
 ];
@@ -671,6 +755,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'void',
     fxPreset: 'black-sun',
+    fxDensity: 'low',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -691,6 +778,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'ley-surge',
     fxPreset: 'ley-surge',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -711,6 +801,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'aether',
     fxPreset: 'aether-haze',
+    fxDensity: null,
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -731,6 +824,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'nullstatic',
     fxPreset: 'nullfront',
+    fxDensity: 'low',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -751,6 +847,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'ice',
     fxPreset: 'permafrost-surge',
+    fxDensity: 'high',
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'snow-frost'
   },
   {
@@ -771,6 +870,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'spectral',
     fxPreset: 'gravewind',
+    fxDensity: null,
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'wind'
   },
   {
@@ -791,6 +893,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'veil',
     fxPreset: 'veilfall',
+    fxDensity: 'low',
+    fxSpeed: 'low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -811,6 +916,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'arcane-wind',
     fxPreset: 'arcane-winds',
+    fxDensity: null,
+    fxSpeed: 'high',
+    fxColor: null,
     soundFx: 'wind'
   },
   {
@@ -831,6 +939,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'rain-acid',
     fxPreset: 'acid-rain',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'rain-acid-rain-blood-rain'
   },
   {
@@ -851,6 +962,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'rain-blood',
     fxPreset: 'blood-rain',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: 'rain-acid-rain-blood-rain'
   },
   {
@@ -871,6 +985,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'meteors',
     fxPreset: 'meteor-shower',
+    fxDensity: null,
+    fxSpeed: null,
+    fxColor: null,
     soundFx: null
   },
   {
@@ -891,6 +1008,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'spores',
     fxPreset: 'spore-cloud',
+    fxDensity: null,
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -911,6 +1031,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'divine',
     fxPreset: 'divine-light',
+    fxDensity: 'low',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   },
   {
@@ -931,6 +1054,9 @@ export const FANTASY_WEATHER = [
     inertiaWeight: 0,
     hudEffect: 'miasma',
     fxPreset: 'plague-miasma',
+    fxDensity: 'high',
+    fxSpeed: 'very-low',
+    fxColor: null,
     soundFx: null
   }
 ];
