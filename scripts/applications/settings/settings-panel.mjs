@@ -10,7 +10,7 @@ import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, LOCATION_DEFAULTS, validateFormatString } from '../../utils/formatting/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
-import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
+import { canChangeActiveCalendar, canViewMiniCal, canViewSunDial, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset, getForcedTheme, initializeTheme } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
@@ -127,9 +127,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'bigcal', group: 'primary', icon: 'fas fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', tabGroup: 'apps' },
         { id: 'miniCal', group: 'primary', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCal', tabGroup: 'apps' },
         { id: 'hud', group: 'primary', icon: 'fas fa-landmark-dome', label: 'CALENDARIA.SettingsPanel.Tab.HUD', tabGroup: 'apps' },
-        { id: 'timekeeper', group: 'primary', icon: 'fas fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', tabGroup: 'apps', gmOnly: true },
+        { id: 'timekeeper', group: 'primary', icon: 'fas fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', tabGroup: 'apps' },
         { id: 'stopwatch', group: 'primary', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', tabGroup: 'apps', gmOnly: true },
-        { id: 'sunDial', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.SunDial', tabGroup: 'apps', gmOnly: true }
+        { id: 'sunDial', group: 'primary', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.SunDial', tabGroup: 'apps' }
       ],
       initial: 'home'
     }
@@ -159,6 +159,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (tab.gmOnly && !isGM) return false;
       if (tab.id === 'miniCal' && !canViewMiniCal()) return false;
       if (tab.id === 'timekeeper' && !canViewTimeKeeper()) return false;
+      if (tab.id === 'sunDial' && !canViewSunDial()) return false;
       return true;
     };
     const mapTab = (tab) => ({ ...tab, group: 'primary', active: tab.id === activeTab, cssClass: tab.id === activeTab ? 'active' : '' });
@@ -457,11 +458,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         if (tabDef?.gmOnly) continue;
         if (id === 'miniCal' && !canViewMiniCal()) continue;
         if (id === 'timekeeper' && !canViewTimeKeeper()) continue;
+        if (id === 'sunDial' && !canViewSunDial()) continue;
         filtered[id] = tab;
       }
       const activeTab = this.tabGroups[group];
       const activeTabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === activeTab);
-      const isActiveHidden = activeTabDef?.gmOnly || (activeTab === 'miniCal' && !canViewMiniCal()) || (activeTab === 'timekeeper' && !canViewTimeKeeper());
+      const isActiveHidden =
+        activeTabDef?.gmOnly || (activeTab === 'miniCal' && !canViewMiniCal()) || (activeTab === 'timekeeper' && !canViewTimeKeeper()) || (activeTab === 'sunDial' && !canViewSunDial());
       if (isActiveHidden) {
         this.tabGroups[group] = 'theme';
         for (const tab of Object.values(filtered)) {
