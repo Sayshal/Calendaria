@@ -1,5 +1,7 @@
+/* global PIXI */
 /**
  * Stopwatch Application - Timer with real-time and game-time modes.
+ * Renders a realistic physical stopwatch face via PixiJS.
  * @module Applications/Stopwatch
  * @author Tyler
  */
@@ -33,9 +35,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {number|null} Start world time for game-time mode */
   #startWorldTime = null;
 
-  /** @type {number|null} Animation frame ID for real-time updates */
-  #intervalId = null;
-
   /** @type {number|null} Hook ID for world time updated */
   #timeHookId = null;
 
@@ -62,6 +61,18 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {boolean} Whether notification has fired */
   #notificationFired = false;
+
+  /** @type {PIXI.Application|null} PixiJS application instance */
+  #pixiApp = null;
+
+  /** @type {PIXI.Graphics|null} Second hand graphic */
+  #secondHand = null;
+
+  /** @type {PIXI.Graphics|null} Minute sub-hand graphic */
+  #minuteSubHand = null;
+
+  /** @type {PIXI.Container|null} Container for all dial graphics */
+  #dialContainer = null;
 
   /** @param {object} options - Application options */
   constructor(options = {}) {
@@ -109,13 +120,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#restoreState();
       this.#restorePosition();
     }
+    this.#initPixi();
     this.#enableDragging();
     this.#enableResizing();
     this.#setupContextMenu();
-    this.#updateDialHands();
     if (this.#running) {
-      if (this.#mode === 'realtime') this.#startRealTimeInterval();
-      else this.#registerTimeHook();
+      if (this.#mode === 'gametime') this.#registerTimeHook();
     }
   }
 
@@ -131,13 +141,547 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onClose(options) {
     this.#saveState();
-    this.#stopRealTimeInterval();
+    this.#destroyPixi();
     this.#unregisterTimeHook();
     StickyZones.unregisterFromZoneUpdates(this);
     StickyZones.unpinFromZone(this.element);
     StickyZones.cleanupSnapIndicator();
     super._onClose(options);
   }
+
+  // ── PixiJS Rendering ──────────────────────────────────────────────────
+
+  /**
+   * Initialize the PixiJS application and build the stopwatch face.
+   * @private
+   */
+  #initPixi() {
+    const canvas = this.element.querySelector('.stopwatch-canvas');
+    if (!canvas) return;
+
+    // Destroy previous instance if re-rendering
+    this.#destroyPixi();
+
+    const size = this.#getSize();
+    canvas.width = size;
+    canvas.height = size;
+
+    this.#pixiApp = new PIXI.Application({ view: canvas, width: size, height: size, backgroundAlpha: 0, antialias: true });
+    this.#buildStopwatchFace();
+    this.#pixiApp.ticker.add(this.#onPixiTick, this);
+  }
+
+  /**
+   * Destroy the PixiJS application and clean up references.
+   * @private
+   */
+  #destroyPixi() {
+    if (this.#pixiApp) {
+      this.#pixiApp.ticker.remove(this.#onPixiTick, this);
+      this.#pixiApp.destroy(true);
+      this.#pixiApp = null;
+    }
+    this.#secondHand = null;
+    this.#minuteSubHand = null;
+    this.#dialContainer = null;
+  }
+
+  /**
+   * Rebuild the dial after resize.
+   * @private
+   */
+  #rebuildDial() {
+    if (!this.#pixiApp) return;
+    const size = this.#getSize();
+    const canvas = this.element.querySelector('.stopwatch-canvas');
+    if (canvas) {
+      canvas.width = size;
+      canvas.height = size;
+    }
+    this.#pixiApp.renderer.resize(size, size);
+    this.#pixiApp.stage.removeChildren();
+    this.#secondHand = null;
+    this.#minuteSubHand = null;
+    this.#dialContainer = null;
+    this.#buildStopwatchFace();
+  }
+
+  /**
+   * Read a CSS custom property from the element and convert to hex number.
+   * @param {string} prop - CSS variable name
+   * @param {number} fallback - Fallback hex color
+   * @returns {number} Hex color value
+   * @private
+   */
+  #cssColor(prop, fallback) {
+    const raw = getComputedStyle(this.element).getPropertyValue(prop)?.trim();
+    if (!raw) return fallback;
+    // Handle hex strings
+    if (raw.startsWith('#')) {
+      const hex = raw.replace('#', '');
+      return parseInt(
+        hex.length === 3
+          ? hex
+              .split('')
+              .map((c) => c + c)
+              .join('')
+          : hex,
+        16
+      );
+    }
+    // Handle rgb(r, g, b)
+    const match = raw.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (match) return (parseInt(match[1]) << 16) | (parseInt(match[2]) << 8) | parseInt(match[3]);
+    return fallback;
+  }
+
+  /**
+   * Build all static and dynamic stopwatch face elements.
+   * @private
+   */
+  #buildStopwatchFace() {
+    const app = this.#pixiApp;
+    if (!app) return;
+
+    const size = this.#pixiApp.renderer.width;
+    const cx = size / 2;
+    const cy = size / 2;
+    const outerR = size * 0.46;
+    const bezelWidth = size * 0.035;
+    const dialR = outerR - bezelWidth;
+
+    // Theme colors
+    const textColor = this.#cssColor('--calendaria-text', 0x333333);
+    const bgColor = this.#cssColor('--calendaria-bg', 0x2a2a2a);
+    const borderColor = this.#cssColor('--calendaria-border', 0x888888);
+    const errorColor = this.#cssColor('--calendaria-error', 0xcc3333);
+
+    this.#dialContainer = new PIXI.Container();
+    this.#pixiApp.stage.addChild(this.#dialContainer);
+
+    // 1. Crown ring (lanyard loop)
+    this.#drawCrownRing(cx, cy, outerR, size, borderColor);
+
+    // 2. Crown stem (push button)
+    this.#drawCrownStem(cx, cy, outerR, size, borderColor);
+
+    // 3. Outer bezel ring
+    this.#drawBezel(cx, cy, outerR, bezelWidth, borderColor);
+
+    // 4. Dial face (theme background)
+    this.#drawDialFace(cx, cy, dialR, bgColor);
+
+    // 5. Minute track (60 tick marks)
+    this.#drawMinuteTrack(cx, cy, dialR, textColor);
+
+    // 6. Numerals at 5-second positions
+    this.#drawNumerals(cx, cy, dialR, textColor, size);
+
+    // 7. Sub-dial at 6 o'clock
+    const subDialCy = cy + dialR * 0.38;
+    const subDialR = dialR * 0.22;
+    this.#drawSubDial(cx, subDialCy, subDialR, textColor, bgColor, size);
+
+    // 8. Brand text "Calendaria"
+    this.#drawBrandText(cx, cy, dialR, textColor, size);
+
+    // 9. Second hand
+    this.#secondHand = this.#drawSecondHand(cx, cy, dialR, errorColor, size);
+
+    // 10. Minute sub-hand
+    this.#minuteSubHand = this.#drawMinuteSubHand(cx, subDialCy, subDialR, textColor, size);
+
+    // 11. Center pivot
+    this.#drawCenterPivot(cx, cy, size, borderColor);
+  }
+
+  /**
+   * Draw the lanyard ring above the crown.
+   * @param cx
+   * @param cy
+   * @param outerR
+   * @param size
+   * @param color
+   * @private
+   */
+  #drawCrownRing(cx, cy, outerR, size, color) {
+    const g = new PIXI.Graphics();
+    const ringCy = cy - outerR - size * 0.09;
+    const ringR = size * 0.04;
+    const thickness = size * 0.012;
+    g.lineStyle(thickness, color, 0.7);
+    g.drawCircle(cx, ringCy, ringR);
+    this.#dialContainer.addChild(g);
+  }
+
+  /**
+   * Draw the crown/stem button at 12 o'clock.
+   * @param cx
+   * @param cy
+   * @param outerR
+   * @param size
+   * @param color
+   * @private
+   */
+  #drawCrownStem(cx, cy, outerR, size, color) {
+    const g = new PIXI.Graphics();
+    const stemW = size * 0.06;
+    const stemH = size * 0.08;
+    const stemX = cx - stemW / 2;
+    const stemY = cy - outerR - stemH + size * 0.01;
+
+    // Stem body
+    g.beginFill(color, 0.9);
+    g.drawRoundedRect(stemX, stemY, stemW, stemH, size * 0.015);
+    g.endFill();
+
+    // Highlight
+    g.beginFill(0xffffff, 0.15);
+    g.drawRoundedRect(stemX + stemW * 0.15, stemY + stemH * 0.1, stemW * 0.3, stemH * 0.8, size * 0.008);
+    g.endFill();
+
+    this.#dialContainer.addChild(g);
+  }
+
+  /**
+   * Draw the outer metallic bezel ring.
+   * @param cx
+   * @param cy
+   * @param outerR
+   * @param bezelWidth
+   * @param color
+   * @private
+   */
+  #drawBezel(cx, cy, outerR, bezelWidth, color) {
+    const g = new PIXI.Graphics();
+
+    // Outer shadow ring
+    g.beginFill(0x000000, 0.25);
+    g.drawCircle(cx, cy + 2, outerR + 2);
+    g.endFill();
+
+    // Main bezel (dark metallic)
+    g.beginFill(color, 0.85);
+    g.drawCircle(cx, cy, outerR);
+    g.endFill();
+
+    // Inner cutout to form ring
+    g.beginFill(0x000000, 1);
+    g.drawCircle(cx, cy, outerR - bezelWidth);
+    g.endFill();
+
+    // Highlight arc (top-left)
+    g.lineStyle(bezelWidth * 0.4, 0xffffff, 0.12);
+    g.arc(cx, cy, outerR - bezelWidth / 2, Math.PI * 1.2, Math.PI * 1.8);
+
+    // Shadow arc (bottom-right)
+    g.lineStyle(bezelWidth * 0.4, 0x000000, 0.15);
+    g.arc(cx, cy, outerR - bezelWidth / 2, Math.PI * 0.2, Math.PI * 0.8);
+
+    this.#dialContainer.addChild(g);
+  }
+
+  /**
+   * Draw the dial face using the theme background color.
+   * @param cx
+   * @param cy
+   * @param dialR
+   * @param bgColor
+   * @private
+   */
+  #drawDialFace(cx, cy, dialR, bgColor) {
+    const g = new PIXI.Graphics();
+    g.beginFill(bgColor, 1);
+    g.drawCircle(cx, cy, dialR);
+    g.endFill();
+
+    // Subtle inner shadow
+    g.lineStyle(2, 0x000000, 0.06);
+    g.drawCircle(cx, cy, dialR - 1);
+
+    this.#dialContainer.addChild(g);
+  }
+
+  /**
+   * Draw 60 tick marks around the dial perimeter.
+   * @param cx
+   * @param cy
+   * @param dialR
+   * @param color
+   * @private
+   */
+  #drawMinuteTrack(cx, cy, dialR, color) {
+    const g = new PIXI.Graphics();
+    const outerTick = dialR * 0.92;
+    for (let i = 0; i < 60; i++) {
+      const angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
+      const isMajor = i % 5 === 0;
+      const innerTick = isMajor ? dialR * 0.8 : dialR * 0.86;
+      const thickness = isMajor ? 2 : 1;
+      g.lineStyle(thickness, color, isMajor ? 0.9 : 0.4);
+      g.moveTo(cx + Math.cos(angle) * innerTick, cy + Math.sin(angle) * innerTick);
+      g.lineTo(cx + Math.cos(angle) * outerTick, cy + Math.sin(angle) * outerTick);
+    }
+    this.#dialContainer.addChild(g);
+  }
+
+  /**
+   * Draw numerals at 5-second positions.
+   * @param cx
+   * @param cy
+   * @param dialR
+   * @param color
+   * @param size
+   * @private
+   */
+  #drawNumerals(cx, cy, dialR, color, size) {
+    const numeralR = dialR * 0.7;
+    const fontSize = Math.max(8, size * 0.065);
+    for (let i = 1; i <= 12; i++) {
+      const num = i * 5;
+      const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+      const text = new PIXI.Text(String(num), {
+        fontFamily: 'Arial, sans-serif',
+        fontSize,
+        fontWeight: 'bold',
+        fill: color,
+        align: 'center'
+      });
+      text.anchor.set(0.5);
+      text.x = cx + Math.cos(angle) * numeralR;
+      text.y = cy + Math.sin(angle) * numeralR;
+      this.#dialContainer.addChild(text);
+    }
+  }
+
+  /**
+   * Draw the minute sub-dial at the given position.
+   * @param subCx
+   * @param subCy
+   * @param subR
+   * @param color
+   * @param bgColor
+   * @param size
+   * @private
+   */
+  #drawSubDial(subCx, subCy, subR, color, bgColor, size) {
+    const g = new PIXI.Graphics();
+
+    // Sub-dial background
+    g.beginFill(bgColor, 1);
+    g.drawCircle(subCx, subCy, subR);
+    g.endFill();
+
+    // Sub-dial border
+    g.lineStyle(1.5, color, 0.5);
+    g.drawCircle(subCx, subCy, subR);
+
+    // Sub-dial tick marks (30 marks for 0-30 minutes)
+    const outerTick = subR * 0.88;
+    for (let i = 0; i < 30; i++) {
+      const angle = (i / 30) * Math.PI * 2 - Math.PI / 2;
+      const isMajor = i % 5 === 0;
+      const innerTick = isMajor ? subR * 0.68 : subR * 0.78;
+      g.lineStyle(isMajor ? 1.5 : 0.5, color, isMajor ? 0.8 : 0.3);
+      g.moveTo(subCx + Math.cos(angle) * innerTick, subCy + Math.sin(angle) * innerTick);
+      g.lineTo(subCx + Math.cos(angle) * outerTick, subCy + Math.sin(angle) * outerTick);
+    }
+
+    this.#dialContainer.addChild(g);
+
+    // Sub-dial numerals (0, 10, 20, 30 — but mapped as 0, 5, 10, 15, 20, 25, 30)
+    const subFontSize = Math.max(5, size * 0.032);
+    const labels = [0, 5, 10, 15, 20, 25, 30];
+    // Skip 0 at top (overlaps with tick); draw 5,10,15,20,25,30 — but 30 and 0 overlap
+    // Use 6 labels at even spacing: 5, 10, 15, 20, 25, 30
+    for (let i = 0; i < 6; i++) {
+      const num = (i + 1) * 5;
+      const angle = ((i + 1) / 6) * Math.PI * 2 - Math.PI / 2;
+      const numeralR = subR * 0.5;
+      const text = new PIXI.Text(String(num), {
+        fontFamily: 'Arial, sans-serif',
+        fontSize: subFontSize,
+        fill: color,
+        align: 'center'
+      });
+      text.anchor.set(0.5);
+      text.x = subCx + Math.cos(angle) * numeralR;
+      text.y = subCy + Math.sin(angle) * numeralR;
+      this.#dialContainer.addChild(text);
+    }
+  }
+
+  /**
+   * Draw the "Calendaria" brand text below 12 o'clock.
+   * @param cx
+   * @param cy
+   * @param dialR
+   * @param color
+   * @param size
+   * @private
+   */
+  #drawBrandText(cx, cy, dialR, color, size) {
+    const fontSize = Math.max(6, size * 0.045);
+    const text = new PIXI.Text('Calendaria', {
+      fontFamily: 'serif',
+      fontSize,
+      fontStyle: 'italic',
+      fill: color,
+      align: 'center',
+      letterSpacing: 1
+    });
+    text.anchor.set(0.5);
+    text.x = cx;
+    text.y = cy - dialR * 0.32;
+    text.alpha = 0.6;
+    this.#dialContainer.addChild(text);
+  }
+
+  /**
+   * Draw the main second hand with counterweight tail.
+   * @param {number} cx - Center X
+   * @param {number} cy - Center Y
+   * @param {number} dialR - Dial radius
+   * @param {number} color - Hand color
+   * @param {number} size - Total size
+   * @returns {PIXI.Graphics} The second hand graphic
+   * @private
+   */
+  #drawSecondHand(cx, cy, dialR, color, size) {
+    const g = new PIXI.Graphics();
+    g.pivot.set(0, 0);
+    g.x = cx;
+    g.y = cy;
+
+    const handLength = dialR * 0.85;
+    const tailLength = dialR * 0.2;
+    const handWidth = Math.max(1, size * 0.008);
+    const tailWidth = Math.max(2, size * 0.02);
+
+    // Main hand (thin, pointing up from center)
+    g.beginFill(color, 1);
+    g.moveTo(-handWidth / 2, 0);
+    g.lineTo(0, -handLength);
+    g.lineTo(handWidth / 2, 0);
+    g.endFill();
+
+    // Counterweight tail (wider, pointing down)
+    g.beginFill(color, 1);
+    g.moveTo(-tailWidth / 2, 0);
+    g.lineTo(0, tailLength);
+    g.lineTo(tailWidth / 2, 0);
+    g.endFill();
+
+    // Small circle at base
+    g.beginFill(color, 1);
+    g.drawCircle(0, 0, tailWidth * 0.4);
+    g.endFill();
+
+    this.#pixiApp.stage.addChild(g);
+    return g;
+  }
+
+  /**
+   * Draw the minute hand inside the sub-dial.
+   * @param {number} subCx - Sub-dial center X
+   * @param {number} subCy - Sub-dial center Y
+   * @param {number} subR - Sub-dial radius
+   * @param {number} color - Hand color
+   * @param {number} size - Total size
+   * @returns {PIXI.Graphics} The minute sub-hand graphic
+   * @private
+   */
+  #drawMinuteSubHand(subCx, subCy, subR, color, size) {
+    const g = new PIXI.Graphics();
+    g.pivot.set(0, 0);
+    g.x = subCx;
+    g.y = subCy;
+
+    const handLength = subR * 0.75;
+    const handWidth = Math.max(1.5, size * 0.012);
+
+    // Tapered hand
+    g.beginFill(color, 0.9);
+    g.moveTo(-handWidth / 2, 0);
+    g.lineTo(0, -handLength);
+    g.lineTo(handWidth / 2, 0);
+    g.endFill();
+
+    // Center dot
+    g.beginFill(color, 0.9);
+    g.drawCircle(0, 0, handWidth);
+    g.endFill();
+
+    this.#pixiApp.stage.addChild(g);
+    return g;
+  }
+
+  /**
+   * Draw the center pivot dot.
+   * @param cx
+   * @param cy
+   * @param size
+   * @param color
+   * @private
+   */
+  #drawCenterPivot(cx, cy, size, color) {
+    const g = new PIXI.Graphics();
+    const pivotR = size * 0.025;
+
+    // Metallic center
+    g.beginFill(color, 0.9);
+    g.drawCircle(cx, cy, pivotR);
+    g.endFill();
+
+    // Highlight
+    g.beginFill(0xffffff, 0.3);
+    g.drawCircle(cx - pivotR * 0.2, cy - pivotR * 0.2, pivotR * 0.5);
+    g.endFill();
+
+    this.#pixiApp.stage.addChild(g);
+  }
+
+  /**
+   * PixiJS ticker callback — update hand rotations each frame.
+   * @private
+   */
+  #onPixiTick() {
+    if (!this.#secondHand || !this.#minuteSubHand) return;
+
+    const totalSeconds = this.#getTotalSeconds();
+    // Rotate second hand
+    this.#secondHand.rotation = ((totalSeconds % 60) / 60) * Math.PI * 2;
+    // Rotate minute sub-hand (30-minute range)
+    this.#minuteSubHand.rotation = (((totalSeconds / 60) % 30) / 30) * Math.PI * 2;
+
+    // Update display text and check notification
+    if (this.#running) {
+      const timeEl = this.element?.querySelector('.time');
+      if (timeEl) timeEl.innerHTML = this.#getDisplayTime();
+      this.#checkNotification();
+    }
+  }
+
+  /**
+   * Get total elapsed seconds for hand positioning.
+   * @returns {number} Total seconds
+   * @private
+   */
+  #getTotalSeconds() {
+    if (this.#mode === 'realtime') {
+      let totalMs = this.#elapsedMs;
+      if (this.#running && this.#startTime) totalMs += Date.now() - this.#startTime;
+      return totalMs / 1000;
+    }
+    let total = this.#elapsedGameSeconds;
+    if (this.#running && this.#startWorldTime !== null) {
+      const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+      total += worldTime - this.#startWorldTime;
+    }
+    return total;
+  }
+
+  // ── Format / Display ──────────────────────────────────────────────────
 
   /**
    * Get the current format setting based on mode.
@@ -158,17 +702,23 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #getDisplayTime() {
     const format = this.#getFormat();
+    let raw;
     if (this.#mode === 'realtime') {
       let total = this.#elapsedMs;
       if (this.#running && this.#startTime) total += Date.now() - this.#startTime;
-      return formatDuration(total, format);
+      raw = formatDuration(total, format);
+    } else {
+      let total = this.#elapsedGameSeconds;
+      if (this.#running && this.#startWorldTime !== null) {
+        const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
+        total += worldTime - this.#startWorldTime;
+      }
+      raw = formatGameDuration(total, game.time?.calendar, format);
     }
-    let total = this.#elapsedGameSeconds;
-    if (this.#running && this.#startWorldTime !== null) {
-      const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
-      total += worldTime - this.#startWorldTime;
-    }
-    return formatGameDuration(total, game.time?.calendar, format);
+    // Wrap millisecond portion in a span for smaller rendering
+    const dotIdx = raw.lastIndexOf('.');
+    if (dotIdx !== -1) return `${raw.slice(0, dotIdx)}<span class="ms">.${raw.slice(dotIdx + 1)}</span>`;
+    return raw;
   }
 
   /**
@@ -202,6 +752,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     return total;
   }
 
+  // ── Actions ───────────────────────────────────────────────────────────
+
   /**
    * Start the stopwatch.
    * @private
@@ -210,7 +762,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#running = true;
     if (this.#mode === 'realtime') {
       this.#startTime = Date.now();
-      this.#startRealTimeInterval();
     } else {
       this.#startWorldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
       this.#registerTimeHook();
@@ -230,7 +781,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#mode === 'realtime') {
       if (this.#startTime) this.#elapsedMs += Date.now() - this.#startTime;
       this.#startTime = null;
-      this.#stopRealTimeInterval();
     } else {
       if (this.#startWorldTime !== null) {
         const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
@@ -250,7 +800,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   static #onReset() {
-    this.#stopRealTimeInterval();
     this.#unregisterTimeHook();
     this.#running = false;
     this.#elapsedMs = 0;
@@ -285,7 +834,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#running) {
       if (this.#mode === 'realtime') {
         if (this.#startTime) this.#elapsedMs += Date.now() - this.#startTime;
-        this.#stopRealTimeInterval();
       } else {
         if (this.#startWorldTime !== null) {
           const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
@@ -394,68 +942,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-  /**
-   * Start the requestAnimationFrame loop for real-time updates.
-   * @private
-   */
-  #startRealTimeInterval() {
-    if (this.#intervalId) return;
-    const update = () => {
-      if (!this.#running || this.#mode !== 'realtime') return;
-      this.#updateDisplay();
-      this.#checkNotification();
-      this.#intervalId = requestAnimationFrame(update);
-    };
-    this.#intervalId = requestAnimationFrame(update);
-  }
-
-  /**
-   * Cancel the requestAnimationFrame loop.
-   * @private
-   */
-  #stopRealTimeInterval() {
-    if (this.#intervalId) {
-      cancelAnimationFrame(this.#intervalId);
-      this.#intervalId = null;
-    }
-  }
-
-  /**
-   * Update the time display and dial hands.
-   * @private
-   */
-  #updateDisplay() {
-    if (!this.rendered) return;
-    const timeEl = this.element.querySelector('.time');
-    if (timeEl) timeEl.textContent = this.#getDisplayTime();
-    this.#updateDialHands();
-  }
-
-  /**
-   * Update the second and minute hand rotations.
-   * @private
-   */
-  #updateDialHands() {
-    const secondHand = this.element.querySelector('.second-hand');
-    const minuteHand = this.element.querySelector('.minute-hand');
-    if (!secondHand || !minuteHand) return;
-    let totalSeconds;
-    if (this.#mode === 'realtime') {
-      let totalMs = this.#elapsedMs;
-      if (this.#running && this.#startTime) totalMs += Date.now() - this.#startTime;
-      totalSeconds = totalMs / 1000;
-    } else {
-      totalSeconds = this.#elapsedGameSeconds;
-      if (this.#running && this.#startWorldTime !== null) {
-        const worldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
-        totalSeconds += worldTime - this.#startWorldTime;
-      }
-    }
-    const secondDegrees = ((totalSeconds % 60) / 60) * 360;
-    const minuteDegrees = (((totalSeconds / 60) % 60) / 60) * 360;
-    secondHand.style.transform = `rotate(${secondDegrees}deg)`;
-    minuteHand.style.transform = `rotate(${minuteDegrees}deg)`;
-  }
+  // ── Game Time Hooks ───────────────────────────────────────────────────
 
   /**
    * Register hooks for game-time updates.
@@ -487,7 +974,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onVisualTick() {
     if (!this.#running || this.#mode !== 'gametime') return;
-    this.#updateDisplay();
+    // PixiJS ticker handles hand rotation; just update digital display
+    const timeEl = this.element?.querySelector('.time');
+    if (timeEl) timeEl.innerHTML = this.#getDisplayTime();
   }
 
   /**
@@ -498,6 +987,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#running || this.#mode !== 'gametime') return;
     this.#checkNotification();
   }
+
+  // ── Notifications ─────────────────────────────────────────────────────
 
   /**
    * Check if elapsed time has reached the notification threshold.
@@ -524,6 +1015,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (type === 'toast' || type === 'both') ui.notifications.info(`<i class="fas fa-stopwatch"></i> ${message}`);
     if (type === 'sound' || type === 'both') foundry.audio.AudioHelper.play({ src: sound, volume: 1, autoplay: true });
   }
+
+  // ── State Persistence ─────────────────────────────────────────────────
 
   /**
    * Persist stopwatch state to world settings.
@@ -572,13 +1065,14 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#mode === 'realtime' && state.savedAt) {
       this.#elapsedMs += Date.now() - state.savedAt;
       this.#startTime = Date.now();
-      this.#startRealTimeInterval();
     } else if (this.#mode === 'gametime' && state.savedWorldTime !== undefined) {
       this.#elapsedGameSeconds += game.time.worldTime - state.savedWorldTime;
       this.#startWorldTime = TimeClock.running ? TimeClock.predictedWorldTime : game.time.worldTime;
       this.#registerTimeHook();
     }
   }
+
+  // ── Position / Size ───────────────────────────────────────────────────
 
   /**
    * Restore saved position from settings.
@@ -625,12 +1119,13 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Set the stopwatch size via CSS variable.
+   * Set the stopwatch size via CSS variable and rebuild PixiJS dial.
    * @param {number} size - Size in pixels
    */
   #setSize(size) {
     const clamped = Math.max(100, Math.min(400, size));
     this.element.style.setProperty('--stopwatch-size', `${clamped}px`);
+    this.#rebuildDial();
   }
 
   /**
@@ -638,9 +1133,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {number} Current size in pixels
    */
   #getSize() {
+    if (!this.element) return 140;
     const computed = getComputedStyle(this.element).getPropertyValue('--stopwatch-size');
     return parseInt(computed) || 140;
   }
+
+  // ── Dragging ──────────────────────────────────────────────────────────
 
   /**
    * Set up mouse-based dragging on the stopwatch face.
@@ -719,7 +1217,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const onMouseMove = (event) => {
       event.preventDefault();
       const delta = event.clientX - startX;
-      this.#setSize(startSize + delta);
+      const clamped = Math.max(100, Math.min(400, startSize + delta));
+      this.element.style.setProperty('--stopwatch-size', `${clamped}px`);
+      this.#rebuildDial();
     };
     const onMouseUp = async (event) => {
       event.preventDefault();
@@ -745,6 +1245,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   async #savePosition() {
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: this.position.left, top: this.position.top, size: this.#getSize(), zoneId: this.#snappedZoneId });
   }
+
+  // ── Context Menu ──────────────────────────────────────────────────────
 
   /**
    * Set up the right-click context menu on the stopwatch face.
@@ -818,6 +1320,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: 150, top: 150, size: 140, zoneId: null });
     ui.notifications.info('CALENDARIA.Stopwatch.ContextMenu.PositionReset', { localize: true });
   }
+
+  // ── Static API ────────────────────────────────────────────────────────
 
   /**
    * Get the singleton instance from Foundry's application registry.

@@ -266,85 +266,23 @@
       align-items: center;
       width: var(--stopwatch-size);
       height: var(--stopwatch-size);
-      border: 0.25rem solid var(--calendaria-border);
+      border: none;
       border-radius: 50%;
       cursor: grab;
-      background: var(--calendaria-bg);
-      box-shadow:
-        0 0.25rem 1rem var(--calendaria-shadow),
-        inset 0 0 1.25rem rgb(0 0 0 / 20%);
+      background: transparent;
 
       &:active {
         cursor: grabbing;
       }
     }
 
-    .dial {
-      inset: 0.5rem;
+    .stopwatch-canvas {
       position: absolute;
-      border: 0.125rem solid var(--calendaria-border-light);
-      border-radius: 50%;
-      pointer-events: none;
-      background: linear-gradient(180deg, var(--calendaria-bg-lighter) 0%, color-mix(in srgb, var(--calendaria-bg) 80%, rgb(0 0 0)) 100%);
-    }
-
-    .ticks {
       inset: 0;
-      position: absolute;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
       pointer-events: none;
-
-      &::before {
-        -webkit-mask: radial-gradient(circle, transparent 88%, rgb(0 0 0) 88%);
-        inset: 0.125rem;
-        mask: radial-gradient(circle, transparent 88%, rgb(0 0 0) 88%);
-        position: absolute;
-        border-radius: 50%;
-        content: '';
-        background: repeating-conic-gradient(from 0deg, var(--calendaria-text-dim) 0deg 1deg, transparent 1deg 6deg);
-      }
-    }
-
-    .hand {
-      position: absolute;
-      bottom: 50%;
-      left: 50%;
-      border-radius: 0.125rem;
-      pointer-events: none;
-      transform-origin: bottom center;
-
-      &.second-hand {
-        z-index: 3;
-        width: 0.125rem;
-        height: 42%;
-        margin-left: -0.0625rem;
-        background: var(--calendaria-error);
-        box-shadow: 0 0 0.5rem color-mix(in srgb, var(--calendaria-error) 80%, transparent);
-      }
-
-      &.minute-hand {
-        z-index: 2;
-        width: 0.3125rem;
-        height: 32%;
-        margin-left: -0.1562rem;
-        background: var(--calendaria-text);
-        box-shadow: 0 0 0.1875rem rgb(0 0 0 / 40%);
-      }
-    }
-
-    .center-dot {
-      z-index: 4;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0.75rem;
-      height: 0.75rem;
-      margin: -0.375rem 0 0 -0.375rem;
-      border: 0.125rem solid var(--calendaria-border);
-      border-radius: 50%;
-      pointer-events: none;
-      background: var(--calendaria-text);
-      box-shadow: 0 0.0625rem 0.1875rem rgb(0 0 0 / 30%);
     }
 
     .display {
@@ -355,79 +293,68 @@
       left: 50%;
       flex-direction: column;
       align-items: center;
-      padding: 0.375rem 0.625rem;
-      border-radius: 0.375rem;
       pointer-events: none;
-      background: color-mix(in srgb, var(--calendaria-bg) 85%, transparent);
       transform: translate(-50%, -50%);
     }
 
     .time {
-      padding: 0.25rem 0.5rem;
-      border: 0.0625rem solid var(--calendaria-border);
-      border-radius: 0.25rem;
       color: var(--calendaria-text);
       font-weight: bold;
-      font-size: calc(var(--stopwatch-size) * 0.09);
+      font-size: calc(var(--stopwatch-size) * 0.06);
       line-height: 1;
       font-family: monospace;
       letter-spacing: 0.0313rem;
       user-select: none;
       pointer-events: none;
-      background: var(--calendaria-bg);
+
+      .ms {
+        font-size: 0.7em;
+      }
     }
 
     .controls {
-      inset: 0;
+      gap: calc(var(--stopwatch-size) * 0.03);
+      display: flex;
       position: absolute;
-      pointer-events: none;
+      bottom: 100%;
+      left: 50%;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 0.125rem;
+      pointer-events: auto;
+      transform: translateX(-50%);
     }
 
     .btn {
+      all: unset;
       display: flex;
-      position: absolute;
       justify-content: center;
       align-items: center;
-      width: 2rem;
-      height: 2rem;
-      margin: 0;
-      padding: 0;
-      border: none;
-      border-radius: 50%;
-      outline: none;
+      box-sizing: border-box;
+      width: calc(var(--stopwatch-size) * 0.07);
+      height: calc(var(--stopwatch-size) * 0.07);
       color: var(--calendaria-text-dim);
-      font-size: 1.125rem;
-      line-height: 1;
+      font-size: calc(var(--stopwatch-size) * 0.042);
       cursor: pointer;
       pointer-events: auto;
-      background: rgb(0 0 0 / 30%);
-      box-shadow: none;
       transition:
         color 0.15s ease,
         transform 0.1s ease;
-      transform: translateX(-50%);
-
-      &:focus,
-      &:active {
-        outline: none;
-        box-shadow: none;
-      }
 
       i {
+        all: unset;
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 2rem;
-        height: 2rem;
-        margin: 0;
-        padding: 0;
+        width: 100%;
+        height: 100%;
         font-size: inherit;
-        line-height: 1;
+        font-weight: 900;
       }
 
       &:hover:not(:disabled) {
         color: var(--calendaria-text);
-        transform: translateX(-50%) scale(1.15);
+        transform: scale(1.2);
       }
 
       &:disabled {
@@ -435,24 +362,8 @@
         cursor: not-allowed;
       }
 
-      &.notification {
-        top: 87%;
-        left: 10%;
-
-        &.active {
-          color: var(--calendaria-primary);
-        }
-      }
-
-      &.lap {
-        top: 97%;
-        left: 30%;
-      }
-
-      &.start,
-      &.pause {
-        top: 100%;
-        left: 50%;
+      &.notification.active {
+        color: var(--calendaria-primary);
       }
 
       &.start {
@@ -464,14 +375,10 @@
       }
 
       &.reset {
-        top: 97%;
-        left: 70%;
         color: var(--calendaria-error);
       }
 
       &.mode {
-        top: 87%;
-        left: 90%;
         color: var(--calendaria-primary);
       }
     }
@@ -541,20 +448,20 @@
     .resize-handle {
       opacity: 0;
       position: absolute;
-      top: 0;
+      bottom: 0;
       right: 0;
       width: 0.875rem;
       height: 0.875rem;
-      cursor: nesw-resize;
+      cursor: nwse-resize;
       transition: opacity 0.15s ease;
 
       &::after {
         position: absolute;
-        top: 0.125rem;
+        bottom: 0.125rem;
         right: 0.125rem;
         width: 0.5rem;
         height: 0.5rem;
-        border-top: 0.125rem solid var(--calendaria-text-dim);
+        border-bottom: 0.125rem solid var(--calendaria-text-dim);
         border-right: 0.125rem solid var(--calendaria-text-dim);
         content: '';
       }
