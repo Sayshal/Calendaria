@@ -6,10 +6,20 @@
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { ASSETS } from '../constants.mjs';
+import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
+
+/** Map S&S season icon strings to FontAwesome classes. */
+const SEASON_ICON_MAP = {
+  spring: 'fa-seedling',
+  summer: 'fa-sun',
+  fall: 'fa-leaf',
+  autumn: 'fa-leaf',
+  winter: 'fa-snowflake'
+};
 
 /**
  * Importer for Seasons & Stars module data.
@@ -24,6 +34,9 @@ export default class SeasonsStarsImporter extends BaseImporter {
   static supportsLiveImport = true;
   static moduleId = 'seasons-and-stars';
   static fileExtensions = ['.json'];
+
+  /** @type {object[]} S&S note categories extracted during load. */
+  #ssNoteCategories = [];
 
   /**
    * Check if the provided data is in S&S format.
@@ -44,6 +57,17 @@ export default class SeasonsStarsImporter extends BaseImporter {
     if (!calendarData) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NoCalendar'));
     let worldEvents = [];
     worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
+    // Read journal entry notes with S&S flags
+    const journalNotes = [];
+    for (const entry of game.journal ?? []) {
+      const flags = entry.flags?.['seasons-and-stars'];
+      if (flags?.calendarNote) {
+        journalNotes.push({ ...entry.toObject(), flags: entry.flags });
+      }
+    }
+    // Read note categories
+    const catConfig = game.settings.get('seasons-and-stars', 'noteCategories') || {};
+    this.#ssNoteCategories = Object.entries(catConfig).map(([id, cat]) => ({ id, name: cat.name || id, color: cat.color || '#868e96', icon: cat.icon || 'fa-tag' }));
     let currentDate = null;
     if (game.seasonsStars?.api?.getCurrentDate) {
       const ssDate = game.seasonsStars.api.getCurrentDate();
@@ -53,7 +77,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       }
     }
     if (!currentDate) currentDate = this.#worldTimeToDate(game.time.worldTime, calendarData);
-    return { calendar: calendarData, worldEvents, currentDate };
+    return { calendar: calendarData, worldEvents, journalNotes, currentDate };
   }
 
   /**
@@ -218,7 +242,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const endMonthIdx = (season.endMonth ?? season.startMonth ?? 1) - 1;
       const dayStart = (monthStartDays[startMonthIdx] ?? 0) + ((season.startDay ?? 1) - 1);
       const dayEnd = (monthStartDays[endMonthIdx] ?? 0) + ((season.endDay ?? months[endMonthIdx]?.days ?? 1) - 1);
-      return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon) };
+      return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon), icon: SEASON_ICON_MAP[season.icon] || '' };
     });
   }
 
@@ -428,9 +452,29 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendar = data.calendar || data;
     const events = Array.isArray(calendar.events) ? calendar.events : [];
     const worldEvents = Array.isArray(data.worldEvents) ? data.worldEvents : [];
+    const journalNotes = Array.isArray(data.journalNotes) ? data.journalNotes : [];
     const allEvents = [...events, ...worldEvents];
-    log(3, `Extracting ${allEvents.length} events from Seasons & Stars data`);
-    return allEvents.map((event) => this.#transformEvent(event));
+    log(3, `Extracting ${allEvents.length} events + ${journalNotes.length} journal notes from Seasons & Stars data`);
+    const notes = allEvents.map((event) => this.#transformEvent(event));
+    for (const entry of journalNotes) {
+      const flags = entry.flags?.['seasons-and-stars'];
+      if (!flags?.startDate) continue;
+      const sd = flags.startDate;
+      const content = entry.pages?.[0]?.text?.content || '';
+      notes.push({
+        name: entry.name,
+        content,
+        startDate: { year: sd.year ?? 1, month: (sd.month ?? 1) - 1, dayOfMonth: (sd.day ?? 1) - 1 },
+        endDate: flags.endDate ? { year: flags.endDate.year ?? 1, month: (flags.endDate.month ?? 1) - 1, dayOfMonth: (flags.endDate.day ?? 1) - 1 } : null,
+        allDay: flags.allDay ?? true,
+        repeat: flags.recurring?.type === 'yearly' ? 'yearly' : flags.recurring?.type === 'monthly' ? 'monthly' : flags.recurring?.type === 'weekly' ? 'weekly' : 'never',
+        categories: flags.category ? [flags.category] : [],
+        gmOnly: entry.ownership?.default === 0,
+        originalId: entry._id,
+        suggestedType: content?.trim() ? 'note' : 'festival'
+      });
+    }
+    return notes;
   }
 
   /**
@@ -492,12 +536,13 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    if (this.#ssNoteCategories.length) await this.#importNoteCategories(this.#ssNoteCategories);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     for (const note of notes) {
       try {
         const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, dayOfMonth: 0 };
-        const noteData = { startDate, allDay: true, repeat: note.repeat || 'never' };
+        const noteData = { startDate, allDay: true, repeat: note.repeat || 'never', categories: note.categories || [], gmOnly: note.gmOnly ?? false };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {
           count++;
@@ -522,7 +567,27 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendar = data.calendar || data;
     const events = calendar.events?.length || 0;
     const worldEvents = data.worldEvents?.length || 0;
-    return events + worldEvents;
+    const journalNotes = data.journalNotes?.length || 0;
+    return events + worldEvents + journalNotes;
+  }
+
+  /**
+   * Import S&S note categories as Calendaria custom categories.
+   * @param {object[]} ssCategories - S&S note category definitions
+   */
+  async #importNoteCategories(ssCategories) {
+    const existing = getAllCategories();
+    const existingIds = new Set(existing.map((c) => c.id));
+    for (const cat of ssCategories) {
+      const id = cat.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\da-z-]/g, '');
+      if (!existingIds.has(id)) {
+        await addCustomCategory(cat.name, cat.color, cat.icon || 'fa-tag');
+        log(3, `Imported S&S note category: ${cat.name}`);
+      }
+    }
   }
 
   /** @override */
