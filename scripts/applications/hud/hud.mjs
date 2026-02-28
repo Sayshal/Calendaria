@@ -341,14 +341,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const barRect = bar.getBoundingClientRect();
     const inBottomHalf = barRect.top > window.innerHeight / 2;
     const direction = inBottomHalf ? 'UP' : null;
-    bar.querySelectorAll('[data-tooltip], [data-tooltip-html]').forEach((el) => {
+    const tooltipEls = [...bar.querySelectorAll('[data-tooltip], [data-tooltip-html]')];
+    const dome = this.element.querySelector('.dome[data-tooltip]');
+    if (dome) tooltipEls.push(dome);
+    for (const el of tooltipEls) {
       if (direction) el.setAttribute('data-tooltip-direction', direction);
       else el.removeAttribute('data-tooltip-direction');
-    });
-    const dome = this.element.querySelector('.dome[data-tooltip]');
-    if (dome) {
-      if (direction) dome.setAttribute('data-tooltip-direction', direction);
-      else dome.removeAttribute('data-tooltip-direction');
     }
   }
 
