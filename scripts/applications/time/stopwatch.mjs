@@ -297,11 +297,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the lanyard ring above the crown.
-   * @param cx
-   * @param cy
-   * @param outerR
-   * @param size
-   * @param color
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} outerR - Radius
+   * @param {number} size - Stopwatch diameter
+   * @param {number} color - Fill/stroke color
    * @private
    */
   #drawCrownRing(cx, cy, outerR, size, color) {
@@ -316,11 +316,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the crown/stem button at 12 o'clock.
-   * @param cx
-   * @param cy
-   * @param outerR
-   * @param size
-   * @param color
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} outerR - Radius
+   * @param {number} size - Stopwatch diameter
+   * @param {number} color - Fill/stroke color
    * @private
    */
   #drawCrownStem(cx, cy, outerR, size, color) {
@@ -345,11 +345,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the outer metallic bezel ring.
-   * @param cx
-   * @param cy
-   * @param outerR
-   * @param bezelWidth
-   * @param color
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} outerR - Radius
+   * @param {number} bezelWidth - Bezel ring width
+   * @param {number} color - Fill/stroke color
    * @private
    */
   #drawBezel(cx, cy, outerR, bezelWidth, color) {
@@ -383,10 +383,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the dial face using the theme background color.
-   * @param cx
-   * @param cy
-   * @param dialR
-   * @param bgColor
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} dialR - Radius
+   * @param {number} bgColor - Fill color
    * @private
    */
   #drawDialFace(cx, cy, dialR, bgColor) {
@@ -404,10 +404,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw 60 tick marks around the dial perimeter.
-   * @param cx
-   * @param cy
-   * @param dialR
-   * @param color
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} dialR - Radius
+   * @param {number} color - Fill/stroke color
    * @private
    */
   #drawMinuteTrack(cx, cy, dialR, color) {
@@ -427,11 +427,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw numerals at 5-second positions.
-   * @param cx
-   * @param cy
-   * @param dialR
-   * @param color
-   * @param size
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} dialR - Radius
+   * @param {number} color - Fill/stroke color
+   * @param {number} size - Stopwatch diameter
    * @private
    */
   #drawNumerals(cx, cy, dialR, color, size) {
@@ -456,12 +456,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the minute sub-dial at the given position.
-   * @param subCx
-   * @param subCy
-   * @param subR
-   * @param color
-   * @param bgColor
-   * @param size
+   * @param {number} subCx - Center X coordinate
+   * @param {number} subCy - Center Y coordinate
+   * @param {number} subR - Radius
+   * @param {number} color - Fill/stroke color
+   * @param {number} bgColor - Fill color
+   * @param {number} size - Stopwatch diameter
    * @private
    */
   #drawSubDial(subCx, subCy, subR, color, bgColor, size) {
@@ -491,7 +491,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Sub-dial numerals (0, 10, 20, 30 — but mapped as 0, 5, 10, 15, 20, 25, 30)
     const subFontSize = Math.max(5, size * 0.032);
-    const labels = [0, 5, 10, 15, 20, 25, 30];
     // Skip 0 at top (overlaps with tick); draw 5,10,15,20,25,30 — but 30 and 0 overlap
     // Use 6 labels at even spacing: 5, 10, 15, 20, 25, 30
     for (let i = 0; i < 6; i++) {
@@ -513,11 +512,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the "Calendaria" brand text below 12 o'clock.
-   * @param cx
-   * @param cy
-   * @param dialR
-   * @param color
-   * @param size
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} dialR - Radius
+   * @param {number} color - Fill/stroke color
+   * @param {number} size - Stopwatch diameter
    * @private
    */
   #drawBrandText(cx, cy, dialR, color, size) {
@@ -618,10 +617,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Draw the center pivot dot.
-   * @param cx
-   * @param cy
-   * @param size
-   * @param color
+   * @param {number} cx - Center X coordinate
+   * @param {number} cy - Center Y coordinate
+   * @param {number} size - Stopwatch diameter
+   * @param {number} color - Fill/stroke color
    * @private
    */
   #drawCenterPivot(cx, cy, size, color) {
@@ -1212,7 +1211,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const handle = this.element.querySelector('.resize-handle');
     if (!handle) return;
     let startX = 0;
-    let startY = 0;
     let startSize = 0;
     const onMouseMove = (event) => {
       event.preventDefault();
@@ -1231,7 +1229,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       event.stopPropagation();
       startX = event.clientX;
-      startY = event.clientY;
       startSize = this.#getSize();
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);

@@ -250,7 +250,7 @@ export class CalendariaSocket {
    */
   static async #handleCreateNote(data) {
     if (!this.isPrimaryGM()) return;
-    const { name, content, noteData, calendarId, journalData, requesterId, openSheet = 'edit' } = data;
+    const { name, content, noteData, calendarId, journalData, requesterId } = data;
     log(3, `Primary GM handling note creation request: ${name}`);
     const noteDataWithAuthor = { ...noteData, author: requesterId };
     const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId });

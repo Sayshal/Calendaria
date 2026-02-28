@@ -574,7 +574,6 @@
       display: grid;
       width: fit-content;
       height: fit-content;
-      margin-top: 0.5rem;
       border: 0.0625rem solid var(--calendaria-border);
       border-radius: 0.25rem;
       background: var(--calendaria-border-light);
@@ -756,7 +755,6 @@
     }
 
     .year-grid {
-      gap: var(--calendaria-year-gap);
       display: flex;
       flex-direction: column;
       width: fit-content;
@@ -764,7 +762,6 @@
     }
 
     .year-row {
-      gap: var(--calendaria-year-gap);
       grid-template-columns: repeat(3, auto);
       display: grid;
     }
@@ -775,24 +772,25 @@
       box-sizing: border-box;
       width: fit-content;
       height: fit-content;
+      margin: -0.0625rem;
       padding: var(--calendaria-year-cell-padding);
-      border: 0.125rem solid var(--calendaria-border-light);
-      border-radius: 0.25rem;
+      border: 0.0625rem solid var(--calendaria-border-light);
       cursor: pointer;
       background: var(--calendaria-bg);
       transition:
         border-color 0.2s,
-        box-shadow 0.2s,
-        transform 0.2s;
+        box-shadow 0.2s;
 
       &:hover {
+        z-index: 1;
         border-color: var(--calendaria-border);
         box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow-light);
-        transform: translateY(-0.125rem);
       }
 
       &.current-year {
-        box-shadow: 0 0 0 0.125rem var(--calendaria-today);
+        z-index: 2;
+        border-color: var(--calendaria-today);
+        box-shadow: 0 0 0.25rem var(--calendaria-today);
       }
     }
 
@@ -831,6 +829,11 @@
       &:hover {
         color: var(--calendaria-text-on-color);
         background: var(--calendaria-primary);
+      }
+
+      &.current-month {
+        border: 0.0625rem solid var(--calendaria-today);
+        box-shadow: 0 0 0.25rem var(--calendaria-today);
       }
 
       &.no-days {

@@ -23,7 +23,7 @@
     </div>
   </div>
 
-  {{!-- Row 1: < | Search | Note | Date | SwitchView | Settings | > --}}
+  {{!-- Row 1: < | Search | Compact | Title | Settings | Close | > --}}
   <div class="header-row header-row-top">
     <button type="button" data-action="navigate" data-direction="previous" data-tooltip
       aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
@@ -35,12 +35,10 @@
       <i class="fas fa-search"></i>
     </button>
 
-    {{#if canAddNotes}}
-      <button type="button" data-action="addNoteToday" data-tooltip
-        aria-label="{{localize 'CALENDARIA.CalendarApp.AddNoteToday'}}" class="add-note-today-btn">
-        <i class="fas fa-plus"></i>
-      </button>
-    {{/if}}
+    <button type="button" data-action="toggleCompact" data-tooltip
+      aria-label="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
+      <i class="fas fa-compress"></i>
+    </button>
 
     <h2 class="calendar-title">
       {{#if calendarData}} {{#if (eq displayMode 'week')}} {{{calendarData.formattedHeader}}}
@@ -50,14 +48,14 @@
       {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
     </h2>
 
-    <button type="button" data-action="toggleCompact" data-tooltip
-      aria-label="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
-      <i class="fas fa-compress"></i>
-    </button>
-
     <button type="button" data-action="openSettings" data-tooltip
       aria-label="{{localize 'CALENDARIA.HUD.Settings.Name'}}" class="settings-btn">
       <i class="fas fa-gear"></i>
+    </button>
+
+    <button type="button" data-action="closeBigCal" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.Close'}}" class="close-btn">
+      <i class="fas fa-times"></i>
     </button>
 
     <button type="button" data-action="navigate" data-direction="next" data-tooltip

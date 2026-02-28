@@ -1050,18 +1050,18 @@ const note = await CALENDARIA.api.createNote({
 });
 ```
 
-| Parameter            | Type                    | Description                                                                   |
-| -------------------- | ----------------------- | ----------------------------------------------------------------------------- |
-| `options.name`       | `string`                | Note title                                                                    |
-| `options.content`    | `string`                | Note content (HTML)                                                           |
-| `options.startDate`  | `object`                | Start date `{year, month, day, hour?, minute?}`                               |
-| `options.endDate`    | `object`                | End date (optional)                                                           |
-| `options.allDay`     | `boolean`               | All-day event (default: `true`)                                               |
-| `options.repeat`     | `string`                | `'never'`, `'daily'`, `'weekly'`, `'monthly'`, `'yearly'`                     |
-| `options.categories` | `string[]`              | Category IDs                                                                  |
-| `options.icon`       | `string`                | Icon path or class                                                            |
-| `options.color`      | `string`                | Event color (hex)                                                             |
-| `options.gmOnly`     | `boolean`               | GM-only visibility                                                            |
+| Parameter            | Type                    | Description                                                                                             |
+| -------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `options.name`       | `string`                | Note title                                                                                              |
+| `options.content`    | `string`                | Note content (HTML)                                                                                     |
+| `options.startDate`  | `object`                | Start date `{year, month, day, hour?, minute?}`                                                         |
+| `options.endDate`    | `object`                | End date (optional)                                                                                     |
+| `options.allDay`     | `boolean`               | All-day event (default: `true`)                                                                         |
+| `options.repeat`     | `string`                | `'never'`, `'daily'`, `'weekly'`, `'monthly'`, `'yearly'`                                               |
+| `options.categories` | `string[]`              | Category IDs                                                                                            |
+| `options.icon`       | `string`                | Icon path or class                                                                                      |
+| `options.color`      | `string`                | Event color (hex)                                                                                       |
+| `options.gmOnly`     | `boolean`               | GM-only visibility                                                                                      |
 | `options.openSheet`  | `false\|'edit'\|'view'` | Open the note sheet after creation in the given mode (default: `'edit'`). Pass boolean `false` to skip. |
 
 **Returns:** `Promise<object|null>` - Created note page.

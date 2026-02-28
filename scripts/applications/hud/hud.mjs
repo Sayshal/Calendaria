@@ -11,7 +11,6 @@ import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
 import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers } from '../../utils/formatting/format-utils.mjs';
 import { getMoonPhasePosition } from '../../utils/formatting/moon-utils.mjs';
 import { localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
 import { canChangeDateTime, canChangeWeather, canViewBigCal, canViewMiniCal } from '../../utils/permissions.mjs';
 import SearchManager from '../../utils/search-manager.mjs';
 import { CalendariaSocket } from '../../utils/socket.mjs';

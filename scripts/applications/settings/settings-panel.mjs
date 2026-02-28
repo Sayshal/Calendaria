@@ -1943,7 +1943,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element
    */
   static #onEditCategoryIcon(_event, target) {
-    const index = target.dataset.index;
     const row = target.closest('.category-row');
     if (!row) return;
     const colorInput = row.querySelector('input[name$=".color"]');

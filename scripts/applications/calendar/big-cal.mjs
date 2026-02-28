@@ -97,7 +97,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       openSearchResult: BigCal._onOpenSearchResult,
       openSettings: BigCal._onOpenSettings,
       navigateToMonth: BigCal._onNavigateToMonth,
-      moonClick: BigCal._onMoonClick
+      moonClick: BigCal._onMoonClick,
+      closeBigCal: BigCal._onCloseBigCal
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -736,6 +737,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _generateYearData(calendar, date) {
     const { year } = date;
     const yearZero = calendar.years?.yearZero ?? 0;
+    const currentComponents = game.time.components;
+    const currentYear = currentComponents.year + yearZero;
+    const currentMonth = currentComponents.month;
     const yearGrid = [];
     const startYear = year - 4;
     for (let row = 0; row < 3; row++) {
@@ -760,7 +764,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
                 tooltipText: `${localizedName} (${localizedAbbrev})`,
                 month: idx,
                 year: displayYear,
-                hasNoDays: daysInMonth === 0
+                hasNoDays: daysInMonth === 0,
+                isCurrent: displayYear === currentYear && idx === currentMonth
               };
             }) || []
         });
@@ -1498,7 +1503,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const endHour = (parseInt(hour) + 1) % hoursPerDay;
-    const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
     await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
@@ -1535,7 +1539,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       minute = today.minute ?? 0;
     }
     const endHour = (parseInt(hour) + 1) % hoursPerDay;
-    const endDay = endHour < parseInt(hour) ? parseInt(day) + 1 : parseInt(day);
     await NoteManager.createNote({
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
@@ -1672,6 +1675,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static async _onToggleCompact(_event, _target) {
     await this.close();
     MiniCal.show();
+  }
+
+  /**
+   * Close BigCal.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async _onCloseBigCal(_event, _target) {
+    await this.close();
   }
 
   /**

@@ -8,7 +8,7 @@
               <div class="year-header">{{yearDisplay}}</div>
               <div class="year-months">
                 {{#each months}}
-                  <div class="month-mini {{#if hasNoDays}}no-days{{/if}}" data-year="{{year}}" data-month="{{month}}"
+                  <div class="month-mini{{#if isCurrent}} current-month{{/if}}{{#if hasNoDays}} no-days{{/if}}" data-year="{{year}}" data-month="{{month}}"
                     data-tooltip aria-label="{{tooltipText}}" data-action="selectMonth">{{abbreviation}}</div>
                 {{/each}}
               </div>

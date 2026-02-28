@@ -301,7 +301,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Resolve visual and sky overrides for a preset.
    * @param {object|null} preset - The weather preset object
-   * @returns {{hudEffect: string|null, visualOverrides: object|null, skyOverrides: object|null}}
+   * @returns {{hudEffect: string|null, visualOverrides: object|null, skyOverrides: object|null}} Resolved overrides
    */
   #resolveOverrides(preset) {
     if (!preset) return { hudEffect: null, visualOverrides: null, skyOverrides: null };
@@ -459,9 +459,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Update the day offset label below the time input during crank drags.
-   * @param {{hours: number, minutes: number}} time - Current dial time
+   * @param {{hours: number, minutes: number}} _time - Current dial time
    */
-  #updateDayOffsetDisplay(time) {
+  #updateDayOffsetDisplay(_time) {
     const label = this.element.querySelector('.day-offset');
     if (!label) return;
     const crankMode = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE);
@@ -775,7 +775,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Toggle clock running state. Shift-click toggles lock.
-   * @param event
+   * @param {PointerEvent} event - The triggering click event
    */
   static #onToggleClock(event) {
     if (event.shiftKey) {
@@ -828,7 +828,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const handle = this.element.querySelector('.resize-handle');
     if (!handle) return;
     let startX = 0;
-    let startY = 0;
     let startSize = 0;
     const onMouseMove = (event) => {
       event.preventDefault();
@@ -845,7 +844,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       event.stopPropagation();
       startX = event.clientX;
-      startY = event.clientY;
       startSize = this.#getSize();
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);

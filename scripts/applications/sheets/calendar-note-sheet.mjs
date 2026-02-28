@@ -1062,8 +1062,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
   /**
    * Open the computed event builder dialog.
-   * @param _event
-   * @param _target
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
   static async _onOpenComputedBuilder(_event, _target) {
     const config = this.document.system.computedConfig || { chain: [], yearOverrides: {} };

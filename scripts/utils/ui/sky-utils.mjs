@@ -52,7 +52,7 @@ export function getSkyColorsRgb(hour, calendar) {
 /**
  * Resolve visual and sky overrides for a weather preset.
  * @param {object|null} preset - The weather preset object
- * @returns {{hudEffect: string|null, visualOverrides: object|null, skyOverrides: object|null}}
+ * @returns {{hudEffect: string|null, visualOverrides: object|null, skyOverrides: object|null}} Resolved overrides
  */
 function resolveOverrides(preset) {
   if (!preset) return { hudEffect: null, visualOverrides: null, skyOverrides: null };
