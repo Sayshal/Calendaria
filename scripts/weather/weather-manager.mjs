@@ -387,6 +387,21 @@ export default class WeatherManager {
   }
 
   /**
+   * Regenerate weather for all zones — clears forecast, generates new current weather, rebuilds plan.
+   */
+  static async regenerateAllWeather() {
+    const zones = this.#getEffectiveZones();
+    for (const zone of zones) {
+      await this.generateAndSetWeather({ zoneId: zone.id, broadcast: false });
+    }
+    await this.#clearForecastPlan();
+    await this.#ensureForecastPlan();
+    Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
+    CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
+    log(3, `Regenerated weather for ${zones.length} zones`);
+  }
+
+  /**
    * Generate a weather forecast using the stored forecast plan.
    * @param {object} [options] - Forecast options
    * @param {number} [options.days] - Number of days

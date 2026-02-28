@@ -72,6 +72,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
       removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger,
       openWeatherEditor: SettingsPanel.#onOpenWeatherEditor,
+      regenerateAllWeather: SettingsPanel.#onRegenerateAllWeather,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
       resetSection: SettingsPanel.#onResetSection,
@@ -2333,6 +2334,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     new WeatherEditor().render(true);
+  }
+
+  /**
+   * Regenerate all weather with confirmation dialog.
+   */
+  static async #onRegenerateAllWeather() {
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize('CALENDARIA.Settings.RegenerateWeather.Name') },
+      content: `<p>${localize('CALENDARIA.Settings.RegenerateWeather.Confirm')}</p>`
+    });
+    if (!confirmed) return;
+    await WeatherManager.regenerateAllWeather();
+    ui.notifications.info(localize('CALENDARIA.Settings.RegenerateWeather.Done'));
   }
 
   /**
