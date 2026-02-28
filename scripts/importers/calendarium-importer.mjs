@@ -5,6 +5,7 @@
  */
 
 import { ASSETS } from '../constants.mjs';
+import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -39,6 +40,9 @@ export default class CalendariumImporter extends BaseImporter {
 
   /** @type {Map<string, object>} Category map from Calendarium */
   _categories = new Map();
+
+  /** @type {object[]} Categories to import as Calendaria note categories. */
+  #calCategories = [];
 
   /**
    * Check if data is a Calendarium export.
@@ -109,7 +113,12 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #buildCategoryMap(categories = []) {
     const map = new Map();
-    for (const cat of categories) map.set(cat.id, { name: cat.name, color: cat.color || '#2196f3' });
+    this.#calCategories = [];
+    for (const cat of categories) {
+      const color = cat.color || '#2196f3';
+      map.set(cat.id, { name: cat.name, color });
+      this.#calCategories.push({ name: cat.name, color });
+    }
     return map;
   }
 
@@ -195,15 +204,16 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed moons array
    */
   #transformMoons(moons = []) {
-    return moons.map((moon) => ({
-      name: moon.name,
-      cycleLength: moon.cycle,
-      cycleDayAdjust: moon.offset || 0,
-      color: moon.faceColor || '',
-      hidden: false,
-      phases: this.#generateMoonPhases(),
-      referenceDate: { year: 1, month: 0, dayOfMonth: 0 }
-    }));
+    return moons
+      .filter((moon) => !moon.hidden)
+      .map((moon) => ({
+        name: moon.name,
+        cycleLength: moon.cycle,
+        cycleDayAdjust: moon.offset || 0,
+        color: moon.faceColor || moon.color || '',
+        phases: this.#generateMoonPhases(),
+        referenceDate: { year: 1, month: 0, dayOfMonth: 0 }
+      }));
   }
 
   /**
@@ -255,7 +265,13 @@ export default class CalendariumImporter extends BaseImporter {
       let dayEnd = (monthDayStarts[nextSeason.date?.month] ?? 0) + (nextSeason.date?.day ?? 0) - 1;
       if (dayEnd < 0) dayEnd = totalDays - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
-      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd, color: season.color || null, icon: this.#mapSeasonIcon(season.kind) };
+      return {
+        name: season.name,
+        dayStart,
+        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
+        color: Array.isArray(season.color) ? season.color[0] : season.color || null,
+        icon: this.#mapSeasonIcon(season.kind)
+      };
     });
   }
 
@@ -267,7 +283,12 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed periodic seasons array
    */
   #transformPeriodicSeasons(seasons, totalDays) {
-    return seasons.map((season) => ({ name: season.name, duration: season.duration || Math.floor(totalDays / seasons.length), color: season.color || null, icon: this.#mapSeasonIcon(season.kind) }));
+    return seasons.map((season) => ({
+      name: season.name,
+      duration: season.duration || Math.floor(totalDays / seasons.length),
+      color: Array.isArray(season.color) ? season.color[0] : season.color || null,
+      icon: this.#mapSeasonIcon(season.kind)
+    }));
   }
 
   /**
@@ -314,7 +335,7 @@ export default class CalendariumImporter extends BaseImporter {
     const calendar = normalizedData.calendars?.[0];
     const current = calendar?.current;
     if (!current || (current.year === undefined && current.year !== 0)) return null;
-    return { year: current.year, month: current.month ?? 0, dayOfMonth: current.day ?? 0, hour: 0, minute: 0 };
+    return { year: current.year, month: current.month ?? 0, dayOfMonth: Math.max(0, (current.day ?? 1) - 1), hour: 0, minute: 0 };
   }
 
   /**
@@ -324,7 +345,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #transformCurrentDate(current = {}) {
     if (!current.year && current.year !== 0) return null;
-    return { year: current.year, month: current.month ?? 0, dayOfMonth: current.day ?? 0, hour: 0, minute: 0 };
+    return { year: current.year, month: current.month ?? 0, dayOfMonth: Math.max(0, (current.day ?? 1) - 1), hour: 0, minute: 0 };
   }
 
   /**
@@ -363,7 +384,7 @@ export default class CalendariumImporter extends BaseImporter {
       return {
         name,
         content: description || '',
-        startDate: { year: date.year, month: date.month ?? 0, dayOfMonth: date.day ?? 0 },
+        startDate: { year: date.year, month: date.month ?? 0, dayOfMonth: Math.max(0, (date.day ?? 1) - 1) },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -452,6 +473,7 @@ export default class CalendariumImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    if (this.#calCategories.length) await this.#importNoteCategories();
     for (const note of notes) {
       try {
         const noteData = {
@@ -477,6 +499,22 @@ export default class CalendariumImporter extends BaseImporter {
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Calendarium Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
+  }
+
+  /**
+   * Import Calendarium categories as Calendaria note categories.
+   */
+  async #importNoteCategories() {
+    const existing = getAllCategories().map((c) => c.name.toLowerCase());
+    for (const cat of this.#calCategories) {
+      if (existing.includes(cat.name.toLowerCase())) continue;
+      try {
+        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        log(3, `Imported Calendarium category: ${cat.name}`);
+      } catch (error) {
+        log(1, `Failed to import category "${cat.name}":`, error);
+      }
+    }
   }
 
   /** @override */
