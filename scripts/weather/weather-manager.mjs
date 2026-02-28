@@ -513,11 +513,26 @@ export default class WeatherManager {
     const calendar = CalendarManager.getActiveCalendar();
     const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER) ?? false;
     const zones = this.#getEffectiveZones();
-    for (const zone of zones) {
-      const weather = this.#currentWeatherByZone[zone.id];
-      if (weather) await this.#recordWeatherHistory(weather, zone.id);
+    const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
+    const components = game.time.components;
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const year = components.year + yearZero;
+    const month = components.month;
+    const dayOfMonth = components.dayOfMonth ?? 0;
+    const history = maxDays > 0 ? game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {} : null;
+    if (history) {
+      for (const zone of zones) {
+        const weather = this.#currentWeatherByZone[zone.id];
+        if (weather) this.#addHistoryEntry(history, year, month, dayOfMonth, zone.id, weather);
+      }
     }
-    if (!autoGenerate) return;
+    if (!autoGenerate) {
+      if (history) {
+        this.#pruneHistory(history, maxDays);
+        await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
+      }
+      return;
+    }
     const gap = this.#calcDayGap(data, calendar);
     if (gap > 1) {
       await this.#backfillHistory(data, calendar, gap);
@@ -583,8 +598,11 @@ export default class WeatherManager {
       }
     }
     for (const [zid, weather] of Object.entries(weatherUpdates)) this.#currentWeatherByZone[zid] = weather;
-    await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
-    for (const [zid, weather] of Object.entries(weatherUpdates)) await this.#recordWeatherHistory(weather, zid);
+    if (history) {
+      for (const [zid, weather] of Object.entries(weatherUpdates)) this.#addHistoryEntry(history, year, month, dayOfMonth, zid, weather);
+      this.#pruneHistory(history, maxDays);
+    }
+    await Promise.all([game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone), history ? game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history) : null]);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
   }
@@ -727,14 +745,41 @@ export default class WeatherManager {
         };
       }
     }
-    await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
     this.#pruneHistory(history, maxDays);
-    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
+    await Promise.all([game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone), game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history)]);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
     await this.#clearForecastPlan();
     await this.#ensureForecastPlan();
     log(3, `Backfilled ${daysToFill} days of weather history for ${zones.length} zones`);
+  }
+
+  /**
+   * Add a weather entry to a history object in memory (no DB write).
+   * @param {object} history - Nested history object (mutated)
+   * @param {number} year - Year key
+   * @param {number} month - Month key
+   * @param {number} dayOfMonth - Day key
+   * @param {string} zoneId - Zone ID
+   * @param {object} weather - Weather state to record
+   * @private
+   */
+  static #addHistoryEntry(history, year, month, dayOfMonth, zoneId, weather) {
+    history[year] ??= {};
+    history[year][month] ??= {};
+    history[year][month][dayOfMonth] ??= {};
+    history[year][month][dayOfMonth][zoneId] = {
+      id: weather.id,
+      label: localize(weather.label),
+      icon: weather.icon,
+      color: weather.color,
+      category: weather.category,
+      temperature: weather.temperature,
+      wind: weather.wind ?? null,
+      precipitation: weather.precipitation ?? null,
+      generated: weather.generated ?? false,
+      zoneId
+    };
   }
 
   /**

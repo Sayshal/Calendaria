@@ -351,7 +351,7 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
   const secondsPerHour = (calendar?.days?.secondsPerMinute ?? 60) * minutesPerHour;
   const animateDarkness = Math.abs(dt) < secondsPerHour;
-  for (const scene of getDarknessScenes()) {
+  const updates = getDarknessScenes().map((scene) => {
     const zone = WeatherManager.getActiveZone?.(null, scene);
     const sunrise = calendar?.sunrise?.(components, zone) ?? null;
     const sunset = calendar?.sunset?.(components, zone) ?? null;
@@ -360,12 +360,11 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
     const updateData = { 'environment.darknessLevel': darkness, ...envData };
-    try {
-      await scene.update(updateData, { animateDarkness });
-    } catch (error) {
+    return scene.update(updateData, { animateDarkness }).catch((error) => {
       log(1, `Darkness update failed for scene ${scene.name}:`, error);
-    }
-  }
+    });
+  });
+  await Promise.all(updates);
 }
 
 /**
@@ -411,7 +410,7 @@ export async function onWeatherChange() {
   const currentHour = components?.hour ?? 0;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
-  for (const scene of getDarknessScenes()) {
+  const updates = getDarknessScenes().map((scene) => {
     const zone = WeatherManager.getActiveZone?.(null, scene);
     const sunrise = calendar?.sunrise?.(components, zone) ?? null;
     const sunset = calendar?.sunset?.(components, zone) ?? null;
@@ -420,12 +419,11 @@ export async function onWeatherChange() {
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
     const updateData = { 'environment.darknessLevel': darkness, ...envData };
-    try {
-      await scene.update(updateData);
-    } catch (error) {
+    return scene.update(updateData).catch((error) => {
       log(1, `Weather darkness update failed for scene ${scene.name}:`, error);
-    }
-  }
+    });
+  });
+  await Promise.all(updates);
 }
 
 /**
