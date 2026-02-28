@@ -4,8 +4,10 @@
  * @author Tyler
  */
 
+import { BigCal } from '../applications/calendar/big-cal.mjs';
 import { MiniCal } from '../applications/calendar/mini-cal.mjs';
 import { HUD } from '../applications/hud/hud.mjs';
+import { Stopwatch } from '../applications/time/stopwatch.mjs';
 import { SunDial } from '../applications/time/sun-dial.mjs';
 import { TimeKeeper } from '../applications/time/time-keeper.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
@@ -142,11 +144,17 @@ export class CalendariaSocket {
       case SOCKET_TYPES.REMINDER_NOTIFY:
         this.#handleReminderNotify(data);
         break;
+      case SOCKET_TYPES.BIG_CAL_VISIBILITY:
+        this.#handleBigCalVisibility(data);
+        break;
       case SOCKET_TYPES.HUD_VISIBILITY:
         this.#handleHUDVisibility(data);
         break;
       case SOCKET_TYPES.MINI_CAL_VISIBILITY:
         this.#handleMiniCalVisibility(data);
+        break;
+      case SOCKET_TYPES.STOPWATCH_VISIBILITY:
+        this.#handleStopwatchVisibility(data);
         break;
       case SOCKET_TYPES.TIME_KEEPER_VISIBILITY:
         this.#handleTimeKeeperVisibility(data);
@@ -374,6 +382,21 @@ export class CalendariaSocket {
   }
 
   /**
+   * Handle BigCal visibility commands from GM.
+   * @private
+   * @param {object} data - The BigCal visibility data
+   * @param {boolean} data.visible - Whether BigCal should be visible
+   * @returns {void}
+   */
+  static #handleBigCalVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling BigCal visibility: ${visible}`);
+    if (visible) BigCal.show();
+    else BigCal.hide();
+  }
+
+  /**
    * Handle HUD visibility commands from GM.
    * @private
    * @param {object} data - The HUD visibility data
@@ -419,6 +442,21 @@ export class CalendariaSocket {
   }
 
   /**
+   * Handle Stop Watch visibility commands from GM.
+   * @private
+   * @param {object} data - The Stop Watch visibility data
+   * @param {boolean} data.visible - Whether Stop Watch should be visible
+   * @returns {void}
+   */
+  static #handleStopwatchVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling Stop Watch visibility: ${visible}`);
+    if (visible) Stopwatch.show();
+    else Stopwatch.hide();
+  }
+
+  /**
    * Handle Sun Dial visibility commands from GM.
    * @private
    * @param {object} data - The Sun Dial visibility data
@@ -429,7 +467,7 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling Sun Dial visibility: ${visible}`);
-    if (visible) SunDial.open({ silent: true });
+    if (visible) SunDial.show({ silent: true });
     else SunDial.hide();
   }
 

@@ -17,18 +17,36 @@
     </div>
     <p class="hint section-hint">{{openHint}}</p>
 
-    <fieldset data-section="sunDial-options">
+    <fieldset data-section="sunDial-display">
       <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Options"}}
+        {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="sunDial-display"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
       </legend>
-      <input type="hidden" name="sunDialOptionsSection" value="1">
-
       <div class="form-group">
         <label for="showSunDial">{{localize "CALENDARIA.Settings.ShowSunDial.Name"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="showSunDial" name="showSunDial" {{#if showSunDial}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowSunDial.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="forceSunDial">{{localize "CALENDARIA.Settings.ForceSunDial.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceSunDial" name="forceSunDial" {{#if forceSunDial}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceSunDial.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="sunDialCrankMode">{{localize "CALENDARIA.SettingsPanel.CrankMode"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="sunDialCrankMode" name="sunDialCrankMode"
+            {{#if sunDialCrankMode}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.CrankMode"}}</p>
       </div>
 
       <div class="form-group">
@@ -59,65 +77,54 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
       </div>
-
-      <div class="form-group">
-        <label for="sunDialCrankMode">{{localize "CALENDARIA.SettingsPanel.CrankMode"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="sunDialCrankMode" name="sunDialCrankMode"
-            {{#if sunDialCrankMode}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.CrankMode"}}</p>
-      </div>
     </fieldset>
 
-    {{#if isGM}}
-      <fieldset data-section="display-formats">
-        <legend>
-          {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
-          <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="time" data-tooltip
-            aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
-              class="fa-solid fa-question"></i></button>
-        </legend>
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+    <fieldset data-section="display-formats">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="time" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+            class="fa-solid fa-question"></i></button>
+      </legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
 
-        {{#each formatLocations}}
-          <div class="format-location" data-location="{{id}}">
-            <div class="form-group">
-              <label>{{label}}</label>
+      {{#each formatLocations}}
+        <div class="format-location" data-location="{{id}}">
+          <div class="form-group">
+            <label>{{label}}</label>
+          </div>
+
+          <div class="format-row">
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="gm"></span></span>
+              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+                {{#each gmPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+                placeholder="HH:mm" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                data-location="{{id}}" data-role="gm">
             </div>
 
-            <div class="format-row">
-              <div class="format-column">
-                <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
-                    data-location="{{id}}" data-role="gm"></span></span>
-                <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-                  {{#each gmPresetOptions}}
-                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                  {{/each}}
-                </select>
-                <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-                  placeholder="HH:mm" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-                  data-location="{{id}}" data-role="gm">
-              </div>
-
-              <div class="format-column">
-                <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
-                    data-location="{{id}}" data-role="player"></span></span>
-                <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-                  {{#each playerPresetOptions}}
-                    <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                  {{/each}}
-                </select>
-                <input type="text" name="displayFormats.{{id}}.playerCustom"
-                  value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="HH:mm"
-                  class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
-                  data-role="player">
-              </div>
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="player"></span></span>
+              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+                {{#each playerPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.playerCustom"
+                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="HH:mm"
+                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+                data-role="player">
             </div>
           </div>
-        {{/each}}
-      </fieldset>
-    {{/if}}
+        </div>
+      {{/each}}
+    </fieldset>
 
     <fieldset data-section="sunDial-sticky">
       <legend>
@@ -127,6 +134,7 @@
             class="fas fa-undo"></i></button>
       </legend>
       <input type="hidden" name="sunDialStickySection" value="1">
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
       <div class="form-group">
         <label for="sunDialStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>

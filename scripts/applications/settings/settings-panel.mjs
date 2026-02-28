@@ -609,6 +609,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.DARKNESS_SYNC_ALL_SCENES]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessSyncAllScenes.Name' },
     [SETTINGS.DARKNESS_WEATHER_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessWeatherSync.Name' },
     [SETTINGS.AMBIENCE_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.AmbienceSync.Name' },
+    [SETTINGS.COLOR_SHIFT_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.ColorShiftSync.Name' },
     [SETTINGS.DARKNESS_MOON_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessMoonSync.Name' },
     [SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER]: { tab: 'canvas', label: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name' },
     [SETTINGS.PRIMARY_GM]: { tab: 'module', label: 'CALENDARIA.Settings.PrimaryGM.Name' },
@@ -627,6 +628,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.HUD_COMBAT_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDCombatHide.Name' },
     [SETTINGS.HUD_DOME_BELOW]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDDomeBelow.Name' },
     [SETTINGS.HUD_DOME_AUTO_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.DomeAutoHide.Name' },
+    [SETTINGS.HUD_SHOW_ALL_MOONS]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDShowAllMoons.Name' },
     [SETTINGS.HUD_AUTO_FADE]: { tab: 'hud', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.HUD_IDLE_OPACITY]: { tab: 'hud', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.HUD_WIDTH_SCALE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDWidthScale.Name' },
@@ -659,6 +661,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Name' },
     [SETTINGS.MINI_CAL_STICKY_STATES]: { tab: 'miniCal', label: 'CALENDARIA.SettingsPanel.Section.StickyStates' },
     [SETTINGS.MINI_CAL_TIME_JUMPS]: { tab: 'miniCal', label: 'CALENDARIA.SettingsPanel.Section.CustomTimeJumps' },
+    [SETTINGS.FORCE_BIG_CAL]: { tab: 'bigcal', label: 'CALENDARIA.Settings.ForceBigCal.Name' },
+    [SETTINGS.BIG_CAL_AUTO_FADE]: { tab: 'bigcal', label: 'CALENDARIA.Settings.AutoFade.Name' },
+    [SETTINGS.BIG_CAL_IDLE_OPACITY]: { tab: 'bigcal', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
+    [SETTINGS.BIG_CAL_STICKY_STATES]: { tab: 'bigcal', label: 'CALENDARIA.SettingsPanel.Section.StickyStates' },
     [SETTINGS.BIG_CAL_SHOW_WEATHER]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalShowWeather.Name' },
     [SETTINGS.BIG_CAL_SHOW_SEASON]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalShowSeason.Name' },
     [SETTINGS.BIG_CAL_SHOW_ERA]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalShowEra.Name' },
@@ -669,14 +675,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.BIG_CAL_ERA_DISPLAY_MODE]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalEraDisplayMode.Name' },
     [SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE]: { tab: 'bigcal', label: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Name' },
     [SETTINGS.SHOW_TIME_KEEPER]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.ShowTimeKeeper.Name' },
+    [SETTINGS.FORCE_TIME_KEEPER]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.ForceTimeKeeper.Name' },
     [SETTINGS.TIMEKEEPER_AUTO_FADE]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.TIMEKEEPER_IDLE_OPACITY]: { tab: 'timekeeper', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.TIMEKEEPER_TIME_JUMPS]: { tab: 'timekeeper', label: 'CALENDARIA.SettingsPanel.Section.CustomTimeJumps' },
     [SETTINGS.SHOW_SUN_DIAL]: { tab: 'sunDial', label: 'CALENDARIA.Settings.ShowSunDial.Name' },
+    [SETTINGS.FORCE_SUN_DIAL]: { tab: 'sunDial', label: 'CALENDARIA.Settings.ForceSunDial.Name' },
     [SETTINGS.SUN_DIAL_AUTO_FADE]: { tab: 'sunDial', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.SUN_DIAL_IDLE_OPACITY]: { tab: 'sunDial', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.SUN_DIAL_CRANK_MODE]: { tab: 'sunDial', label: 'CALENDARIA.SettingsPanel.CrankMode' },
+    [SETTINGS.SHOW_STOPWATCH]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.ShowStopwatch.Name' },
+    [SETTINGS.FORCE_STOPWATCH]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.ForceStopwatch.Name' },
     [SETTINGS.STOPWATCH_AUTO_START_TIME]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name' },
+    [SETTINGS.STOPWATCH_AUTO_FADE]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.AutoFade.Name' },
+    [SETTINGS.STOPWATCH_IDLE_OPACITY]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.CUSTOM_CATEGORIES]: { tab: 'notes', label: 'CALENDARIA.SettingsPanel.Section.Categories' },
     [SETTINGS.MACRO_TRIGGERS]: { tab: 'macros', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
     [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'CALENDARIA.SettingsPanel.Section.WeatherPresets' },
@@ -700,6 +712,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.HUD_COMBAT_HIDE,
       SETTINGS.HUD_DOME_BELOW,
       SETTINGS.HUD_DOME_AUTO_HIDE,
+      SETTINGS.HUD_SHOW_ALL_MOONS,
       SETTINGS.HUD_AUTO_FADE,
       SETTINGS.HUD_IDLE_OPACITY,
       SETTINGS.HUD_WIDTH_SCALE
@@ -738,6 +751,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ],
     'minical-sticky': [SETTINGS.MINI_CAL_STICKY_STATES],
     'minical-time-jumps': [SETTINGS.MINI_CAL_TIME_JUMPS],
+    'bigcal-display': [SETTINGS.FORCE_BIG_CAL, SETTINGS.BIG_CAL_AUTO_FADE, SETTINGS.BIG_CAL_IDLE_OPACITY],
     'bigcal-block-visibility': [
       SETTINGS.BIG_CAL_SHOW_WEATHER,
       SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE,
@@ -749,18 +763,26 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE,
       SETTINGS.BIG_CAL_SHOW_MOON_PHASES
     ],
-    'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY],
+    'bigcal-sticky': [SETTINGS.BIG_CAL_STICKY_STATES],
+    'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.FORCE_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY],
     'timekeeper-sticky': [SETTINGS.TIMEKEEPER_STICKY_STATES],
     'timekeeper-time-jumps': [SETTINGS.TIMEKEEPER_TIME_JUMPS],
-    'stopwatch-display': [SETTINGS.STOPWATCH_AUTO_START_TIME],
+    'stopwatch-display': [SETTINGS.SHOW_STOPWATCH, SETTINGS.FORCE_STOPWATCH, SETTINGS.STOPWATCH_AUTO_START_TIME, SETTINGS.STOPWATCH_AUTO_FADE, SETTINGS.STOPWATCH_IDLE_OPACITY],
     'stopwatch-sticky': [SETTINGS.STOPWATCH_STICKY_STATES],
-    'sunDial-options': [SETTINGS.SHOW_SUN_DIAL, SETTINGS.SUN_DIAL_AUTO_FADE, SETTINGS.SUN_DIAL_IDLE_OPACITY, SETTINGS.SUN_DIAL_CRANK_MODE],
+    'sunDial-display': [SETTINGS.SHOW_SUN_DIAL, SETTINGS.FORCE_SUN_DIAL, SETTINGS.SUN_DIAL_CRANK_MODE, SETTINGS.SUN_DIAL_AUTO_FADE, SETTINGS.SUN_DIAL_IDLE_OPACITY],
     'sunDial-sticky': [SETTINGS.SUN_DIAL_STICKY_STATES],
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
     'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_TO_SUNRISE, SETTINGS.SYNC_CLOCK_PAUSE],
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
-    'canvas-scene-integration': [SETTINGS.DARKNESS_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC, SETTINGS.AMBIENCE_SYNC, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER],
+    'canvas-scene-integration': [
+      SETTINGS.DARKNESS_SYNC,
+      SETTINGS.DARKNESS_WEATHER_SYNC,
+      SETTINGS.AMBIENCE_SYNC,
+      SETTINGS.COLOR_SHIFT_SYNC,
+      SETTINGS.DARKNESS_MOON_SYNC,
+      SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER
+    ],
     'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.PRECIPITATION_UNIT],
     'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX],
     fxmaster: [SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_BELOW_TOKENS],
@@ -1000,6 +1022,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareBigCalContext(context) {
     context.formatLocations = this.#prepareFormatLocationsForCategory('bigcal');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'BigCal' });
+    context.forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
+    context.bigCalAutoFade = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_AUTO_FADE);
+    context.bigCalIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_IDLE_OPACITY);
     context.bigCalShowWeather = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
     context.bigCalShowSeason = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON);
     context.bigCalShowEra = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_ERA);
@@ -1191,11 +1216,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareStopwatchContext(context) {
+    context.showStopwatch = game.settings.get(MODULE.ID, SETTINGS.SHOW_STOPWATCH);
+    context.forceStopwatch = game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH);
     context.stopwatchAutoStartTime = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME);
+    context.stopwatchAutoFade = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_FADE);
+    context.stopwatchIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_IDLE_OPACITY);
     const stopwatchSticky = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES);
     context.stopwatchStickyPosition = stopwatchSticky?.position ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stopwatch' });
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stop Watch' });
   }
 
   /**
@@ -1204,6 +1233,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareSunDialContext(context) {
     context.showSunDial = game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL);
+    context.forceSunDial = game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL);
     context.sunDialAutoFade = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_AUTO_FADE);
     context.sunDialIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_IDLE_OPACITY);
     context.sunDialCrankMode = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE);
@@ -1230,6 +1260,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeKeeperContext(context) {
     context.showTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER);
+    context.forceTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER);
     context.timeKeeperAutoFade = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE);
     context.timeKeeperIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY);
     const timeKeeperSticky = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES);
@@ -1238,7 +1269,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const timeKeeperJumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
     const { labels: incrementLabels, keys: incrementKeys } = SettingsPanel.#getIncrementLabels();
     context.timeKeeperTimeJumps = incrementKeys.map((key) => ({ key, label: incrementLabels[key] || key, jumps: timeKeeperJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'TimeKeeper' });
+    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Time Keeper' });
   }
 
   /**
@@ -1462,8 +1493,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const data = foundry.utils.expandObject(formData.object);
     const beforeSnapshot = SettingsPanel.#snapshotSettings();
     if ('showTimeKeeper' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, data.showTimeKeeper);
+    if ('forceTimeKeeper' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER, data.forceTimeKeeper);
     if ('timeKeeperAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, data.timeKeeperAutoFade);
     if ('timeKeeperIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY, Number(data.timeKeeperIdleOpacity));
+    if ('showStopwatch' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, data.showStopwatch);
+    if ('forceStopwatch' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_STOPWATCH, data.forceStopwatch);
+    if ('stopwatchAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_AUTO_FADE, data.stopwatchAutoFade);
+    if ('stopwatchIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_IDLE_OPACITY, Number(data.stopwatchIdleOpacity));
     if ('stopwatchAutoStartTime' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_AUTO_START_TIME, data.stopwatchAutoStartTime);
     if ('timeSpeedMultiplier' in data || 'timeSpeedIncrement' in data) {
       if ('timeSpeedMultiplier' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER, Math.max(0.01, Number(data.timeSpeedMultiplier) || 1));
@@ -1565,12 +1601,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if ('timeKeeperStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: !!data.timeKeeperStickyPosition });
     if ('stopwatchStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, { position: !!data.stopwatchStickyPosition });
-    if ('sunDialOptionsSection' in data) {
-      await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, !!data.showSunDial);
-      await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_AUTO_FADE, !!data.sunDialAutoFade);
-      if (data.sunDialIdleOpacity != null) await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_IDLE_OPACITY, Math.round(Number(data.sunDialIdleOpacity)));
-      await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE, !!data.sunDialCrankMode);
-    }
+    if ('showSunDial' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, !!data.showSunDial);
+    if ('forceSunDial' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_SUN_DIAL, data.forceSunDial);
+    if ('sunDialAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_AUTO_FADE, !!data.sunDialAutoFade);
+    if ('sunDialIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_IDLE_OPACITY, Math.round(Number(data.sunDialIdleOpacity)));
+    if ('sunDialCrankMode' in data) await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE, !!data.sunDialCrankMode);
     if ('sunDialStickySection' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES, { position: !!data.sunDialStickyPosition });
       SunDial.refreshStickyStates();
@@ -1607,6 +1642,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('bigCalSeasonDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE, data.bigCalSeasonDisplayMode);
     if ('bigCalEraDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_ERA_DISPLAY_MODE, data.bigCalEraDisplayMode);
     if ('bigCalCyclesDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE, data.bigCalCyclesDisplayMode);
+    if ('forceBigCal' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_BIG_CAL, data.forceBigCal);
+    if ('bigCalAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_AUTO_FADE, data.bigCalAutoFade);
+    if ('bigCalIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_IDLE_OPACITY, Number(data.bigCalIdleOpacity));
     if (data.customTimeJumps) {
       const jumps = {};
       for (const [key, values] of Object.entries(data.customTimeJumps)) {
@@ -2132,7 +2170,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenBigCal(_event, _target) {
-    new BigCal().render(true);
+    BigCal.show();
   }
 
   /**
@@ -2141,7 +2179,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onCloseBigCal(_event, _target) {
-    foundry.applications.instances.get('calendaria-big-cal')?.close();
+    BigCal.hide();
   }
 
   /**
@@ -2168,7 +2206,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenSunDial(_event, _target) {
-    SunDial.open();
+    SunDial.show();
   }
 
   /**

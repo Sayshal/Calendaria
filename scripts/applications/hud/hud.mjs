@@ -549,7 +549,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       dome.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          SunDial.open();
+          SunDial.show();
         }
       });
     }
@@ -1287,7 +1287,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenSunDial(_event, _target) {
     if (!canChangeDateTime()) return;
-    SunDial.open();
+    SunDial.show();
   }
 
   /**

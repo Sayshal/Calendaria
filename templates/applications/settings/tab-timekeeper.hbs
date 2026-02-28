@@ -32,6 +32,16 @@
       <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
     </div>
 
+    {{#if isGM}}
+      <div class="form-group">
+        <label for="forceTimeKeeper">{{localize "CALENDARIA.Settings.ForceTimeKeeper.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceTimeKeeper" name="forceTimeKeeper" {{#if forceTimeKeeper}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceTimeKeeper.Hint"}}</p>
+      </div>
+    {{/if}}
+
     <div class="form-group">
       <label for="timeKeeperAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
@@ -152,6 +162,7 @@
           class="fas fa-undo"></i></button>
     </legend>
     <input type="hidden" name="timeKeeperStickySection" value="1">
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
     <div class="form-group">
       <label for="timeKeeperStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>

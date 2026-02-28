@@ -94,11 +94,11 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Open the sun dial (reuses existing instance or creates new).
-   * @param {object} [options] - Open options
+   * Show the sun dial (reuses existing instance or creates new).
+   * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
    */
-  static open({ silent = false } = {}) {
+  static show({ silent = false } = {}) {
     if (!canViewSunDial()) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return;
@@ -119,7 +119,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Toggle the sun dial visibility. */
   static toggle() {
     if (foundry.applications.instances.get('calendaria-sun-dial')) SunDial.hide();
-    else SunDial.open();
+    else SunDial.show();
   }
 
   /** Update the idle opacity CSS variable from settings. */
@@ -238,6 +238,10 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options = {}) {
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
     return super.close({ animate: false, ...options });
   }
 
@@ -733,11 +737,15 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     // Show/Hide from all players (GM only)
     if (game.user.isGM) {
-      const isVisible = !!foundry.applications.instances.get('calendaria-sun-dial');
+      const forceSunDial = game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL);
       items.push({
-        name: isVisible ? 'CALENDARIA.SunDial.ContextMenu.HideFromAll' : 'CALENDARIA.SunDial.ContextMenu.ShowToAll',
-        icon: `<i class="fas fa-${isVisible ? 'eye-slash' : 'eye'}"></i>`,
-        callback: () => CalendariaSocket.emit(SOCKET_TYPES.SUN_DIAL_VISIBILITY, { visible: !isVisible })
+        name: forceSunDial ? 'CALENDARIA.SunDial.ContextMenu.HideFromAll' : 'CALENDARIA.SunDial.ContextMenu.ShowToAll',
+        icon: `<i class="fas fa-${forceSunDial ? 'eye-slash' : 'eye'}"></i>`,
+        callback: async () => {
+          const newValue = !forceSunDial;
+          await game.settings.set(MODULE.ID, SETTINGS.FORCE_SUN_DIAL, newValue);
+          CalendariaSocket.emit(SOCKET_TYPES.SUN_DIAL_VISIBILITY, { visible: newValue });
+        }
       });
     }
     // Close

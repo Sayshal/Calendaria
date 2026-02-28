@@ -16,6 +16,44 @@
   </div>
   <p class="hint section-hint">{{openHint}}</p>
 
+  <fieldset data-section="bigcal-display">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="bigcal-display"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    {{#if isGM}}
+      <div class="form-group">
+        <label for="forceBigCal">{{localize "CALENDARIA.Settings.ForceBigCal.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceBigCal" name="forceBigCal" {{#if forceBigCal}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceBigCal.Hint"}}</p>
+      </div>
+    {{/if}}
+
+    <div class="form-group">
+      <label for="bigCalAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="bigCalAutoFade" name="bigCalAutoFade" {{#if bigCalAutoFade}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless bigCalAutoFade}} disabled{{/unless}}">
+      <label for="bigCalIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <div class="form-fields">
+        <input type="range" id="bigCalIdleOpacity" name="bigCalIdleOpacity"
+          min="10" max="100" step="5" value="{{bigCalIdleOpacity}}"
+          {{#unless bigCalAutoFade}}disabled aria-disabled="true"{{/unless}}>
+        <span class="range-value">{{bigCalIdleOpacity}}%</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+    </div>
+  </fieldset>
+
   <fieldset data-section="bigcal-block-visibility">
     <legend>
       {{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}
@@ -126,6 +164,16 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalHeaderShowSelected.Hint"}}</p>
     </div>
+  </fieldset>
+
+  <fieldset data-section="bigcal-sticky">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="bigcal-sticky"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
   </fieldset>
 
   {{#if isGM}}

@@ -5,7 +5,7 @@
  */
 
 import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
+import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
 import { addDays, dayOfWeek, daysBetween } from '../../notes/date-utils.mjs';
 import NoteManager from '../../notes/note-manager.mjs';
 import { isRecurringMatch } from '../../notes/recurrence.mjs';
@@ -13,6 +13,7 @@ import TimeClock from '../../time/time-clock.mjs';
 import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../../utils/formatting/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { canViewBigCal } from '../../utils/permissions.mjs';
+import { CalendariaSocket } from '../../utils/socket.mjs';
 import SearchManager from '../../utils/search-manager.mjs';
 import * as ViewUtils from '../../utils/ui/calendar-view-utils.mjs';
 import * as WidgetManager from '../../utils/widget-manager.mjs';
@@ -112,6 +113,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
     return super.render(options, _options);
+  }
+
+  /** @override */
+  async close(options = {}) {
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
+    return super.close(options);
   }
 
   /** @override */
@@ -1178,6 +1188,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         MiniCal.show();
       }
     });
+    if (game.user.isGM) {
+      const forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
+      items.push({
+        name: forceBigCal ? 'CALENDARIA.BigCal.ContextMenu.HideFromAll' : 'CALENDARIA.BigCal.ContextMenu.ShowToAll',
+        icon: `<i class="fas fa-${forceBigCal ? 'eye-slash' : 'eye'}"></i>`,
+        callback: async () => {
+          const newValue = !forceBigCal;
+          await game.settings.set(MODULE.ID, SETTINGS.FORCE_BIG_CAL, newValue);
+          CalendariaSocket.emit(SOCKET_TYPES.BIG_CAL_VISIBILITY, { visible: newValue });
+        }
+      });
+    }
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
   }
@@ -1774,6 +1796,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static get instance() {
     return foundry.applications.instances.get(this.DEFAULT_OPTIONS.id);
+  }
+
+  /** Update the idle opacity CSS variable from settings. */
+  static updateIdleOpacity() {
+    const autoFade = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_AUTO_FADE);
+    const opacity = autoFade ? game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_IDLE_OPACITY) / 100 : 1;
+    document.documentElement.style.setProperty('--calendaria-bigcal-idle-opacity', opacity);
+  }
+
+  /** Refresh sticky states from settings. */
+  static refreshStickyStates() {
+    // Sticky states are read by the app instance on position restore
   }
 
   /**

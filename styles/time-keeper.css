@@ -239,6 +239,7 @@
   &.stopwatch {
     --stopwatch-size: 12.5rem;
 
+    opacity: var(--calendaria-stopwatch-idle-opacity, 1);
     position: fixed;
     padding: 0;
     border: none;

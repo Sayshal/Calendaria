@@ -235,6 +235,10 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options = {}) {
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
     return super.close({ animate: false, ...options });
   }
 
@@ -282,11 +286,15 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     if (game.user.isGM) {
-      const isVisible = !!TimeKeeper.instance;
+      const forceTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER);
       items.push({
-        name: isVisible ? 'CALENDARIA.TimeKeeper.ContextMenu.HideFromAll' : 'CALENDARIA.TimeKeeper.ContextMenu.ShowToAll',
-        icon: `<i class="fas fa-${isVisible ? 'eye-slash' : 'eye'}"></i>`,
-        callback: () => CalendariaSocket.emit(SOCKET_TYPES.TIME_KEEPER_VISIBILITY, { visible: !isVisible })
+        name: forceTimeKeeper ? 'CALENDARIA.TimeKeeper.ContextMenu.HideFromAll' : 'CALENDARIA.TimeKeeper.ContextMenu.ShowToAll',
+        icon: `<i class="fas fa-${forceTimeKeeper ? 'eye-slash' : 'eye'}"></i>`,
+        callback: async () => {
+          const newValue = !forceTimeKeeper;
+          await game.settings.set(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER, newValue);
+          CalendariaSocket.emit(SOCKET_TYPES.TIME_KEEPER_VISIBILITY, { visible: newValue });
+        }
       });
     }
     items.push({

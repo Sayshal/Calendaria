@@ -134,6 +134,30 @@
       <p class="hint">{{localize "CALENDARIA.Settings.HUDShowAllMoons.Hint"}}</p>
     </div>
 
+    <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
+      <label for="hudWidthScale">{{localize "CALENDARIA.Settings.HUDWidthScale.Name"}}</label>
+      <div class="form-fields range-field">
+        <div class="slider-with-ticks">
+          <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
+            value="{{hudWidthScale}}" list="scale-ticks" {{#if isCompactMode}}disabled aria-disabled="true" data-tooltip
+            aria-label="{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledTitle"}}" {{/if}}>
+          <datalist id="scale-ticks">
+            <option value="0.5"></option>
+            <option value="1"></option>
+            <option value="1.5"></option>
+            <option value="2"></option>
+          </datalist>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <span class="range-value">{{hudWidthScale}}x</span>
+      </div>
+      <p class="hint">
+        {{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDWidthScale.Hint"}}{{/if}}
+      </p>
+    </div>
+
     <div class="form-group">
       <label for="hudAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
@@ -166,30 +190,6 @@
         <span class="input-suffix">%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
-    </div>
-
-    <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
-      <label for="hudWidthScale">{{localize "CALENDARIA.Settings.HUDWidthScale.Name"}}</label>
-      <div class="form-fields range-field">
-        <div class="slider-with-ticks">
-          <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
-            value="{{hudWidthScale}}" list="scale-ticks" {{#if isCompactMode}}disabled aria-disabled="true" data-tooltip
-            aria-label="{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledTitle"}}" {{/if}}>
-          <datalist id="scale-ticks">
-            <option value="0.5"></option>
-            <option value="1"></option>
-            <option value="1.5"></option>
-            <option value="2"></option>
-          </datalist>
-          <div class="slider-ticks">
-            <span></span><span></span><span></span><span></span>
-          </div>
-        </div>
-        <span class="range-value">{{hudWidthScale}}x</span>
-      </div>
-      <p class="hint">
-        {{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDWidthScale.Hint"}}{{/if}}
-      </p>
     </div>
   </fieldset>
 
@@ -384,6 +384,7 @@
         aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>
     <input type="hidden" name="hudStickySection" value="1">
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
     <div class="form-group">
       <label for="hudStickyTray">{{localize "CALENDARIA.SettingsPanel.Sticky.Tray"}}</label>

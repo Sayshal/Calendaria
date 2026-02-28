@@ -4,11 +4,13 @@
  * @author Tyler
  */
 
+import { BigCal } from './applications/calendar/big-cal.mjs';
 import { CalendarEditor } from './applications/calendar/calendar-editor.mjs';
 import { MiniCal } from './applications/calendar/mini-cal.mjs';
 import { ImporterApp } from './applications/dialogs/importer-app.mjs';
 import { HUD } from './applications/hud/hud.mjs';
 import { SettingsPanel } from './applications/settings/settings-panel.mjs';
+import { Stopwatch } from './applications/time/stopwatch.mjs';
 import { SunDial } from './applications/time/sun-dial.mjs';
 import { TimeKeeper } from './applications/time/time-keeper.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
@@ -301,6 +303,23 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: renderBigCal
       },
+      [SETTINGS.BIG_CAL_AUTO_FADE]: {
+        name: 'CALENDARIA.Settings.AutoFade.Name',
+        hint: 'CALENDARIA.Settings.AutoFade.Hint',
+        scope: 'user',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => BigCal.updateIdleOpacity()
+      },
+      [SETTINGS.BIG_CAL_IDLE_OPACITY]: {
+        name: 'CALENDARIA.Settings.IdleOpacity.Name',
+        hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
+        scope: 'user',
+        config: false,
+        type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
+        onChange: () => BigCal.updateIdleOpacity()
+      },
+      [SETTINGS.BIG_CAL_STICKY_STATES]: { name: 'BigCal Sticky States', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       formatMigrationComplete: { name: 'Format Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       settingKeyMigrationComplete: { name: 'Setting Key Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       intercalaryMigrationComplete: { name: 'Intercalary Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
@@ -395,6 +414,22 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
         onChange: () => SunDial.updateIdleOpacity()
       },
+      [SETTINGS.STOPWATCH_AUTO_FADE]: {
+        name: 'CALENDARIA.Settings.AutoFade.Name',
+        hint: 'CALENDARIA.Settings.AutoFade.Hint',
+        scope: 'user',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => Stopwatch.updateIdleOpacity()
+      },
+      [SETTINGS.STOPWATCH_IDLE_OPACITY]: {
+        name: 'CALENDARIA.Settings.IdleOpacity.Name',
+        hint: 'CALENDARIA.Settings.IdleOpacity.Hint',
+        scope: 'user',
+        config: false,
+        type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
+        onChange: () => Stopwatch.updateIdleOpacity()
+      },
       [SETTINGS.TIMEKEEPER_TIME_JUMPS]: {
         name: 'TimeKeeper Time Jumps',
         scope: 'world',
@@ -476,6 +511,18 @@ export default class CalendariaSettings {
           if (!game.user.isGM) return;
           if (value) TimeKeeper.show();
           else TimeKeeper.hide();
+        }
+      },
+      [SETTINGS.SHOW_STOPWATCH]: {
+        name: 'CALENDARIA.Settings.ShowStopwatch.Name',
+        hint: 'CALENDARIA.Settings.ShowStopwatch.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: (value) => {
+          if (!game.user.isGM) return;
+          if (value) Stopwatch.show();
+          else Stopwatch.hide();
         }
       },
       [SETTINGS.SHOW_SUN_DIAL]: {
@@ -711,6 +758,16 @@ export default class CalendariaSettings {
           }
         }
       },
+      [SETTINGS.FORCE_BIG_CAL]: {
+        name: 'CALENDARIA.Settings.ForceBigCal.Name',
+        hint: 'CALENDARIA.Settings.ForceBigCal.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: async (value) => {
+          if (value) BigCal.show();
+        }
+      },
       [SETTINGS.FORCE_MINI_CAL]: {
         name: 'CALENDARIA.Settings.ForceMiniCal.Name',
         hint: 'CALENDARIA.Settings.ForceMiniCal.Hint',
@@ -721,6 +778,45 @@ export default class CalendariaSettings {
           if (value) {
             await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
             MiniCal.show();
+          }
+        }
+      },
+      [SETTINGS.FORCE_TIME_KEEPER]: {
+        name: 'CALENDARIA.Settings.ForceTimeKeeper.Name',
+        hint: 'CALENDARIA.Settings.ForceTimeKeeper.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: async (value) => {
+          if (value) {
+            await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, true);
+            TimeKeeper.show();
+          }
+        }
+      },
+      [SETTINGS.FORCE_STOPWATCH]: {
+        name: 'CALENDARIA.Settings.ForceStopwatch.Name',
+        hint: 'CALENDARIA.Settings.ForceStopwatch.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: async (value) => {
+          if (value) {
+            await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
+            Stopwatch.show();
+          }
+        }
+      },
+      [SETTINGS.FORCE_SUN_DIAL]: {
+        name: 'CALENDARIA.Settings.ForceSunDial.Name',
+        hint: 'CALENDARIA.Settings.ForceSunDial.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: async (value) => {
+          if (value) {
+            await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, true);
+            SunDial.show({ silent: true });
           }
         }
       },

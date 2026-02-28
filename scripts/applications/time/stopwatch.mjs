@@ -4,10 +4,11 @@
  * @author Tyler
  */
 
-import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
+import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import TimeClock from '../../time/time-clock.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatDuration, formatGameDuration, getDisplayFormat } from '../../utils/formatting/format-utils.mjs';
 import { localize } from '../../utils/localization.mjs';
+import { CalendariaSocket } from '../../utils/socket.mjs';
 
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
 
@@ -120,6 +121,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options = {}) {
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
     return super.close({ animate: false, ...options });
   }
 
@@ -775,6 +780,18 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this.#toggleStickyPosition()
     });
+    if (game.user.isGM) {
+      const forceStopwatch = game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH);
+      items.push({
+        name: forceStopwatch ? 'CALENDARIA.Stopwatch.ContextMenu.HideFromAll' : 'CALENDARIA.Stopwatch.ContextMenu.ShowToAll',
+        icon: `<i class="fas fa-${forceStopwatch ? 'eye-slash' : 'eye'}"></i>`,
+        callback: async () => {
+          const newValue = !forceStopwatch;
+          await game.settings.set(MODULE.ID, SETTINGS.FORCE_STOPWATCH, newValue);
+          CalendariaSocket.emit(SOCKET_TYPES.STOPWATCH_VISIBILITY, { visible: newValue });
+        }
+      });
+    }
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
   }
@@ -863,5 +880,14 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!state?.running) return;
 
     this.show();
+  }
+
+  /**
+   * Update the idle opacity CSS variable from settings.
+   */
+  static updateIdleOpacity() {
+    const autoFade = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_AUTO_FADE);
+    const opacity = autoFade ? game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_IDLE_OPACITY) / 100 : 1;
+    document.documentElement.style.setProperty('--calendaria-stopwatch-idle-opacity', opacity);
   }
 }

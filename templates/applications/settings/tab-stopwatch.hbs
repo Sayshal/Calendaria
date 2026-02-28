@@ -26,12 +26,59 @@
       </legend>
 
       <div class="form-group">
+        <label for="showStopwatch">{{localize "CALENDARIA.Settings.ShowStopwatch.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="showStopwatch" name="showStopwatch"
+            {{#if showStopwatch}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowStopwatch.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="forceStopwatch">{{localize "CALENDARIA.Settings.ForceStopwatch.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceStopwatch" name="forceStopwatch"
+            {{#if forceStopwatch}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceStopwatch.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
         <label for="stopwatchAutoStartTime">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Name"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="stopwatchAutoStartTime" name="stopwatchAutoStartTime"
             {{#if stopwatchAutoStartTime}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="stopwatchAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="stopwatchAutoFade" name="stopwatchAutoFade"
+            {{#if stopwatchAutoFade}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+      </div>
+
+      <div class="form-group{{#unless stopwatchAutoFade}} disabled{{/unless}}">
+        <label for="stopwatchIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+        <div class="form-fields">
+          <div class="slider-with-ticks">
+            <input type="range" id="stopwatchIdleOpacity" name="stopwatchIdleOpacity" min="0" max="100"
+              value="{{stopwatchIdleOpacity}}" list="opacity-ticks" {{#unless stopwatchAutoFade}}disabled
+              aria-disabled="true" data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"
+              {{/unless}}>
+            <div class="slider-ticks">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <input type="number" class="range-value" min="0" max="100" value="{{stopwatchIdleOpacity}}"
+            style="width: 3rem; flex: none" {{#unless stopwatchAutoFade}}disabled aria-disabled="true" data-tooltip
+            aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
+          <span class="input-suffix">%</span>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
       </div>
     </fieldset>
 
@@ -90,6 +137,7 @@
             class="fas fa-undo"></i></button>
       </legend>
       <input type="hidden" name="stopwatchStickySection" value="1">
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
       <div class="form-group">
         <label for="stopwatchStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
