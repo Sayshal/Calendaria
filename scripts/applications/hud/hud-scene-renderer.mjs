@@ -748,9 +748,11 @@ export class HudSceneRenderer {
     const perfChanged = newPerf.particleScale !== this.#perfConfig.particleScale;
     this.#perfConfig = newPerf;
     this.#app.ticker.maxFPS = newPerf.maxFPS;
-    this.#weatherOptions = { windSpeed, windDirection, precipIntensity };
+    const newOptions = { windSpeed, windDirection, precipIntensity };
+    const optionsChanged = JSON.stringify(this.#weatherOptions) !== JSON.stringify(newOptions);
     const overridesChanged = JSON.stringify(this.#visualOverrides) !== JSON.stringify(visualOverrides);
-    const changed = effect !== this.#currentEffect || overridesChanged || perfChanged;
+    const changed = effect !== this.#currentEffect || overridesChanged || optionsChanged || perfChanged;
+    this.#weatherOptions = newOptions;
     if (!changed) return;
     if (this.#sprites.length > 0) {
       this.#pendingEffect = effect;
