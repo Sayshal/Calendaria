@@ -1008,7 +1008,11 @@ export default class FantasyCalendarImporter extends BaseImporter {
     return { year, month, dayOfMonth };
   }
 
-  /** @override */
+  /**
+   * Generate preview data with FC-specific category and cycle counts.
+   * @param rawData
+   * @param transformedData
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     preview.noteCount = rawData.events?.length ?? 0;

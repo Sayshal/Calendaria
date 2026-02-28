@@ -474,7 +474,11 @@ export default class MiniCalendarImporter extends BaseImporter {
     return unitMap[repeatUnit] || 'never';
   }
 
-  /** @override */
+  /**
+   * Import MC notes with yearZero offset and gmOnly support.
+   * @param notes
+   * @param options
+   */
   async importNotes(notes, options = {}) {
     const { calendarId } = options;
     const errors = [];
@@ -498,7 +502,11 @@ export default class MiniCalendarImporter extends BaseImporter {
     return { success: errors.length === 0, count, errors };
   }
 
-  /** @override */
+  /**
+   * Import MC festivals into the target calendar.
+   * @param festivals
+   * @param options
+   */
   async importFestivals(festivals, options = {}) {
     const { calendarId } = options;
     const errors = [];
@@ -542,7 +550,11 @@ export default class MiniCalendarImporter extends BaseImporter {
     return presetCount + journalCount;
   }
 
-  /** @override */
+  /**
+   * Generate preview data with MC-specific source and biome info.
+   * @param rawData
+   * @param transformedData
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     preview.noteCount = this.#countNotes(rawData);

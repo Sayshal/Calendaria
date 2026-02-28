@@ -564,7 +564,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     return data.events?.length || 0;
   }
 
-  /** @override */
+  /**
+   * Generate preview data with STK-specific scene and weather info.
+   * @param rawData
+   * @param transformedData
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     preview.noteCount = this.#countNotes(rawData);

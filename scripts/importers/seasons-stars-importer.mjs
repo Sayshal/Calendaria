@@ -590,7 +590,11 @@ export default class SeasonsStarsImporter extends BaseImporter {
     }
   }
 
-  /** @override */
+  /**
+   * Generate preview data with S&S-specific note counts.
+   * @param rawData
+   * @param transformedData
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     preview.noteCount = this.#countNotes(rawData);
