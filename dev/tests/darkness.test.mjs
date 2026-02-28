@@ -164,8 +164,8 @@ describe('calculateTimeOfDayColor()', () => {
 
   it('blends dawn to midday between sunrise and mid', () => {
     const result = calculateTimeOfDayColor(9, 24, 6, 18);
-    expect(result.hue).toBeGreaterThan(30); // between dawn(30) and midday(45)
-    expect(result.hue).toBeLessThanOrEqual(45);
+    expect(result.hue).toBeLessThan(30); // between dawn(30) and midday(0)
+    expect(result.hue).toBeGreaterThanOrEqual(0);
   });
 
   it('returns valid hue/intensity/luminosity structure', () => {

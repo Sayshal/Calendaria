@@ -147,9 +147,9 @@ export function calculateMoonIllumination(baseDarkness) {
  * @returns {{ hue: number, intensity: number, luminosity: number }} Time-based color values
  */
 export function calculateTimeOfDayColor(currentHour, hoursPerDay, sunrise = null, sunset = null, colorShift = null, minutesPerHour = 60) {
-  const dawn = { hue: colorShift?.dawnHue ?? 30, intensity: 0.25, luminosity: 0 };
-  const midday = { hue: 45, intensity: 0.3, luminosity: 0 };
-  const dusk = { hue: colorShift?.duskHue ?? 15, intensity: 0.25, luminosity: 0 };
+  const dawn = { hue: colorShift?.dawnHue ?? 30, intensity: 0.15, luminosity: 0 };
+  const midday = { hue: 0, intensity: 0, luminosity: 0 };
+  const dusk = { hue: colorShift?.duskHue ?? 15, intensity: 0.15, luminosity: 0 };
   const night = { hue: colorShift?.nightHue ?? 220, intensity: 0.12, luminosity: 0 };
   const transitionMinutes = colorShift?.transitionMinutes ?? 60;
   const transitionHours = transitionMinutes / minutesPerHour;

@@ -373,7 +373,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.ColorShiftSync.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.ALLOW_SIDEBAR_OVERLAP]: {
         name: 'CALENDARIA.Settings.AllowSidebarOverlap.Name',
