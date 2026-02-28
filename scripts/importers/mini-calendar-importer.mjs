@@ -98,15 +98,17 @@ export default class MiniCalendarImporter extends BaseImporter {
    * @private
    */
   async #extractJournalNotes() {
-    const journalName = 'Calendar Events - Mini Calendar';
-    const journal = game.journal.getName(journalName);
-    if (!journal) return [];
+    const journalNames = ['Calendar Events - Mini Calendar', 'Player Notes - Mini Calendar'];
     const notes = [];
-    for (const page of journal.pages) {
-      const pageNotes = page.flags?.['wgtgm-mini-calendar']?.notes || [];
-      for (const note of pageNotes) notes.push({ ...note, pageId: page.id, pageName: page.name, isJournalNote: true });
+    for (const journalName of journalNames) {
+      const journal = game.journal.getName(journalName);
+      if (!journal) continue;
+      for (const page of journal.pages) {
+        const pageNotes = page.flags?.['wgtgm-mini-calendar']?.notes || [];
+        for (const note of pageNotes) notes.push({ ...note, pageId: page.id, pageName: page.name, isJournalNote: true });
+      }
     }
-    log(3, `Extracted ${notes.length} notes from Mini Calendar journal`);
+    log(3, `Extracted ${notes.length} notes from Mini Calendar journals`);
     return notes;
   }
 
@@ -316,13 +318,16 @@ export default class MiniCalendarImporter extends BaseImporter {
   #extractFestivals(months = []) {
     if (this.importIntercalaryAsMonths) return [];
     const festivals = [];
-    let regularMonthIndex = 0;
+    let lastRegularMonthIndex = 0;
+    let regularCount = 0;
     for (const month of months) {
       if (month.intercalary) {
+        const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
         for (let day = 0; day < month.days; day++)
-          festivals.push({ name: month.days === 1 ? month.name : `${month.name} (Day ${day + 1})`, month: regularMonthIndex, dayOfMonth: day, countsForWeekday: false });
+          festivals.push({ name: month.days === 1 ? month.name : `${month.name} (Day ${day + 1})`, month: targetMonth, dayOfMonth: day, countsForWeekday: false });
       } else {
-        regularMonthIndex++;
+        lastRegularMonthIndex = regularCount;
+        regularCount++;
       }
     }
     return festivals;
@@ -414,14 +419,16 @@ export default class MiniCalendarImporter extends BaseImporter {
     for (const note of presetNotes) {
       const dateObj = note.date || note.startDate;
       if (!dateObj) continue;
+      const hasTime = note.hour != null;
       allNotes.push({
         name: note.title || note.name || 'Untitled',
         content: note.content || '',
-        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: 0, minute: 0, second: 0 },
+        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: note.hour ?? 0, minute: note.minute ?? 0, second: 0 },
         endDate: null,
-        allDay: true,
+        allDay: !hasTime,
         repeat: this.#transformRepeatRule(note.repeatUnit, note.repeatInterval),
         categories: [],
+        gmOnly: note.playerVisible === false,
         originalId: note.id,
         isPreset: note.isPreset ?? true,
         icon: note.icon,
@@ -435,14 +442,16 @@ export default class MiniCalendarImporter extends BaseImporter {
         this._undatedEvents.push({ name: note.title || note.name || 'Untitled', content: note.content || '' });
         continue;
       }
+      const hasTime = note.hour != null;
       allNotes.push({
         name: note.title || note.name || 'Untitled',
         content: note.content || '',
-        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: 0, minute: 0, second: 0 },
+        startDate: { year: dateObj.year ?? 0, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: note.hour ?? 0, minute: note.minute ?? 0, second: 0 },
         endDate: null,
-        allDay: true,
+        allDay: !hasTime,
         repeat: this.#transformRepeatRule(note.repeatUnit, note.repeatInterval),
         categories: [],
+        gmOnly: note.playerVisible === false,
         originalId: note.id,
         isPreset: note.isPreset ?? false,
         icon: note.icon,
@@ -477,7 +486,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       try {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
-        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
+        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories, gmOnly: note.gmOnly || false };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
