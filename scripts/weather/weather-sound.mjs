@@ -11,9 +11,6 @@ import WeatherManager from './weather-manager.mjs';
 /** Crossfade duration in milliseconds. */
 const FADE_MS = 2000;
 
-/** Target playback volume (before environment gain). */
-const VOLUME = 0.5;
-
 /** @type {object|null} Currently playing weather ambient sound. */
 let activeSound = null;
 
@@ -39,9 +36,11 @@ export function initializeWeatherSound() {
  */
 function onSceneUpdate(scene, change) {
   if (scene !== canvas?.scene) return;
-  const flagKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
-  if (!(flagKey in foundry.utils.flattenObject(change))) return;
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  const flat = foundry.utils.flattenObject(change);
+  const fxKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
+  const soundKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_SOUND_DISABLED}`;
+  if (!(fxKey in flat) && !(soundKey in flat)) return;
+  if (isSoundDisabledForScene(scene)) {
     stopSound();
   } else {
     const weather = WeatherManager.getCurrentWeather();
@@ -55,7 +54,7 @@ function onSceneUpdate(scene, change) {
 function onCanvasReady() {
   const scene = canvas?.scene;
   if (!scene) return;
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (isSoundDisabledForScene(scene)) {
     stopSound();
     return;
   }
@@ -78,7 +77,7 @@ function onWeatherChange({ current, bulk, visualOnly } = {}) {
     return;
   }
   const scene = game.scenes?.active;
-  if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (isSoundDisabledForScene(scene)) {
     stopSound();
     return;
   }
@@ -92,6 +91,16 @@ function onWeatherChange({ current, bulk, visualOnly } = {}) {
 async function fadeOutAndStop(sound) {
   await sound.fade(0, { duration: FADE_MS });
   sound.stop();
+}
+
+/**
+ * Check if weather sound is disabled for a scene (per-scene flag or FX disabled).
+ * @param {object} [scene] - Scene document
+ * @returns {boolean} Whether sound is disabled
+ */
+function isSoundDisabledForScene(scene) {
+  if (!scene) return false;
+  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED);
 }
 
 /**
@@ -113,7 +122,8 @@ async function playSound(weather) {
   const src = `modules/${MODULE.ID}/assets/sound/${soundKey}.ogg`;
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
-    sound.fade(VOLUME, { duration: FADE_MS });
+    const volume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+    sound.fade(volume, { duration: FADE_MS });
     activeSound = sound;
     activeSoundKey = soundKey;
     log(3, `Playing "${soundKey}"`);

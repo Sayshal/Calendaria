@@ -1077,6 +1077,13 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
+      [SETTINGS.WEATHER_SOUND_VOLUME]: {
+        name: 'CALENDARIA.Settings.Weather.SoundVolume.Name',
+        hint: 'CALENDARIA.Settings.Weather.SoundVolume.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 0.5, min: 0, max: 1, step: 0.05 })
+      },
       [SETTINGS.SAVED_TIMEPOINTS]: { name: 'Saved Timepoints', scope: 'world', config: false, type: new ArrayField(new ObjectField()) },
       [SETTINGS.MACRO_TRIGGERS]: {
         name: 'Macro Triggers',

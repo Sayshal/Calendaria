@@ -700,7 +700,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.FXMASTER_ENABLED]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.Enabled.Name' },
     [SETTINGS.FXMASTER_TOP_DOWN]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.TopDown.Name' },
     [SETTINGS.FXMASTER_BELOW_TOKENS]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowTokens.Name' },
-    [SETTINGS.WEATHER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundFx.Name' }
+    [SETTINGS.WEATHER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundFx.Name' },
+    [SETTINGS.WEATHER_SOUND_VOLUME]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundVolume.Name' }
   };
 
   /**
@@ -790,7 +791,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER
     ],
     'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.PRECIPITATION_UNIT],
-    'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX],
+    'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX, SETTINGS.WEATHER_SOUND_VOLUME],
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_BELOW_TOKENS],
     'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
@@ -1320,6 +1321,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.fxmasterTopDown = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN);
     context.fxmasterBelowTokens = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS);
     context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
+    context.weatherSoundVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
   }
 
   /**
@@ -1601,6 +1603,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('fxmasterTopDown' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN, !!data.fxmasterTopDown);
     if ('fxmasterBelowTokens' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, !!data.fxmasterBelowTokens);
     if ('weatherSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);
+    if ('weatherSoundVolume' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME, parseFloat(data.weatherSoundVolume));
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};

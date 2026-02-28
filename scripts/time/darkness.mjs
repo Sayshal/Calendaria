@@ -306,6 +306,7 @@ export async function onRenderSceneConfig(app, html, _data) {
   const climateZoneOverride = app.document.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
   const climateZones = WeatherManager.getCalendarZones?.() ?? [];
   const weatherFxDisabled = app.document.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) ?? false;
+  const weatherSoundDisabled = app.document.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) ?? false;
   const formGroup = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.SCENE_DARKNESS_SYNC, {
     moduleId: MODULE.ID,
     flagName: SCENE_FLAGS.DARKNESS_SYNC,
@@ -313,12 +314,14 @@ export async function onRenderSceneConfig(app, html, _data) {
     hudHideFlag: SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS,
     climateZoneFlag: SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE,
     weatherFxFlag: SCENE_FLAGS.WEATHER_FX_DISABLED,
+    weatherSoundFlag: SCENE_FLAGS.WEATHER_SOUND_DISABLED,
     value,
     brightnessMultiplier,
     hudHideForPlayers,
     climateZoneOverride,
     climateZones,
-    weatherFxDisabled
+    weatherFxDisabled,
+    weatherSoundDisabled
   });
   const ambientLightField = html.querySelector('[name="environment.globalLight.enabled"]')?.closest('.form-group');
   if (ambientLightField) ambientLightField.insertAdjacentHTML('afterend', formGroup);
