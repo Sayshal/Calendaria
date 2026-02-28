@@ -583,19 +583,23 @@ export default class CalendariaSettings {
         type: new StringField({ choices: { down: 'CALENDARIA.Settings.HUDTrayDirection.Down', up: 'CALENDARIA.Settings.HUDTrayDirection.Up' }, initial: 'down' }),
         onChange: renderHUD
       },
-      [SETTINGS.HUD_COMBAT_COMPACT]: {
-        name: 'CALENDARIA.Settings.HUDCombatCompact.Name',
-        hint: 'CALENDARIA.Settings.HUDCombatCompact.Hint',
+      [SETTINGS.HUD_COMBAT_COMPACT]: { name: 'Legacy Combat Compact', scope: 'user', config: false, type: new BooleanField({ initial: true }) },
+      [SETTINGS.HUD_COMBAT_HIDE]: { name: 'Legacy Combat Hide', scope: 'user', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.HUD_COMBAT_MODE]: {
+        name: 'CALENDARIA.Settings.HUDCombatMode.Name',
+        hint: 'CALENDARIA.Settings.HUDCombatMode.Hint',
         scope: 'user',
         config: false,
-        type: new BooleanField({ initial: true })
-      },
-      [SETTINGS.HUD_COMBAT_HIDE]: {
-        name: 'CALENDARIA.Settings.HUDCombatHide.Name',
-        hint: 'CALENDARIA.Settings.HUDCombatHide.Hint',
-        scope: 'user',
-        config: false,
-        type: new BooleanField({ initial: false })
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Settings.HUDCombatMode.None',
+            compactCombat: 'CALENDARIA.Settings.HUDCombatMode.CompactCombat',
+            compactEncounter: 'CALENDARIA.Settings.HUDCombatMode.CompactEncounter',
+            hideCombat: 'CALENDARIA.Settings.HUDCombatMode.HideCombat',
+            hideEncounter: 'CALENDARIA.Settings.HUDCombatMode.HideEncounter'
+          },
+          initial: 'compactCombat'
+        })
       },
       [SETTINGS.HUD_DOME_BELOW]: {
         name: 'CALENDARIA.Settings.HUDDomeBelow.Name',

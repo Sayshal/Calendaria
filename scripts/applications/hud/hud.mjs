@@ -171,7 +171,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const dialStyle = game.settings.get(MODULE.ID, SETTINGS.HUD_DIAL_STYLE);
     if (dialStyle === 'slice') return true;
     if (this.isCompact) return true;
-    if (this.#inCombat && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT)) return true;
+    const combatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+    if (this.#inCombat && (combatMode === 'compactCombat' || combatMode === 'compactEncounter')) return true;
     return false;
   }
 
@@ -392,15 +393,26 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       id: Hooks.on('combatStart', () => this.#onCombatChange(true))
     });
     this.#hooks.push({
+      name: 'createCombat',
+      id: Hooks.on('createCombat', () => this.#onEncounterChange(true))
+    });
+    this.#hooks.push({
       name: 'deleteCombat',
-      id: Hooks.on('deleteCombat', () => this.#onCombatChange(false))
+      id: Hooks.on('deleteCombat', () => {
+        this.#onCombatChange(false);
+        this.#onEncounterChange(false);
+      })
     });
     this.#hooks.push({
       name: 'updateCombat',
       id: Hooks.on('updateCombat', () => this.#onCombatChange(!!game.combat?.started))
     });
+    const combatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
     this.#inCombat = !!game.combat?.started;
-    if (this.#inCombat && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) {
+    if (this.#inCombat && (combatMode === 'hideCombat' || combatMode === 'hideEncounter')) {
+      HUD.#closedForCombat = true;
+      this.close({ combat: true });
+    } else if (game.combat && !game.combat.started && combatMode === 'hideEncounter') {
       HUD.#closedForCombat = true;
       this.close({ combat: true });
     }
@@ -417,14 +429,34 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #onCombatChange(inCombat) {
     if (this.#inCombat === inCombat) return;
     this.#inCombat = inCombat;
-    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) {
+    const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+    if (mode === 'hideCombat' || mode === 'hideEncounter') {
       if (inCombat) {
         HUD.#closedForCombat = true;
         this.close({ combat: true });
       }
       return;
     }
-    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT)) this.render();
+    if (mode === 'compactCombat' || mode === 'compactEncounter') this.render();
+  }
+
+  /**
+   * Handle encounter creation/deletion for encounter-level modes.
+   * @param {boolean} created - Whether an encounter was created
+   */
+  #onEncounterChange(created) {
+    const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+    if (mode === 'hideEncounter') {
+      if (created) {
+        HUD.#closedForCombat = true;
+        this.close({ combat: true });
+      }
+      return;
+    }
+    if (mode === 'compactEncounter') {
+      if (created) this.render();
+      else if (!game.combat) this.render();
+    }
   }
 
   /** @override */
@@ -1676,7 +1708,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {HUD|null} The HUD instance, or null if blocked by combat hide
    */
   static show() {
-    if (game.combat?.started && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return null;
+    const combatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+    if (game.combat?.started && (combatMode === 'hideCombat' || combatMode === 'hideEncounter')) return null;
+    if (game.combat && !game.combat.started && combatMode === 'hideEncounter') return null;
     if (!game.user.isGM && canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS)) return null;
     const instance = this.instance ?? new HUD();
     instance.render({ force: true });
@@ -1719,12 +1753,40 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Migrate legacy combat compact/hide booleans to the unified combat mode dropdown.
+   * @private
+   */
+  static #migrateCombatSettings() {
+    const currentMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+    if (currentMode !== 'compactCombat') return;
+    const legacyHide = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE);
+    const legacyCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
+    if (legacyHide) {
+      game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_MODE, 'hideCombat');
+    } else if (!legacyCompact) {
+      game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_MODE, 'none');
+    }
+  }
+
+  /**
    * Register global combat hooks for hide during combat functionality.
    * Should be called once during module initialization.
    */
   static registerCombatHooks() {
+    this.#migrateCombatSettings();
+
     Hooks.on('combatStart', () => {
-      if (!game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return;
+      const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+      if (mode !== 'hideCombat' && mode !== 'hideEncounter') return;
+      if (this.instance?.rendered) {
+        HUD.#closedForCombat = true;
+        this.instance.close({ combat: true });
+      }
+    });
+
+    Hooks.on('createCombat', () => {
+      const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+      if (mode !== 'hideEncounter') return;
       if (this.instance?.rendered) {
         HUD.#closedForCombat = true;
         this.instance.close({ combat: true });
@@ -1746,6 +1808,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onCombatEnd() {
     if (!HUD.#closedForCombat) return;
     HUD.#closedForCombat = false;
-    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE) && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
+    const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
+    if (mode !== 'none' && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
   }
 }

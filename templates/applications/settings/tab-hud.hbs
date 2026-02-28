@@ -100,22 +100,18 @@
       <p class="hint">{{localize "CALENDARIA.Settings.HUDTrayDirection.Hint"}}</p>
     </div>
 
-    <div class="form-group{{#if hudCombatHide}} disabled{{/if}}">
-      <label for="hudCombatCompact">{{localize "CALENDARIA.Settings.HUDCombatCompact.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" id="hudCombatCompact" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}}
-          {{#if hudCombatHide}}disabled aria-disabled="true" data-tooltip
-          aria-label="{{localize "CALENDARIA.Settings.HUDCombatCompact.DisabledTitle"}}" {{/if}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatCompact.Hint"}}</p>
-    </div>
-
     <div class="form-group">
-      <label for="hudCombatHide">{{localize "CALENDARIA.Settings.HUDCombatHide.Name"}}</label>
+      <label for="hudCombatMode">{{localize "CALENDARIA.Settings.HUDCombatMode.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" id="hudCombatHide" name="hudCombatHide" {{#if hudCombatHide}}checked{{/if}}>
+        <select id="hudCombatMode" name="hudCombatMode">
+          <option value="none" {{#if (eq hudCombatMode "none")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.None"}}</option>
+          <option value="compactCombat" {{#if (eq hudCombatMode "compactCombat")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.CompactCombat"}}</option>
+          <option value="compactEncounter" {{#if (eq hudCombatMode "compactEncounter")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.CompactEncounter"}}</option>
+          <option value="hideCombat" {{#if (eq hudCombatMode "hideCombat")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.HideCombat"}}</option>
+          <option value="hideEncounter" {{#if (eq hudCombatMode "hideEncounter")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.HideEncounter"}}</option>
+        </select>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatHide.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatMode.Hint"}}</p>
     </div>
 
     <div class="form-group">

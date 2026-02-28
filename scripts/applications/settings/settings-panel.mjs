@@ -628,8 +628,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CALENDAR_HUD_MODE]: { tab: 'hud', label: 'CALENDARIA.Settings.CalendarHUDMode.Name' },
     [SETTINGS.HUD_DIAL_STYLE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDDialStyle.Name' },
     [SETTINGS.HUD_TRAY_DIRECTION]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDTrayDirection.Name' },
-    [SETTINGS.HUD_COMBAT_COMPACT]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDCombatCompact.Name' },
-    [SETTINGS.HUD_COMBAT_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDCombatHide.Name' },
+    [SETTINGS.HUD_COMBAT_MODE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDCombatMode.Name' },
     [SETTINGS.HUD_DOME_BELOW]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDDomeBelow.Name' },
     [SETTINGS.HUD_DOME_AUTO_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.DomeAutoHide.Name' },
     [SETTINGS.HUD_SHOW_ALL_MOONS]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDShowAllMoons.Name' },
@@ -715,8 +714,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.HUD_CALENDAR_BUTTON,
       SETTINGS.HUD_DIAL_STYLE,
       SETTINGS.HUD_TRAY_DIRECTION,
-      SETTINGS.HUD_COMBAT_COMPACT,
-      SETTINGS.HUD_COMBAT_HIDE,
+      SETTINGS.HUD_COMBAT_MODE,
       SETTINGS.HUD_DOME_BELOW,
       SETTINGS.HUD_DOME_AUTO_HIDE,
       SETTINGS.HUD_SHOW_ALL_MOONS,
@@ -976,8 +974,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'down', label: localize('CALENDARIA.Settings.HUDTrayDirection.Down'), selected: trayDirection === 'down' },
       { value: 'up', label: localize('CALENDARIA.Settings.HUDTrayDirection.Up'), selected: trayDirection === 'up' }
     ];
-    context.hudCombatCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
-    context.hudCombatHide = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE);
+    context.hudCombatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
     context.hudDomeBelow = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW);
     context.hudDomeAutoHide = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE);
     context.hudShowAllMoons = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
@@ -1544,8 +1541,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudCalendarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON, data.hudCalendarButton);
     if ('hudDialStyle' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, data.hudDialStyle);
     if ('hudTrayDirection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_TRAY_DIRECTION, data.hudTrayDirection);
-    if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);
-    if ('hudCombatHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE, data.hudCombatHide);
+    if ('hudCombatMode' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_MODE, data.hudCombatMode);
     if ('hudDomeBelow' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DOME_BELOW, data.hudDomeBelow);
     if ('hudDomeAutoHide' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DOME_AUTO_HIDE, data.hudDomeAutoHide);
     if ('hudShowAllMoons' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS, data.hudShowAllMoons);
@@ -1809,8 +1805,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const hudKeys = [
       'hudDialStyle',
       'hudTrayDirection',
-      'hudCombatCompact',
-      'hudCombatHide',
+      'hudCombatMode',
       'hudDomeBelow',
       'hudDomeAutoHide',
       'hudShowAllMoons',

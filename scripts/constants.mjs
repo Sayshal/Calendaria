@@ -74,6 +74,7 @@ export const SETTINGS = {
   HUD_CALENDAR_BUTTON: 'hudCalendarButton',
   HUD_COMBAT_COMPACT: 'hudCombatCompact',
   HUD_COMBAT_HIDE: 'hudCombatHide',
+  HUD_COMBAT_MODE: 'hudCombatMode',
   HUD_CYCLES_DISPLAY_MODE: 'hudCyclesDisplayMode',
   HUD_DIAL_STYLE: 'hudDialStyle',
   HUD_DOME_AUTO_HIDE: 'hudDomeAutoHide',
