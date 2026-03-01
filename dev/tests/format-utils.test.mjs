@@ -3,7 +3,7 @@
  * @module Tests/FormatUtils
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock localization before importing
 vi.mock('../../scripts/utils/localization.mjs', () => ({
@@ -17,7 +17,37 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   }
 }));
 
-import { ordinal, toRomanNumeral, dateFormattingParts, formatShort, formatLong, formatFull, formatTime, formatTime12 } from '../../scripts/utils/formatting/format-utils.mjs';
+import {
+  ordinal,
+  toRomanNumeral,
+  dateFormattingParts,
+  formatShort,
+  formatLong,
+  formatFull,
+  formatOrdinal,
+  formatFantasy,
+  formatTime,
+  formatTime12,
+  formatDateTime,
+  formatDateTime12,
+  formatApproximateTime,
+  formatApproximateDate,
+  formatCustom,
+  validateFormatString,
+  hasMoonIconMarkers,
+  renderMoonIcons,
+  stripMoonIconMarkers,
+  formatDuration,
+  formatGameDuration,
+  resolveFormatString,
+  formatForLocation,
+  getDisplayLocationDefinitions,
+  getDisplayFormat,
+  timeSince,
+  getAvailableTokens,
+  DEFAULT_FORMAT_PRESETS,
+  LOCATION_DEFAULTS
+} from '../../scripts/utils/formatting/format-utils.mjs';
 import { addCalendarGetters } from '../__mocks__/calendar-manager.mjs';
 
 /* -------------------------------------------- */
@@ -273,6 +303,26 @@ describe('dateFormattingParts()', () => {
       expect(parts.ddd).toMatch(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/);
       expect(parts.dd).toHaveLength(2);
     });
+
+    it('returns EEEE/EEE/EE/E tokens', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.EEEE).toBe(parts.dddd);
+      expect(parts.EEE).toBe(parts.ddd);
+      expect(parts.EE).toBe(parts.ddd);
+      expect(parts.E).toBe(parts.ddd);
+    });
+
+    it('returns EEEEE single-letter weekday', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.EEEEE).toHaveLength(1);
+    });
+
+    it('returns week of year and week of month', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.w).toBeGreaterThanOrEqual(1);
+      expect(parts.ww).toMatch(/^\d{2}$/);
+      expect(parts.W).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('Hour tokens', () => {
@@ -352,6 +402,71 @@ describe('dateFormattingParts()', () => {
       expect(parts.eraAbbr).toBe('');
       expect(parts.eraYear).toBe('');
     });
+
+    it('returns G/GG/GGG/GGGG tokens', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.G).toBe('CE');
+      expect(parts.GG).toBe('CE');
+      expect(parts.GGG).toBe('CE');
+      expect(parts.GGGG).toBe('Common Era');
+    });
+
+    it('handles multiple eras with matchingEras array', () => {
+      const multiEraCal = addCalendarGetters({
+        ...mockCalendar,
+        eras: [
+          { name: 'Age of Kings', abbreviation: 'AK', startYear: 2000, endYear: 3000 },
+          { name: 'Golden Era', abbreviation: 'GE', startYear: 2020, endYear: 2030 }
+        ]
+      });
+      const parts = dateFormattingParts(multiEraCal, components);
+      expect(parts.matchingEras).toHaveLength(2);
+      expect(parts.matchingEras[0].name).toBe('Age of Kings');
+      expect(parts.matchingEras[1].name).toBe('Golden Era');
+    });
+  });
+
+  describe('Season tokens', () => {
+    it('returns season info when getCurrentSeason is available', () => {
+      const spring = { name: 'Spring', abbreviation: 'Spr' };
+      const seasonCal = addCalendarGetters({
+        ...mockCalendar,
+        seasons: {
+          values: [spring, { name: 'Summer', abbreviation: 'Sum' }]
+        },
+        getCurrentSeason: () => spring
+      });
+      const parts = dateFormattingParts(seasonCal, components);
+      expect(parts.QQQQ).toBe('Spring');
+      expect(parts.QQQ).toBe('Spr');
+      expect(parts.Q).toBe(1);
+      expect(parts.QQ).toBe('01');
+    });
+
+    it('returns empty season when no getCurrentSeason', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.QQQQ).toBe('');
+      expect(parts.QQQ).toBe('');
+      expect(parts.Q).toBe('');
+    });
+  });
+
+  describe('Climate zone tokens', () => {
+    it('returns zone info when getActiveClimateZone is available', () => {
+      const zoneCal = addCalendarGetters({
+        ...mockCalendar,
+        getActiveClimateZone: () => ({ id: 'temperate', name: 'Temperate' })
+      });
+      const parts = dateFormattingParts(zoneCal, components);
+      expect(parts.zzzz).toBe('Temperate');
+      expect(parts.z).toBe('Tem');
+    });
+
+    it('returns empty zone when no getActiveClimateZone', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.zzzz).toBe('');
+      expect(parts.z).toBe('');
+    });
   });
 
   describe('Monthless calendars', () => {
@@ -370,6 +485,59 @@ describe('dateFormattingParts()', () => {
       const parts = dateFormattingParts(monthlessCalendar, { ...components, dayOfMonth: 99 });
       expect(parts.D).toBe(100);
       expect(parts.Do).toBe('100th');
+    });
+  });
+
+  describe('Intercalary handling', () => {
+    it('returns empty D/DD/Do for intercalary festival days', () => {
+      const intercalaryCal = addCalendarGetters({
+        ...mockCalendar,
+        findFestivalDay: () => ({ name: 'Midwinter', countsForWeekday: false })
+      });
+      const parts = dateFormattingParts(intercalaryCal, components);
+      expect(parts.D).toBe('');
+      expect(parts.DD).toBe('');
+      expect(parts.Do).toBe('');
+      expect(parts.M).toBe('');
+      expect(parts.MM).toBe('');
+      expect(parts.MMMM).toBe('Midwinter');
+    });
+  });
+
+  describe('Named week tokens', () => {
+    it('returns named week when getCurrentWeek is available', () => {
+      const weekCal = addCalendarGetters({
+        ...mockCalendar,
+        getCurrentWeek: () => ({ weekName: 'Week of the Wolf', weekAbbr: 'Wolf' })
+      });
+      const parts = dateFormattingParts(weekCal, components);
+      expect(parts.namedWeek).toBe('Week of the Wolf');
+      expect(parts.namedWeekAbbr).toBe('Wolf');
+    });
+
+    it('abbreviates named week if no weekAbbr', () => {
+      const weekCal = addCalendarGetters({
+        ...mockCalendar,
+        getCurrentWeek: () => ({ weekName: 'Harvest' })
+      });
+      const parts = dateFormattingParts(weekCal, components);
+      expect(parts.namedWeekAbbr).toBe('Har');
+    });
+  });
+
+  describe('Year name tokens', () => {
+    it('returns year name when matching', () => {
+      const yearNameCal = addCalendarGetters({
+        ...mockCalendar,
+        years: { ...mockCalendar.years, names: [{ year: 2024, name: 'Year of the Dragon' }] }
+      });
+      const parts = dateFormattingParts(yearNameCal, components);
+      expect(parts.yearName).toBe('Year of the Dragon');
+    });
+
+    it('returns empty string when no year name matches', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.yearName).toBe('');
     });
   });
 
@@ -415,6 +583,32 @@ describe('formatFull()', () => {
   });
 });
 
+describe('formatOrdinal()', () => {
+  it('formats as "Do of MMMM, era"', () => {
+    const result = formatOrdinal(mockCalendar, { year: 2024, month: 0, dayOfMonth: 4 });
+    expect(result).toBe('5th of January, Common Era');
+  });
+
+  it('omits era when none matches', () => {
+    const noEraCal = addCalendarGetters({ ...mockCalendar, eras: [] });
+    const result = formatOrdinal(noEraCal, { year: 2024, month: 0, dayOfMonth: 4 });
+    expect(result).toBe('5th of January');
+  });
+});
+
+describe('formatFantasy()', () => {
+  it('formats as "Do of MMMM, y era"', () => {
+    const result = formatFantasy(mockCalendar, { year: 2024, month: 0, dayOfMonth: 4 });
+    expect(result).toBe('5th of January, 2024 Common Era');
+  });
+
+  it('omits era when none matches', () => {
+    const noEraCal = addCalendarGetters({ ...mockCalendar, eras: [] });
+    const result = formatFantasy(noEraCal, { year: 2024, month: 0, dayOfMonth: 4 });
+    expect(result).toBe('5th of January, 2024');
+  });
+});
+
 describe('formatTime()', () => {
   it('formats as "HH:mm"', () => {
     const result = formatTime(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 14, minute: 30 });
@@ -446,5 +640,745 @@ describe('formatTime12()', () => {
   it('handles noon', () => {
     const result = formatTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0, hour: 12, minute: 0 });
     expect(result).toBe('12:00 PM');
+  });
+});
+
+describe('formatDateTime()', () => {
+  it('formats as "D MMMM y, HH:mm"', () => {
+    const result = formatDateTime(mockCalendar, { year: 2024, month: 0, dayOfMonth: 4, hour: 14, minute: 30 });
+    expect(result).toBe('5 January 2024, 14:30');
+  });
+});
+
+describe('formatDateTime12()', () => {
+  it('formats as "D MMMM y, h:mm A"', () => {
+    const result = formatDateTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 4, hour: 14, minute: 30 });
+    expect(result).toBe('5 January 2024, 2:30 PM');
+  });
+
+  it('handles AM', () => {
+    const result = formatDateTime12(mockCalendar, { year: 2024, month: 0, dayOfMonth: 4, hour: 9, minute: 15 });
+    expect(result).toBe('5 January 2024, 9:15 AM');
+  });
+});
+
+/* -------------------------------------------- */
+/*  formatApproximateTime()                     */
+/* -------------------------------------------- */
+
+describe('formatApproximateTime()', () => {
+  it('returns Morning for early day hours', () => {
+    const result = formatApproximateTime(mockCalendar, { hour: 8 });
+    expect(result).toBe('CALENDARIA.Format.ApproxTime.Morning');
+  });
+
+  it('returns Noon for midday', () => {
+    const result = formatApproximateTime(mockCalendar, { hour: 12 });
+    expect(result).toBe('CALENDARIA.Format.ApproxTime.Noon');
+  });
+
+  it('returns Afternoon for post-noon hours', () => {
+    const result = formatApproximateTime(mockCalendar, { hour: 14 });
+    expect(result).toBe('CALENDARIA.Format.ApproxTime.Afternoon');
+  });
+
+  it('returns Night for late night hours', () => {
+    const result = formatApproximateTime(mockCalendar, { hour: 2 });
+    expect(result).toBe('CALENDARIA.Format.ApproxTime.Night');
+  });
+
+  it('returns Midnight for middle of the night', () => {
+    const result = formatApproximateTime(mockCalendar, { hour: 0 });
+    expect(result).toBe('CALENDARIA.Format.ApproxTime.Midnight');
+  });
+
+  it('defaults hour to 0 when missing', () => {
+    const result = formatApproximateTime(mockCalendar, {});
+    expect(result).toBe('CALENDARIA.Format.ApproxTime.Midnight');
+  });
+
+  it('uses custom sunrise/sunset from calendar', () => {
+    const customCal = addCalendarGetters({
+      ...mockCalendar,
+      sunrise: () => 8,
+      sunset: () => 20
+    });
+    const result = formatApproximateTime(customCal, { hour: 14 });
+    expect(result).toMatch(/CALENDARIA\.Format\.ApproxTime\.\w+/);
+  });
+});
+
+/* -------------------------------------------- */
+/*  formatApproximateDate()                     */
+/* -------------------------------------------- */
+
+describe('formatApproximateDate()', () => {
+  it('falls back to month name when no season', () => {
+    const result = formatApproximateDate(mockCalendar, { year: 2024, month: 0, dayOfMonth: 14 });
+    expect(result).toBe('January');
+  });
+
+  it('returns Early/Mid/Late season when getCurrentSeason available', () => {
+    const seasonCal = addCalendarGetters({
+      ...mockCalendar,
+      seasons: {
+        values: [{ name: 'Spring', monthStart: 2, monthEnd: 4, dayStart: 0, dayEnd: 30 }]
+      },
+      getCurrentSeason: () => ({ name: 'Spring', monthStart: 2, monthEnd: 4, dayStart: 0, dayEnd: 30 })
+    });
+    // March 1 = early spring
+    const result = formatApproximateDate(seasonCal, { year: 2024, month: 2, dayOfMonth: 0 });
+    expect(result).toMatch(/CALENDARIA\.Format\.ApproxDate\.(Early|Mid|Late)/);
+  });
+
+  it('handles seasons with dayStart/dayEnd only', () => {
+    const seasonCal = addCalendarGetters({
+      ...mockCalendar,
+      seasons: {
+        values: [{ name: 'Harvest', dayStart: 0, dayEnd: 100 }]
+      },
+      getCurrentSeason: () => ({ name: 'Harvest', dayStart: 0, dayEnd: 100 })
+    });
+    const result = formatApproximateDate(seasonCal, { year: 2024, month: 0, dayOfMonth: 10 });
+    expect(result).toMatch(/CALENDARIA\.Format\.ApproxDate\.Early/);
+  });
+});
+
+/* -------------------------------------------- */
+/*  formatCustom()                              */
+/* -------------------------------------------- */
+
+describe('formatCustom()', () => {
+  const components = { year: 2024, month: 0, dayOfMonth: 14, hour: 14, minute: 30, second: 45 };
+
+  it('replaces standard tokens', () => {
+    const result = formatCustom(mockCalendar, components, 'YYYY-MM-DD');
+    expect(result).toBe('2024-01-15');
+  });
+
+  it('replaces time tokens', () => {
+    const result = formatCustom(mockCalendar, components, 'HH:mm:ss');
+    expect(result).toBe('14:30:45');
+  });
+
+  it('replaces 12-hour tokens', () => {
+    const result = formatCustom(mockCalendar, components, 'h:mm A');
+    expect(result).toBe('2:30 PM');
+  });
+
+  it('handles literal text in brackets', () => {
+    const result = formatCustom(mockCalendar, components, '[Year] YYYY');
+    expect(result).toBe('Year 2024');
+  });
+
+  it('handles custom context tokens in brackets', () => {
+    const result = formatCustom(mockCalendar, components, '[era]');
+    expect(result).toBe('Common Era');
+  });
+
+  it('handles fallback syntax [primary|fallback]', () => {
+    // No season set, so primary 'season' is empty, fallback to MMMM
+    const result = formatCustom(mockCalendar, components, '[season|MMMM]');
+    expect(result).toBe('January');
+  });
+
+  it('uses primary when available in fallback syntax', () => {
+    const seasonCal = addCalendarGetters({
+      ...mockCalendar,
+      getCurrentSeason: () => ({ name: 'Winter' })
+    });
+    const result = formatCustom(seasonCal, components, '[season|MMMM]');
+    expect(result).toBe('Winter');
+  });
+
+  it('handles era index syntax [era=0]', () => {
+    const result = formatCustom(mockCalendar, components, '[era=0]');
+    expect(result).toBe('Common Era');
+  });
+
+  it('handles eraAbbr index syntax [eraAbbr=0]', () => {
+    const result = formatCustom(mockCalendar, components, '[eraAbbr=0]');
+    expect(result).toBe('CE');
+  });
+
+  it('handles yearInEra index syntax [yearInEra=0]', () => {
+    const result = formatCustom(mockCalendar, components, '[yearInEra=0]');
+    expect(result).toBe('2024');
+  });
+
+  it('returns empty for out-of-range era index', () => {
+    const result = formatCustom(mockCalendar, components, '[era=99]');
+    expect(result).toBe('');
+  });
+
+  it('handles weekday tokens', () => {
+    const result = formatCustom(mockCalendar, components, 'EEEE, Do MMMM');
+    expect(result).toMatch(/^\w+, 15th January$/);
+  });
+
+  it('handles mixed tokens and literals', () => {
+    const result = formatCustom(mockCalendar, components, 'D/MM/YYYY');
+    expect(result).toBe('15/01/2024');
+  });
+
+  it('handles ordinal day', () => {
+    const result = formatCustom(mockCalendar, { ...components, dayOfMonth: 0 }, 'Do');
+    expect(result).toBe('1st');
+  });
+
+  it('handles DDD (day of year)', () => {
+    const result = formatCustom(mockCalendar, components, 'DDD');
+    expect(result).toBe('015');
+  });
+
+  it('handles year tokens Y/YY/YYYY', () => {
+    const result = formatCustom(mockCalendar, { ...components, year: 7 }, 'Y YY YYYY');
+    expect(result).toBe('7 7 0007');
+  });
+
+  it('passes through unrecognized bracket tokens as literals', () => {
+    const result = formatCustom(mockCalendar, components, '[hello]');
+    expect(result).toBe('hello');
+  });
+
+  it('handles approxTime/approxDate custom tokens', () => {
+    const result = formatCustom(mockCalendar, components, '[approxTime]');
+    expect(result).toMatch(/CALENDARIA\.Format\.ApproxTime\.\w+/);
+  });
+
+  it('handles cycle tokens with cycle data', () => {
+    const cycleCal = addCalendarGetters({
+      ...mockCalendar,
+      cycles: [
+        {
+          name: 'Zodiac',
+          length: 12,
+          offset: 0,
+          stages: {
+            0: { name: 'Aries' },
+            1: { name: 'Taurus' },
+            2: { name: 'Gemini' },
+            3: { name: 'Cancer' },
+            4: { name: 'Leo' },
+            5: { name: 'Virgo' },
+            6: { name: 'Libra' },
+            7: { name: 'Scorpio' },
+            8: { name: 'Sagittarius' },
+            9: { name: 'Capricorn' },
+            10: { name: 'Aquarius' },
+            11: { name: 'Pisces' }
+          }
+        }
+      ]
+    });
+    const result = formatCustom(cycleCal, components, '[cycleName]');
+    expect(result).toBeTruthy();
+  });
+
+  it('handles indexed cycle tokens [cycleName=0]', () => {
+    const cycleCal = addCalendarGetters({
+      ...mockCalendar,
+      cycles: [
+        {
+          name: 'Zodiac',
+          length: 12,
+          offset: 0,
+          stages: {
+            0: { name: 'Aries' },
+            1: { name: 'Taurus' },
+            2: { name: 'Gemini' },
+            3: { name: 'Cancer' },
+            4: { name: 'Leo' },
+            5: { name: 'Virgo' },
+            6: { name: 'Libra' },
+            7: { name: 'Scorpio' },
+            8: { name: 'Sagittarius' },
+            9: { name: 'Capricorn' },
+            10: { name: 'Aquarius' },
+            11: { name: 'Pisces' }
+          }
+        }
+      ]
+    });
+    const result = formatCustom(cycleCal, components, '[cycleName=0]');
+    expect(result).toBeTruthy();
+  });
+
+  it('handles [cycleRoman=0]', () => {
+    const cycleCal = addCalendarGetters({
+      ...mockCalendar,
+      cycles: [{ name: 'Age', length: 5, offset: 0, stages: { 0: { name: 'A' }, 1: { name: 'B' }, 2: { name: 'C' }, 3: { name: 'D' }, 4: { name: 'E' } } }],
+      getCurrentCycleNumber: () => 3
+    });
+    const result = formatCustom(cycleCal, components, '[cycleRoman=0]');
+    expect(result).toBe('III');
+  });
+
+  it('handles [cycle=0]', () => {
+    const cycleCal = addCalendarGetters({
+      ...mockCalendar,
+      getCurrentCycleNumber: () => 5
+    });
+    const result = formatCustom(cycleCal, components, '[cycle=0]');
+    expect(result).toBe('5');
+  });
+});
+
+/* -------------------------------------------- */
+/*  validateFormatString()                      */
+/* -------------------------------------------- */
+
+describe('validateFormatString()', () => {
+  it('returns valid for empty/null input', () => {
+    expect(validateFormatString('')).toEqual({ valid: true });
+    expect(validateFormatString(null)).toEqual({ valid: true });
+  });
+
+  it('returns valid for simple format string', () => {
+    expect(validateFormatString('YYYY-MM-DD')).toEqual({ valid: true });
+  });
+
+  it('detects unclosed brackets', () => {
+    const result = validateFormatString('[hello');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('CALENDARIA.Format.Error.UnclosedBracket');
+  });
+
+  it('detects extra closing brackets', () => {
+    const result = validateFormatString('hello]');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('CALENDARIA.Format.Error.UnclosedBracket');
+  });
+
+  it('detects empty brackets', () => {
+    const result = validateFormatString('[]');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('CALENDARIA.Format.Error.EmptyBracket');
+  });
+
+  it('generates preview when calendar and components provided', () => {
+    const components = { year: 2024, month: 0, dayOfMonth: 14, hour: 14, minute: 30 };
+    const result = validateFormatString('YYYY-MM-DD', mockCalendar, components);
+    expect(result.valid).toBe(true);
+    expect(result.preview).toBe('2024-01-15');
+  });
+});
+
+/* -------------------------------------------- */
+/*  Moon icon markers                           */
+/* -------------------------------------------- */
+
+describe('hasMoonIconMarkers()', () => {
+  it('returns false for null/undefined', () => {
+    expect(hasMoonIconMarkers(null)).toBe(false);
+    expect(hasMoonIconMarkers(undefined)).toBe(false);
+  });
+
+  it('returns false for string without markers', () => {
+    expect(hasMoonIconMarkers('hello world')).toBe(false);
+  });
+
+  it('returns true for string with moon marker', () => {
+    expect(hasMoonIconMarkers('text __MOONICON:path|alt|tip|color__ more')).toBe(true);
+  });
+});
+
+describe('renderMoonIcons()', () => {
+  it('returns input for null/undefined', () => {
+    expect(renderMoonIcons(null)).toBe(null);
+    expect(renderMoonIcons(undefined)).toBe(undefined);
+  });
+
+  it('returns input for string without markers', () => {
+    expect(renderMoonIcons('hello')).toBe('hello');
+  });
+
+  it('converts marker to img element', () => {
+    const input = '__MOONICON:icons/moon.png|Full Moon|Luna: Full Moon|__';
+    const result = renderMoonIcons(input);
+    expect(result).toContain('<img');
+    expect(result).toContain('src="icons/moon.png"');
+    expect(result).toContain('alt="Full Moon"');
+    expect(result).toContain('data-tooltip="Luna: Full Moon"');
+  });
+
+  it('wraps in tinted span when color is provided', () => {
+    const input = '__MOONICON:icons/moon.png|Full Moon|Luna: Full Moon|#ff0000__';
+    const result = renderMoonIcons(input);
+    expect(result).toContain('class="calendaria-moon-icon tinted"');
+    expect(result).toContain('--moon-color: #ff0000');
+  });
+
+  it('handles multiple markers in one string', () => {
+    const input = 'text __MOONICON:a.png|A|TipA|__ and __MOONICON:b.png|B|TipB|#00f__';
+    const result = renderMoonIcons(input);
+    expect(result).toContain('src="a.png"');
+    expect(result).toContain('src="b.png"');
+  });
+});
+
+describe('stripMoonIconMarkers()', () => {
+  it('returns input for null/undefined', () => {
+    expect(stripMoonIconMarkers(null)).toBe(null);
+    expect(stripMoonIconMarkers(undefined)).toBe(undefined);
+  });
+
+  it('returns input for string without markers', () => {
+    expect(stripMoonIconMarkers('hello')).toBe('hello');
+  });
+
+  it('removes moon markers from string', () => {
+    const input = 'before __MOONICON:icons/moon.png|Full Moon|Tip|#fff__ after';
+    expect(stripMoonIconMarkers(input)).toBe('before  after');
+  });
+});
+
+/* -------------------------------------------- */
+/*  formatDuration()                            */
+/* -------------------------------------------- */
+
+describe('formatDuration()', () => {
+  it('formats default HH:mm:ss.SSS', () => {
+    // 1h 23m 45s 678ms
+    const ms = (1 * 3600 + 23 * 60 + 45) * 1000 + 678;
+    expect(formatDuration(ms)).toBe('01:23:45.678');
+  });
+
+  it('formats HH:mm:ss', () => {
+    const ms = (2 * 3600 + 5 * 60 + 3) * 1000;
+    expect(formatDuration(ms, 'HH:mm:ss')).toBe('02:05:03');
+  });
+
+  it('formats mm:ss.SSS', () => {
+    const ms = (1 * 3600 + 2 * 60 + 3) * 1000 + 456;
+    expect(formatDuration(ms, 'mm:ss.SSS')).toBe('62:03.456');
+  });
+
+  it('formats mm:ss', () => {
+    const ms = (5 * 60 + 30) * 1000;
+    expect(formatDuration(ms, 'mm:ss')).toBe('05:30');
+  });
+
+  it('formats ss.SSS', () => {
+    const ms = 3500;
+    expect(formatDuration(ms, 'ss.SSS')).toBe('03:500');
+  });
+
+  it('formats ss', () => {
+    const ms = 90 * 1000;
+    expect(formatDuration(ms, 'ss')).toBe('90');
+  });
+
+  it('uses default format for unknown format string', () => {
+    const ms = 1000;
+    const result = formatDuration(ms, 'unknown');
+    expect(result).toBe('00:00:01.000');
+  });
+
+  it('handles zero', () => {
+    expect(formatDuration(0)).toBe('00:00:00.000');
+  });
+});
+
+/* -------------------------------------------- */
+/*  formatGameDuration()                        */
+/* -------------------------------------------- */
+
+describe('formatGameDuration()', () => {
+  it('formats HH:mm:ss', () => {
+    const secs = 2 * 3600 + 15 * 60 + 30;
+    expect(formatGameDuration(secs, mockCalendar, 'HH:mm:ss')).toBe('02:15:30');
+  });
+
+  it('includes day prefix for durations >= 1 day', () => {
+    const secs = 25 * 3600 + 30 * 60;
+    expect(formatGameDuration(secs, mockCalendar, 'HH:mm:ss')).toBe('1d 01:30:00');
+  });
+
+  it('formats mm:ss', () => {
+    const secs = 3 * 60 + 45;
+    expect(formatGameDuration(secs, mockCalendar, 'mm:ss')).toBe('03:45');
+  });
+
+  it('formats ss', () => {
+    const secs = 90;
+    expect(formatGameDuration(secs, mockCalendar, 'ss')).toBe('90');
+  });
+
+  it('formats HH:mm:ss.SSS (with .000 suffix)', () => {
+    const secs = 3661;
+    expect(formatGameDuration(secs, mockCalendar, 'HH:mm:ss.SSS')).toBe('01:01:01.000');
+  });
+
+  it('formats mm:ss.SSS', () => {
+    const secs = 125;
+    expect(formatGameDuration(secs, mockCalendar, 'mm:ss.SSS')).toBe('02:05.000');
+  });
+
+  it('formats ss.SSS', () => {
+    const secs = 5;
+    expect(formatGameDuration(secs, mockCalendar, 'ss.SSS')).toBe('05.000');
+  });
+
+  it('uses default format for unknown format string', () => {
+    const secs = 3661;
+    const result = formatGameDuration(secs, mockCalendar, 'unknown');
+    expect(result).toBe('01:01:01');
+  });
+
+  it('handles null calendar with defaults', () => {
+    const secs = 3661;
+    expect(formatGameDuration(secs, null, 'HH:mm:ss')).toBe('01:01:01');
+  });
+
+  it('handles custom time units', () => {
+    const customCal = addCalendarGetters({
+      ...mockCalendar,
+      days: { ...mockCalendar.days, hoursPerDay: 10, minutesPerHour: 100, secondsPerMinute: 100 }
+    });
+    // 1 hour = 100 * 100 = 10000 seconds in this calendar
+    expect(formatGameDuration(10000, customCal, 'HH:mm:ss')).toBe('01:00:00');
+  });
+});
+
+/* -------------------------------------------- */
+/*  resolveFormatString()                       */
+/* -------------------------------------------- */
+
+describe('resolveFormatString()', () => {
+  it('resolves known preset names', () => {
+    expect(resolveFormatString('dateShort')).toBe('D MMM');
+    expect(resolveFormatString('dateLong')).toBe('D MMMM, Y');
+    expect(resolveFormatString('time24')).toBe('HH:mm');
+    expect(resolveFormatString('time12')).toBe('h:mm A');
+    expect(resolveFormatString('dateISO')).toBe('YYYY-MM-DD');
+  });
+
+  it('returns custom format string as-is', () => {
+    expect(resolveFormatString('Do [of] MMMM')).toBe('Do [of] MMMM');
+  });
+});
+
+/* -------------------------------------------- */
+/*  getDisplayFormat()                          */
+/* -------------------------------------------- */
+
+describe('getDisplayFormat()', () => {
+  beforeEach(() => {
+    game.settings.get.mockReset();
+  });
+
+  it('returns location default when settings throws', () => {
+    game.settings.get.mockImplementation(() => {
+      throw new Error('not registered');
+    });
+    expect(getDisplayFormat('hudDate')).toBe('ordinal');
+  });
+
+  it('returns location default when no format set', () => {
+    game.settings.get.mockReturnValue({});
+    expect(getDisplayFormat('hudDate')).toBe('ordinal');
+  });
+
+  it('returns GM format for GM users', () => {
+    game.settings.get.mockReturnValue({ hudDate: { gm: 'dateFull', player: 'dateShort' } });
+    game.user.isGM = true;
+    expect(getDisplayFormat('hudDate')).toBe('dateFull');
+  });
+
+  it('returns player format for non-GM users', () => {
+    game.settings.get.mockReturnValue({ hudDate: { gm: 'dateFull', player: 'dateShort' } });
+    game.user.isGM = false;
+    expect(getDisplayFormat('hudDate')).toBe('dateShort');
+    game.user.isGM = true; // restore
+  });
+
+  it('falls back to dateLong for unknown location', () => {
+    game.settings.get.mockReturnValue({});
+    expect(getDisplayFormat('unknownLocation')).toBe('dateLong');
+  });
+});
+
+/* -------------------------------------------- */
+/*  formatForLocation()                         */
+/* -------------------------------------------- */
+
+describe('formatForLocation()', () => {
+  beforeEach(() => {
+    game.settings.get.mockReset();
+  });
+
+  it('formats using preset from settings', () => {
+    game.settings.get.mockReturnValue({ hudDate: { gm: 'dateShort' } });
+    game.user.isGM = true;
+    const result = formatForLocation(mockCalendar, { year: 2024, month: 0, dayOfMonth: 14, hour: 12 }, 'hudDate');
+    expect(result).toBe('15 Jan');
+  });
+
+  it('handles calendarDefault setting', () => {
+    game.settings.get.mockReturnValue({ hudDate: { gm: 'calendarDefault' } });
+    const calWithFormats = addCalendarGetters({
+      ...mockCalendar,
+      dateFormats: { dateLong: 'YYYY/MM/DD' }
+    });
+    const result = formatForLocation(calWithFormats, { year: 2024, month: 0, dayOfMonth: 14, hour: 12 }, 'hudDate');
+    expect(result).toBe('2024/01/15');
+  });
+
+  it('handles off preset', () => {
+    game.settings.get.mockReturnValue({ hudDate: { gm: 'off' } });
+    const result = formatForLocation(mockCalendar, { year: 2024, month: 0, dayOfMonth: 14 }, 'hudDate');
+    expect(result).toBe('');
+  });
+});
+
+/* -------------------------------------------- */
+/*  getDisplayLocationDefinitions()             */
+/* -------------------------------------------- */
+
+describe('getDisplayLocationDefinitions()', () => {
+  it('returns array of location definitions', () => {
+    const defs = getDisplayLocationDefinitions();
+    expect(defs).toBeInstanceOf(Array);
+    expect(defs.length).toBeGreaterThan(0);
+  });
+
+  it('each definition has id, label, category', () => {
+    const defs = getDisplayLocationDefinitions();
+    for (const def of defs) {
+      expect(def).toHaveProperty('id');
+      expect(def).toHaveProperty('label');
+      expect(def).toHaveProperty('category');
+    }
+  });
+
+  it('includes expected locations', () => {
+    const defs = getDisplayLocationDefinitions();
+    const ids = defs.map((d) => d.id);
+    expect(ids).toContain('hudDate');
+    expect(ids).toContain('hudTime');
+    expect(ids).toContain('miniCalHeader');
+    expect(ids).toContain('bigCalHeader');
+    expect(ids).toContain('chatTimestamp');
+  });
+});
+
+/* -------------------------------------------- */
+/*  timeSince()                                 */
+/* -------------------------------------------- */
+
+describe('timeSince()', () => {
+  const today = { year: 2024, month: 0, dayOfMonth: 15 };
+
+  it('returns Today for same date', () => {
+    expect(timeSince(today, today)).toBe('CALENDARIA.Format.Today');
+  });
+
+  it('returns Tomorrow for next day', () => {
+    const tomorrow = { ...today, dayOfMonth: 16 };
+    expect(timeSince(tomorrow, today)).toBe('CALENDARIA.Format.Tomorrow');
+  });
+
+  it('returns Yesterday for previous day', () => {
+    const yesterday = { ...today, dayOfMonth: 14 };
+    expect(timeSince(yesterday, today)).toBe('CALENDARIA.Format.Yesterday');
+  });
+
+  it('returns InFuture for days ahead', () => {
+    const future = { ...today, dayOfMonth: 20 };
+    const result = timeSince(future, today);
+    expect(result).toBe('CALENDARIA.Format.InFuture');
+  });
+
+  it('returns InPast for days behind', () => {
+    const past = { ...today, dayOfMonth: 10 };
+    const result = timeSince(past, today);
+    expect(result).toBe('CALENDARIA.Format.InPast');
+  });
+
+  it('returns InFuture for week-scale differences', () => {
+    const future = { year: 2024, month: 1, dayOfMonth: 0 };
+    const result = timeSince(future, today);
+    expect(result).toBe('CALENDARIA.Format.InFuture');
+  });
+
+  it('returns InFuture for month-scale differences', () => {
+    const future = { year: 2024, month: 4, dayOfMonth: 15 };
+    const result = timeSince(future, today);
+    expect(result).toBe('CALENDARIA.Format.InFuture');
+  });
+
+  it('returns InFuture for year-scale differences', () => {
+    const future = { year: 2026, month: 0, dayOfMonth: 15 };
+    const result = timeSince(future, today);
+    expect(result).toBe('CALENDARIA.Format.InFuture');
+  });
+
+  it('returns InPast for year-scale past differences', () => {
+    const past = { year: 2020, month: 0, dayOfMonth: 15 };
+    const result = timeSince(past, today);
+    expect(result).toBe('CALENDARIA.Format.InPast');
+  });
+});
+
+/* -------------------------------------------- */
+/*  getAvailableTokens()                        */
+/* -------------------------------------------- */
+
+describe('getAvailableTokens()', () => {
+  it('returns array of token definitions', () => {
+    const tokens = getAvailableTokens();
+    expect(tokens).toBeInstanceOf(Array);
+    expect(tokens.length).toBeGreaterThan(0);
+  });
+
+  it('each token has required fields', () => {
+    const tokens = getAvailableTokens();
+    for (const t of tokens) {
+      expect(t).toHaveProperty('token');
+      expect(t).toHaveProperty('descriptionKey');
+      expect(t).toHaveProperty('type');
+    }
+  });
+
+  it('includes standard tokens', () => {
+    const tokens = getAvailableTokens();
+    const names = tokens.map((t) => t.token);
+    expect(names).toContain('YYYY');
+    expect(names).toContain('MM');
+    expect(names).toContain('DD');
+    expect(names).toContain('HH');
+  });
+
+  it('includes custom tokens', () => {
+    const tokens = getAvailableTokens();
+    const customTokens = tokens.filter((t) => t.type === 'custom');
+    expect(customTokens.length).toBeGreaterThan(0);
+  });
+});
+
+/* -------------------------------------------- */
+/*  Constants                                   */
+/* -------------------------------------------- */
+
+describe('DEFAULT_FORMAT_PRESETS', () => {
+  it('contains expected preset keys', () => {
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('dateShort');
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('dateLong');
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('time24');
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('time12');
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('dateISO');
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('datetime24');
+    expect(DEFAULT_FORMAT_PRESETS).toHaveProperty('datetime12');
+  });
+});
+
+describe('LOCATION_DEFAULTS', () => {
+  it('contains expected location keys', () => {
+    expect(LOCATION_DEFAULTS).toHaveProperty('hudDate');
+    expect(LOCATION_DEFAULTS).toHaveProperty('hudTime');
+    expect(LOCATION_DEFAULTS).toHaveProperty('miniCalHeader');
+    expect(LOCATION_DEFAULTS).toHaveProperty('bigCalHeader');
+    expect(LOCATION_DEFAULTS).toHaveProperty('chatTimestamp');
   });
 });

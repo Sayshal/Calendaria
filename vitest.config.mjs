@@ -39,6 +39,14 @@ export default defineConfig({
         '**/utils/migrations.mjs',
         '**/utils/widget-manager.mjs',
         '**/utils/macro-utils.mjs',
+        '**/utils/keybinds.mjs',
+        '**/utils/localization.mjs',
+        '**/utils/logger.mjs',
+        '**/utils/theme-utils.mjs',
+        '**/settings-handler.mjs',
+        '**/calendar/calendar-loader.mjs',
+        '**/calendar/calendar-registry.mjs',
+        '**/data/calendar-note-data-model.mjs',
         '**/time/time-clock.mjs'
       ],
       thresholds: {
