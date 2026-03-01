@@ -333,6 +333,7 @@ export default class CalendariaSettings {
       weatherZoneMigrationComplete: { name: 'Weather Zone Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       legacyCalendarMigrationComplete: { name: 'Legacy Calendar Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       dateIndexingMigrationComplete: { name: 'Date Indexing Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      tokenMigrationComplete: { name: 'Token Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',

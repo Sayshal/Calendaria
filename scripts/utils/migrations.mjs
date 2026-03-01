@@ -228,7 +228,9 @@ async function migratePresets() {
  * @returns {Promise<Array>} List of changes made
  */
 async function migrateAllTokens() {
+  const KEY = 'tokenMigrationComplete';
   if (!game.user?.isGM) return [];
+  if (game.settings.get(MODULE.ID, KEY)) return [];
   const changes = [];
   try {
     const cals = game.settings.get(MODULE.ID, 'customCalendars') || {};
@@ -261,6 +263,7 @@ async function migrateAllTokens() {
     log(1, 'Override token migration failed', e);
   }
   changes.push(...(await migrateDisplayTokens()), ...(await migratePresets()));
+  await game.settings.set(MODULE.ID, KEY, true);
   return changes;
 }
 
