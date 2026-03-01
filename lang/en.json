@@ -1445,6 +1445,7 @@
   "CALENDARIA.Repeat.weekly": "Weekly",
   "CALENDARIA.Repeat.weekOfMonth": "Week of Month",
   "CALENDARIA.Repeat.yearly": "Yearly",
+  "CALENDARIA.Scene.Tab": "Calendaria",
   "CALENDARIA.Scene.BrightnessMultiplier.Hint": "Adjust how bright this scene gets during daytime. Lower values = dimmer sunlight (e.g., arctic tundra), higher values = brighter (e.g., desert).",
   "CALENDARIA.Scene.BrightnessMultiplier.Name": "Brightness Multiplier",
   "CALENDARIA.Scene.ClimateZoneOverride.Choices.Default": "Use Calendar Default",

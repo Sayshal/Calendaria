@@ -11,7 +11,7 @@ import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS } from './constants.mjs';
 import { onLongRest, onPreRest } from './integrations/rest-time.mjs';
 import NoteManager from './notes/note-manager.mjs';
-import { onMoonPhaseChange, onRenderSceneConfig, onUpdateScene, onWeatherChange } from './time/darkness.mjs';
+import { onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/darkness.mjs';
 import TimeClock from './time/time-clock.mjs';
 import { onChatMessage } from './utils/chat/chat-commands.mjs';
 import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessageHTML } from './utils/chat/chat-timestamp.mjs';
@@ -41,7 +41,6 @@ export function registerHooks() {
   Hooks.on('renderChatMessageHTML', onRenderAnnouncementMessage);
   Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);
   Hooks.on('renderDocumentDirectory', onRenderDocumentDirectory);
-  Hooks.on('renderSceneConfig', onRenderSceneConfig);
   Hooks.on('updateJournalEntryPage', NoteManager.onUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('updateScene', onUpdateScene);
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));

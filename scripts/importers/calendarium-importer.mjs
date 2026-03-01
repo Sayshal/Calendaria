@@ -519,8 +519,9 @@ export default class CalendariumImporter extends BaseImporter {
 
   /**
    * Generate preview data with Calendarium-specific category and intercalary info.
-   * @param rawData
-   * @param transformedData
+   * @param {object} rawData - Raw Calendarium export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional Calendarium-specific fields
    */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);

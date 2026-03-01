@@ -566,8 +566,9 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
 
   /**
    * Generate preview data with STK-specific scene and weather info.
-   * @param rawData
-   * @param transformedData
+   * @param {object} rawData - Raw STK export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional STK-specific fields
    */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);

@@ -4,7 +4,7 @@
  * @author Tyler
  */
 
-import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../constants.mjs';
+import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { getMoonPhasePosition } from '../utils/formatting/moon-utils.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -288,51 +288,6 @@ function buildEnvironmentUpdateData(_scene, lighting) {
   if (lighting.dark.luminosity !== null) updateData['environment.dark.luminosity'] = lighting.dark.luminosity;
   if (lighting.dark.shadows !== null) updateData['environment.dark.shadows'] = lighting.dark.shadows;
   return Object.keys(updateData).length > 0 ? updateData : null;
-}
-
-/**
- * Inject the darkness sync override setting into the scene configuration sheet.
- * @param {object} app - The scene configuration application
- * @param {HTMLElement} html - The rendered HTML element
- * @param {object} _data - The scene data
- */
-export async function onRenderSceneConfig(app, html, _data) {
-  const flagValue = app.document.getFlag(MODULE.ID, SCENE_FLAGS.DARKNESS_SYNC);
-  let value = 'default';
-  if (flagValue === true || flagValue === 'enabled') value = 'enabled';
-  else if (flagValue === false || flagValue === 'disabled') value = 'disabled';
-  const brightnessMultiplier = app.document.getFlag(MODULE.ID, SCENE_FLAGS.BRIGHTNESS_MULTIPLIER) ?? 1.0;
-  const hudHideForPlayers = app.document.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS) ?? false;
-  const climateZoneOverride = app.document.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
-  const climateZones = WeatherManager.getCalendarZones?.() ?? [];
-  const weatherFxDisabled = app.document.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) ?? false;
-  const weatherSoundDisabled = app.document.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) ?? false;
-  const formGroup = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.SCENE_DARKNESS_SYNC, {
-    moduleId: MODULE.ID,
-    flagName: SCENE_FLAGS.DARKNESS_SYNC,
-    brightnessFlag: SCENE_FLAGS.BRIGHTNESS_MULTIPLIER,
-    hudHideFlag: SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS,
-    climateZoneFlag: SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE,
-    weatherFxFlag: SCENE_FLAGS.WEATHER_FX_DISABLED,
-    weatherSoundFlag: SCENE_FLAGS.WEATHER_SOUND_DISABLED,
-    value,
-    brightnessMultiplier,
-    hudHideForPlayers,
-    climateZoneOverride,
-    climateZones,
-    weatherFxDisabled,
-    weatherSoundDisabled
-  });
-  const ambientLightField = html.querySelector('[name="environment.globalLight.enabled"]')?.closest('.form-group');
-  if (ambientLightField) ambientLightField.insertAdjacentHTML('afterend', formGroup);
-  else log(2, 'Could not find ambiance section to inject darkness sync setting');
-  const rangeInput = html.querySelector(`[name="flags.${MODULE.ID}.${SCENE_FLAGS.BRIGHTNESS_MULTIPLIER}"]`);
-  if (rangeInput) {
-    rangeInput.addEventListener('input', (event) => {
-      const display = event.target.parentElement.querySelector('.range-value');
-      if (display) display.textContent = `${event.target.value}x`;
-    });
-  }
 }
 
 /**

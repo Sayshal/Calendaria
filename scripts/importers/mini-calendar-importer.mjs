@@ -476,8 +476,9 @@ export default class MiniCalendarImporter extends BaseImporter {
 
   /**
    * Import MC notes with yearZero offset and gmOnly support.
-   * @param notes
-   * @param options
+   * @param {object[]} notes - Array of note objects to import
+   * @param {object} options - Import options including calendarId
+   * @returns {Promise<object>} Result with success, count, and errors
    */
   async importNotes(notes, options = {}) {
     const { calendarId } = options;
@@ -504,8 +505,9 @@ export default class MiniCalendarImporter extends BaseImporter {
 
   /**
    * Import MC festivals into the target calendar.
-   * @param festivals
-   * @param options
+   * @param {object[]} festivals - Array of festival objects to import
+   * @param {object} options - Import options including calendarId
+   * @returns {Promise<object>} Result with success, count, and errors
    */
   async importFestivals(festivals, options = {}) {
     const { calendarId } = options;
@@ -552,8 +554,9 @@ export default class MiniCalendarImporter extends BaseImporter {
 
   /**
    * Generate preview data with MC-specific source and biome info.
-   * @param rawData
-   * @param transformedData
+   * @param {object} rawData - Raw MC export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional MC-specific fields
    */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);

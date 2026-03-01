@@ -111,7 +111,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
 
   /**
    * Get available calendar choices from multi-calendar SC data.
-   * @param data
+   * @param {object} data - Raw SC export data
+   * @returns {object[]|null} Array of calendar choices or null if single calendar
    */
   getCalendarChoices(data) {
     const calendars = data.calendars || data;
@@ -529,8 +530,9 @@ export default class SimpleCalendarImporter extends BaseImporter {
 
   /**
    * Import SC notes with category and gmOnly support.
-   * @param notes
-   * @param options
+   * @param {object[]} notes - Array of note objects to import
+   * @param {object} options - Import options including calendarId
+   * @returns {Promise<object>} Result with success, count, and errors
    */
   async importNotes(notes, options = {}) {
     const { calendarId } = options;
@@ -647,8 +649,9 @@ export default class SimpleCalendarImporter extends BaseImporter {
 
   /**
    * Generate preview data with SC-specific note and category counts.
-   * @param rawData
-   * @param transformedData
+   * @param {object} rawData - Raw SC export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional SC-specific fields
    */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);

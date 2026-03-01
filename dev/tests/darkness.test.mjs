@@ -37,7 +37,6 @@ vi.mock('../../scripts/constants.mjs', () => ({
     CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
     WEATHER_FX_DISABLED: 'weatherFxDisabled'
   },
-  TEMPLATES: { PARTIALS: { SCENE_DARKNESS_SYNC: '' } },
   SOCKET_TYPES: { HUD_VISIBILITY: 'hudVisibility' }
 }));
 vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({

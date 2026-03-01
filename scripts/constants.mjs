@@ -228,7 +228,6 @@ export const TEMPLATES = {
     TOKEN_REFERENCE: `modules/${MODULE.ID}/templates/applications/dialogs/token-reference.hbs`
   },
   PARTIALS: {
-    SCENE_DARKNESS_SYNC: `modules/${MODULE.ID}/templates/partials/scene-darkness-sync.hbs`,
     DATE_PICKER: `modules/${MODULE.ID}/templates/partials/dialog-date-picker.hbs`,
     CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`,
     RELEASE_MESSAGE: `modules/${MODULE.ID}/templates/chat/release-message.hbs`
@@ -240,6 +239,9 @@ export const TEMPLATES = {
   CALENDAR_HUD: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud.hbs`,
   CALENDAR_HUD_DOME: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud-dome.hbs`,
   CALENDAR_HUD_BAR: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud-bar.hbs`,
+  SCENE: {
+    CONFIG_CALENDARIA: `modules/${MODULE.ID}/templates/scene/scene-config-calendaria.hbs`
+  },
   SHEETS: {
     CALENDAR_HEADER: `modules/${MODULE.ID}/templates/applications/sheets/calendar-header.hbs`,
     CALENDAR_GRID: `modules/${MODULE.ID}/templates/applications/sheets/calendar-grid.hbs`,

@@ -42,6 +42,7 @@ import NoteManager from './scripts/notes/note-manager.mjs';
 import CalendariaSettings from './scripts/settings-handler.mjs';
 import { CalendarNoteDataModel } from './scripts/data/calendar-note-data-model.mjs';
 import { CalendarNoteSheet } from './scripts/applications/sheets/calendar-note-sheet.mjs';
+import { CalendariaSceneConfig } from './scripts/applications/sheets/calendaria-scene-config.mjs';
 import EventScheduler from './scripts/time/event-scheduler.mjs';
 import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
 import TimeClock from './scripts/time/time-clock.mjs';
@@ -69,6 +70,8 @@ Hooks.once('init', async () => {
   Object.assign(CONFIG.JournalEntryPage.dataModels, { [JOURNALS.CALENDAR_NOTE]: CalendarNoteDataModel });
   CONFIG.JournalEntryPage.sheetClasses[JOURNALS.CALENDAR_NOTE] = {};
   foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, SHEETS.CALENDARIA, CalendarNoteSheet, { types: [JOURNALS.CALENDAR_NOTE], makeDefault: true, label: 'Calendar Note' });
+  foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Scene, 'core', foundry.applications.sheets.SceneConfig);
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Scene, MODULE.ID, CalendariaSceneConfig, { makeDefault: true, label: 'Calendaria Scene Config' });
   await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES).flatMap((v) => (typeof v === 'string' ? v : Object.values(v))));
   log(3, 'Calendaria module initialized.');
 });

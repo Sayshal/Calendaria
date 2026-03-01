@@ -1010,8 +1010,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
 
   /**
    * Generate preview data with FC-specific category and cycle counts.
-   * @param rawData
-   * @param transformedData
+   * @param {object} rawData - Raw Fantasy Calendar export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional FC-specific fields
    */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
