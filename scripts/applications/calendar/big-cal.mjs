@@ -618,7 +618,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     while (true) {
       const festivalDay = calendar.findFestivalDay({ year: weekStartYear - yearZero, month: weekStartMonth, dayOfMonth: weekStartDayOfMonth });
-      if (festivalDay?.countsForWeekday === false) {
+      const weekStartMonthData = calendar.monthsArray[weekStartMonth];
+      if (festivalDay?.countsForWeekday === false || weekStartMonthData?.type === 'intercalary') {
         weekStartDayOfMonth++;
         if (weekStartDayOfMonth >= calendar.getDaysInMonth(weekStartMonth, weekStartYear - yearZero)) {
           weekStartDayOfMonth = 0;
@@ -644,7 +645,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const monthData = calendar.monthsArray[currentMonth];
       if (!monthData) break;
       const festivalDay = calendar.findFestivalDay({ year: currentYear - yearZero, month: currentMonth, dayOfMonth: currentDayOfMonth });
-      const isIntercalary = festivalDay?.countsForWeekday === false;
+      const isIntercalary = festivalDay?.countsForWeekday === false || monthData?.type === 'intercalary';
       if (isIntercalary) {
         currentDayOfMonth++;
         if (currentDayOfMonth >= calendar.getDaysInMonth(currentMonth, currentYear - yearZero)) {
@@ -1421,6 +1422,24 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             newYear--;
           }
           newDayOfMonth += calendar.getDaysInMonth(newMonth, newYear - yearZero);
+        }
+        // Skip past intercalary months so the viewed date lands on a regular month
+        while (calendar.monthsArray[newMonth]?.type === 'intercalary') {
+          if (direction > 0) {
+            newDayOfMonth = 0;
+            newMonth++;
+            if (newMonth >= calendar.monthsArray.length) {
+              newMonth = 0;
+              newYear++;
+            }
+          } else {
+            newMonth--;
+            if (newMonth < 0) {
+              newMonth = calendar.monthsArray.length - 1;
+              newYear--;
+            }
+            newDayOfMonth = Math.max(0, calendar.getDaysInMonth(newMonth, newYear - yearZero) - 1);
+          }
         }
         this.viewedDate = { year: newYear, month: newMonth, dayOfMonth: newDayOfMonth };
         break;
