@@ -139,6 +139,7 @@ export const SETTINGS = {
   STOPWATCH_STATE: 'stopwatchState',
   STOPWATCH_STICKY_STATES: 'stopwatchStickyStates',
   CLOCK_LOCKED: 'clockLocked',
+  CLOCK_RUN_DURING_COMBAT: 'clockRunDuringCombat',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
   TIME_ADVANCE_INTERVAL: 'timeAdvanceInterval',
   TEMPERATURE_UNIT: 'temperatureUnit',

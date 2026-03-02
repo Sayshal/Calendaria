@@ -72,6 +72,14 @@ export default class TimeClock {
   static #appSettings = new Map();
 
   /**
+   * Whether combat should block clock operations.
+   * @returns {boolean} True if combat is active and the setting does not allow running during combat
+   */
+  static get #combatBlocks() {
+    return game.combat?.started && !game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT);
+  }
+
+  /**
    * Whether the clock is running.
    * @returns {boolean} True if running
    */
@@ -163,7 +171,7 @@ export default class TimeClock {
   static #autoStartIfSynced() {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
-    if (this.#locked || game.paused || game.combat?.started) return;
+    if (this.#locked || game.paused || this.#combatBlocks) return;
     this.start();
     log(3, 'Clock auto-started (sync enabled, game unpaused)');
   }
@@ -194,7 +202,7 @@ export default class TimeClock {
     if (paused) {
       if (this.#running) this.stop();
       log(3, 'Clock stopped: game paused');
-    } else if (!game.combat?.started && !this.#locked) {
+    } else if (!this.#combatBlocks && !this.#locked) {
       if (!this.#running) this.start();
       log(3, 'Clock started at configured speed (game unpaused)');
     }
@@ -206,6 +214,7 @@ export default class TimeClock {
    */
   static #onCombatStart(_combat) {
     if (!CalendariaSocket.isPrimaryGM()) return;
+    if (game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT)) return;
     if (this.#running) {
       this.stop();
       log(3, 'Clock stopped: combat started');
@@ -240,7 +249,7 @@ export default class TimeClock {
       ui.notifications.warn('CALENDARIA.TimeClock.NoPermission', { localize: true });
       return;
     }
-    if (game.combat?.started) {
+    if (this.#combatBlocks) {
       log(3, 'Clock start blocked: combat active');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
@@ -444,7 +453,7 @@ export default class TimeClock {
     if (directMode) {
       let advancing = false;
       this.#visualIntervalId = setInterval(async () => {
-        if (!this.#running || game.combat?.started || advancing) return;
+        if (!TimeClock.#running || TimeClock.#combatBlocks || advancing) return;
         advancing = true;
         try {
           if (CalendariaSocket.isPrimaryGM()) await game.time.advance(speed);
@@ -456,7 +465,7 @@ export default class TimeClock {
       return;
     }
     this.#visualIntervalId = setInterval(() => {
-      if (!this.#running || game.combat?.started) return;
+      if (!TimeClock.#running || TimeClock.#combatBlocks) return;
       this.#accumulatedSeconds += speed;
       const predicted = this.predictedWorldTime;
       Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: predicted });
@@ -477,7 +486,7 @@ export default class TimeClock {
       }
     }, 1000);
     this.#advanceIntervalId = setInterval(async () => {
-      if (!this.#running || game.combat?.started) return;
+      if (!TimeClock.#running || TimeClock.#combatBlocks) return;
       if (!CalendariaSocket.isPrimaryGM()) return;
       const toAdvance = this.#accumulatedSeconds;
       if (toAdvance <= 0) return;
@@ -572,13 +581,15 @@ export default class TimeClock {
   }
 
   /**
-   * Block combat round/turn time advancement when the clock is locked.
+   * Block combat round/turn time advancement when the clock is locked or running during combat.
    * @param {object} _combat - The combat document
    * @param {object} _updateData - The update data
    * @param {object} updateOptions - The update options containing worldTime delta
    */
   static onCombatTimeBlock(_combat, _updateData, updateOptions) {
-    if (TimeClock.locked && updateOptions.worldTime) updateOptions.worldTime.delta = 0;
+    if (!updateOptions.worldTime) return;
+    if (TimeClock.locked) updateOptions.worldTime.delta = 0;
+    else if (game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT)) updateOptions.worldTime.delta = 0;
   }
 
   /**

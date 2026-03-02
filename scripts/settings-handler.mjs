@@ -942,6 +942,13 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
+      [SETTINGS.CLOCK_RUN_DURING_COMBAT]: {
+        name: 'CALENDARIA.Settings.ClockRunDuringCombat.Name',
+        hint: 'CALENDARIA.Settings.ClockRunDuringCombat.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
       [SETTINGS.TIME_ADVANCE_INTERVAL]: {
         name: 'CALENDARIA.Settings.TimeAdvanceInterval.Name',
         hint: 'CALENDARIA.Settings.TimeAdvanceInterval.Hint',

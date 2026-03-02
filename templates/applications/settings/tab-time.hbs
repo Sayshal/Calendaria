@@ -64,6 +64,14 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.SyncClockPause.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="clockRunDuringCombat">{{localize "CALENDARIA.Settings.ClockRunDuringCombat.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="clockRunDuringCombat" name="clockRunDuringCombat" {{#if clockRunDuringCombat}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ClockRunDuringCombat.Hint"}}</p>
+      </div>
     </fieldset>
 
     {{#if roundTimeDisabled}}

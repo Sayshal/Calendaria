@@ -1589,6 +1589,8 @@
   "CALENDARIA.Settings.ChatTimestampMode.Replace": "Replace real time",
   "CALENDARIA.Settings.ChatTimestampShowTime.Hint": "Include the in-game time (hours:minutes) alongside the date in chat timestamps.",
   "CALENDARIA.Settings.ChatTimestampShowTime.Name": "Show Time in Chat Timestamps",
+  "CALENDARIA.Settings.ClockRunDuringCombat.Hint": "Allow the real-time clock to keep running during combat. Useful for systems like Shadowdark that use real-time torch timers.",
+  "CALENDARIA.Settings.ClockRunDuringCombat.Name": "Run Clock During Combat",
   "CALENDARIA.Settings.AutoOpenNotes.Hint": "Automatically open the notes panel when selecting a day that has notes.",
   "CALENDARIA.Settings.AutoOpenNotes.Name": "Auto-Open Notes Panel",
   "CALENDARIA.Settings.ConfirmSetDate.Hint": "Show a confirmation dialog before changing the current world date.",
