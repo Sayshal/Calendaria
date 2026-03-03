@@ -1974,8 +1974,6 @@
   "CALENDARIA.ThemeEditor.Export": "Exporter",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Thème exporté",
   "CALENDARIA.ThemeEditor.Header.Color": "Couleur",
-  "CALENDARIA.ThemeEditor.Header.ColorCode": "Code",
-  "CALENDARIA.ThemeEditor.Header.ColorCodeHint": "Code hex",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Ouvrir sélecteur",
   "CALENDARIA.ThemeEditor.Header.Location": "Lieu",
   "CALENDARIA.ThemeEditor.Header.LocationHint": "Composant utilisant cette couleur",

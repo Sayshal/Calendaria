@@ -1759,8 +1759,6 @@
   "CALENDARIA.ThemeEditor.Export": "Exportieren",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Theme erfolgreich exportiert.",
   "CALENDARIA.ThemeEditor.Header.Color": "Farbe",
-  "CALENDARIA.ThemeEditor.Header.ColorCode": "Code",
-  "CALENDARIA.ThemeEditor.Header.ColorCodeHint": "Hex-Farbcode",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Klicken, um den Farbwähler zu öffnen",
   "CALENDARIA.ThemeEditor.Header.Location": "Bereich",
   "CALENDARIA.ThemeEditor.Header.LocationHint": "Welche UI-Komponente diese Farbe verwendet (Allgemein = alle Komponenten)",
