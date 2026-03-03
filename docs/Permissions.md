@@ -33,7 +33,8 @@ GMs always have full access to all features.
 | ------------------- | ---------------- | -------------------------- |
 | **View BigCal**     | `viewBigCal`     | Can see the BigCal         |
 | **View MiniCal**    | `viewMiniCal`    | Can see the MiniCal widget |
-| **View TimeKeeper** | `viewTimeKeeper` | Can see the TimeKeeper     |
+| **View Time Keeper** | `viewTimeKeeper` | Can see the Time Keeper     |
+| **View Sun Dial**   | `viewSunDial`    | Can see the Sun Dial       |
 
 ### Action Permissions
 
@@ -58,7 +59,8 @@ By default, all non-GM roles have restricted access:
 | --------------------- | :----: | :-----: | :----------: |
 | View BigCal           |   -    |    ✓    |      ✓       |
 | View MiniCal          |   -    |    ✓    |      ✓       |
-| View TimeKeeper       |   -    |    ✓    |      ✓       |
+| View Time Keeper       |   -    |    ✓    |      ✓       |
+| View Sun Dial         |   -    |    ✓    |      ✓       |
 | Manage Notes          |   ✓    |    ✓    |      ✓       |
 | Edit Notes            |   -    |    ✓    |      ✓       |
 | Delete Notes          |   -    |    -    |      ✓       |
@@ -135,7 +137,7 @@ The permission UI provides cascade-up behavior for easier configuration:
 
 ### Change Date/Time
 
-- Affects all time controls (HUD, MiniCal, TimeKeeper)
+- Affects all time controls (HUD, MiniCal, Time Keeper)
 - Includes advancing time, setting specific dates, and real-time clock control
 - Time changes are broadcast to all clients
 

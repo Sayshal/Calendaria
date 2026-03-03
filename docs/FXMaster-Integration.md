@@ -26,6 +26,24 @@ Calendaria passes the current wind direction to FXMaster, allowing directional w
 
 ---
 
+## Density, Speed, and Color
+
+The [Weather Picker](Weather-Picker) includes FX Density, FX Speed, and FX Color controls that override the particle behavior sent to FXMaster:
+
+- **FX Density**: Default, Very Low, Low, Medium, High, Very High
+- **FX Speed**: Same levels as density
+- **FX Color**: Color input for effect tint override
+
+All 35 built-in presets include tuned density and speed defaults. Saved custom presets include these values.
+
+---
+
+## Global Disable
+
+The **Enable Weather FX** world setting (Settings Panel > Weather tab > Weather Generation fieldset) is a global toggle. When disabled, all FXMaster particle effects and weather sounds are stopped. The per-scene "Disable Weather FX" flag still overrides independently.
+
+---
+
 ## Settings
 
 Found in **Settings Panel > Weather tab > FXMaster Integration**:
@@ -39,7 +57,7 @@ Found in **Settings Panel > Weather tab > FXMaster Integration**:
 
 ## Per-Scene Disable
 
-Individual scenes can disable weather FX via a checkbox in **Scene Configuration > Ambiance tab > Disable Weather FX**. When enabled:
+Individual scenes can disable weather FX via a checkbox in the **Scene Configuration > Calendaria tab > Disable Weather FX**. When enabled:
 
 - FXMaster weather effects are not sent to this scene
 - Ambient weather sounds are silenced on this scene
@@ -59,6 +77,7 @@ When weather changes, the old sound fades out over 2 seconds while the new sound
 ### Controls
 
 - **Sound Effects** setting (Settings Panel > Weather tab > Weather Generation) enables/disables ambient sound globally
-- Per-scene **Disable Weather FX** flag also silences sound
-- Sounds play through Foundry's `environment` audio context at 50% volume
+- **Sound Volume** slider (Settings Panel > Weather tab) controls weather sound volume
+- Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects
+- Sounds play through Foundry's environment audio channel
 - Sound assignments can be customized per-preset via the [Weather Editor](Weather-Editor)

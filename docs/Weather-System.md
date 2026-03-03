@@ -145,6 +145,8 @@ Intensity ranges from 0 to 1 (0 = trace, 1 = maximum). During generation, intens
 
 When **Auto-Generate Weather** is enabled (Settings Panel > Weather tab), weather regenerates automatically on day change (GM only). Each zone generates weather independently.
 
+The "Regenerate All Weather" button in the Weather settings tab clears and rebuilds forecasts for all climate zones (with confirmation dialog).
+
 ---
 
 ## Weather Inertia
@@ -275,6 +277,8 @@ Per-zone in the [Climate Editor](Climate-Editor) > Environment tab:
 - **Night Hue**: Environment hue during full darkness
 - **Transition Duration**: Hours for the color shift transition
 
+Color Shift Sync is disabled by default. Dawn and dusk tint intensity is 15%. Midday applies no color tint.
+
 Enable globally via **Settings Panel > Canvas tab > Sync Scene Ambience with Time of Day**.
 
 ---
@@ -307,25 +311,25 @@ See [Moon Phases](Moon-Phases#moon-brightness) for configuration details.
 
 ## HUD Particle Rendering
 
-The [HUD](HUD) dome uses a unified Pixi.js renderer for weather particle effects. Each preset maps to a `hudEffect` that controls particle behavior.
+The [HUD](HUD) dome displays animated weather effects. Each preset has a unique visual effect.
 
 ### Available Effects
 
-37 particle effects covering all built-in weather types. Each effect defines:
+37 effects covering all built-in weather types. Each effect defines:
 
-- Texture variants and tint colors
-- Particle count, scale, alpha, and speed
-- Gravity, wobble, and special behaviors (flash, tumble, vortex)
-- Sky gradient override (top/mid/bottom colors)
+- Visual style and color
+- Animation density and speed
+- Special behaviors (flash, tumble, vortex)
+- Sky color overrides
 
 ### Wind and Precipitation Influence
 
-- Wind speed affects particle direction and intensity in the HUD renderer
-- Precipitation intensity scales particle count
+- Wind speed affects animation direction and intensity
+- Precipitation intensity scales animation density
 
 ### Customization
 
-HUD visuals can be overridden per-preset via the [Weather Editor](Weather-Editor), including particle count, scale, alpha, speed, gravity, wobble, tint colors, and sky gradient.
+HUD visuals can be customized per-preset via the [Weather Editor](Weather-Editor), including animation density, speed, colors, and sky appearance.
 
 ---
 
@@ -335,13 +339,15 @@ Weather presets can trigger looping ambient audio through Foundry's environment 
 
 ### Categories
 
-Nine sound categories covering all weather types with sound. See [FXMaster Integration — Ambient Sound](FXMaster-Integration#ambient-sound-system) for the complete list.
+Nine sound categories covering all weather types with sound. See [Weather Presets](Weather-Presets) for the Sound column listing which presets trigger which sound loops.
 
 ### Behavior
 
 - Sounds crossfade over 2 seconds when weather changes
 - Controlled by the **Sound Effects** setting (Settings Panel > Weather tab)
-- Per-scene **Disable Weather FX** flag silences sound
+- Volume is controlled by the **Sound Volume** slider (Settings Panel > Weather tab)
+- Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects
+- The global **Enable Weather FX** toggle stops all sounds when disabled
 - Sound assignments can be customized per-preset via the [Weather Editor](Weather-Editor)
 - Independent of FXMaster — works without any external modules
 

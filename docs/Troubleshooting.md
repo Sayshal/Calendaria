@@ -85,7 +85,7 @@ These errors appear when a non-GM user attempts GM-only actions:
 
 ### "Only the GM can control time"
 
-- Non-GM user attempted to use TimeKeeper controls
+- Non-GM user attempted to use Time Keeper controls
 - **Solution:** Only GMs can start/stop or adjust the clock
 
 ### "Clock blocked while game is paused or combat is active"
@@ -96,7 +96,7 @@ These errors appear when a non-GM user attempts GM-only actions:
 ### Clock shows a lock icon / time won't advance
 
 - The clock is locked via shift-click on the play/pause button
-- **Solution:** Shift-click the play/pause button (on HUD, MiniCal, or TimeKeeper) to unlock
+- **Solution:** Shift-click the play/pause button (on HUD, MiniCal, or Time Keeper) to unlock
 
 ---
 
@@ -261,7 +261,7 @@ Common import errors and solutions:
 ### Reset UI Positions
 
 1. Open **Settings** > **Module Settings** > **Calendaria** > **Settings Panel**
-2. Navigate to the relevant tab (MiniCal, HUD, or TimeKeeper)
+2. Navigate to the relevant tab (MiniCal, HUD, or Time Keeper)
 3. Click **Reset Position**
 
 ### Reset Theme Colors

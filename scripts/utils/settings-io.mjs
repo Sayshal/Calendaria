@@ -1,6 +1,5 @@
 /**
  * Settings Import/Export utilities.
- * Handles exporting and importing Calendaria world settings.
  * @module Utils/SettingsIO
  */
 
@@ -11,8 +10,6 @@ import { log } from './logger.mjs';
 
 /**
  * List of settings keys to export.
- * Includes both world-scoped and user-scoped preference settings.
- * Excludes: internal/migration flags, position data, lock states, dev/debug settings.
  */
 const EXPORTABLE_SETTINGS = [
   SETTINGS.ACTIVE_CALENDAR,
@@ -29,7 +26,6 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.BIG_CAL_SHOW_WEATHER,
   SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE,
   SETTINGS.CALENDAR_HUD_MODE,
-  SETTINGS.CALENDARS,
   SETTINGS.CHAT_TIMESTAMP_MODE,
   SETTINGS.CHAT_TIMESTAMP_SHOW_TIME,
   SETTINGS.CURRENT_WEATHER,
@@ -38,16 +34,21 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.CUSTOM_THEME_COLORS,
   SETTINGS.CUSTOM_TIME_JUMPS,
   SETTINGS.CUSTOM_WEATHER_PRESETS,
+  SETTINGS.COLOR_SHIFT_SYNC,
+  SETTINGS.DARKNESS_MOON_SYNC,
   SETTINGS.DARKNESS_SYNC,
   SETTINGS.DARKNESS_WEATHER_SYNC,
   SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER,
   SETTINGS.DEFAULT_OVERRIDES,
   SETTINGS.DISPLAY_FORMATS,
+  SETTINGS.FORCE_BIG_CAL,
   SETTINGS.FORCE_HUD,
   SETTINGS.FORCE_MINI_CAL,
+  SETTINGS.FORCE_STOPWATCH,
+  SETTINGS.FORCE_SUN_DIAL,
+  SETTINGS.FORCE_TIME_KEEPER,
   SETTINGS.HUD_AUTO_FADE,
-  SETTINGS.HUD_COMBAT_COMPACT,
-  SETTINGS.HUD_COMBAT_HIDE,
+  SETTINGS.HUD_COMBAT_MODE,
   SETTINGS.HUD_CYCLES_DISPLAY_MODE,
   SETTINGS.HUD_DIAL_STYLE,
   SETTINGS.HUD_DOME_AUTO_HIDE,
@@ -84,6 +85,7 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.PRIMARY_GM,
   SETTINGS.SAVED_TIMEPOINTS,
   SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS,
+  SETTINGS.SHOW_BIG_CAL,
   SETTINGS.SHOW_CALENDAR_HUD,
   SETTINGS.SHOW_MINI_CAL,
   SETTINGS.SHOW_TIME_KEEPER,
@@ -103,10 +105,8 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.TOOLBAR_APPS
 ];
 
-/**
- * Settings to skip when exporting with calendar data (to avoid duplicating calendar info).
- */
-const CALENDAR_DATA_SETTINGS = [SETTINGS.CALENDARS, SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES];
+/** Settings to skip when exporting with calendar data (to avoid duplicating calendar info). */
+const CALENDAR_DATA_SETTINGS = [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES];
 
 /**
  * Show export dialog and export settings to JSON file.
@@ -114,8 +114,6 @@ const CALENDAR_DATA_SETTINGS = [SETTINGS.CALENDARS, SETTINGS.CUSTOM_CALENDARS, S
 export async function exportSettings() {
   const activeCalendar = CalendarManager.getActiveCalendar();
   const calendarName = activeCalendar?.name ? localize(activeCalendar.name) : null;
-
-  // Build dialog content
   let content = `<p>${localize('CALENDARIA.SettingsPanel.ExportSettings.DialogText')}</p>`;
   if (calendarName) {
     content += `
@@ -126,7 +124,6 @@ export async function exportSettings() {
         </div>
       </div>`;
   }
-
   let dialogElement = null;
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: localize('CALENDARIA.SettingsPanel.ExportSettings.DialogTitle') },
@@ -140,30 +137,20 @@ export async function exportSettings() {
       dialogElement = dialog.element;
     }
   });
-
   if (result !== 'export') return;
   const includeCalendar = dialogElement?.querySelector('input[name="includeCalendar"]')?.checked ?? false;
-
-  // Build export data
   const exportData = { version: game.modules.get(MODULE.ID)?.version, exportedAt: new Date().toISOString(), settings: {} };
   for (const key of EXPORTABLE_SETTINGS) {
     if (includeCalendar && CALENDAR_DATA_SETTINGS.includes(key)) continue;
-    try {
-      exportData.settings[key] = game.settings.get(MODULE.ID, key);
-    } catch (error) {
-      log(1, 'Error exporting settings:', error);
-    }
+    exportData.settings[key] = game.settings.get(MODULE.ID, key);
   }
-
-  // Include active calendar data in importer-compatible format
   if (includeCalendar && activeCalendar) {
     const calendarData = activeCalendar.toObject();
     const currentDate = CalendarManager.getCurrentDateTime();
-    calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, day: currentDate.day };
+    calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
     log(3, `Included active calendar data: ${calendarData.name}`);
   }
-
   const filename = `calendaria-settings-${Date.now()}.json`;
   foundry.utils.saveDataToFile(JSON.stringify(exportData, null, 2), 'application/json', filename);
   ui.notifications.info('CALENDARIA.SettingsPanel.ExportSettings.Success', { localize: true });
@@ -186,12 +173,9 @@ export async function importSettings(onComplete) {
       if (!importData.settings || typeof importData.settings !== 'object') {
         throw new Error('Invalid settings file format');
       }
-
       const hasCalendarData = !!importData.calendarData?.name;
       const settingsCount = Object.keys(importData.settings).length;
       const calendarName = importData.calendarData?.name;
-
-      // Build dialog content
       let content = `<p>${format('CALENDARIA.SettingsPanel.ImportSettings.ConfirmContent', { count: settingsCount, version: importData.version || 'unknown' })}</p>`;
       if (hasCalendarData) {
         content += `
@@ -208,7 +192,6 @@ export async function importSettings(onComplete) {
             </div>
           </div>`;
       }
-
       let dialogElement = null;
       const result = await foundry.applications.api.DialogV2.wait({
         window: { title: localize('CALENDARIA.SettingsPanel.ImportSettings.ConfirmTitle') },
@@ -222,26 +205,17 @@ export async function importSettings(onComplete) {
           dialogElement = dialog.element;
         }
       });
-
       if (result !== 'import') return;
       const importCalendar = dialogElement?.querySelector('input[name="importCalendar"]')?.checked ?? false;
       const setActive = dialogElement?.querySelector('input[name="setActive"]')?.checked ?? false;
-
-      // Import settings
       let imported = 0;
       for (const [key, value] of Object.entries(importData.settings)) {
         if (EXPORTABLE_SETTINGS.includes(key)) {
-          try {
-            await game.settings.set(MODULE.ID, key, value);
-            imported++;
-          } catch (err) {
-            log(2, `Failed to import setting ${key}:`, err);
-          }
+          await game.settings.set(MODULE.ID, key, value);
+          imported++;
         }
       }
       ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.Success', { count: imported }));
-
-      // Import calendar data
       if (hasCalendarData && importCalendar) {
         const calendarData = importData.calendarData;
         const calendarId = calendarData.name
@@ -249,22 +223,19 @@ export async function importSettings(onComplete) {
           .replace(/[^\da-z]+/g, '-')
           .replace(/^-|-$/g, '')
           .substring(0, 32);
-
         const calendar = await CalendarManager.createCustomCalendar(calendarId, calendarData);
         if (calendar) {
           const fullCalendarId = `custom-${calendarId}`;
           ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
-
           if (setActive) {
             await CalendarManager.switchCalendar(fullCalendarId);
             ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
           }
         }
       }
-
       if (onComplete) onComplete();
     } catch (error) {
-      log(2, 'Settings import failed:', error);
+      log(1, 'Settings import failed:', error);
       ui.notifications.error('CALENDARIA.SettingsPanel.ImportSettings.Error', { localize: true });
     }
   });

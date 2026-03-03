@@ -25,12 +25,15 @@ Editable fields for the selected weather:
 | --------------------------- | --------------------------------------------------------------------------- |
 | **Name**                    | Display label (populated from preset, editable for custom)                  |
 | **Icon**                    | FontAwesome icon class                                                      |
-| **Color**                   | Hex color picker                                                            |
+| **Color**                   | Color picker                                                                |
 | **Temperature**             | Numeric input (in display unit)                                             |
 | **Wind Speed**              | Select dropdown (0–5 scale: Calm through Extreme)                           |
 | **Wind Direction**          | 16-point compass select                                                     |
 | **Precipitation Type**      | Select: None, Drizzle, Rain, Snow, Sleet, Hail                              |
 | **Precipitation Intensity** | Range slider (0–1)                                                          |
+| **FX Density**              | Override particle density: Default, Very Low, Low, Medium, High, Very High  |
+| **FX Speed**                | Override particle speed: Default, Very Low, Low, Medium, High, Very High    |
+| **FX Color**                | Override effect tint color                                                  |
 | **FXMaster Preset**         | Dropdown of available FXMaster effects (only shown when FXMaster is active) |
 | **Sound Effect**            | Dropdown of available ambient sound loops                                   |
 

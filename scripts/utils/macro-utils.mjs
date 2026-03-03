@@ -1,11 +1,8 @@
 /**
  * Macro Utility Functions
- * Helpers for executing macros from various trigger points.
  * @module Utils/MacroUtils
  * @author Tyler
  */
-
-import { log } from './logger.mjs';
 
 /**
  * Execute a macro by its ID.
@@ -17,7 +14,7 @@ export async function executeMacroById(macroId, context = {}) {
   if (!macroId) return;
   const macro = game.macros.get(macroId);
   if (!macro) return;
-  log(3, `Executing macro: ${macro.name}`, context);
+
   return macro.execute(context);
 }
 

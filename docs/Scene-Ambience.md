@@ -20,7 +20,7 @@ A global brightness multiplier (0.5x–1.5x, default 1.0x) is applied to all sce
 
 ### Per-Scene Override
 
-Override settings for individual scenes via **Scene Configuration > Ambiance tab**:
+Override settings for individual scenes via the **Scene Configuration > Calendaria** tab:
 
 | Setting               | Options                                                          |
 | --------------------- | ---------------------------------------------------------------- |

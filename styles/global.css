@@ -1,0 +1,280 @@
+.calendaria {
+  .hidden {
+    display: none !important;
+  }
+
+  .range-value {
+    flex: 0;
+    min-width: 2.5em;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-13);
+    text-align: center;
+  }
+
+  .slider-with-ticks {
+    gap: 0.125rem;
+    display: flex;
+    position: relative;
+    flex: 1;
+    flex-direction: column;
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 0.5rem;
+
+      span {
+        width: 0.0625rem;
+        height: 0.375rem;
+        background: var(--color-border-light-tertiary);
+      }
+    }
+  }
+
+  .weather-indicator,
+  .season-indicator,
+  .era-indicator,
+  .cycle-indicator {
+    gap: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+
+    i {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.85em;
+    }
+  }
+
+  .weather-indicator {
+    padding: 0.25rem 0.5rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+    border-radius: 0.25rem;
+    color: var(--calendaria-text);
+    background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 15%, transparent);
+
+    i {
+      color: var(--weather-color, var(--calendaria-text-dim));
+    }
+
+    &.clickable {
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+      &:hover {
+        border-color: var(--weather-color, var(--calendaria-text-dim));
+        background: color-mix(in srgb, var(--weather-color, var(--calendaria-text-dim)) 30%, transparent);
+      }
+    }
+
+    &.no-weather {
+      border: 0.0625rem dashed var(--calendaria-border);
+      color: var(--calendaria-text-dim);
+      background: transparent;
+
+      &:hover {
+        border-color: var(--color-positive-fg, var(--calendaria-success));
+        background: color-mix(in srgb, var(--color-positive-bg, var(--calendaria-positive-bg)) 20%, transparent);
+      }
+    }
+
+    .weather-temp {
+      opacity: 0.8;
+      margin-left: 0.15rem;
+      padding-left: 0.25rem;
+      border-left: 0.0625rem solid var(--calendaria-border);
+      font-size: 0.85em;
+    }
+
+    &.weather-mode-temp .weather-temp {
+      margin-left: 0;
+      padding-left: 0;
+      border-left: none;
+    }
+  }
+
+  .season-indicator {
+    color: var(--season-color, var(--calendaria-text-dim));
+
+    i {
+      color: var(--season-color, var(--calendaria-text-dim));
+    }
+  }
+
+  .calendaria-widget-indicator {
+    gap: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    cursor: default;
+
+    i {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.75em;
+      line-height: 1;
+    }
+
+    .widget-label {
+      line-height: 1;
+    }
+
+    &.clickable {
+      cursor: pointer;
+    }
+  }
+
+  .calendar-indicators .calendaria-widget-indicator {
+    color: var(--widget-color, var(--calendaria-text-dim));
+
+    i {
+      color: var(--widget-color, var(--calendaria-text-dim));
+    }
+  }
+
+  .calendaria-widget-custom {
+    display: flex;
+    align-items: center;
+  }
+}
+
+#journal {
+  .directory-footer {
+    &.calendaria-footer {
+      gap: 0.125rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-top: 0.0625rem solid var(--color-border-light-tertiary);
+
+      .footer-buttons {
+        gap: 0.25rem;
+        display: flex;
+      }
+
+      .calendaria-footer-btn {
+        border: none;
+        box-shadow: none;
+        background: none;
+
+        &:hover,
+        &:active,
+        &:focus {
+          border: none;
+          box-shadow: none;
+        }
+      }
+
+      i {
+        font-size: var(--font-size-16);
+      }
+    }
+  }
+}
+
+.calendaria-snap-indicator {
+  display: flex;
+  opacity: 0;
+  z-index: 59;
+  position: fixed;
+  justify-content: center;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 0.125rem dashed var(--calendaria-primary);
+  border-radius: 0.375rem;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--calendaria-primary) 15%, transparent);
+  transition: opacity 0.15s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+
+  &::before {
+    display: block;
+    opacity: 0.5;
+    width: 3.75rem;
+    height: 0.25rem;
+    border-radius: 0.125rem;
+    content: '';
+    background: var(--calendaria-primary);
+  }
+}
+
+.calendaria-pinned {
+  z-index: 1000 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: max-content;
+  margin-bottom: 0.5rem;
+  pointer-events: auto !important;
+  cursor: grab;
+}
+
+#context-menu.calendaria {
+  .context-item {
+    &.sticky-active {
+      color: var(--color-text-light-highlight, rgb(255 255 255));
+      background: var(--calendaria-primary);
+
+      &:hover {
+        background: var(--calendaria-primary);
+      }
+    }
+
+    &:has(.note-row) {
+      display: flex;
+      align-items: center;
+    }
+
+    .note-row {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .note-name {
+      max-width: 9.375rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .note-actions {
+      gap: 0.5rem;
+      display: inline-flex;
+      margin-left: auto;
+      padding-left: 0.5rem;
+
+      i {
+        opacity: 0.6;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+.moon-tooltip-row {
+  gap: 0.375rem;
+  display: flex;
+  align-items: center;
+  padding: 0.125rem 0;
+
+  img {
+    width: 0.875rem;
+    height: 0.875rem;
+    border: none;
+  }
+}

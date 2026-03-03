@@ -1,7 +1,5 @@
 /**
  * Reminder Scheduler
- * Monitors world time changes and triggers reminders before note events occur.
- * Supports toast notifications, chat messages, and dialog popups.
  * @module Time/ReminderScheduler
  * @author Tyler
  */
@@ -9,9 +7,9 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import CalendarRegistry from '../calendar/calendar-registry.mjs';
 import { HOOKS, MODULE, SOCKET_TYPES } from '../constants.mjs';
+import { getCurrentDate } from '../notes/date-utils.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { getCurrentDate } from '../notes/utils/date-utils.mjs';
-import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
+import { isRecurringMatch } from '../notes/recurrence.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -44,7 +42,6 @@ export default class ReminderScheduler {
 
   /**
    * Handle world time updates.
-   * Only the primary GM runs reminder checks to avoid duplicates.
    * @param {number} worldTime - The new world time in seconds
    * @param {number} _delta - The time delta in seconds
    * @returns {void}
@@ -54,8 +51,6 @@ export default class ReminderScheduler {
     const currentDate = getCurrentDate();
     if (!currentDate) return;
     if (!NoteManager.isInitialized()) return;
-
-    // Backwards time movement - reset all state and check immediately
     if (worldTime < this.#lastCheckTime) {
       this.#firedToday.clear();
       this.#lastCheckTime = worldTime;
@@ -63,7 +58,6 @@ export default class ReminderScheduler {
       this.#lastDate = { ...currentDate };
       return;
     }
-
     if (this.#lastDate && this.#hasDateChanged(this.#lastDate, currentDate)) this.#firedToday.clear();
     if (worldTime - this.#lastCheckTime >= this.CHECK_INTERVAL) {
       this.#checkReminders(worldTime, currentDate);
@@ -74,7 +68,6 @@ export default class ReminderScheduler {
 
   /**
    * Check all notes for pending reminders.
-   * Uses occurrence-based keys to support recurring events firing on each occurrence.
    * @param {number} worldTime - Current world time in seconds
    * @param {object} currentDate - Current date components
    * @private
@@ -84,24 +77,24 @@ export default class ReminderScheduler {
     if (!calendar) return;
     const activeCalendarId = calendar.metadata?.id || CalendarRegistry.getActiveId() || 'unknown';
     const allNotes = NoteManager.getAllNotes();
-    log(3, `Checking ${allNotes.length} notes for reminders at ${currentDate.year}-${currentDate.month}-${currentDate.day} ${currentDate.hour}:${currentDate.minute}`);
+    let fired = 0;
     for (const note of allNotes) {
       if (note.calendarId && note.calendarId !== activeCalendarId) continue;
       if (note.flagData.reminderOffset == null || note.flagData.reminderOffset < 0) continue;
       if (note.flagData.silent) continue;
-      const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.day}`;
+      const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth}`;
       if (this.#firedToday.has(reminderKey)) continue;
-      log(3, `Evaluating reminder for "${note.name}" (offset: ${note.flagData.reminderOffset}h, allDay: ${note.flagData.allDay}, repeat: ${note.flagData.repeat})`);
       if (this.#shouldFireReminder(note, worldTime, calendar, currentDate)) {
         this.#fireReminder(note, currentDate);
         this.#firedToday.add(reminderKey);
+        fired++;
       }
     }
+    if (fired > 0) log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth} ${currentDate.hour}:${currentDate.minute}`);
   }
 
   /**
    * Determine if a reminder should fire based on current time and offset.
-   * Reminder offset is stored in hours, converted to minutes for calculations.
    * @param {object} note - The note stub
    * @param {number} _worldTime - Current world time in seconds
    * @param {object} calendar - Active calendar
@@ -117,77 +110,49 @@ export default class ReminderScheduler {
     const offsetMinutes = (note.flagData.reminderOffset ?? 0) * minutesPerHour;
     const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
     const hasConditions = note.flagData.conditions?.length > 0;
-
     if (hasRecurrence || hasConditions) {
       const occursToday = isRecurringMatch(note.flagData, currentDate);
       let occursTomorrow = false;
       if (note.flagData.allDay) {
         const tomorrow = this.#getNextDay(currentDate, calendar);
         occursTomorrow = isRecurringMatch(note.flagData, tomorrow);
-        log(3, `  Tomorrow check: ${tomorrow.year}-${tomorrow.month}-${tomorrow.day}, occursTomorrow=${occursTomorrow}`);
       }
-
-      log(3, `  Recurring: occursToday=${occursToday}, occursTomorrow=${occursTomorrow}, allDay=${note.flagData.allDay}`);
       if (!occursToday && !occursTomorrow) return false;
-
-      // For all-day events, check if we should fire reminder tonight for tomorrow's occurrence
       if (occursTomorrow && note.flagData.allDay && offsetMinutes > 0) {
         const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
         const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
         const minutesInDay = hoursPerDay * minutesPerHour;
         const reminderMinutes = minutesInDay - offsetMinutes;
-        log(3, `  Day-before check: currentMinutes=${currentMinutes}, reminderMinutes=${reminderMinutes}, shouldFire=${currentMinutes >= reminderMinutes}`);
         if (currentMinutes >= reminderMinutes) return true;
       }
-
-      // For all-day events occurring today, fire reminder
-      // 0-offset: fire anytime during the day (firedToday prevents repeat)
-      // Non-zero offset: fire within early window (catch-up for missed evening reminder)
       if (occursToday && note.flagData.allDay) {
-        if (offsetMinutes === 0) {
-          log(3, `  All-day today (0-offset): shouldFire=true`);
-          return true;
-        }
+        if (offsetMinutes === 0) return true;
         const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-        log(3, `  All-day today check: currentMinutes=${currentMinutes}, offsetMinutes=${offsetMinutes}, shouldFire=${currentMinutes <= offsetMinutes}`);
         if (currentMinutes <= offsetMinutes) return true;
       }
-
-      // For timed events occurring today, check if we're in the reminder window
       if (occursToday && !note.flagData.allDay) {
         const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
         const eventHour = startDate.hour ?? 0;
         const eventMinute = startDate.minute ?? 0;
         const eventMinutes = eventHour * minutesPerHour + eventMinute;
         const reminderMinutes = eventMinutes - offsetMinutes;
-        log(3, `  Same-day check: currentMinutes=${currentMinutes}, eventMinutes=${eventMinutes}, reminderMinutes=${reminderMinutes}`);
         return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
       }
-
       return false;
     }
-
-    // Non-recurring event - check if tomorrow falls within the event's date range (for multi-day events)
     const endDate = note.flagData.endDate;
     const tomorrow = this.#getNextDay(currentDate, calendar);
     const tomorrowInRange = this.#isDateInRange(tomorrow, startDate, endDate);
     const todayInRange = this.#isDateInRange(currentDate, startDate, endDate);
-
-    log(3, `  Non-recurring: todayInRange=${todayInRange}, tomorrowInRange=${tomorrowInRange}, allDay=${note.flagData.allDay}`);
-
-    // For all-day events, fire reminder the evening before each day of the event
     if (note.flagData.allDay && offsetMinutes > 0 && tomorrowInRange) {
       const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
       const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
       const minutesInDay = hoursPerDay * minutesPerHour;
       const reminderMinutes = minutesInDay - offsetMinutes;
-      log(3, `  Multi-day before check: currentMinutes=${currentMinutes}, reminderMinutes=${reminderMinutes}, shouldFire=${currentMinutes >= reminderMinutes}`);
       return currentMinutes >= reminderMinutes;
     }
-
-    // For timed events or same-day check
     if (todayInRange) {
-      const isFirstDay = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.day === startDate.day;
+      const isFirstDay = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.dayOfMonth === startDate.dayOfMonth;
       const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
       const eventHour = note.flagData.allDay ? 0 : isFirstDay ? (startDate.hour ?? 0) : 0;
       const eventMinute = note.flagData.allDay ? 0 : isFirstDay ? (startDate.minute ?? 0) : 0;
@@ -195,7 +160,6 @@ export default class ReminderScheduler {
       const reminderMinutes = eventMinutes - offsetMinutes;
       return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
     }
-
     return false;
   }
 
@@ -208,11 +172,11 @@ export default class ReminderScheduler {
    * @private
    */
   static #isDateInRange(date, startDate, endDate) {
-    const dateVal = date.year * 10000 + date.month * 100 + date.day;
-    const startVal = startDate.year * 10000 + startDate.month * 100 + startDate.day;
+    const dateVal = date.year * 10000 + date.month * 100 + date.dayOfMonth;
+    const startVal = startDate.year * 10000 + startDate.month * 100 + startDate.dayOfMonth;
     if (dateVal < startVal) return false;
     if (!endDate || !endDate.year) return dateVal === startVal;
-    const endVal = endDate.year * 10000 + endDate.month * 100 + endDate.day;
+    const endVal = endDate.year * 10000 + endDate.month * 100 + endDate.dayOfMonth;
     return dateVal <= endVal;
   }
 
@@ -226,25 +190,22 @@ export default class ReminderScheduler {
   static #getNextDay(currentDate, calendar) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInMonth = calendar.getDaysInMonth(currentDate.month, currentDate.year - yearZero);
-    let nextDay = currentDate.day + 1;
+    let nextDayOfMonth = currentDate.dayOfMonth + 1;
     let nextMonth = currentDate.month;
     let nextYear = currentDate.year;
-
-    if (nextDay > daysInMonth) {
-      nextDay = 1;
+    if (nextDayOfMonth >= daysInMonth) {
+      nextDayOfMonth = 0;
       nextMonth++;
       if (nextMonth >= calendar.monthsArray.length) {
         nextMonth = 0;
         nextYear++;
       }
     }
-
-    return { year: nextYear, month: nextMonth, day: nextDay };
+    return { year: nextYear, month: nextMonth, dayOfMonth: nextDayOfMonth };
   }
 
   /**
    * Fire a reminder notification.
-   * Broadcasts to all targeted users via socket for toast/dialog types.
    * @param {object} note - The note stub
    * @param {object} _currentDate - Current date components
    * @private
@@ -253,7 +214,6 @@ export default class ReminderScheduler {
     const reminderType = note.flagData.reminderType || 'toast';
     const targets = this.#getTargetUsers(note);
     const message = this.#formatReminderMessage(note);
-
     switch (reminderType) {
       case 'toast':
       case 'dialog':
@@ -277,7 +237,6 @@ export default class ReminderScheduler {
         this.#sendChatReminder(note, message, targets);
         break;
     }
-
     Hooks.callAll(HOOKS.EVENT_TRIGGERED, { id: note.id, name: note.name, flagData: note.flagData, reminderType, isReminder: true });
   }
 
@@ -305,7 +264,6 @@ export default class ReminderScheduler {
 
   /**
    * Format the reminder message.
-   * Offset is stored in hours.
    * @param {object} note - The note stub
    * @returns {string} - Formatted message
    * @private
@@ -341,16 +299,14 @@ export default class ReminderScheduler {
     let whisper = [];
     if (note.flagData.reminderTargets !== 'all') whisper = targets;
     if (note.flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
-
     const content = `
-      <div class="calendaria-reminder">
+      <div class="calendaria chat-reminder">
         <div class="reminder-message">${message}</div>
-        <a class="announcement-open" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
+        <a class="open-note" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
           ${icon} ${localize('CALENDARIA.Reminder.OpenNote')}
         </a>
       </div>
     `.trim();
-
     await ChatMessage.create({
       content,
       whisper,
@@ -377,7 +333,6 @@ export default class ReminderScheduler {
       ],
       rejectClose: false
     });
-
     if (result === 'open') {
       const page = NoteManager.getFullNote(note.id);
       if (page) page.sheet.render(true, { mode: 'view' });
@@ -392,7 +347,7 @@ export default class ReminderScheduler {
    * @private
    */
   static #hasDateChanged(previous, current) {
-    return previous.year !== current.year || previous.month !== current.month || previous.day !== current.day;
+    return previous.year !== current.year || previous.month !== current.month || previous.dayOfMonth !== current.dayOfMonth;
   }
 
   /**
@@ -425,7 +380,6 @@ export default class ReminderScheduler {
 
   /**
    * Handle incoming reminder notification from socket.
-   * Called by CalendariaSocket when a reminder broadcast is received.
    * @param {object} data - The reminder data
    * @param {string} data.type - 'toast' or 'dialog'
    * @param {string} data.noteId - Note page ID
@@ -438,7 +392,6 @@ export default class ReminderScheduler {
   static handleReminderNotify(data) {
     if (!data.targets.includes(game.user.id)) return;
     const iconHtml = this.#getIconHtmlFromData(data);
-
     if (data.type === 'toast') {
       ui.notifications.info(`${iconHtml} ${data.message}`, { permanent: false });
     } else if (data.type === 'dialog') {

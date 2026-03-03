@@ -1050,18 +1050,18 @@ const note = await CALENDARIA.api.createNote({
 });
 ```
 
-| Parameter            | Type                    | Description                                                                   |
-| -------------------- | ----------------------- | ----------------------------------------------------------------------------- |
-| `options.name`       | `string`                | Note title                                                                    |
-| `options.content`    | `string`                | Note content (HTML)                                                           |
-| `options.startDate`  | `object`                | Start date `{year, month, day, hour?, minute?}`                               |
-| `options.endDate`    | `object`                | End date (optional)                                                           |
-| `options.allDay`     | `boolean`               | All-day event (default: `true`)                                               |
-| `options.repeat`     | `string`                | `'never'`, `'daily'`, `'weekly'`, `'monthly'`, `'yearly'`                     |
-| `options.categories` | `string[]`              | Category IDs                                                                  |
-| `options.icon`       | `string`                | Icon path or class                                                            |
-| `options.color`      | `string`                | Event color (hex)                                                             |
-| `options.gmOnly`     | `boolean`               | GM-only visibility                                                            |
+| Parameter            | Type                    | Description                                                                                             |
+| -------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `options.name`       | `string`                | Note title                                                                                              |
+| `options.content`    | `string`                | Note content (HTML)                                                                                     |
+| `options.startDate`  | `object`                | Start date `{year, month, day, hour?, minute?}`                                                         |
+| `options.endDate`    | `object`                | End date (optional)                                                                                     |
+| `options.allDay`     | `boolean`               | All-day event (default: `true`)                                                                         |
+| `options.repeat`     | `string`                | `'never'`, `'daily'`, `'weekly'`, `'monthly'`, `'yearly'`                                               |
+| `options.categories` | `string[]`              | Category IDs                                                                                            |
+| `options.icon`       | `string`                | Icon path or class                                                                                      |
+| `options.color`      | `string`                | Event color (hex)                                                                                       |
+| `options.gmOnly`     | `boolean`               | GM-only visibility                                                                                      |
 | `options.openSheet`  | `false\|'edit'\|'view'` | Open the note sheet after creation in the given mode (default: `'edit'`). Pass boolean `false` to skip. |
 
 **Returns:** `Promise<object|null>` - Created note page.
@@ -1259,23 +1259,49 @@ const results = CALENDARIA.api.search('council', {
 
 ---
 
-## UI
+## Application Controls
 
-### openBigCal(options)
-
-Open the BigCal application.
+All applications have `show`, `hide`, and `toggle` methods on the public API.
 
 ```javascript
-await CALENDARIA.api.openBigCal();
-await CALENDARIA.api.openBigCal({ view: 'week' });
+// BigCal
+CALENDARIA.api.showBigCal();
+CALENDARIA.api.hideBigCal();
+CALENDARIA.api.toggleBigCal();
+
+// MiniCal
+CALENDARIA.api.showMiniCal();
+CALENDARIA.api.hideMiniCal();
+CALENDARIA.api.toggleMiniCal();
+
+// HUD
+CALENDARIA.api.showHUD();
+CALENDARIA.api.hideHUD();
+CALENDARIA.api.toggleHUD();
+
+// TimeKeeper
+CALENDARIA.api.showTimeKeeper();
+CALENDARIA.api.hideTimeKeeper();
+CALENDARIA.api.toggleTimeKeeper();
+
+// Sun Dial
+CALENDARIA.api.showSunDial();
+CALENDARIA.api.hideSunDial();
+CALENDARIA.api.toggleSunDial();
+
+// Stopwatch
+CALENDARIA.api.showStopwatch();
+CALENDARIA.api.hideStopwatch();
+CALENDARIA.api.toggleStopwatch();
 ```
 
-| Parameter      | Type     | Description                              |
-| -------------- | -------- | ---------------------------------------- |
-| `options.date` | `object` | Date to display `{year, month, day}`     |
-| `options.view` | `string` | View mode: `'month'`, `'week'`, `'year'` |
+### Stopwatch Controls
 
-**Returns:** `Promise<object>` - The BigCal application.
+```javascript
+CALENDARIA.api.startStopwatch();   // Show and start
+CALENDARIA.api.pauseStopwatch();   // Pause if running
+CALENDARIA.api.resetStopwatch();   // Reset to zero
+```
 
 ---
 
@@ -1293,66 +1319,6 @@ await CALENDARIA.api.openCalendarEditor('custom'); // Edit existing
 | `calendarId` | `string` | Calendar ID to edit (omit for new) |
 
 **Returns:** `Promise<object|null>` - The editor application.
-
----
-
-### showMiniCal()
-
-Show the MiniCal widget.
-
-```javascript
-await CALENDARIA.api.showMiniCal();
-```
-
-**Returns:** `Promise<object>` - The MiniCal application.
-
----
-
-### hideMiniCal()
-
-Hide the MiniCal widget.
-
-```javascript
-await CALENDARIA.api.hideMiniCal();
-```
-
-**Returns:** `Promise<void>`
-
----
-
-### toggleMiniCal()
-
-Toggle the MiniCal widget visibility.
-
-```javascript
-await CALENDARIA.api.toggleMiniCal();
-```
-
-**Returns:** `Promise<void>`
-
----
-
-## Toggle Methods
-
-These static methods provide quick access to toggle UI components.
-
-### HUD.toggle()
-
-Toggle the HUD visibility.
-
-```javascript
-CALENDARIA.apps.HUD.toggle();
-```
-
----
-
-### BigCal.toggle()
-
-Toggle the BigCal application.
-
-```javascript
-CALENDARIA.apps.BigCal.toggle();
-```
 
 ---
 

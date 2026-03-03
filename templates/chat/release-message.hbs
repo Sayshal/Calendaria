@@ -1,4 +1,4 @@
-<div class="calendaria-release-message">
+<div class="calendaria chat-release">
   <div class="release-header">
     <i class="fa-solid fa-calendar"></i>
     <strong>{{localize "CALENDARIA.Release.Title" version=version}}</strong>
@@ -11,26 +11,31 @@
       All current modules stay free!
     </p>
 
-    <h4>New</h4>
+    <h4>Headline</h4>
     <ul>
-      <li>Clock lock — shift-click play/pause to block all time advancement</li>
-      <li>Calendar Button setting — choose BigCal or MiniCal for the HUD button</li>
+      <li>BigCal: frameless floating redesign with gapless day grid</li>
+      <li>MicroCal: ultra-compact MiniCal mode with circular cells</li>
+      <li>Sun Dial: animated sky clock with draggable sun handle</li>
+      <li>Stop Watch: physical dial with animated hands</li>
     </ul>
 
-    <h4>Content</h4>
+    <h4>New</h4>
     <ul>
-      <li>26 new Golarion festivals, 4 Harptos equinox/solstice festivals</li>
+      <li>Unified settings for all floating apps (auto-fade, force, sticky states)</li>
+      <li>FX Density, Speed, and Color controls in Weather Picker</li>
+      <li>Combat Mode dropdown (5 options), Run Clock During Combat</li>
+      <li>Global Weather FX toggle, sound volume slider, regenerate button</li>
     </ul>
 
     <h4>Fixes</h4>
     <ul>
-      <li>Zone per-season temperatures now correctly override during generation</li>
-      <li>FXMaster wind direction snapping and preset switching</li>
-      <li>HUD hide-for-players flag</li>
+      <li>Weather generation now filters disabled zone presets</li>
+      <li>BigCal week view with intercalary months</li>
+      <li>Importer fixes for all 6 sources</li>
     </ul>
   </div>
 
-  <a class="release-link" href="{{repoUrl}}" target="_blank" rel="noopener">
+  <a class="open-note" href="{{repoUrl}}" target="_blank" rel="noopener">
     <i class="fa-solid fa-arrow-up-right-from-square"></i> {{localize "CALENDARIA.Release.ReleaseNotes"}}
   </a>
 </div>

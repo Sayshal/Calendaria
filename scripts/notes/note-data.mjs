@@ -7,7 +7,7 @@
 
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
-import { isValidDate } from './utils/date-utils.mjs';
+import { isValidDate } from './date-utils.mjs';
 
 /**
  * Default note data structure.
@@ -15,9 +15,8 @@ import { isValidDate } from './utils/date-utils.mjs';
  */
 export function getDefaultNoteData() {
   const currentDate = game.time.components;
-
   return {
-    startDate: { year: currentDate.year, month: currentDate.month, day: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
+    startDate: { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
     endDate: null,
     allDay: false,
     repeat: 'never',
@@ -57,7 +56,6 @@ export function validateNoteData(noteData) {
     errors.push('Note data is required');
     return { valid: false, errors };
   }
-
   if (!noteData.startDate) errors.push('Start date is required');
   else if (!isValidDate(noteData.startDate)) errors.push('Start date is invalid');
   if (noteData.endDate && !isValidDate(noteData.endDate)) errors.push('End date is invalid');
@@ -102,7 +100,7 @@ export function validateNoteData(noteData) {
     if (typeof noteData.rangePattern !== 'object') {
       errors.push('rangePattern must be an object or null');
     } else {
-      for (const field of ['year', 'month', 'day']) {
+      for (const field of ['year', 'month', 'dayOfMonth']) {
         const bit = noteData.rangePattern[field];
         if (bit !== undefined && bit !== null) {
           if (typeof bit === 'number') {

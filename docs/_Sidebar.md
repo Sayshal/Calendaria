@@ -12,8 +12,9 @@
 - [BigCal](BigCal)
 - [HUD](HUD)
 - [MiniCal](MiniCal)
-- [TimeKeeper](TimeKeeper)
-- [Stopwatch](Stopwatch)
+- [Sun Dial](Sun-Dial)
+- [Time Keeper](Time Keeper)
+- [Stop Watch](Stop Watch)
 
 **Features**
 

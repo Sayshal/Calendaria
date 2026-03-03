@@ -49,7 +49,7 @@ Themes are organized into categories:
 1. Click any color swatch to open the color picker
 2. Choose a new color
 3. Changes apply immediately to all Calendaria widgets
-4. Colors are saved per-client
+4. Colors are saved for each user
 
 ---
 

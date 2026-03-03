@@ -1,0 +1,57 @@
+<div class="wrapper">
+  <div class="face">
+    <canvas class="stopwatch-canvas"></canvas>
+    <div class="display">
+      <div class="controls">
+        <a class="sw-btn sw-notification{{#if hasNotification}} active{{/if}}"
+          data-action="openNotification" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.ConfigureNotification'}}">
+          <i class="fas fa-bell"></i>
+        </a>
+        <a class="sw-btn sw-lap{{#unless running}} disabled{{/unless}}" data-action="lap" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.RecordLap'}}">
+          <i class="fas fa-flag"></i>
+        </a>
+        {{#if running}}
+          <a class="sw-btn sw-pause" data-action="pause" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Stopwatch.Pause'}}">
+            <i class="fas fa-pause"></i>
+          </a>
+        {{else}}
+          <a class="sw-btn sw-start" data-action="start" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Stopwatch.Start'}}">
+            <i class="fas fa-play"></i>
+          </a>
+        {{/if}}
+        <a class="sw-btn sw-reset" data-action="reset" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.Reset'}}">
+          <i class="fas fa-undo"></i>
+        </a>
+        <a class="sw-btn sw-mode" data-action="toggleMode" data-tooltip aria-label="{{modeLabel}}">
+          <i class="fas {{#if (eq mode 'realtime')}}fa-clock{{else}}fa-hourglass-half{{/if}}"></i>
+        </a>
+      </div>
+      <div class="time">{{{elapsed}}}</div>
+    </div>
+  </div>
+  {{#if hasLaps}}
+    <div class="laps">
+      <div class="laps-header">
+        <span>{{localize "CALENDARIA.Stopwatch.Laps"}}</span>
+        <button type="button" class="clear-laps" data-action="clearLaps" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Stopwatch.ClearLaps'}}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      <ul class="lap-list">
+        {{#each laps}}
+          <li class="lap">
+            <span class="lap-index">#{{index}}</span>
+            <span class="lap-time">{{elapsed}}</span>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+  {{/if}}
+  <div class="resize-handle"></div>
+</div>

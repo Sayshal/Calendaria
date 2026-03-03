@@ -1,0 +1,972 @@
+.calendaria {
+  &.mini-cal {
+    --mini-day-size: 3.25rem;
+    --mini-gap: 0.1875rem;
+
+    opacity: var(--calendaria-minical-idle-opacity, 1);
+    z-index: var(--z-index-ui);
+    position: fixed;
+    transition: opacity 0.3s ease-in-out 2s;
+
+    &:hover {
+      opacity: 1;
+      transition-delay: 0s;
+    }
+
+    .container {
+      display: flex;
+      position: relative;
+      flex-direction: column;
+      border: 0.0625rem solid var(--calendaria-border);
+      border-radius: 0.875rem;
+      overflow: visible;
+      background: var(--calendaria-bg);
+      box-shadow: 0 0.25rem 0.75rem var(--calendaria-shadow);
+      transition: border-radius 0.2s ease;
+
+      &:has(.sidebar:is(.visible, .locked)) {
+        border-radius: 0.875rem 0 0 0.875rem;
+
+        .top-row {
+          border-radius: 0.875rem 0 0;
+        }
+
+        .time-display {
+          border-radius: 0 0 0 0.875rem;
+        }
+
+        .time-controls {
+          border-radius: 0 0 0 0.875rem;
+        }
+      }
+    }
+
+    .top-row {
+      gap: 0.375rem;
+      display: flex;
+      align-items: center;
+      padding: 0.375rem 0.5rem;
+      border-bottom: 0.0625rem solid var(--calendaria-border-light);
+      border-radius: 0.875rem 0.875rem 0 0;
+      cursor: grab;
+      background: var(--calendaria-bg-lighter);
+
+      &.near-snap {
+        border-color: var(--calendaria-primary);
+        box-shadow:
+          0 0 0.625rem var(--calendaria-shadow),
+          0 0 0.5rem var(--calendaria-primary);
+        animation: calendaria-wobble 0.15s ease-in-out infinite;
+      }
+
+      .title-group {
+        gap: 0;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .title {
+        color: var(--calendaria-text-heading);
+        font-weight: 600;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
+      .nav-btn {
+        display: flex;
+        flex-shrink: 0;
+        justify-content: center;
+        align-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: none;
+        border-radius: 0.25rem;
+        color: var(--calendaria-text);
+        cursor: pointer;
+        background: transparent;
+        transition: background 0.15s;
+
+        &:hover {
+          background: var(--calendaria-bg-hover);
+        }
+      }
+
+      &.position-locked {
+        cursor: default;
+      }
+    }
+
+    .sidebar {
+      gap: 0.25rem;
+      display: flex;
+      z-index: -1;
+      position: absolute;
+      top: -0.0625rem;
+      bottom: -0.0625rem;
+      left: 100%;
+      flex-direction: column;
+      align-items: center;
+      width: 1.875rem;
+      padding: 0.375rem 0;
+      border-left: 0.0625rem solid var(--calendaria-border-light);
+      border-radius: 0 0.875rem 0.875rem 0;
+      background: var(--calendaria-bg-lighter);
+      transition: transform 0.2s ease;
+      transform: translateX(-100%);
+
+      &.visible {
+        transform: translateX(0);
+      }
+
+      &.locked {
+        transform: translateX(0);
+      }
+    }
+
+    .container:has(.notes-panel.visible) .sidebar {
+      border-radius: 0;
+    }
+
+    .notes-panel {
+      display: flex;
+      opacity: 0;
+      z-index: -2;
+      position: absolute;
+      top: -0.0625rem;
+      bottom: -0.0625rem;
+      left: calc(100% + 1.875rem);
+      flex-direction: column;
+      width: 13.75rem;
+      border: 0.0625rem solid var(--calendaria-border);
+      border-left: none;
+      border-radius: 0 0.875rem 0.875rem 0;
+      pointer-events: none;
+      background: var(--calendaria-bg);
+      box-shadow: 0.25rem 0 0.75rem var(--calendaria-shadow);
+      transition:
+        transform 0.25s ease,
+        opacity 0.25s ease;
+      transform: translateX(-100%);
+
+      &.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+      }
+    }
+
+    .notes-panel-header {
+      gap: 0.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.375rem 0.5rem;
+      border-bottom: 0.0625rem solid var(--calendaria-border-light);
+      border-radius: 0 0.875rem 0 0;
+      background: var(--calendaria-bg-lighter);
+    }
+
+    .notes-panel-title {
+      overflow: hidden;
+      color: var(--calendaria-text-heading);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .notes-panel-close {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.25rem;
+      color: var(--calendaria-text);
+      cursor: pointer;
+      background: transparent;
+      transition:
+        background 0.15s,
+        color 0.15s;
+
+      &:hover {
+        color: var(--calendaria-error);
+        background: var(--calendaria-bg-hover);
+      }
+    }
+
+    .notes-panel-list {
+      gap: 0.25rem;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 0.375rem;
+      overflow-y: auto;
+    }
+
+    .notes-panel-item {
+      gap: 0.5rem;
+      display: flex;
+      align-items: center;
+      padding: 0.375rem 0.5rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      background: var(--calendaria-bg-lighter);
+      transition: background 0.15s;
+
+      &:hover {
+        background: var(--calendaria-bg-hover);
+      }
+    }
+
+    .note-item-icon {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      width: 1.25rem;
+      height: 1.25rem;
+
+      i {
+        font-size: 0.875rem;
+      }
+
+      img {
+        object-fit: contain;
+        width: 1.125rem;
+        height: 1.125rem;
+      }
+    }
+
+    .note-item-content {
+      gap: 0.0625rem;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .note-item-title {
+      overflow: hidden;
+      color: var(--calendaria-text);
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .note-item-meta {
+      gap: 0.375rem;
+      display: flex;
+      align-items: center;
+      color: var(--calendaria-text-dim);
+      font-size: 0.65rem;
+    }
+
+    .note-item-time {
+      white-space: nowrap;
+    }
+
+    .note-item-author {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &::before {
+        margin-right: 0.375rem;
+        content: '•';
+      }
+    }
+
+    .note-item-edit {
+      display: flex;
+      opacity: 0;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      width: 1.375rem;
+      height: 1.375rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.1875rem;
+      color: var(--calendaria-text-dim);
+      cursor: pointer;
+      background: transparent;
+      transition:
+        opacity 0.15s,
+        background 0.15s,
+        color 0.15s;
+
+      &:hover {
+        color: var(--calendaria-primary);
+        background: var(--calendaria-bg-hover);
+      }
+    }
+
+    .notes-panel-item:hover .note-item-edit {
+      opacity: 1;
+    }
+
+    .sidebar-separator {
+      width: 1rem;
+      height: 0.125rem;
+      margin: 0.125rem auto;
+      background: color-mix(in srgb, var(--calendaria-text-dim) 50%, var(--calendaria-border));
+    }
+
+    .sidebar-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.25rem;
+      color: var(--calendaria-text);
+      cursor: pointer;
+      background: transparent;
+      transition:
+        background 0.15s,
+        color 0.15s;
+
+      &:hover {
+        background: var(--calendaria-bg-hover);
+      }
+
+      &[disabled] {
+        opacity: 0.3;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      &.pin-btn.has-sticky {
+        color: var(--calendaria-primary);
+      }
+
+      &.pin-btn.sticky-position {
+        color: var(--calendaria-error);
+      }
+    }
+
+    .calendar-indicators {
+      gap: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0.5rem 0.25rem;
+      padding: 0.25rem 0;
+      color: var(--calendaria-text-dim);
+      font-size: var(--font-size-12, 0.75rem);
+    }
+
+    .grid {
+      z-index: 1;
+      position: relative;
+      padding: 0.5rem;
+      background: var(--calendaria-bg);
+    }
+
+    .weekdays {
+      gap: var(--mini-gap);
+      grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
+      display: grid;
+      width: fit-content;
+      margin: 0 auto 0.25rem;
+
+      .weekday {
+        padding: 0.125rem 0;
+        color: var(--calendaria-weekday-header);
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-align: center;
+        text-transform: uppercase;
+
+        &.rest-day {
+          color: var(--calendaria-rest-day, rgb(139 157 195));
+        }
+      }
+    }
+
+    .days {
+      gap: var(--mini-gap);
+      grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
+      display: grid;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .intercalary-row {
+      gap: var(--mini-gap);
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+
+      .day.intercalary {
+        width: 100%;
+        background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
+
+        .festival-name {
+          color: var(--festival-color, var(--calendaria-festival-text));
+          font-weight: 500;
+          font-size: 0.85rem;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    .day {
+      display: flex;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+      width: var(--mini-day-size);
+      height: var(--mini-day-size);
+      border-radius: 0.25rem;
+      cursor: pointer;
+      background: var(--calendaria-bg-lighter);
+      transition: background 0.15s;
+
+      &:hover {
+        background: var(--calendaria-bg-hover);
+      }
+
+      &.empty {
+        cursor: default;
+        background: transparent;
+      }
+
+      &.other-month,
+      &.other-week {
+        opacity: 0.4;
+        cursor: pointer;
+        background: transparent;
+
+        &:hover {
+          opacity: 0.6;
+          background: var(--calendaria-bg-hover);
+        }
+
+        .day-num {
+          color: var(--calendaria-text);
+        }
+      }
+
+      &.today {
+        box-shadow: inset 0 0 0 0.05rem var(--calendaria-today);
+
+        .day-num {
+          color: var(--calendaria-today);
+          font-weight: 700;
+        }
+      }
+
+      &.selected {
+        box-shadow: inset 0 0 0 0.05rem var(--calendaria-primary);
+      }
+
+      &.festival {
+        background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
+
+        .day-num {
+          color: var(--festival-color, var(--calendaria-festival-text));
+        }
+      }
+
+      .day-num {
+        color: var(--calendaria-text);
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .note-badge {
+        display: grid;
+        place-items: center;
+        position: absolute;
+        bottom: 0.1563rem;
+        left: 0.15rem;
+        width: 1rem;
+        height: 1rem;
+        padding: 0;
+        border-radius: 0.25rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+        line-height: 1;
+      }
+
+      .mini-weather-icon {
+        opacity: 0.7;
+        position: absolute;
+        right: 0.125rem;
+        bottom: 0.125rem;
+        width: 0.75rem;
+        height: 0.75rem;
+        font-size: 0.625rem;
+        line-height: 0.75rem;
+        text-align: center;
+
+        &.forecast {
+          opacity: 0.4;
+        }
+      }
+
+      .moon-tint {
+        position: absolute;
+        top: 0.125rem;
+        right: 0.125rem;
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
+
+        img {
+          pointer-events: none;
+        }
+
+        &.clickable {
+          cursor: pointer;
+          transition: transform 0.15s ease;
+
+          &:hover {
+            z-index: 10;
+            filter: brightness(1.2);
+            transform: scale(1.3);
+          }
+        }
+      }
+
+      .moon-tiny {
+        position: absolute;
+        top: 0.125rem;
+        right: 0.125rem;
+        width: 0.75rem;
+        height: 0.75rem;
+
+        &.clickable {
+          cursor: pointer;
+          transition: transform 0.15s ease;
+
+          &:hover {
+            z-index: 10;
+            filter: brightness(1.2);
+            transform: scale(1.3);
+          }
+        }
+
+        &.tinted {
+          mix-blend-mode: multiply;
+          position: static;
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+
+    .time-display {
+      display: flex;
+      z-index: 1;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+      padding: 0.5rem 0.625rem;
+      border-top: 0.0625rem solid var(--calendaria-border-light);
+      border-radius: 0 0 0.875rem 0.875rem;
+      background: var(--calendaria-bg-lighter);
+
+      &[data-action='toggle'] {
+        cursor: pointer;
+      }
+
+      .time-value {
+        color: var(--calendaria-text-heading);
+        font-weight: 600;
+        font-size: 1.1rem;
+        font-family: monospace;
+        letter-spacing: 0.0625rem;
+        transition: opacity 0.15s;
+      }
+
+      .date-value {
+        color: var(--calendaria-text-dim);
+        font-size: 0.85rem;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .time-toggle {
+        inset: 0;
+        display: flex;
+        opacity: 0;
+        position: absolute;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        background: var(--calendaria-bg-lighter);
+        transition: opacity 0.15s;
+
+        i {
+          color: var(--calendaria-text);
+          font-size: 1.2rem;
+        }
+
+        &.active i {
+          color: var(--calendaria-primary);
+        }
+      }
+
+      &[data-action='toggle']:hover .time-value {
+        opacity: 0;
+      }
+
+      &[data-action='toggle']:hover .time-toggle {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    .time-controls {
+      display: flex;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+      height: 2.75rem;
+      margin-bottom: -2.75rem;
+      padding: 0.5rem 0.625rem;
+      border-top: 0.0625rem solid var(--calendaria-border-light);
+      border-radius: 0 0 0.875rem 0.875rem;
+      background: var(--calendaria-bg-lighter);
+      transition:
+        transform 0.25s ease,
+        margin-bottom 0.25s ease;
+      transform: translateY(-100%);
+
+      &.visible {
+        margin-bottom: 0;
+        transform: translateY(0);
+      }
+
+      .controls-group {
+        gap: 0.25rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .time-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+        border: 0.0625rem solid var(--calendaria-border);
+        border-radius: 0.25rem;
+        color: var(--calendaria-text);
+        cursor: pointer;
+        background: var(--calendaria-button-bg);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+
+        &:hover {
+          border-color: var(--calendaria-primary);
+          background: var(--calendaria-bg-hover);
+        }
+
+        &:focus {
+          outline: none;
+          box-shadow: none;
+        }
+
+        &.custom-jump {
+          width: auto;
+          min-width: 1.75rem;
+          padding: 0 0.25rem;
+          font-weight: 600;
+          font-size: var(--font-size-11);
+        }
+      }
+
+      .increment-select {
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        appearance: none;
+        box-sizing: border-box;
+        width: 3.25rem;
+        min-width: 3.25rem;
+        height: 1.75rem;
+        margin: 0;
+        padding: 0 0.375rem;
+        border: 0.0625rem solid var(--calendaria-border);
+        border-radius: 0.25rem;
+        color: var(--calendaria-text);
+        font-size: 0.75rem;
+        line-height: 1.625rem;
+        text-align: center;
+        cursor: pointer;
+        background: var(--calendaria-button-bg);
+        background-image: none;
+
+        &:hover {
+          border-color: var(--calendaria-primary);
+        }
+
+        &:focus {
+          outline: none;
+          box-shadow: none;
+        }
+      }
+    }
+
+    /* MicroCal: compact mode overrides */
+    &.micro {
+      --mini-day-size: 2.25rem;
+      --mini-gap: 0;
+
+      .container {
+        border-radius: 0.5rem;
+
+        /* Sidebar visible: flatten right corners */
+        &:has(.sidebar:is(.visible, .locked)) {
+          border-radius: 0.5rem 0 0 0.5rem;
+
+          .top-row {
+            border-radius: 0.5rem 0 0;
+          }
+
+          .grid {
+            border-radius: 0 0 0 0.5rem;
+          }
+
+          .time-controls {
+            border-radius: 0 0 0 0.5rem;
+          }
+        }
+
+        /* Time controls visible: grid loses bottom radius */
+        &:has(.time-controls.visible) .grid {
+          border-radius: 0;
+        }
+      }
+
+      cursor: grab;
+
+      .top-row {
+        padding: 0.25rem 0.375rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        position: relative;
+
+        .title {
+          font-size: 0.8rem;
+        }
+
+        .nav-btn {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+
+        .title-group {
+          position: relative;
+        }
+
+        .time-toggle {
+          inset: 0;
+          display: flex;
+          opacity: 0;
+          position: absolute;
+          justify-content: center;
+          align-items: center;
+          pointer-events: none;
+          border-radius: 0.25rem;
+          background: var(--calendaria-bg-lighter);
+          transition: opacity 0.15s;
+          cursor: pointer;
+
+          i {
+            color: var(--calendaria-text);
+            font-size: 0.85rem;
+          }
+
+          &.active i {
+            color: var(--calendaria-primary);
+          }
+
+          &.clock-locked i {
+            color: var(--calendaria-warning);
+          }
+        }
+
+        .title-group:hover .time-toggle {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+
+      .calendar-indicators {
+        gap: 0.375rem;
+        margin: 0 0.375rem 0.125rem;
+        padding: 0.125rem 0;
+        font-size: var(--font-size-11, 0.6875rem);
+      }
+
+      .grid {
+        padding: 0.375rem;
+        border-radius: 0 0 0.5rem 0.5rem;
+      }
+
+      .weekdays {
+        display: none;
+      }
+
+      .day {
+        border-radius: 50%;
+
+        .day-num {
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+
+        .note-badge {
+          width: 0.75rem;
+          height: 0.75rem;
+          bottom: 0.0625rem;
+          left: 0.0625rem;
+          border-radius: 50%;
+          font-size: 0;
+        }
+
+        .moon-tiny:not(.tinted) {
+          bottom: 0.0625rem;
+          right: 0.0625rem;
+          top: auto;
+          width: 0.75rem;
+          height: 0.75rem;
+        }
+
+        .moon-tint {
+          bottom: 0.0625rem;
+          right: 0.0625rem;
+          top: auto;
+          width: 0.75rem;
+          height: 0.75rem;
+        }
+
+        .mini-weather-icon {
+          display: none;
+        }
+      }
+
+      .intercalary-row .day.intercalary .festival-name {
+        font-size: 0.7rem;
+      }
+
+      .time-display {
+        display: none;
+      }
+
+      .time-controls {
+        border-radius: 0 0 0.5rem 0.5rem;
+
+        .time-shortcut,
+        [data-action='reverse'],
+        [data-action='forward'] {
+          display: none;
+        }
+      }
+
+      .sidebar {
+        gap: 0.125rem;
+        top: -0.0625rem;
+        bottom: -0.0625rem;
+        width: 1.5rem;
+        padding: 0.25rem 0;
+        border-radius: 0 0.5rem 0.5rem 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+
+        &.visible,
+        &.locked {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+
+      .sidebar-btn {
+        width: 1.25rem;
+        height: 1.25rem;
+        font-size: 0.75rem;
+      }
+
+      .sidebar-separator {
+        display: none;
+      }
+
+      .notes-panel {
+        left: calc(100% + 1.5rem);
+        width: 8rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+      }
+
+      .notes-panel-header {
+        display: none;
+      }
+
+      .notes-panel-list {
+        gap: 0.125rem;
+        padding: 0.25rem;
+      }
+
+      .notes-panel-item {
+        gap: 0.25rem;
+        padding: 0.25rem 0.375rem;
+      }
+
+      .note-item-icon {
+        width: 1rem;
+        height: 1rem;
+
+        i {
+          font-size: 0.75rem;
+        }
+
+        img {
+          width: 0.875rem;
+          height: 0.875rem;
+        }
+      }
+
+      .note-item-title {
+        font-size: 0.7rem;
+      }
+
+      .note-item-author {
+        display: none;
+      }
+
+      .note-item-meta {
+        font-size: 0.6rem;
+      }
+
+      .note-item-edit {
+        width: 1.125rem;
+        height: 1.125rem;
+      }
+
+      .container:has(.notes-panel.visible) .sidebar {
+        border-radius: 0;
+      }
+    }
+  }
+}

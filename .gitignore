@@ -1,8 +1,8 @@
-calendaria.lock
-/todo
-README.html
 /coverage/
-/node_modules/
-/foundry/
 /dist
 /dnd5e
+/foundry/
+/node_modules/
+/todo
+calendaria.lock
+README.html

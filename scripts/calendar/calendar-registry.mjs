@@ -1,29 +1,20 @@
 /**
  * Calendar Registry
- * Manages the storage and retrieval of calendar instances.
  * @module Calendar/CalendarRegistry
  * @author Tyler
  */
 
+import CalendariaCalendar from '../data/calendaria-calendar.mjs';
 import { log } from '../utils/logger.mjs';
-import CalendariaCalendar from './data/calendaria-calendar.mjs';
 
 /**
  * Registry for managing calendar instances.
  */
 export default class CalendarRegistry {
-  /**
-   * Map of calendar ID to calendar instance
-   * @type {Map<string, CalendariaCalendar>}
-   * @private
-   */
+  /** @type {Map<string, CalendariaCalendar>} Map of calendar ID to calendar instance */
   static #calendars = new Map();
 
-  /**
-   * Currently active calendar ID
-   * @type {string|null}
-   * @private
-   */
+  /** @type {string|null} Currently active calendar ID */
   static #activeId = null;
 
   /**
@@ -35,7 +26,7 @@ export default class CalendarRegistry {
   static register(id, calendar) {
     if (!(calendar instanceof CalendariaCalendar)) calendar = new CalendariaCalendar(calendar);
     this.#calendars.set(id, calendar);
-    log(3, `Registered calendar: ${id}`);
+
     return calendar;
   }
 
@@ -46,7 +37,7 @@ export default class CalendarRegistry {
    */
   static unregister(id) {
     const result = this.#calendars.delete(id);
-    if (result) log(3, `Unregistered calendar: ${id}`);
+
     return result;
   }
 
@@ -119,7 +110,6 @@ export default class CalendarRegistry {
   static clear() {
     this.#calendars.clear();
     this.#activeId = null;
-    log(3, 'Calendar registry cleared');
   }
 
   /**
@@ -142,7 +132,6 @@ export default class CalendarRegistry {
 
   /**
    * Restore registry from a plain object.
-   * Active calendar is controlled by SETTINGS.ACTIVE_CALENDAR, not stored here.
    * @param {object} data  Serialized registry data
    */
   static fromObject(data) {

@@ -1,76 +1,310 @@
 {
-  "id"            : "drakkenheim",
-  "name"          : "CALENDARIA.Calendar.Drakkenheim.Name",
-  "years"         : {"yearZero": 1126, "firstWeekday": 0},
-  "months"        : {
+  "id": "drakkenheim",
+  "name": "CALENDARIA.Calendar.Drakkenheim.Name",
+  "years": {
+    "yearZero": 1126,
+    "firstWeekday": 0
+  },
+  "months": {
     "values": {
-      "threshold0000000": {"name": "Threshold",   "abbreviation": "Thr", "ordinal":  1, "days": 30},
-      "thawing000000000": {"name": "Thawing",     "abbreviation": "Thw", "ordinal":  2, "days": 30},
-      "springtide000000": {"name": "Springtide",  "abbreviation": "Spt", "ordinal":  3, "days": 31},
-      "hearthstone00000": {"name": "Hearthstone", "abbreviation": "Hrt", "ordinal":  4, "days": 30},
-      "sowing0000000000": {"name": "Sowing",      "abbreviation": "Sow", "ordinal":  5, "days": 31},
-      "highsummer000000": {"name": "Highsummer",  "abbreviation": "Hgs", "ordinal":  6, "days": 30},
-      "midyear000000000": {"name": "Midyear",     "abbreviation": "Mdy", "ordinal":  7, "days": 31},
-      "sunbreak00000000": {"name": "Sunbreak",    "abbreviation": "Snb", "ordinal":  8, "days": 30},
-      "autumntide000000": {"name": "Autumntide",  "abbreviation": "Aut", "ordinal":  9, "days": 31},
-      "reaping000000000": {"name": "Reaping",     "abbreviation": "Rep", "ordinal": 10, "days": 30},
-      "rimewind00000000": {"name": "Rimewind",    "abbreviation": "Rim", "ordinal": 11, "days": 30},
-      "midwinter0000000": {"name": "Midwinter",   "abbreviation": "Mdw", "ordinal": 12, "days": 31}
+      "threshold0000000": {
+        "name": "Threshold",
+        "abbreviation": "Thr",
+        "ordinal": 1,
+        "days": 30
+      },
+      "thawing000000000": {
+        "name": "Thawing",
+        "abbreviation": "Thw",
+        "ordinal": 2,
+        "days": 30
+      },
+      "springtide000000": {
+        "name": "Springtide",
+        "abbreviation": "Spt",
+        "ordinal": 3,
+        "days": 31
+      },
+      "hearthstone00000": {
+        "name": "Hearthstone",
+        "abbreviation": "Hrt",
+        "ordinal": 4,
+        "days": 30
+      },
+      "sowing0000000000": {
+        "name": "Sowing",
+        "abbreviation": "Sow",
+        "ordinal": 5,
+        "days": 31
+      },
+      "highsummer000000": {
+        "name": "Highsummer",
+        "abbreviation": "Hgs",
+        "ordinal": 6,
+        "days": 30
+      },
+      "midyear000000000": {
+        "name": "Midyear",
+        "abbreviation": "Mdy",
+        "ordinal": 7,
+        "days": 31
+      },
+      "sunbreak00000000": {
+        "name": "Sunbreak",
+        "abbreviation": "Snb",
+        "ordinal": 8,
+        "days": 30
+      },
+      "autumntide000000": {
+        "name": "Autumntide",
+        "abbreviation": "Aut",
+        "ordinal": 9,
+        "days": 31
+      },
+      "reaping000000000": {
+        "name": "Reaping",
+        "abbreviation": "Rep",
+        "ordinal": 10,
+        "days": 30
+      },
+      "rimewind00000000": {
+        "name": "Rimewind",
+        "abbreviation": "Rim",
+        "ordinal": 11,
+        "days": 30
+      },
+      "midwinter0000000": {
+        "name": "Midwinter",
+        "abbreviation": "Mdw",
+        "ordinal": 12,
+        "days": 31
+      }
     }
   },
-  "days"          : {
-    "values"          : {
-      "moonday000000000": {"name": "Moonday",   "ordinal": 1, "abbreviation": "Moo"                   },
-      "tidesday00000000": {"name": "Tidesday",  "ordinal": 2, "abbreviation": "Tid"                   },
-      "windsday00000000": {"name": "Windsday",  "ordinal": 3, "abbreviation": "Win"                   },
-      "earthsday0000000": {"name": "Earthsday", "ordinal": 4, "abbreviation": "Ear"                   },
-      "fireday000000000": {"name": "Fireday",   "ordinal": 5, "abbreviation": "Fir"                   },
-      "starsday00000000": {"name": "Starsday",  "ordinal": 6, "abbreviation": "Sta"                   },
-      "sunday0000000000": {"name": "Sunday",    "ordinal": 7, "abbreviation": "Sun", "isRestDay": true}
+  "days": {
+    "values": {
+      "moonday000000000": {
+        "name": "Moonday",
+        "ordinal": 1,
+        "abbreviation": "Moo"
+      },
+      "tidesday00000000": {
+        "name": "Tidesday",
+        "ordinal": 2,
+        "abbreviation": "Tid"
+      },
+      "windsday00000000": {
+        "name": "Windsday",
+        "ordinal": 3,
+        "abbreviation": "Win"
+      },
+      "earthsday0000000": {
+        "name": "Earthsday",
+        "ordinal": 4,
+        "abbreviation": "Ear"
+      },
+      "fireday000000000": {
+        "name": "Fireday",
+        "ordinal": 5,
+        "abbreviation": "Fir"
+      },
+      "starsday00000000": {
+        "name": "Starsday",
+        "ordinal": 6,
+        "abbreviation": "Sta"
+      },
+      "sunday0000000000": {
+        "name": "Sunday",
+        "ordinal": 7,
+        "abbreviation": "Sun",
+        "isRestDay": true
+      }
     },
-    "daysPerYear"     : 365,
-    "hoursPerDay"     : 24,
-    "minutesPerHour"  : 60,
+    "daysPerYear": 365,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
     "secondsPerMinute": 60
   },
-  "festivals"     : {
-    "tarnaswake000000": {"name": "Tarna's Wake", "month": 1, "day": 1, "duration": 7, "icon": "fas fa-dove", "color": "#87CEEB", "description": "Seven-day spring remembrance honoring Saint Tarna's martyrdom and sacrifice."},
-    "angelmeet0000000": {"name": "Angelmeet", "month": 7, "day": 1, "icon": "fas fa-hands-praying", "color": "#DAA520", "description": "Midsummer holy day commemorating divine intervention and the protection of the faithful."},
-    "allhallowseve000": {"name": "All Hallow's Eve", "month": 10, "day": 30, "icon": "fas fa-ghost", "color": "#FF6600", "description": "Night when the boundary between the living and dead weakens."},
-    "tarnaswake000002": {"name": "Tarna's Wake", "month": 12, "day": 25, "duration": 7, "icon": "fas fa-fire-flame-simple", "color": "#4169E1", "description": "Seven-day winter observance of Saint Tarna's legacy with candlelit vigils."}
+  "festivals": {
+    "tarnaswake000000": {
+      "name": "Tarna's Wake",
+      "month": 0,
+      "duration": 7,
+      "icon": "fas fa-dove",
+      "color": "#87CEEB",
+      "description": "Seven-day spring remembrance honoring Saint Tarna's martyrdom and sacrifice.",
+      "dayOfMonth": 0
+    },
+    "angelmeet0000000": {
+      "name": "Angelmeet",
+      "month": 6,
+      "icon": "fas fa-hands-praying",
+      "color": "#DAA520",
+      "description": "Midsummer holy day commemorating divine intervention and the protection of the faithful.",
+      "dayOfMonth": 0
+    },
+    "allhallowseve000": {
+      "name": "All Hallow's Eve",
+      "month": 9,
+      "icon": "fas fa-ghost",
+      "color": "#FF6600",
+      "description": "Night when the boundary between the living and dead weakens.",
+      "dayOfMonth": 29
+    },
+    "tarnaswake000002": {
+      "name": "Tarna's Wake",
+      "month": 11,
+      "duration": 7,
+      "icon": "fas fa-fire-flame-simple",
+      "color": "#4169E1",
+      "description": "Seven-day winter observance of Saint Tarna's legacy with candlelit vigils.",
+      "dayOfMonth": 24
+    }
   },
-  "seasons"       : {
+  "seasons": {
     "values": {
-      "winter0000000000": {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"},
-      "spring0000000000": {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
-      "summer0000000000": {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 264, "abbreviation": "Sum"},
-      "autumn0000000000": {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 265, "dayEnd": 354, "abbreviation": "Aut"}
-    }
-  },
-  "eras"          : { "sacredflame00000": {"name": "Sacred Flame", "abbreviation": "SF", "startYear": 1, "endYear": null} },
-  "moons"         : {
-    "luna000000000000": {
-      "name"         : "Luna",
-      "cycleLength"  : 29,
-      "color"        : "#C0C0C0",
-      "phases"       : {
-        "newmoon000000000": {"name": "CALENDARIA.MoonPhase.NewMoon",        "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
-        "waxingcrescent00": {"name": "CALENDARIA.MoonPhase.WaxingCrescent", "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
-        "firstquarter0000": {"name": "CALENDARIA.MoonPhase.FirstQuarter",   "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
-        "waxinggibbous000": {"name": "CALENDARIA.MoonPhase.WaxingGibbous",  "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
-        "fullmoon00000000": {"name": "CALENDARIA.MoonPhase.FullMoon",       "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
-        "waninggibbous000": {"name": "CALENDARIA.MoonPhase.WaningGibbous",  "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
-        "lastquarter00000": {"name": "CALENDARIA.MoonPhase.LastQuarter",    "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
-        "waningcrescent00": {"name": "CALENDARIA.MoonPhase.WaningCrescent", "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "dayStart": 355,
+        "dayEnd": 78,
+        "abbreviation": "Win"
       },
-      "referenceDate": {"year": 0, "month": 0, "day": 14}
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "dayStart": 79,
+        "dayEnd": 171,
+        "abbreviation": "Spr"
+      },
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "dayStart": 172,
+        "dayEnd": 264,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "dayStart": 265,
+        "dayEnd": 354,
+        "abbreviation": "Aut"
+      }
     }
   },
-  "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 355, "summerSolstice": 172},
-  "cycles"        : {},
+  "eras": {
+    "sacredflame00000": {
+      "name": "Sacred Flame",
+      "abbreviation": "SF",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "luna000000000000": {
+      "name": "Luna",
+      "cycleLength": 29,
+      "color": "#C0C0C0",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 13
+      }
+    }
+  },
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 355,
+    "summerSolstice": 172
+  },
+  "cycles": {},
   "canonicalHours": {},
-  "weeks"         : {"enabled": false, "type": "year-based", "names": {}},
-  "amPmNotation"  : {"am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM"},
-  "dateFormats"   : {"short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y", "yearLabel": "Y G"},
-  "metadata"      : {"id": "drakkenheim", "description": "CALENDARIA.Calendar.Drakkenheim.Description", "author": "calendaria", "system": "Drakkenheim"}
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y",
+    "full": "MMMM D, Y",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "drakkenheim",
+    "description": "CALENDARIA.Calendar.Drakkenheim.Description",
+    "author": "calendaria",
+    "system": "Drakkenheim"
+  }
 }

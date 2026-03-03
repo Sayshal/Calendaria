@@ -1,7 +1,5 @@
 /**
  * Weather Sound Manager
- * Plays ambient sound loops tied to weather presets via Foundry's AudioHelper.
- * Controlled by the WEATHER_SOUND_FX setting toggle.
  * @module Weather/WeatherSound
  * @author Tyler
  */
@@ -13,9 +11,6 @@ import WeatherManager from './weather-manager.mjs';
 /** Crossfade duration in milliseconds. */
 const FADE_MS = 2000;
 
-/** Target playback volume (before environment gain). */
-const VOLUME = 0.5;
-
 /** @type {object|null} Currently playing weather ambient sound. */
 let activeSound = null;
 
@@ -24,14 +19,11 @@ let activeSoundKey = null;
 
 /**
  * Initialize weather sound hooks.
- * Called from calendaria.mjs on the ready hook.
  */
 export function initializeWeatherSound() {
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
   Hooks.on('updateScene', onSceneUpdate);
-
-  // Sync sound to current weather on startup
   const weather = WeatherManager.getCurrentWeather();
   playSound(weather || null);
   log(3, 'WeatherSound initialized');
@@ -44,10 +36,11 @@ export function initializeWeatherSound() {
  */
 function onSceneUpdate(scene, change) {
   if (scene !== canvas?.scene) return;
-  const flagKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
-  if (!(flagKey in foundry.utils.flattenObject(change))) return;
-
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  const flat = foundry.utils.flattenObject(change);
+  const fxKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
+  const soundKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_SOUND_DISABLED}`;
+  if (!(fxKey in flat) && !(soundKey in flat)) return;
+  if (isSoundDisabledForScene(scene)) {
     stopSound();
   } else {
     const weather = WeatherManager.getCurrentWeather();
@@ -61,12 +54,10 @@ function onSceneUpdate(scene, change) {
 function onCanvasReady() {
   const scene = canvas?.scene;
   if (!scene) return;
-
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (isSoundDisabledForScene(scene)) {
     stopSound();
     return;
   }
-
   const weather = WeatherManager.getCurrentWeather();
   playSound(weather || null);
 }
@@ -85,13 +76,11 @@ function onWeatherChange({ current, bulk, visualOnly } = {}) {
     playSound(weather || null);
     return;
   }
-
   const scene = game.scenes?.active;
-  if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (isSoundDisabledForScene(scene)) {
     stopSound();
     return;
   }
-
   playSound(current || null);
 }
 
@@ -105,35 +94,42 @@ async function fadeOutAndStop(sound) {
 }
 
 /**
+ * Check if weather sound is disabled for a scene (per-scene flag or FX disabled).
+ * @param {object} [scene] - Scene document
+ * @returns {boolean} Whether sound is disabled
+ */
+function isSoundDisabledForScene(scene) {
+  if (!scene) return false;
+  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED);
+}
+
+/**
  * Play the ambient sound loop for the current weather with crossfade.
  * @param {object|null} weather - Current weather state
  */
 async function playSound(weather) {
-  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX) || !game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
     stopSound();
     return;
   }
-
   const soundKey = weather?.soundFx || null;
-
-  // Same sound already playing — no-op
   if (soundKey === activeSoundKey && activeSound?.playing) return;
-
-  // Fade out the old sound (fire-and-forget so new sound overlaps)
   const oldSound = activeSound;
   if (oldSound) fadeOutAndStop(oldSound);
-
   activeSound = null;
   activeSoundKey = null;
-
   if (!soundKey) return;
-
   const src = `modules/${MODULE.ID}/assets/sound/${soundKey}.ogg`;
-  const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
-  sound.fade(VOLUME, { duration: FADE_MS });
-  activeSound = sound;
-  activeSoundKey = soundKey;
-  log(3, `[Sound] Playing "${soundKey}"`);
+  try {
+    const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
+    const volume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+    sound.fade(volume, { duration: FADE_MS });
+    activeSound = sound;
+    activeSoundKey = soundKey;
+    log(3, `Playing "${soundKey}"`);
+  } catch (error) {
+    log(1, 'Weather sound playback failed:', error);
+  }
 }
 
 /**
@@ -141,10 +137,15 @@ async function playSound(weather) {
  */
 async function stopSound() {
   if (activeSound) {
+    const stoppingKey = activeSoundKey;
     const sound = activeSound;
     activeSound = null;
     activeSoundKey = null;
-    log(3, `[Sound] Stopping "${activeSoundKey}"`);
-    await fadeOutAndStop(sound);
+    log(3, `Stopping "${stoppingKey}"`);
+    try {
+      await fadeOutAndStop(sound);
+    } catch (error) {
+      log(1, 'Weather sound stop failed:', error);
+    }
   }
 }

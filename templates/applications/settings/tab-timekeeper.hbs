@@ -1,0 +1,177 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <div class="button-row app-controls">
+    <button type="button" data-action="resetPosition" data-target="timekeeper">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
+    </button>
+    <button type="button" data-action="closeTimeKeeper">
+      <i class="fas fa-times"></i>
+      {{localize "CALENDARIA.SettingsPanel.CloseTimeKeeper"}}
+    </button>
+    <button type="button" data-action="openTimeKeeper">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.SettingsPanel.OpenTimeKeeper"}}
+    </button>
+  </div>
+  <p class="hint section-hint">{{openHint}}</p>
+
+  <fieldset data-section="timekeeper-display">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="timekeeper-display"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="showTimeKeeper">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="showTimeKeeper" name="showTimeKeeper" {{#if showTimeKeeper}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
+    </div>
+
+    {{#if isGM}}
+      <div class="form-group">
+        <label for="forceTimeKeeper">{{localize "CALENDARIA.Settings.ForceTimeKeeper.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceTimeKeeper" name="forceTimeKeeper" {{#if forceTimeKeeper}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceTimeKeeper.Hint"}}</p>
+      </div>
+    {{/if}}
+
+    <div class="form-group">
+      <label for="timeKeeperAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="timeKeeperAutoFade" name="timeKeeperAutoFade"
+          {{#if timeKeeperAutoFade}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    </div>
+
+    <div class="form-group{{#unless timeKeeperAutoFade}} disabled{{/unless}}">
+      <label for="timeKeeperIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <div class="form-fields">
+        <div class="slider-with-ticks">
+          <input type="range" id="timeKeeperIdleOpacity" name="timeKeeperIdleOpacity" min="0" max="100"
+            value="{{timeKeeperIdleOpacity}}" list="opacity-ticks" {{#unless timeKeeperAutoFade}}disabled
+            aria-disabled="true" data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"
+            {{/unless}}>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <input type="number" class="range-value" min="0" max="100" value="{{timeKeeperIdleOpacity}}"
+          style="width: 3rem; flex: none" {{#unless timeKeeperAutoFade}}disabled aria-disabled="true" data-tooltip
+          aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
+        <span class="input-suffix">%</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  {{#if isGM}}
+    <fieldset data-section="display-formats">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
+        <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="date" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
+            class="fa-solid fa-question"></i></button>
+      </legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
+
+      {{#each formatLocations}}
+        <div class="format-location" data-location="{{id}}">
+          <div class="form-group">
+            <label>{{label}}</label>
+          </div>
+
+          <div class="format-row">
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="gm"></span></span>
+              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+                {{#each gmPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+                placeholder="D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                data-location="{{id}}" data-role="gm">
+            </div>
+
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
+                  data-location="{{id}}" data-role="player"></span></span>
+              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+                {{#each playerPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.playerCustom"
+                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMMM YYYY"
+                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+                data-role="player">
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </fieldset>
+
+    <fieldset data-section="timekeeper-time-jumps">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="timekeeper-time-jumps"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
+
+      <div class="time-jumps-grid timekeeper-jumps">
+        <div class="time-jumps-header">
+          <span></span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}</span>
+          <span>{{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}</span>
+        </div>
+        {{#each timeKeeperTimeJumps}}
+          <div class="time-jumps-row">
+            <label>{{label}}</label>
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorDecrement"}}">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorDecrement"}}">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MinorIncrement"}}">
+            <input type="number" name="timeKeeperTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}"
+              aria-label="{{label}} {{localize "CALENDARIA.SettingsPanel.TimeJumps.MajorIncrement"}}">
+          </div>
+        {{/each}}
+      </div>
+    </fieldset>
+  {{/if}}
+
+  <fieldset data-section="timekeeper-sticky">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="timekeeper-sticky"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+    <input type="hidden" name="timeKeeperStickySection" value="1">
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
+
+    <div class="form-group">
+      <label for="timeKeeperStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="timeKeeperStickyPosition" name="timeKeeperStickyPosition"
+          {{#if timeKeeperStickyPosition}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+    </div>
+  </fieldset>
+
+</section>

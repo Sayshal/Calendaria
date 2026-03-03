@@ -1,0 +1,821 @@
+/**
+ * Shared utilities for calendar view applications.
+ * @module Applications/CalendarViewUtils
+ * @author Tyler
+ */
+
+import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
+import NoteManager from '../../notes/note-manager.mjs';
+import { isRecurringMatch } from '../../notes/recurrence.mjs';
+import WeatherManager from '../../weather/weather-manager.mjs';
+import { formatCustom, toRomanNumeral } from '../formatting/format-utils.mjs';
+import { format, localize } from '../localization.mjs';
+import { canViewWeatherForecast } from '../permissions.mjs';
+import { CalendariaSocket } from '../socket.mjs';
+
+const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
+
+/** @type {string|null} User-selected moon name override for display */
+let selectedMoonOverride = null;
+
+/** @type {string[]|null} BigCal visible moons override (session state) */
+let visibleMoonsOverride = null;
+
+/** @type {{tooltip: HTMLElement|null, handler: Function|null}} Active moon picker state */
+const moonPickerState = { tooltip: null, handler: null };
+
+/**
+ * Set the moon override for display.
+ * @param {string|null} moonName - Moon name to display, or null to use default (first alphabetically)
+ */
+export function setSelectedMoon(moonName) {
+  selectedMoonOverride = moonName;
+}
+
+/**
+ * Get the current moon override.
+ * @returns {string|null} Selected moon name or null
+ */
+export function getSelectedMoon() {
+  return selectedMoonOverride;
+}
+
+/**
+ * Get the visible moons override for BigCal.
+ * @returns {string[]|null} Array of moon names to display, or null for default
+ */
+export function getVisibleMoons() {
+  return visibleMoonsOverride;
+}
+
+/**
+ * Set the visible moons override for BigCal.
+ * @param {string[]|null} moons - Array of moon names, or null to clear
+ */
+export function setVisibleMoons(moons) {
+  visibleMoonsOverride = moons;
+}
+
+/**
+ * Close any active moon picker tooltip.
+ */
+export function closeMoonPicker() {
+  if (moonPickerState.handler) {
+    document.removeEventListener('mousedown', moonPickerState.handler);
+    moonPickerState.handler = null;
+  }
+  if (moonPickerState.tooltip) {
+    moonPickerState.tooltip.remove();
+    moonPickerState.tooltip = null;
+  }
+}
+
+/**
+ * Show a radial moon picker anchored to a target element.
+ * @param {HTMLElement} anchor - The element to position relative to
+ * @param {object[]} moons - Moon data array (from getAllMoonPhases)
+ * @param {string|null} currentMoon - Currently selected moon name (highlighted)
+ * @param {Function} onSelect - Callback when a moon is selected: (moonName) => void
+ */
+export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
+  closeMoonPicker();
+  if (!moons?.length) return;
+  const tooltip = document.createElement('div');
+  tooltip.className = 'calendaria-moon-picker';
+  const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
+  tooltip.innerHTML = `
+    <div class="radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
+      ${moons
+        .map(
+          (moon, i) => `
+        <div class="radial-item${moon.moonName === currentMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
+          <span class="name">${moon.moonName}</span>
+          <div class="radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
+            <img src="${moon.icon}" alt="${moon.phaseName}">
+          </div>
+        </div>
+      `
+        )
+        .join('')}
+    </div>
+  `;
+  document.body.appendChild(tooltip);
+  moonPickerState.tooltip = tooltip;
+  tooltip.querySelectorAll('.radial-item').forEach((item) => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const moonName = item.dataset.moonName;
+      onSelect(moonName);
+      closeMoonPicker();
+    });
+  });
+  const targetRect = anchor.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  let left = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
+  let top = targetRect.bottom + 8;
+  if (left < 10) left = 10;
+  if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
+  if (top + tooltipRect.height > window.innerHeight - 10) top = targetRect.top - tooltipRect.height - 8;
+  top = Math.max(10, top);
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  setTimeout(() => {
+    moonPickerState.handler = (event) => {
+      if (!tooltip.contains(event.target) && !event.target.closest('[data-action="showMoons"], [data-action="moonClick"]')) closeMoonPicker();
+    };
+    document.addEventListener('mousedown', moonPickerState.handler);
+  }, 100);
+}
+
+/**
+ * Convert hex color to hue angle for CSS filter.
+ * @param {string} hex - Hex color (e.g., '#ff0000')
+ * @returns {number} Hue angle in degrees (0-360)
+ */
+function hexToHue(hex) {
+  if (!hex) return 0;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  if (d === 0) return 0;
+  let h;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h = Math.round(h * 60);
+  return h < 0 ? h + 360 : h;
+}
+
+/**
+ * Enrich season data with icon and color based on season name.
+ * @param {object|null} season - Season object with name property
+ * @returns {object|null} Season with icon and color added
+ */
+export function enrichSeasonData(season) {
+  if (!season) return null;
+  if (season.icon && season.color) return season;
+  const seasonName = localize(season.name).toLowerCase();
+  const SEASON_DEFAULTS = {
+    autumn: { icon: 'fas fa-leaf', color: '#d2691e' },
+    fall: { icon: 'fas fa-leaf', color: '#d2691e' },
+    winter: { icon: 'fas fa-snowflake', color: '#87ceeb' },
+    spring: { icon: 'fas fa-seedling', color: '#90ee90' },
+    summer: { icon: 'fas fa-sun', color: '#ffd700' }
+  };
+  const match = Object.keys(SEASON_DEFAULTS).find((key) => seasonName.includes(key));
+  const defaults = match ? SEASON_DEFAULTS[match] : { icon: 'fas fa-leaf', color: '#666666' };
+  return { ...season, icon: season.icon || defaults.icon, color: season.color || defaults.color };
+}
+
+/**
+ * Get all calendar note pages from journal entries for the active calendar.
+ * @returns {object[]} Array of calendar note pages
+ */
+export function getCalendarNotes() {
+  const notes = [];
+  const activeCalendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const noteCalendarId = page.getFlag(MODULE.ID, 'calendarId') || page.parent?.getFlag(MODULE.ID, 'calendarId');
+      if (activeCalendarId && noteCalendarId !== activeCalendarId) continue;
+      notes.push(page);
+    }
+  }
+  return notes;
+}
+
+/**
+ * Filter notes to only those visible to the current user.
+ * @param {object[]} notes - All notes
+ * @returns {object[]} Notes visible to the current user
+ */
+export function getVisibleNotes(notes) {
+  if (game.user.isGM) return notes;
+  return notes.filter((page) => {
+    if (page.system.gmOnly) return false;
+    const journal = page.parent;
+    return journal ? journal.testUserPermission(game.user, 'OBSERVER') : page.testUserPermission(game.user, 'OBSERVER');
+  });
+}
+
+/**
+ * Check if a date is today.
+ * @param {number} year - Display year (with yearZero applied)
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day of month (0-indexed)
+ * @param {object} [calendar] - Calendar to use (defaults to active)
+ * @returns {boolean} True if the given date matches today's date
+ */
+export function isToday(year, month, dayOfMonth, calendar = null) {
+  const today = game.time.components;
+  calendar = calendar || CalendarManager.getActiveCalendar();
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const displayYear = today.year + yearZero;
+  return displayYear === year && today.month === month && (today.dayOfMonth ?? 0) === dayOfMonth;
+}
+
+/**
+ * Get the current viewed date based on game time.
+ * @param {object} [calendar] - Calendar to use
+ * @returns {object} Date object with year, month, dayOfMonth (0-indexed)
+ */
+export function getCurrentViewedDate(calendar = null) {
+  const components = game.time.components;
+  calendar = calendar || CalendarManager.getActiveCalendar();
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  return { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 };
+}
+
+/**
+ * Check if a day has any notes.
+ * @param {object[]} notes - Notes to check
+ * @param {number} year - Year
+ * @param {number} month - Month
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {boolean} True if at least one note exists on the specified day
+ */
+export function hasNotesOnDay(notes, year, month, dayOfMonth) {
+  const targetDate = { year, month, dayOfMonth };
+  return notes.some((page) => {
+    const noteData = {
+      startDate: page.system.startDate,
+      endDate: page.system.endDate,
+      repeat: page.system.repeat,
+      repeatInterval: page.system.repeatInterval,
+      repeatEndDate: page.system.repeatEndDate,
+      maxOccurrences: page.system.maxOccurrences,
+      moonConditions: page.system.moonConditions,
+      randomConfig: page.system.randomConfig,
+      cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
+      linkedEvent: page.system.linkedEvent,
+      weekday: page.system.weekday,
+      weekNumber: page.system.weekNumber,
+      seasonalConfig: page.system.seasonalConfig,
+      conditions: page.system.conditions
+    };
+    return isRecurringMatch(noteData, targetDate);
+  });
+}
+
+/**
+ * Build weather pill template data from a getDayWeather result.
+ * @param {object|null} wd - Weather data from getDayWeather
+ * @returns {object} Template properties for the weather pill
+ */
+export function buildWeatherPillData(wd) {
+  if (!wd) return { weatherIcon: null, weatherColor: null, weatherLabel: null, weatherTemp: null, weatherWindDir: null, weatherTooltipHtml: null, isForecast: false };
+  const temp = wd.temperature != null ? WeatherManager.formatTemperature(wd.temperature) : null;
+  const windDir = wd.wind?.direction != null ? WeatherManager.getWindDirectionLabel(wd.wind.direction) : null;
+  const tooltipHtml = WeatherManager.buildWeatherTooltip({
+    label: wd.label,
+    description: wd.description ?? null,
+    temp,
+    windSpeed: wd.wind?.speed ?? 0,
+    windDirection: wd.wind?.direction,
+    precipType: wd.precipitation?.type ?? null,
+    precipIntensity: wd.precipitation?.intensity
+  });
+  return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };
+}
+
+/**
+ * Render weather indicator HTML.
+ * @param {object} params - Normalized weather params
+ * @param {object|null} params.weather - Weather data { icon, label, color, temperature, tooltipHtml, windSpeed, windDirection, precipType }
+ * @param {string} params.displayMode - Display mode ('full', 'icon', 'iconTemp', 'temp')
+ * @param {boolean} params.canInteract - Whether user can open weather picker
+ * @param {boolean} [params.showBlock] - Whether to show empty-state block when no weather
+ * @returns {string} HTML string
+ */
+export function renderWeatherIndicator({ weather, displayMode, canInteract, showBlock = true }) {
+  if (weather) {
+    const clickable = canInteract ? ' clickable' : '';
+    const action = canInteract ? 'data-action="openWeatherPicker"' : '';
+    const showIcon = displayMode === 'full' || displayMode === 'icon' || displayMode === 'iconTemp';
+    const showLabel = displayMode === 'full';
+    const showTemp = displayMode === 'full' || displayMode === 'temp' || displayMode === 'iconTemp';
+    const icon = showIcon ? `<i class="${weather.icon}"></i>` : '';
+    const label = showLabel ? `<span class="weather-label">${weather.label}</span>` : '';
+    const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+    let windHtml = '';
+    if (showLabel && weather.windSpeed > 0) {
+      const rotation = weather.windDirection != null ? weather.windDirection : 0;
+      windHtml = `<span class="weather-wind"><i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i></span>`;
+    }
+    let precipHtml = '';
+    if (showLabel && weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
+    return `<span class="weather-indicator${clickable} weather-mode-${displayMode}" ${action} style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">${icon}${label}${temp}${windHtml}${precipHtml}</span>`;
+  } else if (showBlock && canInteract) {
+    return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
+  }
+  return '';
+}
+
+/**
+ * Render season indicator HTML.
+ * @param {object} params - Normalized season params
+ * @param {object|null} params.season - Season data { name, icon, color }
+ * @param {string} params.displayMode - Display mode ('full', 'icon', 'text')
+ * @returns {string} HTML string
+ */
+export function renderSeasonIndicator({ season, displayMode }) {
+  if (!season) return '';
+  const showIcon = displayMode === 'full' || displayMode === 'icon';
+  const showLabel = displayMode === 'full' || displayMode === 'text';
+  const icon = showIcon ? `<i class="${season.icon}"></i>` : '';
+  const label = showLabel ? `<span class="season-label">${season.name}</span>` : '';
+  return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${season.name}">${icon}${label}</span>`;
+}
+
+/**
+ * Render era indicator HTML.
+ * @param {object} params - Normalized era params
+ * @param {object|null} params.era - Era data { name, abbreviation }
+ * @param {string} params.displayMode - Display mode ('full', 'icon', 'text', 'abbr')
+ * @returns {string} HTML string
+ */
+export function renderEraIndicator({ era, displayMode }) {
+  if (!era) return '';
+  const showIcon = displayMode === 'full' || displayMode === 'icon';
+  const showLabel = displayMode === 'full' || displayMode === 'text';
+  const showAbbr = displayMode === 'abbr';
+  const icon = showIcon ? '<i class="fas fa-hourglass-half"></i>' : '';
+  let label = '';
+  if (showLabel) label = `<span class="era-label">${era.name}</span>`;
+  else if (showAbbr) label = `<span class="era-label">${era.abbreviation || era.name}</span>`;
+  return `<span class="era-indicator" data-tooltip="${era.name}">${icon}${label}</span>`;
+}
+
+/**
+ * Render cycle indicator HTML.
+ * @param {object} params - Normalized cycle params
+ * @param {object|null} params.cycleData - Cycle data { values: [{ index, entryName }] }
+ * @param {string} params.displayMode - Display mode ('icon', 'number', 'roman', 'name')
+ * @param {string} [params.cycleText] - Tooltip text
+ * @returns {string} HTML string
+ */
+export function renderCycleIndicator({ cycleData, displayMode, cycleText }) {
+  if (!cycleData?.values?.length) return '';
+  const icon = '<i class="fas fa-arrows-rotate"></i>';
+  if (displayMode === 'icon') return `<span class="cycle-indicator" data-tooltip="${cycleText}">${icon}</span>`;
+  let displayText = '';
+  if (displayMode === 'number') displayText = cycleData.values.map((v) => v.index + 1).join(', ');
+  else if (displayMode === 'roman') displayText = cycleData.values.map((v) => toRomanNumeral(v.index + 1)).join(', ');
+  else displayText = cycleData.values.map((v) => v.entryName).join(', ');
+  const label = `<span class="cycle-label">${displayText}</span>`;
+  return `<span class="cycle-indicator" data-tooltip="${cycleText || displayText}">${icon}${label}</span>`;
+}
+
+/**
+ * Get notes that start on a specific day.
+ * @param {object[]} notes - Notes to filter
+ * @param {number} year - Year
+ * @param {number} month - Month
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {object[]} Notes that start on the specified day
+ */
+export function getNotesForDay(notes, year, month, dayOfMonth) {
+  return notes.filter((page) => {
+    const start = page.system.startDate;
+    const end = page.system.endDate;
+    if (start.year !== year || start.month !== month || start.dayOfMonth !== dayOfMonth) return false;
+    const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
+    if (!hasValidEndDate) return true;
+    if (end.year !== start.year || end.month !== start.month || end.dayOfMonth !== start.dayOfMonth) return false;
+    return true;
+  });
+}
+
+/**
+ * Get the selected moon's phase for a specific day.
+ * @param {object} calendar - The calendar
+ * @param {number} year - Display year
+ * @param {number} month - Month
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {object|null} Moon phase data with icon and tooltip
+ */
+export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
+  if (!calendar?.moonsArray?.length) return null;
+  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
+  let moon = sortedMoons[0];
+  if (selectedMoonOverride) {
+    const overrideMoon = sortedMoons.find((m) => localize(m.name) === selectedMoonOverride);
+    if (overrideMoon) moon = overrideMoon;
+  }
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
+  const dayComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const dayWorldTime = calendar.componentsToTime(dayComponents);
+  const phase = calendar.getMoonPhase(moon.originalIndex, dayWorldTime);
+  if (!phase) return null;
+  const color = moon.color || null;
+  return { icon: phase.icon, color, hue: color ? hexToHue(color) : null, tooltip: `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` };
+}
+
+/**
+ * Get all moon phases for a specific day, sorted alphabetically.
+ * @param {object} calendar - The calendar
+ * @param {number} year - Display year
+ * @param {number} month - Month
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {Array|null} Array of moon phase data sorted alphabetically by moon name
+ */
+export function getAllMoonPhases(calendar, year, month, dayOfMonth) {
+  if (!calendar?.moonsArray?.length) return null;
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
+  const dayComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const dayWorldTime = calendar.componentsToTime(dayComponents);
+  return calendar.moonsArray
+    .map((moon, index) => {
+      const phase = calendar.getMoonPhase(index, dayWorldTime);
+      if (!phase) return null;
+      const color = moon.color || null;
+      return { moonName: localize(moon.name), phaseName: phase.subPhaseName || localize(phase.name), icon: phase.icon, color, hue: color ? hexToHue(color) : null };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.moonName.localeCompare(b.moonName));
+}
+
+/**
+ * Build a forecast lookup map for day weather resolution.
+ * @returns {{ lookup: Map|null, todayYear: number, todayMonth: number, todayDayOfMonth: number }} Forecast data and today info
+ */
+export function buildWeatherLookup() {
+  const today = game.time.components;
+  const calendar = CalendarManager.getActiveCalendar();
+  const yz = calendar?.years?.yearZero ?? 0;
+  const todayYear = today.year + yz;
+  const todayMonth = today.month;
+  const todayDayOfMonth = today.dayOfMonth ?? 0;
+  const zoneId = WeatherManager.getActiveZone(null, game.scenes?.active)?.id ?? null;
+  let lookup = null;
+  if (canViewWeatherForecast() && game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) {
+    const forecastOpts = zoneId ? { zoneId } : {};
+    const forecast = WeatherManager.getForecast(forecastOpts);
+    lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.dayOfMonth}`, f]));
+  }
+  return { lookup, todayYear, todayMonth, todayDayOfMonth, zoneId };
+}
+
+/**
+ * Get weather data for a specific day cell.
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @param {object} todayInfo - Today info from buildWeatherLookup
+ * @param {number} todayInfo.todayYear - Today's display year
+ * @param {number} todayInfo.todayMonth - Today's month
+ * @param {number} todayInfo.todayDayOfMonth - Today's day (0-indexed)
+ * @param {Map|null} forecastLookup - Forecast lookup map
+ * @returns {object|null} Weather data with icon, color, label, temperature, isForecast, isVaried
+ */
+export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup) {
+  const { todayYear, todayMonth, todayDayOfMonth, zoneId } = todayInfo;
+  const isCurrentDay = year === todayYear && month === todayMonth && dayOfMonth === todayDayOfMonth;
+  if (isCurrentDay) {
+    const w = WeatherManager.getCurrentWeather(zoneId);
+    if (!w) return null;
+    const temp = WeatherManager.getTemperature(zoneId);
+    return {
+      icon: w.icon,
+      color: w.color,
+      label: localize(w.label),
+      description: w.description ? localize(w.description) : null,
+      temperature: temp,
+      wind: w.wind ?? null,
+      precipitation: w.precipitation ?? null,
+      isForecast: false,
+      isVaried: false
+    };
+  }
+  const hist = WeatherManager.getWeatherForDate(year, month, dayOfMonth, zoneId);
+  if (hist)
+    return {
+      icon: hist.icon,
+      color: hist.color,
+      label: localize(hist.label),
+      description: null,
+      temperature: hist.temperature ?? null,
+      wind: hist.wind ?? null,
+      precipitation: hist.precipitation ?? null,
+      isForecast: false,
+      isVaried: false
+    };
+  if (forecastLookup) {
+    const f = forecastLookup.get(`${year}-${month}-${dayOfMonth}`);
+    if (f)
+      return {
+        icon: f.preset.icon,
+        color: f.preset.color,
+        label: localize(f.preset.label),
+        description: f.preset.description ? localize(f.preset.description) : null,
+        temperature: f.temperature ?? null,
+        wind: f.wind ?? null,
+        precipitation: f.precipitation ?? null,
+        isForecast: true,
+        isVaried: f.isVaried ?? false
+      };
+  }
+  return null;
+}
+
+/**
+ * Get notes on a specific day for context menu display.
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {object[]} Notes on this day
+ */
+export function getNotesOnDay(year, month, dayOfMonth) {
+  const allNotes = getCalendarNotes();
+  const visibleNotes = getVisibleNotes(allNotes);
+  const targetDate = { year, month, dayOfMonth };
+  return visibleNotes.filter((page) => {
+    const noteData = {
+      startDate: page.system.startDate,
+      endDate: page.system.endDate,
+      repeat: page.system.repeat,
+      repeatInterval: page.system.repeatInterval,
+      repeatEndDate: page.system.repeatEndDate,
+      maxOccurrences: page.system.maxOccurrences,
+      moonConditions: page.system.moonConditions,
+      randomConfig: page.system.randomConfig,
+      cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
+      linkedEvent: page.system.linkedEvent,
+      weekday: page.system.weekday,
+      weekNumber: page.system.weekNumber,
+      seasonalConfig: page.system.seasonalConfig,
+      conditions: page.system.conditions
+    };
+    return isRecurringMatch(noteData, targetDate);
+  });
+}
+
+/**
+ * Set the game time to a specific date.
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @param {object} [calendar] - Calendar to use
+ */
+export async function setDateTo(year, month, dayOfMonth, calendar = null) {
+  calendar = calendar || CalendarManager.getActiveCalendar();
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const internalYear = year - yearZero;
+  const currentComponents = game.time.components;
+  const newComponents = { year: internalYear, month, dayOfMonth, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
+  const newWorldTime = calendar.componentsToTime(newComponents);
+  const delta = newWorldTime - game.time.worldTime;
+  if (!game.user.isGM) {
+    CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
+    return;
+  }
+  await game.time.advance(delta);
+}
+
+/**
+ * Create a new note on a specific date.
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {Promise<object|null>} The created note page, or null if creation failed
+ */
+export async function createNoteOnDate(year, month, dayOfMonth) {
+  const page = await NoteManager.createNote({
+    name: localize('CALENDARIA.Note.NewNote'),
+    noteData: { startDate: { year, month, dayOfMonth, hour: 12, minute: 0 }, endDate: { year, month, dayOfMonth, hour: 13, minute: 0 } }
+  });
+  return page;
+}
+
+/**
+ * Build context menu items for a day cell.
+ * @param {object} options - Options
+ * @param {object} options.calendar - The calendar
+ * @param {Function} [options.onSetDate] - Callback after setting date
+ * @param {Function} [options.onCreateNote] - Callback after creating note
+ * @param {object[]} [options.extraItems] - Additional context menu items to append
+ * @returns {Array<object>} Context menu items
+ */
+export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extraItems } = {}) {
+  return (target) => {
+    const year = parseInt(target.dataset.year);
+    const month = parseInt(target.dataset.month);
+    const dayOfMonth = parseInt(target.dataset.day);
+    const notes = getNotesOnDay(year, month, dayOfMonth);
+    const today = getCurrentViewedDate(calendar);
+    const isTodayDate = year === today.year && month === today.month && dayOfMonth === today.dayOfMonth;
+    const items = [];
+    items.push({
+      name: 'CALENDARIA.Common.AddNote',
+      icon: '<i class="fas fa-plus"></i>',
+      callback: async () => {
+        await createNoteOnDate(year, month, dayOfMonth);
+        onCreateNote?.();
+      }
+    });
+    if (game.user.isGM && !isTodayDate) {
+      items.push({
+        name: 'CALENDARIA.MiniCal.SetCurrentDate',
+        icon: '<i class="fas fa-calendar-check"></i>',
+        callback: async () => {
+          await setDateTo(year, month, dayOfMonth, calendar);
+          onSetDate?.();
+        }
+      });
+    }
+    if (extraItems?.length) items.push(...extraItems);
+    if (notes.length > 0) {
+      const sortedNotes = [...notes].sort((a, b) => a.name.localeCompare(b.name));
+      for (const note of sortedNotes) {
+        const isOwner = note.isOwner;
+        const noteIcon = note.system?.icon || 'fas fa-sticky-note';
+        const noteColor = note.system?.color || '#4a9eff';
+        const iconHtml = note.system?.iconType === 'fontawesome' ? `<i class="${noteIcon}" style="color: ${noteColor}"></i>` : `<i class="fas fa-sticky-note" style="color: ${noteColor}"></i>`;
+        items.push({ name: note.name, icon: iconHtml, group: 'notes', _noteData: { note, isOwner }, callback: () => note.sheet.render(true, { mode: isOwner ? 'edit' : 'view' }) });
+      }
+    }
+    return items;
+  };
+}
+
+/** @type {ContextMenu|null} Active day cell context menu instance */
+let activeDayContextMenu = null;
+
+/**
+ * Inject date info header into context menu.
+ * @param {HTMLElement} target - The day cell element
+ * @param {object} calendar - The calendar
+ */
+export function injectContextMenuInfo(target, calendar) {
+  const menu = document.getElementById('context-menu');
+  if (!menu) return;
+  const year = parseInt(target.dataset.year);
+  const month = parseInt(target.dataset.month);
+  const dayOfMonth = parseInt(target.dataset.day);
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
+  const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
+  const season = calendar.getCurrentSeason?.(internalComponents);
+  const seasonName = season ? localize(season.name) : null;
+  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
+  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
+  const formatTime = (hours) => {
+    let h = Math.floor(hours);
+    let m = Math.round((hours - h) * 60);
+    if (m === 60) {
+      m = 0;
+      h += 1;
+    }
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  };
+  const infoHeader = document.createElement('div');
+  infoHeader.className = 'context-info-header';
+  infoHeader.innerHTML = `
+    <div class="info-row date"><strong>${fullDate}</strong></div>
+    ${seasonName ? `<div class="info-row season">${seasonName}</div>` : ''}
+    <div class="info-row sun"><i class="fas fa-sun" data-tooltip="${localize('CALENDARIA.Common.Sunrise')}"></i> ${formatTime(sunriseHour)}
+    <i class="fas fa-moon" data-tooltip="${localize('CALENDARIA.Common.Sunset')}"></i> ${formatTime(sunsetHour)}</div>
+  `;
+  menu.insertBefore(infoHeader, menu.firstChild);
+}
+
+/**
+ * Escape text content for safe HTML embedding.
+ * @param {string} str - Text to escape
+ * @returns {string} Escaped text
+ */
+function escapeText(str) {
+  return (str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/**
+ * Encode HTML for safe use in data-tooltip-html attribute.
+ * @param {string} html - HTML string to encode
+ * @returns {string} HTML-encoded string (< becomes &lt; etc.)
+ */
+function encodeHtmlAttribute(html) {
+  return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Generate HTML tooltip content for a day cell.
+ * @param {object} calendar - The calendar
+ * @param {number} year - Display year (with yearZero applied)
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day of month (0-indexed)
+ * @param {object} [festival] - Optional festival data
+ * @param {string} [festival.name] - Festival name
+ * @param {string} [festival.description] - Festival description
+ * @param {string} [festival.color] - Festival color
+ * @param {object|null} [weatherData] - Weather data from getDayWeather
+ * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
+ */
+export function generateDayTooltip(calendar, year, month, dayOfMonth, festival = null, weatherData = null) {
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
+  const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
+  const season = calendar.getCurrentSeason?.(internalComponents);
+  const seasonName = season ? localize(season.name) : null;
+  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
+  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
+  const formatTime = (hours) => {
+    let h = Math.floor(hours);
+    let m = Math.round((hours - h) * 60);
+    if (m === 60) {
+      m = 0;
+      h += 1;
+    }
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  };
+  const rows = [];
+  rows.push(`<div class="date"><strong>${escapeText(fullDate)}</strong></div>`);
+  if (festival?.name) {
+    const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
+    let festivalText = escapeText(festival.name);
+    if (festival.description) festivalText += `: ${escapeText(festival.description)}`;
+    rows.push(`<div class="festival"${colorStyle}><em>${festivalText}</em></div>`);
+  }
+  if (seasonName) rows.push(`<div class="season">${escapeText(seasonName)}</div>`);
+  rows.push(`<div class="sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
+  if (weatherData) {
+    const prefix = weatherData.isForecast ? `${localize('CALENDARIA.Weather.Forecast')}: ` : '';
+    const tempStr = weatherData.temperature != null ? ` ${weatherData.isForecast && weatherData.isVaried ? '~' : ''}${WeatherManager.formatTemperature(weatherData.temperature)}` : '';
+    rows.push(`<div class="weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
+  }
+  const rawHtml = `<div class="calendaria"><div class="day-tooltip">${rows.join('')}</div></div>`;
+  return encodeHtmlAttribute(rawHtml);
+}
+
+/**
+ * Set up a context menu for day cells.
+ * @param {HTMLElement} container - The container element
+ * @param {string} selector - CSS selector for day cells
+ * @param {object} calendar - The calendar
+ * @param {object} [options] - Additional options
+ * @param {Function} [options.onSetDate] - Callback after setting date
+ * @param {Function} [options.onCreateNote] - Callback after creating note
+ * @param {object[]} [options.extraItems] - Additional context menu items to append
+ * @returns {ContextMenu} The created context menu
+ */
+export function setupDayContextMenu(container, selector, calendar, options = {}) {
+  const itemsGenerator = getDayContextMenuItems({ calendar, ...options });
+  let currentItems = [];
+  activeDayContextMenu = new ContextMenu(container, selector, [], {
+    fixed: true,
+    jQuery: false,
+    onOpen: (target) => {
+      currentItems = itemsGenerator(target);
+      ui.context.menuItems = currentItems;
+      setTimeout(() => {
+        const menu = document.getElementById('context-menu');
+        menu?.classList.add('calendaria');
+        if (!menu) return;
+        const menuItems = menu.querySelectorAll('.context-item');
+        menuItems.forEach((li, idx) => {
+          const item = currentItems[idx];
+          if (!item?._noteData) return;
+          const { note, isOwner } = item._noteData;
+          const nameSpan = li.querySelector('span:not(.note-row)');
+          if (!nameSpan) return;
+          nameSpan.classList.add('note-row');
+          nameSpan.innerHTML = `<span class="note-name">${note.name}</span>`;
+          if (isOwner) {
+            const actions = document.createElement('span');
+            actions.className = 'note-actions';
+            actions.innerHTML = `<i class="fas fa-edit" data-action="edit" data-tooltip="${localize('CALENDARIA.ContextMenu.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.ContextMenu.Delete')}"></i>`;
+            nameSpan.appendChild(actions);
+            actions.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              const action = e.target.closest('[data-action]')?.dataset?.action;
+              if (action === 'edit') {
+                note.sheet.render(true, { mode: 'edit' });
+                ui.context?.close();
+              } else if (action === 'delete') {
+                ui.context?.close();
+                const confirmed = await foundry.applications.api.DialogV2.confirm({
+                  window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+                  content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
+                  rejectClose: false,
+                  modal: true
+                });
+                if (confirmed) {
+                  const journal = note.parent;
+                  if (journal.pages.size === 1) await journal.delete();
+                  else await note.delete();
+                }
+              }
+            });
+          }
+        });
+      }, 220);
+    }
+  });
+  return activeDayContextMenu;
+}

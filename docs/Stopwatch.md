@@ -1,19 +1,19 @@
-# Stopwatch
+# Stop Watch
 
-A versatile stopwatch application for tracking elapsed time in real-time or game-time modes.
+A physical stop watch with animated hands for tracking elapsed time in real-time or game-time modes.
 
 ---
 
-## Opening the Stopwatch
+## Opening the Stop Watch
 
 - Press **Alt+W** to toggle visibility
-- Click the stopwatch button on the TimeKeeper
+- Click the stop watch button on the Time Keeper
 
 ---
 
 ## Display Modes
 
-The Stopwatch supports two timing modes:
+The Stop Watch supports two timing modes:
 
 | Mode          | Description                                             |
 | ------------- | ------------------------------------------------------- |
@@ -41,13 +41,13 @@ Click the mode indicator to switch between modes.
 
 | Button          | Action                               |
 | --------------- | ------------------------------------ |
-| **Start/Pause** | Toggle the stopwatch running state   |
+| **Start/Pause** | Toggle the stop watch running state   |
 | **Reset**       | Clear elapsed time and lap history   |
 | **Lap**         | Record current elapsed time as a lap |
 
 ### Keyboard Shortcuts
 
-All stopwatch keybinds are unbound by default. See [Keybinds](Keybinds) for configuration instructions.
+All stop watch keybinds are unbound by default. See [Keybinds](Keybinds) for configuration instructions.
 
 ---
 
@@ -67,7 +67,7 @@ Use laps to track intervals, phases, or checkpoints during timed activities.
 
 ## Display Format
 
-The elapsed time display format is configurable per mode in **Settings Panel > Stopwatch tab**:
+The elapsed time display format is configurable per mode in **Settings Panel > Stop Watch tab**:
 
 - **Elapsed Time (Real Time)** — Format for real-time mode
 - **Elapsed Time (Game Time)** — Format for game-time mode
@@ -93,7 +93,7 @@ The Display Formats section shows a live preview of how the format will render.
 
 ## Auto-Start Game Time
 
-When enabled, the game-time stopwatch automatically starts when world time begins advancing. Configure in **Settings Panel > Stopwatch tab > Auto-start Game Time**.
+When enabled, the game-time stop watch automatically starts when world time begins advancing. Configure in **Settings Panel > Stop Watch tab > Auto-start Game Time**.
 
 This is useful for automatically tracking in-game duration when the real-time clock starts.
 
@@ -101,13 +101,13 @@ This is useful for automatically tracking in-game duration when the real-time cl
 
 ## Context Menu
 
-Right-click on the Stopwatch face to access the context menu:
+Right-click on the Stop Watch face to access the context menu:
 
 | Option                   | Description                                                                                  |
 | ------------------------ | -------------------------------------------------------------------------------------------- |
-| **Lock/Unlock Position** | Toggle position locking (also available in Settings > Stopwatch tab > Sticky States section) |
+| **Lock/Unlock Position** | Toggle position locking (also available in Settings > Stop Watch tab > Sticky States section) |
 | **Reset Position**       | Restore to default position (150, 150) and clear any sticky zone snapping                    |
-| **Close**                | Close the Stopwatch window                                                                   |
+| **Close**                | Close the Stop Watch window                                                                   |
 
 ---
 
@@ -115,21 +115,21 @@ Right-click on the Stopwatch face to access the context menu:
 
 ### Dragging
 
-Drag the stopwatch by the title bar to reposition it.
+Drag the stop watch by the title bar to reposition it.
 
 ### Resizing
 
-Drag the edges or corners to resize the stopwatch window.
+Drag the bottom-right resize handle to resize the stop watch.
 
 ### Sticky Zones
 
-The Stopwatch supports sticky zone snapping when dragged near predefined positions. See [HUD > Sticky Zones](HUD#sticky-zones) for zone locations.
+The Stop Watch supports sticky zone snapping when dragged near predefined positions. See [HUD > Sticky Zones](HUD#sticky-zones) for zone locations.
 
 ---
 
 ## State Persistence
 
-The Stopwatch saves its state per-client:
+The Stop Watch saves its state for each user:
 
 - Current elapsed time
 - Running/paused state
@@ -143,4 +143,4 @@ State persists across page reloads within the same session.
 
 ## Settings
 
-See [Settings > Stopwatch](Settings#stopwatch) for stopwatch-related settings and display format configuration.
+See [Settings > Stop Watch](Settings#stop watch) for stop watch-related settings and display format configuration.

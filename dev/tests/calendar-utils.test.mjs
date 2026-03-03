@@ -35,8 +35,8 @@ const mockCalendar = addCalendarGetters({
     yearZero: 0
   },
   festivals: [
-    { name: 'New Year', month: 1, day: 1 },
-    { name: 'Festival Day', month: 2, day: 15 }
+    { name: 'New Year', month: 0, dayOfMonth: 0 },
+    { name: 'Festival Day', month: 1, dayOfMonth: 14 }
   ],
   timeToComponents: vi.fn((_time) => ({
     year: 2024,
@@ -53,49 +53,38 @@ const mockCalendar = addCalendarGetters({
 /* -------------------------------------------- */
 
 describe('preLocalizeCalendar()', () => {
-  it('localizes string values', () => {
-    const data = { name: 'CALENDAR.Name' };
-    const result = preLocalizeCalendar(data);
-    expect(result.name).toBe('CALENDAR.Name');
+  it('localizes name, abbreviation, and description keys', () => {
+    const data = { name: 'CALENDAR.Name', abbreviation: 'CALENDAR.Abbr', description: 'CALENDAR.Desc' };
+    preLocalizeCalendar(data);
+    expect(data.name).toBe('CALENDAR.Name');
+    expect(data.abbreviation).toBe('CALENDAR.Abbr');
+    expect(data.description).toBe('CALENDAR.Desc');
   });
 
   it('recursively localizes nested objects', () => {
-    const data = {
-      level1: {
-        level2: {
-          name: 'DEEP.Key'
-        }
-      }
-    };
-    const result = preLocalizeCalendar(data);
-    expect(result.level1.level2.name).toBe('DEEP.Key');
+    const data = { level1: { level2: { name: 'DEEP.Key' } } };
+    preLocalizeCalendar(data);
+    expect(data.level1.level2.name).toBe('DEEP.Key');
   });
 
   it('recursively localizes arrays of objects', () => {
-    const data = {
-      items: [{ name: 'Item1' }, { name: 'Item2' }]
-    };
-    const result = preLocalizeCalendar(data);
-    expect(result.items[0].name).toBe('Item1');
-    expect(result.items[1].name).toBe('Item2');
+    const data = { items: [{ name: 'Item1' }, { name: 'Item2' }] };
+    preLocalizeCalendar(data);
+    expect(data.items[0].name).toBe('Item1');
+    expect(data.items[1].name).toBe('Item2');
   });
 
-  it('preserves non-string values', () => {
-    const data = {
-      count: 5,
-      enabled: true,
-      items: [1, 2, 3]
-    };
-    const result = preLocalizeCalendar(data);
-    expect(result.count).toBe(5);
-    expect(result.enabled).toBe(true);
-    expect(result.items).toEqual([1, 2, 3]);
+  it('preserves non-localizable keys', () => {
+    const data = { count: 5, enabled: true, label: 'SOME.Label' };
+    preLocalizeCalendar(data);
+    expect(data.count).toBe(5);
+    expect(data.enabled).toBe(true);
+    expect(data.label).toBe('SOME.Label');
   });
 
-  it('handles null values', () => {
-    const data = { value: null };
-    const result = preLocalizeCalendar(data);
-    expect(result.value).toBe(null);
+  it('handles null and undefined input', () => {
+    expect(() => preLocalizeCalendar(null)).not.toThrow();
+    expect(() => preLocalizeCalendar(undefined)).not.toThrow();
   });
 });
 
@@ -121,10 +110,9 @@ describe('findFestivalDay()', () => {
   });
 
   it('finds matching festival by components', () => {
-    // Festival is month: 1 (1-indexed), day: 1 (1-indexed)
-    // Components are month: 0 (0-indexed), dayOfMonth: 0 (0-indexed)
+    // Festival and components are both 0-indexed
     const result = findFestivalDay(mockCalendar, { month: 0, dayOfMonth: 0 });
-    expect(result).toEqual({ name: 'New Year', month: 1, day: 1 });
+    expect(result).toEqual({ name: 'New Year', month: 0, dayOfMonth: 0 });
   });
 
   it('returns null when no festival matches', () => {
@@ -133,9 +121,9 @@ describe('findFestivalDay()', () => {
   });
 
   it('finds festival in later month', () => {
-    // Festival is month: 2 (Feb), day: 15
+    // Festival is month: 1 (Feb, 0-indexed), dayOfMonth: 14 (0-indexed)
     const result = findFestivalDay(mockCalendar, { month: 1, dayOfMonth: 14 });
-    expect(result).toEqual({ name: 'Festival Day', month: 2, day: 15 });
+    expect(result).toEqual({ name: 'Festival Day', month: 1, dayOfMonth: 14 });
   });
 });
 

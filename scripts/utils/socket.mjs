@@ -4,9 +4,12 @@
  * @author Tyler
  */
 
-import { HUD } from '../applications/hud.mjs';
-import { MiniCal } from '../applications/mini-cal.mjs';
-import { TimeKeeper } from '../applications/time-keeper.mjs';
+import { BigCal } from '../applications/calendar/big-cal.mjs';
+import { MiniCal } from '../applications/calendar/mini-cal.mjs';
+import { HUD } from '../applications/hud/hud.mjs';
+import { Stopwatch } from '../applications/time/stopwatch.mjs';
+import { SunDial } from '../applications/time/sun-dial.mjs';
+import { TimeKeeper } from '../applications/time/time-keeper.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
@@ -15,7 +18,6 @@ import { log } from './logger.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
- * Manages socket communication and determines the primary GM for authoritative updates.
  */
 export class CalendariaSocket {
   /**
@@ -51,7 +53,6 @@ export class CalendariaSocket {
    */
   static emit(type, data) {
     game.socket.emit(`module.${MODULE.ID}`, { type, data });
-    log(3, `Socket message emitted: ${type}`, data);
   }
 
   /**
@@ -109,8 +110,6 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static #onMessage({ type, data }) {
-    log(3, `Socket message received: ${type}`, data);
-
     switch (type) {
       case SOCKET_TYPES.CLOCK_UPDATE:
         this.#handleClockUpdate(data);
@@ -145,14 +144,23 @@ export class CalendariaSocket {
       case SOCKET_TYPES.REMINDER_NOTIFY:
         this.#handleReminderNotify(data);
         break;
+      case SOCKET_TYPES.BIG_CAL_VISIBILITY:
+        this.#handleBigCalVisibility(data);
+        break;
       case SOCKET_TYPES.HUD_VISIBILITY:
         this.#handleHUDVisibility(data);
         break;
       case SOCKET_TYPES.MINI_CAL_VISIBILITY:
         this.#handleMiniCalVisibility(data);
         break;
+      case SOCKET_TYPES.STOPWATCH_VISIBILITY:
+        this.#handleStopwatchVisibility(data);
+        break;
       case SOCKET_TYPES.TIME_KEEPER_VISIBILITY:
         this.#handleTimeKeeperVisibility(data);
+        break;
+      case SOCKET_TYPES.SUN_DIAL_VISIBILITY:
+        this.#handleSunDialVisibility(data);
         break;
       default:
         log(1, `Unknown socket message type: ${type}`);
@@ -201,7 +209,6 @@ export class CalendariaSocket {
     if (!action || !id) return;
     log(3, `Handling remote note ${action}: ${id}`);
     foundry.applications.instances.get('calendaria-big-cal')?.render();
-
     switch (action) {
       case 'created':
         Hooks.callAll(HOOKS.NOTE_CREATED, data);
@@ -243,18 +250,11 @@ export class CalendariaSocket {
    */
   static async #handleCreateNote(data) {
     if (!this.isPrimaryGM()) return;
-    const { name, content, noteData, calendarId, journalData, requesterId, openSheet = 'edit' } = data;
+    const { name, content, noteData, calendarId, journalData, requesterId } = data;
     log(3, `Primary GM handling note creation request: ${name}`);
-    try {
-      // Set the author to the requester, not the GM
-      const noteDataWithAuthor = { ...noteData, author: requesterId };
-      const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId, openSheet: false });
-      if (page && requesterId) {
-        this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId, openSheet });
-      }
-    } catch (error) {
-      log(1, 'Error creating note via socket:', error);
-    }
+    const noteDataWithAuthor = { ...noteData, author: requesterId };
+    const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId });
+    if (page && requesterId) this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId });
   }
 
   /**
@@ -302,7 +302,6 @@ export class CalendariaSocket {
     if (!this.isPrimaryGM()) return;
     const { action, presetId, options = {} } = data;
     log(3, `Primary GM handling weather request: ${action}`, data);
-
     switch (action) {
       case 'set':
         await WeatherManager.setWeather(presetId, { ...options, fromSocket: true });
@@ -330,7 +329,6 @@ export class CalendariaSocket {
     if (!this.isPrimaryGM()) return;
     const { action, delta, components, date } = data;
     log(3, `Primary GM handling time request: ${action}`, data);
-
     switch (action) {
       case 'advance':
         await game.time.advance(delta);
@@ -384,6 +382,21 @@ export class CalendariaSocket {
   }
 
   /**
+   * Handle BigCal visibility commands from GM.
+   * @private
+   * @param {object} data - The BigCal visibility data
+   * @param {boolean} data.visible - Whether BigCal should be visible
+   * @returns {void}
+   */
+  static #handleBigCalVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling BigCal visibility: ${visible}`);
+    if (visible) BigCal.show();
+    else BigCal.hide();
+  }
+
+  /**
    * Handle HUD visibility commands from GM.
    * @private
    * @param {object} data - The HUD visibility data
@@ -394,12 +407,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling HUD visibility: ${visible}`);
-    if (visible) {
-      // Only show if user has "Show HUD on load" enabled
-      if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
-    } else {
-      HUD.hide();
-    }
+    if (visible && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
+    else HUD.hide();
   }
 
   /**
@@ -430,6 +439,36 @@ export class CalendariaSocket {
     log(3, `Handling TimeKeeper visibility: ${visible}`);
     if (visible) TimeKeeper.show();
     else TimeKeeper.hide();
+  }
+
+  /**
+   * Handle Stop Watch visibility commands from GM.
+   * @private
+   * @param {object} data - The Stop Watch visibility data
+   * @param {boolean} data.visible - Whether Stop Watch should be visible
+   * @returns {void}
+   */
+  static #handleStopwatchVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling Stop Watch visibility: ${visible}`);
+    if (visible) Stopwatch.show();
+    else Stopwatch.hide();
+  }
+
+  /**
+   * Handle Sun Dial visibility commands from GM.
+   * @private
+   * @param {object} data - The Sun Dial visibility data
+   * @param {boolean} data.visible - Whether Sun Dial should be visible
+   * @returns {void}
+   */
+  static #handleSunDialVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling Sun Dial visibility: ${visible}`);
+    if (visible) SunDial.show({ silent: true });
+    else SunDial.hide();
   }
 
   /**

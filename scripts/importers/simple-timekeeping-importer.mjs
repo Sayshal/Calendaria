@@ -1,7 +1,5 @@
 /**
  * Simple Timekeeping Importer
- * Imports calendar data from the Simple Timekeeping module.
- * Live import only - STK does not export to files.
  * @module Importers/SimpleTimekeepingImporter
  * @author Tyler
  */
@@ -11,13 +9,12 @@ import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { getDefaultZoneConfig } from '../weather/climate-data.mjs';
+import { getDefaultZoneConfig } from '../weather/data/climate-data.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
  * Importer for Simple Timekeeping module data.
- * Live import only - reads directly from STK settings and journal entries.
  * @extends BaseImporter
  */
 export default class SimpleTimekeepingImporter extends BaseImporter {
@@ -38,23 +35,16 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {Promise<object[]|null>} Array of STK calendar configs or null.
    */
   static async importSTKCalendars() {
-    // Return cached result if already loaded
     if (this.#stkCalendarsCache) return this.#stkCalendarsCache;
-
-    try {
-      const module = game.modules.get('simple-timekeeping');
-      if (!module?.active) return null;
-      const modulePath = `modules/simple-timekeeping/scripts/calendars.js`;
-      const { CALENDARS } = await import(`/${modulePath}`);
-      if (CALENDARS?.length) {
-        log(3, `Imported ${CALENDARS.length} calendars from Simple Timekeeping module`);
-        this.#stkCalendarsCache = CALENDARS;
-        return CALENDARS;
-      }
-    } catch (error) {
-      log(2, 'Failed to import STK calendars:', error.message);
+    const module = game.modules.get('simple-timekeeping');
+    if (!module?.active) return null;
+    const modulePath = `modules/simple-timekeeping/scripts/calendars.js`;
+    const { CALENDARS } = await import(`/${modulePath}`);
+    if (CALENDARS?.length) {
+      log(3, `Imported ${CALENDARS.length} calendars from Simple Timekeeping module`);
+      this.#stkCalendarsCache = CALENDARS;
+      return CALENDARS;
     }
-
     return null;
   }
 
@@ -92,7 +82,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         log(1, `Could not find STK preset: ${config.calendar}`);
       }
     }
-
     let moons = isNativeFormat ? (calendarData.moons?.values ? Object.values(calendarData.moons.values) : []) : calendarData.moons || [];
     if (config.useCustomMoons && config.customMoons) moons = JSON.parse(config.customMoons);
     const events = await this.#loadEvents();
@@ -108,7 +97,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @param {number} worldTime - Raw world time in seconds
    * @param {object} calendar - STK calendar data
    * @param {boolean} isNativeFormat - Whether calendar is in native STK format
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
    */
   #worldTimeToDate(worldTime, calendar, isNativeFormat) {
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
@@ -124,7 +113,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       year = Math.floor(totalDays / daysPerYear);
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
-
     let month = 0;
     let remainingDays = dayOfYear;
     const regularMonths = (months || []).filter((m) => !m.intercalary);
@@ -137,18 +125,17 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       remainingDays -= monthDays;
       month = i + 1;
     }
-
     const timeOfDay = worldTime % secondsPerDay;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
    * Extract current date from STK data for preservation after import.
    * @param {object} data - Raw STK data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     return data.currentDate || null;
@@ -191,7 +178,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       const darknessSync = scene.getFlag('simple-timekeeping', 'darknessSync');
       if (darknessSync && darknessSync !== 'default') sceneFlags.push({ sceneId: scene.id, sceneName: scene.name, darknessSync });
     }
-
     return sceneFlags;
   }
 
@@ -200,12 +186,8 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    * @returns {object|null} Weather state or null
    */
   #loadWeatherState() {
-    try {
-      const config = game.settings.get('simple-timekeeping', 'configuration');
-      if (config.weatherLabel && config.weatherLabel !== 'Click Me') return { label: config.weatherLabel, color: config.weatherColor || '#ffffff' };
-    } catch {
-      log(2, 'No STK weather state found');
-    }
+    const config = game.settings.get('simple-timekeeping', 'configuration');
+    if (config.weatherLabel && config.weatherLabel !== 'Click Me') return { label: config.weatherLabel, color: config.weatherColor || '#ffffff' };
     return null;
   }
 
@@ -226,7 +208,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const daysPerYear = calendar.days?.daysPerYear ?? months.reduce((sum, m) => sum + (m.days || 0), 0);
     const seasons = isNativeFormat ? (calendar.seasons?.values ? Object.values(calendar.seasons.values) : []) : [];
-    const transformedSeasons = this.#transformSeasons(seasons);
+    const transformedSeasons = this.#transformSeasons(seasons, config);
     return {
       name: calendar.name || 'Imported Calendar',
       days: { values: weekdays, hoursPerDay, minutesPerHour, secondsPerMinute, daysPerYear },
@@ -263,7 +245,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
-
     if (isNativeFormat && typeof weekdays[0] === 'object') {
       return weekdays.map((day, index) => ({
         name: this.#localizeString(day.name),
@@ -272,13 +253,11 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         isRestDay: day.isRestDay || false
       }));
     }
-
     return weekdays.map((name, index) => ({ name, abbreviation: name.substring(0, 2), ordinal: index + 1 }));
   }
 
   /**
    * Transform STK months to Calendaria format.
-   * Filters out intercalary months (they become festivals).
    * @param {object[]} months - STK months array.
    * @returns {object[]} Calendaria months array.
    */
@@ -298,10 +277,12 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   /**
    * Transform STK seasons to Calendaria format.
    * @param {object[]} seasons - STK seasons array.
+   * @param {object} config - STK configuration object with season colors.
    * @returns {object[]} Calendaria seasons array.
    */
-  #transformSeasons(seasons = []) {
+  #transformSeasons(seasons = [], config = {}) {
     if (!seasons?.length) return [];
+    const seasonColors = [config.season0, config.season1, config.season2, config.season3].filter(Boolean);
     return seasons.map((season, index) => ({
       name: this.#localizeString(season.name),
       abbreviation: this.#localizeString(season.abbreviation) || this.#localizeString(season.name).substring(0, 3),
@@ -309,6 +290,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       monthEnd: season.monthEnd,
       dayStart: season.dayStart,
       dayEnd: season.dayEnd,
+      color: seasonColors[index] || '',
       ordinal: index + 1
     }));
   }
@@ -369,9 +351,25 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       name: this.#localizeString(moon.name),
       cycleLength: moon.cycleLength,
       cycleDayAdjust: moon.offset ?? 0,
-      phases: DEFAULT_MOON_PHASES,
-      referenceDate: { year: 0, month: 0, day: 0 }
+      phases: this.#buildMoonPhases(moon.phaseNames),
+      referenceDate: { year: 0, month: 0, dayOfMonth: 0 }
     }));
+  }
+
+  /**
+   * Build moon phases, mapping custom STK phase names if provided.
+   * @param {string[]} [phaseNames] - Optional array of 8 phase name strings.
+   * @returns {object} Keyed phases object matching Calendaria format.
+   */
+  #buildMoonPhases(phaseNames) {
+    if (!phaseNames?.length) return DEFAULT_MOON_PHASES;
+    const keys = Object.keys(DEFAULT_MOON_PHASES);
+    const phases = {};
+    for (let i = 0; i < keys.length; i++) {
+      const base = DEFAULT_MOON_PHASES[keys[i]];
+      phases[keys[i]] = { ...base, name: phaseNames[i] ? this.#localizeString(phaseNames[i]) : base.name };
+    }
+    return phases;
   }
 
   /**
@@ -381,36 +379,27 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   #extractFestivals(months = []) {
     const festivals = [];
-    let regularMonthIndex = 0;
+    let lastRegularMonthIndex = 0;
+    let regularCount = 0;
     for (const month of months) {
       if (month.intercalary) {
         const monthName = this.#localizeString(month.name);
+        const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
         for (let day = 1; day <= month.days; day++) {
-          const festival = {
-            name: month.days === 1 ? monthName : `${monthName} (Day ${day})`,
-            month: regularMonthIndex + 1,
-            day,
-            countsForWeekday: false
-          };
+          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: targetMonth, dayOfMonth: day - 1, countsForWeekday: false };
           if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
         }
         if (month.days === 0 && month.leapDays > 0) {
           for (let day = 1; day <= month.leapDays; day++) {
-            festivals.push({
-              name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`,
-              month: regularMonthIndex + 1,
-              day,
-              leapYearOnly: true,
-              countsForWeekday: false
-            });
+            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: targetMonth, dayOfMonth: day - 1, leapYearOnly: true, countsForWeekday: false });
           }
         }
       } else {
-        regularMonthIndex++;
+        lastRegularMonthIndex = regularCount;
+        regularCount++;
       }
     }
-
     return festivals;
   }
 
@@ -440,7 +429,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         suggestedType: event.content?.trim() ? 'note' : 'festival'
       });
     }
-
     return notes;
   }
 
@@ -462,7 +450,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       year = Math.floor(totalDays / daysPerYear);
       dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
     }
-
     let month = 0;
     let remainingDays = dayOfYear;
     const months = isNativeFormat ? (calendar.months?.values ? Object.values(calendar.months.values) : []) : calendar.months || [];
@@ -475,13 +462,12 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       remainingDays -= regularMonths[i].days;
       month = i + 1;
     }
-
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
@@ -517,7 +503,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {
           count++;
-          log(3, `Successfully created note: ${note.name}`);
         } else {
           errors.push(`Failed to create note: ${note.name}`);
         }
@@ -526,7 +511,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
@@ -539,7 +523,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   async importSceneDarkness(sceneFlags) {
     const errors = [];
     let count = 0;
-
     for (const { sceneId, darknessSync } of sceneFlags) {
       try {
         const scene = game.scenes.get(sceneId);
@@ -553,7 +536,6 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         log(1, `Error importing scene darkness:`, error);
       }
     }
-
     return { success: errors.length === 0, count, errors };
   }
 
@@ -582,7 +564,12 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     return data.events?.length || 0;
   }
 
-  /** @override */
+  /**
+   * Generate preview data with STK-specific scene and weather info.
+   * @param {object} rawData - Raw STK export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional STK-specific fields
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     preview.noteCount = this.#countNotes(rawData);

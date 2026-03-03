@@ -24,12 +24,12 @@ The exported file is named `calendaria-settings-{timestamp}.json` and includes:
 
 | Category          | Examples                                                                |
 | ----------------- | ----------------------------------------------------------------------- |
-| Display Formats   | Date/time formats for HUD, MiniCal, BigCal, TimeKeeper, Stopwatch, Chat |
+| Display Formats   | Date/time formats for HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Chat |
 | Time Settings     | Real-time clock, time progression, increment multiplier                 |
 | Weather           | Weather enabled, weather patterns, brightness multiplier                |
 | UI Integration    | Toolbar buttons, Journal footer                                         |
 | Permissions       | All role-based permissions                                              |
-| Custom Time Jumps | HUD, TimeKeeper, MiniCal jump configurations                            |
+| Custom Time Jumps | HUD, Time Keeper, MiniCal jump configurations                            |
 | Note Categories   | Category names, colors, icons                                           |
 | Macro Triggers    | Season and moon phase trigger assignments                               |
 
@@ -39,13 +39,13 @@ The exported file is named `calendaria-settings-{timestamp}.json` and includes:
 
 User-scoped settings are **not** included in the export:
 
-- Window positions (HUD, MiniCal, TimeKeeper, Stopwatch)
+- Window positions (HUD, MiniCal, Time Keeper, Stop Watch)
 - Sticky zone states
 - Lock position states
 - Block visibility preferences (per-user display settings)
 - Theme colors (per-user customization)
 
-These settings are stored per-client and would not be appropriate to transfer between worlds or users.
+These settings are stored per-user and would not be appropriate to transfer between worlds or users.
 
 ---
 

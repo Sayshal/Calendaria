@@ -1,14 +1,33 @@
-## New Features
-- Clock lock: shift-click the play/pause button on HUD, MiniCal, or TimeKeeper to lock the clock — blocks all time advancement (manual, real-time sync, combat, rests) and persists across refresh
-- Calendar Button setting: per-user choice of BigCal or MiniCal for the HUD calendar button
+## Headline Features
+- **BigCal Visual Redesign** — Frameless floating window with rounded corners, drop shadow, compact two-row header, dropdown view selector, gapless day cells with glow highlights
+- **MicroCal** — Ultra-compact MiniCal mode with circular cells, icon-only indicators, and play/pause hover overlay
+- **Sun Dial** — New animated sky clock with draggable sun handle, Crank Mode for multi-day advancement, hover controls, and full settings
+- **Stop Watch Redesign** — Physical dial with detailed face and smoothly animated hands
 
-## Enhancements
-- Added 26 Golarion (Pathfinder) festivals including Asmodean, Nethysian, Iomedaean, and Calistrian holy days
-- Added 4 Harptos equinox/solstice festivals
-- Moved Krynn-Elven Yule from month 1 to month 12
+## New Features
+- Unified settings for all floating apps: auto-fade, force-to-all, idle opacity, sticky states
+- Force BigCal / Stop Watch / Sun Dial / Time Keeper world settings
+- "Show BigCal on Load" and "Show Sun Dial on Load" world settings
+- FX Density, Speed, and Color controls in Weather Picker with tuned defaults for all presets
+- "Enable Weather FX" global toggle, "Sound Volume" slider, "Regenerate All Weather" button
+- "Disable Weather Sound" per-scene flag (independent of visual FX)
+- Combat Mode dropdown: None, Compact on Combat/Encounter, Hide on Combat/Encounter
+- "Run Clock During Combat" world setting
+- Rich day tooltips on MiniCal (date, festival, season, sunrise/sunset, weather)
+- Category-colored note badges with auto-contrast text
+- Auto-Open Notes Panel setting
+- "View Sun Dial" permission, "Approximate Date & Time" display format
+
+## Changes
+- Color Shift Sync disabled by default (15% dawn/dusk, no midday tint)
+- Scene config flags moved to dedicated "Calendaria" tab
+- Color inputs use Foundry's built-in color picker, note categories use icon-button dialog
+- All importers now import source categories as custom note categories
+- HUD toolbar icon: `fa-landmark-dome`
 
 ## Bug Fixes
-- Fixed zone per-season temperatures ignored during weather generation (priority order in mergeClimateConfig)
-- Fixed HUD not hiding for players when scene "Hide HUD for Players" flag is set
-- Fixed FXMaster wind direction mapping: 16-point compass directions now snap to 8-point cardinals
-- Fixed FXMaster preset switching, suppress UI warnings on stop/switch
+- [#428] Globe particles rebuilt unnecessarily on weather save
+- [#432] Weather generation not filtering disabled zone presets
+- [#437] BigCal week view broken by intercalary months
+- Importer fixes for all 6 sources (intercalary month indices, off-by-one dates, dual module IDs)
+- Moon overflow tooltips, SunDial getComputedStyle crash, first-hover blank tooltip

@@ -1,20 +1,21 @@
 # BigCal
 
-The BigCal window provides month, week, and year views with full note management and navigation.
+A borderless floating calendar window with rounded corners, providing month, week, and year views with full note management.
 
 ---
 
 ## Opening BigCal
 
 - Double-click the HUD or MiniCal
-- Use the API: `CALENDARIA.api.openBigCal()`
+- Use the API: `CALENDARIA.api.showBigCal()`
 - Scene controls button (if enabled in settings)
+- Automatically on world load (if "Show BigCal on Load" is enabled)
 
 ---
 
 ## Display Modes
 
-Switch between views using the Month/Week/Year buttons in the header.
+Switch between views using the dropdown in the header.
 
 ### Month View
 
@@ -40,24 +41,32 @@ A detailed 7-day view with hourly time slots:
 
 A 9-year overview grid for quick navigation:
 
-- Current year highlighted in the center
+- Current year and current month highlighted with visual emphasis
 - Click any month to jump directly to that month view
 - Navigate between year ranges with Previous/Next buttons
 
 ---
 
-## Header Controls
+## Header
+
+The header uses a compact two-row layout:
+
+**Row 1:** Search, compact toggle, calendar title, settings, close button
+
+**Row 2:** Previous/next navigation, dropdown view selector (Month/Week/Year), indicators
 
 | Button           | Action                                             |
 | ---------------- | -------------------------------------------------- |
 | Previous/Next    | Navigate by month, week, or year depending on view |
-| Month/Week/Year  | Switch display mode                                |
+| View Selector    | Dropdown to switch between Month, Week, Year views |
 | Today            | Jump to current date                               |
-| Add Note         | Create note on selected or current date            |
 | Search           | Toggle search panel                                |
 | Settings         | Open settings panel                                |
 | Compact          | Switch to MiniCal                                  |
+| Close            | Close BigCal                                       |
 | Set Current Date | Set world time to selected date (GM only)          |
+
+Note creation is handled by hovering over day cells (the "+ " button appears on hover).
 
 ---
 
@@ -166,6 +175,7 @@ GMs have additional capabilities:
 
 - **Set Current Date** — Updates world time to the selected or viewed date
 - **Weather Picker** — Click the weather indicator to change weather
+- **Show to All Players** / **Hide from All Players** — Context menu actions to toggle BigCal visibility for all connected players
 - **All time controls** — Players cannot modify world time
 
 ---

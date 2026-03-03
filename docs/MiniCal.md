@@ -36,26 +36,38 @@ For calendars without months (like Traveller), the MiniCal shows a 3-week view:
 
 Each day cell may show:
 
-- Note count badge (if notes exist)
+- Note count badge — uses the first note's category color as background
 - Festival highlight
 - Moon phase icon
 - Weather icon
 - Today indicator
 - Selected indicator
 
+### Day Tooltips
+
+Hovering over a day cell shows a detailed tooltip with:
+
+- Full date (Month Day, Year with era)
+- Festival name and description (if applicable)
+- Current season name
+- Sunrise and sunset times
+- Weather summary (icon, name, temperature)
+
 ---
 
 ## Sidebar
+
+The sidebar is organized into four button groups with visual dividers separating navigation, date management, notes, and system sections.
 
 Appears on hover over the calendar area (or always visible when sticky):
 
 - **Close** - Close the MiniCal
 - **Open BigCal** - Opens the BigCal Application
 - **Today** - Return to current date view
-- **Set Current Date** - Set world time to selected date (GM only, appears when date selected). Shows confirmation dialog by default (can be disabled in settings).
+- **Set Current Date** (thumbtack icon) - Set world time to selected date (GM only). Always visible; disabled when no date is selected. Shows confirmation dialog by default (can be disabled in settings).
 - **Add Note** - Create a new note on selected/current date
 - **Search Notes** - Open search panel
-- **View Notes** - View notes on selected date (appears when notes exist)
+- **View Notes** - View notes on selected date. Always visible; disabled when the selected day has no notes.
 - **Settings** - Open the settings panel
 
 Right-click the MiniCal container for a context menu with the following options:
@@ -65,7 +77,7 @@ Right-click the MiniCal container for a context menu with the following options:
 - **Reset Position** - Reset MiniCal to default screen position
 - **Lock/Unlock Position** - Toggle position locking to prevent accidental dragging
 - **Open BigCal** - Opens the BigCal Application
-- **Open TimeKeeper** - Opens the TimeKeeper Application
+- **Open Time Keeper** - Opens the Time Keeper application
 - **Close** - Close the MiniCal
 
 ### Notes Panel
@@ -123,6 +135,35 @@ Configure which information blocks appear below the navigation row via **Setting
 | Show Era         | Display era block. Era Display Mode controls detail level.         |
 | Show Cycles      | Display cycles block. Cycles Display Mode controls detail level.   |
 | Show Moon Phases | Display moon phase icons in day cells.                             |
+
+---
+
+## Compact Mode
+
+MiniCal has a compact mode ("MicroCal") that dramatically reduces its footprint while remaining fully functional. Toggle via the context menu or the "Compact Mode" per-user setting.
+
+### Layout
+
+- Day cells render as circular cells
+- Weekday headers and time controls are hidden
+- Indicators display as icon-only
+- The entire application becomes draggable (not just the header)
+
+### Hover Controls
+
+A play/pause overlay appears on hover over the title group for quick clock control.
+
+### Compact Sidebar
+
+The sidebar fades in smoothly with hidden separators for a minimal look.
+
+### Compact Notes Panel
+
+The notes panel hides the header and author, with a reduced width.
+
+### Compact Mode Header
+
+The "Compact Mode Header" per-user setting controls what text appears in the compact mode header. The default is "Approximate Date & Time".
 
 ---
 

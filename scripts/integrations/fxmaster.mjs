@@ -1,6 +1,5 @@
 /**
  * FXMaster Integration
- * Bridges Calendaria weather presets to FXMaster particle/filter effects.
  * @module Integrations/FXMaster
  * @author Tyler
  */
@@ -49,7 +48,6 @@ export function isFXMasterPlusActive() {
 
 /**
  * Get the list of available FXMaster presets for dropdown selection.
- * Uses listValid() to only return presets valid for this world.
  * @returns {{value: string, label: string}[]} Preset options sorted alphabetically
  */
 export function getAvailableFxPresets() {
@@ -73,7 +71,6 @@ function getActivePreset(scene) {
 
 /**
  * Initialize FXMaster integration.
- * Called from calendaria.mjs on the ready hook.
  */
 export function initializeFXMaster() {
   if (!isFXMasterActive()) return;
@@ -81,7 +78,6 @@ export function initializeFXMaster() {
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
   Hooks.on('updateScene', onSceneUpdate);
-
   const restoredName = getActivePreset(canvas?.scene);
   if (restoredName) {
     const weather = WeatherManager.getCurrentWeather();
@@ -119,12 +115,10 @@ function syncWeatherToScene() {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const scene = canvas?.scene;
   if (!scene) return;
-
-  if (scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
     stopAll();
     return;
   }
-
   const weather = WeatherManager.getCurrentWeather();
   playWeather(weather || null);
 }
@@ -140,19 +134,20 @@ function syncWeatherToScene() {
 function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
   if (visualOnly) return;
   if (!CalendariaSocket.isPrimaryGM()) return;
-
   if (bulk) {
     const weather = WeatherManager.getCurrentWeather();
     playWeather(weather || null);
     return;
   }
-
+  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
+    stopAll();
+    return;
+  }
   const scene = game.scenes?.active;
   if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
     stopAll();
     return;
   }
-
   playWeather(current || null);
 }
 
@@ -164,6 +159,7 @@ async function stopAll() {
   if (!fxApi) return;
   const active = fxApi.listActive?.() ?? [];
   for (const name of active) await fxApi.stop(name, { silent: true });
+  log(3, 'FXMaster effects stopped');
 }
 
 /**
@@ -173,29 +169,25 @@ async function stopAll() {
 async function playWeather(weather) {
   const fxApi = getFxApi();
   if (!fxApi) return;
-
   const fxName = weather?.fxPreset || null;
-
   if (!fxName) {
     await stopAll();
     return;
   }
-
   const available = fxApi.listValid();
   if (!available.includes(fxName)) {
     log(2, `FXMaster Preset "${fxName}" not available, stopping active effects`);
     await stopAll();
     return;
   }
-
   const options = buildPresetOptions(weather);
   options.silent = true;
   await fxApi.switch(fxName, options);
+  log(3, `FXMaster playing weather: ${fxName}`);
 }
 
 /**
  * Convert a degree value to the nearest 8-point cardinal direction for FXMaster.
- * FXMaster only supports n/ne/e/se/s/sw/w/nw; intermediate 16-point directions are snapped.
  * @param {number} degrees - Direction in compass degrees (0-360, 0=north)
  * @returns {string} Lowercase cardinal direction (e.g. "n", "ne", "sw")
  */
@@ -219,10 +211,11 @@ function degreesToCardinal(degrees) {
  */
 function buildPresetOptions(weather) {
   const options = {};
-
   if (weather.wind?.direction != null) options.direction = degreesToCardinal(weather.wind.direction);
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN)) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
-
+  if (weather.fxDensity) options.density = weather.fxDensity;
+  if (weather.fxSpeed) options.speed = weather.fxSpeed;
+  if (weather.fxColor) options.color = weather.fxColor;
   return options;
 }

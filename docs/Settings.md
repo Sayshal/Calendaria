@@ -43,7 +43,7 @@ Button to open the calendar importer for Simple Calendar, Fantasy Calendar, and 
 
 ### Open/Close Buttons
 
-Context-specific buttons to open or close the HUD, MiniCal, and TimeKeeper applications.
+Context-specific buttons to open or close the HUD, MiniCal, and Time Keeper applications.
 
 > [!NOTE]
 > Changes in the Calendar tab are automatically saved. An "Changes saved automatically" indicator confirms this.
@@ -60,7 +60,8 @@ Configure which user roles can access Calendaria features.
 | ------------------------- | ------------------------------------------------------ |
 | **View BigCal**           | Can see the BigCal                                     |
 | **View MiniCal**          | Can see the MiniCal widget                             |
-| **View TimeKeeper**       | Can see the TimeKeeper                                 |
+| **View Time Keeper**       | Can see the Time Keeper                                 |
+| **View Sun Dial**         | Can see the Sun Dial                                   |
 | **Manage Notes**          | Can create own calendar notes                          |
 | **Edit Notes**            | Can edit calendar notes owned by other players         |
 | **Delete Notes**          | Can delete own calendar notes                          |
@@ -89,8 +90,10 @@ See [Permissions](Permissions) for detailed documentation.
 Create custom note categories with:
 
 - **Name**: Category display name
-- **Color**: Category color (hex)
+- **Color**: Category color
 - **Icon**: FontAwesome icon class (e.g., `fas fa-bookmark`)
+
+Each category row has an icon button that opens a dialog for editing the icon class and color.
 
 ---
 
@@ -136,6 +139,12 @@ Clock automatically stops when the game is paused. When enabled, the clock also 
 > [!NOTE]
 > When sync is enabled and blocked (paused or in combat), manually starting the clock shows a warning notification.
 
+### Run Clock During Combat
+
+When enabled, the real-time clock continues running during active combat. Foundry's per-round 6-second time delta is blocked to prevent double-advancement.
+
+- Default: `false`
+
 ---
 
 ## Weather (GM Only)
@@ -162,11 +171,28 @@ Maximum number of days of weather history to retain.
 - Range: `0` to `3650`
 - Default: `365`
 
+#### Enable Weather FX
+
+Global toggle for FXMaster particle effects and weather sounds. When disabled, stops all FXMaster weather effects and ambient sounds. Per-scene flags still override independently.
+
+- Default: `true`
+
 #### Sound Effects
 
 Enable ambient weather sound loops tied to weather presets.
 
 - Default: `false`
+
+#### Sound Volume
+
+Controls weather ambient sound volume.
+
+- Range: `0` to `100` (percentage)
+- Default: `100`
+
+#### Regenerate All Weather
+
+Button that clears and rebuilds weather forecasts for all climate zones. A confirmation dialog is shown before proceeding.
 
 ### Forecast
 
@@ -280,7 +306,7 @@ Global brightness multiplier for scene ambience.
 
 #### Enable Sticky Zones
 
-Allow draggable windows (HUD, MiniCal, TimeKeeper) to snap to predefined positions.
+Allow draggable windows (HUD, MiniCal, Time Keeper) to snap to predefined positions.
 
 - Default: `true`
 
@@ -381,8 +407,8 @@ Multi-select for which apps appear in the toolbar:
 - BigCal
 - MiniCal
 - HUD
-- TimeKeeper
-- Stopwatch
+- Time Keeper
+- Stop Watch
 
 #### Show Journal Footer
 
@@ -453,15 +479,18 @@ Choose which calendar the HUD button opens.
 - Options: `BigCal`, `MiniCal`
 - Default: `bigcal`
 
-### Compact During Combat
+### Combat Mode
 
-Automatically switch to slice style during combat to reduce screen space.
+Controls HUD behavior during combat.
 
-- Default: `true`
+- Options: `None`, `Compact on Combat`, `Compact on Encounter`, `Hide on Combat`, `Hide on Encounter`
+- Default: `Compact on Combat`
 
-### Hide During Combat
+"On Encounter" modes trigger when a combat encounter is created. "On Combat" modes trigger when combat actively starts.
 
-Automatically hide the HUD during active combat. When enabled, disables auto-compact behavior.
+### Color Shift Sync
+
+Enable time-of-day color shifting of the HUD scene. Disabled by default — opt in to enable dawn/dusk atmospheric tinting (15% intensity, no midday tint).
 
 - Default: `false`
 
@@ -625,11 +654,29 @@ Display the MiniCal when the world loads.
 > [!NOTE]
 > This setting is also accessible from **Settings > Module Settings > Calendaria** in Foundry's native settings menu.
 
+### Compact Mode
+
+Toggle compact mode for a minimal-footprint MiniCal with circular day cells, icon-only indicators, and full-app drag.
+
+- Default: `false`
+
+### Compact Mode Header
+
+Display format for the compact mode header text.
+
+- Default: `Approximate Date & Time` (`approxDateTime`)
+
 ### Confirm Set Current Date (GM Only)
 
 Show a confirmation dialog before changing the world date via the "Set Current Date" button.
 
 - Default: `true`
+
+### Auto-Open Notes Panel
+
+Automatically open the notes panel when selecting a day that has notes.
+
+- Default: `false`
 
 ### Block Visibility
 
@@ -759,6 +806,31 @@ Button to reset position to default.
 
 ## BigCal
 
+### Show on World Load (GM Only)
+
+Display BigCal when the world loads.
+
+- Default: `false`
+
+### Auto-Fade
+
+Enable opacity fade when mouse leaves BigCal.
+
+- Default: `false`
+
+### Idle Opacity
+
+Opacity level when BigCal is faded (when Auto-Fade is enabled).
+
+- Range: `0` to `100` (percentage)
+- Default: `40`
+
+### Force BigCal (GM Only)
+
+Force BigCal display for all connected clients.
+
+- Default: `false`
+
 ### Block Visibility
 
 Toggle visibility of indicator blocks in the BigCal. Settings are user-scoped (each player can customize their view).
@@ -826,16 +898,24 @@ Display moon phase indicators.
 
 ---
 
-## TimeKeeper
+## Time Keeper
+
+The Time Keeper tab is visible to any user with the **View Time Keeper** permission.
 
 ### Show on World Load (GM Only)
 
-Display the TimeKeeper when the world loads.
+Display the Time Keeper when the world loads.
 
 - Default: `false`
 
 > [!NOTE]
 > This setting is also accessible from **Settings > Module Settings > Calendaria** in Foundry's native settings menu.
+
+### Force Time Keeper (GM Only)
+
+Force Time Keeper display for all connected clients.
+
+- Default: `false`
 
 ### Custom Time Jumps
 
@@ -844,7 +924,7 @@ Configure custom time jump buttons per increment. Each increment can have its ow
 > [!TIP]
 > Leave a field blank (empty) to hide that button. This applies to both increment and decrement buttons.
 
-### Auto-start Game Time (Stopwatch)
+### Auto-start Game Time (Stop Watch)
 
 When enabled, the game-time stopwatch automatically starts when world time begins advancing.
 
@@ -854,19 +934,19 @@ When enabled, the game-time stopwatch automatically starts when world time begin
 
 #### Lock Position
 
-Prevent dragging the TimeKeeper.
+Prevent dragging the Time Keeper.
 
 - Default: `false`
 
 ### Auto-Fade
 
-Enable opacity fade when mouse leaves the TimeKeeper.
+Enable opacity fade when mouse leaves the Time Keeper.
 
 - Default: `true`
 
 ### Idle Opacity
 
-Opacity level when TimeKeeper is faded (when Auto-Fade is enabled).
+Opacity level when Time Keeper is faded (when Auto-Fade is enabled).
 
 - Range: `0` to `100` (percentage)
 - Default: `40`
@@ -877,7 +957,19 @@ Button to reset position to default.
 
 ---
 
-## Stopwatch
+## Stop Watch
+
+### Show Stop Watch (GM Only)
+
+Controls whether the Stop Watch is available.
+
+- Default: `true`
+
+### Force Stop Watch (GM Only)
+
+Force Stop Watch display for all connected clients.
+
+- Default: `false`
 
 ### Display Formats
 
@@ -891,7 +983,7 @@ Format for real-time stopwatch display.
 
 Format for game-time stopwatch display.
 
-### Stopwatch Format Tokens
+### Stop Watch Format Tokens
 
 | Token | Description            | Example |
 | ----- | ---------------------- | ------- |
@@ -904,7 +996,58 @@ Format for game-time stopwatch display.
 
 #### Lock Position
 
-Prevent dragging the Stopwatch.
+Prevent dragging the Stop Watch.
+
+- Default: `false`
+
+---
+
+## Sun Dial
+
+The Sun Dial tab is visible to any user with the **View Sun Dial** permission.
+
+### Options
+
+#### Show Sun Dial on Load (GM Only)
+
+Auto-open the Sun Dial when the world loads.
+
+- Default: `false`
+
+#### Crank Mode
+
+Enable cumulative day advancement by rotating the sun handle past midnight.
+
+- Default: `false`
+
+#### Auto Fade
+
+Enable opacity fade when mouse leaves the Sun Dial.
+
+- Default: `false`
+
+#### Idle Opacity
+
+Opacity level when Sun Dial is faded.
+
+- Range: `0` to `100` (percentage)
+- Default: `40`
+
+#### Force Sun Dial (GM Only)
+
+Force Sun Dial display for all connected clients.
+
+- Default: `false`
+
+### Display Formats
+
+Time-only format presets for the Sun Dial time display. Separate GM and player formats with live preview.
+
+### Sticky States
+
+#### Lock Position
+
+Prevent dragging the Sun Dial.
 
 - Default: `false`
 
@@ -912,7 +1055,7 @@ Prevent dragging the Stopwatch.
 
 ## Display Formats Reference
 
-Display format settings appear throughout various app tabs (HUD, MiniCal, BigCal, TimeKeeper, Stopwatch, Chat). Each location supports separate GM and player formats.
+Display format settings appear throughout various app tabs (HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Chat). Each location supports separate GM and player formats.
 
 ### Format Preview
 
@@ -926,7 +1069,7 @@ Click the help icon (?) next to Display Formats headings to open an interactive 
 
 #### Utility
 
-- `off`: Hide the element entirely (available for HUD Date and TimeKeeper Date formats)
+- `off`: Hide the element entirely (available for HUD Date and Time Keeper Date formats)
 - `calendarDefault`: Uses the active calendar's built-in format for that location
 - `custom`: User-defined format string
 
@@ -934,6 +1077,7 @@ Click the help icon (?) next to Display Formats headings to open an interactive 
 
 - `approxDate`: Approximate date (e.g., "Midsummer")
 - `approxTime`: Approximate time of day (e.g., "Afternoon")
+- `approxDateTime`: Approximate date and time combined (e.g., "Midsummer, Afternoon")
 
 #### Standard Dates
 
@@ -1076,7 +1220,7 @@ Click the help icon (?) next to Display Formats headings to open an interactive 
 
 ## Per-Scene Settings
 
-Override global settings on individual scenes via **Scene Configuration > Ambiance**:
+Override global settings on individual scenes via the dedicated **Scene Configuration > Calendaria** tab:
 
 ### Darkness Sync Override
 
@@ -1105,6 +1249,12 @@ Override the calendar's default climate zone for this specific scene. Affects we
 
 ### Disable Weather FX
 
-Disable all weather effects (FXMaster particles and ambient sound) on this specific scene. Takes effect immediately.
+Disable FXMaster weather particle effects on this specific scene. Takes effect immediately.
+
+- Default: `false`
+
+### Disable Weather Sound
+
+Suppress weather ambient sounds on this specific scene without affecting visual effects. Independent of the "Disable Weather FX" flag.
 
 - Default: `false`

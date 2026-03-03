@@ -1,16 +1,14 @@
 /**
  * Event Scheduler
- * Monitors world time changes and triggers notifications when events/notes are reached.
- * Handles multi-day event progress tracking and reminder notifications.
  * @module Time/EventScheduler
  * @author Tyler
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
+import { compareDates, getCurrentDate } from '../notes/date-utils.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { compareDates, getCurrentDate } from '../notes/utils/date-utils.mjs';
-import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
+import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/recurrence.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -42,7 +40,6 @@ export default class EventScheduler {
 
   /**
    * Handle world time updates.
-   * Called by the updateWorldTime hook.
    * @param {number} worldTime - The new world time in seconds
    * @param {number} _delta - The time delta in seconds
    * @returns {void}
@@ -57,12 +54,10 @@ export default class EventScheduler {
       this.#updateMultiDayEventProgress(currentDate);
       this.#checkRandomEventRegeneration(currentDate);
     }
-
     if (worldTime - this.#lastTriggerCheckTime >= this.TRIGGER_CHECK_INTERVAL) {
       this.#checkEventTriggers(this.#lastDate, currentDate);
       this.#lastTriggerCheckTime = worldTime;
     }
-
     this.#lastDate = { ...currentDate };
   }
 
@@ -99,11 +94,10 @@ export default class EventScheduler {
     const eventStart = {
       year: startDate.year,
       month: startDate.month,
-      day: startDate.day,
+      dayOfMonth: startDate.dayOfMonth,
       hour: note.flagData.allDay ? 0 : (startDate.hour ?? 0),
       minute: note.flagData.allDay ? 0 : (startDate.minute ?? 0)
     };
-
     const prevComparison = this.#compareDateTimes(previousDate, eventStart);
     const currComparison = this.#compareDateTimes(currentDate, eventStart);
     return prevComparison < 0 && currComparison >= 0;
@@ -119,7 +113,7 @@ export default class EventScheduler {
   static #compareDateTimes(a, b) {
     if (a.year !== b.year) return a.year < b.year ? -1 : 1;
     if (a.month !== b.month) return a.month < b.month ? -1 : 1;
-    if (a.day !== b.day) return a.day < b.day ? -1 : 1;
+    if (a.dayOfMonth !== b.dayOfMonth) return a.dayOfMonth < b.dayOfMonth ? -1 : 1;
     const aHour = a.hour ?? 0;
     const bHour = b.hour ?? 0;
     if (aHour !== bHour) return aHour < bHour ? -1 : 1;
@@ -196,7 +190,6 @@ export default class EventScheduler {
 
   /**
    * Send a chat announcement for an event.
-   * Respects gmOnly visibility setting.
    * @param {object} note - The note stub
    * @private
    */
@@ -219,7 +212,6 @@ export default class EventScheduler {
     } else {
       iconHtml = '<i class="fas fa-calendar"></i>';
     }
-
     const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.CHAT_ANNOUNCEMENT, {
       dateRange,
       content: plainContent,
@@ -227,7 +219,6 @@ export default class EventScheduler {
       journalId: note.journalId,
       iconHtml
     });
-
     let whisper = [];
     if (flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
     await ChatMessage.create({
@@ -237,7 +228,6 @@ export default class EventScheduler {
       flavor: `<span style="color: ${color};">${iconHtml}</span> ${localize('CALENDARIA.Event.CalendarEvent')}`,
       flags: { [MODULE.ID]: { isAnnouncement: true, noteId: note.id, journalId: note.journalId } }
     });
-
     log(3, `Chat announcement sent for event: ${note.name}`, { gmOnly: flagData.gmOnly });
   }
 
@@ -253,7 +243,7 @@ export default class EventScheduler {
     const formatDate = (date) => {
       const monthData = calendar.monthsArray?.[date.month];
       const monthName = monthData?.name ? localize(monthData.name) : `Month ${date.month + 1}`;
-      return `${date.day} ${monthName}, ${date.year}`;
+      return `${(date.dayOfMonth ?? 0) + 1} ${monthName}, ${date.year}`;
     };
     const formatTime = (date) => {
       if (flagData.allDay) return '';
@@ -263,8 +253,8 @@ export default class EventScheduler {
     };
     let result = formatDate(flagData.startDate) + formatTime(flagData.startDate);
     if (flagData.endDate && flagData.endDate.year) {
-      const startKey = `${flagData.startDate.year}-${flagData.startDate.month}-${flagData.startDate.day}`;
-      const endKey = `${flagData.endDate.year}-${flagData.endDate.month}-${flagData.endDate.day}`;
+      const startKey = `${flagData.startDate.year}-${flagData.startDate.month}-${flagData.startDate.dayOfMonth}`;
+      const endKey = `${flagData.endDate.year}-${flagData.endDate.month}-${flagData.endDate.dayOfMonth}`;
       if (startKey !== endKey) {
         result += ` — ${formatDate(flagData.endDate)}`;
         if (!flagData.allDay && flagData.endDate.hour !== undefined) result += formatTime(flagData.endDate);
@@ -276,7 +266,6 @@ export default class EventScheduler {
 
   /**
    * Check and regenerate random event occurrences when approaching year end.
-   * Regenerates occurrences for next year during the last week of the last month.
    * @param {object} currentDate - Current date components
    * @private
    */
@@ -295,7 +284,7 @@ export default class EventScheduler {
       const noteData = { startDate: fullNote.system.startDate, randomConfig: fullNote.system.randomConfig, repeatEndDate: fullNote.system.repeatEndDate };
       const occurrences = generateRandomOccurrences(noteData, targetYear);
       await fullNote.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
-      log(2, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
+      log(3, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
     }
   }
 
@@ -307,7 +296,7 @@ export default class EventScheduler {
    * @private
    */
   static #hasDateChanged(previous, current) {
-    return previous.year !== current.year || previous.month !== current.month || previous.day !== current.day;
+    return previous.year !== current.year || previous.month !== current.month || previous.dayOfMonth !== current.dayOfMonth;
   }
 
   /**
@@ -336,9 +325,9 @@ export default class EventScheduler {
     const startDate = note.flagData.startDate;
     const endDate = note.flagData.endDate;
     if (!startDate || !endDate) return null;
-    const start = { year: startDate.year, month: startDate.month, day: startDate.day };
-    const end = { year: endDate.year, month: endDate.month, day: endDate.day };
-    const current = { year: currentDate.year, month: currentDate.month, day: currentDate.day };
+    const start = { year: startDate.year, month: startDate.month, dayOfMonth: startDate.dayOfMonth };
+    const end = { year: endDate.year, month: endDate.month, dayOfMonth: endDate.dayOfMonth };
+    const current = { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     if (compareDates(current, start) < 0 || compareDates(current, end) > 0) return null;
     const totalDays = this.#daysBetween(start, end) + 1;
     const currentDay = this.#daysBetween(start, current) + 1;
@@ -355,8 +344,8 @@ export default class EventScheduler {
    */
   static #daysBetween(start, end) {
     const calendar = CalendarManager.getActiveCalendar();
-    const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.day - 1, hour: 0, minute: 0, second: 0 });
-    const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.day - 1, hour: 0, minute: 0, second: 0 });
+    const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.dayOfMonth, hour: 0, minute: 0, second: 0 });
+    const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.dayOfMonth, hour: 0, minute: 0, second: 0 });
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const secondsPerMinute = calendar?.days?.secondsPerMinute ?? 60;

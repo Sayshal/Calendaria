@@ -45,8 +45,8 @@
                   <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                 {{/each}}
               </select>
-              <input type="number" id="editor-festival-{{this.index}}-day" name="festivals.{{this.key}}.day"
-                value="{{this.day}}" min="1" class="col-day">
+              <input type="number" id="editor-festival-{{this.index}}-day" name="festivals.{{this.key}}.dayOfMonth"
+                value="{{this.displayDay}}" min="1" class="col-day">
               <input type="number" id="editor-festival-{{this.index}}-duration" name="festivals.{{this.key}}.duration"
                 value="{{#if this.duration}}{{this.duration}}{{else}}1{{/if}}" min="1" class="col-duration">
               <input type="number" id="editor-festival-{{this.index}}-leap-dur"

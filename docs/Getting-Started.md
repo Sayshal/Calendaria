@@ -76,19 +76,21 @@ To create a custom calendar or import from another source, use the buttons in th
 By default, the **MiniCal** appears on world load. Other applications are available:
 
 - **HUD** — Floating HUD with animated sky dome
-- **TimeKeeper** — Minimal time display and controls
+- **Time Keeper** — Minimal time display and controls
 - **BigCal** — Full calendar view via Journal footer or toolbar button
+- **Sun Dial** — Circular sky clock with a draggable sun handle for setting time
+- **Stop Watch** — Physical stop watch with real-time and game-time modes
 
 You can also access Calendaria apps via the **Journal footer button** or **toolbar button** (configurable in settings).
 
 To configure which applications display:
 
 1. Open the Settings Panel (gear icon on any Calendaria application)
-2. Select the **HUD**, **MiniCal**, or **TimeKeeper** tab
+2. Select the **HUD**, **MiniCal**, or **Time Keeper** tab
 3. Enable or disable the **Show** option for each application
 
 > [!TIP]
-> Use the keyboard shortcut **Alt+C** to quickly toggle HUD visibility. Additional keybinds for BigCal, MiniCal, and TimeKeeper are available but unbound by default—configure them in **Settings > Configure Controls > Calendaria**.
+> Use the keyboard shortcut **Alt+C** to quickly toggle HUD visibility. Additional keybinds for BigCal, MiniCal, and Time Keeper are available but unbound by default—configure them in **Settings > Configure Controls > Calendaria**.
 
 ---
 

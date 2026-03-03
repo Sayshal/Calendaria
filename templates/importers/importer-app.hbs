@@ -1,4 +1,4 @@
-<div class="importer-content">
+<div class="content">
   {{#unless hasImporters}}
     <div class="no-importers">
       <i class="fas fa-exclamation-triangle"></i>
@@ -6,9 +6,9 @@
     </div>
   {{else}}
 
-    <div class="importer-grid">
+    <div class="grid">
 
-      <div class="importer-left">
+      <div class="left">
         <fieldset class="source-section">
           <legend>
             <i class="fas fa-database"></i>
@@ -29,7 +29,7 @@
 
           {{#if selectedImporter}}
             {{#if selectedImporter.description}}
-              <p class="importer-description hint">{{localize selectedImporter.description}}</p>
+              <p class="description hint">{{localize selectedImporter.description}}</p>
             {{/if}}
 
             {{#if canUpload}}
@@ -156,7 +156,7 @@
         {{/if}}
       </div>
 
-      <div class="importer-right">
+      <div class="right">
         {{#if extractedNotes.length}}
           <fieldset class="note-selection">
             <legend>

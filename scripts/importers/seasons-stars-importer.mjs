@@ -1,20 +1,28 @@
 /**
  * Seasons & Stars Importer
- * Imports calendar data from the Seasons & Stars module.
  * @module Importers/SeasonsStarsImporter
  * @author Tyler
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { ASSETS } from '../constants.mjs';
+import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import BaseImporter from './base-importer.mjs';
 
+/** Map S&S season icon strings to FontAwesome classes. */
+const SEASON_ICON_MAP = {
+  spring: 'fa-seedling',
+  summer: 'fa-sun',
+  fall: 'fa-leaf',
+  autumn: 'fa-leaf',
+  winter: 'fa-snowflake'
+};
+
 /**
  * Importer for Seasons & Stars module data.
- * Handles both file uploads and live import from installed module.
  * @extends BaseImporter
  */
 export default class SeasonsStarsImporter extends BaseImporter {
@@ -26,6 +34,9 @@ export default class SeasonsStarsImporter extends BaseImporter {
   static supportsLiveImport = true;
   static moduleId = 'seasons-and-stars';
   static fileExtensions = ['.json'];
+
+  /** @type {object[]} S&S note categories extracted during load. */
+  #ssNoteCategories = [];
 
   /**
    * Check if the provided data is in S&S format.
@@ -45,33 +56,39 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendarData = game.settings.get('seasons-and-stars', 'activeCalendarData');
     if (!calendarData) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NoCalendar'));
     let worldEvents = [];
-    try {
-      worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
-    } catch (e) {
-      log(1, 'No world events found in S&S settings', e);
+    worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
+    // Read journal entry notes with S&S flags
+    const journalNotes = [];
+    for (const entry of game.journal ?? []) {
+      const flags = entry.flags?.['seasons-and-stars'];
+      if (flags?.calendarNote) {
+        journalNotes.push({ ...entry.toObject(), flags: entry.flags });
+      }
     }
-
+    // Read note categories
+    const catConfig = game.settings.get('seasons-and-stars', 'noteCategories') || {};
+    this.#ssNoteCategories = Object.entries(catConfig).map(([id, cat]) => ({ id, name: cat.name || id, color: cat.color || '#868e96', icon: cat.icon || 'fa-tag' }));
     let currentDate = null;
     if (game.seasonsStars?.api?.getCurrentDate) {
       const ssDate = game.seasonsStars.api.getCurrentDate();
       if (ssDate) {
         const dateObj = ssDate.toObject?.() ?? ssDate;
-        currentDate = { year: dateObj.year, month: dateObj.month ?? 0, day: (dateObj.day ?? 0) + 1, hour: dateObj.time?.hour ?? 0, minute: dateObj.time?.minute ?? 0 };
+        currentDate = { year: dateObj.year, month: dateObj.month ?? 0, dayOfMonth: dateObj.day ?? 0, hour: dateObj.time?.hour ?? 0, minute: dateObj.time?.minute ?? 0 };
       }
     }
     if (!currentDate) currentDate = this.#worldTimeToDate(game.time.worldTime, calendarData);
-    return { calendar: calendarData, worldEvents, currentDate };
+    return { calendar: calendarData, worldEvents, journalNotes, currentDate };
   }
 
   /**
    * Extract current date from S&S data for preservation after import.
    * @param {object} data - Raw S&S data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     if (data.currentDate) return data.currentDate;
     const calendar = data.calendar || data;
-    if (calendar.year?.currentYear !== undefined) return { year: calendar.year.currentYear, month: 0, day: 1, hour: 0, minute: 0 };
+    if (calendar.year?.currentYear !== undefined) return { year: calendar.year.currentYear, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
     return null;
   }
 
@@ -79,7 +96,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * Convert worldTime to date components using S&S calendar data.
    * @param {number} worldTime - Raw world time in seconds
    * @param {object} calendar - S&S calendar data
-   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
    */
   #worldTimeToDate(worldTime, calendar) {
     const hoursPerDay = calendar.time?.hoursInDay ?? 24;
@@ -106,12 +123,11 @@ export default class SeasonsStarsImporter extends BaseImporter {
       remainingDays -= monthDays;
       month = i + 1;
     }
-
     const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const hour = Math.floor(timeOfDay / secondsPerHour);
     const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, day: remainingDays + 1, hour, minute };
+    return { year, month, dayOfMonth: remainingDays, hour, minute };
   }
 
   /**
@@ -127,7 +143,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const months = this.#transformMonths(calendar.months);
     const daysPerYear = months.reduce((sum, m) => sum + m.days, 0);
-
     return {
       name: label,
       days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
@@ -165,7 +180,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         { name: 'CALENDARIA.Weekday.Saturday', abbreviation: 'CALENDARIA.Weekday.SaturdayShort', ordinal: 7 }
       ];
     }
-
     return weekdays.map((day, index) => ({ name: day.name, abbreviation: day.abbreviation || day.name.substring(0, 2), ordinal: index + 1 }));
   }
 
@@ -228,7 +242,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const endMonthIdx = (season.endMonth ?? season.startMonth ?? 1) - 1;
       const dayStart = (monthStartDays[startMonthIdx] ?? 0) + ((season.startDay ?? 1) - 1);
       const dayEnd = (monthStartDays[endMonthIdx] ?? 0) + ((season.endDay ?? months[endMonthIdx]?.days ?? 1) - 1);
-      return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon) };
+      return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon), icon: SEASON_ICON_MAP[season.icon] || '' };
     });
   }
 
@@ -255,7 +269,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
       color: moon.color || '',
       hidden: false,
       phases: this.#convertPhasesToPercentages(moon.phases || [], moon.cycleLength),
-      referenceDate: { year: moon.firstNewMoon?.year ?? 1, month: (moon.firstNewMoon?.month ?? 1) - 1, day: moon.firstNewMoon?.day ?? 1 }
+      referenceDate: { year: moon.firstNewMoon?.year ?? 1, month: (moon.firstNewMoon?.month ?? 1) - 1, dayOfMonth: (moon.firstNewMoon?.day ?? 1) - 1 }
     }));
   }
 
@@ -333,16 +347,14 @@ export default class SeasonsStarsImporter extends BaseImporter {
       } else {
         continue;
       }
-
       const dayCount = item.days ?? 1;
       for (let d = 0; d < dayCount; d++) {
-        const festival = { name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name, month: monthIndex + 1, day: dayInMonth + d };
+        const festival = { name: dayCount > 1 ? `${item.name} (Day ${d + 1})` : item.name, month: monthIndex, dayOfMonth: dayInMonth + d - 1 };
         if (item.leapYearOnly) festival.leapYearOnly = true;
         if (item.countsForWeekdays === false) festival.countsForWeekday = false;
         festivals.push(festival);
       }
     }
-
     return festivals;
   }
 
@@ -361,7 +373,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const [h, m] = (timeStr || '0:0').split(':').map(Number);
       return h + m / 60;
     };
-
     const winterDaylight = parseTime(winterSolstice.sunset) - parseTime(winterSolstice.sunrise);
     const summerDaylight = parseTime(summerSolstice.sunset) - parseTime(summerSolstice.sunrise);
     let dayIndex = 0;
@@ -441,9 +452,29 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendar = data.calendar || data;
     const events = Array.isArray(calendar.events) ? calendar.events : [];
     const worldEvents = Array.isArray(data.worldEvents) ? data.worldEvents : [];
+    const journalNotes = Array.isArray(data.journalNotes) ? data.journalNotes : [];
     const allEvents = [...events, ...worldEvents];
-    log(3, `Extracting ${allEvents.length} events from Seasons & Stars data`);
-    return allEvents.map((event) => this.#transformEvent(event));
+    log(3, `Extracting ${allEvents.length} events + ${journalNotes.length} journal notes from Seasons & Stars data`);
+    const notes = allEvents.map((event) => this.#transformEvent(event));
+    for (const entry of journalNotes) {
+      const flags = entry.flags?.['seasons-and-stars'];
+      if (!flags?.startDate) continue;
+      const sd = flags.startDate;
+      const content = entry.pages?.[0]?.text?.content || '';
+      notes.push({
+        name: entry.name,
+        content,
+        startDate: { year: sd.year ?? 1, month: (sd.month ?? 1) - 1, dayOfMonth: (sd.day ?? 1) - 1 },
+        endDate: flags.endDate ? { year: flags.endDate.year ?? 1, month: (flags.endDate.month ?? 1) - 1, dayOfMonth: (flags.endDate.day ?? 1) - 1 } : null,
+        allDay: flags.allDay ?? true,
+        repeat: flags.recurring?.type === 'yearly' ? 'yearly' : flags.recurring?.type === 'monthly' ? 'monthly' : flags.recurring?.type === 'weekly' ? 'weekly' : 'never',
+        categories: flags.category ? [flags.category] : [],
+        gmOnly: entry.ownership?.default === 0,
+        originalId: entry._id,
+        suggestedType: content?.trim() ? 'note' : 'festival'
+      });
+    }
+    return notes;
   }
 
   /**
@@ -460,7 +491,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
       icon: event.icon || 'fas fa-calendar-day',
       suggestedType: 'note'
     };
-
     const rec = event.recurrence;
     if (rec) {
       if (rec.type === 'fixed') {
@@ -468,21 +498,20 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.startDate = {
           year: event.startYear ?? 1,
           month: (rec.month ?? 1) - 1,
-          day: rec.day ?? 1
+          dayOfMonth: (rec.day ?? 1) - 1
         };
       } else if (rec.type === 'ordinal') {
         note.repeat = 'yearly';
-        note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, day: 1 };
+        note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, dayOfMonth: 0 };
         note.importWarnings = [`Ordinal recurrence (${rec.occurrence} ${rec.weekday} of month) imported as first of month`];
         log(2, localize('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
       } else if (rec.type === 'interval') {
         note.repeat = 'yearly';
         note.interval = rec.intervalYears;
-        note.startDate = { year: rec.anchorYear ?? 1, month: (rec.month ?? 1) - 1, day: rec.day ?? 1 };
+        note.startDate = { year: rec.anchorYear ?? 1, month: (rec.month ?? 1) - 1, dayOfMonth: (rec.day ?? 1) - 1 };
       }
     }
-
-    if (!note.startDate && event.startDate) note.startDate = { year: event.startDate.year ?? 1, month: (event.startDate.month ?? 1) - 1, day: event.startDate.day ?? 1 };
+    if (!note.startDate && event.startDate) note.startDate = { year: event.startDate.year ?? 1, month: (event.startDate.month ?? 1) - 1, dayOfMonth: (event.startDate.day ?? 1) - 1 };
     if (event.duration) {
       const match = event.duration.match(/^(\d+)([dhmsw])$/);
       if (match) {
@@ -491,7 +520,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.duration = parseInt(value) * (durationMap[unit] || 1);
       }
     }
-
     return note;
   }
 
@@ -508,17 +536,16 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    if (this.#ssNoteCategories.length) await this.#importNoteCategories(this.#ssNoteCategories);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     for (const note of notes) {
       try {
-        const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, day: 1 };
-        const noteData = { startDate, allDay: true, repeat: note.repeat || 'never' };
+        const startDate = note.startDate ? { ...note.startDate, year: note.startDate.year + yearZero } : { year: yearZero, month: 0, dayOfMonth: 0 };
+        const noteData = { startDate, allDay: true, repeat: note.repeat || 'never', categories: note.categories || [], gmOnly: note.gmOnly ?? false };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
-          log(3, `Successfully created note: ${note.name}`);
         } else {
           errors.push(`Failed to create note: ${note.name}`);
         }
@@ -527,7 +554,6 @@ export default class SeasonsStarsImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
@@ -541,10 +567,35 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendar = data.calendar || data;
     const events = calendar.events?.length || 0;
     const worldEvents = data.worldEvents?.length || 0;
-    return events + worldEvents;
+    const journalNotes = data.journalNotes?.length || 0;
+    return events + worldEvents + journalNotes;
   }
 
-  /** @override */
+  /**
+   * Import S&S note categories as Calendaria custom categories.
+   * @param {object[]} ssCategories - S&S note category definitions
+   */
+  async #importNoteCategories(ssCategories) {
+    const existing = getAllCategories();
+    const existingIds = new Set(existing.map((c) => c.id));
+    for (const cat of ssCategories) {
+      const id = cat.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\da-z-]/g, '');
+      if (!existingIds.has(id)) {
+        await addCustomCategory(cat.name, cat.color, cat.icon || 'fa-tag');
+        log(3, `Imported S&S note category: ${cat.name}`);
+      }
+    }
+  }
+
+  /**
+   * Generate preview data with S&S-specific note counts.
+   * @param {object} rawData - Raw S&S export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional S&S-specific fields
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     preview.noteCount = this.#countNotes(rawData);

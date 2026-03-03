@@ -10,7 +10,7 @@ The HUD displays date, time, weather, and events in a draggable widget. Two disp
 - Automatically opens on world load (if enabled in settings)
 - Double-click the HUD bar to toggle between fullsize and compact modes
 
-> See also: [MiniCal](MiniCal) and [TimeKeeper](TimeKeeper) for alternative display options.
+> See also: [MiniCal](MiniCal) and [Time Keeper](Time Keeper) for alternative display options.
 
 ---
 
@@ -45,13 +45,19 @@ The HUD supports two dial styles for displaying the sun/moon:
 
 Configure via Settings > HUD tab > Dial Style.
 
-### Combat Auto-Compact
+### Combat Mode
 
-When enabled, the HUD automatically switches to slice style during combat to reduce screen space usage. Configure via Settings > HUD tab > Compact During Combat.
+The "Combat Mode" dropdown in Settings > HUD tab controls HUD behavior during combat:
 
-### Hide During Combat
+| Option               | Description                                                |
+| -------------------- | ---------------------------------------------------------- |
+| None                 | No change during combat                                    |
+| Compact on Combat    | Switch to compact/slice when combat starts                 |
+| Compact on Encounter | Switch to compact/slice when a combat encounter is created |
+| Hide on Combat       | Hide the HUD entirely when combat starts                   |
+| Hide on Encounter    | Hide the HUD entirely when a combat encounter is created   |
 
-When enabled, the HUD hides entirely during combat and automatically reopens when combat ends. This takes precedence over Combat Auto-Compact. Configure via Settings > HUD tab > Hide During Combat.
+"On Encounter" modes trigger when a combat encounter is created in the tracker, before the "Start Combat" button is pressed. "On Combat" modes trigger only when combat actively starts.
 
 ---
 
@@ -59,7 +65,7 @@ When enabled, the HUD hides entirely during combat and automatically reopens whe
 
 ### Dome Display
 
-The dome uses a **unified PixiJS scene renderer** that draws all visual elements — sky, sun, moon, stars, and weather particles — in a single canvas.
+The dome draws all visual elements — sky, sun, moon, stars, and weather particles — in a single animated display.
 
 #### Sky and Celestial Bodies
 
@@ -123,7 +129,7 @@ An alternative to the dome showing a horizontal sky strip:
 The bar displays (left to right):
 
 - **Search button** - Opens note search panel
-- **Add Note button** - Creates a new note for today
+- **Add Note button** - Creates a new note at the current game time
 - **Events** - Icons for today's notes (up to 5 displayed); click to open note
 - **Date** - Click to open Set Date dialog (GM only)
 - **Time** — Current time with play/pause button (GM only); shift-click to lock/unlock the clock
@@ -184,7 +190,7 @@ Configure custom jump buttons (e.g., skip 8 hours) via Settings > HUD tab > Cust
 
 ### Clock Lock
 
-Shift-click the play/pause button (on the HUD, MiniCal, or TimeKeeper) to lock the clock. When locked:
+Shift-click the play/pause button (on the HUD, MiniCal, or Time Keeper) to lock the clock. When locked:
 
 - All time advancement is blocked (manual toggle, real-time sync, combat time, rest advancement)
 - The play/pause icon changes to a lock icon with updated tooltip
@@ -228,7 +234,7 @@ Both HUD modes include a search panel:
 - **Full HUD**: Drag the info bar
 - **MiniCal**: Drag the top row (month/year header)
 
-Position is saved per-client.
+Position is saved for each user.
 
 ### Sticky Zones
 
@@ -305,4 +311,4 @@ The dome and all time-related controls are non-interactive for players.
 
 GMs can configure individual scenes to hide the HUD from players automatically. When a player navigates to a scene with "Hide HUD for Players" enabled, their HUD closes. When navigating to a non-hidden scene, the HUD is restored if they have "Show HUD on load" enabled.
 
-Configure via **Scene Configuration > Ambiance tab > Hide HUD for Players**.
+Configure via **Scene Configuration > Calendaria tab > Hide HUD for Players**.

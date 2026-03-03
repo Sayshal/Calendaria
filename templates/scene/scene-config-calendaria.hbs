@@ -1,0 +1,59 @@
+<div class="tab{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.DarknessSync.Name"}}</label>
+    <select name="flags.{{moduleId}}.darknessSync">
+      <option value="default" {{#if (eq darknessSync "default")}}selected{{/if}}>
+        {{localize "CALENDARIA.Scene.DarknessSync.Choices.Default"}}
+      </option>
+      <option value="enabled" {{#if (eq darknessSync "enabled")}}selected{{/if}}>
+        {{localize "CALENDARIA.Scene.DarknessSync.Choices.Enabled"}}
+      </option>
+      <option value="disabled" {{#if (eq darknessSync "disabled")}}selected{{/if}}>
+        {{localize "CALENDARIA.Scene.DarknessSync.Choices.Disabled"}}
+      </option>
+    </select>
+    <p class="hint">{{localize "CALENDARIA.Scene.DarknessSync.Hint"}}</p>
+  </div>
+  <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.BrightnessMultiplier.Name"}}</label>
+    <div class="form-fields">
+      <input type="range" name="flags.{{moduleId}}.brightnessMultiplier" min="0.5" max="1.5" step="0.1"
+        value="{{brightnessMultiplier}}">
+      <span class="range-value">{{brightnessMultiplier}}x</span>
+    </div>
+    <p class="hint">{{localize "CALENDARIA.Scene.BrightnessMultiplier.Hint"}}</p>
+  </div>
+  <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.HudHideForPlayers.Name"}}</label>
+    <input type="checkbox" name="flags.{{moduleId}}.hudHideForPlayers" {{#if hudHideForPlayers}}checked{{/if}}>
+    <p class="hint">{{localize "CALENDARIA.Scene.HudHideForPlayers.Hint"}}</p>
+  </div>
+  <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.ClimateZoneOverride.Name"}}</label>
+    <select name="flags.{{moduleId}}.climateZoneOverride" {{#unless climateZones.length}}disabled{{/unless}}>
+      <option value="" {{#unless climateZoneOverride}}selected{{/unless}}>
+        {{localize "CALENDARIA.Scene.ClimateZoneOverride.Choices.Default"}}
+      </option>
+      {{#each climateZones}}
+        <option value="{{this.id}}" {{#if (eq this.id ../climateZoneOverride)}}selected{{/if}}>
+          {{this.name}}
+        </option>
+      {{/each}}
+    </select>
+    {{#if climateZones.length}}
+      <p class="hint">{{localize "CALENDARIA.Scene.ClimateZoneOverride.Hint"}}</p>
+    {{else}}
+      <p class="hint">{{localize "CALENDARIA.Scene.ClimateZoneOverride.NoZones"}}</p>
+    {{/if}}
+  </div>
+  <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.WeatherFxDisabled.Name"}}</label>
+    <input type="checkbox" name="flags.{{moduleId}}.weatherFxDisabled" {{#if weatherFxDisabled}}checked{{/if}}>
+    <p class="hint">{{localize "CALENDARIA.Scene.WeatherFxDisabled.Hint"}}</p>
+  </div>
+  <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.WeatherSoundDisabled.Name"}}</label>
+    <input type="checkbox" name="flags.{{moduleId}}.weatherSoundDisabled" {{#if weatherSoundDisabled}}checked{{/if}}>
+    <p class="hint">{{localize "CALENDARIA.Scene.WeatherSoundDisabled.Hint"}}</p>
+  </div>
+</div>

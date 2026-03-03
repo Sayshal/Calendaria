@@ -1,11 +1,11 @@
 /**
  * Calendarium (Obsidian) Importer
- * Imports calendar data from Calendarium Obsidian plugin data.json exports.
  * @module Importers/CalendariumImporter
  * @author Tyler
  */
 
 import { ASSETS } from '../constants.mjs';
+import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
@@ -41,28 +41,27 @@ export default class CalendariumImporter extends BaseImporter {
   /** @type {Map<string, object>} Category map from Calendarium */
   _categories = new Map();
 
+  /** @type {object[]} Categories to import as Calendaria note categories. */
+  #calCategories = [];
+
   /**
    * Check if data is a Calendarium export.
    * @param {object} data - Parsed JSON data
    * @returns {boolean} - Is valid export
    */
   static isCalendariumExport(data) {
-    // Check for wrapped calendars array format
     if (data.calendars && Array.isArray(data.calendars) && data.calendars[0]?.static?.months && data.calendars[0]?.static?.weekdays) return true;
-    // Check for single calendar object format (direct export)
     if (data.static?.months && data.static?.weekdays) return true;
     return false;
   }
 
   /**
    * Normalize Calendarium data to expected format.
-   * Wraps single calendar exports in a calendars array.
    * @param {object} data - Raw Calendarium data
    * @returns {object} - Normalized data with calendars array
    */
   static normalizeData(data) {
     if (data.calendars && Array.isArray(data.calendars)) return data;
-    // Wrap single calendar object in calendars array
     return { calendars: [data] };
   }
 
@@ -114,13 +113,17 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #buildCategoryMap(categories = []) {
     const map = new Map();
-    for (const cat of categories) map.set(cat.id, { name: cat.name, color: cat.color || '#2196f3' });
+    this.#calCategories = [];
+    for (const cat of categories) {
+      const color = cat.color || '#2196f3';
+      map.set(cat.id, { name: cat.name, color });
+      this.#calCategories.push({ name: cat.name, color });
+    }
     return map;
   }
 
   /**
    * Transform Calendarium months to Calendaria format.
-   * Includes per-month custom weekdays if present.
    * @param {object[]} months - Calendarium months array
    * @returns {object[]} - Transformed months array
    */
@@ -135,15 +138,7 @@ export default class CalendariumImporter extends BaseImporter {
         startingWeekday: null,
         leapDays: null
       };
-
-      if (m.week && Array.isArray(m.week) && m.week.length > 0) {
-        month.weekdays = m.week.map((wd) => ({
-          name: wd.name,
-          abbreviation: wd.name?.substring(0, 2) || '',
-          isRestDay: false
-        }));
-      }
-
+      if (m.week && Array.isArray(m.week) && m.week.length > 0) month.weekdays = m.week.map((wd) => ({ name: wd.name, abbreviation: wd.name?.substring(0, 2) || '', isRestDay: false }));
       return month;
     });
   }
@@ -160,7 +155,6 @@ export default class CalendariumImporter extends BaseImporter {
       const details = monthsWithCustomWeeks.map((m) => m.name).join(', ');
       log(3, `Imported custom weekdays for months: ${details}`);
     }
-
     return weekdays.map((wd, idx) => ({ name: wd.name, abbreviation: wd.name.substring(0, 2), ordinal: idx + 1 }));
   }
 
@@ -180,7 +174,7 @@ export default class CalendariumImporter extends BaseImporter {
         else if (intervals.length === 1 && !intervals[0].ignore) leapYearConfig = { rule: 'simple', interval: intervals[0].interval, start: ld.offset || 0 };
         else leapYearConfig = { rule: 'custom', pattern: this.#serializeIntervals(intervals), start: ld.offset || 0 };
       }
-      if (ld.intercalary && ld.name) festivals.push({ name: ld.name, month: (ld.timespan || 0) + 1, day: (ld.after || 0) + 1, leapYearOnly: true, countsForWeekday: !ld.numbered });
+      if (ld.intercalary && ld.name) festivals.push({ name: ld.name, month: ld.timespan || 0, dayOfMonth: ld.after || 0, leapYearOnly: true, countsForWeekday: !ld.numbered });
     }
     return { config: leapYearConfig, festivals };
   }
@@ -210,15 +204,16 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed moons array
    */
   #transformMoons(moons = []) {
-    return moons.map((moon) => ({
-      name: moon.name,
-      cycleLength: moon.cycle,
-      cycleDayAdjust: moon.offset || 0,
-      color: moon.faceColor || '',
-      hidden: false,
-      phases: this.#generateMoonPhases(),
-      referenceDate: { year: 1, month: 0, day: 1 }
-    }));
+    return moons
+      .filter((moon) => !moon.hidden)
+      .map((moon) => ({
+        name: moon.name,
+        cycleLength: moon.cycle,
+        cycleDayAdjust: moon.offset || 0,
+        color: moon.faceColor || moon.color || '',
+        phases: this.#generateMoonPhases(),
+        referenceDate: { year: 1, month: 0, dayOfMonth: 0 }
+      }));
   }
 
   /**
@@ -246,7 +241,6 @@ export default class CalendariumImporter extends BaseImporter {
       monthDayStarts.push(dayCount);
       dayCount += m.days || 0;
     }
-
     const isDated = seasons[0]?.date != null;
     if (isDated) return { type: 'dated', offset: 0, values: this.#transformDatedSeasons(seasons, monthDayStarts, daysPerYear) };
     else return { type: 'periodic', offset: seasonal.offset || 0, values: this.#transformPeriodicSeasons(seasons, daysPerYear) };
@@ -265,14 +259,19 @@ export default class CalendariumImporter extends BaseImporter {
       const bDay = (monthDayStarts[b.date?.month] ?? 0) + (b.date?.day ?? 0);
       return aDay - bDay;
     });
-
     return sortedSeasons.map((season, index) => {
       const dayStart = (monthDayStarts[season.date?.month] ?? 0) + (season.date?.day ?? 0);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
       let dayEnd = (monthDayStarts[nextSeason.date?.month] ?? 0) + (nextSeason.date?.day ?? 0) - 1;
       if (dayEnd < 0) dayEnd = totalDays - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
-      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd, color: season.color || null, icon: this.#mapSeasonIcon(season.kind) };
+      return {
+        name: season.name,
+        dayStart,
+        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
+        color: Array.isArray(season.color) ? season.color[0] : season.color || null,
+        icon: this.#mapSeasonIcon(season.kind)
+      };
     });
   }
 
@@ -284,7 +283,12 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed periodic seasons array
    */
   #transformPeriodicSeasons(seasons, totalDays) {
-    return seasons.map((season) => ({ name: season.name, duration: season.duration || Math.floor(totalDays / seasons.length), color: season.color || null, icon: this.#mapSeasonIcon(season.kind) }));
+    return seasons.map((season) => ({
+      name: season.name,
+      duration: season.duration || Math.floor(totalDays / seasons.length),
+      color: Array.isArray(season.color) ? season.color[0] : season.color || null,
+      icon: this.#mapSeasonIcon(season.kind)
+    }));
   }
 
   /**
@@ -303,12 +307,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed eras array
    */
   #transformEras(eras = []) {
-    return eras.map((era) => ({
-      name: era.name || localize('CALENDARIA.Common.Era'),
-      abbreviation: era.name?.substring(0, 3) || 'E',
-      startYear: era.date?.year ?? 0,
-      endYear: era.end?.year ?? null
-    }));
+    return eras.map((era) => ({ name: era.name || localize('CALENDARIA.Common.Era'), abbreviation: era.name?.substring(0, 3) || 'E', startYear: era.date?.year ?? 0, endYear: era.end?.year ?? null }));
   }
 
   /**
@@ -329,14 +328,14 @@ export default class CalendariumImporter extends BaseImporter {
   /**
    * Extract current date from Calendarium data for preservation after import.
    * @param {object} data - Raw Calendarium data
-   * @returns {{year: number, month: number, day: number}|null} Current date
+   * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data) {
     const normalizedData = CalendariumImporter.normalizeData(data);
     const calendar = normalizedData.calendars?.[0];
     const current = calendar?.current;
     if (!current || (current.year === undefined && current.year !== 0)) return null;
-    return { year: current.year, month: current.month ?? 0, day: current.day ?? 1, hour: 0, minute: 0 };
+    return { year: current.year, month: current.month ?? 0, dayOfMonth: Math.max(0, (current.day ?? 1) - 1), hour: 0, minute: 0 };
   }
 
   /**
@@ -346,7 +345,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #transformCurrentDate(current = {}) {
     if (!current.year && current.year !== 0) return null;
-    return { year: current.year, month: current.month ?? 0, day: current.day ?? 1, hour: 0, minute: 0 };
+    return { year: current.year, month: current.month ?? 0, dayOfMonth: Math.max(0, (current.day ?? 1) - 1), hour: 0, minute: 0 };
   }
 
   /**
@@ -362,14 +361,9 @@ export default class CalendariumImporter extends BaseImporter {
     this._undatedEvents = [];
     log(3, `Extracting ${events.length} events from Calendarium`);
     for (const event of events) {
-      try {
-        const note = this.#transformEvent(event);
-        if (note) notes.push(note);
-      } catch (error) {
-        log(1, `Error transforming event "${event.name}":`, error);
-      }
+      const note = this.#transformEvent(event);
+      if (note) notes.push(note);
     }
-
     log(3, `Extracted ${notes.length} notes from Calendarium`);
     return notes;
   }
@@ -386,12 +380,11 @@ export default class CalendariumImporter extends BaseImporter {
       this._undatedEvents.push({ name, content: description || '', category: categoryData?.name || 'default' });
       return null;
     }
-
     if (type === 'Date') {
       return {
         name,
         content: description || '',
-        startDate: { year: date.year, month: date.month ?? 0, day: date.day ?? 1 },
+        startDate: { year: date.year, month: date.month ?? 0, dayOfMonth: Math.max(0, (date.day ?? 1) - 1) },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -399,13 +392,12 @@ export default class CalendariumImporter extends BaseImporter {
         suggestedType: 'note'
       };
     }
-
     if (type === 'Range') {
       return {
         name,
         content: description || '',
-        startDate: { year: date.start?.year ?? date.year ?? 0, month: date.start?.month ?? date.month ?? 0, day: date.start?.day ?? date.day ?? 1 },
-        endDate: { year: date.end?.year ?? date.year ?? 0, month: date.end?.month ?? date.month ?? 0, day: date.end?.day ?? date.day ?? 1 },
+        startDate: { year: date.start?.year ?? date.year ?? 0, month: date.start?.month ?? date.month ?? 0, dayOfMonth: (date.start?.day ?? date.day ?? 1) - 1 },
+        endDate: { year: date.end?.year ?? date.year ?? 0, month: date.end?.month ?? date.month ?? 0, dayOfMonth: (date.end?.day ?? date.day ?? 1) - 1 },
         repeat: 'never',
         gmOnly: false,
         category: categoryData?.name || 'default',
@@ -413,7 +405,6 @@ export default class CalendariumImporter extends BaseImporter {
         suggestedType: 'note'
       };
     }
-
     if (type === 'Recurring') {
       const pattern = this.#detectRecurringPattern(date);
       return {
@@ -430,11 +421,10 @@ export default class CalendariumImporter extends BaseImporter {
         importWarnings: pattern.warnings
       };
     }
-
     return {
       name,
       content: description || '',
-      startDate: { year: date?.year ?? 0, month: date?.month ?? 0, day: date?.day ?? 1 },
+      startDate: { year: date?.year ?? 0, month: date?.month ?? 0, dayOfMonth: (date?.day ?? 1) - 1 },
       repeat: 'never',
       gmOnly: false,
       category: categoryData?.name || 'default',
@@ -453,9 +443,13 @@ export default class CalendariumImporter extends BaseImporter {
     const yearIsRange = Array.isArray(year);
     const monthIsRange = Array.isArray(month);
     const dayIsRange = Array.isArray(day);
-    if (yearIsRange && year[0] === null && year[1] === null && !monthIsRange && !dayIsRange) return { repeat: 'yearly', startDate: { year: 1, month: month ?? 0, day: day ?? 1 } };
-    if (yearIsRange && monthIsRange && !dayIsRange && year[0] === null && month[0] === null) return { repeat: 'monthly', startDate: { year: 1, month: 0, day: day ?? 1 } };
-    return { repeat: 'range', rangePattern: { year, month, day }, startDate: { year: this.#extractFirst(year), month: this.#extractFirst(month), day: this.#extractFirst(day) } };
+    if (yearIsRange && year[0] === null && year[1] === null && !monthIsRange && !dayIsRange) return { repeat: 'yearly', startDate: { year: 1, month: month ?? 0, dayOfMonth: (day ?? 1) - 1 } };
+    if (yearIsRange && monthIsRange && !dayIsRange && year[0] === null && month[0] === null) return { repeat: 'monthly', startDate: { year: 1, month: 0, dayOfMonth: (day ?? 1) - 1 } };
+    return {
+      repeat: 'range',
+      rangePattern: { year, month, dayOfMonth: day },
+      startDate: { year: this.#extractFirst(year), month: this.#extractFirst(month), dayOfMonth: (this.#extractFirst(day) ?? 1) - 1 }
+    };
   }
 
   /**
@@ -479,7 +473,7 @@ export default class CalendariumImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-
+    if (this.#calCategories.length) await this.#importNoteCategories();
     for (const note of notes) {
       try {
         const noteData = {
@@ -491,12 +485,9 @@ export default class CalendariumImporter extends BaseImporter {
           rangePattern: note.rangePattern || null,
           gmOnly: note.gmOnly
         };
-
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-
         if (page) {
           count++;
-          log(3, `Created note: ${note.name}`);
         } else {
           errors.push(`Failed to create note: ${note.name}`);
         }
@@ -505,13 +496,33 @@ export default class CalendariumImporter extends BaseImporter {
         log(1, `Error importing note "${note.name}":`, error);
       }
     }
-
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Calendarium Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 
-  /** @override */
+  /**
+   * Import Calendarium categories as Calendaria note categories.
+   */
+  async #importNoteCategories() {
+    const existing = getAllCategories().map((c) => c.name.toLowerCase());
+    for (const cat of this.#calCategories) {
+      if (existing.includes(cat.name.toLowerCase())) continue;
+      try {
+        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        log(3, `Imported Calendarium category: ${cat.name}`);
+      } catch (error) {
+        log(1, `Failed to import category "${cat.name}":`, error);
+      }
+    }
+  }
+
+  /**
+   * Generate preview data with Calendarium-specific category and intercalary info.
+   * @param {object} rawData - Raw Calendarium export data
+   * @param {object} transformedData - Transformed calendar data
+   * @returns {object} Preview data with additional Calendarium-specific fields
+   */
   getPreviewData(rawData, transformedData) {
     const preview = super.getPreviewData(rawData, transformedData);
     const normalizedData = CalendariumImporter.normalizeData(rawData);

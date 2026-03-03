@@ -400,7 +400,7 @@ Hooks.on('calendaria.clockUpdate', (data) => {
 
 ### calendaria.visualTick
 
-Fired on each real-time clock render frame. Used internally by HUD, BigCal, MiniCal, TimeKeeper, and Stopwatch for smooth time display updates.
+Fired on each real-time clock render frame. Used internally by HUD, BigCal, MiniCal, Time Keeper, and Stop Watch for smooth time display updates.
 
 **Parameters:**
 
@@ -430,16 +430,16 @@ Hooks.on('calendaria.worldTimeUpdated', (worldTime, dt) => {
 
 ---
 
-## Stopwatch Hooks
+## Stop Watch Hooks
 
 ### calendaria.stopwatchStart
 
-Fired when the stopwatch starts.
+Fired when the stop watch starts.
 
 **Parameters:**
 
 - `data` (object)
-  - `mode` (string) - Stopwatch mode (`"realtime"` or `"gametime"`)
+  - `mode` (string) - Stop watch mode (`"realtime"` or `"gametime"`)
 
 ```javascript
 Hooks.on('calendaria.stopwatchStart', (data) => {
@@ -449,12 +449,12 @@ Hooks.on('calendaria.stopwatchStart', (data) => {
 
 ### calendaria.stopwatchPause
 
-Fired when the stopwatch is paused.
+Fired when the stop watch is paused.
 
 **Parameters:**
 
 - `data` (object)
-  - `mode` (string) - Stopwatch mode
+  - `mode` (string) - Stop watch mode
   - `elapsed` (number) - Elapsed time in milliseconds (realtime) or seconds (gametime)
 
 ```javascript
@@ -465,12 +465,12 @@ Hooks.on('calendaria.stopwatchPause', (data) => {
 
 ### calendaria.stopwatchReset
 
-Fired when the stopwatch is reset.
+Fired when the stop watch is reset.
 
 **Parameters:**
 
 - `data` (object)
-  - `mode` (string) - Stopwatch mode
+  - `mode` (string) - Stop watch mode
 
 ```javascript
 Hooks.on('calendaria.stopwatchReset', (data) => {
@@ -485,7 +485,7 @@ Fired when a lap is recorded.
 **Parameters:**
 
 - `data` (object)
-  - `mode` (string) - Stopwatch mode
+  - `mode` (string) - Stop watch mode
   - `lap` (number) - Lap number
   - `elapsed` (number) - Elapsed time at lap
 

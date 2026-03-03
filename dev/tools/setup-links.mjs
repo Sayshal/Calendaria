@@ -82,7 +82,8 @@ console.log('Calendaria — Intellisense Setup\n');
 console.log('Resolving Foundry VTT...');
 const foundryPath = await resolvePath('FOUNDRY_PATH', 'Foundry VTT');
 
-console.log('\nCreating symlink...');
+console.log('\nCreating symlinks...');
 createLink(foundryPath, join(ROOT, 'foundry'), 'foundry');
+createLink(resolve(ROOT, '..', 'dnd5e'), join(ROOT, 'dnd5e'), 'dnd5e');
 
 console.log('\nDone! IDE intellisense for @client/* and @common/* should now work.');
