@@ -1974,8 +1974,6 @@
   "CALENDARIA.ThemeEditor.Export": "Экспорт",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Тема успешно экспортирована.",
   "CALENDARIA.ThemeEditor.Header.Color": "Цвет",
-  "CALENDARIA.ThemeEditor.Header.ColorCode": "Код",
-  "CALENDARIA.ThemeEditor.Header.ColorCodeHint": "16-ричный код цвета",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Нажмите, чтобы открыть палитру цветов",
   "CALENDARIA.ThemeEditor.Header.Location": "Расположение",
   "CALENDARIA.ThemeEditor.Header.LocationHint": "Какие компоненты интерфейса используют этот цвет (Общие = все компоненты)",
