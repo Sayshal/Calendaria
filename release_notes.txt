@@ -1,4 +1,2 @@
 ## Bug Fixes
-- [#442] All days displaying as "1" in custom calendars — note form hidden inputs used old `day` field instead of `dayOfMonth`; also fixed undefined `endDayOfMonth` in BigCal note creation
-- [#457] Importer window too small to reach buttons — now resizable, scrollable, with increased max-height
-- [#458] `/w` chat alias overriding Foundry's built-in `/whisper` — removed `/w` shorthand from `/weather` command
+- [#432] Weather presets not enabled for a climate zone still generating — zone season overrides now fully define the probability pool rather than layering on top of the calendar's season climate
