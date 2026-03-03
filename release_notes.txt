@@ -1,33 +1,4 @@
-## Headline Features
-- **BigCal Visual Redesign** — Frameless floating window with rounded corners, drop shadow, compact two-row header, dropdown view selector, gapless day cells with glow highlights
-- **MicroCal** — Ultra-compact MiniCal mode with circular cells, icon-only indicators, and play/pause hover overlay
-- **Sun Dial** — New animated sky clock with draggable sun handle, Crank Mode for multi-day advancement, hover controls, and full settings
-- **Stop Watch Redesign** — Physical dial with detailed face and smoothly animated hands
-
-## New Features
-- Unified settings for all floating apps: auto-fade, force-to-all, idle opacity, sticky states
-- Force BigCal / Stop Watch / Sun Dial / Time Keeper world settings
-- "Show BigCal on Load" and "Show Sun Dial on Load" world settings
-- FX Density, Speed, and Color controls in Weather Picker with tuned defaults for all presets
-- "Enable Weather FX" global toggle, "Sound Volume" slider, "Regenerate All Weather" button
-- "Disable Weather Sound" per-scene flag (independent of visual FX)
-- Combat Mode dropdown: None, Compact on Combat/Encounter, Hide on Combat/Encounter
-- "Run Clock During Combat" world setting
-- Rich day tooltips on MiniCal (date, festival, season, sunrise/sunset, weather)
-- Category-colored note badges with auto-contrast text
-- Auto-Open Notes Panel setting
-- "View Sun Dial" permission, "Approximate Date & Time" display format
-
-## Changes
-- Color Shift Sync disabled by default (15% dawn/dusk, no midday tint)
-- Scene config flags moved to dedicated "Calendaria" tab
-- Color inputs use Foundry's built-in color picker, note categories use icon-button dialog
-- All importers now import source categories as custom note categories
-- HUD toolbar icon: `fa-landmark-dome`
-
 ## Bug Fixes
-- [#428] Globe particles rebuilt unnecessarily on weather save
-- [#432] Weather generation not filtering disabled zone presets
-- [#437] BigCal week view broken by intercalary months
-- Importer fixes for all 6 sources (intercalary month indices, off-by-one dates, dual module IDs)
-- Moon overflow tooltips, SunDial getComputedStyle crash, first-hover blank tooltip
+- [#442] All days displaying as "1" in custom calendars — note form hidden inputs used old `day` field instead of `dayOfMonth`; also fixed undefined `endDayOfMonth` in BigCal note creation
+- [#457] Importer window too small to reach buttons — now resizable, scrollable, with increased max-height
+- [#458] `/w` chat alias overriding Foundry's built-in `/whisper` — removed `/w` shorthand from `/weather` command
