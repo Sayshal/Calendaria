@@ -41,7 +41,7 @@ Click the mode indicator to switch between modes.
 
 | Button          | Action                               |
 | --------------- | ------------------------------------ |
-| **Start/Pause** | Toggle the stop watch running state   |
+| **Start/Pause** | Toggle the stop watch running state  |
 | **Reset**       | Clear elapsed time and lap history   |
 | **Lap**         | Record current elapsed time as a lap |
 
@@ -103,10 +103,10 @@ This is useful for automatically tracking in-game duration when the real-time cl
 
 Right-click on the Stop Watch face to access the context menu:
 
-| Option                   | Description                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
+| Option                   | Description                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
 | **Lock/Unlock Position** | Toggle position locking (also available in Settings > Stop Watch tab > Sticky States section) |
-| **Reset Position**       | Restore to default position (150, 150) and clear any sticky zone snapping                    |
+| **Reset Position**       | Restore to default position (150, 150) and clear any sticky zone snapping                     |
 | **Close**                | Close the Stop Watch window                                                                   |
 
 ---

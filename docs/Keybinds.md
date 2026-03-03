@@ -6,11 +6,11 @@ Calendaria provides configurable keyboard shortcuts for quick access to its widg
 
 ## Toggle Keybinds
 
-| Keybind           | Action                  | Default |
-| ----------------- | ----------------------- | ------- |
-| Toggle BigCal     | Opens/closes BigCal     | Unbound |
-| Toggle MiniCal    | Opens/closes MiniCal    | Unbound |
-| Toggle HUD        | Opens/closes HUD        | Alt+C   |
+| Keybind            | Action                   | Default |
+| ------------------ | ------------------------ | ------- |
+| Toggle BigCal      | Opens/closes BigCal      | Unbound |
+| Toggle MiniCal     | Opens/closes MiniCal     | Unbound |
+| Toggle HUD         | Opens/closes HUD         | Alt+C   |
 | Toggle Time Keeper | Opens/closes Time Keeper | Unbound |
 | Toggle Stop Watch  | Opens/closes Stop Watch  | Unbound |
 
@@ -18,8 +18,8 @@ Calendaria provides configurable keyboard shortcuts for quick access to its widg
 
 ## Stop Watch Controls
 
-| Keybind               | Action                          | Default |
-| --------------------- | ------------------------------- | ------- |
+| Keybind                | Action                           | Default |
+| ---------------------- | -------------------------------- | ------- |
 | Start/Pause Stop Watch | Toggles stop watch running state | Unbound |
 | Reset Stop Watch       | Resets stop watch to zero        | Unbound |
 

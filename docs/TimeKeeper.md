@@ -45,14 +45,14 @@ Configure via **Settings Panel > Time Keeper** tab. See [Settings](Settings#time
 
 Right-click the Time Keeper to access:
 
-| Option                   | Description                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------- |
+| Option                   | Description                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------- |
 | Settings                 | Opens the Settings Panel to the Time Keeper tab                               |
-| Show/Hide to All Players | Toggle visibility for all players (GM only)                                  |
-| Reset Position           | Reset to default position (120, 120) and clear sticky zone snapping          |
+| Show/Hide to All Players | Toggle visibility for all players (GM only)                                   |
+| Reset Position           | Reset to default position (120, 120) and clear sticky zone snapping           |
 | Lock/Unlock Position     | Toggle whether Time Keeper can be dragged; displays notification when toggled |
-| Open Stop Watch           | Open the Stop Watch application                                               |
-| Open MiniCal             | Open the MiniCal application                                                 |
+| Open Stop Watch          | Open the Stop Watch application                                               |
+| Open MiniCal             | Open the MiniCal application                                                  |
 | Close                    | Close the Time Keeper                                                         |
 
 ---

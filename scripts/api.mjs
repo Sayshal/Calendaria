@@ -825,10 +825,10 @@ export const CalendariaAPI = {
 
   /**
    * @deprecated Use `showBigCal()` instead.
-   * @param {object} [options] - Render options
+   * @param {object} [_options] - Render options
    * @returns {Promise<object>} The BigCal application
    */
-  async openBigCal(options = {}) {
+  async openBigCal(_options = {}) {
     foundry.utils.logCompatibilityWarning('CALENDARIA.api.openBigCal() is deprecated. Use CALENDARIA.api.showBigCal() instead.', { since: 'Calendaria 0.11', until: 'Calendaria 1.0' });
     return BigCal.show();
   },

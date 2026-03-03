@@ -1298,9 +1298,9 @@ CALENDARIA.api.toggleStopwatch();
 ### Stopwatch Controls
 
 ```javascript
-CALENDARIA.api.startStopwatch();   // Show and start
-CALENDARIA.api.pauseStopwatch();   // Pause if running
-CALENDARIA.api.resetStopwatch();   // Reset to zero
+CALENDARIA.api.startStopwatch(); // Show and start
+CALENDARIA.api.pauseStopwatch(); // Pause if running
+CALENDARIA.api.resetStopwatch(); // Reset to zero
 ```
 
 ---

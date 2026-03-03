@@ -29,12 +29,12 @@ GMs always have full access to all features.
 
 ### UI Visibility Permissions
 
-| Permission          | Key              | Description                |
-| ------------------- | ---------------- | -------------------------- |
-| **View BigCal**     | `viewBigCal`     | Can see the BigCal         |
-| **View MiniCal**    | `viewMiniCal`    | Can see the MiniCal widget |
-| **View Time Keeper** | `viewTimeKeeper` | Can see the Time Keeper     |
-| **View Sun Dial**   | `viewSunDial`    | Can see the Sun Dial       |
+| Permission           | Key              | Description                |
+| -------------------- | ---------------- | -------------------------- |
+| **View BigCal**      | `viewBigCal`     | Can see the BigCal         |
+| **View MiniCal**     | `viewMiniCal`    | Can see the MiniCal widget |
+| **View Time Keeper** | `viewTimeKeeper` | Can see the Time Keeper    |
+| **View Sun Dial**    | `viewSunDial`    | Can see the Sun Dial       |
 
 ### Action Permissions
 
@@ -59,7 +59,7 @@ By default, all non-GM roles have restricted access:
 | --------------------- | :----: | :-----: | :----------: |
 | View BigCal           |   -    |    ✓    |      ✓       |
 | View MiniCal          |   -    |    ✓    |      ✓       |
-| View Time Keeper       |   -    |    ✓    |      ✓       |
+| View Time Keeper      |   -    |    ✓    |      ✓       |
 | View Sun Dial         |   -    |    ✓    |      ✓       |
 | Manage Notes          |   ✓    |    ✓    |      ✓       |
 | Edit Notes            |   -    |    ✓    |      ✓       |

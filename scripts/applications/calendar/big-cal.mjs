@@ -1526,7 +1526,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: 0 },
-        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: endDayOfMonth, hour: endHour, minute: 0 }
+        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: endHour, minute: 0 }
       }
     });
     this._selectedTimeSlot = null;
@@ -1562,7 +1562,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       name: localize('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: parseInt(minute) },
-        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: endDayOfMonth, hour: endHour, minute: parseInt(minute) }
+        endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: endHour, minute: parseInt(minute) }
       }
     });
     this._selectedTimeSlot = null;

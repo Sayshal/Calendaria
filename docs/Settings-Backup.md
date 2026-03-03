@@ -22,16 +22,16 @@ Open the settings panel and navigate to **Module** tab > **Backup & Transfer** s
 
 The exported file is named `calendaria-settings-{timestamp}.json` and includes:
 
-| Category          | Examples                                                                |
-| ----------------- | ----------------------------------------------------------------------- |
+| Category          | Examples                                                                  |
+| ----------------- | ------------------------------------------------------------------------- |
 | Display Formats   | Date/time formats for HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Chat |
-| Time Settings     | Real-time clock, time progression, increment multiplier                 |
-| Weather           | Weather enabled, weather patterns, brightness multiplier                |
-| UI Integration    | Toolbar buttons, Journal footer                                         |
-| Permissions       | All role-based permissions                                              |
-| Custom Time Jumps | HUD, Time Keeper, MiniCal jump configurations                            |
-| Note Categories   | Category names, colors, icons                                           |
-| Macro Triggers    | Season and moon phase trigger assignments                               |
+| Time Settings     | Real-time clock, time progression, increment multiplier                   |
+| Weather           | Weather enabled, weather patterns, brightness multiplier                  |
+| UI Integration    | Toolbar buttons, Journal footer                                           |
+| Permissions       | All role-based permissions                                                |
+| Custom Time Jumps | HUD, Time Keeper, MiniCal jump configurations                             |
+| Note Categories   | Category names, colors, icons                                             |
+| Macro Triggers    | Season and moon phase trigger assignments                                 |
 
 ---
 

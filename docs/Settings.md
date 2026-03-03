@@ -60,7 +60,7 @@ Configure which user roles can access Calendaria features.
 | ------------------------- | ------------------------------------------------------ |
 | **View BigCal**           | Can see the BigCal                                     |
 | **View MiniCal**          | Can see the MiniCal widget                             |
-| **View Time Keeper**       | Can see the Time Keeper                                 |
+| **View Time Keeper**      | Can see the Time Keeper                                |
 | **View Sun Dial**         | Can see the Sun Dial                                   |
 | **Manage Notes**          | Can create own calendar notes                          |
 | **Edit Notes**            | Can edit calendar notes owned by other players         |
