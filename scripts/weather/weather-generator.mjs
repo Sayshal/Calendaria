@@ -123,8 +123,15 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   } else if (zoneFallback?.temperatures?._default) {
     tempRange = zoneFallback.temperatures._default;
   }
-  for (const preset of Object.values(zoneFallback?.presets ?? {})) if (preset.enabled === false) delete probabilities[preset.id];
-  for (const preset of Object.values(zoneOverride?.presets ?? {})) if (preset.enabled === false) delete probabilities[preset.id];
+  const rawFallbackPresets = zoneFallback?.presets;
+  if (rawFallbackPresets && Object.keys(rawFallbackPresets).length > 0) {
+    const enabledIds = new Set(
+      Object.values(rawFallbackPresets)
+        .filter((p) => p?.id && p.enabled !== false)
+        .map((p) => p.id)
+    );
+    for (const id of Object.keys(probabilities)) if (!enabledIds.has(id)) delete probabilities[id];
+  }
   return { probabilities, tempRange };
 }
 

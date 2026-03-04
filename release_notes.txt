@@ -1,2 +1,2 @@
 ## Bug Fixes
-- [#432] Weather presets not enabled for a climate zone still generating — zone season overrides now fully define the probability pool rather than layering on top of the calendar's season climate
+- [#432] Disabled zone presets could still generate — zone preset list now acts as a whitelist, fully blocking any preset absent from or explicitly disabled in the zone config

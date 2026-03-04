@@ -204,6 +204,39 @@ describe('mergeClimateConfig()', () => {
     expect(probabilities.rain).toBeUndefined(); // not enabled
   });
 
+  it('excludes presets absent from zone presets when zone has a preset list (issue #432)', () => {
+    // zone.presets only contains enabled presets — disabled presets are absent, not marked enabled:false
+    const zoneFallback = { presets: { a: { id: 'clear', enabled: true, chance: 50 } } };
+    // season array still has 'mist' from a template — user has since disabled it in the zone editor
+    const zoneOverride = {
+      presets: [
+        { id: 'clear', chance: 50 },
+        { id: 'mist', chance: 14 }
+      ]
+    };
+    const { probabilities } = mergeClimateConfig(null, zoneOverride, zoneFallback, 'Spring');
+    expect(probabilities.clear).toBe(50);
+    expect(probabilities.mist).toBeUndefined(); // absent from zone presets = disabled
+  });
+
+  it('excludes absent-disabled presets from array-format season override across all data formats', () => {
+    // Simulates Temperate template zone after user unchecks Mist and enables Windy
+    // zone.presets (object, post-editor-save): only windy and clear present
+    const zoneFallback = { presets: { a: { id: 'windy', enabled: true, chance: 15 }, b: { id: 'clear', enabled: true, chance: 35 } } };
+    // zone.seasonOverrides.Spring.presets (array from template): has mist, no windy
+    const zoneOverride = {
+      presets: [
+        { id: 'rain', chance: 28 },
+        { id: 'mist', chance: 14 },
+        { id: 'clear', chance: 14 }
+      ]
+    };
+    const { probabilities } = mergeClimateConfig(null, zoneOverride, zoneFallback, 'Spring');
+    expect(probabilities.mist).toBeUndefined(); // disabled (absent from zone presets)
+    expect(probabilities.rain).toBeUndefined(); // not in zone presets either
+    expect(probabilities.clear).toBe(14); // in both — allowed through
+  });
+
   // Temperature merging
   it('uses season climate temperatures as base', () => {
     const seasonClimate = { temperatures: { min: 5, max: 15 } };
