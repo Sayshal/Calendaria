@@ -1,2 +1,9 @@
+## New Features
+- [#462] All 6 apps now have an "Open" context menu item that opens a submenu listing every Calendaria app. Opening one never closes another
+
 ## Bug Fixes
-- [#432] Disabled zone presets could still generate — zone preset list now acts as a whitelist, fully blocking any preset absent from or explicitly disabled in the zone config
+- [#432] Disabled zone presets could still generate. Zone preset list now acts as a whitelist, fully blocking any preset absent from or explicitly disabled in the zone config
+- [#461] Position lock on TimeKeeper, Stopwatch, and SunDial now actually prevents dragging. Previously the lock was saved but not enforced
+- [#463] SceneConfig broke when other modules added their own scene config parts. Calendaria now reads PARTS dynamically at render time
+- [#464] Calendaria's Scene tab appeared blank in PF2e. The base SceneConfig is now patched so PF2e's sheet handles the tab correctly
+- Fixed release announcement title appearing white-on-white in some themes
