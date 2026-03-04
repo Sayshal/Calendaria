@@ -53,6 +53,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} ID of zone stopwatch is snapped to */
   #snappedZoneId = null;
 
+  /** @type {boolean} Whether position dragging is locked */
+  #stickyPosition = false;
+
   /** @type {object|null} Notification settings */
   #notification = null;
 
@@ -116,6 +119,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
+    const stopwatchStickyStates = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};
+    this.#stickyPosition = stopwatchStickyStates.position ?? false;
     if (options.isFirstRender) {
       this.#restoreState();
       this.#restorePosition();
@@ -1165,6 +1170,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       await this.#savePosition();
     };
     dragHandle.addEventListener('mousedown', (event) => {
+      if (this.#stickyPosition) return;
       if (event.target.closest('.sw-btn')) return;
       event.preventDefault();
       isDragging = true;
@@ -1284,6 +1290,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   async #toggleStickyPosition() {
     const current = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};
     const newLocked = !(current.position ?? false);
+    this.#stickyPosition = newLocked;
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, { ...current, position: newLocked });
     ui.notifications.info(newLocked ? 'CALENDARIA.Stopwatch.ContextMenu.PositionLocked' : 'CALENDARIA.Stopwatch.ContextMenu.PositionUnlocked', { localize: true });
   }

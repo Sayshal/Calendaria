@@ -68,6 +68,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {string|null} ID of zone the dial is snapped to */
   #snappedZoneId = null;
+
+  /** @type {boolean} Whether position dragging is locked */
+  #stickyPosition = false;
   #lastSize = 300;
 
   /** @override */
@@ -135,9 +138,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const instance = foundry.applications.instances.get('calendaria-sun-dial');
     if (!instance) return;
     const sticky = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
-    const isLocked = sticky.position ?? false;
-    const dragHandle = instance.element?.querySelector('.container');
-    if (dragHandle) dragHandle.style.pointerEvents = isLocked ? 'none' : '';
+    instance.#stickyPosition = sticky.position ?? false;
   }
 
   /** @override */
@@ -168,6 +169,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#currentMinutes = components.minute ?? 0;
     this.#initialTime = game.time.worldTime;
 
+    const sunDialStickyStates = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
+    this.#stickyPosition = sunDialStickyStates.position ?? false;
     if (options.isFirstRender) this.#restorePosition();
     this.#enableDragging();
     this.#enableResizing();
@@ -926,6 +929,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     dragHandle.addEventListener('mousedown', (event) => {
+      if (this.#stickyPosition) return;
       if (event.button !== 0) return;
       if (event.target.closest('.handle') || event.target.closest('.time') || event.target.closest('.resize-handle')) return;
       event.preventDefault();

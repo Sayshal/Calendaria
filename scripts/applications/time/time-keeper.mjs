@@ -14,7 +14,6 @@ import { CalendariaSocket } from '../../utils/socket.mjs';
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
 import { MiniCal } from '../calendar/mini-cal.mjs';
 import { SettingsPanel } from '../settings/settings-panel.mjs';
-import { Stopwatch } from './stopwatch.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -40,6 +39,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} ID of zone HUD is currently snapped to */
   #snappedZoneId = null;
 
+  /** @type {boolean} Whether position dragging is locked */
+  #stickyPosition = false;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-timekeeper',
@@ -51,8 +53,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       dec1: TimeKeeper.#onDec1,
       inc1: TimeKeeper.#onInc1,
       inc2: TimeKeeper.#onInc2,
-      toggle: TimeKeeper.#onToggle,
-      openStopwatch: TimeKeeper.#onOpenStopwatch
+      toggle: TimeKeeper.#onToggle
     }
   };
 
@@ -92,6 +93,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
+    const stickyStates = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
+    this.#stickyPosition = stickyStates.position ?? false;
     if (options.isFirstRender) this.#restorePosition();
     this.#enableDragging();
     const incrementSelect = this.element.querySelector('[data-action="increment"]');
@@ -186,6 +189,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     let previousZoneId = null;
     const originalMouseDown = drag._onDragMouseDown.bind(drag);
     drag._onDragMouseDown = (event) => {
+      if (this.#stickyPosition) return;
       previousZoneId = this.#snappedZoneId;
       if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
         const preserved = StickyZones.unpinFromZone(this.element);
@@ -310,11 +314,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       callback: () => this._toggleStickyPosition()
     });
     items.push({
-      name: 'CALENDARIA.TimeKeeper.ContextMenu.OpenStopwatch',
-      icon: '<i class="fas fa-stopwatch"></i>',
-      callback: () => Stopwatch.show()
-    });
-    items.push({
       name: 'CALENDARIA.TimeKeeper.ContextMenu.SwapToMiniCal',
       icon: '<i class="fas fa-calendar-alt"></i>',
       callback: () => {
@@ -342,6 +341,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   async _toggleStickyPosition() {
     const current = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
     const newLocked = !(current.position ?? false);
+    this.#stickyPosition = newLocked;
     await this.#saveStickyStates({ position: newLocked });
     ui.notifications.info(newLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.PositionLocked' : 'CALENDARIA.TimeKeeper.ContextMenu.PositionUnlocked', { localize: true });
   }
@@ -401,11 +401,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     TimeClock.toggle();
     this.render();
-  }
-
-  /** Open the Stopwatch application. */
-  static #onOpenStopwatch() {
-    Stopwatch.toggle();
   }
 
   /**
