@@ -75,10 +75,6 @@
         color: rgb(233 30 140);
         font-size: 1.25rem;
       }
-
-      strong {
-        color: var(--color-text-dark-heading, var(--calendaria-text));
-      }
     }
 
     .release-body {
