@@ -12,7 +12,7 @@ import { log } from '../utils/logger.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './data/climate-data.mjs';
-import { ALL_PRESETS, getAllPresets, getPreset, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
+import { ALL_PRESETS, getAllPresets, getPreset, getPresetAlias, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
 import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
 
 /**
@@ -1453,6 +1453,117 @@ export default class WeatherManager {
     const min = prevEntry ? prevEntry.kph + 1 : 0;
     const max = entry.kph;
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  /**
+   * Build a weight tooltip showing the source breakdown for a preset.
+   * @param {string} id - Preset ID
+   * @param {number} weight - Final effective weight
+   * @param {number} totalWeight - Total weight of all presets
+   * @param {object} [seasonClimate] - Season climate data
+   * @param {object} [zoneOverride] - Zone season override data
+   * @returns {{ weightTooltip: string, percentTooltip: string }} HTML tooltip strings
+   */
+  static #buildTooltips(id, weight, totalWeight, seasonClimate, zoneOverride) {
+    const seasonPreset = Object.values(seasonClimate?.presets ?? {}).find((p) => p.id === id);
+    const zoneOverridePreset = zoneOverride?.presets ? Object.values(zoneOverride.presets).find((p) => p.id === id) : null;
+    const seasonVal = seasonPreset?.chance ?? 0;
+    let zoneVal = 0;
+    if (zoneOverridePreset) {
+      const ch = zoneOverridePreset.chance;
+      zoneVal = typeof ch === 'string' && /[+-]$/.test(ch) ? ch : (ch ?? 0);
+    }
+    const sLabel = localize('CALENDARIA.WeatherProbability.SeasonBase');
+    const zLabel = localize('CALENDARIA.WeatherProbability.ZoneOverride');
+    const eLabel = localize('CALENDARIA.WeatherProbability.Effective');
+    const weightTooltip = `<p>${sLabel}: <strong>${seasonVal}</strong></p>` + `<p>${zLabel}: <strong>${zoneVal}</strong></p>` + `<p>${eLabel}: <strong>${weight}</strong></p>`;
+    const percent = totalWeight > 0 ? Math.round((weight / totalWeight) * 1000) / 10 : 0;
+    const percentTooltip = `<p>${weight} / ${totalWeight}</p>` + `<p><strong>${percent}%</strong> ${localize('CALENDARIA.WeatherProbability.Likely')}</p>`;
+    return { weightTooltip, percentTooltip };
+  }
+
+  /**
+   * Compute the effective probability breakdown for a zone and season.
+   * @param {object} [options] - Options
+   * @param {string} [options.zoneId] - Zone ID (defaults to active zone)
+   * @param {string} [options.season] - Season name (defaults to current season)
+   * @returns {object} { zone: { id, name }, season, entries: [{ id, label, icon, color, weight, percent }], tempRange: { min, max } }
+   */
+  static getWeatherProbabilities({ zoneId, season } = {}) {
+    const isNoZone = zoneId === 'none' || (zoneId == null && this.isZoneDisabled());
+    const zone = isNoZone ? null : (this.getActiveZone(zoneId) ?? { id: this.DEFAULT_ZONE, name: 'Default' });
+    const seasonData = this.#getCurrentSeason();
+    const calendar = CalendarManager.getActiveCalendar();
+    const seasons = calendar?.seasonsArray ?? [];
+    let resolvedSeason = season;
+    if (resolvedSeason) {
+      const match = seasons.find((s) => localize(s.name).toLowerCase() === resolvedSeason.toLowerCase());
+      if (match) resolvedSeason = match.name;
+      else resolvedSeason = seasonData?.name ?? null;
+    } else {
+      resolvedSeason = seasonData?.name ?? null;
+    }
+    const resolvedSeasonObj = seasons.find((s) => s.name === resolvedSeason);
+    const seasonClimate = resolvedSeasonObj?.climate ?? seasonData?.climate ?? null;
+    const zoneOverride = resolvedSeason && zone?.seasonOverrides?.[resolvedSeason];
+    const { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, isNoZone ? null : zone, resolvedSeason);
+    const customPresets = this.getCustomPresets();
+    const totalWeight = Object.values(probabilities).reduce((sum, w) => sum + w, 0);
+    const calendarId = calendar?.metadata?.id;
+    const entries = Object.entries(probabilities)
+      .map(([id, weight]) => {
+        const preset = getPreset(id, customPresets);
+        const alias = calendarId && zone?.id ? getPresetAlias(id, calendarId, zone.id) : null;
+        return {
+          id,
+          label: alias || (preset ? localize(preset.label) : id),
+          icon: preset?.icon ?? 'fa-question',
+          color: preset?.color ?? '#888888',
+          weight,
+          percent: totalWeight > 0 ? Math.round((weight / totalWeight) * 1000) / 10 : 0,
+          ...this.#buildTooltips(id, weight, totalWeight, seasonClimate, zoneOverride)
+        };
+      })
+      .sort((a, b) => b.percent - a.percent);
+    return {
+      zone: isNoZone ? { id: 'none', name: localize('CALENDARIA.Weather.Picker.NoZone') } : { id: zone.id, name: zone.name ? localize(zone.name) : zone.id },
+      season: resolvedSeason ? localize(resolvedSeason) : null,
+      entries,
+      tempRange
+    };
+  }
+
+  /**
+   * Compute probability breakdown from raw climate data (for editors working with unsaved data).
+   * @param {object} options - Raw climate inputs
+   * @param {object} options.seasonClimate - Season's climate { temperatures, presets }
+   * @param {object} options.zoneConfig - Zone config object with presets, seasonOverrides, etc.
+   * @param {string} options.season - Season name
+   * @param {string} [options.calendarId] - Calendar ID for alias lookup
+   * @returns {object} { entries: [{ id, label, icon, color, weight, percent }], tempRange: { min, max } }
+   */
+  static computeProbabilitiesFromRaw({ seasonClimate, zoneConfig, season, calendarId } = {}) {
+    const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
+    const { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
+    const customPresets = this.getCustomPresets();
+    const totalWeight = Object.values(probabilities).reduce((sum, w) => sum + w, 0);
+    const zoneId = zoneConfig?.id;
+    const entries = Object.entries(probabilities)
+      .map(([id, weight]) => {
+        const preset = getPreset(id, customPresets);
+        const alias = calendarId && zoneId ? getPresetAlias(id, calendarId, zoneId) : null;
+        return {
+          id,
+          label: alias || (preset ? localize(preset.label) : id),
+          icon: preset?.icon ?? 'fa-question',
+          color: preset?.color ?? '#888888',
+          weight,
+          percent: totalWeight > 0 ? Math.round((weight / totalWeight) * 1000) / 10 : 0,
+          ...this.#buildTooltips(id, weight, totalWeight, seasonClimate, zoneOverride)
+        };
+      })
+      .sort((a, b) => b.percent - a.percent);
+    return { entries, tempRange };
   }
 
   /**

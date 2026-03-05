@@ -1,9 +1,7 @@
 ## New Features
-- [#462] All 6 apps now have an "Open" context menu item that opens a submenu listing every Calendaria app. Opening one never closes another
+- [#465] Weather Probability dialog — view the effective weight breakdown for each preset by zone and season. Access from Settings, Climate Editor, Weather Picker, or `/weatherprob` chat command
+- [#465] Season-based weight overrides — zone presets now use per-season weight overrides instead of a single flat weight. Select a season in the Climate Editor to set weights per preset with support for relative modifiers (`10+`, `5-`)
 
 ## Bug Fixes
-- [#432] Disabled zone presets could still generate. Zone preset list now acts as a whitelist, fully blocking any preset absent from or explicitly disabled in the zone config
-- [#461] Position lock on TimeKeeper, Stopwatch, and SunDial now actually prevents dragging. Previously the lock was saved but not enforced
-- [#463] SceneConfig broke when other modules added their own scene config parts. Calendaria now reads PARTS dynamically at render time
-- [#464] Calendaria's Scene tab appeared blank in PF2e. The base SceneConfig is now patched so PF2e's sheet handles the tab correctly
-- Fixed release announcement title appearing white-on-white in some themes
+- [#432] Disabled zone presets could still generate. Zone preset list now acts as a whitelist
+- [#468] All notes appeared on the 1st of the month after migration

@@ -237,6 +237,15 @@ function registerCommands() {
       requiredRole: 'NONE',
       callback: cmdForecast,
       autocompleteCallback: autocompleteForecast
+    },
+    {
+      name: '/weatherprob',
+      aliases: ['/wp'],
+      description: localize('CALENDARIA.ChatCommander.WeatherProbDesc'),
+      icon: '<i class="fas fa-chart-pie"></i>',
+      requiredRole: 'NONE',
+      callback: cmdWeatherProb,
+      autocompleteCallback: autocompleteWeatherProb
     }
   ];
   for (const cmd of commands) game.chatCommands.register({ ...cmd, module: MODULE.ID });
@@ -790,4 +799,45 @@ function autocompleteForecast(_menu, _alias, _parameters) {
     entries.push(game.chatCommands.createCommandElement(`/forecast ${i}`, `<span class="command-title">${label}</span>`));
   }
   return entries;
+}
+
+/**
+ * /weatherprob [season] - Show weather probability breakdown.
+ * @param {object} _chat - Chat log instance
+ * @param {string} parameters - Optional season name
+ * @returns {object} Chat message data
+ */
+function cmdWeatherProb(_chat, parameters) {
+  const calendar = CalendariaAPI.getActiveCalendar();
+  if (!calendar) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoForecast')) };
+  if (!canViewWeatherForecast()) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoPermission')) };
+  const args = parameters?.trim();
+  const data = WeatherManager.getWeatherProbabilities({ season: args || undefined });
+  if (!data.entries.length) return { content: wrapContent(localize('CALENDARIA.WeatherProbability.NoPresets')) };
+  const header = `<h3>${localize('CALENDARIA.ChatCommand.WeatherProbHeader')}</h3>`;
+  const subtitle = data.zone ? `<div class="forecast-zone">${data.zone.name}${data.season ? ` — ${data.season}` : ''}</div>` : '';
+  const rows = data.entries.map((e) => `<i class="fas ${e.icon}" style="color:${e.color}"></i> ${e.label} — <strong>${e.percent}%</strong>`);
+  const tempStr = `${WeatherManager.formatTemperature(data.tempRange.min)} – ${WeatherManager.formatTemperature(data.tempRange.max)}`;
+  const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${localize('CALENDARIA.WeatherProbability.TempRange')}: ${tempStr}</div>`;
+  return { content: wrapContent(`${header}${subtitle}${rows.join('<br>')}${footer}`) };
+}
+
+/**
+ * Autocomplete for /weatherprob - show available seasons.
+ * @param {object} _menu - Autocomplete menu instance
+ * @param {string} _alias - Command alias used
+ * @param {string} parameters - Current input parameters
+ * @returns {HTMLElement[]} Autocomplete entries
+ */
+function autocompleteWeatherProb(_menu, _alias, parameters) {
+  const calendar = CalendariaAPI.getActiveCalendar();
+  if (!calendar) return [];
+  const seasons = calendar.seasonsArray ?? [];
+  const term = parameters?.toLowerCase() || '';
+  const filtered = seasons.filter((s) => localize(s.name).toLowerCase().includes(term));
+  return filtered.map((s) => {
+    const name = localize(s.name);
+    return game.chatCommands.createCommandElement(`/weatherprob ${name}`, `<span class="command-title">${name}</span>`);
+  });
 }

@@ -4,7 +4,7 @@
  * @module Tests/API
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/localization.mjs', () => ({
@@ -60,7 +60,8 @@ vi.mock('../../scripts/weather/weather-manager.mjs', () => ({
     getTemperature: vi.fn(() => null),
     getPreset: vi.fn(() => null),
     formatTemperature: vi.fn(() => ''),
-    getClimateZoneTemplates: vi.fn(() => [])
+    getClimateZoneTemplates: vi.fn(() => []),
+    getWeatherProbabilities: vi.fn(() => ({ zone: { id: '_default', name: 'Default' }, season: null, entries: [], tempRange: { min: 10, max: 22 } }))
   }
 }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({
@@ -159,21 +160,24 @@ vi.mock('../../scripts/applications/hud/hud.mjs', () => ({ HUD: {} }));
 vi.mock('../../scripts/applications/time/stopwatch.mjs', () => ({ Stopwatch: {} }));
 vi.mock('../../scripts/applications/time/sun-dial.mjs', () => ({ SunDial: {} }));
 vi.mock('../../scripts/applications/time/time-keeper.mjs', () => ({ TimeKeeper: {} }));
+vi.mock('../../scripts/applications/weather/weather-probability-dialog.mjs', () => ({
+  WeatherProbabilityDialog: { open: vi.fn(() => ({})) }
+}));
 
 import { CalendariaAPI, createGlobalNamespace } from '../../scripts/api.mjs';
-import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
-import NoteManager from '../../scripts/notes/note-manager.mjs';
-import WeatherManager from '../../scripts/weather/weather-manager.mjs';
-import { CalendariaSocket } from '../../scripts/utils/socket.mjs';
-import TimeClock from '../../scripts/time/time-clock.mjs';
-import SearchManager from '../../scripts/utils/search-manager.mjs';
-import { canChangeDateTime, canAddNotes, canChangeActiveCalendar, canEditCalendars, canEditNotes, canViewWeatherForecast } from '../../scripts/utils/permissions.mjs';
-import { addDays, addMonths, addYears, daysBetween, monthsBetween, compareDates, compareDays, isSameDay, dayOfWeek, isValidDate } from '../../scripts/notes/date-utils.mjs';
-import { PRESET_FORMATTERS, formatCustom, resolveFormatString, getAvailableTokens, timeSince } from '../../scripts/utils/formatting/format-utils.mjs';
-import { getMoonPhasePosition, isMoonFull, getNextConvergence, getNextFullMoon, getConvergencesInRange } from '../../scripts/utils/formatting/moon-utils.mjs';
-import { registerWidget, getRegisteredWidgets, getWidgetByReplacement, refreshWidgets } from '../../scripts/utils/widget-manager.mjs';
-import { diagnoseWeatherConfig } from '../../scripts/utils/migrations.mjs';
 import { MiniCal } from '../../scripts/applications/calendar/mini-cal.mjs';
+import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
+import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from '../../scripts/notes/date-utils.mjs';
+import NoteManager from '../../scripts/notes/note-manager.mjs';
+import TimeClock from '../../scripts/time/time-clock.mjs';
+import { PRESET_FORMATTERS, formatCustom, getAvailableTokens, resolveFormatString, timeSince } from '../../scripts/utils/formatting/format-utils.mjs';
+import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from '../../scripts/utils/formatting/moon-utils.mjs';
+import { diagnoseWeatherConfig } from '../../scripts/utils/migrations.mjs';
+import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } from '../../scripts/utils/permissions.mjs';
+import SearchManager from '../../scripts/utils/search-manager.mjs';
+import { CalendariaSocket } from '../../scripts/utils/socket.mjs';
+import { getRegisteredWidgets, getWidgetByReplacement, refreshWidgets, registerWidget } from '../../scripts/utils/widget-manager.mjs';
+import WeatherManager from '../../scripts/weather/weather-manager.mjs';
 
 beforeEach(() => {
   game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0, season: 0 };

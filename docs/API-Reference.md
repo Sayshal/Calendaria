@@ -1734,6 +1734,48 @@ const templates = CALENDARIA.api.getClimateZoneTemplates();
 
 ---
 
+### getWeatherProbabilities(options)
+
+Get the weather probability breakdown for a zone and season.
+
+```javascript
+const data = CALENDARIA.api.getWeatherProbabilities();
+const data = CALENDARIA.api.getWeatherProbabilities({ season: 'Winter' });
+const data = CALENDARIA.api.getWeatherProbabilities({ zoneId: 'arctic', season: 'Summer' });
+```
+
+| Parameter | Type     | Description                              |
+| --------- | -------- | ---------------------------------------- |
+| `zoneId`  | `string` | Zone ID (defaults to active zone)        |
+| `season`  | `string` | Season name (defaults to current season) |
+
+**Returns:** `object` with:
+
+- `zone` — `{ id, name }` of the resolved zone
+- `season` — Localized season name
+- `entries` — Array of `{ id, label, icon, color, weight, percent }` sorted by percent descending
+- `tempRange` — `{ min, max }` in Celsius
+
+---
+
+### openWeatherProbabilities(options)
+
+Open the Weather Probability dialog.
+
+```javascript
+CALENDARIA.api.openWeatherProbabilities();
+CALENDARIA.api.openWeatherProbabilities({ season: 'Winter' });
+```
+
+| Parameter | Type     | Description         |
+| --------- | -------- | ------------------- |
+| `zoneId`  | `string` | Initial zone ID     |
+| `season`  | `string` | Initial season name |
+
+**Returns:** The dialog instance.
+
+---
+
 ### diagnoseWeather(showDialog)
 
 Diagnose weather configuration issues. Useful for troubleshooting when weather isn't loading properly.

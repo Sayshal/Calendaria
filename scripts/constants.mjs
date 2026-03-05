@@ -274,7 +274,8 @@ export const TEMPLATES = {
     CLIMATE_EDITOR_TABS: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-tabs.hbs`,
     CLIMATE_EDITOR_WEATHER: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-weather.hbs`,
     CLIMATE_EDITOR_PRESETS: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-presets.hbs`,
-    CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-environment.hbs`
+    CLIMATE_EDITOR_ENVIRONMENT: `modules/${MODULE.ID}/templates/applications/weather/climate-editor-environment.hbs`,
+    PROBABILITY_DIALOG: `modules/${MODULE.ID}/templates/applications/weather/weather-probability-dialog.hbs`
   },
   DIALOGS: {
     SET_DATE: `modules/${MODULE.ID}/templates/applications/dialogs/set-date-dialog.hbs`,

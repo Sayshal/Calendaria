@@ -23,6 +23,8 @@ import { HUD } from '../hud/hud.mjs';
 import { Stopwatch } from '../time/stopwatch.mjs';
 import { SunDial } from '../time/sun-dial.mjs';
 import { TimeKeeper } from '../time/time-keeper.mjs';
+import { WeatherEditor } from '../weather/weather-editor.mjs';
+import { WeatherProbabilityDialog } from '../weather/weather-probability-dialog.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -72,6 +74,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       addSeasonTrigger: SettingsPanel.#onAddSeasonTrigger,
       removeSeasonTrigger: SettingsPanel.#onRemoveSeasonTrigger,
       openWeatherEditor: SettingsPanel.#onOpenWeatherEditor,
+      openWeatherProbabilities: SettingsPanel.#onOpenWeatherProbabilities,
       regenerateAllWeather: SettingsPanel.#onRegenerateAllWeather,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
@@ -2327,14 +2330,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Open the Weather Editor application.
    */
-  static async #onOpenWeatherEditor() {
-    const { WeatherEditor } = await import('../weather/weather-editor.mjs');
+  static #onOpenWeatherEditor() {
     const existing = foundry.applications.instances.get('calendaria-weather-editor');
     if (existing) {
       existing.bringToFront();
       return;
     }
     new WeatherEditor().render(true);
+  }
+
+  /**
+   * Open the Weather Probability dialog.
+   */
+  static #onOpenWeatherProbabilities() {
+    WeatherProbabilityDialog.open();
   }
 
   /**

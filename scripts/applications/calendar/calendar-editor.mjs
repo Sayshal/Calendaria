@@ -8,10 +8,10 @@
 import { isBundledCalendar } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import CalendarRegistry from '../../calendar/calendar-registry.mjs';
+import { preLocalizeCalendar } from '../../calendar/calendar-utils.mjs';
 import { ASSETS, DEFAULT_MOON_PHASES, TEMPLATES } from '../../constants.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { validateFormatString } from '../../utils/formatting/format-utils.mjs';
-import { preLocalizeCalendar } from '../../calendar/calendar-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { RangeSlider } from '../../utils/ui/range-slider.mjs';
@@ -2040,6 +2040,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         zone.environmentDark = result.environmentDark;
         zone.temperatures = result.temperatures;
         zone.presets = result.presets;
+        zone.seasonOverrides = result.seasonOverrides;
         zone.windDirections = result.windDirections;
         zone.windSpeedRange = result.windSpeedRange;
         editor.render({ parts: ['weather'] });

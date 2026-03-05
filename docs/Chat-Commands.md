@@ -1,6 +1,6 @@
 # Chat Commands
 
-Calendaria provides 20 slash commands for interacting with the calendar directly from chat. All commands and aliases work natively without any additional modules.
+Calendaria provides 21 slash commands for interacting with the calendar directly from chat. All commands and aliases work natively without any additional modules.
 
 If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is installed, commands gain enhanced autocomplete with format presets and calendar suggestions.
 
@@ -8,28 +8,29 @@ If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is
 
 ## Available Commands
 
-| Command      | Alias     | Description                           | Permission       |
-| ------------ | --------- | ------------------------------------- | ---------------- |
-| `/date`      | `/d`      | Display current date                  | Everyone         |
-| `/time`      | `/t`      | Display current time                  | Everyone         |
-| `/datetime`  | `/dt`     | Display current date and time         | Everyone         |
-| `/today`     |           | List today's notes                    | Everyone         |
-| `/sunrise`   |           | Display today's sunrise time          | Everyone         |
-| `/sunset`    |           | Display today's sunset time           | Everyone         |
-| `/moon`      |           | Display current moon phase(s)         | Everyone         |
-| `/season`    |           | Display current season                | Everyone         |
-| `/weather`   |           | Display current or historical weather | Everyone         |
-| `/forecast`  | `/fc`     | Display weather forecast              | Permission-gated |
-| `/weekday`   |           | Display current weekday               | Everyone         |
-| `/festival`  |           | Display current festival              | Everyone         |
-| `/cycle`     | `/zodiac` | Display zodiac/cycle values           | Everyone         |
-| `/calendar`  | `/cal`    | Display full calendar summary         | Everyone         |
-| `/calendars` | `/cals`   | List all available calendars          | Everyone         |
-| `/note`      | `/n`      | Create a quick note                   | Note permissions |
-| `/advance`   | `/adv`    | Advance time                          | GM only          |
-| `/setdate`   |           | Set date (year month day)             | GM only          |
-| `/settime`   |           | Set time (hour minute [second])       | GM only          |
-| `/switchcal` |           | Switch active calendar                | GM only          |
+| Command        | Alias     | Description                           | Permission       |
+| -------------- | --------- | ------------------------------------- | ---------------- |
+| `/date`        | `/d`      | Display current date                  | Everyone         |
+| `/time`        | `/t`      | Display current time                  | Everyone         |
+| `/datetime`    | `/dt`     | Display current date and time         | Everyone         |
+| `/today`       |           | List today's notes                    | Everyone         |
+| `/sunrise`     |           | Display today's sunrise time          | Everyone         |
+| `/sunset`      |           | Display today's sunset time           | Everyone         |
+| `/moon`        |           | Display current moon phase(s)         | Everyone         |
+| `/season`      |           | Display current season                | Everyone         |
+| `/weather`     |           | Display current or historical weather | Everyone         |
+| `/forecast`    | `/fc`     | Display weather forecast              | Permission-gated |
+| `/weatherprob` | `/wp`     | Display weather probability breakdown | Permission-gated |
+| `/weekday`     |           | Display current weekday               | Everyone         |
+| `/festival`    |           | Display current festival              | Everyone         |
+| `/cycle`       | `/zodiac` | Display zodiac/cycle values           | Everyone         |
+| `/calendar`    | `/cal`    | Display full calendar summary         | Everyone         |
+| `/calendars`   | `/cals`   | List all available calendars          | Everyone         |
+| `/note`        | `/n`      | Create a quick note                   | Note permissions |
+| `/advance`     | `/adv`    | Advance time                          | GM only          |
+| `/setdate`     |           | Set date (year month day)             | GM only          |
+| `/settime`     |           | Set time (hour minute [second])       | GM only          |
+| `/switchcal`   |           | Switch active calendar                | GM only          |
 
 ---
 
@@ -209,6 +210,28 @@ Display weather forecast for upcoming days.
 **Output:** Forecast entries showing icon, day, weather label, and temperature for each upcoming day. Includes zone name subtitle.
 
 **Permission:** Requires the `viewWeatherForecast` permission (see [Permissions](Permissions)). GMs always see the accurate forecast; non-GM users see variance-adjusted results.
+
+---
+
+### /weatherprob
+
+Display the weather probability breakdown for the current zone and season.
+
+```text
+/weatherprob
+/weatherprob Winter
+/wp
+```
+
+**Aliases:** `/wp`
+
+**Arguments:**
+
+- Optional: Season name to view probabilities for a specific season
+
+**Output:** Whispered chat message showing each weather preset's probability percentage, weight, and the temperature range. Includes zone name and season subtitle.
+
+**Permission:** Requires the `viewWeatherForecast` permission (see [Permissions](Permissions)).
 
 ---
 

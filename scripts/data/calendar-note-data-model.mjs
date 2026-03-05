@@ -144,4 +144,24 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       author: new fields.DocumentAuthorField(foundry.documents.BaseUser)
     };
   }
+
+  /**
+   * Migrate raw source data before schema initialization.
+   * Converts legacy `day` fields to `dayOfMonth`.
+   * @param {object} source - Raw source data
+   * @returns {object} Migrated source data
+   */
+  static migrateData(source) {
+    for (const field of ['startDate', 'endDate', 'repeatEndDate']) {
+      if (source[field]?.day != null && source[field]?.dayOfMonth == null) {
+        source[field].dayOfMonth = (source[field].day ?? 1) - 1;
+        delete source[field].day;
+      }
+    }
+    if (source.rangePattern?.day != null && source.rangePattern?.dayOfMonth == null) {
+      source.rangePattern.dayOfMonth = source.rangePattern.day;
+      delete source.rangePattern.day;
+    }
+    return super.migrateData(source);
+  }
 }

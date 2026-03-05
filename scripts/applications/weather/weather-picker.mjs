@@ -12,6 +12,7 @@ import { log } from '../../utils/logger.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/data/climate-data.mjs';
 import { SOUND_FX_OPTIONS, WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from '../../weather/data/weather-presets.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
+import { WeatherProbabilityDialog } from './weather-probability-dialog.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -88,7 +89,8 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     actions: {
       selectWeather: WeatherPickerApp._onSelectWeather,
       randomWeather: WeatherPickerApp._onRandomWeather,
-      clearWeather: WeatherPickerApp._onClearWeather
+      clearWeather: WeatherPickerApp._onClearWeather,
+      viewProbabilities: WeatherPickerApp._onViewProbabilities
     }
   };
 
@@ -390,6 +392,13 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#fxColor = weather?.fxColor ?? null;
     log(3, 'Random weather generated');
     this.render();
+  }
+
+  /**
+   * Open the Weather Probability dialog.
+   */
+  static _onViewProbabilities() {
+    WeatherProbabilityDialog.open();
   }
 
   /**

@@ -47,9 +47,10 @@ Each season can override the base zone climate with custom temperature ranges an
 
 Climate configuration follows a layered approach (first matching value wins):
 
-1. **Season override in zone** — Per-season settings within a zone
-2. **Zone defaults** — Base zone temperature and preset chances
-3. **Global defaults** — Fallback values
+1. **Zone season override** — Per-season weight and temperature overrides within a zone
+2. **Season base** — Season climate temperatures and preset weights
+3. **Zone base** — Enabled/disabled filter and base temperatures (no preset weights)
+4. **Global defaults** — Fallback values
 
 ### Configuring Season Climate
 
@@ -135,7 +136,7 @@ Intensity ranges from 0 to 1 (0 = trace, 1 = maximum). During generation, intens
 
 1. Build probability map from enabled presets in active zone config
 2. Apply inertia weighting (if current weather exists)
-3. Weighted random selection using `chance` values
+3. Weighted random selection from merged probabilities
 4. Generate temperature from zone's seasonal range (clamped to preset overrides if configured)
 5. Generate wind from preset + zone config
 6. Generate precipitation with intensity variance
@@ -215,6 +216,30 @@ The forecast accuracy system adds uncertainty to forecasts shown to players.
 - **Preset swapping**: Chance to swap to another preset in the same category, probability increasing with distance and lower accuracy
 - **`isVaried` flag**: Forecast entries that differ from the plan are marked with `isVaried: true`
 - **GM always accurate**: GMs always see the true forecast plan without variance
+
+---
+
+## Probability Guide
+
+Verify your climate zone setup produces the weather distribution you expect.
+
+### Access
+
+- **Chat command**: `/weatherprob` or `/wp` (optionally pass a season name, e.g. `/weatherprob Winter`)
+- **Settings**: Settings > Weather > Climate section > **Weather Probabilities** button (visible when zones are configured)
+- **Climate Editor**: Preset Overrides tab > **Weather Probabilities** button (uses unsaved editor data for live preview)
+- **API**: `CALENDARIA.api.getWeatherProbabilities()` or `CALENDARIA.api.openWeatherProbabilities()`
+
+### Dialog
+
+The dialog shows:
+
+- **Zone selector** — compare probabilities across zones (disabled when only one zone exists)
+- **Season selector** — switch between seasons to see how weights change
+- **Probability table** — each enabled weather preset with its weight, percentage, and a colored bar visualization
+- **Temperature range** — effective min/max for the selected zone and season
+
+When opened from the Climate Editor, the dialog uses the editor's in-progress data so you can preview changes before saving.
 
 ---
 

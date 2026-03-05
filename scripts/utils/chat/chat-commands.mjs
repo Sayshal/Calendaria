@@ -32,7 +32,8 @@ const COMMAND_PATTERNS = {
   festival: /^\/festival$/i,
   weekday: /^\/weekday$/i,
   cycle: /^\/(?:cycle|zodiac)$/i,
-  forecast: /^\/(?:forecast|fc)(?:\s+(\d+))?$/i
+  forecast: /^\/(?:forecast|fc)(?:\s+(\d+))?$/i,
+  weatherprob: /^\/(?:weatherprob|wp)(?:\s+(.*))?$/i
 };
 
 /** Time unit aliases mapping to component fields. */
@@ -116,7 +117,8 @@ function handleCommand(cmd, match) {
     festival: cmdFestival,
     weekday: cmdWeekday,
     cycle: cmdCycle,
-    forecast: () => cmdForecast(match[1]?.trim() || '')
+    forecast: () => cmdForecast(match[1]?.trim() || ''),
+    weatherprob: () => cmdWeatherProb(match[1]?.trim() || '')
   };
   handlers[cmd]?.();
 }
@@ -552,5 +554,26 @@ async function cmdForecast(args) {
     return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.dayOfMonth + 1}</strong> — ${label}${tempStr}`;
   });
   const content = `<div class="calendaria chat-output"><h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}</div>`;
+  await ChatMessage.create({ content, speaker: ChatMessage.getSpeaker(), whisper: game.user.isGM ? [game.user.id] : [] });
+}
+
+/**
+ * Handle /weatherprob command - output weather probability breakdown.
+ * @param {string} args - Optional season name
+ * @returns {Promise<void>}
+ */
+async function cmdWeatherProb(args) {
+  const calendar = CalendariaAPI.getActiveCalendar();
+  if (!calendar) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return sendChat(localize('CALENDARIA.ChatCommand.NoForecast'));
+  if (!canViewWeatherForecast()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
+  const data = WeatherManager.getWeatherProbabilities({ season: args || undefined });
+  if (!data.entries.length) return sendChat(localize('CALENDARIA.WeatherProbability.NoPresets'));
+  const header = `<h3>${localize('CALENDARIA.ChatCommand.WeatherProbHeader')}</h3>`;
+  const subtitle = data.zone ? `<div class="forecast-zone">${data.zone.name}${data.season ? ` — ${data.season}` : ''}</div>` : '';
+  const rows = data.entries.map((e) => `<i class="fas ${e.icon}" style="color:${e.color}"></i> ${e.label} — <strong>${e.percent}%</strong>`);
+  const tempStr = `${WeatherManager.formatTemperature(data.tempRange.min)} – ${WeatherManager.formatTemperature(data.tempRange.max)}`;
+  const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${localize('CALENDARIA.WeatherProbability.TempRange')}: ${tempStr}</div>`;
+  const content = `<div class="calendaria chat-output">${header}${subtitle}${rows.join('<br>')}${footer}</div>`;
   await ChatMessage.create({ content, speaker: ChatMessage.getSpeaker(), whisper: game.user.isGM ? [game.user.id] : [] });
 }

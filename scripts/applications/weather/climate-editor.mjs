@@ -10,6 +10,7 @@ import CalendariaCalendar from '../../data/calendaria-calendar.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { fromDisplayDelta, fromDisplayUnit, toDisplayDelta, toDisplayUnit } from '../../weather/data/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../../weather/data/weather-presets.mjs';
+import { WeatherProbabilityDialog } from './weather-probability-dialog.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -26,7 +27,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     window: { contentClasses: ['standard-form'] },
     position: { width: 1100, height: 900 },
     form: { handler: ClimateEditor.#onSubmit, submitOnChange: true, closeOnSubmit: false },
-    actions: { resetAlias: ClimateEditor.#onResetAlias }
+    actions: { resetAlias: ClimateEditor.#onResetAlias, viewProbabilities: ClimateEditor.#onViewProbabilities }
   };
 
   /** @override */
@@ -66,6 +67,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string[]} Season names for zone temperature rows */
   #seasonNames;
 
+  /** @type {string} Currently selected season for zone preset overrides */
+  #selectedSeason;
+
   /** @type {Function} Callback invoked on save with parsed result */
   #onSave;
 
@@ -103,6 +107,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarId = options.calendarId;
     this.#calendarData = options.calendarData ?? null;
     this.#seasonNames = options.seasonNames ?? [];
+    this.#selectedSeason = this.#seasonNames[0] ?? null;
     this.#onSave = options.onSave;
   }
 
@@ -152,6 +157,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       });
     }
+    const selectedSeason = isZoneMode ? this.#selectedSeason : null;
+    const seasonOptions = isZoneMode ? this.#seasonNames.map((name) => ({ value: name, label: localize(name), selected: name === selectedSeason })) : [];
     const categories = Object.values(WEATHER_CATEGORIES)
       .map((cat) => {
         const categoryPresets = allPresets.filter((p) => p.category === cat.id);
@@ -161,6 +168,11 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             const savedPresets = this.#data.presets ? Object.values(this.#data.presets) : [];
             const saved = savedPresets.find((s) => s.id === preset.id) || {};
             const alias = getPresetAlias(preset.id, this.#calendarId, this.#data.id) || '';
+            const seasonPresets = selectedSeason ? (this.#data.seasonOverrides?.[selectedSeason]?.presets ?? {}) : {};
+            const seasonOverride = seasonPresets[preset.id];
+            const seasonChance = seasonOverride?.chance;
+            const seasonChanceDisplay = seasonChance != null ? String(seasonChance) : '';
+            const isRelativeChance = typeof seasonChance === 'string' && /[+-]$/.test(seasonChance);
             return {
               id: preset.id,
               icon: preset.icon,
@@ -169,7 +181,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               alias,
               hasAlias: !!alias,
               enabled: saved.enabled ?? false,
-              chance: saved.chance ? saved.chance.toFixed(2) : '',
+              seasonChance: seasonChanceDisplay,
+              isRelativeChance,
               tempMin: ClimateEditor.#formatTempValue(saved.tempMin),
               tempMax: ClimateEditor.#formatTempValue(saved.tempMax),
               isRelativeTempMin: typeof saved.tempMin === 'string' && /[+-]$/.test(saved.tempMin),
@@ -262,6 +275,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       ...context,
       isZoneMode,
+      seasonOptions,
+      selectedSeason,
       tempLabel,
       tempMin,
       tempMax,
@@ -332,7 +347,19 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
+    const seasonSelect = this.element.querySelector('.season-override-select');
+    if (seasonSelect) {
+      seasonSelect.addEventListener('change', () => {
+        this.#selectedSeason = seasonSelect.value;
+        this.render({ parts: ['presets'] });
+      });
+    }
     for (const input of this.element.querySelectorAll('.form-fields.temperature input[type="text"], .preset-temp-input')) {
+      input.addEventListener('input', () => {
+        input.classList.toggle('modifier-relative', /^\d+(\.\d+)?[+-]$/.test(input.value.trim()));
+      });
+    }
+    for (const input of this.element.querySelectorAll('.preset-season-chance')) {
       input.addEventListener('input', () => {
         input.classList.toggle('modifier-relative', /^\d+(\.\d+)?[+-]$/.test(input.value.trim()));
       });
@@ -402,11 +429,29 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         max: ClimateEditor.#parseTempInput(maxRaw, 20)
       };
     }
+    const seasonOverrides = foundry.utils.deepClone(this.#data.seasonOverrides ?? {});
+    const selectedSeason = this.#selectedSeason;
+    if (selectedSeason) {
+      if (!seasonOverrides[selectedSeason]) seasonOverrides[selectedSeason] = {};
+      const seasonPresets = {};
+      for (const preset of allPresets) {
+        const raw = String(data[`preset_${preset.id}_seasonChance`] ?? '').trim();
+        if (!raw) continue;
+        if (/^\d+(\.\d+)?[+-]$/.test(raw)) {
+          seasonPresets[preset.id] = { id: preset.id, chance: raw };
+        } else {
+          const num = parseFloat(raw);
+          if (Number.isFinite(num)) seasonPresets[preset.id] = { id: preset.id, chance: num };
+        }
+      }
+      seasonOverrides[selectedSeason].presets = seasonPresets;
+    }
+    result.seasonOverrides = seasonOverrides;
+    this.#data.seasonOverrides = seasonOverrides;
     for (const preset of allPresets) {
       const enabled = !!data[`preset_${preset.id}_enabled`];
-      const chance = parseFloat(data[`preset_${preset.id}_chance`]) || 0;
-      if (!enabled && !chance) continue;
-      const pData = { id: preset.id, enabled, chance };
+      if (!enabled) continue;
+      const pData = { id: preset.id, enabled };
       const tMinRaw = String(data[`preset_${preset.id}_tempMin`] ?? '').trim();
       const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();
       if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
@@ -445,6 +490,21 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = target.dataset.presetId;
     await setPresetAlias(presetId, null, this.#calendarId, this.#data.id);
     this.render();
+  }
+
+  /**
+   * Open the Weather Probability dialog using the editor's in-progress data.
+   * @this {ClimateEditor}
+   */
+  static #onViewProbabilities() {
+    const calendar = this.#calendarData ?? CalendarManager.getCalendar(this.#calendarId) ?? CalendarManager.getActiveCalendar();
+    const seasons = calendar?.seasonsArray ?? Object.values(calendar?.seasons?.values ?? {});
+    WeatherProbabilityDialog.open({
+      zoneConfig: this.#data,
+      calendarId: this.#calendarId,
+      seasons,
+      editorMode: true
+    });
   }
 
   /**

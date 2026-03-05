@@ -91,13 +91,13 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   const rawZonePresets = zoneOverride?.presets;
   const zonePresets = rawZonePresets ? Object.values(rawZonePresets) : [];
   if (zonePresets.length) {
-    if (!Array.isArray(rawZonePresets)) {
-      for (const preset of Object.values(seasonClimate?.presets ?? {})) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
-    }
+    for (const preset of Object.values(seasonClimate?.presets ?? {})) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
     for (const preset of zonePresets) {
-      if (typeof preset.chance === 'string' && /^[+-]/.test(preset.chance)) {
-        const delta = Number(preset.chance);
-        if (!isNaN(delta)) {
+      if (typeof preset.chance === 'string' && /[+-]$/.test(preset.chance)) {
+        const suffix = preset.chance.slice(-1);
+        const value = Number(preset.chance.slice(0, -1));
+        if (!isNaN(value)) {
+          const delta = suffix === '+' ? value : -value;
           probabilities[preset.id] = Math.max(0, (probabilities[preset.id] ?? 0) + delta);
           if (probabilities[preset.id] === 0) delete probabilities[preset.id];
         }
@@ -109,7 +109,6 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
     }
   } else {
     for (const preset of Object.values(seasonClimate?.presets ?? {})) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
-    for (const preset of Object.values(zoneFallback?.presets ?? {})) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
   }
   const baseMin = seasonClimate?.temperatures?.min ?? 10;
   const baseMax = seasonClimate?.temperatures?.max ?? 22;

@@ -24,8 +24,8 @@
       <div class="form-group">
         <label for="weatherHistoryDays">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Name"}}</label>
         <div class="form-fields">
-          <input type="number" id="weatherHistoryDays" name="weatherHistoryDays"
-            value="{{weatherHistoryDays}}" min="0" max="3650" step="1" />
+          <input type="number" id="weatherHistoryDays" name="weatherHistoryDays" value="{{weatherHistoryDays}}" min="0"
+            max="3650" step="1" />
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Hint"}}</p>
       </div>
@@ -33,8 +33,7 @@
       <div class="form-group">
         <label for="weatherSoundFx">{{localize "CALENDARIA.Settings.Weather.SoundFx.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" id="weatherSoundFx" name="weatherSoundFx"
-            {{#if weatherSoundFx}}checked{{/if}} />
+          <input type="checkbox" id="weatherSoundFx" name="weatherSoundFx" {{#if weatherSoundFx}}checked{{/if}} />
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.Weather.SoundFx.Hint"}}</p>
       </div>
@@ -42,7 +41,8 @@
       <div class="form-group">
         <label for="weatherSoundVolume">{{localize "CALENDARIA.Settings.Weather.SoundVolume.Name"}}</label>
         <div class="form-fields">
-          <range-picker name="weatherSoundVolume" value="{{weatherSoundVolume}}" min="0" max="1" step="0.05"></range-picker>
+          <range-picker name="weatherSoundVolume" value="{{weatherSoundVolume}}" min="0" max="1"
+            step="0.05"></range-picker>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.Weather.SoundVolume.Hint"}}</p>
       </div>
@@ -64,8 +64,8 @@
       <div class="form-group">
         <label for="forecastDays">{{localize "CALENDARIA.Settings.ForecastDays.Name"}}</label>
         <div class="form-fields">
-          <input type="number" id="forecastDays" name="forecastDays"
-            value="{{forecastDays}}" min="1" max="30" step="1" />
+          <input type="number" id="forecastDays" name="forecastDays" value="{{forecastDays}}" min="1" max="30"
+            step="1" />
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForecastDays.Hint"}}</p>
       </div>
@@ -118,6 +118,17 @@
           </div>
           <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.ClimateZone"}}</p>
         </div>
+
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.WeatherProbability.Title"}}</label>
+          <div class="form-fields">
+            <button type="button" data-action="openWeatherProbabilities" class="add-button">
+              <i class="fas fa-chart-pie"></i>
+              {{localize "CALENDARIA.WeatherProbability.Title"}}
+            </button>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.WeatherProbability.Hint"}}</p>
+        </div>
       {{/if}}
     </fieldset>
   {{/if}}
@@ -150,8 +161,7 @@
         <div class="form-group">
           <label for="fxmasterEnabled">{{localize "CALENDARIA.Settings.FXMaster.Enabled.Name"}}</label>
           <div class="form-fields">
-            <input type="checkbox" id="fxmasterEnabled" name="fxmasterEnabled"
-              {{#if fxmasterEnabled}}checked{{/if}} />
+            <input type="checkbox" id="fxmasterEnabled" name="fxmasterEnabled" {{#if fxmasterEnabled}}checked{{/if}} />
           </div>
           <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.Enabled.Hint"}}</p>
         </div>
@@ -159,8 +169,7 @@
         <div class="form-group">
           <label for="fxmasterTopDown">{{localize "CALENDARIA.Settings.FXMaster.TopDown.Name"}}</label>
           <div class="form-fields">
-            <input type="checkbox" id="fxmasterTopDown" name="fxmasterTopDown"
-              {{#if fxmasterTopDown}}checked{{/if}} />
+            <input type="checkbox" id="fxmasterTopDown" name="fxmasterTopDown" {{#if fxmasterTopDown}}checked{{/if}} />
           </div>
           <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.TopDown.Hint"}}</p>
         </div>
@@ -182,9 +191,8 @@
     <fieldset data-section="weather-units">
       <legend>
         {{localize "CALENDARIA.SettingsPanel.Section.Units"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-units"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
+        <button type="button" class="reset-section" data-action="resetSection" data-section="weather-units" data-tooltip
+          aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
       </legend>
 
       <div class="form-group">

@@ -136,6 +136,11 @@
       color: var(--color-level-info);
     }
 
+    .zero-weight-warning {
+      border-color: var(--color-level-warning);
+      box-shadow: 0 0 0.1875rem var(--color-level-warning);
+    }
+
     .wind-direction-grid {
       gap: 0.25rem 0.75rem;
       grid-template-columns: repeat(4, 1fr);
@@ -168,6 +173,112 @@
           border-bottom-color: var(--color-warm-2);
           color: var(--color-text-primary);
         }
+      }
+    }
+  }
+
+  &.weather-probability-dialog {
+    .window-content {
+      max-height: 46.875rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .weather-probability-content {
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .probability-table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .probability-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+
+      th {
+        text-align: center;
+        font-size: var(--font-size-11);
+        color: var(--color-text-secondary);
+        padding: 0.25rem 0.5rem;
+        border-bottom: 0.0625rem solid var(--color-border-light-2);
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 0.35rem 0.5rem;
+        vertical-align: middle;
+      }
+
+      tr:nth-child(even) {
+        background: color-mix(in srgb, var(--color-text-primary) 3%, transparent);
+      }
+
+      .preset-icon {
+        width: 1.5rem;
+        text-align: center;
+      }
+
+      .preset-name {
+        width: 1%;
+        white-space: nowrap;
+      }
+
+      .preset-weight {
+        width: 1%;
+        white-space: nowrap;
+        text-align: center;
+        color: var(--color-text-secondary);
+      }
+
+      .preset-percent {
+        width: 100%;
+      }
+    }
+
+    .percent-bar-container {
+      position: relative;
+      height: 1.25rem;
+      background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+      border-radius: 0.1875rem;
+      overflow: hidden;
+    }
+
+    .percent-bar {
+      height: 100%;
+      border-radius: 0.1875rem;
+      opacity: 0.6;
+      transition: width 0.3s ease;
+    }
+
+    .percent-label {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: var(--font-size-11);
+      line-height: 1.25rem;
+      color: var(--color-text-primary);
+      font-weight: bold;
+    }
+
+    .temp-range-footer {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      text-align: center;
+      color: var(--color-text-secondary);
+      border-top: 0.0625rem solid var(--color-border-light-2);
+
+      i {
+        margin-right: 0.25rem;
       }
     }
   }

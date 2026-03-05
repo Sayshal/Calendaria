@@ -753,79 +753,64 @@
         "presets": {
           "clear00000000000": {
             "id": "clear",
-            "enabled": true,
-            "chance": 5
+            "enabled": true
           },
           "partlycloudy0000": {
             "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "cloudy0000000000": {
             "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "overcast00000000": {
             "id": "overcast",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "snow000000000000": {
             "id": "snow",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "blizzard00000000": {
             "id": "blizzard",
             "enabled": true,
-            "chance": 2,
             "tempMax": "5-"
           },
           "fog0000000000000": {
             "id": "fog",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "windy00000000000": {
             "id": "windy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "sleet00000000000": {
             "id": "sleet",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "aetherhaze000000": {
             "id": "aether-haze",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "luminoussky00000": {
             "id": "luminous-sky",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "veilfall00000000": {
             "id": "veilfall",
-            "enabled": true,
-            "chance": 1
+            "enabled": true
           },
           "gravewind0000000": {
             "id": "gravewind",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "nullfront0000000": {
             "id": "nullfront",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "leysurge00000000": {
             "id": "ley-surge",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           }
         },
         "seasonOverrides": {
@@ -834,168 +819,308 @@
               "min": -18,
               "max": 10
             },
-            "presets": [
-              {
+            "presets": {
+              "rain": {
                 "id": "rain",
                 "chance": 0
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 0
               },
-              {
+              "thunderstorm": {
                 "id": "thunderstorm",
                 "chance": 0
               },
-              {
+              "clear": {
                 "id": "clear",
                 "chance": 10
               },
-              {
+              "partly-cloudy": {
                 "id": "partly-cloudy",
                 "chance": 10
               },
-              {
+              "snow": {
                 "id": "snow",
                 "chance": 15
               },
-              {
+              "blizzard": {
                 "id": "blizzard",
                 "chance": 5
               },
-              {
+              "sleet": {
                 "id": "sleet",
                 "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 3
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 3
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 2
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 2
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Summer": {
             "temperatures": {
               "min": 10,
               "max": 30
             },
-            "presets": [
-              {
+            "presets": {
+              "snow": {
                 "id": "snow",
                 "chance": 0
               },
-              {
+              "blizzard": {
                 "id": "blizzard",
                 "chance": 0
               },
-              {
+              "sleet": {
                 "id": "sleet",
                 "chance": 0
               },
-              {
+              "clear": {
                 "id": "clear",
                 "chance": 20
               },
-              {
+              "windy": {
                 "id": "windy",
                 "chance": 10
               },
-              {
+              "thunderstorm": {
                 "id": "thunderstorm",
                 "chance": 8
               },
-              {
+              "rain": {
                 "id": "rain",
                 "chance": 5
               },
-              {
+              "luminous-sky": {
                 "id": "luminous-sky",
                 "chance": 0
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 4
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 3
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 2
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 2
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Autumn": {
             "temperatures": {
               "min": -3,
               "max": 19
             },
-            "presets": [
-              {
+            "presets": {
+              "clear": {
                 "id": "clear",
                 "chance": 10
               },
-              {
+              "overcast": {
                 "id": "overcast",
                 "chance": 20
               },
-              {
+              "rain": {
                 "id": "rain",
                 "chance": 8
               },
-              {
+              "snow": {
                 "id": "snow",
                 "chance": 10
               },
-              {
+              "sleet": {
                 "id": "sleet",
                 "chance": 8
               },
-              {
+              "fog": {
                 "id": "fog",
                 "chance": 8
               },
-              {
+              "gravewind": {
                 "id": "gravewind",
                 "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 4
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 3
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 2
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Winter": {
             "temperatures": {
               "min": -35,
               "max": -4
             },
-            "presets": [
-              {
+            "presets": {
+              "rain": {
                 "id": "rain",
                 "chance": 0
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 0
               },
-              {
+              "sleet": {
                 "id": "sleet",
                 "chance": 0
               },
-              {
+              "clear": {
                 "id": "clear",
                 "chance": 5
               },
-              {
+              "partly-cloudy": {
                 "id": "partly-cloudy",
                 "chance": 5
               },
-              {
+              "overcast": {
                 "id": "overcast",
                 "chance": 25
               },
-              {
+              "snow": {
                 "id": "snow",
                 "chance": 25
               },
-              {
+              "blizzard": {
                 "id": "blizzard",
                 "chance": 15
               },
-              {
+              "permafrost-surge": {
                 "id": "permafrost-surge",
                 "chance": 5
               },
-              {
+              "luminous-sky": {
                 "id": "luminous-sky",
                 "chance": 8
               },
-              {
+              "nullfront": {
                 "id": "nullfront",
                 "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 2
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           }
         }
       },
@@ -1029,79 +1154,64 @@
         "presets": {
           "clear00000000000": {
             "id": "clear",
-            "enabled": true,
-            "chance": 6
+            "enabled": true
           },
           "partlycloudy0000": {
             "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 5
+            "enabled": true
           },
           "cloudy0000000000": {
             "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "rain000000000000": {
             "id": "rain",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "drizzle000000000": {
             "id": "drizzle",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "thunderstorm0000": {
             "id": "thunderstorm",
             "enabled": true,
-            "chance": 2,
             "tempMin": "3+"
           },
           "fog0000000000000": {
             "id": "fog",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "mist000000000000": {
             "id": "mist",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "windy00000000000": {
             "id": "windy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "aetherhaze000000": {
             "id": "aether-haze",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "luminoussky00000": {
             "id": "luminous-sky",
-            "enabled": true,
-            "chance": 1
+            "enabled": true
           },
           "veilfall00000000": {
             "id": "veilfall",
-            "enabled": true,
-            "chance": 1
+            "enabled": true
           },
           "gravewind0000000": {
             "id": "gravewind",
-            "enabled": true,
-            "chance": 1
+            "enabled": true
           },
           "nullfront0000000": {
             "id": "nullfront",
-            "enabled": true,
-            "chance": 1
+            "enabled": true
           },
           "leysurge00000000": {
             "id": "ley-surge",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           }
         },
         "seasonOverrides": {
@@ -1109,107 +1219,283 @@
             "temperatures": {
               "max": "7+"
             },
-            "presets": [
-              {
+            "presets": {
+              "fog": {
                 "id": "fog",
                 "chance": 6
               },
-              {
+              "mist": {
                 "id": "mist",
                 "chance": 5
               },
-              {
+              "sunshower": {
                 "id": "sunshower",
                 "chance": 8
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 4
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 3
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 1
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 1
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 1
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Summer": {
             "temperatures": {
               "max": "1+"
             },
-            "presets": [
-              {
+            "presets": {
+              "rain": {
                 "id": "rain",
                 "chance": 5
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 0
               },
-              {
+              "fog": {
                 "id": "fog",
                 "chance": 0
               },
-              {
+              "mist": {
                 "id": "mist",
                 "chance": 0
               },
-              {
+              "clear": {
                 "id": "clear",
                 "chance": 35
               },
-              {
+              "thunderstorm": {
                 "id": "thunderstorm",
                 "chance": 8
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 1
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 1
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 1
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Autumn": {
             "temperatures": {
               "min": "3+",
               "max": "3+"
             },
-            "presets": [
-              {
+            "presets": {
+              "rain": {
                 "id": "rain",
                 "chance": 12
               },
-              {
+              "fog": {
                 "id": "fog",
                 "chance": 8
               },
-              {
+              "mist": {
                 "id": "mist",
                 "chance": 6
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 8
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 1
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 1
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 1
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Winter": {
             "temperatures": {
               "min": 2,
               "max": 14
             },
-            "presets": [
-              {
+            "presets": {
+              "snow": {
                 "id": "snow",
                 "chance": 0
               },
-              {
+              "blizzard": {
                 "id": "blizzard",
                 "chance": 0
               },
-              {
+              "rain": {
                 "id": "rain",
                 "chance": 15
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 10
               },
-              {
+              "fog": {
                 "id": "fog",
                 "chance": 8
               },
-              {
+              "mist": {
                 "id": "mist",
                 "chance": 5
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 3
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 2
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 1
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 1
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 1
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 1
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           }
         }
       },
@@ -1243,74 +1529,60 @@
         "presets": {
           "clear00000000000": {
             "id": "clear",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "partlycloudy0000": {
             "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "cloudy0000000000": {
             "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "overcast00000000": {
             "id": "overcast",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "snow000000000000": {
             "id": "snow",
-            "enabled": true,
-            "chance": 5
+            "enabled": true
           },
           "blizzard00000000": {
             "id": "blizzard",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "fog0000000000000": {
             "id": "fog",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "windy00000000000": {
             "id": "windy",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "aetherhaze000000": {
             "id": "aether-haze",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "luminoussky00000": {
             "id": "luminous-sky",
             "enabled": true,
-            "chance": 4,
             "tempMax": "3-"
           },
           "veilfall00000000": {
             "id": "veilfall",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "gravewind0000000": {
             "id": "gravewind",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "nullfront0000000": {
             "id": "nullfront",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "leysurge00000000": {
             "id": "ley-surge",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           }
         },
         "seasonOverrides": {
@@ -1319,148 +1591,288 @@
               "min": -25,
               "max": 5
             },
-            "presets": [
-              {
+            "presets": {
+              "clear": {
                 "id": "clear",
                 "chance": 5
               },
-              {
+              "partly-cloudy": {
                 "id": "partly-cloudy",
                 "chance": 5
               },
-              {
+              "overcast": {
                 "id": "overcast",
                 "chance": 20
               },
-              {
+              "rain": {
                 "id": "rain",
                 "chance": 0
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 0
               },
-              {
+              "thunderstorm": {
                 "id": "thunderstorm",
                 "chance": 0
               },
-              {
+              "snow": {
                 "id": "snow",
                 "chance": 20
               },
-              {
+              "luminous-sky": {
                 "id": "luminous-sky",
                 "chance": 6
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 4
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 4
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 3
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 2
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 3
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 4
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Summer": {
             "temperatures": {
               "min": -5,
               "max": 22
             },
-            "presets": [
-              {
+            "presets": {
+              "snow": {
                 "id": "snow",
                 "chance": 5
               },
-              {
+              "blizzard": {
                 "id": "blizzard",
                 "chance": 0
               },
-              {
+              "clear": {
                 "id": "clear",
                 "chance": 20
               },
-              {
+              "luminous-sky": {
                 "id": "luminous-sky",
                 "chance": 3
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 3
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 4
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 4
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 3
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 2
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 3
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 4
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Autumn": {
             "temperatures": {
               "min": -20,
               "max": 8
             },
-            "presets": [
-              {
+            "presets": {
+              "clear": {
                 "id": "clear",
                 "chance": 5
               },
-              {
+              "overcast": {
                 "id": "overcast",
                 "chance": 20
               },
-              {
+              "rain": {
                 "id": "rain",
                 "chance": 0
               },
-              {
+              "snow": {
                 "id": "snow",
                 "chance": 15
               },
-              {
+              "nullfront": {
                 "id": "nullfront",
                 "chance": 8
               },
-              {
+              "luminous-sky": {
                 "id": "luminous-sky",
                 "chance": 6
               },
-              {
+              "gravewind": {
                 "id": "gravewind",
                 "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 3
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 4
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 4
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 3
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 2
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           },
           "Winter": {
             "temperatures": {
               "min": -42,
               "max": -18
             },
-            "presets": [
-              {
+            "presets": {
+              "clear": {
                 "id": "clear",
                 "chance": 2
               },
-              {
+              "partly-cloudy": {
                 "id": "partly-cloudy",
                 "chance": 2
               },
-              {
+              "overcast": {
                 "id": "overcast",
                 "chance": 20
               },
-              {
+              "rain": {
                 "id": "rain",
                 "chance": 0
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 0
               },
-              {
+              "thunderstorm": {
                 "id": "thunderstorm",
                 "chance": 0
               },
-              {
+              "snow": {
                 "id": "snow",
                 "chance": 25
               },
-              {
+              "blizzard": {
                 "id": "blizzard",
                 "chance": 20
               },
-              {
+              "permafrost-surge": {
                 "id": "permafrost-surge",
                 "chance": 10
               },
-              {
+              "luminous-sky": {
                 "id": "luminous-sky",
                 "chance": 12
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 2
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 4
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 3
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 2
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 3
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 4
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 2
               }
-            ]
+            }
           }
         }
       },
@@ -1499,77 +1911,63 @@
         "presets": {
           "clear00000000000": {
             "id": "clear",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "partlycloudy0000": {
             "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "cloudy0000000000": {
             "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "overcast00000000": {
             "id": "overcast",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "rain000000000000": {
             "id": "rain",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "fog0000000000000": {
             "id": "fog",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "mist000000000000": {
             "id": "mist",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "thunderstorm0000": {
             "id": "thunderstorm",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "aetherhaze000000": {
             "id": "aether-haze",
             "enabled": true,
-            "chance": 4,
             "tempMin": "2+",
             "tempMax": "2+"
           },
           "luminoussky00000": {
             "id": "luminous-sky",
-            "enabled": true,
-            "chance": 2
+            "enabled": true
           },
           "veilfall00000000": {
             "id": "veilfall",
             "enabled": true,
-            "chance": 5,
             "tempMin": "3-",
             "tempMax": "3-"
           },
           "gravewind0000000": {
             "id": "gravewind",
-            "enabled": true,
-            "chance": 4
+            "enabled": true
           },
           "nullfront0000000": {
             "id": "nullfront",
-            "enabled": true,
-            "chance": 3
+            "enabled": true
           },
           "leysurge00000000": {
             "id": "ley-surge",
-            "enabled": true,
-            "chance": 5
+            "enabled": true
           }
         },
         "seasonOverrides": {
@@ -1578,104 +1976,264 @@
               "min": -2,
               "max": 20
             },
-            "presets": [
-              {
+            "presets": {
+              "mist": {
                 "id": "mist",
                 "chance": 15
               },
-              {
+              "fog": {
                 "id": "fog",
-                "chance": "+5"
+                "chance": "5+"
               },
-              {
+              "veilfall": {
                 "id": "veilfall",
                 "chance": 8
               },
-              {
+              "ley-surge": {
                 "id": "ley-surge",
                 "chance": 8
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 4
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 4
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 3
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 3
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 2
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 4
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 2
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 4
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 3
               }
-            ]
+            }
           },
           "Summer": {
             "temperatures": {
               "min": 12,
               "max": 30
             },
-            "presets": [
-              {
+            "presets": {
+              "fog": {
                 "id": "fog",
                 "chance": 5
               },
-              {
+              "mist": {
                 "id": "mist",
                 "chance": 8
               },
-              {
+              "thunderstorm": {
                 "id": "thunderstorm",
-                "chance": "-2"
+                "chance": "2-"
               },
-              {
+              "aether-haze": {
                 "id": "aether-haze",
                 "chance": 10
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 4
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 4
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 3
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 3
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 2
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 5
+              },
+              "gravewind": {
+                "id": "gravewind",
+                "chance": 4
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 3
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 5
               }
-            ]
+            }
           },
           "Autumn": {
             "temperatures": {
               "min": -2,
               "max": 22
             },
-            "presets": [
-              {
+            "presets": {
+              "fog": {
                 "id": "fog",
-                "chance": "+5"
+                "chance": "5+"
               },
-              {
+              "mist": {
                 "id": "mist",
                 "chance": 12
               },
-              {
+              "gravewind": {
                 "id": "gravewind",
                 "chance": 10
               },
-              {
+              "veilfall": {
                 "id": "veilfall",
                 "chance": 10
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 4
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 4
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 3
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 3
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 2
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 4
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 2
+              },
+              "nullfront": {
+                "id": "nullfront",
+                "chance": 3
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 5
               }
-            ]
+            }
           },
           "Winter": {
             "temperatures": {
               "min": -15,
               "max": 5
             },
-            "presets": [
-              {
+            "presets": {
+              "rain": {
                 "id": "rain",
                 "chance": 0
               },
-              {
+              "drizzle": {
                 "id": "drizzle",
                 "chance": 0
               },
-              {
+              "snow": {
                 "id": "snow",
-                "chance": "-5"
+                "chance": "5-"
               },
-              {
+              "fog": {
                 "id": "fog",
-                "chance": "+5"
+                "chance": "5+"
               },
-              {
+              "gravewind": {
                 "id": "gravewind",
                 "chance": 8
               },
-              {
+              "nullfront": {
                 "id": "nullfront",
                 "chance": 8
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 4
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 4
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 3
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 3
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 4
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 2
+              },
+              "aether-haze": {
+                "id": "aether-haze",
+                "chance": 4
+              },
+              "luminous-sky": {
+                "id": "luminous-sky",
+                "chance": 2
+              },
+              "veilfall": {
+                "id": "veilfall",
+                "chance": 5
+              },
+              "ley-surge": {
+                "id": "ley-surge",
+                "chance": 5
               }
-            ]
+            }
           }
         }
       }

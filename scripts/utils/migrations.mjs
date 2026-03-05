@@ -402,10 +402,18 @@ async function migrateWeatherZones() {
       fixed.seasonOverrides = {};
       changed = true;
     }
+    for (const seasonData of Object.values(fixed.seasonOverrides)) {
+      if (seasonData?.presets && Array.isArray(seasonData.presets)) {
+        const map = {};
+        for (const p of seasonData.presets) if (p?.id) map[p.id] = { id: p.id, chance: p.chance };
+        seasonData.presets = map;
+        changed = true;
+      }
+    }
     const presetsArr = Array.isArray(fixed.presets) ? fixed.presets : Object.values(fixed.presets);
     for (const preset of presetsArr) {
       if (preset.enabled === undefined) preset.enabled = false;
-      if (preset.chance === undefined) preset.chance = 0;
+      delete preset.chance;
     }
     if (Array.isArray(fixed.presets)) fixed.presets = fixed.presets.filter((p) => p && typeof p === 'object' && p.id);
     return changed ? fixed : zone;
@@ -556,10 +564,8 @@ async function migrateDateIndexing() {
   const KEY = 'dateIndexingMigrationComplete';
   if (game.settings.get(MODULE.ID, KEY)) return;
   if (!game.user?.isGM) return;
-
   const migrateCalendarDates = (cal) => {
     let modified = false;
-    // Festivals
     if (cal.festivals) {
       const festivals = Array.isArray(cal.festivals) ? cal.festivals : Object.values(cal.festivals);
       for (const f of festivals) {
@@ -572,7 +578,6 @@ async function migrateDateIndexing() {
         }
       }
     }
-    // Seasons — only migrate if festivals were old format (co-stored in same era)
     if (modified && cal.seasons?.values) {
       const seasons = Array.isArray(cal.seasons.values) ? cal.seasons.values : Object.values(cal.seasons.values);
       for (const s of seasons) {
@@ -580,7 +585,6 @@ async function migrateDateIndexing() {
         if (s.monthEnd != null && s.monthEnd >= 1) s.monthEnd -= 1;
       }
     }
-    // Moons
     if (cal.moons) {
       const moons = Array.isArray(cal.moons) ? cal.moons : Object.values(cal.moons);
       for (const m of moons) {
@@ -593,44 +597,14 @@ async function migrateDateIndexing() {
     }
     return modified;
   };
-
-  // 1. Migrate customCalendars
   const custom = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
   let customModified = false;
-  for (const cal of Object.values(custom)) {
-    if (migrateCalendarDates(cal)) customModified = true;
-  }
+  for (const cal of Object.values(custom)) if (migrateCalendarDates(cal)) customModified = true;
   if (customModified) await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, custom);
-
-  // 2. Migrate defaultOverrides
   const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
   let overridesModified = false;
-  for (const cal of Object.values(overrides)) {
-    if (migrateCalendarDates(cal)) overridesModified = true;
-  }
+  for (const cal of Object.values(overrides)) if (migrateCalendarDates(cal)) overridesModified = true;
   if (overridesModified) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-
-  // 3. Migrate note journal pages
-  for (const journal of game.journal) {
-    for (const page of journal.pages) {
-      if (page.type !== 'calendaria.calendarnote') continue;
-      const data = page.system;
-      if (!data) continue;
-      const updates = {};
-      for (const field of ['startDate', 'endDate', 'repeatEndDate']) {
-        if (data[field]?.day != null && data[field]?.dayOfMonth == null) {
-          updates[`system.${field}.dayOfMonth`] = (data[field].day ?? 1) - 1;
-          updates[`system.${field}.-=day`] = null;
-        }
-      }
-      if (data.rangePattern?.day != null && data.rangePattern?.dayOfMonth == null) {
-        updates['system.rangePattern.dayOfMonth'] = data.rangePattern.day;
-        updates['system.rangePattern.-=day'] = null;
-      }
-      if (Object.keys(updates).length) await page.update(updates);
-    }
-  }
-
   await game.settings.set(MODULE.ID, KEY, true);
   log(3, 'Date indexing migration complete');
 }

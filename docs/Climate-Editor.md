@@ -51,17 +51,23 @@ Direction weights control how likely each compass direction is during weather ge
 
 ### Preset Overrides Tab
 
+#### Weather Probabilities
+
+A **Weather Probabilities** button at the top of this tab opens a dialog showing the effective probability breakdown for the zone being edited. Select a season from the dropdown to preview how your weight changes affect the distribution. The dialog uses the editor's in-progress (unsaved) data, so you can tweak weights and immediately see the results.
+
+#### Per-Preset Overrides
+
 Per-preset overrides for this zone:
 
-| Column       | Description                                                                       |
-| ------------ | --------------------------------------------------------------------------------- |
-| **Enabled**  | Checkbox — disabled presets are excluded from generation and dimmed in the picker |
-| **Icon**     | Preset icon (read-only)                                                           |
-| **Name**     | Preset name with alias input (type to override, empty for default)                |
-| **Weight**   | Chance weight override for this zone                                              |
-| **Temp Min** | Minimum temperature override (supports relative modifiers)                        |
-| **Temp Max** | Maximum temperature override (supports relative modifiers)                        |
-| **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default)            |
+| Column       | Description                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------- |
+| **Enabled**  | Checkbox — disabled presets are excluded from generation and dimmed in the picker                             |
+| **Icon**     | Preset icon (read-only)                                                                                       |
+| **Name**     | Preset name with alias input (type to override, empty for default)                                            |
+| **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers |
+| **Temp Min** | Minimum temperature override (supports relative modifiers)                                                    |
+| **Temp Max** | Maximum temperature override (supports relative modifiers)                                                    |
+| **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default)                                        |
 
 Each column header has a tooltip explaining the field. Presets are grouped by category.
 

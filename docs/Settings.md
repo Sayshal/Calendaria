@@ -253,6 +253,10 @@ Choose precipitation display format.
 
 Button to open the [Weather Editor](Weather-Editor) for customizing preset visuals, sounds, and FXMaster mappings.
 
+### Weather Probabilities
+
+Button to open the [Weather Probability dialog](Weather-System#probability-guide). Only visible when climate zones are configured. Shows effective weight breakdown per preset for the selected zone and season.
+
 ---
 
 ## Canvas (GM Only)

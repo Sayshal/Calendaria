@@ -1,0 +1,66 @@
+<div class="weather-probability-content">
+  <div class="standard-form">
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.WeatherProbability.Zone"}}</label>
+      <div class="form-fields">
+        <select name="zone" {{#if zoneDisabled}}disabled{{/if}}>
+          {{#each zones}}
+            <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.WeatherProbability.Season"}}</label>
+      <div class="form-fields">
+        <select name="season">
+          {{#each seasons}}
+            <option value="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="probability-table-wrapper">
+    {{#if hasEntries}}
+      <table class="probability-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>{{localize "CALENDARIA.Common.Weather"}}</th>
+            <th><i class="fas fa-weight-hanging" data-tooltip="{{localize "CALENDARIA.WeatherProbability.Weight"}}"
+                data-tooltip-direction="UP"></i></th>
+            <th><i class="fas fa-chart-pie" data-tooltip="{{localize "CALENDARIA.WeatherProbability.Percent"}}"
+                data-tooltip-direction="UP"></i></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each entries}}
+            <tr>
+              <td class="preset-icon"><i class="fas {{this.icon}}" style="color: {{this.color}}"></i></td>
+              <td class="preset-name">{{this.label}}</td>
+              <td class="preset-weight" data-tooltip-html="{{{this.weightTooltip}}}" data-tooltip-direction="UP">
+                {{this.weight}}
+              </td>
+              <td class="preset-percent" data-tooltip-html="{{{this.percentTooltip}}}" data-tooltip-direction="UP">
+                <div class="percent-bar-container">
+                  <div class="percent-bar" style="width: {{this.percent}}%; background-color: {{this.color}}"></div>
+                  <span class="percent-label">{{this.percent}}%</span>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <p class="notification info">{{localize "CALENDARIA.WeatherProbability.NoPresets"}}</p>
+    {{/if}}
+  </div>
+
+  <div class="temp-range-footer">
+    <i class="fas fa-temperature-half"></i>
+    {{localize "CALENDARIA.WeatherProbability.TempRange"}}: {{tempRange.min}} – {{tempRange.max}}
+  </div>
+</div>

@@ -11,9 +11,9 @@ import { HUD } from './applications/hud/hud.mjs';
 import { Stopwatch } from './applications/time/stopwatch.mjs';
 import { SunDial } from './applications/time/sun-dial.mjs';
 import { TimeKeeper } from './applications/time/time-keeper.mjs';
+import { WeatherProbabilityDialog } from './applications/weather/weather-probability-dialog.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
-import { log } from './utils/logger.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
 import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/date-utils.mjs';
 import NoteManager from './notes/note-manager.mjs';
@@ -21,6 +21,7 @@ import TimeClock from './time/time-clock.mjs';
 import TimeTracker from './time/time-tracker.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/formatting/format-utils.mjs';
 import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/formatting/moon-utils.mjs';
+import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
 import * as Permissions from './utils/permissions.mjs';
 import SearchManager from './utils/search-manager.mjs';
@@ -1235,6 +1236,28 @@ export const CalendariaAPI = {
    */
   async diagnoseWeather(showDialog = true) {
     return diagnoseWeatherConfig(showDialog);
+  },
+
+  /**
+   * Get the weather probability breakdown for a zone and season.
+   * @param {object} [options] - Options
+   * @param {string} [options.zoneId] - Zone ID (defaults to active zone)
+   * @param {string} [options.season] - Season name (defaults to current season)
+   * @returns {object} { zone, season, entries, tempRange }
+   */
+  getWeatherProbabilities(options = {}) {
+    return WeatherManager.getWeatherProbabilities(options);
+  },
+
+  /**
+   * Open the Weather Probability dialog.
+   * @param {object} [options] - Options
+   * @param {string} [options.zoneId] - Initial zone ID
+   * @param {string} [options.season] - Initial season name
+   * @returns {object} The dialog instance
+   */
+  openWeatherProbabilities(options = {}) {
+    return WeatherProbabilityDialog.open(options);
   },
 
   /**

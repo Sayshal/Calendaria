@@ -5,7 +5,7 @@
  * @module Tests/WeatherGenerator
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // Mock logger (no-op)
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
@@ -43,14 +43,14 @@ vi.mock('../../scripts/constants.mjs', () => ({
 }));
 
 import {
-  seededRandom,
-  dateSeed,
-  applyTempModifier,
-  mergeClimateConfig,
-  generateWeather,
-  generateForecast,
   applyForecastVariance,
-  applyWeatherInertia
+  applyTempModifier,
+  applyWeatherInertia,
+  dateSeed,
+  generateForecast,
+  generateWeather,
+  mergeClimateConfig,
+  seededRandom
 } from '../../scripts/weather/weather-generator.mjs';
 
 /* -------------------------------------------- */
@@ -170,21 +170,21 @@ describe('mergeClimateConfig()', () => {
 
   it('applies zone override relative "+" modifier', () => {
     const seasonClimate = { presets: { 0: { id: 'clear', chance: 30 } } };
-    const zoneOverride = { presets: { 0: { id: 'clear', chance: '+10' } } };
+    const zoneOverride = { presets: { 0: { id: 'clear', chance: '10+' } } };
     const { probabilities } = mergeClimateConfig(seasonClimate, zoneOverride, null, null);
     expect(probabilities.clear).toBe(40);
   });
 
   it('applies zone override relative "-" modifier', () => {
     const seasonClimate = { presets: { 0: { id: 'rain', chance: 20 } } };
-    const zoneOverride = { presets: { 0: { id: 'rain', chance: '-5' } } };
+    const zoneOverride = { presets: { 0: { id: 'rain', chance: '5-' } } };
     const { probabilities } = mergeClimateConfig(seasonClimate, zoneOverride, null, null);
     expect(probabilities.rain).toBe(15);
   });
 
   it('clamps negative relative modifier to 0 and removes', () => {
     const seasonClimate = { presets: { 0: { id: 'rain', chance: 3 } } };
-    const zoneOverride = { presets: { 0: { id: 'rain', chance: '-10' } } };
+    const zoneOverride = { presets: { 0: { id: 'rain', chance: '10-' } } };
     const { probabilities } = mergeClimateConfig(seasonClimate, zoneOverride, null, null);
     expect(probabilities.rain).toBeUndefined();
   });
@@ -197,44 +197,46 @@ describe('mergeClimateConfig()', () => {
     expect(probabilities.clear).toBe(30);
   });
 
-  it('falls back to zone default presets when no override presets', () => {
-    const zoneFallback = { presets: { 0: { id: 'snow', enabled: true, chance: 25 }, 1: { id: 'rain', enabled: false, chance: 10 } } };
+  it('zone fallback only filters enabled/disabled, does not inject weights', () => {
+    const zoneFallback = { presets: { 0: { id: 'snow', enabled: true }, 1: { id: 'rain', enabled: false } } };
     const { probabilities } = mergeClimateConfig(null, null, zoneFallback, null);
-    expect(probabilities.snow).toBe(25);
-    expect(probabilities.rain).toBeUndefined(); // not enabled
+    expect(probabilities.snow).toBeUndefined(); // no season climate → no weights
+    expect(probabilities.rain).toBeUndefined();
   });
 
-  it('excludes presets absent from zone presets when zone has a preset list (issue #432)', () => {
-    // zone.presets only contains enabled presets — disabled presets are absent, not marked enabled:false
-    const zoneFallback = { presets: { a: { id: 'clear', enabled: true, chance: 50 } } };
-    // season array still has 'mist' from a template — user has since disabled it in the zone editor
+  it('excludes presets absent from zone presets when zone has overrides (issue #432)', () => {
+    const zoneFallback = { presets: { a: { id: 'clear', enabled: true } } };
     const zoneOverride = {
-      presets: [
-        { id: 'clear', chance: 50 },
-        { id: 'mist', chance: 14 }
-      ]
+      presets: { clear: { id: 'clear', chance: 50 }, mist: { id: 'mist', chance: 14 } }
     };
     const { probabilities } = mergeClimateConfig(null, zoneOverride, zoneFallback, 'Spring');
     expect(probabilities.clear).toBe(50);
-    expect(probabilities.mist).toBeUndefined(); // absent from zone presets = disabled
+    expect(probabilities.mist).toBeUndefined();
   });
 
-  it('excludes absent-disabled presets from array-format season override across all data formats', () => {
-    // Simulates Temperate template zone after user unchecks Mist and enables Windy
-    // zone.presets (object, post-editor-save): only windy and clear present
-    const zoneFallback = { presets: { a: { id: 'windy', enabled: true, chance: 15 }, b: { id: 'clear', enabled: true, chance: 35 } } };
-    // zone.seasonOverrides.Spring.presets (array from template): has mist, no windy
+  it('excludes disabled presets from season override — zone base only filters', () => {
+    const zoneFallback = { presets: { a: { id: 'windy', enabled: true }, b: { id: 'clear', enabled: true } } };
     const zoneOverride = {
-      presets: [
-        { id: 'rain', chance: 28 },
-        { id: 'mist', chance: 14 },
-        { id: 'clear', chance: 14 }
-      ]
+      presets: { rain: { id: 'rain', chance: 28 }, mist: { id: 'mist', chance: 14 }, clear: { id: 'clear', chance: 14 } }
     };
     const { probabilities } = mergeClimateConfig(null, zoneOverride, zoneFallback, 'Spring');
-    expect(probabilities.mist).toBeUndefined(); // disabled (absent from zone presets)
-    expect(probabilities.rain).toBeUndefined(); // not in zone presets either
-    expect(probabilities.clear).toBe(14); // in both — allowed through
+    expect(probabilities.mist).toBeUndefined(); // not in zone base
+    expect(probabilities.rain).toBeUndefined(); // not in zone base
+    expect(probabilities.clear).toBe(14); // in zone base and has override weight
+    expect(probabilities.windy).toBeUndefined(); // in zone base but no weight from override
+  });
+
+  it('zone fallback filters season presets to only enabled ones (#432)', () => {
+    const zoneFallback = {
+      presets: {
+        a: { id: 'clear', enabled: true },
+        b: { id: 'sandstorm', enabled: true }
+      }
+    };
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 40 } } };
+    const { probabilities } = mergeClimateConfig(seasonClimate, null, zoneFallback, null);
+    expect(probabilities.clear).toBe(40); // season weight preserved
+    expect(probabilities.sandstorm).toBeUndefined(); // enabled but no weight source
   });
 
   // Temperature merging
@@ -420,38 +422,44 @@ describe('generateForecast()', () => {
   getDaysInMonth._monthsPerYear = 12;
 
   it('generates the requested number of days', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 50 }, 1: { id: 'rain', chance: 50 } } };
     const forecast = generateForecast({
-      zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 50 }, 1: { id: 'rain', enabled: true, chance: 50 } } },
+      zoneConfig: { presets: { 0: { id: 'clear', enabled: true }, 1: { id: 'rain', enabled: true } } },
       startYear: 1,
       startMonth: 0,
       startDayOfMonth: 0,
       days: 7,
-      getDaysInMonth
+      getDaysInMonth,
+      getSeasonForDate: () => ({ name: 'Default', climate: seasonClimate })
     });
     expect(forecast).toHaveLength(7);
   });
 
   it('advances dates correctly', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 100 } } };
     const forecast = generateForecast({
-      zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 100 } } },
+      zoneConfig: { presets: { 0: { id: 'clear', enabled: true } } },
       startYear: 1,
       startMonth: 0,
       startDayOfMonth: 27,
       days: 5,
-      getDaysInMonth
+      getDaysInMonth,
+      getSeasonForDate: () => ({ name: 'Default', climate: seasonClimate })
     });
     expect(forecast.map((f) => f.dayOfMonth)).toEqual([27, 28, 29, 0, 1]);
     expect(forecast[3].month).toBe(1); // rolled over
   });
 
   it('rolls over year correctly', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 100 } } };
     const forecast = generateForecast({
-      zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 100 } } },
+      zoneConfig: { presets: { 0: { id: 'clear', enabled: true } } },
       startYear: 1,
       startMonth: 11,
       startDayOfMonth: 29,
       days: 3,
-      getDaysInMonth
+      getDaysInMonth,
+      getSeasonForDate: () => ({ name: 'Default', climate: seasonClimate })
     });
     expect(forecast[0]).toMatchObject({ year: 1, month: 11, dayOfMonth: 29 });
     expect(forecast[1]).toMatchObject({ year: 2, month: 0, dayOfMonth: 0 });
@@ -459,13 +467,15 @@ describe('generateForecast()', () => {
   });
 
   it('produces deterministic results (seeded)', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 50 }, 1: { id: 'rain', chance: 50 } } };
     const opts = {
-      zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 50 }, 1: { id: 'rain', enabled: true, chance: 50 } } },
+      zoneConfig: { presets: { 0: { id: 'clear', enabled: true }, 1: { id: 'rain', enabled: true } } },
       startYear: 1,
       startMonth: 0,
       startDayOfMonth: 0,
       days: 7,
-      getDaysInMonth
+      getDaysInMonth,
+      getSeasonForDate: () => ({ name: 'Default', climate: seasonClimate })
     };
     const f1 = generateForecast(opts);
     const f2 = generateForecast(opts);
@@ -476,16 +486,18 @@ describe('generateForecast()', () => {
   });
 
   it('chains inertia from previous day', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 30 }, 1: { id: 'rain', chance: 30 }, 2: { id: 'snow', chance: 30 } } };
     // With high inertia and clear as start, most days should stay clear
     const forecast = generateForecast({
-      zoneConfig: { presets: { 0: { id: 'clear', enabled: true, chance: 30 }, 1: { id: 'rain', enabled: true, chance: 30 }, 2: { id: 'snow', enabled: true, chance: 30 } } },
+      zoneConfig: { presets: { 0: { id: 'clear', enabled: true }, 1: { id: 'rain', enabled: true }, 2: { id: 'snow', enabled: true } } },
       startYear: 1,
       startMonth: 0,
       startDayOfMonth: 0,
       days: 10,
       currentWeatherId: 'clear',
       inertia: 0.8,
-      getDaysInMonth
+      getDaysInMonth,
+      getSeasonForDate: () => ({ name: 'Default', climate: seasonClimate })
     });
     // With inertia, clear should appear more often than without (baseline ~3.3 of 10)
     // Verify inertia is being applied by checking first day keeps the chain
@@ -575,7 +587,7 @@ describe('applyForecastVariance()', () => {
 describe('generateWeather() — wind', () => {
   it('clamps wind speed to zone range', () => {
     const zoneConfig = {
-      presets: { 0: { id: 'clear', enabled: true, chance: 100 } },
+      presets: { 0: { id: 'clear', enabled: true } },
       windSpeedRange: { min: 2, max: 3 }
     };
     // Run multiple times — speed should always be in [2, 3]
@@ -592,7 +604,7 @@ describe('generateWeather() — wind', () => {
 
   it('uses zone wind direction weights', () => {
     const zoneConfig = {
-      presets: { 0: { id: 'clear', enabled: true, chance: 100 } },
+      presets: { 0: { id: 'clear', enabled: true } },
       windDirections: { N: 100, S: 0 }
     };
     const result = generateWeather({
