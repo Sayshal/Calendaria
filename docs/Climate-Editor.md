@@ -61,13 +61,13 @@ Per-preset overrides for this zone:
 
 | Column       | Description                                                                                                   |
 | ------------ | ------------------------------------------------------------------------------------------------------------- |
-| **Enabled**  | Checkbox — disabled presets are excluded from generation and dimmed in the picker                             |
+| **Enabled**  | Checkbox — disabled presets are excluded from generation and dimmed in the picker. Saved per-season.          |
 | **Icon**     | Preset icon (read-only)                                                                                       |
 | **Name**     | Preset name with alias input (type to override, empty for default)                                            |
 | **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers |
-| **Temp Min** | Minimum temperature override (supports relative modifiers)                                                    |
-| **Temp Max** | Maximum temperature override (supports relative modifiers)                                                    |
-| **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default)                                        |
+| **Temp Min** | Minimum temperature override (supports relative modifiers). Saved per-season.                                 |
+| **Temp Max** | Maximum temperature override (supports relative modifiers). Saved per-season.                                 |
+| **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default). Saved per-season.                     |
 
 Each column header has a tooltip explaining the field. Presets are grouped by category.
 

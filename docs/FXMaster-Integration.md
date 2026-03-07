@@ -55,6 +55,16 @@ Found in **Settings Panel > Weather tab > FXMaster Integration**:
 
 ---
 
+## Per-Scene Top-Down Override
+
+Individual scenes can override the global Top-Down Mode setting via **Scene Configuration > Calendaria tab > FX Top-Down Override**:
+
+- **Use Global**: Follow the module-level Top-Down Mode setting
+- **Top-Down**: Force top-down rendering on this scene regardless of global setting
+- **Side View**: Force side-view rendering on this scene regardless of global setting
+
+---
+
 ## Per-Scene Disable
 
 Individual scenes can disable weather FX via a checkbox in the **Scene Configuration > Calendaria tab > Disable Weather FX**. When enabled:

@@ -28,6 +28,7 @@ Override settings for individual scenes via the **Scene Configuration > Calendar
 | Brightness Multiplier | 0.5x - 1.5x slider                                               |
 | Hide HUD for Players  | Automatically hide the HUD for players when this scene is active |
 | Climate Zone Override | Use a different climate zone than the calendar's default         |
+| FX Top-Down Override  | Use Global / Top-Down / Side View                                |
 
 ---
 

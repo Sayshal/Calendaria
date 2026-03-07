@@ -1263,6 +1263,15 @@ Disable FXMaster weather particle effects on this specific scene. Takes effect i
 
 - Default: `false`
 
+### FXMaster Top-Down Override
+
+Override the global Top-Down Mode setting for FXMaster effects on this specific scene.
+
+- `Use Global`: Follow the module setting
+- `Top-Down`: Force top-down rendering on this scene
+- `Side View`: Force side-view rendering on this scene
+- Default: `Use Global`
+
 ### Disable Weather Sound
 
 Suppress weather ambient sounds on this specific scene without affecting visual effects. Independent of the "Disable Weather FX" flag.

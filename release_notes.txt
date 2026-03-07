@@ -1,18 +1,10 @@
 ## New Features
-- [#477] Wind direction now uses meteorological convention — labels show where wind comes from, arrow and particles show where it blows
-- [#467] Sun Dial closes when clicking outside it (when opened from the HUD dome)
-- [#460] "Disable Weather Effects" per-client setting turns off HUD/Sun Dial particle animations while keeping sky, sun, moon, and stars
-- [#473] `clearWeatherHistory()` API for managing weather history via macros
-- `addCalendar()` API for programmatic calendar creation
-- All 7 climate zone templates now have explicit weather definitions for all 4 seasons
+- PF2E "Rest for the Night" now advances world time (8 hours or to sunrise)
+- Starfinder 2E world clock sync — Golarion calendar syncs with SF2E's built-in clock
+- Per-scene FX Top-Down Override (Default / Top-Down / Side View) in scene config
+- Climate zone preset enabled, temperature, and inertia settings now save per-season
 
 ## Bug Fixes
-- [#470] Weather Picker no longer re-rolls temperature when saving a preset
-- [#476] Climate zone season temperature edits no longer masked by stale overrides
-- [#471] Disabled presets saved correctly; weather generation respects zone preset filters
-- [#475] Rain/cloudy/fog presets no longer tint scenes red (added proper hue values)
-- [#288] BigCal set-date icon changed to thumbtack; disabled when no date selected or on today
-- [#472] Null festival entries no longer crash initialization
-- [#474] HUD combat migration deferred to ready hook; WeatherManager wrapped in try-catch
-- Zero-weight-warning highlight on enabled presets with empty season weight
-- Weather Probability dialog shows the correct zone when opened from the editor
+- Empty translation strings in fr, it, pl, and tr language files no longer cause blank UI
+- Climate editor no longer loses inertia values on re-render
+- Localization guard prevents undefined calendar names when using incomplete language packs
