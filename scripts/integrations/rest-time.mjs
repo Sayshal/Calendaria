@@ -61,6 +61,38 @@ export function onLongRest(_actor, config) {
   log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
 }
 
+/** @type {number|null} Debounce timer for PF2E rest handler */
+let pf2eRestTimer = null;
+
+/**
+ * Handle PF2E "Rest for the Night" hook. Debounced since it fires per-character.
+ * @returns {void}
+ */
+export function onPF2eRest() {
+  if (pf2eRestTimer) return;
+  pf2eRestTimer = setTimeout(() => {
+    pf2eRestTimer = null;
+  }, 500);
+  if (TimeClock.locked) {
+    log(2, 'PF2E rest time advancement blocked (clock locked)');
+    return;
+  }
+  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+  if (!advanceTime) return;
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return;
+  const targetHour = getTargetHour(calendar);
+  const currentDate = getCurrentDate();
+  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+  const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
+  const targetMinutes = targetHour * minutesPerHour;
+  const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
+  const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  game.time.advance(minutesUntilTarget * secondsPerMinute);
+  log(3, `PF2E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
+}
+
 /**
  * Determine the target hour for rest completion.
  * @param {object} calendar - The active calendar

@@ -52,6 +52,21 @@
     <p class="hint">{{localize "CALENDARIA.Scene.WeatherFxDisabled.Hint"}}</p>
   </div>
   <div class="form-group slim">
+    <label>{{localize "CALENDARIA.Scene.FxTopDownOverride.Name"}}</label>
+    <select name="flags.{{moduleId}}.fxmasterTopDownOverride">
+      <option value="default" {{#if (eq fxTopDownOverride "default")}}selected{{/if}}>
+        {{localize "CALENDARIA.Scene.FxTopDownOverride.Choices.Default"}}
+      </option>
+      <option value="topdown" {{#if (eq fxTopDownOverride "topdown")}}selected{{/if}}>
+        {{localize "CALENDARIA.Scene.FxTopDownOverride.Choices.TopDown"}}
+      </option>
+      <option value="sideview" {{#if (eq fxTopDownOverride "sideview")}}selected{{/if}}>
+        {{localize "CALENDARIA.Scene.FxTopDownOverride.Choices.SideView"}}
+      </option>
+    </select>
+    <p class="hint">{{localize "CALENDARIA.Scene.FxTopDownOverride.Hint"}}</p>
+  </div>
+  <div class="form-group slim">
     <label>{{localize "CALENDARIA.Scene.WeatherSoundDisabled.Name"}}</label>
     <input type="checkbox" name="flags.{{moduleId}}.weatherSoundDisabled" {{#if weatherSoundDisabled}}checked{{/if}}>
     <p class="hint">{{localize "CALENDARIA.Scene.WeatherSoundDisabled.Hint"}}</p>

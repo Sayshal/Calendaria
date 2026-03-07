@@ -198,6 +198,7 @@ export const SCENE_FLAGS = {
   BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
   CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
   DARKNESS_SYNC: 'darknessSync',
+  FXMASTER_TOP_DOWN_OVERRIDE: 'fxmasterTopDownOverride',
   HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
   WEATHER_FX_DISABLED: 'weatherFxDisabled',
   WEATHER_SOUND_DISABLED: 'weatherSoundDisabled'

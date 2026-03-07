@@ -169,10 +169,14 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             const saved = savedPresets.find((s) => s.id === preset.id) || {};
             const alias = getPresetAlias(preset.id, this.#calendarId, this.#data.id) || '';
             const seasonPresets = selectedSeason ? (this.#data.seasonOverrides?.[selectedSeason]?.presets ?? {}) : {};
-            const seasonOverride = seasonPresets[preset.id];
-            const seasonChance = seasonOverride?.chance;
+            const seasonOverride = seasonPresets[preset.id] ?? {};
+            const seasonChance = seasonOverride.chance;
             const seasonChanceDisplay = seasonChance != null ? String(seasonChance) : '';
             const isRelativeChance = typeof seasonChance === 'string' && /[+-]$/.test(seasonChance);
+            const effectiveEnabled = seasonOverride.enabled ?? saved.enabled ?? false;
+            const effectiveTempMin = seasonOverride.tempMin ?? saved.tempMin;
+            const effectiveTempMax = seasonOverride.tempMax ?? saved.tempMax;
+            const effectiveInertia = seasonOverride.inertiaWeight ?? saved.inertiaWeight;
             return {
               id: preset.id,
               icon: preset.icon,
@@ -180,15 +184,15 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               label: localize(preset.label),
               alias,
               hasAlias: !!alias,
-              enabled: saved.enabled ?? false,
-              enabledNoWeight: (saved.enabled ?? false) && !seasonChanceDisplay,
+              enabled: effectiveEnabled,
+              enabledNoWeight: effectiveEnabled && !seasonChanceDisplay,
               seasonChance: seasonChanceDisplay,
               isRelativeChance,
-              tempMin: ClimateEditor.#formatTempValue(saved.tempMin),
-              tempMax: ClimateEditor.#formatTempValue(saved.tempMax),
-              isRelativeTempMin: typeof saved.tempMin === 'string' && /[+-]$/.test(saved.tempMin),
-              isRelativeTempMax: typeof saved.tempMax === 'string' && /[+-]$/.test(saved.tempMax),
-              inertiaWeight: saved.inertiaWeight ?? '',
+              tempMin: ClimateEditor.#formatTempValue(effectiveTempMin),
+              tempMax: ClimateEditor.#formatTempValue(effectiveTempMax),
+              isRelativeTempMin: typeof effectiveTempMin === 'string' && /[+-]$/.test(effectiveTempMin),
+              isRelativeTempMax: typeof effectiveTempMax === 'string' && /[+-]$/.test(effectiveTempMax),
+              inertiaWeight: effectiveInertia ?? '',
               defaultInertiaWeight: preset.inertiaWeight ?? 1
             };
           }
@@ -440,30 +444,34 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!seasonOverrides[selectedSeason]) seasonOverrides[selectedSeason] = {};
       const seasonPresets = {};
       for (const preset of allPresets) {
+        const pData = { id: preset.id };
+        pData.enabled = !!data[`preset_${preset.id}_enabled`];
         const raw = String(data[`preset_${preset.id}_seasonChance`] ?? '').trim();
-        if (!raw) continue;
-        if (/^\d+(\.\d+)?[+-]$/.test(raw)) {
-          seasonPresets[preset.id] = { id: preset.id, chance: raw };
-        } else {
-          const num = parseFloat(raw);
-          if (Number.isFinite(num)) seasonPresets[preset.id] = { id: preset.id, chance: num };
+        if (raw) {
+          if (/^\d+(\.\d+)?[+-]$/.test(raw)) {
+            pData.chance = raw;
+          } else {
+            const num = parseFloat(raw);
+            if (Number.isFinite(num)) pData.chance = num;
+          }
         }
+        const tMinRaw = String(data[`preset_${preset.id}_tempMin`] ?? '').trim();
+        const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();
+        if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
+        if (tMaxRaw) pData.tempMax = ClimateEditor.#parseTempInput(tMaxRaw, null);
+        const iwRaw = data[`preset_${preset.id}_inertiaWeight`];
+        if (iwRaw !== '' && iwRaw != null) pData.inertiaWeight = parseFloat(iwRaw);
+        seasonPresets[preset.id] = pData;
       }
       seasonOverrides[selectedSeason].presets = seasonPresets;
     }
     result.seasonOverrides = seasonOverrides;
     this.#data.seasonOverrides = seasonOverrides;
     for (const preset of allPresets) {
-      const enabled = !!data[`preset_${preset.id}_enabled`];
-      const pData = { id: preset.id, enabled };
-      const tMinRaw = String(data[`preset_${preset.id}_tempMin`] ?? '').trim();
-      const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();
-      if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
-      if (tMaxRaw) pData.tempMax = ClimateEditor.#parseTempInput(tMaxRaw, null);
-      const iwRaw = data[`preset_${preset.id}_inertiaWeight`];
-      if (iwRaw !== '' && iwRaw != null) pData.inertiaWeight = parseFloat(iwRaw);
-      result.presets[preset.id] = pData;
+      const existing = this.#data.presets?.[preset.id];
+      result.presets[preset.id] = existing ? { ...existing } : { id: preset.id, enabled: false };
     }
+    this.#data.presets = result.presets;
     const colorShiftResult = {};
     const csHueFields = ['dawnHue', 'duskHue', 'nightHue'];
     for (const field of csHueFields) {

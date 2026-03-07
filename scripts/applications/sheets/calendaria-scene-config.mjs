@@ -54,6 +54,7 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
         context.climateZoneOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
         context.climateZones = WeatherManager.getCalendarZones?.() ?? [];
         context.weatherFxDisabled = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) ?? false;
+        context.fxTopDownOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE) ?? 'default';
         context.weatherSoundDisabled = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) ?? false;
       }
       return context;

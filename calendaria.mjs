@@ -123,11 +123,12 @@ Hooks.once('ready', async () => {
       await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
     }
   }
-  if (game.pf2e?.worldClock && game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC)) {
+  const systemWorldClock = game.pf2e?.worldClock ?? game.sf2e?.worldClock;
+  if (systemWorldClock && game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC)) {
     const systemId = game.system.id;
-    const pf2eWorldClock = game.settings.get(systemId, 'worldClock');
-    if (pf2eWorldClock?.syncDarkness) {
-      await game.settings.set(systemId, 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+    const systemClockSetting = game.settings.get(systemId, 'worldClock');
+    if (systemClockSetting?.syncDarkness) {
+      await game.settings.set(systemId, 'worldClock', { ...systemClockSetting, syncDarkness: false });
       ui.notifications.warn('CALENDARIA.Notification.PF2eDarknessSyncDisabled', { localize: true });
     }
   }

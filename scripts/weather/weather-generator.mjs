@@ -124,9 +124,14 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
   }
   const rawFallbackPresets = zoneFallback?.presets;
   if (rawFallbackPresets && Object.keys(rawFallbackPresets).length > 0) {
+    const seasonPresetMap = rawZonePresets ?? {};
     const enabledIds = new Set(
       Object.values(rawFallbackPresets)
-        .filter((p) => p?.id && p.enabled !== false)
+        .filter((p) => {
+          if (!p?.id) return false;
+          const seasonP = seasonPresetMap[p.id];
+          return (seasonP?.enabled ?? p.enabled) !== false;
+        })
         .map((p) => p.id)
     );
     for (const id of Object.keys(probabilities)) if (!enabledIds.has(id)) delete probabilities[id];
@@ -153,10 +158,14 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   let { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
   if (Object.keys(probabilities).length === 0) {
     const rawZonePresets = zoneConfig?.presets;
+    const seasonPresetMap = zoneOverride?.presets ?? {};
     if (rawZonePresets && Object.keys(rawZonePresets).length > 0) {
       const enabledIds = new Set(
         Object.values(rawZonePresets)
-          .filter((p) => p?.id && p.enabled !== false)
+          .filter((p) => {
+            if (!p?.id) return false;
+            return (seasonPresetMap[p.id]?.enabled ?? p.enabled) !== false;
+          })
           .map((p) => p.id)
       );
       for (const preset of getAllPresets(customPresets)) if (enabledIds.has(preset.id)) probabilities[preset.id] = 1;
@@ -164,13 +173,16 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
     if (Object.keys(probabilities).length === 0) for (const preset of getAllPresets(customPresets)) probabilities[preset.id] = 1;
     if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
   }
-  if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig);
+  if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig, season);
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
   let finalTempRange = { ...tempRange };
-  const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
-  if (presetConfig?.tempMin != null) finalTempRange.min = applyTempModifier(presetConfig.tempMin, tempRange.min);
-  if (presetConfig?.tempMax != null) finalTempRange.max = applyTempModifier(presetConfig.tempMax, tempRange.max);
+  const seasonPresetConfig = zoneOverride?.presets?.[weatherId];
+  const zonePresetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
+  const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin;
+  const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax;
+  if (effectiveTempMin != null) finalTempRange.min = applyTempModifier(effectiveTempMin, tempRange.min);
+  if (effectiveTempMax != null) finalTempRange.max = applyTempModifier(effectiveTempMax, tempRange.max);
   let temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
@@ -368,13 +380,15 @@ function lerpAngle(from, to, t) {
  * @param {number} [inertia] - How much to favor current weather (0-1)
  * @param {object[]} [customPresets] - Custom presets for weight lookup
  * @param {object} [zoneConfig] - Zone config for per-preset inertiaWeight overrides
+ * @param {string} [season] - Season name for per-season inertiaWeight lookup
  * @returns {object} Adjusted probabilities
  */
-export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0.3, customPresets = [], zoneConfig = null) {
+export function applyWeatherInertia(currentWeatherId, probabilities, inertia = 0.3, customPresets = [], zoneConfig = null, season = null) {
   if (!currentWeatherId || !probabilities[currentWeatherId]) return probabilities;
+  const seasonPreset = season ? zoneConfig?.seasonOverrides?.[season]?.presets?.[currentWeatherId] : null;
   const zonePreset = zoneConfig?.presets ? Object.values(zoneConfig.presets).find((p) => p.id === currentWeatherId) : null;
   const preset = getPreset(currentWeatherId, customPresets);
-  const weight = zonePreset?.inertiaWeight ?? preset?.inertiaWeight ?? 1;
+  const weight = seasonPreset?.inertiaWeight ?? zonePreset?.inertiaWeight ?? preset?.inertiaWeight ?? 1;
   const effectiveInertia = Math.min(1, inertia * weight);
   if (effectiveInertia <= 0) return probabilities;
   const adjusted = { ...probabilities };

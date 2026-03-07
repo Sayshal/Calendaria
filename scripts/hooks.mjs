@@ -9,7 +9,7 @@ import { HUD } from './applications/hud/hud.mjs';
 import { Stopwatch } from './applications/time/stopwatch.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS } from './constants.mjs';
-import { onLongRest, onPreRest } from './integrations/rest-time.mjs';
+import { onLongRest, onPF2eRest, onPreRest } from './integrations/rest-time.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import { onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/darkness.mjs';
 import TimeClock from './time/time-clock.mjs';
@@ -33,6 +33,7 @@ export function registerHooks() {
   Hooks.on('dnd5e.longRest', onLongRest);
   Hooks.on('dnd5e.preLongRest', onPreRest);
   Hooks.on('dnd5e.preShortRest', onPreRest);
+  Hooks.on('pf2e.restForTheNight', onPF2eRest);
   Hooks.on('getSceneControlButtons', onGetSceneControlButtons);
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
   Hooks.on('preDeleteFolder', NoteManager.onPreDeleteFolder.bind(NoteManager));

@@ -148,7 +148,7 @@ export function preLocalizeCalendar(calendarData) {
     if (!value || typeof value !== 'object') return;
     for (const [key, entry] of Object.entries(value)) {
       if (LOCALIZE_KEYS.has(key) && typeof entry === 'string') {
-        value[key] = localize(entry);
+        value[key] = localize(entry) || entry;
         continue;
       }
       walk(entry);

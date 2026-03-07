@@ -103,8 +103,10 @@ function onCanvasReady() {
 function onSceneUpdate(scene, change) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   if (scene !== canvas?.scene) return;
-  const flagKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
-  if (!(flagKey in foundry.utils.flattenObject(change))) return;
+  const flat = foundry.utils.flattenObject(change);
+  const fxDisabledKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
+  const topDownKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE}`;
+  if (!(fxDisabledKey in flat) && !(topDownKey in flat)) return;
   syncWeatherToScene();
 }
 
@@ -212,7 +214,9 @@ function degreesToCardinal(degrees) {
 function buildPresetOptions(weather) {
   const options = {};
   if (weather.wind?.direction != null) options.direction = degreesToCardinal((weather.wind.direction + 180) % 360);
-  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN)) options.topDown = true;
+  const sceneTopDown = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE);
+  const useTopDown = sceneTopDown === 'topdown' || (sceneTopDown !== 'sideview' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN));
+  if (useTopDown) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
   if (weather.fxDensity) options.density = weather.fxDensity;
   if (weather.fxSpeed) options.speed = weather.fxSpeed;

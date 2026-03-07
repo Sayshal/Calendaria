@@ -1565,10 +1565,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('miniCalCompactMode' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE, data.miniCalCompactMode);
     if ('darknessSync' in data) {
       await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
-      if (data.darknessSync && game.pf2e?.worldClock) {
+      if (data.darknessSync && (game.pf2e?.worldClock ?? game.sf2e?.worldClock)) {
         const systemId = game.system.id;
-        const pf2eWorldClock = game.settings.get(systemId, 'worldClock');
-        if (pf2eWorldClock?.syncDarkness) await game.settings.set(systemId, 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+        const systemClockSetting = game.settings.get(systemId, 'worldClock');
+        if (systemClockSetting?.syncDarkness) await game.settings.set(systemId, 'worldClock', { ...systemClockSetting, syncDarkness: false });
       }
     }
     if ('darknessSyncAllScenes' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC_ALL_SCENES, data.darknessSyncAllScenes);
