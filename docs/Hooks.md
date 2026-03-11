@@ -82,7 +82,7 @@ Hooks.on('calendaria.renderCalendar', (data) => {
 
 ### calendaria.calendarSwitched
 
-Fired when the active calendar changes (local switch).
+Fired when the active calendar changes. Also fires once at startup after initialization completes.
 
 **Parameters:**
 

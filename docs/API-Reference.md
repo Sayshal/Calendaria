@@ -769,14 +769,25 @@ Convert a world time timestamp to date components.
 
 ```javascript
 const date = CALENDARIA.api.timestampToDate(86400);
-// Returns: { year, month, dayOfMonth, hour, minute, second }
+// Returns: { year, month, ordinal, monthName, intercalary, day, hour, minute }
 ```
 
 | Parameter   | Type     | Description           |
 | ----------- | -------- | --------------------- |
 | `timestamp` | `number` | World time in seconds |
 
-**Returns:** `object|null` - Date components.
+**Returns:** `object|null` - Date components:
+
+| Field          | Type      | Description                                                                 |
+| -------------- | --------- | --------------------------------------------------------------------------- |
+| `year`         | `number`  | Year (adjusted for yearZero)                                                |
+| `month`        | `number`  | 1-based sequential month index (includes intercalary months)                |
+| `ordinal`      | `number`  | Traditional month ordinal (may be shared by intercalary and regular months) |
+| `monthName`    | `string`  | Localized month name                                                        |
+| `intercalary`  | `boolean` | Whether this month is an intercalary (festival) month                       |
+| `day`          | `number`  | 1-based day of month                                                        |
+| `hour`         | `number`  | Hour                                                                        |
+| `minute`       | `number`  | Minute                                                                      |
 
 ---
 
@@ -785,6 +796,7 @@ const date = CALENDARIA.api.timestampToDate(86400);
 Convert date components to a world time timestamp.
 
 ```javascript
+// Using sequential month index
 const timestamp = CALENDARIA.api.dateToTimestamp({
   year: 1492,
   month: 5,
@@ -792,11 +804,25 @@ const timestamp = CALENDARIA.api.dateToTimestamp({
   hour: 10,
   minute: 30
 });
+
+// Using ordinal (prefers non-intercalary months when ordinals are shared)
+const timestamp2 = CALENDARIA.api.dateToTimestamp({
+  year: 729,
+  ordinal: 7,
+  day: 1
+});
 ```
 
-| Parameter | Type     | Description     |
-| --------- | -------- | --------------- |
-| `date`    | `object` | Date components |
+| Parameter       | Type     | Description                                                      |
+| --------------- | -------- | ---------------------------------------------------------------- |
+| `date`          | `object` | Date components                                                  |
+| `date.year`     | `number` | Year                                                             |
+| `date.month`    | `number` | 1-based sequential month index (takes priority over `ordinal`)   |
+| `date.ordinal`  | `number` | Traditional month ordinal (used if `month` is not provided)      |
+| `date.day`      | `number` | 1-based day of month                                             |
+| `date.hour`     | `number` | Hour (optional, default 0)                                       |
+| `date.minute`   | `number` | Minute (optional, default 0)                                     |
+| `date.second`   | `number` | Second (optional, default 0)                                     |
 
 **Returns:** `number` - World time in seconds.
 
