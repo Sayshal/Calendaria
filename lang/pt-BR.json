@@ -2265,6 +2265,7 @@
   "CALENDARIA.Weather.Picker.FxSpeedHint": "Substituição da velocidade das partículas para o efeito FXMaster.",
   "CALENDARIA.Weather.Picker.NoZone": "Sem Zona",
   "CALENDARIA.Weather.Picker.NotActiveInZone": "(Não ativo na zona)",
+  "CALENDARIA.Weather.Picker.OpenSettings": "Configurações de Clima",
   "CALENDARIA.Weather.Picker.Random": "Aleatorizar",
   "CALENDARIA.Weather.Picker.RandomHint": "Gera climas aleatórios para a zona atual.",
   "CALENDARIA.Weather.Picker.Save": "Salvar",
