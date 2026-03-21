@@ -226,5 +226,6 @@ function buildPresetOptions(weather) {
   if (weather.fxDensity) options.density = weather.fxDensity;
   if (weather.fxSpeed) options.speed = weather.fxSpeed;
   if (weather.fxColor) options.color = weather.fxColor;
+  options.soundFx = true;
   return options;
 }
