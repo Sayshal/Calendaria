@@ -165,6 +165,7 @@ export const SETTINGS = {
   FORCE_THEME: 'forceTheme',
   FORCED_THEME_COLORS: 'forcedThemeColors',
   WEATHER_SOUND_FX: 'weatherSoundFx',
+  FXMASTER_SOUND_FX: 'fxMasterSoundFx',
   WEATHER_SOUND_VOLUME: 'weatherSoundVolume',
   FXMASTER_TOP_DOWN: 'fxmasterTopDown',
   AUTO_GENERATE_WEATHER: 'autoGenerateWeather',
