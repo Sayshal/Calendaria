@@ -1584,6 +1584,8 @@
   "CALENDARIA.Settings.FXMaster.SectionTitle": "FXMaster Integration",
   "CALENDARIA.Settings.FXMaster.TopDown.Hint": "Use top-down particle view instead of side view.",
   "CALENDARIA.Settings.FXMaster.TopDown.Name": "Top-Down Mode",
+  "CALENDARIA.Settings.FXMaster.soundFX.Hint": "Enable FXMaster Sound Effects.",
+  "CALENDARIA.Settings.FXMaster.soundFX.Name": "FXMaster Sound Effects",
   "CALENDARIA.Settings.GMOverrideClearsForecast.Hint": "Manual weather changes regenerate the forecast. If disabled, only today is affected.",
   "CALENDARIA.Settings.GMOverrideClearsForecast.Name": "GM Override Affects Forecast",
   "CALENDARIA.Settings.HUDCalendarButton.BigCal": "BigCal",
