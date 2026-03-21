@@ -188,7 +188,8 @@ async function playWeather(weather) {
     return;
   }
   const options = buildPresetOptions(weather);
-  options.silent = true;
+  options.silent = false;
+  console.log('this is giga dumb', options);
   await fxApi.switch(fxName, options);
   log(3, `FXMaster playing weather: ${fxName}`);
 }
@@ -226,5 +227,6 @@ function buildPresetOptions(weather) {
   if (weather.fxDensity) options.density = weather.fxDensity;
   if (weather.fxSpeed) options.speed = weather.fxSpeed;
   if (weather.fxColor) options.color = weather.fxColor;
+  options.soundFx = true;
   return options;
 }
