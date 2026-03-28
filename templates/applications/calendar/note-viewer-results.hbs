@@ -1,0 +1,62 @@
+<div class="note-viewer-results">
+  {{#if notes.length}}
+    <div class="note-list">
+      {{#each notes}}
+        <div class="note-row{{#if this.selected}} selected{{/if}}" data-note-id="{{this.id}}"
+          data-preset="{{this.presetId}}" data-visibility="{{this.visibility}}"
+          data-display-style="{{this.displayStyle}}" style="--note-color: {{this.color}}">
+          {{#if ../selectionMode}}
+            <input type="checkbox" class="note-select-checkbox" {{#if this.selected}}checked{{/if}} />
+          {{/if}}
+          <div class="note-color" style="background-color: {{this.color}};"></div>
+          <i class="{{this.icon}} note-icon"></i>
+          <div class="note-info">
+            <span class="note-name">{{this.name}}</span>
+            <span class="note-date">{{this.dateLabel}}</span>
+          </div>
+          <span class="note-tags">
+            {{#each this.presetBadges}}
+              <i class="{{this.icon}} tag-preset" style="color: {{this.color}};" data-tooltip="{{this.label}}"></i>
+            {{/each}}
+            {{#if this.isHidden}}
+              <i class="fas fa-eye-slash tag-visibility"
+                data-tooltip="{{localize 'CALENDARIA.Note.Visibility.Hidden'}}"></i>
+            {{else if this.isSecret}}
+              <i class="fas fa-eye-low-vision tag-visibility"
+                data-tooltip="{{localize 'CALENDARIA.Note.Visibility.Secret'}}"></i>
+            {{/if}}
+            {{#if this.hasDuration}}
+              <i class="fas fa-arrows-left-right tag-duration"
+                data-tooltip="{{localize 'CALENDARIA.NoteViewer.Filter.HasDuration'}}"></i>
+            {{/if}}
+            {{#if this.isRecurring}}
+              <i class="fas fa-rotate tag-recurrence"
+                data-tooltip="{{localize 'CALENDARIA.NoteViewer.Filter.IsRecurring'}}"></i>
+            {{/if}}
+            {{#if this.isFestival}}
+              <i class="fas fa-star tag-festival"
+                data-tooltip="{{localize 'CALENDARIA.NoteViewer.Filter.IsFestival'}}"></i>
+            {{/if}}
+          </span>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="note-viewer-empty">
+      <i class="fas fa-book-open empty-icon"></i>
+      {{#if hasActiveFilters}}
+        <p>{{localize "CALENDARIA.NoteViewer.NoResults"}}</p>
+      {{else if totalNotes}}
+        <p>{{localize "CALENDARIA.NoteViewer.NoResults"}}</p>
+      {{else}}
+        <p>{{localize "CALENDARIA.NoteViewer.EmptyState"}}</p>
+      {{/if}}
+    </div>
+  {{/if}}
+  {{#if canAdd}}
+    <button type="button" class="create-note-fab" data-action="createNote"
+      data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}" data-tooltip-direction="LEFT">
+      <i class="fas fa-plus"></i>
+    </button>
+  {{/if}}
+</div>

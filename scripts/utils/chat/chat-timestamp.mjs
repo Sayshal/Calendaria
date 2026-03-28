@@ -4,9 +4,9 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
+import { NoteManager } from '../../notes/_module.mjs';
 import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../formatting/format-utils.mjs';
 
 const ChatLog = foundry.applications.sidebar.tabs.ChatLog;

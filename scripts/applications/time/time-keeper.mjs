@@ -4,16 +4,33 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
-import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
-import { formatForLocation, getDisplayFormat, hasMoonIconMarkers, renderMoonIcons } from '../../utils/formatting/format-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { canChangeDateTime, canViewTimeKeeper } from '../../utils/permissions.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
-import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import { SettingsPanel } from '../settings/settings-panel.mjs';
-import { buildOpenAppsMenuItem } from '../../utils/ui/calendar-view-utils.mjs';
+import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
+import {
+  CalendariaSocket,
+  buildOpenAppsMenuItem,
+  canChangeDateTime,
+  canViewTimeKeeper,
+  checkStickyZones,
+  cleanupSnapIndicator,
+  finalizeDrag,
+  formatForLocation,
+  getDisplayFormat,
+  getRestorePosition,
+  getSidebarBuffer,
+  hasMoonIconMarkers,
+  isCombatBlocked,
+  localize,
+  registerForZoneUpdates,
+  renderMoonIcons,
+  restorePinnedState,
+  unpinFromZone,
+  unregisterFromZoneUpdates,
+  usesDomParenting,
+  warnShowToAll
+} from '../../utils/_module.mjs';
+import { SettingsPanel } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -69,7 +86,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       .filter(([key]) => !isMonthless || key !== 'month')
       .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeClock.incrementKey }));
     context.running = TimeClock.running;
-    context.clockLocked = TimeClock.locked;
+    context.clockDisabled = TimeClock.disabled;
+    context.clockLocked = TimeClock.locked || TimeClock.disabled;
     context.isGM = game.user.isGM;
     context.canChangeDateTime = canChangeDateTime();
     const rawTime = this.#formatTime();
@@ -141,16 +159,16 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION);
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
       this.#snappedZoneId = savedPos.zoneId || null;
-      if (this.#snappedZoneId && StickyZones.restorePinnedState(this.element, this.#snappedZoneId)) {
-        StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      if (this.#snappedZoneId && restorePinnedState(this.element, this.#snappedZoneId)) {
+        registerForZoneUpdates(this, this.#snappedZoneId);
         return;
       }
       if (this.#snappedZoneId) {
         const rect = this.element.getBoundingClientRect();
-        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+        const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
         if (zonePos) {
           this.setPosition({ left: zonePos.left, top: zonePos.top });
-          StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+          registerForZoneUpdates(this, this.#snappedZoneId);
           return;
         }
       }
@@ -167,7 +185,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
-    const rightBuffer = StickyZones.getSidebarBuffer();
+    const rightBuffer = getSidebarBuffer();
     let { left, top } = this.position;
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
@@ -191,8 +209,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     drag._onDragMouseDown = (event) => {
       if (this.#stickyPosition) return;
       previousZoneId = this.#snappedZoneId;
-      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
-        const preserved = StickyZones.unpinFromZone(this.element);
+      if (previousZoneId && usesDomParenting(previousZoneId)) {
+        const preserved = unpinFromZone(this.element);
         if (preserved) {
           elementStartLeft = preserved.left;
           elementStartTop = preserved.top;
@@ -215,22 +233,22 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-      const rightBuffer = StickyZones.getSidebarBuffer();
+      const rightBuffer = getSidebarBuffer();
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
-      this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
+      this.#activeSnapZone = checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
     };
     drag._onDragMouseUp = async (event) => {
       event.preventDefault();
       window.removeEventListener(...drag.handlers.dragMove);
       window.removeEventListener(...drag.handlers.dragUp);
       const rect = this.element.getBoundingClientRect();
-      const result = StickyZones.finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
+      const result = finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
       this.#snappedZoneId = result.zoneId;
-      StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      registerForZoneUpdates(this, this.#snappedZoneId);
       this.#activeSnapZone = null;
       previousZoneId = null;
       await game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { left: this.position.left, top: this.position.top, zoneId: this.#snappedZoneId });
@@ -239,7 +257,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options = {}) {
-    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER)) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
@@ -250,9 +268,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   _onClose(options) {
     const pos = this.position;
     if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { top: pos.top, left: pos.left, zoneId: this.#snappedZoneId });
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
-    StickyZones.cleanupSnapIndicator();
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
+    cleanupSnapIndicator();
     super._onClose(options);
     if (this.#timeHookId) {
       Hooks.off(HOOKS.VISUAL_TICK, this.#timeHookId);
@@ -292,10 +310,11 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER);
       items.push({
-        name: forceTimeKeeper ? 'CALENDARIA.TimeKeeper.ContextMenu.HideFromAll' : 'CALENDARIA.TimeKeeper.ContextMenu.ShowToAll',
+        name: forceTimeKeeper ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceTimeKeeper ? 'eye-slash' : 'eye'}"></i>`,
         callback: async () => {
           const newValue = !forceTimeKeeper;
+          if (newValue) warnShowToAll('viewTimeKeeper', game.i18n.localize('CALENDARIA.Permissions.ViewTimeKeeper'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.TIME_KEEPER_VISIBILITY, { visible: newValue });
         }
@@ -343,8 +362,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    * Reset position to default and clear any sticky zone.
    */
   async resetPosition() {
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
     this.#snappedZoneId = null;
     this.setPosition({ left: 120, top: 120 });
     await game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { left: 120, top: 120, zoneId: null });
@@ -406,7 +425,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle visual tick - update clock display without full re-render.
-   * Uses predicted world time for smooth 1/sec UI updates.
    * @private
    */
   #onVisualTick() {
@@ -521,6 +539,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
+    if (isCombatBlocked(SETTINGS.TIMEKEEPER_COMBAT_MODE)) return null;
     const instance = this.instance ?? new TimeKeeper();
     instance.render({ force: true });
     return instance;

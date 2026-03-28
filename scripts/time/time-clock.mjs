@@ -4,12 +4,10 @@
  * @author Tyler
  */
 
+import { CinematicOverlay } from '../applications/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { updateDarknessFromWorldTime } from '../time/darkness.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { canChangeDateTime } from '../utils/permissions.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
+import { CalendariaSocket, canChangeDateTime, localize, log } from '../utils/_module.mjs';
+import { updateDarknessFromWorldTime } from './darkness.mjs';
 import EventScheduler from './event-scheduler.mjs';
 import ReminderScheduler from './reminder-scheduler.mjs';
 import TimeTracker from './time-tracker.mjs';
@@ -132,6 +130,14 @@ export default class TimeClock {
   }
 
   /**
+   * Whether the real-time clock is disabled (speed set to 0).
+   * @returns {boolean} True if disabled
+   */
+  static get disabled() {
+    return this.#realTimeSpeed === 0;
+  }
+
+  /**
    * Predicted world time including accumulated seconds for UI display.
    * @returns {number} Predicted world time in seconds
    */
@@ -171,7 +177,7 @@ export default class TimeClock {
   static #autoStartIfSynced() {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
-    if (this.#locked || game.paused || this.#combatBlocks) return;
+    if (this.#locked || this.disabled || game.paused || this.#combatBlocks) return;
     this.start();
     log(3, 'Clock auto-started (sync enabled, game unpaused)');
   }
@@ -180,15 +186,22 @@ export default class TimeClock {
    * Load real-time clock speed from settings.
    */
   static loadSpeedFromSettings() {
-    const multiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER) || 1;
+    const wasDisabled = this.disabled;
+    const multiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER) ?? 1;
     const incrementKey = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT) || 'second';
     const increments = getTimeIncrements();
     const incrementSeconds = increments[incrementKey] || 1;
     this.#realTimeSpeed = multiplier * incrementSeconds;
     log(3, `TimeClock real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
     if (this.#running) {
-      this.#stopIntervals();
-      this.#startIntervals();
+      if (this.disabled) this.stop();
+      else {
+        this.#stopIntervals();
+        this.#startIntervals();
+      }
+    }
+    if (wasDisabled !== this.disabled) {
+      Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: this.#running, increment: this.#increment, disabled: this.disabled });
     }
   }
 
@@ -202,7 +215,7 @@ export default class TimeClock {
     if (paused) {
       if (this.#running) this.stop();
       log(3, 'Clock stopped: game paused');
-    } else if (!this.#combatBlocks && !this.#locked) {
+    } else if (!this.#combatBlocks && !this.#locked && !this.disabled) {
       if (!this.#running) this.start();
       log(3, 'Clock started at configured speed (game unpaused)');
     }
@@ -228,7 +241,7 @@ export default class TimeClock {
   static #onCombatEnd(_combat) {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
-    if (!this.#locked && !game.paused && !this.#running) {
+    if (!this.#locked && !this.disabled && !game.paused && !this.#running) {
       this.start();
       log(3, 'Clock started at configured speed (combat ended)');
     }
@@ -241,8 +254,8 @@ export default class TimeClock {
    */
   static start({ broadcast = true } = {}) {
     if (this.#running) return;
-    if (this.#locked) {
-      log(3, 'Clock start blocked: locked');
+    if (this.#locked || this.disabled) {
+      log(3, `Clock start blocked: ${this.disabled ? 'disabled (speed 0)' : 'locked'}`);
       return;
     }
     if (!this.canAdjustTime()) {
@@ -353,7 +366,7 @@ export default class TimeClock {
       return;
     }
     if (this.#running) await this.#flushAccumulated();
-    await game.time.advance(amount);
+    await this.#advanceWithCinematic(amount);
     log(3, `Time advanced by ${amount}s for ${appId}`);
   }
 
@@ -388,7 +401,7 @@ export default class TimeClock {
       return;
     }
     if (this.#running) await this.#flushAccumulated();
-    await game.time.advance(amount);
+    await this.#advanceWithCinematic(amount);
     log(3, `Time advanced by ${amount}s (${multiplier}x)`);
   }
 
@@ -419,8 +432,21 @@ export default class TimeClock {
       return;
     }
     if (this.#running) await this.#flushAccumulated();
-    await game.time.advance(seconds);
+    await this.#advanceWithCinematic(seconds);
     log(3, `Time advanced by ${seconds}s`);
+  }
+
+  /**
+   * Advance with cinematic threshold check.
+   * @param {number} seconds - Seconds to advance
+   * @private
+   */
+  static async #advanceWithCinematic(seconds) {
+    if (seconds > 0 && CinematicOverlay.shouldTrigger(seconds)) {
+      await CinematicOverlay.triggerFromAdvance(seconds);
+      return;
+    }
+    await game.time.advance(seconds);
   }
 
   /**

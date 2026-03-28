@@ -23,6 +23,7 @@
 - [Moon Phases](Moon-Phases)
 - [Notes and Events](Notes-and-Events)
 - [Reminders](Reminders)
+- [Text Enrichers](Text-Enrichers)
 - [Scene Ambience](Scene-Ambience)
 - [Weather System](Weather-System)
 - [Weather Presets](Weather-Presets)

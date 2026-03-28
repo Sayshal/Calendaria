@@ -129,42 +129,182 @@
     "yule000000000000": {
       "name": "Yule",
       "month": 0,
-      "icon": "fas fa-holly-berry",
+      "icon": "fa-holly-berry",
       "color": "#006400",
       "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "springdawningfes": {
       "name": "Spring Dawning Festival",
       "month": 2,
-      "icon": "fas fa-cloud-sun",
+      "icon": "fa-cloud-sun",
       "color": "#98FB98",
       "description": "Vernal equinox celebration marking the awakening of spring.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "midyear000000000": {
       "name": "Midyear",
       "month": 5,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFFF00",
       "description": "Longest day of the year celebrated with dancing and lights.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestfestival0": {
       "name": "Harvest Festival",
       "month": 8,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#CD853F",
       "description": "Autumn celebration of the harvest bounty and thanksgiving.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "nightoftheeye000": {
       "name": "Night of the Eye",
       "month": 10,
-      "icon": "fas fa-eye",
+      "icon": "fa-eye",
       "color": "#9400D3",
       "description": "Rare conjunction when all three moons align, celebrated by the Orders of High Sorcery.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

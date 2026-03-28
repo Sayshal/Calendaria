@@ -16,14 +16,16 @@
       </button>
     </div>
     <p class="hint section-hint">{{openHint}}</p>
+  {{/if}}
 
-    <fieldset data-section="sunDial-display">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="sunDial-display"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
+  <fieldset data-section="sunDial-display">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="sunDial-display" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
+
+    {{#if isGM}}
       <div class="form-group">
         <label for="showSunDial">{{localize "CALENDARIA.Settings.ShowSunDial.Name"}}</label>
         <div class="form-fields">
@@ -39,46 +41,63 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForceSunDial.Hint"}}</p>
       </div>
+    {{/if}}
 
-      <div class="form-group">
-        <label for="sunDialCrankMode">{{localize "CALENDARIA.SettingsPanel.CrankMode"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="sunDialCrankMode" name="sunDialCrankMode"
-            {{#if sunDialCrankMode}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.CrankMode"}}</p>
+    <div class="form-group">
+      <label for="sunDialCrankMode">{{localize "CALENDARIA.SettingsPanel.CrankMode"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="sunDialCrankMode" name="sunDialCrankMode" {{#if sunDialCrankMode}}checked{{/if}}>
       </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.CrankMode"}}</p>
+    </div>
 
-      <div class="form-group">
-        <label for="sunDialAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="sunDialAutoFade" name="sunDialAutoFade"
-            {{#if sunDialAutoFade}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    <div class="form-group">
+      <label for="sunDialAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="sunDialAutoFade" name="sunDialAutoFade" {{#if sunDialAutoFade}}checked{{/if}}>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    </div>
 
-      <div class="form-group{{#unless sunDialAutoFade}} disabled{{/unless}}">
-        <label for="sunDialIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
-        <div class="form-fields">
-          <div class="slider-with-ticks">
-            <input type="range" id="sunDialIdleOpacity" name="sunDialIdleOpacity" min="0" max="100"
-              value="{{sunDialIdleOpacity}}" list="opacity-ticks" {{#unless sunDialAutoFade}}disabled
-              aria-disabled="true" data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"
-              {{/unless}}>
-            <div class="slider-ticks">
-              <span></span><span></span><span></span><span></span><span></span>
-            </div>
+    <div class="form-group{{#unless sunDialAutoFade}} disabled{{/unless}}">
+      <label for="sunDialIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <div class="form-fields">
+        <div class="slider-with-ticks">
+          <input type="range" id="sunDialIdleOpacity" name="sunDialIdleOpacity" min="0" max="100"
+            value="{{sunDialIdleOpacity}}" list="opacity-ticks" {{#unless sunDialAutoFade}}disabled aria-disabled="true"
+            data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span>
           </div>
-          <input type="number" class="range-value" min="0" max="100" value="{{sunDialIdleOpacity}}"
-            style="width: 3rem; flex: none" {{#unless sunDialAutoFade}}disabled aria-disabled="true" data-tooltip
-            aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
-          <span class="input-suffix">%</span>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+        <input type="number" class="range-value" min="0" max="100" value="{{sunDialIdleOpacity}}"
+          style="width: 3rem; flex: none" {{#unless sunDialAutoFade}}disabled aria-disabled="true" data-tooltip
+          aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
+        <span class="input-suffix">%</span>
       </div>
-    </fieldset>
+      <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+    </div>
 
+    <div class="form-group">
+      <label for="sunDialCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="sunDialCombatMode" name="sunDialCombatMode">
+          <option value="none" {{#if (eq sunDialCombatMode "none")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+          </option>
+          <option value="hideCombat" {{#if (eq sunDialCombatMode "hideCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+          </option>
+          <option value="hideEncounter" {{#if (eq sunDialCombatMode "hideEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+          </option>
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.WidgetCombatMode.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  {{#if isGM}}
     <fieldset data-section="display-formats">
       <legend>
         {{localize "CALENDARIA.SettingsPanel.Section.DisplayFormats"}}
@@ -125,31 +144,25 @@
         </div>
       {{/each}}
     </fieldset>
-
-    <fieldset data-section="sunDial-sticky">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="sunDial-sticky"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
-      <input type="hidden" name="sunDialStickySection" value="1">
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
-
-      <div class="form-group">
-        <label for="sunDialStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="sunDialStickyPosition" name="sunDialStickyPosition"
-            {{#if sunDialStickyPosition}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
-      </div>
-    </fieldset>
-  {{else}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.SunDialTab.PlayerMessage"}}</p>
-    </div>
   {{/if}}
+
+  <fieldset data-section="sunDial-sticky">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="sunDial-sticky" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
+    <input type="hidden" name="sunDialStickySection" value="1">
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
+
+    <div class="form-group">
+      <label for="sunDialStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="sunDialStickyPosition" name="sunDialStickyPosition"
+          {{#if sunDialStickyPosition}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+    </div>
+  </fieldset>
 
 </section>

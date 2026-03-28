@@ -4,8 +4,8 @@
  * @author Tyler
  */
 
-import CalendariaCalendar from '../data/calendaria-calendar.mjs';
-import { log } from '../utils/logger.mjs';
+import { CalendariaCalendar } from '../data/_module.mjs';
+import { log } from '../utils/_module.mjs';
 
 /**
  * Registry for managing calendar instances.
@@ -26,7 +26,6 @@ export default class CalendarRegistry {
   static register(id, calendar) {
     if (!(calendar instanceof CalendariaCalendar)) calendar = new CalendariaCalendar(calendar);
     this.#calendars.set(id, calendar);
-
     return calendar;
   }
 
@@ -37,7 +36,6 @@ export default class CalendarRegistry {
    */
   static unregister(id) {
     const result = this.#calendars.delete(id);
-
     return result;
   }
 

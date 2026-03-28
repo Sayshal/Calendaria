@@ -16,20 +16,21 @@
       </button>
     </div>
     <p class="hint section-hint">{{openHint}}</p>
+  {{/if}}
 
-    <fieldset data-section="stopwatch-display">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-display"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
+  <fieldset data-section="stopwatch-display">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-display"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
 
+    {{#if isGM}}
       <div class="form-group">
         <label for="showStopwatch">{{localize "CALENDARIA.Settings.ShowStopwatch.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" id="showStopwatch" name="showStopwatch"
-            {{#if showStopwatch}}checked{{/if}}>
+          <input type="checkbox" id="showStopwatch" name="showStopwatch" {{#if showStopwatch}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowStopwatch.Hint"}}</p>
       </div>
@@ -37,8 +38,7 @@
       <div class="form-group">
         <label for="forceStopwatch">{{localize "CALENDARIA.Settings.ForceStopwatch.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" id="forceStopwatch" name="forceStopwatch"
-            {{#if forceStopwatch}}checked{{/if}}>
+          <input type="checkbox" id="forceStopwatch" name="forceStopwatch" {{#if forceStopwatch}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForceStopwatch.Hint"}}</p>
       </div>
@@ -51,37 +51,56 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.StopwatchAutoStartTime.Hint"}}</p>
       </div>
+    {{/if}}
 
-      <div class="form-group">
-        <label for="stopwatchAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="stopwatchAutoFade" name="stopwatchAutoFade"
-            {{#if stopwatchAutoFade}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    <div class="form-group">
+      <label for="stopwatchAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="stopwatchAutoFade" name="stopwatchAutoFade" {{#if stopwatchAutoFade}}checked{{/if}}>
       </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
+    </div>
 
-      <div class="form-group{{#unless stopwatchAutoFade}} disabled{{/unless}}">
-        <label for="stopwatchIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
-        <div class="form-fields">
-          <div class="slider-with-ticks">
-            <input type="range" id="stopwatchIdleOpacity" name="stopwatchIdleOpacity" min="0" max="100"
-              value="{{stopwatchIdleOpacity}}" list="opacity-ticks" {{#unless stopwatchAutoFade}}disabled
-              aria-disabled="true" data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"
-              {{/unless}}>
-            <div class="slider-ticks">
-              <span></span><span></span><span></span><span></span><span></span>
-            </div>
+    <div class="form-group{{#unless stopwatchAutoFade}} disabled{{/unless}}">
+      <label for="stopwatchIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
+      <div class="form-fields">
+        <div class="slider-with-ticks">
+          <input type="range" id="stopwatchIdleOpacity" name="stopwatchIdleOpacity" min="0" max="100"
+            value="{{stopwatchIdleOpacity}}" list="opacity-ticks" {{#unless stopwatchAutoFade}}disabled
+            aria-disabled="true" data-tooltip aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}"
+            {{/unless}}>
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span>
           </div>
-          <input type="number" class="range-value" min="0" max="100" value="{{stopwatchIdleOpacity}}"
-            style="width: 3rem; flex: none" {{#unless stopwatchAutoFade}}disabled aria-disabled="true" data-tooltip
-            aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
-          <span class="input-suffix">%</span>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+        <input type="number" class="range-value" min="0" max="100" value="{{stopwatchIdleOpacity}}"
+          style="width: 3rem; flex: none" {{#unless stopwatchAutoFade}}disabled aria-disabled="true" data-tooltip
+          aria-label="{{localize "CALENDARIA.Settings.IdleOpacity.DisabledTitle"}}" {{/unless}}>
+        <span class="input-suffix">%</span>
       </div>
-    </fieldset>
+      <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
+    </div>
 
+    <div class="form-group">
+      <label for="stopwatchCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="stopwatchCombatMode" name="stopwatchCombatMode">
+          <option value="none" {{#if (eq stopwatchCombatMode "none")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+          </option>
+          <option value="hideCombat" {{#if (eq stopwatchCombatMode "hideCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+          </option>
+          <option value="hideEncounter" {{#if (eq stopwatchCombatMode "hideEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+          </option>
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.WidgetCombatMode.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  {{#if isGM}}
     <fieldset data-section="stopwatch-formats">
       <legend>
         {{localize "CALENDARIA.Format.Category.Stopwatch"}}
@@ -128,31 +147,26 @@
         </div>
       {{/each}}
     </fieldset>
-
-    <fieldset data-section="stopwatch-sticky">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-sticky"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
-      <input type="hidden" name="stopwatchStickySection" value="1">
-      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
-
-      <div class="form-group">
-        <label for="stopwatchStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
-        <div class="form-fields">
-          <input type="checkbox" id="stopwatchStickyPosition" name="stopwatchStickyPosition"
-            {{#if stopwatchStickyPosition}}checked{{/if}}>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
-      </div>
-    </fieldset>
-  {{else}}
-    <div class="info-box">
-      <i class="fas fa-info-circle"></i>
-      <p>{{localize "CALENDARIA.SettingsPanel.StopwatchTab.PlayerMessage"}}</p>
-    </div>
   {{/if}}
+
+  <fieldset data-section="stopwatch-sticky">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.StickyStates"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="stopwatch-sticky"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+    <input type="hidden" name="stopwatchStickySection" value="1">
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
+
+    <div class="form-group">
+      <label for="stopwatchStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="stopwatchStickyPosition" name="stopwatchStickyPosition"
+          {{#if stopwatchStickyPosition}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyPosition"}}</p>
+    </div>
+  </fieldset>
 
 </section>

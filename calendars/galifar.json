@@ -129,98 +129,434 @@
     "wintersolstice00": {
       "name": "Winter Solstice",
       "month": 0,
-      "icon": "fas fa-snowflake",
+      "icon": "fa-snowflake",
       "color": "#B0E0E6",
       "description": "Longest night of the year, marking the turning point of winter across the Five Nations.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "brightblade00000": {
       "name": "Brightblade",
       "month": 3,
-      "icon": "fas fa-shield-halved",
+      "icon": "fa-shield-halved",
       "color": "#C0C0C0",
       "description": "Holy day of Dol Dorn, Sovereign Lord of Strength and Steel.",
-      "dayOfMonth": 8
+      "dayOfMonth": 8,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 9
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "aureonscrown0000": {
       "name": "Aureon's Crown",
       "month": 4,
-      "icon": "fas fa-book",
+      "icon": "fa-book",
       "color": "#4169E1",
       "description": "Celebration of knowledge where elders share wisdom with the young at evening feasts.",
-      "dayOfMonth": 25
+      "dayOfMonth": 25,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 26
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "sunsblessing0000": {
       "name": "Sun's Blessing",
       "month": 5,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFD700",
       "description": "Holy day of Dol Arrah when armies traditionally kept the peace.",
-      "dayOfMonth": 14
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "bakersnight00000": {
       "name": "Baker's Night",
       "month": 5,
-      "icon": "fas fa-bread-slice",
+      "icon": "fa-bread-slice",
       "color": "#D2691E",
       "description": "Festival celebrating hearth, home, and the simple comforts that sustain communities.",
-      "dayOfMonth": 5
+      "dayOfMonth": 5,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 6
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "foundersday00000": {
       "name": "Founder's Day",
       "month": 6,
-      "icon": "fas fa-flag",
+      "icon": "fa-flag",
       "color": "#8B0000",
       "description": "Commemoration of the founding of the Kingdom of Galifar.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "feastofthemoon00": {
       "name": "Feast of the Moon",
       "month": 7,
-      "icon": "fas fa-moon",
+      "icon": "fa-moon",
       "color": "#C0C0C0",
       "description": "Nighttime celebration honoring the twelve moons of Eberron.",
-      "dayOfMonth": 24
+      "dayOfMonth": 24,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 25
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "boldreishearth00": {
       "name": "Boldrei's Hearth",
       "month": 8,
-      "icon": "fas fa-house-chimney",
+      "icon": "fa-house-chimney",
       "color": "#A0522D",
       "description": "Holy day honoring Boldrei, goddess of community, family, and the warmth of home.",
-      "dayOfMonth": 8
+      "dayOfMonth": 8,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 9
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "throneholdday000": {
       "name": "Thronehold Day",
       "month": 8,
-      "icon": "fas fa-scroll",
+      "icon": "fa-scroll",
       "color": "#483D8B",
       "description": "Anniversary of the Treaty of Thronehold that ended the Last War.",
-      "dayOfMonth": 10
+      "dayOfMonth": 10,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 11
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "longshadows00000": {
       "name": "Long Shadows",
       "month": 9,
-      "icon": "fas fa-cloud-moon",
+      "icon": "fa-cloud-moon",
       "color": "#2F4F4F",
       "description": "Three nights when dark magic dominates and most people stay indoors.",
-      "dayOfMonth": 25
+      "dayOfMonth": 25,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 26
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "throneday0000000": {
       "name": "Throne Day",
       "month": 10,
-      "icon": "fas fa-chess-king",
+      "icon": "fa-chess-king",
       "color": "#FFD700",
       "description": "Celebration of rulership and governance, honoring the authority of legitimate monarchs.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "forgefire0000000": {
       "name": "Forge Fire",
       "month": 11,
-      "icon": "fas fa-hammer",
+      "icon": "fa-hammer",
       "color": "#FF6347",
       "description": "Festival celebrating craftsmanship, artifice, and the transformative power of creation.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

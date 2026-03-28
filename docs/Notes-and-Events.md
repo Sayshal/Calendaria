@@ -76,10 +76,10 @@ await CALENDARIA.api.createNote({
 
 ### Visibility Fields
 
-| Field    | Type    | Description                            |
-| -------- | ------- | -------------------------------------- |
-| `gmOnly` | Boolean | Visible only to GMs                    |
-| `silent` | Boolean | Suppresses reminders and announcements |
+| Field        | Type    | Description                                                   |
+| ------------ | ------- | ------------------------------------------------------------- |
+| `visibility` | String  | `'visible'`, `'hidden'` (GM-only), or `'secret'` (owner-only) |
+| `silent`     | Boolean | Suppresses reminders and announcements                        |
 
 ### Reminder Fields
 

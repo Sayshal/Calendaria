@@ -135,53 +135,217 @@
       "name": "Day of Rebirth",
       "month": 2,
       "countsForWeekday": false,
-      "icon": "fas fa-seedling",
+      "icon": "fa-seedling",
       "color": "#32CD32",
       "description": "Vernal equinox marking the new year and the rebirth of spring across Cerilia.",
-      "dayOfMonth": 31
+      "dayOfMonth": 31,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 32
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "nightoffire00000": {
       "name": "Night of Fire",
       "month": 5,
       "countsForWeekday": false,
-      "icon": "fas fa-meteor",
+      "icon": "fa-meteor",
       "color": "#FF4500",
       "description": "Summer solstice featuring a spectacular display of falling stars from an annual meteor passage.",
-      "dayOfMonth": 31
+      "dayOfMonth": 31,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 32
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "venerationofthed": {
       "name": "Veneration of the Dead",
       "month": 8,
       "countsForWeekday": false,
-      "icon": "fas fa-monument",
+      "icon": "fa-monument",
       "color": "#696969",
       "description": "Autumnal equinox honoring ancestors and the departed.",
-      "dayOfMonth": 31
+      "dayOfMonth": 31,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 32
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "nightofsleeping0": {
       "name": "Night of Sleeping",
       "month": 11,
       "countsForWeekday": false,
-      "icon": "fas fa-moon",
+      "icon": "fa-moon",
       "color": "#191970",
       "description": "Winter solstice observance when the land enters its deepest slumber.",
-      "dayOfMonth": 32
+      "dayOfMonth": 32,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 33
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "haelynsday000000": {
       "name": "Haelyn's Day",
       "month": 3,
-      "icon": "fas fa-crown",
+      "icon": "fa-crown",
       "color": "#B8860B",
       "description": "Festival honoring Haelyn, god of courage, justice, and rightful rulership.",
-      "dayOfMonth": 15
+      "dayOfMonth": 15,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 16
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "eriksmoot0000000": {
       "name": "Erik's Moot",
       "month": 4,
-      "icon": "fas fa-tree",
+      "icon": "fa-tree",
       "color": "#228B22",
       "description": "Celebration dedicated to Erik, god of forests, hunting, and wild places.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

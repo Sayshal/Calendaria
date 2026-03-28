@@ -6,18 +6,19 @@
 
 import { MODULE, SETTINGS } from '../constants.mjs';
 
-/**
- * Default color values for Calendaria theme (Dark).
- * @type {Object<string, string>}
- */
+/** @type {Object<string, string>} Default color values for Calendaria theme (Dark). */
 export const DEFAULT_COLORS = {
   bg: '#1f1f1f',
   bgLighter: '#2a2a2a',
   bgHover: '#353535',
   border: '#4a4a4a',
   borderLight: '#3a3a3a',
+  divider: '#414141',
+  inputBg: '#303030',
   text: '#e0e0e0',
   textDim: '#999999',
+  textHeading: '#eeeeee',
+  textSecondary: '#aaaaaa',
   titleText: '#ffffff',
   weekdayHeader: '#e0e0e0',
   dayNumber: '#e0e0e0',
@@ -28,6 +29,8 @@ export const DEFAULT_COLORS = {
   primary: '#4a90e2',
   today: '#ff6400',
   accent: '#a89060',
+  error: '#f44336',
+  warning: '#ffc107',
   success: '#88cc88',
   festivalBorder: '#d4af37',
   festivalText: '#ffd700',
@@ -35,18 +38,19 @@ export const DEFAULT_COLORS = {
   overlay: '#000000'
 };
 
-/**
- * Light theme preset colors.
- * @type {Object<string, string>}
- */
+/** @type {Object<string, string>} Light theme preset colors. */
 export const LIGHT_COLORS = {
   bg: '#f5f5f5',
   bgLighter: '#ffffff',
   bgHover: '#e8e8e8',
   border: '#d0d0d0',
   borderLight: '#e0e0e0',
+  divider: '#d2d2d2',
+  inputBg: '#f8f8f8',
   text: '#2c2c2c',
   textDim: '#666666',
+  textHeading: '#202020',
+  textSecondary: '#505050',
   titleText: '#1a1a1a',
   weekdayHeader: '#2c2c2c',
   dayNumber: '#2c2c2c',
@@ -57,6 +61,8 @@ export const LIGHT_COLORS = {
   primary: '#2a70c2',
   today: '#e05500',
   accent: '#8b7000',
+  error: '#d32f2f',
+  warning: '#f5b400',
   success: '#228822',
   festivalBorder: '#b89527',
   festivalText: '#8b7000',
@@ -64,18 +70,19 @@ export const LIGHT_COLORS = {
   overlay: '#000000'
 };
 
-/**
- * High contrast theme preset colors.
- * @type {Object<string, string>}
- */
+/** @type {Object<string, string>} High contrast theme preset colors. */
 export const HIGH_CONTRAST_COLORS = {
   bg: '#000000',
   bgLighter: '#1a1a1a',
   bgHover: '#333333',
   border: '#ffffff',
   borderLight: '#cccccc',
+  divider: '#666666',
+  inputBg: '#1a1a1a',
   text: '#ffffff',
   textDim: '#cccccc',
+  textHeading: '#ffffff',
+  textSecondary: '#dddddd',
   titleText: '#ffffff',
   weekdayHeader: '#ffffff',
   dayNumber: '#ffffff',
@@ -86,6 +93,8 @@ export const HIGH_CONTRAST_COLORS = {
   primary: '#00aaff',
   today: '#ff8800',
   accent: '#ffcc00',
+  error: '#ff4444',
+  warning: '#ffcc00',
   success: '#00ff88',
   festivalBorder: '#ffdd00',
   festivalText: '#ffee00',
@@ -93,19 +102,146 @@ export const HIGH_CONTRAST_COLORS = {
   overlay: '#000000'
 };
 
-/**
- * All bundled theme presets.
- * @type {Object<string, {name: string, colors: Object<string, string>}>}
- */
-export const THEME_PRESETS = {
-  dark: { name: 'CALENDARIA.ThemeEditor.Presets.Dark', colors: DEFAULT_COLORS },
-  highContrast: { name: 'CALENDARIA.ThemeEditor.Presets.HighContrast', colors: HIGH_CONTRAST_COLORS }
+/** @type {Object<string, string>} Parchment theme preset colors. */
+export const PARCHMENT_COLORS = {
+  bg: '#f5e6c8',
+  bgLighter: '#eddcc0',
+  bgHover: '#d0b888',
+  border: '#c9a96e',
+  borderLight: '#b8944e',
+  divider: '#b8944e',
+  inputBg: '#eddcc0',
+  text: '#3c2415',
+  textDim: '#8a7460',
+  textHeading: '#5c3a1e',
+  textSecondary: '#6b4f3a',
+  titleText: '#5c3a1e',
+  weekdayHeader: '#3c2415',
+  dayNumber: '#3c2415',
+  restDay: '#7a6040',
+  buttonBg: '#dcc8a0',
+  buttonText: '#3c2415',
+  buttonBorder: '#c9a96e',
+  primary: '#8b6914',
+  today: '#ff8c00',
+  accent: '#8b6914',
+  error: '#c62828',
+  warning: '#e6a000',
+  success: '#5a7a2e',
+  festivalBorder: '#b8860b',
+  festivalText: '#8b6914',
+  shadow: '#000000',
+  overlay: '#000000'
 };
 
-/**
- * Color categories with labels.
- * @type {Object<string, string>}
- */
+/** @type {Object<string, string>} Logbook theme preset colors. */
+export const LOGBOOK_COLORS = {
+  bg: '#f5f0e0',
+  bgLighter: '#faf5e8',
+  bgHover: '#e8e0cc',
+  border: '#5b7daa',
+  borderLight: '#7b9cc4',
+  divider: '#5b7daa',
+  inputBg: '#f0ead8',
+  text: '#1a1a30',
+  textDim: '#5a5a70',
+  textHeading: '#2a1010',
+  textSecondary: '#3a3a55',
+  titleText: '#2a1010',
+  weekdayHeader: '#1a1a30',
+  dayNumber: '#1a1a30',
+  restDay: '#b03030',
+  buttonBg: '#e0d8c4',
+  buttonText: '#1a1a30',
+  buttonBorder: '#5b7daa',
+  primary: '#2855a0',
+  today: '#c02020',
+  accent: '#b03030',
+  error: '#c62828',
+  warning: '#cc8800',
+  success: '#2a7a3a',
+  festivalBorder: '#c02020',
+  festivalText: '#901818',
+  shadow: '#000000',
+  overlay: '#000000'
+};
+
+/** @type {Object<string, string>} Arcane theme preset colors. */
+export const ARCANE_COLORS = {
+  bg: '#1a0a2e',
+  bgLighter: '#231440',
+  bgHover: '#3d2a6e',
+  border: '#4a3580',
+  borderLight: '#5a45a0',
+  divider: '#5a45a0',
+  inputBg: '#251845',
+  text: '#c8b8e8',
+  textDim: '#7766a0',
+  textHeading: '#e0d0ff',
+  textSecondary: '#9988c0',
+  titleText: '#e0d0ff',
+  weekdayHeader: '#c8b8e8',
+  dayNumber: '#c8b8e8',
+  restDay: '#9988c0',
+  buttonBg: '#2e1e55',
+  buttonText: '#c8b8e8',
+  buttonBorder: '#4a3580',
+  primary: '#b088ff',
+  today: '#b496ff',
+  accent: '#b088ff',
+  error: '#ff5555',
+  warning: '#e8a0ff',
+  success: '#66bb88',
+  festivalBorder: '#b088ff',
+  festivalText: '#d4b8ff',
+  shadow: '#000000',
+  overlay: '#000000'
+};
+
+/** @type {Object<string, string>} Sci-Fi theme preset colors. */
+export const SCIFI_COLORS = {
+  bg: '#0a0e17',
+  bgLighter: '#111820',
+  bgHover: '#1a2a40',
+  border: '#1a3050',
+  borderLight: '#1a3050',
+  divider: '#1a3050',
+  inputBg: '#0d1520',
+  text: '#b0c4de',
+  textDim: '#506070',
+  textHeading: '#00e5ff',
+  textSecondary: '#7a94b0',
+  titleText: '#00e5ff',
+  weekdayHeader: '#b0c4de',
+  dayNumber: '#b0c4de',
+  restDay: '#7a94b0',
+  buttonBg: '#0f1a28',
+  buttonText: '#b0c4de',
+  buttonBorder: '#1a3050',
+  primary: '#00e5ff',
+  today: '#00e5ff',
+  accent: '#00e5ff',
+  error: '#ff4444',
+  warning: '#ffaa00',
+  success: '#00cc88',
+  festivalBorder: '#00e5ff',
+  festivalText: '#00e5ff',
+  shadow: '#000000',
+  overlay: '#000000'
+};
+
+/** @type {Object<string, {name: string, colors: Object<string, string>}>} All bundled theme presets. */
+export const THEME_PRESETS = {
+  dark: { name: 'CALENDARIA.ThemeEditor.Presets.Dark', colors: DEFAULT_COLORS },
+  light: { name: 'CALENDARIA.ThemeEditor.Presets.Light', colors: LIGHT_COLORS },
+  highContrast: { name: 'CALENDARIA.ThemeEditor.Presets.HighContrast', colors: HIGH_CONTRAST_COLORS },
+  parchment: { name: 'CALENDARIA.ThemeEditor.Presets.Parchment', colors: PARCHMENT_COLORS },
+  logbook: { name: 'CALENDARIA.ThemeEditor.Presets.Logbook', colors: LOGBOOK_COLORS },
+  arcane: { name: 'CALENDARIA.ThemeEditor.Presets.Arcane', colors: ARCANE_COLORS },
+  scifi: { name: 'CALENDARIA.ThemeEditor.Presets.Scifi', colors: SCIFI_COLORS }
+};
+
+/** @type {Object<string, string>} Color categories with labels. */
 export const COLOR_CATEGORIES = {
   backgrounds: 'CALENDARIA.ThemeEditor.Category.Backgrounds',
   borders: 'CALENDARIA.ThemeEditor.Category.Borders',
@@ -116,10 +252,7 @@ export const COLOR_CATEGORIES = {
   effects: 'CALENDARIA.ThemeEditor.Category.Effects'
 };
 
-/**
- * HUD component categories with labels.
- * @type {Object<string, string>}
- */
+/** @type {Object<string, string>} HUD component categories with labels. */
 export const COMPONENT_CATEGORIES = {
   common: 'CALENDARIA.ThemeEditor.Component.Common',
   domeHud: 'CALENDARIA.ThemeEditor.Component.DomeHud',
@@ -127,18 +260,19 @@ export const COMPONENT_CATEGORIES = {
   miniCal: 'CALENDARIA.ThemeEditor.Component.MiniCal'
 };
 
-/**
- * Color variable definitions with display names and categories.
- * @type {Array<{key: string, label: string, category: string, component: string}>}
- */
+/** @type {Array<{key: string, label: string, category: string, component: string}>} Color variable definitions with display names and categories. */
 export const COLOR_DEFINITIONS = [
   { key: 'bg', label: 'CALENDARIA.ThemeEditor.Colors.Background', category: 'backgrounds', component: 'common' },
   { key: 'bgLighter', label: 'CALENDARIA.ThemeEditor.Colors.BackgroundLighter', category: 'backgrounds', component: 'common' },
   { key: 'bgHover', label: 'CALENDARIA.ThemeEditor.Colors.BackgroundHover', category: 'backgrounds', component: 'common' },
+  { key: 'inputBg', label: 'CALENDARIA.ThemeEditor.Colors.InputBackground', category: 'backgrounds', component: 'common' },
+  { key: 'divider', label: 'CALENDARIA.ThemeEditor.Colors.Divider', category: 'borders', component: 'common' },
   { key: 'border', label: 'CALENDARIA.ThemeEditor.Colors.Border', category: 'borders', component: 'common' },
   { key: 'borderLight', label: 'CALENDARIA.ThemeEditor.Colors.BorderLight', category: 'borders', component: 'common' },
   { key: 'text', label: 'CALENDARIA.ThemeEditor.Colors.Text', category: 'text', component: 'common' },
   { key: 'textDim', label: 'CALENDARIA.ThemeEditor.Colors.TextDim', category: 'text', component: 'common' },
+  { key: 'textHeading', label: 'CALENDARIA.ThemeEditor.Colors.TextHeading', category: 'text', component: 'common' },
+  { key: 'textSecondary', label: 'CALENDARIA.ThemeEditor.Colors.TextSecondary', category: 'text', component: 'common' },
   { key: 'titleText', label: 'CALENDARIA.ThemeEditor.Colors.TitleText', category: 'text', component: 'common' },
   { key: 'weekdayHeader', label: 'CALENDARIA.ThemeEditor.Colors.WeekdayHeader', category: 'text', component: 'miniCal' },
   { key: 'dayNumber', label: 'CALENDARIA.ThemeEditor.Colors.DayNumber', category: 'text', component: 'miniCal' },
@@ -149,6 +283,8 @@ export const COLOR_DEFINITIONS = [
   { key: 'primary', label: 'CALENDARIA.ThemeEditor.Colors.Primary', category: 'accents', component: 'common' },
   { key: 'today', label: 'CALENDARIA.ThemeEditor.Colors.Today', category: 'accents', component: 'common' },
   { key: 'accent', label: 'CALENDARIA.ThemeEditor.Colors.Accent', category: 'accents', component: 'common' },
+  { key: 'error', label: 'CALENDARIA.ThemeEditor.Colors.Error', category: 'accents', component: 'common' },
+  { key: 'warning', label: 'CALENDARIA.ThemeEditor.Colors.Warning', category: 'accents', component: 'common' },
   { key: 'success', label: 'CALENDARIA.ThemeEditor.Colors.Success', category: 'accents', component: 'common' },
   { key: 'festivalBorder', label: 'CALENDARIA.ThemeEditor.Colors.FestivalBorder', category: 'festivals', component: 'common' },
   { key: 'festivalText', label: 'CALENDARIA.ThemeEditor.Colors.FestivalText', category: 'festivals', component: 'common' },
@@ -321,18 +457,20 @@ export function generateDerivedColors(colors) {
   return derived;
 }
 
-/**
- * CSS variable mapping from color keys to CSS variable names.
- * @type {Object<string, string>}
- */
+/** @type {Object<string, string>} CSS variable mapping from color keys to CSS variable names. */
 const CSS_VAR_MAP = {
   bg: '--calendaria-bg',
   bgLighter: '--calendaria-bg-lighter',
   bgHover: '--calendaria-bg-hover',
   border: '--calendaria-border',
   borderLight: '--calendaria-border-light',
+  divider: '--calendaria-divider',
+  error: '--calendaria-error',
+  inputBg: '--calendaria-input-bg',
   text: '--calendaria-text',
   textDim: '--calendaria-text-dim',
+  textHeading: '--calendaria-text-heading',
+  textSecondary: '--calendaria-text-secondary',
   titleText: '--calendaria-title-text',
   weekdayHeader: '--calendaria-weekday-header',
   restDay: '--calendaria-rest-day',
@@ -341,14 +479,30 @@ const CSS_VAR_MAP = {
   today: '--calendaria-today',
   accent: '--calendaria-accent',
   success: '--calendaria-success',
+  warning: '--calendaria-warning',
   festivalBorder: '--calendaria-festival-border',
   festivalText: '--calendaria-festival-text',
   shadow: '--calendaria-shadow-color',
   overlay: '--calendaria-overlay-color'
 };
 
+/** @type {string[]} Themed application classes — only these receive custom theme colors. */
+const THEMED_APPS = [
+  '.calendaria-hud',
+  '.mini-cal',
+  '.big-cal',
+  '.chronicle',
+  '.calendar-note-sheet',
+  '.note-viewer',
+  '.time-keeper',
+  '.sun-dial',
+  '.stopwatch',
+  '.secondary-calendar',
+  '.set-date-dialog'
+];
+
 /**
- * Apply custom colors to all Calendaria elements.
+ * Apply custom colors to all themed Calendaria applications.
  * @param {Object<string, string>} colors - Color values to apply
  */
 export function applyCustomColors(colors) {
@@ -362,7 +516,8 @@ export function applyCustomColors(colors) {
   for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) if (colors[key]) cssVars.push(`${cssVar}: ${colors[key]};`);
   const derived = generateDerivedColors(colors);
   for (const [cssVar, value] of Object.entries(derived)) cssVars.push(`${cssVar}: ${value};`);
-  styleEl.textContent = `.calendaria {\n  ${cssVars.join('\n  ')}\n}`;
+  const selector = THEMED_APPS.map((cls) => `.calendaria${cls}`).join(',\n');
+  styleEl.textContent = `${selector} {\n  ${cssVars.join('\n  ')}\n}`;
   const ids = ['calendaria-hud', 'calendaria-timekeeper', 'calendaria-mini-cal', 'calendaria-big-cal', 'calendaria-stopwatch'];
   for (const id of ids) foundry.applications.instances.get(id)?.render();
 }

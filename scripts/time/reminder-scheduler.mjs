@@ -4,15 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import CalendarRegistry from '../calendar/calendar-registry.mjs';
+import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SOCKET_TYPES } from '../constants.mjs';
-import { getCurrentDate } from '../notes/date-utils.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { isRecurringMatch } from '../notes/recurrence.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
+import { NoteManager, getCurrentDate, isRecurringMatch } from '../notes/_module.mjs';
+import { CalendariaSocket, format, localize, log } from '../utils/_module.mjs';
 
 /**
  * Reminder Scheduler class that monitors time and triggers pre-event reminders.
@@ -30,9 +25,16 @@ export default class ReminderScheduler {
   /** @type {number} Last world time when reminders were checked */
   static #lastCheckTime = 0;
 
+  /** @type {boolean} Flag to skip reminders on next update (for timepoint jumps) */
+  static #skipNext = false;
+
+  /** Skip reminders on the next time update. */
+  static skipNext() {
+    this.#skipNext = true;
+  }
+
   /**
    * Initialize the reminder scheduler.
-   * Registers hook listener for socket-broadcast reminders.
    * @returns {void}
    */
   static initialize() {
@@ -48,6 +50,12 @@ export default class ReminderScheduler {
    */
   static onUpdateWorldTime(worldTime, _delta) {
     if (!CalendariaSocket.isPrimaryGM()) return;
+    if (this.#skipNext) {
+      this.#skipNext = false;
+      this.#lastDate = getCurrentDate();
+      log(3, 'Skipping reminders (timepoint jump)');
+      return;
+    }
     const currentDate = getCurrentDate();
     if (!currentDate) return;
     if (!NoteManager.isInitialized()) return;
@@ -109,7 +117,7 @@ export default class ReminderScheduler {
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const offsetMinutes = (note.flagData.reminderOffset ?? 0) * minutesPerHour;
     const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
-    const hasConditions = note.flagData.conditions?.length > 0;
+    const hasConditions = note.flagData.conditions?.length > 0 || note.flagData.conditionTree?.children?.length > 0;
     if (hasRecurrence || hasConditions) {
       const occursToday = isRecurringMatch(note.flagData, currentDate);
       let occursTomorrow = false;
@@ -257,6 +265,11 @@ export default class ReminderScheduler {
         return note.flagData.author ? [note.flagData.author] : [game.user.id];
       case 'specific':
         return note.flagData.reminderUsers || [];
+      case 'viewers': {
+        const visibility = note.flagData.visibility || 'visible';
+        if (visibility === 'hidden' || visibility === 'secret') return game.users.filter((u) => u.isGM).map((u) => u.id);
+        return game.users.filter((u) => u.isGM || note.page?.testUserPermission(u, 'OBSERVER')).map((u) => u.id);
+      }
       default:
         return game.users.map((u) => u.id);
     }
@@ -298,7 +311,7 @@ export default class ReminderScheduler {
     const color = note.flagData.color || '#4a9eff';
     let whisper = [];
     if (note.flagData.reminderTargets !== 'all') whisper = targets;
-    if (note.flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
+    if (note.flagData.visibility && note.flagData.visibility !== 'visible') whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
     const content = `
       <div class="calendaria chat-reminder">
         <div class="reminder-message">${message}</div>

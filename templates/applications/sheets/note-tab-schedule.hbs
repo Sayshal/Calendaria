@@ -1,0 +1,135 @@
+<section class="tab {{tab.cssClass}}" data-tab="schedule" data-group="primary">
+  <div class="note-tab-schedule">
+    {{#if isFestival}}
+      <div class="festival-banner festival-banner--info">
+        <i class="fas fa-star"></i>
+        {{#if isGM}}
+          <span>{{localize "CALENDARIA.Note.FestivalBannerLinkedGM"}} <a
+              data-action="openFestivalEditor">{{localize "CALENDARIA.Note.FestivalBannerEditorLink"}}</a>.</span>
+        {{else}}
+          <span>{{localize "CALENDARIA.Note.FestivalBannerLinked"}}</span>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    <div class="form-row-dates">
+      <fieldset class="date-fieldset">
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Date'}}">
+          {{localize "CALENDARIA.Common.Date"}}
+        </legend>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.Common.Start"}}</label>
+          <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="startDate"
+            data-tooltip aria-label="{{localize 'CALENDARIA.UI.StartDateTooltip'}}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{{startDateDisplay}}</span>
+          </button>
+          <input type="hidden" name="system.startDate.year" value="{{system.startDate.year}}">
+          <input type="hidden" name="system.startDate.month" value="{{system.startDate.month}}">
+          <input type="hidden" name="system.startDate.dayOfMonth" value="{{system.startDate.dayOfMonth}}">
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.Common.End"}}</label>
+          <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="endDate" data-tooltip
+            aria-label="{{localize 'CALENDARIA.UI.EndDateTooltip'}}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{{endDateDisplay}}</span>
+          </button>
+          <input type="hidden" name="system.endDate.year" value="{{system.endDate.year}}">
+          <input type="hidden" name="system.endDate.month" value="{{system.endDate.month}}">
+          <input type="hidden" name="system.endDate.dayOfMonth" value="{{system.endDate.dayOfMonth}}">
+        </div>
+      </fieldset>
+
+      <fieldset class="time-fieldset">
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Time'}}">
+          {{localize "CALENDARIA.Common.Time"}}
+        </legend>
+        <div class="time-grid">
+          <label>{{localize "CALENDARIA.Common.Start"}}</label>
+          <div class="time-inputs">
+            <input type="number" name="system.startDate.hour" value="{{system.startDate.hour}}" min="0"
+              max="{{maxHour}}" step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+              aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
+            <span class="time-separator">:</span>
+            <input type="number" name="system.startDate.minute" value="{{system.startDate.minute}}" min="0" max="59"
+              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+              aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
+          </div>
+          <label class="all-day-label">
+            <input type="checkbox" name="system.allDay" {{checked system.allDay}} data-tooltip
+              aria-label="{{localize 'CALENDARIA.UI.AllDayTooltip'}}">
+            {{localize "CALENDARIA.MiniCal.AllDay"}}
+          </label>
+          <label>{{localize "CALENDARIA.Common.End"}}</label>
+          <div class="time-inputs">
+            <input type="number" name="system.endDate.hour" value="{{system.endDate.hour}}" min="0" max="{{maxHour}}"
+              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+              aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
+            <span class="time-separator">:</span>
+            <input type="number" name="system.endDate.minute" value="{{system.endDate.minute}}" min="0" max="59"
+              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+              aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="schedule-row">
+      <fieldset class="conditions-fieldset">
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Schedule.ConditionBuilderHint'}}">
+          {{localize "CALENDARIA.Note.Schedule.ConditionBuilder"}}
+        </legend>
+
+        <div class="condition-actions">
+          <button type="button" class="cb-open-builder" data-action="openConditionBuilder">
+            <i class="fas fa-sitemap"></i> {{localize "CALENDARIA.Condition.Builder.OpenBuilder"}}
+          </button>
+
+          <div class="preset-group">
+            <select class="preset-select">
+              <option value="">{{localize "CALENDARIA.Note.Schedule.SelectPreset"}}</option>
+              <option value="__clear__">{{localize "CALENDARIA.Note.Schedule.ClearConditions"}}</option>
+              {{#each presetGroups}}
+                <optgroup label="{{label}}">
+                  {{#each options}}
+                    <option value="{{id}}">{{label}}</option>
+                  {{/each}}
+                </optgroup>
+              {{/each}}
+            </select>
+          </div>
+        </div>
+
+        {{#if conditionSummaryHtml}}
+          <div class="condition-groups">
+            {{{conditionSummaryHtml}}}
+          </div>
+        {{else}}
+          <p class="hint">{{localize "CALENDARIA.Note.Schedule.NoConditions"}}</p>
+        {{/if}}
+      </fieldset>
+
+      <fieldset class="max-occurrences-fieldset">
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Schedule.MaxOccurrencesTooltip'}}">
+          {{localize "CALENDARIA.Note.Schedule.MaxOccurrences"}}
+        </legend>
+        <input type="number" name="system.maxOccurrences" value="{{system.maxOccurrences}}" min="0" step="1"
+          placeholder="∞">
+      </fieldset>
+    </div>
+
+    {{#if occurrences.length}}
+      <fieldset class="occurrences-fieldset">
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Occurrences'}}">
+          {{localize "CALENDARIA.Note.Schedule.Occurrences"}}
+        </legend>
+        <ul class="occurrence-list">
+          {{#each occurrences}}
+            <li><i class="fas fa-calendar-day"></i> {{this}}</li>
+          {{/each}}
+        </ul>
+      </fieldset>
+    {{/if}}
+  </div>
+</section>

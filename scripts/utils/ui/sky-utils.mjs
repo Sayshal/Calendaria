@@ -4,10 +4,9 @@
  * @author Tyler
  */
 
+import { SKY_KEYFRAMES, SKY_OVERRIDES } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import { getPreset } from '../../weather/data/weather-presets.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { SKY_KEYFRAMES, SKY_OVERRIDES } from '../../applications/hud/hud-scene-renderer.mjs';
+import { WeatherManager, getPreset } from '../../weather/_module.mjs';
 
 /**
  * Linearly interpolate between two hex color strings, returning [r,g,b].

@@ -145,26 +145,110 @@
     "festivalofzenali": {
       "name": "Festival of Zenalia",
       "month": 4,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFD700",
       "description": "Five-day celebration at the zenith of High Sun, featuring the Starlight Pageants.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "festivalofdessal": {
       "name": "Festival of Dessalia",
       "month": 9,
-      "icon": "fas fa-cloud-sun",
+      "icon": "fa-cloud-sun",
       "color": "#FF8C00",
       "description": "Five-day festival marking the midpoint of Sun Descending season.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "festivalofassali": {
       "name": "Festival of Assalia",
       "month": 14,
-      "icon": "fas fa-sun-plant-wilt",
+      "icon": "fa-sun-plant-wilt",
       "color": "#FFA500",
       "description": "Five-day festival celebrating the midpoint of Sun Ascending season.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 15
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

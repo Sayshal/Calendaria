@@ -4,14 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
-import { compareDates, getCurrentDate } from '../notes/date-utils.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/recurrence.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
+import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, needsRandomRegeneration } from '../notes/_module.mjs';
+import { CalendariaSocket, format, localize, log } from '../utils/_module.mjs';
 
 /**
  * Event Scheduler class that monitors time changes and triggers event notifications.
@@ -28,6 +24,14 @@ export default class EventScheduler {
 
   /** @type {number} Minimum interval between trigger checks in game seconds (30 minutes) */
   static TRIGGER_CHECK_INTERVAL = 1800;
+
+  /** @type {boolean} Flag to skip event triggers on next update (for timepoint jumps) */
+  static #skipNext = false;
+
+  /** Skip event triggers on the next time update. */
+  static skipNext() {
+    this.#skipNext = true;
+  }
 
   /**
    * Initialize the event scheduler.
@@ -46,6 +50,12 @@ export default class EventScheduler {
    */
   static onUpdateWorldTime(worldTime, _delta) {
     if (!CalendariaSocket.isPrimaryGM()) return;
+    if (this.#skipNext) {
+      this.#skipNext = false;
+      this.#lastDate = getCurrentDate();
+      log(3, 'Skipping event triggers (timepoint jump)');
+      return;
+    }
     const currentDate = getCurrentDate();
     if (!currentDate) return;
     if (!NoteManager.isInitialized()) return;
@@ -124,52 +134,16 @@ export default class EventScheduler {
   }
 
   /**
-   * Trigger an event and show notification.
+   * Trigger an event — chat announcement, Hook, and macro.
    * @param {object} note - The note stub
    * @param {object} currentDate - Current date components
    * @private
    */
   static #triggerEvent(note, currentDate) {
     log(3, `Triggering event: ${note.name}`);
-    const notificationType = this.#getNotificationType(note);
-    const message = this.#formatEventMessage(note);
-    ui.notifications[notificationType](message, { permanent: false });
     this.#sendChatAnnouncement(note);
     Hooks.callAll(HOOKS.EVENT_TRIGGERED, { id: note.id, name: note.name, flagData: note.flagData, currentDate });
     this.#executeMacro(note);
-  }
-
-  /**
-   * Get notification type based on note category.
-   * @param {object} note - The note stub
-   * @returns {'info'|'warn'|'error'} Notification type
-   * @private
-   */
-  static #getNotificationType(note) {
-    const categories = note.flagData.categories || [];
-    if (categories.includes('deadline') || categories.includes('combat')) return 'warn';
-    return 'info';
-  }
-
-  /**
-   * Format the event notification message.
-   * @param {object} note - The note stub
-   * @returns {string} Formatted message
-   * @private
-   */
-  static #formatEventMessage(note) {
-    let message = `<strong>${note.name}</strong>`;
-    if (!note.flagData.allDay) {
-      const hour = String(note.flagData.startDate.hour ?? 0).padStart(2, '0');
-      const minute = String(note.flagData.startDate.minute ?? 0).padStart(2, '0');
-      message += ` at ${hour}:${minute}`;
-    }
-    const categories = note.flagData.categories || [];
-    if (categories.length > 0) {
-      const categoryDef = NoteManager.getCategoryDefinition(categories[0]);
-      if (categoryDef) message = `<i class="${categoryDef.icon}" style="color:${categoryDef.color}"></i> ${message}`;
-    }
-    return message;
   }
 
   /**
@@ -220,7 +194,7 @@ export default class EventScheduler {
       iconHtml
     });
     let whisper = [];
-    if (flagData.gmOnly) whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
+    if (flagData.visibility && flagData.visibility !== 'visible') whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
     await ChatMessage.create({
       content,
       whisper,
@@ -228,7 +202,7 @@ export default class EventScheduler {
       flavor: `<span style="color: ${color};">${iconHtml}</span> ${localize('CALENDARIA.Event.CalendarEvent')}`,
       flags: { [MODULE.ID]: { isAnnouncement: true, noteId: note.id, journalId: note.journalId } }
     });
-    log(3, `Chat announcement sent for event: ${note.name}`, { gmOnly: flagData.gmOnly });
+    log(3, `Chat announcement sent for event: ${note.name}`, { visibility: flagData.visibility });
   }
 
   /**
@@ -360,10 +334,7 @@ export default class EventScheduler {
    * @private
    */
   static #showProgressNotification(note, progress) {
-    const message = format('CALENDARIA.Event.DayProgress', { name: note.name, currentDay: progress.currentDay, totalDays: progress.totalDays });
-    if (progress.isFirstDay) ui.notifications.info(format('CALENDARIA.Event.StartingToday', { message }), { permanent: false });
-    else if (progress.isLastDay) ui.notifications.info(format('CALENDARIA.Event.FinalDay', { message }), { permanent: false });
-    else ui.notifications.info(format('CALENDARIA.Event.PercentComplete', { message, percentage: progress.percentage }), { permanent: false });
+    log(3, `Multi-day progress: ${note.name} — day ${progress.currentDay}/${progress.totalDays}`);
     Hooks.callAll(HOOKS.EVENT_DAY_CHANGED, { id: note.id, name: note.name, progress });
     this.#executeMacro(note, { trigger: 'multiDayProgress', progress });
   }

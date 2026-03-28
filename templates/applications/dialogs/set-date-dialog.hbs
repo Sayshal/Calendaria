@@ -111,5 +111,11 @@
       <i class="fas fa-calendar-check"></i>
       {{localize "CALENDARIA.SetDate.SetDate"}}
     </button>
+    {{#if cinematicEnabled}}
+      <button type="button" data-action="cinematicAdvance">
+        <i class="fa-solid fa-film"></i>
+        {{localize "CALENDARIA.Cinematic.RunCinematic"}}
+      </button>
+    {{/if}}
   </footer>
 </div>

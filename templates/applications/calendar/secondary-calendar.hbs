@@ -1,0 +1,59 @@
+<div class="secondary-calendar-container">
+  <header class="secondary-header">
+    <button type="button" data-action="navigate" data-direction="previous" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.PreviousMonth'}}">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <div class="header-center">
+      <span class="month-year">{{{formattedHeader}}}</span>
+    </div>
+
+    <button type="button" data-action="navigate" data-direction="next" data-tooltip
+      aria-label="{{localize 'CALENDARIA.Common.NextMonth'}}">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </header>
+
+  {{#if calendarData}}
+    <div class="secondary-grid" style="--weekday-count: {{calendarData.weekdays.length}}">
+      {{#if calendarData.weekdays.length}}
+        <div class="weekday-row">
+          {{#each calendarData.weekdays}}
+            <div class="weekday-header">{{abbreviation}}</div>
+          {{/each}}
+        </div>
+      {{/if}}
+
+      {{#each calendarData.weeks}}
+        <div class="week-row">
+          {{#each this}}
+            <div class="day-cell{{#if isToday}} today{{/if}}{{#if isFromOtherMonth}} other-month{{/if}}">
+              <span class="day-number">{{day}}</span>
+            </div>
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+
+    {{#if calendarData.intercalaryDays.length}}
+      <div class="intercalary-section">
+        {{#each calendarData.intercalaryDays}}
+          <span class="intercalary-day{{#if isToday}} today{{/if}}" data-tooltip
+            aria-label="{{festivalName}}">{{day}}</span>
+        {{/each}}
+      </div>
+    {{/if}}
+  {{/if}}
+
+  <footer class="secondary-footer">
+    <button type="button" data-action="today" data-tooltip aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
+      <i class="fas fa-calendar-day"></i>
+    </button>
+    <select class="calendar-select" data-action="switchCalendar">
+      {{#each calendarOptions}}
+        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+      {{/each}}
+    </select>
+  </footer>
+</div>

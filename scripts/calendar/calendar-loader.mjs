@@ -5,14 +5,10 @@
  */
 
 import { MODULE } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
-import CalendarRegistry from './calendar-registry.mjs';
-import { preLocalizeCalendar } from './calendar-utils.mjs';
+import { log } from '../utils/_module.mjs';
+import { CalendarRegistry, preLocalizeCalendar } from './_module.mjs';
 
-/**
- * List of bundled calendar IDs that ship with the module.
- * @type {string[]}
- */
+/** @type {string[]} List of bundled calendar IDs that ship with the module. */
 export const BUNDLED_CALENDARS = [
   'athasian',
   'barovian',
@@ -22,10 +18,13 @@ export const BUNDLED_CALENDARS = [
   'forbidden-lands',
   'galifar',
   'golarion',
+  'golarion-imperial',
   'gregorian',
+  'pact-standard',
   'greyhawk',
   'greyhawk-364',
   'harptos',
+  'imperial-warhammer',
   'khorvaire',
   'krynn-elven',
   'krynn-solamnia',
@@ -34,10 +33,7 @@ export const BUNDLED_CALENDARS = [
   'traveller'
 ];
 
-/**
- * Default calendar ID to use when no calendar is selected.
- * @type {string}
- */
+/** @type {string} Default calendar ID to use when no calendar is selected. */
 export const DEFAULT_CALENDAR = 'gregorian';
 
 /**

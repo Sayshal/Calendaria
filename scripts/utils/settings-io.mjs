@@ -3,14 +3,12 @@
  * @module Utils/SettingsIO
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
 
-/**
- * List of settings keys to export.
- */
+/** @type {string[]} List of settings keys to export. */
 const EXPORTABLE_SETTINGS = [
   SETTINGS.ACTIVE_CALENDAR,
   SETTINGS.ADVANCE_TIME_ON_REST,
@@ -30,7 +28,7 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.CHAT_TIMESTAMP_SHOW_TIME,
   SETTINGS.CURRENT_WEATHER,
   SETTINGS.CUSTOM_CALENDARS,
-  SETTINGS.CUSTOM_CATEGORIES,
+  SETTINGS.CUSTOM_PRESETS,
   SETTINGS.CUSTOM_THEME_COLORS,
   SETTINGS.CUSTOM_TIME_JUMPS,
   SETTINGS.CUSTOM_WEATHER_PRESETS,
@@ -84,7 +82,6 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.PERMISSIONS,
   SETTINGS.PRIMARY_GM,
   SETTINGS.SAVED_TIMEPOINTS,
-  SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS,
   SETTINGS.SHOW_BIG_CAL,
   SETTINGS.SHOW_CALENDAR_HUD,
   SETTINGS.SHOW_MINI_CAL,
@@ -170,9 +167,7 @@ export async function importSettings(onComplete) {
     try {
       const text = await foundry.utils.readTextFromFile(file);
       const importData = JSON.parse(text);
-      if (!importData.settings || typeof importData.settings !== 'object') {
-        throw new Error('Invalid settings file format');
-      }
+      if (!importData.settings || typeof importData.settings !== 'object') throw new Error('Invalid settings file format');
       const hasCalendarData = !!importData.calendarData?.name;
       const settingsCount = Object.keys(importData.settings).length;
       const calendarName = importData.calendarData?.name;

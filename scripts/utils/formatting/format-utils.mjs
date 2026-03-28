@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { resolveRandomizedPhase } from '../../data/_module.mjs';
 import { format, localize } from '../localization.mjs';
 
 /**
@@ -349,9 +350,13 @@ export function formatApproximateDate(calendar, components) {
   const season = calendar?.getCurrentSeason?.(components);
   if (!season) return parts.MMMM;
   const seasonName = localize(season.name);
-  let dayOfYear = components.dayOfMonth;
   const monthsValues = resolveArray(calendar, 'monthsArray', 'months.values');
-  for (let i = 0; i < components.month; i++) dayOfYear += monthsValues[i]?.days ?? 0;
+  let dayOfYear;
+  if (calendar?._calculateDayOfYear) dayOfYear = calendar._calculateDayOfYear(components);
+  else {
+    dayOfYear = components.dayOfMonth;
+    for (let i = 0; i < components.month; i++) dayOfYear += monthsValues[i]?.days ?? 0;
+  }
   let seasonStart = 0;
   let seasonEnd = 365;
   const seasonsArray = resolveArray(calendar, 'seasonsArray', 'seasons.values');
@@ -362,7 +367,7 @@ export function formatApproximateDate(calendar, components) {
     seasonEnd = season.dayEnd ?? (monthsValues[season.monthEnd]?.days ?? 30) - 1;
     for (let i = 0; i < season.monthEnd; i++) seasonEnd += monthsValues[i]?.days ?? 0;
   } else if (seasonIdx >= 0 && calendar?.seasons?.type === 'periodic' && calendar?._calculatePeriodicSeasonBounds) {
-    const bounds = calendar._calculatePeriodicSeasonBounds(seasonIdx);
+    const bounds = calendar._calculatePeriodicSeasonBounds(seasonIdx, calendar.getDaysInYear?.(components.year));
     seasonStart = bounds.dayStart;
     seasonEnd = bounds.dayEnd;
   } else if (season.dayStart !== undefined) {
@@ -502,6 +507,13 @@ export function formatCustom(calendar, components, formatStr) {
         if (field === 'cycle') return String(getCycleNumber(calendar, components, idx));
         return '';
       }
+      if (customToken.startsWith('moon=')) {
+        const paramPart = customToken.slice(5);
+        let moonSelector;
+        if ((paramPart.startsWith("'") && paramPart.endsWith("'")) || (paramPart.startsWith('"') && paramPart.endsWith('"'))) moonSelector = paramPart.slice(1, -1);
+        else moonSelector = /^\d+$/.test(paramPart) ? parseInt(paramPart, 10) : paramPart;
+        return getMoonPhaseName(calendar, components, moonSelector);
+      }
       if (customToken.startsWith('moonIcon')) {
         const paramPart = customToken.slice(9);
         let moonSelector;
@@ -544,29 +556,65 @@ export function validateFormatString(formatStr, calendar, components) {
 }
 
 /**
- * Get moon phase name for the given date.
- * @param {object} calendar - Calendar data
- * @param {object} components - Date components
- * @returns {string} Moon phase name
+ * Resolve a moon selector (index, name string, or undefined) to a numeric index.
+ * @param {object[]} moons - Array of moon definitions
+ * @param {string|number} [moonSelector] - Moon name or index
+ * @returns {number} Resolved moon index
  */
-function getMoonPhaseName(calendar, components) {
-  const moons = resolveArray(calendar, 'moonsArray', 'moons');
-  if (!moons.length) return '';
-  if (calendar.getMoonPhase && calendar.componentsToTime) {
-    const worldTime = calendar.componentsToTime(components);
-    const phaseData = calendar.getMoonPhase(0, worldTime);
-    return phaseData?.subPhaseName || phaseData?.name || '';
-  }
-  const moon = moons[0];
-  const phasesArr = Object.values(moon.phases ?? {});
-  if (!phasesArr.length) return '';
+function resolveMoonIndex(moons, moonSelector) {
+  if (moonSelector === undefined || moonSelector === null || moonSelector === '') return 0;
+  if (typeof moonSelector === 'number') return moonSelector;
+  if (/^\d+$/.test(moonSelector)) return parseInt(moonSelector, 10);
+  const selectorLower = String(moonSelector).toLowerCase();
+  const foundIndex = moons.findIndex((m) => {
+    const moonName = localize(m.name).toLowerCase();
+    const rawName = (m.name || '').toLowerCase();
+    return moonName === selectorLower || rawName === selectorLower;
+  });
+  return foundIndex >= 0 ? foundIndex : 0;
+}
+
+/**
+ * Get fallback phase position for a moon when calendar.getMoonPhase is unavailable.
+ * @param {object} moon - Moon definition
+ * @param {object} components - Date components {year, month, dayOfMonth}
+ * @returns {number} Phase position 0-1
+ */
+function getFallbackPhasePosition(moon, components) {
   const { year, month, dayOfMonth } = components;
   const cycleLength = moon.cycleLength || 29;
   const refDate = moon.referenceDate || { year: 0, month: 0, dayOfMonth: 0 };
   const refDays = refDate.year * 365 + refDate.month * 30 + (refDate.dayOfMonth ?? 0);
   const currentDays = year * 365 + month * 30 + dayOfMonth;
+  if (moon.phaseMode === 'randomized') {
+    return resolveRandomizedPhase(moon, currentDays, { year, month, dayOfMonth });
+  }
   const daysSinceRef = currentDays - refDays;
-  const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+  return (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+}
+
+/**
+ * Get moon phase name for the given date.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @param {string|number} [moonSelector] - Moon name or index (default: first moon)
+ * @returns {string} Moon phase name
+ */
+function getMoonPhaseName(calendar, components, moonSelector) {
+  const moons = resolveArray(calendar, 'moonsArray', 'moons');
+  if (!moons.length) return '';
+  let moonIndex = resolveMoonIndex(moons, moonSelector);
+  if (calendar.getMoonPhase && calendar.componentsToTime) {
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const internalComponents = { ...components, year: components.year - yearZero };
+    const worldTime = calendar.componentsToTime(internalComponents);
+    const phaseData = calendar.getMoonPhase(moonIndex, worldTime);
+    return phaseData?.subPhaseName || phaseData?.name || '';
+  }
+  const moon = moons[moonIndex];
+  const phasesArr = Object.values(moon.phases ?? {});
+  if (!phasesArr.length) return '';
+  const cyclePosition = getFallbackPhasePosition(moon, components);
   const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
   const phase = phasesArr[phaseIndex];
   return phase ? localize(phase.name) : '';
@@ -582,20 +630,7 @@ function getMoonPhaseName(calendar, components) {
 function getMoonPhaseIcon(calendar, components, moonSelector) {
   const moons = resolveArray(calendar, 'moonsArray', 'moons');
   if (!moons.length) return '';
-  let moonIndex = 0;
-  if (moonSelector !== undefined && moonSelector !== null && moonSelector !== '') {
-    if (typeof moonSelector === 'number') moonIndex = moonSelector;
-    else if (/^\d+$/.test(moonSelector)) moonIndex = parseInt(moonSelector, 10);
-    else {
-      const selectorLower = String(moonSelector).toLowerCase();
-      const foundIndex = moons.findIndex((m) => {
-        const moonName = localize(m.name).toLowerCase();
-        const rawName = (m.name || '').toLowerCase();
-        return moonName === selectorLower || rawName === selectorLower;
-      });
-      if (foundIndex >= 0) moonIndex = foundIndex;
-    }
-  }
+  const moonIndex = resolveMoonIndex(moons, moonSelector);
   const moon = moons[moonIndex];
   if (!moon) return '';
   let phase;
@@ -612,13 +647,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
   if (!phase) {
     const phasesArr = Object.values(moon.phases ?? {});
     if (phasesArr.length) {
-      const { year, month, dayOfMonth } = components;
-      const cycleLength = moon.cycleLength || 29;
-      const refDate = moon.referenceDate || { year: 0, month: 0, dayOfMonth: 0 };
-      const refDays = refDate.year * 365 + refDate.month * 30 + (refDate.dayOfMonth ?? 0);
-      const currentDays = year * 365 + month * 30 + dayOfMonth;
-      const daysSinceRef = currentDays - refDays;
-      const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+      const cyclePosition = getFallbackPhasePosition(moon, components);
       const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
       phase = phasesArr[phaseIndex];
     }

@@ -75,7 +75,7 @@
       min-width: 0;
       max-width: 100%;
       padding: 0.75rem;
-      border: 0.0625rem dashed var(--color-border-light-tertiary, var(--calendaria-border));
+      border: 0.0625rem dashed var(--calendaria-border-light);
       border-radius: 0.375rem;
       overflow: hidden;
       cursor: pointer;
@@ -83,7 +83,7 @@
 
       &:hover,
       &.dragover {
-        border-color: var(--color-border-highlight, var(--calendaria-primary));
+        border-color: var(--calendaria-primary);
       }
 
       &.has-file {
@@ -167,7 +167,7 @@
 
       i {
         flex-shrink: 0;
-        color: var(--color-level-error, var(--calendaria-error));
+        color: var(--calendaria-error);
       }
 
       span {
@@ -272,7 +272,7 @@
         box-shadow: none;
 
         &:hover {
-          background: var(--color-cool-4);
+          background: var(--calendaria-border);
         }
       }
     }
@@ -292,7 +292,7 @@
       display: grid;
       align-items: center;
       padding: 0.3rem 0.5rem;
-      border-bottom: 0.0625rem solid var(--color-border-light-tertiary, var(--calendaria-border));
+      border-bottom: 0.0625rem solid var(--calendaria-border-light);
 
       &:last-child {
         border-bottom: none;
@@ -304,7 +304,7 @@
         top: 0;
         font-weight: 600;
         font-size: 0.8rem;
-        background: var(--color-cool-5);
+        background: var(--calendaria-ui-surface-dim);
 
         .note-radios {
           display: flex;
@@ -318,7 +318,7 @@
       }
 
       &:not(.header):hover {
-        background: var(--calendaria-surface-dim-75);
+        background: var(--calendaria-ui-surface);
       }
     }
 
@@ -371,7 +371,7 @@
 
     .form-footer {
       justify-content: center;
-      border-top: 0.0625rem solid var(--color-border-light-tertiary, var(--calendaria-border));
+      border-top: 0.0625rem solid var(--calendaria-border-light);
     }
   }
 }

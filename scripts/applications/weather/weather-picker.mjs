@@ -4,16 +4,12 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { CalendarEditor } from '../calendar/calendar-editor.mjs';
-import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
-import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/fxmaster.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
-import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/data/climate-data.mjs';
-import { SOUND_FX_OPTIONS, WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from '../../weather/data/weather-presets.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { WeatherProbabilityDialog } from './weather-probability-dialog.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
+import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SETTINGS, TEMPLATES, WEATHER_PERIODS, WIND_SPEEDS } from '../../constants.mjs';
+import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
+import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';
+import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetAlias, getPresetsByCategory, getTemperatureUnit, toDisplayUnit } from '../../weather/_module.mjs';
+import { CalendarEditor, WeatherProbabilityDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -36,6 +32,9 @@ function getPrecipIntensityLabel(value) {
 export default class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} Selected preset ID (null = none selected) */
   #selectedPresetId = null;
+
+  /** @type {string|null} Selected intraday period (null = current period) */
+  #selectedPeriod = null;
 
   /** @type {boolean} Whether user has edited custom fields */
   #customEdited = false;
@@ -79,6 +78,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
   /** @type {string|null} FXMaster color override (hex) */
   #fxColor = null;
 
+  /** @type {string|null} Effect macro ID */
+  #fxMacro = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-weather-picker',
@@ -97,7 +99,8 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       randomWeather: WeatherPickerApp._onRandomWeather,
       clearWeather: WeatherPickerApp._onClearWeather,
       viewProbabilities: WeatherPickerApp._onViewProbabilities,
-      openWeatherSettings: WeatherPickerApp._onOpenWeatherSettings
+      openWeatherSettings: WeatherPickerApp._onOpenWeatherSettings,
+      selectPeriod: WeatherPickerApp._onSelectPeriod
     }
   };
 
@@ -107,6 +110,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
   /** @override */
   async close(options) {
     this.#selectedPresetId = null;
+    this.#selectedPeriod = null;
     this.#customEdited = false;
     this.#customLabel = null;
     this.#customTemp = null;
@@ -121,6 +125,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#fxDensity = null;
     this.#fxSpeed = null;
     this.#fxColor = null;
+    this.#fxMacro = null;
     return super.close(options);
   }
 
@@ -136,6 +141,13 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     context.zoneOptions = [];
     for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === selectedZoneId });
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+    context.intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+    if (context.intradayEnabled) {
+      const currentPeriod = WeatherManager.getCurrentPeriod();
+      const selected = this.#selectedPeriod ?? currentPeriod;
+      context.periods = Object.values(WEATHER_PERIODS).map((p) => ({ id: p.id, label: localize(p.label), icon: p.icon, selected: p.id === selected, isCurrent: p.id === currentPeriod }));
+      context.selectedPeriod = selected;
+    }
     const enabledPresetIds = new Set();
     if (sceneZone?.presets) for (const p of Object.values(sceneZone.presets)) if (p.enabled !== false) enabledPresetIds.add(p.id);
     const hasZoneFilter = sceneZone && enabledPresetIds.size > 0;
@@ -231,12 +243,13 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       ];
       context.fxColor = this.#fxColor !== null ? this.#fxColor : (currentWeather?.fxColor ?? '');
     }
-    const currentSoundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
-    context.soundFx = currentSoundFx;
-    const sfxEntries = SOUND_FX_OPTIONS.map((key) => ({ value: key, label: localize(`CALENDARIA.SoundFx.${key}`), selected: key === currentSoundFx })).sort((a, b) =>
-      a.label.localeCompare(b.label, game.i18n.lang)
-    );
-    context.soundFxOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx }, ...sfxEntries];
+    context.soundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
+    const currentFxMacro = this.#fxMacro !== null ? this.#fxMacro : (currentWeather?.fxMacro ?? '');
+    const macros = getAvailableMacros();
+    context.fxMacroOptions = [
+      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxMacro },
+      ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
+    ];
     return context;
   }
 
@@ -256,6 +269,22 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         this.#customEdited = true;
         this.#selectedPresetId = null;
         for (const btn of this.element.querySelectorAll('.weather-btn.active')) btn.classList.remove('active');
+      });
+    }
+    const soundPickerBtn = this.element.querySelector('.sound-file-picker');
+    if (soundPickerBtn) {
+      soundPickerBtn.addEventListener('click', () => {
+        const input = this.element.querySelector('input[name="soundFx"]');
+        const fp = new foundry.applications.apps.FilePicker({
+          type: 'audio',
+          current: input?.value || 'modules/calendaria/assets/sound/',
+          callback: (path) => {
+            if (input) input.value = path;
+            this.#customEdited = true;
+            this.#selectedPresetId = null;
+          }
+        });
+        fp.browse();
       });
     }
     const precipSlider = this.element.querySelector('[name="precipIntensity"]');
@@ -288,6 +317,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const zoneId = sceneZone?.id ?? null;
     const fxPreset = fd.fxPreset || null;
     const soundFx = fd.soundFx || null;
+    const fxMacro = fd.fxMacro || null;
     const fxDensity = fd.fxDensity || null;
     const fxSpeed = fd.fxSpeed || null;
     const fxColor = fd.fxColor || null;
@@ -299,18 +329,25 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const nativeSound = preset?.soundFx || '';
       const userPickedSound = this.#soundFx || '';
       const soundOverride = userPickedSound !== nativeSound ? userPickedSound || null : undefined;
+      const nativeMacro = preset?.fxMacro || '';
+      const userPickedMacro = this.#fxMacro || '';
+      const macroOverride = userPickedMacro !== nativeMacro ? userPickedMacro || null : undefined;
       const temp = fd.customTemp;
       const temperature = temp != null && temp !== '' ? fromDisplayUnit(parseInt(temp, 10)) : undefined;
+      const periodOpts = {};
+      if (game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER)) periodOpts.period = this.#selectedPeriod ?? WeatherManager.getCurrentPeriod();
       await WeatherManager.setWeather(this.#selectedPresetId, {
         temperature,
         wind: windData,
         precipitation: precipData,
         fxPreset: fxOverride,
         soundFx: soundOverride,
+        fxMacro: macroOverride,
         fxDensity,
         fxSpeed,
         fxColor,
-        zoneId
+        zoneId,
+        ...periodOpts
       });
     } else {
       const data = foundry.utils.expandObject(fd);
@@ -320,7 +357,23 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         const icon = data.customIcon?.trim() || 'fa-question';
         const color = data.customColor || '#888888';
         const temperature = temp != null && temp !== '' ? fromDisplayUnit(parseInt(temp, 10)) : null;
-        await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, soundFx, fxDensity, fxSpeed, fxColor, zoneId });
+        const periodField = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER) ? (this.#selectedPeriod ?? WeatherManager.getCurrentPeriod()) : undefined;
+        await WeatherManager.setCustomWeather({
+          label,
+          temperature,
+          icon,
+          color,
+          wind: windData,
+          precipitation: precipData,
+          fxPreset,
+          soundFx,
+          fxMacro,
+          fxDensity,
+          fxSpeed,
+          fxColor,
+          zoneId,
+          period: periodField
+        });
       }
     }
     log(3, `Weather applied: ${this.#selectedPresetId ?? 'custom'}`);
@@ -341,6 +394,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           tempMax: data.customTemp != null && data.customTemp !== '' ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
           fxPreset,
           soundFx,
+          fxMacro,
           fxDensity,
           fxSpeed,
           fxColor,
@@ -355,6 +409,16 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
 
   /**
    * Select a weather preset — populates custom fields for preview/editing.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static _onSelectPeriod(_event, target) {
+    this.#selectedPeriod = target.dataset.periodId;
+    this.render();
+  }
+
+  /**
+   * Select a weather preset.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
@@ -379,6 +443,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = preset.precipitation?.intensity ?? 0;
     this.#fxPreset = preset.fxPreset || '';
     this.#soundFx = preset.soundFx || '';
+    this.#fxMacro = preset.fxMacro || '';
     this.#fxDensity = preset.fxDensity || '';
     this.#fxSpeed = preset.fxSpeed || '';
     this.#fxColor = preset.fxColor || '';
@@ -393,7 +458,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
   static async _onRandomWeather(_event, _target) {
     const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
     const zoneId = sceneZone?.id ?? null;
-    const weather = await WeatherManager.generateAndSetWeather({ zoneId });
+    const weather = await WeatherManager.generateAndSetWeather({ zoneId, randomize: true });
     this.#selectedPresetId = weather?.id ?? null;
     this.#customEdited = false;
     this.#customLabel = null;
@@ -406,6 +471,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = weather?.precipitation?.intensity ?? null;
     this.#fxPreset = weather?.fxPreset ?? null;
     this.#soundFx = weather?.soundFx ?? null;
+    this.#fxMacro = weather?.fxMacro ?? null;
     this.#fxDensity = weather?.fxDensity ?? null;
     this.#fxSpeed = weather?.fxSpeed ?? null;
     this.#fxColor = weather?.fxColor ?? null;
@@ -449,6 +515,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#precipIntensity = 0;
     this.#fxPreset = null;
     this.#soundFx = null;
+    this.#fxMacro = null;
     this.#fxDensity = null;
     this.#fxSpeed = null;
     this.#fxColor = null;

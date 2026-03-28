@@ -4,16 +4,23 @@
  * @author Tyler
  */
 
-import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { canAddNotes, canDeleteNotes, getUsersWithPermission } from '../utils/permissions.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
-import { compareDates } from './date-utils.mjs';
-import { createNoteStub, getCategoryDefinition, getDefaultNoteData, getPredefinedCategories, sanitizeNoteData, validateNoteData } from './note-data.mjs';
-import { getOccurrencesInRange, getRecurrenceDescription, isRecurringMatch } from './recurrence.mjs';
+import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
+import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
+import { CalendariaSocket, canAddNotes, canDeleteNotes, format, getUsersWithPermission, localize, log } from '../utils/_module.mjs';
+import {
+  applyPresetDefaultsToNoteData,
+  compareDates,
+  createNoteStub,
+  getAllPresets,
+  getDefaultNoteData,
+  getOccurrencesInRange,
+  getPlayerUsablePresets,
+  getPresetDefinition,
+  getRecurrenceDescription,
+  isRecurringMatch,
+  sanitizeNoteData,
+  validateNoteData
+} from './_module.mjs';
 
 /**
  * Main entry point for calendar notes system management.
@@ -30,6 +37,12 @@ export default class NoteManager {
 
   /** @type {boolean} Bypass flag for internal cleanup operations */
   static #bypassDeleteProtection = false;
+
+  /** @type {boolean} Guard flag to prevent festival name sync loops */
+  static #suppressFestivalNameSync = false;
+
+  /** @type {Map<string, object>} Festival removals captured in preDelete, persisted in deleteJournalEntry */
+  static #pendingFestivalRemovals = new Map();
 
   /**
    * Initialize the note manager.
@@ -66,7 +79,7 @@ export default class NoteManager {
     for (const journal of game.journal) {
       if (!journal.getFlag(MODULE.ID, 'isCalendarNote')) continue;
       const page = journal.pages.contents[0];
-      if (!page || page.system?.gmOnly) continue;
+      if (!page || page.system?.visibility !== NOTE_VISIBILITY.VISIBLE) continue;
       const currentOwnership = journal.ownership || {};
       const authorId = page.system?.author?._id;
       const updateData = {};
@@ -116,12 +129,24 @@ export default class NoteManager {
     for (const journal of game.journal) {
       for (const page of journal.pages) {
         const stub = createNoteStub(page);
-        if (stub) {
-          this.#noteIndex.set(page.id, stub);
-        }
+        if (stub) this.#noteIndex.set(page.id, stub);
       }
     }
     log(3, `Built note index with ${this.#noteIndex.size} notes`);
+  }
+
+  /**
+   * Handle createJournalEntry hook — index pages when a journal appears (e.g. ownership grant).
+   * @param {JournalEntry} journal - The created journal
+   */
+  static onCreateJournalEntry(journal) {
+    for (const page of journal.pages) {
+      const stub = createNoteStub(page);
+      if (stub && !NoteManager.#noteIndex.has(page.id)) {
+        NoteManager.#noteIndex.set(page.id, stub);
+        Hooks.callAll(HOOKS.NOTE_CREATED, stub);
+      }
+    }
   }
 
   /**
@@ -134,7 +159,6 @@ export default class NoteManager {
     const stub = createNoteStub(page);
     if (stub) {
       NoteManager.#noteIndex.set(page.id, stub);
-
       Hooks.callAll(HOOKS.NOTE_CREATED, stub);
     }
   }
@@ -149,32 +173,35 @@ export default class NoteManager {
   static async onUpdateJournalEntryPage(page, changes, _options, _userId) {
     const stub = createNoteStub(page);
     if (stub) {
+      if (!game.user.isGM && changes.system?.visibility !== undefined) {
+        const vis = changes.system.visibility;
+        const isAuthor = page.system?.author?._id === game.user.id;
+        if (vis === NOTE_VISIBILITY.SECRET) stub.visible = false;
+        else if (vis === NOTE_VISIBILITY.HIDDEN) stub.visible = isAuthor;
+      }
       NoteManager.#noteIndex.set(page.id, stub);
-
       Hooks.callAll(HOOKS.NOTE_UPDATED, stub);
       if (game.user.isGM) {
         if (changes.name !== undefined) {
           const journal = page.parent;
           if (journal?.getFlag(MODULE.ID, 'isCalendarNote') && journal.name !== page.name) await journal.update({ name: page.name });
+          if (!NoteManager.#suppressFestivalNameSync) {
+            const linked = page.system?.linkedFestival;
+            if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalNameToCalendar(linked, changes.name);
+          }
         }
-        if (changes.system?.gmOnly !== undefined) {
+        if (changes.system?.visibility !== undefined) {
           const journal = page.parent;
           if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
-            if (changes.system.gmOnly) {
-              await journal.update({ ownership: { default: 0 } });
-            } else {
-              const newOwnership = { default: 2 };
-              for (const user of getUsersWithPermission('editNotes')) newOwnership[user.id] = 3;
-              await journal.update({ ownership: newOwnership });
-            }
-            log(3, `Updated journal ownership for gmOnly change: ${changes.system.gmOnly}`);
+            const ownership = this.#buildOwnership(changes.system.visibility, page.system?.author?._id);
+            await journal.update({ ownership });
+            log(3, `Updated journal ownership for visibility change: ${changes.system.visibility}`);
           }
         }
       }
     } else {
       if (NoteManager.#noteIndex.has(page.id)) {
         NoteManager.#noteIndex.delete(page.id);
-
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
@@ -190,7 +217,6 @@ export default class NoteManager {
   static onDeleteJournalEntryPage(page, _options, _userId) {
     if (NoteManager.#noteIndex.has(page.id)) {
       NoteManager.#noteIndex.delete(page.id);
-
       Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
     }
   }
@@ -201,13 +227,60 @@ export default class NoteManager {
    * @param {object} _options - Deletion options
    * @param {string} _userId - User ID who deleted the journal
    */
-  static onDeleteJournalEntry(journal, _options, _userId) {
+  static async onDeleteJournalEntry(journal, _options, _userId) {
+    let removed = false;
     for (const page of journal.pages) {
       if (NoteManager.#noteIndex.has(page.id)) {
         NoteManager.#noteIndex.delete(page.id);
+        Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
+        removed = true;
+      }
+    }
+    if (!removed) {
+      for (const [id, stub] of NoteManager.#noteIndex) {
+        if (stub.journalId === journal.id) {
+          NoteManager.#noteIndex.delete(id);
+          Hooks.callAll(HOOKS.NOTE_DELETED, id);
+        }
+      }
+    }
+    const linked = NoteManager.#pendingFestivalRemovals.get(journal.id);
+    if (linked) {
+      NoteManager.#pendingFestivalRemovals.delete(journal.id);
+      await NoteManager.#removeFestivalFromCalendar(linked);
+    }
+  }
 
+  /**
+   * Handle updateJournalEntry hook — re-sync ownership when native Foundry UI edits ownership.
+   * @param {JournalEntry} journal - The updated journal
+   * @param {object} changes - The changes applied
+   */
+  static async onUpdateJournalEntry(journal, changes) {
+    if (!journal.getFlag?.(MODULE.ID, 'isCalendarNote')) return;
+    if (!changes.ownership) return;
+    for (const page of journal.pages) {
+      const stub = createNoteStub(page);
+      if (stub) {
+        const existed = NoteManager.#noteIndex.has(page.id);
+        NoteManager.#noteIndex.set(page.id, stub);
+        Hooks.callAll(existed ? HOOKS.NOTE_UPDATED : HOOKS.NOTE_CREATED, stub);
+      } else if (NoteManager.#noteIndex.has(page.id)) {
+        NoteManager.#noteIndex.delete(page.id);
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
+    }
+    if (!game.user.isGM) return;
+    const page = journal.pages.contents[0];
+    if (!page) return;
+    const visibility = page.system?.visibility;
+    if (!visibility) return;
+    const expected = this.#buildOwnership(visibility, page.system?.author?._id);
+    const current = journal.ownership || {};
+    const needsRepair = Object.entries(expected).some(([k, v]) => current[k] !== v);
+    if (needsRepair) {
+      await journal.update({ ownership: expected });
+      log(3, `Re-synced ownership for "${journal.name}" after external edit`);
     }
   }
 
@@ -231,6 +304,11 @@ export default class NoteManager {
    * @returns {boolean|void} False to prevent deletion
    */
   static onPreDeleteJournalEntry(journal, _options, _userId) {
+    const page = journal.pages.contents[0];
+    if (game.user.isGM && page?.system?.linkedFestival) {
+      NoteManager.#pendingFestivalRemovals.set(journal.id, page.system.linkedFestival);
+      return;
+    }
     if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) return;
     if (this.#bypassDeleteProtection) return;
     const isCalendarJournal = journal.getFlag(MODULE.ID, 'isCalendarJournal');
@@ -238,6 +316,13 @@ export default class NoteManager {
       ui.notifications.warn('CALENDARIA.Warning.CannotDeleteCalendarJournal', { localize: true });
       log(2, `Prevented deletion of calendar journal: ${journal.name}`);
       return false;
+    }
+    if (!game.user.isGM) {
+      if (page?.system?.linkedFestival) {
+        ui.notifications.warn('CALENDARIA.Warning.CannotDeleteFestivalNote', { localize: true });
+        log(2, `Prevented deletion of festival note: ${journal.name}`);
+        return false;
+      }
     }
   }
 
@@ -250,6 +335,7 @@ export default class NoteManager {
    */
   static onPreDeleteFolder(folder, _options, _userId) {
     if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) return;
+    if (this.#bypassDeleteProtection) return;
     const isCalendarNotesFolder = folder.getFlag(MODULE.ID, 'isCalendarNotesFolder');
     if (isCalendarNotesFolder) {
       ui.notifications.warn('CALENDARIA.Warning.CannotDeleteNotesFolder', { localize: true });
@@ -274,9 +360,10 @@ export default class NoteManager {
    * @param {object} [options.journalData]  Additional journal entry data
    * @param {string} [options.creatorId]  User ID of creator (for socket-created notes)
    * @param {false|'edit'|'view'} [options.openSheet]  Open the note sheet after creation in the given mode, or false to skip (default 'edit')
+   * @param {'ui'|undefined} [options.source]  Pass 'ui' for interactive callers to trigger preset selection dialog
    * @returns {Promise<object>} Created journal entry page
    */
-  static async createNote({ name, content = '', noteData, calendarId, journalData = {}, creatorId, openSheet = 'edit' }) {
+  static async createNote({ name, content = '', noteData, calendarId, journalData = {}, creatorId, openSheet = 'edit', source }) {
     if (!canAddNotes()) {
       ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
@@ -284,6 +371,10 @@ export default class NoteManager {
     const validation = validateNoteData(noteData);
     if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
     const sanitized = sanitizeNoteData(noteData);
+    if (source === 'ui' && !sanitized.categories?.length && !sanitized.linkedFestival) {
+      const result = await this.#resolvePresetForNewNote(sanitized);
+      if (result === false) return null;
+    }
     if (!calendarId) {
       const activeCalendar = CalendarManager.getActiveCalendar();
       if (!activeCalendar?.metadata?.id) throw new Error('No active calendar found');
@@ -299,16 +390,14 @@ export default class NoteManager {
     const folder = await this.getCalendarFolder(calendarId, calendar);
     if (!folder) throw new Error('Failed to get or create calendar folder');
     const actualCreatorId = creatorId || game.user.id;
-    const ownership = sanitized.gmOnly ? { default: 0 } : { default: 2 };
-    ownership[actualCreatorId] = 3;
-    if (!sanitized.gmOnly) for (const user of getUsersWithPermission('editNotes')) ownership[user.id] = 3;
+    const ownership = this.#buildOwnership(sanitized.visibility, actualCreatorId);
     const journal = await JournalEntry.create({ name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } }, ...journalData });
     const page = await JournalEntryPage.create(
       { name, type: 'calendaria.calendarnote', system: sanitized, text: { content }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
       { parent: journal }
     );
     log(3, `Created calendar note: ${name}`);
-    if (openSheet) page.sheet.render(true, { mode: openSheet });
+    if (openSheet && (!creatorId || creatorId === game.user.id)) page.sheet.render(true, { mode: openSheet });
     return page;
   }
 
@@ -334,11 +423,15 @@ export default class NoteManager {
       if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) await journal.update({ name: updates.name });
     }
     if (updates.noteData) {
-      const currentNoteData = page.system || {};
+      const currentNoteData = page.system?.toObject?.() ?? page.system ?? {};
       const mergedNoteData = foundry.utils.mergeObject(currentNoteData, updates.noteData);
+      if (mergedNoteData.color && typeof mergedNoteData.color !== 'string') mergedNoteData.color = String(mergedNoteData.color);
       const validation = validateNoteData(mergedNoteData);
       if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
       updateData.system = sanitizeNoteData(mergedNoteData);
+    }
+    if (updates.content !== undefined) {
+      updateData['text.content'] = updates.content;
     }
     await page.update(updateData);
     log(3, `Updated calendar note: ${page.name}`);
@@ -477,7 +570,7 @@ export default class NoteManager {
       const endsInRange = noteEnd && compareDates(noteEnd, startDate) >= 0 && compareDates(noteEnd, endDate) <= 0;
       const spansRange = noteEnd && compareDates(noteStart, startDate) < 0 && compareDates(noteEnd, endDate) > 0;
       if (startsInRange || endsInRange || spansRange) matchingNotes.push(stub);
-      else if (stub.flagData.repeat && stub.flagData.repeat !== 'never') {
+      else if ((stub.flagData.repeat && stub.flagData.repeat !== 'never') || stub.flagData.conditionTree) {
         const occurrences = getOccurrencesInRange(stub.flagData, startDate, endDate, 10);
         if (occurrences.length > 0) matchingNotes.push(stub);
       }
@@ -497,41 +590,41 @@ export default class NoteManager {
   }
 
   /**
-   * Get notes by category.
-   * @param {string} category  Category ID
+   * Get notes by preset.
+   * @param {string} presetId  Preset ID
    * @returns {object[]}  Array of note stubs
    */
-  static getNotesByCategory(category) {
+  static getNotesByPreset(presetId) {
     return this.getAllNotes().filter((stub) => {
-      return stub.flagData.categories?.includes(category);
+      return stub.flagData.categories?.includes(presetId);
     });
   }
 
   /**
-   * Get all unique categories in use.
-   * @returns {string[]}  Array of category IDs
+   * Get all unique preset IDs in use.
+   * @returns {string[]}  Array of preset IDs
    */
-  static getAllCategories() {
-    const categories = new Set();
-    for (const stub of this.#noteIndex.values()) if (stub.flagData.categories) stub.flagData.categories.forEach((cat) => categories.add(cat));
-    return Array.from(categories);
+  static getAllUsedPresetIds() {
+    const presetIds = new Set();
+    for (const stub of this.#noteIndex.values()) if (stub.flagData.categories) stub.flagData.categories.forEach((cat) => presetIds.add(cat));
+    return Array.from(presetIds);
   }
 
   /**
-   * Get predefined category definitions.
-   * @returns {object[]}  Array of category definitions
+   * Get predefined preset definitions.
+   * @returns {object[]}  Array of preset definitions
    */
-  static getCategoryDefinitions() {
-    return getPredefinedCategories();
+  static getPresetDefinitions() {
+    return getAllPresets();
   }
 
   /**
-   * Get category definition by ID.
-   * @param {string} categoryId  Category ID
-   * @returns {object|null}  Category definition or null
+   * Get preset definition by ID.
+   * @param {string} presetId  Preset ID
+   * @returns {object|null}  Preset definition or null
    */
-  static getCategoryDefinition(categoryId) {
-    return getCategoryDefinition(categoryId);
+  static getPresetDefinition(presetId) {
+    return getPresetDefinition(presetId);
   }
 
   /**
@@ -547,11 +640,21 @@ export default class NoteManager {
     }
     const parentFolder = await this.getCalendarNotesFolder();
     if (!parentFolder) return null;
-    const existing = game.folders.find((f) => {
-      const flagId = f.getFlag(MODULE.ID, 'calendarId');
-      return f.type === 'JournalEntry' && flagId === calendarId;
-    });
-    if (existing) return existing;
+    const allMatching = game.folders.filter((f) => f.type === 'JournalEntry' && f.getFlag(MODULE.ID, 'calendarId') === calendarId);
+    if (allMatching.length > 1 && game.user.isGM) {
+      const [keep, ...duplicates] = allMatching;
+      this.#bypassDeleteProtection = true;
+      for (const dup of duplicates) {
+        for (const journal of game.journal.filter((j) => j.folder === dup)) {
+          await journal.update({ folder: keep.id });
+        }
+        await dup.delete();
+        log(3, `Merged duplicate calendar folder for ${calendarId}: ${dup.name}`);
+      }
+      this.#bypassDeleteProtection = false;
+      return keep;
+    }
+    if (allMatching.length === 1) return allMatching[0];
     if (game.user.isGM) {
       try {
         let calendarName = calendar.name || calendarId;
@@ -595,7 +698,7 @@ export default class NoteManager {
       log(3, `Migrating ${notePages.length} notes from ${journal.name}`);
       for (const page of notePages) {
         const noteData = page.system;
-        const ownership = noteData?.gmOnly ? { default: 0 } : { default: 2 };
+        const ownership = noteData?.visibility !== NOTE_VISIBILITY.VISIBLE ? { default: 0 } : { default: 2 };
         const newJournal = await JournalEntry.create({ name: page.name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } } });
         await JournalEntryPage.create(
           { name: page.name, type: 'calendaria.calendarnote', system: noteData, text: { content: page.text?.content || '' }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
@@ -638,6 +741,38 @@ export default class NoteManager {
   }
 
   /**
+   * Remove a festival from the calendar definition when its note is deleted.
+   * @param {{ calendarId: string, festivalKey: string }} linkedFestival - Festival link data
+   * @private
+   */
+  static async #removeFestivalFromCalendar({ calendarId, festivalKey }) {
+    const calendar = CalendarManager.getCalendar(calendarId);
+    if (!calendar?.festivals?.[festivalKey]) return;
+    const data = calendar.toObject();
+    delete data.festivals[festivalKey];
+    log(3, `Removed festival "${festivalKey}" from calendar ${calendarId}`);
+    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
+    else await CalendarManager.updateCustomCalendar(calendarId, data);
+  }
+
+  /**
+   * Sync a festival note's name to the calendar festival definition.
+   * @param {{ calendarId: string, festivalKey: string }} linkedFestival - Festival link data
+   * @param {string} newName - The new festival name
+   * @private
+   */
+  static async #syncFestivalNameToCalendar({ calendarId, festivalKey }, newName) {
+    const calendar = CalendarManager.getCalendar(calendarId);
+    if (!calendar?.festivals?.[festivalKey]) return;
+    if (calendar.festivals[festivalKey].name === newName) return;
+    const data = calendar.toObject();
+    data.festivals[festivalKey].name = newName;
+    log(3, `Synced festival name "${festivalKey}" → "${newName}" in calendar ${calendarId}`);
+    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
+    else await CalendarManager.updateCustomCalendar(calendarId, data);
+  }
+
+  /**
    * Get or create the Calendar Notes folder.
    * @returns {Promise<Folder|null>}  Folder document or null
    */
@@ -646,10 +781,25 @@ export default class NoteManager {
       const folder = game.folders.get(this.#notesFolderId);
       if (folder) return folder;
     }
-    const existing = game.folders.find((f) => {
-      const isCalendarFolder = f.getFlag(MODULE.ID, 'isCalendarNotesFolder');
-      return f.type === 'JournalEntry' && isCalendarFolder;
-    });
+    const allMatching = game.folders.filter((f) => f.type === 'JournalEntry' && f.getFlag(MODULE.ID, 'isCalendarNotesFolder'));
+    if (allMatching.length > 1 && game.user.isGM) {
+      const [keep, ...duplicates] = allMatching;
+      this.#bypassDeleteProtection = true;
+      for (const dup of duplicates) {
+        for (const child of game.folders.filter((f) => f.folder === dup)) {
+          await child.update({ folder: keep.id });
+        }
+        for (const journal of game.journal.filter((j) => j.folder === dup)) {
+          await journal.update({ folder: keep.id });
+        }
+        await dup.delete();
+        log(3, `Merged duplicate Calendar Notes folder: ${dup.name}`);
+      }
+      this.#bypassDeleteProtection = false;
+      this.#notesFolderId = keep.id;
+      return keep;
+    }
+    const existing = allMatching[0];
     if (existing) {
       this.#notesFolderId = existing.id;
       return existing;
@@ -687,6 +837,145 @@ export default class NoteManager {
     const stub = this.getNote(journalId);
     if (!stub) return 'Unknown';
     return getRecurrenceDescription(stub.flagData);
+  }
+
+  /**
+   * Resolve which preset to apply for a new UI-created note.
+   * @param {object} sanitized - Sanitized note data (mutated in place)
+   * @returns {Promise<string|null|false>} Preset ID, null (no category), or false (cancelled)
+   * @private
+   */
+  static async #resolvePresetForNewNote(sanitized) {
+    const storedDefault = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET);
+    if (storedDefault) {
+      const preset = getPresetDefinition(storedDefault);
+      if (preset) {
+        sanitized.categories = [storedDefault];
+        applyPresetDefaultsToNoteData(sanitized, [storedDefault]);
+        if (preset.icon) sanitized.icon = preset.icon;
+        if (preset.color) sanitized.color = preset.color;
+        return storedDefault;
+      }
+    }
+    return this.#showPresetSelectionDialog(sanitized);
+  }
+
+  /**
+   * Show a dialog for the user to select a preset for the new note.
+   * @param {object} sanitized - Sanitized note data (mutated in place)
+   * @returns {Promise<string|null|false>} Preset ID, null (no category), or false (cancelled)
+   * @private
+   */
+  static async #showPresetSelectionDialog(sanitized) {
+    const presets = game.user.isGM ? getAllPresets() : getPlayerUsablePresets();
+    const options = presets.map((p) => `<option value="${p.id}">${p.label}</option>`).join('');
+    const html = `<div class="form-group">
+      <label>${localize('CALENDARIA.PresetDialog.SelectLabel')}</label>
+      <div class="form-fields">
+        <multi-select name="presetChoice">${options}</multi-select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="checkbox">
+        <input type="checkbox" name="alwaysUse">
+        ${localize('CALENDARIA.PresetDialog.AlwaysUse')}
+      </label>
+    </div>`;
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: localize('CALENDARIA.PresetDialog.Title') },
+      content: html,
+      buttons: [
+        {
+          action: 'ok',
+          label: localize('CALENDARIA.Common.Confirm'),
+          icon: 'fas fa-check',
+          default: true,
+          callback: (_event, button) => {
+            const form = button.form ?? button.closest('form');
+            const multiSelect = form.querySelector('multi-select[name="presetChoice"]');
+            const selected = multiSelect
+              ? Array.from(multiSelect.querySelectorAll('.tag'))
+                  .map((t) => t.dataset.key)
+                  .filter(Boolean)
+              : [];
+            const alwaysUse = form.querySelector('input[name="alwaysUse"]')?.checked ?? false;
+            return { presetIds: selected, alwaysUse };
+          }
+        },
+        {
+          action: 'cancel',
+          label: localize('CALENDARIA.Common.Cancel'),
+          icon: 'fas fa-times'
+        }
+      ],
+      rejectClose: false,
+      modal: false
+    });
+    if (!result || result === 'cancel') return false;
+    const { presetIds, alwaysUse } = result;
+    if (alwaysUse && presetIds.length === 1) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET, presetIds[0]);
+    if (presetIds.length) {
+      sanitized.categories = presetIds;
+      applyPresetDefaultsToNoteData(sanitized, presetIds);
+      const firstPreset = getPresetDefinition(presetIds[0]);
+      if (firstPreset?.icon) sanitized.icon = firstPreset.icon;
+      if (firstPreset?.color) sanitized.color = firstPreset.color;
+    }
+    return presetIds.length ? presetIds[0] : null;
+  }
+
+  /**
+   * Build ownership object based on visibility level.
+   * @param {string} visibility - Note visibility level
+   * @param {string} [authorId] - Author user ID
+   * @returns {object} Foundry ownership object
+   * @private
+   */
+  static #buildOwnership(visibility, authorId) {
+    const ownership = {};
+    for (const user of game.users) if (!user.isGM) ownership[user.id] = 0;
+    ownership.default = 0;
+    switch (visibility) {
+      case NOTE_VISIBILITY.VISIBLE:
+        ownership.default = 2;
+        if (authorId) ownership[authorId] = 3;
+        for (const user of getUsersWithPermission('editNotes')) ownership[user.id] = 3;
+        break;
+      case NOTE_VISIBILITY.HIDDEN:
+        if (authorId) ownership[authorId] = 3;
+        break;
+      case NOTE_VISIBILITY.SECRET:
+        break;
+    }
+    return ownership;
+  }
+
+  /**
+   * Enable bypass of delete protection (used internally by FestivalManager).
+   */
+  static enableBypassDeleteProtection() {
+    this.#bypassDeleteProtection = true;
+  }
+
+  /**
+   * Disable bypass of delete protection.
+   */
+  static disableBypassDeleteProtection() {
+    this.#bypassDeleteProtection = false;
+  }
+
+  /**
+   * Enable suppression of festival name sync (prevents loops during editor→note sync).
+   */
+  static enableSuppressFestivalNameSync() {
+    this.#suppressFestivalNameSync = true;
+  }
+
+  /**
+   * Disable suppression of festival name sync.
+   */
+  static disableSuppressFestivalNameSync() {
+    this.#suppressFestivalNameSync = false;
   }
 
   /**

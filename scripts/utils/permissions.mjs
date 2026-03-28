@@ -6,14 +6,15 @@
 
 import { MODULE, SETTINGS } from '../constants.mjs';
 
-/**
- * Default permission settings for each action.
- */
+/** @type {Object<string, object>} Default permission settings for each action. */
 const DEFAULTS = {
   viewBigCal: { player: false, trusted: true, assistant: true },
+  viewChronicle: { player: false, trusted: true, assistant: true },
+  viewHUD: { player: true, trusted: true, assistant: true },
   viewMiniCal: { player: false, trusted: true, assistant: true },
-  viewTimeKeeper: { player: false, trusted: true, assistant: true },
+  viewStopwatch: { player: false, trusted: true, assistant: true },
   viewSunDial: { player: false, trusted: true, assistant: true },
+  viewTimeKeeper: { player: false, trusted: true, assistant: true },
   addNotes: { player: true, trusted: true, assistant: true },
   changeDateTime: { player: false, trusted: false, assistant: true },
   changeActiveCalendar: { player: false, trusted: false, assistant: false },
@@ -48,6 +49,22 @@ export function canViewBigCal() {
 }
 
 /**
+ * Check if the current user can view the Chronicle.
+ * @returns {boolean} True if user has permission
+ */
+export function canViewChronicle() {
+  return hasPermission('viewChronicle');
+}
+
+/**
+ * Check if the current user can view the HUD.
+ * @returns {boolean} True if user has permission
+ */
+export function canViewHUD() {
+  return hasPermission('viewHUD');
+}
+
+/**
  * Check if the current user can view the MiniCal.
  * @returns {boolean} True if user has permission
  */
@@ -56,11 +73,11 @@ export function canViewMiniCal() {
 }
 
 /**
- * Check if the current user can view the TimeKeeper.
+ * Check if the current user can view the Stopwatch.
  * @returns {boolean} True if user has permission
  */
-export function canViewTimeKeeper() {
-  return hasPermission('viewTimeKeeper');
+export function canViewStopwatch() {
+  return hasPermission('viewStopwatch');
 }
 
 /**
@@ -69,6 +86,14 @@ export function canViewTimeKeeper() {
  */
 export function canViewSunDial() {
   return hasPermission('viewSunDial');
+}
+
+/**
+ * Check if the current user can view the TimeKeeper.
+ * @returns {boolean} True if user has permission
+ */
+export function canViewTimeKeeper() {
+  return hasPermission('viewTimeKeeper');
 }
 
 /**
@@ -150,4 +175,33 @@ export function getUsersWithPermission(permissionKey) {
     if (perms.assistant && user.role === CONST.USER_ROLES.ASSISTANT) return true;
     return false;
   });
+}
+
+/**
+ * Get active non-GM users who lack a specific view permission.
+ * @param {string} permissionKey - The permission key to check
+ * @returns {object[]} Array of active users blocked by the permission
+ */
+export function getBlockedActiveUsers(permissionKey) {
+  const saved = game.settings.get(MODULE.ID, SETTINGS.PERMISSIONS) || {};
+  const perms = saved[permissionKey] || DEFAULTS[permissionKey] || {};
+  return game.users.filter((user) => {
+    if (!user.active || user.isGM) return false;
+    if (perms.player) return false;
+    if (perms.trusted && user.isTrusted) return false;
+    if (perms.assistant && user.role === CONST.USER_ROLES.ASSISTANT) return false;
+    return true;
+  });
+}
+
+/**
+ * Warn the GM when some active players lack view permission for a widget.
+ * @param {string} permissionKey - The view permission key for the widget
+ * @param {string} featureLabel - Localized name of the feature/widget
+ */
+export function warnShowToAll(permissionKey, featureLabel) {
+  const blocked = getBlockedActiveUsers(permissionKey);
+  if (blocked.length === 0) return;
+  const names = blocked.map((u) => u.name).join(', ');
+  ui.notifications.warn(game.i18n.format('CALENDARIA.Permissions.MismatchWarning', { names, feature: featureLabel }));
 }

@@ -95,42 +95,182 @@
     "awakeningday0000": {
       "name": "Awakening Day",
       "month": 1,
-      "icon": "fas fa-leaf",
+      "icon": "fa-leaf",
       "color": "#90EE90",
       "description": "Spring's arrival and the awakening of the land from winter's grip.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "springrisefestiv": {
       "name": "Springrise Festival",
       "month": 1,
-      "icon": "fas fa-seedling",
+      "icon": "fa-seedling",
       "color": "#FF69B4",
       "description": "Celebration of spring's full bloom when life returns to the Forbidden Lands.",
-      "dayOfMonth": 22
+      "dayOfMonth": 22,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 23
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "midsummerblot000": {
       "name": "Midsummer Blot",
       "month": 3,
-      "icon": "fas fa-fire",
+      "icon": "fa-fire",
       "color": "#FF4500",
       "description": "Sacrificial festival at the height of summer honoring the gods with offerings and sacred rites.",
-      "dayOfMonth": 22
+      "dayOfMonth": 22,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 23
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestfeast0000": {
       "name": "Harvest Feast",
       "month": 5,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#CD853F",
       "description": "Autumn celebration of the harvest bounty with feasting and thanksgiving.",
-      "dayOfMonth": 22
+      "dayOfMonth": 22,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 23
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "winternight00000": {
       "name": "Winter Night",
       "month": 7,
-      "icon": "fas fa-snowflake",
+      "icon": "fa-snowflake",
       "color": "#4682B4",
       "description": "Midwinter festival when servants of the gods decree next year's celebrations.",
-      "dayOfMonth": 22
+      "dayOfMonth": 22,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 23
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

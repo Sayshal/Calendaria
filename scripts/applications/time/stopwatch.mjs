@@ -1,19 +1,35 @@
 /* global PIXI */
+
 /**
  * Stopwatch Application - Timer with real-time and game-time modes.
- * Renders a realistic physical stopwatch face via PixiJS.
  * @module Applications/Stopwatch
  * @author Tyler
  */
 
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
-import TimeClock from '../../time/time-clock.mjs';
-import { DEFAULT_FORMAT_PRESETS, formatDuration, formatGameDuration, getDisplayFormat } from '../../utils/formatting/format-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
-
-import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import { buildOpenAppsMenuItem } from '../../utils/ui/calendar-view-utils.mjs';
+import { TimeClock } from '../../time/_module.mjs';
+import {
+  CalendariaSocket,
+  DEFAULT_FORMAT_PRESETS,
+  buildOpenAppsMenuItem,
+  canViewStopwatch,
+  checkStickyZones,
+  cleanupSnapIndicator,
+  finalizeDrag,
+  formatDuration,
+  formatGameDuration,
+  getDisplayFormat,
+  getRestorePosition,
+  getSidebarBuffer,
+  isCombatBlocked,
+  localize,
+  registerForZoneUpdates,
+  restorePinnedState,
+  unpinFromZone,
+  unregisterFromZoneUpdates,
+  usesDomParenting,
+  warnShowToAll
+} from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -130,14 +146,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#enableDragging();
     this.#enableResizing();
     this.#setupContextMenu();
-    if (this.#running) {
-      if (this.#mode === 'gametime') this.#registerTimeHook();
-    }
+    if (this.#running) if (this.#mode === 'gametime') this.#registerTimeHook();
   }
 
   /** @override */
   async close(options = {}) {
-    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
@@ -149,9 +163,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#saveState();
     this.#destroyPixi();
     this.#unregisterTimeHook();
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
-    StickyZones.cleanupSnapIndicator();
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
+    cleanupSnapIndicator();
     super._onClose(options);
   }
 
@@ -162,14 +176,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #initPixi() {
     const canvas = this.element.querySelector('.stopwatch-canvas');
     if (!canvas) return;
-
-    // Destroy previous instance if re-rendering
     this.#destroyPixi();
-
     const size = this.#getSize();
     canvas.width = size;
     canvas.height = size;
-
     this.#pixiApp = new PIXI.Application({ view: canvas, width: size, height: size, backgroundAlpha: 0, antialias: true });
     this.#buildStopwatchFace();
     this.#pixiApp.ticker.add(this.#onPixiTick, this);
@@ -220,7 +230,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #cssColor(prop, fallback) {
     const raw = getComputedStyle(this.element).getPropertyValue(prop)?.trim();
     if (!raw) return fallback;
-    // Handle hex strings
     if (raw.startsWith('#')) {
       const hex = raw.replace('#', '');
       return parseInt(
@@ -233,7 +242,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         16
       );
     }
-    // Handle rgb(r, g, b)
     const match = raw.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     if (match) return (parseInt(match[1]) << 16) | (parseInt(match[2]) << 8) | parseInt(match[3]);
     return fallback;
@@ -246,56 +254,30 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #buildStopwatchFace() {
     const app = this.#pixiApp;
     if (!app) return;
-
     const size = this.#pixiApp.renderer.width;
     const cx = size / 2;
     const cy = size / 2;
     const outerR = size * 0.46;
     const bezelWidth = size * 0.035;
     const dialR = outerR - bezelWidth;
-
-    // Theme colors
     const textColor = this.#cssColor('--calendaria-text', 0x333333);
     const bgColor = this.#cssColor('--calendaria-bg', 0x2a2a2a);
     const borderColor = this.#cssColor('--calendaria-border', 0x888888);
     const errorColor = this.#cssColor('--calendaria-error', 0xcc3333);
-
     this.#dialContainer = new PIXI.Container();
     this.#pixiApp.stage.addChild(this.#dialContainer);
-
-    // 1. Crown ring (lanyard loop)
     this.#drawCrownRing(cx, cy, outerR, size, borderColor);
-
-    // 2. Crown stem (push button)
     this.#drawCrownStem(cx, cy, outerR, size, borderColor);
-
-    // 3. Outer bezel ring
     this.#drawBezel(cx, cy, outerR, bezelWidth, borderColor);
-
-    // 4. Dial face (theme background)
     this.#drawDialFace(cx, cy, dialR, bgColor);
-
-    // 5. Minute track (60 tick marks)
     this.#drawMinuteTrack(cx, cy, dialR, textColor);
-
-    // 6. Numerals at 5-second positions
     this.#drawNumerals(cx, cy, dialR, textColor, size);
-
-    // 7. Sub-dial at 6 o'clock
     const subDialCy = cy + dialR * 0.38;
     const subDialR = dialR * 0.22;
     this.#drawSubDial(cx, subDialCy, subDialR, textColor, bgColor, size);
-
-    // 8. Brand text "Calendaria"
     this.#drawBrandText(cx, cy, dialR, textColor, size);
-
-    // 9. Second hand
     this.#secondHand = this.#drawSecondHand(cx, cy, dialR, errorColor, size);
-
-    // 10. Minute sub-hand
     this.#minuteSubHand = this.#drawMinuteSubHand(cx, subDialCy, subDialR, textColor, size);
-
-    // 11. Center pivot
     this.#drawCenterPivot(cx, cy, size, borderColor);
   }
 
@@ -333,17 +315,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const stemH = size * 0.08;
     const stemX = cx - stemW / 2;
     const stemY = cy - outerR - stemH + size * 0.01;
-
-    // Stem body
     g.beginFill(color, 0.9);
     g.drawRoundedRect(stemX, stemY, stemW, stemH, size * 0.015);
     g.endFill();
-
-    // Highlight
     g.beginFill(0xffffff, 0.15);
     g.drawRoundedRect(stemX + stemW * 0.15, stemY + stemH * 0.1, stemW * 0.3, stemH * 0.8, size * 0.008);
     g.endFill();
-
     this.#dialContainer.addChild(g);
   }
 
@@ -358,30 +335,19 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #drawBezel(cx, cy, outerR, bezelWidth, color) {
     const g = new PIXI.Graphics();
-
-    // Outer shadow ring
     g.beginFill(0x000000, 0.25);
     g.drawCircle(cx, cy + 2, outerR + 2);
     g.endFill();
-
-    // Main bezel (dark metallic)
     g.beginFill(color, 0.85);
     g.drawCircle(cx, cy, outerR);
     g.endFill();
-
-    // Inner cutout to form ring
     g.beginFill(0x000000, 1);
     g.drawCircle(cx, cy, outerR - bezelWidth);
     g.endFill();
-
-    // Highlight arc (top-left)
     g.lineStyle(bezelWidth * 0.4, 0xffffff, 0.12);
     g.arc(cx, cy, outerR - bezelWidth / 2, Math.PI * 1.2, Math.PI * 1.8);
-
-    // Shadow arc (bottom-right)
     g.lineStyle(bezelWidth * 0.4, 0x000000, 0.15);
     g.arc(cx, cy, outerR - bezelWidth / 2, Math.PI * 0.2, Math.PI * 0.8);
-
     this.#dialContainer.addChild(g);
   }
 
@@ -398,8 +364,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     g.beginFill(bgColor, 1);
     g.drawCircle(cx, cy, dialR);
     g.endFill();
-
-    // Subtle inner shadow
     g.lineStyle(2, 0x000000, 0.06);
     g.drawCircle(cx, cy, dialR - 1);
 
@@ -470,17 +434,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #drawSubDial(subCx, subCy, subR, color, bgColor, size) {
     const g = new PIXI.Graphics();
-
-    // Sub-dial background
     g.beginFill(bgColor, 1);
     g.drawCircle(subCx, subCy, subR);
     g.endFill();
-
-    // Sub-dial border
     g.lineStyle(1.5, color, 0.5);
     g.drawCircle(subCx, subCy, subR);
-
-    // Sub-dial tick marks (30 marks for 0-30 minutes)
     const outerTick = subR * 0.88;
     for (let i = 0; i < 30; i++) {
       const angle = (i / 30) * Math.PI * 2 - Math.PI / 2;
@@ -490,23 +448,13 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       g.moveTo(subCx + Math.cos(angle) * innerTick, subCy + Math.sin(angle) * innerTick);
       g.lineTo(subCx + Math.cos(angle) * outerTick, subCy + Math.sin(angle) * outerTick);
     }
-
     this.#dialContainer.addChild(g);
-
-    // Sub-dial numerals (0, 10, 20, 30 — but mapped as 0, 5, 10, 15, 20, 25, 30)
     const subFontSize = Math.max(5, size * 0.032);
-    // Skip 0 at top (overlaps with tick); draw 5,10,15,20,25,30 — but 30 and 0 overlap
-    // Use 6 labels at even spacing: 5, 10, 15, 20, 25, 30
     for (let i = 0; i < 6; i++) {
       const num = (i + 1) * 5;
       const angle = ((i + 1) / 6) * Math.PI * 2 - Math.PI / 2;
       const numeralR = subR * 0.5;
-      const text = new PIXI.Text(String(num), {
-        fontFamily: 'Arial, sans-serif',
-        fontSize: subFontSize,
-        fill: color,
-        align: 'center'
-      });
+      const text = new PIXI.Text(String(num), { fontFamily: 'Arial, sans-serif', fontSize: subFontSize, fill: color, align: 'center' });
       text.anchor.set(0.5);
       text.x = subCx + Math.cos(angle) * numeralR;
       text.y = subCy + Math.sin(angle) * numeralR;
@@ -525,14 +473,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #drawBrandText(cx, cy, dialR, color, size) {
     const fontSize = Math.max(6, size * 0.045);
-    const text = new PIXI.Text('Calendaria', {
-      fontFamily: 'serif',
-      fontSize,
-      fontStyle: 'italic',
-      fill: color,
-      align: 'center',
-      letterSpacing: 1
-    });
+    const text = new PIXI.Text('Calendaria', { fontFamily: 'serif', fontSize, fontStyle: 'italic', fill: color, align: 'center', letterSpacing: 1 });
     text.anchor.set(0.5);
     text.x = cx;
     text.y = cy - dialR * 0.32;
@@ -555,31 +496,23 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     g.pivot.set(0, 0);
     g.x = cx;
     g.y = cy;
-
     const handLength = dialR * 0.85;
     const tailLength = dialR * 0.2;
     const handWidth = Math.max(1, size * 0.008);
     const tailWidth = Math.max(2, size * 0.02);
-
-    // Main hand (thin, pointing up from center)
     g.beginFill(color, 1);
     g.moveTo(-handWidth / 2, 0);
     g.lineTo(0, -handLength);
     g.lineTo(handWidth / 2, 0);
     g.endFill();
-
-    // Counterweight tail (wider, pointing down)
     g.beginFill(color, 1);
     g.moveTo(-tailWidth / 2, 0);
     g.lineTo(0, tailLength);
     g.lineTo(tailWidth / 2, 0);
     g.endFill();
-
-    // Small circle at base
     g.beginFill(color, 1);
     g.drawCircle(0, 0, tailWidth * 0.4);
     g.endFill();
-
     this.#pixiApp.stage.addChild(g);
     return g;
   }
@@ -599,22 +532,16 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     g.pivot.set(0, 0);
     g.x = subCx;
     g.y = subCy;
-
     const handLength = subR * 0.75;
     const handWidth = Math.max(1.5, size * 0.012);
-
-    // Tapered hand
     g.beginFill(color, 0.9);
     g.moveTo(-handWidth / 2, 0);
     g.lineTo(0, -handLength);
     g.lineTo(handWidth / 2, 0);
     g.endFill();
-
-    // Center dot
     g.beginFill(color, 0.9);
     g.drawCircle(0, 0, handWidth);
     g.endFill();
-
     this.#pixiApp.stage.addChild(g);
     return g;
   }
@@ -630,17 +557,12 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #drawCenterPivot(cx, cy, size, color) {
     const g = new PIXI.Graphics();
     const pivotR = size * 0.025;
-
-    // Metallic center
     g.beginFill(color, 0.9);
     g.drawCircle(cx, cy, pivotR);
     g.endFill();
-
-    // Highlight
     g.beginFill(0xffffff, 0.3);
     g.drawCircle(cx - pivotR * 0.2, cy - pivotR * 0.2, pivotR * 0.5);
     g.endFill();
-
     this.#pixiApp.stage.addChild(g);
   }
 
@@ -650,14 +572,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onPixiTick() {
     if (!this.#secondHand || !this.#minuteSubHand) return;
-
     const totalSeconds = this.#getTotalSeconds();
-    // Rotate second hand
     this.#secondHand.rotation = ((totalSeconds % 60) / 60) * Math.PI * 2;
-    // Rotate minute sub-hand (30-minute range)
     this.#minuteSubHand.rotation = (((totalSeconds / 60) % 30) / 30) * Math.PI * 2;
-
-    // Update display text and check notification
     if (this.#running) {
       const timeEl = this.element?.querySelector('.time');
       if (timeEl) timeEl.innerHTML = this.#getDisplayTime();
@@ -716,7 +633,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       raw = formatGameDuration(total, game.time?.calendar, format);
     }
-    // Wrap millisecond portion in a span for smaller rendering
     const dotIdx = raw.lastIndexOf('.');
     if (dotIdx !== -1) return `${raw.slice(0, dotIdx)}<span class="ms">.${raw.slice(dotIdx + 1)}</span>`;
     return raw;
@@ -971,7 +887,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onVisualTick() {
     if (!this.#running || this.#mode !== 'gametime') return;
-    // PixiJS ticker handles hand rotation; just update digital display
     const timeEl = this.element?.querySelector('.time');
     if (timeEl) timeEl.innerHTML = this.#getDisplayTime();
   }
@@ -1075,16 +990,16 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       if (savedPos.size) this.#setSize(savedPos.size);
       if (typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
         this.#snappedZoneId = savedPos.zoneId || null;
-        if (this.#snappedZoneId && StickyZones.restorePinnedState(this.element, this.#snappedZoneId)) {
-          StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+        if (this.#snappedZoneId && restorePinnedState(this.element, this.#snappedZoneId)) {
+          registerForZoneUpdates(this, this.#snappedZoneId);
           return;
         }
         if (this.#snappedZoneId) {
           const rect = this.element.getBoundingClientRect();
-          const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+          const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
           if (zonePos) {
             this.setPosition({ left: zonePos.left, top: zonePos.top });
-            StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+            registerForZoneUpdates(this, this.#snappedZoneId);
             return;
           }
         }
@@ -1102,7 +1017,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
-    const rightBuffer = StickyZones.getSidebarBuffer();
+    const rightBuffer = getSidebarBuffer();
     let { left, top } = this.position;
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
@@ -1148,13 +1063,13 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-      const rightBuffer = StickyZones.getSidebarBuffer();
+      const rightBuffer = getSidebarBuffer();
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
-      this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
+      this.#activeSnapZone = checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
     };
     const onMouseUp = async (event) => {
       if (!isDragging) return;
@@ -1163,9 +1078,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       const rect = this.element.getBoundingClientRect();
-      const result = StickyZones.finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
+      const result = finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
       this.#snappedZoneId = result.zoneId;
-      StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      registerForZoneUpdates(this, this.#snappedZoneId);
       this.#activeSnapZone = null;
       previousZoneId = null;
       await this.#savePosition();
@@ -1176,8 +1091,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       isDragging = true;
       previousZoneId = this.#snappedZoneId;
-      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
-        const preserved = StickyZones.unpinFromZone(this.element);
+      if (previousZoneId && usesDomParenting(previousZoneId)) {
+        const preserved = unpinFromZone(this.element);
         if (preserved) {
           elementStartLeft = preserved.left;
           elementStartTop = preserved.top;
@@ -1271,10 +1186,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceStopwatch = game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH);
       items.push({
-        name: forceStopwatch ? 'CALENDARIA.Stopwatch.ContextMenu.HideFromAll' : 'CALENDARIA.Stopwatch.ContextMenu.ShowToAll',
+        name: forceStopwatch ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceStopwatch ? 'eye-slash' : 'eye'}"></i>`,
         callback: async () => {
           const newValue = !forceStopwatch;
+          if (newValue) warnShowToAll('viewStopwatch', game.i18n.localize('CALENDARIA.Permissions.ViewStopwatch'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_STOPWATCH, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.STOPWATCH_VISIBILITY, { visible: newValue });
         }
@@ -1301,8 +1217,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * Reset position to default and clear any sticky zone.
    */
   async resetPosition() {
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
     this.#snappedZoneId = null;
     this.setPosition({ left: 150, top: 150 });
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: 150, top: 150, size: 140, zoneId: null });
@@ -1319,9 +1235,16 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the Stopwatch.
+   * @param {object} [options] - Show options
+   * @param {boolean} [options.silent] - If true, don't show permission warning
    * @returns {Stopwatch} The instance
    */
-  static show() {
+  static show({ silent = false } = {}) {
+    if (!canViewStopwatch()) {
+      if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return null;
+    }
+    if (isCombatBlocked(SETTINGS.STOPWATCH_COMBAT_MODE)) return null;
     const instance = this.instance ?? new Stopwatch();
     instance.render({ force: true });
     return instance;

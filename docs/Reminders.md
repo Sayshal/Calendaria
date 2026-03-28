@@ -23,7 +23,7 @@ Selecting `none` as the type disables the reminder and disables other inputs.
 | Non-GM users | `Author`        |
 
 > [!NOTE]
-> Defaults are based on the current user creating the note, not the note's `gmOnly` flag.
+> Defaults are based on the current user creating the note, not the note's `visibility` setting.
 
 ## Notification Types
 
@@ -40,7 +40,7 @@ Brief popup notification in the top-center of the screen. Auto-dismisses after a
 Message posted to the chat log with a link to open the note. Can be whispered to specific users based on target settings.
 
 > [!NOTE]
-> If a note has `gmOnly: true`, chat reminders are always whispered to GM users regardless of the target setting.
+> If a note has `visibility: 'hidden'` or `'secret'`, chat reminders are always whispered to GM users regardless of the target setting.
 
 ### Dialog
 

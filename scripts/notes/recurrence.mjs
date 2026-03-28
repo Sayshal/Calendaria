@@ -4,530 +4,45 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { addDays, addMonths, addYears, compareDays, dayOfWeek, daysBetween, isSameDay, monthsBetween } from './date-utils.mjs';
-import NoteManager from './note-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
+import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
+import { format, getCalendarMoonPhaseIndex, getDayOfYear, getLastDayOfMonth, getMidpoint, isInSeasonRange, localize, log, seededRandom } from '../utils/_module.mjs';
+import {
+  EpochDataCache,
+  NoteManager,
+  addDays,
+  addMonths,
+  addYears,
+  canConditionTreeMatchRange,
+  compareDays,
+  createEpochContext,
+  dayOfWeek,
+  daysBetween,
+  evaluateConditions,
+  evaluateEntry,
+  getSearchDistanceFromTree,
+  isGroup,
+  isSameDay,
+  monthsBetween,
+  registerFieldHandler
+} from './_module.mjs';
+
+/** Recursion guard for resolveAnchor event: references. */
+const _resolvingAnchors = new Set();
+
+/** Per-config, per-year cache for resolveComputedDate results. Keyed by stable fingerprint. */
+const _computedDateCache = new Map();
 
 /**
- * Seeded random number generator.
- * @param {number} seed - Base seed value
- * @param {number} year - Year component
- * @param {number} dayOfYear - Day of year (1-366)
- * @returns {number} Value between 0-99.99
+ * Compute the effective duration in days for a note.
+ * @param {object} noteData - Note flag data
+ * @returns {number} Duration in days (0 if no duration)
  */
-function seededRandom(seed, year, dayOfYear) {
-  let hash = Math.abs(seed) || 1;
-  hash = ((hash * 1103515245 + 12345) >>> 0) % 0x7fffffff;
-  hash = ((hash + year * 31337) >>> 0) % 0x7fffffff;
-  hash = ((hash * 1103515245 + dayOfYear * 7919) >>> 0) % 0x7fffffff;
-  return (hash % 10000) / 100;
-}
-
-/**
- * Calculate day of year for a date (1-based).
- * @param {object} date - Date with year, month, day
- * @returns {number} Day of year (1-366)
- */
-function getDayOfYear(date) {
-  const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return date.dayOfMonth + 1;
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const internalYear = date.year - yearZero;
-  let dayOfYear = 0;
-  for (let m = 0; m < date.month; m++) dayOfYear += calendar.getDaysInMonth(m, internalYear);
-  return dayOfYear + date.dayOfMonth + 1;
-}
-
-/**
- * Get the value of a condition field for a given date.
- * @param {string} field - Field name
- * @param {object} date - Date to evaluate
- * @param {*} value2 - Secondary value (e.g., moon index, cycle index)
- * @returns {number|boolean|string|null} Field value
- */
-function getFieldValue(field, date, value2 = null) {
-  const calendar = CalendarManager.getActiveCalendar();
-  switch (field) {
-    case 'year':
-      return date.year;
-    case 'month':
-      return date.month + 1;
-    case 'day':
-      return date.dayOfMonth + 1;
-    case 'dayOfYear':
-      return getDayOfYear(date);
-    case 'daysBeforeMonthEnd': {
-      const lastDay = getLastDayOfMonth(date);
-      return lastDay - (date.dayOfMonth + 1);
-    }
-    case 'weekday':
-      return dayOfWeek(date) + 1;
-    case 'weekNumberInMonth': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      return Math.ceil((date.dayOfMonth + 1) / daysInWeek);
-    }
-    case 'inverseWeekNumber': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      const lastDay = getLastDayOfMonth(date);
-      return Math.floor((lastDay - (date.dayOfMonth + 1)) / daysInWeek) + 1;
-    }
-    case 'weekInMonth': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      return Math.ceil((date.dayOfMonth + 1) / daysInWeek);
-    }
-    case 'weekInYear': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      const dayOfYear = getDayOfYear(date);
-      return Math.ceil(dayOfYear / daysInWeek);
-    }
-    case 'totalWeek': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      const totalDays = getTotalDaysSinceEpoch(date);
-      return Math.floor(totalDays / daysInWeek);
-    }
-    case 'weeksBeforeMonthEnd': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      const lastDay = getLastDayOfMonth(date);
-      return Math.floor((lastDay - (date.dayOfMonth + 1)) / daysInWeek);
-    }
-    case 'weeksBeforeYearEnd': {
-      const daysInWeek = calendar?.daysInWeek ?? 7;
-      const totalDaysInYear = getTotalDaysInYear(date.year);
-      const dayOfYear = getDayOfYear(date);
-      return Math.floor((totalDaysInYear - dayOfYear) / daysInWeek);
-    }
-    case 'season': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return null;
-      const dayOfYear = getDayOfYear(date);
-      const idx = getSeasonIndex(dayOfYear, seasons, date);
-      return idx >= 0 ? idx + 1 : null;
-    }
-    case 'seasonPercent': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return null;
-      const dayOfYear = getDayOfYear(date);
-      const idx = getSeasonIndex(dayOfYear, seasons, date);
-      if (idx < 0) return null;
-      return getSeasonPercent(dayOfYear, seasons, getTotalDaysInYear(date.year), idx);
-    }
-    case 'seasonDay': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return null;
-      const dayOfYear = getDayOfYear(date);
-      const idx = getSeasonIndex(dayOfYear, seasons, date);
-      if (idx < 0) return null;
-      return getSeasonDay(dayOfYear, seasons, getTotalDaysInYear(date.year), idx);
-    }
-    case 'isLongestDay': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return false;
-      return checkSolsticeOrEquinox(date, seasons, 'longest');
-    }
-    case 'isShortestDay': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return false;
-      return checkSolsticeOrEquinox(date, seasons, 'shortest');
-    }
-    case 'isSpringEquinox': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return false;
-      return checkSolsticeOrEquinox(date, seasons, 'spring');
-    }
-    case 'isAutumnEquinox': {
-      const seasons = calendar?.seasonsArray ?? [];
-      if (!seasons.length) return false;
-      return checkSolsticeOrEquinox(date, seasons, 'autumn');
-    }
-    case 'moonPhase': {
-      const moons = calendar?.moonsArray ?? [];
-      const moonIndex = value2 ?? 0;
-      if (moonIndex >= moons.length) return null;
-      const yearZero = calendar.years?.yearZero ?? 0;
-      const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth, hour: 12, minute: 0, second: 0 };
-      const moonPhaseInfo = calendar.getMoonPhase(moonIndex, components);
-      return moonPhaseInfo?.position ?? null;
-    }
-    case 'moonPhaseIndex': {
-      const moons = calendar?.moonsArray ?? [];
-      const moonIndex = value2 ?? 0;
-      if (moonIndex >= moons.length) return null;
-      return getCalendarMoonPhaseIndex(date, moonIndex);
-    }
-    case 'moonPhaseCountMonth': {
-      const moons = calendar?.moonsArray ?? [];
-      const moonIndex = value2 ?? 0;
-      if (moonIndex >= moons.length) return null;
-      return getMoonPhaseCountInMonth(date, moons[moonIndex], moonIndex);
-    }
-    case 'moonPhaseCountYear': {
-      const moons = calendar?.moonsArray ?? [];
-      const moonIndex = value2 ?? 0;
-      if (moonIndex >= moons.length) return null;
-      return getMoonPhaseCountInYear(date, moons[moonIndex], moonIndex);
-    }
-    case 'cycle': {
-      const cycles = calendar?.cyclesArray ?? [];
-      const cycleIndex = value2 ?? 0;
-      if (cycleIndex >= cycles.length) return null;
-      return getCycleValue(date, cycles[cycleIndex]);
-    }
-    case 'era': {
-      const eras = calendar?.erasArray ?? [];
-      if (!eras.length) return null;
-      return getEraIndex(date.year, eras) + 1;
-    }
-    case 'eraYear': {
-      const eras = calendar?.erasArray ?? [];
-      if (!eras.length) return date.year;
-      return getEraYear(date.year, eras);
-    }
-    case 'intercalary': {
-      const months = calendar?.monthsArray ?? [];
-      const monthData = months[date.month];
-      return monthData?.type === 'intercalary';
-    }
-    default:
-      return null;
-  }
-}
-
-/**
- * Evaluate a single condition against a date.
- * @param {object} condition - Condition { field, op, value, value2?, offset? }
- * @param {object} date - Date to evaluate
- * @param {object} [startDate] - Note start date, used as implicit offset for modulo conditions
- * @returns {boolean} True if condition passes
- */
-function evaluateCondition(condition, date, startDate) {
-  const { field, op, value, value2 } = condition;
-  const fieldValue = getFieldValue(field, date, value2);
-  if (fieldValue === null || fieldValue === undefined) return false;
-  switch (op) {
-    case '==':
-      return fieldValue === value;
-    case '!=':
-      return fieldValue !== value;
-    case '>=':
-      return fieldValue >= value;
-    case '<=':
-      return fieldValue <= value;
-    case '>':
-      return fieldValue > value;
-    case '<':
-      return fieldValue < value;
-    case '%': {
-      if (value === 0) return false;
-      const effectiveOffset = startDate ? (getFieldValue(field, startDate, value2) ?? 0) : 0;
-      return (fieldValue - effectiveOffset) % value === 0;
-    }
-    default:
-      return false;
-  }
-}
-
-/**
- * Evaluate all conditions for a date (AND logic).
- * @param {object[]} conditions - Array of conditions
- * @param {object} date - Date to evaluate
- * @param {object} [startDate] - Note start date, used as implicit offset for modulo conditions
- * @returns {boolean} True if all conditions pass
- */
-function evaluateConditions(conditions, date, startDate) {
-  if (!conditions?.length) return true;
-  return conditions.every((cond) => evaluateCondition(cond, date, startDate));
-}
-
-/**
- * Get total days since epoch (year 0, day 1).
- * @param {object} date - Date object
- * @returns {number} - Total days since beginning
- */
-function getTotalDaysSinceEpoch(date) {
-  const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return 0;
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const internalYear = date.year - yearZero;
-  const dayOfMonth = date.dayOfMonth ?? 0;
-  const components = { year: internalYear, month: date.month, dayOfMonth, hour: 0, minute: 0, second: 0 };
-  const time = calendar.componentsToTime(components);
-  const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
-  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
-  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
-  const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
-  return Math.floor(time / secondsPerDay);
-}
-
-/**
- * Get current season index for a date.
- * @param {number} dayOfYear - Day of year (1-based)
- * @param {object[]} seasons - Seasons array
- * @param {object} [date] - Full date object with month (0-indexed) and day (1-indexed)
- * @returns {number} Season index, or -1 if no season matches
- */
-function getSeasonIndex(dayOfYear, seasons, date) {
-  const calendar = CalendarManager.getActiveCalendar();
-  if (calendar?.seasons?.type === 'periodic') {
-    const yearZero = calendar.years?.yearZero ?? 0;
-    const totalDays = calendar.getDaysInYear((date?.year ?? 0) - yearZero);
-    for (let i = 0; i < seasons.length; i++) {
-      const { dayStart, dayEnd } = calendar._calculatePeriodicSeasonBounds(i, totalDays);
-      if (isInSeasonRange(dayOfYear, dayStart, dayEnd)) return i;
-    }
-    return -1;
-  }
-  for (let i = 0; i < seasons.length; i++) {
-    const season = seasons[i];
-    if (season.monthStart != null && season.monthEnd != null && date) {
-      const currentMonth = date.month;
-      const startDay = season.dayStart ?? 0;
-      const months = calendar?.monthsArray ?? [];
-      const endDay = season.dayEnd ?? (months[season.monthEnd]?.days ?? 30) - 1;
-      if (season.monthStart === season.monthEnd) {
-        if (currentMonth === season.monthStart && date.dayOfMonth >= startDay && date.dayOfMonth <= endDay) return i;
-      } else if (season.monthStart < season.monthEnd) {
-        if (currentMonth > season.monthStart && currentMonth < season.monthEnd) return i;
-        if (currentMonth === season.monthStart && date.dayOfMonth >= startDay) return i;
-        if (currentMonth === season.monthEnd && date.dayOfMonth <= endDay) return i;
-      } else {
-        if (currentMonth > season.monthStart || currentMonth < season.monthEnd) return i;
-        if (currentMonth === season.monthStart && date.dayOfMonth >= startDay) return i;
-        if (currentMonth === season.monthEnd && date.dayOfMonth <= endDay) return i;
-      }
-    } else {
-      const start = season.dayStart ?? 0;
-      const end = season.dayEnd ?? start;
-      if (isInSeasonRange(dayOfYear, start, end)) return i;
-    }
-  }
-  return -1;
-}
-
-/**
- * Get percentage progress through current season (0-100).
- * @param {number} dayOfYear - Day of year
- * @param {object[]} seasons - Seasons array
- * @param {number} totalDays - Total days in year
- * @param {number} idx - Season index (from getSeasonIndex)
- * @returns {number} Percentage (0-100)
- */
-function getSeasonPercent(dayOfYear, seasons, totalDays, idx) {
-  const season = seasons[idx];
-  const start = season.dayStart ?? 0;
-  const end = season.dayEnd ?? start;
-  let seasonLength, dayInSeason;
-  if (start <= end) {
-    seasonLength = end - start + 1;
-    dayInSeason = dayOfYear - start;
-  } else {
-    seasonLength = totalDays - start + end + 1;
-    dayInSeason = dayOfYear >= start ? dayOfYear - start : totalDays - start + dayOfYear;
-  }
-  return Math.round((dayInSeason / seasonLength) * 100);
-}
-
-/**
- * Get day number within current season (1-based).
- * @param {number} dayOfYear - Day of year
- * @param {object[]} seasons - Seasons array
- * @param {number} totalDays - Total days in year
- * @param {number} idx - Season index (from getSeasonIndex)
- * @returns {number} Day in season
- */
-function getSeasonDay(dayOfYear, seasons, totalDays, idx) {
-  const season = seasons[idx];
-  const start = season.dayStart ?? 0;
-  if (dayOfYear >= start) return dayOfYear - start + 1;
-  else return totalDays - start + dayOfYear + 1;
-}
-
-/**
- * Check if date is a solstice or equinox.
- * @param {object} date - Date to check
- * @param {object[]} seasons - Seasons array
- * @param {string} type - 'longest', 'shortest', 'spring', 'autumn'
- * @returns {boolean} Is date solstice/equinox?
- */
-function checkSolsticeOrEquinox(date, seasons, type) {
-  const totalDays = getTotalDaysInYear(date.year);
-  const dayOfYear = getDayOfYear(date);
-  let summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
-  let winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
-  let springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
-  let autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
-  if (summerIdx === -1 && seasons.length >= 4) summerIdx = 1;
-  if (winterIdx === -1 && seasons.length >= 4) winterIdx = 3;
-  if (springIdx === -1 && seasons.length >= 4) springIdx = 0;
-  if (autumnIdx === -1 && seasons.length >= 4) autumnIdx = 2;
-  switch (type) {
-    case 'longest': {
-      if (summerIdx === -1) return false;
-      const summer = seasons[summerIdx];
-      const midpoint = getMidpoint(summer.dayStart ?? 0, summer.dayEnd ?? 0, totalDays);
-      return dayOfYear === midpoint;
-    }
-    case 'shortest': {
-      if (winterIdx === -1) return false;
-      const winter = seasons[winterIdx];
-      const midpoint = getMidpoint(winter.dayStart ?? 0, winter.dayEnd ?? 0, totalDays);
-      return dayOfYear === midpoint;
-    }
-    case 'spring': {
-      if (springIdx === -1) return false;
-      return dayOfYear === (seasons[springIdx].dayStart ?? 0);
-    }
-    case 'autumn': {
-      if (autumnIdx === -1) return false;
-      return dayOfYear === (seasons[autumnIdx].dayStart ?? 0);
-    }
-    default:
-      return false;
-  }
-}
-
-/**
- * Get midpoint of a season range.
- * @param {number} start - Start day
- * @param {number} end - End day
- * @param {number} totalDays - Total days in year
- * @returns {number} Midpoint day
- */
-function getMidpoint(start, end, totalDays) {
-  if (start <= end) {
-    return Math.floor((start + end) / 2);
-  } else {
-    const length = totalDays - start + end + 1;
-    const mid = Math.floor(length / 2);
-    return (start + mid) % totalDays;
-  }
-}
-
-/**
- * Get moon phase index using the calendar's method for accurate phase matching.
- * @param {object} date - Date to check (year, month, day)
- * @param {number} moonIndex - Index of the moon
- * @returns {number|null} Phase index or null
- */
-function getCalendarMoonPhaseIndex(date, moonIndex) {
-  const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return null;
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth, hour: 12, minute: 0, second: 0 };
-  const moonPhaseInfo = calendar.getMoonPhase(moonIndex, components);
-  return moonPhaseInfo?.phaseIndex ?? null;
-}
-
-/**
- * Get count of current moon phase occurrences in the month.
- * @param {object} date - Date to check
- * @param {object} _moon - Moon configuration
- * @param {number} moonIndex - Index of this moon in calendar.moons
- * @returns {number} Count (1 = first occurrence)
- */
-function getMoonPhaseCountInMonth(date, _moon, moonIndex = 0) {
-  const currentPhaseIndex = getCalendarMoonPhaseIndex(date, moonIndex);
-  if (currentPhaseIndex === null) return 0;
-  let count = 0;
-  let wasInPhase = false;
-  for (let d = 0; d <= date.dayOfMonth; d++) {
-    const checkDate = { ...date, dayOfMonth: d };
-    const phaseIndex = getCalendarMoonPhaseIndex(checkDate, moonIndex);
-    const isInPhase = phaseIndex === currentPhaseIndex;
-    if (isInPhase && !wasInPhase) count++;
-    wasInPhase = isInPhase;
-  }
-  return count;
-}
-
-/**
- * Get count of current moon phase occurrences in the year.
- * @param {object} date - Date to check
- * @param {object} _moon - Moon configuration
- * @param {number} moonIndex - Index of this moon in calendar.moons
- * @returns {number} Count (1 = first occurrence)
- */
-function getMoonPhaseCountInYear(date, _moon, moonIndex = 0) {
-  const calendar = CalendarManager.getActiveCalendar();
-  const currentPhaseIndex = getCalendarMoonPhaseIndex(date, moonIndex);
-  if (currentPhaseIndex === null) return 0;
-  const targetDayOfYear = getDayOfYear(date);
-  let count = 0;
-  let dayCounter = 0;
-  let wasInPhase = false;
-  const months = calendar?.monthsArray ?? [];
-  for (let m = 0; m < months.length && dayCounter < targetDayOfYear; m++) {
-    const daysInMonth = months[m]?.days || 30;
-    for (let d = 0; d < daysInMonth && dayCounter < targetDayOfYear; d++) {
-      dayCounter++;
-      const checkDate = { year: date.year, month: m, dayOfMonth: d };
-      const phaseIndex = getCalendarMoonPhaseIndex(checkDate, moonIndex);
-      const isInPhase = phaseIndex === currentPhaseIndex;
-      if (isInPhase && !wasInPhase) count++;
-      wasInPhase = isInPhase;
-    }
-  }
-  return count;
-}
-
-/**
- * Get cycle value for a date.
- * @param {object} date - Date to check
- * @param {object} cycle - Cycle configuration
- * @returns {number} Cycle entry index
- */
-function getCycleValue(date, cycle) {
-  if (!cycle?.length || !cycle?.entries?.length) return 0;
-  let value;
-  switch (cycle.basedOn) {
-    case 'year':
-      value = date.year;
-      break;
-    case 'eraYear':
-      value = getEraYear(date.year, CalendarManager.getActiveCalendar()?.erasArray ?? []);
-      break;
-    case 'month':
-      value = date.month;
-      break;
-    case 'monthDay':
-      value = date.dayOfMonth + 1;
-      break;
-    case 'yearDay':
-      value = getDayOfYear(date);
-      break;
-    case 'day':
-    default:
-      value = getTotalDaysSinceEpoch(date);
-      break;
-  }
-  return (((value - (cycle.offset || 0)) % cycle.length) + cycle.length) % cycle.length;
-}
-
-/**
- * Get era index for a year.
- * @param {number} year - Year to check
- * @param {object[]} eras - Eras array
- * @returns {number} Era index
- */
-function getEraIndex(year, eras) {
-  for (let i = eras.length - 1; i >= 0; i--) {
-    const era = eras[i];
-    if (year >= (era.startYear ?? 0)) if (era.endYear == null || year <= era.endYear) return i;
-  }
+export function getEffectiveDuration(noteData) {
+  const { startDate, endDate, hasDuration, duration } = noteData;
+  if (hasDuration && duration > 0) return duration - 1;
+  if (endDate && !isSameDay(startDate, endDate)) return daysBetween(startDate, endDate);
   return 0;
-}
-
-/**
- * Get year within current era.
- * @param {number} year - Year to check
- * @param {object[]} eras - Eras array
- * @returns {number} Year in era
- */
-function getEraYear(year, eras) {
-  const idx = getEraIndex(year, eras);
-  const era = eras[idx];
-  if (!era) return year;
-  return year - (era.startYear ?? 0) + 1;
 }
 
 /**
@@ -538,37 +53,53 @@ function getEraYear(year, eras) {
  */
 export function resolveComputedDate(computedConfig, year) {
   if (!computedConfig?.chain?.length) return null;
+  const key = (computedConfig._cacheKey ??= JSON.stringify(computedConfig.chain));
+  let yearMap = _computedDateCache.get(key);
+  if (yearMap?.has(year)) return yearMap.get(year);
   const { chain, yearOverrides } = computedConfig;
+  let result = null;
   if (yearOverrides?.[year]) {
     const override = yearOverrides[year];
-    return { year, month: override.month, dayOfMonth: override.dayOfMonth ?? override.day };
-  }
-  const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return null;
-  let currentDate = null;
-  for (const step of chain) {
-    switch (step.type) {
-      case 'anchor':
-        currentDate = resolveAnchor(step.value, year, calendar);
-        break;
-      case 'firstAfter':
-        if (!currentDate) return null;
-        currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
-        break;
-      case 'daysAfter':
-        if (!currentDate) return null;
-        currentDate = addDays(currentDate, step.params?.days ?? 0);
-        break;
-      case 'weekdayOnOrAfter':
-        if (!currentDate) return null;
-        currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
-        break;
-      default:
-        break;
+    result = { year, month: override.month, dayOfMonth: override.dayOfMonth ?? override.day };
+  } else {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return null;
+    let currentDate = null;
+    for (const step of chain) {
+      switch (step.type) {
+        case 'anchor':
+          currentDate = resolveAnchor(step.value, year, calendar);
+          break;
+        case 'firstAfter':
+          if (!currentDate) break;
+          currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
+          break;
+        case 'daysAfter':
+          if (!currentDate) break;
+          currentDate = addDays(currentDate, step.params?.days ?? 0);
+          break;
+        case 'weekdayOnOrAfter':
+          if (!currentDate) break;
+          currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
+          break;
+        default:
+          break;
+      }
+      if (!currentDate) break;
     }
-    if (!currentDate) return null;
+    result = currentDate ?? null;
   }
-  return currentDate;
+  if (!yearMap) {
+    yearMap = new Map();
+    _computedDateCache.set(key, yearMap);
+  }
+  yearMap.set(year, result);
+  return result;
+}
+
+/** Clear the computed date cache. Call when calendar settings change. */
+export function clearComputedDateCache() {
+  _computedDateCache.clear();
 }
 
 /**
@@ -627,12 +158,21 @@ function resolveAnchor(anchorType, year, calendar) {
       }
       if (anchorType?.startsWith('event:')) {
         const noteId = anchorType.split(':')[1];
-        const linkedNote = NoteManager.getNote(noteId);
-        if (linkedNote?.flagData) {
-          const linkedData = linkedNote.flagData;
-          if (linkedData.repeat === 'computed' && linkedData.computedConfig) return resolveComputedDate(linkedData.computedConfig, year);
-          const occurrences = getOccurrencesInRange(linkedData, { year, month: 0, dayOfMonth: 0 }, { year, month: 11, dayOfMonth: 30 }, 1);
-          if (occurrences.length > 0) return occurrences[0];
+        if (_resolvingAnchors.has(noteId)) {
+          log(2, `Circular event anchor detected for note ${noteId}`);
+          return null;
+        }
+        _resolvingAnchors.add(noteId);
+        try {
+          const linkedNote = NoteManager.getNote(noteId);
+          if (linkedNote?.flagData) {
+            const linkedData = linkedNote.flagData;
+            if (linkedData.repeat === 'computed' && linkedData.computedConfig) return resolveComputedDate(linkedData.computedConfig, year);
+            const occurrences = getOccurrencesInRange(linkedData, { year, month: 0, dayOfMonth: 0 }, { year, month: 11, dayOfMonth: 30 }, 1);
+            if (occurrences.length > 0) return occurrences[0];
+          }
+        } finally {
+          _resolvingAnchors.delete(noteId);
         }
       }
       return null;
@@ -776,12 +316,133 @@ function getComputedOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurr
 }
 
 /**
+ * Evaluate a condition tree against a target date for a note.
+ * @param {object} noteData - Note flag data with conditionTree, startDate, etc.
+ * @param {object} targetDate - Date to check
+ * @param {object} [options] - Options
+ * @param {object} [options.epochCtx] - Epoch context for caching
+ * @param {number} [options._runningCount] - Pre-computed occurrence count up to targetDate (skips re-counting)
+ * @returns {boolean} True if condition tree matches this date
+ */
+function evaluateConditionTree(noteData, targetDate, options = {}) {
+  const { startDate, endDate, repeatEndDate, conditionTree, maxOccurrences, hasDuration } = noteData;
+  if (compareDays(targetDate, startDate) < 0) return false;
+  if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
+  const duration = getEffectiveDuration(noteData);
+  if (duration > 0 && !hasDuration && compareDays(targetDate, startDate) >= 0 && compareDays(targetDate, endDate) <= 0) return true;
+  const epochCtx = options.epochCtx ?? createEpochContext(targetDate);
+  const evalOptions = { startDate, epochCtx, _evaluatingNotes: options._evaluatingNotes };
+  let matches;
+  if (isGroup(conditionTree)) matches = evaluateConditions([conditionTree], targetDate, evalOptions);
+  else matches = evaluateEntry(conditionTree, targetDate, evalOptions);
+  if (!matches && duration > 0) {
+    for (let offset = 1; offset <= duration; offset++) {
+      const priorDate = addDays(targetDate, -offset);
+      if (compareDays(priorDate, startDate) < 0) continue;
+      if (repeatEndDate && compareDays(priorDate, repeatEndDate) > 0) continue;
+      const priorCtx = options._cache?.getContext(priorDate) ?? createEpochContext(priorDate);
+      const priorOptions = { startDate, epochCtx: priorCtx, _evaluatingNotes: options._evaluatingNotes };
+      const priorMatch = isGroup(conditionTree) ? evaluateConditions([conditionTree], priorDate, priorOptions) : evaluateEntry(conditionTree, priorDate, priorOptions);
+      if (priorMatch) {
+        matches = true;
+        break;
+      }
+    }
+  }
+  if (!matches) return false;
+  if (maxOccurrences > 0) {
+    const count = options._runningCount ?? countConditionTreeOccurrencesUpTo(noteData, targetDate);
+    if (count > maxOccurrences) return false;
+  }
+  return true;
+}
+
+/**
+ * Count condition tree occurrences from startDate up to (including) targetDate.
+ * @param {object} noteData - Note flag data
+ * @param {object} targetDate - Count up to this date
+ * @returns {number} Number of occurrences
+ */
+function countConditionTreeOccurrencesUpTo(noteData, targetDate) {
+  const { startDate, repeatEndDate, conditionTree } = noteData;
+  const effectiveEnd = repeatEndDate && compareDays(repeatEndDate, targetDate) < 0 ? { ...repeatEndDate } : { ...targetDate };
+  let currentDate = { ...startDate };
+  let count = 0;
+  const maxIterations = 100000;
+  let iterations = 0;
+  const cache = new EpochDataCache();
+  while (compareDays(currentDate, effectiveEnd) <= 0 && iterations < maxIterations) {
+    const epochCtx = cache.getContext(currentDate);
+    const evalOptions = { startDate, epochCtx };
+    const matches = isGroup(conditionTree) ? evaluateConditions([conditionTree], currentDate, evalOptions) : evaluateEntry(conditionTree, currentDate, evalOptions);
+    if (matches) count++;
+    currentDate = addDays(currentDate, 1);
+    iterations++;
+  }
+  return count;
+}
+
+/**
+ * Get all occurrences of a condition-tree note within a date range.
+ * @param {object} noteData - Note flag data with conditionTree
+ * @param {object} rangeStart - Range start date
+ * @param {object} rangeEnd - Range end date
+ * @param {number} [max] - Maximum occurrences to return
+ * @returns {object[]} Array of matching date objects
+ */
+function getOccurrencesInRangeForTree(noteData, rangeStart, rangeEnd, max = 100) {
+  const { startDate, repeatEndDate, conditionTree, maxOccurrences } = noteData;
+  if (!canConditionTreeMatchRange(conditionTree, rangeStart, rangeEnd)) return [];
+  const occurrences = [];
+  const effectiveStart = compareDays(startDate, rangeStart) >= 0 ? { ...startDate } : { ...rangeStart };
+  const effectiveEnd = repeatEndDate && compareDays(repeatEndDate, rangeEnd) < 0 ? { ...repeatEndDate } : { ...rangeEnd };
+  let currentDate = { ...effectiveStart };
+  let totalCount = 0;
+  const cache = new EpochDataCache();
+  if (maxOccurrences > 0 && compareDays(effectiveStart, startDate) > 0) totalCount = countConditionTreeOccurrencesUpTo(noteData, addDays(effectiveStart, -1));
+  const maxIterations = 100000;
+  let iterations = 0;
+  while (compareDays(currentDate, effectiveEnd) <= 0 && iterations < maxIterations) {
+    const epochCtx = cache.getContext(currentDate);
+    const evalOptions = { startDate, epochCtx };
+    const matches = isGroup(conditionTree) ? evaluateConditions([conditionTree], currentDate, evalOptions) : evaluateEntry(conditionTree, currentDate, evalOptions);
+    if (matches) {
+      totalCount++;
+      if (maxOccurrences > 0 && totalCount > maxOccurrences) break;
+      occurrences.push({ ...currentDate });
+      if (occurrences.length >= max) break;
+    }
+    currentDate = addDays(currentDate, 1);
+    iterations++;
+  }
+  return occurrences;
+}
+
+/**
+ * Get the next N occurrences of a note from a given date.
+ * @param {object} noteData - Note flag data
+ * @param {object} fromDate - Start searching from this date
+ * @param {number} [count] - Number of occurrences to find
+ * @param {number} [maxSearchDays] - Maximum days to search forward (auto-estimated if omitted)
+ * @returns {object[]} Array of occurrence dates
+ */
+export function getNextOccurrences(noteData, fromDate, count = 1, maxSearchDays) {
+  const searchDays = maxSearchDays ?? (noteData.conditionTree ? getSearchDistanceFromTree(noteData.conditionTree) * (count + 1) : 366 * (count + 1));
+  const rangeEnd = addDays(fromDate, searchDays);
+  return getOccurrencesInRange(noteData, fromDate, rangeEnd, count);
+}
+
+/**
  * Check if a recurring note occurs on a target date.
  * @param {object} noteData  Note flag data with recurrence settings
  * @param {object} targetDate  Date to check
+ * @param {object} [evalOptions] - Options forwarded to condition tree evaluation
+ * @param {Set<string>} [evalOptions._evaluatingNotes] - Circular dependency guard for event conditions
  * @returns {boolean}  True if note occurs on this date
  */
-export function isRecurringMatch(noteData, targetDate) {
+export function isRecurringMatch(noteData, targetDate, evalOptions) {
+  ensureFieldHandlersRegistered();
+  if (noteData.conditionTree?.type) return evaluateConditionTree(noteData, targetDate, evalOptions);
   const { startDate, endDate, repeat, repeatInterval, repeatEndDate, moonConditions, randomConfig, cachedRandomOccurrences, linkedEvent, maxOccurrences } = noteData;
   if (linkedEvent?.noteId) return matchesLinkedEvent(linkedEvent, targetDate, startDate, repeatEndDate);
   if (repeat === 'computed') return matchesComputed(noteData, targetDate);
@@ -796,7 +457,7 @@ export function isRecurringMatch(noteData, targetDate) {
       const occurrenceNum = countOccurrencesUpTo(noteData, targetDate);
       if (occurrenceNum > maxOccurrences) return false;
     }
-    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
+    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, { startDate })) return false;
     return matches;
   }
   if (repeat === 'moon') {
@@ -808,19 +469,19 @@ export function isRecurringMatch(noteData, targetDate) {
       const occurrenceNum = countOccurrencesUpTo(noteData, targetDate);
       if (occurrenceNum > maxOccurrences) return false;
     }
-    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
+    if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, { startDate })) return false;
     return matches;
   }
   if (moonConditions?.length > 0) if (!matchesMoonConditions(moonConditions, targetDate)) return false;
   if (repeat === 'never' || !repeat) {
     if (!isSameDay(startDate, targetDate)) return false;
-    if (noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
+    if (noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, { startDate })) return false;
     return true;
   }
   if (compareDays(targetDate, startDate) < 0) return false;
   if (repeatEndDate && compareDays(targetDate, repeatEndDate) > 0) return false;
-  const duration = endDate && !isSameDay(startDate, endDate) ? daysBetween(startDate, endDate) : 0;
-  if (duration > 0 && compareDays(targetDate, endDate) <= 0) return true;
+  const duration = getEffectiveDuration(noteData);
+  if (duration > 0 && !noteData.hasDuration && endDate && compareDays(targetDate, endDate) <= 0) return true;
   const interval = repeatInterval || 1;
   let matches = false;
   switch (repeat) {
@@ -839,7 +500,7 @@ export function isRecurringMatch(noteData, targetDate) {
     case 'range':
       if (!noteData.rangePattern) return false;
       if (!matchesRangePattern(noteData.rangePattern, targetDate, startDate, repeatEndDate)) return false;
-      if (noteData.conditions?.length > 0 && !evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
+      if (noteData.conditions?.length > 0 && !evaluateConditions(noteData.conditions, targetDate, { startDate })) return false;
       return true;
     case 'weekOfMonth':
       matches = matchesWeekOfMonth(startDate, targetDate, interval, noteData.weekday, noteData.weekNumber);
@@ -885,7 +546,7 @@ export function isRecurringMatch(noteData, targetDate) {
     const occurrenceNum = countOccurrencesUpTo(noteData, targetDate);
     if (occurrenceNum > maxOccurrences) return false;
   }
-  if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, startDate)) return false;
+  if (matches && noteData.conditions?.length > 0) if (!evaluateConditions(noteData.conditions, targetDate, { startDate })) return false;
   return matches;
 }
 
@@ -973,6 +634,75 @@ function matchesMoonConditions(moonConditions, targetDate) {
     if (modifier === 'fading' && dayWithinPhase >= phaseDuration - third) return true;
   }
   return false;
+}
+
+/**
+ * Evaluate an EVENT condition against a target date.
+ * @param {object} condition - { field, op, value, value2: { noteId, inclusive? } }
+ * @param {object} date - Target date to evaluate
+ * @param {object} [options] - Evaluation options
+ * @param {Set<string>} [options._evaluatingNotes] - Circular dependency guard
+ * @returns {boolean} True if the event condition is satisfied
+ */
+function evaluateEventCondition(condition, date, options = {}) {
+  const { op, value, value2 } = condition;
+  const noteId = typeof value2 === 'string' ? value2 : value2?.noteId;
+  if (!noteId) return false;
+  const evaluating = options._evaluatingNotes ?? new Set();
+  if (evaluating.has(noteId)) return false;
+  const linkedNote = NoteManager.getNote(noteId);
+  if (!linkedNote?.flagData) return false;
+  const childEvaluating = new Set(evaluating);
+  childEvaluating.add(noteId);
+  const childNoteData = { ...linkedNote.flagData, linkedEvent: null };
+  const inclusive = value2?.inclusive !== false;
+  const n = value ?? 0;
+  switch (op) {
+    case CONDITION_OPERATORS.DAYS_AGO: {
+      const checkDate = addDays(date, -n);
+      return isRecurringMatch(childNoteData, checkDate, { _evaluatingNotes: childEvaluating });
+    }
+    case CONDITION_OPERATORS.DAYS_FROM_NOW: {
+      const checkDate = addDays(date, n);
+      return isRecurringMatch(childNoteData, checkDate, { _evaluatingNotes: childEvaluating });
+    }
+    case CONDITION_OPERATORS.WITHIN_LAST: {
+      const rangeEnd = inclusive ? { ...date } : addDays(date, -1);
+      const rangeStart = addDays(date, -n);
+      return getOccurrencesInRange(childNoteData, rangeStart, rangeEnd, 1).length > 0;
+    }
+    case CONDITION_OPERATORS.WITHIN_NEXT: {
+      const rangeStart = inclusive ? { ...date } : addDays(date, 1);
+      const rangeEnd = addDays(date, n);
+      return getOccurrencesInRange(childNoteData, rangeStart, rangeEnd, 1).length > 0;
+    }
+    default:
+      return false;
+  }
+}
+/** @type {boolean} One-time init guard preventing duplicate field handler registration. */
+let _fieldHandlersRegistered = false;
+
+/** Ensure custom field handlers (EVENT, COMPUTED) are registered with the condition engine. */
+export function ensureFieldHandlersRegistered() {
+  if (_fieldHandlersRegistered) return;
+  _fieldHandlersRegistered = true;
+  registerFieldHandler(CONDITION_FIELDS.EVENT, evaluateEventCondition);
+  registerFieldHandler(CONDITION_FIELDS.COMPUTED, evaluateComputedCondition);
+}
+
+/**
+ * Field handler for COMPUTED conditions. Resolves a computed date and checks if it matches.
+ * @param {object} condition - { field, op, value, value2: computedConfig }
+ * @param {object} date - Date to evaluate
+ * @returns {boolean} True if computed date matches
+ */
+function evaluateComputedCondition(condition, date) {
+  const config = condition.value2;
+  if (!config?.chain?.length) return false;
+  const resolved = resolveComputedDate(config, date.year);
+  if (!resolved) return false;
+  return isSameDay(resolved, date);
 }
 
 /**
@@ -1112,18 +842,6 @@ function matchesYearly(startDate, targetDate, interval) {
 }
 
 /**
- * Get last day of month for a given date.
- * @param {object} date  Date object
- * @returns {number}  Last day of month
- */
-function getLastDayOfMonth(date) {
-  const calendar = CalendarManager.getActiveCalendar();
-  if (!calendar) return 30;
-  const yearZero = calendar.years?.yearZero ?? 0;
-  return calendar.getDaysInMonth(date.month, date.year - yearZero);
-}
-
-/**
  * Check if note matches week-of-month recurrence pattern.
  * @param {object} startDate - Note start date (defines the weekday if not specified)
  * @param {object} targetDate - Date to check
@@ -1143,12 +861,8 @@ function matchesWeekOfMonth(startDate, targetDate, interval, weekday, weekNumber
   const monthsDiff = monthsBetween(startDate, targetDate);
   if (monthsDiff < 0 || monthsDiff % interval !== 0) return false;
   const targetDayWeekNumber = getWeekNumberInMonth(targetDate, daysInWeek);
-  if (targetWeekNumber > 0) {
-    return targetDayWeekNumber === targetWeekNumber;
-  } else {
-    const inverseWeekNumber = getInverseWeekNumberInMonth(targetDate, daysInWeek);
-    return inverseWeekNumber === Math.abs(targetWeekNumber);
-  }
+  if (targetWeekNumber > 0) return targetDayWeekNumber === targetWeekNumber;
+  else return getInverseWeekNumberInMonth(targetDate, daysInWeek) === Math.abs(targetWeekNumber);
 }
 
 /**
@@ -1202,29 +916,6 @@ function matchesSeasonal(seasonalConfig, targetDate) {
     default:
       return true;
   }
-}
-
-/**
- * Check if a day of year is within a season's range.
- * @param {number} dayOfYear - Target day of year
- * @param {number} start - Season start day
- * @param {number} end - Season end day
- * @returns {boolean} - Is day part of given season?
- */
-function isInSeasonRange(dayOfYear, start, end) {
-  if (start <= end) return dayOfYear >= start && dayOfYear <= end;
-  else return dayOfYear >= start || dayOfYear <= end;
-}
-
-/**
- * Get total days in year from calendar, accounting for leap years.
- * @param {number} [year] - The display year to check
- * @returns {number} - Total days in the year
- */
-function getTotalDaysInYear(year) {
-  const calendar = CalendarManager.getActiveCalendar();
-  const yearZero = calendar?.years?.yearZero ?? 0;
-  return calendar.getDaysInYear(year - yearZero);
 }
 
 /**
@@ -1301,9 +992,15 @@ function matchesRangeBit(rangeBit, value) {
  * @returns {object[]}  Array of date objects
  */
 export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurrences = 100) {
+  ensureFieldHandlersRegistered();
   const occurrences = [];
-  const { startDate, repeat, repeatInterval, linkedEvent, repeatEndDate } = noteData;
+  const { startDate, repeat, repeatInterval, linkedEvent, repeatEndDate, limitedRepeat, limitedRepeatDays } = noteData;
+  if (limitedRepeat && limitedRepeatDays > 0) {
+    const earliest = addDays(rangeEnd, -limitedRepeatDays);
+    if (compareDays(earliest, rangeStart) > 0) rangeStart = earliest;
+  }
   if (linkedEvent?.noteId) return getLinkedEventOccurrences(linkedEvent, rangeStart, rangeEnd, startDate, repeatEndDate, maxOccurrences);
+  if (noteData.conditionTree?.type) return getOccurrencesInRangeForTree(noteData, rangeStart, rangeEnd, maxOccurrences);
   if (repeat === 'never' || !repeat) {
     const afterStart = compareDays(startDate, rangeStart) >= 0;
     const beforeEnd = compareDays(startDate, rangeEnd) <= 0;
@@ -1490,7 +1187,11 @@ export function getRecurrenceDescription(noteData) {
     }
     return appendUntil(appendMaxOccurrences(description));
   }
-  if (repeat === 'never' || !repeat) return localize('CALENDARIA.Recurrence.DoesNotRepeat');
+  if (repeat === 'never' || !repeat) {
+    const tree = noteData.conditionTree;
+    if (tree && (tree.children?.length || (tree.type === 'condition' && tree.field))) return localize('CALENDARIA.Recurrence.Conditional');
+    return localize('CALENDARIA.Recurrence.DoesNotRepeat');
+  }
   if (repeat === 'computed') return appendUntil(appendMaxOccurrences(getComputedDescription(noteData.computedConfig)));
   if (repeat === 'moon') return appendUntil(appendMaxOccurrences(getMoonConditionsDescription(moonConditions)));
   if (repeat === 'random') {

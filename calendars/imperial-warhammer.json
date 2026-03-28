@@ -1,0 +1,560 @@
+{
+  "id": "imperial-warhammer",
+  "name": "CALENDARIA.Calendar.ImperialWarhammer.Name",
+  "years": {
+    "yearZero": 2522,
+    "firstWeekday": 0
+  },
+  "months": {
+    "values": {
+      "hexenstag000000": {
+        "name": "Hexenstag",
+        "abbreviation": "Hex",
+        "ordinal": 1,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "nachhexen000000": {
+        "name": "Nachhexen",
+        "abbreviation": "Nach",
+        "ordinal": 1,
+        "days": 32
+      },
+      "jahrdrung000000": {
+        "name": "Jahrdrung",
+        "abbreviation": "Jahr",
+        "ordinal": 2,
+        "days": 33
+      },
+      "pflugzeit000000": {
+        "name": "Pflugzeit",
+        "abbreviation": "Pflug",
+        "ordinal": 3,
+        "days": 33
+      },
+      "mitterfruhl0000": {
+        "name": "Mitterfruhl",
+        "abbreviation": "Mitt",
+        "ordinal": 4,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "sigmarzeit00000": {
+        "name": "Sigmarzeit",
+        "abbreviation": "Sig",
+        "ordinal": 4,
+        "days": 33
+      },
+      "sommerzeit00000": {
+        "name": "Sommerzeit",
+        "abbreviation": "Som",
+        "ordinal": 5,
+        "days": 33
+      },
+      "sonnstill000000": {
+        "name": "Sonnstill",
+        "abbreviation": "Sonn",
+        "ordinal": 6,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "vorgeheim000000": {
+        "name": "Vorgeheim",
+        "abbreviation": "Vorg",
+        "ordinal": 6,
+        "days": 33
+      },
+      "geheimnisna0000": {
+        "name": "Geheimnisnacht",
+        "abbreviation": "Geh",
+        "ordinal": 7,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "nachgeheim00000": {
+        "name": "Nachgeheim",
+        "abbreviation": "Nachg",
+        "ordinal": 7,
+        "days": 32
+      },
+      "erntezeit000000": {
+        "name": "Erntezeit",
+        "abbreviation": "Ernt",
+        "ordinal": 8,
+        "days": 33
+      },
+      "mittherbst00000": {
+        "name": "Mittherbst",
+        "abbreviation": "Mith",
+        "ordinal": 9,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "brauzeit0000000": {
+        "name": "Brauzeit",
+        "abbreviation": "Brau",
+        "ordinal": 9,
+        "days": 33
+      },
+      "kaldezeit000000": {
+        "name": "Kaldezeit",
+        "abbreviation": "Kald",
+        "ordinal": 10,
+        "days": 33
+      },
+      "mondstille00000": {
+        "name": "Mondstille",
+        "abbreviation": "Mond",
+        "ordinal": 11,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "ulriczeit000000": {
+        "name": "Ulriczeit",
+        "abbreviation": "Ulr",
+        "ordinal": 11,
+        "days": 33
+      },
+      "vorhexen0000000": {
+        "name": "Vorhexen",
+        "abbreviation": "Vorh",
+        "ordinal": 12,
+        "days": 33
+      }
+    }
+  },
+  "days": {
+    "values": {
+      "wellentag000000": {
+        "name": "Wellentag",
+        "ordinal": 1,
+        "abbreviation": "Wel"
+      },
+      "aubentag0000000": {
+        "name": "Aubentag",
+        "ordinal": 2,
+        "abbreviation": "Aub"
+      },
+      "marktag00000000": {
+        "name": "Marktag",
+        "ordinal": 3,
+        "abbreviation": "Mar"
+      },
+      "backertag000000": {
+        "name": "Backertag",
+        "ordinal": 4,
+        "abbreviation": "Bac"
+      },
+      "bezahltag000000": {
+        "name": "Bezahltag",
+        "ordinal": 5,
+        "abbreviation": "Bez"
+      },
+      "konistag0000000": {
+        "name": "Konistag",
+        "ordinal": 6,
+        "abbreviation": "Kon"
+      },
+      "angestag0000000": {
+        "name": "Angestag",
+        "ordinal": 7,
+        "abbreviation": "Ang"
+      },
+      "festag0000000000": {
+        "name": "Festag",
+        "ordinal": 8,
+        "abbreviation": "Fes",
+        "restDay": true
+      }
+    },
+    "daysPerYear": 400,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "festivals": {
+    "hexenstagfest00": {
+      "name": "Hexenstag",
+      "month": 0,
+      "countsForWeekday": false,
+      "icon": "fa-skull",
+      "color": "#6B0F6B",
+      "description": "The first day of the year, a night of dark magic when the Chaos Moon Morrslieb hangs full and baleful in the sky. Doors are locked, windows shuttered, and prayers offered to Morr for protection.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          { "type": "condition", "field": "month", "op": "==", "value": 1 },
+          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "mitterfruhlfe00": {
+      "name": "Mitterfruhl",
+      "month": 4,
+      "countsForWeekday": false,
+      "icon": "fa-seedling",
+      "color": "#90EE90",
+      "description": "The Spring Equinox. A joyous festival marking the end of winter with feasting, dancing, and the symbolic burning of effigies representing the cold months.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          { "type": "condition", "field": "month", "op": "==", "value": 5 },
+          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "sonnstillfest00": {
+      "name": "Sonnstill",
+      "month": 7,
+      "countsForWeekday": false,
+      "icon": "fa-sun",
+      "color": "#FFD700",
+      "description": "The Summer Solstice, the longest day. A festival of light and warmth, celebrated with bonfires, feasts, and competitions.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          { "type": "condition", "field": "month", "op": "==", "value": 8 },
+          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "geheimnisfest00": {
+      "name": "Geheimnisnacht",
+      "month": 9,
+      "countsForWeekday": false,
+      "icon": "fa-ghost",
+      "color": "#4B0082",
+      "description": "The Night of Mysteries, when the barrier between the living and dead grows thin. Morrslieb hangs full, its green light casting eerie shadows. A night of terror and dark portent.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          { "type": "condition", "field": "month", "op": "==", "value": 10 },
+          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "mittherbstfe000": {
+      "name": "Mittherbst",
+      "month": 12,
+      "countsForWeekday": false,
+      "icon": "fa-leaf",
+      "color": "#D2691E",
+      "description": "The Autumn Equinox. A harvest festival where communities give thanks for the year's crops before the dark months ahead.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          { "type": "condition", "field": "month", "op": "==", "value": 13 },
+          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "mondstillefe000": {
+      "name": "Mondstille",
+      "month": 15,
+      "countsForWeekday": false,
+      "icon": "fa-moon",
+      "color": "#4682B4",
+      "description": "The Winter Solstice, the longest night. A solemn time of reflection, remembrance of the dead, and warding against the darkness.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          { "type": "condition", "field": "month", "op": "==", "value": 16 },
+          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    }
+  },
+  "seasons": {
+    "values": {
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "dayStart": 67,
+        "dayEnd": 166,
+        "abbreviation": "Spr"
+      },
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "dayStart": 167,
+        "dayEnd": 266,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "dayStart": 267,
+        "dayEnd": 366,
+        "abbreviation": "Aut"
+      },
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "dayStart": 367,
+        "dayEnd": 66,
+        "abbreviation": "Win"
+      }
+    }
+  },
+  "eras": {
+    "imperialcalenda": {
+      "name": "Imperial Calendar",
+      "abbreviation": "IC",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "mannslieb000000": {
+      "name": "Mannslieb",
+      "cycleLength": 25,
+      "color": "#C0C0C0",
+      "phaseMode": "fixed",
+      "phaseSeed": 0,
+      "cycleVariance": 0,
+      "anchorPhases": {},
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 0
+      }
+    },
+    "morrslieb000000": {
+      "name": "Morrslieb",
+      "cycleLength": 44,
+      "color": "#3A7D44",
+      "phaseMode": "randomized",
+      "phaseSeed": 666013,
+      "cycleVariance": 0.4,
+      "anchorPhases": {
+        "hexenstag_full0": {
+          "year": null,
+          "month": 0,
+          "dayOfMonth": 0,
+          "phaseIndex": 4
+        },
+        "geheimnis_full0": {
+          "year": null,
+          "month": 9,
+          "dayOfMonth": 0,
+          "phaseIndex": 4
+        }
+      },
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 0
+      }
+    }
+  },
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 383,
+    "summerSolstice": 183
+  },
+  "cycles": {},
+  "canonicalHours": {},
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y",
+    "full": "MMMM D, Y G",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "imperial-warhammer",
+    "description": "CALENDARIA.Calendar.ImperialWarhammer.Description",
+    "author": "calendaria",
+    "system": "Warhammer Fantasy"
+  }
+}

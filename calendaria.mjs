@@ -6,50 +6,54 @@
  */
 
 import { CalendariaAPI, createGlobalNamespace } from './scripts/api.mjs';
-import { BigCal } from './scripts/applications/calendar/big-cal.mjs';
-import { MiniCal } from './scripts/applications/calendar/mini-cal.mjs';
-import { HUD } from './scripts/applications/hud/hud.mjs';
-import { CalendarNoteSheet } from './scripts/applications/sheets/calendar-note-sheet.mjs';
-import { CalendariaSceneConfig } from './scripts/applications/sheets/calendaria-scene-config.mjs';
-import { Stopwatch } from './scripts/applications/time/stopwatch.mjs';
-import { SunDial } from './scripts/applications/time/sun-dial.mjs';
-import { TimeKeeper } from './scripts/applications/time/time-keeper.mjs';
-import CalendarManager from './scripts/calendar/calendar-manager.mjs';
+import { BigCal, CalendarNoteSheet, CalendariaSceneConfig, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from './scripts/applications/_module.mjs';
+import { CalendarManager } from './scripts/calendar/_module.mjs';
 import { HOOKS, JOURNALS, MODULE, SETTINGS, SHEETS, TEMPLATES } from './scripts/constants.mjs';
-import { CalendarNoteDataModel } from './scripts/data/calendar-note-data-model.mjs';
-import CalendariaCalendar from './scripts/data/calendaria-calendar.mjs';
+import { CalendarNoteDataModel, CalendariaCalendar } from './scripts/data/_module.mjs';
+import { FestivalManager } from './scripts/festivals/_module.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/_module.mjs';
-import { initializeChatCommander } from './scripts/integrations/chat-commander.mjs';
-import { initializeFXMaster } from './scripts/integrations/fxmaster.mjs';
-import NoteManager from './scripts/notes/note-manager.mjs';
+import { initializeChatCommander, initializeFXMaster } from './scripts/integrations/_module.mjs';
+import { NoteManager } from './scripts/notes/_module.mjs';
 import CalendariaSettings from './scripts/settings-handler.mjs';
-import EventScheduler from './scripts/time/event-scheduler.mjs';
-import ReminderScheduler from './scripts/time/reminder-scheduler.mjs';
-import TimeClock from './scripts/time/time-clock.mjs';
-import TimeTracker from './scripts/time/time-tracker.mjs';
-import { overrideChatLogTimestamps } from './scripts/utils/chat/chat-timestamp.mjs';
-import { checkReleaseMessage } from './scripts/utils/chat/release-message.mjs';
-import { registerKeybindings } from './scripts/utils/keybinds.mjs';
-import { initializeLogger, log } from './scripts/utils/logger.mjs';
-import { runAllMigrations } from './scripts/utils/migrations.mjs';
-import { canViewMiniCal, canViewSunDial, canViewTimeKeeper } from './scripts/utils/permissions.mjs';
-import { CalendariaSocket } from './scripts/utils/socket.mjs';
-import { initializeTheme } from './scripts/utils/theme-utils.mjs';
-import * as StickyZones from './scripts/utils/ui/sticky-zones.mjs';
-import WeatherManager from './scripts/weather/weather-manager.mjs';
-import { initializeWeatherSound } from './scripts/weather/weather-sound.mjs';
+import { EventScheduler, ReminderScheduler, TimeClock, TimeTracker } from './scripts/time/_module.mjs';
+import {
+  CalendariaSocket,
+  canViewBigCal,
+  canViewChronicle,
+  canViewHUD,
+  canViewMiniCal,
+  canViewStopwatch,
+  canViewSunDial,
+  canViewTimeKeeper,
+  checkReleaseMessage,
+  initializeLogger,
+  initializeTheme,
+  log,
+  overrideChatLogTimestamps,
+  registerEnrichers,
+  registerKeybindings,
+  runAllMigrations,
+  showDebugZones,
+  updateZonePositions
+} from './scripts/utils/_module.mjs';
+import { WeatherManager, initializeWeatherSound } from './scripts/weather/_module.mjs';
 import './styles/big-cal.css';
 import './styles/calendar-editor.css';
 import './styles/chat.css';
+import './styles/chronicle.css';
+import './styles/cinematics.css';
 import './styles/climate-editor.css';
+import './styles/condition-builder.css';
 import './styles/dialogs.css';
+import './styles/enrichers.css';
 import './styles/global.css';
 import './styles/hud.css';
 import './styles/importer.css';
 import './styles/mini-cal.css';
 import './styles/note-sheet.css';
-import './styles/search.css';
+import './styles/note-viewer.css';
+import './styles/secondary-calendar.css';
 import './styles/settings.css';
 import './styles/sun-dial.css';
 import './styles/theme.css';
@@ -64,6 +68,7 @@ Hooks.once('init', async () => {
   initializeLogger();
   registerKeybindings();
   registerHooks();
+  registerEnrichers();
   initializeImporters();
   overrideChatLogTimestamps();
   CalendariaSocket.initialize();
@@ -80,7 +85,6 @@ Hooks.once('init', async () => {
 Hooks.once('dnd5e.setupCalendar', () => {
   CONFIG.DND5E.calendar.application = null;
   CONFIG.DND5E.calendar.calendars = [];
-  log(3, 'Disabling D&D 5e calendar system - Calendaria will handle calendars');
   return false;
 });
 
@@ -89,6 +93,10 @@ Hooks.once('ready', async () => {
   await CalendarManager.initialize();
   await runAllMigrations();
   await NoteManager.initialize();
+  if (game.user.isGM) {
+    const activeCalendar = CalendarManager.getActiveCalendar();
+    if (activeCalendar?.metadata?.id) await FestivalManager.ensureFestivalNotes(activeCalendar.metadata.id, activeCalendar);
+  }
   TimeTracker.initialize();
   TimeClock.initialize();
   EventScheduler.initialize();
@@ -107,9 +115,11 @@ Hooks.once('ready', async () => {
   Stopwatch.updateIdleOpacity();
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL) && canViewSunDial()) SunDial.show({ silent: true });
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_STOPWATCH)) Stopwatch.show();
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL)) BigCal.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_STOPWATCH) && canViewStopwatch()) Stopwatch.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL) && canViewBigCal()) BigCal.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CHRONICLE) && canViewChronicle()) Chronicle.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
+  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_CHRONICLE)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CHRONICLE, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
@@ -132,9 +142,9 @@ Hooks.once('ready', async () => {
       ui.notifications.warn('CALENDARIA.Notification.PF2eDarknessSyncDisabled', { localize: true });
     }
   }
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
-  if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) StickyZones.showDebugZones();
-  Hooks.on('renderSceneControls', () => StickyZones.updateZonePositions('below-controls'));
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD) && canViewHUD()) HUD.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) showDebugZones();
+  Hooks.on('renderSceneControls', () => updateZonePositions('below-controls'));
   initializeChatCommander();
   initializeFXMaster();
   initializeWeatherSound();

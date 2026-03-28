@@ -1,38 +1,18 @@
-/**
- * Foundry VTT globals mock for testing.
- * @module Mocks/Foundry
- */
-
 import { vi } from 'vitest';
 
-// Mock game.i18n
 const i18n = {
   localize: vi.fn((key) => key),
   format: vi.fn((key, data) => {
     let result = key;
-    for (const [k, v] of Object.entries(data || {})) {
-      result = result.replace(`{${k}}`, String(v));
-    }
+    for (const [k, v] of Object.entries(data || {})) result = result.replace(`{${k}}`, String(v));
     return result;
   })
 };
 
-// Mock user
-const user = {
-  id: 'test-user',
-  name: 'Test User',
-  isGM: true,
-  active: true
-};
+const user = { id: 'test-user', name: 'Test User', isGM: true, active: true };
 
-// Mock time
-const time = {
-  worldTime: 0,
-  components: { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 },
-  advance: vi.fn()
-};
+const time = { worldTime: 0, components: { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 }, advance: vi.fn() };
 
-// Mock settings
 const settings = {
   get: vi.fn(),
   set: vi.fn(() => Promise.resolve(true)),
@@ -40,7 +20,6 @@ const settings = {
   registerMenu: vi.fn()
 };
 
-// Mock users collection
 const users = [
   { id: 'test-user', name: 'Test User', isGM: true, active: true },
   { id: 'player-1', name: 'Player 1', isGM: false, active: true },
@@ -49,59 +28,14 @@ const users = [
 users.filter = (fn) => Array.prototype.filter.call(users, fn);
 users.map = (fn) => Array.prototype.map.call(users, fn);
 users.find = (fn) => Array.prototype.find.call(users, fn);
-
-// Mock scenes collection
-const scenes = {
-  active: null,
-  filter: vi.fn(() => [])
-};
-
-// Mock macros collection
-const macros = {
-  get: vi.fn(() => null)
-};
-
-// Global game object
-globalThis.game = {
-  i18n,
-  user,
-  users,
-  time,
-  settings,
-  scenes,
-  macros,
-  modules: { get: vi.fn() },
-  system: { id: 'dnd5e' },
-  world: { id: 'test-world' }
-};
-
-// Mock ui
-globalThis.ui = {
-  notifications: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn()
-  }
-};
-
-// Mock Hooks
-globalThis.Hooks = {
-  on: vi.fn(),
-  once: vi.fn(),
-  off: vi.fn(),
-  call: vi.fn(),
-  callAll: vi.fn()
-};
-
-// Mock CONFIG
+const scenes = { active: null, filter: vi.fn(() => []) };
+const macros = { get: vi.fn(() => null) };
+globalThis.game = { i18n, user, users, time, settings, scenes, macros, modules: { get: vi.fn() }, system: { id: 'dnd5e' }, world: { id: 'test-world' } };
+globalThis.ui = { notifications: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } };
+globalThis.Hooks = { on: vi.fn(), once: vi.fn(), off: vi.fn(), call: vi.fn(), callAll: vi.fn() };
 globalThis.CONFIG = {};
+globalThis.ChatMessage = { create: vi.fn(() => Promise.resolve({})) };
 
-// Mock ChatMessage
-globalThis.ChatMessage = {
-  create: vi.fn(() => Promise.resolve({}))
-};
-
-// Mock document.createElement (for DOM-dependent code)
 if (typeof document === 'undefined') {
   globalThis.document = {
     createElement: vi.fn((tag) => ({
@@ -119,14 +53,12 @@ if (typeof document === 'undefined') {
   };
 }
 
-// Mock foundry namespace
 globalThis.foundry = {
   utils: {
     mergeObject: vi.fn((target, source) => ({ ...target, ...source })),
     deepClone: vi.fn((obj) => JSON.parse(JSON.stringify(obj))),
     Color: {
       from: vi.fn((hex) => {
-        // Simple hex to HSL mock
         const r = parseInt(hex.slice(1, 3), 16) / 255;
         const g = parseInt(hex.slice(3, 5), 16) / 255;
         const b = parseInt(hex.slice(5, 7), 16) / 255;
@@ -145,17 +77,25 @@ globalThis.foundry = {
         return { hsl: [h, s, l] };
       })
     },
+    randomID: vi.fn(() => 'mock-random-id'),
     saveDataToFile: vi.fn(),
     readTextFromFile: vi.fn(),
     logCompatibilityWarning: vi.fn()
   },
   applications: {
-    handlebars: {
-      renderTemplate: vi.fn(() => Promise.resolve(''))
-    },
+    handlebars: { renderTemplate: vi.fn(() => Promise.resolve('')) },
     api: {
       DialogV2: {
-        wait: vi.fn(() => Promise.resolve('cancel'))
+        wait: vi.fn(() => Promise.resolve('cancel')),
+        prompt: vi.fn(() => Promise.resolve(null))
+      }
+    },
+    ux: {
+      ContextMenu: {
+        implementation: class MockContextMenu {
+          constructor() {}
+          static create() {}
+        }
       }
     }
   }

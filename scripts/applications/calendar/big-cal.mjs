@@ -4,27 +4,66 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
-import { addDays, dayOfWeek, daysBetween } from '../../notes/date-utils.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
-import { isRecurringMatch } from '../../notes/recurrence.mjs';
-import TimeClock from '../../time/time-clock.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../../utils/formatting/format-utils.mjs';
-import { format, localize } from '../../utils/localization.mjs';
-import { canViewBigCal } from '../../utils/permissions.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
-import SearchManager from '../../utils/search-manager.mjs';
-import * as ViewUtils from '../../utils/ui/calendar-view-utils.mjs';
-import * as WidgetManager from '../../utils/widget-manager.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { SettingsPanel } from '../settings/settings-panel.mjs';
-import WeatherPickerApp from '../weather/weather-picker.mjs';
-import { MiniCal } from './mini-cal.mjs';
+import { FestivalManager } from '../../festivals/_module.mjs';
+import {
+  NoteManager,
+  addDays,
+  clearDisplayPropsCache,
+  dayOfWeek,
+  enrichNoteForDisplay,
+  extractNoteMatchData,
+  getEffectiveDuration,
+  isRecurringMatch,
+  resolveNoteDisplayProps,
+  topologicalSortNotes
+} from '../../notes/_module.mjs';
+import { TimeClock } from '../../time/_module.mjs';
+import {
+  CalendariaSocket,
+  attachWidgetListeners,
+  buildOpenAppsMenuItem,
+  buildWeatherLookup,
+  buildWeatherPillData,
+  canViewBigCal,
+  enrichSeasonData,
+  format,
+  formatForLocation,
+  generateDayTooltip,
+  getAllMoonPhases,
+  getCalendarNotes,
+  getDayWeather,
+  getFestivalNoteForDay,
+  getLeadingDays,
+  getVisibleMoons,
+  getVisibleNotes,
+  hasFogRevealedMonthInDirection,
+  hasMoonIconMarkers,
+  hasWidgetsForPoint,
+  isCombatBlocked,
+  isFogEnabled,
+  isMonthFullyFogged,
+  isRevealed,
+  localize,
+  renderCycleIndicator,
+  renderEraIndicator,
+  renderMoonIcons,
+  renderReplacementOrOriginal,
+  renderSeasonIndicator,
+  renderWeatherIndicator,
+  renderWidgetsForPoint,
+  setVisibleMoons,
+  setupDayContextMenu,
+  showMoonPicker,
+  warnShowToAll
+} from '../../utils/_module.mjs';
+import { WeatherManager } from '../../weather/_module.mjs';
+import { MiniCal, NoteViewer, SecondaryCalendar, SettingsPanel, WeatherPickerApp } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-/** Max moon icons visible per day cell before overflow. */
+/** @type {number} Max moon icons visible per day cell before overflow. */
 const MAX_VISIBLE_MOONS = 3;
 
 /**
@@ -34,7 +73,7 @@ const MAX_VISIBLE_MOONS = 3;
  */
 function processMoonPhases(phases) {
   if (!phases?.length) return null;
-  const override = ViewUtils.getVisibleMoons();
+  const override = getVisibleMoons();
   let ordered = phases;
   if (override?.length && phases.length > MAX_VISIBLE_MOONS) {
     const phaseMap = new Map(phases.map((m) => [m.moonName, m]));
@@ -66,10 +105,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._displayMode = 'month';
     this._selectedDate = null;
     this._selectedTimeSlot = null;
-    this._searchTerm = '';
-    this._searchResults = null;
-    this._searchOpen = false;
-    this._clickOutsideHandler = null;
   }
 
   /** @override */
@@ -92,13 +127,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       selectTimeSlot: BigCal._onSelectTimeSlot,
       toggleCompact: BigCal._onToggleCompact,
       openWeatherPicker: BigCal._onOpenWeatherPicker,
-      toggleSearch: BigCal._onToggleSearch,
-      closeSearch: BigCal._onCloseSearch,
-      openSearchResult: BigCal._onOpenSearchResult,
+      openNoteViewer: BigCal._onOpenNoteViewer,
+      openChronicle: BigCal._onOpenChronicle,
       openSettings: BigCal._onOpenSettings,
       navigateToMonth: BigCal._onNavigateToMonth,
       moonClick: BigCal._onMoonClick,
-      closeBigCal: BigCal._onCloseBigCal
+      closeBigCal: BigCal._onCloseBigCal,
+      openSecondaryCalendar: BigCal._onOpenSecondaryCalendar
     },
     position: { width: 'auto', height: 'auto' }
   };
@@ -118,11 +153,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options = {}) {
-    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
-    return super.close(options);
+    return super.close({ animate: false, ...options });
   }
 
   /** @override */
@@ -159,17 +194,28 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Navigate the calendar view to a specific date and select it.
+   * @param {object} date - Date to select {year, month, dayOfMonth} (all 0-indexed internally)
+   */
+  selectDate(date) {
+    this._viewedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
+    this._selectedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
+  }
+
+  /**
    * Prepare context data for rendering.
    * @param {object} options - Render options
    * @returns {Promise<object>} The prepared context
    * @override
    */
   async _prepareContext(options) {
+    clearDisplayPropsCache();
     const context = await super._prepareContext(options);
     const calendar = this.calendar;
     const viewedDate = this.viewedDate;
     context.editable = game.user.isGM;
     context.canAddNotes = true;
+    context.showChronicleButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON);
     context.calendar = calendar;
     context.viewedDate = viewedDate;
     context.displayMode = this._displayMode;
@@ -183,9 +229,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this._selectedDate) context.isToday = this._selectedDate.year === todayYear && this._selectedDate.month === todayMonth && this._selectedDate.dayOfMonth === todayDayOfMonth;
     else context.isToday = true;
     context.disableSetCurrentDate = !this._selectedDate || context.isToday;
-    const allNotes = ViewUtils.getCalendarNotes();
+    const allNotes = getCalendarNotes();
     context.notes = allNotes;
-    context.visibleNotes = ViewUtils.getVisibleNotes(allNotes);
+    context.visibleNotes = topologicalSortNotes(getVisibleNotes(allNotes));
     if (calendar) {
       switch (this._displayMode) {
         case 'week':
@@ -198,6 +244,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           context.calendarData = this._generateCalendarData(calendar, viewedDate, context.visibleNotes);
           break;
       }
+    }
+    if (!game.user.isGM && isFogEnabled() && game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_NAV_MODE) === 'skip') {
+      context.fogNavDisablePrev = !hasFogRevealedMonthInDirection(viewedDate.year, viewedDate.month, -1, calendar);
+      context.fogNavDisableNext = !hasFogRevealedMonthInDirection(viewedDate.year, viewedDate.month, 1, calendar);
     }
     context.currentMonthNotes = this._getNotesForMonth(context.visibleNotes, viewedDate.year, viewedDate.month);
     context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES);
@@ -218,9 +268,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       context.cycleValues = cycleResult.values;
       context.cycleData = cycleResult;
     }
-    context.searchTerm = this._searchTerm;
-    context.searchOpen = this._searchOpen;
-    context.searchResults = this._searchResults || [];
+    const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
+    if (eqCalendars.size) {
+      const activeId = CalendarRegistry.getActiveId();
+      const equivalents = getEquivalentDates({ year: viewedDate.year, month: viewedDate.month, dayOfMonth: viewedDate.dayOfMonth ?? 0 }, activeId, [...eqCalendars]);
+      if (equivalents.length) context.equivalentDates = equivalents.map((eq) => ({ label: eq.formatted, tooltip: eq.calendarName, calendarId: eq.calendarId }));
+    }
     context.widgets = this._prepareWidgetContext(context);
     return context;
   }
@@ -232,29 +285,25 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _prepareWidgetContext(context) {
     const widgets = {};
-    widgets.actions = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.BIGCAL_ACTIONS, 'bigcal');
+    widgets.actions = renderWidgetsForPoint(WIDGET_POINTS.BIGCAL_ACTIONS, 'bigcal');
     const weatherObj = context.showWeather && context.weather ? { ...context.weather, icon: this._normalizeWeatherIcon(context.weather.icon) } : null;
-    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.weatherIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.WEATHER_INDICATOR,
-      ViewUtils.renderWeatherIndicator({ weather: weatherObj, displayMode: context.weatherDisplayMode, canInteract: context.editable, showBlock: context.showWeather && context.editable }),
+      renderWeatherIndicator({ weather: weatherObj, displayMode: context.weatherDisplayMode, canInteract: context.editable, showBlock: context.showWeather && context.editable }),
       'bigcal'
     );
     const season = context.showSeason ? this._normalizeSeasonData(context.calendarData?.currentSeason) : null;
-    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(
-      REPLACEABLE_ELEMENTS.SEASON_INDICATOR,
-      ViewUtils.renderSeasonIndicator({ season, displayMode: context.seasonDisplayMode }),
-      'bigcal'
-    );
+    widgets.seasonIndicator = renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, renderSeasonIndicator({ season, displayMode: context.seasonDisplayMode }), 'bigcal');
     const era = context.showEra ? this._normalizeEraData(context.calendarData?.currentEra) : null;
-    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, ViewUtils.renderEraIndicator({ era, displayMode: context.eraDisplayMode }), 'bigcal');
+    widgets.eraIndicator = renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, renderEraIndicator({ era, displayMode: context.eraDisplayMode }), 'bigcal');
     const cycleData = context.showCycles ? context.cycleData : null;
-    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.cycleIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.CYCLE_INDICATOR,
-      ViewUtils.renderCycleIndicator({ cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
+      renderCycleIndicator({ cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
       'bigcal'
     );
-    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'bigcal');
-    widgets.hasIndicators = WidgetManager.hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
+    widgets.indicators = renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'bigcal');
+    widgets.hasIndicators = hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
     return widgets;
   }
 
@@ -326,40 +375,22 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     if (startDayOfWeek > 0) {
-      const totalMonths = calendar.monthsArray.length ?? 12;
-      let prevDays = [];
-      let remainingSlots = startDayOfWeek;
-      let checkMonth = month === 0 ? totalMonths - 1 : month - 1;
-      let checkYear = month === 0 ? year - 1 : year;
-      let checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
-      while (remainingSlots > 0 && checkDay > 0) {
-        const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: checkDay - 1 });
-        const isIntercalary = festivalDay?.countsForWeekday === false;
-        if (!isIntercalary) {
-          prevDays.unshift({ day: checkDay, year: checkYear, month: checkMonth });
-          remainingSlots--;
-        }
-        checkDay--;
-        if (checkDay < 1 && remainingSlots > 0) {
-          checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
-          if (checkMonth === totalMonths - 1) checkYear--;
-          checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
-        }
-      }
-      for (const pd of prevDays)
-        currentWeek.push({ day: pd.day, dayOfMonth: pd.day - 1, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day - 1) });
+      const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
+      for (const pd of prevDays) currentWeek.push({ ...pd, isToday: this._isToday(pd.year, pd.month, pd.dayOfMonth) });
     }
     const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
     let weatherLookup = null;
-    if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
+    if (showWeatherIcons) weatherLookup = buildWeatherLookup();
     const intercalaryDays = [];
     let dayIndex = startDayOfWeek;
+    const fogEnabled = isFogEnabled();
     for (let dayOfMonth = 0; dayOfMonth < daysInMonth; dayOfMonth++) {
       const displayDay = dayOfMonth + 1;
-      const dayNotes = this._getNotesForDay(notes, year, month, dayOfMonth);
-      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth });
+      const isFogged = fogEnabled && !isRevealed(year, month, dayOfMonth);
+      const dayNotes = isFogged ? [] : this._getNotesForDay(notes, year, month, dayOfMonth);
+      const fi = isFogged ? null : getFestivalNoteForDay(notes, year, month, dayOfMonth);
       let moonPhases = null;
-      if (showMoons) {
+      if (showMoons && !isFogged) {
         const dayComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moonsArray
@@ -372,52 +403,53 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           .sort((a, b) => a.moonName.localeCompare(b.moonName));
         moonPhases = processMoonPhases(moonPhases);
       }
-      const isIntercalary = festivalDay?.countsForWeekday === false;
+      const isIntercalary = fi && !fi.countsForWeekday;
+      const festivalInfo = fi ? { name: fi.name, description: fi.description, color: fi.color, position: fi.position } : null;
       if (isIntercalary) {
-        const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
-        const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
-        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
+        const wd = !isFogged && weatherLookup ? getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         intercalaryDays.push({
           day: displayDay,
           dayOfMonth,
           year,
           month,
+          isFogged,
           isToday: this._isToday(year, month, dayOfMonth),
           isSelected: this._isSelected(year, month, dayOfMonth),
           notes: dayNotes,
-          isFestival: true,
-          festivalName: festivalNameStr,
-          festivalColor: festivalDay?.color || '',
-          festivalIcon: festivalDay?.icon || '',
-          festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd),
+          isFestival: !isFogged && !!fi?.showVisuals,
+          festivalName: !isFogged && fi?.showVisuals ? fi.name : '',
+          festivalColor: !isFogged && fi?.showVisuals ? fi.color : '',
+          festivalIcon: !isFogged && fi?.showVisuals ? fi.icon : '',
+          festivalDescription: !isFogged ? fi?.description || '' : '',
+          festivalNoteId: !isFogged ? fi?.note?.id || '' : '',
+          dayTooltip: isFogged ? '' : generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd, dayNotes),
           moonPhases,
           isIntercalary: true,
-          ...ViewUtils.buildWeatherPillData(wd)
+          ...buildWeatherPillData(isFogged ? null : wd)
         });
       } else {
         const weekdayData = calendar.weekdaysArray[currentWeek.length];
-        const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
-        const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
-        const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
+        const wd = !isFogged && weatherLookup ? getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         currentWeek.push({
           day: displayDay,
           dayOfMonth,
           year,
           month,
+          isFogged,
           isToday: this._isToday(year, month, dayOfMonth),
           isSelected: this._isSelected(year, month, dayOfMonth),
           notes: dayNotes,
           isOddDay: dayIndex % 2 === 1,
-          isFestival: !!festivalDay,
-          festivalName: festivalNameStr,
-          festivalColor: festivalDay?.color || '',
-          festivalIcon: festivalDay?.icon || '',
-          festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd),
+          isFestival: !isFogged && !!fi?.showVisuals,
+          festivalName: !isFogged && fi?.showVisuals ? fi.name : '',
+          festivalColor: !isFogged && fi?.showVisuals ? fi.color : '',
+          festivalIcon: !isFogged && fi?.showVisuals ? fi.icon : '',
+          festivalDescription: !isFogged ? fi?.description || '' : '',
+          festivalNoteId: !isFogged ? fi?.note?.id || '' : '',
+          dayTooltip: isFogged ? '' : generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd, dayNotes),
           isRestDay: weekdayData?.isRestDay || false,
           moonPhases,
-          ...ViewUtils.buildWeatherPillData(wd)
+          ...buildWeatherPillData(isFogged ? null : wd)
         });
         dayIndex++;
         if (currentWeek.length === daysInWeek) {
@@ -470,7 +502,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
     });
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
-    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
@@ -508,6 +540,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const fogEnabled = isFogEnabled();
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
@@ -529,11 +562,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const dayInternalYear = dayYear - yearZero;
         const dayOfMonth = dayNum - 1;
-        const dayNotes = this._getNotesForDay(notes, dayYear, 0, dayOfMonth);
-        const festivalDay = calendar.findFestivalDay({ year: dayInternalYear, month: 0, dayOfMonth });
+        const dayIsFogged = fogEnabled && !isRevealed(dayYear, 0, dayOfMonth);
+        const dayNotes = dayIsFogged ? [] : this._getNotesForDay(notes, dayYear, 0, dayOfMonth);
+        const festivalDay = dayIsFogged ? null : calendar.findFestivalDay({ year: dayInternalYear, month: 0, dayOfMonth });
         const isIntercalary = festivalDay?.countsForWeekday === false;
         let moonPhases = null;
-        if (showMoons) {
+        if (showMoons && !dayIsFogged) {
           const dayComponents = { year: dayInternalYear, month: 0, dayOfMonth, hour: 12, minute: 0, second: 0 };
           const dayWorldTime = calendar.componentsToTime(dayComponents);
           moonPhases = calendar.moonsArray
@@ -547,18 +581,21 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           moonPhases = processMoonPhases(moonPhases);
         }
         const weekdayData = calendar.weekdaysArray[i % daysInWeek];
+        const festivalNoteId = this._getFestivalNoteId(festivalDay, calendar);
         const dayData = {
           day: dayNum,
           dayOfMonth,
           year: dayYear,
           month: 0,
+          isFogged: dayIsFogged,
           isToday: this._isToday(dayYear, 0, dayOfMonth),
           isSelected: this._isSelected(dayYear, 0, dayOfMonth),
           notes: dayNotes,
-          isFestival: !!festivalDay,
-          festivalName: festivalDay ? localize(festivalDay.name) : null,
-          festivalColor: festivalDay?.color || '',
-          festivalIcon: festivalDay?.icon || '',
+          isFestival: !dayIsFogged && !!festivalDay,
+          festivalName: !dayIsFogged && festivalDay ? localize(festivalDay.name) : null,
+          festivalColor: !dayIsFogged ? festivalDay?.color || '' : '',
+          festivalIcon: !dayIsFogged && festivalDay?.icon ? `fas ${festivalDay.icon}` : '',
+          festivalNoteId: dayIsFogged ? '' : festivalNoteId,
           moonPhases,
           isRestDay: weekdayData?.isRestDay || false,
           isFromOtherWeek: weekOffset !== 0,
@@ -569,7 +606,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       weeks.push(currentWeek);
     }
     const viewedComponents = { month: 0, dayOfMonth: viewedDayOfMonth };
-    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const weekdayData = calendar.weekdaysArray ?? [];
     const displayWeek = weekNumber + 1;
@@ -637,6 +674,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentTime = game.time.components || {};
     const currentHour = currentTime.hour ?? 0;
     const daysInWeek = calendar.daysInWeek;
+    const fogEnabled = isFogEnabled();
     const days = [];
     let currentDayOfMonth = weekStartDayOfMonth;
     let currentMonth = weekStartMonth;
@@ -659,7 +697,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         continue;
       }
-      const dayNotes = this._getNotesForDay(notes, currentYear, currentMonth, currentDayOfMonth);
+      const weekDayFogged = fogEnabled && !isRevealed(currentYear, currentMonth, currentDayOfMonth);
+      const dayNotes = weekDayFogged ? [] : this._getNotesForDay(notes, currentYear, currentMonth, currentDayOfMonth);
       const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.weekdaysArray ?? [];
       const weekdayData = monthWeekdays[weekdayIndex];
       const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
@@ -672,6 +711,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         dayOfMonth: currentDayOfMonth,
         year: currentYear,
         month: currentMonth,
+        isFogged: weekDayFogged,
         monthName: monthName,
         dayName: dayName,
         isToday: isToday,
@@ -703,7 +743,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
     const midWeekDay = days[Math.floor(days.length / 2)];
     const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: midWeekDay?.dayOfMonth ?? date.dayOfMonth ?? 0 };
-    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.weekdaysArray ?? [];
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
@@ -775,7 +815,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       yearGrid.push(yearRow);
     }
     const viewedComponents = { month: 0, dayOfMonth: 0 };
-    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const startYearComponents = { year: startYear, month: 0, dayOfMonth: 0 };
     const endYearComponents = { year: startYear + 8, month: 0, dayOfMonth: 0 };
@@ -830,31 +870,39 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _getNotesForDay(notePages, year, month, dayOfMonth) {
     const targetDate = { year, month, dayOfMonth };
+    const STYLE_PRIORITY = { banner: 0, icon: 1, pip: 2 };
     return notePages
       .filter((page) => {
+        if (page.system.linkedFestival) return false;
         const start = page.system.startDate;
         const end = page.system.endDate;
         const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
         if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.dayOfMonth !== start.dayOfMonth)) return false;
-        const noteData = {
-          startDate: start,
-          endDate: end,
-          repeat: page.system.repeat,
-          repeatInterval: page.system.repeatInterval,
-          repeatEndDate: page.system.repeatEndDate,
-          maxOccurrences: page.system.maxOccurrences,
-          moonConditions: page.system.moonConditions,
-          randomConfig: page.system.randomConfig,
-          cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-          linkedEvent: page.system.linkedEvent,
-          weekday: page.system.weekday,
-          weekNumber: page.system.weekNumber,
-          seasonalConfig: page.system.seasonalConfig,
-          conditions: page.system.conditions
-        };
-        return isRecurringMatch(noteData, targetDate);
+        if (getEffectiveDuration({ hasDuration: page.system.hasDuration, duration: page.system.duration }) > 0) return false;
+        return isRecurringMatch(extractNoteMatchData(page), targetDate);
       })
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .map((page) => enrichNoteForDisplay(page))
+      .sort((a, b) => {
+        const aPri = STYLE_PRIORITY[a.displayStyle] ?? 1;
+        const bPri = STYLE_PRIORITY[b.displayStyle] ?? 1;
+        if (aPri !== bPri) return aPri - bPri;
+        return a.name.localeCompare(b.name);
+      });
+  }
+
+  /**
+   * Get the journal page ID for a festival's note.
+   * @param {object|null} festivalDay - Festival definition from findFestivalDay
+   * @param {object} calendar - Calendar instance
+   * @returns {string} Page ID or empty string
+   */
+  _getFestivalNoteId(festivalDay, calendar) {
+    if (!festivalDay || !calendar?.festivals) return '';
+    const calendarId = this._calendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
+    if (!calendarId) return '';
+    const key = Object.entries(calendar.festivals).find(([, f]) => f === festivalDay)?.[0];
+    if (!key) return '';
+    return FestivalManager.getFestivalNoteByKey(calendarId, key)?.id || '';
   }
 
   /**
@@ -899,32 +947,21 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const start = note.system.startDate;
       const end = note.system.endDate;
       const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
-      if (!hasValidEndDate) continue;
-      const isSameDay = end.year === start.year && end.month === start.month && end.dayOfMonth === start.dayOfMonth;
-      if (isSameDay) continue;
+      const hasDur = note.system.hasDuration && note.system.duration > 0;
+      if (!hasValidEndDate && !hasDur) continue;
+      if (hasValidEndDate && !hasDur) {
+        const isSameDay = end.year === start.year && end.month === start.month && end.dayOfMonth === start.dayOfMonth;
+        if (isSameDay) continue;
+      }
       const repeat = note.system.repeat;
-      const duration = daysBetween(start, end);
+      const hasConditionTree = note.system.conditionTree?.children?.length > 0 || note.system.conditionTree?.field;
+      const noteData = { startDate: start, endDate: end, hasDuration: note.system.hasDuration, duration: note.system.duration };
+      const duration = getEffectiveDuration(noteData);
+      if (duration <= 0) continue;
       const isAllDay = start.hour == null || note.system.allDay;
       const priority = isAllDay ? -1 : start.hour;
-      if (repeat && repeat !== 'never') {
-        const noteData = {
-          startDate: start,
-          endDate: start,
-          repeat: note.system.repeat,
-          repeatInterval: note.system.repeatInterval,
-          repeatEndDate: note.system.repeatEndDate,
-          maxOccurrences: note.system.maxOccurrences,
-          moonConditions: note.system.moonConditions,
-          randomConfig: note.system.randomConfig,
-          cachedRandomOccurrences: note.flags?.[MODULE.ID]?.randomOccurrences,
-          linkedEvent: note.system.linkedEvent,
-          weekday: note.system.weekday,
-          weekNumber: note.system.weekNumber,
-          seasonalConfig: note.system.seasonalConfig,
-          rangePattern: note.system.rangePattern,
-          computedConfig: note.system.computedConfig,
-          conditions: note.system.conditions
-        };
+      if ((repeat && repeat !== 'never') || hasConditionTree) {
+        const recNoteData = { ...extractNoteMatchData(note), hasDuration: false, duration: 0 };
         const calendar = CalendarManager.getActiveCalendar();
         const yearZero = calendar?.years?.yearZero ?? 0;
         const prevMonth = month === 0 ? (calendar?.monthsArray.length || 12) - 1 : month - 1;
@@ -933,7 +970,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const checkFromDay = Math.max(1, prevMonthDays - duration);
         for (let d = checkFromDay; d <= prevMonthDays; d++) {
           const checkDate = { year: prevYear, month: prevMonth, dayOfMonth: d - 1 };
-          if (isRecurringMatch(noteData, checkDate)) {
+          if (isRecurringMatch(recNoteData, checkDate)) {
             const occEnd = addDays(checkDate, duration);
             if (occEnd.year > year || (occEnd.year === year && occEnd.month >= month)) {
               const endDayOfMonth = occEnd.month === month && occEnd.year === year ? occEnd.dayOfMonth : daysInMonth - 1;
@@ -943,27 +980,76 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         for (let d = 1; d <= daysInMonth; d++) {
           const checkDate = { year, month, dayOfMonth: d - 1 };
-          if (isRecurringMatch(noteData, checkDate)) {
+          if (isRecurringMatch(recNoteData, checkDate)) {
             const occEnd = addDays(checkDate, duration);
             const endDayOfMonth = occEnd.month === month && occEnd.year === year ? occEnd.dayOfMonth : daysInMonth - 1;
             multiDayEvents.push({ note, start: checkDate, end: occEnd, startDayOfMonth: checkDate.dayOfMonth, endDayOfMonth, priority, isContinuation: false });
           }
         }
       } else {
+        const effectiveEnd = hasDur ? addDays(start, duration) : end;
         const startBeforeOrInMonth = start.year < year || (start.year === year && start.month <= month);
-        const endInOrAfterMonth = end.year > year || (end.year === year && end.month >= month);
+        const endInOrAfterMonth = effectiveEnd.year > year || (effectiveEnd.year === year && effectiveEnd.month >= month);
         if (!startBeforeOrInMonth || !endInOrAfterMonth) continue;
         const isContinuation = start.year < year || (start.year === year && start.month < month);
         const startDayOfMonth = isContinuation ? 0 : start.dayOfMonth;
-        const endDayOfMonth = end.month === month && end.year === year ? end.dayOfMonth : daysInMonth - 1;
+        const endDayOfMonth = effectiveEnd.month === month && effectiveEnd.year === year ? effectiveEnd.dayOfMonth : daysInMonth - 1;
         if (endDayOfMonth < startDayOfMonth) continue;
-        multiDayEvents.push({ note, start, end, startDayOfMonth, endDayOfMonth, priority, isContinuation });
+        multiDayEvents.push({ note, start, end: effectiveEnd, startDayOfMonth, endDayOfMonth, priority, isContinuation });
       }
     }
     multiDayEvents.sort((a, b) => a.priority - b.priority);
-    multiDayEvents.forEach(({ note, startDayOfMonth, endDayOfMonth, isContinuation }) => {
+    const singleDayWidth = (1 / daysInWeek) * 100;
+    const PRIMARY_HEIGHT = 1;
+    const SECONDARY_HEIGHT = 0.1875;
+    const BAR_OFFSET = 1.625;
+    const getBarTop = (row) => {
+      if (row === 0) return BAR_OFFSET;
+      return BAR_OFFSET + PRIMARY_HEIGHT + (row - 1) * SECONDARY_HEIGHT;
+    };
+    multiDayEvents.forEach(({ note, end, startDayOfMonth, endDayOfMonth, isContinuation }) => {
+      const endsInMonth = end.month === month && end.year === year;
+      const resolved = resolveNoteDisplayProps(note);
+      const displayStyle = resolved.displayStyle;
+      const isHidden = resolved.visibility === 'hidden';
+      const isSecret = resolved.visibility === 'secret';
+      const showBookends = note.system.showBookends || false;
       const startPosition = startDayOfMonth + startDayOfWeek;
       const endPosition = endDayOfMonth + startDayOfWeek;
+      if (showBookends) {
+        const baseProps = { name: note.name, color: resolved.color, icon: resolved.icon, iconType: resolved.iconType, displayStyle, showBookends, isHidden, isSecret };
+        if (!isContinuation) {
+          const col = startPosition % daysInWeek;
+          events.push({
+            ...baseProps,
+            id: `${note.id}-bk-start`,
+            weekIndex: Math.floor(startPosition / daysInWeek),
+            left: (col / daysInWeek) * 100,
+            width: singleDayWidth,
+            top: getBarTop(0),
+            isSecondary: false,
+            isContinuation: false,
+            isStart: true,
+            isEnd: false
+          });
+        }
+        if (endsInMonth) {
+          const col = endPosition % daysInWeek;
+          events.push({
+            ...baseProps,
+            id: `${note.id}-bk-end`,
+            weekIndex: Math.floor(endPosition / daysInWeek),
+            left: (col / daysInWeek) * 100,
+            width: singleDayWidth,
+            top: getBarTop(0),
+            isSecondary: false,
+            isContinuation: false,
+            isStart: false,
+            isEnd: true
+          });
+        }
+        return;
+      }
       const startWeekIndex = Math.floor(startPosition / daysInWeek);
       const endWeekIndex = Math.floor(endPosition / daysInWeek);
       let eventRow = rows.length;
@@ -987,14 +1073,21 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         events.push({
           id: note.id,
           name: note.name,
-          color: note.system.color || '#4a86e8',
-          icon: note.system.icon,
-          iconType: note.system.iconType,
+          color: resolved.color,
+          icon: resolved.icon,
+          iconType: resolved.iconType,
           weekIndex: startWeekIndex,
           left,
           width,
-          row: eventRow,
-          isContinuation
+          top: getBarTop(eventRow),
+          isSecondary: eventRow > 0,
+          isContinuation,
+          isStart: !isContinuation,
+          isEnd: endsInMonth,
+          displayStyle,
+          showBookends: false,
+          isHidden,
+          isSecret
         });
       } else {
         for (let weekIdx = startWeekIndex; weekIdx <= endWeekIndex; weekIdx++) {
@@ -1010,15 +1103,22 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           events.push({
             id: `${note.id}-week-${weekIdx}`,
             name: note.name,
-            color: note.system.color || '#4a86e8',
-            icon: note.system.icon,
-            iconType: note.system.iconType,
+            color: resolved.color,
+            icon: resolved.icon,
+            iconType: resolved.iconType,
             weekIndex: weekIdx,
             left,
             width,
-            row: eventRow,
+            top: getBarTop(eventRow),
+            isSecondary: eventRow > 0,
             isSegment: true,
-            isContinuation: showContinuationIcon
+            isContinuation: showContinuationIcon,
+            isStart: weekIdx === startWeekIndex && !isContinuation,
+            isEnd: weekIdx === endWeekIndex && endsInMonth,
+            displayStyle,
+            showBookends: false,
+            isHidden,
+            isSecret
           });
         }
       }
@@ -1038,6 +1138,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = CalendarManager.getActiveCalendar();
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     notes.forEach((note) => {
+      const resolved = resolveNoteDisplayProps(note);
       const start = note.system.startDate;
       const end = note.system.endDate;
       const allDay = note.system.allDay;
@@ -1059,9 +1160,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         blocks.push({
           id: note.id,
           name: note.name,
-          color: note.system.color || '#4a86e8',
-          icon: note.system.icon,
-          iconType: note.system.iconType,
+          color: resolved.color,
+          icon: resolved.icon,
+          iconType: resolved.iconType,
           day: start.dayOfMonth + 1,
           dayOfMonth: start.dayOfMonth,
           month: start.month,
@@ -1089,9 +1190,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           blocks.push({
             id: note.id,
             name: note.name,
-            color: note.system.color || '#4a86e8',
-            icon: note.system.icon,
-            iconType: note.system.iconType,
+            color: resolved.color,
+            icon: resolved.icon,
+            iconType: resolved.iconType,
             day: dayData.day,
             dayOfMonth: dayData.dayOfMonth,
             month: dayData.month,
@@ -1106,7 +1207,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       }
     });
-
     return blocks;
   }
 
@@ -1143,37 +1243,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     header?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-item, .event-block, .multi-day-event')) return;
       e.preventDefault();
-      this.close();
-      MiniCal.show();
+      this.close({ animate: false });
+      MiniCal.show({ animate: false });
     });
-    const searchInput = this.element.querySelector('.search-input');
-    if (searchInput) {
-      if (this._searchOpen) searchInput.focus();
-      const debouncedSearch = foundry.utils.debounce((term) => {
-        this._searchTerm = term;
-        if (term.length >= 2) this._searchResults = SearchManager.search(term, { searchContent: true });
-        else this._searchResults = null;
-        this._updateSearchResults();
-      }, 300);
-      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') this._closeSearch();
-      });
-    }
-    if (this._searchOpen) {
-      this._positionSearchPanel();
-      const panel = this.element.querySelector('.calendaria-search');
-      const button = this.element.querySelector('.search-toggle');
-      if (panel && !this._clickOutsideHandler) {
-        setTimeout(() => {
-          this._clickOutsideHandler = (event) => {
-            if (!panel.contains(event.target) && !button?.contains(event.target)) this._closeSearch();
-          };
-          document.addEventListener('mousedown', this._clickOutsideHandler);
-        }, 100);
-      }
-    }
-    WidgetManager.attachWidgetListeners(this.element);
+    attachWidgetListeners(this.element);
     Hooks.callAll(HOOKS.RENDER_CALENDAR, { app: this, element: this.element, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
   }
 
@@ -1193,14 +1266,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       }
     });
-    items.push(ViewUtils.buildOpenAppsMenuItem());
+    items.push(buildOpenAppsMenuItem());
     if (game.user.isGM) {
       const forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
       items.push({
-        name: forceBigCal ? 'CALENDARIA.BigCal.ContextMenu.HideFromAll' : 'CALENDARIA.BigCal.ContextMenu.ShowToAll',
+        name: forceBigCal ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceBigCal ? 'eye-slash' : 'eye'}"></i>`,
         callback: async () => {
           const newValue = !forceBigCal;
+          if (newValue) warnShowToAll('viewBigCal', game.i18n.localize('CALENDARIA.Permissions.ViewBigCal'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_BIG_CAL, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.BIG_CAL_VISIBILITY, { visible: newValue });
         }
@@ -1210,81 +1284,20 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     return items;
   }
 
-  /**
-   * Update search results without full re-render.
-   */
-  _updateSearchResults() {
-    const panel = this.element.querySelector('.calendaria-search');
-    if (!panel) return;
-    const resultsContainer = panel.querySelector('.search-panel-results');
-    if (!resultsContainer) return;
-    if (this._searchResults?.length) {
-      resultsContainer.innerHTML = this._searchResults
-        .map((r) => {
-          const icons = [];
-          if (r.data?.icon) icons.push(`<i class="result-note-icon ${r.data.icon}" style="color: ${r.data.color || '#4a9eff'}" data-tooltip="${localize('CALENDARIA.Search.NoteIcon')}"></i>`);
-          if (r.data?.gmOnly) icons.push(`<i class="result-gm-icon fas fa-lock" data-tooltip="${localize('CALENDARIA.Search.GMOnly')}"></i>`);
-          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}"${r.data.repeatTooltip ? ` data-tooltip="${r.data.repeatTooltip}"` : ''}></i>`);
-          if (r.data?.categoryIcons?.length) {
-            for (const cat of r.data.categoryIcons) icons.push(`<i class="result-category-icon fas ${cat.icon}" style="color: ${cat.color}" data-tooltip="${cat.label}"></i>`);
-          }
-          return `<div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
-            <div class="result-content">
-              <span class="result-name">${r.name}</span>
-              ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-            </div>
-            ${icons.length ? `<div class="result-icons">${icons.join('')}</div>` : ''}
-          </div>`;
-        })
-        .join('');
-      resultsContainer.classList.add('has-results');
-    } else if (this._searchTerm?.length >= 2) {
-      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
-      resultsContainer.classList.add('has-results');
-    } else {
-      resultsContainer.innerHTML = '';
-      resultsContainer.classList.remove('has-results');
-    }
-  }
-
-  /**
-   * Position search panel - CSS handles positioning, this just sets dimensions.
-   */
-  _positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-search');
-    if (!panel) return;
-    panel.style.width = '17.5rem';
-    panel.style.maxHeight = '21.875rem';
-  }
-
-  /**
-   * Close search and clean up.
-   */
-  _closeSearch() {
-    if (this._clickOutsideHandler) {
-      document.removeEventListener('mousedown', this._clickOutsideHandler);
-      this._clickOutsideHandler = null;
-    }
-    this._searchTerm = '';
-    this._searchResults = null;
-    this._searchOpen = false;
-    this.render();
-  }
-
-  /**
-   * Set up hook listeners when the application is first rendered
-   * @param {object} context - Render context
-   * @param {object} options - Render options
-   * @override
-   */
+  /** @override */
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
     this._adjustSizeForView();
-    const rect = this.element.getBoundingClientRect();
-    const left = Math.max(0, (window.innerWidth - rect.width) / 2);
-    const top = Math.max(0, (window.innerHeight - rect.height) / 2);
-    this.setPosition({ left, top });
-    ViewUtils.setupDayContextMenu(this.element, '.calendar-day:not(.empty)', this.calendar, {
+    const saved = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_POSITION);
+    if (saved?.left != null && saved?.top != null) {
+      this.setPosition({ left: saved.left, top: saved.top });
+    } else {
+      const rect = this.element.getBoundingClientRect();
+      const left = Math.max(0, (window.innerWidth - rect.width) / 2);
+      const top = Math.max(0, (window.innerHeight - rect.height) / 2);
+      this.setPosition({ left, top });
+    }
+    setupDayContextMenu(this.element, '.calendar-day:not(.empty)', this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
         this.render();
@@ -1310,6 +1323,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       })
     });
     this._hooks.push({
+      name: 'updateJournalEntry',
+      id: Hooks.on('updateJournalEntry', (journal, changes) => {
+        if (changes.ownership && journal.getFlag?.(MODULE.ID, 'isCalendarNote')) debouncedRender();
+      })
+    });
+    this._hooks.push({
+      name: 'createJournalEntry',
+      id: Hooks.on('createJournalEntry', (journal) => {
+        if (journal.getFlag?.(MODULE.ID, 'isCalendarNote')) debouncedRender();
+      })
+    });
+    this._hooks.push({
       name: 'createJournalEntryPage',
       id: Hooks.on('createJournalEntryPage', (page, _options, _userId) => {
         if (page.type === 'calendaria.calendarnote') debouncedRender();
@@ -1318,7 +1343,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._hooks.push({
       name: 'deleteJournalEntry',
       id: Hooks.on('deleteJournalEntry', (journal) => {
-        if (journal.pages.some((p) => p.type === 'calendaria.calendarnote')) debouncedRender();
+        if (journal.getFlag?.(MODULE.ID, 'isCalendarNote') || journal.pages.some((p) => p.type === 'calendaria.calendarnote')) debouncedRender();
       })
     });
     this._hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
@@ -1337,6 +1362,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     drag._onDragMouseDown = (event) => {
       if (event.target.closest('button, a, input, select, [data-action]')) return;
       originalMouseDown(event);
+    };
+    const originalMouseUp = drag._onDragMouseUp.bind(drag);
+    drag._onDragMouseUp = (event) => {
+      originalMouseUp(event);
+      const { left, top } = this.position;
+      game.settings.set(MODULE.ID, SETTINGS.CALENDAR_POSITION, { left, top });
     };
   }
 
@@ -1417,7 +1448,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           }
           newDayOfMonth += calendar.getDaysInMonth(newMonth, newYear - yearZero);
         }
-        // Skip past intercalary months so the viewed date lands on a regular month
         while (calendar.monthsArray[newMonth]?.type === 'intercalary') {
           if (direction > 0) {
             newDayOfMonth = 0;
@@ -1481,6 +1511,22 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           }
           attempts++;
         }
+        if (!game.user.isGM && isFogEnabled() && game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_NAV_MODE) === 'skip') {
+          let fogAttempts = 0;
+          const maxFogAttempts = calendar.monthsArray.length * 10;
+          while (isMonthFullyFogged(newYear, newMonth) && fogAttempts < maxFogAttempts) {
+            newMonth += direction;
+            if (newMonth >= calendar.monthsArray.length) {
+              newMonth = 0;
+              newYear++;
+            } else if (newMonth < 0) {
+              newMonth = calendar.monthsArray.length - 1;
+              newYear--;
+            }
+            fogAttempts++;
+          }
+          if (isMonthFullyFogged(newYear, newMonth)) return;
+        }
         this.viewedDate = { year: newYear, month: newMonth, dayOfMonth: 0 };
         break;
       }
@@ -1521,7 +1567,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: 0 },
         endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: endHour, minute: 0 }
-      }
+      },
+      source: 'ui'
     });
     this._selectedTimeSlot = null;
   }
@@ -1557,7 +1604,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: parseInt(minute) },
         endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: endHour, minute: parseInt(minute) }
-      }
+      },
+      source: 'ui'
     });
     this._selectedTimeSlot = null;
   }
@@ -1681,13 +1729,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Toggle between full and MiniCal views.
-   * Closes this window and opens the MiniCal.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onToggleCompact(_event, _target) {
-    await this.close();
-    MiniCal.show();
+    await this.close({ animate: false });
+    MiniCal.show({ animate: false });
   }
 
   /**
@@ -1697,6 +1744,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async _onCloseBigCal(_event, _target) {
     await this.close();
+  }
+
+  /**
+   * Open a secondary calendar viewer for the clicked equivalent date.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static _onOpenSecondaryCalendar(_event, target) {
+    const calendarId = target.dataset.calendarId;
+    if (calendarId) SecondaryCalendar.open(calendarId);
   }
 
   /**
@@ -1721,72 +1778,32 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;
     const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const windKph = weather.wind?.kph ?? null;
     const tooltipHtml = WeatherManager.buildWeatherTooltip({
       label,
       description: weather.description ? localize(weather.description) : null,
       temp,
       windSpeed,
+      windKph,
       windDirection,
       precipType,
       precipIntensity: weather.precipitation?.intensity
     });
-    return {
-      id: weather.id,
-      label,
-      icon: weather.icon,
-      color: weather.color,
-      temperature: temp,
-      tooltipHtml,
-      windSpeed,
-      windDirection,
-      precipType
-    };
+    return { id: weather.id, label, icon: weather.icon, color: weather.color, temperature: temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };
+  }
+
+  /** Open the Note Viewer. */
+  static _onOpenNoteViewer() {
+    NoteViewer.toggle();
   }
 
   /**
-   * Toggle the search input visibility.
+   * Open the Chronicle chronicle.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
-  static async _onToggleSearch(_event, _target) {
-    this._searchOpen = !this._searchOpen;
-    if (!this._searchOpen) {
-      this._searchTerm = '';
-      this._searchResults = null;
-    }
-    await this.render();
-  }
-
-  /**
-   * Close the search panel.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onCloseSearch(_event, _target) {
-    this._searchTerm = '';
-    this._searchResults = null;
-    this._searchOpen = false;
-    await this.render();
-  }
-
-  /**
-   * Open a search result (note).
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element with result data
-   */
-  static async _onOpenSearchResult(_event, target) {
-    const id = target.dataset.id;
-    const journalId = target.dataset.journalId;
-    const page = NoteManager.getFullNote(id);
-    if (page) page.sheet.render(true, { mode: 'view' });
-    else if (journalId) {
-      const journal = game.journal.get(journalId);
-      if (journal) journal.sheet.render(true, { pageId: id });
-    }
-    this._searchTerm = '';
-    this._searchResults = null;
-    this._searchOpen = false;
-    await this.render();
+  static _onOpenChronicle(_event, _target) {
+    CALENDARIA.apps.Chronicle.toggle();
   }
 
   /**
@@ -1812,11 +1829,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle click on a visible moon icon in the day cell.
-   * Opens radial picker to swap the moon in that slot.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked moon-phase element
    */
-  static _onMoonClick(_event, target) {
+  static async _onMoonClick(_event, target) {
     _event.stopPropagation();
     const dayCell = target.closest('[data-year][data-month][data-day]');
     if (!dayCell) return;
@@ -1824,16 +1840,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const month = parseInt(dayCell.dataset.month);
     const dayOfMonth = parseInt(dayCell.dataset.day);
     const slot = parseInt(target.dataset.moonSlot);
-    const allMoons = ViewUtils.getAllMoonPhases(this.calendar, year, month, dayOfMonth);
+    const allMoons = getAllMoonPhases(this.calendar, year, month, dayOfMonth);
     if (!allMoons?.length || allMoons.length <= MAX_VISIBLE_MOONS) return;
     const clickedMoon = target.dataset.moonName;
-    ViewUtils.showMoonPicker(target, allMoons, clickedMoon, (moonName) => {
-      const current = ViewUtils.getVisibleMoons() ?? allMoons.slice(0, MAX_VISIBLE_MOONS).map((m) => m.moonName);
+    await showMoonPicker(target, allMoons, clickedMoon, (moonName) => {
+      const current = getVisibleMoons() ?? allMoons.slice(0, MAX_VISIBLE_MOONS).map((m) => m.moonName);
       const updated = [...current];
       const existingIdx = updated.indexOf(moonName);
       if (existingIdx !== -1 && existingIdx !== slot) updated[existingIdx] = updated[slot];
       if (slot >= 0 && slot < updated.length) updated[slot] = moonName;
-      ViewUtils.setVisibleMoons(updated);
+      setVisibleMoons(updated);
       this.render();
     });
   }
@@ -1855,12 +1871,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the BigCal application.
+   * @param {object} [options] - Show options
+   * @param {boolean} [options.animate] - Whether to animate the show
+   * @param {boolean} [options.silent] - If true, don't show permission warning
    * @static
    * @returns {BigCal} The BigCal instance
    */
-  static show() {
+  static show({ animate = true, silent = false } = {}) {
+    if (isCombatBlocked(SETTINGS.BIG_CAL_COMBAT_MODE)) return null;
     const instance = this.instance ?? new BigCal();
-    instance.render({ force: true });
+    instance.render({ force: true, animate, silent });
     return instance;
   }
 

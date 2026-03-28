@@ -778,16 +778,16 @@ const date = CALENDARIA.api.timestampToDate(86400);
 
 **Returns:** `object|null` - Date components:
 
-| Field          | Type      | Description                                                                 |
-| -------------- | --------- | --------------------------------------------------------------------------- |
-| `year`         | `number`  | Year (adjusted for yearZero)                                                |
-| `month`        | `number`  | 1-based sequential month index (includes intercalary months)                |
-| `ordinal`      | `number`  | Traditional month ordinal (may be shared by intercalary and regular months) |
-| `monthName`    | `string`  | Localized month name                                                        |
-| `intercalary`  | `boolean` | Whether this month is an intercalary (festival) month                       |
-| `day`          | `number`  | 1-based day of month                                                        |
-| `hour`         | `number`  | Hour                                                                        |
-| `minute`       | `number`  | Minute                                                                      |
+| Field         | Type      | Description                                                                 |
+| ------------- | --------- | --------------------------------------------------------------------------- |
+| `year`        | `number`  | Year (adjusted for yearZero)                                                |
+| `month`       | `number`  | 1-based sequential month index (includes intercalary months)                |
+| `ordinal`     | `number`  | Traditional month ordinal (may be shared by intercalary and regular months) |
+| `monthName`   | `string`  | Localized month name                                                        |
+| `intercalary` | `boolean` | Whether this month is an intercalary (festival) month                       |
+| `day`         | `number`  | 1-based day of month                                                        |
+| `hour`        | `number`  | Hour                                                                        |
+| `minute`      | `number`  | Minute                                                                      |
 
 ---
 
@@ -813,16 +813,16 @@ const timestamp2 = CALENDARIA.api.dateToTimestamp({
 });
 ```
 
-| Parameter       | Type     | Description                                                      |
-| --------------- | -------- | ---------------------------------------------------------------- |
-| `date`          | `object` | Date components                                                  |
-| `date.year`     | `number` | Year                                                             |
-| `date.month`    | `number` | 1-based sequential month index (takes priority over `ordinal`)   |
-| `date.ordinal`  | `number` | Traditional month ordinal (used if `month` is not provided)      |
-| `date.day`      | `number` | 1-based day of month                                             |
-| `date.hour`     | `number` | Hour (optional, default 0)                                       |
-| `date.minute`   | `number` | Minute (optional, default 0)                                     |
-| `date.second`   | `number` | Second (optional, default 0)                                     |
+| Parameter      | Type     | Description                                                    |
+| -------------- | -------- | -------------------------------------------------------------- |
+| `date`         | `object` | Date components                                                |
+| `date.year`    | `number` | Year                                                           |
+| `date.month`   | `number` | 1-based sequential month index (takes priority over `ordinal`) |
+| `date.ordinal` | `number` | Traditional month ordinal (used if `month` is not provided)    |
+| `date.day`     | `number` | 1-based day of month                                           |
+| `date.hour`    | `number` | Hour (optional, default 0)                                     |
+| `date.minute`  | `number` | Minute (optional, default 0)                                   |
+| `date.second`  | `number` | Second (optional, default 0)                                   |
 
 **Returns:** `number` - World time in seconds.
 
@@ -1088,7 +1088,7 @@ const note = await CALENDARIA.api.createNote({
   categories: ['meeting'],
   icon: 'fas fa-handshake',
   color: '#4a90e2',
-  gmOnly: false,
+  visibility: 'visible',
   openSheet: 'edit'
 });
 ```
@@ -1104,7 +1104,7 @@ const note = await CALENDARIA.api.createNote({
 | `options.categories` | `string[]`              | Category IDs                                                                                            |
 | `options.icon`       | `string`                | Icon path or class                                                                                      |
 | `options.color`      | `string`                | Event color (hex)                                                                                       |
-| `options.gmOnly`     | `boolean`               | GM-only visibility                                                                                      |
+| `options.visibility` | `string`                | `'visible'`, `'hidden'`, or `'secret'` (default: `'visible'`)                                           |
 | `options.openSheet`  | `false\|'edit'\|'view'` | Open the note sheet after creation in the given mode (default: `'edit'`). Pass boolean `false` to skip. |
 
 **Returns:** `Promise<object|null>` - Created note page.
@@ -1850,24 +1850,6 @@ CALENDARIA.api.openWeatherProbabilities({ season: 'Winter' });
 | `season`  | `string` | Initial season name |
 
 **Returns:** The dialog instance.
-
----
-
-### diagnoseWeather(showDialog)
-
-Diagnose weather configuration issues. Useful for troubleshooting when weather isn't loading properly.
-
-```javascript
-const results = await CALENDARIA.api.diagnoseWeather();
-// Or silently get results:
-const results = await CALENDARIA.api.diagnoseWeather(false);
-```
-
-| Parameter    | Type      | Description                              |
-| ------------ | --------- | ---------------------------------------- |
-| `showDialog` | `boolean` | Show results in a dialog (default: true) |
-
-**Returns:** `Promise<object>` - Diagnostic results with settingsData and activeCalendar info.
 
 ---
 

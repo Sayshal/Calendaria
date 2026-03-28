@@ -142,106 +142,470 @@
     "firstlightfestiv": {
       "name": "Firstlight Festival",
       "month": 0,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#F0C75E",
       "description": "Communities kindle bonfires and lanterns to welcome the new year and banish winter's lingering darkness.",
-      "dayOfMonth": 14
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "sowtide000000000": {
       "name": "Sowtide",
       "month": 1,
-      "icon": "fas fa-seedling",
+      "icon": "fa-seedling",
       "color": "#7CB342",
       "description": "Farmers and druids bless newly sown fields with ritual prayers for a bountiful growing season.",
-      "dayOfMonth": 6
+      "dayOfMonth": 6,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 7
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "firstbloom000000": {
       "name": "Firstbloom",
       "month": 2,
-      "icon": "fas fa-heart",
+      "icon": "fa-heart",
       "color": "#E88AAF",
       "description": "A spring fertility festival of marriages and courtship, celebrated with flower garlands and dancing.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "greenfire0000000": {
       "name": "Greenfire",
       "month": 3,
-      "icon": "fas fa-tree",
+      "icon": "fa-tree",
       "color": "#2E7D32",
       "description": "Forest clans honor the living world with bonfires of green wood, sacred to the Thornborn and all who revere nature.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "solsticecrown000": {
       "name": "Solstice Crown",
       "month": 4,
-      "icon": "fas fa-crown",
+      "icon": "fa-crown",
       "color": "#FFB300",
       "description": "The summer solstice sacred to Solarius, when priests crown the sun's golden fire and the longest days are celebrated.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "firstreaping0000": {
       "name": "First Reaping",
       "month": 5,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#D4A017",
       "description": "The first sheaves of grain are cut and offered in thanksgiving as the harvest season begins.",
-      "dayOfMonth": 7
+      "dayOfMonth": 7,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 8
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "thegathering0000": {
       "name": "The Gathering",
       "month": 6,
-      "icon": "fas fa-utensils",
+      "icon": "fa-utensils",
       "color": "#E65100",
       "description": "The great harvest feast where communities gather to share food, stories, and gratitude for the year's bounty.",
-      "dayOfMonth": 14
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "theturning000000": {
       "name": "The Turning",
       "month": 7,
-      "icon": "fas fa-leaf",
+      "icon": "fa-leaf",
       "color": "#BF6900",
       "description": "An autumn festival honoring transformation and the beauty of change as leaves turn gold and crimson.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "lastlight0000000": {
       "name": "Lastlight",
       "month": 8,
-      "icon": "fas fa-cloud-sun",
+      "icon": "fa-cloud-sun",
       "color": "#A1887F",
       "description": "The last great fires are lit as communities make final preparations before winter's dark months descend.",
-      "dayOfMonth": 6
+      "dayOfMonth": 6,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 7
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "firstfrostfair00": {
       "name": "Firstfrost Fair",
       "month": 9,
-      "icon": "fas fa-tent",
+      "icon": "fa-tent",
       "color": "#4FC3F7",
       "description": "Merchants and travelers converge for the last great market before heavy snows close the mountain passes.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "thelongnight0000": {
       "name": "The Long Night",
       "month": 10,
-      "icon": "fas fa-moon",
+      "icon": "fa-moon",
       "color": "#1A237E",
       "description": "The longest night of the year, kept as a solemn vigil with bonfires and prayers against the encroaching dark.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "ironfeast0000000": {
       "name": "Iron Feast",
       "month": 11,
-      "icon": "fas fa-hammer",
+      "icon": "fa-hammer",
       "color": "#78909C",
       "description": "Valdris warriors feast in honor of The Iron Wolf, forging ancestor nails and blessing weapons through the night.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "theveilwalk00000": {
       "name": "The Veilwalk",
       "month": 12,
-      "icon": "fas fa-ghost",
+      "icon": "fa-ghost",
       "color": "#7E57C2",
       "description": "The living walk among memories of the dead, leaving offerings at shrines as the veil between worlds grows thin.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 13
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "moons": {
@@ -320,7 +684,8 @@
         "year": 3247,
         "month": 0,
         "dayOfMonth": 0
-      }
+      },
+      "eclipseMode": "rare"
     },
     "ruan000000000000": {
       "name": "Ruan",
@@ -397,7 +762,8 @@
         "year": 3247,
         "month": 0,
         "dayOfMonth": 18
-      }
+      },
+      "eclipseMode": "rare"
     }
   },
   "seasons": {

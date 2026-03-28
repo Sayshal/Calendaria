@@ -134,42 +134,182 @@
     "blessingofthemor": {
       "name": "Blessing of the Morninglord",
       "month": 2,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFD700",
       "description": "Spring equinox honoring the Morninglord who once watched over Barovia.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestfestival0": {
       "name": "Harvest Festival",
       "month": 8,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#8B4513",
       "description": "A rare moment of joy in the cursed land of Barovia celebrating the harvest.",
-      "dayOfMonth": 21
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "winefestival0000": {
       "name": "Wine Festival",
       "month": 9,
-      "icon": "fas fa-wine-bottle",
+      "icon": "fa-wine-bottle",
       "color": "#722F37",
       "description": "Celebration of Barovia's famed wines, honoring the vintners and their craft.",
-      "dayOfMonth": 14
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "nightofthedead00": {
       "name": "Night of the Dead",
       "month": 9,
-      "icon": "fas fa-skull",
+      "icon": "fa-skull",
       "color": "#1C1C1C",
       "description": "Somber remembrance when the veil between the living and dead grows thin.",
-      "dayOfMonth": 30
+      "dayOfMonth": 30,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 31
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "wintersolstice00": {
       "name": "Winter Solstice",
       "month": 11,
-      "icon": "fas fa-snowflake",
+      "icon": "fa-snowflake",
       "color": "#4682B4",
       "description": "The longest night of the year when Barovians huddle indoors against the darkness.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

@@ -1,24 +1,20 @@
-import { registerCalendarSwitching } from './calendar-switching.mjs';
-import { registerTimeAdvancement } from './time-advancement.mjs';
-import { registerWeatherGeneration } from './weather-generation.mjs';
-import { registerNoteCrud } from './note-crud.mjs';
-import { registerDarknessSync } from './darkness-sync.mjs';
 import { registerApiSmoke } from './api-smoke.mjs';
-import { registerWeatherAdvanced } from './weather-advanced.mjs';
-import { registerNoteQueries } from './note-queries.mjs';
-import { registerNoteProperties } from './note-properties.mjs';
-import { registerTimeDayCycle } from './time-day-cycle.mjs';
-import { registerDateArithmetic } from './date-arithmetic.mjs';
-import { registerMoonPhases } from './moon-phases.mjs';
 import { registerCalendarMetadata } from './calendar-metadata.mjs';
-import { registerFormatStrings } from './format-strings.mjs';
+import { registerCalendarSwitching } from './calendar-switching.mjs';
 import { registerClockControls } from './clock-controls.mjs';
+import { registerDarknessSync } from './darkness-sync.mjs';
+import { registerDateArithmetic } from './date-arithmetic.mjs';
+import { registerFormatStrings } from './format-strings.mjs';
 import { registerHookEvents } from './hook-events.mjs';
+import { registerMoonPhases } from './moon-phases.mjs';
+import { registerNoteCrud } from './note-crud.mjs';
+import { registerNoteProperties } from './note-properties.mjs';
+import { registerNoteQueries } from './note-queries.mjs';
+import { registerTimeAdvancement } from './time-advancement.mjs';
+import { registerTimeDayCycle } from './time-day-cycle.mjs';
+import { registerWeatherAdvanced } from './weather-advanced.mjs';
+import { registerWeatherGeneration } from './weather-generation.mjs';
 
-/**
- * Register all Calendaria Quench integration test batches.
- * @param {object} quench  Quench test runner instance
- */
 export function registerBatches(quench) {
   registerCalendarSwitching(quench);
   registerTimeAdvancement(quench);

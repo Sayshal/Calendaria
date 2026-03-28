@@ -5,10 +5,8 @@
  */
 
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
+import { CalendariaSocket, localize, log } from '../utils/_module.mjs';
+import { WeatherManager } from '../weather/_module.mjs';
 
 /** 8-point cardinal directions accepted by FXMaster, keyed by compass degrees. */
 const FXMASTER_CARDINALS = [
@@ -96,12 +94,16 @@ function onCanvasReady() {
 }
 
 /**
- * On scene update, re-sync FX if the weather disable flag changed.
+ * On scene update, re-sync FX if the weather disable flag changed or scene activated.
  * @param {object} scene - Updated scene document
- * @param {object} change - Flattened change data
+ * @param {object} change - Change data
  */
 function onSceneUpdate(scene, change) {
   if (!CalendariaSocket.isPrimaryGM()) return;
+  if (change.active) {
+    syncWeatherToScene(scene);
+    return;
+  }
   if (scene !== canvas?.scene) return;
   const flat = foundry.utils.flattenObject(change);
   const fxDisabledKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
@@ -111,17 +113,18 @@ function onSceneUpdate(scene, change) {
 }
 
 /**
- * Sync current weather to the active scene's FXMaster state.
+ * Sync current weather to a scene's FXMaster state.
+ * @param {object} [sceneOverride] - Scene to sync for (defaults to canvas scene)
  */
-function syncWeatherToScene() {
+function syncWeatherToScene(sceneOverride) {
   if (!CalendariaSocket.isPrimaryGM()) return;
-  const scene = canvas?.scene;
+  const scene = sceneOverride ?? canvas?.scene;
   if (!scene) return;
   if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-    stopAll();
+    stopAllFX();
     return;
   }
-  const weather = WeatherManager.getCurrentWeather();
+  const weather = WeatherManager.getCurrentWeather(null, scene);
   playWeather(weather || null);
 }
 
@@ -139,7 +142,7 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
   if (bulk) {
     const scene = game.scenes?.active;
     if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-      stopAll();
+      stopAllFX();
       return;
     }
     const weather = WeatherManager.getCurrentWeather();
@@ -147,21 +150,22 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
     return;
   }
   if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
-    stopAll();
+    stopAllFX();
     return;
   }
   const scene = game.scenes?.active;
   if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
-    stopAll();
+    stopAllFX();
     return;
   }
   playWeather(current || null);
 }
 
 /**
- * Stop all active presets on the current scene.
+ * Stop all active FXMaster presets on the current scene.
+ * @returns {Promise<void>}
  */
-async function stopAll() {
+export async function stopAllFX() {
   const fxApi = getFxApi();
   if (!fxApi) return;
   const active = fxApi.listActive?.() ?? [];
@@ -178,13 +182,13 @@ async function playWeather(weather) {
   if (!fxApi) return;
   const fxName = weather?.fxPreset || null;
   if (!fxName) {
-    await stopAll();
+    await stopAllFX();
     return;
   }
   const available = fxApi.listValid();
   if (!available.includes(fxName)) {
     log(2, `FXMaster Preset "${fxName}" not available, stopping active effects`);
-    await stopAll();
+    await stopAllFX();
     return;
   }
   const options = buildPresetOptions(weather);
@@ -212,15 +216,33 @@ function degreesToCardinal(degrees) {
 }
 
 /**
+ * Clamp a "blow toward" direction so particles always fall mostly downward.
+ * @param {number} blowDeg - Direction particles move toward (0-360, 180=south/downward)
+ * @param {number} [maxAngle] - Maximum deviation from south in degrees
+ * @returns {number} Clamped direction in degrees
+ */
+function clampToDownward(blowDeg, maxAngle = 45) {
+  const offset = ((blowDeg - 180 + 540) % 360) - 180;
+  if (Math.abs(offset) <= maxAngle) return blowDeg;
+  const ew = Math.sin((blowDeg * Math.PI) / 180);
+  return (180 - ew * maxAngle + 360) % 360;
+}
+
+/**
  * Build options object for FXMaster preset playback.
  * @param {object} weather - Current weather state
  * @returns {object} Options for FXMaster play/switch
  */
 function buildPresetOptions(weather) {
   const options = {};
-  if (weather.wind?.direction != null) options.direction = degreesToCardinal((weather.wind.direction + 180) % 360);
   const sceneTopDown = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE);
   const useTopDown = sceneTopDown === 'topdown' || (sceneTopDown !== 'sideview' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN));
+  const forceDownward = !useTopDown || game.settings.get(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD);
+  if (weather.wind?.direction != null) {
+    let blowDeg = (weather.wind.direction + 180) % 360;
+    if (forceDownward) blowDeg = clampToDownward(blowDeg);
+    options.direction = degreesToCardinal(blowDeg);
+  }
   if (useTopDown) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
   if (weather.fxDensity) options.density = weather.fxDensity;
@@ -228,4 +250,48 @@ function buildPresetOptions(weather) {
   if (weather.fxColor) options.color = weather.fxColor;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
   return options;
+}
+
+/**
+ * Play an FXMaster preset with custom options, independent of weather state.
+ * @param {string} presetName - FXMaster preset name (e.g., "rain", "snow", "fog")
+ * @param {object} [options] - FXMaster preset options
+ * @param {string} [options.density] - Particle density
+ * @param {string} [options.speed] - Particle speed
+ * @param {string} [options.color] - Tint color
+ * @param {string} [options.direction] - Cardinal direction (n, ne, e, se, s, sw, w, nw)
+ * @param {boolean} [options.topDown] - Top-down particle view
+ * @param {boolean} [options.belowTokens] - Render below token layer
+ * @returns {Promise<boolean>} True if FX started successfully
+ */
+export async function playStandaloneFX(presetName, options = {}) {
+  if (!isFXMasterActive()) {
+    log(2, localize('CALENDARIA.Weather.Error.FXMasterInactive'));
+    return false;
+  }
+  const fxApi = getFxApi();
+  if (!fxApi) return false;
+  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
+    log(2, localize('CALENDARIA.Weather.Error.FXDisabled'));
+    return false;
+  }
+  const scene = canvas?.scene;
+  if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+    log(2, localize('CALENDARIA.Weather.Error.FXDisabled'));
+    return false;
+  }
+  const available = fxApi.listValid?.() ?? [];
+  if (!available.includes(presetName)) {
+    ui.notifications.warn(localize('CALENDARIA.Weather.Error.FXPresetInvalid', { name: presetName }));
+    return false;
+  }
+  const fxOptions = { ...options, silent: true };
+  try {
+    await fxApi.switch(presetName, fxOptions);
+    log(3, `FXMaster standalone playing: ${presetName}`);
+    return true;
+  } catch (error) {
+    log(1, 'FXMaster standalone playback failed:', error);
+    return false;
+  }
 }

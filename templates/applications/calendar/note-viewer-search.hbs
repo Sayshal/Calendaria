@@ -1,0 +1,15 @@
+<div class="note-viewer-search">
+  <div class="search-input-wrapper">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" class="note-viewer-search-input" placeholder="{{localize 'CALENDARIA.NoteViewer.Search'}}"
+      value="{{searchValue}}" />
+    {{#if searchValue}}
+      <button type="button" class="search-clear" data-action="clearSearch" aria-label="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
+    {{/if}}
+  </div>
+  <button type="button" class="close-btn" data-action="closeViewer" aria-label="Close">
+    <i class="fas fa-times"></i>
+  </button>
+</div>

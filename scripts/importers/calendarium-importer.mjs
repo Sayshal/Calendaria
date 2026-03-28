@@ -4,26 +4,10 @@
  * @author Tyler
  */
 
-import { ASSETS } from '../constants.mjs';
-import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
+import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
+import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
+import { localize, log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
-
-/**
- * Moon phase names for standard 8 phases.
- */
-const PHASE_NAMES_8 = [
-  'CALENDARIA.MoonPhase.NewMoon',
-  'CALENDARIA.MoonPhase.WaxingCrescent',
-  'CALENDARIA.MoonPhase.FirstQuarter',
-  'CALENDARIA.MoonPhase.WaxingGibbous',
-  'CALENDARIA.MoonPhase.FullMoon',
-  'CALENDARIA.MoonPhase.WaningGibbous',
-  'CALENDARIA.MoonPhase.LastQuarter',
-  'CALENDARIA.MoonPhase.WaningCrescent'
-];
 
 /**
  * Importer for Calendarium Obsidian plugin exports.
@@ -98,7 +82,7 @@ export default class CalendariumImporter extends BaseImporter {
       cycleFormat,
       metadata: {
         id: calendar.id || 'imported-calendarium',
-        description: calendar.description || localize('CALENDARIA.Common.ImportedFromCalendarium'),
+        description: calendar.description || localize('CALENDARIA.Importer.ImportedFrom.Calendarium'),
         system: calendar.name || localize('CALENDARIA.Common.Unknown'),
         importedFrom: 'calendarium'
       },
@@ -222,7 +206,7 @@ export default class CalendariumImporter extends BaseImporter {
    */
   #generateMoonPhases() {
     const iconNames = ['01_newmoon', '02_waxingcrescent', '03_firstquarter', '04_waxinggibbous', '05_fullmoon', '06_waninggibbous', '07_lastquarter', '08_waningcrescent'];
-    return PHASE_NAMES_8.map((name, i) => ({ name, rising: '', fading: '', icon: `${ASSETS.MOON_ICONS}/${iconNames[i]}.svg`, start: i / 8, end: (i + 1) / 8 }));
+    return MOON_PHASE_LABELS.map((name, i) => ({ name, rising: '', fading: '', icon: `${ASSETS.MOON_ICONS}/${iconNames[i]}.svg`, start: i / 8, end: (i + 1) / 8 }));
   }
 
   /**
@@ -386,7 +370,7 @@ export default class CalendariumImporter extends BaseImporter {
         content: description || '',
         startDate: { year: date.year, month: date.month ?? 0, dayOfMonth: Math.max(0, (date.day ?? 1) - 1) },
         repeat: 'never',
-        gmOnly: false,
+        visibility: 'visible',
         category: categoryData?.name || 'default',
         color: categoryData?.color || '#2196f3',
         suggestedType: 'note'
@@ -399,7 +383,7 @@ export default class CalendariumImporter extends BaseImporter {
         startDate: { year: date.start?.year ?? date.year ?? 0, month: date.start?.month ?? date.month ?? 0, dayOfMonth: (date.start?.day ?? date.day ?? 1) - 1 },
         endDate: { year: date.end?.year ?? date.year ?? 0, month: date.end?.month ?? date.month ?? 0, dayOfMonth: (date.end?.day ?? date.day ?? 1) - 1 },
         repeat: 'never',
-        gmOnly: false,
+        visibility: 'visible',
         category: categoryData?.name || 'default',
         color: categoryData?.color || '#2196f3',
         suggestedType: 'note'
@@ -414,7 +398,7 @@ export default class CalendariumImporter extends BaseImporter {
         repeat: pattern.repeat,
         rangePattern: pattern.rangePattern || null,
         repeatInterval: pattern.interval || 1,
-        gmOnly: false,
+        visibility: 'visible',
         category: categoryData?.name || 'default',
         color: categoryData?.color || '#2196f3',
         suggestedType: pattern.repeat === 'never' ? 'note' : 'festival',
@@ -426,7 +410,7 @@ export default class CalendariumImporter extends BaseImporter {
       content: description || '',
       startDate: { year: date?.year ?? 0, month: date?.month ?? 0, dayOfMonth: (date?.day ?? 1) - 1 },
       repeat: 'never',
-      gmOnly: false,
+      visibility: 'visible',
       category: categoryData?.name || 'default',
       color: categoryData?.color || '#2196f3',
       suggestedType: 'note'
@@ -483,17 +467,13 @@ export default class CalendariumImporter extends BaseImporter {
           repeat: note.repeat,
           repeatInterval: note.repeatInterval || 1,
           rangePattern: note.rangePattern || null,
-          gmOnly: note.gmOnly
+          visibility: note.visibility || 'visible'
         };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-        if (page) {
-          count++;
-        } else {
-          errors.push(`Failed to create note: ${note.name}`);
-        }
+        if (page) count++;
+        else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {
         errors.push(`Error creating "${note.name}": ${error.message}`);
-        log(1, `Error importing note "${note.name}":`, error);
       }
     }
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Calendarium Import');
@@ -502,14 +482,14 @@ export default class CalendariumImporter extends BaseImporter {
   }
 
   /**
-   * Import Calendarium categories as Calendaria note categories.
+   * Import Calendarium categories as Calendaria note presets.
    */
   async #importNoteCategories() {
-    const existing = getAllCategories().map((c) => c.name.toLowerCase());
+    const existing = getAllPresets().map((c) => c.name.toLowerCase());
     for (const cat of this.#calCategories) {
       if (existing.includes(cat.name.toLowerCase())) continue;
       try {
-        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        await addCustomPreset(cat.name, cat.color, 'fa-tag');
         log(3, `Imported Calendarium category: ${cat.name}`);
       } catch (error) {
         log(1, `Failed to import category "${cat.name}":`, error);

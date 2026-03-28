@@ -5,12 +5,10 @@
  */
 
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
-import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/fxmaster.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
-import { ALL_PRESETS, HUD_EFFECTS, SOUND_FX_OPTIONS, WEATHER_CATEGORIES } from '../../weather/data/weather-presets.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { getEffectDefaults, SKY_OVERRIDES } from '../hud/hud-scene-renderer.mjs';
+import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
+import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';
+import { ALL_PRESETS, HUD_EFFECTS, WEATHER_CATEGORIES, WeatherManager } from '../../weather/_module.mjs';
+import { getEffectDefaults, SKY_OVERRIDES } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -206,12 +204,14 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
     }
-    const currentSoundFx = isCustom ? preset.soundFx || '' : overrides.soundFx !== undefined ? overrides.soundFx || '' : builtinPreset?.soundFx || '';
-    context.preset.soundFx = currentSoundFx;
-    const sfxEntries = SOUND_FX_OPTIONS.map((s) => ({ value: s, label: localize(`CALENDARIA.SoundFx.${s}`), selected: s === currentSoundFx })).sort((a, b) =>
-      a.label.localeCompare(b.label, game.i18n.lang)
-    );
-    context.soundFxOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !currentSoundFx }, ...sfxEntries];
+    context.preset.soundFx = isCustom ? preset.soundFx || '' : overrides.soundFx !== undefined ? overrides.soundFx || '' : builtinPreset?.soundFx || '';
+    const currentFxMacro = isCustom ? preset.fxMacro || '' : overrides.fxMacro !== undefined ? overrides.fxMacro || '' : '';
+    context.preset.fxMacro = currentFxMacro;
+    const macros = getAvailableMacros();
+    context.fxMacroOptions = [
+      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxMacro },
+      ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
+    ];
     context.visuals = {
       countMin: vo.count?.[0] ?? defCount[0],
       countMax: vo.count?.[1] ?? defCount[1],
@@ -256,6 +256,28 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (state.focusedField) {
       const field = newElement?.querySelector(`[name="${state.focusedField}"]`);
       field?.focus();
+    }
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender?.(context, options);
+    for (const btn of this.element.querySelectorAll('.sound-file-picker')) {
+      btn.addEventListener('click', () => {
+        const targetName = btn.dataset.target;
+        const input = this.element.querySelector(`input[name="${targetName}"]`);
+        const fp = new foundry.applications.apps.FilePicker({
+          type: 'audio',
+          current: input?.value || 'modules/calendaria/assets/sound/',
+          callback: (path) => {
+            if (input) {
+              input.value = path;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+        });
+        fp.browse();
+      });
     }
   }
 
@@ -342,6 +364,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.hudEffect = effectId;
       preset.fxPreset = data.fxPreset || null;
       preset.soundFx = data.soundFx || null;
+      preset.fxMacro = data.fxMacro || null;
       preset.environmentCycle = environmentCycle;
       preset.environmentBase = environmentBase;
       preset.environmentDark = environmentDark;
@@ -362,6 +385,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (fxPresetValue !== (builtinPreset.fxPreset ?? null)) override.fxPreset = fxPresetValue;
       const soundFxValue = data.soundFx || null;
       if (soundFxValue !== (builtinPreset.soundFx ?? null)) override.soundFx = soundFxValue;
+      const fxMacroValue = data.fxMacro || null;
+      if (fxMacroValue) override.fxMacro = fxMacroValue;
       if (environmentCycle !== (builtinPreset.environmentCycle ?? null)) override.environmentCycle = environmentCycle;
       if (environmentBase) override.environmentBase = environmentBase;
       if (environmentDark) override.environmentDark = environmentDark;
@@ -392,6 +417,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       hudEffect: 'clear',
       fxPreset: null,
       soundFx: null,
+      fxMacro: null,
       environmentBase: null,
       environmentDark: null,
       description: ''

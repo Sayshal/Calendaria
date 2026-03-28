@@ -61,6 +61,18 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowJournalFooter.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="enricherClickTarget">{{localize "CALENDARIA.Settings.EnricherClickTarget.Name"}}</label>
+        <div class="form-fields">
+          <select id="enricherClickTarget" name="enricherClickTarget">
+            {{#each enricherClickTargetOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.EnricherClickTarget.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 

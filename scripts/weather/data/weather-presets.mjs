@@ -51,21 +51,35 @@ export const HUD_EFFECTS = [
   'ley-surge'
 ];
 
+/** @type {string} Base path for built-in weather sound assets. */
+const SOUND_BASE = `modules/${MODULE.ID}/assets/sound`;
+
 /**
- * Available sound effect files for weather ambient loops.
+ * Available built-in sound effect files for weather ambient loops (full paths).
  * @type {string[]}
  */
 export const SOUND_FX_OPTIONS = [
-  'rain-acid-rain-blood-rain',
-  'sunshower-drizzle',
-  'thunderstorm',
-  'sleet-hail',
-  'blizzard-ice-storm',
-  'snow-frost',
-  'hurricane-monsoon-tornado',
-  'sandstorm-dust-devil',
-  'wind'
+  `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`,
+  `${SOUND_BASE}/sunshower-drizzle.ogg`,
+  `${SOUND_BASE}/thunderstorm.ogg`,
+  `${SOUND_BASE}/sleet-hail.ogg`,
+  `${SOUND_BASE}/blizzard-ice-storm.ogg`,
+  `${SOUND_BASE}/snow-frost.ogg`,
+  `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`,
+  `${SOUND_BASE}/sandstorm-dust-devil.ogg`,
+  `${SOUND_BASE}/wind.ogg`
 ];
+
+/**
+ * Expand a legacy sound key to a full Foundry-resolvable path.
+ * @param {string|null} key - Legacy sound key or full path
+ * @returns {string|null} Full sound path or null
+ */
+export function expandLegacySoundKey(key) {
+  if (!key) return null;
+  if (key.includes('/')) return key;
+  return `${SOUND_BASE}/${key}.ogg`;
+}
 
 /**
  * Standard weather conditions - common everyday weather.
@@ -185,7 +199,7 @@ export const STANDARD_WEATHER = [
     fxDensity: 'low',
     fxSpeed: 'low',
     fxColor: null,
-    soundFx: 'sunshower-drizzle'
+    soundFx: `${SOUND_BASE}/sunshower-drizzle.ogg`
   },
   {
     id: 'rain',
@@ -208,7 +222,7 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'rain-acid-rain-blood-rain'
+    soundFx: `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`
   },
   {
     id: 'fog',
@@ -277,7 +291,7 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'wind'
+    soundFx: `${SOUND_BASE}/wind.ogg`
   },
   {
     id: 'sunshower',
@@ -300,7 +314,7 @@ export const STANDARD_WEATHER = [
     fxDensity: 'low',
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'sunshower-drizzle'
+    soundFx: `${SOUND_BASE}/sunshower-drizzle.ogg`
   },
   {
     id: 'snow',
@@ -323,7 +337,7 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'snow-frost'
+    soundFx: `${SOUND_BASE}/snow-frost.ogg`
   },
   {
     id: 'sleet',
@@ -346,7 +360,7 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'sleet-hail'
+    soundFx: `${SOUND_BASE}/sleet-hail.ogg`
   },
   {
     id: 'heat-wave',
@@ -399,7 +413,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'thunderstorm'
+    soundFx: `${SOUND_BASE}/thunderstorm.ogg`
   },
   {
     id: 'blizzard',
@@ -422,7 +436,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'blizzard-ice-storm'
+    soundFx: `${SOUND_BASE}/blizzard-ice-storm.ogg`
   },
   {
     id: 'hail',
@@ -445,7 +459,7 @@ export const SEVERE_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'sleet-hail'
+    soundFx: `${SOUND_BASE}/sleet-hail.ogg`
   },
   {
     id: 'tornado',
@@ -468,7 +482,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'very-high',
     fxColor: null,
-    soundFx: 'hurricane-monsoon-tornado'
+    soundFx: `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`
   },
   {
     id: 'hurricane',
@@ -491,7 +505,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'very-high',
     fxColor: null,
-    soundFx: 'hurricane-monsoon-tornado'
+    soundFx: `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`
   },
   {
     id: 'ice-storm',
@@ -514,7 +528,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'blizzard-ice-storm'
+    soundFx: `${SOUND_BASE}/blizzard-ice-storm.ogg`
   },
   {
     id: 'monsoon',
@@ -537,7 +551,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'hurricane-monsoon-tornado'
+    soundFx: `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`
   }
 ];
 
@@ -590,7 +604,7 @@ export const ENVIRONMENTAL_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'sandstorm-dust-devil'
+    soundFx: `${SOUND_BASE}/sandstorm-dust-devil.ogg`
   },
   {
     id: 'luminous-sky',
@@ -728,7 +742,7 @@ export const ENVIRONMENTAL_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'sandstorm-dust-devil'
+    soundFx: `${SOUND_BASE}/sandstorm-dust-devil.ogg`
   }
 ];
 
@@ -850,7 +864,7 @@ export const FANTASY_WEATHER = [
     fxDensity: 'high',
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'snow-frost'
+    soundFx: `${SOUND_BASE}/snow-frost.ogg`
   },
   {
     id: 'gravewind',
@@ -873,7 +887,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'wind'
+    soundFx: `${SOUND_BASE}/wind.ogg`
   },
   {
     id: 'veilfall',
@@ -919,7 +933,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'wind'
+    soundFx: `${SOUND_BASE}/wind.ogg`
   },
   {
     id: 'acid-rain',
@@ -942,7 +956,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'rain-acid-rain-blood-rain'
+    soundFx: `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`
   },
   {
     id: 'blood-rain',
@@ -965,7 +979,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'rain-acid-rain-blood-rain'
+    soundFx: `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`
   },
   {
     id: 'meteor-shower',

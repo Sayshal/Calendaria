@@ -159,28 +159,109 @@
       "name": "Mummergin",
       "month": -1,
       "duration": 1,
-      "icon": "fas fa-masks-theater",
+      "icon": "fa-masks-theater",
       "color": "#9370DB",
       "description": "Festival of theatrical performances, mummery, and festive celebrations.",
-      "dayOfMonth": 3
+      "dayOfMonth": 3,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 4
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "walpurgis0000000": {
       "name": "Walpurgis",
       "month": 5,
       "duration": 1,
-      "icon": "fas fa-skull-crossbones",
+      "icon": "fa-skull-crossbones",
       "color": "#8B0000",
       "description": "Extremely sacred day to priests of evil, with elaborate ceremonies.",
-      "dayOfMonth": 17
+      "dayOfMonth": 17,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 18
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "midsummernight00": {
       "name": "Midsummer Night",
       "month": 7,
       "duration": 1,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFD700",
       "description": "Evening when both moons are full, holiest day for followers of Pelor.",
-      "dayOfMonth": 3
+      "dayOfMonth": 3,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 4
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

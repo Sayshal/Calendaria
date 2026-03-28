@@ -5,6 +5,15 @@ import terser from '@rollup/plugin-terser';
 const isDev = process.env.BUILD === 'development';
 
 export default {
+  /**
+   * Suppress circular dependency warnings.
+   * @param {object} warning - The rollup warning
+   * @param {Function} warn - Default warning handler
+   */
+  onwarn(warning, warn) {
+    if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+    warn(warning);
+  },
   input: 'calendaria.mjs',
   output: {
     file: 'dist/calendaria.mjs',
@@ -15,7 +24,7 @@ export default {
   plugins: [
     postcss({
       extract: 'styles/calendaria.css',
-      minimize: !isDev
+      minimize: false
     }),
     !isDev &&
       terser({

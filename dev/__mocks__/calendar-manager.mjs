@@ -1,79 +1,19 @@
-/**
- * CalendarManager mock for testing.
- * Provides a configurable mock calendar for date utility tests.
- * @module Mocks/CalendarManager
- */
-
 import { vi } from 'vitest';
 
-/**
- * Add convenience getters matching CalendariaCalendar schema to a plain calendar object.
- * @param {object} cal - Plain calendar data object
- * @returns {object} Same object with getters defined
- */
 export function addCalendarGetters(cal) {
   Object.defineProperties(cal, {
-    monthsArray: {
-      get() {
-        return this.months?.values ? Object.values(this.months.values) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    weekdaysArray: {
-      get() {
-        return this.days?.values ? Object.values(this.days.values) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    seasonsArray: {
-      get() {
-        return this.seasons?.values ? Object.values(this.seasons.values) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    moonsArray: {
-      get() {
-        return this.moons ? Object.values(this.moons) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    cyclesArray: {
-      get() {
-        return this.cycles ? Object.values(this.cycles) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    erasArray: {
-      get() {
-        return this.eras ? Object.values(this.eras) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    festivalsArray: {
-      get() {
-        return this.festivals ? Object.values(this.festivals) : [];
-      },
-      configurable: true,
-      enumerable: true
-    },
-    daysInWeek: {
-      get() {
-        return this.weekdaysArray?.length || 7;
-      },
-      configurable: true,
-      enumerable: true
-    }
+    monthsArray: { get() { return this.months?.values ? Object.values(this.months.values) : []; }, configurable: true, enumerable: true },
+    weekdaysArray: { get() { return this.days?.values ? Object.values(this.days.values) : []; }, configurable: true, enumerable: true },
+    seasonsArray: { get() { return this.seasons?.values ? Object.values(this.seasons.values) : []; }, configurable: true, enumerable: true },
+    moonsArray: { get() { return this.moons ? Object.values(this.moons) : []; }, configurable: true, enumerable: true },
+    cyclesArray: { get() { return this.cycles ? Object.values(this.cycles) : []; }, configurable: true, enumerable: true },
+    erasArray: { get() { return this.eras ? Object.values(this.eras) : []; }, configurable: true, enumerable: true },
+    festivalsArray: { get() { return this.festivals ? Object.values(this.festivals) : []; }, configurable: true, enumerable: true },
+    daysInWeek: { get() { return this.weekdaysArray?.length || 7; }, configurable: true, enumerable: true }
   });
   return cal;
 }
 
-// Default Gregorian-like calendar configuration
 const defaultCalendar = addCalendarGetters({
   months: {
     values: [
@@ -106,10 +46,7 @@ const defaultCalendar = addCalendarGetters({
     secondsPerMinute: 60,
     daysPerYear: 365
   },
-  years: {
-    yearZero: 0,
-    firstWeekday: 0
-  },
+  years: { yearZero: 0, firstWeekday: 0 },
   isMonthless: false,
   moons: [
     {
@@ -143,20 +80,10 @@ const defaultCalendar = addCalendarGetters({
     { name: 'Third Age', abbreviation: 'TA', startYear: 2000 }
   ],
   cycles: [
-    {
-      name: 'Weekday Cycle',
-      length: 7,
-      basedOn: 'day',
-      offset: 0,
-      entries: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    }
+    { name: 'Weekday Cycle', length: 7, basedOn: 'day', offset: 0, entries: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] }
   ],
-  daylight: {
-    summerSolstice: 172,
-    winterSolstice: 355
-  },
+  daylight: { summerSolstice: 172, winterSolstice: 355 },
 
-  // Mock methods
   getDaysInMonth: vi.fn((month, year) => {
     const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     return days[month] || 30;
@@ -199,8 +126,6 @@ const defaultCalendar = addCalendarGetters({
     const hour = Math.floor(remainingSeconds / secondsPerHour);
     const minute = Math.floor((remainingSeconds % secondsPerHour) / secondsPerMinute);
     const second = remainingSeconds % secondsPerMinute;
-
-    // Convert dayOfYear to month and dayOfMonth
     const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     let month = 0;
     let dayOfMonth = dayOfYear;
@@ -211,7 +136,6 @@ const defaultCalendar = addCalendarGetters({
       }
       dayOfMonth -= days[i];
     }
-
     return { year, month, dayOfMonth, hour, minute, second };
   }),
 
@@ -228,39 +152,41 @@ const defaultCalendar = addCalendarGetters({
     const totalDays = (components.year || 0) * 365 + dayOfYear;
     return ((totalDays % daysInWeek) + daysInWeek) % daysInWeek;
   }),
+
+  isLeapYear: vi.fn((year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)),
+
   getMoonPhase: vi.fn((moonIndex, components) => {
-    // Simple moon phase calculation for testing
     const moon = defaultCalendar.moonsArray[moonIndex];
     if (!moon) return null;
-    // Calculate phase position based on days since reference
     const refDate = moon.referenceDate || { year: 2000, month: 0, day: 6 };
     const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     let totalDays = 0;
-    // Days from ref year to current year
     totalDays += (components.year - refDate.year) * 365;
-    // Days from ref month/day to current
     for (let m = 0; m < components.month; m++) totalDays += days[m];
     totalDays += components.dayOfMonth + 1;
     for (let m = 0; m < refDate.month; m++) totalDays -= days[m];
     totalDays -= refDate.day;
     const cyclePosition = ((totalDays % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
     const position = cyclePosition / moon.cycleLength;
-    return { position, phase: moon.phases[Math.floor(position * 8)] };
+    const phaseCount = Object.keys(moon.phases).length;
+    const phaseIndex = Math.floor(position * phaseCount);
+    const phaseFraction = 1 / phaseCount;
+    const phaseStartPos = phaseIndex * phaseFraction;
+    const phaseDuration = Math.round(moon.cycleLength * phaseFraction);
+    const dayWithinPhase = Math.floor((position - phaseStartPos) * moon.cycleLength);
+    return { position, phase: moon.phases[phaseIndex], phaseIndex, dayWithinPhase, phaseDuration };
   })
 });
 
-// Mutable active calendar for test configuration
 let activeCalendar = { ...defaultCalendar };
 addCalendarGetters(activeCalendar);
 
-// CalendarManager mock
 const CalendarManager = {
   getActiveCalendar: vi.fn(() => activeCalendar),
   setActiveCalendar: vi.fn((calendar) => {
     activeCalendar = calendar;
   }),
 
-  // Helper to reset to default calendar
   _reset: () => {
     activeCalendar = addCalendarGetters({
       ...defaultCalendar,
@@ -273,11 +199,11 @@ const CalendarManager = {
       countIntercalaryDaysBefore: vi.fn(() => 0),
       countIntercalaryDaysBeforeYear: vi.fn(() => 0),
       _computeDayOfWeek: vi.fn(defaultCalendar._computeDayOfWeek),
+      isLeapYear: vi.fn(defaultCalendar.isLeapYear),
       getMoonPhase: vi.fn(defaultCalendar.getMoonPhase)
     });
   },
 
-  // Helper to configure calendar with custom settings
   _configure: (config) => {
     activeCalendar = addCalendarGetters({
       ...activeCalendar,
@@ -286,11 +212,11 @@ const CalendarManager = {
       getDaysInYear: config.getDaysInYear || activeCalendar.getDaysInYear,
       componentsToTime: config.componentsToTime || activeCalendar.componentsToTime,
       timeToComponents: config.timeToComponents || activeCalendar.timeToComponents,
+      isLeapYear: config.isLeapYear || activeCalendar.isLeapYear,
       getMoonPhase: config.getMoonPhase || activeCalendar.getMoonPhase
     });
   },
 
-  // Helper to get the default calendar config
   _getDefault: () => ({ ...defaultCalendar })
 };
 

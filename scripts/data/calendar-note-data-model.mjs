@@ -1,3 +1,6 @@
+import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
+import { BaseConditionData } from './_module.mjs';
+
 /**
  * Data model for calendar note journal entry pages.
  * @module Sheets/CalendarNoteDataModel
@@ -86,69 +89,44 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         },
         { nullable: true }
       ),
-      conditions: new fields.ArrayField(
-        new fields.SchemaField({
-          field: new fields.StringField({
-            required: true,
-            choices: [
-              'year',
-              'month',
-              'day',
-              'dayOfYear',
-              'daysBeforeMonthEnd',
-              'weekday',
-              'weekNumberInMonth',
-              'inverseWeekNumber',
-              'weekInMonth',
-              'weekInYear',
-              'totalWeek',
-              'weeksBeforeMonthEnd',
-              'weeksBeforeYearEnd',
-              'season',
-              'seasonPercent',
-              'seasonDay',
-              'isLongestDay',
-              'isShortestDay',
-              'isSpringEquinox',
-              'isAutumnEquinox',
-              'moonPhase',
-              'moonPhaseIndex',
-              'moonPhaseCountMonth',
-              'moonPhaseCountYear',
-              'cycle',
-              'era',
-              'eraYear',
-              'intercalary'
-            ]
-          }),
-          op: new fields.StringField({ required: true, choices: ['==', '!=', '>=', '<=', '>', '<', '%'], initial: '==' }),
-          value: new fields.JSONField({ required: true }),
-          value2: new fields.JSONField({ nullable: true }),
-          offset: new fields.NumberField({ integer: true, initial: 0 })
-        }),
-        { initial: [] }
-      ),
+      connectedEvents: new fields.ArrayField(new fields.StringField({ blank: false }), { initial: [] }),
+      conditionTree: new fields.ObjectField({ nullable: true, initial: null }),
+      conditions: new fields.ArrayField(new fields.TypedSchemaField(BaseConditionData.TYPES), { initial: [] }),
       categories: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       color: new fields.ColorField({ initial: '#4a9eff' }),
       icon: new fields.StringField({ initial: 'fas fa-calendar', blank: true }),
       iconType: new fields.StringField({ choices: ['image', 'fontawesome'], initial: 'fontawesome' }),
       reminderOffset: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       reminderType: new fields.StringField({ choices: ['none', 'toast', 'chat', 'dialog'], initial: 'toast' }),
-      reminderTargets: new fields.StringField({ choices: ['all', 'gm', 'author', 'specific'], initial: 'all' }),
+      reminderTargets: new fields.StringField({ choices: ['all', 'gm', 'author', 'specific', 'viewers'], initial: 'all' }),
       reminderUsers: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       macro: new fields.StringField({ nullable: true, blank: true }),
       sceneId: new fields.StringField({ nullable: true, blank: true }),
       playlistId: new fields.StringField({ nullable: true, blank: true }),
-      gmOnly: new fields.BooleanField({ initial: false }),
+      hasDuration: new fields.BooleanField({ initial: false }),
+      duration: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
+      showBookends: new fields.BooleanField({ initial: false }),
+      limitedRepeat: new fields.BooleanField({ initial: false }),
+      limitedRepeatDays: new fields.NumberField({ integer: true, min: 1, initial: 365 }),
+      displayStyle: new fields.StringField({ choices: [DISPLAY_STYLES.ICON, DISPLAY_STYLES.PIP, DISPLAY_STYLES.BANNER], initial: DISPLAY_STYLES.ICON }),
+      visibility: new fields.StringField({ choices: [NOTE_VISIBILITY.VISIBLE, NOTE_VISIBILITY.HIDDEN, NOTE_VISIBILITY.SECRET], initial: NOTE_VISIBILITY.VISIBLE }),
       silent: new fields.BooleanField({ initial: false }),
+      linkedFestival: new fields.SchemaField(
+        {
+          calendarId: new fields.StringField({ required: true, blank: false }),
+          festivalKey: new fields.StringField({ required: true, blank: false })
+        },
+        { nullable: true, initial: null }
+      ),
       author: new fields.DocumentAuthorField(foundry.documents.BaseUser)
     };
   }
 
   /**
    * Migrate raw source data before schema initialization.
-   * Converts legacy `day` fields to `dayOfMonth`.
    * @param {object} source - Raw source data
+   * @since 0.10.4
+   * @deprecated Remove in 1.2.0
    * @returns {object} Migrated source data
    */
   static migrateData(source) {
@@ -161,6 +139,10 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
     if (source.rangePattern?.day != null && source.rangePattern?.dayOfMonth == null) {
       source.rangePattern.dayOfMonth = source.rangePattern.day;
       delete source.rangePattern.day;
+    }
+    if (source.gmOnly !== undefined && source.visibility === undefined) {
+      source.visibility = source.gmOnly ? NOTE_VISIBILITY.HIDDEN : NOTE_VISIBILITY.VISIBLE;
+      delete source.gmOnly;
     }
     return super.migrateData(source);
   }

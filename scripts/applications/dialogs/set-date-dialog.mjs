@@ -4,13 +4,11 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
-import TimeTracker from '../../time/time-tracker.mjs';
-import { formatForLocation } from '../../utils/formatting/format-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
+import { EventScheduler, ReminderScheduler, TimeTracker } from '../../time/_module.mjs';
+import { CalendariaSocket, formatForLocation, localize, log } from '../../utils/_module.mjs';
+import { CinematicOverlay } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -37,14 +35,13 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       saveTimepoint: SetDateDialog.#onSaveTimepoint,
       jumpToTimepoint: SetDateDialog.#onJumpToTimepoint,
       deleteTimepoint: SetDateDialog.#onDeleteTimepoint,
-      editTimepointName: SetDateDialog.#onEditTimepointName
+      editTimepointName: SetDateDialog.#onEditTimepointName,
+      cinematicAdvance: SetDateDialog.#onCinematicAdvance
     }
   };
 
   /** @override */
-  static PARTS = {
-    form: { template: TEMPLATES.SET_DATE_DIALOG, classes: ['standard-form'] }
-  };
+  static PARTS = { form: { template: TEMPLATES.SET_DATE_DIALOG, classes: ['standard-form'] } };
 
   /**
    * Get the active calendar.
@@ -83,6 +80,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     context.timepoints = this.#getTimepointsContext();
     context.editingTimepointId = this.#editingTimepointId;
     context.skipTriggers = true;
+    context.cinematicEnabled = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_ENABLED);
     return context;
   }
 
@@ -232,7 +230,11 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!timepoint) return;
     const skipCheckbox = this.element.querySelector('input[name="skipTriggers"]');
     const skipTriggers = skipCheckbox?.checked ?? true;
-    if (skipTriggers) TimeTracker.skipNextHooks();
+    if (skipTriggers) {
+      TimeTracker.skipNextHooks();
+      EventScheduler.skipNext();
+      ReminderScheduler.skipNext();
+    }
     const delta = timepoint.worldTime - game.time.worldTime;
     if (!game.user.isGM) {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
@@ -300,7 +302,11 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const newTime = calendar.componentsToTime(newTimeComponents);
     const delta = newTime - game.time.worldTime;
     if (delta !== 0) {
-      if (skipTriggers) TimeTracker.skipNextHooks();
+      if (skipTriggers) {
+        TimeTracker.skipNextHooks();
+        EventScheduler.skipNext();
+        ReminderScheduler.skipNext();
+      }
       if (!game.user.isGM) {
         CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
         return;
@@ -308,6 +314,42 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.time.advance(delta);
       log(3, `Set date to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute} (skip triggers: ${skipTriggers})`);
     }
+  }
+
+  /**
+   * Trigger a cinematic time advance using the form's current date values.
+   * @this {SetDateDialog}
+   */
+  static async #onCinematicAdvance() {
+    const calendar = this.calendar;
+    if (!calendar) return;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const form = this.element.querySelector('form') ?? this.element;
+    const fd = new foundry.applications.ux.FormDataExtended(form).object;
+    const year = parseInt(fd.year) - yearZero;
+    const day = parseInt(fd.day);
+    const hour = parseInt(fd.hour) || 0;
+    const minute = parseInt(fd.minute) || 0;
+    const skipTriggers = fd.skipTriggers ?? true;
+    const isMonthless = calendar.isMonthless ?? false;
+    let month = 0;
+    if (!isMonthless) month = parseInt(fd.month);
+    const newTime = calendar.componentsToTime({ year, month, dayOfMonth: day - 1, hour, minute, second: 0 });
+    const delta = newTime - game.time.worldTime;
+    if (delta === 0) return;
+    if (skipTriggers) {
+      TimeTracker.skipNextHooks();
+      EventScheduler.skipNext();
+      ReminderScheduler.skipNext();
+    }
+    if (!game.user.isGM) {
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
+      this.close();
+      return;
+    }
+    await CinematicOverlay.triggerFromAdvance(delta);
+    log(3, `Cinematic advance to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute}`);
+    this.close();
   }
 
   /**

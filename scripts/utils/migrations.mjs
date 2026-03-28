@@ -3,611 +3,434 @@
  * @module Utils/Migrations
  */
 
-import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
+import { dayOfWeek, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';
 import { log } from './logger.mjs';
 
-const LEGACY_TOKENS = {
-  '{{y}}': 'YY',
-  '{{yyyy}}': 'YYYY',
-  '{{Y}}': 'YYYY',
-  '{{B}}': 'MMMM',
-  '{{b}}': 'MMM',
-  '{{m}}': 'M',
-  '{{mm}}': 'MM',
-  '{{d}}': 'D',
-  '{{dd}}': 'DD',
-  '{{0}}': 'Do',
-  '{{j}}': 'DDD',
-  '{{w}}': 'd',
-  '{{A}}': 'dddd',
-  '{{a}}': 'ddd',
-  '{{H}}': 'HH',
-  '{{h}}': 'h',
-  '{{hh}}': 'hh',
-  '{{M}}': 'mm',
-  '{{S}}': 'ss',
-  '{{p}}': 'a',
-  '{{P}}': 'A',
-  '{{W}}': 'W',
-  '{{WW}}': 'WW',
-  '{{WN}}': '[namedWeek]',
-  '{{Wn}}': '[namedWeekAbbr]',
-  '{{ch}}': '[ch]',
-  '{{chAbbr}}': '[chAbbr]',
-  '{{E}}': 'GGGG',
-  '{{e}}': '[yearInEra]',
-  '{{season}}': 'QQQQ',
-  '{{moon}}': '[moon]',
-  '{{era}}': 'GGGG',
-  '{{eraYear}}': '[yearInEra]',
-  '{{yearInEra}}': '[yearInEra]',
-  '{{year}}': 'YYYY',
-  '{{abbreviation}}': 'G',
-  '{{short}}': 'G'
+/** Converter dispatch table. */
+const CONDITION_TREE_CONVERTERS = {
+  daily: convertDaily,
+  weekly: convertWeekly,
+  monthly: convertMonthly,
+  yearly: convertYearly,
+  seasonal: convertSeasonal,
+  weekOfMonth: convertWeekOfMonth,
+  range: convertRange,
+  moon: convertMoon,
+  random: convertRandom,
+  computed: convertComputed,
+  linked: convertLinked
 };
 
-const DEPRECATED = { dddd: 'EEEE', ddd: 'EEE', dd: 'EE', d: 'e', '[era]': 'GGGG', '[eraAbbr]': 'G', '[year]': 'YYYY', '[short]': 'G', '[season]': 'QQQQ', '[seasonAbbr]': 'QQQ' };
-
-const PRESETS = { time: 'time24', date: 'dateLong', datetime: 'datetime24', dateTime: 'datetime24', short: 'dateShort', long: 'dateLong', full: 'dateFull' };
-
-const KEYS = {
-  forceMiniCalendar: 'forceMiniCal',
-  miniCalendarAutoFade: 'miniCalAutoFade',
-  miniCalendarConfirmSetDate: 'miniCalConfirmSetDate',
-  miniCalendarControlsDelay: 'miniCalControlsDelay',
-  miniCalendarIdleOpacity: 'miniCalIdleOpacity',
-  miniCalendarPosition: 'miniCalPosition',
-  miniCalendarStickyStates: 'miniCalStickyStates',
-  showMiniCalendar: 'showMiniCal'
-};
-
-const HARPTOS = [
-  'CALENDARIA.Calendar.Harptos.Festival.Midwinter',
-  'CALENDARIA.Calendar.Harptos.Festival.Greengrass',
-  'CALENDARIA.Calendar.Harptos.Festival.Midsummer',
-  'CALENDARIA.Calendar.Harptos.Festival.Shieldmeet',
-  'CALENDARIA.Calendar.Harptos.Festival.Highharvestide',
-  'CALENDARIA.Calendar.Harptos.Festival.FeastOfTheMoon'
-];
-
 /**
- * Check if format uses legacy {{var}} syntax
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @param {string} str - Format string to check
- * @returns {boolean} True if legacy format
+ * Build an AND group, flattening single-child groups.
+ * @param {object[]} children - Condition/group entries
+ * @returns {object|null} Condition tree root or null if empty
  */
-function isLegacyFormat(str) {
-  return /{{[^}]+}}/.test(str);
+function buildAndGroup(children) {
+  if (!children.length) return null;
+  if (children.length === 1) return children[0];
+  return { type: 'group', mode: 'and', children };
 }
 
 /**
- * Convert legacy {{var}} format to new tokens
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @param {string} str - Format string to convert
- * @returns {string} Converted format string
+ * Create a condition entry.
+ * @param {string} field - Condition field name
+ * @param {string} op - Operator
+ * @param {*} value - Comparison value
+ * @param {object} [extras] - Additional fields (value2, offset)
+ * @returns {object} Condition entry
  */
-function migrateLegacyFormat(str) {
-  let out = str.replace(/{{c\d+}}/g, '[cycle]').replace(/{{(\d+)}}/g, '[$1]');
-  for (const [old, neu] of Object.entries(LEGACY_TOKENS)) out = out.replace(new RegExp(old.replace(/[{}]/g, '\\$&'), 'g'), neu);
-  return out;
+function ct(field, op, value, extras = {}) {
+  return { type: 'condition', field, op, value, ...extras };
 }
 
 /**
- * Replace deprecated tokens in format string
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @param {string} str - Format string to migrate
- * @returns {{migrated: string, changes: Array}} Migrated string and list of changes
+ * Convert daily repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object} Condition tree root
  */
-function migrateDeprecatedTokens(str) {
-  if (!str || typeof str !== 'string') return { migrated: str, changes: [] };
-  let out = str;
-  const changes = [];
-  for (const [tok, rep] of Object.entries(DEPRECATED).sort((a, b) => b[0].length - a[0].length)) {
-    if (tok.startsWith('[')) {
-      if (out.includes(tok)) {
-        out = out.split(tok).join(rep);
-        changes.push({ from: tok, to: rep });
-      }
-    } else {
-      const re = new RegExp(`(?<![a-zA-Z])${tok}(?![a-zA-Z])`, 'g');
-      if (re.test(out)) {
-        out = out.replace(re, rep);
-        changes.push({ from: tok, to: rep });
-      }
-    }
-  }
-  return { migrated: out, changes };
+function convertDaily(noteData) {
+  const interval = noteData.repeatInterval || 1;
+  if (interval === 1) return { type: 'group', mode: 'and', children: [] };
+  return ct('date', '%', interval);
 }
 
 /**
- * Migrate deprecated tokens in calendar data object
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @param {object} cal - Calendar data object
- * @returns {Array} List of changes made
+ * Convert weekly repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object} Condition tree root
  */
-function migrateCalTokens(cal) {
-  const changes = [];
-  if (cal?.dateFormats) {
-    for (const [k, v] of Object.entries(cal.dateFormats)) {
-      if (typeof v === 'string') {
-        const { migrated, changes: c } = migrateDeprecatedTokens(v);
-        if (c.length) {
-          cal.dateFormats[k] = migrated;
-          changes.push(...c);
-        }
-      }
-    }
-  }
-  if (cal?.cycleFormat) {
-    const { migrated, changes: c } = migrateDeprecatedTokens(cal.cycleFormat);
-    if (c.length) {
-      cal.cycleFormat = migrated;
-      changes.push(...c);
-    }
-  }
-  return changes;
+function convertWeekly(noteData) {
+  const interval = noteData.repeatInterval || 1;
+  const children = [ct('weekday', '==', dayOfWeek(noteData.startDate) + 1)];
+  if (interval > 1) children.push(ct('totalWeek', '%', interval));
+  return buildAndGroup(children);
 }
 
 /**
- * Migrate display format deprecated tokens
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<Array>} List of changes made
+ * Convert monthly repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object} Condition tree root
  */
-async function migrateDisplayTokens() {
-  if (!game.user?.isGM) return [];
-  const changes = [];
-  try {
-    const fmts = game.settings.get(MODULE.ID, 'displayFormats');
-    if (!fmts || typeof fmts !== 'object') return [];
-    let mod = false;
-    for (const loc of Object.values(fmts)) {
-      for (const role of ['gm', 'player']) {
-        if (loc?.[role]) {
-          const { migrated, changes: c } = migrateDeprecatedTokens(loc[role]);
-          if (c.length) {
-            loc[role] = migrated;
-            changes.push(...c);
-            mod = true;
-          }
-        }
-      }
-    }
-    if (mod) {
-      await game.settings.set(MODULE.ID, 'displayFormats', fmts);
-      log(3, `Migrated display format tokens: ${[...new Set(changes.map((c) => `${c.from}→${c.to}`))].join(', ')}`);
-    }
-  } catch {
-    log(3, 'No display token settings to migrate');
-  }
-  return changes;
+function convertMonthly(noteData) {
+  const interval = noteData.repeatInterval || 1;
+  const children = [ct('day', '==', noteData.startDate.dayOfMonth + 1)];
+  if (interval > 1) children.push(ct('month', '%', interval));
+  return buildAndGroup(children);
 }
 
 /**
- * Migrate legacy preset names
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<Array>} List of changes made
+ * Convert yearly repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object} Condition tree root
  */
-async function migratePresets() {
-  if (!game.user?.isGM) return [];
-  const changes = [];
-  try {
-    const fmts = game.settings.get(MODULE.ID, 'displayFormats');
-    if (!fmts || typeof fmts !== 'object') return [];
-    let mod = false;
-    for (const [loc, val] of Object.entries(fmts)) {
-      for (const role of ['gm', 'player']) {
-        if (val?.[role] && PRESETS[val[role]]) {
-          const old = val[role];
-          val[role] = PRESETS[old];
-          changes.push({ from: old, to: val[role], loc, role });
-          mod = true;
-        }
-      }
-    }
-    if (mod) {
-      await game.settings.set(MODULE.ID, 'displayFormats', fmts);
-      log(3, `Migrated presets: ${changes.map((c) => `${c.loc}/${c.role}: ${c.from}→${c.to}`).join(', ')}`);
-    }
-  } catch {
-    log(3, 'No preset settings to migrate');
-  }
-  return changes;
+function convertYearly(noteData) {
+  const interval = noteData.repeatInterval || 1;
+  const children = [ct('month', '==', noteData.startDate.month + 1), ct('day', '==', noteData.startDate.dayOfMonth + 1)];
+  if (interval > 1) children.push(ct('year', '%', interval));
+  return buildAndGroup(children);
 }
 
 /**
- * Migrate all deprecated tokens in calendars
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<Array>} List of changes made
+ * Convert seasonal repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object|null} Condition tree root or null
  */
-async function migrateAllTokens() {
-  const KEY = 'tokenMigrationComplete';
-  if (!game.user?.isGM) return [];
-  if (game.settings.get(MODULE.ID, KEY)) return [];
-  const changes = [];
-  try {
-    const cals = game.settings.get(MODULE.ID, 'customCalendars') || {};
-    let mod = false;
-    for (const [id, cal] of Object.entries(cals)) {
-      const c = migrateCalTokens(cal);
-      if (c.length) {
-        log(3, `Migrated tokens in "${cal?.metadata?.name || cal?.name || id}"`);
-        changes.push(...c);
-        mod = true;
-      }
-    }
-    if (mod) await game.settings.set(MODULE.ID, 'customCalendars', cals);
-  } catch (e) {
-    log(1, 'Token migration failed', e);
+function convertSeasonal(noteData) {
+  const config = noteData.seasonalConfig;
+  if (!config) return null;
+  const children = [ct('season', '==', (config.seasonIndex ?? 0) + 1)];
+  if (config.trigger === 'firstDay' || config.trigger === 'lastDay') {
+    const season = CalendarManager.getActiveCalendar()?.seasonsArray?.[config.seasonIndex];
+    if (season) children.push(ct('dayOfYear', '==', config.trigger === 'firstDay' ? (season.dayStart ?? 0) : (season.dayEnd ?? 0)));
   }
-  try {
-    const ovr = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
-    let mod = false;
-    for (const [id, cal] of Object.entries(ovr)) {
-      const c = migrateCalTokens(cal);
-      if (c.length) {
-        log(3, `Migrated tokens in override "${cal?.metadata?.name || cal?.name || id}"`);
-        changes.push(...c);
-        mod = true;
-      }
-    }
-    if (mod) await game.settings.set(MODULE.ID, 'defaultOverrides', ovr);
-  } catch (e) {
-    log(1, 'Override token migration failed', e);
-  }
-  changes.push(...(await migrateDisplayTokens()), ...(await migratePresets()));
-  await game.settings.set(MODULE.ID, KEY, true);
-  return changes;
+  return buildAndGroup(children);
 }
 
 /**
- * Migrate legacy {{var}} format in custom calendars
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<void>}
+ * Convert weekOfMonth repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object} Condition tree root
  */
-async function migrateLegacyFormats() {
-  const KEY = 'formatMigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return;
-  if (!game.user.isGM) return;
-  const cals = game.settings.get(MODULE.ID, 'customCalendars');
-  if (!cals || typeof cals !== 'object') {
-    await game.settings.set(MODULE.ID, KEY, true);
+function convertWeekOfMonth(noteData) {
+  const interval = noteData.repeatInterval || 1;
+  const daysInWeek = CalendarManager.getActiveCalendar()?.daysInWeek ?? 7;
+  const children = [ct('weekday', '==', (noteData.weekday ?? dayOfWeek(noteData.startDate)) + 1)];
+  const weekNumber = noteData.weekNumber ?? Math.ceil((noteData.startDate.dayOfMonth + 1) / daysInWeek);
+  if (weekNumber > 0) children.push(ct('weekNumberInMonth', '==', weekNumber));
+  else children.push(ct('inverseWeekNumber', '==', Math.abs(weekNumber)));
+  if (interval > 1) children.push(ct('month', '%', interval));
+  return buildAndGroup(children);
+}
+
+/**
+ * Convert range pattern repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object|null} Condition tree root or null
+ */
+function convertRange(noteData) {
+  const pattern = noteData.rangePattern;
+  if (!pattern) return null;
+  const children = [];
+  addRangeBit(children, 'year', pattern.year);
+  addRangeBit(children, 'month', offsetRangeBit(pattern.month, 1));
+  addRangeBit(children, 'day', pattern.dayOfMonth);
+  if (!children.length) return { type: 'group', mode: 'and', children: [] };
+  return buildAndGroup(children);
+}
+
+/**
+ * Offset a range bit value (number or [min, max]) by a fixed amount.
+ * @param {*} rangeBit - Range specification (number, [min, max], or null)
+ * @param {number} offset - Amount to add
+ * @returns {*} Offset range bit
+ */
+function offsetRangeBit(rangeBit, offset) {
+  if (rangeBit == null) return null;
+  if (typeof rangeBit === 'number') return rangeBit + offset;
+  if (Array.isArray(rangeBit) && rangeBit.length === 2) return [rangeBit[0] !== null ? rangeBit[0] + offset : null, rangeBit[1] !== null ? rangeBit[1] + offset : null];
+  return rangeBit;
+}
+
+/**
+ * Add conditions for a range bit specification.
+ * @param {object[]} children - Array to push conditions onto
+ * @param {string} field - Condition field name
+ * @param {*} rangeBit - Range specification (number, [min, max], or null)
+ */
+function addRangeBit(children, field, rangeBit) {
+  if (rangeBit == null) return;
+  if (typeof rangeBit === 'number') {
+    children.push(ct(field, '==', rangeBit));
     return;
   }
-  let mod = false;
-  const out = {};
-  for (const [id, cal] of Object.entries(cals)) {
-    const upd = { ...cal };
-    if (upd.dateFormats) {
-      for (const [k, v] of Object.entries(upd.dateFormats)) {
-        if (typeof v === 'string' && isLegacyFormat(v)) {
-          upd.dateFormats[k] = migrateLegacyFormat(v);
-          mod = true;
-        }
-      }
-    }
-    if (upd.cycleFormat && isLegacyFormat(upd.cycleFormat)) {
-      upd.cycleFormat = migrateLegacyFormat(upd.cycleFormat);
-      mod = true;
-    }
-    out[id] = upd;
-  }
-  if (mod) {
-    await game.settings.set(MODULE.ID, 'customCalendars', out);
-    log(3, 'Migrated legacy format tokens');
-  }
-  await game.settings.set(MODULE.ID, KEY, true);
-}
-
-/**
- * Migrate Harptos intercalary festivals
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<void>}
- */
-async function migrateHarptos() {
-  const KEY = 'intercalaryMigrationComplete';
-  try {
-    if (game.settings.get(MODULE.ID, KEY)) return;
-  } catch {}
-  if (!game.user.isGM) return;
-  try {
-    const cals = game.settings.get(MODULE.ID, 'customCalendars');
-    if (!cals || typeof cals !== 'object') {
-      await game.settings.set(MODULE.ID, KEY, true);
-      return;
-    }
-    let mod = false;
-    const out = {};
-    for (const [id, cal] of Object.entries(cals)) {
-      const upd = { ...cal };
-      const festivals = upd.festivals ? (Array.isArray(upd.festivals) ? upd.festivals : Object.values(upd.festivals)) : [];
-      if ((id === 'harptos' || cal.metadata?.id === 'harptos') && festivals.length) {
-        for (const f of festivals) {
-          if (HARPTOS.includes(f.name) && f.countsForWeekday === undefined) {
-            f.countsForWeekday = false;
-            mod = true;
-          }
-        }
-      }
-      out[id] = upd;
-    }
-    if (mod) {
-      await game.settings.set(MODULE.ID, 'customCalendars', out);
-      log(3, 'Migrated Harptos festivals');
-    }
-    await game.settings.set(MODULE.ID, KEY, true);
-  } catch (e) {
-    log(1, 'Harptos migration failed', e);
+  if (Array.isArray(rangeBit) && rangeBit.length === 2) {
+    if (rangeBit[0] !== null) children.push(ct(field, '>=', rangeBit[0]));
+    if (rangeBit[1] !== null) children.push(ct(field, '<=', rangeBit[1]));
   }
 }
 
 /**
- * Migrate setting keys
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<void>}
+ * Convert moon repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object|null} Condition tree root or null
  */
-async function migrateKeys() {
-  if (!game.user.isGM) return;
-  if (game.settings.get(MODULE.ID, 'settingKeyMigrationComplete')) return;
-  let n = 0;
-  for (const [old, neu] of Object.entries(KEYS)) {
-    const storage = game.settings.storage.get('world');
-    const oldS = storage.getSetting(`${MODULE.ID}.${old}`);
-    if (oldS && !storage.getSetting(`${MODULE.ID}.${neu}`)) {
-      await game.settings.set(MODULE.ID, neu, oldS.value);
-      log(3, `Migrated setting: ${old} -> ${neu}`);
-      n++;
-    }
-  }
-  if (n) log(3, `Setting migration complete: ${n} migrated`);
-  await game.settings.set(MODULE.ID, 'settingKeyMigrationComplete', true);
-}
-
-/**
- * Migrate weather zone configuration to ensure all required fields exist.
- * @since 0.10.0
- * @deprecated Remove in 1.1.0
- * @returns {Promise<number>} Number of calendars migrated
- */
-async function migrateWeatherZones() {
-  const KEY = 'weatherZoneMigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return 0;
-  if (!game.user?.isGM) return 0;
-  let migratedCount = 0;
-  const fixZone = (zone) => {
-    if (!zone || typeof zone !== 'object') return null;
-    const fixed = { ...zone };
-    let changed = false;
-    if (!fixed.id || typeof fixed.id !== 'string') return null;
-    if (!fixed.name || typeof fixed.name !== 'string') return null;
-    if (!fixed.temperatures || typeof fixed.temperatures !== 'object') {
-      fixed.temperatures = {};
-      changed = true;
-    }
-    if (!fixed.presets || typeof fixed.presets !== 'object') {
-      fixed.presets = Array.isArray(fixed.presets) ? fixed.presets : [];
-      changed = true;
-    }
-    if (!fixed.seasonOverrides || typeof fixed.seasonOverrides !== 'object') {
-      fixed.seasonOverrides = {};
-      changed = true;
-    }
-    for (const seasonData of Object.values(fixed.seasonOverrides)) {
-      if (seasonData?.presets && Array.isArray(seasonData.presets)) {
-        const map = {};
-        for (const p of seasonData.presets) if (p?.id) map[p.id] = { id: p.id, chance: p.chance };
-        seasonData.presets = map;
-        changed = true;
-      }
-    }
-    const presetsArr = Array.isArray(fixed.presets) ? fixed.presets : Object.values(fixed.presets);
-    for (const preset of presetsArr) {
-      if (preset.enabled === undefined) preset.enabled = false;
-      delete preset.chance;
-    }
-    if (Array.isArray(fixed.presets)) fixed.presets = fixed.presets.filter((p) => p && typeof p === 'object' && p.id);
-    return changed ? fixed : zone;
-  };
-  const migrateCalendarWeather = (cal) => {
-    if (!cal?.weather) return false;
-    const zones = cal.weather.zones;
-    if (!zones || typeof zones !== 'object') return false;
-    const zonesArray = Array.isArray(zones) ? zones : Object.values(zones);
-    if (zonesArray.length === 0) return false;
-    let modified = false;
-    const fixedZones = [];
-    for (const zone of zonesArray) {
-      const fixed = fixZone(zone);
-      if (fixed) {
-        fixedZones.push(fixed);
-        if (fixed !== zone) modified = true;
-      } else {
-        modified = true;
-      }
-    }
-    if (modified) {
-      cal.weather.zones = fixedZones;
-      if (cal.weather.activeZone && !fixedZones.find((z) => z.id === cal.weather.activeZone)) cal.weather.activeZone = fixedZones[0]?.id || null;
-    }
-    return modified;
-  };
-  const customCalendars = game.settings.get(MODULE.ID, 'customCalendars') || {};
-  let customModified = false;
-  for (const [id, cal] of Object.entries(customCalendars)) {
-    if (migrateCalendarWeather(cal)) {
-      log(3, `Migrated weather zones in custom calendar: ${id}`);
-      customModified = true;
-      migratedCount++;
-    }
-  }
-  if (customModified) await game.settings.set(MODULE.ID, 'customCalendars', customCalendars);
-  const overrides = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
-  let overridesModified = false;
-  for (const [id, cal] of Object.entries(overrides)) {
-    if (migrateCalendarWeather(cal)) {
-      log(3, `Migrated weather zones in override: ${id}`);
-      overridesModified = true;
-      migratedCount++;
-    }
-  }
-  if (overridesModified) await game.settings.set(MODULE.ID, 'defaultOverrides', overrides);
-  await game.settings.set(MODULE.ID, KEY, true);
-  if (migratedCount > 0) log(3, `Weather zone migration complete: ${migratedCount} calendar(s) updated`);
-  return migratedCount;
-}
-
-/**
- * Diagnose weather configuration - inspects raw settings to find any weather data.
- * @param {boolean} [showDialog] - Whether to show a dialog with results
- * @returns {object} Diagnostic results
- */
-export async function diagnoseWeatherConfig(showDialog = true) {
-  const results = [];
-  const getZonesArray = (zones) => {
-    if (!zones || typeof zones !== 'object') return [];
-    return Array.isArray(zones) ? zones : Object.values(zones);
-  };
-  const overrides = game.settings.get(MODULE.ID, 'defaultOverrides') || {};
-  for (const [id, cal] of Object.entries(overrides)) {
-    const zones = getZonesArray(cal?.weather?.zones);
-    if (zones.length) results.push({ source: 'defaultOverrides', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
-  }
-  const customs = game.settings.get(MODULE.ID, 'customCalendars') || {};
-  for (const [id, cal] of Object.entries(customs)) {
-    const zones = getZonesArray(cal?.weather?.zones);
-    if (zones.length) results.push({ source: 'customCalendars', calendarId: id, calendarName: cal.name || id, zones, activeZone: cal.weather.activeZone, autoGenerate: cal.weather.autoGenerate });
-  }
-  const active = game.time.calendar;
-  const activeWeather = active?.weather || null;
-  const diagnostic = {
-    activeCalendar: active?.name || null,
-    activeCalendarId: active?.metadata?.id || null,
-    activeWeatherZones: getZonesArray(activeWeather?.zones).length,
-    settingsData: results,
-    migrationComplete: game.settings.get(MODULE.ID, 'weatherZoneMigrationComplete')
-  };
-  log(2, 'Weather diagnostic:', diagnostic);
-  if (showDialog) {
-    let report = '<h3>Active Calendar</h3>';
-    report += `<p><strong>${active?.name || 'None'}</strong></p>`;
-    report += `<p>Weather zones loaded: ${getZonesArray(activeWeather?.zones).length}</p>`;
-    if (results.length > 0) {
-      report += '<h3>Weather Data in Settings</h3>';
-      for (const r of results) {
-        report += `<div style="border:1px solid #666; padding:8px; margin:4px 0;">`;
-        report += `<p><strong>${r.calendarName}</strong> (${r.source})</p>`;
-        report += `<p>Zones: ${r.zones.length} | Active: ${r.activeZone || 'none'}</p>`;
-        report += '<ul>';
-        for (const z of r.zones) report += `<li>${z.name} (${z.id}) - ${z.presets?.length || 0} presets</li>`;
-        report += '</ul></div>';
-      }
+function convertMoon(noteData) {
+  const moonConditions = noteData.moonConditions;
+  if (!moonConditions?.length) return null;
+  const calendar = CalendarManager.getActiveCalendar();
+  const orChildren = [];
+  for (const cond of moonConditions) {
+    const moon = calendar?.moonsArray?.[cond.moonIndex];
+    if (!moon) continue;
+    const phases = Object.values(moon.phases ?? {});
+    const phaseIdx = phases.findIndex((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
+    if (phaseIdx === -1) continue;
+    const phaseCondition = ct('moonPhaseIndex', '==', phaseIdx, { value2: cond.moonIndex });
+    const modifier = cond.modifier || 'any';
+    if (modifier === 'any') {
+      orChildren.push(phaseCondition);
     } else {
-      report += '<p style="color:#c66;">No weather configuration found in settings.</p>';
+      const modValue = modifier === 'rising' ? 1 : modifier === 'true' ? 2 : 3;
+      orChildren.push(buildAndGroup([phaseCondition, ct('moonSubPhase', '==', modValue, { value2: cond.moonIndex })]));
     }
-    report += '<p><em>Full data logged to browser console (F12).</em></p>';
-    await foundry.applications.api.DialogV2.prompt({ window: { title: 'Weather Diagnostic', width: 500 }, content: report, ok: { label: 'Close' } });
   }
-  return diagnostic;
+  if (!orChildren.length) return null;
+  if (orChildren.length === 1) return orChildren[0];
+  return { type: 'group', mode: 'or', children: orChildren };
 }
 
 /**
- * Migrate legacy SETTINGS.CALENDARS data to customCalendars, then clear the legacy setting.
- * @since 0.10.0
- * @deprecated Remove in 1.1.0 — all legacy data will have been migrated by then.
+ * Convert random repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object|null} Condition tree root or null
+ */
+function convertRandom(noteData) {
+  const config = noteData.randomConfig;
+  if (!config) return null;
+  const { seed, probability, checkInterval } = config;
+  if (probability <= 0) return null;
+  if (probability >= 100) return { type: 'group', mode: 'and', children: [] };
+  const children = [ct('random', '<=', probability, { value2: seed })];
+  if (checkInterval === 'weekly') children.push(ct('weekday', '==', dayOfWeek(noteData.startDate) + 1));
+  else if (checkInterval === 'monthly') children.push(ct('day', '==', noteData.startDate.dayOfMonth + 1));
+  return buildAndGroup(children);
+}
+
+/**
+ * Convert computed repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object|null} Condition tree root or null
+ */
+function convertComputed(noteData) {
+  const config = noteData.computedConfig;
+  if (!config?.chain?.length) return null;
+  return ct('computed', '==', true, { value2: config });
+}
+
+/**
+ * Convert linked repeat to condition tree.
+ * @param {object} noteData - Note flag data
+ * @returns {object|null} Condition tree root or null
+ */
+function convertLinked(noteData) {
+  const { linkedEvent } = noteData;
+  if (!linkedEvent?.noteId) return null;
+  const { noteId, offset } = linkedEvent;
+  if (offset >= 0) return ct('event', 'daysAgo', offset, { value2: { noteId } });
+  return ct('event', 'daysFromNow', Math.abs(offset), { value2: { noteId } });
+}
+
+/**
+ * Normalize conditions array entries to include type discriminator.
+ * @param {object[]} conditions - Existing conditions from the note
+ * @returns {object[]} Normalized conditions
+ */
+function normalizeConditions(conditions) {
+  if (!conditions?.length) return [];
+  return conditions.map((entry) => {
+    if (entry.type === 'condition' || entry.type === 'group') return entry;
+    if (entry.mode && entry.children) return { type: 'group', ...entry };
+    return { type: 'condition', ...entry };
+  });
+}
+
+/**
+ * Convert a note's legacy recurrence to a condition tree.
+ * @param {object} noteData - Note flag data (page.system)
+ * @returns {object|null} Condition tree root, or null if not convertible
+ */
+export function convertToConditionTree(noteData) {
+  if (noteData.conditionTree) return noteData.conditionTree;
+  const { repeat, conditions } = noteData;
+  if (repeat === 'never' || !repeat) {
+    const normalized = normalizeConditions(conditions);
+    return normalized.length ? buildAndGroup(normalized) : null;
+  }
+  const converter = CONDITION_TREE_CONVERTERS[repeat];
+  if (!converter) return null;
+  const recurrenceTree = converter(noteData);
+  if (!recurrenceTree) return null;
+  const normalized = normalizeConditions(conditions);
+  if (!normalized.length) return recurrenceTree;
+  const allChildren = recurrenceTree.type === 'group' && recurrenceTree.mode === 'and' ? [...recurrenceTree.children, ...normalized] : [recurrenceTree, ...normalized];
+  return buildAndGroup(allChildren);
+}
+
+/**
+ * Validate migration by comparing occurrences against old engine over a 3-year range.
+ * @param {object} oldData - Original note data (no conditionTree)
+ * @param {object} newData - Migrated note data (with conditionTree)
+ * @param {string} name - Note name for logging
+ * @returns {boolean} True if occurrences match
+ */
+function validateNoteMigration(oldData, newData, name) {
+  const { startDate } = oldData;
+  const rangeEnd = { year: startDate.year + 3, month: startDate.month, dayOfMonth: startDate.dayOfMonth };
+  const oldOcc = getOccurrencesInRange(oldData, startDate, rangeEnd, 500);
+  const newOcc = getOccurrencesInRange(newData, startDate, rangeEnd, 500);
+  const oldSet = new Set(oldOcc.map((d) => `${d.year}:${d.month}:${d.dayOfMonth}`));
+  const newSet = new Set(newOcc.map((d) => `${d.year}:${d.month}:${d.dayOfMonth}`));
+  let discrepancies = 0;
+  for (const key of oldSet) if (!newSet.has(key)) discrepancies++;
+  for (const key of newSet) if (!oldSet.has(key)) discrepancies++;
+  if (discrepancies) log(2, `Migration discrepancy for "${name}": ${discrepancies} date mismatches over 3-year range`);
+  return discrepancies === 0;
+}
+
+/**
+ * Migrate notes from legacy repeat-type schema to condition tree format.
+ * @since 1.0.0
  * @returns {Promise<void>}
  */
-async function migrateLegacyCalendars() {
-  const KEY = 'legacyCalendarMigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return;
+async function migrateNotesDataModel() {
+  const KEY = 'noteConditionTreeMigrationComplete';
   if (!game.user?.isGM) return;
-  const legacyData = game.settings.get(MODULE.ID, SETTINGS.CALENDARS);
-  if (!legacyData?.calendars || Object.keys(legacyData.calendars).length === 0) {
-    await game.settings.set(MODULE.ID, KEY, true);
-    return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  log(3, 'Starting note condition tree migration...');
+  const pages = [];
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const noteData = page.system;
+      if (!noteData?.startDate) continue;
+      const hasLegacyRepeat = noteData.repeat && noteData.repeat !== 'never';
+      const hasLegacyConditions = noteData.conditions?.length > 0;
+      const needsConversion = !noteData.conditionTree && (hasLegacyRepeat || hasLegacyConditions);
+      const needsCleanup = noteData.conditionTree && (hasLegacyRepeat || hasLegacyConditions);
+      if (!needsConversion && !needsCleanup) continue;
+      pages.push(page);
+    }
   }
-  const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
   let migrated = 0;
-  for (const [id, calendarData] of Object.entries(legacyData.calendars)) {
-    if (isBundledCalendar(id)) continue;
-    if (customCalendars[id]) continue;
-    calendarData.metadata = calendarData.metadata || {};
-    calendarData.metadata.isCustom = true;
-    customCalendars[id] = calendarData;
-    migrated++;
+  let failed = 0;
+  let warnings = 0;
+  const total = pages.length;
+  const BATCH_SIZE = 10;
+  const LEGACY_RESETS = {
+    'system.repeat': 'never',
+    'system.repeatInterval': 1,
+    'system.repeatEndDate': null,
+    'system.maxOccurrences': 0,
+    'system.moonConditions': [],
+    'system.randomConfig': null,
+    'system.linkedEvent': null,
+    'system.rangePattern': null,
+    'system.weekday': null,
+    'system.weekNumber': null,
+    'system.seasonalConfig': null,
+    'system.computedConfig': null,
+    'system.conditions': []
+  };
+  for (let i = 0; i < total; i++) {
+    const page = pages[i];
+    const noteData = page.system;
+    try {
+      const updateData = { ...LEGACY_RESETS };
+      if (!noteData.conditionTree) {
+        const conditionTree = convertToConditionTree(noteData);
+        if (!conditionTree) continue;
+        const valid = validateNoteMigration({ ...noteData, conditionTree: undefined }, { ...noteData, conditionTree }, page.name);
+        if (!valid) warnings++;
+        updateData['system.conditionTree'] = conditionTree;
+        const deps = extractEventDependencies(conditionTree);
+        if (deps.length) updateData['system.connectedEvents'] = deps;
+      }
+      await page.update(updateData);
+      migrated++;
+    } catch (error) {
+      failed++;
+      log(1, `Failed to migrate note "${page.name}":`, error);
+    }
+    if (total > BATCH_SIZE && (i + 1) % BATCH_SIZE === 0) {
+      ui.notifications?.info(`Calendaria: Migrating notes... ${i + 1}/${total}`);
+      await new Promise((r) => setTimeout(r, 0));
+    }
   }
-  if (migrated > 0) {
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
-    log(3, `Migrated ${migrated} legacy calendar(s) to customCalendars`);
-  }
-  await game.settings.set(MODULE.ID, SETTINGS.CALENDARS, null);
+  log(3, `Note migration complete: ${migrated} migrated, ${failed} failed${warnings ? `, ${warnings} with discrepancies` : ''}`);
   await game.settings.set(MODULE.ID, KEY, true);
-  log(3, 'Legacy calendar migration complete');
 }
 
 /**
- * Migrate date fields from 1-indexed day/month to 0-indexed dayOfMonth/month.
- * @since 0.10.4
- * @deprecated Remove in 1.1.0
+ * Migrate gmOnly boolean to visibility enum.
+ * @since 1.0.0
+ * @deprecated Remove in 1.2.0
  * @returns {Promise<void>}
  */
-async function migrateDateIndexing() {
-  const KEY = 'dateIndexingMigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return;
+async function migrateNoteVisibility() {
+  const KEY = 'noteVisibilityMigrationComplete';
   if (!game.user?.isGM) return;
-  const migrateCalendarDates = (cal) => {
-    let modified = false;
-    if (cal.festivals) {
-      const festivals = Array.isArray(cal.festivals) ? cal.festivals : Object.values(cal.festivals);
-      for (const f of festivals) {
-        if (!f || typeof f !== 'object') continue;
-        if ('day' in f && !('dayOfMonth' in f)) {
-          f.dayOfMonth = (f.day ?? 1) - 1;
-          delete f.day;
-          if (f.month != null && f.month >= 1) f.month -= 1;
-          if (f.dayOfYear != null && f.dayOfYear >= 1) f.dayOfYear -= 1;
-          modified = true;
-        }
-      }
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  log(3, 'Starting note visibility migration...');
+  let migrated = 0;
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const source = page.toObject().system;
+      if (source.visibility) continue;
+      if (source.gmOnly === undefined) continue;
+      const visibility = source.gmOnly ? 'hidden' : 'visible';
+      await page.update({ 'system.visibility': visibility, 'system.-=gmOnly': null });
+      migrated++;
     }
-    if (modified && cal.seasons?.values) {
-      const seasons = Array.isArray(cal.seasons.values) ? cal.seasons.values : Object.values(cal.seasons.values);
-      for (const s of seasons) {
-        if (s.monthStart != null && s.monthStart >= 1) s.monthStart -= 1;
-        if (s.monthEnd != null && s.monthEnd >= 1) s.monthEnd -= 1;
-      }
-    }
-    if (cal.moons) {
-      const moons = Array.isArray(cal.moons) ? cal.moons : Object.values(cal.moons);
-      for (const m of moons) {
-        if (m.referenceDate && 'day' in m.referenceDate && !('dayOfMonth' in m.referenceDate)) {
-          m.referenceDate.dayOfMonth = (m.referenceDate.day ?? 1) - 1;
-          delete m.referenceDate.day;
-          modified = true;
-        }
-      }
-    }
-    return modified;
-  };
-  const custom = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-  let customModified = false;
-  for (const cal of Object.values(custom)) if (migrateCalendarDates(cal)) customModified = true;
-  if (customModified) await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, custom);
-  const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
-  let overridesModified = false;
-  for (const cal of Object.values(overrides)) if (migrateCalendarDates(cal)) overridesModified = true;
-  if (overridesModified) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
+  }
+  if (migrated > 0) log(3, `Migrated visibility for ${migrated} notes`);
   await game.settings.set(MODULE.ID, KEY, true);
-  log(3, 'Date indexing migration complete');
+}
+
+/**
+ * Remove the built-in 'festival' preset if no notes reference it in their categories.
+ * @returns {Promise<void>}
+ */
+async function migrateFestivalPresetRemoval() {
+  if (!game.user?.isGM) return;
+  const KEY = 'festivalPresetRemovalComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  if (!raw.some((p) => p.id === 'festival')) {
+    await game.settings.set(MODULE.ID, KEY, true);
+    return;
+  }
+  let inUse = false;
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      if (page.system?.categories?.includes('festival')) {
+        inUse = true;
+        break;
+      }
+    }
+    if (inUse) break;
+  }
+  if (!inUse) {
+    const filtered = raw.filter((p) => p.id !== 'festival');
+    invalidatePresetCache();
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, filtered);
+    log(3, 'Removed unused "festival" preset');
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
 }
 
 /**
@@ -616,15 +439,8 @@ async function migrateDateIndexing() {
  */
 export async function runAllMigrations() {
   if (!game.user?.isGM) return;
-  await migrateLegacyFormats();
-  await migrateHarptos();
-  await migrateKeys();
-  await migrateWeatherZones();
-  await migrateLegacyCalendars();
-  await migrateDateIndexing();
-  const changes = await migrateAllTokens();
-  if (changes.length) {
-    const list = [...new Map(changes.map((c) => [`${c.from}→${c.to}`, c])).values()].map((c) => `${c.from} → ${c.to}`).join(', ');
-    log(3, `Auto-migrated deprecated format tokens: ${list}`);
-  }
+  await migrateNotesDataModel();
+  await migrateNoteVisibility();
+  await migratePresetSchema();
+  await migrateFestivalPresetRemoval();
 }

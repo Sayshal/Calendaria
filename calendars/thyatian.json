@@ -129,66 +129,290 @@
     "newyearsday00000": {
       "name": "New Year's Day",
       "month": 0,
-      "icon": "fas fa-glass-cheers",
+      "icon": "fa-glass-cheers",
       "color": "#FFD700",
       "description": "First day of Nuwmont celebrating the new year across the Empire.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "vaternasfeast000": {
       "name": "Vaterna's Feast",
       "month": 1,
-      "icon": "fas fa-ship",
+      "icon": "fa-ship",
       "color": "#4169E1",
       "description": "Start of shipping season with boat launchings and boating competitions.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "springrevel00000": {
       "name": "Spring Revel",
       "month": 2,
-      "icon": "fas fa-music",
+      "icon": "fa-music",
       "color": "#FF69B4",
       "description": "Springtime festival of music, dancing, and merriment.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "midyearfestival0": {
       "name": "Mid-Year Festival",
       "month": 5,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFA500",
       "description": "Summer solstice celebration marking the halfway point of the year.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestfestival0": {
       "name": "Harvest Festival",
       "month": 8,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#DAA520",
       "description": "Autumn gathering to celebrate the harvest and give thanks.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "dayofthedead0000": {
       "name": "Day of the Dead",
       "month": 9,
-      "icon": "fas fa-cross",
+      "icon": "fa-cross",
       "color": "#2F4F4F",
       "description": "Solemn day of remembrance for the departed and honoring ancestral spirits.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "coronationday000": {
       "name": "Coronation Day",
       "month": 10,
-      "icon": "fas fa-crown",
+      "icon": "fa-crown",
       "color": "#B8860B",
       "description": "Anniversary commemorating the crowning of Emperor Zendrolion.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "wintersolstice00": {
       "name": "Winter Solstice",
       "month": 11,
-      "icon": "fas fa-snowflake",
+      "icon": "fa-snowflake",
       "color": "#87CEEB",
       "description": "Longest night marking winter's deepest point with candlelight vigils.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {

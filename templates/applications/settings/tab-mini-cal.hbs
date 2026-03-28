@@ -44,7 +44,8 @@
     <div class="form-group">
       <label for="miniCalCompactMode">{{localize "CALENDARIA.Settings.MiniCalCompactMode.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" id="miniCalCompactMode" name="miniCalCompactMode" {{#if miniCalCompactMode}}checked{{/if}}>
+        <input type="checkbox" id="miniCalCompactMode" name="miniCalCompactMode"
+          {{#if miniCalCompactMode}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.MiniCalCompactMode.Hint"}}</p>
     </div>
@@ -121,6 +122,24 @@
           {{#if miniCalAutoOpenNotes}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.AutoOpenNotes.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="miniCalCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <div class="form-fields">
+        <select id="miniCalCombatMode" name="miniCalCombatMode">
+          <option value="none" {{#if (eq miniCalCombatMode "none")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+          </option>
+          <option value="hideCombat" {{#if (eq miniCalCombatMode "hideCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+          </option>
+          <option value="hideEncounter" {{#if (eq miniCalCombatMode "hideEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+          </option>
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.WidgetCombatMode.Hint"}}</p>
     </div>
   </fieldset>
 

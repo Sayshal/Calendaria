@@ -1,45 +1,18 @@
 <header class="calendar-header">
-  {{!-- Search panel (absolute dropdown) --}}
-  <div class="calendaria-search{{#if searchOpen}} visible{{/if}}">
-    <div class="search-panel-header">
-      <input type="search" class="search-input" name="search" placeholder="{{localize 'CALENDARIA.Search.Placeholder'}}"
-        value="{{searchTerm}}" autocomplete="off">
-    </div>
-    <div class="search-panel-results">
-      {{#if searchResults.length}}
-        {{#each searchResults}}
-          <div class="search-result-item" data-action="openSearchResult" data-id="{{id}}"
-            data-journal-id="{{data.journalId}}">
-            <span class="result-name">{{name}}</span>
-            {{#if description}}<span class="result-description">{{description}}</span>{{/if}}
-          </div>
-        {{/each}}
-      {{else if searchTerm}}
-        <div class="no-results">
-          <i class="fas fa-search"></i>
-          <span>{{localize "CALENDARIA.Search.NoResults"}}</span>
-        </div>
-      {{/if}}
-    </div>
-  </div>
-
-  {{!-- Row 1: < | Search | Compact | Title | Settings | Close | > --}}
   <div class="header-row header-row-top">
-    <button type="button" data-action="navigate" data-direction="previous" data-tooltip
+    <button type="button" data-action="navigate" data-direction="previous" {{#if fogNavDisablePrev}}disabled{{/if}}
+      data-tooltip
       aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
-
-    <button type="button" class="search-toggle" data-action="toggleSearch" data-tooltip
-      aria-label="{{localize 'CALENDARIA.Common.SearchNotes'}}">
-      <i class="fas fa-search"></i>
+    <button type="button" class="search-toggle" data-action="openNoteViewer" data-tooltip
+      aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
+      <i class="fas fa-book-open"></i>
     </button>
-
     <button type="button" data-action="toggleCompact" data-tooltip
       aria-label="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
       <i class="fas fa-compress"></i>
     </button>
-
     <h2 class="calendar-title">
       {{#if calendarData}} {{#if (eq displayMode 'week')}} {{{calendarData.formattedHeader}}}
         {{else if (eq displayMode 'year')}}
@@ -47,24 +20,36 @@
         {{else}} {{{calendarData.formattedHeader}}} {{/if}}
       {{else}} {{localize 'CALENDARIA.Common.Calendar'}} {{/if}}
     </h2>
-
+    {{#if showChronicleButton}}
+      <button type="button" data-action="openChronicle" data-tooltip
+        aria-label="{{localize 'CALENDARIA.Chronicle.OpenChronicle'}}">
+        <i class="fas fa-scroll"></i>
+      </button>
+    {{/if}}
     <button type="button" data-action="openSettings" data-tooltip
       aria-label="{{localize 'CALENDARIA.HUD.Settings.Name'}}" class="settings-btn">
       <i class="fas fa-gear"></i>
     </button>
-
     <button type="button" data-action="closeBigCal" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Close'}}"
       class="close-btn">
       <i class="fas fa-times"></i>
     </button>
-
-    <button type="button" data-action="navigate" data-direction="next" data-tooltip
+    <button type="button" data-action="navigate" data-direction="next" {{#if fogNavDisableNext}}disabled{{/if}}
+      data-tooltip
       aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>
-
-  {{!-- Row 2: MWY Select | Indicators (flex) | Today + SetDate --}}
+  {{#if equivalentDates.length}}
+    <div class="header-row header-row-equivalent">
+      {{#each equivalentDates}}
+        {{#unless @first}}<span class="equivalent-date-sep"></span>{{/unless}}
+        <span class="equivalent-date-subtitle" data-action="openSecondaryCalendar"
+          data-calendar-id="{{this.calendarId}}" data-tooltip aria-label="{{this.tooltip}}"><i
+            class="fas fa-calendar-alt"></i> {{this.label}}</span>
+      {{/each}}
+    </div>
+  {{/if}}
   <div class="header-row header-row-bottom">
     <select class="view-select">
       <option value="month" {{#if (eq displayMode 'month')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Month'}}
@@ -72,7 +57,6 @@
       <option value="week" {{#if (eq displayMode 'week')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Week'}}</option>
       <option value="year" {{#if (eq displayMode 'year')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Year'}}</option>
     </select>
-
     <div class="calendar-indicators">
       {{{widgets.weatherIndicator}}}
       {{{widgets.seasonIndicator}}}
@@ -80,13 +64,11 @@
       {{{widgets.cycleIndicator}}}
       {{{widgets.indicators}}}
     </div>
-
     <div class="calendar-actions">
       <button type="button" data-action="today" data-tooltip
         aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
         <i class="fas fa-calendar-day"></i>
       </button>
-
       {{#if editable}}
         <button type="button" data-action="setAsCurrentDate" data-tooltip
           aria-label="{{#if disableSetCurrentDate}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
@@ -94,8 +76,6 @@
           <i class="fas fa-thumbtack"></i>
         </button>
       {{/if}}
-
-      {{!-- Custom widget actions insertion point --}}
       {{{widgets.actions}}}
     </div>
   </div>

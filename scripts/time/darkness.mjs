@@ -5,10 +5,8 @@
  */
 
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { getMoonPhasePosition } from '../utils/formatting/moon-utils.mjs';
-import { log } from '../utils/logger.mjs';
-import { CalendariaSocket } from '../utils/socket.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
+import { CalendariaSocket, getMoonPhasePosition, log } from '../utils/_module.mjs';
+import { WeatherManager } from '../weather/_module.mjs';
 
 /** @type {number|null} Last hour we calculated darkness for */
 let lastHour = null;
@@ -267,27 +265,28 @@ export function calculateEnvironmentLighting(scene) {
 /**
  * Build environment lighting update data for a scene.
  * @param {object} _scene - The scene to get update data for (unused, kept for future per-scene overrides)
- * @param {{base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} lighting - Lighting overrides
- * @returns {object|null} Update data object, or null if no updates needed
+ * @param {{cycle: boolean|null, base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} lighting - Lighting overrides
+ * @returns {object|null} Update data object, or null if ambience sync is off or not primary GM
  */
 function buildEnvironmentUpdateData(_scene, lighting) {
   if (!CalendariaSocket.isPrimaryGM()) return null;
   const ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
   if (!ambienceSync) return null;
-  if (!lighting) return null;
-  const updateData = {};
-  if (lighting.cycle !== null) updateData['environment.cycle'] = lighting.cycle;
-  if (lighting.base.hue !== null) updateData['environment.base.hue'] = lighting.base.hue / 360;
-  if (lighting.base.intensity !== null) updateData['environment.base.intensity'] = lighting.base.intensity;
-  if (lighting.base.saturation !== null) updateData['environment.base.saturation'] = lighting.base.saturation;
-  if (lighting.base.luminosity !== null) updateData['environment.base.luminosity'] = lighting.base.luminosity;
-  if (lighting.base.shadows !== null) updateData['environment.base.shadows'] = lighting.base.shadows;
-  if (lighting.dark.hue !== null) updateData['environment.dark.hue'] = lighting.dark.hue / 360;
-  if (lighting.dark.intensity !== null) updateData['environment.dark.intensity'] = lighting.dark.intensity;
-  if (lighting.dark.saturation !== null) updateData['environment.dark.saturation'] = lighting.dark.saturation;
-  if (lighting.dark.luminosity !== null) updateData['environment.dark.luminosity'] = lighting.dark.luminosity;
-  if (lighting.dark.shadows !== null) updateData['environment.dark.shadows'] = lighting.dark.shadows;
-  return Object.keys(updateData).length > 0 ? updateData : null;
+  const base = lighting?.base ?? {};
+  const dark = lighting?.dark ?? {};
+  return {
+    'environment.cycle': lighting?.cycle ?? true,
+    'environment.base.hue': (base.hue ?? 0) / 360,
+    'environment.base.intensity': base.intensity ?? 0,
+    'environment.base.saturation': base.saturation ?? 0,
+    'environment.base.luminosity': base.luminosity ?? 0,
+    'environment.base.shadows': base.shadows ?? 0,
+    'environment.dark.hue': (dark.hue ?? 0) / 360,
+    'environment.dark.intensity': dark.intensity ?? 0,
+    'environment.dark.saturation': dark.saturation ?? 0,
+    'environment.dark.luminosity': dark.luminosity ?? 0,
+    'environment.dark.shadows': dark.shadows ?? 0
+  };
 }
 
 /**

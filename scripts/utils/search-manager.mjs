@@ -4,10 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import { getAllCategories } from '../notes/note-data.mjs';
-import NoteManager from '../notes/note-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
+import { NoteManager, getAllPresets, getPresetOverrides } from '../notes/_module.mjs';
 import { format, localize } from './localization.mjs';
+import { stripSecrets } from './ui/calendar-view-utils.mjs';
 
 /**
  * Provides note search functionality.
@@ -28,7 +28,6 @@ export default class SearchManager {
     const searchContent = options.searchContent !== false;
     const limit = options.limit || 50;
     const results = this.#searchNotes(searchTerm, limit, searchContent);
-
     return results;
   }
 
@@ -53,17 +52,17 @@ export default class SearchManager {
   static #searchNotes(term, limit, searchContent) {
     const results = [];
     const allNotes = NoteManager.getAllNotes().filter((stub) => stub.visible);
-    const allCategories = getAllCategories();
-    if (term.startsWith('category:')) {
-      const categoryName = term.slice(9).trim();
-      if (!categoryName) return results;
-      const matchingCategories = allCategories.filter((c) => c.label.toLowerCase().includes(categoryName));
-      if (matchingCategories.length === 0) return results;
-      const matchingCategoryIds = matchingCategories.map((c) => c.id);
+    const allPresets = getAllPresets();
+    if (term.startsWith('preset:')) {
+      const presetName = term.slice(7).trim();
+      if (!presetName) return results;
+      const matchingPresets = allPresets.filter((c) => c.label.toLowerCase().includes(presetName));
+      if (matchingPresets.length === 0) return results;
+      const matchingPresetIds = matchingPresets.map((c) => c.id);
       for (const note of allNotes) {
         if (results.length >= limit) break;
         const noteCategories = note.flagData?.categories ?? [];
-        if (noteCategories.some((id) => matchingCategoryIds.includes(id))) results.push(this.#buildobject(note, this.#formatNoteDate(note)));
+        if (noteCategories.some((id) => matchingPresetIds.includes(id))) results.push(this.#buildobject(note, this.#formatNoteDate(note)));
       }
       return results;
     }
@@ -74,18 +73,19 @@ export default class SearchManager {
         continue;
       }
       const noteCategories = note.flagData?.categories ?? [];
-      const matchedCategory = noteCategories.some((catId) => {
-        const cat = allCategories.find((c) => c.id === catId);
+      const matchedPreset = noteCategories.some((catId) => {
+        const cat = allPresets.find((c) => c.id === catId);
         return cat && this.#matches(cat.label, term);
       });
-      if (matchedCategory) {
+      if (matchedPreset) {
         results.push(this.#buildobject(note, this.#formatNoteDate(note)));
         continue;
       }
       if (searchContent) {
         const page = NoteManager.getFullNote(note.id);
-        if (page?.text?.content && this.#matches(page.text.content, term)) {
-          const snippet = this.#extractSnippet(page.text.content, term);
+        const cleaned = stripSecrets(page?.text?.content);
+        if (cleaned && this.#matches(cleaned, term)) {
+          const snippet = this.#extractSnippet(cleaned, term);
           results.push(this.#buildobject(note, snippet));
         }
       }
@@ -111,30 +111,26 @@ export default class SearchManager {
    * @returns {object} - Icon data for template
    */
   static #extractIconData(flagData) {
-    const result = { icon: flagData.icon || null, color: flagData.color || '#4a9eff', gmOnly: flagData.gmOnly || false, repeatIcon: null, repeatTooltip: null, categoryIcons: [] };
-    const repeatIcons = {
-      daily: 'fas fa-rotate',
-      weekly: 'fas fa-rotate',
-      monthly: 'fas fa-rotate',
-      yearly: 'fas fa-rotate',
-      moon: 'fas fa-moon',
-      random: 'fas fa-dice',
-      linked: 'fas fa-link',
-      seasonal: 'fas fa-leaf',
-      weekOfMonth: 'fas fa-calendar-week',
-      range: 'fas fa-arrows-left-right'
+    const overrides = getPresetOverrides(flagData.categories);
+    const result = {
+      icon: flagData.icon || null,
+      color: flagData.color || '#4a9eff',
+      visibility: overrides.visibility || flagData.visibility || 'visible',
+      repeatIcon: null,
+      repeatTooltip: null,
+      presetIcons: []
     };
-    if (flagData.repeat && flagData.repeat !== 'never') {
-      result.repeatIcon = repeatIcons[flagData.repeat] || 'fas fa-rotate';
-      result.repeatTooltip = localize(`CALENDARIA.Repeat.${flagData.repeat}`);
+    if (flagData.conditionTree) {
+      result.repeatIcon = 'fas fa-rotate';
+      result.repeatTooltip = localize('CALENDARIA.Note.HasConditions');
     }
     if (Array.isArray(flagData.categories) && flagData.categories.length > 0) {
-      const allCategories = getAllCategories();
-      const maxCategories = 6;
-      for (let i = 0; i < Math.min(flagData.categories.length, maxCategories); i++) {
+      const allPresets = getAllPresets();
+      const maxPresets = 6;
+      for (let i = 0; i < Math.min(flagData.categories.length, maxPresets); i++) {
         const catId = flagData.categories[i];
-        const catDef = allCategories.find((c) => c.id === catId);
-        if (catDef) result.categoryIcons.push({ icon: catDef.icon, color: catDef.color, label: catDef.label });
+        const catDef = allPresets.find((c) => c.id === catId);
+        if (catDef) result.presetIcons.push({ icon: catDef.icon, color: catDef.color, label: catDef.label });
       }
     }
     return result;

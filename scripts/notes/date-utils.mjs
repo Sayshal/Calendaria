@@ -4,8 +4,8 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import { log } from '../utils/logger.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
+import { log } from '../utils/_module.mjs';
 
 /**
  * Compare two date objects.
@@ -95,10 +95,11 @@ export function monthsBetween(startDate, endDate) {
 /**
  * Get day of week for a date (0 = first day of week).
  * @param {object} date  Date to check
+ * @param {object} [cal]  Calendar to use (defaults to active calendar)
  * @returns {number}  Day of week index
  */
-export function dayOfWeek(date) {
-  const calendar = CalendarManager.getActiveCalendar();
+export function dayOfWeek(date, cal) {
+  const calendar = cal || CalendarManager.getActiveCalendar();
   if (!calendar) return 0;
   try {
     const yearZero = calendar.years?.yearZero ?? 0;
@@ -177,6 +178,106 @@ export function addYears(date, years) {
   const maxDays = calendar.getDaysInMonth(date.month, newYear - yearZero);
   const newDayOfMonth = Math.min(date.dayOfMonth ?? 0, maxDays - 1);
   return { year: newYear, month: date.month, dayOfMonth: newDayOfMonth, hour: date.hour, minute: date.minute };
+}
+
+/**
+ * Get the calendar's time unit sizes in seconds.
+ * @returns {{secondsPerMinute: number, secondsPerHour: number, secondsPerDay: number}} Time unit sizes
+ */
+function getTimeUnits() {
+  const calendar = CalendarManager.getActiveCalendar();
+  const secondsPerMinute = calendar?.days?.secondsPerMinute ?? 60;
+  const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+  const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+  const secondsPerHour = minutesPerHour * secondsPerMinute;
+  const secondsPerDay = hoursPerDay * secondsPerHour;
+  return { secondsPerMinute, secondsPerHour, secondsPerDay };
+}
+
+/**
+ * Add hours to a date.
+ * @param {object} date  Starting date
+ * @param {number} hours  Hours to add (can be negative)
+ * @returns {object}  New date object
+ */
+export function addHours(date, hours) {
+  const { secondsPerHour, secondsPerDay } = getTimeUnits();
+  return addDays(date, (hours * secondsPerHour) / secondsPerDay);
+}
+
+/**
+ * Add minutes to a date.
+ * @param {object} date  Starting date
+ * @param {number} minutes  Minutes to add (can be negative)
+ * @returns {object}  New date object
+ */
+export function addMinutes(date, minutes) {
+  const { secondsPerMinute, secondsPerDay } = getTimeUnits();
+  return addDays(date, (minutes * secondsPerMinute) / secondsPerDay);
+}
+
+/**
+ * Add seconds to a date.
+ * @param {object} date  Starting date
+ * @param {number} seconds  Seconds to add (can be negative)
+ * @returns {object}  New date object
+ */
+export function addSeconds(date, seconds) {
+  return addDays(date, seconds / getTimeUnits().secondsPerDay);
+}
+
+/**
+ * Calculate seconds between two dates (including time components).
+ * @param {object} startDate  Start date
+ * @param {object} endDate  End date
+ * @returns {number}  Number of seconds (can be negative)
+ */
+export function secondsBetween(startDate, endDate) {
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return 0;
+  try {
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const startTime = calendar.componentsToTime({
+      year: startDate.year - yearZero,
+      month: startDate.month,
+      dayOfMonth: startDate.dayOfMonth ?? 0,
+      hour: startDate.hour ?? 0,
+      minute: startDate.minute ?? 0,
+      second: 0
+    });
+    const endTime = calendar.componentsToTime({
+      year: endDate.year - yearZero,
+      month: endDate.month,
+      dayOfMonth: endDate.dayOfMonth ?? 0,
+      hour: endDate.hour ?? 0,
+      minute: endDate.minute ?? 0,
+      second: 0
+    });
+    return endTime - startTime;
+  } catch (error) {
+    log(1, 'Error calculating seconds between dates:', error);
+    return 0;
+  }
+}
+
+/**
+ * Calculate hours between two dates (including time components).
+ * @param {object} startDate  Start date
+ * @param {object} endDate  End date
+ * @returns {number}  Number of hours (can be negative/fractional)
+ */
+export function hoursBetween(startDate, endDate) {
+  return secondsBetween(startDate, endDate) / getTimeUnits().secondsPerHour;
+}
+
+/**
+ * Calculate minutes between two dates (including time components).
+ * @param {object} startDate  Start date
+ * @param {object} endDate  End date
+ * @returns {number}  Number of minutes (can be negative)
+ */
+export function minutesBetween(startDate, endDate) {
+  return Math.floor(secondsBetween(startDate, endDate) / getTimeUnits().secondsPerMinute);
 }
 
 /**

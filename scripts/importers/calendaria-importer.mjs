@@ -4,7 +4,7 @@
  * @author Tyler
  */
 
-import { log } from '../utils/logger.mjs';
+import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**

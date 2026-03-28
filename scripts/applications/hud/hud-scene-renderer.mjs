@@ -1,12 +1,11 @@
 /* global PIXI */
+
 /**
  * Unified PixiJS scene renderer for HUD overlays.
  * @module Applications/HudSceneRenderer
  */
 
-/**
- * Sky color keyframes for interpolation throughout the day.
- */
+/** @type {object[]} Sky color keyframes for interpolation throughout the day. */
 export const SKY_KEYFRAMES = [
   { hour: 0, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' },
   { hour: 4, top: '#0a0a15', mid: '#151530', bottom: '#1a1a35' },
@@ -25,9 +24,7 @@ export const SKY_KEYFRAMES = [
   { hour: 24, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' }
 ];
 
-/**
- * Per-effect sky color overrides (RGB arrays for top/mid/bottom gradient).
- */
+/** @type {Object<string, object>} Per-effect sky color overrides (RGB arrays for top/mid/bottom gradient). */
 export const SKY_OVERRIDES = {
   'clouds-light': { strength: 0.5, top: [160, 170, 185], mid: [175, 185, 200], bottom: [190, 200, 215] },
   'clouds-heavy': { strength: 0.7, top: [115, 120, 130], mid: [130, 135, 145], bottom: [150, 155, 165] },
@@ -68,10 +65,7 @@ export const SKY_OVERRIDES = {
   'ley-surge': { strength: 0.75, top: [50, 30, 120], mid: [80, 60, 160], bottom: [120, 100, 200] }
 };
 
-/**
- * Effect configuration definitions.
- * @type {Object<string, object>}
- */
+/** @type {Object<string, object>} Effect configuration definitions. */
 export const EFFECT_CONFIGS = {
   clear: { particles: 0 },
   'clouds-light': {
@@ -540,27 +534,6 @@ function randHue() {
 }
 
 /**
- * Convert HSL to hex color number.
- * @param {number} h - Hue (0-360)
- * @param {number} s - Saturation (0-1)
- * @param {number} l - Lightness (0-1)
- * @returns {number} Hex color number
- */
-function hslToHex(h, s, l) {
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = l - c / 2;
-  let r, g, b;
-  if (h < 60) [r, g, b] = [c, x, 0];
-  else if (h < 120) [r, g, b] = [x, c, 0];
-  else if (h < 180) [r, g, b] = [0, c, x];
-  else if (h < 240) [r, g, b] = [0, x, c];
-  else if (h < 300) [r, g, b] = [x, 0, c];
-  else [r, g, b] = [c, 0, x];
-  return (Math.round((r + m) * 255) << 16) | (Math.round((g + m) * 255) << 8) | Math.round((b + m) * 255);
-}
-
-/**
  * Unified PixiJS scene renderer for HUD dome/slice views.
  */
 export class HudSceneRenderer {
@@ -675,6 +648,9 @@ export class HudSceneRenderer {
   /** @type {{particleScale: number, enableStarTwinkle: boolean, enableCoronaPulse: boolean, maxFPS: number}} */
   #perfConfig = null;
 
+  /** @type {number} User-configured particle density multiplier (0–1) */
+  #densityScale = 1;
+
   /**
    * @param {HTMLCanvasElement} canvas - Target canvas element
    * @param {string} mode - 'dome', 'slice', or 'dial'
@@ -684,7 +660,6 @@ export class HudSceneRenderer {
     this.#mode = mode;
     this.#perfConfig = this.#getPerformanceConfig();
     const parent = canvas.parentElement;
-
     this.#app = new PIXI.Application({ view: canvas, backgroundAlpha: 0, resizeTo: parent, antialias: true });
     this.#app.ticker.maxFPS = this.#perfConfig.maxFPS;
     this.#buildSkyLayer();
@@ -740,18 +715,22 @@ export class HudSceneRenderer {
    * @param {number} [options.windSpeed] - Wind speed value
    * @param {number} [options.windDirection] - Wind direction in degrees
    * @param {number} [options.precipIntensity] - Precipitation intensity
+   * @param {boolean} [options.forceDownward] - Clamp direction to always fall from above
    * @param {object|null} [visualOverrides] - Visual overrides
+   * @param {number} [densityScale] - Particle density multiplier (0–1)
    */
-  setEffect(effect, { windSpeed = 0, windDirection = 0, precipIntensity = 0 } = {}, visualOverrides = null) {
+  setEffect(effect, { windSpeed = 0, windDirection = 0, precipIntensity = 0, forceDownward = false } = {}, visualOverrides = null, densityScale = 1) {
     if (this.#destroyed) return;
     const newPerf = this.#getPerformanceConfig();
     const perfChanged = newPerf.particleScale !== this.#perfConfig.particleScale;
     this.#perfConfig = newPerf;
     this.#app.ticker.maxFPS = newPerf.maxFPS;
-    const newOptions = { windSpeed, windDirection, precipIntensity };
+    const densityChanged = densityScale !== this.#densityScale;
+    this.#densityScale = densityScale;
+    const newOptions = { windSpeed, windDirection, precipIntensity, forceDownward };
     const optionsChanged = JSON.stringify(this.#weatherOptions) !== JSON.stringify(newOptions);
     const overridesChanged = JSON.stringify(this.#visualOverrides) !== JSON.stringify(visualOverrides);
-    const changed = effect !== this.#currentEffect || overridesChanged || optionsChanged || perfChanged;
+    const changed = effect !== this.#currentEffect || overridesChanged || optionsChanged || perfChanged || densityChanged;
     this.#weatherOptions = newOptions;
     if (!changed) return;
     if (this.#sprites.length > 0) {
@@ -786,7 +765,6 @@ export class HudSceneRenderer {
   /** Destroy application and free all GPU resources. */
   destroy() {
     if (this.#destroyed) return;
-
     this.#destroyed = true;
     this.#app.ticker.remove(this.#tick, this);
     this.#clearParticles();
@@ -835,7 +813,6 @@ export class HudSceneRenderer {
     this.#skySpriteBg.width = w;
     this.#skySpriteBg.height = h;
     this.#app.stage.addChild(this.#skySpriteBg);
-
     this.#skySpriteFg = new PIXI.Sprite(PIXI.Texture.EMPTY);
     this.#skySpriteFg.width = w;
     this.#skySpriteFg.height = h;
@@ -962,7 +939,6 @@ export class HudSceneRenderer {
     }
     this.#targetSkyRgb = target;
     const texture = this.#generateSkyTexture(target);
-    // In dial mode, apply sky instantly (no crossfade) for real-time drag feedback
     if (!this.#currentSkyRgb || this.#mode === 'dial') {
       this.#currentSkyRgb = [...target];
       if (this.#skyTextureBg) this.#skyTextureBg.destroy(true);
@@ -1039,9 +1015,7 @@ export class HudSceneRenderer {
   #updateSun(hour, sunrise, sunset, hoursPerDay = 24) {
     const w = this.#app.screen.width;
     const h = this.#app.screen.height;
-
     if (this.#mode === 'dial') {
-      // Fade sun in at sunrise, out at sunset
       const fadeDuration = 0.5;
       let sunAlpha = 0;
       if (hour >= sunrise && hour < sunset) {
@@ -1052,7 +1026,6 @@ export class HudSceneRenderer {
       sunAlpha = Math.max(0, Math.min(1, sunAlpha));
       this.#sunSprite.alpha = sunAlpha;
       this.#sunCorona.alpha = sunAlpha > 0 ? sunAlpha * 0.12 : 0;
-      // Sun orbits sunrise→noon→sunset arc, position mapped to daytime progress
       const daylightHours = sunset - sunrise;
       const sunProgress = Math.max(0, Math.min(1, (hour - sunrise) / daylightHours));
       const sunHour = sunrise + sunProgress * daylightHours;
@@ -1171,8 +1144,6 @@ export class HudSceneRenderer {
       const trailingHour = normalizedHour - i * trailHours;
       let moonX, moonY;
       if (isDial) {
-        // Moon rises at sunrise position (6am/west), arcs over the top (like the sky),
-        // sets at sunset position (6pm/east). Same upper arc as sun, visible at night.
         const moonProgress = trailingHour / nightHours;
         const daylightHours = sunset - sunrise;
         const moonHour = sunrise + moonProgress * daylightHours;
@@ -1541,7 +1512,7 @@ export class HudSceneRenderer {
     const h = this.#app.screen.height;
     const intensity = this.#weatherOptions.precipIntensity || 0.5;
     const countRange = config.count;
-    const count = Math.round((countRange[0] + (countRange[1] - countRange[0]) * intensity) * this.#perfConfig.particleScale);
+    const count = Math.round((countRange[0] + (countRange[1] - countRange[0]) * intensity) * this.#perfConfig.particleScale * this.#densityScale);
     const texture = this.#textures.get(config.texture);
     if (!texture) return;
     const variants = config.textureVariants?.map((name) => this.#textures.get(name)).filter(Boolean) ?? [];
@@ -1671,7 +1642,14 @@ export class HudSceneRenderer {
     const w = this.#app.screen.width;
     const h = this.#app.screen.height;
     const windFactor = this.#weatherOptions.windSpeed * 0.4;
-    const blowDir = ((this.#weatherOptions.windDirection ?? 0) + 180) % 360;
+    let blowDir = ((this.#weatherOptions.windDirection ?? 0) + 180) % 360;
+    if (this.#weatherOptions.forceDownward) {
+      const offset = ((blowDir - 180 + 540) % 360) - 180;
+      if (Math.abs(offset) > 45) {
+        const ew = Math.sin((blowDir * Math.PI) / 180);
+        blowDir = (180 - ew * 45 + 360) % 360;
+      }
+    }
     const windRad = (blowDir * Math.PI) / 180;
     const windX = Math.sin(windRad) * windFactor;
     const windY = -Math.cos(windRad) * windFactor * 0.3;
@@ -1819,7 +1797,7 @@ export class HudSceneRenderer {
     let x = boltX;
     let y = isUpward ? h : 0;
     const baseHue = Math.random() * 360;
-    const segColor = (s) => (isRainbow ? hslToHex((baseHue + (s * 360) / segments) % 360, 1, 0.65) : 0xffffff);
+    const segColor = (s) => (isRainbow ? foundry.utils.Color.fromHSL([((baseHue + (s * 360) / segments) % 360) / 360, 1, 0.65]).valueOf() : 0xffffff);
     this.#boltOverlay.lineStyle(2.5, segColor(0), 0.95);
     this.#boltOverlay.moveTo(x, y);
     for (let s = 1; s <= segments; s++) {

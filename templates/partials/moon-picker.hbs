@@ -1,0 +1,12 @@
+<div class="radial" style="--moon-count: {{moonCount}}; --radial-size: {{radialSize}}px">
+  {{#each moons}}
+    <div class="radial-item{{#if this.selected}} selected{{/if}}" style="--moon-index: {{@index}}"
+      data-tooltip="{{this.phaseName}}" data-moon-name="{{this.moonName}}">
+      <span class="name">{{this.moonName}}</span>
+      <div class="radial-icon{{#if this.color}} tinted{{/if}}" {{#if this.color}} style="--moon-color: {{this.color}}"
+        {{/if}}>
+        <img src="{{this.icon}}" alt="{{this.phaseName}}">
+      </div>
+    </div>
+  {{/each}}
+</div>

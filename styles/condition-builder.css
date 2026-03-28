@@ -1,0 +1,171 @@
+.calendaria {
+  &.condition-builder {
+    --cb-border-1: rgb(230 180 34);
+    --cb-border-2: rgb(217 72 72);
+    --cb-border-3: rgb(74 143 212);
+    --cb-border-4: rgb(72 184 88);
+
+    min-width: 16.25rem;
+    max-width: 80vw;
+    max-height: 75vh;
+
+    .cb-content {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding-bottom: 2rem;
+      overflow-y: auto;
+    }
+
+    .cb-group-legend {
+      gap: 0.375rem;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.625rem;
+      font-weight: normal;
+      font-size: var(--font-size-12);
+    }
+
+    .cb-group {
+      &.depth-1 {
+        border-color: var(--cb-border-1);
+      }
+
+      &.depth-2 {
+        border-color: var(--cb-border-2);
+      }
+
+      &.depth-3 {
+        border-color: var(--cb-border-3);
+      }
+
+      &.depth-4 {
+        border-color: var(--cb-border-4);
+      }
+    }
+
+    .cb-remove-group {
+      cursor: pointer;
+    }
+
+    .cb-empty {
+      margin: 0;
+      padding: 0.5rem;
+      font-style: italic;
+      font-size: var(--font-size-11);
+      text-align: center;
+    }
+
+    .cb-group-actions {
+      gap: 0.375rem;
+      display: flex;
+    }
+
+    .cb-add-btn {
+      gap: 0.375rem;
+      display: flex;
+      opacity: 0.6;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      padding: 0.375rem 0.5rem;
+      border: 0.0625rem dashed currentcolor;
+      border-radius: 0.25rem;
+      font-size: var(--font-size-11);
+      cursor: pointer;
+      background: transparent;
+      transition:
+        border-color 0.15s ease,
+        opacity 0.15s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .cb-condition {
+      margin: 0;
+    }
+
+    .cb-condition-legend {
+      gap: 0.375rem;
+      display: flex;
+      align-items: center;
+      padding: 0 0.75rem;
+      font-weight: 600;
+      font-size: var(--font-size-11);
+
+      .cb-remove {
+        font-size: var(--font-size-14);
+      }
+    }
+
+    .cb-condition-row {
+      gap: 0.375rem;
+      display: flex;
+      flex-direction: column;
+
+      select,
+      input {
+        width: 100%;
+      }
+    }
+
+    .cb-date-inputs {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .cb-special-label {
+      gap: 0.375rem;
+      display: flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.1875rem;
+      font-weight: 600;
+      font-size: var(--font-size-11);
+      white-space: nowrap;
+
+      i {
+        opacity: 0.7;
+        font-size: var(--font-size-10);
+      }
+    }
+
+    .cb-special-value {
+      flex: 1;
+      padding: 0.25rem 0.5rem;
+      font-style: italic;
+      font-size: var(--font-size-11);
+    }
+
+    .cb-labeled-input {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .cb-offset-group {
+      gap: 0.25rem;
+      display: inline-flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      width: 100%;
+    }
+
+    .cb-inline-label {
+      font-size: var(--font-size-11);
+      white-space: nowrap;
+    }
+
+    .cb-remove {
+      cursor: pointer;
+    }
+
+    .form-footer button {
+      width: 100%;
+    }
+  }
+}

@@ -1,13 +1,8 @@
-/**
- * Integration tests for date arithmetic with a live calendar.
- * @param {object} quench  Quench test runner instance
- */
 export function registerDateArithmetic(quench) {
   quench.registerBatch(
     'calendaria.integration.date-arithmetic',
     (context) => {
       const { describe, it, assert, before, after } = context;
-
       let api;
       let savedWorldTime;
 
@@ -34,16 +29,13 @@ export function registerDateArithmetic(quench) {
           assert.isAtLeast(dt.hour, 0, 'hour should be >= 0');
           assert.isBelow(dt.hour, 24, 'hour should be < 24');
         });
-
         it('advancing 1 day increments dayOfMonth or wraps month', async function () {
           const dtBefore = api.getCurrentDateTime();
           await api.advanceTime(86400);
           const dtAfter = api.getCurrentDateTime();
-
           const dayChanged = dtAfter.dayOfMonth !== dtBefore.dayOfMonth || dtAfter.month !== dtBefore.month || dtAfter.year !== dtBefore.year;
           assert.ok(dayChanged, 'Day, month, or year should change after advancing 1 day');
         });
-
         it('getCurrentWeekday returns object with name', function () {
           const weekday = api.getCurrentWeekday();
           if (!weekday) {
@@ -55,7 +47,6 @@ export function registerDateArithmetic(quench) {
           assert.property(weekday, 'index');
           assert.typeOf(weekday.index, 'number');
         });
-
         it('getActiveCalendar has months with days', function () {
           const cal = api.getActiveCalendar();
           assert.isNotNull(cal);

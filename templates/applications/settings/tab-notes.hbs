@@ -1,47 +1,61 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-
   {{#if isGM}}
-    <fieldset data-section="categories">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Categories"}}</legend>
-      <div class="fieldset-header-row">
-        <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.Categories"}}</p>
-        <button type="button" data-action="addCategory" class="add-button">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.SettingsPanel.Category.Add"}}
-        </button>
-      </div>
-
-      <div class="categories-list">
-        {{#each categories}}
-          <div class="category-row" data-category-id="{{this.id}}">
-            <input type="hidden" name="categories.{{@index}}.id" value="{{this.id}}">
-            <input type="hidden" name="categories.{{@index}}.color" value="{{this.color}}">
-            <input type="hidden" name="categories.{{@index}}.icon" value="{{this.icon}}">
-            <button type="button" class="category-icon-display" data-action="editCategoryIcon"
-              data-index="{{@index}}" data-tooltip
-              aria-label="{{localize 'CALENDARIA.SettingsPanel.Category.EditIconColor'}}"
-              style="color: {{this.color}}">
-              <i class="{{#if this.icon}}{{this.icon}}{{else}}fas fa-bookmark{{/if}}"></i>
-            </button>
-            <input type="text" name="categories.{{@index}}.name" value="{{this.name}}"
-              placeholder="{{localize 'CALENDARIA.SettingsPanel.Category.NamePlaceholder'}}">
-            <button type="button" data-action="removeCategory" data-category-id="{{this.id}}"
-              class="icon-button danger">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        {{else}}
-          <p class="empty-message">{{localize "CALENDARIA.SettingsPanel.Category.None"}}</p>
-        {{/each}}
+    <fieldset data-section="presets">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Presets"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.OpenPresetManager"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="openPresetManager" class="open-manager-btn">
+            <i class="fas fa-tags"></i>
+            {{localize "CALENDARIA.SettingsPanel.OpenPresetManager"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.Presets"}}</p>
       </div>
     </fieldset>
   {{/if}}
-
+  <fieldset data-section="default-preset">
+    <legend>{{localize "CALENDARIA.Settings.DefaultNotePreset.Name"}}</legend>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.DefaultNotePreset.Name"}}</label>
+      <div class="form-fields">
+        <select name="defaultNotePreset">
+          {{#each defaultNotePresetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.DefaultNotePreset.Hint"}}</p>
+    </div>
+  </fieldset>
+  {{#if isGM}}
+    <fieldset data-section="visibility">
+      <legend>{{localize "CALENDARIA.Note.VisibilityLabel"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ShowSecretNotes.Name"}}</label>
+        <input type="checkbox" name="showSecretNotes" {{#if showSecretNotes}}checked{{/if}} data-tooltip
+          aria-label="{{localize 'CALENDARIA.Settings.ShowSecretNotes.Hint'}}">
+        <p class="hint">{{localize "CALENDARIA.Settings.ShowSecretNotes.Hint"}}</p>
+      </div>
+    </fieldset>
+    <fieldset data-section="festivals">
+      <legend>{{localize "CALENDARIA.Common.Festivals"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.SyncFestivals.Name"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="syncFestivals" class="open-manager-btn">
+            <i class="fas fa-sync"></i>
+            {{localize "CALENDARIA.Settings.SyncFestivals.Name"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.SyncFestivals.Hint"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
   {{#unless isGM}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>
       <p>{{localize "CALENDARIA.SettingsPanel.NotesTab.PlayerMessage"}}</p>
     </div>
   {{/unless}}
-
 </section>

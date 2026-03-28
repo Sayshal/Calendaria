@@ -5,15 +5,11 @@
  */
 
 import { TEMPLATES } from '../../constants.mjs';
-import { getAvailableTokens } from '../../utils/formatting/format-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
+import { getAvailableTokens, localize } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/**
- * Token categories for contextual highlighting.
- * @enum {string[]}
- */
+/** @enum {string[]} Token categories for contextual highlighting. */
 const TOKEN_CATEGORIES = {
   date: ['Y', 'YY', 'YYYY', '[yearName]', 'M', 'MM', 'MMM', 'MMMM', 'Mo', 'D', 'DD', 'Do', 'DDD', 'EEEE', 'EEE', 'EE', 'E', 'EEEEE', 'e', 'w', 'ww', 'W', '[namedWeek]', '[namedWeekAbbr]'],
   fantasy: [
@@ -44,7 +40,7 @@ const TOKEN_CATEGORIES = {
   time: ['H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'A', 'a', '[meridiemFull]'],
   stopwatch: ['HH', 'mm', 'ss', 'SSS']
 };
-/** Token-to-display-group mapping for UI layout. */
+/** @type {Object<string, string>} Token-to-display-group mapping for UI layout. */
 const TOKEN_GROUPS = {
   Y: 'year',
   YY: 'year',

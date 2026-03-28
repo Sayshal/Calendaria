@@ -1,10 +1,6 @@
-/**
- * Tests for settings-io.mjs
- * Covers: exportSettings, importSettings — dialog flows, file I/O, calendar ID generation.
- * @module Tests/SettingsIO
- */
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
+import { exportSettings, importSettings } from '../../scripts/utils/settings-io.mjs';
 
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/localization.mjs', () => ({
@@ -28,12 +24,11 @@ vi.mock('../../scripts/constants.mjs', () => ({
     BIG_CAL_SHOW_WEATHER: 'bigCalShowWeather',
     BIG_CAL_WEATHER_DISPLAY_MODE: 'bigCalWeatherDisplayMode',
     CALENDAR_HUD_MODE: 'calendarHudMode',
-    CALENDARS: 'calendars',
     CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
     CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
     CURRENT_WEATHER: 'currentWeather',
     CUSTOM_CALENDARS: 'customCalendars',
-    CUSTOM_CATEGORIES: 'customCategories',
+    CUSTOM_PRESETS: 'customPresets',
     CUSTOM_THEME_COLORS: 'customThemeColors',
     CUSTOM_TIME_JUMPS: 'customTimeJumps',
     CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
@@ -81,7 +76,6 @@ vi.mock('../../scripts/constants.mjs', () => ({
     PERMISSIONS: 'permissions',
     PRIMARY_GM: 'primaryGM',
     SAVED_TIMEPOINTS: 'savedTimepoints',
-    SHOW_ACTIVE_CALENDAR_TO_PLAYERS: 'showActiveCalendarToPlayers',
     SHOW_CALENDAR_HUD: 'showCalendarHud',
     SHOW_MINI_CAL: 'showMiniCal',
     SHOW_TIME_KEEPER: 'showTimeKeeper',
@@ -114,62 +108,33 @@ vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   }
 }));
 
-import { exportSettings, importSettings } from '../../scripts/utils/settings-io.mjs';
-import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
-
-/* -------------------------------------------- */
-/*  Helper                                       */
-/* -------------------------------------------- */
-
-/**
- * Build a mock input element for importSettings file picker.
- * @returns {object} Mock input element
- */
 function createMockInput() {
-  const input = {
-    type: '',
-    accept: '',
-    addEventListener: vi.fn(),
-    click: vi.fn()
-  };
+  const input = { type: '', accept: '', addEventListener: vi.fn(), click: vi.fn() };
   document.createElement.mockReturnValue(input);
   return input;
 }
 
-/**
- * Trigger the 'change' handler registered on the mock input.
- * @param {object} mockInput - Mock input element from createMockInput
- * @param {object} file - Mock file object
- */
 async function triggerFileChange(mockInput, file) {
   const changeCall = mockInput.addEventListener.mock.calls.find((c) => c[0] === 'change');
   if (changeCall) await changeCall[1]({ target: { files: [file] } });
 }
-
-/* -------------------------------------------- */
-/*  exportSettings                               */
-/* -------------------------------------------- */
 
 describe('exportSettings()', () => {
   beforeEach(() => {
     game.settings.get.mockReturnValue('mock-value');
     game.modules.get.mockReturnValue({ version: '1.0.0' });
   });
-
   it('returns early when dialog is cancelled', async () => {
     foundry.applications.api.DialogV2.wait.mockResolvedValue('cancel');
     await exportSettings();
     expect(foundry.utils.saveDataToFile).not.toHaveBeenCalled();
   });
-
   it('exports settings to file when dialog confirmed', async () => {
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => null) } });
       return 'export';
     });
-
     await exportSettings();
-
     expect(foundry.utils.saveDataToFile).toHaveBeenCalledTimes(1);
     const [jsonStr, mimeType] = foundry.utils.saveDataToFile.mock.calls[0];
     expect(mimeType).toBe('application/json');
@@ -180,7 +145,6 @@ describe('exportSettings()', () => {
     expect(Object.keys(data.settings).length).toBeGreaterThan(0);
     expect(ui.notifications.info).toHaveBeenCalled();
   });
-
   it('includes calendar data when checkbox checked and calendar exists', async () => {
     CalendarManager.getActiveCalendar.mockReturnValue({
       name: 'Test Calendar',
@@ -188,20 +152,16 @@ describe('exportSettings()', () => {
       toObject: () => ({ name: 'Test Calendar', months: [] })
     });
     CalendarManager.getCurrentDateTime.mockReturnValue({ year: 5, month: 2, dayOfMonth: 10 });
-
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => ({ checked: true })) } });
       return 'export';
     });
-
     await exportSettings();
-
     const data = JSON.parse(foundry.utils.saveDataToFile.mock.calls[0][0]);
     expect(data).toHaveProperty('calendarData');
     expect(data.calendarData.name).toBe('Test Calendar');
     expect(data.calendarData.currentDate).toEqual({ year: 5, month: 2, dayOfMonth: 10 });
   });
-
   it('skips CALENDAR_DATA_SETTINGS keys when including calendar data', async () => {
     CalendarManager.getActiveCalendar.mockReturnValue({
       name: 'Test Calendar',
@@ -209,30 +169,21 @@ describe('exportSettings()', () => {
       toObject: () => ({ name: 'Test Calendar' })
     });
     CalendarManager.getCurrentDateTime.mockReturnValue({ year: 1, month: 0, day: 0 });
-
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => ({ checked: true })) } });
       return 'export';
     });
-
     await exportSettings();
-
     const data = JSON.parse(foundry.utils.saveDataToFile.mock.calls[0][0]);
-    expect(data.settings).not.toHaveProperty('calendars');
     expect(data.settings).not.toHaveProperty('customCalendars');
     expect(data.settings).not.toHaveProperty('defaultOverrides');
   });
 });
 
-/* -------------------------------------------- */
-/*  importSettings                               */
-/* -------------------------------------------- */
-
 describe('importSettings()', () => {
   beforeEach(() => {
     game.settings.set.mockResolvedValue(true);
   });
-
   it('creates a file input and clicks it', async () => {
     const mockInput = createMockInput();
     await importSettings();
@@ -241,73 +192,51 @@ describe('importSettings()', () => {
     expect(mockInput.accept).toBe('.json');
     expect(mockInput.click).toHaveBeenCalled();
   });
-
   it('does nothing when no file is selected', async () => {
     const mockInput = createMockInput();
     await importSettings();
-
     const changeCall = mockInput.addEventListener.mock.calls.find((c) => c[0] === 'change');
     await changeCall[1]({ target: { files: [] } });
-
     expect(game.settings.set).not.toHaveBeenCalled();
   });
-
   it('shows error for invalid file format', async () => {
     const mockInput = createMockInput();
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify({ noSettings: true }));
     await importSettings();
     await triggerFileChange(mockInput, { name: 'bad.json' });
-
     expect(ui.notifications.error).toHaveBeenCalled();
   });
-
   it('imports settings from valid file when dialog confirmed', async () => {
     const mockInput = createMockInput();
-    const importData = {
-      version: '1.0.0',
-      settings: { activeCalendar: 'gregorian', themeMode: 'dark' }
-    };
+    const importData = { version: '1.0.0', settings: { activeCalendar: 'gregorian', themeMode: 'dark' } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => null) } });
       return 'import';
     });
-
     const onComplete = vi.fn();
     await importSettings(onComplete);
     await triggerFileChange(mockInput, { name: 'settings.json' });
-
     expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'activeCalendar', 'gregorian');
     expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'themeMode', 'dark');
     expect(onComplete).toHaveBeenCalled();
   });
-
   it('skips settings not in EXPORTABLE_SETTINGS list', async () => {
     const mockInput = createMockInput();
-    const importData = {
-      version: '1.0.0',
-      settings: { themeMode: 'dark', bogusKey: 'ignored' }
-    };
+    const importData = { version: '1.0.0', settings: { themeMode: 'dark', bogusKey: 'ignored' } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => null) } });
       return 'import';
     });
-
     await importSettings();
     await triggerFileChange(mockInput, { name: 'settings.json' });
-
     expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'themeMode', 'dark');
     expect(game.settings.set).not.toHaveBeenCalledWith('calendaria', 'bogusKey', expect.anything());
   });
-
   it('imports calendar data when present and selected', async () => {
     const mockInput = createMockInput();
-    const importData = {
-      version: '1.0.0',
-      settings: {},
-      calendarData: { name: 'My Custom Calendar' }
-    };
+    const importData = { version: '1.0.0', settings: {}, calendarData: { name: 'My Custom Calendar' } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) {
@@ -323,21 +252,14 @@ describe('importSettings()', () => {
       }
       return 'import';
     });
-
     await importSettings();
     await triggerFileChange(mockInput, { name: 'settings.json' });
-
     expect(CalendarManager.createCustomCalendar).toHaveBeenCalledWith('my-custom-calendar', importData.calendarData);
     expect(CalendarManager.switchCalendar).toHaveBeenCalledWith('custom-my-custom-calendar');
   });
-
   it('generates valid calendar ID from name', async () => {
     const mockInput = createMockInput();
-    const importData = {
-      version: '1.0.0',
-      settings: {},
-      calendarData: { name: '  !!My SpeciaL Calendar!! 2024  ' }
-    };
+    const importData = { version: '1.0.0', settings: {}, calendarData: { name: '  !!My SpeciaL Calendar!! 2024  ' } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) {
@@ -353,21 +275,13 @@ describe('importSettings()', () => {
       }
       return 'import';
     });
-
     await importSettings();
     await triggerFileChange(mockInput, { name: 'settings.json' });
-
-    // Expected: lowercase, non-alphanumeric replaced with -, leading/trailing dashes stripped, max 32 chars
     expect(CalendarManager.createCustomCalendar).toHaveBeenCalledWith('my-special-calendar-2024', importData.calendarData);
   });
-
   it('does not switch calendar when setActive is unchecked', async () => {
     const mockInput = createMockInput();
-    const importData = {
-      version: '1.0.0',
-      settings: {},
-      calendarData: { name: 'Test' }
-    };
+    const importData = { version: '1.0.0', settings: {}, calendarData: { name: 'Test' } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) {
@@ -383,10 +297,8 @@ describe('importSettings()', () => {
       }
       return 'import';
     });
-
     await importSettings();
     await triggerFileChange(mockInput, { name: 'settings.json' });
-
     expect(CalendarManager.createCustomCalendar).toHaveBeenCalled();
     expect(CalendarManager.switchCalendar).not.toHaveBeenCalled();
   });

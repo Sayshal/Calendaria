@@ -13,7 +13,7 @@
       transition-delay: 0s;
     }
 
-    .container {
+    .minical-container {
       display: flex;
       position: relative;
       flex-direction: column;
@@ -24,24 +24,24 @@
       box-shadow: 0 0.25rem 0.75rem var(--calendaria-shadow);
       transition: border-radius 0.2s ease;
 
-      &:has(.sidebar:is(.visible, .locked)) {
+      &:has(.minical-sidebar:is(.visible, .locked)) {
         border-radius: 0.875rem 0 0 0.875rem;
 
-        .top-row {
+        .minical-top-row {
           border-radius: 0.875rem 0 0;
         }
 
-        .time-display {
+        .minical-time-display {
           border-radius: 0 0 0 0.875rem;
         }
 
-        .time-controls {
+        .minical-time-controls {
           border-radius: 0 0 0 0.875rem;
         }
       }
     }
 
-    .top-row {
+    .minical-top-row {
       gap: 0.375rem;
       display: flex;
       align-items: center;
@@ -69,10 +69,29 @@
       }
 
       .title {
-        color: var(--calendaria-text-heading);
+        color: var(--calendaria-title-text, var(--calendaria-text));
         font-weight: 600;
         font-size: 0.95rem;
         white-space: nowrap;
+      }
+
+      .equivalent-dates-row {
+        gap: 0.25rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        font-style: italic;
+        font-size: 0.65rem;
+      }
+
+      .equivalent-date-link {
+        color: var(--calendaria-text-dim);
+        cursor: pointer;
+        transition: color 0.15s;
+
+        &:hover {
+          color: var(--calendaria-primary);
+        }
       }
 
       .nav-btn {
@@ -93,6 +112,11 @@
         &:hover {
           background: var(--calendaria-bg-hover);
         }
+
+        &:disabled {
+          opacity: 0.2;
+          pointer-events: none;
+        }
       }
 
       &.position-locked {
@@ -100,7 +124,7 @@
       }
     }
 
-    .sidebar {
+    .minical-sidebar {
       gap: 0.25rem;
       display: flex;
       z-index: -1;
@@ -127,7 +151,7 @@
       }
     }
 
-    .container:has(.notes-panel.visible) .sidebar {
+    .minical-container:has(.notes-panel.visible) .minical-sidebar {
       border-radius: 0;
     }
 
@@ -172,7 +196,7 @@
 
     .notes-panel-title {
       overflow: hidden;
-      color: var(--calendaria-text-heading);
+      color: var(--calendaria-title-text, var(--calendaria-text));
       font-weight: 600;
       font-size: 0.85rem;
       text-overflow: ellipsis;
@@ -202,6 +226,97 @@
       }
     }
 
+    .notes-panel-filter-bar {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+      padding: 0.25rem 0.375rem;
+      border-bottom: 0.0625rem solid var(--calendaria-border-light);
+    }
+
+    .notes-filter-select {
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      min-width: 0;
+      height: 1.375rem;
+      padding: 0 0.25rem;
+      border: 0.0625rem solid var(--calendaria-border);
+      border-radius: 0.1875rem;
+      color: var(--calendaria-text);
+      font-size: 0.625rem;
+      line-height: 1.375rem;
+      cursor: pointer;
+      background: var(--calendaria-bg-lighter);
+      background-image: none;
+
+      &:hover {
+        border-color: var(--calendaria-primary);
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
+      }
+    }
+
+    .notes-filter-clear {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.1875rem;
+      color: var(--calendaria-text-dim);
+      font-size: 0.625rem;
+      cursor: pointer;
+      background: transparent;
+      transition:
+        color 0.15s,
+        background 0.15s;
+
+      &:hover {
+        color: var(--calendaria-error);
+        background: var(--calendaria-bg-hover);
+      }
+    }
+
+    .notes-section-label {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+      padding: 0.125rem 0.25rem;
+      color: var(--calendaria-text-dim);
+      font-weight: 600;
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.0313rem;
+
+      i {
+        color: var(--calendaria-primary);
+        font-size: 0.5625rem;
+      }
+    }
+
+    .notes-section-divider {
+      width: 100%;
+      height: 0.0625rem;
+      margin: 0.125rem 0;
+      background: var(--calendaria-border-light);
+    }
+
+    .notes-panel-empty {
+      padding: 0.5rem;
+      color: var(--calendaria-text-dim);
+      font-style: italic;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
     .notes-panel-list {
       gap: 0.25rem;
       display: flex;
@@ -228,13 +343,14 @@
 
     .note-item-icon {
       display: flex;
+      position: relative;
       flex-shrink: 0;
       justify-content: center;
       align-items: center;
       width: 1.25rem;
       height: 1.25rem;
 
-      i {
+      > i {
         font-size: 0.875rem;
       }
 
@@ -266,12 +382,35 @@
       gap: 0.375rem;
       display: flex;
       align-items: center;
+      min-width: 0;
+      overflow: hidden;
       color: var(--calendaria-text-dim);
       font-size: 0.65rem;
     }
 
     .note-item-time {
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .note-item-repeat {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--calendaria-primary);
+      font-size: 0.6rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      i {
+        font-size: 0.5rem;
+      }
+
+      &::before {
+        margin-right: 0.375rem;
+        color: var(--calendaria-text-dim);
+        content: '•';
+      }
     }
 
     .note-item-author {
@@ -314,14 +453,35 @@
       opacity: 1;
     }
 
-    .sidebar-separator {
+    .notes-panel-item.festival-note {
+      border-left: 0.1875rem solid var(--calendaria-primary);
+    }
+
+    i.note-visibility-badge {
+      display: flex;
+      position: absolute;
+      right: -0.1875rem;
+      bottom: -0.1875rem;
+      justify-content: center;
+      align-items: center;
+      width: 0.625rem;
+      height: 0.625rem;
+      border-radius: 50%;
+      color: var(--calendaria-text);
+      font-size: 0.4rem;
+      line-height: 1;
+      background: var(--calendaria-bg-lighter);
+      box-shadow: 0 0 0 0.0625rem var(--calendaria-border);
+    }
+
+    .minical-sidebar-separator {
       width: 1rem;
       height: 0.125rem;
       margin: 0.125rem auto;
       background: color-mix(in srgb, var(--calendaria-text-dim) 50%, var(--calendaria-border));
     }
 
-    .sidebar-btn {
+    .minical-sidebar-btn {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -368,14 +528,14 @@
       font-size: var(--font-size-12, 0.75rem);
     }
 
-    .grid {
+    .minical-grid {
       z-index: 1;
       position: relative;
       padding: 0.5rem;
       background: var(--calendaria-bg);
     }
 
-    .weekdays {
+    .minical-weekdays {
       gap: var(--mini-gap);
       grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
       display: grid;
@@ -396,7 +556,7 @@
       }
     }
 
-    .days {
+    .minical-days {
       gap: var(--mini-gap);
       grid-template-columns: repeat(var(--mini-weekday-count, 7), var(--mini-day-size));
       display: grid;
@@ -410,7 +570,7 @@
       display: flex;
       justify-content: center;
 
-      .day.intercalary {
+      .minical-day.intercalary {
         width: 100%;
         background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
 
@@ -423,7 +583,7 @@
       }
     }
 
-    .day {
+    .minical-day {
       display: flex;
       position: relative;
       justify-content: center;
@@ -455,7 +615,7 @@
           background: var(--calendaria-bg-hover);
         }
 
-        .day-num {
+        .minical-day-num {
           color: var(--calendaria-text);
         }
       }
@@ -463,7 +623,7 @@
       &.today {
         box-shadow: inset 0 0 0 0.05rem var(--calendaria-today);
 
-        .day-num {
+        .minical-day-num {
           color: var(--calendaria-today);
           font-weight: 700;
         }
@@ -476,20 +636,32 @@
       &.festival {
         background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
 
-        .day-num {
+        .minical-day-num {
           color: var(--festival-color, var(--calendaria-festival-text));
         }
       }
 
-      .day-num {
+      &.fogged {
+        opacity: 0.3;
+        pointer-events: none;
+
+        .note-badge,
+        .moon-tiny,
+        .moon-tint,
+        .mini-weather-icon {
+          display: none;
+        }
+      }
+
+      .minical-day-num {
         color: var(--calendaria-text);
         font-weight: 500;
         font-size: 0.9rem;
       }
 
       .note-badge {
-        display: grid;
         place-items: center;
+        display: grid;
         position: absolute;
         bottom: 0.1563rem;
         left: 0.15rem;
@@ -497,7 +669,7 @@
         height: 1rem;
         padding: 0;
         border-radius: 0.25rem;
-        font-weight: 700;
+        font-weight: 500;
         font-size: 0.85rem;
         line-height: 1;
       }
@@ -571,7 +743,7 @@
       }
     }
 
-    .time-display {
+    .minical-time-display {
       display: flex;
       z-index: 1;
       position: relative;
@@ -587,7 +759,7 @@
       }
 
       .time-value {
-        color: var(--calendaria-text-heading);
+        color: var(--calendaria-title-text, var(--calendaria-text));
         font-weight: 600;
         font-size: 1.1rem;
         font-family: monospace;
@@ -635,7 +807,7 @@
       }
     }
 
-    .time-controls {
+    .minical-time-controls {
       display: flex;
       position: relative;
       justify-content: center;
@@ -729,46 +901,47 @@
       }
     }
 
-    /* MicroCal: compact mode overrides */
     &.micro {
       --mini-day-size: 2.25rem;
       --mini-gap: 0;
 
-      .container {
+      .minical-container {
         border-radius: 0.5rem;
 
-        /* Sidebar visible: flatten right corners */
-        &:has(.sidebar:is(.visible, .locked)) {
+        &:has(.minical-sidebar:is(.visible, .locked)) {
           border-radius: 0.5rem 0 0 0.5rem;
 
-          .top-row {
+          .minical-top-row {
             border-radius: 0.5rem 0 0;
           }
 
-          .grid {
+          .minical-grid {
             border-radius: 0 0 0 0.5rem;
           }
 
-          .time-controls {
+          .minical-time-controls {
             border-radius: 0 0 0 0.5rem;
           }
         }
 
-        /* Time controls visible: grid loses bottom radius */
-        &:has(.time-controls.visible) .grid {
+        &:has(.minical-time-controls.visible) .minical-grid {
           border-radius: 0;
         }
       }
 
       cursor: grab;
 
-      .top-row {
+      .minical-top-row {
+        position: relative;
         padding: 0.25rem 0.375rem;
         border-radius: 0.5rem 0.5rem 0 0;
-        position: relative;
 
         .title {
           font-size: 0.8rem;
+        }
+
+        .equivalent-dates-row {
+          display: none;
         }
 
         .nav-btn {
@@ -787,11 +960,11 @@
           position: absolute;
           justify-content: center;
           align-items: center;
-          pointer-events: none;
           border-radius: 0.25rem;
+          cursor: pointer;
+          pointer-events: none;
           background: var(--calendaria-bg-lighter);
           transition: opacity 0.15s;
-          cursor: pointer;
 
           i {
             color: var(--calendaria-text);
@@ -820,44 +993,45 @@
         font-size: var(--font-size-11, 0.6875rem);
       }
 
-      .grid {
+      .minical-grid {
         padding: 0.375rem;
         border-radius: 0 0 0.5rem 0.5rem;
       }
 
-      .weekdays {
+      .minical-weekdays {
         display: none;
       }
 
-      .day {
+      .minical-day {
         border-radius: 50%;
+        overflow: hidden;
 
-        .day-num {
-          font-size: 0.8rem;
+        .minical-day-num {
           font-weight: 700;
+          font-size: 0.8rem;
         }
 
         .note-badge {
-          width: 0.75rem;
-          height: 0.75rem;
           bottom: 0.0625rem;
           left: 0.0625rem;
+          width: 0.75rem;
+          height: 0.75rem;
           border-radius: 50%;
           font-size: 0;
         }
 
         .moon-tiny:not(.tinted) {
-          bottom: 0.0625rem;
-          right: 0.0625rem;
           top: auto;
+          right: 0.0625rem;
+          bottom: 0.0625rem;
           width: 0.75rem;
           height: 0.75rem;
         }
 
         .moon-tint {
-          bottom: 0.0625rem;
-          right: 0.0625rem;
           top: auto;
+          right: 0.0625rem;
+          bottom: 0.0625rem;
           width: 0.75rem;
           height: 0.75rem;
         }
@@ -867,15 +1041,15 @@
         }
       }
 
-      .intercalary-row .day.intercalary .festival-name {
+      .intercalary-row .minical-day.intercalary .festival-name {
         font-size: 0.7rem;
       }
 
-      .time-display {
+      .minical-time-display {
         display: none;
       }
 
-      .time-controls {
+      .minical-time-controls {
         border-radius: 0 0 0.5rem 0.5rem;
 
         .time-shortcut,
@@ -885,14 +1059,14 @@
         }
       }
 
-      .sidebar {
+      .minical-sidebar {
         gap: 0.125rem;
+        opacity: 0;
         top: -0.0625rem;
         bottom: -0.0625rem;
         width: 1.5rem;
         padding: 0.25rem 0;
         border-radius: 0 0.5rem 0.5rem 0;
-        opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
 
@@ -903,13 +1077,13 @@
         }
       }
 
-      .sidebar-btn {
+      .minical-sidebar-btn {
         width: 1.25rem;
         height: 1.25rem;
         font-size: 0.75rem;
       }
 
-      .sidebar-separator {
+      .minical-sidebar-separator {
         display: none;
       }
 
@@ -920,6 +1094,10 @@
       }
 
       .notes-panel-header {
+        display: none;
+      }
+
+      .notes-panel-filter-bar {
         display: none;
       }
 
@@ -937,7 +1115,7 @@
         width: 1rem;
         height: 1rem;
 
-        i {
+        > i:not(.note-visibility-badge) {
           font-size: 0.75rem;
         }
 
@@ -964,7 +1142,7 @@
         height: 1.125rem;
       }
 
-      .container:has(.notes-panel.visible) .sidebar {
+      .minical-container:has(.notes-panel.visible) .minical-sidebar {
         border-radius: 0;
       }
     }

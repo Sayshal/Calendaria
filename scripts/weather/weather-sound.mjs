@@ -6,6 +6,7 @@
 
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
+import { expandLegacySoundKey } from './data/weather-presets.mjs';
 import WeatherManager from './weather-manager.mjs';
 
 /** Crossfade duration in milliseconds. */
@@ -14,7 +15,7 @@ const FADE_MS = 2000;
 /** @type {object|null} Currently playing weather ambient sound. */
 let activeSound = null;
 
-/** @type {string|null} SoundFx key of the currently playing sound (for dedup). */
+/** @type {string|null} Full path of the currently playing sound (for dedup). */
 let activeSoundKey = null;
 
 /**
@@ -30,11 +31,20 @@ export function initializeWeatherSound() {
 }
 
 /**
- * On scene update, re-sync sound if the weather disable flag changed.
+ * On scene update, re-sync sound if the weather disable flag changed or scene activated.
  * @param {object} scene - Updated scene document
- * @param {object} change - Flattened change data
+ * @param {object} change - Change data
  */
 function onSceneUpdate(scene, change) {
+  if (change.active) {
+    if (isSoundDisabledForScene(scene)) {
+      stopSound();
+    } else {
+      const weather = WeatherManager.getCurrentWeather(null, scene);
+      playSound(weather || null);
+    }
+    return;
+  }
   if (scene !== canvas?.scene) return;
   const flat = foundry.utils.flattenObject(change);
   const fxKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
@@ -117,20 +127,20 @@ async function playSound(weather) {
     return;
   }
   const soundKey = weather?.soundFx || null;
-  if (soundKey === activeSoundKey && activeSound?.playing) return;
+  const src = expandLegacySoundKey(soundKey);
+  if (src === activeSoundKey && activeSound?.playing) return;
   const oldSound = activeSound;
   if (oldSound) fadeOutAndStop(oldSound);
   activeSound = null;
   activeSoundKey = null;
-  if (!soundKey) return;
-  const src = `modules/${MODULE.ID}/assets/sound/${soundKey}.ogg`;
+  if (!src) return;
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
     const volume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
     sound.fade(volume, { duration: FADE_MS });
     activeSound = sound;
-    activeSoundKey = soundKey;
-    log(3, `Playing "${soundKey}"`);
+    activeSoundKey = src;
+    log(3, `Playing "${src}"`);
   } catch (error) {
     log(1, 'Weather sound playback failed:', error);
   }
@@ -151,5 +161,72 @@ async function stopSound() {
     } catch (error) {
       log(1, 'Weather sound stop failed:', error);
     }
+  }
+}
+
+/**
+ * Play an arbitrary audio file as the weather sound with crossfade.
+ * @param {string} src - Foundry audio path (e.g., "modules/my-mod/sounds/rain.ogg")
+ * @param {object} [options] - Playback options
+ * @param {number} [options.volume] - Volume override (0-1, defaults to Weather Sound Volume setting)
+ * @param {number} [options.fade] - Fade-in duration in ms (default: 2000)
+ * @param {boolean} [options.loop] - Loop playback (default: true)
+ * @param {object} [options.context] - Audio context override (default: game.audio.environment)
+ * @returns {Promise<boolean>} True if playback started successfully
+ */
+export async function playStandaloneSound(src, options = {}) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
+    log(2, 'Weather sounds are disabled');
+    return false;
+  }
+  if (isSoundDisabledForScene(canvas?.scene)) {
+    log(2, 'Weather sounds are disabled for this scene');
+    return false;
+  }
+  if (game.audio.locked) {
+    game.audio.awaitFirstGesture().then(() => playStandaloneSound(src, options));
+    return false;
+  }
+  if (src === activeSoundKey && activeSound?.playing) return true;
+  const oldSound = activeSound;
+  if (oldSound) fadeOutAndStop(oldSound);
+  activeSound = null;
+  activeSoundKey = null;
+  const fadeDuration = options.fade ?? FADE_MS;
+  try {
+    const sound = await game.audio.play(src, { loop: options.loop ?? true, volume: 0, context: options.context ?? game.audio.environment });
+    const volume = options.volume ?? game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+    sound.fade(volume, { duration: fadeDuration });
+    activeSound = sound;
+    activeSoundKey = src;
+    log(3, `Standalone playing "${src}"`);
+    return true;
+  } catch (error) {
+    log(1, 'Standalone sound playback failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Stop the current weather sound with configurable fade-out.
+ * @param {object} [options] - Stop options
+ * @param {number} [options.fade] - Fade-out duration in ms (default: 2000)
+ * @returns {Promise<boolean>} True if a sound was stopped
+ */
+export async function stopStandaloneSound(options = {}) {
+  if (!activeSound) return false;
+  const stoppingKey = activeSoundKey;
+  const sound = activeSound;
+  activeSound = null;
+  activeSoundKey = null;
+  log(3, `Standalone stopping "${stoppingKey}"`);
+  try {
+    const fadeDuration = options.fade ?? FADE_MS;
+    await sound.fade(0, { duration: fadeDuration });
+    sound.stop();
+    return true;
+  } catch (error) {
+    log(1, 'Standalone sound stop failed:', error);
+    return false;
   }
 }

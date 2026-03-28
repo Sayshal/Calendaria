@@ -6,14 +6,26 @@
 
 import { MODULE, SETTINGS } from '../../constants.mjs';
 
-/** Snap detection radius in pixels */
+/** @type {number} Snap detection radius in pixels. */
 export const SNAP_DISTANCE = 50;
 
-/** CSS class for wobble animation */
+/** @type {string} CSS class for wobble animation. */
 export const WOBBLE_CLASS = 'near-snap';
 
-/** Buffer pixels between windows and sidebar */
+/** @type {number} Buffer pixels between windows and sidebar. */
 const SIDEBAR_BUFFER = 8;
+
+/** @type {string} CSS class for pinned/docked state. */
+export const PINNED_CLASS = 'calendaria-pinned';
+
+/** @type {HTMLElement|null} Shared snap indicator element. */
+let snapIndicator = null;
+
+/** @type {HTMLElement[]} Debug zone indicators. */
+let debugIndicators = [];
+
+/** @type {Set<{app: object, zoneId: string}>} Registered apps for position updates. */
+const registeredApps = new Set();
 
 /**
  * Get the right-side boundary buffer (Foundry sidebar width + buffer).
@@ -26,15 +38,6 @@ export function getSidebarBuffer() {
   const sidebarWidth = sidebar && !sidebar.classList.contains('collapsed') ? sidebar.offsetWidth : 0;
   return sidebarWidth + SIDEBAR_BUFFER;
 }
-
-/** CSS class for pinned/docked state */
-export const PINNED_CLASS = 'calendaria-pinned';
-
-/** @type {HTMLElement|null} Shared snap indicator element */
-let snapIndicator = null;
-
-/** @type {HTMLElement[]} Debug zone indicators */
-let debugIndicators = [];
 
 /**
  * Show debug indicators for all sticky zones (temporary debugging).
@@ -355,9 +358,6 @@ export function getZonePosition(zoneId, hudWidth, hudHeight) {
   const top = zone.anchor === 'bottom' ? zone.center.y - hudHeight : zone.center.y - hudHeight / 2;
   return { left, top };
 }
-
-/** @type {Set<{app: object, zoneId: string}>} Registered apps for position updates */
-const registeredApps = new Set();
 
 /**
  * Register an app for automatic position updates when its zone changes.

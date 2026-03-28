@@ -4,29 +4,59 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
-import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers } from '../../utils/formatting/format-utils.mjs';
-import { getMoonPhasePosition } from '../../utils/formatting/moon-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { canChangeDateTime, canChangeWeather, canViewBigCal, canViewMiniCal } from '../../utils/permissions.mjs';
-import SearchManager from '../../utils/search-manager.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
-import * as ViewUtils from '../../utils/ui/calendar-view-utils.mjs';
-import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import * as WidgetManager from '../../utils/widget-manager.mjs';
-import { getPreset, getPresetAlias } from '../../weather/data/weather-presets.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { BigCal } from '../calendar/big-cal.mjs';
-import { MiniCal } from '../calendar/mini-cal.mjs';
-import { SetDateDialog } from '../dialogs/set-date-dialog.mjs';
-import { SettingsPanel } from '../settings/settings-panel.mjs';
-import WeatherPickerApp from '../weather/weather-picker.mjs';
-import { getSkyColorsRgb, applyWeatherSkyTint, computeStarAlpha } from '../../utils/ui/sky-utils.mjs';
-import { SunDial } from '../time/sun-dial.mjs';
-import { HudSceneRenderer } from './hud-scene-renderer.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
+import { HOOKS, MODULE, REDUCED_FX_DENSITY, REPLACEABLE_ELEMENTS, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
+import { NoteManager } from '../../notes/_module.mjs';
+import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
+import {
+  CalendariaSocket,
+  WOBBLE_CLASS,
+  applyWeatherSkyTint,
+  attachWidgetListeners,
+  buildOpenAppsMenuItem,
+  canChangeDateTime,
+  canChangeWeather,
+  canViewBigCal,
+  canViewHUD,
+  canViewMiniCal,
+  checkStickyZones,
+  cleanupSnapIndicator,
+  computeStarAlpha,
+  encodeHtmlAttribute,
+  escapeText,
+  finalizeDrag,
+  formatForLocation,
+  getActiveZone,
+  getEquivalentDateTooltip,
+  getMoonPhasePosition,
+  getNotesOnDay,
+  getRestorePosition,
+  getSidebarBuffer,
+  getSkyColorsRgb,
+  hasMoonIconMarkers,
+  hideSnapIndicator,
+  isBottomAnchored,
+  isCombatBlocked,
+  localize,
+  previewSnippet,
+  registerForZoneUpdates,
+  renderCycleIndicator,
+  renderEraIndicator,
+  renderMoonIcons,
+  renderReplacementOrOriginal,
+  renderSeasonIndicator,
+  renderWeatherIndicator,
+  renderWidgetsForPoint,
+  restorePinnedState,
+  stripMoonIconMarkers,
+  stripSecrets,
+  unpinFromZone,
+  unregisterFromZoneUpdates,
+  usesDomParenting,
+  warnShowToAll
+} from '../../utils/_module.mjs';
+import { WeatherManager, getPreset, getPresetAlias } from '../../weather/_module.mjs';
+import { BigCal, Chronicle, CinematicOverlay, HudSceneRenderer, MiniCal, NoteViewer, SetDateDialog, SettingsPanel, SunDial, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -34,9 +64,6 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * Calendar HUD with sundial dome, time controls, and calendar info.
  */
 export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
-  /** @type {boolean} Tracks if HUD was closed due to combat (for reopening) */
-  static #closedForCombat = false;
-
   /** @type {number|null} Hook ID for visual tick */
   #timeHookId = null;
 
@@ -58,23 +85,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {Array} Cached live events */
   #liveEvents = [];
 
-  /** @type {boolean} Search panel visibility state */
-  #searchOpen = false;
-
-  /** @type {string} Current search term */
-  #searchTerm = '';
-
-  /** @type {object[]|null} Current search results */
-  #searchResults = null;
-
   /** @type {number|null} Debounce timer for bar re-render */
   #barRenderDebounce = null;
-
-  /** @type {HTMLElement|null} Search panel element (moved to body for positioning) */
-  #searchPanelEl = null;
-
-  /** @type {Function|null} Click-outside handler for search panel */
-  #clickOutsideHandler = null;
 
   /** @type {boolean} Whether combat is currently active */
   #inCombat = false;
@@ -108,12 +120,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     window: { frame: false, positioned: true },
     actions: {
       openSunDial: HUD.#onOpenSunDial,
-      searchNotes: HUD.#onSearchNotes,
+      openNoteViewer: HUD.#onOpenNoteViewer,
       addNote: HUD.#onAddNote,
       openEvent: HUD.#onOpenEvent,
       toggleTimeFlow: HUD.#onToggleTimeFlow,
-      openBigCal: HUD.#onOpenBigCal,
+      showBigCal: HUD.#onShowBigCal,
       openMiniCal: HUD.#onOpenMiniCal,
+      openChronicle: HUD.#onOpenChronicle,
       openSettings: HUD.#onOpenSettings,
       openWeatherPicker: HUD.#onOpenWeatherPicker,
       toSunrise: HUD.#onToSunrise,
@@ -126,8 +139,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       customDec1: HUD.#onCustomDec1,
       customInc1: HUD.#onCustomInc1,
       customInc2: HUD.#onCustomInc2,
-      closeSearch: HUD.#onCloseSearch,
-      openSearchResult: HUD.#onOpenSearchResult,
       setDate: HUD.#onSetDate
     }
   };
@@ -182,6 +193,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const components = this.#getPredictedComponents();
     context.isGM = game.user.isGM;
+    context.showChronicleButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_HUD_BUTTON);
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
     context.canViewBigCal = canViewBigCal();
@@ -189,7 +201,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hudCalendarButton = game.settings.get(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON);
     context.locked = this.isLocked;
     context.isPlaying = TimeClock.running;
-    context.clockLocked = TimeClock.locked;
+    context.clockDisabled = TimeClock.disabled;
+    context.clockLocked = TimeClock.locked || TimeClock.disabled;
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
     this.#stickyTray = stickyStates.tray ?? false;
     this.#stickyPosition = stickyStates.position ?? false;
@@ -208,6 +221,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.dateDisplay = stripMoonIconMarkers(dateFormatted);
     context.dateDisplayHtml = renderMoonIcons(dateFormatted);
     context.dateCompressed = context.dateDisplay.length > 35;
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    context.dateEquivalentHtml = getEquivalentDateTooltip(components.year + yearZero, components.month, components.dayOfMonth ?? 0);
     const showWeatherBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
     const showSeasonBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_SEASON);
     const showEraBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
@@ -242,6 +257,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#liveEvents = this.#getLiveEvents();
     context.hasEvents = this.#liveEvents.length > 0;
     context.liveEvents = this.#liveEvents;
+    context.borderGlow = game.settings.get(MODULE.ID, SETTINGS.HUD_BORDER_GLOW);
     context.firstEventColor = this.#liveEvents[0]?.color || null;
     context.currentEvent = this.#liveEvents.length > 0 ? this.#liveEvents[0] : null;
     const isMonthless = calendar?.isMonthless ?? false;
@@ -251,9 +267,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
     const currentJumps = customJumps[appSettings.incrementKey] || {};
     context.customJumps = { dec2: currentJumps.dec2 ?? null, dec1: currentJumps.dec1 ?? null, inc1: currentJumps.inc1 ?? null, inc2: currentJumps.inc2 ?? null };
-    context.searchOpen = this.#searchOpen;
-    context.searchTerm = this.#searchTerm;
-    context.searchResults = this.#searchResults || [];
     context.useSliceMode = this.useSliceMode;
     context.inCombat = this.#inCombat;
     context.widgets = this.#prepareWidgetContext(context);
@@ -267,29 +280,25 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #prepareWidgetContext(context) {
     const widgets = {};
-    widgets.buttonsLeft = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_LEFT, 'hud');
-    widgets.buttonsRight = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_RIGHT, 'hud');
-    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'hud');
-    widgets.tray = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_TRAY, 'hud');
+    widgets.buttonsLeft = renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_LEFT, 'hud');
+    widgets.buttonsRight = renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_RIGHT, 'hud');
+    widgets.indicators = renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'hud');
+    widgets.tray = renderWidgetsForPoint(WIDGET_POINTS.HUD_TRAY, 'hud');
     const weatherObj = context.weather ? { ...context.weather, temperature: context.weather.temp } : null;
-    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.weatherIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.WEATHER_INDICATOR,
-      ViewUtils.renderWeatherIndicator({ weather: weatherObj, displayMode: context.weatherDisplayMode, canInteract: context.canChangeWeather, showBlock: context.showWeatherBlock }),
+      renderWeatherIndicator({ weather: weatherObj, displayMode: context.weatherDisplayMode, canInteract: context.canChangeWeather, showBlock: context.showWeatherBlock }),
       'hud'
     );
-    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.seasonIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.SEASON_INDICATOR,
-      ViewUtils.renderSeasonIndicator({ season: context.currentSeason, displayMode: context.seasonDisplayMode }),
+      renderSeasonIndicator({ season: context.currentSeason, displayMode: context.seasonDisplayMode }),
       'hud'
     );
-    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(
-      REPLACEABLE_ELEMENTS.ERA_INDICATOR,
-      ViewUtils.renderEraIndicator({ era: context.currentEra, displayMode: context.eraDisplayMode }),
-      'hud'
-    );
-    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.eraIndicator = renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, renderEraIndicator({ era: context.currentEra, displayMode: context.eraDisplayMode }), 'hud');
+    widgets.cycleIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.CYCLE_INDICATOR,
-      ViewUtils.renderCycleIndicator({ cycleData: context.cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
+      renderCycleIndicator({ cycleData: context.cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
       'hud'
     );
     return widgets;
@@ -324,17 +333,14 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateDomeVisibility();
     this.#setupEventListeners();
     this.#updateTooltipDirections();
-    WidgetManager.attachWidgetListeners(this.element);
+    attachWidgetListeners(this.element);
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
     if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
     const c = this.#getPredictedComponents();
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
   }
 
-  /**
-   * Update tooltip directions based on HUD position.
-   * When the HUD bar is in the lower half of the viewport, tooltips should point UP.
-   */
+  /** Update tooltip directions based on HUD position. */
   #updateTooltipDirections() {
     const bar = this.element.querySelector('.bar');
     if (!bar) return;
@@ -371,9 +377,21 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       })
     });
     this.#hooks.push({
+      name: 'updateJournalEntry',
+      id: Hooks.on('updateJournalEntry', (journal, changes) => {
+        if (changes.ownership && journal.getFlag?.(MODULE.ID, 'isCalendarNote')) debouncedRender();
+      })
+    });
+    this.#hooks.push({
+      name: 'createJournalEntry',
+      id: Hooks.on('createJournalEntry', (journal) => {
+        if (journal.getFlag?.(MODULE.ID, 'isCalendarNote')) debouncedRender();
+      })
+    });
+    this.#hooks.push({
       name: 'deleteJournalEntry',
       id: Hooks.on('deleteJournalEntry', (journal) => {
-        if (journal.pages.some((p) => p.type === 'calendaria.calendarnote')) debouncedRender();
+        if (journal.getFlag?.(MODULE.ID, 'isCalendarNote') || journal.pages.some((p) => p.type === 'calendaria.calendarnote')) debouncedRender();
       })
     });
     this.#hooks.push({
@@ -405,15 +423,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       name: 'updateCombat',
       id: Hooks.on('updateCombat', () => this.#onCombatChange(!!game.combat?.started))
     });
-    const combatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
     this.#inCombat = !!game.combat?.started;
-    if (this.#inCombat && (combatMode === 'hideCombat' || combatMode === 'hideEncounter')) {
-      HUD.#closedForCombat = true;
-      this.close({ combat: true });
-    } else if (game.combat && !game.combat.started && combatMode === 'hideEncounter') {
-      HUD.#closedForCombat = true;
-      this.close({ combat: true });
-    }
     this.#resizeHandler = foundry.utils.debounce(() => this.#onViewportResize(), 100);
     window.addEventListener('resize', this.#resizeHandler);
     this.#fullscreenHandler = foundry.utils.debounce(() => this.#onViewportResize(), 50);
@@ -428,13 +438,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#inCombat === inCombat) return;
     this.#inCombat = inCombat;
     const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (mode === 'hideCombat' || mode === 'hideEncounter') {
-      if (inCombat) {
-        HUD.#closedForCombat = true;
-        this.close({ combat: true });
-      }
-      return;
-    }
     if (mode === 'compactCombat' || mode === 'compactEncounter') this.render();
   }
 
@@ -444,13 +447,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onEncounterChange(created) {
     const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (mode === 'hideEncounter') {
-      if (created) {
-        HUD.#closedForCombat = true;
-        this.close({ combat: true });
-      }
-      return;
-    }
     if (mode === 'compactEncounter') {
       if (created) this.render();
       else if (!game.combat) this.render();
@@ -476,10 +472,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       Hooks.off(HOOKS.WORLD_TIME_UPDATED, this.#worldTimeHookId);
       this.#worldTimeHookId = null;
     }
-    if (this.#clickOutsideHandler) {
-      document.removeEventListener('mousedown', this.#clickOutsideHandler);
-      this.#clickOutsideHandler = null;
-    }
     if (this.#resizeHandler) {
       window.removeEventListener('resize', this.#resizeHandler);
       this.#resizeHandler = null;
@@ -488,17 +480,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       document.removeEventListener('fullscreenchange', this.#fullscreenHandler);
       this.#fullscreenHandler = null;
     }
-    if (this.#searchPanelEl?.parentElement === document.body) {
-      this.#searchPanelEl.remove();
-      this.#searchPanelEl = null;
-    }
     if (this.#sceneRenderer) {
       this.#sceneRenderer.destroy();
       this.#sceneRenderer = null;
     }
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
-    StickyZones.cleanupSnapIndicator();
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
+    cleanupSnapIndicator();
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
     await super._onClose(options);
@@ -558,21 +546,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         { passive: false }
       );
     }
-    const searchInput = this.element.querySelector('.calendaria-search .search-input');
-    if (searchInput) {
-      if (this.#searchOpen) searchInput.focus();
-      const debouncedSearch = foundry.utils.debounce((term) => {
-        this.#searchTerm = term;
-        if (term.length >= 2) this.#searchResults = SearchManager.search(term, { searchContent: true });
-        else this.#searchResults = null;
-        this.#updateSearchResults();
-      }, 300);
-      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') this.#closeSearch();
-      });
-    }
-    if (this.#searchOpen) requestAnimationFrame(() => this.#positionSearchPanel());
     const dome = this.element.querySelector('.dome');
     if (dome) {
       dome.addEventListener('keydown', (event) => {
@@ -615,10 +588,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceHUD = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD);
       items.push({
-        name: forceHUD ? 'CALENDARIA.HUD.ContextMenu.HideFromAll' : 'CALENDARIA.HUD.ContextMenu.ShowToAll',
+        name: forceHUD ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: forceHUD ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>',
         callback: async () => {
           const newValue = !forceHUD;
+          if (newValue) warnShowToAll('viewHUD', game.i18n.localize('CALENDARIA.Permissions.ViewHUD'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: newValue });
         }
@@ -638,7 +612,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, newMode);
       }
     });
-    items.push(ViewUtils.buildOpenAppsMenuItem());
+    items.push(buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => HUD.hide() });
     return items;
   }
@@ -709,22 +683,22 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
       this.#snappedZoneId = savedPos.zoneId || null;
-      if (this.#snappedZoneId && StickyZones.restorePinnedState(this.element, this.#snappedZoneId)) {
-        StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      if (this.#snappedZoneId && restorePinnedState(this.element, this.#snappedZoneId)) {
+        registerForZoneUpdates(this, this.#snappedZoneId);
         return;
       }
       if (this.#snappedZoneId) {
         const rect = this.element.getBoundingClientRect();
         const barEl = this.element.querySelector('.bar');
         const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
+        const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
         if (zonePos) {
           let newTop = zonePos.top;
-          if (StickyZones.isBottomAnchored(this.#snappedZoneId) && typeof savedPos.anchorY === 'number') {
+          if (isBottomAnchored(this.#snappedZoneId) && typeof savedPos.anchorY === 'number') {
             newTop = savedPos.anchorY - barHeight;
           }
           this.setPosition({ left: zonePos.left, top: newTop });
-          StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+          registerForZoneUpdates(this, this.#snappedZoneId);
           return;
         }
       }
@@ -746,9 +720,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#snappedZoneId) {
       this.#snappedZoneId = this.#detectCurrentZone();
       if (this.#snappedZoneId) {
-        StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+        registerForZoneUpdates(this, this.#snappedZoneId);
         const posData = { left: this.position.left, top: this.position.top, zoneId: this.#snappedZoneId };
-        if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+        if (isBottomAnchored(this.#snappedZoneId)) {
           const barEl = this.element.querySelector('.bar');
           if (barEl) posData.anchorY = barEl.getBoundingClientRect().bottom;
         }
@@ -767,7 +741,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + barHeight / 2;
-    const zone = StickyZones.getActiveZone(centerX, centerY, rect.width, barHeight);
+    const zone = getActiveZone(centerX, centerY, rect.width, barHeight);
     return zone?.id || null;
   }
 
@@ -776,17 +750,17 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #handleModeChange() {
     if (!this.#snappedZoneId) this.#snappedZoneId = this.#detectCurrentZone();
-    if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) return;
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) return;
     const rect = this.element.getBoundingClientRect();
     if (this.#snappedZoneId) {
       const barEl = this.element.querySelector('.bar');
       const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-      const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
+      const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
       if (zonePos) {
         let newLeft = zonePos.left;
         let newTop = zonePos.top;
         let anchorY = null;
-        if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+        if (isBottomAnchored(this.#snappedZoneId)) {
           const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
           anchorY = savedPos?.anchorY;
           if (typeof anchorY === 'number') newTop = anchorY - barHeight;
@@ -819,10 +793,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         const rect = this.element.getBoundingClientRect();
         const barEl = this.element.querySelector('.bar');
         const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, currentWidth, barHeight);
+        const zonePos = getRestorePosition(this.#snappedZoneId, currentWidth, barHeight);
         if (zonePos) {
           let newTop = zonePos.top;
-          if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+          if (isBottomAnchored(this.#snappedZoneId)) {
             const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
             if (typeof savedPos?.anchorY === 'number') newTop = savedPos.anchorY - barHeight;
           }
@@ -846,7 +820,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
-    const rightBuffer = StickyZones.getSidebarBuffer();
+    const rightBuffer = getSidebarBuffer();
     let { left, top } = this.position;
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
@@ -858,17 +832,15 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #onViewportResize() {
     if (!this.rendered || !this.element) return;
-
-    if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) return;
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) return;
     const rect = this.element.getBoundingClientRect();
     const barEl = this.element.querySelector('.bar');
     const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-
     if (this.#snappedZoneId) {
-      const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
+      const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, barHeight);
       if (zonePos) {
         let newTop = zonePos.top;
-        if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+        if (isBottomAnchored(this.#snappedZoneId)) {
           const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
           if (typeof savedPos?.anchorY === 'number') {
             const hotbar = document.getElementById('hotbar');
@@ -909,7 +881,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     drag._onDragMouseDown = (event) => {
       if (this.isLocked) return;
       if (event.detail >= 2) return;
-      if (this.#searchOpen) this.#closeSearch();
       previousZoneId = this.#snappedZoneId;
       hasMoved = false;
       const rect = this.element.getBoundingClientRect();
@@ -930,7 +901,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaY = event.clientY - dragStartY;
       if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) hasMoved = true;
       const rect = this.element.getBoundingClientRect();
-      const rightBuffer = StickyZones.getSidebarBuffer();
+      const rightBuffer = getSidebarBuffer();
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
@@ -939,16 +910,16 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#updateDomeVisibility();
       const barEl = this.element.querySelector('.bar');
       const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-      this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, barHeight);
+      this.#activeSnapZone = checkStickyZones(dragHandle, newLeft, newTop, rect.width, barHeight);
     };
     drag._onDragMouseUp = async (event) => {
       event.preventDefault();
       window.removeEventListener(...drag.handlers.dragMove);
       window.removeEventListener(...drag.handlers.dragUp);
       dragHandle.classList.remove('dragging');
-      StickyZones.hideSnapIndicator();
+      hideSnapIndicator();
       if (!hasMoved) {
-        dragHandle.classList.remove(StickyZones.WOBBLE_CLASS);
+        dragHandle.classList.remove(WOBBLE_CLASS);
         this.#activeSnapZone = null;
         previousZoneId = null;
         return;
@@ -956,16 +927,16 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const rect = this.element.getBoundingClientRect();
       const barEl = this.element.querySelector('.bar');
       const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
-      const result = StickyZones.finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, barHeight, previousZoneId);
+      const result = finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, barHeight, previousZoneId);
       this.#snappedZoneId = result.zoneId;
-      StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      registerForZoneUpdates(this, this.#snappedZoneId);
       this.#activeSnapZone = null;
       previousZoneId = null;
       const posData = { left: this.position.left, top: this.position.top, zoneId: this.#snappedZoneId };
       if (!this.#snappedZoneId) {
         posData.centerX = this.position.left + rect.width / 2;
         posData.centerY = this.position.top + rect.height / 2;
-      } else if (StickyZones.isBottomAnchored(this.#snappedZoneId)) {
+      } else if (isBottomAnchored(this.#snappedZoneId)) {
         const barEl = this.element.querySelector('.bar');
         if (barEl) posData.anchorY = barEl.getBoundingClientRect().bottom;
       }
@@ -1063,13 +1034,19 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
-    const disableFx = game.settings.get(MODULE.ID, SETTINGS.HUD_DISABLE_WEATHER_FX);
-    const effect = disableFx ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
+    const fxMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_FX_MODE);
+    const fxOff = fxMode === 'off';
+    const effect = fxOff ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
+    const densityScale = fxMode === 'reduced' ? REDUCED_FX_DENSITY : 1;
     const { visualOverrides } = resolved;
+    const sceneTopDown = game.scenes?.active?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE);
+    const useTopDown = sceneTopDown === 'topdown' || (sceneTopDown !== 'sideview' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN));
+    const forceDownward = !useTopDown || game.settings.get(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD);
     this.#sceneRenderer.setEffect(
       effect,
-      { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
-      disableFx ? null : visualOverrides
+      { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0, forceDownward },
+      fxOff ? null : visualOverrides,
+      densityScale
     );
   }
 
@@ -1144,7 +1121,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #onClockStateChange() {
     if (!this.rendered) return;
     const running = TimeClock.running;
-    const locked = TimeClock.locked;
+    const locked = TimeClock.locked || TimeClock.disabled;
     const hud = this.element.querySelector('.content');
     if (hud) hud.classList.toggle('time-flowing', running);
     const playBtn = this.element.querySelector('.play-btn');
@@ -1152,7 +1129,14 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       playBtn.classList.toggle('playing', running);
       playBtn.classList.toggle('clock-locked', locked);
       playBtn.setAttribute('aria-pressed', String(running));
-      playBtn.dataset.tooltip = locked ? localize('CALENDARIA.TimeClock.Locked') : running ? localize('CALENDARIA.HUD.PauseTime') : localize('CALENDARIA.TimeKeeper.Start');
+      const tooltip = TimeClock.disabled
+        ? localize('CALENDARIA.TimeClock.Disabled')
+        : locked
+          ? localize('CALENDARIA.TimeClock.Locked')
+          : running
+            ? localize('CALENDARIA.HUD.PauseTime')
+            : localize('CALENDARIA.TimeKeeper.Start');
+      playBtn.dataset.tooltip = tooltip;
       const icon = playBtn.querySelector('i');
       if (icon) {
         icon.classList.remove('fa-play', 'fa-pause', 'fa-lock');
@@ -1242,16 +1226,19 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;
     const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature(zoneId));
-    const tooltipHtml = WeatherManager.buildWeatherTooltip({
+    const windKph = weather.wind?.kph ?? null;
+    const tooltipArgs = {
       label,
       description: weather.description ? localize(weather.description) : null,
       temp,
       windSpeed,
+      windKph,
       windDirection,
       precipType,
       precipIntensity: weather.precipitation?.intensity
-    });
-    return { id: weather.id, label, icon, color: weather.color, temp, tooltipHtml, windSpeed, windDirection, precipType };
+    };
+    const tooltipHtml = weather.periods ? WeatherManager.buildWeatherTooltipWithPeriods(tooltipArgs, weather.periods, weather.activePeriod) : WeatherManager.buildWeatherTooltip(tooltipArgs);
+    return { id: weather.id, label, icon, color: weather.color, temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };
   }
 
   /**
@@ -1266,19 +1253,19 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const year = components.year + yearZero;
     const month = components.month;
     const dayOfMonth = components.dayOfMonth ?? 0;
-    const notes = ViewUtils.getNotesOnDay(year, month, dayOfMonth);
+    const notes = getNotesOnDay(year, month, dayOfMonth);
     if (!notes.length) return [];
+    const esc = escapeText;
     return notes.slice(0, 5).map((note) => {
-      let tooltip = note.name;
-      const desc = note.text?.content;
+      const color = note.system.color || '#e88';
+      const lines = [`<strong style="color: ${color}">${esc(note.name)}</strong>`];
+      const desc = stripSecrets(note.text?.content);
       if (desc) {
-        const plainText = desc.replace(/<[^>]*>/g, '').trim();
-        if (plainText) {
-          const truncated = plainText.length > 120 ? `${plainText.substring(0, 117)}...` : plainText;
-          tooltip += `\n${truncated}`;
-        }
+        const snippet = previewSnippet(desc, 120);
+        if (snippet) lines.push(`<hr style="margin: 0.25rem 0; border-color: var(--calendaria-border-light)"><span style="font-style: italic">${snippet}</span>`);
       }
-      return { id: note.id, parentId: note.parent.id, name: note.name, icon: note.system.icon || 'fas fa-star', color: note.system.color || '#e88', tooltip };
+      const tooltipHtml = encodeHtmlAttribute(`<div class="calendaria"><div class="day-tooltip">${lines.join('<br>')}</div></div>`);
+      return { id: note.id, parentId: note.parent.id, name: note.name, icon: note.system.icon || 'fas fa-star', color, tooltipHtml };
     });
   }
 
@@ -1307,7 +1294,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: secondsToAdvance });
         return;
       }
-      await game.time.advance(secondsToAdvance);
+      await CinematicOverlay.gatedAdvance(secondsToAdvance);
     }
   }
 
@@ -1322,43 +1309,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click on search button to toggle search panel.
+   * Open the Note Viewer.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
-  static async #onSearchNotes(_event, _target) {
-    this.#searchOpen = !this.#searchOpen;
-    if (!this.#searchOpen) {
-      this.#searchTerm = '';
-      this.#searchResults = null;
-    }
-    await this.render({ parts: ['bar'] });
-  }
-
-  /**
-   * Handle click to close search panel.
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} _target - Target element
-   */
-  static async #onCloseSearch(_event, _target) {
-    this.#closeSearch();
-  }
-
-  /**
-   * Handle click on search result to open the note.
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} target - Target element with data attributes
-   */
-  static async #onOpenSearchResult(_event, target) {
-    const id = target.dataset.id;
-    const journalId = target.dataset.journalId;
-    const page = NoteManager.getFullNote(id);
-    if (page) page.sheet.render(true, { mode: 'view' });
-    else if (journalId) {
-      const journal = game.journal.get(journalId);
-      if (journal) journal.sheet.render(true, { pageId: id });
-    }
-    this.#closeSearch();
+  static #onOpenNoteViewer(_event, _target) {
+    NoteViewer.toggle();
   }
 
   /**
@@ -1375,130 +1331,6 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Update search results without full re-render.
-   */
-  #updateSearchResults() {
-    const panel = this.#searchPanelEl || this.element.querySelector('.calendaria-search');
-    if (!panel) return;
-    const resultsContainer = panel.querySelector('.search-panel-results');
-    if (!resultsContainer) return;
-    if (this.#searchResults?.length) {
-      resultsContainer.innerHTML = this.#searchResults
-        .map((r) => {
-          const icons = [];
-          if (r.data?.icon) icons.push(`<i class="result-note-icon ${r.data.icon}" style="color: ${r.data.color || '#4a9eff'}" data-tooltip="${localize('CALENDARIA.Search.NoteIcon')}"></i>`);
-          if (r.data?.gmOnly) icons.push(`<i class="result-gm-icon fas fa-lock" data-tooltip="${localize('CALENDARIA.Search.GMOnly')}"></i>`);
-          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}"${r.data.repeatTooltip ? ` data-tooltip="${r.data.repeatTooltip}"` : ''}></i>`);
-          if (r.data?.categoryIcons?.length) {
-            for (const cat of r.data.categoryIcons) icons.push(`<i class="result-category-icon fas ${cat.icon}" style="color: ${cat.color}" data-tooltip="${cat.label}"></i>`);
-          }
-          return `<div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
-            <div class="result-content">
-              <span class="result-name">${r.name}</span>
-              ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-            </div>
-            ${icons.length ? `<div class="result-icons">${icons.join('')}</div>` : ''}
-          </div>`;
-        })
-        .join('');
-      resultsContainer.classList.add('has-results');
-      if (this.#searchPanelEl) {
-        resultsContainer.querySelectorAll('[data-action="openSearchResult"]').forEach((el) => {
-          el.addEventListener('click', () => {
-            const id = el.dataset.id;
-            const journalId = el.dataset.journalId;
-            const page = NoteManager.getFullNote(id);
-            if (page) page.sheet.render(true, { mode: 'view' });
-            else if (journalId) {
-              const journal = game.journal.get(journalId);
-              if (journal) journal.sheet.render(true, { pageId: id });
-            }
-            this.#closeSearch();
-          });
-        });
-      }
-    } else if (this.#searchTerm?.length >= 2) {
-      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
-      resultsContainer.classList.add('has-results');
-    } else {
-      resultsContainer.innerHTML = '';
-      resultsContainer.classList.remove('has-results');
-    }
-  }
-
-  /**
-   * Position search panel with edge awareness.
-   */
-  #positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-search');
-    const bar = this.element.querySelector('.bar');
-    if (!panel || !bar) return;
-    if (panel.parentElement !== document.body) {
-      document.body.appendChild(panel);
-      this.#searchPanelEl = panel;
-      panel.querySelectorAll('[data-action="openSearchResult"]').forEach((el) => {
-        el.addEventListener('click', () => {
-          const id = el.dataset.id;
-          const journalId = el.dataset.journalId;
-          const page = NoteManager.getFullNote(id);
-          if (page) page.sheet.render(true, { mode: 'view' });
-          else if (journalId) {
-            const journal = game.journal.get(journalId);
-            if (journal) journal.sheet.render(true, { pageId: id });
-          }
-          this.#closeSearch();
-        });
-      });
-      const searchInput = panel.querySelector('.search-input');
-      if (searchInput) {
-        searchInput.focus();
-        const debouncedSearch = foundry.utils.debounce((term) => {
-          this.#searchTerm = term;
-          if (term.length >= 2) this.#searchResults = SearchManager.search(term, { searchContent: true });
-          else this.#searchResults = null;
-          this.#updateSearchResults();
-        }, 300);
-        searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
-        searchInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') this.#closeSearch();
-        });
-      }
-      setTimeout(() => {
-        this.#clickOutsideHandler = (event) => {
-          if (!panel.contains(event.target) && !this.element.contains(event.target)) this.#closeSearch();
-        };
-        document.addEventListener('mousedown', this.#clickOutsideHandler);
-      }, 100);
-    }
-    const barRect = bar.getBoundingClientRect();
-    const panelWidth = 280;
-    let left = barRect.left;
-    let top = barRect.bottom + 4;
-    if (left + panelWidth > window.innerWidth - 10) left = window.innerWidth - panelWidth - 10;
-    left = Math.max(10, left);
-    panel.style.left = `${left}px`;
-    panel.style.top = `${top}px`;
-  }
-
-  /**
-   * Close search and clean up.
-   */
-  #closeSearch() {
-    if (this.#clickOutsideHandler) {
-      document.removeEventListener('mousedown', this.#clickOutsideHandler);
-      this.#clickOutsideHandler = null;
-    }
-    if (this.#searchPanelEl?.parentElement === document.body) {
-      this.#searchPanelEl.remove();
-      this.#searchPanelEl = null;
-    }
-    this.#searchTerm = '';
-    this.#searchResults = null;
-    this.#searchOpen = false;
-    this.render({ parts: ['bar'] });
-  }
-
-  /**
    * Handle click on add note button to create a new note.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
@@ -1512,7 +1344,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
         endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
-      }
+      },
+      source: 'ui'
     });
   }
 
@@ -1543,12 +1376,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click to open BigCal application.
+   * Handle click to show BigCal application.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
-  static #onOpenBigCal(_event, _target) {
-    new BigCal().render(true);
+  static #onShowBigCal(_event, _target) {
+    BigCal.show();
   }
 
   /**
@@ -1561,7 +1394,16 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click to open settings panel.
+   * Open the Chronicle chronicle.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onOpenChronicle(_event, _target) {
+    Chronicle.toggle();
+  }
+
+  /**
+   * Open the settings panel.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
@@ -1653,23 +1495,39 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     TimeClock.forwardFor('calendaria-hud');
   }
 
-  /** Handle custom decrement 2 (larger). */
-  static #onCustomDec2() {
+  /**
+   * Handle custom decrement 2 (larger).
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onCustomDec2(_event, _target) {
     HUD.#applyCustomJump('dec2');
   }
 
-  /** Handle custom decrement 1 (smaller). */
-  static #onCustomDec1() {
+  /**
+   * Handle custom decrement 1 (smaller).
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onCustomDec1(_event, _target) {
     HUD.#applyCustomJump('dec1');
   }
 
-  /** Handle custom increment 1 (smaller). */
-  static #onCustomInc1() {
+  /**
+   * Handle custom increment 1 (smaller).
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onCustomInc1(_event, _target) {
     HUD.#applyCustomJump('inc1');
   }
 
-  /** Handle custom increment 2 (larger). */
-  static #onCustomInc2() {
+  /**
+   * Handle custom increment 2 (larger).
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Target element
+   */
+  static #onCustomInc2(_event, _target) {
     HUD.#applyCustomJump('inc2');
   }
 
@@ -1692,7 +1550,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: totalSeconds });
       return;
     }
-    game.time.advance(totalSeconds);
+    CinematicOverlay.gatedAdvance(totalSeconds);
   }
 
   /**
@@ -1705,12 +1563,16 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the HUD.
+   * @param {object} [options] - Show options
+   * @param {boolean} [options.silent] - If true, don't show permission warning
    * @returns {HUD|null} The HUD instance, or null if blocked by combat hide
    */
-  static show() {
-    const combatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (game.combat?.started && (combatMode === 'hideCombat' || combatMode === 'hideEncounter')) return null;
-    if (game.combat && !game.combat.started && combatMode === 'hideEncounter') return null;
+  static show({ silent = false } = {}) {
+    if (!canViewHUD()) {
+      if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return null;
+    }
+    if (isCombatBlocked(SETTINGS.HUD_COMBAT_MODE)) return null;
     if (!game.user.isGM && canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS)) return null;
     const instance = this.instance ?? new HUD();
     instance.render({ force: true });
@@ -1750,65 +1612,5 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const autoFade = game.settings.get(MODULE.ID, SETTINGS.HUD_AUTO_FADE);
     const opacity = autoFade ? game.settings.get(MODULE.ID, SETTINGS.HUD_IDLE_OPACITY) / 100 : 1;
     document.documentElement.style.setProperty('--calendaria-hud-idle-opacity', opacity);
-  }
-
-  /**
-   * Migrate legacy combat compact/hide booleans to the unified combat mode dropdown.
-   * @private
-   */
-  static #migrateCombatSettings() {
-    const currentMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (currentMode !== 'compactCombat') return;
-    const legacyHide = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE);
-    const legacyCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
-    if (legacyHide) {
-      game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_MODE, 'hideCombat');
-    } else if (!legacyCompact) {
-      game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_MODE, 'none');
-    }
-  }
-
-  /**
-   * Register global combat hooks for hide during combat functionality.
-   * Should be called once during module initialization.
-   */
-  static registerCombatHooks() {
-    Hooks.once('ready', () => this.#migrateCombatSettings());
-
-    Hooks.on('combatStart', () => {
-      const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-      if (mode !== 'hideCombat' && mode !== 'hideEncounter') return;
-      if (this.instance?.rendered) {
-        HUD.#closedForCombat = true;
-        this.instance.close({ combat: true });
-      }
-    });
-
-    Hooks.on('createCombat', () => {
-      const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-      if (mode !== 'hideEncounter') return;
-      if (this.instance?.rendered) {
-        HUD.#closedForCombat = true;
-        this.instance.close({ combat: true });
-      }
-    });
-
-    Hooks.on('deleteCombat', () => {
-      HUD.#onCombatEnd();
-    });
-
-    Hooks.on('updateCombat', () => {
-      if (!game.combat?.started) HUD.#onCombatEnd();
-    });
-  }
-
-  /**
-   * Handle combat ending - reopen HUD if it was closed due to combat.
-   */
-  static #onCombatEnd() {
-    if (!HUD.#closedForCombat) return;
-    HUD.#closedForCombat = false;
-    const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (mode !== 'none' && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
   }
 }

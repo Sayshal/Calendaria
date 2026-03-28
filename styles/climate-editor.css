@@ -23,14 +23,14 @@
       padding: 0.4rem 0.6rem;
       border: 0.0625rem solid color-mix(in srgb, var(--weather-color) 50%, transparent);
       border-radius: 0.25rem;
-      background: color-mix(in srgb, var(--weather-color) 15%, var(--color-cool-5));
+      background: color-mix(in srgb, var(--weather-color) 15%, var(--calendaria-surface-dim));
       transition:
         border-color 0.15s ease,
         background 0.15s ease;
 
       &.active {
         border-color: var(--weather-color);
-        background: color-mix(in srgb, var(--weather-color) 35%, var(--color-cool-5));
+        background: color-mix(in srgb, var(--weather-color) 35%, var(--calendaria-surface-dim));
       }
 
       i {
@@ -53,7 +53,7 @@
         width: 3.5rem;
         height: 1.125rem;
         padding: 0 0.25rem;
-        border: 0.0625rem solid var(--color-cool-4);
+        border: 0.0625rem solid var(--calendaria-border);
         font-size: var(--font-size-14);
         text-align: right;
       }
@@ -92,7 +92,7 @@
     }
 
     .units {
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-size: 0.85rem;
     }
 
@@ -105,8 +105,8 @@
     }
 
     .preset-header {
-      border-bottom: 0.0625rem solid var(--color-cool-4);
-      color: var(--color-text-secondary);
+      border-bottom: 0.0625rem solid var(--calendaria-border);
+      color: var(--calendaria-text-secondary);
       font-weight: 600;
       font-size: var(--font-size-14);
 
@@ -127,18 +127,18 @@
       }
 
       .solstice-date {
-        color: var(--color-text-secondary, hsl(0deg 0% 60%));
+        color: var(--calendaria-text-secondary);
         font-size: 0.85rem;
       }
     }
 
     .modifier-relative {
-      color: var(--color-level-info);
+      color: var(--calendaria-primary);
     }
 
     .zero-weight-warning {
-      border-color: var(--color-level-warning);
-      box-shadow: 0 0 0.1875rem var(--color-level-warning);
+      border-color: var(--calendaria-warning);
+      box-shadow: 0 0 0.1875rem var(--calendaria-warning);
     }
 
     .wind-direction-grid {
@@ -150,7 +150,7 @@
     &.zone-mode .sheet-tabs.tabs {
       gap: 0;
       margin-bottom: 0.5rem;
-      border-bottom: 0.0625rem solid var(--color-cool-4);
+      border-bottom: 0.0625rem solid var(--calendaria-border);
 
       a {
         gap: 0.4rem;
@@ -158,7 +158,7 @@
         align-items: center;
         padding: 0.5rem 1rem;
         border-bottom: 0.125rem solid transparent;
-        color: var(--color-text-secondary);
+        color: var(--calendaria-text-secondary);
         font-weight: 500;
         cursor: pointer;
         transition:
@@ -166,12 +166,12 @@
           border-color 0.15s ease;
 
         &:hover {
-          color: var(--color-text-primary);
+          color: var(--calendaria-text);
         }
 
         &.active {
-          border-bottom-color: var(--color-warm-2);
-          color: var(--color-text-primary);
+          border-bottom-color: var(--calendaria-accent);
+          color: var(--calendaria-text);
         }
       }
     }
@@ -179,36 +179,36 @@
 
   &.weather-probability-dialog {
     .window-content {
-      max-height: 46.875rem;
       display: flex;
       flex-direction: column;
+      max-height: 46.875rem;
     }
 
     .weather-probability-content {
-      padding: 0.5rem;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
       min-height: 0;
+      padding: 0.5rem;
+      overflow: hidden;
     }
 
     .probability-table-wrapper {
       flex: 1;
-      overflow-y: auto;
       min-height: 0;
+      overflow-y: auto;
     }
 
     .probability-table {
       width: 100%;
-      border-collapse: collapse;
       margin: 0.75rem 0;
+      border-collapse: collapse;
 
       th {
-        text-align: center;
-        font-size: var(--font-size-11);
-        color: var(--color-text-secondary);
         padding: 0.25rem 0.5rem;
-        border-bottom: 0.0625rem solid var(--color-border-light-2);
+        border-bottom: 0.0625rem solid var(--calendaria-border);
+        color: var(--calendaria-text-secondary);
+        font-size: var(--font-size-11);
+        text-align: center;
         white-space: nowrap;
       }
 
@@ -218,7 +218,7 @@
       }
 
       tr:nth-child(even) {
-        background: color-mix(in srgb, var(--color-text-primary) 3%, transparent);
+        background: color-mix(in srgb, var(--calendaria-text) 3%, transparent);
       }
 
       .preset-icon {
@@ -233,9 +233,9 @@
 
       .preset-weight {
         width: 1%;
-        white-space: nowrap;
+        color: var(--calendaria-text-secondary);
         text-align: center;
-        color: var(--color-text-secondary);
+        white-space: nowrap;
       }
 
       .preset-percent {
@@ -246,36 +246,36 @@
     .percent-bar-container {
       position: relative;
       height: 1.25rem;
-      background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
       border-radius: 0.1875rem;
       overflow: hidden;
+      background: color-mix(in srgb, var(--calendaria-text) 5%, transparent);
     }
 
     .percent-bar {
+      opacity: 0.6;
       height: 100%;
       border-radius: 0.1875rem;
-      opacity: 0.6;
       transition: width 0.3s ease;
     }
 
     .percent-label {
       position: absolute;
       top: 0;
-      left: 0;
       right: 0;
-      text-align: center;
+      left: 0;
+      color: var(--calendaria-text);
+      font-weight: bold;
       font-size: var(--font-size-11);
       line-height: 1.25rem;
-      color: var(--color-text-primary);
-      font-weight: bold;
+      text-align: center;
     }
 
     .temp-range-footer {
       margin-top: 0.5rem;
       padding: 0.5rem;
+      border-top: 0.0625rem solid var(--calendaria-border);
+      color: var(--calendaria-text-secondary);
       text-align: center;
-      color: var(--color-text-secondary);
-      border-top: 0.0625rem solid var(--color-border-light-2);
 
       i {
         margin-right: 0.25rem;

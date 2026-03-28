@@ -4,12 +4,7 @@
  * @author Tyler
  */
 
-import { BigCal } from '../../applications/calendar/big-cal.mjs';
-import { MiniCal } from '../../applications/calendar/mini-cal.mjs';
-import { HUD } from '../../applications/hud/hud.mjs';
-import { Stopwatch } from '../../applications/time/stopwatch.mjs';
-import { SunDial } from '../../applications/time/sun-dial.mjs';
-import { TimeKeeper } from '../../applications/time/time-keeper.mjs';
+import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../localization.mjs';
 
@@ -44,7 +39,8 @@ function replaceFooter({ element }) {
     { id: 'hud', icon: 'fa-landmark-dome', tooltip: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
     { id: 'timekeeper', icon: 'fa-gauge', tooltip: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', toggle: () => TimeKeeper.toggle() },
     { id: 'sundial', icon: 'fa-sun', tooltip: 'CALENDARIA.SettingsPanel.Tab.SunDial', toggle: () => SunDial.toggle() },
-    { id: 'stopwatch', icon: 'fa-stopwatch', tooltip: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', toggle: () => Stopwatch.toggle() }
+    { id: 'stopwatch', icon: 'fa-stopwatch', tooltip: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', toggle: () => Stopwatch.toggle() },
+    { id: 'chronicle', icon: 'fa-scroll', tooltip: 'CALENDARIA.SettingsPanel.Tab.Chronicle', toggle: () => Chronicle.toggle() }
   ];
   for (const app of apps) {
     const btn = document.createElement('button');

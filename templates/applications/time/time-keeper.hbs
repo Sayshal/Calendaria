@@ -4,7 +4,7 @@
       <span class="time">{{{currentTime}}}</span>
       {{#if canChangeDateTime}}
         <button type="button" class="play-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggle" data-tooltip
-          aria-label="{{#if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else}}{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}{{/if}}">
+          aria-label="{{#if clockDisabled}}{{localize 'CALENDARIA.TimeClock.Disabled'}}{{else if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
           <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
         </button>
       {{/if}}

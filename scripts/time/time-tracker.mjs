@@ -4,12 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { executeMacroById } from '../utils/macro-utils.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
+import { executeMacroById, format, localize, log } from '../utils/_module.mjs';
+import { WeatherManager } from '../weather/_module.mjs';
 
 /**
  * Static class that tracks world time changes and fires threshold hooks.
@@ -32,6 +30,9 @@ export default class TimeTracker {
 
   /** @type {boolean} Flag to skip threshold/period hooks on next update (for timepoint jumps) */
   static #skipNextHooks = false;
+
+  /** @type {number} Maximum days to fire threshold hooks for (prevents hook spam on large advances) */
+  static #MAX_THRESHOLD_DAYS = 30;
 
   /**
    * Skip threshold and period hooks on the next time update.
@@ -69,13 +70,14 @@ export default class TimeTracker {
     }
     if (this.#skipNextHooks) {
       this.#skipNextHooks = false;
-      log(3, 'Skipping threshold/period hooks (timepoint jump)');
+      log(3, 'Skipping threshold/period macros (timepoint jump)');
+      this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
+      this.#checkPeriodChanges(this.#lastComponents, currentComponents, calendar, { skipMacros: true });
       this.#lastWorldTime = worldTime;
       this.#lastComponents = foundry.utils.deepClone(currentComponents);
       this.#lastSeason = currentComponents?.season ?? null;
       this.#lastMoonPhases = this.#getCurrentMoonPhases();
       this.#lastRestDay = this.#isCurrentDayRestDay();
-      this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
       return;
     }
     this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
@@ -115,15 +117,13 @@ export default class TimeTracker {
    * @param {object} previousComponents - Previous time components
    * @param {object} currentComponents - Current time components
    * @param {object} calendar - Active calendar
+   * @param {object} [options] - Additional options
+   * @param {boolean} [options.skipMacros] - If true, skip macro execution
    * @private
    */
-  static #checkPeriodChanges(previousComponents, currentComponents, calendar) {
+  static #checkPeriodChanges(previousComponents, currentComponents, calendar, { skipMacros = false } = {}) {
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const hookData = {
-      previous: { ...previousComponents, year: previousComponents.year + yearZero },
-      current: { ...currentComponents, year: currentComponents.year + yearZero },
-      calendar: calendar
-    };
+    const hookData = { previous: { ...previousComponents, year: previousComponents.year + yearZero }, current: { ...currentComponents, year: currentComponents.year + yearZero }, calendar: calendar };
     if (previousComponents.year !== currentComponents.year) {
       log(3, `Year changed: ${previousComponents.year + yearZero} -> ${currentComponents.year + yearZero}`);
       Hooks.callAll(HOOKS.YEAR_CHANGE, hookData);
@@ -135,7 +135,7 @@ export default class TimeTracker {
     if (previousComponents.dayOfMonth !== currentComponents.dayOfMonth || previousComponents.month !== currentComponents.month || previousComponents.year !== currentComponents.year) {
       log(3, `Day changed`);
       Hooks.callAll(HOOKS.DAY_CHANGE, hookData);
-      this.#executePeriodMacro('day', hookData);
+      if (!skipMacros) this.#executePeriodMacro('day', hookData);
     }
     const previousSeason = previousComponents.season ?? this.#lastSeason;
     const currentSeason = currentComponents.season;
@@ -143,7 +143,7 @@ export default class TimeTracker {
       const seasonData = { ...hookData, previousSeason: calendar.seasonsArray?.[previousSeason] ?? null, currentSeason: calendar.seasonsArray?.[currentSeason] ?? null };
       log(3, `Season changed: ${previousSeason} -> ${currentSeason}`);
       Hooks.callAll(HOOKS.SEASON_CHANGE, seasonData);
-      this.#executePeriodMacro('season', seasonData);
+      if (!skipMacros) this.#executePeriodMacro('season', seasonData);
     }
   }
 
@@ -164,9 +164,6 @@ export default class TimeTracker {
     const thresholds = this.#getAllThresholdsCrossed(previousComponents, currentComponents, calendar);
     for (const threshold of thresholds) this.#fireThresholdHook(threshold.name, threshold.data);
   }
-
-  /** @type {number} Maximum days to fire threshold hooks for (prevents hook spam on large advances) */
-  static #MAX_THRESHOLD_DAYS = 30;
 
   /**
    * Get all thresholds crossed between two time points.

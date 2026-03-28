@@ -69,9 +69,24 @@
       "name": "Holiday",
       "dayOfYear": 0,
       "countsForWeekday": false,
-      "icon": "fas fa-rocket",
+      "icon": "fa-rocket",
       "color": "#4169E1",
-      "description": "Intercalary day commemorating the founding of the Third Imperium, dedicated to leisure."
+      "description": "Intercalary day commemorating the founding of the Third Imperium, dedicated to leisure.",
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "condition",
+        "field": "dayOfYear",
+        "op": "==",
+        "value": 1
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "daylight": {

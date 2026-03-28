@@ -5,33 +5,12 @@
  * @author Tyler
  */
 
-import CalendarRegistry from '../calendar/calendar-registry.mjs';
-import * as LeapYearUtils from '../calendar/calendar-utils.mjs';
+import { CalendarRegistry, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
-import { format, localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/_module.mjs';
+import { resolveRandomizedPhase } from './_module.mjs';
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
-
-/**
- * @param {number} a - First number
- * @param {number} b - Second number
- * @returns {number} Greatest common divisor
- */
-function _gcd(a, b) {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a;
-}
-
-/**
- * @param {number} a - First number
- * @param {number} b - Second number
- * @returns {number} Least common multiple
- */
-function _lcm(a, b) {
-  return (a / _gcd(a, b)) * b;
-}
 
 /**
  * Calendar data model with extended features for fantasy calendars.
@@ -41,12 +20,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   static #epochOffset = 0;
 
   /** @type {Object<string, string[]>} Maps date themes to accepted Calendaria calendar IDs */
-  static #themeCalendarMap = {
-    AR: ['golarion'],
-    IC: ['golarion'],
-    AD: ['gregorian'],
-    CE: ['gregorian']
-  };
+  static #themeCalendarMap = { AR: ['golarion'], IC: ['golarion-imperial', 'golarion'], AG: ['golarion', 'pact-standard'], AD: ['gregorian'], CE: ['gregorian'] };
 
   /**
    * Get the active system world clock (PF2E or SF2E).
@@ -84,8 +58,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const hoursPerDay = calendar.time?.hoursPerDay ?? 24;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const secondsPerDay = hoursPerDay * secondsPerHour;
-    const yearZero = calendar.years?.yearZero ?? 0;
-    const internalYear = wc.year - yearZero;
+    const internalYear = dt.year;
     let dayOfYear = dt.day - 1;
     for (let m = 0; m < dt.month - 1; m++) dayOfYear += calendar.getDaysInMonth?.(m, internalYear) ?? 30;
     let totalDays = calendar.totalDaysBeforeYear?.(internalYear) ?? 0;
@@ -268,192 +241,29 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Legacy {{var}} → modern token mapping.
-   * @since 0.9.0
-   * @deprecated Remove in 1.1.0
-   */
-  static #LEGACY_TOKENS = {
-    '{{y}}': 'YY',
-    '{{yyyy}}': 'YYYY',
-    '{{Y}}': 'YYYY',
-    '{{B}}': 'MMMM',
-    '{{b}}': 'MMM',
-    '{{m}}': 'M',
-    '{{mm}}': 'MM',
-    '{{d}}': 'D',
-    '{{dd}}': 'DD',
-    '{{0}}': 'Do',
-    '{{j}}': 'DDD',
-    '{{w}}': 'd',
-    '{{A}}': 'dddd',
-    '{{a}}': 'ddd',
-    '{{H}}': 'HH',
-    '{{h}}': 'h',
-    '{{hh}}': 'hh',
-    '{{M}}': 'mm',
-    '{{S}}': 'ss',
-    '{{p}}': 'a',
-    '{{P}}': 'A',
-    '{{W}}': 'W',
-    '{{WW}}': 'WW',
-    '{{WN}}': '[namedWeek]',
-    '{{Wn}}': '[namedWeekAbbr]',
-    '{{ch}}': '[ch]',
-    '{{chAbbr}}': '[chAbbr]',
-    '{{E}}': 'GGGG',
-    '{{e}}': '[yearInEra]',
-    '{{season}}': 'QQQQ',
-    '{{moon}}': '[moon]',
-    '{{era}}': 'GGGG',
-    '{{eraYear}}': '[yearInEra]',
-    '{{yearInEra}}': '[yearInEra]',
-    '{{year}}': 'YYYY',
-    '{{abbreviation}}': 'G',
-    '{{short}}': 'G'
-  };
-
-  /**
-   * Deprecated token → replacement mapping.
-   * @since 0.9.0
-   * @deprecated Remove in 1.1.0
-   */
-  static #DEPRECATED_TOKENS = {
-    dddd: 'EEEE',
-    ddd: 'EEE',
-    dd: 'EE',
-    d: 'e',
-    '[era]': 'GGGG',
-    '[eraAbbr]': 'G',
-    '[year]': 'YYYY',
-    '[short]': 'G',
-    '[season]': 'QQQQ',
-    '[seasonAbbr]': 'QQQ'
-  };
-
-  /**
    * Migrate source data before schema validation.
    * @param {object} source - Raw source data
    * @returns {object} Migrated source data
    * @override
    */
   static migrateData(source) {
-    CalendariaCalendar.#migrateCycleStages(source);
-    CalendariaCalendar.#migrateLegacyFormats(source);
-    CalendariaCalendar.#migrateDeprecatedTokens(source);
-    CalendariaCalendar.#migrateArraysToObjects(source);
     CalendariaCalendar.#migrateDateIndexing(source);
+    CalendariaCalendar.#migrateFestivalIcons(source);
+    CalendariaCalendar.#migrateFestivalConditionTrees(source);
     return super.migrateData(source);
   }
 
   /**
-   * Rename cycle.entries → cycle.stages.
-   * @param {object} source - Raw source data
-   * @since 0.9.0
-   * @deprecated Remove in 1.1.0
-   */
-  static #migrateCycleStages(source) {
-    const cycles = Array.isArray(source.cycles) ? source.cycles : source.cycles ? Object.values(source.cycles) : [];
-    if (!cycles.length) return;
-    for (const cycle of cycles) {
-      if (cycle.entries && !cycle.stages) {
-        cycle.stages = cycle.entries;
-        delete cycle.entries;
-      }
-    }
-  }
-
-  /**
-   * Convert legacy {{var}} format strings to modern bracket tokens.
-   * @param {object} source - Raw source data
-   * @since 0.9.0
-   * @deprecated Remove in 1.1.0
-   */
-  static #migrateLegacyFormats(source) {
-    const format = (str) => {
-      let out = str.replace(/{{c\d+}}/g, '[cycle]').replace(/{{(\d+)}}/g, '[$1]');
-      for (const [old, rep] of Object.entries(CalendariaCalendar.#LEGACY_TOKENS)) out = out.replace(new RegExp(old.replace(/[{}]/g, '\\$&'), 'g'), rep);
-      return out;
-    };
-    const isLegacy = (str) => typeof str === 'string' && /{{[^}]+}}/.test(str);
-    if (source.dateFormats) for (const [key, val] of Object.entries(source.dateFormats)) if (isLegacy(val)) source.dateFormats[key] = format(val);
-    if (isLegacy(source.cycleFormat)) source.cycleFormat = format(source.cycleFormat);
-  }
-
-  /**
-   * Replace deprecated format tokens with current equivalents.
-   * @param {object} source - Raw source data
-   * @since 0.9.0
-   * @deprecated Remove in 1.1.0
-   */
-  static #migrateDeprecatedTokens(source) {
-    const migrate = (str) => {
-      if (typeof str !== 'string') return str;
-      let out = str;
-      for (const [tok, rep] of Object.entries(CalendariaCalendar.#DEPRECATED_TOKENS).sort((a, b) => b[0].length - a[0].length)) {
-        if (tok.startsWith('[')) out = out.split(tok).join(rep);
-        else out = out.replace(new RegExp(`(?<![a-zA-Z])${tok}(?![a-zA-Z])`, 'g'), rep);
-      }
-      return out;
-    };
-    if (source.dateFormats) {
-      for (const [key, val] of Object.entries(source.dateFormats)) {
-        const migrated = migrate(val);
-        if (migrated !== val) source.dateFormats[key] = migrated;
-      }
-    }
-    if (source.cycleFormat) {
-      const migrated = migrate(source.cycleFormat);
-      if (migrated !== source.cycleFormat) source.cycleFormat = migrated;
-    }
-  }
-
-  /**
-   * Convert legacy array-based collections to keyed objects.
-   * @param {object} source - Raw source data
-   * @since 0.9.0
-   * @deprecated Remove in 1.1.0
-   */
-  static #migrateArraysToObjects(source) {
-    const convert = (arr) => {
-      if (!Array.isArray(arr)) return arr;
-      const obj = {};
-      for (const item of arr) obj[foundry.utils.randomID()] = item;
-      return obj;
-    };
-    for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) if (Array.isArray(source[key])) source[key] = convert(source[key]);
-    if (source.months?.values && Array.isArray(source.months.values)) source.months.values = convert(source.months.values);
-    if (source.days?.values && Array.isArray(source.days.values)) source.days.values = convert(source.days.values);
-    if (source.seasons?.values && Array.isArray(source.seasons.values)) source.seasons.values = convert(source.seasons.values);
-    if (source.weather?.zones && Array.isArray(source.weather.zones)) source.weather.zones = convert(source.weather.zones);
-    if (source.weeks?.names && Array.isArray(source.weeks.names)) source.weeks.names = convert(source.weeks.names);
-    const convertNested = (parent, key) => {
-      if (!parent || typeof parent !== 'object') return;
-      for (const item of Object.values(parent)) if (item && Array.isArray(item[key])) item[key] = convert(item[key]);
-    };
-    if (source.moons && !Array.isArray(source.moons)) convertNested(source.moons, 'phases');
-    if (source.cycles && !Array.isArray(source.cycles)) convertNested(source.cycles, 'stages');
-    if (source.weather?.zones && !Array.isArray(source.weather.zones)) convertNested(source.weather.zones, 'presets');
-    if (source.months?.values && !Array.isArray(source.months.values)) convertNested(source.months.values, 'weekdays');
-    if (source.seasons?.values && !Array.isArray(source.seasons.values)) {
-      for (const season of Object.values(source.seasons.values)) if (season?.climate?.presets && Array.isArray(season.climate.presets)) season.climate.presets = convert(season.climate.presets);
-    }
-  }
-
-  /**
    * Migrate date fields from 1-indexed to 0-indexed conventions.
-   * Detects old format by presence of `day` field (renamed to `dayOfMonth` in new format).
-   * When old format detected, migrates ALL date fields: festivals, seasons, moons.
+   * @deprecated since 0.10.4 — remove in 1.1.0
    * @param {object} source - Raw source data
    */
   static #migrateDateIndexing(source) {
-    // Detect old format: any festival with `day` field, or any moon with referenceDate.day
     const festivals = source.festivals ? Object.values(source.festivals) : [];
     const moons = source.moons ? Object.values(source.moons) : [];
     const hasOldFestival = festivals.some((f) => 'day' in f && !('dayOfMonth' in f));
     const hasOldMoon = moons.some((m) => m.referenceDate && 'day' in m.referenceDate && !('dayOfMonth' in m.referenceDate));
     if (!hasOldFestival && !hasOldMoon) return;
-
-    // Migrate festivals: day→dayOfMonth, month/dayOfYear from 1-indexed to 0-indexed
     for (const f of festivals) {
       if (!('day' in f) || 'dayOfMonth' in f) continue;
       f.dayOfMonth = (f.day ?? 1) - 1;
@@ -461,27 +271,73 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       if (f.month != null && f.month >= 1) f.month -= 1;
       if (f.dayOfYear != null && f.dayOfYear >= 1) f.dayOfYear -= 1;
     }
-
-    // Migrate seasons only when old festival data was detected (co-stored in same format era)
     if (hasOldFestival && source.seasons?.values) {
       for (const s of Object.values(source.seasons.values)) {
         if (s.monthStart != null && s.monthStart >= 1) s.monthStart -= 1;
         if (s.monthEnd != null && s.monthEnd >= 1) s.monthEnd -= 1;
       }
     }
-
-    // Migrate moons: referenceDate.day→dayOfMonth
     for (const m of moons) {
       if (m.referenceDate && 'day' in m.referenceDate && !('dayOfMonth' in m.referenceDate)) {
         m.referenceDate.dayOfMonth = (m.referenceDate.day ?? 1) - 1;
         delete m.referenceDate.day;
       }
     }
-
-    // Migrate currentDate: day→dayOfMonth
     if (source.currentDate && 'day' in source.currentDate && !('dayOfMonth' in source.currentDate)) {
       source.currentDate.dayOfMonth = (source.currentDate.day ?? 1) - 1;
       delete source.currentDate.day;
+    }
+  }
+
+  /**
+   * Strip legacy `fas ` prefix from festival icons.
+   * @deprecated since 1.0.0 — remove in 1.2.0
+   * @param {object} source - Raw source data
+   * @private
+   */
+  static #migrateFestivalIcons(source) {
+    if (!source.festivals) return;
+    for (const fest of Object.values(source.festivals)) {
+      if (typeof fest.icon !== 'string') continue;
+      if (fest.icon.startsWith('fas ')) fest.icon = fest.icon.slice(4);
+      else if (fest.icon.startsWith('fa-solid ')) fest.icon = fest.icon.slice(9);
+    }
+  }
+
+  /**
+   * Populate conditionTree on festivals that only have month+day fields.
+   * @param {object} source - Raw source data
+   * @since 1.1.0
+   * @deprecated Remove in 1.3.0
+   * @private
+   */
+  static #migrateFestivalConditionTrees(source) {
+    if (!source.festivals) return;
+    for (const fest of Object.values(source.festivals)) {
+      if (fest.conditionTree != null) continue;
+      let dateCondition;
+      if (fest.dayOfYear != null) {
+        dateCondition = { type: 'condition', field: 'dayOfYear', op: '==', value: fest.dayOfYear + 1 };
+      } else if (fest.month != null && fest.dayOfMonth != null) {
+        dateCondition = {
+          type: 'group',
+          mode: 'and',
+          children: [
+            { type: 'condition', field: 'month', op: '==', value: fest.month + 1 },
+            { type: 'condition', field: 'day', op: '==', value: fest.dayOfMonth + 1 }
+          ]
+        };
+      }
+      if (!dateCondition) continue;
+      if (fest.leapYearOnly) {
+        fest.conditionTree = {
+          type: 'group',
+          mode: 'and',
+          children: [{ type: 'condition', field: 'isLeapYear', op: '==', value: 1 }, dateCondition]
+        };
+      } else {
+        fest.conditionTree = dateCondition;
+      }
     }
   }
 
@@ -592,7 +448,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           duration: new NumberField({ required: false, nullable: false, min: 1, integer: true, initial: 1 }),
           leapDuration: new NumberField({ required: false, nullable: true, min: 1, integer: true }),
           leapYearOnly: new BooleanField({ required: false, initial: false }),
-          countsForWeekday: new BooleanField({ required: false, initial: true })
+          countsForWeekday: new BooleanField({ required: false, initial: true }),
+          conditionTree: new foundry.data.fields.ObjectField({ nullable: true, initial: null })
         })
       ),
       moons: new TypedObjectField(
@@ -603,6 +460,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           referencePhase: new NumberField({ required: false, nullable: false, initial: 0, integer: true, min: 0 }),
           color: new StringField({ required: false, initial: '' }),
           moonBrightnessMax: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 0.3 }),
+          phaseMode: new StringField({ required: false, initial: 'fixed', choices: ['fixed', 'randomized'] }),
+          phaseSeed: new NumberField({ required: false, nullable: false, integer: true, initial: 0 }),
+          cycleVariance: new NumberField({ required: false, nullable: false, initial: 0, min: 0, max: 1 }),
+          anchorPhases: new TypedObjectField(
+            new SchemaField({
+              year: new NumberField({ required: false, nullable: true, integer: true }),
+              month: new NumberField({ required: true, integer: true, min: 0 }),
+              dayOfMonth: new NumberField({ required: true, integer: true, min: 0 }),
+              phaseIndex: new NumberField({ required: true, integer: true, min: 0 })
+            })
+          ),
           phases: new TypedObjectField(
             new SchemaField({
               name: new StringField({ required: true }),
@@ -618,7 +486,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             year: new NumberField({ required: true, integer: true, initial: 1 }),
             month: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
             dayOfMonth: new NumberField({ required: true, integer: true, min: 0, initial: 0 })
-          })
+          }),
+          eclipseMode: new StringField({ required: false, initial: 'never', choices: ['never', 'rare', 'occasional', 'frequent', 'custom'] }),
+          nodalPeriod: new NumberField({ required: false, nullable: true, initial: null, min: 1 }),
+          apparentSize: new NumberField({ required: false, nullable: false, initial: 1.0, min: 0.1, max: 2.0 })
         })
       ),
       eras: new TypedObjectField(
@@ -772,7 +643,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   isLeapYear(year) {
     const { intervals, yearZero } = this._getLeapYearLookup();
     if (!intervals.length) return false;
-    return LeapYearUtils.intersectsYear(intervals, year + yearZero, true);
+    return intersectsYear(intervals, year + yearZero, true);
   }
 
   /**
@@ -792,32 +663,38 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       switch (advancedConfig.rule) {
         case 'simple': {
           const interval = advancedConfig.interval;
-          if (interval && interval > 0) intervals = [LeapYearUtils.parseInterval(String(interval), start)];
+          if (interval && interval > 0) intervals = [parseInterval(String(interval), start)];
           break;
         }
         case 'gregorian':
-          intervals = LeapYearUtils.parsePattern('400,!100,4', start);
+          intervals = parsePattern('400,!100,4', start);
           break;
         case 'custom':
-          if (advancedConfig.pattern) intervals = LeapYearUtils.parsePattern(advancedConfig.pattern, start);
+          if (advancedConfig.pattern) intervals = parsePattern(advancedConfig.pattern, start);
           break;
       }
     } else if (leapConfig) {
       const interval = leapConfig.leapInterval;
       const start = leapConfig.leapStart ?? 0;
-      if (interval && interval > 0) intervals = [LeapYearUtils.parseInterval(String(interval), start)];
+      if (interval && interval > 0) intervals = [parseInterval(String(interval), start)];
     }
     if (!intervals.length) {
       const lookup = { key, intervals, period: 1, perPeriod: 0, cumulative: null, yearZero };
       this.__leapLookup = lookup;
       return lookup;
     }
-    const period = intervals.reduce((acc, iv) => _lcm(acc, iv.interval), 1);
+    const gcd = (a, b) => {
+      a = Math.abs(a);
+      b = Math.abs(b);
+      while (b) [a, b] = [b, a % b];
+      return a;
+    };
+    const period = intervals.reduce((acc, iv) => (acc / gcd(acc, iv.interval)) * iv.interval, 1);
     let cumulative = null;
     let perPeriod = 0;
     if (period <= 100_000) {
       cumulative = new Int32Array(period + 1);
-      for (let i = 0; i < period; i++) cumulative[i + 1] = cumulative[i] + (LeapYearUtils.intersectsYear(intervals, i, true) ? 1 : 0);
+      for (let i = 0; i < period; i++) cumulative[i + 1] = cumulative[i] + (intersectsYear(intervals, i, true) ? 1 : 0);
       perPeriod = cumulative[period];
     }
     const lookup = { key, intervals, period, perPeriod, cumulative, yearZero };
@@ -835,9 +712,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!cumulative) {
       let count = 0;
       if (displayYear > 0) {
-        for (let y = 0; y < displayYear; y++) if (LeapYearUtils.intersectsYear(intervals, y, true)) count++;
+        for (let y = 0; y < displayYear; y++) if (intersectsYear(intervals, y, true)) count++;
       } else {
-        for (let y = -1; y >= displayYear; y--) if (LeapYearUtils.intersectsYear(intervals, y, true)) count--;
+        for (let y = -1; y >= displayYear; y--) if (intersectsYear(intervals, y, true)) count--;
       }
       return count;
     }
@@ -845,17 +722,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const fullPeriods = Math.floor(displayYear / period);
     const remainder = ((displayYear % period) + period) % period;
     return fullPeriods * perPeriod + cumulative[remainder];
-  }
-
-  /**
-   * Count leap years between epoch (internal year 0) and the given internal year. O(1).
-   * @param {number} year - Internal year (0-based)
-   * @returns {number} Signed leap year count (positive for future, negative for past)
-   */
-  countLeapYearsBefore(year) {
-    if (year === 0) return 0;
-    const { yearZero } = this._getLeapYearLookup();
-    return this._cumulativeLeapCount(yearZero + year) - this._cumulativeLeapCount(yearZero);
   }
 
   /**
@@ -893,13 +759,14 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Check if the current year is a leap year.
-   * @param {number|object} [time] - Time to check, defaults to current world time
-   * @returns {boolean} True if the year is a leap year
+   * Count leap years between epoch (internal year 0) and the given internal year. O(1).
+   * @param {number} year - Internal year (0-based)
+   * @returns {number} Signed leap year count (positive for future, negative for past)
    */
-  isCurrentYearLeapYear(time = game.time.worldTime) {
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    return this.isLeapYear(components.year);
+  countLeapYearsBefore(year) {
+    if (year === 0) return 0;
+    const { yearZero } = this._getLeapYearLookup();
+    return this._cumulativeLeapCount(yearZero + year) - this._cumulativeLeapCount(yearZero);
   }
 
   /**
@@ -938,10 +805,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   getLeapYearDescription() {
     const advancedConfig = this.leapYearConfig;
-    if (advancedConfig?.rule && advancedConfig.rule !== 'none') return LeapYearUtils.getLeapYearDescription(advancedConfig);
+    if (advancedConfig?.rule && advancedConfig.rule !== 'none') return getLeapYearDescription(advancedConfig);
     const leapConfig = this.years?.leapYear;
-    if (!leapConfig) return LeapYearUtils.getLeapYearDescription(null);
-    return LeapYearUtils.getLeapYearDescription({ rule: 'simple', interval: leapConfig.leapInterval, start: leapConfig.leapStart ?? 0 });
+    if (!leapConfig) return getLeapYearDescription(null);
+    return getLeapYearDescription({ rule: 'simple', interval: leapConfig.leapInterval, start: leapConfig.leapStart ?? 0 });
   }
 
   /**
@@ -1206,16 +1073,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Check if a specific date is a non-counting festival day.
-   * @param {number|object} time  Time to check.
-   * @returns {boolean} True if date is a festival that doesn't count for weekdays.
-   */
-  isNonWeekdayFestival(time) {
-    const festival = this.findFestivalDay(time);
-    return festival?.countsForWeekday === false;
-  }
-
-  /**
    * Count total festival days that don't count for weekday calculation in a full year.
    * @param {boolean} [isLeap] - Whether to calculate for a leap year.
    * @returns {number} Number of non-counting festival days per year.
@@ -1330,6 +1187,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!Number.isFinite(daysSinceReference) || !Number.isFinite(moon.cycleLength) || moon.cycleLength <= 0) {
       return { name: phases[0].name, subPhaseName: phases[0].name, icon: phases[0].icon || '', position: 0, dayInCycle: 0 };
     }
+    if (moon.phaseMode === 'randomized') return this.#resolveRandomizedMoonPhase(moon, phases, currentDays, components);
     const refPhase = phases[moon.referencePhase ?? 0];
     const phaseOffset = (refPhase?.start ?? 0) * moon.cycleLength;
     const cycleDayAdjust = Number.isFinite(moon.cycleDayAdjust) ? moon.cycleDayAdjust : 0;
@@ -1368,6 +1226,47 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         }
         cumulativeDays += phaseDays[i];
       }
+    }
+    const matchedPhase = phases[phaseArrayIndex] || phases[0];
+    if (!matchedPhase) return null;
+    const subPhaseName = CalendariaCalendar.#getSubPhaseName(matchedPhase, dayWithinPhase, phaseDuration);
+    return { name: matchedPhase.name, subPhaseName, icon: matchedPhase.icon || '', position: normalizedPosition, dayInCycle: dayIndex, phaseIndex: phaseArrayIndex, dayWithinPhase, phaseDuration };
+  }
+
+  /**
+   * Resolve moon phase for a randomized moon using the seeded PRNG resolver.
+   * @param {object} moon - Moon definition
+   * @param {object[]} phases - Phase definitions array
+   * @param {number} absoluteDay - Absolute day number
+   * @param {object} components - Date components {year, month, dayOfMonth}
+   * @returns {object} Moon phase data
+   * @private
+   */
+  #resolveRandomizedMoonPhase(moon, phases, absoluteDay, components) {
+    const dateComponents = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? components.day ?? 0 };
+    const normalizedPosition = resolveRandomizedPhase(moon, absoluteDay, dateComponents);
+    const dayIndex = Math.floor(normalizedPosition * moon.cycleLength);
+    const hasRanges = phases.length > 0 && phases[0].start !== undefined && phases[0].end !== undefined;
+    let phaseArrayIndex = 0;
+    let dayWithinPhase = 0;
+    let phaseDuration = 1;
+    if (hasRanges) {
+      for (let i = 0; i < phases.length; i++) {
+        const phase = phases[i];
+        if (normalizedPosition >= (phase.start ?? 0) && normalizedPosition < (phase.end ?? 1)) {
+          phaseArrayIndex = i;
+          const startDay = Math.round((phase.start ?? 0) * moon.cycleLength);
+          const endDay = Math.round((phase.end ?? 1) * moon.cycleLength);
+          phaseDuration = Math.max(1, endDay - startDay);
+          dayWithinPhase = dayIndex - startDay;
+          break;
+        }
+      }
+    } else {
+      const numPhases = phases.length || 8;
+      phaseArrayIndex = Math.min(Math.floor(normalizedPosition * numPhases), numPhases - 1);
+      phaseDuration = Math.max(1, Math.round(moon.cycleLength / numPhases));
+      dayWithinPhase = dayIndex % phaseDuration;
     }
     const matchedPhase = phases[phaseArrayIndex] || phases[0];
     if (!matchedPhase) return null;
@@ -1470,7 +1369,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     let dayStart = offset;
     for (let i = 0; i < seasonIndex; i++) dayStart += seasons[i].duration ?? Math.floor(totalDays / seasons.length);
     const duration = seasons[seasonIndex].duration ?? Math.floor(totalDays / seasons.length);
-    const dayEnd = dayStart + duration - 1;
+    let dayEnd = dayStart + duration - 1;
+    if (seasonIndex === seasons.length - 1 && totalDays > cycleLength) dayEnd += totalDays - cycleLength;
     return { dayStart, dayEnd, cycleLength };
   }
 
@@ -1490,16 +1390,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const totalDays = this.getDaysInYear(components.year);
       const { cycleLength } = this._calculatePeriodicSeasonBounds(0, totalDays);
       if (cycleLength <= 0) return null;
-      const totalAbsDays = this._componentsToDays(components);
       const offset = this.seasons?.offset ?? 0;
-      const dayInCycle = (((totalAbsDays - offset) % cycleLength) + cycleLength) % cycleLength;
+      const leapDayOfYear = this._calculateDayOfYear(components);
+      const dayInCycle = (((leapDayOfYear - offset) % totalDays) + totalDays) % totalDays;
       let cumulative = 0;
       for (let i = 0; i < seasons.length; i++) {
         const duration = seasons[i].duration ?? Math.floor(totalDays / seasons.length);
-        if (dayInCycle >= cumulative && dayInCycle < cumulative + duration) return seasons[i];
         cumulative += duration;
+        if (dayInCycle < cumulative) return seasons[i];
       }
-      return null;
+      return seasons[seasons.length - 1];
     }
     for (const season of seasons) {
       if (season.monthStart != null && season.monthEnd != null) {
@@ -1589,126 +1489,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Get the current era for a given year.
-   * @param {number|object} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, abbreviation: string, yearInEra: number}|null} - Era data or null
-   */
-  getCurrentEra(time = game.time.worldTime) {
-    const eras = this.erasArray;
-    if (!eras.length) return null;
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const displayYear = components.year + (this.years?.yearZero ?? 0);
-    const sortedEras = [...eras].sort((a, b) => b.startYear - a.startYear);
-    for (const era of sortedEras) {
-      if (displayYear >= era.startYear && (era.endYear == null || displayYear <= era.endYear)) return { name: era.name, abbreviation: era.abbreviation, yearInEra: displayYear - era.startYear + 1 };
-    }
-    if (eras.length > 0) {
-      const era = eras[0];
-      return { name: era.name, abbreviation: era.abbreviation, yearInEra: displayYear };
-    }
-    return null;
-  }
-
-  /**
-   * Get all eras for this calendar.
-   * @returns {Array<object>} All eras
-   */
-  getAllEras() {
-    return this.erasArray;
-  }
-
-  /**
-   * Get the current canonical hour for a given time.
-   * @param {number|object} [time]  Time to use, by default the current world time.
-   * @returns {{name: string, abbreviation: string, startHour: number, endHour: number}|null} - Canonical hour or null
-   */
-  getCanonicalHour(time = game.time.worldTime) {
-    const canonicalHours = this.canonicalHoursArray;
-    if (!canonicalHours.length) return null;
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const currentHour = components.hour;
-    for (const ch of canonicalHours) {
-      if (ch.startHour <= ch.endHour)
-        if (currentHour >= ch.startHour && currentHour < ch.endHour) return ch;
-        else if (currentHour >= ch.startHour || currentHour < ch.endHour) return ch;
-    }
-    for (const ch of canonicalHours) if (currentHour === ch.endHour) return ch;
-    return null;
-  }
-
-  /**
-   * Get all canonical hours for this calendar.
-   * @returns {Array<{name: string, abbreviation: string, startHour: number, endHour: number}>} - All canonical hours
-   */
-  getAllCanonicalHours() {
-    return this.canonicalHoursArray;
-  }
-
-  /**
-   * Get the current week number and name for a given time.
-   * @param {number|object} [time]  Time to use, by default the current world time.
-   * @returns {{weekNumber: number, weekName: string, weekAbbr: string, type: string}|null} - Week data or null
-   */
-  getCurrentWeek(time = game.time.worldTime) {
-    const weekNames = this.namedWeeksArray;
-    if (!weekNames.length) return null;
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const daysInWeek = this.daysInWeek;
-    let weekNumber;
-    if (this.weeks.type === 'month-based') {
-      weekNumber = Math.floor(components.dayOfMonth / daysInWeek) + 1;
-      const nameIndex = (weekNumber - 1) % weekNames.length;
-      const week = weekNames[nameIndex];
-      return { weekNumber, weekName: localize(week?.name ?? ''), weekAbbr: week?.abbreviation ? localize(week.abbreviation) : '', type: this.weeks.type };
-    }
-    const months = this.monthsArray;
-    let dayOfYear = components.dayOfMonth;
-    for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
-    weekNumber = Math.floor(dayOfYear / daysInWeek) + 1;
-    let week = weekNames.find((w) => w.weekNumber === weekNumber);
-    if (!week && this.weeks.repeat) {
-      const sortedWeeks = [...weekNames].sort((a, b) => a.weekNumber - b.weekNumber);
-      const index = (weekNumber - sortedWeeks[0].weekNumber) % sortedWeeks.length;
-      week = sortedWeeks[((index % sortedWeeks.length) + sortedWeeks.length) % sortedWeeks.length];
-    }
-    if (!week) return { weekNumber, weekName: '', weekAbbr: '', type: this.weeks.type };
-    return { weekNumber, weekName: localize(week.name ?? ''), weekAbbr: week.abbreviation ? localize(week.abbreviation) : '', type: this.weeks.type };
-  }
-
-  /**
-   * Get week number within the year (1-indexed).
-   * @param {number|object} [time]  Time to use, by default the current world time.
-   * @returns {number} Week number (1-indexed).
-   */
-  getWeekOfYear(time = game.time.worldTime) {
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const daysInWeek = this.daysInWeek;
-    const months = this.monthsArray;
-    let dayOfYear = components.dayOfMonth;
-    for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
-    return Math.floor(dayOfYear / daysInWeek) + 1;
-  }
-
-  /**
-   * Get week number within the month (1-indexed).
-   * @param {number|object} [time]  Time to use, by default the current world time.
-   * @returns {number} Week number (1-indexed).
-   */
-  getWeekOfMonth(time = game.time.worldTime) {
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const daysInWeek = this.daysInWeek;
-    return Math.floor(components.dayOfMonth / daysInWeek) + 1;
-  }
-
-  /**
-   * Get all named weeks for this calendar.
-   * @returns {Array<{name: string, abbreviation: string}>} - All named weeks
-   */
-  getAllNamedWeeks() {
-    return this.namedWeeksArray;
-  }
-
-  /**
    * Get the current values for all cycles.
    * @param {number|object} [time]  Time to use, by default the current world time.
    * @returns {{text: string, values: Array<{cycleName: string, entryName: string, index: number}>}} - Cycle values
@@ -1773,24 +1553,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Get the current 1-indexed cycle number for a specific cycle.
-   * @param {number} [cycleIndex] - Index of the cycle definition to use
-   * @param {number|object} [time] - Time to use, by default the current world time
-   * @returns {number} - 1-indexed cycle number (minimum 1)
-   */
-  getCurrentCycleNumber(cycleIndex = 0, time = game.time.worldTime) {
-    const cycle = this.cyclesArray[cycleIndex];
-    if (!cycle?.length) return 1;
-    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const displayYear = components.year + (this.years?.yearZero ?? 0);
-    const epochValues = this._getCycleEpochValues(components, displayYear);
-    const epochValue = epochValues[cycle.basedOn] ?? 0;
-    const adjustedValue = epochValue + (cycle.offset || 0);
-    const cycleNum = Math.floor(adjustedValue / cycle.length) + 1;
-    return Math.max(1, cycleNum);
-  }
-
-  /**
    * Get the current cycle entry (named entry) for a specific cycle.
    * @param {number} [cycleIndex] - Index of the cycle definition to use
    * @param {number|object} [time] - Time to use, by default the current world time
@@ -1810,49 +1572,5 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const cycleNumber = Math.max(1, Math.floor(adjustedValue / cycle.length) + 1);
     const stage = stages[stageIndex];
     return { name: stage?.name ?? '', index: stageIndex, cycleNumber };
-  }
-
-  /**
-   * Get the active climate zone configuration.
-   * @returns {object|null} Active zone object or null
-   */
-  getActiveClimateZone() {
-    const zones = this.weatherZonesArray;
-    const activeId = this.weather?.activeZone ?? 'temperate';
-    return zones.find((z) => z.id === activeId) ?? zones[0] ?? null;
-  }
-
-  /**
-   * Get a climate zone by ID.
-   * @param {string} id - Zone ID
-   * @returns {object|null} Zone object or null
-   */
-  getClimateZoneById(id) {
-    return this.weatherZonesArray.find((z) => z.id === id) ?? null;
-  }
-
-  /**
-   * Get temperature range for a season in a specific zone.
-   * @param {string} zoneId - Climate zone ID
-   * @param {string} seasonName - Season name (localized or key)
-   * @returns {{min: number, max: number}} Temperature range
-   */
-  getTemperatureForSeason(zoneId, seasonName) {
-    const zone = this.getClimateZoneById(zoneId);
-    if (!zone?.temperatures) return { min: 10, max: 22 };
-    const temps = zone.temperatures;
-    if (temps[seasonName]) return temps[seasonName];
-    const lowerSeason = seasonName?.toLowerCase();
-    const matchedKey = Object.keys(temps).find((k) => k.toLowerCase() === lowerSeason);
-    if (matchedKey) return temps[matchedKey];
-    return temps._default ?? { min: 10, max: 22 };
-  }
-
-  /**
-   * Get all climate zone IDs for this calendar.
-   * @returns {string[]} Array of zone IDs
-   */
-  getClimateZoneIds() {
-    return this.weatherZonesArray.map((z) => z.id);
   }
 }

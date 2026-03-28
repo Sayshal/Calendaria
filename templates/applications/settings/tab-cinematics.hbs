@@ -1,0 +1,139 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <fieldset data-section="cinematic-behavior">
+    <legend>
+      {{localize "CALENDARIA.Cinematic.Settings.Fieldset.Behavior"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="cinematic-behavior"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="cinematicEnabled">{{localize "CALENDARIA.Cinematic.Settings.Enabled.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="cinematicEnabled" name="cinematicEnabled" {{#if cinematicEnabled}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.Enabled.Hint"}}</p>
+    </div>
+
+    <div class="form-group" data-depends-on="cinematicEnabled">
+      <label for="cinematicThreshold">{{localize "CALENDARIA.Cinematic.Settings.Threshold.Name"}}</label>
+      <div class="form-fields">
+        <input type="number" id="cinematicThreshold" name="cinematicThreshold" value="{{cinematicThreshold}}" min="1"
+          step="1" style="width: 4rem; flex: none">
+        <select id="cinematicThresholdUnit" name="cinematicThresholdUnit">
+          {{#each thresholdUnits}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.Threshold.Hint"}}</p>
+    </div>
+
+    <div class="form-group" data-depends-on="cinematicEnabled">
+      <label for="cinematicOnRest">{{localize "CALENDARIA.Cinematic.Settings.OnRest.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="cinematicOnRest" name="cinematicOnRest" {{#if cinematicOnRest}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.OnRest.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset data-section="cinematic-animation" data-depends-on="cinematicEnabled">
+    <legend>
+      {{localize "CALENDARIA.Cinematic.Settings.Fieldset.Animation"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="cinematic-animation"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="cinematicPanelDuration">{{localize "CALENDARIA.Cinematic.Settings.PanelDuration.Name"}}</label>
+      <div class="form-fields">
+        <div class="slider-with-ticks">
+          <input type="range" id="cinematicPanelDuration" name="cinematicPanelDuration" min="1000" max="6000" step="100"
+            value="{{cinematicPanelDuration}}">
+          <div class="slider-ticks">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <input type="number" class="range-value" min="1000" max="6000" step="100" value="{{cinematicPanelDuration}}"
+          style="width: 4.5rem; flex: none" tabindex="-1">
+        <span class="input-suffix">ms</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.PanelDuration.Hint"}}</p>
+    </div>
+
+  </fieldset>
+
+  <fieldset data-section="cinematic-content" data-depends-on="cinematicEnabled">
+    <legend>
+      {{localize "CALENDARIA.Cinematic.Settings.Fieldset.Content"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="cinematic-content"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="cinematicShowWeather">{{localize "CALENDARIA.Cinematic.Settings.ShowWeather.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="cinematicShowWeather" name="cinematicShowWeather"
+          {{#if cinematicShowWeather}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.ShowWeather.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="cinematicShowMoons">{{localize "CALENDARIA.Cinematic.Settings.ShowMoons.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="cinematicShowMoons" name="cinematicShowMoons"
+          {{#if cinematicShowMoons}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.ShowMoons.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="cinematicShowEvents">{{localize "CALENDARIA.Cinematic.Settings.ShowEvents.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="cinematicShowEvents" name="cinematicShowEvents"
+          {{#if cinematicShowEvents}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.ShowEvents.Hint"}}</p>
+    </div>
+
+    <div class="form-group" data-depends-on="cinematicShowEvents">
+      <label for="cinematicEventWeighting">{{localize "CALENDARIA.Cinematic.Settings.EventWeighting.Name"}}</label>
+      <div class="form-fields">
+        <select id="cinematicEventWeighting" name="cinematicEventWeighting">
+          <option value="all" {{#if (eq cinematicEventWeighting "all")}}selected{{/if}}>
+            {{localize "CALENDARIA.Cinematic.Settings.EventWeighting.All"}}
+          </option>
+          <option value="festivals-only" {{#if (eq cinematicEventWeighting "festivals-only")}}selected{{/if}}>
+            {{localize "CALENDARIA.Cinematic.Settings.EventWeighting.FestivalsOnly"}}
+          </option>
+          <option value="weighted" {{#if (eq cinematicEventWeighting "weighted")}}selected{{/if}}>
+            {{localize "CALENDARIA.Cinematic.Settings.EventWeighting.Weighted"}}
+          </option>
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.EventWeighting.Hint"}}</p>
+    </div>
+
+    <div class="form-group" data-depends-on="cinematicShowEvents">
+      <label for="cinematicEventMaxCards">{{localize "CALENDARIA.Cinematic.Settings.EventMaxCards.Name"}}</label>
+      <div class="form-fields">
+        <input type="number" id="cinematicEventMaxCards" name="cinematicEventMaxCards"
+          value="{{cinematicEventMaxCards}}" min="1" max="20" step="1" style="width: 4rem; flex: none">
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.EventMaxCards.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <div class="button-row app-controls">
+    <button type="button" data-action="playCinematicPreview">
+      <i class="fas fa-play"></i>
+      {{localize "CALENDARIA.Cinematic.Settings.Preview"}}
+    </button>
+  </div>
+
+</section>
