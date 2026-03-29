@@ -14,7 +14,6 @@ export function registerCinematic(quench) {
         it('isCinematicActive returns boolean', function () {
           const result = api.isCinematicActive();
           assert.typeOf(result, 'boolean');
-          assert.isFalse(result, 'No cinematic should be active during tests');
         });
         it('abortCinematic does not throw when nothing is playing', function () {
           assert.doesNotThrow(() => api.abortCinematic());

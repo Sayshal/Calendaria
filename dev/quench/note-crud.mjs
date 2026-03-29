@@ -18,7 +18,7 @@ export function registerNoteCrud(quench) {
         it('should create a note', async function () {
           api = CALENDARIA.api;
           const dt = api.getCurrentDateTime();
-          const page = await api.createNote({ name: `${TEST_NOTE_PREFIX} Create`, startDate: { year: dt.year, month: dt.month, day: dt.dayOfMonth + 1 } });
+          const page = await api.createNote({ name: `${TEST_NOTE_PREFIX} Create`, startDate: { year: dt.year, month: dt.month, day: dt.day + 1 } });
           assert.isNotNull(page, 'createNote should return a page');
           assert.ok(page.id, 'Created note should have an id');
           createdPageId = page.id;

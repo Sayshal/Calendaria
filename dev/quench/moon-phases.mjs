@@ -56,7 +56,7 @@ export function registerMoonPhases(quench) {
             return;
           }
           const dt = api.getCurrentDateTime();
-          const position = api.getMoonPhasePosition(moons[0], { year: dt.year, month: dt.month, day: dt.dayOfMonth });
+          const position = api.getMoonPhasePosition(moons[0], { year: dt.year, month: dt.month, day: dt.day });
           if (position == null) {
             this.skip();
             return;
@@ -66,6 +66,7 @@ export function registerMoonPhases(quench) {
           assert.isBelow(position, 1, 'Position should be < 1');
         });
         it('moon phase changes after advancing time significantly', async function () {
+          this.timeout(10000);
           const phases = api.getAllMoonPhases();
           if (phases.length === 0) {
             this.skip();

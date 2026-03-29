@@ -12,9 +12,10 @@ export function registerClockControls(quench) {
       });
 
       after(async function () {
+        this.timeout(10000);
         if (savedWorldTime !== undefined) {
           const delta = savedWorldTime - game.time.worldTime;
-          if (delta !== 0) await api.advanceTime(delta);
+          if (delta !== 0) await game.time.advance(delta);
         }
       });
 

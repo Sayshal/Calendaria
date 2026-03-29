@@ -224,7 +224,7 @@ export function registerWeatherAdvanced(quench) {
           for (const entry of forecast) {
             assert.property(entry, 'year', 'Forecast entry missing year');
             assert.property(entry, 'month', 'Forecast entry missing month');
-            assert.property(entry, 'day', 'Forecast entry missing day');
+            assert.property(entry, 'dayOfMonth', 'Forecast entry missing dayOfMonth');
             assert.property(entry, 'preset', 'Forecast entry missing preset');
             assert.property(entry.preset, 'id', 'Forecast preset missing id');
             assert.property(entry.preset, 'label', 'Forecast preset missing label');
@@ -237,7 +237,7 @@ export function registerWeatherAdvanced(quench) {
           const dt = api.getCurrentDateTime();
           const filtered = api.getWeatherHistory({ year: dt.year });
           assert.isArray(filtered, 'getWeatherHistory({ year }) should return an array');
-          const day = (dt.dayOfMonth ?? 0) + 1;
+          const day = dt.day;
           const result = api.getWeatherForDate(dt.year, dt.month, day);
           if (result) {
             assert.property(result, 'id');

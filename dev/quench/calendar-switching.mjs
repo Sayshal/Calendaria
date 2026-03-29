@@ -29,7 +29,7 @@ export function registerCalendarSwitching(quench) {
           assert.isNotNull(dt);
           assert.typeOf(dt.year, 'number');
           assert.typeOf(dt.month, 'number');
-          assert.typeOf(dt.dayOfMonth, 'number');
+          assert.typeOf(dt.day, 'number');
           assert.typeOf(dt.hour, 'number');
           assert.typeOf(dt.minute, 'number');
         });

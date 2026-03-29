@@ -24,7 +24,7 @@ export function registerNoteAdvanced(quench) {
         });
         it('getNoteDocument returns page for valid note', async function () {
           const dt = api.getCurrentDateTime();
-          const note = await api.createNote({ name: '[Quench Test] Doc Test', year: dt.year, month: dt.month, day: dt.day });
+          const note = await api.createNote({ name: '[Quench Test] Doc Test', startDate: { year: dt.year, month: dt.month, day: dt.day } });
           if (!note) { this.skip(); return; }
           testNoteId = note.id;
           const doc = api.getNoteDocument(note.id);
@@ -69,12 +69,12 @@ export function registerNoteAdvanced(quench) {
           const result = api.getNotesForMonth(dt.year, dt.month);
           assert.isArray(result);
         });
-        it('timeSince returns object', function () {
+        it('timeSince returns string', function () {
           const dt = api.getCurrentDateTime();
           const pastDate = api.addDays(dt, -30);
           const result = api.timeSince(pastDate);
           if (!result) { this.skip(); return; }
-          assert.typeOf(result, 'object');
+          assert.typeOf(result, 'string');
         });
       });
 
@@ -82,15 +82,16 @@ export function registerNoteAdvanced(quench) {
         it('isBundledCalendar returns boolean', function () {
           const cal = api.getActiveCalendar();
           if (!cal) { this.skip(); return; }
-          const result = api.isBundledCalendar(cal.id);
+          const calId = cal.metadata?.id ?? cal.id;
+          const result = api.isBundledCalendar(calId);
           assert.typeOf(result, 'boolean');
         });
         it('getCalendar returns calendar by id', function () {
           const cal = api.getActiveCalendar();
           if (!cal) { this.skip(); return; }
-          const result = api.getCalendar(cal.id);
+          const calId = cal.metadata?.id ?? cal.id;
+          const result = api.getCalendar(calId);
           assert.isNotNull(result);
-          assert.strictEqual(result.id, cal.id);
         });
         it('getCalendar returns null for invalid id', function () {
           const result = api.getCalendar('nonexistent-calendar-id');

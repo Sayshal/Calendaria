@@ -10,7 +10,7 @@ export function registerNoteProperties(quench) {
       before(async function () {
         api = CALENDARIA.api;
         const dt = api.getCurrentDateTime();
-        const page = await api.createNote({ name: `${TEST_NOTE_PREFIX} Properties`, content: 'Test note content for property checks', startDate: { year: dt.year, month: dt.month, day: dt.dayOfMonth + 1 }, categories: ['event'] });
+        const page = await api.createNote({ name: `${TEST_NOTE_PREFIX} Properties`, content: 'Test note content for property checks', startDate: { year: dt.year, month: dt.month, day: dt.day + 1 }, categories: ['event'] });
         createdPageId = page?.id;
       });
 
@@ -56,7 +56,7 @@ export function registerNoteProperties(quench) {
           const startDate = note.flagData.startDate;
           assert.strictEqual(startDate.year, dt.year, 'Year should match');
           assert.strictEqual(startDate.month, dt.month, 'Month should match');
-          assert.strictEqual(startDate.day, dt.dayOfMonth + 1, 'Day should match');
+          assert.strictEqual(startDate.day, dt.day + 1, 'Day should match');
         });
         it('note with preset preserves categories field', function () {
           if (!createdPageId) {

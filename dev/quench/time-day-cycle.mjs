@@ -24,7 +24,7 @@ export function registerTimeDayCycle(quench) {
           assert.isNotNull(dt);
           assert.typeOf(dt.year, 'number');
           assert.typeOf(dt.month, 'number');
-          assert.typeOf(dt.dayOfMonth, 'number');
+          assert.typeOf(dt.day, 'number');
           assert.typeOf(dt.hour, 'number');
           assert.typeOf(dt.minute, 'number');
           assert.typeOf(dt.second, 'number');
@@ -33,7 +33,7 @@ export function registerTimeDayCycle(quench) {
           const dtBefore = api.getCurrentDateTime();
           await api.advanceTime(3600);
           const dtAfter = api.getCurrentDateTime();
-          const changed = dtBefore.hour !== dtAfter.hour || dtBefore.dayOfMonth !== dtAfter.dayOfMonth;
+          const changed = dtBefore.hour !== dtAfter.hour || dtBefore.day !== dtAfter.day;
           assert.ok(changed, 'Hour or day should change after advancing 1 hour');
         });
         it('isDaytime and isNighttime are complementary', function () {

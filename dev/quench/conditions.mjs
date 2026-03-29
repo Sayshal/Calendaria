@@ -85,7 +85,7 @@ export function registerConditions(quench) {
       describe('Conditions — Note Evaluation', function () {
         it('evaluateNote on one-time note', async function () {
           const dt = api.getCurrentDateTime();
-          const note = await api.createNote({ name: '[Quench Test] Condition Eval', year: dt.year, month: dt.month, day: dt.day });
+          const note = await api.createNote({ name: '[Quench Test] Condition Eval', startDate: { year: dt.year, month: dt.month, day: dt.day } });
           if (!note) { this.skip(); return; }
           testNoteId = note.id;
           const result = api.evaluateNote(note.id, dt);

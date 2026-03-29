@@ -389,7 +389,7 @@ export const CalendariaAPI = {
    * @returns {number} Phase position from 0 (new moon) to 1
    */
   getMoonPhasePosition(moon, date = null) {
-    return getMoonPhasePosition(moon, date ?? game.time.components);
+    return getMoonPhasePosition(moon, date ? toInternal(date) : game.time.components);
   },
 
   /**
@@ -399,7 +399,7 @@ export const CalendariaAPI = {
    * @returns {boolean} True if moon is full
    */
   isMoonFull(moon, date = null) {
-    return isMoonFull(moon, date ?? game.time.components);
+    return isMoonFull(moon, date ? toInternal(date) : game.time.components);
   },
 
   /**
@@ -411,7 +411,9 @@ export const CalendariaAPI = {
    * @returns {object|null} Next convergence date { year, month, day }, or null if not found
    */
   getNextConvergence(moons, startDate = null, options = {}) {
-    return getNextConvergence(moons, startDate ?? game.time.components, options);
+    const start = startDate ? toInternal(startDate) : game.time.components;
+    const result = getNextConvergence(moons, start, options);
+    return result ? toPublic(result) : null;
   },
 
   /**
@@ -423,7 +425,9 @@ export const CalendariaAPI = {
    * @returns {object|null} Next full moon date { year, month, day }
    */
   getNextFullMoon(moon, startDate = null, options = {}) {
-    return getNextFullMoon(moon, startDate ?? game.time.components, options);
+    const start = startDate ? toInternal(startDate) : game.time.components;
+    const result = getNextFullMoon(moon, start, options);
+    return result ? toPublic(result) : null;
   },
 
   /**
@@ -435,7 +439,7 @@ export const CalendariaAPI = {
    * @returns {object[]} Array of convergence dates
    */
   getConvergencesInRange(moons, startDate, endDate, options = {}) {
-    return getConvergencesInRange(moons, startDate, endDate, options);
+    return getConvergencesInRange(moons, toInternal(startDate), toInternal(endDate), options).map(toPublic);
   },
 
   /**
@@ -447,7 +451,7 @@ export const CalendariaAPI = {
   getEclipse(moonOrIndex, date = null) {
     const calendar = CalendarManager.getActiveCalendar();
     const moon = typeof moonOrIndex === 'number' ? calendar?.moonsArray?.[moonOrIndex] : moonOrIndex;
-    return getEclipseAtDate(moon, date ?? game.time.components, calendar);
+    return getEclipseAtDate(moon, date ? toInternal(date) : game.time.components, calendar);
   },
 
   /**
@@ -457,7 +461,7 @@ export const CalendariaAPI = {
    */
   isEclipse(date = null) {
     const calendar = CalendarManager.getActiveCalendar();
-    return isEclipseOnDate(calendar?.moonsArray ?? [], date ?? game.time.components, calendar);
+    return isEclipseOnDate(calendar?.moonsArray ?? [], date ? toInternal(date) : game.time.components, calendar);
   },
 
   /**
@@ -471,7 +475,10 @@ export const CalendariaAPI = {
   getNextEclipse(moonOrIndex, startDate = null, options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     const moon = typeof moonOrIndex === 'number' ? calendar?.moonsArray?.[moonOrIndex] : moonOrIndex;
-    return getNextEclipse(moon, startDate ?? game.time.components, { ...options, calendar });
+    const start = startDate ? toInternal(startDate) : game.time.components;
+    const result = getNextEclipse(moon, start, { ...options, calendar });
+    if (!result) return null;
+    return { ...result, date: toPublic(result.date) };
   },
 
   /**
@@ -485,7 +492,7 @@ export const CalendariaAPI = {
   getEclipsesInRange(moonOrIndex, startDate, endDate, options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     const moon = typeof moonOrIndex === 'number' ? calendar?.moonsArray?.[moonOrIndex] : moonOrIndex;
-    return getEclipsesInRange(moon, startDate, endDate, { ...options, calendar });
+    return getEclipsesInRange(moon, toInternal(startDate), toInternal(endDate), { ...options, calendar }).map((e) => ({ ...e, date: toPublic(e.date) }));
   },
 
   /**
@@ -686,7 +693,7 @@ export const CalendariaAPI = {
    */
   timeSince(targetDate, currentDate = null) {
     currentDate = currentDate || game.time.components;
-    return timeSince(targetDate, currentDate);
+    return timeSince(toInternal(targetDate), currentDate);
   },
 
   /**

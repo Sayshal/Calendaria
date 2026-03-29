@@ -10,9 +10,9 @@ export function registerNoteQueries(quench) {
       before(async function () {
         api = CALENDARIA.api;
         const dt = api.getCurrentDateTime();
-        const note1 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query A`, content: 'Alpha content for searching', startDate: { year: dt.year, month: dt.month, day: dt.dayOfMonth + 1 }, categories: ['event'] });
-        const note2 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query B`, content: 'Beta content unique', startDate: { year: dt.year, month: dt.month, day: dt.dayOfMonth + 2 }, categories: ['reminder'] });
-        const note3 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query C`, content: 'Alpha recurring text', startDate: { year: dt.year, month: dt.month, day: dt.dayOfMonth + 3 }, categories: ['event'] });
+        const note1 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query A`, content: 'Alpha content for searching', startDate: { year: dt.year, month: dt.month, day: dt.day + 1 }, categories: ['event'] });
+        const note2 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query B`, content: 'Beta content unique', startDate: { year: dt.year, month: dt.month, day: dt.day + 2 }, categories: ['reminder'] });
+        const note3 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query C`, content: 'Alpha recurring text', startDate: { year: dt.year, month: dt.month, day: dt.day + 3 }, categories: ['event'] });
         noteIds = [note1?.id, note2?.id, note3?.id].filter(Boolean);
       });
 
@@ -35,7 +35,7 @@ export function registerNoteQueries(quench) {
             return;
           }
           const dt = api.getCurrentDateTime();
-          const notes = api.getNotesForDate(dt.year, dt.month, dt.dayOfMonth + 1);
+          const notes = api.getNotesForDate(dt.year, dt.month, dt.day + 1);
           assert.isArray(notes);
           const found = notes.some((n) => n.id === noteIds[0]);
           assert.ok(found, 'Should find note A on its date');
@@ -46,8 +46,8 @@ export function registerNoteQueries(quench) {
             return;
           }
           const dt = api.getCurrentDateTime();
-          const start = { year: dt.year, month: dt.month, day: dt.dayOfMonth + 1 };
-          const end = { year: dt.year, month: dt.month, day: dt.dayOfMonth + 3 };
+          const start = { year: dt.year, month: dt.month, day: dt.day + 1 };
+          const end = { year: dt.year, month: dt.month, day: dt.day + 3 };
           const notes = api.getNotesInRange(start, end);
           assert.isArray(notes);
           assert.isAtLeast(notes.length, 3, 'Should find all 3 test notes in range');

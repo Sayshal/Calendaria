@@ -243,7 +243,7 @@ export function secondsBetween(startDate, endDate) {
       dayOfMonth: startDate.dayOfMonth ?? 0,
       hour: startDate.hour ?? 0,
       minute: startDate.minute ?? 0,
-      second: 0
+      second: startDate.second ?? 0
     });
     const endTime = calendar.componentsToTime({
       year: endDate.year - yearZero,
@@ -251,7 +251,7 @@ export function secondsBetween(startDate, endDate) {
       dayOfMonth: endDate.dayOfMonth ?? 0,
       hour: endDate.hour ?? 0,
       minute: endDate.minute ?? 0,
-      second: 0
+      second: endDate.second ?? 0
     });
     return endTime - startTime;
   } catch (error) {

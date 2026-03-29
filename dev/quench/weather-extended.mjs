@@ -13,8 +13,8 @@ export function registerWeatherExtended(quench) {
       });
 
       describe('Weather — Presets & Zones', function () {
-        it('getWeatherPresets returns array', function () {
-          const result = api.getWeatherPresets();
+        it('getWeatherPresets returns array', async function () {
+          const result = await api.getWeatherPresets();
           assert.isArray(result);
         });
         it('getClimateZoneTemplates returns array', function () {
@@ -25,9 +25,12 @@ export function registerWeatherExtended(quench) {
             assert.property(result[0], 'name');
           }
         });
-        it('getActiveZone returns string or null', function () {
+        it('getActiveZone returns object or null', function () {
           const result = api.getActiveZone();
-          if (result != null) assert.typeOf(result, 'string');
+          if (result != null) {
+            assert.typeOf(result, 'object');
+            assert.property(result, 'id');
+          }
         });
       });
 
@@ -57,10 +60,10 @@ export function registerWeatherExtended(quench) {
           const result = api.getWeatherForDate(dt.year, dt.month, dt.day);
           if (result) assert.property(result, 'name');
         });
-        it('getWeatherProbabilities returns array', function () {
+        it('getWeatherProbabilities returns object', function () {
           if (!hasZones) { this.skip(); return; }
           const result = api.getWeatherProbabilities();
-          assert.isArray(result);
+          assert.typeOf(result, 'object');
         });
       });
 

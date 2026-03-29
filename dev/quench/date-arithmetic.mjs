@@ -24,8 +24,8 @@ export function registerDateArithmetic(quench) {
           assert.typeOf(dt.year, 'number');
           assert.typeOf(dt.month, 'number');
           assert.isAtLeast(dt.month, 0, 'month should be >= 0');
-          assert.typeOf(dt.dayOfMonth, 'number');
-          assert.isAtLeast(dt.dayOfMonth, 0, 'dayOfMonth should be >= 0');
+          assert.typeOf(dt.day, 'number');
+          assert.isAtLeast(dt.day, 1, 'day should be >= 1');
           assert.isAtLeast(dt.hour, 0, 'hour should be >= 0');
           assert.isBelow(dt.hour, 24, 'hour should be < 24');
         });
@@ -33,7 +33,7 @@ export function registerDateArithmetic(quench) {
           const dtBefore = api.getCurrentDateTime();
           await api.advanceTime(86400);
           const dtAfter = api.getCurrentDateTime();
-          const dayChanged = dtAfter.dayOfMonth !== dtBefore.dayOfMonth || dtAfter.month !== dtBefore.month || dtAfter.year !== dtBefore.year;
+          const dayChanged = dtAfter.day !== dtBefore.day || dtAfter.month !== dtBefore.month || dtAfter.year !== dtBefore.year;
           assert.ok(dayChanged, 'Day, month, or year should change after advancing 1 day');
         });
         it('getCurrentWeekday returns object with name', function () {

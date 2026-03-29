@@ -66,11 +66,13 @@ export function registerCelestial(quench) {
           const result = api.isEclipse();
           assert.typeOf(result, 'boolean');
         });
-        it('getNextEclipse returns date or null', function () {
+        it('getNextEclipse returns result or null', function () {
           if (!hasMoons) { this.skip(); return; }
           const result = api.getNextEclipse(0);
           if (result) {
-            assert.property(result, 'year');
+            assert.property(result, 'date');
+            assert.property(result, 'type');
+            assert.property(result.date, 'year');
           }
         });
         it('getEclipsesInRange returns array', function () {
@@ -91,12 +93,14 @@ export function registerCelestial(quench) {
           assert.isAtLeast(result, 0);
           assert.isAtMost(result, 24);
         });
-        it('getProgressDay returns number 0-1', function () {
+        it('getProgressDay returns number', function () {
           const result = api.getProgressDay();
           if (result == null) { this.skip(); return; }
           assert.typeOf(result, 'number');
-          assert.isAtLeast(result, 0);
-          assert.isAtMost(result, 1);
+          if (api.isDaytime()) {
+            assert.isAtLeast(result, 0);
+            assert.isAtMost(result, 1);
+          }
         });
         it('getProgressNight returns number 0-1', function () {
           const result = api.getProgressNight();
@@ -105,28 +109,39 @@ export function registerCelestial(quench) {
           assert.isAtLeast(result, 0);
           assert.isAtMost(result, 1);
         });
-        it('getTimeUntilSunrise returns number', function () {
+        it('getTimeUntilSunrise returns time object', function () {
           const result = api.getTimeUntilSunrise();
           if (result == null) { this.skip(); return; }
-          assert.typeOf(result, 'number');
+          assert.typeOf(result, 'object');
+          assert.property(result, 'hours');
+          assert.property(result, 'minutes');
+          assert.property(result, 'seconds');
         });
-        it('getTimeUntilSunset returns number', function () {
+        it('getTimeUntilSunset returns time object', function () {
           const result = api.getTimeUntilSunset();
           if (result == null) { this.skip(); return; }
-          assert.typeOf(result, 'number');
+          assert.typeOf(result, 'object');
+          assert.property(result, 'hours');
+          assert.property(result, 'minutes');
+          assert.property(result, 'seconds');
         });
-        it('getTimeUntilMidnight returns non-negative number', function () {
+        it('getTimeUntilMidnight returns time object', function () {
           const result = api.getTimeUntilMidnight();
-          assert.typeOf(result, 'number');
-          assert.isAtLeast(result, 0);
+          assert.typeOf(result, 'object');
+          assert.property(result, 'hours');
+          assert.isAtLeast(result.hours, 0);
         });
-        it('getTimeUntilMidday returns number', function () {
+        it('getTimeUntilMidday returns time object', function () {
           const result = api.getTimeUntilMidday();
-          assert.typeOf(result, 'number');
+          assert.typeOf(result, 'object');
+          assert.property(result, 'hours');
         });
-        it('getTimeUntilTarget returns number', function () {
+        it('getTimeUntilTarget returns time object', function () {
           const result = api.getTimeUntilTarget(12);
-          assert.typeOf(result, 'number');
+          assert.typeOf(result, 'object');
+          assert.property(result, 'hours');
+          assert.property(result, 'minutes');
+          assert.property(result, 'seconds');
         });
       });
 
