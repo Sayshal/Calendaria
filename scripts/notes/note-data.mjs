@@ -230,7 +230,7 @@ export function createNoteStub(page) {
  */
 export function getRepeatOptions(selected = 'never') {
   const choices = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote']._schema.fields.repeat.choices;
-  return choices.map((value) => ({ value, label: localize(`CALENDARIA.Repeat.${value}`), selected: value === selected }));
+  return choices.map((value) => ({ value, label: localize(`CALENDARIA.Notes.Repeat.${value[0].toUpperCase()}${value.slice(1)}`), selected: value === selected }));
 }
 
 /**
@@ -261,7 +261,7 @@ export function getBuiltinPresetSeeds() {
     { id: 'meeting', label: localize('CALENDARIA.Preset.Meeting'), color: '#845ef7', icon: 'fas fa-handshake', defaults: { reminderType: 'toast', reminderOffset: 1 } },
     { id: 'birthday', label: localize('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
     { id: 'deadline', label: localize('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
-    { id: 'reminder', label: localize('CALENDARIA.Preset.Reminder'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
+    { id: 'reminder', label: localize('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
     { id: 'downtime', label: localize('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { hasDuration: true, duration: 7 } },
     { id: 'lore', label: localize('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } }
   ];
@@ -582,6 +582,8 @@ export function extractNoteMatchData(page) {
 
 /**
  * Migrate the preset schema: seed built-in presets into settings, backfill missing fields on custom presets.
+ * @since 1.0.0
+ * @deprecated Remove in 1.2.0
  * @returns {Promise<boolean>}  True if migration was performed
  */
 export async function migratePresetSchema() {

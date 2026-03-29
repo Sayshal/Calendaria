@@ -303,6 +303,7 @@ function validateNoteMigration(oldData, newData, name) {
 /**
  * Migrate notes from legacy repeat-type schema to condition tree format.
  * @since 1.0.0
+ * @deprecated Remove in 1.2.0
  * @returns {Promise<void>}
  */
 async function migrateNotesDataModel() {
@@ -402,6 +403,8 @@ async function migrateNoteVisibility() {
 
 /**
  * Remove the built-in 'festival' preset if no notes reference it in their categories.
+ * @since 0.11.0
+ * @deprecated Remove in 1.1.0
  * @returns {Promise<void>}
  */
 async function migrateFestivalPresetRemoval() {

@@ -3,13 +3,13 @@
     <button type="button" data-action="importPreset"
       data-tooltip="{{localize 'CALENDARIA.PresetManager.ImportPresetTooltip'}}">
       <i class="fas fa-file-import"></i>
-      {{localize "CALENDARIA.PresetManager.ImportPreset"}}
+      {{localize "CALENDARIA.Common.Import"}}
     </button>
     {{#if selected}}
       <button type="button" data-action="exportPreset"
         data-tooltip="{{localize 'CALENDARIA.PresetManager.ExportPresetTooltip'}}">
         <i class="fas fa-file-export"></i>
-        {{localize "CALENDARIA.PresetManager.ExportPreset"}}
+        {{localize "CALENDARIA.Common.Export"}}
       </button>
     {{/if}}
     {{#if selected}}
@@ -20,7 +20,7 @@
     {{/if}}
     <button type="button" data-action="addPreset">
       <i class="fas fa-plus"></i>
-      {{localize "CALENDARIA.SettingsPanel.Preset.Add"}}
+      {{localize "CALENDARIA.UI.AddPreset"}}
     </button>
   </div>
   <button type="button" data-action="savePresets" class="save-btn">

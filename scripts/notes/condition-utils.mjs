@@ -6,6 +6,7 @@
 
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
+import { isGroup } from './condition-engine.mjs';
 import { getFieldSchema, getGroupedFieldOptions, getOperatorOptions, getValue2Options, getValueOptions } from './_module.mjs';
 
 /**
@@ -104,15 +105,6 @@ function stripEmptyGroups(children) {
 export function unwrapFromRootGroup(rootGroup) {
   const children = foundry.utils.deepClone(rootGroup?.children ?? []);
   return stripEmptyGroups(children);
-}
-
-/**
- * Check if an entry is a condition group.
- * @param {object} entry - Condition or group
- * @returns {boolean} True if group
- */
-export function isGroup(entry) {
-  return entry?.type === 'group';
 }
 
 /**

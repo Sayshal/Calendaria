@@ -197,7 +197,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true, names: [] },
       months: {
         values: {
-          [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.MonthName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }
+          [foundry.utils.randomID()]: { name: format('CALENDARIA.Common.MonthFallback', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }
         }
       },
       days: {
@@ -338,7 +338,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const startingWeekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name }));
     const monthCount = monthsArr.length;
     const monthTypeOptions = [
-      { value: '', label: 'CALENDARIA.Editor.MonthType.Standard' },
+      { value: '', label: 'CALENDARIA.Common.Standard' },
       { value: 'intercalary', label: 'CALENDARIA.Editor.MonthType.Intercalary' }
     ];
     context.monthsWithNav = monthsArr.map(([key, month], idx) => ({
@@ -358,7 +358,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       let conditionSummary = festival.conditionTree ? summarizeConditionTree(festival.conditionTree, this.#calendarData) : '';
       const noteStub = this.#calendarId ? FestivalManager.getFestivalNoteByKey(this.#calendarId, key) : null;
       const noteDuration = noteStub?.flagData?.duration ?? festival.duration ?? 1;
-      if (conditionSummary && noteDuration > 1) conditionSummary += ` (${noteDuration} ${localize('CALENDARIA.Note.Duration.Days').toLowerCase()})`;
+      if (conditionSummary && noteDuration > 1) conditionSummary += ` (${noteDuration} ${localize('CALENDARIA.Common.UnitDays')})`;
       return { ...festival, key, conditionSummary };
     });
     const currentFirstWeekday = this.#calendarData.years.firstWeekday ?? 0;
@@ -371,10 +371,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (leapYearConfig?.rule && leapYearConfig.rule !== 'none') currentRule = leapYearConfig.rule;
     else if (legacyLeapYear?.leapInterval > 0) currentRule = 'simple';
     context.leapRuleOptions = [
-      { value: 'none', label: 'CALENDARIA.Editor.LeapRule.None', selected: currentRule === 'none' },
+      { value: 'none', label: 'CALENDARIA.Common.None', selected: currentRule === 'none' },
       { value: 'simple', label: 'CALENDARIA.Editor.LeapRule.Simple', selected: currentRule === 'simple' },
-      { value: 'gregorian', label: 'CALENDARIA.Editor.LeapRule.Gregorian', selected: currentRule === 'gregorian' },
-      { value: 'custom', label: 'CALENDARIA.Editor.LeapRule.Custom', selected: currentRule === 'custom' }
+      { value: 'gregorian', label: 'CALENDARIA.Common.Gregorian', selected: currentRule === 'gregorian' },
+      { value: 'custom', label: 'CALENDARIA.Common.Custom', selected: currentRule === 'custom' }
     ];
     context.showLeapSimple = currentRule === 'simple';
     context.showLeapGregorian = currentRule === 'gregorian';
@@ -400,11 +400,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         isNoEclipse: !moon.eclipseMode || moon.eclipseMode === 'never',
         apparentSizeDisplay: moon.apparentSize ?? 1.0,
         eclipseModeOptions: [
-          { value: 'never', label: localize('CALENDARIA.Editor.Eclipse.Never'), selected: (moon.eclipseMode ?? 'never') === 'never' },
+          { value: 'never', label: localize('CALENDARIA.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
           { value: 'rare', label: localize('CALENDARIA.Editor.Eclipse.Rare'), selected: moon.eclipseMode === 'rare' },
           { value: 'occasional', label: localize('CALENDARIA.Editor.Eclipse.Occasional'), selected: moon.eclipseMode === 'occasional' },
           { value: 'frequent', label: localize('CALENDARIA.Editor.Eclipse.Frequent'), selected: moon.eclipseMode === 'frequent' },
-          { value: 'custom', label: localize('CALENDARIA.Editor.Eclipse.Custom'), selected: moon.eclipseMode === 'custom' }
+          { value: 'custom', label: localize('CALENDARIA.Common.Custom'), selected: moon.eclipseMode === 'custom' }
         ],
         phaseModeOptions: [
           { value: 'fixed', label: localize('CALENDARIA.Editor.Moon.PhaseMode.Fixed'), selected: (moon.phaseMode ?? 'fixed') === 'fixed' },
@@ -452,7 +452,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: '', label: 'CALENDARIA.Common.None' },
       { value: 'spring', label: 'CALENDARIA.Season.Spring' },
       { value: 'summer', label: 'CALENDARIA.Season.Summer' },
-      { value: 'autumn', label: 'CALENDARIA.Season.Autumn' },
+      { value: 'autumn', label: 'CALENDARIA.Common.Autumn' },
       { value: 'winter', label: 'CALENDARIA.Season.Winter' }
     ];
     const seasonsArr = Object.entries(this.#calendarData.seasons.values);
@@ -493,11 +493,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.erasWithNav = erasArr.map(([key, era]) => ({ ...era, key }));
     const basedOnOptions = [
       { value: 'year', label: 'CALENDARIA.Editor.Cycle.BasedOn.Year' },
-      { value: 'eraYear', label: 'CALENDARIA.Editor.Cycle.BasedOn.EraYear' },
+      { value: 'eraYear', label: 'CALENDARIA.Condition.Field.eraYear' },
       { value: 'month', label: 'CALENDARIA.Common.Month' },
       { value: 'monthDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.MonthDay' },
       { value: 'day', label: 'CALENDARIA.Editor.Cycle.BasedOn.Day' },
-      { value: 'yearDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.YearDay' }
+      { value: 'yearDay', label: 'CALENDARIA.Condition.Field.dayOfYear' }
     ];
     const cyclesArr = Object.entries(this.#calendarData.cycles || {});
     context.cyclesWithNav = cyclesArr.map(([cycleKey, cycle], idx) => {
@@ -1324,7 +1324,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const totalMonths = Object.keys(this.#calendarData.months.values ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
     const newMonth = {
-      name: format('CALENDARIA.Editor.Default.MonthName', { num: totalMonths }),
+      name: format('CALENDARIA.Common.MonthFallback', { num: totalMonths }),
       abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: totalMonths }),
       ordinal: totalMonths,
       days: 30
@@ -1427,7 +1427,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'disable',
-          label: localize('CALENDARIA.Editor.Month.DisableCustomWeekdays'),
+          label: localize('CALENDARIA.Common.Reset'),
           icon: 'fas fa-undo',
           callback: () => {
             delete month.weekdays;
@@ -1600,7 +1600,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         <p class="hint">${localize('CALENDARIA.Common.IconHint')}</p>
       </div>
       <div class="form-group">
-        <label>${localize('CALENDARIA.Editor.Season.Color')}</label>
+        <label>${localize('CALENDARIA.Common.Color')}</label>
         <div class="form-fields">
           <color-picker name="color" value="${season.color || '#808080'}"></color-picker>
         </div>
@@ -1775,7 +1775,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} calendarId - The calendar ID
    * @private
    */
-  static async #syncFestivalNamesToNotes(calendarId) {
+  async #syncFestivalNamesToNotes(calendarId) {
     for (const [key, festival] of Object.entries(this.#calendarData.festivals)) {
       const stub = FestivalManager.getFestivalNoteByKey(calendarId, key);
       if (!stub || stub.name === festival.name) continue;
@@ -2337,7 +2337,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (calendar) {
         this.#isDirty = false;
-        if (calendarId) await CalendarEditor.#syncFestivalNamesToNotes(calendarId);
+        if (calendarId) await this.#syncFestivalNamesToNotes(calendarId);
         log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {
           const importer = createImporter(this.#pendingImporterId);

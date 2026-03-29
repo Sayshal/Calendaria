@@ -14,6 +14,7 @@ export * from './localization.mjs';
 export * from './logger.mjs';
 export * from './macro-utils.mjs';
 export * from './migrations.mjs';
+export * from './patches.mjs';
 export * from './permissions.mjs';
 export { default as SearchManager } from './search-manager.mjs';
 export * from './settings-io.mjs';

@@ -12,7 +12,7 @@
       </button>
       <button type="button" data-action="openStopwatch">
         <i class="fas fa-external-link-alt"></i>
-        {{localize "CALENDARIA.SettingsPanel.OpenStopwatch"}}
+        {{localize "CALENDARIA.Common.OpenStopWatch"}}
       </button>
     </div>
     <p class="hint section-hint">{{openHint}}</p>
@@ -36,7 +36,7 @@
       </div>
 
       <div class="form-group">
-        <label for="forceStopwatch">{{localize "CALENDARIA.Settings.ForceStopwatch.Name"}}</label>
+        <label for="forceStopwatch">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceStopwatch" name="forceStopwatch" {{#if forceStopwatch}}checked{{/if}}>
         </div>
@@ -82,17 +82,17 @@
     </div>
 
     <div class="form-group">
-      <label for="stopwatchCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <label for="stopwatchCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
       <div class="form-fields">
         <select id="stopwatchCombatMode" name="stopwatchCombatMode">
           <option value="none" {{#if (eq stopwatchCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+            {{localize "CALENDARIA.Common.None"}}
           </option>
           <option value="hideCombat" {{#if (eq stopwatchCombatMode "hideCombat")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
           </option>
           <option value="hideEncounter" {{#if (eq stopwatchCombatMode "hideEncounter")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
           </option>
         </select>
       </div>
@@ -103,7 +103,7 @@
   {{#if isGM}}
     <fieldset data-section="stopwatch-formats">
       <legend>
-        {{localize "CALENDARIA.Format.Category.Stopwatch"}}
+        {{localize "CALENDARIA.Common.StopWatch"}}
         <button type="button" class="legend-help" data-action="showTokenReference" data-context-type="stopwatch"
           data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.FormatHelp.Tooltip"}}"><i
             class="fa-solid fa-question"></i></button>

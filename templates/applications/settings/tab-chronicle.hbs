@@ -12,7 +12,7 @@
       </button>
       <button type="button" data-action="openChronicle">
         <i class="fas fa-external-link-alt"></i>
-        {{localize "CALENDARIA.SettingsPanel.OpenChronicle"}}
+        {{localize "CALENDARIA.Common.OpenChronicle"}}
       </button>
     </div>
     <p class="hint section-hint">{{openHint}}</p>
@@ -20,7 +20,7 @@
 
   <fieldset data-section="chronicle-visibility">
     <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.Visibility"}}
+      {{localize "CALENDARIA.Common.Visibility"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-visibility"
         data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
           class="fas fa-undo"></i></button>
@@ -35,7 +35,7 @@
     </div>
     {{#if isGM}}
       <div class="form-group">
-        <label for="forceChronicle">{{localize "CALENDARIA.Settings.ForceChronicle.Name"}}</label>
+        <label for="forceChronicle">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceChronicle" name="forceChronicle" {{#if forceChronicle}}checked{{/if}}>
         </div>
@@ -73,17 +73,17 @@
     {{/if}}
 
     <div class="form-group">
-      <label for="chronicleCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <label for="chronicleCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
       <div class="form-fields">
         <select id="chronicleCombatMode" name="chronicleCombatMode">
           <option value="none" {{#if (eq chronicleCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+            {{localize "CALENDARIA.Common.None"}}
           </option>
           <option value="hideCombat" {{#if (eq chronicleCombatMode "hideCombat")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
           </option>
           <option value="hideEncounter" {{#if (eq chronicleCombatMode "hideEncounter")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
           </option>
         </select>
       </div>
@@ -123,14 +123,14 @@
 
   <fieldset data-section="chronicle-content">
     <legend>
-      {{localize "CALENDARIA.Chronicle.Settings.Content"}}
+      {{localize "CALENDARIA.Common.Content"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-content"
         data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
           class="fas fa-undo"></i></button>
     </legend>
 
     <div class="form-group">
-      <label for="chronicleShowWeather">{{localize "CALENDARIA.Chronicle.Settings.ShowWeather.Name"}}</label>
+      <label for="chronicleShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="chronicleShowWeather" name="chronicleShowWeather"
           {{#if chronicleShowWeather}}checked{{/if}}>
@@ -139,7 +139,7 @@
     </div>
 
     <div class="form-group">
-      <label for="chronicleShowMoonPhases">{{localize "CALENDARIA.Chronicle.Settings.ShowMoonPhases.Name"}}</label>
+      <label for="chronicleShowMoonPhases">{{localize "CALENDARIA.Common.ShowMoonPhases"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="chronicleShowMoonPhases" name="chronicleShowMoonPhases"
           {{#if chronicleShowMoonPhases}}checked{{/if}}>

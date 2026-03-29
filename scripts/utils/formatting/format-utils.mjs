@@ -68,7 +68,7 @@ export function dateFormattingParts(calendar, components) {
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
-  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
+  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Common.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = resolveArray(calendar, 'weekdaysArray', 'days.values');
   let daysInMonthsBefore = 0;
@@ -336,7 +336,8 @@ export function formatApproximateTime(calendar, components, zone = null) {
   else if (dayProgress >= 0.5 && dayProgress <= 0.85) formatter = 'Afternoon';
   else if (dayProgress > 0.85 && nightProgress < 0) formatter = 'Evening';
   else formatter = 'Night';
-  return localize(`CALENDARIA.Format.ApproxTime.${formatter}`);
+  const COMMON_OVERRIDES = { Midnight: 'CALENDARIA.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
+  return localize(COMMON_OVERRIDES[formatter] ?? `CALENDARIA.Format.ApproxTime.${formatter}`);
 }
 
 /**
@@ -994,14 +995,14 @@ export function formatForLocation(calendar, components, locationId) {
  */
 export function getDisplayLocationDefinitions() {
   return [
-    { id: 'hudDate', label: 'CALENDARIA.Format.Location.HudDate', category: 'hud' },
-    { id: 'hudTime', label: 'CALENDARIA.Format.Location.HudTime', category: 'hud' },
+    { id: 'hudDate', label: 'CALENDARIA.Common.DateDisplay', category: 'hud' },
+    { id: 'hudTime', label: 'CALENDARIA.Common.TimeDisplay', category: 'hud' },
     { id: 'microCalHeader', label: 'CALENDARIA.Format.Location.MicroCalHeader', category: 'miniCal' },
     { id: 'miniCalHeader', label: 'CALENDARIA.Format.Location.MiniCalHeader', category: 'miniCal' },
-    { id: 'miniCalTime', label: 'CALENDARIA.Format.Location.MiniCalTime', category: 'miniCal' },
+    { id: 'miniCalTime', label: 'CALENDARIA.Common.TimeDisplay', category: 'miniCal' },
     { id: 'bigCalHeader', label: 'CALENDARIA.Format.Location.BigCalHeader', category: 'bigcal' },
-    { id: 'bigCalWeekHeader', label: 'CALENDARIA.Format.Location.BigCalWeekHeader', category: 'bigcal' },
-    { id: 'bigCalYearHeader', label: 'CALENDARIA.Format.Location.BigCalYearHeader', category: 'bigcal' },
+    { id: 'bigCalWeekHeader', label: 'CALENDARIA.Common.WeekViewHeader', category: 'bigcal' },
+    { id: 'bigCalYearHeader', label: 'CALENDARIA.Common.YearViewHeader', category: 'bigcal' },
     { id: 'bigCalYearLabel', label: 'CALENDARIA.Format.Location.BigCalYearLabel', category: 'bigcal' },
     { id: 'chatTimestamp', label: 'CALENDARIA.Format.Location.ChatTimestamp', category: 'chat' }
   ];
@@ -1030,16 +1031,16 @@ export function timeSince(targetDate, currentDate) {
   const days = absDiff;
   let unit, count;
   if (years >= 1) {
-    unit = years === 1 ? localize('CALENDARIA.Format.Year') : localize('CALENDARIA.Format.Years');
+    unit = years === 1 ? localize('CALENDARIA.Common.UnitYear') : localize('CALENDARIA.Common.UnitYears');
     count = years;
   } else if (months >= 1) {
-    unit = months === 1 ? localize('CALENDARIA.Format.Month') : localize('CALENDARIA.Format.Months');
+    unit = months === 1 ? localize('CALENDARIA.Common.UnitMonth') : localize('CALENDARIA.Common.UnitMonths');
     count = months;
   } else if (weeks >= 1) {
-    unit = weeks === 1 ? localize('CALENDARIA.Format.Week') : localize('CALENDARIA.Format.Weeks');
+    unit = weeks === 1 ? localize('CALENDARIA.Common.UnitWeek') : localize('CALENDARIA.Common.UnitWeeks');
     count = weeks;
   } else {
-    unit = days === 1 ? localize('CALENDARIA.Format.Day') : localize('CALENDARIA.Format.Days');
+    unit = days === 1 ? localize('CALENDARIA.Common.UnitDay') : localize('CALENDARIA.Common.UnitDays');
     count = days;
   }
   if (isFuture) return format('CALENDARIA.Format.InFuture', { count, unit });
@@ -1066,9 +1067,9 @@ export function getAvailableTokens() {
     { token: 'Do', descriptionKey: 'CALENDARIA.Format.Token.Do', type: 'standard' },
     { token: 'DDD', descriptionKey: 'CALENDARIA.Format.Token.DDD', type: 'standard' },
     { token: 'EEEE', descriptionKey: 'CALENDARIA.Format.Token.EEEE', type: 'standard' },
-    { token: 'EEE', descriptionKey: 'CALENDARIA.Format.Token.EEE', type: 'standard' },
-    { token: 'EE', descriptionKey: 'CALENDARIA.Format.Token.EE', type: 'standard' },
-    { token: 'E', descriptionKey: 'CALENDARIA.Format.Token.E', type: 'standard' },
+    { token: 'EEE', descriptionKey: 'CALENDARIA.Common.FormatWeekdayShort', type: 'standard' },
+    { token: 'EE', descriptionKey: 'CALENDARIA.Common.FormatWeekdayShort', type: 'standard' },
+    { token: 'E', descriptionKey: 'CALENDARIA.Common.FormatWeekdayShort', type: 'standard' },
     { token: 'EEEEE', descriptionKey: 'CALENDARIA.Format.Token.EEEEE', type: 'standard' },
     { token: 'e', descriptionKey: 'CALENDARIA.Format.Token.e', type: 'standard' },
     { token: 'w', descriptionKey: 'CALENDARIA.Format.Token.w', type: 'standard' },
@@ -1077,9 +1078,9 @@ export function getAvailableTokens() {
     { token: '[namedWeek]', descriptionKey: 'CALENDARIA.Format.Token.namedWeek', type: 'custom' },
     { token: '[namedWeekAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedWeekAbbr', type: 'custom' },
     { token: 'GGGG', descriptionKey: 'CALENDARIA.Format.Token.GGGG', type: 'standard' },
-    { token: 'GGG', descriptionKey: 'CALENDARIA.Format.Token.GGG', type: 'standard' },
-    { token: 'GG', descriptionKey: 'CALENDARIA.Format.Token.GG', type: 'standard' },
-    { token: 'G', descriptionKey: 'CALENDARIA.Format.Token.G', type: 'standard' },
+    { token: 'GGG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
+    { token: 'GG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
+    { token: 'G', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
     { token: '[yearInEra]', descriptionKey: 'CALENDARIA.Format.Token.yearInEra', type: 'custom' },
     { token: '[era=N]', descriptionKey: 'CALENDARIA.Format.Token.eraIndex', type: 'custom' },
     { token: '[eraAbbr=N]', descriptionKey: 'CALENDARIA.Format.Token.eraAbbrIndex', type: 'custom' },

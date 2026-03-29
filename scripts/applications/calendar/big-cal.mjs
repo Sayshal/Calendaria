@@ -1211,7 +1211,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Adjust window size to exactly fit rendered content.
+   * Adjust window size to fit rendered content, capping at viewport bounds.
    */
   _adjustSizeForView() {
     if (!this.element) return;
@@ -1219,7 +1219,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const header = this.element.querySelector('.calendar-header');
     if (!content) return;
     const width = Math.max(content.scrollWidth, header?.scrollWidth || 0);
-    const height = (header?.offsetHeight || 0) + content.scrollHeight;
+    const headerHeight = header?.offsetHeight || 0;
+    const naturalHeight = headerHeight + content.scrollHeight;
+    const maxHeight = window.innerHeight - 40;
+    const height = Math.min(naturalHeight, maxHeight);
+    if (naturalHeight > maxHeight) {
+      const maxContentHeight = maxHeight - headerHeight;
+      content.style.maxHeight = `${maxContentHeight}px`;
+      content.style.overflowY = 'auto';
+    } else {
+      content.style.maxHeight = '';
+      content.style.overflowY = '';
+    }
     this.setPosition({ width: width + 2, height: height + 2 });
   }
 
@@ -1288,9 +1299,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
     this._adjustSizeForView();
+    this._resizeHandler = () => this._adjustSizeForView();
+    window.addEventListener('resize', this._resizeHandler);
     const saved = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_POSITION);
     if (saved?.left != null && saved?.top != null) {
-      this.setPosition({ left: saved.left, top: saved.top });
+      const rect = this.element.getBoundingClientRect();
+      const left = Math.min(saved.left, window.innerWidth - rect.width);
+      const top = Math.min(saved.top, window.innerHeight - rect.height);
+      this.setPosition({ left: Math.max(0, left), top: Math.max(0, top) });
     } else {
       const rect = this.element.getBoundingClientRect();
       const left = Math.max(0, (window.innerWidth - rect.width) / 2);
@@ -1408,6 +1424,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this._hooks) {
       this._hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
       this._hooks = [];
+    }
+    if (this._resizeHandler) {
+      window.removeEventListener('resize', this._resizeHandler);
+      this._resizeHandler = null;
     }
     if (this._clickOutsideHandler) {
       document.removeEventListener('mousedown', this._clickOutsideHandler);
@@ -1633,7 +1653,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const page = journal?.pages.get(pageId);
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+        window: { title: localize('CALENDARIA.Common.DeleteNote') },
         content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
         rejectClose: false,
         modal: true

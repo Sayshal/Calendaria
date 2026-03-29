@@ -3,13 +3,13 @@
     <label>{{localize "CALENDARIA.Scene.DarknessSync.Name"}}</label>
     <select name="flags.{{moduleId}}.darknessSync">
       <option value="default" {{#if (eq darknessSync "default")}}selected{{/if}}>
-        {{localize "CALENDARIA.Scene.DarknessSync.Choices.Default"}}
+        {{localize "CALENDARIA.Common.UseGlobal"}}
       </option>
       <option value="enabled" {{#if (eq darknessSync "enabled")}}selected{{/if}}>
         {{localize "CALENDARIA.Scene.DarknessSync.Choices.Enabled"}}
       </option>
       <option value="disabled" {{#if (eq darknessSync "disabled")}}selected{{/if}}>
-        {{localize "CALENDARIA.Scene.DarknessSync.Choices.Disabled"}}
+        {{localize "CALENDARIA.Common.Disabled"}}
       </option>
     </select>
     <p class="hint">{{localize "CALENDARIA.Scene.DarknessSync.Hint"}}</p>
@@ -55,7 +55,7 @@
     <label>{{localize "CALENDARIA.Scene.FxTopDownOverride.Name"}}</label>
     <select name="flags.{{moduleId}}.fxmasterTopDownOverride">
       <option value="default" {{#if (eq fxTopDownOverride "default")}}selected{{/if}}>
-        {{localize "CALENDARIA.Scene.FxTopDownOverride.Choices.Default"}}
+        {{localize "CALENDARIA.Common.UseGlobal"}}
       </option>
       <option value="topdown" {{#if (eq fxTopDownOverride "topdown")}}selected{{/if}}>
         {{localize "CALENDARIA.Scene.FxTopDownOverride.Choices.TopDown"}}

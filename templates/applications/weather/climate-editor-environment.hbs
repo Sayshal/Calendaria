@@ -13,10 +13,10 @@
 
     {{!-- Environment Lighting --}}
     <fieldset>
-      <legend>{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLighting"}}</legend>
+      <legend>{{localize "CALENDARIA.WeatherEditor.EnvironmentLighting"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.EnvironmentLightingHint"}}</p>
       <div class="form-group">
-        <label for="brightnessMultiplier">{{localize "CALENDARIA.Editor.Weather.Zone.BrightnessMultiplier"}}</label>
+        <label for="brightnessMultiplier">{{localize "CALENDARIA.Scene.BrightnessMultiplier.Name"}}</label>
         <div class="form-fields range-field">
           <div class="slider-with-ticks">
             <input type="range" id="brightnessMultiplier" name="brightnessMultiplier" min="0.5" max="1.5"
@@ -121,19 +121,19 @@
       <legend>{{localize "CALENDARIA.Editor.Weather.Zone.ColorShift"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.ColorShiftHint"}}</p>
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DawnHue"}}</label>
+        <label>{{localize "CALENDARIA.Common.Dawn"}}</label>
         <div class="form-fields">
           <hue-slider name="colorShiftDawnHue" value="{{colorShift.dawnHueNorm}}"></hue-slider>
         </div>
       </div>
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Weather.Zone.DuskHue"}}</label>
+        <label>{{localize "CALENDARIA.Common.Dusk"}}</label>
         <div class="form-fields">
           <hue-slider name="colorShiftDuskHue" value="{{colorShift.duskHueNorm}}"></hue-slider>
         </div>
       </div>
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Editor.Weather.Zone.NightHue"}}</label>
+        <label>{{localize "CALENDARIA.Common.Night"}}</label>
         <div class="form-fields">
           <hue-slider name="colorShiftNightHue" value="{{colorShift.nightHueNorm}}"></hue-slider>
         </div>

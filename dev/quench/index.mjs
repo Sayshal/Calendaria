@@ -1,18 +1,24 @@
 import { registerApiSmoke } from './api-smoke.mjs';
 import { registerCalendarMetadata } from './calendar-metadata.mjs';
 import { registerCalendarSwitching } from './calendar-switching.mjs';
+import { registerCelestial } from './celestial.mjs';
+import { registerCinematic } from './cinematic.mjs';
 import { registerClockControls } from './clock-controls.mjs';
+import { registerConditions } from './conditions.mjs';
 import { registerDarknessSync } from './darkness-sync.mjs';
 import { registerDateArithmetic } from './date-arithmetic.mjs';
+import { registerDateMath } from './date-math.mjs';
 import { registerFormatStrings } from './format-strings.mjs';
 import { registerHookEvents } from './hook-events.mjs';
 import { registerMoonPhases } from './moon-phases.mjs';
+import { registerNoteAdvanced } from './note-advanced.mjs';
 import { registerNoteCrud } from './note-crud.mjs';
 import { registerNoteProperties } from './note-properties.mjs';
 import { registerNoteQueries } from './note-queries.mjs';
 import { registerTimeAdvancement } from './time-advancement.mjs';
 import { registerTimeDayCycle } from './time-day-cycle.mjs';
 import { registerWeatherAdvanced } from './weather-advanced.mjs';
+import { registerWeatherExtended } from './weather-extended.mjs';
 import { registerWeatherGeneration } from './weather-generation.mjs';
 
 export function registerBatches(quench) {
@@ -32,4 +38,10 @@ export function registerBatches(quench) {
   registerFormatStrings(quench);
   registerClockControls(quench);
   registerHookEvents(quench);
+  registerDateMath(quench);
+  registerCelestial(quench);
+  registerConditions(quench);
+  registerWeatherExtended(quench);
+  registerNoteAdvanced(quench);
+  registerCinematic(quench);
 }

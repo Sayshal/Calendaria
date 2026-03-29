@@ -8,7 +8,7 @@ import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../../constants.mjs';
 import { getTimeIncrements } from '../../time/_module.mjs';
 import { CalendariaSocket, getSkyColorsRgb, log } from '../../utils/_module.mjs';
-import { CinematicKeyframeBuilder } from './_module.mjs';
+import CinematicKeyframeBuilder from './cinematic-keyframe-builder.mjs';
 
 /** @type {number} */
 const FADE_MS = 300;
@@ -274,7 +274,7 @@ export default class CinematicOverlay {
           <div class="cinematic-progress-bar"><div class="cinematic-progress-fill"></div></div>
           <div class="cinematic-controls">
             <button class="cinematic-skip" type="button">
-              <i class="fas fa-forward"></i> ${game.i18n.localize('CALENDARIA.Cinematic.Skip')}
+              <i class="fas fa-forward"></i> ${game.i18n.localize('CALENDARIA.Common.Skip')}
             </button>
           </div>
         </div>

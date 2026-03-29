@@ -187,8 +187,18 @@
         "type": "group",
         "mode": "and",
         "children": [
-          { "type": "condition", "field": "month", "op": "==", "value": 1 },
-          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
         ]
       },
       "allDay": true,
@@ -213,8 +223,18 @@
         "type": "group",
         "mode": "and",
         "children": [
-          { "type": "condition", "field": "month", "op": "==", "value": 5 },
-          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
         ]
       },
       "allDay": true,
@@ -239,8 +259,18 @@
         "type": "group",
         "mode": "and",
         "children": [
-          { "type": "condition", "field": "month", "op": "==", "value": 8 },
-          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
         ]
       },
       "allDay": true,
@@ -265,8 +295,18 @@
         "type": "group",
         "mode": "and",
         "children": [
-          { "type": "condition", "field": "month", "op": "==", "value": 10 },
-          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
         ]
       },
       "allDay": true,
@@ -291,8 +331,18 @@
         "type": "group",
         "mode": "and",
         "children": [
-          { "type": "condition", "field": "month", "op": "==", "value": 13 },
-          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 13
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
         ]
       },
       "allDay": true,
@@ -317,8 +367,18 @@
         "type": "group",
         "mode": "and",
         "children": [
-          { "type": "condition", "field": "month", "op": "==", "value": 16 },
-          { "type": "condition", "field": "day", "op": "==", "value": 1 }
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 16
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
         ]
       },
       "allDay": true,
@@ -556,5 +616,272 @@
     "description": "CALENDARIA.Calendar.ImperialWarhammer.Description",
     "author": "calendaria",
     "system": "Warhammer Fantasy"
+  },
+  "weather": {
+    "activeZone": "subarctic",
+    "zones": {
+      "subarctic000000": {
+        "id": "subarctic",
+        "name": "CALENDARIA.Weather.Climate.Subarctic",
+        "description": "CALENDARIA.Weather.Climate.SubarcticDesc",
+        "windSpeedRange": {
+          "min": 1,
+          "max": 4
+        },
+        "windDirections": {
+          "N": 20,
+          "NNW": 15,
+          "NW": 12,
+          "NNE": 10,
+          "W": 10,
+          "NE": 8,
+          "E": 5,
+          "WNW": 5,
+          "S": 3,
+          "SW": 3,
+          "SE": 3,
+          "SSW": 2,
+          "SSE": 1,
+          "ESE": 1,
+          "ENE": 1,
+          "WSW": 1
+        },
+        "brightnessMultiplier": 0.9,
+        "shortestDay": 6,
+        "longestDay": 18,
+        "temperatures": {
+          "_default": {
+            "min": -10,
+            "max": 5
+          }
+        },
+        "presets": {
+          "snow00000000000": {
+            "id": "snow",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "overcast0000000": {
+            "id": "overcast",
+            "enabled": true
+          },
+          "windy0000000000": {
+            "id": "windy",
+            "enabled": true
+          },
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "mist00000000000": {
+            "id": "mist",
+            "enabled": true
+          },
+          "blizzard0000000": {
+            "id": "blizzard",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "CALENDARIA.Season.Spring": {
+            "temperatures": {
+              "min": -10,
+              "max": 8
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 23
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 23
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 15
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 15
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 23
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 0
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Summer": {
+            "temperatures": {
+              "min": 5,
+              "max": 18
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 22
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 22
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 17
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 6
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 11
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 6
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 6
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 11
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Autumn": {
+            "temperatures": {
+              "min": -5,
+              "max": 10
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 29
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 29
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 21
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 14
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 7
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 0
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Winter": {
+            "temperatures": {
+              "min": -35,
+              "max": -10
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 32
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 21
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 16
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 16
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 11
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 0
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 0
+              }
+            }
+          }
+        },
+        "colorShift": {
+          "dawnHue": 210,
+          "duskHue": 230,
+          "nightHue": 220,
+          "transitionMinutes": 75
+        },
+        "environmentBase": {
+          "hue": 200,
+          "saturation": 0.7
+        }
+      }
+    }
   }
 }

@@ -284,5 +284,321 @@
     "description": "CALENDARIA.Calendar.PactStandard.Description",
     "author": "calendaria",
     "system": "Starfinder2e (Golarion)"
+  },
+  "weather": {
+    "activeZone": "temperate",
+    "zones": {
+      "temperate000000": {
+        "id": "temperate",
+        "name": "CALENDARIA.Weather.Climate.Temperate",
+        "description": "CALENDARIA.Weather.Climate.TemperateDesc",
+        "windSpeedRange": {
+          "min": 0,
+          "max": 3
+        },
+        "windDirections": {
+          "W": 20,
+          "WSW": 15,
+          "SW": 12,
+          "WNW": 10,
+          "NW": 8,
+          "S": 8,
+          "N": 5,
+          "NNW": 5,
+          "E": 4,
+          "SE": 4,
+          "NE": 3,
+          "SSW": 3,
+          "SSE": 1,
+          "ESE": 1,
+          "ENE": 1
+        },
+        "brightnessMultiplier": 1,
+        "shortestDay": 8,
+        "longestDay": 16,
+        "temperatures": {
+          "_default": {
+            "min": 8,
+            "max": 20
+          }
+        },
+        "presets": {
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "drizzle00000000": {
+            "id": "drizzle",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "mist00000000000": {
+            "id": "mist",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "thunderstorm000": {
+            "id": "thunderstorm",
+            "enabled": true
+          },
+          "fog000000000000": {
+            "id": "fog",
+            "enabled": true
+          },
+          "windy0000000000": {
+            "id": "windy",
+            "enabled": true
+          },
+          "snow00000000000": {
+            "id": "snow",
+            "enabled": true
+          },
+          "blizzard0000000": {
+            "id": "blizzard",
+            "enabled": true
+          },
+          "overcast0000000": {
+            "id": "overcast",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "CALENDARIA.Season.Winter": {
+            "temperatures": {
+              "min": -5,
+              "max": 5
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 26
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 11
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 11
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 16
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 11
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 11
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 5
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Spring": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "rain": {
+                "id": "rain",
+                "chance": 25
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 19
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 19
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 13
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 13
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 13
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Summer": {
+            "temperatures": {
+              "min": 18,
+              "max": 30
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 35
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 24
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 12
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 12
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 6
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Autumn": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 24
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 18
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 18
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 12
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 12
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

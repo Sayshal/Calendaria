@@ -20,8 +20,8 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  */
 function getPrecipIntensityLabel(value) {
   if (value <= 0) return localize('CALENDARIA.Common.None');
-  if (value <= 0.25) return localize('CALENDARIA.Weather.Precipitation.IntensityLight');
-  if (value <= 0.5) return localize('CALENDARIA.Weather.Precipitation.IntensityModerate');
+  if (value <= 0.25) return localize('CALENDARIA.Common.Light');
+  if (value <= 0.5) return localize('CALENDARIA.Common.Moderate');
   if (value <= 0.75) return localize('CALENDARIA.Weather.Precipitation.IntensityHeavy');
   return localize('CALENDARIA.Weather.Precipitation.IntensityTorrential');
 }
@@ -233,12 +233,12 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const fxLevels = ['very-low', 'low', 'medium', 'high', 'very-high'];
       const currentFxDensity = this.#fxDensity !== null ? this.#fxDensity : (currentWeather?.fxDensity ?? '');
       context.fxDensityOptions = [
-        { value: '', label: localize('CALENDARIA.FxParam.Default'), selected: !currentFxDensity },
+        { value: '', label: localize('CALENDARIA.Common.Default'), selected: !currentFxDensity },
         ...fxLevels.map((v) => ({ value: v, label: localize(`CALENDARIA.FxParam.${v}`), selected: v === currentFxDensity }))
       ];
       const currentFxSpeed = this.#fxSpeed !== null ? this.#fxSpeed : (currentWeather?.fxSpeed ?? '');
       context.fxSpeedOptions = [
-        { value: '', label: localize('CALENDARIA.FxParam.Default'), selected: !currentFxSpeed },
+        { value: '', label: localize('CALENDARIA.Common.Default'), selected: !currentFxSpeed },
         ...fxLevels.map((v) => ({ value: v, label: localize(`CALENDARIA.FxParam.${v}`), selected: v === currentFxSpeed }))
       ];
       context.fxColor = this.#fxColor !== null ? this.#fxColor : (currentWeather?.fxColor ?? '');

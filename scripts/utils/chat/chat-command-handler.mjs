@@ -235,12 +235,12 @@ export function cmdMoon(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const moons = calendar.moonsArray;
-  if (!moons?.length) return { content: localize('CALENDARIA.ChatCommand.NoMoons') };
+  if (!moons?.length) return { content: localize('CALENDARIA.Common.NoMoonsConfigured') };
   const moonIndex = args ? parseInt(args, 10) : null;
   if (moonIndex !== null && !isNaN(moonIndex)) {
     const moon = moons[moonIndex];
     const phase = calendar.getMoonPhase(moonIndex);
-    if (!moon || !phase) return { content: localize('CALENDARIA.ChatCommand.NoMoons') };
+    if (!moon || !phase) return { content: localize('CALENDARIA.Common.NoMoonsConfigured') };
     const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
     return { content: `${icon}<strong>${localize(moon.name)}:</strong> ${phase.subPhaseName || localize(phase.name)}` };
   }
@@ -252,7 +252,7 @@ export function cmdMoon(args) {
       return `${icon}<strong>${localize(moon.name)}:</strong> ${phase.subPhaseName || localize(phase.name)}`;
     })
     .filter(Boolean);
-  if (!lines.length) return { content: localize('CALENDARIA.ChatCommand.NoMoons') };
+  if (!lines.length) return { content: localize('CALENDARIA.Common.NoMoonsConfigured') };
   return { content: lines.join('<br>') };
 }
 
@@ -301,7 +301,7 @@ export function cmdSunrise(formatStr) {
   const m = Math.round((sunrise - h) * 60);
   const components = { ...dt, hour: h, minute: m, second: 0 };
   const formatted = formatDate(components, formatStr || 'time24');
-  return { content: `<i class="fas fa-sun"></i> ${localize('CALENDARIA.ChatCommand.Sunrise')}: ${formatted}` };
+  return { content: `<i class="fas fa-sun"></i> ${localize('CALENDARIA.Common.Sunrise')}: ${formatted}` };
 }
 
 /**
@@ -319,7 +319,7 @@ export function cmdSunset(formatStr) {
   const m = Math.round((sunset - h) * 60);
   const components = { ...dt, hour: h, minute: m, second: 0 };
   const formatted = formatDate(components, formatStr || 'time24');
-  return { content: `<i class="fas fa-moon"></i> ${localize('CALENDARIA.ChatCommand.Sunset')}: ${formatted}` };
+  return { content: `<i class="fas fa-moon"></i> ${localize('CALENDARIA.Common.Sunset')}: ${formatted}` };
 }
 
 /**
@@ -407,16 +407,16 @@ export function cmdCalendar() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const lines = [];
-  lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Date')}:</strong> ${formatDate(null, 'dateLong')}`);
-  lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Time')}:</strong> ${formatDate(null, 'time24')}`);
+  lines.push(`<strong>${localize('CALENDARIA.Common.Date')}:</strong> ${formatDate(null, 'dateLong')}`);
+  lines.push(`<strong>${localize('CALENDARIA.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
   const season = getCurrentSeason();
-  if (season) lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Season')}:</strong> ${localize(season.name)}`);
+  if (season) lines.push(`<strong>${localize('CALENDARIA.Common.Season')}:</strong> ${localize(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {
     const temp = WeatherManager.getTemperature();
     const unit = game.settings.get('calendaria', 'temperatureUnit');
     const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
-    lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Weather')}:</strong> <i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`);
+    lines.push(`<strong>${localize('CALENDARIA.Common.Weather')}:</strong> <i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`);
   }
   const calMoons = calendar.moonsArray;
   if (calMoons?.length) {
@@ -426,7 +426,7 @@ export function cmdCalendar() {
         return phase ? `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` : null;
       })
       .filter(Boolean);
-    if (moonStrs.length) lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Moons')}:</strong> ${moonStrs.join(', ')}`);
+    if (moonStrs.length) lines.push(`<strong>${localize('CALENDARIA.Common.Moons')}:</strong> ${moonStrs.join(', ')}`);
   }
   const sunrise = getSunrise();
   const sunset = getSunset();
@@ -488,7 +488,7 @@ export function cmdWeekday() {
   if (!calendar) return null;
   const weekday = getCurrentWeekday();
   if (!weekday) return { content: localize('CALENDARIA.ChatCommand.NoWeekday') };
-  const restDay = weekday.isRestDay ? ` (${localize('CALENDARIA.ChatCommand.RestDay')})` : '';
+  const restDay = weekday.isRestDay ? ` (${localize('CALENDARIA.Common.RestDay')})` : '';
   return { content: `<i class="fas fa-calendar-week"></i> <strong>${localize(weekday.name)}</strong>${restDay}` };
 }
 
@@ -542,10 +542,10 @@ export function cmdWeatherProb(args) {
   if (!canViewWeatherForecast()) return { content: localize('CALENDARIA.ChatCommand.NoPermission'), error: true };
   const data = WeatherManager.getWeatherProbabilities({ season: args || undefined });
   if (!data.entries.length) return { content: localize('CALENDARIA.WeatherProbability.NoPresets') };
-  const header = `<h3>${localize('CALENDARIA.ChatCommand.WeatherProbHeader')}</h3>`;
+  const header = `<h3>${localize('CALENDARIA.WeatherProbability.Title')}</h3>`;
   const subtitle = data.zone ? `<div class="forecast-zone">${data.zone.name}${data.season ? ` — ${data.season}` : ''}</div>` : '';
   const rows = data.entries.map((e) => `<i class="fas ${e.icon}" style="color:${e.color}"></i> ${e.label} — <strong>${e.percent}%</strong>`);
   const tempStr = `${WeatherManager.formatTemperature(data.tempRange.min)} – ${WeatherManager.formatTemperature(data.tempRange.max)}`;
-  const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${localize('CALENDARIA.WeatherProbability.TempRange')}: ${tempStr}</div>`;
+  const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${localize('CALENDARIA.Common.TemperatureRange')}: ${tempStr}</div>`;
   return { content: `${header}${subtitle}${rows.join('<br>')}${footer}`, whisper: true };
 }

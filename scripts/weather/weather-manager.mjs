@@ -1084,6 +1084,8 @@ export default class WeatherManager {
 
   /**
    * Migrate weather history and forecast plan day keys from 1-indexed to 0-indexed.
+   * @since 0.11.0
+   * @deprecated Remove in 1.1.0
    * @private
    */
   static async #migrateWeatherDayIndex() {
@@ -1107,6 +1109,8 @@ export default class WeatherManager {
 
   /**
    * Migrate legacy bare-key soundFx values to full paths in custom presets and current weather.
+   * @since 1.0.0
+   * @deprecated Remove in 1.2.0
    * @private
    */
   static async #migrateLegacySoundKeys() {

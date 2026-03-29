@@ -123,10 +123,10 @@ export async function exportSettings() {
   }
   let dialogElement = null;
   const result = await foundry.applications.api.DialogV2.wait({
-    window: { title: localize('CALENDARIA.SettingsPanel.ExportSettings.DialogTitle') },
+    window: { title: localize('CALENDARIA.Common.ExportSettings') },
     content,
     buttons: [
-      { action: 'export', label: localize('CALENDARIA.SettingsPanel.ExportSettings.Label'), icon: 'fas fa-file-export', default: true },
+      { action: 'export', label: localize('CALENDARIA.Common.Export'), icon: 'fas fa-file-export', default: true },
       { action: 'cancel', label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     ],
     close: () => 'cancel',
@@ -181,7 +181,7 @@ export async function importSettings(onComplete) {
             </div>
           </div>
           <div class="form-group">
-            <label for="setActive">${localize('CALENDARIA.SettingsPanel.ImportSettings.SetActive')}</label>
+            <label for="setActive">${localize('CALENDARIA.Editor.SetAsActive')}</label>
             <div class="form-fields">
               <input type="checkbox" id="setActive" name="setActive" checked>
             </div>
@@ -189,7 +189,7 @@ export async function importSettings(onComplete) {
       }
       let dialogElement = null;
       const result = await foundry.applications.api.DialogV2.wait({
-        window: { title: localize('CALENDARIA.SettingsPanel.ImportSettings.ConfirmTitle') },
+        window: { title: localize('CALENDARIA.Common.ImportSettings') },
         content,
         buttons: [
           { action: 'import', label: localize('CALENDARIA.Common.Import'), icon: 'fas fa-file-import', default: true },

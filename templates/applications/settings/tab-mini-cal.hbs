@@ -11,7 +11,7 @@
     </button>
     <button type="button" data-action="openMiniCal">
       <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenMiniCal"}}
+      {{localize "CALENDARIA.Common.OpenMiniCal"}}
     </button>
   </div>
   <p class="hint section-hint">{{openHint}}</p>
@@ -33,7 +33,7 @@
 
     {{#if isGM}}
       <div class="form-group">
-        <label for="forceMiniCal">{{localize "CALENDARIA.Settings.ForceMiniCal.Name"}}</label>
+        <label for="forceMiniCal">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceMiniCal" name="forceMiniCal" {{#if forceMiniCal}}checked{{/if}}>
         </div>
@@ -125,17 +125,17 @@
     </div>
 
     <div class="form-group">
-      <label for="miniCalCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <label for="miniCalCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
       <div class="form-fields">
         <select id="miniCalCombatMode" name="miniCalCombatMode">
           <option value="none" {{#if (eq miniCalCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+            {{localize "CALENDARIA.Common.None"}}
           </option>
           <option value="hideCombat" {{#if (eq miniCalCombatMode "hideCombat")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
           </option>
           <option value="hideEncounter" {{#if (eq miniCalCombatMode "hideEncounter")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
           </option>
         </select>
       </div>
@@ -153,7 +153,7 @@
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
 
     <div class="form-group">
-      <label for="miniCalShowWeather">{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
+      <label for="miniCalShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalShowWeather" name="miniCalShowWeather"
           {{#if miniCalShowWeather}}checked{{/if}}>
@@ -162,7 +162,7 @@
     </div>
 
     <div class="form-group{{#unless miniCalShowWeather}} disabled{{/unless}}">
-      <label for="miniCalWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+      <label for="miniCalWeatherDisplayMode">{{localize "CALENDARIA.Common.WeatherDisplay"}}</label>
       <div class="form-fields">
         <select id="miniCalWeatherDisplayMode" name="miniCalWeatherDisplayMode" {{#unless miniCalShowWeather}}disabled
           aria-disabled="true" {{/unless}}>
@@ -175,7 +175,7 @@
     </div>
 
     <div class="form-group">
-      <label for="miniCalShowSeason">{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
+      <label for="miniCalShowSeason">{{localize "CALENDARIA.Common.ShowSeason"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalShowSeason" name="miniCalShowSeason" {{#if miniCalShowSeason}}checked{{/if}}>
       </div>
@@ -183,7 +183,7 @@
     </div>
 
     <div class="form-group{{#unless miniCalShowSeason}} disabled{{/unless}}">
-      <label for="miniCalSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+      <label for="miniCalSeasonDisplayMode">{{localize "CALENDARIA.Common.SeasonDisplay"}}</label>
       <div class="form-fields">
         <select id="miniCalSeasonDisplayMode" name="miniCalSeasonDisplayMode" {{#unless miniCalShowSeason}}disabled
           aria-disabled="true" {{/unless}}>
@@ -196,7 +196,7 @@
     </div>
 
     <div class="form-group">
-      <label for="miniCalShowEra">{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
+      <label for="miniCalShowEra">{{localize "CALENDARIA.Common.ShowEra"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalShowEra" name="miniCalShowEra" {{#if miniCalShowEra}}checked{{/if}}>
       </div>
@@ -204,7 +204,7 @@
     </div>
 
     <div class="form-group{{#unless miniCalShowEra}} disabled{{/unless}}">
-      <label for="miniCalEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
+      <label for="miniCalEraDisplayMode">{{localize "CALENDARIA.Common.EraDisplay"}}</label>
       <div class="form-fields">
         <select id="miniCalEraDisplayMode" name="miniCalEraDisplayMode" {{#unless miniCalShowEra}}disabled
           aria-disabled="true" {{/unless}}>
@@ -217,7 +217,7 @@
     </div>
 
     <div class="form-group">
-      <label for="miniCalShowCycles">{{localize "CALENDARIA.Settings.HUDShowCycles.Name"}}</label>
+      <label for="miniCalShowCycles">{{localize "CALENDARIA.Common.ShowCycles"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalShowCycles" name="miniCalShowCycles" {{#if miniCalShowCycles}}checked{{/if}}>
       </div>
@@ -225,7 +225,7 @@
     </div>
 
     <div class="form-group{{#unless miniCalShowCycles}} disabled{{/unless}}">
-      <label for="miniCalCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
+      <label for="miniCalCyclesDisplayMode">{{localize "CALENDARIA.Common.CyclesDisplay"}}</label>
       <div class="form-fields">
         <select id="miniCalCyclesDisplayMode" name="miniCalCyclesDisplayMode" {{#unless miniCalShowCycles}}disabled
           aria-disabled="true" {{/unless}}>
@@ -238,7 +238,7 @@
     </div>
 
     <div class="form-group">
-      <label for="miniCalShowMoonPhases">{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
+      <label for="miniCalShowMoonPhases">{{localize "CALENDARIA.Common.ShowMoonPhases"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalShowMoonPhases" name="miniCalShowMoonPhases"
           {{#if miniCalShowMoonPhases}}checked{{/if}}>
@@ -247,12 +247,12 @@
     </div>
 
     <div class="form-group">
-      <label for="miniCalHeaderShowSelected">{{localize "CALENDARIA.Settings.MiniCalHeaderShowSelected.Name"}}</label>
+      <label for="miniCalHeaderShowSelected">{{localize "CALENDARIA.Common.ShowSelectedDateInHeader"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalHeaderShowSelected" name="miniCalHeaderShowSelected"
           {{#if miniCalHeaderShowSelected}}checked{{/if}}>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalHeaderShowSelected.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Common.ShowSelectedDateInHeaderHint"}}</p>
     </div>
   </fieldset>
 

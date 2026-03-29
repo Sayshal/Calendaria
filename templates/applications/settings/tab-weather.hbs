@@ -68,7 +68,7 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-forecast">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Forecast"}}</legend>
+      <legend>{{localize "CALENDARIA.Weather.Forecast"}}</legend>
 
       <div class="form-group">
         <label for="forecastAccuracy">{{localize "CALENDARIA.Settings.ForecastAccuracy.Name"}}</label>
@@ -152,7 +152,7 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-presets">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherEditor"}}</legend>
+      <legend>{{localize "CALENDARIA.WeatherEditor.Title"}}</legend>
       <div class="form-group">
         <label>{{localize "CALENDARIA.WeatherEditor.Title"}}</label>
         <div class="form-fields">
@@ -230,7 +230,7 @@
       </legend>
 
       <div class="form-group">
-        <label for="temperatureUnit">{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
+        <label for="temperatureUnit">{{localize "CALENDARIA.Common.Temperature"}}</label>
         <div class="form-fields">
           <select id="temperatureUnit" name="temperatureUnit">
             {{#each temperatureUnitOptions}}
@@ -242,7 +242,7 @@
       </div>
 
       <div class="form-group">
-        <label for="precipitationUnit">{{localize "CALENDARIA.Settings.PrecipitationUnit.Name"}}</label>
+        <label for="precipitationUnit">{{localize "CALENDARIA.Common.Precipitation"}}</label>
         <div class="form-fields">
           <select id="precipitationUnit" name="precipitationUnit">
             {{#each precipitationUnitOptions}}

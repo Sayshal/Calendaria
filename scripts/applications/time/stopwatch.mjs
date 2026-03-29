@@ -792,7 +792,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         <p class="hint">${this.#mode === 'realtime' ? localize('CALENDARIA.Stopwatch.ThresholdHintRealtime') : localize('CALENDARIA.Stopwatch.ThresholdHintGametime')}</p>
       </div>
       <div class="form-group">
-        <label>${localize('CALENDARIA.Stopwatch.NotificationType')}</label>
+        <label>${localize('CALENDARIA.Common.NotifType')}</label>
         <select name="type">
           <option value="toast" ${this.#notification?.type === 'toast' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationToast')}</option>
           <option value="sound" ${this.#notification?.type === 'sound' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationSound')}</option>
@@ -800,7 +800,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         </select>
       </div>
       <div class="form-group">
-        <label>${localize('CALENDARIA.Stopwatch.NotificationSoundFile')}</label>
+        <label>${localize('CALENDARIA.WeatherEditor.SoundFile')}</label>
         <div class="form-fields">
           <input type="text" name="sound" value="${currentSound}" placeholder="sounds/notify.wav" />
           <button type="button" class="file-picker" data-type="audio" data-target="sound" data-tooltip="${localize('FILES.BrowseTooltip')}">
@@ -841,7 +841,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'clear',
-          label: localize('CALENDARIA.Stopwatch.ClearNotification'),
+          label: localize('CALENDARIA.Common.Clear'),
           icon: 'fas fa-times',
           callback: () => ({ threshold: null, type: null, sound: null })
         }
@@ -1172,14 +1172,14 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.Stopwatch.ContextMenu.ResetPosition',
+      name: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
       callback: () => this.resetPosition()
     });
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.Stopwatch.ContextMenu.UnlockPosition' : 'CALENDARIA.Stopwatch.ContextMenu.LockPosition',
+      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this.#toggleStickyPosition()
     });

@@ -5,13 +5,13 @@
       <legend class="cb-group-legend">s
         {{localize "CALENDARIA.Condition.Builder.MatchLabel"}}
         <select name="group.{{path}}.mode"
-          data-tooltip-html="<b>{{localize 'CALENDARIA.Condition.Group.Mode.and'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.andHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.or'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.orHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.nand'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.nandHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.xor'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.xorHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.count'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.countHint'}}">
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Common.All'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.andHint'}}<br><b>{{localize 'CALENDARIA.Common.Any'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.orHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.nand'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.nandHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.xor'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.xorHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.count'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.countHint'}}">
           {{#each modeOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
         {{#if isCountMode}}
-          {{localize "CALENDARIA.Condition.Group.Threshold"}}:
+          {{localize "CALENDARIA.Common.Threshold"}}:
           <input type="number" name="group.{{path}}.threshold" value="{{threshold}}" min="1" class="cb-threshold">
         {{/if}}
         {{#unless isRoot}}
@@ -97,10 +97,10 @@
                 {{/each}}
               </select>
               <input type="number" name="condition.{{path}}.dateDay" value="{{dateDay}}" min="0" max="{{maxDay}}"
-                class="cb-date-day" placeholder="{{localize 'CALENDARIA.Condition.Field.day'}}" data-tooltip
+                class="cb-date-day" placeholder="{{localize 'CALENDARIA.Common.Day'}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateDay'}}">
               <input type="number" name="condition.{{path}}.dateYear" value="{{dateYear}}" class="cb-date-year"
-                placeholder="{{localize 'CALENDARIA.Condition.Field.year'}}" data-tooltip
+                placeholder="{{localize 'CALENDARIA.Common.Year'}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateYear'}}">
             </div>
           {{else}}

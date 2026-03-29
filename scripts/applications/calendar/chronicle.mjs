@@ -127,7 +127,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     context.depths = [
       { id: 'title', label: localize('CALENDARIA.Chronicle.Depth.Title'), active: this._entryDepth === 'title' },
       { id: 'excerpt', label: localize('CALENDARIA.Chronicle.Depth.Excerpt'), active: this._entryDepth === 'excerpt' },
-      { id: 'full', label: localize('CALENDARIA.Chronicle.Depth.Full'), active: this._entryDepth === 'full' }
+      { id: 'full', label: localize('CALENDARIA.Common.Full'), active: this._entryDepth === 'full' }
     ];
     return context;
   }

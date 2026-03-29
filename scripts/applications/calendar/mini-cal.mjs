@@ -780,7 +780,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const isAllDay = enriched.allDay;
         let timeLabel = '';
         if (isAllDay) {
-          timeLabel = localize('CALENDARIA.MiniCal.AllDay');
+          timeLabel = localize('CALENDARIA.Common.AllDay');
         } else {
           const startTime = this._formatTime(start.hour, start.minute);
           const endTime = this._formatTime(end?.hour, end?.minute);
@@ -869,7 +869,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     lines.push(`<strong style="color: ${enriched.color}">${esc(enriched.name)}</strong>`);
     lines.push(`<span>${esc(timeLabel)}</span>`);
     if (enriched.visibility !== 'visible') {
-      const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Note.Visibility.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
+      const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
       const visIcon = enriched.visibility === 'hidden' ? 'fa-eye-slash' : 'fa-lock';
       lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(localize(visKey))}</span>`);
     }
@@ -1246,9 +1246,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE, !compact);
       }
     });
-    items.push({ name: 'CALENDARIA.MiniCal.ContextMenu.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => MiniCal.resetPosition() });
+    items.push({ name: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => MiniCal.resetPosition() });
     items.push({
-      name: this.#stickyPosition ? 'CALENDARIA.MiniCal.ContextMenu.UnlockPosition' : 'CALENDARIA.MiniCal.ContextMenu.LockPosition',
+      name: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
       callback: () => this._toggleStickyPosition()
     });

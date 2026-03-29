@@ -39,11 +39,11 @@
           {{/each}}
         </select>
         <button type="button" data-action="importTheme" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Importer.Import'}}">
+          aria-label="{{localize 'CALENDARIA.Common.Import'}}">
           <i class="fas fa-upload"></i>
         </button>
         <button type="button" data-action="exportTheme" data-tooltip
-          aria-label="{{localize 'CALENDARIA.ThemeEditor.Export'}}">
+          aria-label="{{localize 'CALENDARIA.Common.Export'}}">
           <i class="fas fa-download"></i>
         </button>
       </div>
@@ -61,9 +61,9 @@
                 <span class="col-usage" data-tooltip
                   aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.UsageHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Usage"}}</span>
                 <span class="col-color" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ColorHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Color"}}</span>
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ColorHint'}}">{{localize "CALENDARIA.Common.Color"}}</span>
                 <span class="col-reset" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ResetHint'}}">{{localize "CALENDARIA.ThemeEditor.Header.Reset"}}</span>
+                  aria-label="{{localize 'CALENDARIA.ThemeEditor.Header.ResetHint'}}">{{localize "CALENDARIA.Common.Reset"}}</span>
               </div>
               {{#each this.colors}}
                 <div class="color-table-row">

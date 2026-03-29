@@ -5,7 +5,7 @@
         <i class="fas fa-star"></i>
         {{#if isGM}}
           <span>{{localize "CALENDARIA.Note.FestivalBannerLinkedGM"}} <a
-              data-action="openFestivalEditor">{{localize "CALENDARIA.Note.FestivalBannerEditorLink"}}</a>.</span>
+              data-action="openFestivalEditor">{{localize "CALENDARIA.Settings.CalendarEditor.Name"}}</a>.</span>
         {{else}}
           <span>{{localize "CALENDARIA.Note.FestivalBannerLinked"}}</span>
         {{/if}}
@@ -16,8 +16,8 @@
     <div class="settings-row">
       <fieldset>
         <legend
-          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
-          {{localize "CALENDARIA.Note.VisibilityLabel"}}
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'CALENDARIA.Common.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
+          {{localize "CALENDARIA.Common.Visibility"}}
         </legend>
         <div class="visibility-group">
           {{#if isGM}}
@@ -26,7 +26,7 @@
                 {{localize "CALENDARIA.Note.Visibility.Visible"}}
               </option>
               <option value="hidden" {{#if (eq system.visibility "hidden")}}selected{{/if}}>
-                {{localize "CALENDARIA.Note.Visibility.Hidden"}}
+                {{localize "CALENDARIA.Common.Hidden"}}
               </option>
               <option value="secret" {{#if (eq system.visibility "secret")}}selected{{/if}}>
                 {{localize "CALENDARIA.Note.Visibility.Secret"}}
@@ -48,12 +48,12 @@
 
       <fieldset class="display-style-fieldset">
         <legend
-          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.DisplayStyle.Icon'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.IconHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Pip'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.PipHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Banner'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.BannerHint'}}">
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Common.Icon'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.IconHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Pip'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.PipHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Banner'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.BannerHint'}}">
           {{localize "CALENDARIA.Note.DisplayStyleLabel"}}
         </legend>
         <select name="system.displayStyle">
           <option value="icon" {{#if (eq system.displayStyle "icon")}}selected{{/if}}>
-            {{localize "CALENDARIA.Note.DisplayStyle.Icon"}}
+            {{localize "CALENDARIA.Common.Icon"}}
           </option>
           <option value="pip" {{#if (eq system.displayStyle "pip")}}selected{{/if}}>
             {{localize "CALENDARIA.Note.DisplayStyle.Pip"}}
@@ -79,12 +79,12 @@
     {{!-- Duration --}}
     <fieldset class="duration-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Duration'}}">{{localize
-          "CALENDARIA.Note.DurationLabel"}}</legend>
+          "CALENDARIA.Common.Duration"}}</legend>
       <div class="duration-grid">
         <div class="duration-cell">
           <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.EnableHint'}}">
             <input type="checkbox" name="system.hasDuration" {{checked system.hasDuration}}>
-            {{localize "CALENDARIA.Note.Duration.Enable"}}
+            {{localize "CALENDARIA.Common.HasDuration"}}
           </label>
           <input type="number" name="system.duration" value="{{system.duration}}" min="1" step="1"
             {{#unless system.hasDuration}}disabled{{/unless}}>
@@ -111,10 +111,10 @@
     {{!-- Reminders --}}
     <fieldset class="reminder-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Reminder'}}">{{localize
-          "CALENDARIA.Preset.Reminder"}}</legend>
+          "CALENDARIA.Reminder.Label"}}</legend>
       <div class="reminder-controls">
         <div class="form-group-stacked">
-          <label>{{localize "CALENDARIA.Note.ReminderType"}}</label>
+          <label>{{localize "CALENDARIA.Common.NotifType"}}</label>
           <select name="system.reminderType" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTypeTooltip'}}">
             {{#each reminderTypeOptions}}
               <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
@@ -194,7 +194,7 @@
               <select data-ownership-user="{{userId}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Note.Ownership.Level'}}">
                 <option value="-1" {{#if (eq level -1)}}selected{{/if}}>
-                  {{localize "CALENDARIA.Note.Ownership.None"}}
+                  {{localize "CALENDARIA.Common.None"}}
                 </option>
                 <option value="2" {{#if (eq level 2)}}selected{{/if}}>
                   {{localize "CALENDARIA.Note.Ownership.Observer"}}

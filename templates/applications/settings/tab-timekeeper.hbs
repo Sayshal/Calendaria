@@ -11,7 +11,7 @@
     </button>
     <button type="button" data-action="openTimeKeeper">
       <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenTimeKeeper"}}
+      {{localize "CALENDARIA.Common.OpenTimeKeeper"}}
     </button>
   </div>
   <p class="hint section-hint">{{openHint}}</p>
@@ -36,7 +36,7 @@
 
     {{#if isGM}}
       <div class="form-group">
-        <label for="forceTimeKeeper">{{localize "CALENDARIA.Settings.ForceTimeKeeper.Name"}}</label>
+        <label for="forceTimeKeeper">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceTimeKeeper" name="forceTimeKeeper" {{#if forceTimeKeeper}}checked{{/if}}>
         </div>
@@ -74,17 +74,17 @@
     </div>
 
     <div class="form-group">
-      <label for="timeKeeperCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <label for="timeKeeperCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
       <div class="form-fields">
         <select id="timeKeeperCombatMode" name="timeKeeperCombatMode">
           <option value="none" {{#if (eq timeKeeperCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+            {{localize "CALENDARIA.Common.None"}}
           </option>
           <option value="hideCombat" {{#if (eq timeKeeperCombatMode "hideCombat")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
           </option>
           <option value="hideEncounter" {{#if (eq timeKeeperCombatMode "hideEncounter")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
           </option>
         </select>
       </div>

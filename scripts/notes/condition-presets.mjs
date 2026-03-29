@@ -30,18 +30,18 @@ function cond(field, op, value, extra = {}) {
 }
 
 /** Sub-phase labels keyed by sub-phase value. */
-const SUB_PHASE_LABELS = { 1: 'CALENDARIA.Condition.MoonSubPhase.Rising', 2: 'CALENDARIA.Condition.MoonSubPhase.True', 3: 'CALENDARIA.Condition.MoonSubPhase.Fading' };
+const SUB_PHASE_LABELS = { 1: 'CALENDARIA.Common.Rising', 2: 'CALENDARIA.Condition.MoonSubPhase.True', 3: 'CALENDARIA.Common.Fading' };
 
 /** Group labels for preset optgroups, keyed by group ID. */
 const GROUP_LABELS = {
   basic: 'CALENDARIA.Note.PresetGroup.Basic',
-  weekly: 'CALENDARIA.Note.PresetGroup.Weekly',
-  monthly: 'CALENDARIA.Note.PresetGroup.Monthly',
-  yearly: 'CALENDARIA.Note.PresetGroup.Yearly',
+  weekly: 'CALENDARIA.Notes.Repeat.Weekly',
+  monthly: 'CALENDARIA.Notes.Repeat.Monthly',
+  yearly: 'CALENDARIA.Notes.Repeat.Yearly',
   interval: 'CALENDARIA.Note.PresetGroup.Interval',
-  season: 'CALENDARIA.Note.PresetGroup.Season',
-  moon: 'CALENDARIA.Note.PresetGroup.Moon',
-  eclipse: 'CALENDARIA.Note.PresetGroup.Eclipse'
+  season: 'CALENDARIA.Common.Seasons',
+  moon: 'CALENDARIA.Common.Moons',
+  eclipse: 'CALENDARIA.Editor.Section.Eclipse'
 };
 
 /** Stable ordering for preset groups. */

@@ -52,7 +52,6 @@ export default class NoteManager {
     if (game.user.isGM) {
       await this.getCalendarNotesFolder();
       await this.#initializeActiveCalendarFolder();
-      await this.#migrateCalendarJournalsToFolders();
       await this.#syncNoteOwnership();
     }
     this.#initialized = true;
@@ -668,51 +667,6 @@ export default class NoteManager {
       }
     }
     return null;
-  }
-
-  /**
-   * Migrate legacy calendar journals to new folder-based structure.
-   * @returns {Promise<void>}
-   * @private
-   */
-  static async #migrateCalendarJournalsToFolders() {
-    const legacyJournals = game.journal.filter((j) => j.getFlag(MODULE.ID, 'isCalendarJournal'));
-    if (legacyJournals.length === 0) return;
-    log(3, `Found ${legacyJournals.length} legacy calendar journal(s) to migrate`);
-    for (const journal of legacyJournals) {
-      const calendarId = journal.getFlag(MODULE.ID, 'calendarId');
-      if (!calendarId) continue;
-      const calendar = CalendarManager.getCalendar(calendarId);
-      if (!calendar) {
-        if (game.user.isGM) {
-          log(3, `Deleting orphaned legacy journal "${journal.name}" - calendar ${calendarId} no longer exists`);
-          this.#bypassDeleteProtection = true;
-          await journal.delete();
-          this.#bypassDeleteProtection = false;
-        }
-        continue;
-      }
-      const folder = await this.getCalendarFolder(calendarId, calendar);
-      if (!folder) continue;
-      const notePages = journal.pages.filter((p) => p.type === 'calendaria.calendarnote');
-      log(3, `Migrating ${notePages.length} notes from ${journal.name}`);
-      for (const page of notePages) {
-        const noteData = page.system;
-        const ownership = noteData?.visibility !== NOTE_VISIBILITY.VISIBLE ? { default: 0 } : { default: 2 };
-        const newJournal = await JournalEntry.create({ name: page.name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } } });
-        await JournalEntryPage.create(
-          { name: page.name, type: 'calendaria.calendarnote', system: noteData, text: { content: page.text?.content || '' }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
-          { parent: newJournal }
-        );
-        log(3, `Migrated note: ${page.name}`);
-      }
-      const originalName = journal.name;
-      await journal.update({ name: `(DELETEME) - ${originalName}` });
-      await journal.unsetFlag(MODULE.ID, 'isCalendarJournal');
-      log(2, `Renamed legacy calendar journal: ${originalName} → (DELETEME) - ${originalName}`);
-    }
-    await this.#buildIndex();
-    log(3, 'Calendar journal migration complete');
   }
 
   /**

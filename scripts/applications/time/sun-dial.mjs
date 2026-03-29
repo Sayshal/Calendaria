@@ -487,7 +487,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const sign = dayOffset > 0 ? '+' : '';
-    label.textContent = `${sign}${dayOffset} ${localize('CALENDARIA.SunDial.Days')}`;
+    label.textContent = `${sign}${dayOffset} ${localize('CALENDARIA.Common.UnitDays')}`;
   }
 
   /** Setup handle drag and time input interaction. */
@@ -697,14 +697,14 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       callback: () => this.#toggleCrankMode()
     });
     items.push({
-      name: 'CALENDARIA.SunDial.ContextMenu.ResetPosition',
+      name: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
       callback: () => this.resetPosition()
     });
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.SunDial.ContextMenu.UnlockPosition' : 'CALENDARIA.SunDial.ContextMenu.LockPosition',
+      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this.#toggleStickyPosition()
     });

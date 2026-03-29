@@ -1,7 +1,7 @@
 <div class="dialog-date-picker">
   <div class="form-grid">
     <div class="form-group">
-      <label>{{#if isMonthless}}{{localize "CALENDARIA.SetDate.DayOfYear"}}{{else}}{{localize "CALENDARIA.Common.Day"}}{{/if}}</label>
+      <label>{{#if isMonthless}}{{localize "CALENDARIA.Condition.Field.dayOfYear"}}{{else}}{{localize "CALENDARIA.Common.Day"}}{{/if}}</label>
       <select name="day" id="day-select">
         {{#each days}}
           <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>

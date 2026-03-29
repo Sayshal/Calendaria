@@ -229,11 +229,11 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     let repeatTooltip = null;
     if (flagData.conditionTree) {
       repeatIcon = 'fas fa-code-branch';
-      repeatTooltip = localize('CALENDARIA.NoteViewer.Filter.Computed');
+      repeatTooltip = localize('CALENDARIA.Notes.Repeat.Computed');
     } else if (flagData.repeat && flagData.repeat !== 'never') {
       const icons = { daily: 'fas fa-rotate', weekly: 'fas fa-rotate', monthly: 'fas fa-rotate', yearly: 'fas fa-rotate', moon: 'fas fa-moon' };
       repeatIcon = icons[flagData.repeat] || 'fas fa-rotate';
-      repeatTooltip = localize(`CALENDARIA.Repeat.${flagData.repeat}`);
+      repeatTooltip = localize(`CALENDARIA.Notes.Repeat.${flagData.repeat[0].toUpperCase()}${flagData.repeat.slice(1)}`);
     }
     return {
       id: stub.id,
@@ -593,7 +593,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         if (!pageId) return;
         const items = [
           {
-            name: localize('CALENDARIA.NoteViewer.Context.Open'),
+            name: localize('CALENDARIA.Common.Open'),
             icon: '<i class="fas fa-eye"></i>',
             callback: () => {
               const page = NoteManager.getFullNote(pageId);
@@ -603,7 +603,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         ];
         if (canEditNotes()) {
           items.push({
-            name: localize('CALENDARIA.NoteViewer.Context.Edit'),
+            name: localize('CALENDARIA.Common.Edit'),
             icon: '<i class="fas fa-edit"></i>',
             callback: () => {
               const page = NoteManager.getFullNote(pageId);
@@ -623,12 +623,12 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         });
         if (isGM && canDeleteNotes()) {
           items.push({
-            name: localize('CALENDARIA.NoteViewer.Context.Delete'),
+            name: localize('CALENDARIA.Common.Delete'),
             icon: '<i class="fas fa-trash"></i>',
             callback: async () => {
               const stub = NoteManager.getNote(pageId);
               const confirmed = await foundry.applications.api.DialogV2.confirm({
-                window: { title: localize('CALENDARIA.NoteViewer.ConfirmDelete') },
+                window: { title: localize('CALENDARIA.Common.DeleteNote') },
                 content: `<p>${stub?.name || 'this note'}</p>`,
                 yes: { default: false }
               });
@@ -828,10 +828,10 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {Promise<boolean>} Whether the operation completed
    */
   async #executeBulkChangeVisibility(ids) {
-    const content = `<div class="form-group"><label>${localize('CALENDARIA.NoteViewer.Filter.Visibility')}</label>
+    const content = `<div class="form-group"><label>${localize('CALENDARIA.Common.Visibility')}</label>
       <select id="bulk-visibility-select">
         <option value="visible">${localize('CALENDARIA.Note.Visibility.Visible')}</option>
-        <option value="hidden">${localize('CALENDARIA.Note.Visibility.Hidden')}</option>
+        <option value="hidden">${localize('CALENDARIA.Common.Hidden')}</option>
         <option value="secret">${localize('CALENDARIA.Note.Visibility.Secret')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
@@ -854,7 +854,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
   async #executeBulkChangeDisplayStyle(ids) {
     const content = `<div class="form-group"><label>${localize('CALENDARIA.Note.DisplayStyleLabel')}</label>
       <select id="bulk-style-select">
-        <option value="icon">${localize('CALENDARIA.Note.DisplayStyle.Icon')}</option>
+        <option value="icon">${localize('CALENDARIA.Common.Icon')}</option>
         <option value="pip">${localize('CALENDARIA.Note.DisplayStyle.Pip')}</option>
         <option value="banner">${localize('CALENDARIA.Note.DisplayStyle.Banner')}</option>
       </select></div>`;

@@ -2,7 +2,7 @@
 
   <fieldset data-section="fog-of-war">
     <legend data-tooltip="{{localize "CALENDARIA.SettingsPanel.FogOfWar.Note"}}">
-      {{localize "CALENDARIA.SettingsPanel.Section.FogOfWar"}}
+      {{localize "CALENDARIA.SettingsPanel.Tab.FogOfWar"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="fog-of-war" data-tooltip
         aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>
@@ -18,16 +18,16 @@
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.FogOfWar.StartDate"}}</label>
       <div class="form-fields">
-        <label class="inline-label">{{localize "CALENDARIA.Settings.FogOfWar.StartDateYear"}}</label>
+        <label class="inline-label">{{localize "CALENDARIA.Common.Year"}}</label>
         <input type="number" name="fogStartYear" value="{{fogStartYear}}" />
-        <label class="inline-label">{{localize "CALENDARIA.Settings.FogOfWar.StartDateMonth"}}</label>
+        <label class="inline-label">{{localize "CALENDARIA.Common.Month"}}</label>
         <select name="fogStartMonth" data-action="fogStartMonthChanged">
           <option value="">—</option>
           {{#each fogStartMonths}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
-        <label class="inline-label">{{localize "CALENDARIA.Settings.FogOfWar.StartDateDay"}}</label>
+        <label class="inline-label">{{localize "CALENDARIA.Common.Day"}}</label>
         <select name="fogStartDay">
           <option value="">—</option>
           {{#each fogStartDays}}
@@ -77,7 +77,7 @@
   </fieldset>
 
   <fieldset data-section="fog-of-war-reset">
-    <legend>{{localize "CALENDARIA.Settings.FogOfWar.ResetLegend"}}</legend>
+    <legend>{{localize "CALENDARIA.Common.Reset"}}</legend>
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.FogOfWar.ResetRanges"}}</label>
       <div class="form-fields">

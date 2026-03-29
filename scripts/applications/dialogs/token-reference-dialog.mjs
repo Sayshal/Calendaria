@@ -137,16 +137,16 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
     const context = await super._prepareContext(options);
     const tokens = getAvailableTokens();
     const groups = [
-      { id: 'year', label: localize('CALENDARIA.TokenReference.Group.Year'), tokens: [] },
-      { id: 'month', label: localize('CALENDARIA.TokenReference.Group.Month'), tokens: [] },
-      { id: 'day', label: localize('CALENDARIA.TokenReference.Group.Day'), tokens: [] },
-      { id: 'weekday', label: localize('CALENDARIA.TokenReference.Group.Weekday'), tokens: [] },
-      { id: 'week', label: localize('CALENDARIA.TokenReference.Group.Week'), tokens: [] },
-      { id: 'time', label: localize('CALENDARIA.TokenReference.Group.Time'), tokens: [] },
-      { id: 'era', label: localize('CALENDARIA.TokenReference.Group.Era'), tokens: [] },
+      { id: 'year', label: localize('CALENDARIA.Common.Year'), tokens: [] },
+      { id: 'month', label: localize('CALENDARIA.Common.Month'), tokens: [] },
+      { id: 'day', label: localize('CALENDARIA.Common.Day'), tokens: [] },
+      { id: 'weekday', label: localize('CALENDARIA.Common.Weekday'), tokens: [] },
+      { id: 'week', label: localize('CALENDARIA.Common.Week'), tokens: [] },
+      { id: 'time', label: localize('CALENDARIA.Common.Time'), tokens: [] },
+      { id: 'era', label: localize('CALENDARIA.Common.Era'), tokens: [] },
       { id: 'season', label: localize('CALENDARIA.TokenReference.Group.Season'), tokens: [] },
-      { id: 'fantasy', label: localize('CALENDARIA.TokenReference.Group.Fantasy'), tokens: [] },
-      { id: 'stopwatch', label: localize('CALENDARIA.TokenReference.Group.Stopwatch'), tokens: [] }
+      { id: 'fantasy', label: localize('CALENDARIA.Common.Fantasy'), tokens: [] },
+      { id: 'stopwatch', label: localize('CALENDARIA.Common.StopWatch'), tokens: [] }
     ];
     const highlightedTokens = this.#getHighlightedTokens();
     for (const tokenDef of tokens) {

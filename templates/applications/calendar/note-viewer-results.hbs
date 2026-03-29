@@ -20,14 +20,14 @@
             {{/each}}
             {{#if this.isHidden}}
               <i class="fas fa-eye-slash tag-visibility"
-                data-tooltip="{{localize 'CALENDARIA.Note.Visibility.Hidden'}}"></i>
+                data-tooltip="{{localize 'CALENDARIA.Common.Hidden'}}"></i>
             {{else if this.isSecret}}
               <i class="fas fa-eye-low-vision tag-visibility"
                 data-tooltip="{{localize 'CALENDARIA.Note.Visibility.Secret'}}"></i>
             {{/if}}
             {{#if this.hasDuration}}
               <i class="fas fa-arrows-left-right tag-duration"
-                data-tooltip="{{localize 'CALENDARIA.NoteViewer.Filter.HasDuration'}}"></i>
+                data-tooltip="{{localize 'CALENDARIA.Common.HasDuration'}}"></i>
             {{/if}}
             {{#if this.isRecurring}}
               <i class="fas fa-rotate tag-recurrence"

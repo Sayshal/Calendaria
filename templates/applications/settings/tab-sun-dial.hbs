@@ -35,7 +35,7 @@
       </div>
 
       <div class="form-group">
-        <label for="forceSunDial">{{localize "CALENDARIA.Settings.ForceSunDial.Name"}}</label>
+        <label for="forceSunDial">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceSunDial" name="forceSunDial" {{#if forceSunDial}}checked{{/if}}>
         </div>
@@ -79,17 +79,17 @@
     </div>
 
     <div class="form-group">
-      <label for="sunDialCombatMode">{{localize "CALENDARIA.Settings.WidgetCombatMode.Name"}}</label>
+      <label for="sunDialCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
       <div class="form-fields">
         <select id="sunDialCombatMode" name="sunDialCombatMode">
           <option value="none" {{#if (eq sunDialCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.None"}}
+            {{localize "CALENDARIA.Common.None"}}
           </option>
           <option value="hideCombat" {{#if (eq sunDialCombatMode "hideCombat")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideCombat"}}
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
           </option>
           <option value="hideEncounter" {{#if (eq sunDialCombatMode "hideEncounter")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.WidgetCombatMode.HideEncounter"}}
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
           </option>
         </select>
       </div>

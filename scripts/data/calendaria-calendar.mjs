@@ -247,10 +247,43 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @override
    */
   static migrateData(source) {
+    CalendariaCalendar.#migrateArraysToObjects(source);
     CalendariaCalendar.#migrateDateIndexing(source);
     CalendariaCalendar.#migrateFestivalIcons(source);
     CalendariaCalendar.#migrateFestivalConditionTrees(source);
     return super.migrateData(source);
+  }
+
+  /**
+   * Convert legacy array-based collections to keyed objects.
+   * @param {object} source - Raw source data
+   * @since 0.9.0
+   * @deprecated Remove in 1.1.0
+   */
+  static #migrateArraysToObjects(source) {
+    const convert = (arr) => {
+      if (!Array.isArray(arr)) return arr;
+      const obj = {};
+      for (const item of arr) obj[foundry.utils.randomID()] = item;
+      return obj;
+    };
+    for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) if (Array.isArray(source[key])) source[key] = convert(source[key]);
+    if (source.months?.values && Array.isArray(source.months.values)) source.months.values = convert(source.months.values);
+    if (source.days?.values && Array.isArray(source.days.values)) source.days.values = convert(source.days.values);
+    if (source.seasons?.values && Array.isArray(source.seasons.values)) source.seasons.values = convert(source.seasons.values);
+    if (source.weather?.zones && Array.isArray(source.weather.zones)) source.weather.zones = convert(source.weather.zones);
+    if (source.weeks?.names && Array.isArray(source.weeks.names)) source.weeks.names = convert(source.weeks.names);
+    const convertNested = (parent, key) => {
+      if (!parent || typeof parent !== 'object') return;
+      for (const item of Object.values(parent)) if (item && Array.isArray(item[key])) item[key] = convert(item[key]);
+    };
+    if (source.moons && !Array.isArray(source.moons)) convertNested(source.moons, 'phases');
+    if (source.cycles && !Array.isArray(source.cycles)) convertNested(source.cycles, 'stages');
+    if (source.weather?.zones && !Array.isArray(source.weather.zones)) convertNested(source.weather.zones, 'presets');
+    if (source.months?.values && !Array.isArray(source.months.values)) convertNested(source.months.values, 'weekdays');
+    if (source.seasons?.values && !Array.isArray(source.seasons.values)) {
+      for (const season of Object.values(source.seasons.values)) if (season?.climate?.presets && Array.isArray(season.climate.presets)) season.climate.presets = convert(season.climate.presets);
+    }
   }
 
   /**
@@ -308,7 +341,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * Populate conditionTree on festivals that only have month+day fields.
    * @param {object} source - Raw source data
    * @since 1.1.0
-   * @deprecated Remove in 1.3.0
+   * @deprecated Remove in 1.2.0
    * @private
    */
   static #migrateFestivalConditionTrees(source) {

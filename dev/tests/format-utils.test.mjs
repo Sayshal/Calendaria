@@ -553,8 +553,8 @@ describe('formatApproximateTime()', () => {
   it('returns Noon for midday', () => { expect(formatApproximateTime(mockCalendar, { hour: 12 })).toBe('CALENDARIA.Format.ApproxTime.Noon'); });
   it('returns Afternoon for post-noon hours', () => { expect(formatApproximateTime(mockCalendar, { hour: 14 })).toBe('CALENDARIA.Format.ApproxTime.Afternoon'); });
   it('returns Night for late night hours', () => { expect(formatApproximateTime(mockCalendar, { hour: 2 })).toBe('CALENDARIA.Format.ApproxTime.Night'); });
-  it('returns Midnight for middle of the night', () => { expect(formatApproximateTime(mockCalendar, { hour: 0 })).toBe('CALENDARIA.Format.ApproxTime.Midnight'); });
-  it('defaults hour to 0 when missing', () => { expect(formatApproximateTime(mockCalendar, {})).toBe('CALENDARIA.Format.ApproxTime.Midnight'); });
+  it('returns Midnight for middle of the night', () => { expect(formatApproximateTime(mockCalendar, { hour: 0 })).toBe('CALENDARIA.Common.Midnight'); });
+  it('defaults hour to 0 when missing', () => { expect(formatApproximateTime(mockCalendar, {})).toBe('CALENDARIA.Common.Midnight'); });
   it('uses custom sunrise/sunset from calendar', () => {
     const customCal = addCalendarGetters({ ...mockCalendar, sunrise: () => 8, sunset: () => 20 });
     const result = formatApproximateTime(customCal, { hour: 14 });

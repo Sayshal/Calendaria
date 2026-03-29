@@ -18,7 +18,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
   /** @type {string} The calendar ID being displayed */
   #calendarId;
 
-  /** @type {object|null} Currently viewed month/year */
+  /** @type {object|null} Currently viewed month/year (or year/dayOfMonth for monthless) */
   #viewedDate = null;
 
   /** @type {Array<{hook: string, id: number}>} Registered hooks for cleanup */
@@ -59,12 +59,12 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
 
   /**
    * Get the current viewed date, defaulting to today on this calendar.
-   * @returns {{year: number, month: number}} The viewed date
+   * @returns {{year: number, month: number, dayOfMonth?: number}} The viewed date
    */
   get viewedDate() {
     if (this.#viewedDate) return this.#viewedDate;
     const current = getCurrentDateOn(this.#calendarId);
-    return current ? { year: current.year, month: current.month } : { year: 0, month: 0 };
+    return current ? { year: current.year, month: current.month, dayOfMonth: current.dayOfMonth ?? 0 } : { year: 0, month: 0, dayOfMonth: 0 };
   }
 
   /** @override */
@@ -87,9 +87,14 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     }
     const viewedDate = this.viewedDate;
     context.calendarName = localize(calendar.name) || this.#calendarId;
-    const displayComponents = { year: viewedDate.year, month: viewedDate.month, dayOfMonth: 0 };
-    context.formattedHeader = formatCustom(calendar, displayComponents, 'MMMM YYYY');
-    context.calendarData = this.#generateGridData(calendar, viewedDate);
+    if (calendar.isMonthless) {
+      context.calendarData = this.#generateWeekViewData(calendar, viewedDate);
+      context.formattedHeader = context.calendarData?.formattedHeader ?? '';
+    } else {
+      const displayComponents = { year: viewedDate.year, month: viewedDate.month, dayOfMonth: 0 };
+      context.formattedHeader = formatCustom(calendar, displayComponents, 'MMMM YYYY');
+      context.calendarData = this.#generateGridData(calendar, viewedDate);
+    }
     context.calendarOptions = this.#getCalendarOptions();
     return context;
   }
@@ -144,6 +149,49 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
   }
 
   /**
+   * Generate week-based view data for monthless calendars.
+   * @param {object} calendar - Calendar instance
+   * @param {object} date - {year, dayOfMonth}
+   * @returns {object} Week view grid data
+   */
+  #generateWeekViewData(calendar, date) {
+    const { year } = date;
+    const viewedDay = date.dayOfMonth ?? 0;
+    const daysInWeek = calendar.daysInWeek;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const daysInYear = calendar.getDaysInYear(year - yearZero);
+    const weekNumber = Math.floor(viewedDay / daysInWeek);
+    const currentDate = getCurrentDateOn(this.#calendarId);
+    const todayYear = currentDate?.year;
+    const todayDay = currentDate?.dayOfMonth ?? 0;
+    const weekdays = calendar.weekdaysArray.map((w) => ({ name: localize(w.name), abbreviation: localize(w.abbreviation || w.name).slice(0, 2) }));
+    const weeks = [];
+    for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
+      const targetWeek = weekNumber + weekOffset;
+      const weekStartDay = targetWeek * daysInWeek + 1;
+      const currentWeek = [];
+      for (let i = 0; i < daysInWeek; i++) {
+        let dayNum = weekStartDay + i;
+        let dayYear = year;
+        if (dayNum > daysInYear) {
+          dayNum -= daysInYear;
+          dayYear++;
+        } else if (dayNum < 1) {
+          const prevYearDays = calendar.getDaysInYear(dayYear - yearZero - 1);
+          dayNum += prevYearDays;
+          dayYear--;
+        }
+        const isToday = dayYear === todayYear && dayNum - 1 === todayDay;
+        currentWeek.push({ day: dayNum, isToday, isFromOtherMonth: weekOffset !== 0 });
+      }
+      weeks.push(currentWeek);
+    }
+    const displayWeek = weekNumber + 1;
+    const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${year}`;
+    return { weekdays, weeks, intercalaryDays: [], formattedHeader, isMonthless: true, weekNumber: displayWeek };
+  }
+
+  /**
    * Build calendar select options excluding the active calendar.
    * @returns {Array<{id: string, name: string, selected: boolean}>} Calendar options
    */
@@ -194,7 +242,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
   }
 
   /**
-   * Navigate months forward/backward.
+   * Navigate forward/backward — by month for standard calendars, by week for monthless.
    * @param {Event} _event - The triggering event
    * @param {HTMLElement} target - The clicked element
    */
@@ -203,22 +251,46 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     const calendar = this.calendar;
     if (!calendar) return;
     const current = this.viewedDate;
-    const totalMonths = calendar.monthsArray.length;
-    let { year, month } = current;
-    if (direction === 'next') {
-      month++;
-      if (month >= totalMonths) {
-        month = 0;
-        year++;
+
+    if (calendar.isMonthless) {
+      const daysInWeek = calendar.daysInWeek;
+      const yearZero = calendar.years?.yearZero ?? 0;
+      let { year, dayOfMonth } = current;
+      dayOfMonth = dayOfMonth ?? 0;
+      if (direction === 'next') {
+        dayOfMonth += daysInWeek;
+        const daysInYear = calendar.getDaysInYear(year - yearZero);
+        if (dayOfMonth >= daysInYear) {
+          dayOfMonth -= daysInYear;
+          year++;
+        }
+      } else {
+        dayOfMonth -= daysInWeek;
+        if (dayOfMonth < 0) {
+          year--;
+          const daysInYear = calendar.getDaysInYear(year - yearZero);
+          dayOfMonth += daysInYear;
+        }
       }
+      this.#viewedDate = { year, month: 0, dayOfMonth };
     } else {
-      month--;
-      if (month < 0) {
-        month = totalMonths - 1;
-        year--;
+      const totalMonths = calendar.monthsArray.length;
+      let { year, month } = current;
+      if (direction === 'next') {
+        month++;
+        if (month >= totalMonths) {
+          month = 0;
+          year++;
+        }
+      } else {
+        month--;
+        if (month < 0) {
+          month = totalMonths - 1;
+          year--;
+        }
       }
+      this.#viewedDate = { year, month };
     }
-    this.#viewedDate = { year, month };
     this.render();
   }
 

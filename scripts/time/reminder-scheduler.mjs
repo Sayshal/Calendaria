@@ -316,7 +316,7 @@ export default class ReminderScheduler {
       <div class="calendaria chat-reminder">
         <div class="reminder-message">${message}</div>
         <a class="open-note" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
-          ${icon} ${localize('CALENDARIA.Reminder.OpenNote')}
+          ${icon} ${localize('CALENDARIA.Common.OpenNote')}
         </a>
       </div>
     `.trim();
@@ -341,7 +341,7 @@ export default class ReminderScheduler {
       window: { title: localize('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
       content: `<p>${icon} ${message}</p>`,
       buttons: [
-        { action: 'open', label: localize('CALENDARIA.Reminder.OpenNote'), icon: 'fas fa-book-open', callback: () => 'open' },
+        { action: 'open', label: localize('CALENDARIA.Common.OpenNote'), icon: 'fas fa-book-open', callback: () => 'open' },
         { action: 'dismiss', label: localize('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
       ],
       rejectClose: false
@@ -414,7 +414,7 @@ export default class ReminderScheduler {
         buttons: [
           {
             action: 'open',
-            label: localize('CALENDARIA.Reminder.OpenNote'),
+            label: localize('CALENDARIA.Common.OpenNote'),
             icon: 'fas fa-book-open',
             callback: () => {
               const page = NoteManager.getFullNote(data.noteId);

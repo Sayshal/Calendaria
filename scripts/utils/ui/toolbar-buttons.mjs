@@ -10,13 +10,13 @@ import { localize } from '../localization.mjs';
 
 /** App definitions for toolbar buttons. */
 const TOOLBAR_APP_DEFS = {
-  bigcal: { icon: 'fa-calendar-days', label: 'CALENDARIA.SettingsPanel.Tab.BigCal', toggle: () => BigCal.toggle() },
-  minical: { icon: 'fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCal', toggle: () => MiniCal.toggle() },
+  bigcal: { icon: 'fa-calendar-days', label: 'CALENDARIA.Common.BigCal', toggle: () => BigCal.toggle() },
+  minical: { icon: 'fa-compress', label: 'CALENDARIA.Common.MiniCal', toggle: () => MiniCal.toggle() },
   hud: { icon: 'fa-landmark-dome', label: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
-  timekeeper: { icon: 'fa-gauge', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', toggle: () => TimeKeeper.toggle() },
+  timekeeper: { icon: 'fa-gauge', label: 'CALENDARIA.Common.TimeKeeper', toggle: () => TimeKeeper.toggle() },
   sundial: { icon: 'fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.SunDial', toggle: () => SunDial.toggle() },
-  stopwatch: { icon: 'fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.Stopwatch', toggle: () => Stopwatch.toggle() },
-  chronicle: { icon: 'fa-scroll', label: 'CALENDARIA.SettingsPanel.Tab.Chronicle', toggle: () => Chronicle.toggle() }
+  stopwatch: { icon: 'fa-stopwatch', label: 'CALENDARIA.Common.StopWatch', toggle: () => Stopwatch.toggle() },
+  chronicle: { icon: 'fa-scroll', label: 'CALENDARIA.Chronicle.Title', toggle: () => Chronicle.toggle() }
 };
 
 /**

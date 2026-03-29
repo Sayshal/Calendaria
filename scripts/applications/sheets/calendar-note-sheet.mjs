@@ -70,9 +70,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static TABS = {
     primary: {
       tabs: [
-        { id: 'content', group: 'primary', label: 'CALENDARIA.Note.Tab.Content' },
+        { id: 'content', group: 'primary', label: 'CALENDARIA.Common.Content' },
         { id: 'schedule', group: 'primary', label: 'CALENDARIA.Note.Tab.Schedule' },
-        { id: 'settings', group: 'primary', label: 'CALENDARIA.Note.Tab.Settings' }
+        { id: 'settings', group: 'primary', label: 'CALENDARIA.Common.Settings' }
       ],
       initial: 'content'
     }
@@ -195,7 +195,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   async #showDeletePresetMenu(_event, presetId, presetLabel) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Note.DeletePresetTitle') },
+      window: { title: localize('CALENDARIA.Common.DeletePreset') },
       content: `<p>${format('CALENDARIA.Note.DeletePresetConfirm', { label: presetLabel })}</p><p class="hint">${localize('CALENDARIA.Note.DeletePresetHint')}</p>`,
       rejectClose: false,
       modal: true
@@ -349,7 +349,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const visibility = this.document.system.visibility || 'visible';
     const visibilityConfig = {
       visible: { icon: 'fa-eye', label: 'CALENDARIA.Note.Visibility.Visible', badge: null },
-      hidden: { icon: 'fa-eye-slash', label: 'CALENDARIA.Note.Visibility.Hidden', badge: localize('CALENDARIA.Note.Visibility.Hidden') },
+      hidden: { icon: 'fa-eye-slash', label: 'CALENDARIA.Common.Hidden', badge: localize('CALENDARIA.Common.Hidden') },
       secret: { icon: 'fa-lock', label: 'CALENDARIA.Note.Visibility.Secret', badge: localize('CALENDARIA.Note.Visibility.Secret') }
     };
     const vis = visibilityConfig[visibility] || visibilityConfig.visible;
@@ -389,7 +389,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const currentReminderTargets = this.document.system.reminderTargets || 'all';
       context.reminderTargetOptions = [
         { value: 'all', label: localize('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
-        { value: 'gm', label: localize('CALENDARIA.Note.ReminderTargetGM'), selected: currentReminderTargets === 'gm' },
+        { value: 'gm', label: localize('CALENDARIA.Common.GMOnly'), selected: currentReminderTargets === 'gm' },
         { value: 'author', label: localize('CALENDARIA.Note.ReminderTargetAuthor'), selected: currentReminderTargets === 'author' },
         { value: 'viewers', label: localize('CALENDARIA.Note.ReminderTargetViewers'), selected: currentReminderTargets === 'viewers' },
         { value: 'specific', label: localize('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
@@ -694,7 +694,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         buttons: [
           {
             action: 'apply',
-            label: localize('CALENDARIA.Note.Preset.Apply'),
+            label: localize('CALENDARIA.Common.Apply'),
             icon: 'fas fa-check',
             default: true,
             callback: (_event, button) => ({ merge: button.form.elements.merge?.checked ?? false })
@@ -963,7 +963,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static async _onDeleteNote(_event, _target) {
     if (!this.isAuthor && !game.user.isGM) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+      window: { title: localize('CALENDARIA.Common.DeleteNote') },
       content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
       rejectClose: false,
       modal: true
@@ -1065,32 +1065,32 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   #getConditionDescription(condition, calendar) {
     const { field, op, value, offset } = condition;
     const fieldLabels = {
-      year: localize('CALENDARIA.Note.Condition.Year'),
-      month: localize('CALENDARIA.Note.Condition.Month'),
-      day: localize('CALENDARIA.Note.Condition.Day'),
+      year: localize('CALENDARIA.Common.Year'),
+      month: localize('CALENDARIA.Common.Month'),
+      day: localize('CALENDARIA.Common.Day'),
       dayOfYear: localize('CALENDARIA.Note.Condition.DayInYear'),
-      daysBeforeMonthEnd: localize('CALENDARIA.Note.Condition.DaysBeforeMonthEnd'),
-      weekday: localize('CALENDARIA.Note.Condition.Weekday'),
+      daysBeforeMonthEnd: localize('CALENDARIA.Condition.Field.daysBeforeMonthEnd'),
+      weekday: localize('CALENDARIA.Common.Weekday'),
       weekNumberInMonth: localize('CALENDARIA.Note.Condition.WeekdayNumInMonth'),
       inverseWeekNumber: localize('CALENDARIA.Note.Condition.InverseWeekNumber'),
-      weekInMonth: localize('CALENDARIA.Note.Condition.WeekInMonth'),
-      weekInYear: localize('CALENDARIA.Note.Condition.WeekInYear'),
+      weekInMonth: localize('CALENDARIA.Condition.Field.weekInMonth'),
+      weekInYear: localize('CALENDARIA.Condition.Field.weekInYear'),
       totalWeek: localize('CALENDARIA.Note.Condition.TotalWeek'),
-      weeksBeforeMonthEnd: localize('CALENDARIA.Note.Condition.WeeksBeforeMonthEnd'),
-      weeksBeforeYearEnd: localize('CALENDARIA.Note.Condition.WeeksBeforeYearEnd'),
-      season: localize('CALENDARIA.Note.Condition.Season'),
+      weeksBeforeMonthEnd: localize('CALENDARIA.Condition.Field.weeksBeforeMonthEnd'),
+      weeksBeforeYearEnd: localize('CALENDARIA.Condition.Field.weeksBeforeYearEnd'),
+      season: localize('CALENDARIA.Common.Season'),
       seasonPercent: localize('CALENDARIA.Note.Condition.SeasonPercent'),
-      seasonDay: localize('CALENDARIA.Note.Condition.DayInSeason'),
-      isLongestDay: localize('CALENDARIA.Note.Condition.IsLongestDay'),
-      isShortestDay: localize('CALENDARIA.Note.Condition.IsShortestDay'),
-      isSpringEquinox: localize('CALENDARIA.Note.Condition.IsSpringEquinox'),
-      isAutumnEquinox: localize('CALENDARIA.Note.Condition.IsAutumnEquinox'),
-      moonPhaseIndex: localize('CALENDARIA.Note.Condition.MoonPhase'),
+      seasonDay: localize('CALENDARIA.Condition.Field.seasonDay'),
+      isLongestDay: localize('CALENDARIA.Condition.Field.isLongestDay'),
+      isShortestDay: localize('CALENDARIA.Condition.Field.isShortestDay'),
+      isSpringEquinox: localize('CALENDARIA.Condition.Field.isSpringEquinox'),
+      isAutumnEquinox: localize('CALENDARIA.Condition.Field.isAutumnEquinox'),
+      moonPhaseIndex: localize('CALENDARIA.Common.MoonPhase'),
       moonPhaseCountMonth: localize('CALENDARIA.Note.Condition.MoonPhaseCountMonth'),
       moonPhaseCountYear: localize('CALENDARIA.Note.Condition.MoonPhaseCountYear'),
-      cycle: localize('CALENDARIA.Note.Condition.Cycle'),
-      era: localize('CALENDARIA.Note.Condition.Era'),
-      eraYear: localize('CALENDARIA.Note.Condition.EraYear'),
+      cycle: localize('CALENDARIA.Common.Cycle'),
+      era: localize('CALENDARIA.Common.Era'),
+      eraYear: localize('CALENDARIA.Condition.Field.eraYear'),
       intercalary: localize('CALENDARIA.Note.Condition.IsIntercalaryDay')
     };
     const opLabels = {

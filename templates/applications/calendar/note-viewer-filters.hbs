@@ -14,15 +14,15 @@
 
   {{#if isGM}}
     <div class="filter-group">
-      <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.Visibility"}}</label>
+      <label class="filter-label">{{localize "CALENDARIA.Common.Visibility"}}</label>
       <select class="filter-select filter-visibility">
-        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "CALENDARIA.NoteViewer.Filter.All"}}
+        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.All"}}
         </option>
         <option value="visible" {{#if (eq visibility "visible")}}selected{{/if}}>
           {{localize "CALENDARIA.Note.Visibility.Visible"}}
         </option>
         <option value="hidden" {{#if (eq visibility "hidden")}}selected{{/if}}>
-          {{localize "CALENDARIA.Note.Visibility.Hidden"}}
+          {{localize "CALENDARIA.Common.Hidden"}}
         </option>
         <option value="secret" {{#if (eq visibility "secret")}}selected{{/if}}>
           {{localize "CALENDARIA.Note.Visibility.Secret"}}
@@ -53,7 +53,7 @@
     <div class="filter-group">
       <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.Author"}}</label>
       <select class="filter-select filter-author">
-        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "CALENDARIA.NoteViewer.Filter.All"}}
+        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.All"}}
         </option>
         {{#each authors}}
           <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
@@ -65,11 +65,11 @@
   <div class="filter-group filter-checkboxes">
     <label class="filter-checkbox">
       <input type="checkbox" class="filter-all-day" {{#if allDay}}checked{{/if}} />
-      {{localize "CALENDARIA.NoteViewer.Filter.AllDay"}}
+      {{localize "CALENDARIA.Common.AllDay"}}
     </label>
     <label class="filter-checkbox">
       <input type="checkbox" class="filter-has-duration" {{#if hasDuration}}checked{{/if}} />
-      {{localize "CALENDARIA.NoteViewer.Filter.HasDuration"}}
+      {{localize "CALENDARIA.Common.HasDuration"}}
     </label>
     <label class="filter-checkbox">
       <input type="checkbox" class="filter-is-recurring" {{#if isRecurring}}checked{{/if}} />

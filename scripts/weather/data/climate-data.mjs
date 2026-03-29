@@ -6,7 +6,7 @@
 
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../../utils/_module.mjs';
-import { ALL_PRESETS } from './_module.mjs';
+import { ALL_PRESETS } from './weather-presets.mjs';
 
 /**
  * Convert Celsius to Fahrenheit.

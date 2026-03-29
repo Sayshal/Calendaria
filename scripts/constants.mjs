@@ -372,10 +372,10 @@ export const MOON_PHASE_LABELS = [
 /** @type {Object<string, object>} Wind speed scale (0-5). Canonical values stored in kph; imperial conversion at display time. */
 export const WIND_SPEEDS = {
   CALM: { id: 'calm', value: 0, label: 'CALENDARIA.Weather.Wind.Calm', kph: 5 },
-  LIGHT: { id: 'light', value: 1, label: 'CALENDARIA.Weather.Wind.Light', kph: 20 },
-  MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Weather.Wind.Moderate', kph: 40 },
+  LIGHT: { id: 'light', value: 1, label: 'CALENDARIA.Common.Light', kph: 20 },
+  MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Common.Moderate', kph: 40 },
   STRONG: { id: 'strong', value: 3, label: 'CALENDARIA.Weather.Wind.Strong', kph: 60 },
-  SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Weather.Wind.Severe', kph: 90 },
+  SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Common.Severe', kph: 90 },
   EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 250 }
 };
 
@@ -387,10 +387,10 @@ export const COMPASS_DIRECTIONS = { N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, E
 
 /** @type {Object<string, object>} Intraday weather period definitions tied to threshold hooks */
 export const WEATHER_PERIODS = {
-  NIGHT: { id: 'night', index: 0, label: 'CALENDARIA.Weather.Period.Night', icon: 'fa-moon' },
-  MORNING: { id: 'morning', index: 1, label: 'CALENDARIA.Weather.Period.Morning', icon: 'fa-sun-bright' },
-  AFTERNOON: { id: 'afternoon', index: 2, label: 'CALENDARIA.Weather.Period.Afternoon', icon: 'fa-sun' },
-  EVENING: { id: 'evening', index: 3, label: 'CALENDARIA.Weather.Period.Evening', icon: 'fa-cloud-moon' }
+  NIGHT: { id: 'night', index: 0, label: 'CALENDARIA.Common.Night', icon: 'fa-moon' },
+  MORNING: { id: 'morning', index: 1, label: 'CALENDARIA.Format.ApproxTime.Morning', icon: 'fa-sun-bright' },
+  AFTERNOON: { id: 'afternoon', index: 2, label: 'CALENDARIA.Format.ApproxTime.Afternoon', icon: 'fa-sun' },
+  EVENING: { id: 'evening', index: 3, label: 'CALENDARIA.Format.ApproxTime.Evening', icon: 'fa-cloud-moon' }
 };
 
 /** @enum {string} Condition field identifiers for the unified condition engine. */

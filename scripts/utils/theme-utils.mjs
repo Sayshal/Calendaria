@@ -233,11 +233,11 @@ export const SCIFI_COLORS = {
 /** @type {Object<string, {name: string, colors: Object<string, string>}>} All bundled theme presets. */
 export const THEME_PRESETS = {
   dark: { name: 'CALENDARIA.ThemeEditor.Presets.Dark', colors: DEFAULT_COLORS },
-  light: { name: 'CALENDARIA.ThemeEditor.Presets.Light', colors: LIGHT_COLORS },
+  light: { name: 'CALENDARIA.Common.Light', colors: LIGHT_COLORS },
   highContrast: { name: 'CALENDARIA.ThemeEditor.Presets.HighContrast', colors: HIGH_CONTRAST_COLORS },
   parchment: { name: 'CALENDARIA.ThemeEditor.Presets.Parchment', colors: PARCHMENT_COLORS },
   logbook: { name: 'CALENDARIA.ThemeEditor.Presets.Logbook', colors: LOGBOOK_COLORS },
-  arcane: { name: 'CALENDARIA.ThemeEditor.Presets.Arcane', colors: ARCANE_COLORS },
+  arcane: { name: 'CALENDARIA.Common.Arcane', colors: ARCANE_COLORS },
   scifi: { name: 'CALENDARIA.ThemeEditor.Presets.Scifi', colors: SCIFI_COLORS }
 };
 
@@ -248,7 +248,7 @@ export const COLOR_CATEGORIES = {
   text: 'CALENDARIA.ThemeEditor.Category.Text',
   buttons: 'CALENDARIA.ThemeEditor.Category.Buttons',
   accents: 'CALENDARIA.ThemeEditor.Category.Accents',
-  festivals: 'CALENDARIA.ThemeEditor.Category.Festivals',
+  festivals: 'CALENDARIA.Common.Festivals',
   effects: 'CALENDARIA.ThemeEditor.Category.Effects'
 };
 
@@ -256,8 +256,8 @@ export const COLOR_CATEGORIES = {
 export const COMPONENT_CATEGORIES = {
   common: 'CALENDARIA.ThemeEditor.Component.Common',
   domeHud: 'CALENDARIA.ThemeEditor.Component.DomeHud',
-  timeKeeper: 'CALENDARIA.ThemeEditor.Component.TimeKeeper',
-  miniCal: 'CALENDARIA.ThemeEditor.Component.MiniCal'
+  timeKeeper: 'CALENDARIA.Common.TimeKeeper',
+  miniCal: 'CALENDARIA.Common.MiniCal'
 };
 
 /** @type {Array<{key: string, label: string, category: string, component: string}>} Color variable definitions with display names and categories. */

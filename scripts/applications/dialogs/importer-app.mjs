@@ -92,7 +92,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       context.canImportFromModule = context.selectedImporter.supportsLiveImport && context.selectedImporter.detected;
       context.fileExtensions = this.#getSelectedImporter()?.constructor.fileExtensions?.join(',') || '.json';
     }
-    context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'CALENDARIA.Importer.Import', disabled: !context.hasData || this.#importing }];
+    context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'CALENDARIA.Common.Import', disabled: !context.hasData || this.#importing }];
     return context;
   }
 

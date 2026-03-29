@@ -5,7 +5,7 @@
         <i class="fas fa-star"></i>
         {{#if isGM}}
           <span>{{localize "CALENDARIA.Note.FestivalBannerLinkedGM"}} <a
-              data-action="openFestivalEditor">{{localize "CALENDARIA.Note.FestivalBannerEditorLink"}}</a>.</span>
+              data-action="openFestivalEditor">{{localize "CALENDARIA.Settings.CalendarEditor.Name"}}</a>.</span>
         {{else}}
           <span>{{localize "CALENDARIA.Note.FestivalBannerLinked"}}</span>
         {{/if}}
@@ -59,7 +59,7 @@
           <label class="all-day-label">
             <input type="checkbox" name="system.allDay" {{checked system.allDay}} data-tooltip
               aria-label="{{localize 'CALENDARIA.UI.AllDayTooltip'}}">
-            {{localize "CALENDARIA.MiniCal.AllDay"}}
+            {{localize "CALENDARIA.Common.AllDay"}}
           </label>
           <label>{{localize "CALENDARIA.Common.End"}}</label>
           <div class="time-inputs">
@@ -78,7 +78,7 @@
     <div class="schedule-row">
       <fieldset class="conditions-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Schedule.ConditionBuilderHint'}}">
-          {{localize "CALENDARIA.Note.Schedule.ConditionBuilder"}}
+          {{localize "CALENDARIA.Condition.Builder.Title"}}
         </legend>
 
         <div class="condition-actions">

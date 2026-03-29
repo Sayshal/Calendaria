@@ -598,9 +598,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    items.push({ name: 'CALENDARIA.HUD.ContextMenu.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => HUD.resetPosition() });
+    items.push({ name: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => HUD.resetPosition() });
     items.push({
-      name: this.#stickyPosition ? 'CALENDARIA.HUD.ContextMenu.UnlockPosition' : 'CALENDARIA.HUD.ContextMenu.LockPosition',
+      name: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
       callback: () => this._toggleStickyPosition()
     });

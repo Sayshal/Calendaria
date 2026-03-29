@@ -17,7 +17,7 @@
     </div>
 
     <div class="form-group" data-depends-on="cinematicEnabled">
-      <label for="cinematicThreshold">{{localize "CALENDARIA.Cinematic.Settings.Threshold.Name"}}</label>
+      <label for="cinematicThreshold">{{localize "CALENDARIA.Common.Threshold"}}</label>
       <div class="form-fields">
         <input type="number" id="cinematicThreshold" name="cinematicThreshold" value="{{cinematicThreshold}}" min="1"
           step="1" style="width: 4rem; flex: none">
@@ -68,14 +68,14 @@
 
   <fieldset data-section="cinematic-content" data-depends-on="cinematicEnabled">
     <legend>
-      {{localize "CALENDARIA.Cinematic.Settings.Fieldset.Content"}}
+      {{localize "CALENDARIA.Common.Content"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="cinematic-content"
         data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
           class="fas fa-undo"></i></button>
     </legend>
 
     <div class="form-group">
-      <label for="cinematicShowWeather">{{localize "CALENDARIA.Cinematic.Settings.ShowWeather.Name"}}</label>
+      <label for="cinematicShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="cinematicShowWeather" name="cinematicShowWeather"
           {{#if cinematicShowWeather}}checked{{/if}}>
@@ -84,7 +84,7 @@
     </div>
 
     <div class="form-group">
-      <label for="cinematicShowMoons">{{localize "CALENDARIA.Cinematic.Settings.ShowMoons.Name"}}</label>
+      <label for="cinematicShowMoons">{{localize "CALENDARIA.Common.ShowMoonPhases"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="cinematicShowMoons" name="cinematicShowMoons"
           {{#if cinematicShowMoons}}checked{{/if}}>

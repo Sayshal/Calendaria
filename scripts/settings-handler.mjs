@@ -37,7 +37,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: true })
       },
       [SETTINGS.CINEMATIC_THRESHOLD]: {
-        name: 'CALENDARIA.Cinematic.Settings.Threshold.Name',
+        name: 'CALENDARIA.Common.Threshold',
         hint: 'CALENDARIA.Cinematic.Settings.Threshold.Hint',
         scope: 'world',
         config: false,
@@ -52,14 +52,14 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 3000, min: 1000, max: 6000, step: 100, integer: true })
       },
       [SETTINGS.CINEMATIC_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Cinematic.Settings.ShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Cinematic.Settings.ShowWeather.Hint',
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: true })
       },
       [SETTINGS.CINEMATIC_SHOW_MOONS]: {
-        name: 'CALENDARIA.Cinematic.Settings.ShowMoons.Name',
+        name: 'CALENDARIA.Common.ShowMoonPhases',
         hint: 'CALENDARIA.Cinematic.Settings.ShowMoons.Hint',
         scope: 'world',
         config: false,
@@ -161,7 +161,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: true })
       },
       [SETTINGS.MINI_CAL_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Settings.MiniCalShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Settings.MiniCalShowWeather.Hint',
         scope: 'user',
         config: false,
@@ -169,7 +169,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalWeatherDisplayMode.Name',
+        name: 'CALENDARIA.Common.WeatherDisplay',
         hint: 'CALENDARIA.Settings.MiniCalWeatherDisplayMode.Hint',
         scope: 'user',
         config: false,
@@ -177,7 +177,7 @@ export default class CalendariaSettings {
           choices: {
             full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
             iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp',
-            icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'
           },
           initial: 'full'
@@ -185,7 +185,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_SEASON]: {
-        name: 'CALENDARIA.Settings.MiniCalShowSeason.Name',
+        name: 'CALENDARIA.Common.ShowSeason',
         hint: 'CALENDARIA.Settings.MiniCalShowSeason.Hint',
         scope: 'user',
         config: false,
@@ -193,18 +193,18 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalSeasonDisplayMode.Name',
+        name: 'CALENDARIA.Common.SeasonDisplay',
         hint: 'CALENDARIA.Settings.MiniCalSeasonDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
-          choices: { full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full', icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly', text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly' },
+          choices: { full: 'CALENDARIA.Common.DisplayIconText', icon: 'CALENDARIA.Common.DisplayIconOnly', text: 'CALENDARIA.Common.DisplayTextOnly' },
           initial: 'full'
         }),
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_ERA]: {
-        name: 'CALENDARIA.Settings.MiniCalShowEra.Name',
+        name: 'CALENDARIA.Common.ShowEra',
         hint: 'CALENDARIA.Settings.MiniCalShowEra.Hint',
         scope: 'user',
         config: false,
@@ -212,15 +212,15 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_ERA_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalEraDisplayMode.Name',
+        name: 'CALENDARIA.Common.EraDisplay',
         hint: 'CALENDARIA.Settings.MiniCalEraDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
-            icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
-            text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+            full: 'CALENDARIA.Common.DisplayIconText',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
+            text: 'CALENDARIA.Common.DisplayTextOnly',
             abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
           },
           initial: 'full'
@@ -228,7 +228,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_CYCLES]: {
-        name: 'CALENDARIA.Settings.MiniCalShowCycles.Name',
+        name: 'CALENDARIA.Common.ShowCycles',
         hint: 'CALENDARIA.Settings.MiniCalShowCycles.Hint',
         scope: 'user',
         config: false,
@@ -236,14 +236,14 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Name',
+        name: 'CALENDARIA.Common.CyclesDisplay',
         hint: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
-            icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+            name: 'CALENDARIA.Common.Name',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
           },
@@ -252,7 +252,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Name',
+        name: 'CALENDARIA.Common.ShowMoonPhases',
         hint: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Hint',
         scope: 'user',
         config: false,
@@ -260,15 +260,15 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED]: {
-        name: 'CALENDARIA.Settings.MiniCalHeaderShowSelected.Name',
-        hint: 'CALENDARIA.Settings.MiniCalHeaderShowSelected.Hint',
+        name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
+        hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: false }),
         onChange: renderMiniCal
       },
       [SETTINGS.BIG_CAL_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Settings.BigCalShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Settings.BigCalShowWeather.Hint',
         scope: 'user',
         config: false,
@@ -276,7 +276,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalWeatherDisplayMode.Name',
+        name: 'CALENDARIA.Common.WeatherDisplay',
         hint: 'CALENDARIA.Settings.BigCalWeatherDisplayMode.Hint',
         scope: 'user',
         config: false,
@@ -284,7 +284,7 @@ export default class CalendariaSettings {
           choices: {
             full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
             iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp',
-            icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'
           },
           initial: 'full'
@@ -292,7 +292,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_SEASON]: {
-        name: 'CALENDARIA.Settings.BigCalShowSeason.Name',
+        name: 'CALENDARIA.Common.ShowSeason',
         hint: 'CALENDARIA.Settings.BigCalShowSeason.Hint',
         scope: 'user',
         config: false,
@@ -300,18 +300,18 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalSeasonDisplayMode.Name',
+        name: 'CALENDARIA.Common.SeasonDisplay',
         hint: 'CALENDARIA.Settings.BigCalSeasonDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
-          choices: { full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full', icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly', text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly' },
+          choices: { full: 'CALENDARIA.Common.DisplayIconText', icon: 'CALENDARIA.Common.DisplayIconOnly', text: 'CALENDARIA.Common.DisplayTextOnly' },
           initial: 'full'
         }),
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_ERA]: {
-        name: 'CALENDARIA.Settings.BigCalShowEra.Name',
+        name: 'CALENDARIA.Common.ShowEra',
         hint: 'CALENDARIA.Settings.BigCalShowEra.Hint',
         scope: 'user',
         config: false,
@@ -319,15 +319,15 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_ERA_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalEraDisplayMode.Name',
+        name: 'CALENDARIA.Common.EraDisplay',
         hint: 'CALENDARIA.Settings.BigCalEraDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
-            icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
-            text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+            full: 'CALENDARIA.Common.DisplayIconText',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
+            text: 'CALENDARIA.Common.DisplayTextOnly',
             abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
           },
           initial: 'full'
@@ -335,7 +335,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_CYCLES]: {
-        name: 'CALENDARIA.Settings.BigCalShowCycles.Name',
+        name: 'CALENDARIA.Common.ShowCycles',
         hint: 'CALENDARIA.Settings.BigCalShowCycles.Hint',
         scope: 'user',
         config: false,
@@ -343,14 +343,14 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Name',
+        name: 'CALENDARIA.Common.CyclesDisplay',
         hint: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
-            icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+            name: 'CALENDARIA.Common.Name',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
           },
@@ -359,7 +359,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Settings.BigCalShowMoonPhases.Name',
+        name: 'CALENDARIA.Common.ShowMoonPhases',
         hint: 'CALENDARIA.Settings.BigCalShowMoonPhases.Hint',
         scope: 'user',
         config: false,
@@ -367,8 +367,8 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED]: {
-        name: 'CALENDARIA.Settings.BigCalHeaderShowSelected.Name',
-        hint: 'CALENDARIA.Settings.BigCalHeaderShowSelected.Hint',
+        name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
+        hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: false }),
@@ -625,7 +625,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.HUDCalendarButton.Hint',
         scope: 'client',
         config: false,
-        type: new StringField({ choices: { bigcal: 'CALENDARIA.Settings.HUDCalendarButton.BigCal', minical: 'CALENDARIA.Settings.HUDCalendarButton.MiniCal' }, initial: 'bigcal' }),
+        type: new StringField({ choices: { bigcal: 'CALENDARIA.Common.BigCal', minical: 'CALENDARIA.Common.MiniCal' }, initial: 'bigcal' }),
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_DIAL_STYLE]: {
@@ -645,101 +645,101 @@ export default class CalendariaSettings {
         onChange: renderHUD
       },
       [SETTINGS.HUD_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.HUDCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.HUDCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.HUDCombatMode.None',
+            none: 'CALENDARIA.Common.None',
             compactCombat: 'CALENDARIA.Settings.HUDCombatMode.CompactCombat',
             compactEncounter: 'CALENDARIA.Settings.HUDCombatMode.CompactEncounter',
-            hideCombat: 'CALENDARIA.Settings.HUDCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.HUDCombatMode.HideEncounter'
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'compactCombat'
         })
       },
       [SETTINGS.BIG_CAL_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.WidgetCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.WidgetCombatMode.None',
-            hideCombat: 'CALENDARIA.Settings.WidgetCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.WidgetCombatMode.HideEncounter'
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'none'
         })
       },
       [SETTINGS.CHRONICLE_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.WidgetCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.WidgetCombatMode.None',
-            hideCombat: 'CALENDARIA.Settings.WidgetCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.WidgetCombatMode.HideEncounter'
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'none'
         })
       },
       [SETTINGS.MINI_CAL_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.WidgetCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.WidgetCombatMode.None',
-            hideCombat: 'CALENDARIA.Settings.WidgetCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.WidgetCombatMode.HideEncounter'
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'none'
         })
       },
       [SETTINGS.TIMEKEEPER_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.WidgetCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.WidgetCombatMode.None',
-            hideCombat: 'CALENDARIA.Settings.WidgetCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.WidgetCombatMode.HideEncounter'
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'none'
         })
       },
       [SETTINGS.STOPWATCH_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.WidgetCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.WidgetCombatMode.None',
-            hideCombat: 'CALENDARIA.Settings.WidgetCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.WidgetCombatMode.HideEncounter'
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'none'
         })
       },
       [SETTINGS.SUN_DIAL_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.WidgetCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.WidgetCombatMode.None',
-            hideCombat: 'CALENDARIA.Settings.WidgetCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.WidgetCombatMode.HideEncounter'
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'none'
         })
@@ -837,7 +837,7 @@ export default class CalendariaSettings {
         })
       },
       [SETTINGS.HUD_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Settings.HUDShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Settings.HUDShowWeather.Hint',
         scope: 'user',
         config: false,
@@ -845,7 +845,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SHOW_SEASON]: {
-        name: 'CALENDARIA.Settings.HUDShowSeason.Name',
+        name: 'CALENDARIA.Common.ShowSeason',
         hint: 'CALENDARIA.Settings.HUDShowSeason.Hint',
         scope: 'user',
         config: false,
@@ -853,7 +853,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SHOW_ERA]: {
-        name: 'CALENDARIA.Settings.HUDShowEra.Name',
+        name: 'CALENDARIA.Common.ShowEra',
         hint: 'CALENDARIA.Settings.HUDShowEra.Hint',
         scope: 'user',
         config: false,
@@ -861,7 +861,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_WEATHER_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Name',
+        name: 'CALENDARIA.Common.WeatherDisplay',
         hint: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Hint',
         scope: 'user',
         config: false,
@@ -869,7 +869,7 @@ export default class CalendariaSettings {
           choices: {
             full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
             temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly',
-            icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'
           },
           initial: 'full'
@@ -877,26 +877,26 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SEASON_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Name',
+        name: 'CALENDARIA.Common.SeasonDisplay',
         hint: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
-          choices: { full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full', icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly', text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly' },
+          choices: { full: 'CALENDARIA.Common.DisplayIconText', icon: 'CALENDARIA.Common.DisplayIconOnly', text: 'CALENDARIA.Common.DisplayTextOnly' },
           initial: 'full'
         }),
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_ERA_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDEraDisplayMode.Name',
+        name: 'CALENDARIA.Common.EraDisplay',
         hint: 'CALENDARIA.Settings.HUDEraDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
-            icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
-            text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+            full: 'CALENDARIA.Common.DisplayIconText',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
+            text: 'CALENDARIA.Common.DisplayTextOnly',
             abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
           },
           initial: 'full'
@@ -904,7 +904,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SHOW_CYCLES]: {
-        name: 'CALENDARIA.Settings.HUDShowCycles.Name',
+        name: 'CALENDARIA.Common.ShowCycles',
         hint: 'CALENDARIA.Settings.HUDShowCycles.Hint',
         scope: 'user',
         config: false,
@@ -912,14 +912,14 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_CYCLES_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Name',
+        name: 'CALENDARIA.Common.CyclesDisplay',
         hint: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
-            icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+            name: 'CALENDARIA.Common.Name',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
           },
@@ -928,7 +928,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.FORCE_HUD]: {
-        name: 'CALENDARIA.Settings.ForceHUD.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceHUD.Hint',
         scope: 'world',
         config: false,
@@ -942,7 +942,7 @@ export default class CalendariaSettings {
       },
       [SETTINGS.SHOW_CHRONICLE]: { name: 'Show Chronicle', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.FORCE_CHRONICLE]: {
-        name: 'CALENDARIA.Settings.ForceChronicle.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceChronicle.Hint',
         scope: 'world',
         config: false,
@@ -955,7 +955,7 @@ export default class CalendariaSettings {
         }
       },
       [SETTINGS.FORCE_BIG_CAL]: {
-        name: 'CALENDARIA.Settings.ForceBigCal.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceBigCal.Hint',
         scope: 'world',
         config: false,
@@ -968,7 +968,7 @@ export default class CalendariaSettings {
         }
       },
       [SETTINGS.FORCE_MINI_CAL]: {
-        name: 'CALENDARIA.Settings.ForceMiniCal.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceMiniCal.Hint',
         scope: 'world',
         config: false,
@@ -981,7 +981,7 @@ export default class CalendariaSettings {
         }
       },
       [SETTINGS.FORCE_TIME_KEEPER]: {
-        name: 'CALENDARIA.Settings.ForceTimeKeeper.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceTimeKeeper.Hint',
         scope: 'world',
         config: false,
@@ -994,7 +994,7 @@ export default class CalendariaSettings {
         }
       },
       [SETTINGS.FORCE_STOPWATCH]: {
-        name: 'CALENDARIA.Settings.ForceStopwatch.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceStopwatch.Hint',
         scope: 'world',
         config: false,
@@ -1007,7 +1007,7 @@ export default class CalendariaSettings {
         }
       },
       [SETTINGS.FORCE_SUN_DIAL]: {
-        name: 'CALENDARIA.Settings.ForceSunDial.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceSunDial.Hint',
         scope: 'world',
         config: false,
@@ -1035,13 +1035,13 @@ export default class CalendariaSettings {
           choices: {
             none: 'CALENDARIA.Settings.ForceTheme.None',
             dark: 'CALENDARIA.ThemeEditor.Presets.Dark',
-            light: 'CALENDARIA.ThemeEditor.Presets.Light',
+            light: 'CALENDARIA.Common.Light',
             highContrast: 'CALENDARIA.ThemeEditor.Presets.HighContrast',
             parchment: 'CALENDARIA.ThemeEditor.Presets.Parchment',
             logbook: 'CALENDARIA.ThemeEditor.Presets.Logbook',
-            arcane: 'CALENDARIA.ThemeEditor.Presets.Arcane',
+            arcane: 'CALENDARIA.Common.Arcane',
             scifi: 'CALENDARIA.ThemeEditor.Presets.Scifi',
-            custom: 'CALENDARIA.ThemeEditor.Custom'
+            custom: 'CALENDARIA.Common.Custom'
           },
           initial: 'none'
         }),
@@ -1065,7 +1065,7 @@ export default class CalendariaSettings {
         scope: 'world',
         config: false,
         type: new StringField({
-          choices: { disabled: 'CALENDARIA.Settings.ChatTimestampMode.Disabled', replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace', augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment' },
+          choices: { disabled: 'CALENDARIA.Common.Disabled', replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace', augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment' },
           initial: 'disabled'
         })
       },
@@ -1192,14 +1192,14 @@ export default class CalendariaSettings {
       },
       [SETTINGS.CURRENT_WEATHER]: { name: 'Current Weather', scope: 'world', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.TEMPERATURE_UNIT]: {
-        name: 'CALENDARIA.Settings.TemperatureUnit.Name',
+        name: 'CALENDARIA.Common.Temperature',
         hint: 'CALENDARIA.Settings.TemperatureUnit.Hint',
         scope: 'world',
         config: false,
         type: new StringField({ choices: { celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius', fahrenheit: 'CALENDARIA.Settings.TemperatureUnit.Fahrenheit' }, initial: 'celsius' })
       },
       [SETTINGS.PRECIPITATION_UNIT]: {
-        name: 'CALENDARIA.Settings.PrecipitationUnit.Name',
+        name: 'CALENDARIA.Common.Precipitation',
         hint: 'CALENDARIA.Settings.PrecipitationUnit.Hint',
         scope: 'world',
         config: false,
@@ -1414,7 +1414,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            0: 'CALENDARIA.Settings.Logger.Choices.Off',
+            0: 'CALENDARIA.Common.Off',
             1: 'CALENDARIA.Settings.Logger.Choices.Errors',
             2: 'CALENDARIA.Settings.Logger.Choices.Warnings',
             3: 'CALENDARIA.Settings.Logger.Choices.Verbose'

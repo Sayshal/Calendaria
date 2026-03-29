@@ -13,7 +13,7 @@
         </button>
         {{#if showChronicleButton}}
           <button type="button" class="btn" data-action="openChronicle" data-tooltip
-            aria-label="{{localize 'CALENDARIA.Chronicle.OpenChronicle'}}">
+            aria-label="{{localize 'CALENDARIA.Common.OpenChronicle'}}">
             <i class="fa-solid fa-scroll"></i>
           </button>
         {{/if}}
@@ -81,14 +81,14 @@
         {{#if (eq hudCalendarButton "minical")}}
           {{#if canViewMiniCal}}
             <button type="button" class="btn" data-action="openMiniCal" data-tooltip
-              aria-label="{{localize 'CALENDARIA.HUD.OpenMiniCal'}}">
+              aria-label="{{localize 'CALENDARIA.Common.OpenMiniCal'}}">
               <i class="fa-solid fa-calendar"></i>
             </button>
           {{/if}}
         {{else}}
           {{#if canViewBigCal}}
             <button type="button" class="btn" data-action="showBigCal" data-tooltip
-              aria-label="{{localize 'CALENDARIA.HUD.ShowBigCal'}}">
+              aria-label="{{localize 'CALENDARIA.Common.OpenBigCal'}}">
               <i class="fa-solid fa-calendar-days"></i>
             </button>
           {{/if}}

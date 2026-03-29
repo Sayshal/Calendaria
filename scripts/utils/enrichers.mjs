@@ -368,7 +368,7 @@ function formatPercent(value) {
  * @returns {string} Localized countdown string
  */
 function formatCountdown(days) {
-  if (days === 0) return game.i18n.localize('CALENDARIA.Enricher.Label.Today');
+  if (days === 0) return game.i18n.localize('CALENDARIA.Common.Today');
   const abs = Math.abs(days);
   if (days > 0) return abs === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.DayUntil') : game.i18n.format('CALENDARIA.Enricher.Label.DaysUntil', { count: abs });
   return abs === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.DayAgo') : game.i18n.format('CALENDARIA.Enricher.Label.DaysAgo', { count: abs });
@@ -605,7 +605,7 @@ function enrichRestDay(config, label) {
   const { calendar } = resolveCalendar(config);
   const weekday = calendar?.getWeekdayForDate?.();
   const isRest = weekday?.isRestDay ?? false;
-  const key = isRest ? 'CALENDARIA.Enricher.Label.RestDay' : 'CALENDARIA.Enricher.Label.WorkDay';
+  const key = isRest ? 'CALENDARIA.Common.RestDay' : 'CALENDARIA.Enricher.Label.WorkDay';
   const text = game.i18n.localize(key);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DayType', { value: text });
   return createElement('restday', label || text, '', true, 'fa-couch', tooltip);
@@ -624,7 +624,7 @@ function enrichCountdown(config, label) {
   const current = getCurrentDateTime(calendar, components);
   const days = daysBetween(toInternal(current), toInternal(target));
   const abs = Math.abs(days);
-  const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.Day') : game.i18n.localize('CALENDARIA.Enricher.Label.Days');
+  const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
   const text = label || formatCountdown(days);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Countdown', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
   return createContentLink('countdown', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
@@ -644,16 +644,16 @@ function enrichCountup(config, label) {
     const yearZero = calendar?.years?.yearZero ?? 0;
     const text = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, components);
     const sinceDays = Math.abs(daysBetween(toInternal(target), toInternal(getCurrentDateTime(calendar, components))));
-    const sinceUnit = sinceDays === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.Day') : game.i18n.localize('CALENDARIA.Enricher.Label.Days');
+    const sinceUnit = sinceDays === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
     const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: formatDate(target, 'dateLong', calendar), value: `${sinceDays} ${sinceUnit}` });
     return createContentLink('countup', label || text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
   }
   const current = getCurrentDateTime(calendar, components);
   const days = daysBetween(toInternal(target), toInternal(current));
   const abs = Math.abs(days);
-  const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.Day') : game.i18n.localize('CALENDARIA.Enricher.Label.Days');
+  const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
   const text = label || `${abs} ${unit}`;
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.CountUp', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
   return createContentLink('countup', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
 }
 
@@ -670,8 +670,8 @@ function enrichBetween(config, label) {
   const useMonths = config.unit === 'months';
   if (useMonths) {
     const months = Math.abs(monthsBetween(toInternal(dates.date1), toInternal(dates.date2)));
-    const unit = months === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.Month') : game.i18n.localize('CALENDARIA.Enricher.Label.Months');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MonthsBetween', {
+    const unit = months === 1 ? game.i18n.localize('CALENDARIA.Common.UnitMonth') : game.i18n.localize('CALENDARIA.Common.UnitMonths');
+    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DaysBetween', {
       value: `${months} ${unit}`,
       from: formatDate(dates.date1, 'dateLong', calendar),
       to: formatDate(dates.date2, 'dateLong', calendar)
@@ -679,7 +679,7 @@ function enrichBetween(config, label) {
     return createElement('between', label || `${months} ${unit}`, null, false, 'fa-ruler-horizontal', tooltip);
   }
   const days = Math.abs(daysBetween(toInternal(dates.date1), toInternal(dates.date2)));
-  const unit = days === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.Day') : game.i18n.localize('CALENDARIA.Enricher.Label.Days');
+  const unit = days === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DaysBetween', {
     value: `${days} ${unit}`,
     from: formatDate(dates.date1, 'dateLong', calendar),
@@ -704,7 +704,7 @@ function enrichTimeUntil(config, label) {
     if (result.hours) parts.push(`${result.hours}h`);
     if (result.minutes) parts.push(`${result.minutes}m`);
     const text = parts.length ? parts.join(' ') : '0m';
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.HoursUntil', { target, value: text });
+    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntil', { target, value: text });
     return createElement('timeuntil', label || text, config.raw, true, 'fa-hourglass-half', tooltip);
   }
   const text = formatDuration(result);
@@ -887,7 +887,7 @@ function enrichLeapYear(config, label) {
   const current = getCurrentDateTime(calendar, components);
   const yearZero = calendar.years?.yearZero ?? 0;
   const isLeap = calendar.isLeapYear?.(current.year - yearZero) ?? false;
-  const key = isLeap ? 'CALENDARIA.Enricher.Label.LeapYear' : 'CALENDARIA.Enricher.Label.NotLeapYear';
+  const key = isLeap ? 'CALENDARIA.Editor.Section.LeapYear' : 'CALENDARIA.Enricher.Label.NotLeapYear';
   const text = game.i18n.localize(key);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.LeapYear', { value: text });
   return createElement('leapyear', label || text, '', true, 'fa-calendar', tooltip);
@@ -906,7 +906,7 @@ function enrichIntercalary(config, label) {
   const months = calendar.monthsArray || [];
   const monthData = months[current.month - 1];
   const isIntercalary = monthData?.type === 'intercalary';
-  const key = isIntercalary ? 'CALENDARIA.Enricher.Label.Intercalary' : 'CALENDARIA.Enricher.Label.Standard';
+  const key = isIntercalary ? 'CALENDARIA.Editor.MonthType.Intercalary' : 'CALENDARIA.Common.Standard';
   const text = game.i18n.localize(key);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MonthType', { value: text });
   return createElement('intercalary', label || text, '', true, 'fa-calendar', tooltip);
@@ -1137,7 +1137,7 @@ function enrichMoon(config, label) {
     const moon = moonsArr[moonIndex];
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
     const isFull = isMoonFull(moon, components);
-    const key = isFull ? 'CALENDARIA.Enricher.Label.FullMoon' : 'CALENDARIA.Enricher.Label.NotFullMoon';
+    const key = isFull ? 'CALENDARIA.MoonPhase.FullMoon' : 'CALENDARIA.Enricher.Label.NotFullMoon';
     const text = game.i18n.localize(key);
     const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.FullMoon', { value: text });
     return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
@@ -1192,7 +1192,7 @@ function enrichNextFullMoon(config, label) {
   const targetMoon = moonsArr[moonIndex];
   if (!targetMoon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   const nextFull = getNextFullMoon(targetMoon, components);
-  if (!nextFull) return createErrorElement('CALENDARIA.Enricher.Error.NoConvergence');
+  if (!nextFull) return createErrorElement('CALENDARIA.Common.NoConvergence');
   const nextDate = internalToPublic(nextFull, calendar);
   if (isCountdown) {
     const current = getCurrentDateTime(calendar, components);
@@ -1219,13 +1219,13 @@ function enrichConvergence(config, label) {
   const result = getNextConvergence(moonsArr, components);
   const moonNames = moonsArr.map((m) => game.i18n.localize(m.name)).join(', ');
   if (!result) {
-    const noText = game.i18n.localize('CALENDARIA.Enricher.Label.NoConvergence');
+    const noText = game.i18n.localize('CALENDARIA.Common.NoConvergence');
     const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: '', date: noText });
     return createElement('convergence', label || noText, '', true, 'fa-moon', tooltip);
   }
   const date = internalToPublic(result, calendar);
   const dateText = formatDate(date, 'dateLong', calendar);
-  const fullMoonLabel = game.i18n.localize('CALENDARIA.Enricher.Label.FullMoon');
+  const fullMoonLabel = game.i18n.localize('CALENDARIA.MoonPhase.FullMoon');
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: fullMoonLabel, date: dateText });
   return createContentLink('convergence', label || dateText, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-moon', tooltip, '');
 }
@@ -1340,7 +1340,7 @@ function enrichPrecipitation(_config, label) {
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const precipType = weather.precipitation?.type;
-  const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : game.i18n.localize('CALENDARIA.Enricher.Label.None');
+  const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : game.i18n.localize('CALENDARIA.Common.None');
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Precipitation', { value: text });
   return createElement('precipitation', label || text, '', true, 'fa-cloud-rain', tooltip);
 }
@@ -1572,32 +1572,32 @@ function enrichAlmanac(config, label) {
   lines.push(formatDate(null, 'dateFull', calendar));
   const seasonIndex = components.season ?? 0;
   const season = calendar?.seasonsArray?.[seasonIndex];
-  if (season) lines.push(`${game.i18n.localize('CALENDARIA.Enricher.Label.Season')}: ${game.i18n.localize(season.name)}`);
+  if (season) lines.push(`${game.i18n.localize('CALENDARIA.Common.Season')}: ${game.i18n.localize(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {
     const weatherLabel = game.i18n.localize(weather.label);
     const temp = WeatherManager.getTemperature();
     const tempStr = temp != null ? ` ${WeatherManager.formatTemperature(temp)}` : '';
-    lines.push(`${game.i18n.localize('CALENDARIA.Enricher.Label.Weather')}: ${weatherLabel}${tempStr}`);
+    lines.push(`${game.i18n.localize('CALENDARIA.Common.Weather')}: ${weatherLabel}${tempStr}`);
     const windSpeed = weather.wind?.speed;
     if (windSpeed != null) {
       const windLabel = getWindLabel(windSpeed);
       const windDir = weather.wind?.direction;
       const dirStr = windDir != null ? ` ${degreesToCompass(windDir)}` : '';
-      lines.push(`${game.i18n.localize('CALENDARIA.Enricher.Label.Wind')}: ${windLabel}${dirStr}`);
+      lines.push(`${game.i18n.localize('CALENDARIA.Common.Wind')}: ${windLabel}${dirStr}`);
     }
   }
   const moon = calendar?.getCurrentMoonPhase?.(0);
   if (moon) {
     const phaseName = game.i18n.localize(moon.name);
-    lines.push(`${game.i18n.localize('CALENDARIA.Enricher.Label.Moon')}: ${phaseName}`);
+    lines.push(`${game.i18n.localize('CALENDARIA.Common.Moon')}: ${phaseName}`);
   }
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
   const sunrise = calendar?.sunrise(undefined, zone);
   const sunset = calendar?.sunset(undefined, zone);
   if (sunrise != null && sunset != null) {
-    const srLabel = game.i18n.localize('CALENDARIA.Enricher.Label.Sunrise');
-    const ssLabel = game.i18n.localize('CALENDARIA.Enricher.Label.Sunset');
+    const srLabel = game.i18n.localize('CALENDARIA.Common.Sunrise');
+    const ssLabel = game.i18n.localize('CALENDARIA.Common.Sunset');
     lines.push(`${srLabel}: ${formatHoursToTime(sunrise)} | ${ssLabel}: ${formatHoursToTime(sunset)}`);
   }
   container.innerHTML = lines.map((l) => foundry.utils.escapeHTML(l)).join('<br>');
@@ -1631,7 +1631,7 @@ function enrichCompare(config, label) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const timeSinceText = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, components);
   const days = Math.abs(daysBetween(toInternal(target), toInternal(getCurrentDateTime(calendar, components))));
-  const unit = days === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.Day') : game.i18n.localize('CALENDARIA.Enricher.Label.Days');
+  const unit = days === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
   const text = `${timeSinceText} (${days} ${unit})`;
   const targetStr = formatDate(target, 'dateLong', calendar);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DateComparison', { value: targetStr });

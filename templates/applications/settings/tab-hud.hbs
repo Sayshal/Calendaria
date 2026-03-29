@@ -29,7 +29,7 @@
     </div>
     {{#if isGM}}
       <div class="form-group">
-        <label for="forceHUD">{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
+        <label for="forceHUD">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceHUD" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
         </div>
@@ -62,7 +62,7 @@
       <label for="hudDialStyle">{{localize "CALENDARIA.Settings.HUDDialStyle.Name"}}</label>
       <div class="form-fields">
         <select id="hudDialStyle" name="hudDialStyle" {{#if isCompactMode}}disabled aria-disabled="true" data-tooltip
-          aria-label="{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledTitle"}}" {{/if}}>
+          aria-label="{{localize "CALENDARIA.Common.NotAvailableInCompact"}}" {{/if}}>
           {{#each dialStyleOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
@@ -111,11 +111,11 @@
       <p class="hint">{{localize "CALENDARIA.Settings.HUDTrayDirection.Hint"}}</p>
     </div>
     <div class="form-group">
-      <label for="hudCombatMode">{{localize "CALENDARIA.Settings.HUDCombatMode.Name"}}</label>
+      <label for="hudCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
       <div class="form-fields">
         <select id="hudCombatMode" name="hudCombatMode">
           <option value="none" {{#if (eq hudCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.HUDCombatMode.None"}}
+            {{localize "CALENDARIA.Common.None"}}
           </option>
           <option value="compactCombat" {{#if (eq hudCombatMode "compactCombat")}}selected{{/if}}>
             {{localize "CALENDARIA.Settings.HUDCombatMode.CompactCombat"}}
@@ -124,10 +124,10 @@
             {{localize "CALENDARIA.Settings.HUDCombatMode.CompactEncounter"}}
           </option>
           <option value="hideCombat" {{#if (eq hudCombatMode "hideCombat")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.HUDCombatMode.HideCombat"}}
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
           </option>
           <option value="hideEncounter" {{#if (eq hudCombatMode "hideEncounter")}}selected{{/if}}>
-            {{localize "CALENDARIA.Settings.HUDCombatMode.HideEncounter"}}
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
           </option>
         </select>
       </div>
@@ -153,7 +153,7 @@
         <div class="slider-with-ticks">
           <input type="range" id="hudWidthScale" name="hudWidthScale" min="0.5" max="2" step="0.05"
             value="{{hudWidthScale}}" list="scale-ticks" {{#if isCompactMode}}disabled aria-disabled="true" data-tooltip
-            aria-label="{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledTitle"}}" {{/if}}>
+            aria-label="{{localize "CALENDARIA.Common.NotAvailableInCompact"}}" {{/if}}>
           <datalist id="scale-ticks">
             <option value="0.5"></option>
             <option value="1"></option>
@@ -212,7 +212,7 @@
     </legend>
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
     <div class="form-group">
-      <label for="hudShowWeather">{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
+      <label for="hudShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudShowWeather" name="hudShowWeather" {{#if hudShowWeather}}checked{{/if}}>
       </div>
@@ -220,7 +220,7 @@
     </div>
     {{#unless isCompactMode}}
       <div class="form-group{{#unless hudShowWeather}} disabled{{/unless}}">
-        <label for="hudWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+        <label for="hudWeatherDisplayMode">{{localize "CALENDARIA.Common.WeatherDisplay"}}</label>
         <div class="form-fields">
           <select id="hudWeatherDisplayMode" name="hudWeatherDisplayMode" {{#unless hudShowWeather}}disabled
             aria-disabled="true" {{/unless}}>
@@ -233,7 +233,7 @@
       </div>
     {{/unless}}
     <div class="form-group">
-      <label for="hudShowSeason">{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
+      <label for="hudShowSeason">{{localize "CALENDARIA.Common.ShowSeason"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudShowSeason" name="hudShowSeason" {{#if hudShowSeason}}checked{{/if}}>
       </div>
@@ -241,7 +241,7 @@
     </div>
     {{#unless isCompactMode}}
       <div class="form-group{{#unless hudShowSeason}} disabled{{/unless}}">
-        <label for="hudSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+        <label for="hudSeasonDisplayMode">{{localize "CALENDARIA.Common.SeasonDisplay"}}</label>
         <div class="form-fields">
           <select id="hudSeasonDisplayMode" name="hudSeasonDisplayMode" {{#unless hudShowSeason}}disabled
             aria-disabled="true" {{/unless}}>
@@ -254,7 +254,7 @@
       </div>
     {{/unless}}
     <div class="form-group">
-      <label for="hudShowEra">{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
+      <label for="hudShowEra">{{localize "CALENDARIA.Common.ShowEra"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudShowEra" name="hudShowEra" {{#if hudShowEra}}checked{{/if}}>
       </div>
@@ -262,7 +262,7 @@
     </div>
     {{#unless isCompactMode}}
       <div class="form-group{{#unless hudShowEra}} disabled{{/unless}}">
-        <label for="hudEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
+        <label for="hudEraDisplayMode">{{localize "CALENDARIA.Common.EraDisplay"}}</label>
         <div class="form-fields">
           <select id="hudEraDisplayMode" name="hudEraDisplayMode" {{#unless hudShowEra}}disabled aria-disabled="true"
             {{/unless}}>
@@ -275,7 +275,7 @@
       </div>
     {{/unless}}
     <div class="form-group">
-      <label for="hudShowCycles">{{localize "CALENDARIA.Settings.HUDShowCycles.Name"}}</label>
+      <label for="hudShowCycles">{{localize "CALENDARIA.Common.ShowCycles"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudShowCycles" name="hudShowCycles" {{#if hudShowCycles}}checked{{/if}}>
       </div>
@@ -283,7 +283,7 @@
     </div>
     {{#unless isCompactMode}}
       <div class="form-group{{#unless hudShowCycles}} disabled{{/unless}}">
-        <label for="hudCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
+        <label for="hudCyclesDisplayMode">{{localize "CALENDARIA.Common.CyclesDisplay"}}</label>
         <div class="form-fields">
           <select id="hudCyclesDisplayMode" name="hudCyclesDisplayMode" {{#unless hudShowCycles}}disabled
             aria-disabled="true" {{/unless}}>

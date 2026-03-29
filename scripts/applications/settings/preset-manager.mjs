@@ -109,7 +109,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     return [
       {
         key: 'allDay',
-        label: localize('CALENDARIA.Note.AllDay'),
+        label: localize('CALENDARIA.Common.AllDay'),
         locked: overrides.allDay != null,
         inputHtml: boolSelectHtml('allDay', overrides.allDay ?? defaults.allDay),
         hint: localize('CALENDARIA.PresetManager.DefaultAllDayHint')
@@ -123,14 +123,14 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       },
       {
         key: 'visibility',
-        label: localize('CALENDARIA.Note.VisibilityLabel'),
+        label: localize('CALENDARIA.Common.Visibility'),
         locked: overrides.visibility != null,
         inputHtml: selectHtml('visibility', overrides.visibility ?? defaults.visibility, visibilityOptions),
         hint: localize('CALENDARIA.PresetManager.DefaultVisibilityHint')
       },
       {
         key: 'reminderType',
-        label: localize('CALENDARIA.Note.ReminderType'),
+        label: localize('CALENDARIA.Common.NotifType'),
         locked: overrides.reminderType != null,
         inputHtml: selectHtml('reminderType', overrides.reminderType ?? defaults.reminderType, [
           { value: 'toast', label: 'Toast' },
@@ -144,25 +144,25 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         label: localize('CALENDARIA.Note.ReminderOffset'),
         locked: overrides.reminderOffset != null,
         inputHtml: numberHtml('reminderOffset', overrides.reminderOffset ?? defaults.reminderOffset),
-        hint: localize('CALENDARIA.PresetManager.DefaultReminderOffsetHint')
+        hint: localize('CALENDARIA.Note.ReminderOffsetTooltip')
       },
       {
         key: 'hasDuration',
-        label: localize('CALENDARIA.Note.HasDuration'),
+        label: localize('CALENDARIA.Common.HasDuration'),
         locked: overrides.hasDuration != null,
         inputHtml: boolSelectHtml('hasDuration', overrides.hasDuration ?? defaults.hasDuration),
         hint: localize('CALENDARIA.PresetManager.DefaultHasDurationHint')
       },
       {
         key: 'duration',
-        label: localize('CALENDARIA.Note.DurationLabel'),
+        label: localize('CALENDARIA.Common.Duration'),
         locked: overrides.duration != null,
         inputHtml: numberHtml('duration', overrides.duration ?? defaults.duration, 'min="1"'),
         hint: localize('CALENDARIA.PresetManager.DefaultDurationHint')
       },
       {
         key: 'macro',
-        label: localize('CALENDARIA.Note.Macro'),
+        label: localize('CALENDARIA.Common.Macro'),
         locked: overrides.macro != null,
         inputHtml: selectHtml('macro', overrides.macro ?? defaults.macro, macroOptions),
         hint: localize('CALENDARIA.PresetManager.DefaultMacroHint')
@@ -192,7 +192,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const maxSort = this._presets.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
     this._presets.push({
       id,
-      label: localize('CALENDARIA.PresetManager.NewPreset'),
+      label: localize('CALENDARIA.Common.NewPreset'),
       color: '#4a90e2',
       icon: 'fas fa-bookmark',
       builtin: false,
@@ -216,7 +216,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const cat = this._presets.find((c) => c.id === id);
     if (!cat) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.PresetManager.ConfirmDelete') },
+      window: { title: localize('CALENDARIA.Common.DeletePreset') },
       content: `<p>${format('CALENDARIA.PresetManager.ConfirmDeleteMessage', { name: cat.label })}</p>`,
       yes: { default: false }
     });
@@ -449,7 +449,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         cat.color = seed.color;
         cat.playerUsable = true;
       } else {
-        cat.label = localize('CALENDARIA.PresetManager.NewPreset');
+        cat.label = localize('CALENDARIA.Common.NewPreset');
         cat.icon = 'fas fa-bookmark';
         cat.color = '#4a90e2';
         cat.playerUsable = true;
@@ -537,7 +537,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const raw = importData.preset;
         const newId = foundry.utils.randomID();
-        let label = raw.label || localize('CALENDARIA.PresetManager.NewPreset');
+        let label = raw.label || localize('CALENDARIA.Common.NewPreset');
         if (manager._presets.some((c) => c.label === label)) label = `${label} (Imported)`;
         const maxSort = manager._presets.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
         manager._presets.push({

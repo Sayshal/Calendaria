@@ -321,14 +321,14 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     items.push({
-      name: 'CALENDARIA.TimeKeeper.ContextMenu.ResetPosition',
+      name: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
       callback: () => this.resetPosition()
     });
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.UnlockPosition' : 'CALENDARIA.TimeKeeper.ContextMenu.LockPosition',
+      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this._toggleStickyPosition()
     });

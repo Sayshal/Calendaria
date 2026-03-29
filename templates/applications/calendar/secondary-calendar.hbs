@@ -1,7 +1,7 @@
 <div class="secondary-calendar-container">
   <header class="secondary-header">
     <button type="button" data-action="navigate" data-direction="previous" data-tooltip
-      aria-label="{{localize 'CALENDARIA.Common.PreviousMonth'}}">
+      aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.PreviousWeek'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
 
@@ -10,7 +10,7 @@
     </div>
 
     <button type="button" data-action="navigate" data-direction="next" data-tooltip
-      aria-label="{{localize 'CALENDARIA.Common.NextMonth'}}">
+      aria-label="{{#if calendarData.isMonthless}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </header>

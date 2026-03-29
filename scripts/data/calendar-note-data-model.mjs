@@ -125,8 +125,6 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
   /**
    * Migrate raw source data before schema initialization.
    * @param {object} source - Raw source data
-   * @since 0.10.4
-   * @deprecated Remove in 1.2.0
    * @returns {object} Migrated source data
    */
   static migrateData(source) {

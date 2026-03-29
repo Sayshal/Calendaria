@@ -264,7 +264,7 @@ export function renderWeatherIndicator({ weather, displayMode, canInteract, show
     let precipHtml = '';
     if (showLabel && weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
     return `<span class="weather-indicator${clickable} weather-mode-${displayMode}" ${action} style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">${icon}${label}${temp}${windHtml}${precipHtml}</span>`;
-  } else if (showBlock && canInteract) {
+  } else if (showBlock && canInteract && WeatherManager.getCalendarZones().length > 0) {
     return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
   }
   return '';
@@ -605,7 +605,7 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
       });
     }
     items.push({
-      name: 'CALENDARIA.Chronicle.OpenChronicle',
+      name: 'CALENDARIA.Common.OpenChronicle',
       icon: '<i class="fas fa-scroll"></i>',
       callback: () => CALENDARIA.apps.Chronicle.show()
     });
@@ -919,7 +919,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
           if (isOwner) {
             const actions = document.createElement('span');
             actions.className = 'note-actions';
-            actions.innerHTML = `<i class="fas fa-edit" data-action="edit" data-tooltip="${localize('CALENDARIA.ContextMenu.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.ContextMenu.Delete')}"></i>`;
+            actions.innerHTML = `<i class="fas fa-edit" data-action="edit" data-tooltip="${localize('CALENDARIA.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.Common.Delete')}"></i>`;
             nameSpan.appendChild(actions);
             actions.addEventListener('click', async (e) => {
               e.stopPropagation();
@@ -930,7 +930,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               } else if (action === 'delete') {
                 ui.context?.close();
                 const confirmed = await foundry.applications.api.DialogV2.confirm({
-                  window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+                  window: { title: localize('CALENDARIA.Common.DeleteNote') },
                   content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
                   rejectClose: false,
                   modal: true
@@ -968,11 +968,11 @@ export function buildOpenAppsMenuItem() {
       document.removeEventListener('pointermove', onMove);
       requestAnimationFrame(async () => {
         const subItems = [
-          { name: 'CALENDARIA.Format.Category.BigCal', icon: '<i class="fas fa-calendar-days"></i>', callback: () => BigCal.show() },
-          { name: 'CALENDARIA.Format.Category.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', callback: () => MiniCal.show() },
-          { name: 'CALENDARIA.Format.Category.HUD', icon: '<i class="fas fa-layer-group"></i>', callback: () => HUD.show() },
-          { name: 'CALENDARIA.Format.Category.TimeKeeper', icon: '<i class="fas fa-clock"></i>', callback: () => TimeKeeper.show() },
-          { name: 'CALENDARIA.Format.Category.Stopwatch', icon: '<i class="fas fa-stopwatch"></i>', callback: () => Stopwatch.show() },
+          { name: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', callback: () => BigCal.show() },
+          { name: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', callback: () => MiniCal.show() },
+          { name: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', callback: () => HUD.show() },
+          { name: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', callback: () => TimeKeeper.show() },
+          { name: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', callback: () => Stopwatch.show() },
           { name: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', callback: () => SunDial.show() },
           { name: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', callback: () => CALENDARIA.apps.Chronicle.show() }
         ];

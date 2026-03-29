@@ -2,7 +2,7 @@
   <div class="header-row header-row-top">
     <button type="button" data-action="navigate" data-direction="previous" {{#if fogNavDisablePrev}}disabled{{/if}}
       data-tooltip
-      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
+      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.Common.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
     <button type="button" class="search-toggle" data-action="openNoteViewer" data-tooltip
@@ -22,7 +22,7 @@
     </h2>
     {{#if showChronicleButton}}
       <button type="button" data-action="openChronicle" data-tooltip
-        aria-label="{{localize 'CALENDARIA.Chronicle.OpenChronicle'}}">
+        aria-label="{{localize 'CALENDARIA.Common.OpenChronicle'}}">
         <i class="fas fa-scroll"></i>
       </button>
     {{/if}}
@@ -36,7 +36,7 @@
     </button>
     <button type="button" data-action="navigate" data-direction="next" {{#if fogNavDisableNext}}disabled{{/if}}
       data-tooltip
-      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.CalendarApp.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
+      aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.Common.NextWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.NextYears'}}{{else}}{{localize 'CALENDARIA.Common.NextMonth'}}{{/if}}">
       <i class="fas fa-chevron-right"></i>
     </button>
   </div>

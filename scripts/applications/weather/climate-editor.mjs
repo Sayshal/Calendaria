@@ -42,8 +42,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static TABS = {
     primary: {
       tabs: [
-        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.ClimateEditor.Tab.Weather' },
-        { id: 'presets', group: 'primary', icon: 'fas fa-sliders', label: 'CALENDARIA.ClimateEditor.Tab.Presets' },
+        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather' },
+        { id: 'presets', group: 'primary', icon: 'fas fa-sliders', label: 'CALENDARIA.PresetManager.Overrides' },
         { id: 'environment', group: 'primary', icon: 'fas fa-tree', label: 'CALENDARIA.ClimateEditor.Tab.Environment' }
       ],
       initial: 'weather'
