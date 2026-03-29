@@ -156,6 +156,7 @@ export const SETTINGS = {
   CHRONICLE_SHOW_MOON_PHASES: 'chronicleShowMoonPhases',
   CHRONICLE_SHOW_SEASON_CHANGES: 'chronicleShowSeasonChanges',
   CHRONICLE_SHOW_WEATHER: 'chronicleShowWeather',
+  CHRONICLE_VIEW_MODE: 'chronicleViewMode',
   PERMISSIONS: 'permissions',
   POSITION_LOCKED: 'positionLocked',
   PRECIPITATION_UNIT: 'precipitationUnit',
@@ -330,6 +331,7 @@ export const TEMPLATES = {
   CHRONICLE: `modules/${MODULE.ID}/templates/applications/calendar/chronicle.hbs`,
   CHRONICLE_CONTENT: `modules/${MODULE.ID}/templates/applications/calendar/chronicle-content.hbs`,
   CHRONICLE_ENTRY: `modules/${MODULE.ID}/templates/applications/calendar/chronicle-entry.hbs`,
+  CHRONICLE_TIMELINE_ENTRY: `modules/${MODULE.ID}/templates/applications/calendar/chronicle-timeline-entry.hbs`,
   NOTE_VIEWER: {
     SEARCH: `modules/${MODULE.ID}/templates/applications/calendar/note-viewer-search.hbs`,
     FILTERS: `modules/${MODULE.ID}/templates/applications/calendar/note-viewer-filters.hbs`,

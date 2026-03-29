@@ -3,6 +3,11 @@
   <span class="toolbar-title">{{localize "CALENDARIA.Chronicle.Title"}}</span>
 
   <div class="toolbar-actions">
+    <select class="toolbar-select view-mode-select">
+      {{#each viewModes}}
+        <option value="{{this.id}}" {{#if this.active}}selected{{/if}}>{{this.label}}</option>
+      {{/each}}
+    </select>
     <select class="toolbar-select depth-select">
       {{#each depths}}
         <option value="{{this.id}}" {{#if this.active}}selected{{/if}}>{{this.label}}</option>

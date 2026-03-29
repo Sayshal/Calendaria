@@ -30,6 +30,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._calendarId = options.calendarId || null;
     this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH) || 'excerpt';
     this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY) || false;
+    this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE) || 'scroll';
     this._hooks = [];
     this._entries = [];
     this._loading = false;
@@ -129,6 +130,11 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'excerpt', label: localize('CALENDARIA.Chronicle.Depth.Excerpt'), active: this._entryDepth === 'excerpt' },
       { id: 'full', label: localize('CALENDARIA.Common.Full'), active: this._entryDepth === 'full' }
     ];
+    context.viewMode = this._viewMode;
+    context.viewModes = [
+      { id: 'scroll', label: localize('CALENDARIA.Chronicle.ViewMode.Scroll'), active: this._viewMode === 'scroll' },
+      { id: 'timeline', label: localize('CALENDARIA.Chronicle.ViewMode.Timeline'), active: this._viewMode === 'timeline' }
+    ];
     return context;
   }
 
@@ -136,6 +142,9 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
     this.element.dataset.depth = this._entryDepth;
+    this.element.classList.remove('chronicle--scroll', 'chronicle--timeline');
+    this.element.classList.add(`chronicle--${this._viewMode}`);
+    this.setPosition({ width: this._viewMode === 'timeline' ? 680 : 480 });
     if (options.isFirstRender) {
       this.#restorePosition();
       this.#initContextMenu();
@@ -179,7 +188,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.CHRONICLE_SHOW_EMPTY,
       SETTINGS.CHRONICLE_SHOW_WEATHER,
       SETTINGS.CHRONICLE_SHOW_MOON_PHASES,
-      SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES
+      SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES,
+      SETTINGS.CHRONICLE_VIEW_MODE
     ]);
     this._hooks.push({
       name: 'updateSetting',
@@ -187,6 +197,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
         if (setting.key?.startsWith(`${MODULE.ID}.`) && scrollSettingKeys.has(setting.key.replace(`${MODULE.ID}.`, ''))) {
           this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH);
           this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY);
+          this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE);
           refresh();
         }
       })
@@ -236,6 +247,12 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       this._entryDepth = e.target.value;
       this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
       await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH, this._entryDepth);
+      await this.render();
+    });
+    el.querySelector('.view-mode-select')?.addEventListener('change', async (e) => {
+      this._viewMode = e.target.value;
+      this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+      await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE, this._viewMode);
       await this.render();
     });
   }
@@ -329,7 +346,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Scroll to the today entry if it exists. */
   #scrollToToday() {
     const container = this.element?.querySelector('.scroll-container');
-    const today = container?.querySelector('.scroll-entry--today');
+    const today = container?.querySelector('.scroll-entry--today, .timeline-entry--today');
     if (container && today) container.scrollTop = today.offsetTop - container.offsetTop;
   }
 
@@ -352,7 +369,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (batch.length > 0) {
       this._entries = [...batch, ...this._entries];
       const entryHtml = await this.#renderEntryBatch(batch);
-      const scrollContent = container.querySelector('.scroll-entries') || container;
+      const scrollContent = container.querySelector('.scroll-entries, .timeline-entries') || container;
       scrollContent.insertAdjacentHTML('afterbegin', entryHtml);
       container.scrollTop = container.scrollHeight - prevScrollHeight + container.scrollTop;
       this._loading = false;
@@ -381,7 +398,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (batch.length > 0) {
       this._entries = [...this._entries, ...batch];
       const entryHtml = await this.#renderEntryBatch(batch);
-      const scrollContent = container.querySelector('.scroll-entries') || container;
+      const scrollContent = container.querySelector('.scroll-entries, .timeline-entries') || container;
       scrollContent.insertAdjacentHTML('beforeend', entryHtml);
       this._loading = false;
     } else if (retries < 12) {
@@ -397,9 +414,10 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {Promise<string>} Combined HTML string
    */
   async #renderEntryBatch(entries) {
+    const template = this._viewMode === 'timeline' ? TEMPLATES.CHRONICLE_TIMELINE_ENTRY : TEMPLATES.CHRONICLE_ENTRY;
     const parts = [];
     for (const entry of entries) {
-      const html = await foundry.applications.handlebars.renderTemplate(TEMPLATES.CHRONICLE_ENTRY, { ...entry, isGM: game.user.isGM });
+      const html = await foundry.applications.handlebars.renderTemplate(template, { ...entry, isGM: game.user.isGM });
       parts.push(html);
     }
     return parts.join('');
@@ -451,7 +469,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element
    */
   static #onExpandEntry(_event, target) {
-    const entry = target.closest('.scroll-entry');
+    const entry = target.closest('.scroll-entry, .timeline-entry');
     entry?.classList.add('expanded');
   }
 
@@ -461,7 +479,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} target - The clicked element
    */
   static #onCollapseEntry(_event, target) {
-    const entry = target.closest('.scroll-entry');
+    const entry = target.closest('.scroll-entry, .timeline-entry');
     entry?.classList.remove('expanded');
   }
 

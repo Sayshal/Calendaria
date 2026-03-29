@@ -1,10 +1,18 @@
 <div class="scroll-container">
   {{#if hasEntries}}
-    <div class="scroll-entries">
-      {{#each entries}}
-        {{> "modules/calendaria/templates/applications/calendar/chronicle-entry.hbs"}}
-      {{/each}}
-    </div>
+    {{#if (eq viewMode 'timeline')}}
+      <div class="timeline-entries">
+        {{#each entries}}
+          {{> "modules/calendaria/templates/applications/calendar/chronicle-timeline-entry.hbs"}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="scroll-entries">
+        {{#each entries}}
+          {{> "modules/calendaria/templates/applications/calendar/chronicle-entry.hbs"}}
+        {{/each}}
+      </div>
+    {{/if}}
   {{else}}
     <div class="scroll-empty">
       <i class="fas fa-scroll"></i>
