@@ -377,7 +377,6 @@
         padding: 1.5rem 1rem;
       }
 
-      /* Vertical spine */
       .timeline-entries::before {
         content: '';
         position: absolute;
@@ -398,14 +397,13 @@
         width: 100%;
       }
 
-      /* Alternation: odd = card on left, even = card on right */
       .timeline-entry:nth-child(odd) {
         flex-direction: row-reverse;
       }
 
       .timeline-entry:nth-child(odd) .timeline-card {
-        margin-right: 1.75rem;
-        margin-left: 0;
+        margin-left: 2.5rem;
+        margin-right: 0;
       }
 
       .timeline-entry:nth-child(odd) .timeline-date-banner {
@@ -414,13 +412,13 @@
       }
 
       .timeline-entry:nth-child(even) .timeline-card {
-        margin-left: 1.75rem;
-        margin-right: 0;
+        margin-right: 2.5rem;
+        margin-left: 0;
       }
 
       .timeline-card {
-        flex: 0 0 calc(50% - 1.75rem);
-        max-width: calc(50% - 1.75rem);
+        flex: 0 0 calc(50% - 2.5rem);
+        max-width: calc(50% - 2.5rem);
         border: 0.0625rem solid var(--calendaria-border);
         border-radius: 0.5rem;
         background: color-mix(in srgb, var(--calendaria-bg-lighter, var(--calendaria-bg)) 95%, var(--calendaria-accent));
@@ -428,7 +426,6 @@
         box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 25%);
       }
 
-      /* Spine node */
       .timeline-node {
         position: absolute;
         left: 50%;
@@ -446,6 +443,25 @@
         box-shadow: 0 0 0 0.125rem var(--calendaria-bg);
       }
 
+      .timeline-node::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2.25rem;
+        height: 0.125rem;
+        background: var(--calendaria-border);
+        opacity: 0.5;
+      }
+
+      .timeline-entry:nth-child(odd) .timeline-node::after {
+        left: 100%;
+      }
+
+      .timeline-entry:nth-child(even) .timeline-node::after {
+        right: 100%;
+      }
+
       .timeline-node-dot--today {
         border-color: var(--calendaria-today);
         background: var(--calendaria-today);
@@ -460,7 +476,6 @@
         box-shadow: 0 0 0 0.125rem var(--calendaria-bg);
       }
 
-      /* Date banner - golden accent */
       .timeline-date-banner {
         display: flex;
         align-items: center;
