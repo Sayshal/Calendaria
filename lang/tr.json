@@ -1,6 +1,5 @@
 {
   "CALENDARIA.BigCal.ContextMenu.Settings": "BigCal Ayarları",
-  "CALENDARIA.BigCal.ContextMenu.SwapToMiniCal": "MiniCal'ı aç",
   "CALENDARIA.Calendar.Athasian.Description": "Dark Sun kampanya ayarından Tyr Takvimi (Satıcı Takvimi). 6 günlük hafta ve çift döngülü dönem adlandırmasıyla 375 gün.",
   "CALENDARIA.Calendar.Barovian.Description": "Barovia ve Korku Diyarları'nda (Ravenloft) kullanılan takvim",
   "CALENDARIA.Calendar.Barovian.Name": "Barovian",
@@ -52,14 +51,10 @@
   "CALENDARIA.CalendarApp.AddNoteToday": "Bugün için Not Ekle",
   "CALENDARIA.CalendarApp.CurrentDateBtn": "Güncel Tarih",
   "CALENDARIA.CalendarApp.GoToToday": "Bugüne git",
-  "CALENDARIA.CalendarApp.NextWeek": "Gelecek Hafta",
   "CALENDARIA.CalendarApp.NextYears": "Gelecek Yıllar",
   "CALENDARIA.CalendarApp.NoCalendarConfigured": "Takvim yapılandırılmamış. Ayarlardan bir takvim seçin.",
-  "CALENDARIA.CalendarApp.PreviousWeek": "Geçen Hafta",
   "CALENDARIA.CalendarApp.PreviousYears": "Önceki Yıllar",
   "CALENDARIA.CalendarApp.SetAsCurrent": "Seçilen Tarihi Güncel Olarak Ayarla",
   "CALENDARIA.CalendarApp.SetAsCurrentBtn": "Geçerli Olarak Ayarla",
-  "CALENDARIA.CalendarApp.ToggleCompact": "Kompakt Görünüme Geç",
-  "CALENDARIA.Category.Birthday": "Doğum günü",
-  "CALENDARIA.Category.Combat": "Savaş"
+  "CALENDARIA.CalendarApp.ToggleCompact": "Kompakt Görünüme Geç"
 }
