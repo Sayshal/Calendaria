@@ -3009,9 +3009,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = CalendarManager.getActiveCalendar();
     const rawComponents = calendar?.timeToComponents?.(game.time.worldTime);
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const components = rawComponents
-      ? { ...rawComponents, year: rawComponents.year + yearZero, dayOfMonth: (rawComponents.dayOfMonth ?? 0) + 1 }
-      : { year: 1492, month: 0, dayOfMonth: 15, hour: 14, minute: 30, second: 0 };
+    const components = rawComponents ? { ...rawComponents, year: rawComponents.year + yearZero } : { year: 1492, month: 0, dayOfMonth: 15, hour: 14, minute: 30, second: 0 };
     const isStopwatch = locationId === 'stopwatchRealtime' || locationId === 'stopwatchGametime';
     if (isStopwatch) {
       previewSpan.textContent = formatStr;
