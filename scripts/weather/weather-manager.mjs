@@ -307,7 +307,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} The set weather
    */
   static async setWeather(presetId, options = {}) {
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to set weather');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
@@ -351,18 +351,28 @@ export default class WeatherManager {
     const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
     if (intradayEnabled && !options.allPeriods) {
       const targetPeriod = options.period ?? this.getCurrentPeriod();
+      const currentPeriod = this.getCurrentPeriod();
       const existing = this.#currentWeatherByZone[zoneId];
       const periods = existing?.periods ? { ...existing.periods } : {};
       periods[targetPeriod] = { ...weather };
-      weather.activePeriod = targetPeriod;
-      weather.periods = periods;
+      if (targetPeriod !== currentPeriod && existing) {
+        // Saving to a non-current period: keep the root weather showing the current period
+        existing.periods = periods;
+        await this.#saveWeather(existing, options.broadcast !== false, zoneId);
+      } else {
+        weather.activePeriod = currentPeriod;
+        weather.periods = periods;
+        await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+      }
     } else if (intradayEnabled && options.allPeriods) {
       const periods = {};
       for (const p of Object.values(WEATHER_PERIODS)) periods[p.id] = { ...weather };
       weather.activePeriod = this.getCurrentPeriod();
       weather.periods = periods;
+      await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+    } else {
+      await this.#saveWeather(weather, options.broadcast !== false, zoneId);
     }
-    await this.#saveWeather(weather, options.broadcast !== false, zoneId);
     if (game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
       await this.#clearForecastPlan(zoneId);
       await this.#ensureForecastPlan();
@@ -384,7 +394,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} The set weather
    */
   static async setCustomWeather(weatherData, broadcast = true) {
-    const zoneId = weatherData.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = weatherData.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     if (!canChangeWeather()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this.getCurrentWeather(zoneId);
@@ -418,18 +428,27 @@ export default class WeatherManager {
     const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
     if (intradayEnabled && !weatherData.allPeriods) {
       const targetPeriod = weatherData.period ?? this.getCurrentPeriod();
+      const currentPeriod = this.getCurrentPeriod();
       const existing = this.#currentWeatherByZone[zoneId];
       const periods = existing?.periods ? { ...existing.periods } : {};
       periods[targetPeriod] = { ...weather };
-      weather.activePeriod = targetPeriod;
-      weather.periods = periods;
+      if (targetPeriod !== currentPeriod && existing) {
+        existing.periods = periods;
+        await this.#saveWeather(existing, broadcast, zoneId);
+      } else {
+        weather.activePeriod = currentPeriod;
+        weather.periods = periods;
+        await this.#saveWeather(weather, broadcast, zoneId);
+      }
     } else if (intradayEnabled && weatherData.allPeriods) {
       const periods = {};
       for (const p of Object.values(WEATHER_PERIODS)) periods[p.id] = { ...weather };
       weather.activePeriod = this.getCurrentPeriod();
       weather.periods = periods;
+      await this.#saveWeather(weather, broadcast, zoneId);
+    } else {
+      await this.#saveWeather(weather, broadcast, zoneId);
     }
-    await this.#saveWeather(weather, broadcast, zoneId);
     if (game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
       await this.#clearForecastPlan(zoneId);
       await this.#ensureForecastPlan();
@@ -446,7 +465,7 @@ export default class WeatherManager {
    */
   static async clearWeather(broadcast = true, fromSocket = false, zoneId) {
     if (!fromSocket && !canChangeWeather()) return;
-    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     if (!fromSocket && !game.user.isGM && canChangeWeather()) {
       CalendariaSocket.emit('weatherRequest', { action: 'clear', options: { zoneId: resolvedZoneId } });
       return;
@@ -502,7 +521,7 @@ export default class WeatherManager {
    * @returns {Promise<object>} Generated weather
    */
   static async generateAndSetWeather(options = {}) {
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to generate weather');
       return this.getCurrentWeather(zoneId);
@@ -1327,7 +1346,7 @@ export default class WeatherManager {
    */
   static #getFromForecastPlan(year, month, dayOfMonth, zoneId) {
     const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
-    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     return plan[resolvedZoneId]?.[year]?.[month]?.[dayOfMonth] ?? null;
   }
 
