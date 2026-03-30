@@ -1,10 +1,10 @@
 # Calendar Editor
 
-The Calendar Editor lets you create custom calendars or modify existing ones. Access it from **Settings** → **Module Settings** → **Calendaria** → **Open Calendar Editor**.
+Create custom calendars or modify existing ones. Access from **Settings** → **Module Settings** → **Calendaria** → **Open Calendar Editor**.
 
 ## Overview
 
-The editor is organized into 12 tabs across color-coded groups:
+12 tabs across color-coded groups:
 
 | Group                 | Tabs                                             |
 | --------------------- | ------------------------------------------------ |
@@ -22,22 +22,22 @@ Configure calendar identity and selection.
 
 ### Calendar Selector
 
-- **Calendar Dropdown** — Select an existing calendar template or custom calendar to edit (auto-loads on selection)
-- **Duplicate Calendar** — Create a copy of the currently loaded calendar
-- **Create From Scratch** — Start a fresh blank calendar
+- **Calendar Dropdown.** Select an existing calendar template or custom calendar to edit (auto-loads on selection)
+- **Duplicate Calendar.** Create a copy of the currently loaded calendar
+- **Create From Scratch.** Start a fresh blank calendar
 
 ### Calendar Identity
 
-- **Name** — Display name for the calendar (required)
-- **Description** — Optional notes about the calendar
+- **Name.** Display name for the calendar (required)
+- **Description.** Optional notes about the calendar
 
 ---
 
 ## Display Tab
 
-Configure how dates and times are formatted throughout the UI. Each format field shows a **live preview** below the input using sample data from the calendar being edited. Invalid format strings are highlighted with a red border and an error message.
+Configure date and time formatting throughout the UI. Each format field shows a **live preview** below the input using sample calendar data. Invalid format strings get a red border and error message.
 
-Click the **Token Reference** button to open a dialog listing all available format tokens.
+**Token Reference** button opens a dialog listing all available format tokens.
 
 > [!TIP]
 > See [Format Tokens](Format-Tokens) for the full token reference.
@@ -61,15 +61,15 @@ Define your calendar's months.
 
 ### Month Types
 
-- **Standard** — A normal month that is part of the regular calendar structure
-- **Intercalary** — Days that exist outside the normal month/week structure (e.g., festival days between months, the "Day of Threshold" in Renescara). Intercalary periods typically don't count toward normal weekday progression.
+- **Standard.** Normal month in the regular calendar structure
+- **Intercalary.** Days outside the normal month/week structure (e.g., festival days between months, the "Day of Threshold" in Renescara). Typically don't count toward weekday progression.
 
 ### Month Controls
 
-- **Custom Weekdays** (calendar-week icon) — Toggle custom weekday names for this month only
-- **Add** (+) — Insert a new month after this one
-- **Move Up/Down** (chevrons) — Reorder months
-- **Remove** (trash icon) — Delete this month
+- **Custom Weekdays** (calendar-week icon): Toggle custom weekday names for this month only
+- **Add** (+): Insert a new month after this one
+- **Move Up/Down** (chevrons): Reorder months
+- **Remove** (trash icon): Delete this month
 
 ### Custom Weekdays Per Month
 
@@ -77,7 +77,7 @@ When enabled, a month can have its own weekday names independent of the global w
 
 ### Zero-Day Months
 
-Months can have 0 days in their base configuration, making them only appear during leap years when extra days are added. Useful for leap-year-only festival periods.
+Months with 0 base days only appear during leap years when extra days are added. Useful for leap-year-only festival periods.
 
 - Navigation automatically skips 0-day months in non-leap years
 - Year view displays 0-day months with reduced opacity
@@ -90,27 +90,27 @@ Configure the days of the week and optional named weeks.
 
 ### Weekdays List
 
-| Column           | Description                                                                       |
-| ---------------- | --------------------------------------------------------------------------------- |
-| **Name**         | Full weekday name (e.g., "Monday")                                                |
-| **Abbreviation** | Short form (e.g., "Mon")                                                          |
-| **Rest Day**     | Checkbox — marks weekends for styling (this can be hooked into to trigger events) |
+| Column           | Description                                                                      |
+| ---------------- | -------------------------------------------------------------------------------- |
+| **Name**         | Full weekday name (e.g., "Monday")                                               |
+| **Abbreviation** | Short form (e.g., "Mon")                                                         |
+| **Rest Day**     | Checkbox. Marks weekends for styling (this can be hooked into to trigger events) |
 
 ### Weekday Controls
 
-- **Add** (+) — Insert a new weekday after this one
-- **Move Up/Down** (chevrons) — Reorder weekdays
-- **Remove** (trash icon) — Delete this weekday
+- **Add** (+): Insert a new weekday after this one
+- **Move Up/Down** (chevrons): Reorder weekdays
+- **Remove** (trash icon): Delete this weekday
 
 ### Named Weeks
 
 Give each week a name (like "Week of the Wolf" or "Tenday of Stars").
 
-- **Enabled** — Turn named weeks on/off
-- **Type** — How weeks are numbered:
-  - **Year-based** — Week numbers continue through the entire year
-  - **Month-based** — Week numbers reset at the start of each month
-- **Repeat Cycling** — When enabled, named weeks cycle through if there are more weeks in the year than named entries
+- **Enabled.** Turn named weeks on/off
+- **Type.** How weeks are numbered:
+  - **Year-based.** Week numbers continue through the entire year
+  - **Month-based.** Week numbers reset at the start of each month
+- **Repeat Cycling.** When enabled, named weeks cycle through if there are more weeks in the year than named entries
 
 ### Named Weeks List
 
@@ -131,30 +131,30 @@ Configure year settings, leap year rules, and named years.
 
 ### Year Settings
 
-- **Year Zero** — The reference year (year 0 in your calendar's internal numbering)
-- **Year Zero Weekday** — Which weekday falls on day 1 of year zero (determines weekday calculations)
+- **Year Zero.** The reference year (year 0 in your calendar's internal numbering)
+- **Year Zero Weekday.** Which weekday falls on day 1 of year zero (determines weekday calculations)
 
 ### Leap Year Configuration
 
-- **Leap Rule** — Select how leap years are calculated:
-  - **None** — No leap years
-  - **Simple** — Every N years
-  - **Gregorian** — Standard Earth calendar rules (every 4 years, except centuries, except 400-year marks)
-  - **Custom** — Pattern-based rules
+- **Leap Rule.** Select how leap years are calculated:
+  - **None.** No leap years
+  - **Simple.** Every N years
+  - **Gregorian.** Standard Earth calendar rules (every 4 years, except centuries, except 400-year marks)
+  - **Custom.** Pattern-based rules
 
 #### Simple Leap Year Fields
 
-- **Leap Interval** — How often leap years occur (e.g., 4 for every 4th year)
-- **Leap Start** — First year with a leap day
+- **Leap Interval.** How often leap years occur (e.g., 4 for every 4th year)
+- **Leap Start.** First year with a leap day
 
 #### Custom Leap Year Fields
 
-- **Leap Pattern** — Comma-separated divisibility rules using `!` for exclusions (e.g., `400,!100,4` means divisible by 400, OR divisible by 4 but NOT by 100)
-- **Leap Start** — First year the pattern applies from
+- **Leap Pattern.** Comma-separated divisibility rules using `!` for exclusions (e.g., `400,!100,4` means divisible by 400, OR divisible by 4 but NOT by 100)
+- **Leap Start.** First year the pattern applies from
 
 ### Named Years
 
-Assign display names to specific years. When a year has a name, the `[yearName]` format token renders it in date strings. Use pipe fallback syntax `[yearName|YYYY]` to show the year name when defined, or fall back to the numeric year.
+Assign display names to specific years. When a year has a name, the `[yearName]` format token renders it in date strings. Pipe fallback syntax `[yearName|YYYY]` shows the year name when defined, falling back to the numeric year.
 
 | Column   | Description                               |
 | -------- | ----------------------------------------- |
@@ -169,25 +169,25 @@ Set how time works in your world, including daylight hours.
 
 ### Time Structure
 
-- **Hours Per Day** — Number of hours in one day (default: 24)
-- **Minutes Per Hour** — Number of minutes per hour (default: 60)
-- **Seconds Per Minute** — Number of seconds per minute (default: 60)
-- **Seconds Per Round** — Combat round duration in seconds (default: 6)
+- **Hours Per Day.** Number of hours in one day (default: 24)
+- **Minutes Per Hour.** Number of minutes per hour (default: 60)
+- **Seconds Per Minute.** Number of seconds per minute (default: 60)
+- **Seconds Per Round.** Combat round duration in seconds (default: 6)
 
 > [!WARNING]
 > Changing time settings affects how Foundry's world time is interpreted. Existing timestamps may display differently.
 
 ### Non-Standard Time Units
 
-Calendaria fully supports calendars with non-standard time structures:
+Supports calendars with non-standard time structures:
 
-- **Variable hours per day** — Calendars can have any number of hours (e.g., 20-hour days)
-- **Variable minutes per hour** — Calendars can have any number of minutes (e.g., 100 minutes/hour)
-- **Variable seconds per minute** — Calendars can have any number of seconds
+- **Variable hours per day.** Any number of hours (e.g., 20-hour days)
+- **Variable minutes per hour.** Any number of minutes (e.g., 100 minutes/hour)
+- **Variable seconds per minute.** Any number of seconds
 
 When using non-standard time:
 
-- AM/PM midday is calculated as `hoursPerDay / 2` instead of fixed 12
+- AM/PM midday calculated as `hoursPerDay / 2` instead of fixed 12
 - Time dial and hour markers automatically scale to the configured hours
 - All API time methods respect the calendar's time structure
 - Sunrise/sunset calculations adapt to the day length
@@ -196,11 +196,11 @@ When using non-standard time:
 
 Control sunrise and sunset times throughout the year.
 
-- **Enabled** — Toggle daylight calculations on/off
-- **Shortest Day** — Hours of daylight on the winter solstice
-- **Longest Day** — Hours of daylight on the summer solstice
-- **Winter Solstice** — Month and day of the shortest day
-- **Summer Solstice** — Month and day of the longest day
+- **Enabled.** Toggle daylight calculations on/off
+- **Shortest Day.** Hours of daylight on the winter solstice
+- **Longest Day.** Hours of daylight on the summer solstice
+- **Winter Solstice.** Month and day of the shortest day
+- **Summer Solstice.** Month and day of the longest day
 
 Calendaria interpolates daylight hours between these solstices using a sinusoidal curve.
 
@@ -211,12 +211,12 @@ Calendaria interpolates daylight hours between these solstices using a sinusoida
 
 Customize 12-hour time labels for your setting.
 
-- **Ante Meridiem** — Full text for morning hours (default: "AM")
-- **Post Meridiem** — Full text for afternoon/evening hours (default: "PM")
-- **AM Abbreviation** — Abbreviated morning label (default: "AM")
-- **PM Abbreviation** — Abbreviated evening label (default: "PM")
+- **Ante Meridiem.** Full text for morning hours (default: "AM")
+- **Post Meridiem.** Full text for afternoon/evening hours (default: "PM")
+- **AM Abbreviation.** Abbreviated morning label (default: "AM")
+- **PM Abbreviation.** Abbreviated evening label (default: "PM")
 
-The `A` and `a` format tokens use the abbreviated forms. Use `[meridiemFull]` for the full-length labels.
+`A` and `a` format tokens use the abbreviated forms. `[meridiemFull]` gives the full-length labels.
 
 Examples: "Sunward" / "Moonward", "Before Noon" / "After Noon"
 
@@ -239,12 +239,12 @@ Define seasonal periods with visual styling.
 
 ### Season Type
 
-- **Dated** — Seasons have fixed start and end dates (e.g., Spring starts March 20)
-- **Periodic** — Seasons cycle by duration in days (e.g., 91 days each)
+- **Dated.** Seasons have fixed start and end dates (e.g., Spring starts March 20)
+- **Periodic.** Seasons cycle by duration in days (e.g., 91 days each)
 
 ### Season Offset (Periodic Only)
 
-- **Offset** — Number of days into the year before the first season begins
+- **Offset.** Number of days into the year before the first season begins
 
 ### Season Fields
 
@@ -256,18 +256,18 @@ Define seasonal periods with visual styling.
 
 #### Dated Season Fields
 
-- **Start Month/Day** — When this season begins
-- **End Month/Day** — When this season ends
+- **Start Month/Day.** When this season begins
+- **End Month/Day.** When this season ends
 
 #### Periodic Season Fields
 
-- **Duration** — Number of days this season lasts
+- **Duration.** Number of days this season lasts
 
 ### Season Controls
 
-- **Add** (+) — Insert a new season after this one
-- **Remove** (trash icon) — Delete this season
-- **Climate** (edit icon) — Open the [ClimateEditor](#climateeditor) to configure per-season temperature ranges and weather chance overrides
+- **Add** (+): Insert a new season after this one
+- **Remove** (trash icon): Delete this season
+- **Climate** (edit icon): Open the [ClimateEditor](#climateeditor) to configure per-season temperature ranges and weather chance overrides
 
 ---
 
@@ -276,7 +276,7 @@ Define seasonal periods with visual styling.
 Define historical periods for your calendar.
 
 > [!TIP]
-> Eras may overlap — use indexed format tokens like `[era=1]`, `[eraAbbr=2]`, `[yearInEra=1]` to reference a specific matching era.
+> Eras may overlap. Use indexed format tokens like `[era=1]`, `[eraAbbr=2]`, `[yearInEra=1]` to reference a specific matching era.
 
 ### Era Fields
 
@@ -301,8 +301,8 @@ Example: If year 1492 falls in both "Dale Reckoning" (era 1) and "Age of Mortals
 
 ### Era Controls
 
-- **Add** (+) — Insert a new era after this one
-- **Remove** (trash icon) — Delete this era
+- **Add** (+): Insert a new era after this one
+- **Remove** (trash icon): Delete this era
 
 ---
 
@@ -312,18 +312,18 @@ Create holidays and special days that appear on the calendar.
 
 ### Festival Fields
 
-| Column            | Description                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Icon/Color**    | Click to open icon/color picker dialog (Font Awesome class and hex color; default: `fas fa-star` / gold `#d4af37`)  |
-| **Name**          | Festival name (e.g., "Midwinter")                                                                                   |
-| **Month**         | Which month the festival falls in                                                                                   |
-| **Day**           | Day of the month                                                                                                    |
-| **Duration**      | Number of days the festival lasts (default: 1)                                                                      |
-| **Leap Duration** | Duration on leap years (leave blank to use standard duration)                                                       |
-| **Only Leap**     | Checkbox — festival only occurs in leap years                                                                       |
-| **Non-Weekday**   | Checkbox — this day does NOT count for weekday progression (for intercalary days that exist "outside" normal weeks) |
+| Column            | Description                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Icon/Color**    | Click to open icon/color picker dialog (Font Awesome class and hex color; default: `fas fa-star` / gold `#d4af37`) |
+| **Name**          | Festival name (e.g., "Midwinter")                                                                                  |
+| **Month**         | Which month the festival falls in                                                                                  |
+| **Day**           | Day of the month                                                                                                   |
+| **Duration**      | Number of days the festival lasts (default: 1)                                                                     |
+| **Leap Duration** | Duration on leap years (leave blank to use standard duration)                                                      |
+| **Only Leap**     | Checkbox. Festival only occurs in leap years                                                                       |
+| **Non-Weekday**   | Checkbox. This day does NOT count for weekday progression (for intercalary days that exist "outside" normal weeks) |
 
-Each festival also has a **Description** field — lore or flavor text that appears in calendar day tooltips colored with the festival's custom color.
+Each festival also has a **Description** field for lore or flavor text that appears in calendar day tooltips colored with the festival's custom color.
 
 > [!NOTE]
 > For monthless calendars (like Traveller), festival positioning uses the internal `dayOfYear` field (1-365) instead of Month/Day. This is set programmatically when importing calendars.
@@ -332,8 +332,10 @@ Festival colors render throughout the calendar UI: BigCal grid cells, MiniCal da
 
 ### Festival Controls
 
-- **Add** (+) — Insert a new festival after this one
-- **Remove** (trash icon) — Delete this festival
+- **Edit** (pencil icon): Open the festival's linked note sheet for editing (calendar must be saved first)
+- **Refresh** (sync icon): Reset the festival's linked journal note back to its template defaults (name, icon, color, dates, visibility, display style, duration). User-set fields like reminders are preserved.
+- **Add** (+): Insert a new festival after this one
+- **Remove** (trash icon): Delete this festival **and** its associated journal note. When a festival is removed from the calendar definition, any linked note is also deleted to prevent orphaned entries.
 
 ---
 
@@ -353,11 +355,11 @@ Add one or more moons with customizable phases.
 
 A known date when the moon was at a specific phase. The moon's phase on any date is calculated from this reference point.
 
-- **Year** — Reference year
-- **Month** — Reference month
-- **Day** — Reference day of the month
-- **Reference Phase** — Which phase the moon is at on the reference date (dropdown)
-- **Cycle Day Adjust** — Offset in days to fine-tune phase alignment (positive or negative)
+- **Year.** Reference year
+- **Month.** Reference month
+- **Day.** Reference day of the month
+- **Reference Phase.** Which phase the moon is at on the reference date (dropdown)
+- **Cycle Day Adjust.** Offset in days to fine-tune phase alignment (positive or negative)
 
 ### Moon Phases
 
@@ -374,29 +376,90 @@ Define the phases of the lunar cycle. Each phase covers a percentage range of th
 
 ### Phase Slider
 
-An interactive visual slider displays all phases as colored segments. The slider syncs bidirectionally with the Start %/End % number inputs.
+Interactive visual slider showing all phases as colored segments. Syncs bidirectionally with the Start %/End % number inputs.
 
 ![Moon Phase Slider](https://github.com/Sayshal/Calendaria/blob/main/.github/assets/editor-moon-phase-slider.png)
 
-- **Drag handles** between phases to adjust boundaries; adjacent phases push to maintain a 1% minimum gap
-- **Double-click** a phase segment to normalize it to an equal share (100% / number of phases)
-- **Click percentage labels** to toggle between percentage and days display
+- **Drag handles** between phases to adjust boundaries. Adjacent phases push to maintain a 1% minimum gap.
+- **Double-click** a phase segment to normalize it to an equal share (100% / number of phases).
+- **Click percentage labels** to toggle between percentage and days display.
+
+> [!NOTE]
+> The phase slider and the Start %/End % columns are hidden when the moon uses **Randomized** phase mode, since randomized moons do not use fixed percentage boundaries.
 
 ### Moon Brightness
 
-A brightness fieldset for each moon controls how much illumination it contributes to nighttime scenes:
+Brightness fieldset for each moon controls illumination contributed to nighttime scenes:
 
-- **Brightness Max** — Range slider (0 to 0.3) controlling maximum illumination at full moon
+- **Brightness Max.** Range slider (0 to 0.3) controlling maximum illumination at full moon
 - Default: `0` (no illumination)
 
-Moon illumination follows a cosine curve based on phase position. Multiple moons sum their contributions, capped at 0.3 total. See [Moon Phases — Moon Brightness](Moon-Phases#moon-brightness) and [Scene Ambience](Scene-Ambience#moon-illumination) for details.
+Moon illumination follows a cosine curve based on phase position. Multiple moons sum their contributions, capped at 0.3 total. See [Moon Phases: Moon Brightness](Moon-Phases#moon-brightness) and [Scene Ambience](Scene-Ambience#moon-illumination) for details.
+
+### Phase Mode
+
+Control how the moon's phase is determined on each date.
+
+- **Phase Mode.** Dropdown with two options:
+  - **Fixed** (default): Phases follow a deterministic cycle based on the cycle length and reference date. Phase boundaries are defined by Start %/End % values.
+  - **Randomized.** Phases are determined by a seeded PRNG, producing erratic, non-cyclical moon behavior. Useful for chaotic or magical moons (e.g., Warhammer's Morrslieb).
+
+#### Randomized Mode Settings
+
+When phase mode is set to **Randomized**, additional controls appear:
+
+- **Seed.** Integer seed for the random number generator. The same seed always produces the same phase sequence. Click the dice button to generate a random seed.
+- **Cycle Variance.** Range slider (0 to 1) controlling how much the moon's effective cycle length deviates from its base cycle length. At 0, the randomized cycle stays close to the base length. At 1, cycle lengths vary widely.
+
+#### Anchor Phases
+
+Guaranteed phase overrides on specific dates. The moon is always at the specified phase on that date regardless of randomization.
+
+| Column    | Description                                                                            |
+| --------- | -------------------------------------------------------------------------------------- |
+| **Year**  | The year this anchor applies to (leave blank to apply every year)                      |
+| **Month** | Which month the anchor falls in                                                        |
+| **Day**   | Day of the month                                                                       |
+| **Phase** | Which phase the moon is forced to on this date (dropdown of the moon's defined phases) |
+
+- **Add Anchor.** Add a new anchor phase entry
+- **Remove** (trash icon): Delete an anchor phase
+
+> [!TIP]
+> Anchors with a blank year recur annually. For example, setting "Full Moon on month 1, day 15" with no year ensures the moon is always full on that date every year.
+
+### Eclipse Settings
+
+Configure eclipses per moon. Eclipses occur when the moon aligns with the calendar's nodal window model: solar eclipses at new moon during nodal alignment, lunar eclipses at full moon during nodal alignment.
+
+- **Eclipse Frequency Mode.** Dropdown controlling how often eclipses occur:
+  - **None** (default): Eclipses disabled for this moon
+  - **Rare.** Infrequent eclipses
+  - **Occasional.** Moderate eclipse frequency
+  - **Frequent.** Eclipses occur often
+  - **Custom.** Manually specify the nodal period (see below)
+
+#### Custom Eclipse Fields
+
+When frequency mode is set to **Custom**:
+
+- **Nodal Period.** Number of days for the moon's orbital node to complete one cycle. Controls the spacing between eclipse windows. Smaller values produce more frequent eclipses.
+
+#### Apparent Size
+
+Visible when eclipses are enabled (any mode except None):
+
+- **Apparent Size.** Range slider (0.1 to 2.0) controlling the moon's apparent angular size relative to the sun. Determines eclipse subtypes:
+  - Values < 1.0 produce **annular** solar eclipses (moon too small to fully cover the sun)
+  - Values >= 1.0 produce **total** solar eclipses
+  - Affects whether lunar eclipses are **total** or **penumbral**
 
 ### Moon & Phase Controls
 
-- **Add Moon** (+) — Add a new moon
-- **Remove Moon** (trash icon) — Delete this moon
-- **Add Phase** (+) — Add a phase to this moon
-- **Remove Phase** (trash icon) — Delete this phase
+- **Add Moon** (+): Add a new moon
+- **Remove Moon** (trash icon): Delete this moon
+- **Add Phase** (+): Add a phase to this moon
+- **Remove Phase** (trash icon): Delete this phase
 
 ---
 
@@ -406,7 +469,7 @@ Create repeating patterns like zodiac signs, elemental weeks, or numbered years.
 
 ### Cycle Format
 
-- **Cycle Format** — Template string for displaying cycle values using placeholders like `[1]`, `[2]`, etc.
+- **Cycle Format.** Template string for displaying cycle values using placeholders like `[1]`, `[2]`, etc.
 
 ### Cycle Fields
 
@@ -419,31 +482,31 @@ Create repeating patterns like zodiac signs, elemental weeks, or numbered years.
 
 #### Based On Options
 
-- **Year** — Cycle advances each calendar year
-- **Era Year** — Cycle advances based on years within the current era
-- **Month** — Cycle advances each month
-- **Month Day** — Cycle advances each day of the month (resets monthly)
-- **Day** — Cycle advances each day (total days since epoch)
-- **Year Day** — Cycle advances each day of the year (resets yearly)
+- **Year.** Cycle advances each calendar year
+- **Era Year.** Cycle advances based on years within the current era
+- **Month.** Cycle advances each month
+- **Month Day.** Cycle advances each day of the month (resets monthly)
+- **Day.** Cycle advances each day (total days since epoch)
+- **Year Day.** Cycle advances each day of the year (resets yearly)
 
 ### Cycle Stages
 
 Each cycle has numbered stages that repeat in order.
 
-- **Stage Name** — Name for this position in the cycle (e.g., "Year of the Dragon")
+- **Stage Name.** Name for this position in the cycle (e.g., "Year of the Dragon")
 
 ### Cycle Controls
 
-- **Add Cycle** (+) — Add a new cycle
-- **Remove Cycle** (trash icon) — Delete this cycle
-- **Add Stage** (+) — Add a stage to this cycle
-- **Remove Stage** (trash icon) — Delete this stage
+- **Add Cycle** (+): Add a new cycle
+- **Remove Cycle** (trash icon): Delete this cycle
+- **Add Stage** (+): Add a stage to this cycle
+- **Remove Stage** (trash icon): Delete this stage
 
 ---
 
 ## Weather Tab
 
-Configure climate zones and weather conditions. The Weather Tab has a two-section layout: **Season Climate** and **Zone Climate**.
+Configure climate zones and weather conditions. Two-section layout: **Season Climate** and **Zone Climate**.
 
 ### Season Climate
 
@@ -451,16 +514,16 @@ Lists all defined seasons. Click the edit button on a season row to open the [Cl
 
 ### Zone Climate
 
-A two-column list of all climate zones with inline controls:
+Two-column list of all climate zones with inline controls:
 
-- **Name** — Inline-editable zone name
-- **Edit** (pencil icon) — Open the [Climate Editor](Climate-Editor) in zone mode for full configuration
-- **Add** (+) — Insert a new zone after this row
-- **Remove** (trash icon) — Delete this zone
+- **Name.** Inline-editable zone name
+- **Edit** (pencil icon): Open the [Climate Editor](Climate-Editor) in zone mode for full configuration
+- **Add** (+): Insert a new zone after this row
+- **Remove** (trash icon): Delete this zone
 
 ### Climate Editor
 
-The Climate Editor is a dedicated application for editing climate settings. See the full [Climate Editor](Climate-Editor) documentation for details on both season mode and zone mode configuration.
+See the full [Climate Editor](Climate-Editor) documentation for details on both season mode and zone mode configuration.
 
 ---
 
@@ -470,7 +533,7 @@ Click **Export** to download the current calendar as a JSON file.
 
 ### Export Contents
 
-The exported file includes:
+Exported file includes:
 
 - All calendar configuration (months, weekdays, seasons, moons, etc.)
 - Calendar metadata (name, description)
@@ -479,9 +542,9 @@ The exported file includes:
 
 ### Use Cases
 
-- **Backup** — Save calendar configurations before making changes
-- **Migration** — Move calendars between worlds
-- **Sharing** — Share custom calendars with other GMs
+- **Backup.** Save calendar configurations before making changes
+- **Migration.** Move calendars between worlds
+- **Sharing.** Share custom calendars with other GMs
 
 ### Filename
 
@@ -489,34 +552,38 @@ Exports use the format `{calendar-name}.json` with special characters sanitized.
 
 ### Re-importing
 
-Exported calendars can be re-imported using the **Calendaria JSON** importer. See [Importing Calendars](Importing-Calendars).
+Re-import via the **Calendaria JSON** importer. See [Importing Calendars](Importing-Calendars).
 
 ---
 
 ## Saving Your Calendar
 
-Click **Save Changes** to store your calendar. Options:
+Click **Save Changes** to store the calendar. Options:
 
-- **Set as Active** — Checkbox to switch to this calendar immediately after saving (reloads the world)
+- **Set as Active.** Checkbox to switch to this calendar immediately after saving (reloads the world)
+
+### Unsaved Changes Confirmation
+
+If unsaved changes exist when **closing the editor**, **switching calendars**, **creating a new calendar**, or **duplicating**, a confirmation dialog asks whether to discard or cancel.
 
 ### Editing Built-in Calendars
 
-When you modify a bundled calendar, Calendaria saves your changes as an override. The **Delete** button becomes **Reset to Default** to restore the original bundled calendar.
+Modifying a bundled calendar saves changes as an override. **Delete** becomes **Reset to Default** to restore the original.
 
 ### Deleting Calendars
 
-The **Delete** button behavior depends on the calendar type:
+**Delete** behavior depends on calendar type:
 
-- **Custom calendars** — Permanently deletes the calendar
-- **Bundled calendars with overrides** — Resets to the original bundled version
-- **Bundled calendars without overrides** — Cannot be deleted
+- **Custom calendars.** Permanently deletes the calendar
+- **Bundled calendars with overrides.** Resets to the original bundled version
+- **Bundled calendars without overrides.** Cannot be deleted
 
 > [!NOTE]
 > You must save a new calendar before the Delete button becomes available.
 
 ### Reset Button
 
-The **Reset** button clears all current editor data and starts with a blank calendar template. This does not affect saved calendars.
+**Reset** clears all current editor data and starts with a blank template. Does not affect saved calendars.
 
 ---
 

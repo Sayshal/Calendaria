@@ -1,6 +1,6 @@
 # Time Keeper
 
-A minimal time-only display for GMs who want a smaller footprint.
+Minimal time-only display with a small footprint.
 
 ---
 
@@ -32,12 +32,6 @@ Hover to reveal (GM only):
 | Fast Forward (>>)  | Jump forward by inc2 amount                   |
 
 Default jump amounts are -5, -1, +1, +5 per increment. Configure via Settings > Time Keeper tab.
-
----
-
-## Settings
-
-Configure via **Settings Panel > Time Keeper** tab. See [Settings](Settings#timekeeper) for all options.
 
 ---
 

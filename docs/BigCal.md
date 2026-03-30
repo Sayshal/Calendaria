@@ -1,6 +1,6 @@
 # BigCal
 
-A borderless floating calendar window with rounded corners, providing month, week, and year views with full note management.
+A borderless floating calendar window with rounded corners, showing month, week, and year views with note management. BigCal's height caps at the browser viewport. If the calendar grid has too many rows to fit on screen, the content area scrolls while the header stays fixed. The window re-constrains on browser resize.
 
 ---
 
@@ -19,7 +19,7 @@ Switch between views using the dropdown in the header.
 
 ### Month View
 
-The default view displays a monthly grid:
+Default view. Displays a monthly grid:
 
 - Weekday headers with rest-day highlighting
 - Day cells showing notes, moon phases, and festival indicators
@@ -29,7 +29,7 @@ The default view displays a monthly grid:
 
 ### Week View
 
-A detailed 7-day view with hourly time slots:
+Detailed 7-day layout with hourly time slots:
 
 - 24-hour time grid with current hour highlighted
 - All-day events displayed at the top of each column
@@ -39,7 +39,7 @@ A detailed 7-day view with hourly time slots:
 
 ### Year View
 
-A 9-year overview grid for quick navigation:
+9-year overview grid for quick navigation:
 
 - Current year and current month highlighted with visual emphasis
 - Click any month to jump directly to that month view
@@ -49,7 +49,7 @@ A 9-year overview grid for quick navigation:
 
 ## Header
 
-The header uses a compact two-row layout:
+Compact two-row layout:
 
 **Row 1:** Search, compact toggle, calendar title, settings, close button
 
@@ -66,28 +66,32 @@ The header uses a compact two-row layout:
 | Close            | Close BigCal                                       |
 | Set Current Date | Set world time to selected date (GM only)          |
 
-Note creation is handled by hovering over day cells (the "+ " button appears on hover).
+### Equivalent Dates
+
+When multiple calendars are loaded and "Show Equivalent Dates" is enabled, the header shows an extra row with the current date converted to each secondary calendar. Each equivalent date links to the Secondary Calendar Viewer for that calendar.
+
+Create notes by hovering over day cells (the "+" button appears on hover).
 
 ---
 
 ## Indicators
 
-Below the header, contextual indicators display:
+Below the header, contextual indicators show:
 
-- **Weather** — Current conditions with icon and temperature (GM can click to open weather picker)
-- **Season** — Current season with icon and color
-- **Era** — Current era name (if calendar has eras configured)
-- **Cycle** — Current cycle values (if calendar has cycles configured)
+- **Weather.** Current conditions with icon and temperature (GM can click to open weather picker)
+- **Season.** Current season with icon and color
+- **Era.** Current era name (if calendar has eras configured)
+- **Cycle.** Current cycle values (if calendar has cycles configured)
 
 ---
 
 ## Day Cells
 
-Each day cell in month view displays:
+Each day cell in month view shows:
 
 | Element         | Description                                                                                            |
 | --------------- | ------------------------------------------------------------------------------------------------------ |
-| Day number      | The date, with today highlighted                                                                       |
+| Day number      | Date, with today highlighted                                                                           |
 | Festival star   | Indicates a festival day                                                                               |
 | Moon icons      | Up to 3 visible, hover "+N" badge for additional moons; clickable for radial moon picker when >3 moons |
 | Note indicators | Custom icons and colors for each note                                                                  |
@@ -96,27 +100,29 @@ Each day cell in month view displays:
 
 ### Weather Pills
 
-Day cells display weather information as compact pills:
+Day cells show weather as compact pills:
 
 - **Today**: Current weather (full opacity)
 - **Past days**: Historical weather from the weather history
 - **Future days**: Forecast weather (dimmed at 50% opacity)
 
-Each pill shows the weather icon, temperature, and wind direction indicator.
+Each pill shows weather icon, temperature, and wind direction.
 
 **Hover Tooltip:**
-Hovering over a day cell displays a tooltip with:
+Hovering over a day cell shows:
 
 - Full date (Month Day, Year with era)
 - Festival name (if applicable)
 - Season name
 - Sunrise/sunset times
 - Weather conditions (icon, name, temperature, wind, precipitation)
+- Equivalent dates from other calendars (if configured)
+- **Note listing.** Festivals listed first with a star icon, then regular notes with colored dots matching each note's color. Capped at 5 entries; extra notes show a "+N more" overflow indicator.
 
 **Interactions:**
 
 - Click a day to select it (click again to deselect)
-- Right-click for context menu with notes (sorted alphabetically) showing inline edit/delete icons, plus BigCal-specific items (Settings, Open MiniCal, Close)
+- Right-click for context menu with notes (sorted alphabetically) showing inline edit/delete icons, plus BigCal-specific items (Settings, Open MiniCal, Close). Capped at 5 entries. Days with more than 5 notes show a "+N more" item that opens the Note Viewer pre-filtered to that date.
 - Right-click the BigCal window header to also open the context menu
 - Click a grayed-out day from another month to navigate there
 
@@ -124,13 +130,26 @@ Hovering over a day cell displays a tooltip with:
 
 ## Multi-Day Events
 
-Events spanning multiple days appear as horizontal bars:
+Events with duration span multiple days, rendered as horizontal bars across the calendar grid:
 
 - Color-coded with the note's custom color
-- Display note icon and title
-- Arrow indicators show events continuing from previous weeks
+- Show note icon and title
+- Arrow indicators mark events continuing from previous weeks
 - Overlapping events stack in separate rows
 - Click any bar to open the note
+- Optional bookend markers indicate the start and end days of the event
+
+### Display Styles
+
+Multi-day events render differently depending on their display style:
+
+| Style      | Rendering                                                                                |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| **Icon**   | Default style. Event bar shows the note's icon and title text across its duration span   |
+| **Pip**    | Compact dot indicator. A minimal colored bar with reduced height for less visual weight  |
+| **Banner** | Full-width bar. A prominent colored bar emphasizing the event across its entire duration |
+
+Events sort by display priority: banners first, then icons, then pips. Festival notes always sort above regular notes.
 
 ---
 
@@ -171,18 +190,18 @@ Events spanning multiple days appear as horizontal bars:
 
 ## GM Controls
 
-GMs have additional capabilities:
+GM-only controls:
 
-- **Set Current Date** — Updates world time to the selected or viewed date
-- **Weather Picker** — Click the weather indicator to change weather
-- **Show to All Players** / **Hide from All Players** — Context menu actions to toggle BigCal visibility for all connected players
-- **All time controls** — Players cannot modify world time
+- **Set Current Date.** Updates world time to the selected or viewed date
+- **Weather Picker.** Click the weather indicator to change weather
+- **Show to All Players** / **Hide from All Players.** Context menu actions to toggle BigCal visibility for all connected players
+- **All time controls.** Players cannot modify world time
 
 ---
 
 ## Intercalary Days
 
-Special days that don't count toward the normal weekday cycle (configured via Festival Days with "Counts for Weekday" disabled) appear in a separate row above the calendar grid. These are typically used for festival days that exist "outside" the regular calendar.
+Special days that don't count toward the normal weekday cycle (configured via Festival Days with "Counts for Weekday" disabled) appear in a separate row above the calendar grid, typically festival days that exist "outside" the regular calendar.
 
 ---
 
@@ -193,21 +212,3 @@ For calendars without months (like Traveller), the month view displays a 3-week 
 - Shows previous week, current week, and next week
 - Navigation moves by week instead of month
 - Header displays "Week X, Year" instead of month name
-
----
-
-## Settings
-
-Configure via **Settings Panel > BigCal** tab. See [Settings](Settings#bigcal) for all options.
-
-### Block Visibility
-
-Control which information blocks appear on the BigCal interface:
-
-| Setting          | Description                                       |
-| ---------------- | ------------------------------------------------- |
-| Show Weather     | Display weather block (with Weather Display Mode) |
-| Show Season      | Display season block (with Season Display Mode)   |
-| Show Era         | Display era block (with Era Display Mode)         |
-| Show Cycles      | Display cycles block (with Cycles Display Mode)   |
-| Show Moon Phases | Display moon phase indicators on day cells        |

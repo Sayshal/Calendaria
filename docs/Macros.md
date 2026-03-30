@@ -47,7 +47,7 @@ Calendar notes can have an attached macro that executes when the event triggers.
 
 ### The Scope Parameter
 
-When Calendaria triggers a macro, it passes context data through Foundry's `scope` parameter. This is a standard Foundry feature—when macros are executed programmatically (rather than manually clicked), the caller can provide a `scope` object containing relevant data.
+When Calendaria triggers a macro, it passes context data through Foundry's `scope` parameter. This is a standard Foundry feature. When macros are executed programmatically (rather than manually clicked), the caller can provide a `scope` object containing relevant data.
 
 Inside your macro, access this data by destructuring from `scope`:
 
@@ -55,7 +55,7 @@ Inside your macro, access this data by destructuring from `scope`:
 const { event, trigger } = scope;
 ```
 
-The `scope` variable is automatically available in your macro code—you don't need to define or import it.
+The `scope` variable is automatically available in your macro code. You don't need to define or import it.
 
 ### Context Data
 
@@ -255,6 +255,4 @@ await CALENDARIA.api.clearWeatherHistory({ future: true });
 
 ## For Developers
 
-See [API Reference](API-Reference) for all available methods.
-
-See [Hooks](Hooks) for calendar events you can listen to in world scripts or modules.
+See [API Reference](API-Reference) and [Hooks](Hooks).

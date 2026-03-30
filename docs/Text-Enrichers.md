@@ -18,7 +18,7 @@ Calendaria provides inline enrichers for journals, chat, items, and anywhere Fou
 
 ### date
 
-Display a date. Clickable — navigates calendar to that date.
+Display a date. Clickable: navigates calendar to that date.
 
 ```text
 [[cal.date]]                 → 5 Shadowmoon, 1499
@@ -89,7 +89,7 @@ Display the current time.
 
 ### festival
 
-Clickable — opens festival note if one exists.
+Clickable. Opens festival note if one exists.
 
 ```text
 [[cal.festival]] → Midsummer
@@ -109,7 +109,7 @@ Clickable — opens festival note if one exists.
 
 ### countdown
 
-Days until a target date. Clickable — navigates to target.
+Days until a target date. Clickable: navigates to target.
 
 ```text
 [[cal.countdown 1 Mirtul 1500]] → in 45 days
@@ -120,7 +120,7 @@ Days until a target date. Clickable — navigates to target.
 
 ### countup / elapsed
 
-Days since a target date. Clickable — navigates to target.
+Days since a target date. Clickable: navigates to target.
 
 ```text
 [[cal.countup 1 Mirtul 1490]]               → 730 days
@@ -171,7 +171,7 @@ Time until a target event.
 
 ### datemath
 
-Date arithmetic from current date. Clickable — navigates to result.
+Date arithmetic from current date. Clickable: navigates to result.
 
 ```text
 [[cal.datemath +30d]]    → 6 Thawmoon, 1500
@@ -351,6 +351,43 @@ Clickable. Requires 2+ moons.
 
 ---
 
+## Eclipse
+
+### eclipse
+
+Current eclipse status for a moon. Requires eclipses enabled in the Calendar Editor moon settings.
+
+```text
+[[cal.eclipse]]   → Total Solar Eclipse
+[[cal.eclipse 1]] → Partial Lunar Eclipse
+```
+
+| Parameter  | Type     | Description          |
+| ---------- | -------- | -------------------- |
+| positional | `number` | Moon index (0-based) |
+
+**Eclipse types:** Total Solar, Partial Solar, Annular Solar, Total Lunar, Partial Lunar, Penumbral Lunar. Returns "No Eclipse" when none is occurring.
+
+---
+
+### nexteclipse
+
+Date of the next eclipse. Date mode is clickable: navigates to that date.
+
+```text
+[[cal.nexteclipse]]             → 22 Shadowmoon, 1499
+[[cal.nexteclipse countdown]]   → in 12 days
+[[cal.nexteclipse 1]]           → 8 Thawmoon, 1500
+[[cal.nexteclipse 1 countdown]] → in 45 days
+```
+
+| Parameter  | Type     | Description                   |
+| ---------- | -------- | ----------------------------- |
+| positional | `number` | Moon index (0-based)          |
+| positional | `string` | `countdown` for relative days |
+
+---
+
 ## Weather
 
 ### weather
@@ -420,7 +457,7 @@ Weather forecast block.
 
 ### event
 
-Clickable — opens note.
+Clickable. Opens note.
 
 ```text
 [[cal.event The Council Meeting]] → The Council Meeting
@@ -446,7 +483,7 @@ Clickable — opens note.
 
 ### next
 
-Date mode is clickable — opens note.
+Date mode is clickable. Opens note.
 
 ```text
 [[cal.next Council Meeting]]           → 22 Mirtul, 1492
@@ -469,7 +506,7 @@ Uses the category's icon.
 
 ### summary
 
-Clickable — navigates to today.
+Clickable. Navigates to today.
 
 ```text
 [[cal.summary]] → 5 Shadowmoon, 1499 · Clear · Waxing
@@ -497,7 +534,7 @@ See [Format Tokens](Format-Tokens).
 
 ### compare
 
-Clickable — navigates to target.
+Clickable. Navigates to target.
 
 ```text
 [[cal.compare 1 1 1490]] → in 9 years (3285 days)
@@ -507,7 +544,7 @@ Clickable — navigates to target.
 
 ### peek
 
-Clickable — navigates to result.
+Clickable. Navigates to result.
 
 ```text
 [[cal.peek +7d]] → 12 Shadowmoon, 1499
@@ -526,12 +563,4 @@ Any enricher accepts `cal=<id>` to query a non-active calendar.
 [[cal.season cal=gregorian]] → Winter
 ```
 
-This is read-only — click navigation still targets the active calendar.
-
----
-
-## Settings
-
-| Setting               | Description                                              | Default     |
-| --------------------- | -------------------------------------------------------- | ----------- |
-| Enricher Click Target | Calendar view for date clicks (Auto, MiniCal, or BigCal) | Auto-detect |
+This is read-only. Click navigation still targets the active calendar.

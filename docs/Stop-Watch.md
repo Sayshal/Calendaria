@@ -1,6 +1,6 @@
 # Stop Watch
 
-A physical stop watch with animated hands for tracking elapsed time in real-time or game-time modes.
+Physical stop watch with animated hands for tracking elapsed time in real-time or game-time modes.
 
 ---
 
@@ -13,7 +13,7 @@ A physical stop watch with animated hands for tracking elapsed time in real-time
 
 ## Display Modes
 
-The Stop Watch supports two timing modes:
+Two timing modes:
 
 | Mode          | Description                                             |
 | ------------- | ------------------------------------------------------- |
@@ -53,7 +53,7 @@ All stop watch keybinds are unbound by default. See [Keybinds](Keybinds) for con
 
 ## Lap Timing
 
-Click the **Lap** button to record the current elapsed time. Laps appear in a scrollable list below the main display.
+Click **Lap** to record the current elapsed time. Laps appear in a scrollable list below the main display.
 
 Each lap shows:
 
@@ -67,12 +67,12 @@ Use laps to track intervals, phases, or checkpoints during timed activities.
 
 ## Display Format
 
-The elapsed time display format is configurable per mode in **Settings Panel > Stop Watch tab**:
+Elapsed time format is configurable per mode in **Settings Panel > Stop Watch tab**:
 
-- **Elapsed Time (Real Time)** — Format for real-time mode
-- **Elapsed Time (Game Time)** — Format for game-time mode
+- **Elapsed Time (Real Time).** Format for real-time mode
+- **Elapsed Time (Game Time).** Format for game-time mode
 
-The Display Formats section shows a live preview of how the format will render.
+Display Formats section shows a live preview of how the format renders.
 
 ### Format Tokens
 
@@ -95,7 +95,7 @@ The Display Formats section shows a live preview of how the format will render.
 
 When enabled, the game-time stop watch automatically starts when world time begins advancing. Configure in **Settings Panel > Stop Watch tab > Auto-start Game Time**.
 
-This is useful for automatically tracking in-game duration when the real-time clock starts.
+Useful for automatically tracking in-game duration when the real-time clock starts.
 
 ---
 
@@ -123,24 +123,4 @@ Drag the bottom-right resize handle to resize the stop watch.
 
 ### Sticky Zones
 
-The Stop Watch supports sticky zone snapping when dragged near predefined positions. See [HUD > Sticky Zones](HUD#sticky-zones) for zone locations.
-
----
-
-## State Persistence
-
-The Stop Watch saves its state for each user:
-
-- Current elapsed time
-- Running/paused state
-- Current mode (real-time vs game-time)
-- Lap history
-- Window position and size
-
-State persists across page reloads within the same session.
-
----
-
-## Settings
-
-See [Settings > Stop Watch](Settings#stop watch) for stop watch-related settings and display format configuration.
+Supports sticky zone snapping when dragged near predefined positions. See [HUD > Sticky Zones](HUD#sticky-zones) for zone locations.

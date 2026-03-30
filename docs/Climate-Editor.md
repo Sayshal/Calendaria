@@ -2,8 +2,8 @@
 
 Configure weather behavior for climate zones and seasons. The editor opens in one of two modes:
 
-- **Season mode** — from a season row in Calendar Editor > Weather tab
-- **Zone mode** — from a zone row in Calendar Editor > Weather tab
+- **Season mode.** From a season row in Calendar Editor > Weather tab
+- **Zone mode.** From a zone row in Calendar Editor > Weather tab
 
 ---
 
@@ -61,7 +61,7 @@ Per-preset overrides for this zone:
 
 | Column       | Description                                                                                                   |
 | ------------ | ------------------------------------------------------------------------------------------------------------- |
-| **Enabled**  | Checkbox — disabled presets are excluded from generation and dimmed in the picker. Saved per-season.          |
+| **Enabled**  | Checkbox. Disabled presets are excluded from generation and dimmed in the picker. Saved per-season.           |
 | **Icon**     | Preset icon (read-only)                                                                                       |
 | **Name**     | Preset name with alias input (type to override, empty for default)                                            |
 | **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers |
@@ -114,4 +114,4 @@ Each column header has a tooltip explaining the field. Presets are grouped by ca
 | **Night Hue**           | Environment hue during nighttime      |
 | **Transition Duration** | How long color shifts take (in hours) |
 
-Color shift is per-zone — different zones can have different dawn/dusk atmospheres. See [Weather System — Time-of-Day Color Shifting](Weather-System#time-of-day-color-shifting) for details.
+Color shift is per-zone, so different zones can have different dawn/dusk atmospheres. See [Weather System: Time-of-Day Color Shifting](Weather-System#time-of-day-color-shifting) for details.

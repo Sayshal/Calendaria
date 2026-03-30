@@ -614,6 +614,106 @@ Hooks.on('calendaria.reminderReceived', (data) => {
 
 ---
 
+## Condition Hooks
+
+### calendaria.conditionEvaluated
+
+Fired after a note's condition tree is evaluated via the API.
+
+**Parameters:**
+
+- `data` (object)
+  - `noteId` (string) - Note ID
+  - `result` (boolean) - Evaluation result
+  - `date` (object) - Date the condition was evaluated against
+
+```javascript
+Hooks.on('calendaria.conditionEvaluated', (data) => {
+  console.log(`Note ${data.noteId} evaluated: ${data.result}`);
+});
+```
+
+### calendaria.presetsChanged
+
+Fired when note presets (categories) are added, removed, or modified.
+
+**Parameters:**
+
+- `presets` (object[]) - Updated array of all presets
+
+```javascript
+Hooks.on('calendaria.presetsChanged', (presets) => {
+  console.log(`Presets updated: ${presets.length} total`);
+});
+```
+
+---
+
+## Fog of War Hooks
+
+### calendaria.fogRangeChanged
+
+Fired when the GM reveals or resets fog of war date ranges.
+
+**Parameters:**
+
+- `data` (object)
+  - `ranges` (object[]) - Updated array of revealed date ranges
+
+```javascript
+Hooks.on('calendaria.fogRangeChanged', (data) => {
+  console.log(`Fog ranges updated: ${data.ranges.length} ranges`);
+});
+```
+
+---
+
+## Cinematic Hooks
+
+### calendaria.cinematicStart
+
+Fired when a cinematic time skip begins.
+
+**Parameters:**
+
+- `data` (object) - Cinematic payload
+
+```javascript
+Hooks.on('calendaria.cinematicStart', (data) => {
+  console.log('Cinematic started');
+});
+```
+
+### calendaria.cinematicEnd
+
+Fired when a cinematic time skip completes.
+
+**Parameters:**
+
+- `data` (object) - Cinematic payload
+
+```javascript
+Hooks.on('calendaria.cinematicEnd', (data) => {
+  console.log('Cinematic ended');
+});
+```
+
+### calendaria.cinematicAbort
+
+Fired when a cinematic time skip is aborted by the user.
+
+**Parameters:**
+
+- `data` (object) - Cinematic payload
+
+```javascript
+Hooks.on('calendaria.cinematicAbort', (data) => {
+  console.log('Cinematic aborted');
+});
+```
+
+---
+
 ## Weather Hooks
 
 ### calendaria.weatherChange
@@ -630,10 +730,24 @@ Fired when weather changes. Note: This hook is fired with varying payloads depen
 
 ```javascript
 Hooks.on('calendaria.weatherChange', (data) => {
-  // data may be undefined when triggered from weather picker UI
   if (data?.current) {
     console.log(`Weather: ${data.current.id}`);
   }
+});
+```
+
+### calendaria.weatherPeriodChange
+
+Fired when the intraday weather period changes (sunrise, midday, sunset, midnight thresholds).
+
+**Parameters:**
+
+- `data` (object)
+  - `period` (string) - The period that just started (`"night"`, `"morning"`, `"afternoon"`, `"evening"`)
+
+```javascript
+Hooks.on('calendaria.weatherPeriodChange', (data) => {
+  console.log(`Weather period: ${data.period}`);
 });
 ```
 

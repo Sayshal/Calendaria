@@ -15,7 +15,7 @@ Eras define historical periods with custom year formatting. Configure eras in th
 
 ### Overlapping Eras
 
-Eras may overlap — multiple eras can cover the same year range. When eras overlap, use indexed format tokens to reference a specific matching era by position.
+Eras may overlap. Multiple eras can cover the same year range. When eras overlap, use indexed format tokens to reference a specific matching era by position.
 
 ### Era Resolution
 
@@ -70,8 +70,8 @@ Cycles are repeating sequences (zodiac signs, elemental weeks, etc.). Configure 
 
 The cycle format field controls how cycles appear in the UI. Use numbered placeholders for each cycle:
 
-- `[1]`, `[2]`, etc. — Current entry name for each cycle
-- `[n]` — Line break
+- `[1]`, `[2]`, etc. - Current entry name for each cycle
+- `[n]` - Line break
 
 Example: `[1] - Week of [2]` produces "Gemini - Week of Fire"
 
@@ -82,4 +82,4 @@ Example: `[1] - Week of [2]` produces "Gemini - Week of Fire"
 
 ## For Developers
 
-See [API Reference](API-Reference#eras-and-cycles) for era and cycle methods.
+See [API Reference](API-Reference) and [Hooks](Hooks).

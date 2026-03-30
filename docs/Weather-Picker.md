@@ -4,9 +4,18 @@ The Weather Picker is a dialog for manually setting weather conditions. Open it 
 
 ## Layout
 
+### Period Tabs
+
+When the **Intraday Weather** setting is enabled, a row of period tabs appears at the top of the picker (below the zone info bar). There are four periods: **Night**, **Morning**, **Afternoon**, and **Evening**. Each tab shows an icon and label, with the current real-time period marked.
+
+- Click a tab to switch the picker context to that period
+- The preset grid and detail panel reflect the selected period's weather
+- Saving applies weather only to the selected period, so each time of day can have different weather
+- If no period is selected, the picker defaults to the current period
+
 ### Zone Info Bar
 
-A bar at the top displays the current climate zone with a dropdown for per-scene zone override. Changing the zone here overrides the active scene's climate zone, affecting weather generation and scene ambience for that scene only. Select "No Zone" to explicitly disable zone-based weather — this selection persists across scene reloads.
+A bar at the top displays the current climate zone with a dropdown for per-scene zone override. Changing the zone here overrides the active scene's climate zone, affecting weather generation and scene ambience for that scene only. Select "No Zone" to explicitly disable zone-based weather. This selection persists across scene reloads.
 
 ### Preset Grid
 
@@ -35,19 +44,20 @@ Editable fields for the selected weather:
 | **FX Speed**                | Override particle speed: Default, Very Low, Low, Medium, High, Very High    |
 | **FX Color**                | Override effect tint color                                                  |
 | **FXMaster Preset**         | Dropdown of available FXMaster effects (only shown when FXMaster is active) |
-| **Sound Effect**            | Dropdown of available ambient sound loops                                   |
+| **Sound Effect**            | Sound file path with a file picker button for browsing custom audio files   |
+| **FX Macro**                | Dropdown of world macros to execute when this weather activates (GM only)   |
 
 ### Save as Preset
 
-A checkbox near the footer labeled "Save as Preset" — when checked, clicking Save also creates a new custom preset with the full configuration (name, icon, color, temperature range, wind, precipitation, HUD effect, FX preset, sound).
+A checkbox near the footer labeled "Save as Preset." When checked, clicking Save also creates a new custom preset with the full configuration (name, icon, color, temperature range, wind, precipitation, HUD effect, FX preset, sound).
 
 ## Footer
 
-| Button        | Action                                                          |
-| ------------- | --------------------------------------------------------------- |
-| **Clear**     | Remove current weather from the active zone                     |
-| **Randomize** | Generate random weather using current zone/season probabilities |
-| **Save**      | Apply the selected/configured weather                           |
+| Button        | Action                                                                            |
+| ------------- | --------------------------------------------------------------------------------- |
+| **Clear**     | Remove current weather from the active zone                                       |
+| **Randomize** | Generate random weather for the active scene's climate zone using true randomness |
+| **Save**      | Apply the selected/configured weather                                             |
 
 ## Behavior
 
@@ -55,4 +65,4 @@ A checkbox near the footer labeled "Save as Preset" — when checked, clicking S
 - Editing detail fields creates a one-time weather override; the original preset is not modified
 - Randomize respects the current zone's enabled presets and chance weights
 - When a GM override is applied and the "GM Override Affects Forecast" setting is enabled, the forecast plan for the current zone is cleared and regenerated
-- The picker is permission-gated — only users with the **Change Weather** permission can access it
+- The picker is permission-gated. Only users with the **Change Weather** permission can access it

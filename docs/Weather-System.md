@@ -1,15 +1,23 @@
 # Weather System
 
-Calendaria includes a procedural weather generation system with climate zones, seasonal temperatures, wind, precipitation, weather inertia, forecast plans, and 42 built-in weather presets across four categories.
+A procedural weather system with climate zones, seasonal temperatures, wind, precipitation, forecasts, and 42 built-in weather presets across four categories.
 
 > [!TIP]
 > For the complete preset reference, see [Weather Presets](Weather-Presets). For the manual weather picker, see [Weather Picker](Weather-Picker). For visual customization, see [Weather Editor](Weather-Editor).
 
 ---
 
+## Getting Started
+
+All 20 bundled calendar presets include default climate zone configurations with full weather data. Weather generation works out of the box when using a bundled calendar, no manual zone setup required.
+
+To customize the weather profile, open the [Climate Editor](Climate-Editor) and modify the bundled zone or add additional zones.
+
+---
+
 ## Climate Zones
 
-Seven built-in climate zone templates define temperature ranges and weather probabilities by season.
+Seven built-in climate zone templates with temperature ranges and weather probabilities by season.
 
 ### Available Templates
 
@@ -41,16 +49,16 @@ Zone configuration is done via the [Climate Editor](Climate-Editor) in zone mode
 
 ## Season-Specific Climate
 
-Each season can override the base zone climate with custom temperature ranges and weather preset chances.
+Each season overrides the base zone climate with custom temperature ranges and weather preset chances.
 
 ### Climate Layering
 
-Climate configuration follows a layered approach (first matching value wins):
+Climate settings follow a layered approach. The first matching value wins:
 
-1. **Zone season override** — Per-season weight and temperature overrides within a zone
-2. **Season base** — Season climate temperatures and preset weights
-3. **Zone base** — Enabled/disabled filter and base temperatures (no preset weights)
-4. **Global defaults** — Fallback values
+1. **Zone season override.** Per-season weight and temperature overrides within a zone
+2. **Season base.** Season climate temperatures and preset weights
+3. **Zone base.** Enabled/disabled filter and base temperatures
+4. **Global defaults.** Fallback values
 
 ### Configuring Season Climate
 
@@ -71,8 +79,6 @@ Display unit configurable via **Temperature Unit** setting (Settings Panel > Wea
 
 - Celsius (default)
 - Fahrenheit
-
-Generated temperatures are clamped to the configured seasonal/zone temperature range after all modifiers (inertia blending, preset overrides) are applied.
 
 ---
 
@@ -97,8 +103,6 @@ Wind displays as mph when the temperature unit is set to Fahrenheit, and kph whe
 
 Wind direction uses meteorological convention: the labeled direction indicates where the wind is coming **from**. A "North" wind originates from the north and blows southward.
 
-A 16-point compass system: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (stored as degrees 0–337.5°).
-
 The wind arrow indicator points in the direction the wind blows (opposite the labeled origin). HUD particles and FXMaster effects also move in the blowing direction.
 
 ### Zone Wind Configuration
@@ -110,7 +114,7 @@ Zones can define:
 
 ### Forced Wind
 
-Some presets (thunderstorm, blizzard, tornado, hurricane, ice storm, monsoon) have `forced: true` wind — their speed and direction are locked to preset values and ignore zone configuration.
+Some presets (thunderstorm, blizzard, tornado, hurricane, ice storm, monsoon) lock their wind speed and direction to preset values, ignoring zone configuration.
 
 ---
 
@@ -128,23 +132,15 @@ Weather presets can define precipitation with type and intensity.
 | Sleet   | Sleet                                                                                       |
 | Hail    | Hail, Ice Storm                                                                             |
 
-### Intensity Scale
+### Intensity
 
-Intensity ranges from 0 to 1 (0 = trace, 1 = maximum). During generation, intensity varies ±15% from the preset's base value.
+Intensity ranges from trace to maximum. During generation, intensity varies slightly from the preset's base value to keep things feeling natural.
 
 ---
 
 ## Weather Generation
 
-### Algorithm
-
-1. Build probability map from enabled presets in active zone config
-2. Apply inertia weighting (if current weather exists)
-3. Weighted random selection from merged probabilities
-4. Generate temperature from zone's seasonal range (clamped to preset overrides if configured)
-5. Generate wind from preset + zone config
-6. Generate precipitation with intensity variance
-7. Blend temperature and wind with previous values using inertia
+Weather generates based on the climate zone's presets and season settings, with natural variation in temperature and wind. Enabled preset weights determine what weather is most likely, and inertia keeps transitions smooth.
 
 ### Auto-Generation
 
@@ -156,48 +152,37 @@ The "Regenerate All Weather" button in the Weather settings tab clears and rebui
 
 ## Weather Inertia
 
-Weather inertia creates smoother, more realistic transitions by favoring the current weather when generating new conditions.
+Weather inertia favors the current weather when generating new conditions, creating smoother transitions.
 
 **Setting:** `Weather Inertia` (range 0–1, default 0.3)
 
 - **0** = no inertia (fully random each day)
 - **1** = maximum inertia (strongly favors current weather)
 
-### Per-Preset Inertia Weight
+### Per-Preset Behavior
 
-Each preset has an `inertiaWeight` multiplier (default 1.0) that scales the global inertia setting:
-
-- **0** = never persists (tornado, hurricane, sunshower, most fantasy presets)
-- **0.3–0.5** = low persistence (thunderstorm, blizzard, hail, sandstorm, ashfall)
-- **1.0** = normal persistence (partly cloudy, drizzle, mist, windy)
-- **1.2–1.5** = sticky (clear, cloudy, overcast, fog, rain, snow)
-
-Custom presets can set their own inertia weight (0–2 range). Zone-level overrides can also be configured per-preset in the [Climate Editor](Climate-Editor).
+Some weather types persist longer while others change quickly. Stable conditions like clear skies, overcast, fog, rain, and snow tend to stick around; dramatic events like tornadoes, hurricanes, and sunshowers pass quickly. Custom presets configure their own persistence in the [Climate Editor](Climate-Editor).
 
 ### Season Boundary
 
-When a season boundary is crossed, inertia is automatically halved to allow the new season's weather profile to take effect faster.
+When a season boundary is crossed, inertia is reduced so the new season's weather profile takes effect faster.
 
 ### Value Blending
 
-Beyond preset selection, inertia also blends **temperature** and **wind speed/direction** between the previous and new weather. Wind direction interpolation takes the shortest angular path and snaps to the nearest compass point. Forced wind is not blended.
+Beyond preset selection, inertia also smooths **temperature** and **wind** transitions between the previous and new weather so changes feel gradual rather than abrupt.
 
 ---
 
 ## Forecast Plan
 
-Calendaria pre-generates and stores future weather as a **forecast plan** — a structured record of upcoming weather for each zone.
+Future weather is pre-generated and stored as a **forecast plan**: upcoming weather for each zone over a configurable window.
 
-### Plan Storage
+### How It Works
 
-Forecast plans are stored per-zone in a nested structure: `{ [zoneId]: { [year]: { [month]: { [day]: forecastEntry } } } }`.
-
-### Plan Lifecycle
-
-1. When auto-generation is enabled, the forecast plan is generated on initialization and after day changes
+1. When auto-generation is enabled, the forecast plan generates on initialization and after day changes
 2. The plan covers the configured **Forecast Days** window (1–30, default 7)
-3. Each entry uses **path-dependent inertia**: each forecast day chains from the previous day's result
-4. Plans are pruned to remove entries older than the forecast window
+3. Forecasts account for the previous day's weather to create realistic patterns
+4. Old entries are pruned automatically
 
 ### GM Override Behavior
 
@@ -207,41 +192,78 @@ When a GM manually sets weather via the [Weather Picker](Weather-Picker) and the
 
 ## Forecast Variance
 
-The forecast accuracy system adds uncertainty to forecasts shown to players.
+Adds uncertainty to forecasts shown to players, simulating imperfect weather prediction.
 
 **Setting:** `Forecast Accuracy` (0–100, default 70)
 
-- **100** = perfect accuracy (forecast matches plan exactly)
+- **100** = perfect accuracy (forecast matches reality exactly)
 - **0** = maximum variance (forecast is heavily randomized)
 
 ### How Variance Works
 
-- **Temperature offset**: Random offset up to ±8°C, scaled down by accuracy and proximity (closer days are more accurate)
-- **Preset swapping**: Chance to swap to another preset in the same category, probability increasing with distance and lower accuracy
-- **`isVaried` flag**: Forecast entries that differ from the plan are marked with `isVaried: true`
+- **Temperature**: Forecasts may show temperatures slightly off from the actual plan, with closer days being more accurate
+- **Preset swapping**: Distant forecasts have a chance to show a different weather type from the same category
 - **GM always accurate**: GMs always see the true forecast plan without variance
+
+---
+
+## Intraday Weather
+
+Splits each day into four periods so weather changes throughout the day rather than remaining fixed from dawn to dawn.
+
+**Setting:** `Intraday Weather` (toggle, default off). Opt-in per world in Settings Panel > Weather tab.
+
+### Periods
+
+| Period        | Changes At |
+| ------------- | ---------- |
+| **Night**     | Midnight   |
+| **Morning**   | Sunrise    |
+| **Afternoon** | Midday     |
+| **Evening**   | Sunset     |
+
+Period boundaries are derived from the calendar's sunrise, midday, and sunset times, which depend on the active climate zone's daylight configuration. Weather changes when the world clock crosses a period boundary.
+
+### Period Carry-Over Chance
+
+**Setting:** `Period Carry-Over Chance` (0–100%, default 50%). Controls how often a period keeps the previous period's weather instead of generating new conditions.
+
+- **0%** = every period generates independently (maximum variation throughout the day)
+- **100%** = weather always carries over (each period matches the previous one)
+
+### Cross-Day Transitions
+
+The evening period's weather influences the next day's night period for smooth overnight transitions.
+
+### HUD and Tooltip Display
+
+When intraday weather is enabled, the HUD and calendar day tooltips show a per-period weather breakdown instead of a single daily condition.
+
+### Weather Picker Integration
+
+The [Weather Picker](Weather-Picker) gains period selector tabs when intraday weather is enabled. GMs can set weather for individual periods rather than the whole day.
 
 ---
 
 ## Probability Guide
 
-Verify your climate zone setup produces the weather distribution you expect.
+Verify the weather distribution your climate zone setup produces.
 
 ### Access
 
 - **Chat command**: `/weatherprob` or `/wp` (optionally pass a season name, e.g. `/weatherprob Winter`)
 - **Settings**: Settings > Weather > Climate section > **Weather Probabilities** button (visible when zones are configured)
 - **Climate Editor**: Preset Overrides tab > **Weather Probabilities** button (uses unsaved editor data for live preview)
-- **API**: `CALENDARIA.api.getWeatherProbabilities()` or `CALENDARIA.api.openWeatherProbabilities()`
+- **Weather Picker**: **Weather Probabilities** button in footer on any weather picker instance
 
 ### Dialog
 
-The dialog shows:
+Shows:
 
-- **Zone selector** — compare probabilities across zones (disabled when only one zone exists)
-- **Season selector** — switch between seasons to see how weights change
-- **Probability table** — each enabled weather preset with its weight, percentage, and a colored bar visualization
-- **Temperature range** — effective min/max for the selected zone and season
+- **Zone selector.** Compare probabilities across zones (disabled when only one zone exists)
+- **Season selector.** Switch between seasons to see how weights change
+- **Probability table.** Each enabled weather preset with its weight, percentage, and a colored bar visualization
+- **Temperature range.** Effective min/max for the selected zone and season
 
 When opened from the Climate Editor, the dialog uses the editor's in-progress data so you can preview changes before saving.
 
@@ -249,18 +271,14 @@ When opened from the Climate Editor, the dialog uses the editor's in-progress da
 
 ## Weather History
 
-Weather is automatically recorded in a per-zone history when it changes.
-
-### Storage
-
-History is nested: `{ [year]: { [month]: { [day]: { [zoneId]: weatherEntry } } } }`.
+Weather is recorded in a per-zone history when it changes.
 
 ### Behavior
 
 - History is recorded whenever weather is set (auto-generated or manual)
 - On time jumps that skip multiple days, history is backfilled for skipped dates
 - History is pruned to the configured **Weather History Days** (0–3650, default 365)
-- History can be queried via API or the `/weather` chat command
+- History can be queried via the `/weather` chat command
 
 ---
 
@@ -271,11 +289,11 @@ Each climate zone maintains independent weather state:
 - **Current weather**: Separate current conditions per zone
 - **Forecast plan**: Independent forecast chain per zone
 - **Weather history**: Zone-scoped entries
-- **No Zone sentinel**: Scenes with "No Zone" selected store a `"none"` sentinel that persists across reloads, disabling zone-based weather for that scene.
+- **No Zone**: Scenes with "No Zone" selected disable zone-based weather for that scene
 
 ### Batched Day Change
 
-When the day changes, all zones generate weather in a single batched operation. The `WEATHER_CHANGE` hook fires with `bulk: true` for these batch updates.
+When the day changes, all zones generate weather in a single batched operation.
 
 ### Zone-Scoped Plan Clearing
 
@@ -283,9 +301,21 @@ GM overrides only clear the forecast plan for the affected zone, leaving other z
 
 ---
 
+## Scene Integration
+
+Weather syncs to the active scene's climate zone when switching scenes. When a scene is activated:
+
+1. The scene's assigned climate zone is resolved
+2. If weather data exists for that zone, it applies immediately: sound, visual effects, and HUD update without delay
+3. If no weather data exists and **Auto-Generate Weather** is enabled, new weather is generated for the zone on the spot
+
+Players always see the correct weather for their active scene, even when different scenes use different climate zones.
+
+---
+
 ## Time-of-Day Color Shifting
 
-Climate zones can define hue values for dawn, dusk, and nighttime that shift scene environment lighting based on time of day.
+Climate zones define hue values for dawn, dusk, and nighttime that shift scene environment lighting based on time of day.
 
 ### Phases
 
@@ -314,25 +344,18 @@ Enable globally via **Settings Panel > Canvas tab > Sync Scene Ambience with Tim
 
 ## Moon Illumination
 
-Moons contribute illumination to nighttime scenes, reducing darkness.
+Moons add illumination to nighttime scenes, reducing darkness.
 
 ### How It Works
 
-- Each moon defines a `moonBrightnessMax` value (0–0.3) configurable in Calendar Editor > Moons tab
-- Illumination follows a cosine curve based on the moon's phase position — maximum at full moon, zero at new moon
-- Multiple moons sum their illumination contributions
-- Total illumination is capped at 0.3 to prevent nights from becoming too bright
+- Each moon has a maximum brightness set in Calendar Editor > Moons tab
+- Illumination follows phase: brightest at full moon, dark at new moon
+- Multiple moons combine their illumination (capped to prevent over-bright nights)
 - Moon color tinting applies colored light based on the moon's configured color
 
 ### Effect on Darkness
 
-Moon illumination reduces the nighttime darkness value:
-
-```
-Final darkness = Base darkness - Moon illumination (capped at 0.3)
-```
-
-Enable via **Settings Panel > Canvas tab > Moon Illumination**.
+Moon illumination reduces the nighttime darkness value. Enable via **Settings Panel > Canvas tab > Moon Illumination**.
 
 See [Moon Phases](Moon-Phases#moon-brightness) for configuration details.
 
@@ -340,16 +363,11 @@ See [Moon Phases](Moon-Phases#moon-brightness) for configuration details.
 
 ## HUD Particle Rendering
 
-The [HUD](HUD) dome displays animated weather effects. Each preset has a unique visual effect.
+The [HUD](HUD) dome displays animated weather effects with a unique visual per preset.
 
 ### Available Effects
 
-37 effects covering all built-in weather types. Each effect defines:
-
-- Visual style and color
-- Animation density and speed
-- Special behaviors (flash, tumble, vortex)
-- Sky color overrides
+37 effects covering all built-in weather types. Each defines a visual style, animation density and speed, special behaviors (flash, tumble, vortex), and sky color overrides.
 
 ### Wind and Precipitation Influence
 
@@ -358,13 +376,13 @@ The [HUD](HUD) dome displays animated weather effects. Each preset has a unique 
 
 ### Customization
 
-HUD visuals can be customized per-preset via the [Weather Editor](Weather-Editor), including animation density, speed, colors, and sky appearance.
+Customize HUD visuals per-preset via the [Weather Editor](Weather-Editor), including animation density, speed, colors, and sky appearance.
 
 ---
 
 ## Ambient Sound System
 
-Weather presets can trigger looping ambient audio through Foundry's environment audio context.
+Weather presets trigger looping ambient audio through Foundry's environment audio context.
 
 ### Categories
 
@@ -378,7 +396,7 @@ Nine sound categories covering all weather types with sound. See [Weather Preset
 - Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects
 - The global **Enable Weather FX** toggle stops all sounds when disabled
 - Sound assignments can be customized per-preset via the [Weather Editor](Weather-Editor)
-- Independent of FXMaster — works without any external modules
+- Independent of FXMaster. Works without any external modules
 
 ---
 
@@ -388,15 +406,15 @@ Weather and climate zones affect scene lighting when ambience sync is enabled.
 
 ### Darkness Penalty
 
-Weather presets apply additive darkness adjustments to scenes. See [Weather Presets](Weather-Presets) for per-preset darkness values.
+Weather presets apply additive darkness adjustments. See [Weather Presets](Weather-Presets) for per-preset values.
 
 ### Environment Lighting
 
-Weather presets and climate zones can override the full set of Foundry scene environment properties: hue, intensity, luminosity, saturation, and shadows per channel (day/night), plus the blend ambience (cycle) toggle. Weather takes precedence, with zone values as fallback. When no overrides apply, the scene's existing environment settings are preserved.
+Weather presets and climate zones override Foundry's scene environment properties: hue, intensity, luminosity, saturation, and shadows per channel (day/night), plus the blend ambience toggle. Weather takes precedence, with zone values as fallback. When nothing overrides, the scene's existing environment settings are preserved.
 
 ### Weather Tooltips
 
-Weather tooltips throughout the UI (HUD, MiniCal, BigCal, calendar day cells) display rich HTML with:
+Weather tooltips throughout the UI (HUD, MiniCal, BigCal, calendar day cells) display:
 
 - Weather icon, name, and temperature
 - Wind speed label and direction
@@ -408,12 +426,10 @@ Weather tooltips throughout the UI (HUD, MiniCal, BigCal, calendar day cells) di
 
 GMs can rename any weather preset on a per-zone basis. Aliases appear everywhere the preset name is displayed.
 
-Aliases are **zone-scoped** — each calendar + zone combination can have different names for the same preset. Configure aliases in the [Climate Editor](Climate-Editor) > Preset Overrides tab.
+Aliases are **zone-scoped**: each calendar + zone combination can have different names for the same preset. Configure aliases in the [Climate Editor](Climate-Editor) > Preset Overrides tab.
 
 ---
 
 ## For Developers
 
-See [API Reference](API-Reference#weather) for weather-related methods .
-
-See [Hooks](Hooks#calendariaweatherchange) for the `calendaria.weatherChange` hook.
+See [API Reference](API-Reference) and [Hooks](Hooks).

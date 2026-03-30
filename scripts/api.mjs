@@ -54,6 +54,7 @@ import {
   secondsBetween
 } from './notes/_module.mjs';
 import { TimeClock, TimeTracker } from './time/_module.mjs';
+import { isFogEnabled, isRevealed as fogIsRevealed, getRevealedRanges as fogGetRevealedRanges, revealRange as fogRevealRange, clearRanges as fogClearRanges } from './utils/fog-of-war.mjs';
 import {
   CalendariaSocket,
   DEFAULT_FORMAT_PRESETS,
@@ -2264,6 +2265,62 @@ export const CalendariaAPI = {
    */
   buildCinematicPayload(startTime, endTime) {
     return CinematicOverlay.buildPayload(startTime, endTime);
+  },
+
+  // ─── Fog of War ──────────────────────────────────────────────
+
+  /**
+   * Check whether Fog of War is enabled.
+   * @returns {boolean}
+   */
+  isFogEnabled() {
+    return isFogEnabled();
+  },
+
+  /**
+   * Check whether a specific date is revealed (visible to the current user).
+   * GMs always return true. Returns true if fog is disabled.
+   * @param {number} year - Year
+   * @param {number} month - Month (1-indexed)
+   * @param {number} day - Day (1-indexed)
+   * @param {string} [calendarId] - Calendar ID (defaults to active)
+   * @returns {boolean}
+   */
+  isDateRevealed(year, month, day, calendarId) {
+    return fogIsRevealed(year, month - 1, day - 1, calendarId);
+  },
+
+  /**
+   * Get all revealed date ranges for a calendar.
+   * @param {string} [calendarId] - Calendar ID (defaults to active)
+   * @returns {Array<{start: {year, month, day}, end: {year, month, day}}>} Revealed ranges (1-indexed)
+   */
+  getRevealedRanges(calendarId) {
+    const id = calendarId || CalendarRegistry.getActiveId();
+    return fogGetRevealedRanges(id).map((r) => ({
+      start: toPublic(r.start),
+      end: toPublic(r.end)
+    }));
+  },
+
+  /**
+   * Reveal a date range. GM only. Merges adjacent/overlapping ranges.
+   * @param {object} start - Start date {year, month (1-indexed), day (1-indexed)}
+   * @param {object} end - End date {year, month (1-indexed), day (1-indexed)}
+   * @param {string} [calendarId] - Calendar ID (defaults to active)
+   * @returns {Promise<void>}
+   */
+  async revealDateRange(start, end, calendarId) {
+    return fogRevealRange(toInternal(start), toInternal(end), calendarId);
+  },
+
+  /**
+   * Clear all revealed ranges for a calendar. GM only.
+   * @param {string} [calendarId] - Calendar ID (defaults to active)
+   * @returns {Promise<void>}
+   */
+  async clearRevealedRanges(calendarId) {
+    return fogClearRanges(calendarId);
   }
 };
 

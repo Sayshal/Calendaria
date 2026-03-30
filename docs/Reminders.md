@@ -48,12 +48,16 @@ Modal dialog requiring acknowledgment. Includes "Open Note" and "Dismiss" button
 
 ## Target Options
 
-| Target     | Recipients              |
-| ---------- | ----------------------- |
-| `all`      | All connected users     |
-| `gm`       | Only GM users           |
-| `author`   | Only the note creator   |
-| `specific` | Manually selected users |
+| Target     | Recipients                                          |
+| ---------- | --------------------------------------------------- |
+| `all`      | All connected users                                 |
+| `gm`       | Only GM users                                       |
+| `author`   | Only the note creator                               |
+| `viewers`  | Users with at least Observer permission on the note |
+| `specific` | Manually selected users                             |
+
+> [!NOTE]
+> The `viewers` target respects the note's visibility setting. If the note is hidden or secret, reminders are sent only to GM users regardless of individual permissions.
 
 ## How Reminders Work
 
@@ -91,4 +95,4 @@ For `toast` and `dialog` notification types, the primary GM broadcasts the remin
 
 ## For Developers
 
-See [Hooks](Hooks#calendariaeventtriggered) for the `calendaria.eventTriggered` hook that fires when reminders trigger.
+See [API Reference](API-Reference) and [Hooks](Hooks).

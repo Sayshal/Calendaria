@@ -1,6 +1,6 @@
 # Keybinds
 
-Calendaria provides configurable keyboard shortcuts for quick access to its widgets and controls.
+Keyboard shortcuts for Calendaria widgets and controls.
 
 ---
 
@@ -12,6 +12,9 @@ Calendaria provides configurable keyboard shortcuts for quick access to its widg
 | Toggle MiniCal     | Opens/closes MiniCal     | Unbound |
 | Toggle HUD         | Opens/closes HUD         | Alt+C   |
 | Toggle Time Keeper | Opens/closes Time Keeper | Unbound |
+| Toggle Sun Dial    | Opens/closes Sun Dial    | Unbound |
+| Toggle Chronicle   | Opens/closes Chronicle   | Unbound |
+| Toggle Note Viewer | Opens/closes Note Viewer | Unbound |
 | Toggle Stop Watch  | Opens/closes Stop Watch  | Unbound |
 
 ---

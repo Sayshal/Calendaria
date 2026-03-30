@@ -8,7 +8,7 @@ Calendaria integrates with the [FXMaster](https://foundryvtt.com/packages/fxmast
 
 Each weather preset can map to an FXMaster effect. When weather changes, Calendaria sends the mapped effect to FXMaster for rendering on the canvas.
 
-- If FXMaster is not installed or inactive, canvas effects are skipped — the HUD dome effects and ambient sound still work independently
+- If FXMaster is not installed or inactive, canvas effects are skipped. The HUD dome effects and ambient sound still work independently
 - FXMaster effects can be overridden per-preset in the [Weather Editor](Weather-Editor) or temporarily in the [Weather Picker](Weather-Picker)
 - The effect dropdowns in Weather Editor and Weather Picker only show effects available to your installation
 
@@ -22,7 +22,7 @@ Some canvas effects are enhanced or only available with [FXMaster+](https://foun
 
 ## Wind Direction Passthrough
 
-Calendaria passes the current wind direction to FXMaster, allowing directional weather effects like angled rain or wind-blown snow.
+Calendaria passes the current wind direction to FXMaster, so effects like rain and snow angle with the wind.
 
 ---
 
@@ -41,17 +41,6 @@ All 35 built-in presets include tuned density and speed defaults. Saved custom p
 ## Global Disable
 
 The **Enable Weather FX** world setting (Settings Panel > Weather tab > Weather Generation fieldset) is a global toggle. When disabled, all FXMaster particle effects and weather sounds are stopped. The per-scene "Disable Weather FX" flag still overrides independently.
-
----
-
-## Settings
-
-Found in **Settings Panel > Weather tab > FXMaster Integration**:
-
-| Setting           | Description                                         | Default |
-| ----------------- | --------------------------------------------------- | ------- |
-| **Top-Down Mode** | Render FXMaster effects from a top-down perspective | `false` |
-| **Below Tokens**  | Render weather effects below token layer            | `false` |
 
 ---
 
@@ -82,7 +71,7 @@ Calendaria includes a **native ambient sound system** independent of FXMaster. W
 
 ### Crossfade Behavior
 
-When weather changes, the old sound fades out over 2 seconds while the new sound fades in simultaneously. This creates smooth audio transitions without abrupt cuts.
+When weather changes, the old sound fades out over 2 seconds while the new sound fades in simultaneously, preventing abrupt audio cuts.
 
 ### Controls
 
