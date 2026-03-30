@@ -14,6 +14,7 @@ import {
   COLOR_DEFINITIONS,
   COMPONENT_CATEGORIES,
   DEFAULT_COLORS,
+  THEME_PRESETS,
   DEFAULT_FORMAT_PRESETS,
   LOCATION_DEFAULTS,
   applyCustomColors,
@@ -1543,7 +1544,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const forcedTheme = getForcedTheme();
     if (context.isGM) {
       const forceTheme = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME) || 'none';
-      const forcePresets = ['dark', 'light', 'highContrast', 'parchment', 'logbook', 'arcane', 'scifi']
+      const forcePresets = Object.keys(THEME_PRESETS)
         .map((v) => ({ value: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
         .sort((a, b) => a.label.localeCompare(b.label));
       context.forceThemeOptions = [
@@ -1555,7 +1556,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.themeForced = !!forcedTheme;
     context.forcedThemeName = forcedTheme ? localize(`CALENDARIA.ThemeEditor.Presets.${forcedTheme.charAt(0).toUpperCase() + forcedTheme.slice(1)}`) || forcedTheme : '';
     const displayMode = forcedTheme || themeMode;
-    const modePresets = ['dark', 'light', 'highContrast', 'parchment', 'logbook', 'arcane', 'scifi']
+    const modePresets = Object.keys(THEME_PRESETS)
       .map((v) => ({ key: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
       .sort((a, b) => a.label.localeCompare(b.label));
     context.themeModes = [...modePresets, { key: 'custom', label: localize('CALENDARIA.Common.Custom'), selected: displayMode === 'custom' }];

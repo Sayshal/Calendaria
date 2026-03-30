@@ -7,7 +7,7 @@
 import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import { NoteManager, invalidatePresetCache } from './notes/_module.mjs';
-import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
+import { THEME_PRESETS, hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
@@ -1025,7 +1025,7 @@ export default class CalendariaSettings {
         name: 'Theme Mode',
         scope: 'user',
         config: false,
-        type: new StringField({ initial: 'dark', choices: ['dark', 'light', 'highContrast', 'parchment', 'logbook', 'arcane', 'scifi', 'custom'] })
+        type: new StringField({ initial: 'dark', choices: [...Object.keys(THEME_PRESETS), 'custom'] })
       },
       [SETTINGS.FORCE_THEME]: {
         name: 'CALENDARIA.Settings.ForceTheme.Name',
@@ -1035,13 +1035,7 @@ export default class CalendariaSettings {
         type: new StringField({
           choices: {
             none: 'CALENDARIA.Settings.ForceTheme.None',
-            dark: 'CALENDARIA.ThemeEditor.Presets.Dark',
-            light: 'CALENDARIA.Common.Light',
-            highContrast: 'CALENDARIA.ThemeEditor.Presets.HighContrast',
-            parchment: 'CALENDARIA.ThemeEditor.Presets.Parchment',
-            logbook: 'CALENDARIA.ThemeEditor.Presets.Logbook',
-            arcane: 'CALENDARIA.Common.Arcane',
-            scifi: 'CALENDARIA.ThemeEditor.Presets.Scifi',
+            ...Object.fromEntries(Object.entries(THEME_PRESETS).map(([k, v]) => [k, v.name])),
             custom: 'CALENDARIA.Common.Custom'
           },
           initial: 'none'
