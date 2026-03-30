@@ -983,6 +983,16 @@
         }
       }
 
+      prose-mirror {
+        display: flex;
+        flex-direction: column;
+
+        .editor-container {
+          min-height: 15rem;
+          overflow-y: auto;
+        }
+      }
+
       .empty-editor {
         display: flex;
         justify-content: center;

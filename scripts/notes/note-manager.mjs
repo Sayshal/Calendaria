@@ -15,6 +15,7 @@ import {
   getDefaultNoteData,
   getOccurrencesInRange,
   getPlayerUsablePresets,
+  getPresetContentTemplate,
   getPresetDefinition,
   getRecurrenceDescription,
   isRecurringMatch,
@@ -374,6 +375,7 @@ export default class NoteManager {
       const result = await this.#resolvePresetForNewNote(sanitized);
       if (result === false) return null;
     }
+    if (!content && sanitized.categories?.length) content = getPresetContentTemplate(sanitized.categories) || '';
     if (!calendarId) {
       const activeCalendar = CalendarManager.getActiveCalendar();
       if (!activeCalendar?.metadata?.id) throw new Error('No active calendar found');

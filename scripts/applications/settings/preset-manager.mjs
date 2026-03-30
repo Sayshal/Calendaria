@@ -40,7 +40,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    main: { template: `modules/${MODULE.ID}/templates/applications/settings/preset-manager.hbs`, scrollable: [''] },
+    main: { template: `modules/${MODULE.ID}/templates/applications/settings/preset-manager.hbs`, scrollable: ['.preset-editor-panel'] },
     footer: { template: `modules/${MODULE.ID}/templates/applications/settings/preset-manager-footer.hbs` }
   };
 
@@ -55,6 +55,10 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     if (!this._presets) {
       this._presets = structuredClone(getAllPresetsIncludingHidden());
+      for (const p of this._presets) {
+        if (!p.defaults) p.defaults = {};
+        if (!('content' in p.defaults)) p.defaults.content = null;
+      }
       this._originalPresets = structuredClone(this._presets);
     }
     if (!this._selectedId && this._presets.length) this._selectedId = this._presets[0].id;
@@ -259,7 +263,16 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       rejectClose: false
     });
     if (!confirmed) return;
-    for (const cat of this._presets) if (cat.builtin && cat.hidden) cat.hidden = false;
+    const seeds = getBuiltinPresetSeeds();
+    for (const cat of this._presets) {
+      if (!cat.builtin || !cat.hidden) continue;
+      cat.hidden = false;
+      const seed = seeds.find((s) => s.id === cat.id);
+      if (seed?.defaults?.content && !cat.defaults?.content) {
+        cat.defaults = cat.defaults || {};
+        cat.defaults.content = seed.defaults.content;
+      }
+    }
     this.render();
   }
 
@@ -362,6 +375,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     cat.defaults.color = cat.defaults.color ?? null;
     cat.defaults.icon = cat.defaults.icon ?? null;
     cat.defaults.owners = cat.defaults.owners ?? [];
+    const rawContent = raw.content?.trim();
+    cat.defaults.content = rawContent && rawContent !== '<p></p>' ? rawContent : null;
     this.render();
   }
 
@@ -468,7 +483,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           hasDuration: seedDefaults.hasDuration ?? null,
           duration: seedDefaults.duration ?? null,
           macro: null,
-          owners: []
+          owners: [],
+          content: null
         };
       } else {
         cat.defaults = {
@@ -482,10 +498,14 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           hasDuration: null,
           duration: null,
           macro: null,
-          owners: []
+          owners: [],
+          content: null
         };
       }
       cat.overrides = { displayStyle: null, visibility: null };
+    } else if (section === 'content') {
+      cat.defaults = cat.defaults || {};
+      cat.defaults.content = seed?.defaults?.content ?? null;
     }
     this.render();
   }
@@ -560,7 +580,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
             hasDuration: raw.defaults?.hasDuration ?? null,
             duration: raw.defaults?.duration ?? null,
             macro: raw.defaults?.macro ?? null,
-            owners: raw.defaults?.owners ?? []
+            owners: raw.defaults?.owners ?? [],
+            content: raw.defaults?.content ?? null
           },
           overrides: {
             displayStyle: raw.overrides?.displayStyle ?? null,

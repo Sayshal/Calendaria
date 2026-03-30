@@ -57,6 +57,19 @@ The Defaults fieldset defines values that apply when a note is created with this
 
 Any field set to "No Default" is left to the user's choice at note creation time.
 
+---
+
+## Content Template
+
+The Content Template fieldset provides an optional editor for defining default note content. When a note is created with this preset and no content is provided, the template HTML is pre-filled into the note body.
+
+- Leave the editor empty for no template
+- Use the reset button to restore the built-in seed template (if one exists for this preset)
+- Content templates only apply to **new** notes — they do not affect existing notes
+
+> [!TIP]
+> Content templates are useful for standardizing session logs, quest write-ups, or any recurring note format. The template is inserted as the note's initial content and can be freely edited afterward.
+
 ### How Overrides Work
 
 - When displaying notes on the calendar, overridden display styles and visibility take effect

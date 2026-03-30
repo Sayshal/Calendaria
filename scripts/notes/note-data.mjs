@@ -238,7 +238,20 @@ export function getRepeatOptions(selected = 'never') {
  * @returns {object} Empty defaults with all null values
  */
 function emptyDefaults() {
-  return { allDay: null, displayStyle: null, visibility: null, color: null, icon: null, reminderType: null, reminderOffset: null, hasDuration: null, duration: null, macro: null, owners: [] };
+  return {
+    allDay: null,
+    displayStyle: null,
+    visibility: null,
+    color: null,
+    icon: null,
+    reminderType: null,
+    reminderOffset: null,
+    hasDuration: null,
+    duration: null,
+    macro: null,
+    owners: [],
+    content: null
+  };
 }
 
 /**
@@ -257,7 +270,18 @@ function emptyOverrides() {
 export function getBuiltinPresetSeeds() {
   return [
     { id: 'quest', label: localize('CALENDARIA.Preset.Quest'), color: '#4a9eff', icon: 'fas fa-scroll', defaults: { displayStyle: 'icon' } },
-    { id: 'session', label: localize('CALENDARIA.Preset.Session'), color: '#51cf66', icon: 'fas fa-users', defaults: { displayStyle: 'icon', allDay: true } },
+    {
+      id: 'session',
+      label: localize('CALENDARIA.Preset.Session'),
+      color: '#51cf66',
+      icon: 'fas fa-users',
+      defaults: {
+        displayStyle: 'icon',
+        allDay: true,
+        content:
+          '<p><strong>Recap</strong></p><p></p><p><strong>Key Events</strong></p><p></p><p><strong>NPCs Met</strong></p><p></p><p><strong>Loot &amp; Rewards</strong></p><p></p><p><strong>Notes for Next Session</strong></p><p></p>'
+      }
+    },
     { id: 'meeting', label: localize('CALENDARIA.Preset.Meeting'), color: '#845ef7', icon: 'fas fa-handshake', defaults: { reminderType: 'toast', reminderOffset: 1 } },
     { id: 'birthday', label: localize('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
     { id: 'deadline', label: localize('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
@@ -440,6 +464,21 @@ export function getPresetDefaults(presetIds) {
     for (const [key, val] of Object.entries(d)) if (val !== null && val !== undefined && !(Array.isArray(val) && val.length === 0)) merged[key] = val;
   }
   return merged;
+}
+
+/**
+ * Get the content template from presets (first non-null content wins).
+ * @param {string[]} presetIds  Array of preset IDs
+ * @returns {string|null}  Content template HTML or null
+ */
+export function getPresetContentTemplate(presetIds) {
+  if (!presetIds?.length) return null;
+  const allCats = getAllPresets();
+  for (const id of presetIds) {
+    const cat = allCats.find((c) => c.id === id);
+    if (cat?.defaults?.content) return cat.defaults.content;
+  }
+  return null;
 }
 
 /**

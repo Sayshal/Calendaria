@@ -86,6 +86,21 @@
         {{/each}}
       </fieldset>
 
+      {{!-- Content Template --}}
+      <fieldset data-section="content">
+        <legend data-tooltip="{{localize 'CALENDARIA.PresetManager.ContentTemplateHint'}}">
+          {{localize "CALENDARIA.PresetManager.ContentTemplate"}}
+          <button type="button" class="reset-section" data-action="resetSection" data-section="content" data-tooltip
+            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+              class="fas fa-undo"></i></button>
+        </legend>
+        <div class="form-group stacked">
+          <p class="hint">{{localize "CALENDARIA.PresetManager.ContentTemplateFieldHint"}}</p>
+          <prose-mirror name="selected.defaults.content" value="{{selected.defaults.content}}"
+            aria-label="{{localize 'CALENDARIA.PresetManager.ContentTemplate'}}" compact></prose-mirror>
+        </div>
+      </fieldset>
+
     {{else}}
       <div class="empty-editor">
         <p>{{localize "CALENDARIA.PresetManager.NoSelection"}}</p>

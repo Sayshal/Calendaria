@@ -59,7 +59,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
 
   /**
    * Get the current viewed date, defaulting to today on this calendar.
-   * @returns {{year: number, month: number, dayOfMonth?: number}} The viewed date
+   * @returns {{year: number, month: number, dayOfMonth: number}} The viewed date
    */
   get viewedDate() {
     if (this.#viewedDate) return this.#viewedDate;

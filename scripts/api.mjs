@@ -32,6 +32,7 @@ import { FestivalManager } from './festivals/_module.mjs';
 import { playStandaloneFX, stopAllFX } from './integrations/_module.mjs';
 import {
   NoteManager,
+  addCustomPreset,
   addDays,
   addHours,
   addMinutes,
@@ -43,6 +44,7 @@ import {
   createGroup,
   dayOfWeek,
   daysBetween,
+  deleteCustomPreset,
   getNextOccurrences,
   getOccurrencesInRange,
   hoursBetween,
@@ -51,10 +53,10 @@ import {
   isValidDate,
   minutesBetween,
   monthsBetween,
-  secondsBetween
+  secondsBetween,
+  updatePreset
 } from './notes/_module.mjs';
 import { TimeClock, TimeTracker } from './time/_module.mjs';
-import { isFogEnabled, isRevealed as fogIsRevealed, getRevealedRanges as fogGetRevealedRanges, revealRange as fogRevealRange, clearRanges as fogClearRanges } from './utils/fog-of-war.mjs';
 import {
   CalendariaSocket,
   DEFAULT_FORMAT_PRESETS,
@@ -85,6 +87,7 @@ import {
   resolveFormatString,
   timeSince
 } from './utils/_module.mjs';
+import { clearRanges as fogClearRanges, getRevealedRanges as fogGetRevealedRanges, isRevealed as fogIsRevealed, revealRange as fogRevealRange, isFogEnabled } from './utils/fog-of-war.mjs';
 import { WeatherManager, playStandaloneSound, stopStandaloneSound } from './weather/_module.mjs';
 
 /**
@@ -1000,6 +1003,47 @@ export const CalendariaAPI = {
    */
   getPresets() {
     return NoteManager.getPresetDefinitions();
+  },
+
+  /**
+   * Add a custom note preset.
+   * @param {object} options - Preset options
+   * @param {string} options.label - Display name
+   * @param {string} [options.color] - Hex color (default '#868e96')
+   * @param {string} [options.icon] - FontAwesome icon class (default 'fas fa-tag')
+   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, hasDuration, duration, macro, content }
+   * @returns {Promise<object>} The created preset
+   */
+  async addPreset({ label, color, icon, defaults } = {}) {
+    if (!label) throw new Error('Preset label is required');
+    const preset = await addCustomPreset(label, color, icon);
+    if (defaults && Object.keys(defaults).length) await updatePreset(preset.id, { defaults });
+    return preset;
+  },
+
+  /**
+   * Update a note preset.
+   * @param {string} presetId - Preset ID
+   * @param {object} updates - Properties to update
+   * @param {string} [updates.label] - New display name
+   * @param {string} [updates.color] - New hex color
+   * @param {string} [updates.icon] - New FontAwesome icon class
+   * @param {boolean} [updates.playerUsable] - Allow non-GM users
+   * @param {object} [updates.defaults] - Updated default values, merged with existing (includes content template)
+   * @param {object} [updates.overrides] - Updated override values (merged with existing)
+   * @returns {Promise<object|null>} Updated preset or null if not found
+   */
+  async updatePreset(presetId, updates) {
+    return updatePreset(presetId, updates);
+  },
+
+  /**
+   * Delete a custom note preset.
+   * @param {string} presetId - Preset ID to delete
+   * @returns {Promise<boolean>} True if deleted
+   */
+  async deletePreset(presetId) {
+    return deleteCustomPreset(presetId);
   },
 
   /**

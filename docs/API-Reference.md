@@ -1396,7 +1396,7 @@ const note = await CALENDARIA.api.createNote({
 | Parameter               | Type                    | Description                                                                                             |
 | ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
 | `options.name`          | `string`                | Note title                                                                                              |
-| `options.content`       | `string`                | Note content (HTML)                                                                                     |
+| `options.content`       | `string`                | Note content (HTML). If omitted and categories are set, the preset's content template is used.          |
 | `options.startDate`     | `object`                | Start date `{year, month, day, hour?, minute?}`                                                         |
 | `options.endDate`       | `object`                | End date (optional)                                                                                     |
 | `options.allDay`        | `boolean`               | All-day event (default: `true`)                                                                         |
@@ -1649,6 +1649,83 @@ const presets = CALENDARIA.api.getPresets();
 ```
 
 **Returns:** `object[]` - Array of preset definitions.
+
+---
+
+### addPreset(options)
+
+Add a custom note preset. GM only.
+
+```javascript
+const preset = await CALENDARIA.api.addPreset({
+  label: 'Session Log',
+  color: '#51cf66',
+  icon: 'fas fa-book-open',
+  defaults: {
+    allDay: true,
+    displayStyle: 'icon',
+    content: '<p><strong>Recap</strong></p><p></p><p><strong>Key Events</strong></p><p></p>'
+  }
+});
+```
+
+| Parameter                         | Type      | Description                                       |
+| --------------------------------- | --------- | ------------------------------------------------- |
+| `options.label`                   | `string`  | Display name (required)                           |
+| `options.color`                   | `string`  | Hex color                                         |
+| `options.icon`                    | `string`  | FontAwesome icon class                            |
+| `options.defaults`                | `object`  | Default values for notes created with this preset |
+| `options.defaults.allDay`         | `boolean` | Default all-day setting                           |
+| `options.defaults.displayStyle`   | `string`  | `'icon'`, `'pip'`, or `'banner'`                  |
+| `options.defaults.visibility`     | `string`  | `'visible'`, `'hidden'`, or `'secret'`            |
+| `options.defaults.reminderType`   | `string`  | `'toast'`, `'chat'`, or `'dialog'`                |
+| `options.defaults.reminderOffset` | `number`  | Reminder offset in hours                          |
+| `options.defaults.hasDuration`    | `boolean` | Default multi-day setting                         |
+| `options.defaults.duration`       | `number`  | Default duration in days                          |
+| `options.defaults.macro`          | `string`  | Macro ID to execute                               |
+| `options.defaults.content`        | `string`  | HTML content template pre-filled into new notes   |
+
+**Returns:** `Promise<object>` - The created preset.
+
+---
+
+### updatePreset(presetId, updates)
+
+Update a note preset's properties.
+
+```javascript
+await CALENDARIA.api.updatePreset('session', {
+  defaults: { content: '<p><strong>Session Notes</strong></p><p></p>' }
+});
+```
+
+| Parameter              | Type      | Description                            |
+| ---------------------- | --------- | -------------------------------------- |
+| `presetId`             | `string`  | Preset ID                              |
+| `updates.label`        | `string`  | New display name                       |
+| `updates.color`        | `string`  | New hex color                          |
+| `updates.icon`         | `string`  | New FontAwesome icon class             |
+| `updates.playerUsable` | `boolean` | Allow non-GM users                     |
+| `updates.defaults`     | `object`  | Default values (merged with existing)  |
+| `updates.overrides`    | `object`  | Override values (merged with existing) |
+
+**Returns:** `Promise<object|null>` - Updated preset or null if not found.
+
+---
+
+### deletePreset(presetId)
+
+Delete a custom note preset.
+
+```javascript
+await CALENDARIA.api.deletePreset('my-custom-preset');
+```
+
+| Parameter  | Type     | Description         |
+| ---------- | -------- | ------------------- |
+| `presetId` | `string` | Preset ID to delete |
+
+**Returns:** `Promise<boolean>` - True if deleted.
 
 ---
 
