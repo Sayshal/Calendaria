@@ -6,15 +6,13 @@
         <div class="weekday-header{{#if isRestDay}} rest-day{{/if}}">{{name}}</div>
       {{/each}}
     </div>
-
     <div class="calendar-days">
       {{#each calendarData.weeks}}
         {{#if this.isIntercalaryRow}}
-          {{!-- Intercalary row: full width, centered, no weekday alignment --}}
           <div class="calendar-week intercalary-row">
             {{#each this.days}}
               <div
-                class="calendar-day intercalary festival-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}"
+                class="calendar-day intercalary festival-day{{#if isFogged}} fogged{{/if}}{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}"
                 data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}" data-action="selectDay"
                 data-tooltip-html="{{{dayTooltip}}}" {{#if festivalColor}}style="--festival-color: {{festivalColor}}"
                 {{/if}}>
@@ -23,7 +21,8 @@
                   {{#if moonPhases}}
                     <span class="day-moons">
                       {{#each moonPhases.visible}}
-                        <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}
+                        <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
+                          aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}" {{/if}}
                           data-action="moonClick" data-moon-slot="{{@index}}" data-moon-name="{{moonName}}">
                           <img src="{{icon}}" alt="{{phaseName}}">
                         </span>
@@ -35,37 +34,49 @@
                     </span>
                   {{/if}}
                 </div>
-                {{#if weatherIcon}}
-                  <div class="day-weather-pill{{#if isForecast}} forecast{{/if}}"
-                    data-tooltip-html="{{{weatherTooltipHtml}}}">
-                    <i class="fas {{weatherIcon}}" style="color: {{weatherColor}}"></i>
-                    {{#if weatherTemp}}<span class="pill-temp">{{weatherTemp}}</span>{{/if}}
-                    {{#if weatherWindDir}}<span class="pill-wind">{{weatherWindDir}}</span>{{/if}}
-                  </div>
-                {{/if}}
-                <div class="day-notes">
-                  {{#each notes}}
-                    <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
-                      data-note-id="{{id}}">
-                      {{#if (eq system.iconType "fontawesome")}}
-                        <i class="{{system.icon}}" style="color: {{system.color}}"></i>
-                      {{else}}
-                        <img src="{{system.icon}}" alt="{{name}}" style="width: 1rem; height: 1rem;">
-                      {{/if}}
+                <div class="day-bottom">
+                  {{#if weatherIcon}}
+                    <div class="day-weather-pill{{#if isForecast}} forecast{{/if}}"
+                      data-tooltip-html="{{{weatherTooltipHtml}}}">
+                      <i class="fas {{weatherIcon}}" style="color: {{weatherColor}}"></i>
+                      {{#if weatherTemp}}<span class="pill-temp">{{weatherTemp}}</span>{{/if}}
+                      {{#if weatherWindDir}}<span class="pill-wind">{{weatherWindDir}}</span>{{/if}}
                     </div>
-                  {{/each}}
-                  {{#if ../../canAddNotes}}
-                    <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                      data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
-                      <i class="fas fa-plus"></i>
-                    </button>
                   {{/if}}
+                  <div class="day-notes">
+                    {{#each notes}}
+                      {{#if (eq displayStyle "pip")}}
+                        <div class="note-pip" data-tooltip aria-label="{{name}}" data-action="editNote"
+                          data-note-id="{{id}}" style="background-color: {{color}};"></div>
+                      {{else if (eq displayStyle "banner")}}
+                        <div class="note-banner" data-tooltip aria-label="{{name}}" data-action="editNote"
+                          data-note-id="{{id}}" style="background-color: {{color}};">
+                          <span class="note-banner-text">{{name}}</span>
+                        </div>
+                      {{else}}
+                        <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
+                          data-note-id="{{id}}">
+                          {{#if (eq iconType "fontawesome")}}
+                            <i class="{{icon}}" style="color: {{color}}"></i>
+                          {{else}}
+                            <img src="{{icon}}" alt="{{name}}" style="width: 1rem; height: 1rem;">
+                          {{/if}}
+                        </div>
+                      {{/if}}
+                    {{/each}}
+                    {{#if ../../canAddNotes}}
+                      <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
+                        data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
+                        aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    {{/if}}
+                  </div>
                 </div>
               </div>
             {{/each}}
           </div>
         {{else}}
-          {{!-- Regular week row --}}
           <div class="calendar-week"
             style="grid-template-columns: repeat({{../calendarData.daysInWeek}}, var(--calendaria-day-size));">
             {{#each this}}
@@ -78,23 +89,25 @@
                 </div>
               {{else}}
                 <div
-                  class="calendar-day{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
+                  class="calendar-day{{#if isFogged}} fogged{{/if}}{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if notes.length}} has-notes{{/if}}{{#if isOddDay}} odd-day{{/if}}{{#if isFestival}} festival-day{{/if}}"
                   data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}" data-action="selectDay"
                   data-tooltip-html="{{{dayTooltip}}}" {{#if festivalColor}}style="--festival-color: {{festivalColor}}"
                   {{/if}}>
                   <div class="day-number">
                     {{day}}
                     {{#if isFestival}}
-                      <i class="{{#if festivalIcon}}{{festivalIcon}}{{else}}fas fa-star{{/if}} festival-icon"
-                        data-tooltip aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}"></i>
+                      <span class="festival-icon-wrapper" {{#if festivalNoteId}}data-action="editNote"
+                        data-note-id="{{festivalNoteId}}" {{/if}} data-tooltip
+                        aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}">
+                        <i class="{{#if festivalIcon}}{{festivalIcon}}{{else}}fas fa-star{{/if}} festival-icon"></i>
+                      </span>
                     {{/if}}
                     {{#if moonPhases}}
                       <span class="day-moons">
                         {{#each moonPhases.visible}}
                           <span class="moon-phase{{#if color}} tinted{{/if}}" data-tooltip
                             aria-label="{{moonName}}: {{phaseName}}" {{#if color}}style="--moon-color: {{color}}"
-                            {{/if}} data-action="moonClick" data-moon-slot="{{@index}}"
-                            data-moon-name="{{moonName}}">
+                            {{/if}} data-action="moonClick" data-moon-slot="{{@index}}" data-moon-name="{{moonName}}">
                             <img src="{{icon}}" alt="{{phaseName}}">
                           </span>
                         {{/each}}
@@ -105,51 +118,67 @@
                       </span>
                     {{/if}}
                   </div>
-                  {{#if weatherIcon}}
-                    <div class="day-weather-pill{{#if isForecast}} forecast{{/if}}"
-                      data-tooltip-html="{{{weatherTooltipHtml}}}">
-                      <i class="fas {{weatherIcon}}" style="color: {{weatherColor}}"></i>
-                      {{#if weatherTemp}}<span class="pill-temp">{{weatherTemp}}</span>{{/if}}
-                      {{#if weatherWindDir}}<span class="pill-wind">{{weatherWindDir}}</span>{{/if}}
-                    </div>
-                  {{/if}}
-                  <div class="day-notes">
-                    {{#each notes}}
-                      <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
-                        data-note-id="{{id}}">
-                        {{#if (eq system.iconType "fontawesome")}}
-                          <i class="{{system.icon}}" style="color: {{system.color}}"></i>
-                        {{else}}
-                          <img src="{{system.icon}}" alt="{{name}}" style="width: 1rem; height: 1rem;">
-                        {{/if}}
+                  <div class="day-bottom">
+                    {{#if weatherIcon}}
+                      <div class="day-weather-pill{{#if isForecast}} forecast{{/if}}"
+                        data-tooltip-html="{{{weatherTooltipHtml}}}">
+                        <i class="fas {{weatherIcon}}" style="color: {{weatherColor}}"></i>
+                        {{#if weatherTemp}}<span class="pill-temp">{{weatherTemp}}</span>{{/if}}
+                        {{#if weatherWindDir}}<span class="pill-wind">{{weatherWindDir}}</span>{{/if}}
                       </div>
-                    {{/each}}
-                    {{#if ../../canAddNotes}}
-                      <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
-                        data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
-                        aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
-                        <i class="fas fa-plus"></i>
-                      </button>
                     {{/if}}
+                    <div class="day-notes">
+                      <div class="day-notes-items">
+                        {{#each notes}}
+                          {{#if (eq displayStyle "pip")}}
+                            <div class="note-pip" data-tooltip aria-label="{{name}}" data-action="editNote"
+                              data-note-id="{{id}}" style="background-color: {{color}};"></div>
+                          {{else if (eq displayStyle "banner")}}
+                            <div class="note-banner" data-tooltip aria-label="{{name}}" data-action="editNote"
+                              data-note-id="{{id}}" style="background-color: {{color}};">
+                              <span class="note-banner-text">{{name}}</span>
+                            </div>
+                          {{else}}
+                            <div class="note-indicator" data-tooltip aria-label="{{name}}" data-action="editNote"
+                              data-note-id="{{id}}">
+                              {{#if (eq iconType "fontawesome")}}
+                                <i class="{{icon}}" style="color: {{color}}"></i>
+                              {{else}}
+                                <img src="{{icon}}" alt="{{name}}" style="width: 1rem; height: 1rem;">
+                              {{/if}}
+                            </div>
+                          {{/if}}
+                        {{/each}}
+                      </div>
+                      {{#if ../../canAddNotes}}
+                        <button type="button" class="add-note-btn" data-action="addNote" data-year="{{year}}"
+                          data-month="{{month}}" data-day="{{dayOfMonth}}" data-tooltip
+                          aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      {{/if}}
+                    </div>
                   </div>
                 </div>
               {{/if}}
             {{/each}}
-
             {{#each multiDayEvents}}
-              <div class="event-bar{{#if isContinuation}} continuation{{/if}}"
-                style="left: {{left}}%; width: {{width}}%; top: calc(1.625rem + {{row}} * 1.625rem); background-color: {{color}};"
-                data-tooltip aria-label="{{name}}" data-action="editNote" data-note-id="{{id}}">
-                {{#if isContinuation}}
-                  <i class="fas fa-angles-right event-bar-continuation"></i>
-                {{else}}
-                  {{#if (eq iconType "fontawesome")}}
-                    <i class="{{icon}} event-bar-icon"></i>
-                  {{else if icon}}
-                    <img src="{{icon}}" alt="{{name}}" class="event-bar-icon">
+              <div
+                class="event-bar{{#if isSecondary}} event-bar-secondary{{/if}}{{#if isContinuation}} continuation{{/if}}{{#if showBookends}}{{#if isStart}} bookend-start{{/if}}{{#if isEnd}} bookend-end{{/if}}{{/if}}"
+                style="left: {{left}}%; width: {{width}}%; top: {{top}}rem; background-color: {{color}};" data-tooltip
+                aria-label="{{name}}" data-action="editNote" data-note-id="{{id}}">
+                {{#unless isSecondary}}
+                  {{#if isContinuation}}
+                    <i class="fas fa-angles-right event-bar-continuation"></i>
+                  {{else}}
+                    {{#if (eq iconType "fontawesome")}}
+                      <i class="{{icon}} event-bar-icon"></i>
+                    {{else if icon}}
+                      <img src="{{icon}}" alt="{{name}}" class="event-bar-icon">
+                    {{/if}}
                   {{/if}}
-                {{/if}}
-                <span class="event-bar-text">{{name}}</span>
+                  <span class="event-bar-text">{{name}}</span>
+                {{/unless}}
               </div>
             {{/each}}
           </div>

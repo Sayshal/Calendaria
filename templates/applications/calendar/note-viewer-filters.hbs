@@ -1,0 +1,90 @@
+<div class="note-viewer-filters">
+  <div class="filter-group">
+    <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.Preset"}}</label>
+    <multi-select class="filter-preset">
+      <option value="__none__" {{#if selectedNone}}selected{{/if}}>
+        {{localize "CALENDARIA.NoteViewer.Filter.Uncategorized"}}
+      </option>
+      {{#each presets}}
+        <option value="{{this.id}}" {{#if this.selected}}selected{{/if}} data-color="{{this.color}}">{{this.label}}
+        </option>
+      {{/each}}
+    </multi-select>
+  </div>
+
+  {{#if isGM}}
+    <div class="filter-group">
+      <label class="filter-label">{{localize "CALENDARIA.Common.Visibility"}}</label>
+      <select class="filter-select filter-visibility">
+        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.All"}}
+        </option>
+        <option value="visible" {{#if (eq visibility "visible")}}selected{{/if}}>
+          {{localize "CALENDARIA.Note.Visibility.Visible"}}
+        </option>
+        <option value="hidden" {{#if (eq visibility "hidden")}}selected{{/if}}>
+          {{localize "CALENDARIA.Common.Hidden"}}
+        </option>
+        <option value="secret" {{#if (eq visibility "secret")}}selected{{/if}}>
+          {{localize "CALENDARIA.Note.Visibility.Secret"}}
+        </option>
+      </select>
+    </div>
+  {{/if}}
+
+  <div class="filter-group">
+    <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.SortBy"}}</label>
+    <select class="filter-select filter-sort">
+      <option value="dateAsc" {{#if (eq sortBy "dateAsc")}}selected{{/if}}>
+        {{localize "CALENDARIA.NoteViewer.Sort.DateAsc"}}
+      </option>
+      <option value="dateDesc" {{#if (eq sortBy "dateDesc")}}selected{{/if}}>
+        {{localize "CALENDARIA.NoteViewer.Sort.DateDesc"}}
+      </option>
+      <option value="nameAsc" {{#if (eq sortBy "nameAsc")}}selected{{/if}}>
+        {{localize "CALENDARIA.NoteViewer.Sort.NameAsc"}}
+      </option>
+      <option value="nameDesc" {{#if (eq sortBy "nameDesc")}}selected{{/if}}>
+        {{localize "CALENDARIA.NoteViewer.Sort.NameDesc"}}
+      </option>
+    </select>
+  </div>
+
+  {{#if isGM}}
+    <div class="filter-group">
+      <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.Author"}}</label>
+      <select class="filter-select filter-author">
+        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.All"}}
+        </option>
+        {{#each authors}}
+          <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+        {{/each}}
+      </select>
+    </div>
+  {{/if}}
+
+  <div class="filter-group filter-checkboxes">
+    <label class="filter-checkbox">
+      <input type="checkbox" class="filter-all-day" {{#if allDay}}checked{{/if}} />
+      {{localize "CALENDARIA.Common.AllDay"}}
+    </label>
+    <label class="filter-checkbox">
+      <input type="checkbox" class="filter-has-duration" {{#if hasDuration}}checked{{/if}} />
+      {{localize "CALENDARIA.Common.HasDuration"}}
+    </label>
+    <label class="filter-checkbox">
+      <input type="checkbox" class="filter-is-recurring" {{#if isRecurring}}checked{{/if}} />
+      {{localize "CALENDARIA.NoteViewer.Filter.IsRecurring"}}
+    </label>
+    <label class="filter-checkbox">
+      <input type="checkbox" class="filter-is-festival" {{#if isFestival}}checked{{/if}} />
+      {{localize "CALENDARIA.NoteViewer.Filter.IsFestival"}}
+    </label>
+  </div>
+
+  {{#if hasActiveFilters}}
+    <button type="button" class="clear-filters-btn" data-action="clearFilters">
+      <i class="fas fa-filter-circle-xmark"></i>
+      {{localize "CALENDARIA.NoteViewer.ClearFilters"}}
+    </button>
+  {{/if}}
+</div>

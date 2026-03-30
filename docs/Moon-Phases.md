@@ -1,6 +1,6 @@
 # Moon Phases
 
-Calendaria supports multiple moons with configurable cycle lengths, phases, and colors.
+Multiple moons with configurable cycle lengths, phases, and colors.
 
 ---
 
@@ -26,19 +26,55 @@ Each phase can be customized with:
 - **Icon**: SVG path or emoji
 - **Start/End**: Cycle position (0-1)
 
-An interactive **phase slider** in the Moons tab provides a visual way to adjust phase boundaries by dragging handles between segments. See [Calendar Editor — Moon Phases](Calendar-Editor#moon-phases) for details.
+An interactive **phase slider** in the Moons tab lets you adjust phase boundaries by dragging handles between segments. See [Calendar Editor: Moon Phases](Calendar-Editor#moon-phases) for details.
 
 ---
 
-## Phase Calculation
+## Phase Modes
 
-The moon phase is determined by:
+Each moon has a **Phase Mode** setting that determines how its phase is calculated over time.
 
-1. Days since reference date
+### Fixed (Default)
+
+The moon follows a predictable, repeating cycle. The phase on any given day is determined by:
+
+1. Days since the reference date
 2. Position within the cycle (`daysSinceReference % cycleLength`)
 3. Which phase contains that position
 
-### Sub-Phases
+Phases repeat at exact intervals, producing a regular, real-world-style lunar cycle.
+
+### Randomized
+
+The moon follows an erratic, non-cyclical pattern driven by seeded randomness. The base cycle length still influences overall pacing, but the actual phase on any day varies unpredictably. Good for alien, magical, or chaotic moons (e.g., Warhammer's Morrslieb).
+
+Randomized moons are configured with:
+
+| Setting        | Description                                                                                                                                                                                               |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seed           | Integer seed for randomization. The same seed always produces the same sequence. Use the dice button to randomize.                                                                                        |
+| Cycle Variance | Slider (`0`–`1`) controlling how much the moon deviates from its base cycle length. At `0`, the moon behaves identically to fixed mode. At `1`, phases shift dramatically and unpredictably between days. |
+
+Same seed always produces the same results.
+
+### Anchor Phases
+
+Anchor phases are date-specific phase overrides available in **Randomized** mode. They guarantee a moon is in a specific phase on a specific date, regardless of what the randomization would otherwise produce.
+
+Configure anchor phases in **Calendar Editor > Moons tab** by clicking **Add Anchor Phase**. Each anchor defines:
+
+| Field | Description                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------- |
+| Year  | The year to match. Leave blank for **yearly recurrence** (the anchor repeats every year).   |
+| Month | The month the anchor falls on.                                                              |
+| Day   | The day of the month.                                                                       |
+| Phase | Which phase the moon should display on the anchored date (selected from the moon's phases). |
+
+For example, an anchor with no year, month "Hexenstag", day 1, and phase "Full Moon" ensures the moon is always full on the first day of Hexenstag every year.
+
+---
+
+## Sub-Phases
 
 When a phase spans multiple days:
 
@@ -52,7 +88,7 @@ When a phase spans multiple days:
 
 ### Calendar View
 
-Moon phases display on calendar day cells when **Show Moon Phases** is enabled. This setting is controlled per-application:
+Moon phases display on calendar day cells when **Show Moon Phases** is enabled. Controlled per-application:
 
 - **Settings Panel > MiniCal tab > Block Visibility > Show Moon Phases**
 - **Settings Panel > BigCal tab > Block Visibility > Show Moon Phases**
@@ -63,25 +99,25 @@ Moon phases display on calendar day cells when **Show Moon Phases** is enabled. 
 
 ### HUD Dome
 
-The HUD dome renders moons with phase-accurate shadows and color glow. When **Show All Moons** is enabled (Settings > HUD tab), secondary moons trail behind the primary moon at a smaller size.
+The HUD dome renders moons with phase-accurate shadows and color glow. With **Show All Moons** enabled (Settings > HUD tab), secondary moons trail behind the primary moon at a smaller size.
 
 ---
 
 ## Moon Brightness
 
-Moons can reduce nighttime scene darkness based on their phase. Each moon has a **Brightness Max** slider (`0`–`0.3`, default `0`) in **Calendar Editor > Moons tab**.
+Moons reduce nighttime scene darkness based on their phase. Each moon has a **Brightness Max** slider (`0`–`0.3`, default `0`) in **Calendar Editor > Moons tab**.
 
-Illumination follows a cosine curve — maximum at full moon, zero at new moon. When multiple moons are configured, their values are summed (capped at 0.3). Each moon's light is tinted with its configured color.
+Illumination follows a cosine curve: maximum at full moon, zero at new moon. Multiple moons sum their values (capped at 0.3). Each moon's light is tinted with its configured color.
 
 Enable/disable via **Settings Panel > Canvas tab > Moon Illumination**.
 
-See [Scene Ambience — Moon Illumination](Scene-Ambience#moon-illumination) for how this affects darkness calculations.
+See [Scene Ambience: Moon Illumination](Scene-Ambience#moon-illumination) for how this affects darkness calculations.
 
 ---
 
 ## Moon-Based Note Recurrence
 
-Notes can repeat on specific moon phases. In the note editor:
+Notes repeat on specific moon phases. In the note editor:
 
 1. Set repeat pattern to **Moon Phase**
 2. Select which moon(s) to track
@@ -95,7 +131,7 @@ Notes can repeat on specific moon phases. In the note editor:
 | True     | Middle third of the phase           |
 | Fading   | Last third of the phase             |
 
-The modifier aligns with the sub-phase system used for display (Rising/True/Fading). For example, "Full Moon (Rising)" triggers only during the first third of the Full Moon phase.
+Modifiers align with the sub-phase display system (Rising/True/Fading). For example, "Full Moon (Rising)" triggers only during the first third of the Full Moon phase.
 
 See [Notes and Events](Notes-and-Events#recurrence-patterns) for more on recurrence patterns.
 
@@ -103,6 +139,4 @@ See [Notes and Events](Notes-and-Events#recurrence-patterns) for more on recurre
 
 ## For Developers
 
-See [API Reference](API-Reference#moons) for exposed methods.
-
-See [Hooks](Hooks#calendariamoonphasechange) for the `calendaria.moonPhaseChange` hook.
+See [API Reference](API-Reference) and [Hooks](Hooks).

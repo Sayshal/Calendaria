@@ -1,0 +1,460 @@
+.calendaria {
+  &.note-viewer {
+    grid-template:
+      'search  search' auto
+      'filters results' 1fr
+      'footer  footer' auto
+      / 14rem 1fr;
+    display: grid;
+    position: fixed;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    color: var(--calendaria-text);
+    background: var(--calendaria-bg);
+    box-shadow:
+      0 0.5rem 2rem rgb(0 0 0 / 30%),
+      0 0 0 0.0625rem var(--calendaria-border);
+
+    input[type='checkbox'],
+    input[type='checkbox']:checked,
+    input[type='checkbox']:indeterminate {
+      --checkbox-background-color: var(--calendaria-input-bg);
+      --checkbox-border-color: var(--calendaria-border);
+      --checkbox-checked-color: var(--calendaria-primary);
+      --checkbox-checkmark-color: var(--calendaria-text-on-color);
+
+      width: var(--checkbox-size);
+      height: var(--checkbox-size);
+      border: 0.0625rem solid var(--calendaria-border);
+      border-radius: 0.1875rem;
+
+      &:checked,
+      &:indeterminate {
+        border-color: transparent;
+      }
+    }
+
+    .note-viewer-search {
+      gap: 0.5rem;
+      grid-area: search;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 0.0625rem solid var(--calendaria-border);
+      cursor: grab;
+      background: var(--calendaria-bg-lighter);
+
+      .search-input-wrapper {
+        gap: 0.375rem;
+        display: flex;
+        flex: 1;
+        align-items: center;
+        height: 1.625rem;
+        padding: 0 0.375rem;
+        border: 0.0625rem solid var(--calendaria-border);
+        border-radius: 0.25rem;
+        background: var(--calendaria-bg);
+
+        .search-icon {
+          color: var(--calendaria-text-dim);
+          font-size: var(--font-size-12, 0.75rem);
+        }
+
+        input {
+          flex: 1;
+          padding: 0;
+          border: none;
+          outline: none;
+          color: var(--calendaria-text);
+          font-size: var(--font-size-12, 0.75rem);
+          background: transparent;
+
+          &::placeholder {
+            color: var(--calendaria-text-dim);
+          }
+        }
+
+        .search-clear {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 1.25rem;
+          height: 1.25rem;
+          padding: 0;
+          border: none;
+          border-radius: 50%;
+          color: var(--calendaria-text-dim);
+          cursor: pointer;
+          background: transparent;
+
+          &:hover {
+            color: var(--calendaria-text);
+            background: var(--calendaria-bg-hover);
+          }
+        }
+      }
+
+      .close-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-left: 0.25rem;
+        padding: 0;
+        border: none;
+        border-radius: 0.25rem;
+        color: var(--calendaria-text-dim);
+        cursor: pointer;
+        background: transparent;
+
+        &:hover {
+          color: var(--calendaria-text);
+          background: var(--calendaria-bg-hover);
+        }
+      }
+    }
+
+    .note-viewer-filters {
+      gap: 0.625rem;
+      grid-area: filters;
+      display: flex;
+      flex-direction: column;
+      padding: 0.625rem;
+      border-right: 0.0625rem solid var(--calendaria-border);
+      overflow-y: auto;
+      background: var(--calendaria-bg-lighter);
+
+      .filter-group {
+        gap: 0.25rem;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter-label {
+        color: var(--calendaria-text-dim);
+        font-weight: 600;
+        font-size: var(--font-size-11, 0.6875rem);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .filter-select {
+        padding: 0.25rem 0.375rem;
+        border: 0.0625rem solid var(--calendaria-border);
+        border-radius: 0.25rem;
+        color: var(--calendaria-text);
+        font-size: var(--font-size-12, 0.75rem);
+        background: var(--calendaria-bg);
+      }
+
+      multi-select {
+        font-size: var(--font-size-12, 0.75rem);
+
+        .tags {
+          gap: 0.25rem;
+          display: flex;
+          flex-wrap: wrap;
+          padding-right: 0.25rem;
+        }
+
+        .tag {
+          padding: 0.125rem 0.375rem;
+          border-radius: 0.1875rem;
+          color: var(--calendaria-text);
+          font-size: var(--font-size-10, 0.625rem);
+          cursor: pointer;
+          background: color-mix(in srgb, var(--calendaria-primary) 20%, var(--calendaria-bg));
+
+          &:hover {
+            background: color-mix(in srgb, var(--calendaria-primary) 35%, var(--calendaria-bg));
+          }
+        }
+
+        select {
+          padding: 0.125rem 0.375rem;
+          border: 0.0625rem solid var(--calendaria-border);
+          border-radius: 0.25rem;
+          color: var(--calendaria-text);
+          font-size: var(--font-size-11, 0.6875rem);
+          background: var(--calendaria-bg);
+        }
+      }
+
+      .filter-checkboxes {
+        gap: 0.375rem;
+        padding-top: 0.5rem;
+        border-top: 0.0625rem solid var(--calendaria-border-light);
+      }
+
+      .filter-checkbox {
+        gap: 0.375rem;
+        display: flex;
+        align-items: center;
+        color: var(--calendaria-text);
+        font-size: var(--font-size-12, 0.75rem);
+        cursor: pointer;
+      }
+
+      .clear-filters-btn {
+        gap: 0.25rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: auto;
+        padding: 0.25rem 0.5rem;
+        border: 0.0625rem solid var(--calendaria-primary);
+        border-radius: 0.25rem;
+        color: var(--calendaria-primary);
+        font-size: var(--font-size-11, 0.6875rem);
+        cursor: pointer;
+        background: transparent;
+
+        &:hover {
+          background: color-mix(in srgb, var(--calendaria-primary) 15%, transparent);
+        }
+      }
+    }
+
+    .note-viewer-results {
+      grid-area: results;
+      position: relative;
+      overflow-y: auto;
+
+      .create-note-fab {
+        display: flex;
+        z-index: 1;
+        position: sticky;
+        bottom: 0.75rem;
+        justify-content: center;
+        align-items: center;
+        float: right;
+        width: 2.25rem;
+        height: 2.25rem;
+        margin-right: 0.75rem;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        color: var(--calendaria-text-on-color);
+        font-size: var(--font-size-14, 0.875rem);
+        cursor: pointer;
+        background: var(--calendaria-primary);
+        box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 30%);
+        transition:
+          background 0.15s ease,
+          transform 0.15s ease;
+
+        &:hover {
+          background: var(--calendaria-primary-hover, color-mix(in srgb, var(--calendaria-primary) 85%, rgb(255 255 255)));
+          transform: scale(1.1);
+        }
+      }
+
+      .note-list {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .note-row {
+        gap: 0.5rem;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 0.0625rem solid var(--calendaria-border-light);
+        cursor: pointer;
+        transition: background 0.1s ease;
+
+        &:hover {
+          background: var(--calendaria-bg-hover);
+        }
+
+        &.selected {
+          background: color-mix(in srgb, var(--calendaria-primary) 12%, transparent);
+        }
+
+        .note-select-checkbox {
+          flex-shrink: 0;
+          cursor: pointer;
+        }
+
+        .note-color {
+          flex-shrink: 0;
+          width: 0.25rem;
+          min-height: 1.75rem;
+          border-radius: 0.125rem;
+        }
+
+        .note-icon {
+          flex-shrink: 0;
+          width: 1.25rem;
+          color: var(--note-color, var(--calendaria-text-dim));
+          font-size: 1.125rem;
+          text-align: center;
+        }
+
+        .note-info {
+          gap: 0.0625rem;
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+          min-width: 0;
+
+          .note-name {
+            overflow: hidden;
+            color: var(--calendaria-text);
+            font-weight: 500;
+            font-size: var(--font-size-13, 0.8125rem);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .note-date {
+            color: var(--calendaria-text-dim);
+            font-size: var(--font-size-11, 0.6875rem);
+          }
+        }
+
+        span.note-tags {
+          gap: 0.375rem;
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+
+          i {
+            display: inline-block;
+            width: 0.75rem;
+            color: var(--calendaria-text-dim);
+            font-size: 0.6875rem;
+            text-align: center;
+          }
+
+          .tag-visibility {
+            color: var(--calendaria-warning);
+          }
+
+          .tag-duration {
+            color: var(--calendaria-accent);
+          }
+
+          .tag-recurrence {
+            color: var(--calendaria-primary);
+          }
+
+          .tag-festival {
+            color: var(--calendaria-festival-text);
+          }
+        }
+      }
+
+      .note-viewer-empty {
+        gap: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem 1.5rem;
+        color: var(--calendaria-text-dim);
+        text-align: center;
+
+        .empty-icon {
+          opacity: 0.4;
+          font-size: 2rem;
+        }
+
+        p {
+          margin: 0;
+          font-size: var(--font-size-13, 0.8125rem);
+        }
+      }
+    }
+
+    .note-viewer-footer {
+      gap: 0.5rem;
+      grid-area: footer;
+      display: flex;
+      align-items: center;
+      height: 2rem;
+      padding: 0 0.75rem;
+      border-top: 0.0625rem solid var(--calendaria-border);
+      background: var(--calendaria-bg-lighter);
+
+      .note-count {
+        color: var(--calendaria-text-dim);
+        font-size: var(--font-size-11, 0.6875rem);
+        white-space: nowrap;
+      }
+
+      .bulk-controls {
+        gap: 0.375rem;
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+      }
+
+      .selection-toggle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: none;
+        border-radius: 0.25rem;
+        color: var(--calendaria-text-dim);
+        font-size: var(--font-size-12, 0.75rem);
+        cursor: pointer;
+        background: transparent;
+
+        &:hover {
+          color: var(--calendaria-text);
+          background: var(--calendaria-bg-hover);
+        }
+      }
+
+      .select-all-checkbox {
+        cursor: pointer;
+      }
+
+      .selection-count {
+        min-width: 1rem;
+        color: var(--calendaria-text-dim);
+        font-size: var(--font-size-11, 0.6875rem);
+        text-align: center;
+      }
+
+      .bulk-actions {
+        gap: 0.125rem;
+        display: flex;
+        align-items: center;
+        margin-left: 0.25rem;
+        padding-left: 0.375rem;
+        border-left: 0.0625rem solid var(--calendaria-border-light);
+      }
+
+      .bulk-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: none;
+        border-radius: 0.25rem;
+        color: var(--calendaria-text-dim);
+        font-size: var(--font-size-11, 0.6875rem);
+        cursor: pointer;
+        background: transparent;
+
+        &:hover:not(:disabled) {
+          color: var(--calendaria-text);
+          background: var(--calendaria-bg-hover);
+        }
+
+        &:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}

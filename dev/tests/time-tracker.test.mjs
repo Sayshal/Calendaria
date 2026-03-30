@@ -1,11 +1,6 @@
-/**
- * Tests for time-tracker.mjs
- * Covers: onUpdateWorldTime period changes, threshold crossings,
- * moon phase changes, skipNextHooks.
- * @module Tests/TimeTracker
- */
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
+import TimeTracker from '../../scripts/time/time-tracker.mjs';
 
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/localization.mjs', () => ({
@@ -36,15 +31,10 @@ vi.mock('../../scripts/constants.mjs', () => ({
     REST_DAY_CHANGE: 'calendaria.restDayChange'
   }
 }));
-
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   default: {
     getActiveCalendar: vi.fn(() => ({
-      monthsArray: [
-        { name: 'January', days: 31 },
-        { name: 'February', days: 28 },
-        { name: 'March', days: 31 }
-      ],
+      monthsArray: [{ name: 'January', days: 31 }, { name: 'February', days: 28 }, { name: 'March', days: 31 }],
       seasonsArray: [{ name: 'Spring' }, { name: 'Summer' }, { name: 'Autumn' }, { name: 'Winter' }],
       moonsArray: [],
       days: { hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60 },
@@ -77,18 +67,12 @@ vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
     }))
   }
 }));
-
 vi.mock('../../scripts/weather/weather-manager.mjs', () => ({
-  default: {
-    getActiveZone: vi.fn(() => null)
-  }
+  default: { getActiveZone: vi.fn(() => null) }
 }));
 
-import TimeTracker from '../../scripts/time/time-tracker.mjs';
-import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
-
 beforeEach(() => {
-  game.time.worldTime = 43200; // noon day 0
+  game.time.worldTime = 43200;
   game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 };
   game.settings.get.mockReturnValue({ global: {}, moonPhase: [] });
   game.scenes = { active: null, filter: vi.fn(() => []) };
@@ -96,33 +80,25 @@ beforeEach(() => {
   TimeTracker.initialize();
 });
 
-/* -------------------------------------------- */
-/*  Period changes                               */
-/* -------------------------------------------- */
-
 describe('TimeTracker — period changes', () => {
   it('fires DAY_CHANGE when dayOfMonth changes', () => {
-    // Advance from day 0 to day 1
-    game.time.worldTime = 86400 + 43200; // day 1, noon
+    game.time.worldTime = 86400 + 43200;
     game.time.components = { year: 0, month: 0, dayOfMonth: 1, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.dayChange', expect.any(Object));
   });
-
   it('fires MONTH_CHANGE when month changes', () => {
     game.time.worldTime = 31 * 86400 + 43200;
     game.time.components = { year: 0, month: 1, dayOfMonth: 0, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.monthChange', expect.any(Object));
   });
-
   it('fires YEAR_CHANGE when year changes', () => {
     game.time.worldTime = 365 * 86400 + 43200;
     game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.yearChange', expect.any(Object));
   });
-
   it('fires SEASON_CHANGE when season changes', () => {
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0, season: 0 };
     TimeTracker.initialize();
@@ -131,14 +107,12 @@ describe('TimeTracker — period changes', () => {
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.seasonChange', expect.any(Object));
   });
-
   it('always fires DATE_TIME_CHANGE', () => {
     game.time.worldTime = 43200 + 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 13, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 3600);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.dateTimeChange', expect.any(Object));
   });
-
   it('does not fire period hooks when no period change', () => {
     game.time.worldTime = 43200 + 60;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 12, minute: 1, second: 0 };
@@ -148,23 +122,16 @@ describe('TimeTracker — period changes', () => {
   });
 });
 
-/* -------------------------------------------- */
-/*  Threshold crossings                          */
-/* -------------------------------------------- */
-
 describe('TimeTracker — threshold crossings', () => {
   it('fires MIDDAY when crossing midday (hour 12)', () => {
-    // Start at hour 11
     game.time.worldTime = 11 * 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 11, minute: 0, second: 0 };
     TimeTracker.initialize();
-    // Advance to hour 13
     game.time.worldTime = 13 * 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 13, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 2 * 3600);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.midday', expect.any(Object));
   });
-
   it('fires SUNRISE when crossing sunrise (hour 6)', () => {
     game.time.worldTime = 5 * 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 5, minute: 0, second: 0 };
@@ -174,7 +141,6 @@ describe('TimeTracker — threshold crossings', () => {
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 2 * 3600);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.sunrise', expect.any(Object));
   });
-
   it('fires SUNSET when crossing sunset (hour 18)', () => {
     game.time.worldTime = 17 * 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 17, minute: 0, second: 0 };
@@ -184,48 +150,36 @@ describe('TimeTracker — threshold crossings', () => {
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 2 * 3600);
     expect(Hooks.callAll).toHaveBeenCalledWith('calendaria.sunset', expect.any(Object));
   });
-
   it('does not fire threshold when time goes backwards', () => {
     game.time.worldTime = 13 * 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 13, minute: 0, second: 0 };
     TimeTracker.initialize();
-    // Go backwards
     game.time.worldTime = 10 * 3600;
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 10, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, -3 * 3600);
-    // Should not fire midday or sunrise
     const hookCalls = Hooks.callAll.mock.calls.map((c) => c[0]);
     expect(hookCalls).not.toContain('calendaria.midday');
     expect(hookCalls).not.toContain('calendaria.sunrise');
   });
 });
 
-/* -------------------------------------------- */
-/*  skipNextHooks                                */
-/* -------------------------------------------- */
-
 describe('TimeTracker — skipNextHooks', () => {
-  it('skips period and threshold hooks after skipNextHooks()', () => {
+  it('skips threshold hooks and macros but fires period hooks after skipNextHooks()', () => {
     TimeTracker.skipNextHooks();
-    // Large time jump from day 0 to day 5
     game.time.worldTime = 5 * 86400 + 43200;
     game.time.components = { year: 0, month: 0, dayOfMonth: 5, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 5 * 86400);
-    // Only DATE_TIME_CHANGE should fire, not period or threshold hooks
     const hookCalls = Hooks.callAll.mock.calls.map((c) => c[0]);
     expect(hookCalls).toContain('calendaria.dateTimeChange');
-    expect(hookCalls).not.toContain('calendaria.dayChange');
+    expect(hookCalls).toContain('calendaria.dayChange');
     expect(hookCalls).not.toContain('calendaria.midday');
   });
-
   it('resumes normal behavior after one skip', () => {
     TimeTracker.skipNextHooks();
-    // First update — skipped
     game.time.worldTime = 86400 + 43200;
     game.time.components = { year: 0, month: 0, dayOfMonth: 1, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
     Hooks.callAll.mockClear();
-    // Second update — should fire normally
     game.time.worldTime = 2 * 86400 + 43200;
     game.time.components = { year: 0, month: 0, dayOfMonth: 2, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
@@ -234,19 +188,10 @@ describe('TimeTracker — skipNextHooks', () => {
   });
 });
 
-/* -------------------------------------------- */
-/*  Moon phase changes                           */
-/* -------------------------------------------- */
-
 describe('TimeTracker — moon phase changes', () => {
   it('fires MOON_PHASE_CHANGE when phase changes', () => {
-    // Override getActiveCalendar to return a persistent object with moonsArray
     const moonCalendar = {
-      monthsArray: [
-        { name: 'January', days: 31 },
-        { name: 'February', days: 28 },
-        { name: 'March', days: 31 }
-      ],
+      monthsArray: [{ name: 'January', days: 31 }, { name: 'February', days: 28 }, { name: 'March', days: 31 }],
       seasonsArray: [{ name: 'Spring' }, { name: 'Summer' }, { name: 'Autumn' }, { name: 'Winter' }],
       moonsArray: [{ name: 'Luna', phases: { 0: { name: 'New' }, 1: { name: 'Crescent' } } }],
       days: { hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60 },
@@ -281,8 +226,6 @@ describe('TimeTracker — moon phase changes', () => {
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 };
     TimeTracker.initialize();
     Hooks.callAll.mockClear();
-
-    // Now change the phase
     moonCalendar.getMoonPhase.mockReturnValue({ phaseIndex: 1 });
     game.time.worldTime = 86400 + 43200;
     game.time.components = { year: 0, month: 0, dayOfMonth: 1, hour: 12, minute: 0, second: 0 };
@@ -294,24 +237,18 @@ describe('TimeTracker — moon phase changes', () => {
       })
     );
   });
-
   it('does not fire when no phase change', () => {
     const calendar = CalendarManager.getActiveCalendar();
     calendar.moonsArray = [{ name: 'Luna', phases: { 0: { name: 'New' } } }];
     calendar.getMoonPhase.mockReturnValue({ phaseIndex: 0 });
     game.time.components = { year: 0, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 };
     TimeTracker.initialize();
-
     game.time.worldTime = 86400 + 43200;
     game.time.components = { year: 0, month: 0, dayOfMonth: 1, hour: 12, minute: 0, second: 0 };
     TimeTracker.onUpdateWorldTime(game.time.worldTime, 86400);
     expect(Hooks.callAll).not.toHaveBeenCalledWith('calendaria.moonPhaseChange', expect.any(Object));
   });
 });
-
-/* -------------------------------------------- */
-/*  No calendar                                  */
-/* -------------------------------------------- */
 
 describe('TimeTracker — edge cases', () => {
   it('returns early when no active calendar', () => {

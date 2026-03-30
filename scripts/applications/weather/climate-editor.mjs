@@ -4,13 +4,12 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
-import CalendariaCalendar from '../../data/calendaria-calendar.mjs';
-import { format, localize } from '../../utils/localization.mjs';
-import { fromDisplayDelta, fromDisplayUnit, toDisplayDelta, toDisplayUnit } from '../../weather/data/climate-data.mjs';
-import { ALL_PRESETS, getAllPresets, getPresetAlias, setPresetAlias, WEATHER_CATEGORIES } from '../../weather/data/weather-presets.mjs';
-import { WeatherProbabilityDialog } from './weather-probability-dialog.mjs';
+import { CalendariaCalendar } from '../../data/_module.mjs';
+import { format, localize } from '../../utils/_module.mjs';
+import { ALL_PRESETS, WEATHER_CATEGORIES, fromDisplayDelta, fromDisplayUnit, getAllPresets, getPresetAlias, setPresetAlias, toDisplayDelta, toDisplayUnit } from '../../weather/_module.mjs';
+import { WeatherProbabilityDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -43,8 +42,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static TABS = {
     primary: {
       tabs: [
-        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.ClimateEditor.Tab.Weather' },
-        { id: 'presets', group: 'primary', icon: 'fas fa-sliders', label: 'CALENDARIA.ClimateEditor.Tab.Presets' },
+        { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather' },
+        { id: 'presets', group: 'primary', icon: 'fas fa-sliders', label: 'CALENDARIA.PresetManager.Overrides' },
         { id: 'environment', group: 'primary', icon: 'fas fa-tree', label: 'CALENDARIA.ClimateEditor.Tab.Environment' }
       ],
       initial: 'weather'
@@ -439,7 +438,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!seasonOverrides[season]) continue;
       seasonOverrides[season].temperatures = result.temperatures[season] ? { ...result.temperatures[season] } : null;
     }
-    const selectedSeason = this.#selectedSeason;
+    const selectedSeason = this.element?.querySelector('[data-rendered-season]')?.dataset.renderedSeason || this.#selectedSeason;
     if (selectedSeason) {
       if (!seasonOverrides[selectedSeason]) seasonOverrides[selectedSeason] = {};
       const seasonPresets = {};
@@ -468,7 +467,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     result.seasonOverrides = seasonOverrides;
     this.#data.seasonOverrides = seasonOverrides;
     for (const preset of allPresets) {
-      const existing = this.#data.presets?.[preset.id];
+      const existing = this.#data.presets?.[preset.id] ?? Object.values(this.#data.presets ?? {}).find((p) => p.id === preset.id);
       result.presets[preset.id] = existing ? { ...existing } : { id: preset.id, enabled: false };
     }
     this.#data.presets = result.presets;

@@ -5,21 +5,12 @@
  */
 
 import { MODULE, SCENE_FLAGS, TEMPLATES } from '../../constants.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
+import { WeatherManager } from '../../weather/_module.mjs';
 
 /**
  * Scene configuration sheet with an additional Calendaria tab for module-specific scene flags.
  */
 export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConfig {
-  /**
-   * Read super.PARTS dynamically.
-   * @returns {object} The merged PARTS definition including the calendaria tab
-   */
-  static get PARTS() {
-    const { footer, ...rest } = super.PARTS;
-    return { ...rest, calendaria: { template: TEMPLATES.SCENE.CONFIG_CALENDARIA, scrollable: [''] }, footer };
-  }
-
   /**
    * Mutates SceneConfig.TABS so all subclasses inherit the Calendaria tab.
    * @returns {object} The extended TABS configuration
@@ -32,12 +23,14 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
   static TABS = CalendariaSceneConfig.buildTabs();
 
   /**
-   * Patch the base SceneConfig
+   * Patch the base SceneConfig to add the Calendaria part and context handling.
    */
   static patchBaseSceneConfig() {
     const Base = foundry.applications.sheets.SceneConfig;
-    const { footer, ...rest } = Base.PARTS;
-    Object.defineProperty(Base, 'PARTS', { value: { ...rest, calendaria: { template: TEMPLATES.SCENE.CONFIG_CALENDARIA, scrollable: [''] }, footer }, writable: true, configurable: true });
+    const footer = Base.PARTS.footer;
+    delete Base.PARTS.footer;
+    Base.PARTS.calendaria = { template: TEMPLATES.SCENE.CONFIG_CALENDARIA, scrollable: [''] };
+    Base.PARTS.footer = footer;
     const origPrepare = Base.prototype._preparePartContext;
     Base.prototype._preparePartContext = async function (partId, context, options) {
       context = await origPrepare.call(this, partId, context, options);

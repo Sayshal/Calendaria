@@ -1,59 +1,81 @@
-<div class="calendar-note-view">
-  <header class="note-header">
-    <div class="note-icon">
-      {{#if (eq iconType "fontawesome")}}
-        <i class="{{system.icon}}" style="color: {{system.color}}"></i>
-      {{else}}
-        <img src="{{system.icon}}" alt="Note Icon"
-          style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);">
-      {{/if}}
-    </div>
-    <h1 class="note-title">{{name}}</h1>
-    {{#if system.gmOnly}}
-      <span class="gm-only-badge" data-tooltip aria-label="{{localize 'CALENDARIA.UI.GmOnlyTooltip'}}"><i
-          class="fas fa-eye-slash"></i></span>
-    {{/if}}
-  </header>
+<div class="calendar-note-view" style="--note-color: {{system.color}}">
+  <div class="note-accent-bar" style="background: {{system.color}}"></div>
 
-  <div class="note-datetime">
-    <div class="date-info">
-      <i class="fas fa-calendar-alt"></i>
-      <span class="date-text">{{startDateDisplay}}</span>
-      {{#if hasEndDate}}
-        <i class="fas fa-arrow-right"></i>
-        <span class="date-text">{{endDateDisplay}}</span>
-      {{/if}}
-    </div>
-    {{#unless system.allDay}}
-      <div class="time-info">
-        <i class="fas fa-clock"></i>
-        <span class="time-text">{{startTimeDisplay}}</span>
-        {{#if hasEndTime}}
-          <span class="time-separator">-</span>
-          <span class="time-text">{{endTimeDisplay}}</span>
+  <div class="note-body">
+    <header class="note-header">
+      <div class="note-icon">
+        {{#if (eq iconType "fontawesome")}}
+          <i class="{{system.icon}}"></i>
+        {{else}}
+          <img src="{{system.icon}}" alt="Note Icon">
         {{/if}}
       </div>
-    {{/unless}}
-    {{#if repeatLabel}}
-      <div class="repeat-info">
-        <i class="fas fa-arrows-rotate"></i>
-        <span>{{repeatLabel}}</span>
+      <div class="note-header-text">
+        <h1 class="note-title">{{name}}</h1>
+        {{#if visibilityBadge}}
+          <span class="visibility-label">
+            <i class="fas {{visibilityIcon}}"></i>
+            {{visibilityBadge}}
+          </span>
+        {{/if}}
       </div>
-    {{/if}}
-    {{#if moonConditionsDisplay}}
-      <div class="moon-info">
-        <i class="fas fa-moon"></i>
-        <span>{{moonConditionsDisplay}}</span>
-      </div>
-    {{/if}}
-  </div>
+    </header>
 
-  {{#if displayCategories.length}}
-    <div class="note-categories">
-      {{#each displayCategories}}
-        <span class="category-tag">{{this}}</span>
-      {{/each}}
+    <div class="note-metadata">
+      <div class="metadata-row">
+        <i class="fas fa-calendar-alt"></i>
+        <span>{{startDateDisplay}}</span>
+        {{#if hasEndDate}}
+          <i class="fas fa-arrow-right meta-arrow"></i>
+          <span>{{endDateDisplay}}</span>
+        {{/if}}
+      </div>
+      {{#unless system.allDay}}
+        <div class="metadata-row">
+          <i class="fas fa-clock"></i>
+          <span>{{startTimeDisplay}}</span>
+          {{#if hasEndTime}}
+            <span class="time-separator">&ndash;</span>
+            <span>{{endTimeDisplay}}</span>
+          {{/if}}
+        </div>
+      {{/unless}}
+      {{#if repeatLabel}}
+        <div class="metadata-row">
+          <i class="fas fa-arrows-rotate"></i>
+          <span>{{repeatLabel}}</span>
+        </div>
+      {{/if}}
+      {{#if moonConditionsDisplay}}
+        <div class="metadata-row">
+          <i class="fas fa-moon"></i>
+          <span>{{moonConditionsDisplay}}</span>
+        </div>
+      {{/if}}
+      {{#if equivalentDates.length}}
+        <div class="equivalent-dates">
+          {{#each equivalentDates}}
+            <div class="metadata-row equivalent">
+              <i class="fas fa-calendar-alt"></i>
+              <span class="calendar-name">{{calendarName}}:</span>
+              <span>{{formatted}}</span>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
     </div>
-  {{/if}}
-  <div class="note-content">{{{enrichedContent}}}</div>
+
+    {{#if displayPresets.length}}
+      <div class="note-presets">
+        {{#each displayPresets}}
+          <span class="preset-tag" style="--preset-color: {{this.color}}">
+            <span class="preset-dot"></span>
+            {{this.label}}
+          </span>
+        {{/each}}
+      </div>
+    {{/if}}
+
+    <div class="note-content">{{{enrichedContent}}}</div>
+  </div>
 </div>

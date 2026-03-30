@@ -5,11 +5,9 @@
  */
 
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import CalendariaCalendar from '../data/calendaria-calendar.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { BUNDLED_CALENDARS, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './calendar-loader.mjs';
-import CalendarRegistry from './calendar-registry.mjs';
+import { CalendariaCalendar } from '../data/_module.mjs';
+import { format, localize, log } from '../utils/_module.mjs';
+import { BUNDLED_CALENDARS, CalendarRegistry, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './_module.mjs';
 
 /**
  * Main entry point for calendar system management.
@@ -779,7 +777,6 @@ export default class CalendarManager {
       delete newData.metadata.author;
       delete newData.metadata.isCustom;
     }
-
     return this.createCustomCalendar(newId, newData);
   }
 
@@ -792,15 +789,6 @@ export default class CalendarManager {
     if (isBundledCalendar(id)) return false;
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     return !!customCalendars[id];
-  }
-
-  /**
-   * Check if a calendar is a bundled (built-in) calendar.
-   * @param {string} id - Calendar ID to check
-   * @returns {boolean} True if the calendar is a bundled calendar
-   */
-  static isBundledCalendar(id) {
-    return isBundledCalendar(id);
   }
 
   /**

@@ -4,26 +4,15 @@
  * @author Tyler
  */
 
-import { BigCal } from './applications/calendar/big-cal.mjs';
-import { CalendarEditor } from './applications/calendar/calendar-editor.mjs';
-import { MiniCal } from './applications/calendar/mini-cal.mjs';
-import { ImporterApp } from './applications/dialogs/importer-app.mjs';
-import { HUD } from './applications/hud/hud.mjs';
-import { SettingsPanel } from './applications/settings/settings-panel.mjs';
-import { Stopwatch } from './applications/time/stopwatch.mjs';
-import { SunDial } from './applications/time/sun-dial.mjs';
-import { TimeKeeper } from './applications/time/time-keeper.mjs';
+import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
-import NoteManager from './notes/note-manager.mjs';
-import { localize } from './utils/localization.mjs';
-import { log } from './utils/logger.mjs';
-import { initializeTheme } from './utils/theme-utils.mjs';
-import * as StickyZones from './utils/ui/sticky-zones.mjs';
+import { NoteManager, invalidatePresetCache } from './notes/_module.mjs';
+import { THEME_PRESETS, hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
+import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
-
 const renderMiniCal = () => foundry.applications.instances.get('calendaria-mini-cal')?.render();
-const renderBigCal = () => foundry.applications.instances.get('calendaria')?.render();
+const renderBigCal = () => foundry.applications.instances.get('calendaria-big-cal')?.render();
 const renderHUD = () => foundry.applications.instances.get('calendaria-hud')?.render();
 const renderHUDBar = () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] });
 
@@ -40,9 +29,84 @@ export default class CalendariaSettings {
       [SETTINGS.TIME_KEEPER_POSITION]: { name: 'TimeKeeper Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.STOPWATCH_POSITION]: { name: 'Stopwatch Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.SUN_DIAL_POSITION]: { name: 'Sun Dial Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
+      [SETTINGS.CINEMATIC_ENABLED]: {
+        name: 'CALENDARIA.Cinematic.Settings.Enabled.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.Enabled.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.CINEMATIC_THRESHOLD]: {
+        name: 'CALENDARIA.Common.Threshold',
+        hint: 'CALENDARIA.Cinematic.Settings.Threshold.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 1, min: 1, integer: true })
+      },
+      [SETTINGS.CINEMATIC_THRESHOLD_UNIT]: { name: 'CALENDARIA.Cinematic.Settings.ThresholdUnit.Name', scope: 'world', config: false, type: new StringField({ initial: 'week' }) },
+      [SETTINGS.CINEMATIC_PANEL_DURATION]: {
+        name: 'CALENDARIA.Cinematic.Settings.PanelDuration.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.PanelDuration.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 3000, min: 1000, max: 6000, step: 100, integer: true })
+      },
+      [SETTINGS.CINEMATIC_SHOW_WEATHER]: {
+        name: 'CALENDARIA.Common.ShowWeather',
+        hint: 'CALENDARIA.Cinematic.Settings.ShowWeather.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.CINEMATIC_SHOW_MOONS]: {
+        name: 'CALENDARIA.Common.ShowMoonPhases',
+        hint: 'CALENDARIA.Cinematic.Settings.ShowMoons.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.CINEMATIC_SHOW_EVENTS]: {
+        name: 'CALENDARIA.Cinematic.Settings.ShowEvents.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.ShowEvents.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.CINEMATIC_EVENT_WEIGHTING]: {
+        name: 'CALENDARIA.Cinematic.Settings.EventWeighting.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.EventWeighting.Hint',
+        scope: 'world',
+        config: false,
+        type: new StringField({ initial: 'all' })
+      },
+      [SETTINGS.CINEMATIC_EVENT_MAX_CARDS]: {
+        name: 'CALENDARIA.Cinematic.Settings.EventMaxCards.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.EventMaxCards.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 8, min: 1, max: 20, integer: true })
+      },
+      [SETTINGS.CINEMATIC_ON_REST]: {
+        name: 'CALENDARIA.Cinematic.Settings.OnRest.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.OnRest.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.CHRONICLE_BIG_CAL_BUTTON]: { name: 'Chronicle BigCal Button', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.CHRONICLE_HUD_BUTTON]: { name: 'Chronicle HUD Button', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.CHRONICLE_MINI_CAL_BUTTON]: { name: 'Chronicle MiniCal Button', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.CHRONICLE_ENTRY_DEPTH]: { name: 'Chronicle Entry Depth', scope: 'client', config: false, type: new StringField({ initial: 'excerpt' }) },
+      [SETTINGS.CHRONICLE_SHOW_EMPTY]: { name: 'Chronicle Show Empty', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.CHRONICLE_SHOW_WEATHER]: { name: 'Chronicle Show Weather', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
+      [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { name: 'Chronicle Show Moon Phases', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
+      [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { name: 'Chronicle Show Season Changes', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
+      [SETTINGS.CHRONICLE_VIEW_MODE]: { name: 'Chronicle View Mode', scope: 'client', config: false, type: new StringField({ initial: 'scroll' }) },
+      [SETTINGS.CHRONICLE_POSITION]: { name: 'Chronicle Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.SUN_DIAL_CRANK_MODE]: { name: 'Sun Dial Crank Mode', scope: 'user', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SUN_DIAL_STICKY_STATES]: { name: 'Sun Dial Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { position: false } }) },
       [SETTINGS.STOPWATCH_STATE]: { name: 'Stopwatch State', scope: 'client', config: false, type: new ObjectField({ nullable: true, initial: null }) },
+      [SETTINGS.DEFAULT_NOTE_PRESET]: { name: 'Default Note Preset', scope: 'client', config: false, type: new StringField({ nullable: true, initial: null }) },
       [SETTINGS.STOPWATCH_AUTO_START_TIME]: {
         name: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name',
         hint: 'CALENDARIA.Settings.StopwatchAutoStartTime.Hint',
@@ -98,7 +162,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: true })
       },
       [SETTINGS.MINI_CAL_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Settings.MiniCalShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Settings.MiniCalShowWeather.Hint',
         scope: 'user',
         config: false,
@@ -106,7 +170,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalWeatherDisplayMode.Name',
+        name: 'CALENDARIA.Common.WeatherDisplay',
         hint: 'CALENDARIA.Settings.MiniCalWeatherDisplayMode.Hint',
         scope: 'user',
         config: false,
@@ -114,7 +178,7 @@ export default class CalendariaSettings {
           choices: {
             full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
             iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp',
-            icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'
           },
           initial: 'full'
@@ -122,7 +186,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_SEASON]: {
-        name: 'CALENDARIA.Settings.MiniCalShowSeason.Name',
+        name: 'CALENDARIA.Common.ShowSeason',
         hint: 'CALENDARIA.Settings.MiniCalShowSeason.Hint',
         scope: 'user',
         config: false,
@@ -130,18 +194,18 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalSeasonDisplayMode.Name',
+        name: 'CALENDARIA.Common.SeasonDisplay',
         hint: 'CALENDARIA.Settings.MiniCalSeasonDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
-          choices: { full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full', icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly', text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly' },
+          choices: { full: 'CALENDARIA.Common.DisplayIconText', icon: 'CALENDARIA.Common.DisplayIconOnly', text: 'CALENDARIA.Common.DisplayTextOnly' },
           initial: 'full'
         }),
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_ERA]: {
-        name: 'CALENDARIA.Settings.MiniCalShowEra.Name',
+        name: 'CALENDARIA.Common.ShowEra',
         hint: 'CALENDARIA.Settings.MiniCalShowEra.Hint',
         scope: 'user',
         config: false,
@@ -149,15 +213,15 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_ERA_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalEraDisplayMode.Name',
+        name: 'CALENDARIA.Common.EraDisplay',
         hint: 'CALENDARIA.Settings.MiniCalEraDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
-            icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
-            text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+            full: 'CALENDARIA.Common.DisplayIconText',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
+            text: 'CALENDARIA.Common.DisplayTextOnly',
             abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
           },
           initial: 'full'
@@ -165,7 +229,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_CYCLES]: {
-        name: 'CALENDARIA.Settings.MiniCalShowCycles.Name',
+        name: 'CALENDARIA.Common.ShowCycles',
         hint: 'CALENDARIA.Settings.MiniCalShowCycles.Hint',
         scope: 'user',
         config: false,
@@ -173,14 +237,14 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Name',
+        name: 'CALENDARIA.Common.CyclesDisplay',
         hint: 'CALENDARIA.Settings.MiniCalCyclesDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
-            icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+            name: 'CALENDARIA.Common.Name',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
           },
@@ -189,7 +253,7 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Name',
+        name: 'CALENDARIA.Common.ShowMoonPhases',
         hint: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Hint',
         scope: 'user',
         config: false,
@@ -197,15 +261,15 @@ export default class CalendariaSettings {
         onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED]: {
-        name: 'CALENDARIA.Settings.MiniCalHeaderShowSelected.Name',
-        hint: 'CALENDARIA.Settings.MiniCalHeaderShowSelected.Hint',
+        name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
+        hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: false }),
         onChange: renderMiniCal
       },
       [SETTINGS.BIG_CAL_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Settings.BigCalShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Settings.BigCalShowWeather.Hint',
         scope: 'user',
         config: false,
@@ -213,7 +277,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalWeatherDisplayMode.Name',
+        name: 'CALENDARIA.Common.WeatherDisplay',
         hint: 'CALENDARIA.Settings.BigCalWeatherDisplayMode.Hint',
         scope: 'user',
         config: false,
@@ -221,7 +285,7 @@ export default class CalendariaSettings {
           choices: {
             full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
             iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp',
-            icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'
           },
           initial: 'full'
@@ -229,7 +293,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_SEASON]: {
-        name: 'CALENDARIA.Settings.BigCalShowSeason.Name',
+        name: 'CALENDARIA.Common.ShowSeason',
         hint: 'CALENDARIA.Settings.BigCalShowSeason.Hint',
         scope: 'user',
         config: false,
@@ -237,18 +301,18 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalSeasonDisplayMode.Name',
+        name: 'CALENDARIA.Common.SeasonDisplay',
         hint: 'CALENDARIA.Settings.BigCalSeasonDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
-          choices: { full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full', icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly', text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly' },
+          choices: { full: 'CALENDARIA.Common.DisplayIconText', icon: 'CALENDARIA.Common.DisplayIconOnly', text: 'CALENDARIA.Common.DisplayTextOnly' },
           initial: 'full'
         }),
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_ERA]: {
-        name: 'CALENDARIA.Settings.BigCalShowEra.Name',
+        name: 'CALENDARIA.Common.ShowEra',
         hint: 'CALENDARIA.Settings.BigCalShowEra.Hint',
         scope: 'user',
         config: false,
@@ -256,15 +320,15 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_ERA_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalEraDisplayMode.Name',
+        name: 'CALENDARIA.Common.EraDisplay',
         hint: 'CALENDARIA.Settings.BigCalEraDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
-            icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
-            text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+            full: 'CALENDARIA.Common.DisplayIconText',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
+            text: 'CALENDARIA.Common.DisplayTextOnly',
             abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
           },
           initial: 'full'
@@ -272,7 +336,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_CYCLES]: {
-        name: 'CALENDARIA.Settings.BigCalShowCycles.Name',
+        name: 'CALENDARIA.Common.ShowCycles',
         hint: 'CALENDARIA.Settings.BigCalShowCycles.Hint',
         scope: 'user',
         config: false,
@@ -280,14 +344,14 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Name',
+        name: 'CALENDARIA.Common.CyclesDisplay',
         hint: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
-            icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+            name: 'CALENDARIA.Common.Name',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
           },
@@ -296,7 +360,7 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Settings.BigCalShowMoonPhases.Name',
+        name: 'CALENDARIA.Common.ShowMoonPhases',
         hint: 'CALENDARIA.Settings.BigCalShowMoonPhases.Hint',
         scope: 'user',
         config: false,
@@ -304,8 +368,8 @@ export default class CalendariaSettings {
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED]: {
-        name: 'CALENDARIA.Settings.BigCalHeaderShowSelected.Name',
-        hint: 'CALENDARIA.Settings.BigCalHeaderShowSelected.Hint',
+        name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
+        hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: false }),
@@ -327,13 +391,10 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
         onChange: () => BigCal.updateIdleOpacity()
       },
-      formatMigrationComplete: { name: 'Format Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      settingKeyMigrationComplete: { name: 'Setting Key Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      intercalaryMigrationComplete: { name: 'Intercalary Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      weatherZoneMigrationComplete: { name: 'Weather Zone Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      legacyCalendarMigrationComplete: { name: 'Legacy Calendar Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      dateIndexingMigrationComplete: { name: 'Date Indexing Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      tokenMigrationComplete: { name: 'Token Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      noteConditionTreeMigrationComplete: { name: 'Note Condition Tree Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      noteVisibilityMigrationComplete: { name: 'Note Visibility Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      presetSchemaV2MigrationComplete: { name: 'Preset Schema V2 Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      festivalPresetRemovalComplete: { name: 'Festival Preset Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -565,7 +626,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.HUDCalendarButton.Hint',
         scope: 'client',
         config: false,
-        type: new StringField({ choices: { bigcal: 'CALENDARIA.Settings.HUDCalendarButton.BigCal', minical: 'CALENDARIA.Settings.HUDCalendarButton.MiniCal' }, initial: 'bigcal' }),
+        type: new StringField({ choices: { bigcal: 'CALENDARIA.Common.BigCal', minical: 'CALENDARIA.Common.MiniCal' }, initial: 'bigcal' }),
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_DIAL_STYLE]: {
@@ -584,30 +645,120 @@ export default class CalendariaSettings {
         type: new StringField({ choices: { down: 'CALENDARIA.Settings.HUDTrayDirection.Down', up: 'CALENDARIA.Settings.HUDTrayDirection.Up' }, initial: 'down' }),
         onChange: renderHUD
       },
-      [SETTINGS.HUD_COMBAT_COMPACT]: { name: 'Legacy Combat Compact', scope: 'user', config: false, type: new BooleanField({ initial: true }) },
-      [SETTINGS.HUD_COMBAT_HIDE]: { name: 'Legacy Combat Hide', scope: 'user', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.HUD_COMBAT_MODE]: {
-        name: 'CALENDARIA.Settings.HUDCombatMode.Name',
+        name: 'CALENDARIA.Common.CombatBehavior',
         hint: 'CALENDARIA.Settings.HUDCombatMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Settings.HUDCombatMode.None',
+            none: 'CALENDARIA.Common.None',
             compactCombat: 'CALENDARIA.Settings.HUDCombatMode.CompactCombat',
             compactEncounter: 'CALENDARIA.Settings.HUDCombatMode.CompactEncounter',
-            hideCombat: 'CALENDARIA.Settings.HUDCombatMode.HideCombat',
-            hideEncounter: 'CALENDARIA.Settings.HUDCombatMode.HideEncounter'
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
           initial: 'compactCombat'
         })
       },
-      [SETTINGS.HUD_DISABLE_WEATHER_FX]: {
-        name: 'CALENDARIA.Settings.HUDDisableWeatherFx.Name',
-        hint: 'CALENDARIA.Settings.HUDDisableWeatherFx.Hint',
+      [SETTINGS.BIG_CAL_COMBAT_MODE]: {
+        name: 'CALENDARIA.Common.CombatBehavior',
+        hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
+        scope: 'user',
+        config: false,
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
+          },
+          initial: 'none'
+        })
+      },
+      [SETTINGS.CHRONICLE_COMBAT_MODE]: {
+        name: 'CALENDARIA.Common.CombatBehavior',
+        hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
+        scope: 'user',
+        config: false,
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
+          },
+          initial: 'none'
+        })
+      },
+      [SETTINGS.MINI_CAL_COMBAT_MODE]: {
+        name: 'CALENDARIA.Common.CombatBehavior',
+        hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
+        scope: 'user',
+        config: false,
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
+          },
+          initial: 'none'
+        })
+      },
+      [SETTINGS.TIMEKEEPER_COMBAT_MODE]: {
+        name: 'CALENDARIA.Common.CombatBehavior',
+        hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
+        scope: 'user',
+        config: false,
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
+          },
+          initial: 'none'
+        })
+      },
+      [SETTINGS.STOPWATCH_COMBAT_MODE]: {
+        name: 'CALENDARIA.Common.CombatBehavior',
+        hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
+        scope: 'user',
+        config: false,
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
+          },
+          initial: 'none'
+        })
+      },
+      [SETTINGS.SUN_DIAL_COMBAT_MODE]: {
+        name: 'CALENDARIA.Common.CombatBehavior',
+        hint: 'CALENDARIA.Settings.WidgetCombatMode.Hint',
+        scope: 'user',
+        config: false,
+        type: new StringField({
+          choices: {
+            none: 'CALENDARIA.Common.None',
+            hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
+            hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
+          },
+          initial: 'none'
+        })
+      },
+      [SETTINGS.HUD_WEATHER_FX_MODE]: {
+        name: 'CALENDARIA.Settings.HUDWeatherFxMode.Name',
+        hint: 'CALENDARIA.Settings.HUDWeatherFxMode.Hint',
         scope: 'client',
         config: false,
-        type: new BooleanField({ initial: false }),
+        type: new StringField({ initial: 'full', choices: ['full', 'reduced', 'off'] }),
+        onChange: renderHUD
+      },
+      [SETTINGS.HUD_BORDER_GLOW]: {
+        name: 'CALENDARIA.Settings.HUDBorderGlow.Name',
+        hint: 'CALENDARIA.Settings.HUDBorderGlow.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true }),
         onChange: renderHUD
       },
       [SETTINGS.HUD_DOME_BELOW]: {
@@ -659,8 +810,8 @@ export default class CalendariaSettings {
         onChange: renderHUD
       },
       [SETTINGS.HUD_STICKY_ZONES_ENABLED]: {
-        name: 'CALENDARIA.Settings.StickyZones.Name',
-        hint: 'CALENDARIA.Settings.StickyZones.Hint',
+        name: 'CALENDARIA.Settings.Name',
+        hint: 'CALENDARIA.Settings.Hint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: true })
@@ -687,7 +838,7 @@ export default class CalendariaSettings {
         })
       },
       [SETTINGS.HUD_SHOW_WEATHER]: {
-        name: 'CALENDARIA.Settings.HUDShowWeather.Name',
+        name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Settings.HUDShowWeather.Hint',
         scope: 'user',
         config: false,
@@ -695,7 +846,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SHOW_SEASON]: {
-        name: 'CALENDARIA.Settings.HUDShowSeason.Name',
+        name: 'CALENDARIA.Common.ShowSeason',
         hint: 'CALENDARIA.Settings.HUDShowSeason.Hint',
         scope: 'user',
         config: false,
@@ -703,7 +854,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SHOW_ERA]: {
-        name: 'CALENDARIA.Settings.HUDShowEra.Name',
+        name: 'CALENDARIA.Common.ShowEra',
         hint: 'CALENDARIA.Settings.HUDShowEra.Hint',
         scope: 'user',
         config: false,
@@ -711,7 +862,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_WEATHER_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Name',
+        name: 'CALENDARIA.Common.WeatherDisplay',
         hint: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Hint',
         scope: 'user',
         config: false,
@@ -719,7 +870,7 @@ export default class CalendariaSettings {
           choices: {
             full: 'CALENDARIA.Settings.HUDWeatherDisplayMode.Full',
             temp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly',
-            icon: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconOnly',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             iconTemp: 'CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'
           },
           initial: 'full'
@@ -727,26 +878,26 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SEASON_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Name',
+        name: 'CALENDARIA.Common.SeasonDisplay',
         hint: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
-          choices: { full: 'CALENDARIA.Settings.HUDSeasonDisplayMode.Full', icon: 'CALENDARIA.Settings.HUDSeasonDisplayMode.IconOnly', text: 'CALENDARIA.Settings.HUDSeasonDisplayMode.TextOnly' },
+          choices: { full: 'CALENDARIA.Common.DisplayIconText', icon: 'CALENDARIA.Common.DisplayIconOnly', text: 'CALENDARIA.Common.DisplayTextOnly' },
           initial: 'full'
         }),
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_ERA_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDEraDisplayMode.Name',
+        name: 'CALENDARIA.Common.EraDisplay',
         hint: 'CALENDARIA.Settings.HUDEraDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            full: 'CALENDARIA.Settings.HUDEraDisplayMode.Full',
-            icon: 'CALENDARIA.Settings.HUDEraDisplayMode.IconOnly',
-            text: 'CALENDARIA.Settings.HUDEraDisplayMode.TextOnly',
+            full: 'CALENDARIA.Common.DisplayIconText',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
+            text: 'CALENDARIA.Common.DisplayTextOnly',
             abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
           },
           initial: 'full'
@@ -754,7 +905,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_SHOW_CYCLES]: {
-        name: 'CALENDARIA.Settings.HUDShowCycles.Name',
+        name: 'CALENDARIA.Common.ShowCycles',
         hint: 'CALENDARIA.Settings.HUDShowCycles.Hint',
         scope: 'user',
         config: false,
@@ -762,14 +913,14 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.HUD_CYCLES_DISPLAY_MODE]: {
-        name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Name',
+        name: 'CALENDARIA.Common.CyclesDisplay',
         hint: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Hint',
         scope: 'user',
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Settings.HUDCyclesDisplayMode.NameOption',
-            icon: 'CALENDARIA.Settings.HUDCyclesDisplayMode.IconOnly',
+            name: 'CALENDARIA.Common.Name',
+            icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
           },
@@ -778,7 +929,7 @@ export default class CalendariaSettings {
         onChange: renderHUDBar
       },
       [SETTINGS.FORCE_HUD]: {
-        name: 'CALENDARIA.Settings.ForceHUD.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceHUD.Hint',
         scope: 'world',
         config: false,
@@ -786,12 +937,26 @@ export default class CalendariaSettings {
         onChange: async (value) => {
           if (value) {
             await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
-            HUD.show();
+            HUD.show({ silent: true });
+          }
+        }
+      },
+      [SETTINGS.SHOW_CHRONICLE]: { name: 'Show Chronicle', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.FORCE_CHRONICLE]: {
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
+        hint: 'CALENDARIA.Settings.ForceChronicle.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: async (value) => {
+          if (value) {
+            await game.settings.set(MODULE.ID, SETTINGS.SHOW_CHRONICLE, true);
+            Chronicle.show({ silent: true });
           }
         }
       },
       [SETTINGS.FORCE_BIG_CAL]: {
-        name: 'CALENDARIA.Settings.ForceBigCal.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceBigCal.Hint',
         scope: 'world',
         config: false,
@@ -799,12 +964,12 @@ export default class CalendariaSettings {
         onChange: async (value) => {
           if (value) {
             await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
-            BigCal.show();
+            BigCal.show({ silent: true });
           }
         }
       },
       [SETTINGS.FORCE_MINI_CAL]: {
-        name: 'CALENDARIA.Settings.ForceMiniCal.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceMiniCal.Hint',
         scope: 'world',
         config: false,
@@ -812,12 +977,12 @@ export default class CalendariaSettings {
         onChange: async (value) => {
           if (value) {
             await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
-            MiniCal.show();
+            MiniCal.show({ silent: true });
           }
         }
       },
       [SETTINGS.FORCE_TIME_KEEPER]: {
-        name: 'CALENDARIA.Settings.ForceTimeKeeper.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceTimeKeeper.Hint',
         scope: 'world',
         config: false,
@@ -825,12 +990,12 @@ export default class CalendariaSettings {
         onChange: async (value) => {
           if (value) {
             await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, true);
-            TimeKeeper.show();
+            TimeKeeper.show({ silent: true });
           }
         }
       },
       [SETTINGS.FORCE_STOPWATCH]: {
-        name: 'CALENDARIA.Settings.ForceStopwatch.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceStopwatch.Hint',
         scope: 'world',
         config: false,
@@ -838,12 +1003,12 @@ export default class CalendariaSettings {
         onChange: async (value) => {
           if (value) {
             await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
-            Stopwatch.show();
+            Stopwatch.show({ silent: true });
           }
         }
       },
       [SETTINGS.FORCE_SUN_DIAL]: {
-        name: 'CALENDARIA.Settings.ForceSunDial.Name',
+        name: 'CALENDARIA.Common.ForceDisplayForAll',
         hint: 'CALENDARIA.Settings.ForceSunDial.Hint',
         scope: 'world',
         config: false,
@@ -856,7 +1021,12 @@ export default class CalendariaSettings {
         }
       },
       [SETTINGS.CUSTOM_THEME_COLORS]: { name: 'Custom Theme Colors', scope: 'user', config: false, type: new ObjectField({ initial: {} }) },
-      [SETTINGS.THEME_MODE]: { name: 'Theme Mode', scope: 'user', config: false, type: new StringField({ initial: 'dark', choices: ['dark', 'highContrast', 'custom'] }) },
+      [SETTINGS.THEME_MODE]: {
+        name: 'Theme Mode',
+        scope: 'user',
+        config: false,
+        type: new StringField({ initial: 'dark', choices: [...Object.keys(THEME_PRESETS), 'custom'] })
+      },
       [SETTINGS.FORCE_THEME]: {
         name: 'CALENDARIA.Settings.ForceTheme.Name',
         hint: 'CALENDARIA.Settings.ForceTheme.Hint',
@@ -865,16 +1035,14 @@ export default class CalendariaSettings {
         type: new StringField({
           choices: {
             none: 'CALENDARIA.Settings.ForceTheme.None',
-            dark: 'CALENDARIA.ThemeEditor.Presets.Dark',
-            highContrast: 'CALENDARIA.ThemeEditor.Presets.HighContrast',
-            custom: 'CALENDARIA.ThemeEditor.Custom'
+            ...Object.fromEntries(Object.entries(THEME_PRESETS).map(([k, v]) => [k, v.name])),
+            custom: 'CALENDARIA.Common.Custom'
           },
           initial: 'none'
         }),
         onChange: () => initializeTheme()
       },
       [SETTINGS.FORCED_THEME_COLORS]: { name: 'Forced Theme Colors', scope: 'world', config: false, type: new ObjectField({ initial: {} }), onChange: () => initializeTheme() },
-      [SETTINGS.CALENDARS]: { name: 'Calendar Configurations', scope: 'world', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.CUSTOM_CALENDARS]: { name: 'Custom Calendars', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
       [SETTINGS.ACTIVE_CALENDAR]: {
         name: 'CALENDARIA.Settings.ActiveCalendar.Name',
@@ -884,22 +1052,15 @@ export default class CalendariaSettings {
         type: new StringField({ initial: 'gregorian', blank: true }),
         requiresReload: true
       },
-      [SETTINGS.SHOW_ACTIVE_CALENDAR_TO_PLAYERS]: {
-        name: 'CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name',
-        hint: 'CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint',
-        scope: 'world',
-        config: false,
-        type: new BooleanField({ initial: false })
-      },
       [SETTINGS.DEFAULT_OVERRIDES]: { name: 'Default Calendar Overrides', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
-      [SETTINGS.CUSTOM_CATEGORIES]: { name: 'Custom Categories', scope: 'world', config: false, type: new ArrayField(new ObjectField()) },
+      [SETTINGS.CUSTOM_PRESETS]: { name: 'Custom Presets', scope: 'world', config: false, type: new ArrayField(new ObjectField()), onChange: () => invalidatePresetCache() },
       [SETTINGS.CHAT_TIMESTAMP_MODE]: {
         name: 'CALENDARIA.Settings.ChatTimestampMode.Name',
         hint: 'CALENDARIA.Settings.ChatTimestampMode.Hint',
         scope: 'world',
         config: false,
         type: new StringField({
-          choices: { disabled: 'CALENDARIA.Settings.ChatTimestampMode.Disabled', replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace', augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment' },
+          choices: { disabled: 'CALENDARIA.Common.Disabled', replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace', augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment' },
           initial: 'disabled'
         })
       },
@@ -909,6 +1070,20 @@ export default class CalendariaSettings {
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.ENRICHER_CLICK_TARGET]: {
+        name: 'CALENDARIA.Settings.EnricherClickTarget.Name',
+        hint: 'CALENDARIA.Settings.EnricherClickTarget.Hint',
+        scope: 'client',
+        config: false,
+        type: new StringField({
+          choices: {
+            auto: 'CALENDARIA.Settings.EnricherClickTarget.Auto',
+            minical: 'CALENDARIA.Settings.EnricherClickTarget.MiniCal',
+            bigcal: 'CALENDARIA.Settings.EnricherClickTarget.BigCal'
+          },
+          initial: 'auto'
+        })
       },
       [SETTINGS.DISPLAY_FORMATS]: {
         name: 'Display Formats',
@@ -969,7 +1144,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.TimeSpeedMultiplier.Hint',
         scope: 'world',
         config: false,
-        type: new NumberField({ initial: 1, min: 0.01 })
+        type: new NumberField({ initial: 1, min: 0, nullable: false })
       },
       [SETTINGS.TIME_SPEED_INCREMENT]: {
         name: 'CALENDARIA.Settings.TimeSpeedIncrement.Name',
@@ -985,7 +1160,11 @@ export default class CalendariaSettings {
         type: new ObjectField({
           initial: {
             viewBigCal: { player: false, trusted: true, assistant: true },
+            viewChronicle: { player: false, trusted: true, assistant: true },
+            viewHUD: { player: true, trusted: true, assistant: true },
             viewMiniCal: { player: false, trusted: true, assistant: true },
+            viewStopwatch: { player: false, trusted: true, assistant: true },
+            viewSunDial: { player: false, trusted: true, assistant: true },
             viewTimeKeeper: { player: false, trusted: true, assistant: true },
             addNotes: { player: true, trusted: true, assistant: true },
             changeDateTime: { player: false, trusted: false, assistant: true },
@@ -1008,14 +1187,14 @@ export default class CalendariaSettings {
       },
       [SETTINGS.CURRENT_WEATHER]: { name: 'Current Weather', scope: 'world', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.TEMPERATURE_UNIT]: {
-        name: 'CALENDARIA.Settings.TemperatureUnit.Name',
+        name: 'CALENDARIA.Common.Temperature',
         hint: 'CALENDARIA.Settings.TemperatureUnit.Hint',
         scope: 'world',
         config: false,
         type: new StringField({ choices: { celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius', fahrenheit: 'CALENDARIA.Settings.TemperatureUnit.Fahrenheit' }, initial: 'celsius' })
       },
       [SETTINGS.PRECIPITATION_UNIT]: {
-        name: 'CALENDARIA.Settings.PrecipitationUnit.Name',
+        name: 'CALENDARIA.Common.Precipitation',
         hint: 'CALENDARIA.Settings.PrecipitationUnit.Hint',
         scope: 'world',
         config: false,
@@ -1058,6 +1237,20 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ initial: 0.3, min: 0, max: 1, step: 0.05 })
       },
+      [SETTINGS.INTRADAY_WEATHER]: {
+        name: 'CALENDARIA.Settings.IntradayWeather.Name',
+        hint: 'CALENDARIA.Settings.IntradayWeather.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.INTRADAY_CARRY_OVER]: {
+        name: 'CALENDARIA.Settings.IntradayCarryOver.Name',
+        hint: 'CALENDARIA.Settings.IntradayCarryOver.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 50, min: 0, max: 100, step: 5, integer: true })
+      },
       [SETTINGS.CUSTOM_WEATHER_PRESETS]: { name: 'Custom Weather Presets', scope: 'world', config: false, type: new ArrayField(new ObjectField()) },
       [SETTINGS.WEATHER_PRESET_ALIASES]: { name: 'Weather Preset Aliases', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
       [SETTINGS.WEATHER_FORECAST_PLAN]: { name: 'Weather Forecast Plan', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
@@ -1079,6 +1272,13 @@ export default class CalendariaSettings {
       [SETTINGS.FXMASTER_TOP_DOWN]: {
         name: 'CALENDARIA.Settings.FXMaster.TopDown.Name',
         hint: 'CALENDARIA.Settings.FXMaster.TopDown.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_FORCE_DOWNWARD]: {
+        name: 'CALENDARIA.Settings.FXMaster.ForceDownward.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.ForceDownward.Hint',
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: false })
@@ -1118,14 +1318,88 @@ export default class CalendariaSettings {
         config: false,
         type: new ObjectField({ initial: { global: { dawn: '', dusk: '', midday: '', midnight: '', newDay: '' }, season: [], moonPhase: [] } })
       },
+      [SETTINGS.EQUIVALENT_DATE_CALENDARS]: {
+        name: 'CALENDARIA.Settings.EquivalentDateCalendars.Name',
+        hint: 'CALENDARIA.Settings.EquivalentDateCalendars.Hint',
+        scope: 'world',
+        config: false,
+        type: new SetField(new StringField()),
+        default: [],
+        onChange: () => {
+          renderMiniCal();
+          renderBigCal();
+        }
+      },
+      [SETTINGS.SHOW_SECRET_NOTES]: {
+        name: 'CALENDARIA.Settings.ShowSecretNotes.Name',
+        hint: 'CALENDARIA.Settings.ShowSecretNotes.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FOG_OF_WAR_ENABLED]: {
+        name: 'CALENDARIA.Settings.FogOfWar.Name',
+        hint: 'CALENDARIA.Settings.FogOfWar.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => {
+          renderMiniCal();
+          renderBigCal();
+          renderHUD();
+        }
+      },
+      [SETTINGS.FOG_OF_WAR_CONFIG]: {
+        name: 'Fog of War Config',
+        scope: 'world',
+        config: false,
+        type: new ObjectField({ initial: { autoReveal: true, revealRadius: 0 } })
+      },
+      [SETTINGS.FOG_OF_WAR_NAV_MODE]: {
+        name: 'CALENDARIA.Settings.FogOfWar.NavMode',
+        scope: 'world',
+        config: false,
+        type: new StringField({ choices: { skip: 'CALENDARIA.Settings.FogOfWar.NavModeSkip', normal: 'CALENDARIA.Settings.FogOfWar.NavModeNormal' }, initial: 'skip' })
+      },
+      [SETTINGS.FOG_OF_WAR_RANGES]: {
+        name: 'Fog of War Ranges',
+        scope: 'world',
+        config: false,
+        type: new ObjectField({ initial: {} }),
+        onChange: () => {
+          invalidateFogCache();
+          renderMiniCal();
+          renderBigCal();
+          renderHUD();
+        }
+      },
+      [SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE]: {
+        name: 'CALENDARIA.Settings.FogOfWar.RevealIntermediate',
+        hint: 'CALENDARIA.Settings.FogOfWar.RevealIntermediateHint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.FOG_OF_WAR_START_DATE]: {
+        name: 'CALENDARIA.Settings.FogOfWar.StartDate',
+        hint: 'CALENDARIA.Settings.FogOfWar.StartDateHint',
+        scope: 'world',
+        config: false,
+        type: new ObjectField({ initial: {} }),
+        onChange: () => {
+          renderMiniCal();
+          renderBigCal();
+          renderHUD();
+        }
+      },
       [SETTINGS.DEV_MODE]: {
         name: 'Dev Mode',
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: false }),
         onChange: (enabled) => {
-          if (enabled) StickyZones.showDebugZones();
-          else StickyZones.hideDebugZones();
+          if (enabled) showDebugZones();
+          else hideDebugZones();
         }
       },
       [SETTINGS.LOGGING_LEVEL]: {
@@ -1135,7 +1409,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            0: 'CALENDARIA.Settings.Logger.Choices.Off',
+            0: 'CALENDARIA.Common.Off',
             1: 'CALENDARIA.Settings.Logger.Choices.Errors',
             2: 'CALENDARIA.Settings.Logger.Choices.Warnings',
             3: 'CALENDARIA.Settings.Logger.Choices.Verbose'

@@ -4,7 +4,7 @@
  * @author Tyler
  */
 
-import { COMPASS_DIRECTIONS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import { getAllPresets, getPreset } from './data/weather-presets.mjs';
 
@@ -31,6 +31,18 @@ export function seededRandom(seed) {
  */
 export function dateSeed(year, month, day) {
   return year * 10000 + month * 100 + day;
+}
+
+/**
+ * Generate a seed for a specific intraday period.
+ * @param {number} year - Year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} day - Day of month
+ * @param {number} periodIndex - Period index (0=night, 1=morning, 2=afternoon, 3=evening)
+ * @returns {number} Period-specific seed value
+ */
+export function periodSeed(year, month, day, periodIndex) {
+  return dateSeed(year, month, day) * 4 + periodIndex;
 }
 
 /**
@@ -191,6 +203,7 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
     if (previousWeather.temperature != null) temperature = Math.round(previousWeather.temperature * inertia + temperature * (1 - inertia));
     if (previousWeather.wind && !wind.forced) {
       wind.speed = Math.round(previousWeather.wind.speed * inertia + wind.speed * (1 - inertia));
+      wind.kph = resolveWindKph(wind.speed, randomFn);
       if (previousWeather.wind.direction != null && wind.direction != null) wind.direction = lerpAngle(previousWeather.wind.direction, wind.direction, 1 - inertia);
     }
   }
@@ -213,6 +226,61 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
 export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year, month, dayOfMonth, customPresets = [] }) {
   const seed = dateSeed(year, month, dayOfMonth);
   return generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets });
+}
+
+/**
+ * Generate weather for all 4 intraday periods with chained inertia.
+ * Period order: night → morning → afternoon → evening.
+ * @param {object} options - Generation options
+ * @param {object} [options.seasonClimate] - Season's base climate
+ * @param {object} options.zoneConfig - Climate zone config
+ * @param {string} [options.season] - Season name
+ * @param {number} options.year - Year
+ * @param {number} options.month - Month (0-indexed)
+ * @param {number} options.dayOfMonth - Day of month (0-indexed)
+ * @param {object[]} [options.customPresets] - Custom weather presets
+ * @param {number} [options.carryOverChance] - Chance (0-100) that a period copies the previous period's weather instead of generating new (default 50)
+ * @param {string} [options.currentWeatherId] - Current weather ID for first period's inertia
+ * @param {number} [options.inertia] - Day-level inertia (0-1), used for all periods
+ * @param {object|null} [options.previousWeather] - Previous weather for first period blending { temperature, wind }
+ * @returns {{ dominant: object, periods: object }} Dominant weather and per-period breakdown
+ */
+export function generateIntradayWeather({
+  seasonClimate,
+  zoneConfig,
+  season,
+  year,
+  month,
+  dayOfMonth,
+  customPresets = [],
+  carryOverChance = 50,
+  currentWeatherId = null,
+  inertia = 0,
+  previousWeather = null
+}) {
+  const periodOrder = [WEATHER_PERIODS.NIGHT, WEATHER_PERIODS.MORNING, WEATHER_PERIODS.AFTERNOON, WEATHER_PERIODS.EVENING];
+  const periods = {};
+  let prevId = currentWeatherId;
+  let prevWeather = previousWeather;
+  let prevResult = null;
+  for (const period of periodOrder) {
+    const seed = periodSeed(year, month, dayOfMonth, period.index);
+    const isFirst = period.index === 0;
+    if (!isFirst && prevResult && carryOverChance > 0) {
+      const rng = seededRandom(seed + 7919);
+      if (rng() * 100 < carryOverChance) {
+        periods[period.id] = { ...prevResult };
+        continue;
+      }
+    }
+    const weather = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId: prevId, inertia, previousWeather: prevWeather });
+    periods[period.id] = weather;
+    prevId = weather.preset.id;
+    prevWeather = { temperature: weather.temperature, wind: weather.wind };
+    prevResult = weather;
+  }
+  const dominant = periods.morning;
+  return { dominant, periods };
 }
 
 /**
@@ -262,6 +330,8 @@ export function applyForecastVariance(weather, dayDistance, totalDays, accuracy,
  * @param {number} [options.inertia] - Inertia value (0-1) for path-dependent chaining
  * @param {number} [options.accuracy] - Forecast accuracy 0-100 (100 = perfect)
  * @param {object|null} [options.previousWeather] - Previous weather for value-level blending { temperature, wind }
+ * @param {boolean} [options.intraday] - Generate per-period weather for each day
+ * @param {number} [options.carryOverChance] - Chance (0-100) that a period copies the previous period's weather (default 50)
  * @returns {object[]} Array of weather forecasts
  */
 export function generateForecast({
@@ -277,7 +347,9 @@ export function generateForecast({
   currentWeatherId = null,
   inertia = 0,
   accuracy = 100,
-  previousWeather = null
+  previousWeather = null,
+  intraday = false,
+  carryOverChance = 50
 }) {
   const forecast = [];
   let year = startYear;
@@ -289,15 +361,41 @@ export function generateForecast({
     const seasonData = getSeasonForDate ? getSeasonForDate(year, month, dayOfMonth) : null;
     const currentSeason = seasonData?.name ?? season;
     const seasonClimate = seasonData?.climate ?? null;
-    const seed = dateSeed(year, month, dayOfMonth);
-    const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia, previousWeather: prevWeather });
-    previousWeatherId = weather.preset.id;
-    prevWeather = { temperature: weather.temperature, wind: weather.wind };
-    if (accuracy < 100) {
-      const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
-      forecast.push({ year, month, dayOfMonth, ...varied });
+    if (intraday) {
+      const result = generateIntradayWeather({
+        seasonClimate,
+        zoneConfig,
+        season: currentSeason,
+        year,
+        month,
+        dayOfMonth,
+        customPresets,
+        carryOverChance,
+        currentWeatherId: previousWeatherId,
+        inertia,
+        previousWeather: prevWeather
+      });
+      previousWeatherId = result.periods.evening.preset.id;
+      prevWeather = { temperature: result.periods.evening.temperature, wind: result.periods.evening.wind };
+      const entry = { year, month, dayOfMonth, ...result.dominant, isVaried: false, periods: result.periods };
+      if (accuracy < 100) {
+        const seed = dateSeed(year, month, dayOfMonth);
+        const varied = applyForecastVariance(entry, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+        forecast.push({ ...entry, ...varied, periods: entry.periods });
+      } else {
+        forecast.push(entry);
+      }
     } else {
-      forecast.push({ year, month, dayOfMonth, ...weather, isVaried: false });
+      const seed = dateSeed(year, month, dayOfMonth);
+      const weather = generateWeather({ seasonClimate, zoneConfig, season: currentSeason, seed, customPresets, currentWeatherId: previousWeatherId, inertia, previousWeather: prevWeather });
+      previousWeatherId = weather.preset.id;
+      prevWeather = { temperature: weather.temperature, wind: weather.wind };
+      if (accuracy < 100) {
+        const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+        forecast.push({ year, month, dayOfMonth, ...varied });
+      } else {
+        forecast.push({ year, month, dayOfMonth, ...weather, isVaried: false });
+      }
     }
     dayOfMonth++;
     if (getDaysInMonth) {
@@ -317,21 +415,41 @@ export function generateForecast({
 }
 
 /**
+ * Resolve a kph value for a wind speed scale value (0-5) deterministically.
+ * @param {number} speed - Wind speed on 0-5 scale
+ * @param {Function} [randomFn] - Random function
+ * @returns {number} Speed in kph
+ */
+function resolveWindKph(speed, randomFn = Math.random) {
+  const speeds = Object.values(WIND_SPEEDS);
+  const entry = speeds.find((w) => w.value === speed);
+  if (!entry) return 0;
+  const prevEntry = speeds.find((w) => w.value === speed - 1);
+  const min = prevEntry ? prevEntry.kph + 1 : 0;
+  const max = entry.kph;
+  return Math.floor(randomFn() * (max - min + 1)) + min;
+}
+
+/**
  * Generate wind conditions based on preset, zone config, and forced wind rules.
  * @param {object} preset - Weather preset with wind defaults
  * @param {object} [zoneConfig] - Zone config (windDirections, windSpeedRange)
  * @param {Function} [randomFn] - Random function
- * @returns {{ speed: number, direction: number|null, forced: boolean }} Wind conditions
+ * @returns {{ speed: number, kph: number, direction: number|null, forced: boolean }} Wind conditions
  */
 function generateWind(preset, zoneConfig, randomFn = Math.random) {
   const compassValues = Object.values(COMPASS_DIRECTIONS);
   const randomCompass = () => compassValues[Math.floor(randomFn() * compassValues.length)];
-  if (preset.wind?.forced) return { speed: preset.wind.speed, direction: preset.wind.direction ?? randomCompass(), forced: true };
+  if (preset.wind?.forced) {
+    const kph = resolveWindKph(preset.wind.speed, randomFn);
+    return { speed: preset.wind.speed, kph, direction: preset.wind.direction ?? randomCompass(), forced: true };
+  }
   const baseSpeed = preset.wind?.speed ?? 0;
   const zoneMin = zoneConfig?.windSpeedRange?.min ?? 0;
   const zoneMax = zoneConfig?.windSpeedRange?.max ?? 5;
   const variance = Math.round((randomFn() - 0.5) * 2);
   const speed = Math.max(zoneMin, Math.min(zoneMax, baseSpeed + variance));
+  const kph = resolveWindKph(speed, randomFn);
   let direction;
   const dirWeights = zoneConfig?.windDirections ?? {};
   if (Object.keys(dirWeights).length > 0) {
@@ -340,7 +458,7 @@ function generateWind(preset, zoneConfig, randomFn = Math.random) {
   } else {
     direction = preset.wind?.direction ?? randomCompass();
   }
-  return { speed, direction, forced: false };
+  return { speed, kph, direction, forced: false };
 }
 
 /**

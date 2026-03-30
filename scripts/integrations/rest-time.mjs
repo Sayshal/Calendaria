@@ -4,15 +4,19 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CinematicOverlay } from '../applications/_module.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
-import { getCurrentDate } from '../notes/date-utils.mjs';
-import TimeClock from '../time/time-clock.mjs';
-import { log } from '../utils/logger.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
+import { getCurrentDate } from '../notes/_module.mjs';
+import { TimeClock } from '../time/_module.mjs';
+import { log } from '../utils/_module.mjs';
+import { WeatherManager } from '../weather/_module.mjs';
 
 /** @type {number} Hour to advance to when "New Day" is selected (8:00 AM) */
 const NEW_DAY_HOUR = 8;
+
+/** @type {number|null} Debounce timer for PF2E rest handler */
+let pf2eRestTimer = null;
 
 /**
  * Handle pre-rest hook to enable time advancement.
@@ -61,9 +65,6 @@ export function onLongRest(_actor, config) {
   log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
 }
 
-/** @type {number|null} Debounce timer for PF2E rest handler */
-let pf2eRestTimer = null;
-
 /**
  * Handle PF2E "Rest for the Night" hook. Debounced since it fires per-character.
  * @returns {void}
@@ -89,7 +90,7 @@ export function onPF2eRest() {
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
-  game.time.advance(minutesUntilTarget * secondsPerMinute);
+  CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
   log(3, `PF2E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
 }
 

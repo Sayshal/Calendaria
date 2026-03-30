@@ -1,0 +1,55 @@
+<section class="tab {{tab.cssClass}}" data-tab="content" data-group="primary">
+  <div class="note-tab-content">
+    {{#if isFestival}}
+      <div class="festival-banner festival-banner--info">
+        <i class="fas fa-star"></i>
+        {{#if isGM}}
+          <span>{{localize "CALENDARIA.Note.FestivalBannerLinkedGM"}} <a
+              data-action="openFestivalEditor">{{localize "CALENDARIA.Settings.CalendarEditor.Name"}}</a>.</span>
+        {{else}}
+          <span>{{localize "CALENDARIA.Note.FestivalBannerLinked"}}</span>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    <div class="form-row-header">
+      <fieldset>
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Title'}}">
+          {{localize "CALENDARIA.Note.Title"}}
+        </legend>
+        <input type="text" id="note-name" name="name" value="{{name}}"
+          placeholder="{{localize 'CALENDARIA.Note.NewNote'}}">
+      </fieldset>
+
+      <fieldset>
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Emblem'}}">
+          {{localize "CALENDARIA.Note.Emblem"}}
+        </legend>
+        <div class="emblem-controls">
+          <div class="icon-picker" data-action="selectIcon" data-icon-type="{{iconType}}" data-tooltip
+            aria-label="{{localize 'CALENDARIA.UI.IconPickerTooltip'}}">
+            {{#if (eq iconType "fontawesome")}}
+              <i class="{{system.icon}} icon-preview" style="color: {{system.color}}"></i>
+            {{else}}
+              <img src="{{system.icon}}" alt="Note Icon" class="icon-preview"
+                style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);">
+            {{/if}}
+            <input type="hidden" name="system.icon" value="{{system.icon}}">
+            <input type="hidden" name="system.iconType" value="{{iconType}}">
+          </div>
+          <color-picker name="system.color" value="{{system.color}}" class="color-input" data-tooltip
+            aria-label="{{localize 'CALENDARIA.UI.ColorTooltip'}}"></color-picker>
+        </div>
+      </fieldset>
+    </div>
+
+    <fieldset class="editor-fieldset">
+      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Content'}}">
+        {{localize "CALENDARIA.Note.Content"}}
+      </legend>
+      <prose-mirror id="note-content" name="text.content" value="{{text.content}}"
+        aria-label="{{localize 'CALENDARIA.Note.Content'}}"></prose-mirror>
+    </fieldset>
+
+  </div>
+</section>

@@ -1,18 +1,24 @@
 # Permissions
 
-Calendaria includes a role-based permission system that controls what actions different user roles can perform.
+Role-based permission system controlling what actions different user roles can perform.
 
 ---
 
 ## Overview
 
-The permission system allows GMs to configure which Calendaria features are available to:
+GMs configure which features are available to:
 
-- **Players** — Standard player role
-- **Trusted Players** — Trusted player role
-- **Assistant GMs** — Assistant GM role
+- **Players.** Standard player role
+- **Trusted Players.** Trusted player role
+- **Assistant GMs.** Assistant GM role
 
 GMs always have full access to all features.
+
+### Widget View Permissions
+
+Every widget has a dedicated view permission. Without it, the widget does not render; users see nothing in its place. Applies to all 7 widgets: BigCal, MiniCal, HUD, Time Keeper, Sun Dial, Chronicle, and Stopwatch.
+
+When a GM uses **Show to All**, Calendaria checks whether any active players are blocked by view permissions. If so, the GM gets a notification listing blocked users by name. Permitted users see the widget; blocked users are unaffected.
 
 ---
 
@@ -29,12 +35,15 @@ GMs always have full access to all features.
 
 ### UI Visibility Permissions
 
-| Permission           | Key              | Description                |
-| -------------------- | ---------------- | -------------------------- |
-| **View BigCal**      | `viewBigCal`     | Can see the BigCal         |
-| **View MiniCal**     | `viewMiniCal`    | Can see the MiniCal widget |
-| **View Time Keeper** | `viewTimeKeeper` | Can see the Time Keeper    |
-| **View Sun Dial**    | `viewSunDial`    | Can see the Sun Dial       |
+| Permission           | Key              | Description                    |
+| -------------------- | ---------------- | ------------------------------ |
+| **View BigCal**      | `viewBigCal`     | Can see the BigCal             |
+| **View MiniCal**     | `viewMiniCal`    | Can see the MiniCal widget     |
+| **View HUD**         | `viewHUD`        | Can see the HUD                |
+| **View Time Keeper** | `viewTimeKeeper` | Can see the Time Keeper        |
+| **View Sun Dial**    | `viewSunDial`    | Can see the Sun Dial           |
+| **View Chronicle**   | `viewChronicle`  | Can see the Chronicle timeline |
+| **View Stopwatch**   | `viewStopwatch`  | Can see the Stopwatch          |
 
 ### Action Permissions
 
@@ -59,8 +68,11 @@ By default, all non-GM roles have restricted access:
 | --------------------- | :----: | :-----: | :----------: |
 | View BigCal           |   -    |    ✓    |      ✓       |
 | View MiniCal          |   -    |    ✓    |      ✓       |
+| View HUD              |   ✓    |    ✓    |      ✓       |
 | View Time Keeper      |   -    |    ✓    |      ✓       |
 | View Sun Dial         |   -    |    ✓    |      ✓       |
+| View Chronicle        |   -    |    ✓    |      ✓       |
+| View Stopwatch        |   -    |    ✓    |      ✓       |
 | Manage Notes          |   ✓    |    ✓    |      ✓       |
 | Edit Notes            |   -    |    ✓    |      ✓       |
 | Delete Notes          |   -    |    -    |      ✓       |
@@ -76,7 +88,7 @@ By default, all non-GM roles have restricted access:
 
 ### UI Controls
 
-When a user lacks permission for an action, the corresponding UI controls are hidden or disabled:
+Without permission for an action, UI controls are hidden or disabled:
 
 - Time control buttons hidden without Change Date/Time permission
 - Weather picker disabled without Change Weather permission
@@ -86,7 +98,7 @@ When a user lacks permission for an action, the corresponding UI controls are hi
 
 ### Socket Relay
 
-For non-GM users with appropriate permissions, actions that modify world state are relayed through a socket system to the GM for execution. This ensures proper authority while allowing delegated control.
+Non-GM users with appropriate permissions relay world-state-modifying actions through a socket to the GM for execution.
 
 Socket relay is used for:
 
@@ -97,16 +109,16 @@ Socket relay is used for:
 
 ## For Developers
 
-See [API Reference > Permissions](API-Reference#permissions) for programmatic permission checks.
+See [API Reference](API-Reference) and [Hooks](Hooks).
 
 ---
 
 ## Permission Inheritance
 
-The permission UI provides cascade-up behavior for easier configuration:
+Permission UI has cascade-up behavior:
 
 - **Cascade Up**: Checking a lower role (e.g., Player) automatically checks higher roles (Trusted, Assistant GM)
-- **Independent Unchecking**: Unchecking a role does not affect other roles — each can be unchecked individually
+- **Independent Unchecking**: Unchecking a role does not affect other roles; each can be unchecked individually
 
 ---
 
@@ -114,19 +126,19 @@ The permission UI provides cascade-up behavior for easier configuration:
 
 ### Manage Notes
 
-- Users can view non-GM-only notes that they have at least OBSERVER permission on (respects Foundry journal permissions)
-- With this permission, users can create new notes
-- Users can only delete notes they created (original author); GMs can delete any note
+- Users view non-GM-only notes they have at least OBSERVER permission on (respects Foundry journal permissions)
+- Grants note creation
+- Users can only delete their own notes (original author); GMs can delete any note
 - If the user lacks Foundry's core `JOURNAL_CREATE` permission, note creation is relayed to a connected GM via socket
 
 ### Edit Notes
 
-- Allows users to edit calendar notes owned by other players
+- Edit calendar notes owned by other players
 - Does not apply to GM-only notes
-- Ownership is automatically synced when the world loads and whenever the permission setting changes
-- Removing a user from this permission revokes their ownership on all calendar notes (preserving author and GM ownership)
-- When a note's "GM Only" flag is toggled off, users with this permission automatically receive owner-level access
-- Only the original note author or a GM can delete a note (regardless of this permission)
+- Ownership syncs on world load and when the permission setting changes
+- Removing a user revokes their ownership on all calendar notes (author and GM ownership preserved)
+- Toggling off a note's "GM Only" flag grants owner-level access to users with this permission
+- Only the original author or a GM can delete a note (regardless of this permission)
 
 ### View Weather Forecast
 
@@ -141,13 +153,18 @@ The permission UI provides cascade-up behavior for easier configuration:
 - Includes advancing time, setting specific dates, and real-time clock control
 - Time changes are broadcast to all clients
 
+### Settings Tab Access
+
+- **Stopwatch** and **Sun Dial** settings tabs expose user-scope settings (fade, opacity, combat behavior) to non-GM users for personal customization
+- World-scope settings on these tabs remain GM-only
+- Settings panel tabs for BigCal, HUD, Chronicle, Stopwatch, and Sun Dial are hidden from users who lack the corresponding view permission
+
 ### Change Calendar
 
 - Controls whether users can switch the active calendar
-- **Note**: Visibility of the active calendar for players is controlled separately via the "Show Active Calendar to Players" setting in Settings > Home tab
+- Player visibility of the active calendar is controlled separately via "Show Active Calendar to Players" in Settings > Home tab
 
 ### Edit Calendars
 
-- This is a powerful permission — allows modifying calendar structure
-- Consider restricting to GM only in most games
+- Allows modifying calendar structure. Restrict to GM only in most games
 - Changes affect all players in the world

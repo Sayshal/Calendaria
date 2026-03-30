@@ -1,0 +1,212 @@
+<section class="tab {{tab.cssClass}}" data-tab="settings" data-group="primary">
+  <div class="note-tab-settings">
+    {{#if isFestival}}
+      <div class="festival-banner festival-banner--info">
+        <i class="fas fa-star"></i>
+        {{#if isGM}}
+          <span>{{localize "CALENDARIA.Note.FestivalBannerLinkedGM"}} <a
+              data-action="openFestivalEditor">{{localize "CALENDARIA.Settings.CalendarEditor.Name"}}</a>.</span>
+        {{else}}
+          <span>{{localize "CALENDARIA.Note.FestivalBannerLinked"}}</span>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    {{!-- Display --}}
+    <div class="settings-row">
+      <fieldset>
+        <legend
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'CALENDARIA.Common.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
+          {{localize "CALENDARIA.Common.Visibility"}}
+        </legend>
+        <div class="visibility-group">
+          {{#if isGM}}
+            <select name="system.visibility" data-tooltip aria-label="{{localize 'CALENDARIA.Note.VisibilityTooltip'}}">
+              <option value="visible" {{#if (eq system.visibility "visible")}}selected{{/if}}>
+                {{localize "CALENDARIA.Note.Visibility.Visible"}}
+              </option>
+              <option value="hidden" {{#if (eq system.visibility "hidden")}}selected{{/if}}>
+                {{localize "CALENDARIA.Common.Hidden"}}
+              </option>
+              <option value="secret" {{#if (eq system.visibility "secret")}}selected{{/if}}>
+                {{localize "CALENDARIA.Note.Visibility.Secret"}}
+              </option>
+            </select>
+          {{else}}
+            <span class="visibility-label">
+              <i class="fas {{visibilityIcon}}"></i>
+              {{localize visibilityLabel}}
+            </span>
+            <input type="hidden" name="system.visibility" value="{{system.visibility}}">
+          {{/if}}
+          <label data-tooltip aria-label="{{localize 'CALENDARIA.UI.SilentTooltip'}}">
+            <input type="checkbox" name="system.silent" {{checked system.silent}}>
+            {{localize "CALENDARIA.Note.Silent"}}
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="display-style-fieldset">
+        <legend
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Common.Icon'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.IconHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Pip'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.PipHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Banner'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.BannerHint'}}">
+          {{localize "CALENDARIA.Note.DisplayStyleLabel"}}
+        </legend>
+        <select name="system.displayStyle">
+          <option value="icon" {{#if (eq system.displayStyle "icon")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.Icon"}}
+          </option>
+          <option value="pip" {{#if (eq system.displayStyle "pip")}}selected{{/if}}>
+            {{localize "CALENDARIA.Note.DisplayStyle.Pip"}}
+          </option>
+          <option value="banner" {{#if (eq system.displayStyle "banner")}}selected{{/if}}>
+            {{localize "CALENDARIA.Note.DisplayStyle.Banner"}}
+          </option>
+        </select>
+      </fieldset>
+
+      <fieldset class="macro-fieldset">
+        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize
+            "CALENDARIA.Common.Macro"}}</legend>
+        <select name="system.macro" data-tooltip aria-label="{{localize 'CALENDARIA.UI.MacroTooltip'}}">
+          <option value="">{{localize "CALENDARIA.Common.None"}}</option>
+          {{#each availableMacros}}
+            <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+      </fieldset>
+    </div>
+
+    {{!-- Duration --}}
+    <fieldset class="duration-fieldset">
+      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Duration'}}">{{localize
+          "CALENDARIA.Common.Duration"}}</legend>
+      <div class="duration-grid">
+        <div class="duration-cell">
+          <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.EnableHint'}}">
+            <input type="checkbox" name="system.hasDuration" {{checked system.hasDuration}}>
+            {{localize "CALENDARIA.Common.HasDuration"}}
+          </label>
+          <input type="number" name="system.duration" value="{{system.duration}}" min="1" step="1"
+            {{#unless system.hasDuration}}disabled{{/unless}}>
+        </div>
+        <div class="duration-cell">
+          <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.ShowBookendsHint'}}">
+            <input type="checkbox" name="system.showBookends" {{checked system.showBookends}}
+              {{#unless system.hasDuration}}disabled{{/unless}}>
+            {{localize "CALENDARIA.Note.Duration.ShowBookends"}}
+          </label>
+        </div>
+        <div class="duration-cell">
+          <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.LimitedRepeatHint'}}">
+            <input type="checkbox" name="system.limitedRepeat" {{checked system.limitedRepeat}}
+              {{#unless system.hasDuration}}disabled{{/unless}}>
+            {{localize "CALENDARIA.Note.Duration.LimitedRepeat"}}
+          </label>
+          <input type="number" name="system.limitedRepeatDays" value="{{system.limitedRepeatDays}}" min="1" step="1"
+            {{#unless (and system.hasDuration system.limitedRepeat)}}disabled{{/unless}}>
+        </div>
+      </div>
+    </fieldset>
+
+    {{!-- Reminders --}}
+    <fieldset class="reminder-fieldset">
+      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Reminder'}}">{{localize
+          "CALENDARIA.Reminder.Label"}}</legend>
+      <div class="reminder-controls">
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Common.NotifType"}}</label>
+          <select name="system.reminderType" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTypeTooltip'}}">
+            {{#each reminderTypeOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderTargets"}}</label>
+          <select name="system.reminderTargets" data-tooltip
+            aria-label="{{localize 'CALENDARIA.UI.ReminderTargetsTooltip'}}"
+            {{#unless showReminderOptions}}disabled{{/unless}}>
+            {{#each reminderTargetOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group-stacked">
+          <label>{{localize "CALENDARIA.Note.ReminderOffset"}}</label>
+          <input type="number" name="system.reminderOffset" value="{{system.reminderOffset}}" min="0" max="720" step="1"
+            placeholder="0" data-tooltip aria-label="{{localize 'CALENDARIA.Note.ReminderOffsetTooltip'}}"
+            {{#unless showReminderOptions}}disabled{{/unless}}>
+        </div>
+        {{#if showReminderUsers}}
+          <div class="form-group-stacked reminder-users">
+            <label>{{localize "CALENDARIA.Note.ReminderUsers"}}</label>
+            <multi-select name="system.reminderUsers">
+              {{#each userOptions}}
+                <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+              {{/each}}
+            </multi-select>
+          </div>
+        {{/if}}
+      </div>
+    </fieldset>
+
+    {{!-- Categories --}}
+    <fieldset class="presets-fieldset">
+      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Categories'}}">{{localize
+          "CALENDARIA.Note.Categories"}}</legend>
+      <div class="inline-form">
+        <multi-select name="system.categories">
+          {{#each presetOptions}}
+            <option value="{{id}}" {{#if selected}}selected{{/if}} {{#if custom}}data-custom="true" {{/if}}>
+              {{label}}
+            </option>
+          {{/each}}
+        </multi-select>
+        <input type="text" class="new-preset-input" placeholder="{{localize 'CALENDARIA.Note.NewCategory'}}">
+        <button type="button" class="add-btn" data-action="addPreset" data-tooltip
+          aria-label="{{localize 'CALENDARIA.UI.AddCategory'}}">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+    </fieldset>
+
+    {{!-- Ownership --}}
+    <fieldset class="ownership-fieldset" {{#unless (eq system.visibility "visible")}}disabled{{/unless}} data-tooltip
+      data-tooltip-direction="UP"
+      aria-label="{{#unless (eq system.visibility "visible")}}{{localize 'CALENDARIA.Note.Ownership.DisabledByVisibility'}}{{else}}{{localize 'CALENDARIA.Note.Tooltip.Ownership'}}{{/unless}}">
+      <legend>{{localize "CALENDARIA.Note.Tab.Ownership"}}</legend>
+      <div class="ownership-list">
+        {{#each ownershipEntries}}
+          <div class="ownership-row">
+            <span class="user-name">
+              <i class="fas fa-user" style="color: {{color}}"></i>
+              {{name}}
+            </span>
+            {{#if isGMEntry}}
+              <select disabled>
+                <option selected>{{localize "CALENDARIA.Note.Ownership.Owner"}}</option>
+              </select>
+            {{else if isAuthorEntry}}
+              <select disabled>
+                <option selected>{{localize "CALENDARIA.Note.Ownership.Owner"}}</option>
+              </select>
+            {{else}}
+              <select data-ownership-user="{{userId}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Note.Ownership.Level'}}">
+                <option value="-1" {{#if (eq level -1)}}selected{{/if}}>
+                  {{localize "CALENDARIA.Common.None"}}
+                </option>
+                <option value="2" {{#if (eq level 2)}}selected{{/if}}>
+                  {{localize "CALENDARIA.Note.Ownership.Observer"}}
+                </option>
+                <option value="3" {{#if (eq level 3)}}selected{{/if}}>
+                  {{localize "CALENDARIA.Note.Ownership.Owner"}}
+                </option>
+              </select>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    </fieldset>
+  </div>
+</section>

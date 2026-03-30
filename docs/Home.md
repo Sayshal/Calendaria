@@ -1,6 +1,6 @@
 # Calendaria
 
-A powerful calendar and time tracking module for Foundry VTT.
+A calendar and time tracking module for Foundry VTT.
 
 Track in-game time with animated sky domes, schedule events with complex recurrence patterns, sync scene lighting to sunrise/sunset, and support multiple moons, eras, and custom calendars.
 
@@ -8,9 +8,9 @@ Track in-game time with animated sky domes, schedule events with complex recurre
 
 ## New to Calendaria?
 
-Start here: **[Getting Started](Getting-Started)** — Installation, setup, and first steps.
+Start here: **[Getting Started](Getting-Started)**. Installation, setup, and first steps.
 
-Migrating from another module? **[Importing Calendars](Importing-Calendars)** — Import from Simple Calendar, Fantasy-Calendar.com, and more.
+Migrating from another module? **[Importing Calendars](Importing-Calendars)**. Import from Simple Calendar, Fantasy-Calendar.com, and more.
 
 ---
 
@@ -20,13 +20,13 @@ Migrating from another module? **[Importing Calendars](Importing-Calendars)** �
 
 Watch the sun and moon arc across a realistic sky dome, or choose from compact displays for minimal screen space. The [HUD](HUD) provides at-a-glance time, weather, and event information.
 
-### Flexible Calendars
+### Custom Calendars
 
 Use bundled calendars (Gregorian, Harptos, Exandria, Golarian, and more) or create your own with the [Calendar Editor](Calendar-Editor). Support for custom months, weekdays, leap years, intercalary days, and year zero handling.
 
 ### Smart Events
 
-Schedule [notes and events](Notes-and-Events) with powerful recurrence patterns—daily, weekly, monthly, yearly, or advanced options like moon phases, seasons, linked events, and computed dates (Easter, lunar new year, etc.).
+Schedule [notes and events](Notes-and-Events) with recurrence patterns: daily, weekly, monthly, yearly, or advanced options like moon phases, seasons, linked events, and computed dates (Easter, lunar new year, etc.).
 
 ### Multi-Moon Support
 
@@ -46,15 +46,15 @@ Define historical [eras](Eras-and-Cycles) with custom year formatting (1492 DR, 
 
 Calendaria provides a full API for module integration:
 
-- **[API Reference](API-Reference)** — Full documentation of `CALENDARIA.api` methods
-- **[Hooks](Hooks)** — 35+ hooks for time, calendar, note, and weather events
-- **[Widgets](Widgets)** — Inject custom UI into Calendaria applications
-- **[Macros](Macros)** — Automation examples and recipes
+- **[API Reference](API-Reference).** Full documentation of `CALENDARIA.api` methods
+- **[Hooks](Hooks).** 35+ hooks for time, calendar, note, and weather events
+- **[Widgets](Widgets).** Inject custom UI into Calendaria applications
+- **[Macros](Macros).** Automation examples and recipes
 
 ---
 
 ## Support
 
-- **Issues & Features** — [GitHub Issues](https://github.com/Sayshal/calendaria/issues)
-- **Community** — [Discord](https://discord.gg/foundryvtt)
-- **Support Development** — [Ko-fi](https://ko-fi.com/sayshal)
+- **Issues & Features.** [GitHub Issues](https://github.com/Sayshal/calendaria/issues)
+- **Community.** [Discord](https://discord.gg/foundryvtt)
+- **Support Development.** [Ko-fi](https://ko-fi.com/sayshal)

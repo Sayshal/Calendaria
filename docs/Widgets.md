@@ -6,7 +6,7 @@ Calendaria provides a widget system for external modules to add custom UI elemen
 
 ## Overview
 
-Widgets allow module developers to:
+Widgets let module developers:
 
 - Add custom buttons to the HUD, BigCal, and MiniCal
 - Add custom indicator displays
@@ -172,8 +172,8 @@ CALENDARIA.api.refreshWidgets();
 
 Widget-related hooks are documented in [Hooks > Widget Hooks](Hooks#widget-hooks):
 
-- `calendaria.widgetRegistered` — Fired when a widget is registered
-- `calendaria.widgetsRefresh` — Fired when widgets are refreshed
+- `calendaria.widgetRegistered` - Fired when a widget is registered
+- `calendaria.widgetsRefresh` - Fired when widgets are refreshed
 
 ---
 
@@ -230,12 +230,3 @@ Hooks.once('calendaria.ready', ({ api }) => {
   });
 });
 ```
-
----
-
-## Best Practices
-
-1. **Register on `calendaria.ready`** — Ensure Calendaria is fully loaded
-2. **Use unique IDs** — Combine module ID with descriptive widget ID
-3. **Use semantic icons** — Match Calendaria's FontAwesome icon style
-4. **Respect user settings** — Check permissions before showing controls

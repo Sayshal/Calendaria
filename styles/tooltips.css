@@ -8,7 +8,7 @@
       font-size: 0.9rem;
 
       strong {
-        color: var(--color-text-primary, rgb(238 238 238));
+        color: var(--calendaria-text);
       }
     }
 
@@ -18,13 +18,13 @@
     }
 
     .season {
-      color: var(--color-text-secondary, rgb(170 170 170));
+      color: var(--calendaria-text-secondary);
       font-size: 0.8rem;
     }
 
     .sun {
       margin-top: 0.25rem;
-      color: var(--color-text-secondary, rgb(170 170 170));
+      color: var(--calendaria-text-secondary);
       font-size: 0.8rem;
 
       i {
@@ -40,6 +40,57 @@
         color: rgb(167 139 250);
       }
     }
+
+    .equivalent-dates {
+      margin-top: 0.25rem;
+      padding-top: 0.25rem;
+      border-top: 0.0625rem solid rgb(255 255 255 / 10%);
+      text-align: left;
+    }
+
+    .equivalent-date {
+      color: var(--calendaria-text-secondary);
+      font-size: 0.75rem;
+      line-height: 1.5;
+
+      i {
+        opacity: 0.6;
+        margin-right: 0.25rem;
+      }
+    }
+
+    .tooltip-notes {
+      margin-top: 0.25rem;
+      padding-top: 0.25rem;
+      border-top: 0.0625rem solid rgb(255 255 255 / 10%);
+      text-align: left;
+    }
+
+    .tooltip-note {
+      gap: 0.25rem;
+      display: flex;
+      align-items: center;
+      color: var(--calendaria-text-secondary);
+      font-size: 0.75rem;
+      line-height: 1.5;
+
+      &.festival {
+        font-weight: 600;
+      }
+
+      &.more {
+        opacity: 0.6;
+        font-style: italic;
+      }
+    }
+
+    .tooltip-note-dot {
+      display: inline-block;
+      flex-shrink: 0;
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 50%;
+    }
   }
 
   .weather-tooltip {
@@ -50,12 +101,12 @@
       font-size: 0.9rem;
 
       strong {
-        color: var(--color-text-primary, rgb(238 238 238));
+        color: var(--calendaria-text);
       }
     }
 
     .row {
-      color: var(--color-text-secondary, rgb(170 170 170));
+      color: var(--calendaria-text-secondary);
       font-size: 0.8rem;
 
       i {

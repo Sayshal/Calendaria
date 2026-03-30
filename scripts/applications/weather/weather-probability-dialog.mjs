@@ -4,10 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { TEMPLATES } from '../../constants.mjs';
-import { localize } from '../../utils/localization.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
+import { localize } from '../../utils/_module.mjs';
+import { WeatherManager } from '../../weather/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 

@@ -22,6 +22,23 @@
       </div>
 
       <div class="form-group">
+        <label for="intradayWeather">{{localize "CALENDARIA.Settings.IntradayWeather.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="intradayWeather" name="intradayWeather" {{#if intradayWeather}}checked{{/if}} />
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.IntradayWeather.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="intradayCarryOver">{{localize "CALENDARIA.Settings.IntradayCarryOver.Name"}}</label>
+        <div class="form-fields">
+          <range-picker name="intradayCarryOver" value="{{intradayCarryOver}}" min="0" max="100"
+            step="5"></range-picker>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.IntradayCarryOver.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
         <label for="weatherHistoryDays">{{localize "CALENDARIA.Settings.WeatherHistoryDays.Name"}}</label>
         <div class="form-fields">
           <input type="number" id="weatherHistoryDays" name="weatherHistoryDays" value="{{weatherHistoryDays}}" min="0"
@@ -51,7 +68,7 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-forecast">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Forecast"}}</legend>
+      <legend>{{localize "CALENDARIA.Weather.Forecast"}}</legend>
 
       <div class="form-group">
         <label for="forecastAccuracy">{{localize "CALENDARIA.Settings.ForecastAccuracy.Name"}}</label>
@@ -135,7 +152,7 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-presets">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.WeatherEditor"}}</legend>
+      <legend>{{localize "CALENDARIA.WeatherEditor.Title"}}</legend>
       <div class="form-group">
         <label>{{localize "CALENDARIA.WeatherEditor.Title"}}</label>
         <div class="form-fields">
@@ -175,6 +192,15 @@
         </div>
 
         <div class="form-group">
+          <label for="fxmasterForceDownward">{{localize "CALENDARIA.Settings.FXMaster.ForceDownward.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterForceDownward" name="fxmasterForceDownward"
+              {{#if fxmasterForceDownward}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.ForceDownward.Hint"}}</p>
+        </div>
+
+        <div class="form-group">
           <label for="fxmasterBelowTokens">{{localize "CALENDARIA.Settings.FXMaster.BelowTokens.Name"}}</label>
           <div class="form-fields">
             <input type="checkbox" id="fxmasterBelowTokens" name="fxmasterBelowTokens"
@@ -186,8 +212,7 @@
         <div class="form-group">
           <label for="fxmasterSoundFx">{{localize "CALENDARIA.Settings.FXMaster.soundFX.Name"}}</label>
           <div class="form-fields">
-            <input type="checkbox" id="fxmasterSoundFx" name="fxmasterSoundFx"
-                   {{#if fxmasterSoundFx}}checked{{/if}} />
+            <input type="checkbox" id="fxmasterSoundFx" name="fxmasterSoundFx" {{#if fxmasterSoundFx}}checked{{/if}} />
           </div>
           <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.soundFX.Hint"}}</p>
         </div>
@@ -205,7 +230,7 @@
       </legend>
 
       <div class="form-group">
-        <label for="temperatureUnit">{{localize "CALENDARIA.Settings.TemperatureUnit.Name"}}</label>
+        <label for="temperatureUnit">{{localize "CALENDARIA.Common.Temperature"}}</label>
         <div class="form-fields">
           <select id="temperatureUnit" name="temperatureUnit">
             {{#each temperatureUnitOptions}}
@@ -217,7 +242,7 @@
       </div>
 
       <div class="form-group">
-        <label for="precipitationUnit">{{localize "CALENDARIA.Settings.PrecipitationUnit.Name"}}</label>
+        <label for="precipitationUnit">{{localize "CALENDARIA.Common.Precipitation"}}</label>
         <div class="form-fields">
           <select id="precipitationUnit" name="precipitationUnit">
             {{#each precipitationUnitOptions}}

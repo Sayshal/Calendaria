@@ -1,0 +1,94 @@
+<div
+  class="timeline-entry{{#if fogged}} timeline-entry--fogged{{/if}}{{#if hasFestival}} timeline-entry--festival{{/if}}{{#if isToday}} timeline-entry--today{{/if}}{{#if isEmpty}} timeline-entry--empty{{/if}}"
+  data-year="{{date.year}}" data-month="{{date.month}}" data-day="{{date.dayOfMonth}}">
+
+  <div class="timeline-node">
+    <div class="timeline-node-dot{{#if isToday}} timeline-node-dot--today{{/if}}{{#if hasFestival}} timeline-node-dot--festival{{/if}}"></div>
+  </div>
+
+  <div class="timeline-card">
+    <div class="timeline-date-banner">
+      <span class="timeline-weekday">{{weekday}}</span>
+      <span class="timeline-date">{{formattedDate}}</span>
+      {{#if isToday}}
+        <span class="timeline-today-badge">{{localize "CALENDARIA.Common.Today"}}</span>
+      {{/if}}
+    </div>
+
+    {{#if fogged}}
+      <div class="timeline-fog-overlay">
+        <i class="fas fa-cloud-fog"></i>
+        <span>{{localize "CALENDARIA.Chronicle.Fogged"}}</span>
+      </div>
+    {{else}}
+      <div class="timeline-card-body">
+        {{#each banners}}
+          <div class="entry-banner entry-banner--{{type}}" style="--banner-color: {{color}}">
+            {{#if isImage}}
+              <span class="banner-moon-icon tinted" style="--moon-color: {{color}}">
+                <img src="{{icon}}" alt="" />
+              </span>
+            {{else}}
+              <i class="{{icon}} banner-icon"></i>
+            {{/if}}
+            <span class="banner-label">{{label}}</span>
+          </div>
+        {{/each}}
+
+        {{#if notes.length}}
+          <div class="entry-notes">
+            {{#each notes}}
+              <div class="note-item{{#if isFestival}} note-item--festival{{/if}}" data-action="openNote"
+                data-note-id="{{id}}" data-journal-id="{{journalId}}">
+                <span class="note-icon" style="color: {{color}}">
+                  <i class="{{icon}}"></i>
+                </span>
+                <span class="note-name">{{name}}</span>
+                {{#if author}}
+                  <span class="note-author">— {{author}}</span>
+                {{/if}}
+
+                {{#if excerpt}}
+                  {{#unless content}}
+                    <p class="note-excerpt">{{excerpt}}</p>
+                  {{/unless}}
+                {{/if}}
+
+                {{#if content}}
+                  <div class="note-content{{#unless truncated}} note-content--full{{/unless}}">
+                    {{#if truncated}}
+                      <div class="note-excerpt-preview">{{excerpt}}</div>
+                    {{/if}}
+                    <div class="note-full-content">{{{content}}}</div>
+                    {{#if truncated}}
+                      <button type="button" class="expand-toggle" data-action="expandEntry">
+                        <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <button type="button" class="collapse-toggle" data-action="collapseEntry">
+                        <i class="fas fa-chevron-up"></i>
+                      </button>
+                    {{/if}}
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+
+        {{#if isEmpty}}
+          <div class="entry-empty">
+            <span>{{localize "CALENDARIA.Chronicle.EmptyDay"}}</span>
+          </div>
+        {{/if}}
+
+        {{#if isGM}}
+          <button type="button" class="add-note-btn" data-action="addNote" data-year="{{date.year}}"
+            data-month="{{date.month}}" data-day="{{date.dayOfMonth}}"
+            data-tooltip="{{localize 'CALENDARIA.Chronicle.AddNote'}}">
+            <i class="fas fa-plus"></i>
+          </button>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+</div>

@@ -37,7 +37,7 @@
 
           {{#if isFirstAfter}}
             <div class="form-group">
-              <label>{{localize "CALENDARIA.Note.ComputedCondition"}}</label>
+              <label>{{localize "CALENDARIA.Condition.Builder.ConditionLabel"}}</label>
               <select name="chain.{{index}}.condition">
                 {{#each ../conditionTypes}}
                   <option value="{{value}}" {{#if (eq value ../condition)}}selected{{/if}}>{{label}}</option>
@@ -67,7 +67,7 @@
 
             {{#if isWeekdayCondition}}
               <div class="form-group">
-                <label>{{localize "CALENDARIA.Note.ComputedWeekday"}}</label>
+                <label>{{localize "CALENDARIA.Common.Weekday"}}</label>
                 <select name="chain.{{index}}.params.weekday">
                   {{#each ../weekdays}}
                     <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
@@ -86,7 +86,7 @@
 
           {{#if isWeekdayOnOrAfter}}
             <div class="form-group">
-              <label>{{localize "CALENDARIA.Note.ComputedWeekday"}}</label>
+              <label>{{localize "CALENDARIA.Common.Weekday"}}</label>
               <select name="chain.{{index}}.params.weekday">
                 {{#each ../weekdays}}
                   <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>

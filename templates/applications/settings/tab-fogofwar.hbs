@@ -1,0 +1,92 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <fieldset data-section="fog-of-war">
+    <legend data-tooltip="{{localize "CALENDARIA.SettingsPanel.FogOfWar.Note"}}">
+      {{localize "CALENDARIA.SettingsPanel.Tab.FogOfWar"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="fog-of-war" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="fogOfWarEnabled">{{localize "CALENDARIA.Settings.FogOfWar.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="fogOfWarEnabled" name="fogOfWarEnabled" {{#if fogOfWarEnabled}}checked{{/if}} />
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.FogOfWar.StartDate"}}</label>
+      <div class="form-fields">
+        <label class="inline-label">{{localize "CALENDARIA.Common.Year"}}</label>
+        <input type="number" name="fogStartYear" value="{{fogStartYear}}" />
+        <label class="inline-label">{{localize "CALENDARIA.Common.Month"}}</label>
+        <select name="fogStartMonth" data-action="fogStartMonthChanged">
+          <option value="">—</option>
+          {{#each fogStartMonths}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+        <label class="inline-label">{{localize "CALENDARIA.Common.Day"}}</label>
+        <select name="fogStartDay">
+          <option value="">—</option>
+          {{#each fogStartDays}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.StartDateHint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="fogAutoReveal">{{localize "CALENDARIA.Settings.FogOfWar.AutoReveal"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="fogAutoReveal" name="fogAutoReveal" {{#if fogAutoReveal}}checked{{/if}} />
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.AutoRevealHint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="fogRevealRadius">{{localize "CALENDARIA.Settings.FogOfWar.RevealRadius"}}</label>
+      <div class="form-fields">
+        <input type="number" id="fogRevealRadius" name="fogRevealRadius" value="{{fogRevealRadius}}" min="0" max="30" />
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.RevealRadiusHint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="fogRevealIntermediate">{{localize "CALENDARIA.Settings.FogOfWar.RevealIntermediate"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="fogRevealIntermediate" name="fogRevealIntermediate"
+          {{#if fogRevealIntermediate}}checked{{/if}} />
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.RevealIntermediateHint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="fogNavMode">{{localize "CALENDARIA.Settings.FogOfWar.NavModeName"}}</label>
+      <div class="form-fields">
+        <select id="fogNavMode" name="fogNavMode">
+          {{#each fogNavModeOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{localize label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.NavModeHint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset data-section="fog-of-war-reset">
+    <legend>{{localize "CALENDARIA.Common.Reset"}}</legend>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.FogOfWar.ResetRanges"}}</label>
+      <div class="form-fields">
+        <button type="button" data-action="resetFogOfWar">
+          <i class="fas fa-trash"></i> {{localize "CALENDARIA.Settings.FogOfWar.ResetRangesButton"}}
+        </button>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.FogOfWar.ResetRangesHint"}}</p>
+    </div>
+  </fieldset>
+
+</section>

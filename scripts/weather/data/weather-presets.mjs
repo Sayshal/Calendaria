@@ -51,21 +51,35 @@ export const HUD_EFFECTS = [
   'ley-surge'
 ];
 
+/** @type {string} Base path for built-in weather sound assets. */
+const SOUND_BASE = `modules/${MODULE.ID}/assets/sound`;
+
 /**
- * Available sound effect files for weather ambient loops.
+ * Available built-in sound effect files for weather ambient loops (full paths).
  * @type {string[]}
  */
 export const SOUND_FX_OPTIONS = [
-  'rain-acid-rain-blood-rain',
-  'sunshower-drizzle',
-  'thunderstorm',
-  'sleet-hail',
-  'blizzard-ice-storm',
-  'snow-frost',
-  'hurricane-monsoon-tornado',
-  'sandstorm-dust-devil',
-  'wind'
+  `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`,
+  `${SOUND_BASE}/sunshower-drizzle.ogg`,
+  `${SOUND_BASE}/thunderstorm.ogg`,
+  `${SOUND_BASE}/sleet-hail.ogg`,
+  `${SOUND_BASE}/blizzard-ice-storm.ogg`,
+  `${SOUND_BASE}/snow-frost.ogg`,
+  `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`,
+  `${SOUND_BASE}/sandstorm-dust-devil.ogg`,
+  `${SOUND_BASE}/wind.ogg`
 ];
+
+/**
+ * Expand a legacy sound key to a full Foundry-resolvable path.
+ * @param {string|null} key - Legacy sound key or full path
+ * @returns {string|null} Full sound path or null
+ */
+export function expandLegacySoundKey(key) {
+  if (!key) return null;
+  if (key.includes('/')) return key;
+  return `${SOUND_BASE}/${key}.ogg`;
+}
 
 /**
  * Standard weather conditions - common everyday weather.
@@ -74,7 +88,7 @@ export const SOUND_FX_OPTIONS = [
 export const STANDARD_WEATHER = [
   {
     id: 'clear',
-    label: 'CALENDARIA.Weather.Clear',
+    label: 'CALENDARIA.Common.Clear',
     description: 'CALENDARIA.Weather.ClearDesc',
     icon: 'fa-sun',
     color: '#FFEE88',
@@ -97,7 +111,7 @@ export const STANDARD_WEATHER = [
   },
   {
     id: 'partly-cloudy',
-    label: 'CALENDARIA.Weather.PartlyCloudy',
+    label: 'CALENDARIA.Common.PartlyCloudy',
     description: 'CALENDARIA.Weather.PartlyCloudyDesc',
     icon: 'fa-cloud-sun',
     color: '#D0E8FF',
@@ -120,7 +134,7 @@ export const STANDARD_WEATHER = [
   },
   {
     id: 'cloudy',
-    label: 'CALENDARIA.Weather.Cloudy',
+    label: 'CALENDARIA.Common.Cloudy',
     description: 'CALENDARIA.Weather.CloudyDesc',
     icon: 'fa-cloud',
     color: '#B0C4DE',
@@ -143,7 +157,7 @@ export const STANDARD_WEATHER = [
   },
   {
     id: 'overcast',
-    label: 'CALENDARIA.Weather.Overcast',
+    label: 'CALENDARIA.Common.Overcast',
     description: 'CALENDARIA.Weather.OvercastDesc',
     icon: 'fa-smog',
     color: '#CCCCCC',
@@ -166,7 +180,7 @@ export const STANDARD_WEATHER = [
   },
   {
     id: 'drizzle',
-    label: 'CALENDARIA.Weather.Drizzle',
+    label: 'CALENDARIA.Common.Drizzle',
     description: 'CALENDARIA.Weather.DrizzleDesc',
     icon: 'fa-cloud-rain',
     color: '#CDEFFF',
@@ -185,11 +199,11 @@ export const STANDARD_WEATHER = [
     fxDensity: 'low',
     fxSpeed: 'low',
     fxColor: null,
-    soundFx: 'sunshower-drizzle'
+    soundFx: `${SOUND_BASE}/sunshower-drizzle.ogg`
   },
   {
     id: 'rain',
-    label: 'CALENDARIA.Weather.Rain',
+    label: 'CALENDARIA.Common.Rain',
     description: 'CALENDARIA.Weather.RainDesc',
     icon: 'fa-cloud-showers-heavy',
     color: '#A0D8EF',
@@ -208,11 +222,11 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'rain-acid-rain-blood-rain'
+    soundFx: `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`
   },
   {
     id: 'fog',
-    label: 'CALENDARIA.Weather.Fog',
+    label: 'CALENDARIA.Common.Fog',
     description: 'CALENDARIA.Weather.FogDesc',
     icon: 'fa-smog',
     color: '#E6E6E6',
@@ -235,7 +249,7 @@ export const STANDARD_WEATHER = [
   },
   {
     id: 'mist',
-    label: 'CALENDARIA.Weather.Mist',
+    label: 'CALENDARIA.Common.Mist',
     description: 'CALENDARIA.Weather.MistDesc',
     icon: 'fa-water',
     color: '#F0F8FF',
@@ -258,7 +272,7 @@ export const STANDARD_WEATHER = [
   },
   {
     id: 'windy',
-    label: 'CALENDARIA.Weather.Windy',
+    label: 'CALENDARIA.Common.Windy',
     description: 'CALENDARIA.Weather.WindyDesc',
     icon: 'fa-wind',
     color: '#E0F7FA',
@@ -277,11 +291,11 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'wind'
+    soundFx: `${SOUND_BASE}/wind.ogg`
   },
   {
     id: 'sunshower',
-    label: 'CALENDARIA.Weather.Sunshower',
+    label: 'CALENDARIA.Common.Sunshower',
     description: 'CALENDARIA.Weather.SunshowerDesc',
     icon: 'fa-cloud-sun-rain',
     color: '#FCEABB',
@@ -300,11 +314,11 @@ export const STANDARD_WEATHER = [
     fxDensity: 'low',
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'sunshower-drizzle'
+    soundFx: `${SOUND_BASE}/sunshower-drizzle.ogg`
   },
   {
     id: 'snow',
-    label: 'CALENDARIA.Weather.Snow',
+    label: 'CALENDARIA.Common.Snow',
     description: 'CALENDARIA.Weather.SnowDesc',
     icon: 'fa-snowflake',
     color: '#FFFFFF',
@@ -323,11 +337,11 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'snow-frost'
+    soundFx: `${SOUND_BASE}/snow-frost.ogg`
   },
   {
     id: 'sleet',
-    label: 'CALENDARIA.Weather.Sleet',
+    label: 'CALENDARIA.Common.Sleet',
     description: 'CALENDARIA.Weather.SleetDesc',
     icon: 'fa-cloud-rain',
     color: '#C0D8E8',
@@ -346,11 +360,11 @@ export const STANDARD_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'sleet-hail'
+    soundFx: `${SOUND_BASE}/sleet-hail.ogg`
   },
   {
     id: 'heat-wave',
-    label: 'CALENDARIA.Weather.HeatWave',
+    label: 'CALENDARIA.Common.HeatWave',
     description: 'CALENDARIA.Weather.HeatWaveDesc',
     icon: 'fa-temperature-arrow-up',
     color: '#FF9944',
@@ -380,7 +394,7 @@ export const STANDARD_WEATHER = [
 export const SEVERE_WEATHER = [
   {
     id: 'thunderstorm',
-    label: 'CALENDARIA.Weather.Thunderstorm',
+    label: 'CALENDARIA.Common.Thunderstorm',
     description: 'CALENDARIA.Weather.ThunderstormDesc',
     icon: 'fa-cloud-bolt',
     color: '#3D3560',
@@ -399,11 +413,11 @@ export const SEVERE_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'thunderstorm'
+    soundFx: `${SOUND_BASE}/thunderstorm.ogg`
   },
   {
     id: 'blizzard',
-    label: 'CALENDARIA.Weather.Blizzard',
+    label: 'CALENDARIA.Common.Blizzard',
     description: 'CALENDARIA.Weather.BlizzardDesc',
     icon: 'fa-snowflake',
     color: '#C8DCE8',
@@ -422,11 +436,11 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'blizzard-ice-storm'
+    soundFx: `${SOUND_BASE}/blizzard-ice-storm.ogg`
   },
   {
     id: 'hail',
-    label: 'CALENDARIA.Weather.Hail',
+    label: 'CALENDARIA.Common.Hail',
     description: 'CALENDARIA.Weather.HailDesc',
     icon: 'fa-cloud-meatball',
     color: '#D1EFFF',
@@ -445,11 +459,11 @@ export const SEVERE_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'sleet-hail'
+    soundFx: `${SOUND_BASE}/sleet-hail.ogg`
   },
   {
     id: 'tornado',
-    label: 'CALENDARIA.Weather.Tornado',
+    label: 'CALENDARIA.Common.Tornado',
     description: 'CALENDARIA.Weather.TornadoDesc',
     icon: 'fa-tornado',
     color: '#4A5A3A',
@@ -468,11 +482,11 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'very-high',
     fxColor: null,
-    soundFx: 'hurricane-monsoon-tornado'
+    soundFx: `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`
   },
   {
     id: 'hurricane',
-    label: 'CALENDARIA.Weather.Hurricane',
+    label: 'CALENDARIA.Common.Hurricane',
     description: 'CALENDARIA.Weather.HurricaneDesc',
     icon: 'fa-hurricane',
     color: '#445566',
@@ -491,11 +505,11 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'very-high',
     fxColor: null,
-    soundFx: 'hurricane-monsoon-tornado'
+    soundFx: `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`
   },
   {
     id: 'ice-storm',
-    label: 'CALENDARIA.Weather.IceStorm',
+    label: 'CALENDARIA.Common.IceStorm',
     description: 'CALENDARIA.Weather.IceStormDesc',
     icon: 'fa-icicles',
     color: '#A0C8E0',
@@ -514,11 +528,11 @@ export const SEVERE_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'blizzard-ice-storm'
+    soundFx: `${SOUND_BASE}/blizzard-ice-storm.ogg`
   },
   {
     id: 'monsoon',
-    label: 'CALENDARIA.Weather.Monsoon',
+    label: 'CALENDARIA.Common.Monsoon',
     description: 'CALENDARIA.Weather.MonsoonDesc',
     icon: 'fa-cloud-showers-water',
     color: '#3A6080',
@@ -537,7 +551,7 @@ export const SEVERE_WEATHER = [
     fxDensity: 'very-high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'hurricane-monsoon-tornado'
+    soundFx: `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`
   }
 ];
 
@@ -548,7 +562,7 @@ export const SEVERE_WEATHER = [
 export const ENVIRONMENTAL_WEATHER = [
   {
     id: 'ashfall',
-    label: 'CALENDARIA.Weather.Ashfall',
+    label: 'CALENDARIA.Common.Ashfall',
     description: 'CALENDARIA.Weather.AshfallDesc',
     icon: 'fa-volcano',
     color: '#8B5A30',
@@ -571,7 +585,7 @@ export const ENVIRONMENTAL_WEATHER = [
   },
   {
     id: 'sandstorm',
-    label: 'CALENDARIA.Weather.Sandstorm',
+    label: 'CALENDARIA.Common.Sandstorm',
     description: 'CALENDARIA.Weather.SandstormDesc',
     icon: 'fa-wind',
     color: '#C49A44',
@@ -590,11 +604,11 @@ export const ENVIRONMENTAL_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'sandstorm-dust-devil'
+    soundFx: `${SOUND_BASE}/sandstorm-dust-devil.ogg`
   },
   {
     id: 'luminous-sky',
-    label: 'CALENDARIA.Weather.LuminousSky',
+    label: 'CALENDARIA.Common.LuminousSky',
     description: 'CALENDARIA.Weather.LuminousSkyDesc',
     icon: 'fa-star',
     color: '#2E8B57',
@@ -617,7 +631,7 @@ export const ENVIRONMENTAL_WEATHER = [
   },
   {
     id: 'sakura-bloom',
-    label: 'CALENDARIA.Weather.SakuraBloom',
+    label: 'CALENDARIA.Common.SakuraBloom',
     description: 'CALENDARIA.Weather.SakuraBloomDesc',
     icon: 'fa-spa',
     color: '#ffb7c5',
@@ -640,7 +654,7 @@ export const ENVIRONMENTAL_WEATHER = [
   },
   {
     id: 'autumn-leaves',
-    label: 'CALENDARIA.Weather.AutumnLeaves',
+    label: 'CALENDARIA.Common.AutumnLeaves',
     description: 'CALENDARIA.Weather.AutumnLeavesDesc',
     icon: 'fa-leaf',
     color: '#CC7733',
@@ -663,7 +677,7 @@ export const ENVIRONMENTAL_WEATHER = [
   },
   {
     id: 'rolling-fog',
-    label: 'CALENDARIA.Weather.RollingFog',
+    label: 'CALENDARIA.Common.RollingFog',
     description: 'CALENDARIA.Weather.RollingFogDesc',
     icon: 'fa-smog',
     color: '#D0D0D0',
@@ -686,7 +700,7 @@ export const ENVIRONMENTAL_WEATHER = [
   },
   {
     id: 'wildfire-smoke',
-    label: 'CALENDARIA.Weather.WildfireSmoke',
+    label: 'CALENDARIA.Common.WildfireSmoke',
     description: 'CALENDARIA.Weather.WildfireSmokeDesc',
     icon: 'fa-fire',
     color: '#8B6040',
@@ -709,7 +723,7 @@ export const ENVIRONMENTAL_WEATHER = [
   },
   {
     id: 'dust-devil',
-    label: 'CALENDARIA.Weather.DustDevil',
+    label: 'CALENDARIA.Common.DustDevil',
     description: 'CALENDARIA.Weather.DustDevilDesc',
     icon: 'fa-wind',
     color: '#C8A060',
@@ -728,7 +742,7 @@ export const ENVIRONMENTAL_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'sandstorm-dust-devil'
+    soundFx: `${SOUND_BASE}/sandstorm-dust-devil.ogg`
   }
 ];
 
@@ -739,7 +753,7 @@ export const ENVIRONMENTAL_WEATHER = [
 export const FANTASY_WEATHER = [
   {
     id: 'black-sun',
-    label: 'CALENDARIA.Weather.BlackSun',
+    label: 'CALENDARIA.Common.BlackSun',
     description: 'CALENDARIA.Weather.BlackSunDesc',
     icon: 'fa-circle',
     color: '#1A0E22',
@@ -762,7 +776,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'ley-surge',
-    label: 'CALENDARIA.Weather.LeySurge',
+    label: 'CALENDARIA.Common.LeySurge',
     description: 'CALENDARIA.Weather.LeySurgeDesc',
     icon: 'fa-wand-sparkles',
     color: '#3A9BDC',
@@ -785,7 +799,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'aether-haze',
-    label: 'CALENDARIA.Weather.AetherHaze',
+    label: 'CALENDARIA.Common.AetherHaze',
     description: 'CALENDARIA.Weather.AetherHazeDesc',
     icon: 'fa-smog',
     color: '#7B3F96',
@@ -808,7 +822,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'nullfront',
-    label: 'CALENDARIA.Weather.Nullfront',
+    label: 'CALENDARIA.Common.Nullfront',
     description: 'CALENDARIA.Weather.NullfrontDesc',
     icon: 'fa-ban',
     color: '#2A2030',
@@ -831,7 +845,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'permafrost-surge',
-    label: 'CALENDARIA.Weather.PermafrostSurge',
+    label: 'CALENDARIA.Common.PermafrostSurge',
     description: 'CALENDARIA.Weather.PermafrostSurgeDesc',
     icon: 'fa-icicles',
     color: '#A8D8EA',
@@ -850,11 +864,11 @@ export const FANTASY_WEATHER = [
     fxDensity: 'high',
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'snow-frost'
+    soundFx: `${SOUND_BASE}/snow-frost.ogg`
   },
   {
     id: 'gravewind',
-    label: 'CALENDARIA.Weather.Gravewind',
+    label: 'CALENDARIA.Common.Gravewind',
     description: 'CALENDARIA.Weather.GravewindDesc',
     icon: 'fa-ghost',
     color: '#3A5040',
@@ -873,11 +887,11 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'wind'
+    soundFx: `${SOUND_BASE}/wind.ogg`
   },
   {
     id: 'veilfall',
-    label: 'CALENDARIA.Weather.Veilfall',
+    label: 'CALENDARIA.Common.Veilfall',
     description: 'CALENDARIA.Weather.VeilfallDesc',
     icon: 'fa-droplet',
     color: '#6A5A8E',
@@ -900,7 +914,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'arcane-winds',
-    label: 'CALENDARIA.Weather.ArcaneWinds',
+    label: 'CALENDARIA.Common.ArcaneWinds',
     description: 'CALENDARIA.Weather.ArcaneWindsDesc',
     icon: 'fa-hat-wizard',
     color: '#8A40B0',
@@ -919,11 +933,11 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: 'wind'
+    soundFx: `${SOUND_BASE}/wind.ogg`
   },
   {
     id: 'acid-rain',
-    label: 'CALENDARIA.Weather.AcidRain',
+    label: 'CALENDARIA.Common.AcidRain',
     description: 'CALENDARIA.Weather.AcidRainDesc',
     icon: 'fa-flask',
     color: '#55BB33',
@@ -942,11 +956,11 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'rain-acid-rain-blood-rain'
+    soundFx: `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`
   },
   {
     id: 'blood-rain',
-    label: 'CALENDARIA.Weather.BloodRain',
+    label: 'CALENDARIA.Common.BloodRain',
     description: 'CALENDARIA.Weather.BloodRainDesc',
     icon: 'fa-droplet',
     color: '#880022',
@@ -965,11 +979,11 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: 'rain-acid-rain-blood-rain'
+    soundFx: `${SOUND_BASE}/rain-acid-rain-blood-rain.ogg`
   },
   {
     id: 'meteor-shower',
-    label: 'CALENDARIA.Weather.MeteorShower',
+    label: 'CALENDARIA.Common.MeteorShower',
     description: 'CALENDARIA.Weather.MeteorShowerDesc',
     icon: 'fa-meteor',
     color: '#FF6622',
@@ -992,7 +1006,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'spore-cloud',
-    label: 'CALENDARIA.Weather.SporeCloud',
+    label: 'CALENDARIA.Common.SporeCloud',
     description: 'CALENDARIA.Weather.SporeCloudDesc',
     icon: 'fa-disease',
     color: '#88AA44',
@@ -1015,7 +1029,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'divine-light',
-    label: 'CALENDARIA.Weather.DivineLight',
+    label: 'CALENDARIA.Common.DivineLight',
     description: 'CALENDARIA.Weather.DivineLightDesc',
     icon: 'fa-sun',
     color: '#FFD700',
@@ -1038,7 +1052,7 @@ export const FANTASY_WEATHER = [
   },
   {
     id: 'plague-miasma',
-    label: 'CALENDARIA.Weather.PlagueMiasma',
+    label: 'CALENDARIA.Common.PlagueMiasma',
     description: 'CALENDARIA.Weather.PlagueMiasmaDesc',
     icon: 'fa-biohazard',
     color: '#556B2F',
@@ -1072,11 +1086,11 @@ export const ALL_PRESETS = [...STANDARD_WEATHER, ...SEVERE_WEATHER, ...ENVIRONME
  * @type {object}
  */
 export const WEATHER_CATEGORIES = {
-  standard: { id: 'standard', label: 'CALENDARIA.Weather.Category.Standard' },
-  severe: { id: 'severe', label: 'CALENDARIA.Weather.Category.Severe' },
+  standard: { id: 'standard', label: 'CALENDARIA.Common.Standard' },
+  severe: { id: 'severe', label: 'CALENDARIA.Common.Severe' },
   environmental: { id: 'environmental', label: 'CALENDARIA.Weather.Category.Environmental' },
-  fantasy: { id: 'fantasy', label: 'CALENDARIA.Weather.Category.Fantasy' },
-  custom: { id: 'custom', label: 'CALENDARIA.Weather.Category.Custom' }
+  fantasy: { id: 'fantasy', label: 'CALENDARIA.Common.Fantasy' },
+  custom: { id: 'custom', label: 'CALENDARIA.Common.Custom' }
 };
 
 /**

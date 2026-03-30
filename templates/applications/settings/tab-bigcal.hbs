@@ -1,5 +1,4 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-
   <div class="button-row app-controls">
     <button type="button" data-action="resetPosition" data-target="bigcal">
       <i class="fas fa-undo"></i>
@@ -9,21 +8,18 @@
       <i class="fas fa-times"></i>
       {{localize "CALENDARIA.SettingsPanel.CloseBigCal"}}
     </button>
-    <button type="button" data-action="openBigCal">
+    <button type="button" data-action="showBigCal">
       <i class="fas fa-external-link-alt"></i>
-      {{localize "CALENDARIA.SettingsPanel.OpenBigCal"}}
+      {{localize "CALENDARIA.Common.OpenBigCal"}}
     </button>
   </div>
   <p class="hint section-hint">{{openHint}}</p>
-
   <fieldset data-section="bigcal-display">
     <legend>
       {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="bigcal-display"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-          class="fas fa-undo"></i></button>
+      <button type="button" class="reset-section" data-action="resetSection" data-section="bigcal-display" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
     </legend>
-
     {{#if isGM}}
       <div class="form-group">
         <label for="showBigCal">{{localize "CALENDARIA.Settings.ShowBigCal.Name"}}</label>
@@ -32,16 +28,14 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowBigCal.Hint"}}</p>
       </div>
-
       <div class="form-group">
-        <label for="forceBigCal">{{localize "CALENDARIA.Settings.ForceBigCal.Name"}}</label>
+        <label for="forceBigCal">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
         <div class="form-fields">
           <input type="checkbox" id="forceBigCal" name="forceBigCal" {{#if forceBigCal}}checked{{/if}}>
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForceBigCal.Hint"}}</p>
       </div>
     {{/if}}
-
     <div class="form-group">
       <label for="bigCalAutoFade">{{localize "CALENDARIA.Settings.AutoFade.Name"}}</label>
       <div class="form-fields">
@@ -49,19 +43,34 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.AutoFade.Hint"}}</p>
     </div>
-
     <div class="form-group{{#unless bigCalAutoFade}} disabled{{/unless}}">
       <label for="bigCalIdleOpacity">{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" id="bigCalIdleOpacity" name="bigCalIdleOpacity"
-          min="10" max="100" step="5" value="{{bigCalIdleOpacity}}"
-          {{#unless bigCalAutoFade}}disabled aria-disabled="true"{{/unless}}>
+        <input type="range" id="bigCalIdleOpacity" name="bigCalIdleOpacity" min="10" max="100" step="5"
+          value="{{bigCalIdleOpacity}}" {{#unless bigCalAutoFade}}disabled aria-disabled="true" {{/unless}}>
         <span class="range-value">{{bigCalIdleOpacity}}%</span>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>
-  </fieldset>
 
+    <div class="form-group">
+      <label for="bigCalCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
+      <div class="form-fields">
+        <select id="bigCalCombatMode" name="bigCalCombatMode">
+          <option value="none" {{#if (eq bigCalCombatMode "none")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.None"}}
+          </option>
+          <option value="hideCombat" {{#if (eq bigCalCombatMode "hideCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
+          </option>
+          <option value="hideEncounter" {{#if (eq bigCalCombatMode "hideEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
+          </option>
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.WidgetCombatMode.Hint"}}</p>
+    </div>
+  </fieldset>
   <fieldset data-section="bigcal-block-visibility">
     <legend>
       {{localize "CALENDARIA.SettingsPanel.Section.BlockVisibility"}}
@@ -70,17 +79,15 @@
           class="fas fa-undo"></i></button>
     </legend>
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
-
     <div class="form-group">
-      <label for="bigCalShowWeather">{{localize "CALENDARIA.Settings.HUDShowWeather.Name"}}</label>
+      <label for="bigCalShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="bigCalShowWeather" name="bigCalShowWeather" {{#if bigCalShowWeather}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalShowWeather.Hint"}}</p>
     </div>
-
     <div class="form-group{{#unless bigCalShowWeather}} disabled{{/unless}}">
-      <label for="bigCalWeatherDisplayMode">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+      <label for="bigCalWeatherDisplayMode">{{localize "CALENDARIA.Common.WeatherDisplay"}}</label>
       <div class="form-fields">
         <select id="bigCalWeatherDisplayMode" name="bigCalWeatherDisplayMode" {{#unless bigCalShowWeather}}disabled
           aria-disabled="true" {{/unless}}>
@@ -91,17 +98,15 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalWeatherDisplayMode.Hint"}}</p>
     </div>
-
     <div class="form-group">
-      <label for="bigCalShowSeason">{{localize "CALENDARIA.Settings.HUDShowSeason.Name"}}</label>
+      <label for="bigCalShowSeason">{{localize "CALENDARIA.Common.ShowSeason"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="bigCalShowSeason" name="bigCalShowSeason" {{#if bigCalShowSeason}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalShowSeason.Hint"}}</p>
     </div>
-
     <div class="form-group{{#unless bigCalShowSeason}} disabled{{/unless}}">
-      <label for="bigCalSeasonDisplayMode">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+      <label for="bigCalSeasonDisplayMode">{{localize "CALENDARIA.Common.SeasonDisplay"}}</label>
       <div class="form-fields">
         <select id="bigCalSeasonDisplayMode" name="bigCalSeasonDisplayMode" {{#unless bigCalShowSeason}}disabled
           aria-disabled="true" {{/unless}}>
@@ -112,17 +117,15 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalSeasonDisplayMode.Hint"}}</p>
     </div>
-
     <div class="form-group">
-      <label for="bigCalShowEra">{{localize "CALENDARIA.Settings.HUDShowEra.Name"}}</label>
+      <label for="bigCalShowEra">{{localize "CALENDARIA.Common.ShowEra"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="bigCalShowEra" name="bigCalShowEra" {{#if bigCalShowEra}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalShowEra.Hint"}}</p>
     </div>
-
     <div class="form-group{{#unless bigCalShowEra}} disabled{{/unless}}">
-      <label for="bigCalEraDisplayMode">{{localize "CALENDARIA.Settings.HUDEraDisplayMode.Name"}}</label>
+      <label for="bigCalEraDisplayMode">{{localize "CALENDARIA.Common.EraDisplay"}}</label>
       <div class="form-fields">
         <select id="bigCalEraDisplayMode" name="bigCalEraDisplayMode" {{#unless bigCalShowEra}}disabled
           aria-disabled="true" {{/unless}}>
@@ -133,17 +136,15 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalEraDisplayMode.Hint"}}</p>
     </div>
-
     <div class="form-group">
-      <label for="bigCalShowCycles">{{localize "CALENDARIA.Settings.HUDShowCycles.Name"}}</label>
+      <label for="bigCalShowCycles">{{localize "CALENDARIA.Common.ShowCycles"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="bigCalShowCycles" name="bigCalShowCycles" {{#if bigCalShowCycles}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalShowCycles.Hint"}}</p>
     </div>
-
     <div class="form-group{{#unless bigCalShowCycles}} disabled{{/unless}}">
-      <label for="bigCalCyclesDisplayMode">{{localize "CALENDARIA.Settings.HUDCyclesDisplayMode.Name"}}</label>
+      <label for="bigCalCyclesDisplayMode">{{localize "CALENDARIA.Common.CyclesDisplay"}}</label>
       <div class="form-fields">
         <select id="bigCalCyclesDisplayMode" name="bigCalCyclesDisplayMode" {{#unless bigCalShowCycles}}disabled
           aria-disabled="true" {{/unless}}>
@@ -154,26 +155,23 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalCyclesDisplayMode.Hint"}}</p>
     </div>
-
     <div class="form-group">
-      <label for="bigCalShowMoonPhases">{{localize "CALENDARIA.Settings.ShowMoonPhases.Name"}}</label>
+      <label for="bigCalShowMoonPhases">{{localize "CALENDARIA.Common.ShowMoonPhases"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="bigCalShowMoonPhases" name="bigCalShowMoonPhases"
           {{#if bigCalShowMoonPhases}}checked{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.BigCalShowMoonPhases.Hint"}}</p>
     </div>
-
     <div class="form-group">
-      <label for="bigCalHeaderShowSelected">{{localize "CALENDARIA.Settings.BigCalHeaderShowSelected.Name"}}</label>
+      <label for="bigCalHeaderShowSelected">{{localize "CALENDARIA.Common.ShowSelectedDateInHeader"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="bigCalHeaderShowSelected" name="bigCalHeaderShowSelected"
           {{#if bigCalHeaderShowSelected}}checked{{/if}}>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.BigCalHeaderShowSelected.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Common.ShowSelectedDateInHeaderHint"}}</p>
     </div>
   </fieldset>
-
   {{#if isGM}}
     <fieldset data-section="display-formats">
       <legend>
@@ -183,13 +181,11 @@
             class="fa-solid fa-question"></i></button>
       </legend>
       <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.FormatSettings"}}</p>
-
       {{#each formatLocations}}
         <div class="format-location" data-location="{{id}}">
           <div class="form-group">
             <label>{{label}}</label>
           </div>
-
           <div class="format-row">
             <div class="format-column">
               <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}} <span class="format-preview"
@@ -203,7 +199,6 @@
                 placeholder="EEEE, D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
                 data-location="{{id}}" data-role="gm">
             </div>
-
             <div class="format-column">
               <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}} <span class="format-preview"
                   data-location="{{id}}" data-role="player"></span></span>
@@ -222,5 +217,4 @@
       {{/each}}
     </fieldset>
   {{/if}}
-
 </section>

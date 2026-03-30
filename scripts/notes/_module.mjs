@@ -1,4 +1,10 @@
+export * from './condition-engine.mjs';
+export * from './condition-field-schema.mjs';
+export * from './condition-presets.mjs';
+export * from './condition-utils.mjs';
 export * from './date-utils.mjs';
+export * from './event-dependency-resolver.mjs';
 export * from './note-data.mjs';
+export * from './note-filter-service.mjs';
 export { default as NoteManager } from './note-manager.mjs';
 export * from './recurrence.mjs';

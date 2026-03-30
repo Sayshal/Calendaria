@@ -1,7 +1,7 @@
 <div class="dialog-date-picker">
   <div class="form-grid">
     <div class="form-group">
-      <label>{{#if isMonthless}}{{localize "CALENDARIA.SetDate.DayOfYear"}}{{else}}{{localize "CALENDARIA.Common.Day"}}{{/if}}</label>
+      <label>{{#if isMonthless}}{{localize "CALENDARIA.Condition.Field.dayOfYear"}}{{else}}{{localize "CALENDARIA.Common.Day"}}{{/if}}</label>
       <select name="day" id="day-select">
         {{#each days}}
           <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>
@@ -22,5 +22,15 @@
       <label>{{localize "CALENDARIA.Common.Year"}}</label>
       <input type="number" name="year" value="{{year}}" step="1">
     </div>
+    {{#if showTime}}
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Common.Hour"}}</label>
+        <input type="number" name="hour" value="{{currentHour}}" min="0" max="{{maxHour}}" step="1">
+      </div>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Common.Minute"}}</label>
+        <input type="number" name="minute" value="{{currentMinute}}" min="0" max="{{maxMinute}}" step="1">
+      </div>
+    {{/if}}
   </div>
 </div>

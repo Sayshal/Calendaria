@@ -20,6 +20,46 @@
       background: var(--calendaria-bg-lighter);
     }
 
+    .period-selector {
+      gap: 0.25rem;
+      display: flex;
+      padding: 0 0.25rem;
+
+      .period-tab {
+        gap: 0.35rem;
+        display: flex;
+        opacity: 0.6;
+        flex: 1;
+        justify-content: center;
+        align-items: center;
+        padding: 0.35rem 0.5rem;
+        border: 0.0625rem solid var(--calendaria-border);
+        border-radius: 0.25rem;
+        font-size: var(--font-size-11);
+        cursor: pointer;
+        background: var(--calendaria-bg-lighter);
+        transition:
+          opacity 0.15s,
+          background 0.15s;
+
+        &:hover {
+          opacity: 0.85;
+        }
+
+        &.active {
+          opacity: 1;
+          border-color: var(--calendaria-accent);
+          background: color-mix(in srgb, var(--calendaria-accent) 15%, transparent);
+        }
+
+        &.current span::after {
+          font-size: 0.5rem;
+          vertical-align: super;
+          content: ' ●';
+        }
+      }
+    }
+
     .columns {
       gap: 0.25rem;
       display: flex;
@@ -193,8 +233,8 @@
       grid-column: 1 / -1;
       grid-row: 2;
       padding: 0.5rem 1rem;
-      border-top: 0.0625rem solid var(--color-cool-4);
-      background: var(--color-cool-5);
+      border-top: 0.0625rem solid var(--calendaria-ui-border);
+      background: var(--calendaria-ui-surface);
 
       button {
         flex: none;
@@ -222,7 +262,7 @@
       justify-content: center;
       align-items: center;
       height: 100%;
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-style: italic;
     }
   }

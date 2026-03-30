@@ -1,6 +1,6 @@
 # Importing Calendars
 
-Calendaria can import calendars from other modules and websites, letting you migrate existing setups.
+Calendaria can import calendars from other modules and websites to migrate existing setups.
 
 ## Supported Sources
 
@@ -28,9 +28,9 @@ Missing your calendar source? [Request a new importer](https://github.com/Saysha
 6. If the source contains multiple calendars (e.g., Simple Calendar with more than one calendar configured), select which calendar to import from the dropdown
 7. Review the import preview
 8. For each detected note/event, choose how to import:
-   - **Skip** — Do not import this item
-   - **Festival** — Import as a recurring festival day
-   - **Note** — Import as a calendar note (journal entry)
+   - **Skip.** Do not import this item
+   - **Festival.** Import as a recurring festival day
+   - **Note.** Import as a calendar note (journal entry)
 9. Click **Import**
 
 The imported calendar opens in the Calendar Editor for review. Make any needed adjustments, then click **Save** to finalize.
@@ -41,9 +41,9 @@ The imported calendar opens in the Calendar Editor for review. Make any needed a
 
 Before finalizing, the import preview displays:
 
-- **Calendar Summary** — Name, month count, weekday count, moon count, season count, era count, festival count, note count, and days per year
-- **Current Date** — The current date from the source calendar
-- **Detected Notes** — Events and notes found in the source data with their dates
+- **Calendar Summary.** Name, month count, weekday count, moon count, season count, era count, festival count, note count, and days per year
+- **Current Date.** The current date from the source calendar
+- **Detected Notes.** Events and notes found in the source data with their dates
 
 ### Current Date Preservation
 
@@ -51,13 +51,13 @@ Calendaria automatically tries to extract and preserve the current date from sou
 
 - The source calendar's current date is displayed in the import preview
 - After import, the world time is set to match the source calendar's date
-- This ensures your campaign continues from the same point in time
+- Your campaign continues from the same point in time
 
 For each detected note, use the radio buttons to choose:
 
-- **Skip** — Do not import this item
-- **Festival** — Import as a festival (fixed calendar event)
-- **Note** — Import as a calendar note (linked to a journal entry)
+- **Skip.** Do not import this item
+- **Festival.** Import as a festival (fixed calendar event)
+- **Note.** Import as a calendar note (linked to a journal entry)
 
 Use the **Set All** buttons to quickly mark all notes as Skip, Festival, or Note.
 
@@ -80,7 +80,7 @@ Some importers (Calendarium, Fantasy-Calendar) may encounter events without spec
 Calendaria Imports/[Calendar Name]/Undated Events/
 ```
 
-You can access these journal entries and manually assign dates if needed.
+Access these journal entries and manually assign dates if needed.
 
 ---
 

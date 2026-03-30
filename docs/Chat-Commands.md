@@ -2,7 +2,7 @@
 
 Calendaria provides 21 slash commands for interacting with the calendar directly from chat. All commands and aliases work natively without any additional modules.
 
-If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is installed, commands gain enhanced autocomplete with format presets and calendar suggestions.
+If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is installed, commands gain autocomplete with format presets and calendar suggestions.
 
 ---
 
@@ -178,7 +178,7 @@ Display current or historical weather conditions.
 
 **Arguments:**
 
-- Optional: `year month day` — look up weather for a specific historical date
+- Optional: `year month day` - look up weather for a specific historical date
 
 **Examples:**
 
@@ -279,7 +279,7 @@ Display a full calendar summary.
 /calendar
 ```
 
-**Output:** Comprehensive summary including date, time, season, weather, moons, and daylight hours.
+**Output:** Full summary including date, time, season, weather, moons, and daylight hours.
 
 ---
 

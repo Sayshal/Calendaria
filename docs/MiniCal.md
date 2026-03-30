@@ -6,13 +6,13 @@ A compact month-view calendar widget with integrated time controls.
 
 ## Display
 
-The MiniCal shows a monthly grid with the current date highlighted. For monthless calendars (like Traveller), it displays a 3-week view instead.
+Monthly grid with the current date highlighted. For monthless calendars (like Traveller), shows a 3-week view instead.
 
 ### Indicators
 
-Below the navigation row, the MiniCal displays contextual indicators:
+Below the navigation row, contextual indicators show:
 
-- **Weather** - Current weather with icon, label, and temperature. GM can click to open weather picker. Shows "click to generate" prompt when no weather is set.
+- **Weather** - Current weather with icon, label, and temperature. GMs click to open weather picker. Shows "click to generate" when no weather is set.
 - **Season** - Current season with icon and name
 - **Era** - Current era indicator (if calendar has eras)
 - **Cycle** - Current cycle values (if calendar has cycles configured)
@@ -26,7 +26,7 @@ Below the navigation row, the MiniCal displays contextual indicators:
 
 ### Monthless Calendars
 
-For calendars without months (like Traveller), the MiniCal shows a 3-week view:
+For calendars without months (like Traveller), shows a 3-week view:
 
 - Previous week, current week, and next week
 - Navigation moves by week instead of month
@@ -36,7 +36,7 @@ For calendars without months (like Traveller), the MiniCal shows a 3-week view:
 
 Each day cell may show:
 
-- Note count badge — uses the first note's category color as background
+- **Note count badge.** Colored badge showing the number of notes on that day. Badge background uses the first note's category color.
 - Festival highlight
 - Moon phase icon
 - Weather icon
@@ -45,7 +45,7 @@ Each day cell may show:
 
 ### Day Tooltips
 
-Hovering over a day cell shows a detailed tooltip with:
+Hovering over a day cell shows:
 
 - Full date (Month Day, Year with era)
 - Festival name and description (if applicable)
@@ -57,7 +57,7 @@ Hovering over a day cell shows a detailed tooltip with:
 
 ## Sidebar
 
-The sidebar is organized into four button groups with visual dividers separating navigation, date management, notes, and system sections.
+Four button groups separated by visual dividers: navigation, date management, notes, and system.
 
 Appears on hover over the calendar area (or always visible when sticky):
 
@@ -70,7 +70,7 @@ Appears on hover over the calendar area (or always visible when sticky):
 - **View Notes** - View notes on selected date. Always visible; disabled when the selected day has no notes.
 - **Settings** - Open the settings panel
 
-Right-click the MiniCal container for a context menu with the following options:
+Right-click the MiniCal container for a context menu:
 
 - **Settings** - Opens the Settings panel to the MiniCal tab
 - **Show/Hide to All Players** - Toggle visibility for all players (GM only)
@@ -84,18 +84,47 @@ Right-click the MiniCal container for a context menu with the following options:
 
 Click "View Notes" to see all notes for the selected date:
 
-- Notes sorted by time (all-day first)
+- Notes sorted by time. Festivals appear first, then remaining notes sorted by display priority
 - Click a note to open in view mode
 - Click edit icon to open in edit mode (if owner)
+
+#### Visibility Indicators
+
+Visibility status shown as icon overlays:
+
+- **Eye-slash** icon for hidden notes
+- **Lock** icon for secret notes
+- Visible notes show no additional indicator
+
+#### Festival Notes
+
+Festival notes have a left border accent in the notes panel, colored by the note's category.
+
+#### Occurrence Badges
+
+Each recurring note shows an occurrence info badge indicating its repeat type (daily, weekly, yearly, etc.).
+
+#### Filters
+
+Preset filter dropdown for narrowing displayed notes:
+
+- **Festivals.** Show only festival notes
+- Additional filter presets as configured
+
+When filters exclude all results, a "No matching notes" empty state appears. Filters auto-clear when the notes panel closes.
+
+#### Tooltips
+
+Hovering over a note panel item shows a rich HTML tooltip with the note's name, time, visibility, presets, condition summary, and description preview.
 
 ---
 
 ## Time Display
 
-Shows current time. GM can:
+Shows current time. GMs:
 
 - Click to toggle time flow (play/pause)
-- Shift-click to lock/unlock the clock (see [HUD — Clock Lock](HUD#clock-lock))
+- Shift-click to lock/unlock the clock (see [HUD: Clock Lock](HUD#clock-lock))
 - Hover to reveal time controls
 
 ### Time Controls (GM Only)
@@ -114,13 +143,13 @@ Revealed on hover over the time display:
 | Sunset             | Advance to next sunset                              |
 | Midnight           | Advance to next midnight                            |
 
-Custom time jump buttons display the configured jump amount directly on the button. Configure these values in **Settings > MiniCal > Custom Time Jumps**.
+Custom time jump buttons show the configured jump amount on the button. Configure in **Settings > MiniCal > Custom Time Jumps**.
 
 ---
 
 ## Double-Click Behavior
 
-Double-click anywhere in the calendar area to toggle between MiniCal and BigCal. This works on all non-interactive areas (excluding buttons, inputs, and note badges).
+Double-click anywhere in the calendar area to toggle between MiniCal and BigCal. Works on all non-interactive areas (excludes buttons, inputs, and note badges).
 
 ---
 
@@ -140,33 +169,27 @@ Configure which information blocks appear below the navigation row via **Setting
 
 ## Compact Mode
 
-MiniCal has a compact mode ("MicroCal") that dramatically reduces its footprint while remaining fully functional. Toggle via the context menu or the "Compact Mode" per-user setting.
+Compact mode ("MicroCal") reduces the MiniCal's footprint while staying functional. Toggle via the context menu or the "Compact Mode" per-user setting.
 
 ### Layout
 
 - Day cells render as circular cells
 - Weekday headers and time controls are hidden
 - Indicators display as icon-only
-- The entire application becomes draggable (not just the header)
+- Entire application becomes draggable (not just the header)
 
 ### Hover Controls
 
-A play/pause overlay appears on hover over the title group for quick clock control.
+Play/pause overlay appears on hover over the title group for quick clock control.
 
 ### Compact Sidebar
 
-The sidebar fades in smoothly with hidden separators for a minimal look.
+Sidebar fades in smoothly with hidden separators for a minimal look.
 
 ### Compact Notes Panel
 
-The notes panel hides the header and author, with a reduced width.
+Notes panel hides the header and author, with reduced width.
 
 ### Compact Mode Header
 
-The "Compact Mode Header" per-user setting controls what text appears in the compact mode header. The default is "Approximate Date & Time".
-
----
-
-## Settings
-
-Configure via **Settings Panel > MiniCal** tab. See [Settings](Settings#minical) for all options.
+"Compact Mode Header" per-user setting controls what text appears. Default: "Approximate Date & Time".

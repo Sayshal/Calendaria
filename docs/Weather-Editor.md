@@ -8,11 +8,11 @@ The Weather Editor is used to customize the visual appearance, sound, and FXMast
 
 The left sidebar lists all presets grouped by category with color-coded headers:
 
-- **Standard** — Common weather
-- **Severe** — Dangerous conditions
-- **Environmental** — Location phenomena
-- **Fantasy** — Magical weather
-- **Custom** — GM-created presets
+- **Standard.** Common weather
+- **Severe.** Dangerous conditions
+- **Environmental.** Location phenomena
+- **Fantasy.** Magical weather
+- **Custom.** GM-created presets
 
 Click a preset to load it in the main editor area.
 
@@ -30,6 +30,7 @@ Click a preset to load it in the main editor area.
 | **HUD Effect**      | Dropdown to assign a particle effect for the HUD dome renderer |
 | **FXMaster Preset** | Dropdown of available FXMaster effects (or "None")             |
 | **Sound Effect**    | Dropdown of ambient sound loops (or "None")                    |
+| **Effect Macro**    | Dropdown of world macros to execute when this weather activates. Runs on the primary GM client only. The macro receives `{ weather, previousWeather, zoneId }` as context |
 
 ### Environment Lighting
 
@@ -44,7 +45,7 @@ Per-preset overrides for scene environment properties, split into Day (Base) and
 | **Luminosity**     | Scene luminosity (-1 to 1)                  |
 | **Saturation**     | Color saturation (-1 to 1)                  |
 | **Shadows**        | Shadow intensity (0 to 1)                   |
-| **Blend Ambience** | Checkbox — enable ambience blending (cycle) |
+| **Blend Ambience** | Checkbox. Enable ambience blending (cycle)  |
 
 #### Night (Dark)
 
@@ -77,15 +78,15 @@ Fine-tune the particle rendering in the HUD dome:
 
 ### Built-in Presets
 
-Built-in presets are read-only by default. The Weather Editor saves your changes as **visual overrides** (deltas) — only the fields you modify are stored. The original preset data is preserved.
+Built-in presets are read-only by default. The Weather Editor saves your changes as **visual overrides** (deltas): only the fields you modify are stored. The original preset data is preserved.
 
-- **Reset to Defaults** — Removes all visual overrides for this preset, restoring factory settings
+- **Reset to Defaults.** Removes all visual overrides for this preset, restoring factory settings
 
 ### Custom Presets
 
-Custom presets store all fields directly — there is no delta system since there are no factory defaults to preserve.
+Custom presets store all fields directly. There is no delta system since there are no factory defaults to preserve.
 
-- **Delete Weather** — Permanently removes a custom preset
+- **Delete Weather.** Permanently removes a custom preset
 
 ---
 
@@ -98,4 +99,4 @@ Custom presets store all fields directly — there is no delta system since ther
 | **Delete Weather**    | Remove a custom preset                        |
 
 > [!NOTE]
-> Changes in the Weather Editor update the active scene in real-time. Only visual/lighting changes preview — FX and sound effects are not triggered during editing.
+> Changes in the Weather Editor update the active scene in real-time. Only visual/lighting changes preview. FX and sound effects are not triggered during editing.

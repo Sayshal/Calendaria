@@ -5,7 +5,7 @@
  */
 
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import { localize } from '../../utils/localization.mjs';
+import { localize } from '../../utils/_module.mjs';
 import { ALL_PRESETS } from './weather-presets.mjs';
 
 /**

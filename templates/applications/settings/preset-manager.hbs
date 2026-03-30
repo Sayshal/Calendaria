@@ -1,0 +1,111 @@
+<section class="preset-manager-layout">
+
+  {{!-- Left panel: sorted preset list --}}
+  <div class="preset-list-panel">
+    <div class="preset-list">
+      {{#each presets}}
+        <div class="preset-list-item {{#if this.selected}}active{{/if}}" data-preset-id="{{this.id}}"
+          data-action="selectPreset">
+          <span class="preset-label">{{this.label}}</span>
+          <button type="button" class="preset-icon-btn" data-action="editIcon" data-preset-id="{{this.id}}"
+            style="color: {{this.color}}" data-tooltip="{{localize 'CALENDARIA.SettingsPanel.Preset.EditIconColor'}}">
+            <i class="{{this.icon}}"></i>
+          </button>
+        </div>
+      {{/each}}
+    </div>
+    {{#if hasHiddenBuiltins}}
+      <button type="button" class="restore-presets-link" data-action="restorePresets">
+        {{localize "CALENDARIA.PresetManager.RestorePresets"}}
+      </button>
+    {{/if}}
+  </div>
+
+  {{!-- Right panel: preset editor --}}
+  <div class="preset-editor-panel standard-form">
+    {{#if selected}}
+
+      {{!-- Basic Settings --}}
+      <fieldset data-section="basic">
+        <legend data-tooltip="{{localize 'CALENDARIA.PresetManager.BasicSettingsHint'}}">
+          {{localize "CALENDARIA.PresetManager.BasicSettings"}}
+          <button type="button" class="reset-section" data-action="resetSection" data-section="basic" data-tooltip
+            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+              class="fas fa-undo"></i></button>
+        </legend>
+        <div class="form-group">
+          <label for="preset-name">{{localize "CALENDARIA.Common.Name"}}</label>
+          <div class="form-fields">
+            <input type="text" id="preset-name" name="selected.label" value="{{selected.label}}">
+          </div>
+          <p class="hint">{{localize "CALENDARIA.PresetManager.NameHint"}}</p>
+        </div>
+        <div class="form-group">
+          <label>{{localize "CALENDARIA.Common.Icon"}} / {{localize "CALENDARIA.Common.Color"}}</label>
+          <div class="form-fields">
+            <button type="button" class="preset-icon-btn" data-action="editIcon" data-preset-id="{{selected.id}}"
+              style="color: {{selected.color}}"
+              data-tooltip="{{localize 'CALENDARIA.SettingsPanel.Preset.EditIconColor'}}">
+              <i class="{{selected.icon}}"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="preset-player-usable">{{localize "CALENDARIA.PresetManager.PlayerUsable"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="preset-player-usable" name="selected.playerUsable"
+              {{#if selected.playerUsable}}checked{{/if}}>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.PresetManager.PlayerUsableHint"}}</p>
+        </div>
+      </fieldset>
+
+      {{!-- Defaults (with lock toggles) --}}
+      <fieldset data-section="defaults">
+        <legend data-tooltip="{{localize 'CALENDARIA.PresetManager.DefaultsHint'}}">
+          {{localize "CALENDARIA.PresetManager.Defaults"}}
+          <button type="button" class="reset-section" data-action="resetSection" data-section="defaults" data-tooltip
+            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+              class="fas fa-undo"></i></button>
+        </legend>
+        {{#each defaultFields}}
+          <div class="form-group">
+            <label for="cat-def-{{this.key}}">{{this.label}}</label>
+            <div class="form-fields lockable-field">
+              {{{this.inputHtml}}}
+              <button type="button" class="lock-toggle {{#if this.locked}}locked{{/if}}" data-action="toggleLock"
+                data-field="{{this.key}}"
+                data-tooltip="{{#if this.locked}}{{localize 'CALENDARIA.PresetManager.ForcedTooltip'}}{{else}}{{localize 'CALENDARIA.PresetManager.DefaultTooltip'}}{{/if}}">
+                <i class="fas {{#if this.locked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+              </button>
+              <input type="hidden" name="selected.locks.{{this.key}}"
+                value="{{#if this.locked}}true{{else}}false{{/if}}">
+            </div>
+            <p class="hint">{{this.hint}}</p>
+          </div>
+        {{/each}}
+      </fieldset>
+
+      {{!-- Content Template --}}
+      <fieldset data-section="content">
+        <legend data-tooltip="{{localize 'CALENDARIA.PresetManager.ContentTemplateHint'}}">
+          {{localize "CALENDARIA.PresetManager.ContentTemplate"}}
+          <button type="button" class="reset-section" data-action="resetSection" data-section="content" data-tooltip
+            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+              class="fas fa-undo"></i></button>
+        </legend>
+        <div class="form-group stacked">
+          <p class="hint">{{localize "CALENDARIA.PresetManager.ContentTemplateFieldHint"}}</p>
+          <prose-mirror name="selected.defaults.content" value="{{selected.defaults.content}}"
+            aria-label="{{localize 'CALENDARIA.PresetManager.ContentTemplate'}}" compact></prose-mirror>
+        </div>
+      </fieldset>
+
+    {{else}}
+      <div class="empty-editor">
+        <p>{{localize "CALENDARIA.PresetManager.NoSelection"}}</p>
+      </div>
+    {{/if}}
+  </div>
+
+</section>

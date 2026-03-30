@@ -1,9 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-
-  {{! Welcome Section - visible to all users }}
   <fieldset class="welcome-section" data-section="welcome">
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Welcome"}}</legend>
-
     <div class="welcome-content">
       <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.Greeting"}}</p>
       <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.Description"}}</p>
@@ -11,12 +8,9 @@
       <p class="welcome-text">{{localize "CALENDARIA.SettingsPanel.Welcome.Closing"}}</p>
     </div>
   </fieldset>
-
-  {{! Recently Changed Settings - user-specific }}
   {{#if recentSettings.length}}
     <fieldset class="recent-settings" data-section="recent-settings">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.RecentSettings"}}</legend>
-
       <div class="recent-list">
         {{#each recentSettings}}
           <a class="recent-item" data-action="navigateToSetting" data-tab="{{this.tab}}"
@@ -28,58 +22,49 @@
       </div>
     </fieldset>
   {{/if}}
-
-  {{! Active Calendar Fieldset }}
-  {{#if showActiveCalendar}}
-    <fieldset data-section="active-calendar">
-      <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
-
-      <div class="form-group">
-        <label for="activeCalendar">{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
-        <div class="form-fields">
-          <select id="activeCalendar" name="activeCalendar" {{#unless canChangeCalendar}}disabled aria-disabled="true"
-            data-tooltip aria-label="{{localize "CALENDARIA.Settings.ActiveCalendar.DisabledTitle"}}" {{/unless}}>
-            {{#each calendarOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
-                {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
-              </option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
+  <fieldset data-section="active-calendar">
+    <legend>{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</legend>
+    <div class="form-group">
+      <label for="activeCalendar">{{localize "CALENDARIA.Settings.ActiveCalendar.Name"}}</label>
+      <div class="form-fields">
+        <select id="activeCalendar" name="activeCalendar" {{#unless canChangeCalendar}}disabled aria-disabled="true"
+          data-tooltip aria-label="{{localize "CALENDARIA.Settings.ActiveCalendar.DisabledTitle"}}" {{/unless}}>
+          {{#each calendarOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
+              {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+            </option>
+          {{/each}}
+        </select>
       </div>
-
-      {{#if isGM}}
-        <div class="form-group">
-          <label
-            for="showActiveCalendarToPlayers">{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Name"}}</label>
-          <div class="form-fields">
-            <input type="checkbox" id="showActiveCalendarToPlayers" name="showActiveCalendarToPlayers"
-              {{#if showActiveCalendarToPlayers}}checked{{/if}}>
-          </div>
-          <p class="hint">{{localize "CALENDARIA.Settings.ShowActiveCalendarToPlayers.Hint"}}</p>
+      <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
+    </div>
+    {{#if isGM}}
+      <div class="button-row">
+        <button type="button" data-action="openCalendarEditor">
+          <i class="fas fa-calendar-plus"></i>
+          {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
+        </button>
+        <button type="button" data-action="openImporter">
+          <i class="fas fa-file-import"></i>
+          {{localize "CALENDARIA.Settings.Importer.Label"}}
+        </button>
+      </div>
+    {{/if}}
+  </fieldset>
+  {{#if showEquivalentDatesSection}}
+    <fieldset data-section="equivalent-dates">
+      <legend>{{localize "CALENDARIA.Settings.EquivalentDates.Legend"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.EquivalentDateCalendars.Name"}}</label>
+        <div class="form-fields">
+          <multi-select name="equivalentDateCalendars">
+            {{#each equivalentDateOptions}}
+              <option value="{{this.id}}" {{#if this.checked}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </multi-select>
         </div>
-
-        <div class="button-row">
-          <button type="button" data-action="openCalendarEditor">
-            <i class="fas fa-calendar-plus"></i>
-            {{localize "CALENDARIA.Settings.CalendarEditor.Label"}}
-          </button>
-          <button type="button" data-action="openImporter">
-            <i class="fas fa-file-import"></i>
-            {{localize "CALENDARIA.Settings.Importer.Label"}}
-          </button>
-        </div>
-      {{/if}}
+        <p class="hint">{{localize "CALENDARIA.Settings.EquivalentDateCalendars.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
-
-  {{#unless isGM}}
-    {{#unless showActiveCalendar}}
-      <div class="info-box push-bottom">
-        <i class="fas fa-info-circle"></i>
-        <p>{{localize "CALENDARIA.SettingsPanel.HomeTab.PlayerMessage"}}</p>
-      </div>
-    {{/unless}}
-  {{/unless}}
 </section>

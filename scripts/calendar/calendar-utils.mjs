@@ -4,7 +4,7 @@
  * @author Tyler
  */
 
-import { format, localize } from '../utils/localization.mjs';
+import { format, localize } from '../utils/_module.mjs';
 
 /**
  * Parse a single interval string into an interval object.

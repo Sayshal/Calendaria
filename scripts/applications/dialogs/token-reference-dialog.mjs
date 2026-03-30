@@ -5,15 +5,11 @@
  */
 
 import { TEMPLATES } from '../../constants.mjs';
-import { getAvailableTokens } from '../../utils/formatting/format-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
+import { getAvailableTokens, localize } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/**
- * Token categories for contextual highlighting.
- * @enum {string[]}
- */
+/** @enum {string[]} Token categories for contextual highlighting. */
 const TOKEN_CATEGORIES = {
   date: ['Y', 'YY', 'YYYY', '[yearName]', 'M', 'MM', 'MMM', 'MMMM', 'Mo', 'D', 'DD', 'Do', 'DDD', 'EEEE', 'EEE', 'EE', 'E', 'EEEEE', 'e', 'w', 'ww', 'W', '[namedWeek]', '[namedWeekAbbr]'],
   fantasy: [
@@ -44,7 +40,7 @@ const TOKEN_CATEGORIES = {
   time: ['H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'A', 'a', '[meridiemFull]'],
   stopwatch: ['HH', 'mm', 'ss', 'SSS']
 };
-/** Token-to-display-group mapping for UI layout. */
+/** @type {Object<string, string>} Token-to-display-group mapping for UI layout. */
 const TOKEN_GROUPS = {
   Y: 'year',
   YY: 'year',
@@ -141,16 +137,16 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
     const context = await super._prepareContext(options);
     const tokens = getAvailableTokens();
     const groups = [
-      { id: 'year', label: localize('CALENDARIA.TokenReference.Group.Year'), tokens: [] },
-      { id: 'month', label: localize('CALENDARIA.TokenReference.Group.Month'), tokens: [] },
-      { id: 'day', label: localize('CALENDARIA.TokenReference.Group.Day'), tokens: [] },
-      { id: 'weekday', label: localize('CALENDARIA.TokenReference.Group.Weekday'), tokens: [] },
-      { id: 'week', label: localize('CALENDARIA.TokenReference.Group.Week'), tokens: [] },
-      { id: 'time', label: localize('CALENDARIA.TokenReference.Group.Time'), tokens: [] },
-      { id: 'era', label: localize('CALENDARIA.TokenReference.Group.Era'), tokens: [] },
+      { id: 'year', label: localize('CALENDARIA.Common.Year'), tokens: [] },
+      { id: 'month', label: localize('CALENDARIA.Common.Month'), tokens: [] },
+      { id: 'day', label: localize('CALENDARIA.Common.Day'), tokens: [] },
+      { id: 'weekday', label: localize('CALENDARIA.Common.Weekday'), tokens: [] },
+      { id: 'week', label: localize('CALENDARIA.Common.Week'), tokens: [] },
+      { id: 'time', label: localize('CALENDARIA.Common.Time'), tokens: [] },
+      { id: 'era', label: localize('CALENDARIA.Common.Era'), tokens: [] },
       { id: 'season', label: localize('CALENDARIA.TokenReference.Group.Season'), tokens: [] },
-      { id: 'fantasy', label: localize('CALENDARIA.TokenReference.Group.Fantasy'), tokens: [] },
-      { id: 'stopwatch', label: localize('CALENDARIA.TokenReference.Group.Stopwatch'), tokens: [] }
+      { id: 'fantasy', label: localize('CALENDARIA.Common.Fantasy'), tokens: [] },
+      { id: 'stopwatch', label: localize('CALENDARIA.Common.StopWatch'), tokens: [] }
     ];
     const highlightedTokens = this.#getHighlightedTokens();
     for (const tokenDef of tokens) {

@@ -1,13 +1,13 @@
 # HUD
 
-The HUD displays date, time, weather, and events in a draggable widget. Two display modes are available: the full HUD with an animated dome (or slice), or a compact calendar view.
+Draggable widget showing date, time, weather, and events. Two display modes: full HUD with animated dome (or slice), or compact calendar view.
 
 ---
 
 ## Opening the HUD
 
 - Press **Alt+C** to toggle visibility
-- Automatically opens on world load (if enabled in settings)
+- Opens on world load (if enabled in settings)
 - Double-click the HUD bar to toggle between fullsize and compact modes
 
 > See also: [MiniCal](MiniCal) and [Time Keeper](Time Keeper) for alternative display options.
@@ -36,7 +36,7 @@ Double-click the HUD bar to toggle between fullsize and compact modes. Right-cli
 
 ## Dial Styles
 
-The HUD supports two dial styles for displaying the sun/moon:
+Two dial styles for the sun/moon display:
 
 | Style   | Description                                                       |
 | ------- | ----------------------------------------------------------------- |
@@ -45,9 +45,11 @@ The HUD supports two dial styles for displaying the sun/moon:
 
 Configure via Settings > HUD tab > Dial Style.
 
-### Combat Mode
+### Combat Behavior
 
-The "Combat Mode" dropdown in Settings > HUD tab controls HUD behavior during combat:
+"Combat Behavior" per-user dropdown in Settings > HUD tab. Uses the same shared combat behavior system as all other Calendaria widgets (BigCal, MiniCal, Chronicle, Stopwatch, Sun Dial, Time Keeper).
+
+Two additional options beyond the standard set:
 
 | Option               | Description                                                |
 | -------------------- | ---------------------------------------------------------- |
@@ -59,17 +61,19 @@ The "Combat Mode" dropdown in Settings > HUD tab controls HUD behavior during co
 
 "On Encounter" modes trigger when a combat encounter is created in the tracker, before the "Start Combat" button is pressed. "On Combat" modes trigger only when combat actively starts.
 
+Other widgets share the three common options: None, Hide on Combat Start, and Hide on Encounter Creation. Widgets automatically restore when combat ends. See [Settings](Settings#combat-behavior) for per-widget configuration.
+
 ---
 
 ## Full HUD
 
 ### Dome Display
 
-The dome draws all visual elements — sky, sun, moon, stars, and weather particles — in a single animated display.
+Draws sky, sun, moon, stars, and weather particles in a single animated display.
 
 #### Sky and Celestial Bodies
 
-The sky shifts through 14 color keyframes over the course of a day, crossfading smoothly between them. The sun arcs across the dome during daylight hours with a subtle corona pulse, while the moon takes over at night — its phase shadow drawn with bezier curve terminators for accurate crescent shapes. Stars twinkle in the background and fade in and out around twilight.
+Sky shifts through 14 color keyframes over the day, crossfading smoothly between them. Sun arcs across the dome during daylight with a subtle corona pulse, while the moon takes over at night. Phase shadow is drawn with bezier curve terminators for accurate crescent shapes. Stars twinkle in the background and fade around twilight.
 
 #### Multi-Moon Rendering
 
@@ -77,13 +81,21 @@ When **Show All Moons** is enabled (Settings > HUD tab), secondary moons trail b
 
 #### Weather Particle Overlay
 
-Weather conditions render as particle effects directly in the dome, replacing the previous CSS cloud animation. Each weather preset maps to a `hudEffect` with unique particle behavior. See [Weather Presets — HUD Effects](Weather-Presets#hud-effects) for the full list.
+Weather conditions render as particle effects directly in the dome. Each weather preset maps to a `hudEffect` with unique particle behavior. See [Weather Presets: HUD Effects](Weather-Presets#hud-effects) for the full list.
 
-Weather particles are influenced by current wind speed and direction. Sky gradient colors can be overridden per-weather-effect (e.g., greenish sky for tornado, orange for sandstorm).
+Wind speed and direction influence particle movement. Sky gradient colors can override per-weather-effect (e.g., greenish sky for tornado, orange for sandstorm).
 
-#### Disable Weather Effects
+#### Weather FX Mode
 
-A per-client setting (Settings > HUD tab) disables all weather particle effects in the HUD dome and Sun Dial. Sky, sun, moon, and stars are unaffected. Useful for players on low-end hardware or who prefer a cleaner display.
+Per-client dropdown (Settings > HUD tab) for weather particle effects in the HUD dome and Sun Dial:
+
+| Mode    | Description                                             |
+| ------- | ------------------------------------------------------- |
+| Full    | All weather particle effects rendered at full density   |
+| Reduced | Lower particle density for improved performance         |
+| Off     | No weather particle effects (sky, sun, moon unaffected) |
+
+Useful for players on low-end hardware or who prefer a cleaner display.
 
 #### Performance Mode
 
@@ -105,7 +117,7 @@ When enabled (Settings > HUD tab), the dome renders below the info bar instead o
 
 ### Non-Standard Time Support
 
-The HUD fully supports calendars with non-standard time units:
+Supports calendars with non-standard time units:
 
 - Time dial and hour markers automatically scale to `hoursPerDay`
 - Sunrise/sunset positions calculated from calendar's daylight settings
@@ -122,22 +134,22 @@ Click the dome or slice to open the Time Dial overlay:
 
 ### Slice Display
 
-An alternative to the dome showing a horizontal sky strip:
+Alternative to the dome. A horizontal sky strip:
 
 - Sun/moon travels left-to-right across the bar
 - Time displayed over the sky gradient
-- Automatically used in compact mode
+- Used in compact mode automatically
 
 ### Info Bar
 
-The bar displays (left to right):
+Bar contents (left to right):
 
 - **Search button** - Opens note search panel
 - **Add Note button** - Creates a new note at the current game time
 - **Events** - Icons for today's notes (up to 5 displayed); click to open note
 - **Date** - Click to open Set Date dialog (GM only)
-- **Time** — Current time with play/pause button (GM only); shift-click to lock/unlock the clock
-- **Weather** - Current weather; click to open weather picker (GM only). Shows "click to generate" prompt when no weather set.
+- **Time.** Current time with play/pause button (GM only); shift-click to lock/unlock the clock
+- **Weather** - Current weather; click to open weather picker (GM only). Shows "click to generate" prompt when no weather set. When [Intraday Weather](Weather-System#intraday-weather) is enabled, hovering the weather block shows a tooltip with per-period weather breakdown (Night, Morning, Afternoon, Evening), highlighting the active period.
 - **Season** - Current season name and icon
 - **Era** - Current era indicator (toggle via Show Era setting)
 - **Cycle** - Current cycle value (toggle via Show Cycles setting)
@@ -146,7 +158,7 @@ The bar displays (left to right):
 
 ### Block Visibility
 
-Each indicator block (weather, season, era/cycle) can be hidden via Settings > HUD tab. Hiding blocks shrinks the HUD width automatically.
+Each indicator block (weather, season, era/cycle) can be hidden via Settings > HUD tab. Hiding blocks shrinks HUD width automatically.
 
 **Weather Display Modes:**
 
@@ -162,6 +174,10 @@ Each indicator block (weather, season, era/cycle) can be hidden via Settings > H
 - Text Only
 
 Settings are user-scoped - each player can customize their view.
+
+#### Event Border Glow
+
+When events exist on the current day, the HUD shows a glowing border effect. "Event Border Glow" toggle (Settings > HUD tab, display fieldset) controls this. Disabling it removes the glow but keeps event icons, tooltips, and note actions. Enabled by default.
 
 ### Time Controls Tray (GM Only)
 
@@ -181,7 +197,7 @@ Hover over the bar to reveal time controls:
 | Sunset             | Advance to next sunset                                                                                                                  |
 | Midnight           | Advance to next midnight                                                                                                                |
 
-The tray can be configured to open upward or downward via Settings > HUD tab > Tray Open Direction.
+Configure tray to open upward or downward via Settings > HUD tab > Tray Open Direction.
 
 > [!NOTE]
 > Real-time clock speed is configured in Settings > Time tab, not on the HUD.
@@ -206,7 +222,7 @@ Shift-click again to unlock. Requires time-change permission.
 
 ## Clock Sync
 
-The real-time clock syncs with game state:
+Real-time clock syncs with game state:
 
 - **Pause Sync**: Clock stops when game is paused, resumes at 1:1 when unpaused
 - **Combat Sync**: Clock stops during combat (time advances per-turn via system)
@@ -225,7 +241,7 @@ Configure sync behavior in Settings > Time tab.
 Both HUD modes include a search panel:
 
 - Type at least 2 characters to search note names and category names
-- Use `category:` prefix to filter by category (e.g., `category:holiday`)
+- Use `category:` prefix to filter by category (e.g., `category:quest`)
 - Click a result to open the note
 - Press **Escape** to close
 
@@ -259,7 +275,7 @@ Toggle sticky zones via Settings > HUD tab > Enable Sticky Zones.
 
 ### Dome Visibility (Full HUD)
 
-The dome automatically fades when approaching the top of the viewport and hides entirely if insufficient space. This auto-hide behavior can be disabled via Settings > HUD tab > Dome Auto-Hide.
+Dome fades when approaching the top of the viewport and hides entirely if there's insufficient space. Disable via Settings > HUD tab > Dome Auto-Hide.
 
 ### Locking Position
 
@@ -273,19 +289,13 @@ Settings > HUD tab (or MiniCal tab) > Reset Position
 
 ## Auto-Fade
 
-When enabled, the HUD fades to a configurable opacity after the mouse leaves.
+When enabled, the HUD fades to a configurable opacity after the mouse leaves:
 
 - Fade triggers after a brief delay when the mouse exits
 - Hovering restores full opacity immediately
 - Idle opacity configurable from 0% to 100%
 
 Configure via Settings > HUD tab.
-
----
-
-## Settings
-
-Configure via **Settings Panel > HUD** tab. See [Settings](Settings#hud) for all options.
 
 ---
 
@@ -302,17 +312,17 @@ See [Keybinds](Keybinds) for all available keyboard shortcuts and configuration 
 
 ## Player Permissions
 
-Players have limited HUD interaction:
+Player HUD access:
 
 - **Can**: View date/time/weather, search notes, view non-GM notes, create notes
 - **Cannot**: Open Set Date dialog, change time, change weather, access time controls
 
-The dome and all time-related controls are non-interactive for players.
+Dome and time-related controls are non-interactive for players.
 
 ---
 
 ## Per-Scene Visibility
 
-GMs can configure individual scenes to hide the HUD from players automatically. When a player navigates to a scene with "Hide HUD for Players" enabled, their HUD closes. When navigating to a non-hidden scene, the HUD is restored if they have "Show HUD on load" enabled.
+GMs can hide the HUD from players on individual scenes. When a player navigates to a scene with "Hide HUD for Players" enabled, their HUD closes. Navigating to a non-hidden scene restores the HUD if they have "Show HUD on load" enabled.
 
 Configure via **Scene Configuration > Calendaria tab > Hide HUD for Players**.

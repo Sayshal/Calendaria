@@ -4,12 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
-import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
+import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
+import { localize, log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** Both module IDs to support original SC and SC Reborn. */
@@ -209,7 +207,12 @@ export default class SimpleCalendarImporter extends BaseImporter {
       festivals: this.#extractFestivals(calendar.months),
       eras: this.#transformEras(calendar.year),
       daylight: this.#transformDaylight(calendar.seasons),
-      metadata: { description: `Imported from Simple Calendar`, system: calendar.name || 'Unknown', importedFrom: 'simple-calendar', originalId: calendar.id }
+      metadata: {
+        description: localize('CALENDARIA.Importer.ImportedFrom.SimpleCalendar'),
+        system: calendar.name || localize('CALENDARIA.Common.Unknown'),
+        importedFrom: 'simple-calendar',
+        originalId: calendar.id
+      }
     };
   }
 
@@ -310,7 +313,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
       dayCount += month.numberOfDays || 0;
     }
     const totalDays = dayCount;
-    // Map SC month indices (which include intercalary) to regular-month-only indices
     const scToRegularIndex = new Map();
     let regularIdx = 0;
     for (let i = 0; i < scMonths.length; i++) {
@@ -334,13 +336,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       let dayEnd = (monthDayStarts[nextRegIdx] ?? 0) + (nextSeason.startingDay ?? 0) - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
       if (dayEnd < 0) dayEnd = totalDays - 1;
-      return {
-        name: season.name,
-        dayStart,
-        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
-        color: season.color || '',
-        icon: SEASON_ICON_MAP[season.icon] || ''
-      };
+      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd, color: season.color || '', icon: SEASON_ICON_MAP[season.icon] || '' };
     });
   }
 
@@ -409,7 +405,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
 
   /**
    * Extract festivals from SC intercalary months.
-   * Intercalary months are placed relative to the preceding regular month.
    * @param {object[]} months - SC months array
    * @returns {object[]} Calendaria festivals array
    */
@@ -420,7 +415,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
     let regularCount = 0;
     for (const month of months) {
       if (month.intercalary) {
-        // Place festival at end of the last regular month seen (or month 0 day 0 if none yet)
         const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
         const countsForWeekday = month.intercalaryInclude === true;
         for (let day = 0; day < month.numberOfDays; day++) {
@@ -529,7 +523,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
   }
 
   /**
-   * Import SC notes with category and gmOnly support.
+   * Import SC notes with category and visibility support.
    * @param {object[]} notes - Array of note objects to import
    * @param {object} options - Import options including calendarId
    * @returns {Promise<object>} Result with success, count, and errors
@@ -539,7 +533,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-    // Import SC note categories as custom categories
     if (this.#scNoteCategories.length) await this.#importNoteCategories(this.#scNoteCategories);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
@@ -550,15 +543,10 @@ export default class SimpleCalendarImporter extends BaseImporter {
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
-        if (page) {
-          count++;
-        } else {
-          errors.push(`Failed to create note: ${note.name}`);
-          log(1, `Failed to create note: ${note.name}`);
-        }
+        if (page) count++;
+        else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
-        log(1, `Error importing note "${note.name}":`, error);
       }
     }
     log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
@@ -566,11 +554,11 @@ export default class SimpleCalendarImporter extends BaseImporter {
   }
 
   /**
-   * Import SC note categories as Calendaria custom categories.
+   * Import SC note categories as Calendaria custom presets.
    * @param {object[]} scCategories - SC note category definitions
    */
   async #importNoteCategories(scCategories) {
-    const existing = getAllCategories();
+    const existing = getAllPresets();
     const existingIds = new Set(existing.map((c) => c.id));
     for (const cat of scCategories) {
       const id = cat.name
@@ -578,7 +566,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         .replace(/\s+/g, '-')
         .replace(/[^\da-z-]/g, '');
       if (!existingIds.has(id)) {
-        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        await addCustomPreset(cat.name, cat.color, 'fa-tag');
         log(3, `Imported SC note category: ${cat.name}`);
       }
     }
@@ -600,7 +588,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
         newFestivals.push(festivalData);
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);
-        log(1, `Error processing festival "${festival.name}":`, error);
       }
     }
     if (newFestivals.length > 0) {
@@ -610,7 +597,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
         log(3, `Festival import complete: ${newFestivals.length} festivals added`);
       } catch (error) {
         errors.push(`Error saving festivals: ${error.message}`);
-        log(1, 'Error saving festivals:', error);
       }
     }
     return { success: errors.length === 0, count: newFestivals.length, errors };

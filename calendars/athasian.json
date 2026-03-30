@@ -145,26 +145,110 @@
     "festivalofzenali": {
       "name": "Festival of Zenalia",
       "month": 4,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFD700",
       "description": "Five-day celebration at the zenith of High Sun, featuring the Starlight Pageants.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "festivalofdessal": {
       "name": "Festival of Dessalia",
       "month": 9,
-      "icon": "fas fa-cloud-sun",
+      "icon": "fa-cloud-sun",
       "color": "#FF8C00",
       "description": "Five-day festival marking the midpoint of Sun Descending season.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "festivalofassali": {
       "name": "Festival of Assalia",
       "month": 14,
-      "icon": "fas fa-sun-plant-wilt",
+      "icon": "fa-sun-plant-wilt",
       "color": "#FFA500",
       "description": "Five-day festival celebrating the midpoint of Sun Ascending season.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 15
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {
@@ -325,5 +409,216 @@
     "description": "CALENDARIA.Calendar.Athasian.Description",
     "author": "calendaria",
     "system": "Dark Sun"
+  },
+  "weather": {
+    "activeZone": "arid",
+    "zones": {
+      "arid00000000000": {
+        "id": "arid",
+        "name": "CALENDARIA.Weather.Climate.Arid",
+        "description": "CALENDARIA.Weather.Climate.AridDesc",
+        "windSpeedRange": {
+          "min": 0,
+          "max": 4
+        },
+        "windDirections": {
+          "S": 18,
+          "SSW": 15,
+          "SW": 12,
+          "SSE": 10,
+          "SE": 8,
+          "W": 8,
+          "E": 6,
+          "WSW": 5,
+          "N": 4,
+          "NE": 3,
+          "NW": 3,
+          "NNE": 3,
+          "NNW": 2,
+          "ENE": 1,
+          "ESE": 1,
+          "WNW": 1
+        },
+        "brightnessMultiplier": 1.15,
+        "shortestDay": 10,
+        "longestDay": 14,
+        "temperatures": {
+          "_default": {
+            "min": 15,
+            "max": 35
+          }
+        },
+        "presets": {
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "windy0000000000": {
+            "id": "windy",
+            "enabled": true
+          },
+          "sandstorm000000": {
+            "id": "sandstorm",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "heathaze0000000": {
+            "id": "heat-haze",
+            "enabled": true
+          },
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "fog000000000000": {
+            "id": "fog",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "High Sun": {
+            "temperatures": {
+              "min": 28,
+              "max": 48
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 56
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 17
+              },
+              "sandstorm": {
+                "id": "sandstorm",
+                "chance": 11
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 11
+              },
+              "heat-haze": {
+                "id": "heat-haze",
+                "chance": 6
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 0
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              }
+            }
+          },
+          "Sun Descending": {
+            "temperatures": {
+              "min": 28,
+              "max": 48
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 56
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 17
+              },
+              "sandstorm": {
+                "id": "sandstorm",
+                "chance": 11
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 11
+              },
+              "heat-haze": {
+                "id": "heat-haze",
+                "chance": 6
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 0
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              }
+            }
+          },
+          "Sun Ascending": {
+            "temperatures": {
+              "min": 28,
+              "max": 48
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 56
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 17
+              },
+              "sandstorm": {
+                "id": "sandstorm",
+                "chance": 11
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 11
+              },
+              "heat-haze": {
+                "id": "heat-haze",
+                "chance": 6
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 0
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              }
+            }
+          }
+        },
+        "colorShift": {
+          "dawnHue": 25,
+          "duskHue": 10,
+          "nightHue": 240,
+          "transitionMinutes": 40
+        },
+        "environmentBase": {
+          "hue": 35,
+          "saturation": 0.7
+        },
+        "environmentDark": {
+          "hue": 240,
+          "saturation": 0.3
+        }
+      }
+    }
   }
 }

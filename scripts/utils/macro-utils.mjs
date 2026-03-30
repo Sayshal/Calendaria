@@ -14,7 +14,6 @@ export async function executeMacroById(macroId, context = {}) {
   if (!macroId) return;
   const macro = game.macros.get(macroId);
   if (!macro) return;
-
   return macro.execute(context);
 }
 

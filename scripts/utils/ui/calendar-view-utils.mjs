@@ -4,16 +4,12 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
-import { isRecurringMatch } from '../../notes/recurrence.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { formatCustom, toRomanNumeral } from '../formatting/format-utils.mjs';
-import { format, localize } from '../localization.mjs';
-import { canViewWeatherForecast } from '../permissions.mjs';
-import { CalendariaSocket } from '../socket.mjs';
-import { BigCal, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
+import { BigCal, HUD, MiniCal, NoteViewer, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
+import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
+import { MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import { NoteManager, addDays, compareDays, extractNoteMatchData, getEffectiveDuration, isRecurringMatch, resolveNoteDisplayProps } from '../../notes/_module.mjs';
+import { WeatherManager } from '../../weather/_module.mjs';
+import { CalendariaSocket, canViewWeatherForecast, format, formatCustom, isFogEnabled, isRevealed, localize, revealRange, toRomanNumeral } from '../_module.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -25,6 +21,12 @@ let visibleMoonsOverride = null;
 
 /** @type {{tooltip: HTMLElement|null, handler: Function|null}} Active moon picker state */
 const moonPickerState = { tooltip: null, handler: null };
+
+/** @type {ContextMenu|null} Active day cell context menu instance */
+let activeDayContextMenu = null;
+
+/** @type {number} Max notes shown in day tooltip before overflow. */
+const TOOLTIP_MAX_NOTES = 5;
 
 /**
  * Set the moon override for display.
@@ -79,28 +81,14 @@ export function closeMoonPicker() {
  * @param {string|null} currentMoon - Currently selected moon name (highlighted)
  * @param {Function} onSelect - Callback when a moon is selected: (moonName) => void
  */
-export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
+export async function showMoonPicker(anchor, moons, currentMoon, onSelect) {
   closeMoonPicker();
   if (!moons?.length) return;
   const tooltip = document.createElement('div');
   tooltip.className = 'calendaria-moon-picker';
   const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
-  tooltip.innerHTML = `
-    <div class="radial" style="--moon-count: ${moons.length}; --radial-size: ${radialSize}px">
-      ${moons
-        .map(
-          (moon, i) => `
-        <div class="radial-item${moon.moonName === currentMoon ? ' selected' : ''}" style="--moon-index: ${i}" data-tooltip="${moon.phaseName}" data-moon-name="${moon.moonName}">
-          <span class="name">${moon.moonName}</span>
-          <div class="radial-icon${moon.color ? ' tinted' : ''}"${moon.color ? ` style="--moon-color: ${moon.color}"` : ''}>
-            <img src="${moon.icon}" alt="${moon.phaseName}">
-          </div>
-        </div>
-      `
-        )
-        .join('')}
-    </div>
-  `;
+  const templateData = { moonCount: moons.length, radialSize, moons: moons.map((m) => ({ ...m, selected: m.moonName === currentMoon })) };
+  tooltip.innerHTML = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.MOON_PICKER, templateData);
   document.body.appendChild(tooltip);
   moonPickerState.tooltip = tooltip;
   tooltip.querySelectorAll('.radial-item').forEach((item) => {
@@ -127,28 +115,6 @@ export function showMoonPicker(anchor, moons, currentMoon, onSelect) {
     };
     document.addEventListener('mousedown', moonPickerState.handler);
   }, 100);
-}
-
-/**
- * Convert hex color to hue angle for CSS filter.
- * @param {string} hex - Hex color (e.g., '#ff0000')
- * @returns {number} Hue angle in degrees (0-360)
- */
-function hexToHue(hex) {
-  if (!hex) return 0;
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
-  if (d === 0) return 0;
-  let h;
-  if (max === r) h = ((g - b) / d) % 6;
-  else if (max === g) h = (b - r) / d + 2;
-  else h = (r - g) / d + 4;
-  h = Math.round(h * 60);
-  return h < 0 ? h + 360 : h;
 }
 
 /**
@@ -196,9 +162,12 @@ export function getCalendarNotes() {
  * @returns {object[]} Notes visible to the current user
  */
 export function getVisibleNotes(notes) {
-  if (game.user.isGM) return notes;
+  const showSecrets = game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.SHOW_SECRET_NOTES);
   return notes.filter((page) => {
-    if (page.system.gmOnly) return false;
+    const { visibility } = resolveNoteDisplayProps(page);
+    if (visibility === NOTE_VISIBILITY.SECRET && !showSecrets) return false;
+    if (game.user.isGM) return true;
+    if (visibility !== NOTE_VISIBILITY.VISIBLE) return false;
     const journal = page.parent;
     return journal ? journal.testUserPermission(game.user, 'OBSERVER') : page.testUserPermission(game.user, 'OBSERVER');
   });
@@ -242,25 +211,7 @@ export function getCurrentViewedDate(calendar = null) {
  */
 export function hasNotesOnDay(notes, year, month, dayOfMonth) {
   const targetDate = { year, month, dayOfMonth };
-  return notes.some((page) => {
-    const noteData = {
-      startDate: page.system.startDate,
-      endDate: page.system.endDate,
-      repeat: page.system.repeat,
-      repeatInterval: page.system.repeatInterval,
-      repeatEndDate: page.system.repeatEndDate,
-      maxOccurrences: page.system.maxOccurrences,
-      moonConditions: page.system.moonConditions,
-      randomConfig: page.system.randomConfig,
-      cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-      linkedEvent: page.system.linkedEvent,
-      weekday: page.system.weekday,
-      weekNumber: page.system.weekNumber,
-      seasonalConfig: page.system.seasonalConfig,
-      conditions: page.system.conditions
-    };
-    return isRecurringMatch(noteData, targetDate);
-  });
+  return notes.some((page) => isRecurringMatch(extractNoteMatchData(page), targetDate));
 }
 
 /**
@@ -272,15 +223,17 @@ export function buildWeatherPillData(wd) {
   if (!wd) return { weatherIcon: null, weatherColor: null, weatherLabel: null, weatherTemp: null, weatherWindDir: null, weatherTooltipHtml: null, isForecast: false };
   const temp = wd.temperature != null ? WeatherManager.formatTemperature(wd.temperature) : null;
   const windDir = wd.wind?.direction != null ? WeatherManager.getWindDirectionLabel(wd.wind.direction) : null;
-  const tooltipHtml = WeatherManager.buildWeatherTooltip({
+  const tooltipArgs = {
     label: wd.label,
     description: wd.description ?? null,
     temp,
     windSpeed: wd.wind?.speed ?? 0,
+    windKph: wd.wind?.kph ?? null,
     windDirection: wd.wind?.direction,
     precipType: wd.precipitation?.type ?? null,
     precipIntensity: wd.precipitation?.intensity
-  });
+  };
+  const tooltipHtml = wd.periods ? WeatherManager.buildWeatherTooltipWithPeriods(tooltipArgs, wd.periods, wd.activePeriod) : WeatherManager.buildWeatherTooltip(tooltipArgs);
   return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };
 }
 
@@ -311,7 +264,7 @@ export function renderWeatherIndicator({ weather, displayMode, canInteract, show
     let precipHtml = '';
     if (showLabel && weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
     return `<span class="weather-indicator${clickable} weather-mode-${displayMode}" ${action} style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">${icon}${label}${temp}${windHtml}${precipHtml}</span>`;
-  } else if (showBlock && canInteract) {
+  } else if (showBlock && canInteract && WeatherManager.getCalendarZones().length > 0) {
     return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
   }
   return '';
@@ -414,7 +367,7 @@ export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
   const phase = calendar.getMoonPhase(moon.originalIndex, dayWorldTime);
   if (!phase) return null;
   const color = moon.color || null;
-  return { icon: phase.icon, color, hue: color ? hexToHue(color) : null, tooltip: `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` };
+  return { icon: phase.icon, color, hue: color ? Math.round(foundry.utils.Color.from(color).hsv[0] * 360) : null, tooltip: `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` };
 }
 
 /**
@@ -435,7 +388,13 @@ export function getAllMoonPhases(calendar, year, month, dayOfMonth) {
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;
       const color = moon.color || null;
-      return { moonName: localize(moon.name), phaseName: phase.subPhaseName || localize(phase.name), icon: phase.icon, color, hue: color ? hexToHue(color) : null };
+      return {
+        moonName: localize(moon.name),
+        phaseName: phase.subPhaseName || localize(phase.name),
+        icon: phase.icon,
+        color,
+        hue: color ? Math.round(foundry.utils.Color.from(color).hsv[0] * 360) : null
+      };
     })
     .filter(Boolean)
     .sort((a, b) => a.moonName.localeCompare(b.moonName));
@@ -457,7 +416,7 @@ export function buildWeatherLookup() {
   if (canViewWeatherForecast() && game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) {
     const forecastOpts = zoneId ? { zoneId } : {};
     const forecast = WeatherManager.getForecast(forecastOpts);
-    lookup = new Map(forecast.map((f) => [`${f.year}-${f.month}-${f.dayOfMonth}`, f]));
+    lookup = new Map(forecast.map((f) => [`${f.year + yz}-${f.month}-${f.dayOfMonth}`, f]));
   }
   return { lookup, todayYear, todayMonth, todayDayOfMonth, zoneId };
 }
@@ -481,7 +440,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
     const w = WeatherManager.getCurrentWeather(zoneId);
     if (!w) return null;
     const temp = WeatherManager.getTemperature(zoneId);
-    return {
+    const result = {
       icon: w.icon,
       color: w.color,
       label: localize(w.label),
@@ -492,6 +451,11 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
       isForecast: false,
       isVaried: false
     };
+    if (w.periods) {
+      result.periods = w.periods;
+      result.activePeriod = w.activePeriod;
+    }
+    return result;
   }
   const hist = WeatherManager.getWeatherForDate(year, month, dayOfMonth, zoneId);
   if (hist)
@@ -508,8 +472,8 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
     };
   if (forecastLookup) {
     const f = forecastLookup.get(`${year}-${month}-${dayOfMonth}`);
-    if (f)
-      return {
+    if (f) {
+      const result = {
         icon: f.preset.icon,
         color: f.preset.color,
         label: localize(f.preset.label),
@@ -520,6 +484,9 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
         isForecast: true,
         isVaried: f.isVaried ?? false
       };
+      if (f.periods) result.periods = f.periods;
+      return result;
+    }
   }
   return null;
 }
@@ -532,27 +499,18 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
  * @returns {object[]} Notes on this day
  */
 export function getNotesOnDay(year, month, dayOfMonth) {
+  if (isFogEnabled() && !isRevealed(year, month, dayOfMonth)) return [];
   const allNotes = getCalendarNotes();
   const visibleNotes = getVisibleNotes(allNotes);
   const targetDate = { year, month, dayOfMonth };
-  return visibleNotes.filter((page) => {
-    const noteData = {
-      startDate: page.system.startDate,
-      endDate: page.system.endDate,
-      repeat: page.system.repeat,
-      repeatInterval: page.system.repeatInterval,
-      repeatEndDate: page.system.repeatEndDate,
-      maxOccurrences: page.system.maxOccurrences,
-      moonConditions: page.system.moonConditions,
-      randomConfig: page.system.randomConfig,
-      cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-      linkedEvent: page.system.linkedEvent,
-      weekday: page.system.weekday,
-      weekNumber: page.system.weekNumber,
-      seasonalConfig: page.system.seasonalConfig,
-      conditions: page.system.conditions
-    };
-    return isRecurringMatch(noteData, targetDate);
+  const matching = visibleNotes.filter((page) => isRecurringMatch(extractNoteMatchData(page), targetDate));
+  const seenFestivals = new Set();
+  return matching.filter((page) => {
+    const festivalKey = page.system?.linkedFestival?.festivalKey;
+    if (!festivalKey) return true;
+    if (seenFestivals.has(festivalKey)) return false;
+    seenFestivals.add(festivalKey);
+    return true;
   });
 }
 
@@ -586,9 +544,12 @@ export async function setDateTo(year, month, dayOfMonth, calendar = null) {
  * @returns {Promise<object|null>} The created note page, or null if creation failed
  */
 export async function createNoteOnDate(year, month, dayOfMonth) {
+  const components = game.time.components ?? {};
+  const hour = components.hour ?? 12;
   const page = await NoteManager.createNote({
     name: localize('CALENDARIA.Note.NewNote'),
-    noteData: { startDate: { year, month, dayOfMonth, hour: 12, minute: 0 }, endDate: { year, month, dayOfMonth, hour: 13, minute: 0 } }
+    noteData: { startDate: { year, month, dayOfMonth, hour, minute: 0 }, endDate: { year, month, dayOfMonth, hour: hour + 1, minute: 0 } },
+    source: 'ui'
   });
   return page;
 }
@@ -607,6 +568,7 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
     const year = parseInt(target.dataset.year);
     const month = parseInt(target.dataset.month);
     const dayOfMonth = parseInt(target.dataset.day);
+    if (!game.user.isGM && isFogEnabled() && !isRevealed(year, month, dayOfMonth)) return [];
     const notes = getNotesOnDay(year, month, dayOfMonth);
     const today = getCurrentViewedDate(calendar);
     const isTodayDate = year === today.year && month === today.month && dayOfMonth === today.dayOfMonth;
@@ -629,23 +591,48 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
         }
       });
     }
+    if (game.user.isGM && isFogEnabled()) {
+      items.push({
+        name: 'CALENDARIA.FogOfWar.RevealToHere',
+        icon: '<i class="fas fa-eye"></i>',
+        callback: async () => {
+          const currentDate = getCurrentViewedDate(calendar);
+          const start = { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
+          const end = { year, month, dayOfMonth };
+          if (compareDays(start, end) > 0) await revealRange(end, start);
+          else await revealRange(start, end);
+        }
+      });
+    }
+    items.push({
+      name: 'CALENDARIA.Common.OpenChronicle',
+      icon: '<i class="fas fa-scroll"></i>',
+      callback: () => CALENDARIA.apps.Chronicle.show()
+    });
     if (extraItems?.length) items.push(...extraItems);
     if (notes.length > 0) {
       const sortedNotes = [...notes].sort((a, b) => a.name.localeCompare(b.name));
-      for (const note of sortedNotes) {
+      const shown = sortedNotes.slice(0, TOOLTIP_MAX_NOTES);
+      for (const note of shown) {
         const isOwner = note.isOwner;
         const noteIcon = note.system?.icon || 'fas fa-sticky-note';
         const noteColor = note.system?.color || '#4a9eff';
         const iconHtml = note.system?.iconType === 'fontawesome' ? `<i class="${noteIcon}" style="color: ${noteColor}"></i>` : `<i class="fas fa-sticky-note" style="color: ${noteColor}"></i>`;
         items.push({ name: note.name, icon: iconHtml, group: 'notes', _noteData: { note, isOwner }, callback: () => note.sheet.render(true, { mode: isOwner ? 'edit' : 'view' }) });
       }
+      const remaining = sortedNotes.length - shown.length;
+      if (remaining > 0) {
+        items.push({
+          name: `+${remaining} ${localize('CALENDARIA.Common.More')}`,
+          icon: '<i class="fas fa-ellipsis-h"></i>',
+          group: 'notes',
+          callback: () => NoteViewer.show({ date: { year, month: month + 1, day: dayOfMonth + 1 } })
+        });
+      }
     }
     return items;
   };
 }
-
-/** @type {ContextMenu|null} Active day cell context menu instance */
-let activeDayContextMenu = null;
 
 /**
  * Inject date info header into context menu.
@@ -659,17 +646,20 @@ export function injectContextMenuInfo(target, calendar) {
   const month = parseInt(target.dataset.month);
   const dayOfMonth = parseInt(target.dataset.day);
   const internalYear = year - (calendar.years?.yearZero ?? 0);
-  const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
+  const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+  const midday = Math.floor(hoursPerDay / 2);
+  const internalComponents = { year: internalYear, month, dayOfMonth, hour: midday, minute: 0, second: 0 };
   const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
   const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
   const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
+  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
   const formatTime = (hours) => {
     let h = Math.floor(hours);
-    let m = Math.round((hours - h) * 60);
-    if (m === 60) {
+    let m = Math.round((hours - h) * minutesPerHour);
+    if (m >= minutesPerHour) {
       m = 0;
       h += 1;
     }
@@ -691,7 +681,7 @@ export function injectContextMenuInfo(target, calendar) {
  * @param {string} str - Text to escape
  * @returns {string} Escaped text
  */
-function escapeText(str) {
+export function escapeText(str) {
   return (str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
@@ -700,8 +690,101 @@ function escapeText(str) {
  * @param {string} html - HTML string to encode
  * @returns {string} HTML-encoded string (< becomes &lt; etc.)
  */
-function encodeHtmlAttribute(html) {
+export function encodeHtmlAttribute(html) {
   return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Strip secret sections from HTML content for non-GM users.
+ * @param {string} html - Raw HTML content
+ * @returns {string} Sanitized HTML with secrets removed for non-GMs
+ */
+export function stripSecrets(html) {
+  if (!html || game.user.isGM) return html ?? '';
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  temp.querySelectorAll('section.secret:not(.revealed)').forEach((el) => el.remove());
+  return temp.innerHTML;
+}
+
+/**
+ * Create a truncated HTML snippet preserving block-level line breaks.
+ * @param {string} html - Raw HTML content
+ * @param {number} [maxLength] - Maximum text length (default 120)
+ * @returns {string} Truncated HTML snippet or empty string
+ */
+export function previewSnippet(html, maxLength = 120) {
+  if (!html) return '';
+  const clean = foundry.utils.cleanHTML(html);
+  const container = document.createElement('div');
+  container.innerHTML = clean;
+  const text = container.textContent || '';
+  if (!text.trim()) return '';
+  if (text.length <= maxLength) return clean;
+  let count = 0;
+  const truncate = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (count >= maxLength) {
+        child.remove();
+        continue;
+      }
+      if (child.nodeType === Node.TEXT_NODE) {
+        const remaining = maxLength - count;
+        if (child.textContent.length > remaining) {
+          child.textContent = `${child.textContent.slice(0, remaining)}…`;
+          count = maxLength;
+        } else {
+          count += child.textContent.length;
+        }
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        truncate(child);
+      }
+    }
+  };
+  truncate(container);
+  return container.innerHTML;
+}
+
+/**
+ * Find festival note info for a specific day using recurrence/conditionTree matching.
+ * @param {object[]} notes - All visible note pages
+ * @param {number} year - Display year
+ * @param {number} month - Month (0-indexed)
+ * @param {number} dayOfMonth - Day (0-indexed)
+ * @returns {object|null} Festival info or null
+ */
+export function getFestivalNoteForDay(notes, year, month, dayOfMonth) {
+  const targetDate = { year, month, dayOfMonth };
+  const fn = notes.find((p) => p.system?.linkedFestival && isRecurringMatch(extractNoteMatchData(p), targetDate));
+  if (!fn) return null;
+  const matchData = extractNoteMatchData(fn);
+  const isStart = isRecurringMatch({ ...matchData, hasDuration: false, duration: 0 }, targetDate);
+  const duration = getEffectiveDuration(matchData);
+  let isEnd = false;
+  if (duration > 0 && !isStart) {
+    const potentialStart = addDays(targetDate, -duration);
+    isEnd = isRecurringMatch({ ...matchData, hasDuration: false, duration: 0 }, potentialStart);
+  }
+  const isMiddle = !isStart && !isEnd;
+  const showBookends = fn.system?.showBookends || false;
+  const name = fn.name || '';
+  const descEl = document.createElement('div');
+  descEl.innerHTML = foundry.utils.cleanHTML(fn.text?.content || '');
+  const description = descEl.textContent || '';
+  const color = fn.system?.color || '';
+  const icon = fn.system?.icon || '';
+  const iconType = fn.system?.iconType || 'fontawesome';
+  const position = isStart ? 'starting' : isEnd ? 'ending' : null;
+  let countsForWeekday = true;
+  const linked = fn.system?.linkedFestival;
+  if (linked && isStart) {
+    const cal = CalendarManager.getCalendar(linked.calendarId);
+    const festDef = cal?.festivals?.[linked.festivalKey];
+    if (festDef && festDef.countsForWeekday === false) countsForWeekday = false;
+  }
+  const effectiveBookends = countsForWeekday ? showBookends : false;
+  const effectiveShowVisuals = !effectiveBookends || !isMiddle;
+  return { note: fn, name, description, color, icon, iconType, isStart, isEnd, isMiddle, showBookends: effectiveBookends, showVisuals: effectiveShowVisuals, position, countsForWeekday };
 }
 
 /**
@@ -714,13 +797,16 @@ function encodeHtmlAttribute(html) {
  * @param {string} [festival.name] - Festival name
  * @param {string} [festival.description] - Festival description
  * @param {string} [festival.color] - Festival color
+ * @param {string} [festival.position] - 'starting' or 'ending' prefix
  * @param {object|null} [weatherData] - Weather data from getDayWeather
+ * @param {object[]} [notes] - Enriched note objects (from enrichNoteForDisplay)
  * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
  */
-export function generateDayTooltip(calendar, year, month, dayOfMonth, festival = null, weatherData = null) {
+export function generateDayTooltip(calendar, year, month, dayOfMonth, festival = null, weatherData = null, notes = null) {
   const internalYear = year - (calendar.years?.yearZero ?? 0);
+  const displayComponents = { year, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
   const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
-  const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
+  const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
@@ -739,7 +825,8 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   rows.push(`<div class="date"><strong>${escapeText(fullDate)}</strong></div>`);
   if (festival?.name) {
     const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
-    let festivalText = escapeText(festival.name);
+    const prefix = festival.position ? `${localize(`CALENDARIA.Note.Festival.${festival.position === 'starting' ? 'Starting' : 'Ending'}`)}: ` : '';
+    let festivalText = prefix + escapeText(festival.name);
     if (festival.description) festivalText += `: ${escapeText(festival.description)}`;
     rows.push(`<div class="festival"${colorStyle}><em>${festivalText}</em></div>`);
   }
@@ -750,8 +837,45 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
     const tempStr = weatherData.temperature != null ? ` ${weatherData.isForecast && weatherData.isVaried ? '~' : ''}${WeatherManager.formatTemperature(weatherData.temperature)}` : '';
     rows.push(`<div class="weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
   }
+  const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
+  if (eqCalendars.size) {
+    const activeId = CalendarRegistry.getActiveId();
+    const equivalents = getEquivalentDates({ year, month, dayOfMonth }, activeId, [...eqCalendars]);
+    if (equivalents.length) {
+      const eqRows = equivalents.map((eq) => `<div class="equivalent-date"><i class="fas fa-calendar-alt"></i> ${escapeText(eq.calendarName)}: ${escapeText(eq.formatted)}</div>`);
+      rows.push(`<div class="equivalent-dates">${eqRows.join('')}</div>`);
+    }
+  }
+  if (notes?.length) {
+    const festivalNotes = notes.filter((n) => n.isFestival);
+    const regularNotes = notes.filter((n) => !n.isFestival);
+    const noteRows = [];
+    for (const n of festivalNotes) noteRows.push(`<div class="tooltip-note festival" style="color: ${n.color}"><i class="fas fa-star"></i> ${escapeText(n.name)}</div>`);
+    const shown = regularNotes.slice(0, TOOLTIP_MAX_NOTES - festivalNotes.length);
+    for (const n of shown) noteRows.push(`<div class="tooltip-note">${`<span class="tooltip-note-dot" style="background: ${n.color}"></span>`} ${escapeText(n.name)}</div>`);
+    const remaining = notes.length - festivalNotes.length - shown.length;
+    if (remaining > 0) noteRows.push(`<div class="tooltip-note more">+${remaining} ${localize('CALENDARIA.Common.More')}</div>`);
+    rows.push(`<div class="tooltip-notes">${noteRows.join('')}</div>`);
+  }
   const rawHtml = `<div class="calendaria"><div class="day-tooltip">${rows.join('')}</div></div>`;
   return encodeHtmlAttribute(rawHtml);
+}
+
+/**
+ * Get equivalent date HTML tooltip for a given display date.
+ * @param {number} year - Display year (with yearZero)
+ * @param {number} month - Month index (0-indexed)
+ * @param {number} dayOfMonth - Day of month (0-indexed)
+ * @returns {string} HTML string for tooltip, or empty string
+ */
+export function getEquivalentDateTooltip(year, month, dayOfMonth) {
+  const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
+  if (!eqCalendars.size) return '';
+  const activeId = CalendarRegistry.getActiveId();
+  const equivalents = getEquivalentDates({ year, month, dayOfMonth }, activeId, [...eqCalendars]);
+  if (!equivalents.length) return '';
+  const eqRows = equivalents.map((eq) => `<div class="equivalent-date"><i class="fas fa-calendar-alt"></i> ${escapeText(eq.calendarName)}: ${escapeText(eq.formatted)}</div>`);
+  return encodeHtmlAttribute(`<div class="calendaria"><div class="day-tooltip"><div class="equivalent-dates">${eqRows.join('')}</div></div></div>`);
 }
 
 /**
@@ -790,7 +914,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
           if (isOwner) {
             const actions = document.createElement('span');
             actions.className = 'note-actions';
-            actions.innerHTML = `<i class="fas fa-edit" data-action="edit" data-tooltip="${localize('CALENDARIA.ContextMenu.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.ContextMenu.Delete')}"></i>`;
+            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${localize('CALENDARIA.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.Common.Delete')}"></i>`;
             nameSpan.appendChild(actions);
             actions.addEventListener('click', async (e) => {
               e.stopPropagation();
@@ -801,7 +925,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               } else if (action === 'delete') {
                 ui.context?.close();
                 const confirmed = await foundry.applications.api.DialogV2.confirm({
-                  window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+                  window: { title: localize('CALENDARIA.Common.DeleteNote') },
                   content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
                   rejectClose: false,
                   modal: true
@@ -839,12 +963,13 @@ export function buildOpenAppsMenuItem() {
       document.removeEventListener('pointermove', onMove);
       requestAnimationFrame(async () => {
         const subItems = [
-          { name: 'CALENDARIA.Format.Category.BigCal', icon: '<i class="fas fa-calendar-days"></i>', callback: () => BigCal.show() },
-          { name: 'CALENDARIA.Format.Category.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', callback: () => MiniCal.show() },
-          { name: 'CALENDARIA.Format.Category.HUD', icon: '<i class="fas fa-layer-group"></i>', callback: () => HUD.show() },
-          { name: 'CALENDARIA.Format.Category.TimeKeeper', icon: '<i class="fas fa-clock"></i>', callback: () => TimeKeeper.show() },
-          { name: 'CALENDARIA.Format.Category.Stopwatch', icon: '<i class="fas fa-stopwatch"></i>', callback: () => Stopwatch.show() },
-          { name: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', callback: () => SunDial.show() }
+          { name: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', callback: () => BigCal.show() },
+          { name: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', callback: () => MiniCal.show() },
+          { name: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', callback: () => HUD.show() },
+          { name: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', callback: () => TimeKeeper.show() },
+          { name: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', callback: () => Stopwatch.show() },
+          { name: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', callback: () => SunDial.show() },
+          { name: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', callback: () => CALENDARIA.apps.Chronicle.show() }
         ];
         const subMenu = new ContextMenu(document.body, '.calendaria-open-submenu-no-match', subItems, { fixed: true, jQuery: false });
         await subMenu.render(document.body, { event: { clientX: pointer.x, clientY: pointer.y } });
@@ -852,4 +977,39 @@ export function buildOpenAppsMenuItem() {
       });
     }
   };
+}
+
+/**
+ * Compute leading days from the previous month to fill the first week row of a calendar grid.
+ * @param {object} calendar - Calendar instance
+ * @param {number} year - Display year (with yearZero applied)
+ * @param {number} month - Month index (0-based)
+ * @param {number} startDayOfWeek - Starting weekday index for this month
+ * @returns {Array<{day: number, dayOfMonth: number, year: number, month: number, isFromOtherMonth: boolean}>} Leading day objects
+ */
+export function getLeadingDays(calendar, year, month, startDayOfWeek) {
+  if (startDayOfWeek <= 0) return [];
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const totalMonths = calendar.monthsArray.length;
+  const prevDays = [];
+  let remainingSlots = startDayOfWeek;
+  let checkMonth = month === 0 ? totalMonths - 1 : month - 1;
+  let checkYear = month === 0 ? year - 1 : year;
+  let checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
+  while (remainingSlots > 0 && checkDay > 0) {
+    const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: checkDay - 1 });
+    if (festivalDay?.countsForWeekday === false) {
+      checkDay--;
+      continue;
+    }
+    prevDays.unshift({ day: checkDay, dayOfMonth: checkDay - 1, year: checkYear, month: checkMonth, isFromOtherMonth: true });
+    remainingSlots--;
+    checkDay--;
+    if (checkDay < 1 && remainingSlots > 0) {
+      checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
+      if (checkMonth === totalMonths - 1) checkYear--;
+      checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
+    }
+  }
+  return prevDays;
 }

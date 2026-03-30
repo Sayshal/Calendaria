@@ -129,66 +129,290 @@
     "newyearsday00000": {
       "name": "New Year's Day",
       "month": 0,
-      "icon": "fas fa-glass-cheers",
+      "icon": "fa-glass-cheers",
       "color": "#FFD700",
       "description": "First day of Nuwmont celebrating the new year across the Empire.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "vaternasfeast000": {
       "name": "Vaterna's Feast",
       "month": 1,
-      "icon": "fas fa-ship",
+      "icon": "fa-ship",
       "color": "#4169E1",
       "description": "Start of shipping season with boat launchings and boating competitions.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "springrevel00000": {
       "name": "Spring Revel",
       "month": 2,
-      "icon": "fas fa-music",
+      "icon": "fa-music",
       "color": "#FF69B4",
       "description": "Springtime festival of music, dancing, and merriment.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "midyearfestival0": {
       "name": "Mid-Year Festival",
       "month": 5,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFA500",
       "description": "Summer solstice celebration marking the halfway point of the year.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestfestival0": {
       "name": "Harvest Festival",
       "month": 8,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#DAA520",
       "description": "Autumn gathering to celebrate the harvest and give thanks.",
-      "dayOfMonth": 13
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "dayofthedead0000": {
       "name": "Day of the Dead",
       "month": 9,
-      "icon": "fas fa-cross",
+      "icon": "fa-cross",
       "color": "#2F4F4F",
       "description": "Solemn day of remembrance for the departed and honoring ancestral spirits.",
-      "dayOfMonth": 27
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "coronationday000": {
       "name": "Coronation Day",
       "month": 10,
-      "icon": "fas fa-crown",
+      "icon": "fa-crown",
       "color": "#B8860B",
       "description": "Anniversary commemorating the crowning of Emperor Zendrolion.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "wintersolstice00": {
       "name": "Winter Solstice",
       "month": 11,
-      "icon": "fas fa-snowflake",
+      "icon": "fa-snowflake",
       "color": "#87CEEB",
       "description": "Longest night marking winter's deepest point with candlelight vigils.",
-      "dayOfMonth": 20
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {
@@ -342,5 +566,272 @@
     "description": "CALENDARIA.Calendar.Thyatian.Description",
     "author": "calendaria",
     "system": "Mystara"
+  },
+  "weather": {
+    "activeZone": "subtropical",
+    "zones": {
+      "subtropical0000": {
+        "id": "subtropical",
+        "name": "CALENDARIA.Weather.Climate.Subtropical",
+        "description": "CALENDARIA.Weather.Climate.SubtropicalDesc",
+        "windSpeedRange": {
+          "min": 0,
+          "max": 3
+        },
+        "windDirections": {
+          "SW": 18,
+          "SSW": 15,
+          "S": 12,
+          "WSW": 10,
+          "W": 8,
+          "SE": 8,
+          "SSE": 6,
+          "E": 5,
+          "NW": 4,
+          "N": 3,
+          "NE": 3,
+          "NNE": 2,
+          "NNW": 2,
+          "WNW": 2,
+          "ENE": 1,
+          "ESE": 1
+        },
+        "brightnessMultiplier": 1.05,
+        "shortestDay": 10,
+        "longestDay": 14,
+        "temperatures": {
+          "_default": {
+            "min": 12,
+            "max": 28
+          }
+        },
+        "presets": {
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "drizzle00000000": {
+            "id": "drizzle",
+            "enabled": true
+          },
+          "thunderstorm000": {
+            "id": "thunderstorm",
+            "enabled": true
+          },
+          "sunshower000000": {
+            "id": "sunshower",
+            "enabled": true
+          },
+          "mist00000000000": {
+            "id": "mist",
+            "enabled": true
+          },
+          "fog000000000000": {
+            "id": "fog",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "CALENDARIA.Season.Winter": {
+            "temperatures": {
+              "min": 5,
+              "max": 17
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 13
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 20
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 27
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 20
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 13
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 7
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "sunshower": {
+                "id": "sunshower",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Spring": {
+            "temperatures": {
+              "min": 15,
+              "max": 28
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 29
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 29
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 21
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 21
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "sunshower": {
+                "id": "sunshower",
+                "chance": 0
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Summer": {
+            "temperatures": {
+              "min": 22,
+              "max": 35
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 23
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 18
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 9
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 23
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 9
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 14
+              },
+              "sunshower": {
+                "id": "sunshower",
+                "chance": 5
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Autumn": {
+            "temperatures": {
+              "min": 15,
+              "max": 28
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 21
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 29
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 29
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 21
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "sunshower": {
+                "id": "sunshower",
+                "chance": 0
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              }
+            }
+          }
+        },
+        "colorShift": {
+          "dawnHue": 30,
+          "duskHue": 15,
+          "nightHue": 230,
+          "transitionMinutes": 50
+        },
+        "environmentBase": {
+          "hue": 40,
+          "saturation": 0.5
+        }
+      }
+    }
   }
 }

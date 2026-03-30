@@ -1,78 +1,66 @@
 # Theming
 
-Calendaria supports customizable color themes for all UI elements.
+Customizable color themes for all Calendaria application windows (BigCal, MiniCal, Note Viewer, Chronicle, etc.). Non-app elements like journal footers, toolbar buttons, and info boxes use Foundry's native styling.
 
 ---
 
-## Accessing Theme Settings
+## Global Theme Presets
 
-Open the settings panel and navigate to the **Appearance** tab.
+Calendaria ships with 15 built-in theme presets:
 
----
+| Preset            | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| **Dark**          | Dark gray background, light text, blue accents (default) |
+| **Light**         | White background, dark text, blue accents                |
+| **High Contrast** | Black background, white borders, maximum contrast        |
+| **Parchment**     | Warm tan background, sepia text, golden accents          |
+| **Arcane**        | Deep purple background, lavender text, gold headings     |
+| **Verdant**       | Dark forest green background, pale green text            |
+| **Infernal**      | Near-black red background, warm text, fiery accents      |
+| **Frost**         | Light steel-blue background, dark text, blue accents     |
+| **Steampunk**     | Dark brown background, tan text, brass/copper accents    |
+| **Neon**          | Near-black background, cyan and magenta highlights       |
+| **Minimalist**    | White background, black borders, red accent only         |
+| **Solarized**     | Solarized Dark palette with teal and orange accents      |
+| **Royal**         | Dark navy background, gold headings, crimson today       |
+| **Sakura**        | Deep plum background, soft pink text, rose accents       |
+| **Slate**         | Dark sage-green background, warm cream text              |
 
-## Color Categories
+Select a preset from the dropdown in **Settings Panel > Appearance** tab. Presets apply to all Calendaria applications including the note sheet and Chronicle.
 
-Themes are organized into categories:
-
-### Background Colors
-
-- **Primary Background** - Main widget background
-- **Secondary Background** - Alternate/hover backgrounds
-- **Tertiary Background** - Nested element backgrounds
-
-### Text Colors
-
-- **Primary Text** - Main text color
-- **Secondary Text** - Muted/subtitle text
-- **Accent Text** - Highlighted text
-
-### Border Colors
-
-- **Primary Border** - Main border color
-- **Secondary Border** - Subtle borders
-
-### Accent Colors
-
-- **Accent** - Calendar selector, era/cycle indicators
-- **Focus** - Button hovers, focus outlines
-
-### Status Colors
-
-- **Success** - Positive indicators
-- **Warning** - Caution indicators
-- **Error** - Error/danger indicators
+**Settings Panel**, **Preset Manager**, and minor dialogs are excluded from theming and always use Foundry defaults.
 
 ---
 
 ## Customizing Colors
 
-1. Click any color swatch to open the color picker
-2. Choose a new color
+1. Select **Custom** from the preset dropdown
+2. Click any color swatch to open the color picker
 3. Changes apply immediately to all Calendaria widgets
-4. Colors are saved for each user
+4. Colors are saved per-user
 
 ---
 
 ## Resetting Theme
 
-Click the reset button (undo icon) in the Theme section header to restore default colors. A confirmation dialog will list which settings will be reset.
+Click the reset button (undo icon) in the Theme section header to restore default colors. A confirmation dialog lists which settings will be reset.
 
 ---
 
-## Exporting & Importing Themes
+## Exporting and Importing Themes
 
-Import and Export buttons are located inline with the Theme Preset dropdown.
+Import and Export buttons are next to the preset dropdown.
 
 ### Export
 
 1. Open Appearance tab
-2. Click the **Export** button next to the preset dropdown
+2. Click the **Export** button
 3. Save the JSON file
 
 ### Import
 
 1. Open Appearance tab
-2. Click the **Import** button next to the preset dropdown
+2. Click the **Import** button
 3. Select a previously exported JSON file
 4. Colors update immediately
 
@@ -82,4 +70,4 @@ Theme files contain a `colors` object with all customizable color values.
 
 ## CSS Variables
 
-Themes inherit from Foundry's AppV2 theme system. The color settings modify CSS custom properties that integrate with Foundry's native theming. Advanced users can inspect these in browser developer tools for additional customization via world scripts or custom CSS modules.
+Themes modify CSS custom properties prefixed with `--calendaria-`. Inspect in browser dev tools for additional customization via world scripts or custom CSS modules.

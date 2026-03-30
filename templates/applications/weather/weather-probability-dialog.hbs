@@ -12,7 +12,7 @@
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.WeatherProbability.Season"}}</label>
+      <label>{{localize "CALENDARIA.Common.Season"}}</label>
       <div class="form-fields">
         <select name="season">
           {{#each seasons}}
@@ -30,7 +30,7 @@
           <tr>
             <th></th>
             <th>{{localize "CALENDARIA.Common.Weather"}}</th>
-            <th><i class="fas fa-weight-hanging" data-tooltip="{{localize "CALENDARIA.WeatherProbability.Weight"}}"
+            <th><i class="fas fa-weight-hanging" data-tooltip="{{localize "CALENDARIA.Common.Weight"}}"
                 data-tooltip-direction="UP"></i></th>
             <th><i class="fas fa-chart-pie" data-tooltip="{{localize "CALENDARIA.WeatherProbability.Percent"}}"
                 data-tooltip-direction="UP"></i></th>
@@ -61,6 +61,6 @@
 
   <div class="temp-range-footer">
     <i class="fas fa-temperature-half"></i>
-    {{localize "CALENDARIA.WeatherProbability.TempRange"}}: {{tempRange.min}} – {{tempRange.max}}
+    {{localize "CALENDARIA.Common.TemperatureRange"}}: {{tempRange.min}} – {{tempRange.max}}
   </div>
 </div>

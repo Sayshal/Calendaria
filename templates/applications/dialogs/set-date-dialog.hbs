@@ -1,7 +1,7 @@
 <div>
   {{!-- Date Section --}}
   <fieldset>
-    <legend>{{localize "CALENDARIA.SetDate.DateSection"}}</legend>
+    <legend>{{localize "CALENDARIA.Common.Date"}}</legend>
     <div class="form-group">
       <label>{{dayLabel}}</label>
       <div class="form-fields">
@@ -34,7 +34,7 @@
 
   {{!-- Time Section --}}
   <fieldset>
-    <legend>{{localize "CALENDARIA.SetDate.TimeSection"}}</legend>
+    <legend>{{localize "CALENDARIA.Common.Time"}}</legend>
     <div class="form-group">
       <label>{{localize "CALENDARIA.Common.Hour"}}</label>
       <div class="form-fields">
@@ -109,7 +109,13 @@
   <footer class="form-footer">
     <button type="submit">
       <i class="fas fa-calendar-check"></i>
-      {{localize "CALENDARIA.SetDate.SetDate"}}
+      {{localize "CALENDARIA.Common.SetDate"}}
     </button>
+    {{#if cinematicEnabled}}
+      <button type="button" data-action="cinematicAdvance">
+        <i class="fa-solid fa-film"></i>
+        {{localize "CALENDARIA.Cinematic.RunCinematic"}}
+      </button>
+    {{/if}}
   </footer>
 </div>

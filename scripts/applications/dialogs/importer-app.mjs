@@ -1,21 +1,18 @@
 /**
  * Importer Application
- * AppV2 dialog for importing calendars from external sources.
  * @module Applications/ImporterApp
  * @author Tyler
  */
 
 import { TEMPLATES } from '../../constants.mjs';
 import { createImporter, getImporterOptions } from '../../importers/_module.mjs';
-import { format } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
-import { CalendarEditor } from '../calendar/calendar-editor.mjs';
+import { format, log } from '../../utils/_module.mjs';
+import { CalendarEditor } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
  * Calendar Importer Application.
- * Provides UI for selecting an import source, loading data, previewing, and importing.
  */
 export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
@@ -95,7 +92,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       context.canImportFromModule = context.selectedImporter.supportsLiveImport && context.selectedImporter.detected;
       context.fileExtensions = this.#getSelectedImporter()?.constructor.fileExtensions?.join(',') || '.json';
     }
-    context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'CALENDARIA.Importer.Import', disabled: !context.hasData || this.#importing }];
+    context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'CALENDARIA.Common.Import', disabled: !context.hasData || this.#importing }];
     return context;
   }
 

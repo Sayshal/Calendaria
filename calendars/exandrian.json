@@ -123,130 +123,578 @@
     "newdawn000000000": {
       "name": "New Dawn",
       "month": 0,
-      "icon": "fas fa-sun",
+      "icon": "fa-sun",
       "color": "#FFD700",
       "description": "The first day of the new year, celebrated with renewal and fresh beginnings.",
-      "dayOfMonth": 0
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "hillsgold0000000": {
       "name": "Hillsgold",
       "month": 1,
-      "icon": "fas fa-wheat-awn",
+      "icon": "fa-wheat-awn",
       "color": "#DAA520",
       "description": "A harvest festival celebrating the bounty of the hills and early spring crops.",
-      "dayOfMonth": 26
+      "dayOfMonth": 26,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 27
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "dayofchallenging": {
       "name": "Day of Challenging",
       "month": 2,
-      "icon": "fas fa-bolt",
+      "icon": "fa-bolt",
       "color": "#4169E1",
       "description": "The Stormlord's holy day where warriors compete in sacred combat and trials of strength.",
-      "dayOfMonth": 6
+      "dayOfMonth": 6,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 7
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "dayofrenewal0000": {
       "name": "Day of Renewal",
       "month": 2,
-      "icon": "fas fa-seedling",
+      "icon": "fa-seedling",
       "color": "#32CD32",
       "description": "The official start of spring celebrated with fresh food, music, and games.",
-      "dayOfMonth": 25
+      "dayOfMonth": 25,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 26
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "wildsmouth000000": {
       "name": "Wild's Mouth",
       "month": 3,
-      "icon": "fas fa-tree",
+      "icon": "fa-tree",
       "color": "#228B22",
       "description": "A celebration honoring the untamed wilds and the power of nature's awakening.",
-      "dayOfMonth": 19
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "zenith0000000000": {
       "name": "Zenith",
       "month": 5,
-      "icon": "fas fa-fire",
+      "icon": "fa-fire",
       "color": "#FF8C00",
       "description": "The official beginning of summer marked at noon on the longest day of the year.",
-      "dayOfMonth": 25
+      "dayOfMonth": 25,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 26
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "midsummer0000000": {
       "name": "Midsummer",
       "month": 6,
-      "icon": "fas fa-wand-magic-sparkles",
+      "icon": "fa-wand-magic-sparkles",
       "color": "#9370DB",
       "description": "A fey celebration of the elves' first emergence from the Feywild with wild revelry.",
-      "dayOfMonth": 19
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "elvendawn0000000": {
       "name": "Elvendawn",
       "month": 7,
-      "icon": "fas fa-moon",
+      "icon": "fa-moon",
       "color": "#E6E6FA",
       "description": "The Arch Heart's holy day honoring the elven people and their connection to the Feywild.",
-      "dayOfMonth": 2
+      "dayOfMonth": 2,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 3
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "highsummer000000": {
       "name": "Highsummer",
       "month": 7,
-      "icon": "fas fa-crown",
+      "icon": "fa-crown",
       "color": "#FFD700",
       "description": "The Dawnfather's holy day marking summer's peak with a week of feasting and gift-giving.",
-      "dayOfMonth": 6
+      "dayOfMonth": 6,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 7
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestsclose000": {
       "name": "Harvest's Close",
       "month": 8,
-      "icon": "fas fa-apple-whole",
+      "icon": "fa-apple-whole",
       "color": "#D2691E",
       "description": "The beginning of autumn marked with feasting in villages and carnivals in the cities.",
-      "dayOfMonth": 2
+      "dayOfMonth": 2,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 3
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "harvestsrise0000": {
       "name": "Harvest's Rise",
       "month": 9,
-      "icon": "fas fa-leaf",
+      "icon": "fa-leaf",
       "color": "#8B4513",
       "description": "The celebration of planting season's beginning and preparation for the year's growth.",
-      "dayOfMonth": 10
+      "dayOfMonth": 10,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 11
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "zanscup000000000": {
       "name": "Zan's Cup",
       "month": 9,
-      "icon": "fas fa-wine-glass",
+      "icon": "fa-wine-glass",
       "color": "#CD853F",
       "description": "A Tal'Dorei festival honoring Zan Tal'Dorei with celebration and remembrance.",
-      "dayOfMonth": 25
+      "dayOfMonth": 25,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 26
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "thebarreneve0000": {
       "name": "The Barren Eve",
       "month": 10,
-      "icon": "fas fa-cloud-moon",
+      "icon": "fa-cloud-moon",
       "color": "#2F4F4F",
       "description": "Winter's longest night, a solemn day of mourning for those lost in war.",
-      "dayOfMonth": 1
+      "dayOfMonth": 1,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 2
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "embertidestart00": {
       "name": "Embertide (Start)",
       "month": 10,
-      "icon": "fas fa-dragon",
+      "icon": "fa-dragon",
       "color": "#C0C0C0",
       "description": "The beginning of Bahamut's holy observance, a time of remembrance for fallen defenders.",
-      "dayOfMonth": 4
+      "dayOfMonth": 4,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 5
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "embertideend0000": {
       "name": "Embertide (End)",
       "month": 10,
-      "icon": "fas fa-shield-halved",
+      "icon": "fa-shield-halved",
       "color": "#B0C4DE",
       "description": "The final day of Embertide, concluding the Platinum Dragon's sacred festival of honor.",
-      "dayOfMonth": 7
+      "dayOfMonth": 7,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 8
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     },
     "wintersclose0000": {
       "name": "Winter's Close",
       "month": 10,
-      "icon": "fas fa-gift",
+      "icon": "fa-gift",
       "color": "#4682B4",
       "description": "The waning of winter celebrated with feasts, community games, and the exchange of gifts.",
-      "dayOfMonth": 19
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {
@@ -454,5 +902,321 @@
     "description": "CALENDARIA.Calendar.Exandrian.Description",
     "author": "calendaria",
     "system": "Exandria"
+  },
+  "weather": {
+    "activeZone": "temperate",
+    "zones": {
+      "temperate000000": {
+        "id": "temperate",
+        "name": "CALENDARIA.Weather.Climate.Temperate",
+        "description": "CALENDARIA.Weather.Climate.TemperateDesc",
+        "windSpeedRange": {
+          "min": 0,
+          "max": 3
+        },
+        "windDirections": {
+          "W": 20,
+          "WSW": 15,
+          "SW": 12,
+          "WNW": 10,
+          "NW": 8,
+          "S": 8,
+          "N": 5,
+          "NNW": 5,
+          "E": 4,
+          "SE": 4,
+          "NE": 3,
+          "SSW": 3,
+          "SSE": 1,
+          "ESE": 1,
+          "ENE": 1
+        },
+        "brightnessMultiplier": 1,
+        "shortestDay": 8,
+        "longestDay": 16,
+        "temperatures": {
+          "_default": {
+            "min": 8,
+            "max": 20
+          }
+        },
+        "presets": {
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "drizzle00000000": {
+            "id": "drizzle",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "mist00000000000": {
+            "id": "mist",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "thunderstorm000": {
+            "id": "thunderstorm",
+            "enabled": true
+          },
+          "fog000000000000": {
+            "id": "fog",
+            "enabled": true
+          },
+          "windy0000000000": {
+            "id": "windy",
+            "enabled": true
+          },
+          "snow00000000000": {
+            "id": "snow",
+            "enabled": true
+          },
+          "blizzard0000000": {
+            "id": "blizzard",
+            "enabled": true
+          },
+          "overcast0000000": {
+            "id": "overcast",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "CALENDARIA.Season.Winter": {
+            "temperatures": {
+              "min": -5,
+              "max": 5
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 26
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 11
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 11
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 16
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 11
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 11
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 5
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Spring": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "rain": {
+                "id": "rain",
+                "chance": 25
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 19
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 19
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 13
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 13
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 13
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Summer": {
+            "temperatures": {
+              "min": 18,
+              "max": 30
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 35
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 24
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 12
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 12
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 6
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Autumn": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 24
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 18
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 18
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 12
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 12
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -4,17 +4,11 @@
  * @author Tyler
  */
 
-import { BigCal } from '../applications/calendar/big-cal.mjs';
-import { MiniCal } from '../applications/calendar/mini-cal.mjs';
-import { HUD } from '../applications/hud/hud.mjs';
-import { Stopwatch } from '../applications/time/stopwatch.mjs';
-import { TimeKeeper } from '../applications/time/time-keeper.mjs';
+import { BigCal, Chronicle, HUD, MiniCal, NoteViewer, Stopwatch, SunDial, TimeKeeper } from '../applications/_module.mjs';
 import { KEYBINDS, MODULE } from '../constants.mjs';
 import { log } from './logger.mjs';
 
-/**
- * Register all keybindings for the Calendaria module.
- */
+/** Register all keybindings for the Calendaria module. */
 export function registerKeybindings() {
   game.keybindings.register(MODULE.ID, KEYBINDS.TOGGLE_BIGCAL, {
     name: 'CALENDARIA.Keybinds.ToggleBigCal.Name',
@@ -52,6 +46,36 @@ export function registerKeybindings() {
     editable: [],
     onDown: () => {
       TimeKeeper.toggle();
+      return true;
+    },
+    precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+  });
+  game.keybindings.register(MODULE.ID, KEYBINDS.TOGGLE_SUNDIAL, {
+    name: 'CALENDARIA.Keybinds.ToggleSunDial.Name',
+    hint: 'CALENDARIA.Keybinds.ToggleSunDial.Hint',
+    editable: [],
+    onDown: () => {
+      SunDial.toggle();
+      return true;
+    },
+    precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+  });
+  game.keybindings.register(MODULE.ID, KEYBINDS.TOGGLE_CHRONICLE, {
+    name: 'CALENDARIA.Keybinds.ToggleChronicle.Name',
+    hint: 'CALENDARIA.Keybinds.ToggleChronicle.Hint',
+    editable: [],
+    onDown: () => {
+      Chronicle.toggle();
+      return true;
+    },
+    precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+  });
+  game.keybindings.register(MODULE.ID, KEYBINDS.TOGGLE_NOTEVIEWER, {
+    name: 'CALENDARIA.Keybinds.ToggleNoteViewer.Name',
+    hint: 'CALENDARIA.Keybinds.ToggleNoteViewer.Hint',
+    editable: [],
+    onDown: () => {
+      NoteViewer.toggle();
       return true;
     },
     precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL

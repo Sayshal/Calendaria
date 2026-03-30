@@ -1,15 +1,32 @@
-## New Features
-- Weather Picker now has a gear button to jump straight to Weather settings in the Calendar Editor
-- `timestampToDate()` API returns `ordinal`, `monthName`, and `intercalary` for calendars with intercalary months
-- `dateToTimestamp()` API accepts `ordinal` as an alternative to `month`
+## Headline Features
+- **Category Overhaul** — New Category Manager with defaults, forced overrides, player-usable flags, groups, and import/export. Preset selection on note creation.
+- **Chronicle** — Infinite-scroll timeline viewer with notes, festivals, seasons, moons, and weather. Three depth modes, two layouts, fog-of-war awareness.
+- **Cinematic Time Skip** — Fullscreen PixiJS overlay on large time advances with sky cycle, stars, sun, moons, and weather transitions. Configurable threshold and dedicated trigger button.
+- **Condition Builder** — Visual tree builder with nested groups, depth-colored borders, 19 presets, and merge-on-apply.
+- **Condition Engine** — Schedule notes with 41 condition fields, 11 operators, and nested boolean logic (AND/OR/NAND/XOR/COUNT) up to 5 levels deep. Reference other events as conditions for inter-note dependencies.
+- **Event Duration & Display** — Multi-day events with bookend markers and three display styles: icon, pip, and banner.
+- **Event Visibility** — Three visibility levels (Visible, Hidden, Secret) replace the old GM-only toggle, with distinct icons across all views.
+- **Festival System** — Calendar festivals auto-create as independent journal notes via the condition engine. Leap-year support, delete protection, icons/colors out of the box.
+- **Fog of War** — Progressive revelation system. Auto-reveal on day change, configurable radius, "Reveal Today to Here" context action. Content hidden on fogged days.
+- **Multi-Calendar Sync** — Cross-calendar date conversion with a Secondary Calendar Viewer. Equivalent dates in tooltips, headers, and note sheets.
+- **Note Sheet Redesign** — Five-tab layout (Content, Schedule, Settings, Reminders, Ownership) with condition presets, condition summaries, occurrence preview, and per-user permissions.
+- **Note Viewer** — Standalone filter/search application replacing the old search panel. Selection mode with bulk operations and a floating action button.
+- **Recurrence Rewrite** — New recurrence engine built on condition trees with range pre-filtering, occurrence preview, and max occurrence limits.
+- **Text Enrichers** — 39 inline enrichers across 8 categories for embedding live calendar data in journals, chat, and items. Cross-calendar support.
 
-## Bug Fixes
-- Temperature of 0 no longer treated as empty in Weather Picker
-- "Disable Weather FX" scene flag now works on day change
-- Extreme wind speed reduced from 999 kph to a realistic 250 kph
-- `CALENDAR_SWITCHED` hook now fires at startup
-- Forecast wind speeds no longer re-randomize on calendar re-render
-- Weather sounds no longer require FXMaster to be enabled
-- "Disable Weather FX" no longer mutes weather sounds (use "Disable Weather Sound" instead)
-- Weather sounds now use the Environment volume slider instead of Music
-- Periodic seasons longer than a year now cycle correctly across multiple years
+## New Features
+
+- 15+ global theme presets
+- 20+ new public API methods for conditions, time math, navigation, and weather FX
+- All 20 bundled calendars include default climate zones out of the box
+- Custom weather sound effects and FX Macro for weather-triggered macros
+- Eclipse calculation engine with solar/lunar types and condition fields
+- Force Downward Weather for side-view scenes
+- Intraday weather with 4 time-of-day periods and per-period overrides
+- New calendars: Pact Standard (SF2E sync), Imperial (Warhammer), Golarion (Imperial)
+- Randomized moon phases with seeded PRNG, cycle variance, and anchor phases
+- Secret text stripped from note previews for non-GM users
+- Time speed 0 disables automatic advancement; manual controls still work
+- View permissions and Combat Behavior settings for all 7 widgets
+- Weather auto-syncs on scene activation
+- Weather FX Mode dropdown (Full / Reduced / Off)

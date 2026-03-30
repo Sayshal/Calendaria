@@ -45,7 +45,7 @@
     }
 
     .warning {
-      color: var(--color-level-warning);
+      color: var(--calendaria-warning);
     }
 
     .format-input.invalid {
@@ -96,18 +96,18 @@
       padding: 0.5rem 0.75rem;
       border-radius: 0.25rem;
       font-size: var(--font-size-14);
-      background: var(--color-cool-5-50);
+      background: var(--calendaria-surface-dim-50);
 
       i {
-        color: var(--color-level-success);
+        color: var(--calendaria-success);
       }
 
       &.warning i {
-        color: var(--color-level-warning);
+        color: var(--calendaria-warning);
       }
 
       .mismatch {
-        color: var(--color-level-warning);
+        color: var(--calendaria-warning);
       }
     }
 
@@ -146,8 +146,8 @@
       }
 
       input.duplicate {
-        border-color: var(--color-level-error);
-        color: var(--color-level-error);
+        border-color: var(--calendaria-error);
+        color: var(--calendaria-error);
       }
     }
 
@@ -172,7 +172,7 @@
     }
 
     .festivals-list {
-      --list-columns: 2fr auto 1fr 3.5rem 3.5rem 3.5rem auto auto auto;
+      --list-columns: auto 2fr 3fr auto auto;
     }
 
     .festival-icon-display {
@@ -189,10 +189,23 @@
       }
     }
 
-    .festival-description {
-      height: calc(var(--input-height, 1.75rem) * 2);
-      font-size: 0.85rem;
-      resize: none;
+    .festival-name {
+      font-weight: 500;
+    }
+
+    .festival-item.highlight-flash {
+      animation: festival-highlight 1.5s ease;
+    }
+
+    @keyframes festival-highlight {
+      0%,
+      30% {
+        background: color-mix(in srgb, var(--calendaria-ui-accent) 30%, transparent);
+      }
+
+      100% {
+        background: transparent;
+      }
     }
 
     .canonical-hours-list {
@@ -212,9 +225,9 @@
       display: flex;
       align-items: center;
       padding: 0.5rem;
-      border: 0.0625rem solid var(--color-cool-4);
+      border: 0.0625rem solid var(--calendaria-ui-border);
       border-radius: 0.25rem;
-      background: var(--color-cool-5-50);
+      background: var(--calendaria-ui-surface-50);
     }
 
     .item-controls {
@@ -235,7 +248,7 @@
         }
 
         &:hover:not(:disabled) {
-          --button-hover-text-color: var(--color-text-primary);
+          --button-hover-text-color: var(--calendaria-text);
         }
 
         &[data-action='toggleCustomWeekdays'] {
@@ -254,7 +267,7 @@
         &[data-action='removeMoonPhase'],
         &[data-action='removeEra'] {
           &:hover:not(:disabled) {
-            --button-hover-text-color: var(--color-level-error);
+            --button-hover-text-color: var(--calendaria-error);
           }
         }
       }
@@ -299,7 +312,7 @@
         align-items: center;
 
         label {
-          color: var(--color-text-secondary);
+          color: var(--calendaria-text-secondary);
           font-weight: normal;
           font-size: var(--font-size-12);
         }
@@ -319,13 +332,13 @@
     }
 
     .computed-value {
-      color: var(--color-text-primary);
+      color: var(--calendaria-text);
       font-weight: 600;
       font-size: var(--font-size-16);
     }
 
     .leap-days-note {
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-size: var(--font-size-13);
       white-space: nowrap;
     }
@@ -351,7 +364,7 @@
       display: flex;
       align-items: center;
       padding: 0.25rem 0.5rem;
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-weight: 600;
       font-size: var(--font-size-14);
 
@@ -371,7 +384,7 @@
     }
 
     .season-item {
-      border-left: 0.1875rem solid var(--season-color, var(--color-cool-4));
+      border-left: 0.1875rem solid var(--season-color, var(--calendaria-border));
     }
 
     .season-icon-display {
@@ -446,11 +459,32 @@
         padding-top: 0.75rem;
       }
 
+      .anchor-phases {
+        .anchors-list {
+          --list-columns: 4rem 1fr 4rem 1fr auto;
+        }
+
+        .anchors-list select {
+          width: 100%;
+        }
+
+        .add-anchor-btn {
+          grid-column: 1 / -1;
+          width: fit-content;
+          margin-top: 0.5rem;
+          white-space: nowrap;
+        }
+      }
+
       .moon-phases-section {
         margin-top: 0.5rem;
 
         .phases-list {
           --list-columns: auto 1.6fr 1fr 1fr 4.25rem 4.25rem auto;
+
+          &.randomized-phases {
+            --list-columns: auto 1.6fr 1fr 1fr auto;
+          }
         }
 
         .empty-phases {
@@ -493,7 +527,7 @@
 
       .moon-phase-slider {
         margin: 1.125rem 0 0.5rem;
-        border: 0.0625rem solid color-mix(in srgb, var(--color-light-2) 70%, transparent);
+        border: 0.0625rem solid color-mix(in srgb, var(--calendaria-bg-lighter) 70%, transparent);
         border-radius: 0.25rem;
 
         .slider-track {
@@ -568,7 +602,7 @@
             position: absolute;
             top: -1.125rem;
             left: 50%;
-            color: var(--color-text-dark-secondary);
+            color: var(--calendaria-text-dim);
             font-size: var(--font-size-13);
             white-space: nowrap;
             cursor: pointer;
@@ -584,7 +618,7 @@
           height: calc(100% + 0.125rem);
           border-radius: 0.125rem;
           cursor: col-resize;
-          background: var(--color-warm-1);
+          background: var(--calendaria-accent);
           transition:
             background 0.15s,
             box-shadow 0.15s;
@@ -592,8 +626,8 @@
 
           &:hover,
           &.dragging {
-            background: color-mix(in srgb, var(--color-warm-1) 80%, rgb(255 255 255));
-            box-shadow: 0 0 0.5rem var(--color-warm-1);
+            background: color-mix(in srgb, var(--calendaria-accent) 80%, rgb(255 255 255));
+            box-shadow: 0 0 0.5rem var(--calendaria-accent);
           }
 
           &::before {
@@ -621,7 +655,7 @@
         grid-template-columns: 1fr 5rem 5rem 8.75rem auto;
         display: grid;
         padding-bottom: 0.5rem;
-        border-bottom: 0.0625rem solid var(--color-cool-4);
+        border-bottom: 0.0625rem solid var(--calendaria-border);
 
         .grid-col {
           gap: 0.25rem;
@@ -630,7 +664,7 @@
           align-items: center;
 
           label {
-            color: var(--color-text-secondary);
+            color: var(--calendaria-text-secondary);
             font-weight: 600;
             font-size: var(--font-size-14);
             text-align: center;
@@ -690,20 +724,20 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
-      border: 0.0625rem dashed var(--color-cool-4);
+      border: 0.0625rem dashed var(--calendaria-border);
       border-radius: 0.25rem;
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-style: italic;
       text-align: center;
-      background: var(--color-cool-5-50);
+      background: var(--calendaria-surface-dim-50);
     }
 
     footer.form-footer {
       grid-column: 1 / -1;
       grid-row: 2;
       padding: 0.5rem 1rem;
-      border-top: 0.0625rem solid var(--color-cool-4);
-      background: var(--color-cool-5);
+      border-top: 0.0625rem solid var(--calendaria-ui-border);
+      background: var(--calendaria-ui-surface-dim);
 
       button {
         flex: none;
@@ -728,7 +762,7 @@
     }
   }
 
-  &:not(.climate-editor) {
+  &:not(.climate-editor, .calendar-note-sheet) {
     nav.sheet-tabs {
       gap: 0;
       grid-column: 1;
@@ -743,7 +777,7 @@
       height: 100%;
       padding: 0;
       border-top: none;
-      border-right: 0.0625rem solid var(--color-cool-4);
+      border-right: 0.0625rem solid var(--calendaria-border);
       border-bottom: none;
 
       .tab-group {
@@ -752,7 +786,6 @@
 
         .tab-group-header {
           padding: 0.5rem;
-          color: var(--color-text-dark-secondary);
           font-weight: 500;
           font-size: var(--font-size-18);
           text-align: left;
@@ -787,8 +820,8 @@
         }
 
         &.active {
-          border-left-color: var(--group-color, var(--color-warm-1));
-          background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
+          border-left-color: var(--group-color, var(--calendaria-accent));
+          background: color-mix(in srgb, var(--group-color, var(--calendaria-accent)) 40%, transparent);
         }
       }
     }
@@ -820,16 +853,16 @@
   .calendaria {
     &.calendar-editor {
       footer.form-footer {
-        border-top-color: var(--color-border-light-tertiary);
-        background: var(--color-light-2);
+        border-top-color: var(--calendaria-border-light);
+        background: var(--calendaria-bg-lighter);
       }
 
       .warning {
-        color: var(--color-level-error);
+        color: var(--calendaria-error);
       }
 
       .item {
-        border-color: var(--color-border-light-tertiary);
+        border-color: var(--calendaria-border-light);
         background: none;
       }
 

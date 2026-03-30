@@ -4,17 +4,13 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
-import { ASSETS } from '../constants.mjs';
-import { addCustomCategory, getAllCategories } from '../notes/note-data.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
+import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
+import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
+import { localize, log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
-/**
- * FC color names to hex mapping.
- */
+/** @type {Object<string, string>} FC color names to hex mapping. */
 const FC_COLORS = {
   Blue: '#2196f3',
   'Light-Blue': '#03a9f4',
@@ -37,18 +33,6 @@ const FC_COLORS = {
   'Blue-Grey': '#607d8b',
   Dark: '#212121'
 };
-
-/** Moon phase names for different granularities. */
-const PHASE_NAMES_8 = [
-  'CALENDARIA.MoonPhase.NewMoon',
-  'CALENDARIA.MoonPhase.WaxingCrescent',
-  'CALENDARIA.MoonPhase.FirstQuarter',
-  'CALENDARIA.MoonPhase.WaxingGibbous',
-  'CALENDARIA.MoonPhase.FullMoon',
-  'CALENDARIA.MoonPhase.WaningGibbous',
-  'CALENDARIA.MoonPhase.LastQuarter',
-  'CALENDARIA.MoonPhase.WaningCrescent'
-];
 
 /**
  * Importer for Fantasy-Calendar.com exports.
@@ -105,7 +89,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       cycles: this.#transformCycles(staticData.cycles?.data),
       cycleFormat: staticData.cycles?.format || '',
       daylight: this.#transformDaylight(staticData.seasons?.data),
-      metadata: { description: localize('CALENDARIA.Common.ImportedFromFantasyCalendar'), system: data.name || localize('CALENDARIA.Common.Unknown'), importedFrom: 'fantasy-calendar' },
+      metadata: { description: localize('CALENDARIA.Importer.ImportedFrom.FantasyCalendar'), system: data.name || localize('CALENDARIA.Common.Unknown'), importedFrom: 'fantasy-calendar' },
       currentDate: this.#transformCurrentDate(data.dynamic_data)
     };
   }
@@ -261,7 +245,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   #generateMoonPhases() {
     const iconNames = ['01_newmoon', '02_waxingcrescent', '03_firstquarter', '04_waxinggibbous', '05_fullmoon', '06_waninggibbous', '07_lastquarter', '08_waningcrescent'];
-    return PHASE_NAMES_8.map((name, i) => ({ name, rising: '', fading: '', icon: `${ASSETS.MOON_ICONS}/${iconNames[i]}.svg`, start: i / 8, end: (i + 1) / 8 }));
+    return MOON_PHASE_LABELS.map((name, i) => ({ name, rising: '', fading: '', icon: `${ASSETS.MOON_ICONS}/${iconNames[i]}.svg`, start: i / 8, end: (i + 1) / 8 }));
   }
 
   /**
@@ -328,21 +312,21 @@ export default class FantasyCalendarImporter extends BaseImporter {
     this.#fcCategories = [];
     for (const cat of categories) {
       const color = FC_COLORS[cat.event_settings?.color] || '#2196f3';
-      map.set(cat.id, { name: cat.name, color, hidden: cat.event_settings?.hide ?? false, gmOnly: cat.category_settings?.hide ?? false });
+      map.set(cat.id, { name: cat.name, color, hidden: cat.event_settings?.hide ?? false, isHidden: cat.category_settings?.hide ?? false });
       this.#fcCategories.push({ name: cat.name, color });
     }
     return map;
   }
 
   /**
-   * Import FC event categories as Calendaria note categories.
+   * Import FC event categories as Calendaria note presets.
    */
   async #importNoteCategories() {
-    const existing = getAllCategories().map((c) => c.name.toLowerCase());
+    const existing = getAllPresets().map((c) => c.name.toLowerCase());
     for (const cat of this.#fcCategories) {
       if (existing.includes(cat.name.toLowerCase())) continue;
       try {
-        await addCustomCategory(cat.name, cat.color, 'fa-tag');
+        await addCustomPreset(cat.name, cat.color, 'fa-tag');
         log(3, `Imported FC category: ${cat.name}`);
       } catch (error) {
         log(1, `Failed to import FC category "${cat.name}":`, error);
@@ -451,7 +435,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const eventType = this.#detectEventType(conditions, data);
     if (eventType.warnings?.length) for (const warning of eventType.warnings) log(2, `Event "${event.name}": ${warning}`);
     const category = this._categories?.get(event.event_category_id);
-    const gmOnly = event.settings?.hide || category?.gmOnly || false;
+    const isHidden = event.settings?.hide || category?.isHidden || false;
     const date = this.#extractDate(event.data, conditions, data);
     const isOneTimeEvent = Array.isArray(event.data?.date) && event.data.date.length >= 3;
     const isRandomEvent = eventType.repeat === 'random';
@@ -462,7 +446,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       startDate: date,
       repeat: eventType.repeat,
       interval: eventType.interval || 1,
-      gmOnly,
+      visibility: isHidden ? 'hidden' : 'visible',
       category: category?.name || 'default',
       color: FC_COLORS[event.settings?.color] || category?.color || '#2196f3',
       duration: event.data?.duration || 1,
@@ -642,10 +626,13 @@ export default class FantasyCalendarImporter extends BaseImporter {
           conditions.push(...this.#mapYearCondition(ti, values));
           break;
         case 'Month':
-          conditions.push(...this.#mapMonthCondition(ti, values));
+          conditions.push(...this.#mapMonthCondition(ti, values, data));
           break;
         case 'Day':
           conditions.push(...this.#mapDayCondition(ti, values));
+          break;
+        case 'Epoch':
+          conditions.push(...this.#mapEpochCondition(ti, values));
           break;
         case 'Weekday':
           conditions.push(...this.#mapWeekdayCondition(ti, values, weekdays));
@@ -667,6 +654,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
           break;
         case 'Era Year':
           conditions.push(...this.#mapEraYearCondition(ti, values));
+          break;
+        case 'Events':
+          conditions.push(...this.#mapEventCondition(ti, values));
           break;
       }
     }
@@ -691,15 +681,31 @@ export default class FantasyCalendarImporter extends BaseImporter {
    * Map FC Month condition to Calendaria condition format.
    * @param {number} ti - Type index determining comparison operator
    * @param {Array} values - Condition values [month, offset?]
+   * @param {object} [data] - Full FC data for month name lookup
    * @returns {object[]} - Array of condition objects
    */
-  #mapMonthCondition(ti, values) {
+  #mapMonthCondition(ti, values, data) {
     if (ti <= 6) {
       const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
       const op = ops[ti] || '==';
       const value = parseInt(values?.[0]) || 0;
       if (op === '%') return [{ field: 'month', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'month', op, value }];
+    }
+    if (ti >= 7 && ti <= 13) {
+      const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+      const op = ops[ti - 7] || '==';
+      const value = parseInt(values?.[0]) || 0;
+      if (op === '%') return [{ field: 'month', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      return [{ field: 'month', op, value }];
+    }
+    if (ti === 14 || ti === 15) {
+      const op = ti === 14 ? '==' : '!=';
+      const monthName = values?.[0];
+      const timespans = data?.static_data?.year_data?.timespans || [];
+      const monthIndex = timespans.findIndex((ts) => ts.name?.toLowerCase() === monthName?.toLowerCase());
+      if (monthIndex === -1) return [];
+      return [{ field: 'month', op, value: monthIndex + 1 }];
     }
     return [];
   }
@@ -853,6 +859,11 @@ export default class FantasyCalendarImporter extends BaseImporter {
       const op = ops[ti - 14] || '==';
       return [{ field: 'moonPhaseCountYear', op, value, value2: moonIdx }];
     }
+    if (ti >= 21 && ti <= 27) {
+      const op = ops[ti - 21] || '==';
+      if (op === '%') return [{ field: 'moonPhaseCountEpoch', op: '%', value, value2: moonIdx, offset: parseInt(values?.[2]) || 0 }];
+      return [{ field: 'moonPhaseCountEpoch', op, value, value2: moonIdx }];
+    }
     return [];
   }
 
@@ -896,6 +907,44 @@ export default class FantasyCalendarImporter extends BaseImporter {
   }
 
   /**
+   * Map FC Epoch condition to Calendaria condition format.
+   * @param {number} ti - Type index determining comparison operator
+   * @param {Array} values - Condition values [epochDays, offset?]
+   * @returns {object[]} - Array of condition objects
+   */
+  #mapEpochCondition(ti, values) {
+    const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
+    const op = ops[ti] || '==';
+    const value = parseInt(values?.[0]) || 0;
+    if (op === '%') return [{ field: 'epoch', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+    return [{ field: 'epoch', op, value }];
+  }
+
+  /**
+   * Map FC Events condition to Calendaria condition format.
+   * Uses placeholder fcEventId that gets resolved in importNotes second pass.
+   * @param {number} ti - Type index determining operator
+   * @param {Array} values - Condition values [eventId, dayCount]
+   * @returns {object[]} - Array of condition objects
+   */
+  #mapEventCondition(ti, values) {
+    const fcEventId = values?.[0];
+    const dayCount = parseInt(values?.[1]) || 0;
+    if (!fcEventId) return [];
+    const opMap = {
+      0: { op: 'daysAgo', inclusive: true },
+      1: { op: 'daysFromNow', inclusive: true },
+      2: { op: 'withinNext', inclusive: false },
+      3: { op: 'withinLast', inclusive: false },
+      4: { op: 'withinNext', inclusive: true },
+      5: { op: 'withinLast', inclusive: true }
+    };
+    const mapping = opMap[ti];
+    if (!mapping) return [];
+    return [{ field: 'event', op: mapping.op, value: dayCount, value2: { fcEventId, inclusive: mapping.inclusive } }];
+  }
+
+  /**
    * Extract date from FC event data.
    * @param {object} eventData - FC event.data object
    * @param {Array} conditions - FC conditions array (fallback)
@@ -903,9 +952,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    * @returns {{year: number, month: number, day: number}} - Current date
    */
   #extractDate(eventData, conditions, fullData) {
-    if (Array.isArray(eventData?.date) && eventData.date.length >= 3) {
-      return { year: eventData.date[0], month: eventData.date[1], dayOfMonth: Math.max(0, (eventData.date[2] ?? 1) - 1) };
-    }
+    if (Array.isArray(eventData?.date) && eventData.date.length >= 3) return { year: eventData.date[0], month: eventData.date[1], dayOfMonth: Math.max(0, (eventData.date[2] ?? 1) - 1) };
     const date = { year: fullData.dynamic_data?.year || 0, month: 0, dayOfMonth: 0 };
     for (const cond of conditions) {
       if (!Array.isArray(cond) || cond.length < 3) continue;
@@ -940,6 +987,8 @@ export default class FantasyCalendarImporter extends BaseImporter {
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     if (this.#fcCategories.length) await this.#importNoteCategories();
     const calendar = CalendarManager.getCalendar(calendarId);
+    const fcIdToPage = new Map();
+    const pagesWithEventConditions = [];
     for (const note of notes) {
       try {
         const startDate = { ...note.startDate };
@@ -958,22 +1007,53 @@ export default class FantasyCalendarImporter extends BaseImporter {
           weekNumber: note.weekNumber ?? null,
           seasonalConfig: note.seasonalConfig || null,
           conditions: note.conditions || [],
-          gmOnly: note.gmOnly
+          visibility: note.visibility || 'visible'
         };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) {
           count++;
-        } else {
-          errors.push(`Failed to create note: ${note.name}`);
-        }
+          if (note.originalId) fcIdToPage.set(String(note.originalId), page.id);
+          if (noteData.conditions.some((c) => c.field === 'event' && c.value2?.fcEventId)) pagesWithEventConditions.push({ pageId: page.id, conditions: noteData.conditions });
+        } else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {
         errors.push(`Error creating "${note.name}": ${error.message}`);
-        log(1, `Error importing note "${note.name}":`, error);
       }
     }
+    if (pagesWithEventConditions.length > 0) await this.#resolveEventConditions(pagesWithEventConditions, fcIdToPage, errors);
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Fantasy-Calendar Import');
     log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
+  }
+
+  /**
+   * Resolve FC event ID placeholders in event conditions to real Calendaria page IDs.
+   * @param {object[]} pages - Array of {pageId, conditions} with unresolved event conditions
+   * @param {Map<string, string>} fcIdToPage - Map of FC event ID → Calendaria page ID
+   * @param {string[]} errors - Error accumulator
+   */
+  async #resolveEventConditions(pages, fcIdToPage, errors) {
+    for (const { pageId, conditions } of pages) {
+      let modified = false;
+      const resolved = conditions.filter((c) => {
+        if (c.field !== 'event' || !c.value2?.fcEventId) return true;
+        const calendariaId = fcIdToPage.get(String(c.value2.fcEventId));
+        if (!calendariaId) {
+          log(2, `Event condition referencing FC event ${c.value2.fcEventId} dropped — target not found in import`);
+          modified = true;
+          return false;
+        }
+        c.value2 = { noteId: calendariaId, inclusive: c.value2.inclusive };
+        modified = true;
+        return true;
+      });
+      if (modified) {
+        try {
+          await NoteManager.updateNote(pageId, { noteData: { conditions: resolved } });
+        } catch (error) {
+          errors.push(`Error resolving event conditions for page ${pageId}: ${error.message}`);
+        }
+      }
+    }
   }
 
   /**

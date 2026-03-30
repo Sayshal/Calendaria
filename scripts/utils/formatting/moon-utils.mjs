@@ -4,7 +4,8 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
+import { resolveRandomizedPhase } from '../../data/_module.mjs';
 
 /**
  * Get the current phase position (0-1) for a moon at a given date.
@@ -16,6 +17,10 @@ import CalendarManager from '../../calendar/calendar-manager.mjs';
 export function getMoonPhasePosition(moon, date, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   if (!calendar || !moon) return 0;
+  if (moon.phaseMode === 'randomized') {
+    const absoluteDay = dateToDayNumber(date, calendar);
+    return resolveRandomizedPhase(moon, absoluteDay, date);
+  }
   const daysBetween = calculateDaysBetween(moon.referenceDate, date, calendar);
   const cyclePosition = ((daysBetween % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
   return cyclePosition / moon.cycleLength;
@@ -31,6 +36,18 @@ export function getMoonPhasePosition(moon, date, calendar = null) {
 export function isMoonFull(moon, date, calendar = null) {
   const position = getMoonPhasePosition(moon, date, calendar);
   return position >= 0.5 && position < 0.625;
+}
+
+/**
+ * Check if a moon is in its new phase at a given date.
+ * @param {object} moon - Moon definition
+ * @param {object} date - Date to check
+ * @param {object} calendar - Calendar instance (optional)
+ * @returns {boolean} True if moon is new
+ */
+export function isNewMoon(moon, date, calendar = null) {
+  const position = getMoonPhasePosition(moon, date, calendar);
+  return position >= 0 && position < 0.125;
 }
 
 /**
@@ -120,7 +137,7 @@ function calculateDaysBetween(date1, date2, calendar) {
  * @param {object} calendar - Calendar instance
  * @returns {number} Absolute day number
  */
-function dateToDayNumber(date, calendar) {
+export function dateToDayNumber(date, calendar) {
   const daysPerYear = calendar.days?.daysPerYear ?? 365;
   const months = calendar.monthsArray ?? [];
   let dayNumber = date.year * daysPerYear;
@@ -135,7 +152,7 @@ function dateToDayNumber(date, calendar) {
  * @param {object} calendar - Calendar instance
  * @returns {object} New date { year, month, dayOfMonth }
  */
-function addOneDay(date, calendar) {
+export function addOneDay(date, calendar) {
   const months = calendar.monthsArray ?? [];
   let { year, month } = date;
   let dayOfMonth = (date.dayOfMonth ?? 0) + 1;
@@ -157,7 +174,7 @@ function addOneDay(date, calendar) {
  * @param {object} date2 - Second date
  * @returns {number} -1 if date1 < date2, 0 if equal, 1 if date1 > date2
  */
-function compareDates(date1, date2) {
+export function compareDates(date1, date2) {
   if (date1.year !== date2.year) return date1.year < date2.year ? -1 : 1;
   if (date1.month !== date2.month) return date1.month < date2.month ? -1 : 1;
   if (date1.dayOfMonth !== date2.dayOfMonth) return date1.dayOfMonth < date2.dayOfMonth ? -1 : 1;

@@ -4,11 +4,10 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
+import { NoteManager } from '../notes/_module.mjs';
+import { format, localize, log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -147,7 +146,12 @@ export default class MiniCalendarImporter extends BaseImporter {
       festivals: this.#extractFestivals(rawMonths),
       daylight: this.#transformDaylight(rawSun, rawMonths),
       weather: this.#transformWeather(data, rawWeather),
-      metadata: { description: calendar.description || 'Imported from Mini Calendar', system: calendar.name || 'Unknown', importedFrom: 'mini-calendar', originalId: calendar.id }
+      metadata: {
+        description: calendar.description || localize('CALENDARIA.Importer.ImportedFrom.MiniCalendar'),
+        system: calendar.name || localize('CALENDARIA.Common.Unknown'),
+        importedFrom: 'mini-calendar',
+        originalId: calendar.id
+      }
     };
   }
 
@@ -323,8 +327,9 @@ export default class MiniCalendarImporter extends BaseImporter {
     for (const month of months) {
       if (month.intercalary) {
         const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
-        for (let day = 0; day < month.days; day++)
+        for (let day = 0; day < month.days; day++) {
           festivals.push({ name: month.days === 1 ? month.name : `${month.name} (Day ${day + 1})`, month: targetMonth, dayOfMonth: day, countsForWeekday: false });
+        }
       } else {
         lastRegularMonthIndex = regularCount;
         regularCount++;
@@ -399,7 +404,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     const zone = {
       id: biome,
       name: biome.charAt(0).toUpperCase() + biome.slice(1),
-      description: `Imported from Mini Calendar (${biome} biome)`,
+      description: format('CALENDARIA.Importer.ImportedFrom.MiniCalendarBiome', { biome }),
       temperatures: { _default: { min: 50, max: 70 }, ...seasonOverrides },
       presets: [],
       seasonOverrides: {}
@@ -428,7 +433,7 @@ export default class MiniCalendarImporter extends BaseImporter {
         allDay: !hasTime,
         repeat: this.#transformRepeatRule(note.repeatUnit, note.repeatInterval),
         categories: [],
-        gmOnly: note.playerVisible === false,
+        visibility: note.playerVisible === false ? 'hidden' : 'visible',
         originalId: note.id,
         isPreset: note.isPreset ?? true,
         icon: note.icon,
@@ -451,7 +456,7 @@ export default class MiniCalendarImporter extends BaseImporter {
         allDay: !hasTime,
         repeat: this.#transformRepeatRule(note.repeatUnit, note.repeatInterval),
         categories: [],
-        gmOnly: note.playerVisible === false,
+        visibility: note.playerVisible === false ? 'hidden' : 'visible',
         originalId: note.id,
         isPreset: note.isPreset ?? false,
         icon: note.icon,
@@ -475,7 +480,7 @@ export default class MiniCalendarImporter extends BaseImporter {
   }
 
   /**
-   * Import MC notes with yearZero offset and gmOnly support.
+   * Import MC notes with yearZero offset and visibility support.
    * @param {object[]} notes - Array of note objects to import
    * @param {object} options - Import options including calendarId
    * @returns {Promise<object>} Result with success, count, and errors
@@ -491,7 +496,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       try {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
-        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories, gmOnly: note.gmOnly || false };
+        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories, visibility: note.visibility || 'visible' };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
@@ -520,7 +525,6 @@ export default class MiniCalendarImporter extends BaseImporter {
     for (const festival of festivals) {
       try {
         const festivalData = { name: festival.name, month: festival.startDate.month ?? 0, dayOfMonth: festival.startDate.day ?? 0 };
-
         newFestivals.push(festivalData);
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);

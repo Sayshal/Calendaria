@@ -1,13 +1,12 @@
 /**
  * Note Data Schema and Validation
- * Defines the structure and validation rules for calendar note flags.
  * @module Notes/NoteData
  * @author Tyler
  */
 
-import { MODULE, SETTINGS } from '../constants.mjs';
+import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
-import { isValidDate } from './date-utils.mjs';
+import { isValidDate } from './_module.mjs';
 
 /**
  * Default note data structure.
@@ -39,7 +38,14 @@ export function getDefaultNoteData() {
     macro: null,
     sceneId: null,
     author: null,
-    gmOnly: game.user.isGM,
+    hasDuration: false,
+    duration: 1,
+    showBookends: false,
+    limitedRepeat: false,
+    limitedRepeatDays: 365,
+    displayStyle: DISPLAY_STYLES.ICON,
+    visibility: game.user.isGM ? NOTE_VISIBILITY.HIDDEN : NOTE_VISIBILITY.VISIBLE,
+    linkedFestival: null,
     isCalendarNote: true,
     version: 1
   };
@@ -116,6 +122,15 @@ export function validateNoteData(noteData) {
       }
     }
   }
+  if (noteData.hasDuration !== undefined && typeof noteData.hasDuration !== 'boolean') errors.push('hasDuration must be a boolean');
+  if (noteData.duration !== undefined) if (typeof noteData.duration !== 'number' || noteData.duration < 1) errors.push('duration must be a positive integer');
+  if (noteData.showBookends !== undefined && typeof noteData.showBookends !== 'boolean') errors.push('showBookends must be a boolean');
+  if (noteData.limitedRepeat !== undefined && typeof noteData.limitedRepeat !== 'boolean') errors.push('limitedRepeat must be a boolean');
+  if (noteData.limitedRepeatDays !== undefined) if (typeof noteData.limitedRepeatDays !== 'number' || noteData.limitedRepeatDays < 1) errors.push('limitedRepeatDays must be a positive integer');
+  if (noteData.displayStyle !== undefined) {
+    const validDisplayStyles = Object.values(DISPLAY_STYLES);
+    if (!validDisplayStyles.includes(noteData.displayStyle)) errors.push(`displayStyle must be one of: ${validDisplayStyles.join(', ')}`);
+  }
   if (noteData.categories !== undefined) {
     if (!Array.isArray(noteData.categories)) errors.push('categories must be an array');
     else if (noteData.categories.some((c) => typeof c !== 'string')) errors.push('categories must be an array of strings');
@@ -165,7 +180,15 @@ export function sanitizeNoteData(noteData) {
     macro: noteData.macro || null,
     sceneId: noteData.sceneId || null,
     author: noteData.author || null,
-    gmOnly: noteData.gmOnly ?? game.user.isGM,
+    hasDuration: noteData.hasDuration ?? defaults.hasDuration,
+    duration: noteData.duration ?? defaults.duration,
+    showBookends: noteData.showBookends ?? defaults.showBookends,
+    limitedRepeat: noteData.limitedRepeat ?? defaults.limitedRepeat,
+    limitedRepeatDays: noteData.limitedRepeatDays ?? defaults.limitedRepeatDays,
+    displayStyle: noteData.displayStyle || defaults.displayStyle,
+    visibility: noteData.visibility || defaults.visibility,
+    ...(noteData.conditionTree ? { conditionTree: noteData.conditionTree } : noteData.conditions?.length ? { conditions: noteData.conditions } : {}),
+    linkedFestival: noteData.linkedFestival || null,
     isCalendarNote: true,
     version: noteData.version || defaults.version
   };
@@ -183,12 +206,14 @@ export function createNoteStub(page) {
   let calendarId = page.getFlag(MODULE.ID, 'calendarId') || page.parent?.getFlag(MODULE.ID, 'calendarId');
   if (!calendarId && page.parent?.folder) calendarId = page.parent.folder.getFlag?.(MODULE.ID, 'calendarId') || null;
   const randomOccurrences = page.getFlag(MODULE.ID, 'randomOccurrences');
-  const enrichedFlagData = randomOccurrences?.occurrences ? { ...flagData, cachedRandomOccurrences: randomOccurrences.occurrences } : flagData;
+  let enrichedFlagData = randomOccurrences?.occurrences ? { ...flagData, cachedRandomOccurrences: randomOccurrences.occurrences } : flagData;
+  if (enrichedFlagData.conditionTree && enrichedFlagData.conditions) enrichedFlagData = Object.fromEntries(Object.entries(enrichedFlagData).filter(([k]) => k !== 'conditions'));
   const parentJournal = page.parent;
   const isOwner = parentJournal?.isOwner ?? page.isOwner;
   return {
     id: page.id,
     name: page.name,
+    content: page.text?.content ?? '',
     flagData: enrichedFlagData,
     calendarId,
     visible: page.testUserPermission(game.user, 'OBSERVER'),
@@ -205,100 +230,444 @@ export function createNoteStub(page) {
  */
 export function getRepeatOptions(selected = 'never') {
   const choices = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote']._schema.fields.repeat.choices;
-  return choices.map((value) => ({ value, label: localize(`CALENDARIA.Repeat.${value}`), selected: value === selected }));
+  return choices.map((value) => ({ value, label: localize(`CALENDARIA.Notes.Repeat.${value[0].toUpperCase()}${value.slice(1)}`), selected: value === selected }));
 }
 
 /**
- * Get predefined note categories.
- * @returns {object[]}  Array of category definitions
+ * Default preset defaults shape — all null means "don't override".
+ * @returns {object} Empty defaults with all null values
  */
-export function getPredefinedCategories() {
+function emptyDefaults() {
+  return {
+    allDay: null,
+    displayStyle: null,
+    visibility: null,
+    color: null,
+    icon: null,
+    reminderType: null,
+    reminderOffset: null,
+    hasDuration: null,
+    duration: null,
+    macro: null,
+    owners: [],
+    content: null
+  };
+}
+
+/**
+ * Default preset overrides shape.
+ * @returns {object} Empty overrides with null values
+ */
+function emptyOverrides() {
+  return { displayStyle: null, visibility: null };
+}
+
+/**
+ * Seed definitions for the 10 built-in presets.
+ * Used only for initial migration — after that, everything lives in CUSTOM_PRESETS setting.
+ * @returns {object[]} Array of built-in preset seed objects
+ */
+export function getBuiltinPresetSeeds() {
   return [
-    { id: 'holiday', label: localize('CALENDARIA.Category.Holiday'), color: '#ff6b6b', icon: 'fa-gift' },
-    { id: 'festival', label: localize('CALENDARIA.Category.Festival'), color: '#f0a500', icon: 'fa-masks-theater' },
-    { id: 'quest', label: localize('CALENDARIA.Category.Quest'), color: '#4a9eff', icon: 'fa-scroll' },
-    { id: 'session', label: localize('CALENDARIA.Category.Session'), color: '#51cf66', icon: 'fa-users' },
-    { id: 'combat', label: localize('CALENDARIA.Category.Combat'), color: '#ff6b6b', icon: 'fa-swords' },
-    { id: 'meeting', label: localize('CALENDARIA.Category.Meeting'), color: '#845ef7', icon: 'fa-handshake' },
-    { id: 'birthday', label: localize('CALENDARIA.Category.Birthday'), color: '#ff6b6b', icon: 'fa-cake-candles' },
-    { id: 'deadline', label: localize('CALENDARIA.Category.Deadline'), color: '#f03e3e', icon: 'fa-hourglass-end' },
-    { id: 'reminder', label: localize('CALENDARIA.Category.Reminder'), color: '#fcc419', icon: 'fa-bell' },
-    { id: 'other', label: localize('CALENDARIA.Category.Other'), color: '#868e96', icon: 'fa-circle' }
+    { id: 'quest', label: localize('CALENDARIA.Preset.Quest'), color: '#4a9eff', icon: 'fas fa-scroll', defaults: { displayStyle: 'icon' } },
+    {
+      id: 'session',
+      label: localize('CALENDARIA.Preset.Session'),
+      color: '#51cf66',
+      icon: 'fas fa-users',
+      defaults: {
+        displayStyle: 'icon',
+        allDay: true,
+        content:
+          '<p><strong>Recap</strong></p><p></p><p><strong>Key Events</strong></p><p></p><p><strong>NPCs Met</strong></p><p></p><p><strong>Loot &amp; Rewards</strong></p><p></p><p><strong>Notes for Next Session</strong></p><p></p>'
+      }
+    },
+    { id: 'meeting', label: localize('CALENDARIA.Preset.Meeting'), color: '#845ef7', icon: 'fas fa-handshake', defaults: { reminderType: 'toast', reminderOffset: 1 } },
+    { id: 'birthday', label: localize('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
+    { id: 'deadline', label: localize('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
+    { id: 'reminder', label: localize('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
+    { id: 'downtime', label: localize('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { hasDuration: true, duration: 7 } },
+    { id: 'lore', label: localize('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } }
   ];
 }
 
-/**
- * Get custom categories from world settings.
- * @returns {object[]}  Array of custom category definitions
- */
-export function getCustomCategories() {
-  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES) || [];
-  return raw.map((c) => ({ id: c.id, label: c.label || c.name, color: c.color, icon: c.icon || 'fa-tag', custom: true }));
+/** Cached preset array; invalidated on settings change. Avoids repeated filter/sort on settings access. */
+let _presetCache = null;
+
+/** Per-render cache for resolveNoteDisplayProps, keyed by page ID. Prevents re-computation during a single render cycle. */
+const _displayPropsCache = new Map();
+
+/** Clear the cached preset list. */
+export function invalidatePresetCache() {
+  _presetCache = null;
+}
+
+/** Clear the per-render display props cache. Call at the start of each render cycle. */
+export function clearDisplayPropsCache() {
+  _displayPropsCache.clear();
 }
 
 /**
- * Get all categories (predefined + custom).
- * @returns {object[]}  Merged array of category definitions
+ * Get all presets sorted by sortOrder.
+ * @returns {object[]} Sorted array of all presets
  */
-export function getAllCategories() {
-  const predefined = getPredefinedCategories();
-  const custom = getCustomCategories();
-  return [...predefined, ...custom];
+export function getAllPresets() {
+  if (_presetCache) return _presetCache;
+  _presetCache = getAllPresetsIncludingHidden().filter((c) => !c.hidden);
+  return _presetCache;
 }
 
 /**
- * Add a custom category to world settings.
- * @param {string} label  Category label
- * @param {string} [color]  Hex color (defaults to gray)
- * @param {string} [icon]  FontAwesome icon class (defaults to fa-tag)
- * @returns {Promise<object>}  The created category
+ * Get all presets including hidden ones. Used by Preset Manager for editing.
+ * @returns {object[]} Sorted array of all presets
  */
-export async function addCustomCategory(label, color = '#868e96', icon = 'fa-tag') {
-  const id = label
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\da-z-]/g, '');
-  const existing = getAllCategories().find((c) => c.id === id);
-  if (existing) return existing;
-  const newCategory = { id, label, color, icon, custom: true };
-  const customCategories = getCustomCategories();
-  customCategories.push(newCategory);
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, customCategories);
-  return newCategory;
+export function getAllPresetsIncludingHidden() {
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  const savedIds = new Set(raw.map((c) => c.id));
+  const seeds = getBuiltinPresetSeeds()
+    .filter((s) => !savedIds.has(s.id))
+    .map((c) => ({ ...c, builtin: true, playerUsable: true, defaults: { ...emptyDefaults(), ...c.defaults }, overrides: emptyOverrides() }));
+  return [...raw, ...seeds].map((c) => ({ ...c, icon: c.icon && !c.icon.includes(' ') ? `fas ${c.icon}` : c.icon })).sort((a, b) => (a.label || '').localeCompare(b.label || ''));
 }
 
 /**
- * Delete a custom category from world settings.
- * @param {string} categoryId  Category ID to delete
- * @returns {Promise<boolean>}  True if deleted, false if not found or predefined
+ * Get preset definition by ID.
+ * @param {string} presetId - Preset ID
+ * @returns {object|null} Preset definition or null if not found
  */
-export async function deleteCustomCategory(categoryId) {
-  const predefined = getPredefinedCategories().find((c) => c.id === categoryId);
-  if (predefined) return false;
-  const customCategories = getCustomCategories();
-  const index = customCategories.findIndex((c) => c.id === categoryId);
+export function getPresetDefinition(presetId) {
+  return getAllPresets().find((c) => c.id === presetId) || null;
+}
+
+/**
+ * Check if a preset is custom (user-created, not built-in).
+ * @param {string} presetId - Preset ID
+ * @returns {boolean} True if the preset is custom
+ */
+export function isCustomPreset(presetId) {
+  const cat = getPresetDefinition(presetId);
+  return cat ? !cat.builtin : false;
+}
+
+/**
+ * Get presets usable by non-GM players.
+ * @returns {object[]} Array of player-usable presets
+ */
+export function getPlayerUsablePresets() {
+  return getAllPresets().filter((c) => c.playerUsable);
+}
+
+/**
+ * Add a custom preset to world settings.
+ * @param {string} label  Preset label
+ * @param {string} [color]  Hex color
+ * @param {string} [icon]  FontAwesome icon class
+ * @returns {Promise<object>}  The created preset
+ */
+export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-tag') {
+  const id =
+    label
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\da-z-]/g, '') || foundry.utils.randomID();
+  const existing = getAllPresets();
+  if (existing.find((c) => c.id === id)) return existing.find((c) => c.id === id);
+  const maxSort = existing.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
+  const newPreset = { id, label, color, icon, builtin: false, sortOrder: maxSort + 1, playerUsable: true, defaults: emptyDefaults(), overrides: emptyOverrides() };
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  raw.push(newPreset);
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
+  return newPreset;
+}
+
+/**
+ * Delete a preset from world settings.
+ * @param {string} presetId  Preset ID to delete
+ * @returns {Promise<boolean>}  True if deleted
+ */
+export async function deleteCustomPreset(presetId) {
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  const index = raw.findIndex((c) => c.id === presetId);
   if (index === -1) return false;
-  customCategories.splice(index, 1);
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CATEGORIES, customCategories);
+  raw.splice(index, 1);
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
   return true;
 }
 
 /**
- * Check if a category is custom (user-created).
- * @param {string} categoryId  Category ID
- * @returns {boolean}  True if custom
+ * Update a preset's properties.
+ * @param {string} presetId  Preset ID
+ * @param {object} updates  Partial preset properties to merge
+ * @returns {Promise<object|null>}  Updated preset or null if not found
  */
-export function isCustomCategory(categoryId) {
-  const custom = getCustomCategories();
-  return custom.some((c) => c.id === categoryId);
+export async function updatePreset(presetId, updates) {
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  const cat = raw.find((c) => c.id === presetId);
+  if (!cat) return null;
+  const fields = ['label', 'color', 'icon', 'sortOrder', 'playerUsable'];
+  for (const key of fields) if (updates[key] !== undefined) cat[key] = updates[key];
+  if (updates.defaults !== undefined) cat.defaults = { ...(cat.defaults || emptyDefaults()), ...updates.defaults };
+  if (updates.overrides !== undefined) cat.overrides = { ...(cat.overrides || emptyOverrides()), ...updates.overrides };
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
+  return cat;
 }
 
 /**
- * Get category definition by ID.
- * @param {string} categoryId  Category ID
- * @returns {object|null}  Category definition or null
+ * Reorder presets by providing an ordered array of IDs.
+ * @param {string[]} orderedIds  Preset IDs in desired order
+ * @returns {Promise<void>}
  */
-export function getCategoryDefinition(categoryId) {
-  const categories = getAllCategories();
-  return categories.find((c) => c.id === categoryId) || null;
+export async function reorderPresets(orderedIds) {
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  for (let i = 0; i < orderedIds.length; i++) {
+    const cat = raw.find((c) => c.id === orderedIds[i]);
+    if (cat) cat.sortOrder = i;
+  }
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
+}
+
+/**
+ * Save the full presets array to settings (used by Preset Manager).
+ * @param {object[]} presets  Complete presets array
+ * @returns {Promise<void>}
+ */
+export async function saveAllPresets(presets) {
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, presets);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
+}
+
+/**
+ * Get merged preset defaults for a set of preset IDs.
+ * @param {string[]} presetIds  Array of preset IDs
+ * @returns {object}  Merged defaults (non-null values only)
+ */
+export function getPresetDefaults(presetIds) {
+  if (!presetIds?.length) return {};
+  const allCats = getAllPresets();
+  const matched = presetIds
+    .map((id) => allCats.find((c) => c.id === id))
+    .filter(Boolean)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const merged = {};
+  for (const cat of matched) {
+    const d = cat.defaults;
+    if (!d) continue;
+    for (const [key, val] of Object.entries(d)) if (val !== null && val !== undefined && !(Array.isArray(val) && val.length === 0)) merged[key] = val;
+  }
+  return merged;
+}
+
+/**
+ * Get the content template from presets (first non-null content wins).
+ * @param {string[]} presetIds  Array of preset IDs
+ * @returns {string|null}  Content template HTML or null
+ */
+export function getPresetContentTemplate(presetIds) {
+  if (!presetIds?.length) return null;
+  const allCats = getAllPresets();
+  for (const id of presetIds) {
+    const cat = allCats.find((c) => c.id === id);
+    if (cat?.defaults?.content) return cat.defaults.content;
+  }
+  return null;
+}
+
+/**
+ * Get merged preset overrides for a set of preset IDs.
+ * @param {string[]} presetIds  Array of preset IDs
+ * @returns {object}  Override values (non-null fields only)
+ */
+export function getPresetOverrides(presetIds) {
+  if (!presetIds?.length) return { displayStyle: null, visibility: null };
+  const allCats = getAllPresets();
+  const matched = presetIds
+    .map((id) => allCats.find((c) => c.id === id))
+    .filter(Boolean)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const result = { displayStyle: null, visibility: null };
+  for (const cat of matched) {
+    if (!cat.overrides) continue;
+    for (const [key, val] of Object.entries(cat.overrides)) {
+      if (val != null) result[key] = val;
+    }
+  }
+  return result;
+}
+
+/**
+ * Apply preset defaults to note data. Only sets fields that are null/undefined on the note.
+ * @param {object} noteData  Note data to augment
+ * @param {string[]} presetIds  Preset IDs to pull defaults from
+ * @returns {object}  Augmented note data (mutated)
+ */
+export function applyPresetDefaultsToNoteData(noteData, presetIds) {
+  const defaults = getPresetDefaults(presetIds);
+  if (!Object.keys(defaults).length) return noteData;
+  const fieldMap = {
+    allDay: 'allDay',
+    displayStyle: 'displayStyle',
+    visibility: 'visibility',
+    color: 'color',
+    icon: 'icon',
+    reminderType: 'reminderType',
+    reminderOffset: 'reminderOffset',
+    hasDuration: 'hasDuration',
+    duration: 'duration',
+    macro: 'macro'
+  };
+  const noteDefaults = getDefaultNoteData();
+  for (const [defaultKey, noteKey] of Object.entries(fieldMap)) {
+    if (defaults[defaultKey] == null) continue;
+    if (noteData[noteKey] === noteDefaults[noteKey] || noteData[noteKey] == null) noteData[noteKey] = defaults[defaultKey];
+  }
+  if (defaults.owners?.length) {
+    const existing = noteData.remindUsers || [];
+    const combined = [...new Set([...existing, ...defaults.owners])];
+    noteData.remindUsers = combined;
+  }
+  return noteData;
+}
+
+/**
+ * Resolve the effective display properties for a note page, applying preset overrides.
+ * @param {object} page - JournalEntryPage document (calendaria.calendarnote type)
+ * @returns {{ displayStyle: string, visibility: string, color: string, icon: string, iconType: string }} Resolved display properties
+ */
+export function resolveNoteDisplayProps(page) {
+  const id = page.id;
+  if (_displayPropsCache.has(id)) return _displayPropsCache.get(id);
+  const sys = page.system;
+  const overrides = getPresetOverrides(sys.categories);
+  const result = {
+    displayStyle: overrides.displayStyle || sys.displayStyle || DISPLAY_STYLES.ICON,
+    visibility: overrides.visibility || sys.visibility || NOTE_VISIBILITY.VISIBLE,
+    color: sys.color || '#4a9eff',
+    icon: sys.icon || 'fas fa-calendar',
+    iconType: sys.iconType || 'fontawesome',
+    isFestival: !!sys.linkedFestival
+  };
+  _displayPropsCache.set(id, result);
+  return result;
+}
+
+/**
+ * Enrich a note page into a plain object suitable for Handlebars templates.
+ * @param {object} page - JournalEntryPage document (calendaria.calendarnote type)
+ * @returns {object} Enriched note object with resolved display properties
+ */
+export function enrichNoteForDisplay(page) {
+  const props = resolveNoteDisplayProps(page);
+  return {
+    id: page.id,
+    name: page.name,
+    parentId: page.parent?.id || null,
+    displayStyle: props.displayStyle,
+    visibility: props.visibility,
+    color: props.color,
+    icon: props.icon,
+    iconType: props.iconType,
+    isFestival: props.isFestival,
+    isHidden: props.visibility === NOTE_VISIBILITY.HIDDEN,
+    isSecret: props.visibility === NOTE_VISIBILITY.SECRET,
+    isOwner: page.parent?.isOwner ?? page.isOwner,
+    categories: page.system.categories || [],
+    startDate: page.system.startDate,
+    endDate: page.system.endDate,
+    allDay: page.system.allDay ?? false,
+    hasDuration: page.system.hasDuration ?? false,
+    duration: page.system.duration ?? 0,
+    showBookends: page.system.showBookends ?? false,
+    author: page.system.author?.name || null
+  };
+}
+
+/**
+ * Extract recurrence match data from a note page for use with isRecurringMatch().
+ * @param {object} page - JournalEntryPage document (calendaria.calendarnote type)
+ * @returns {object} Recurrence data object consumable by isRecurringMatch()
+ */
+export function extractNoteMatchData(page) {
+  return {
+    startDate: page.system.startDate,
+    endDate: page.system.endDate,
+    repeat: page.system.repeat,
+    repeatInterval: page.system.repeatInterval,
+    repeatEndDate: page.system.repeatEndDate,
+    maxOccurrences: page.system.maxOccurrences,
+    moonConditions: page.system.moonConditions,
+    randomConfig: page.system.randomConfig,
+    cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
+    linkedEvent: page.system.linkedEvent,
+    weekday: page.system.weekday,
+    weekNumber: page.system.weekNumber,
+    seasonalConfig: page.system.seasonalConfig,
+    conditions: page.system.conditions,
+    conditionTree: page.system.conditionTree,
+    hasDuration: page.system.hasDuration,
+    duration: page.system.duration,
+    limitedRepeat: page.system.limitedRepeat,
+    limitedRepeatDays: page.system.limitedRepeatDays
+  };
+}
+
+/**
+ * Migrate the preset schema: seed built-in presets into settings, backfill missing fields on custom presets.
+ * @since 1.0.0
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<boolean>}  True if migration was performed
+ */
+export async function migratePresetSchema() {
+  if (!game.user?.isGM) return false;
+  const KEY = 'presetSchemaV2MigrationComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return false;
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  const existingIds = new Set(raw.map((c) => c.id));
+  const seeds = getBuiltinPresetSeeds();
+  const migrated = [];
+  for (let i = 0; i < seeds.length; i++) {
+    const seed = seeds[i];
+    if (existingIds.has(seed.id)) {
+      const existing = raw.find((c) => c.id === seed.id);
+      migrated.push({
+        ...existing,
+        label: existing.label || existing.name || seed.label,
+        builtin: true,
+        sortOrder: existing.sortOrder ?? i,
+        playerUsable: existing.playerUsable ?? true,
+        defaults: existing.defaults || emptyDefaults(),
+        overrides: existing.overrides || emptyOverrides()
+      });
+    } else {
+      migrated.push({ ...seed, builtin: true, sortOrder: i, playerUsable: true, defaults: emptyDefaults(), overrides: emptyOverrides() });
+    }
+  }
+  const builtinIds = new Set(seeds.map((s) => s.id));
+  let customIndex = seeds.length;
+  for (const cat of raw) {
+    if (builtinIds.has(cat.id)) continue;
+    migrated.push({
+      id: cat.id,
+      label: cat.label || cat.name || 'Unnamed',
+      color: cat.color || '#868e96',
+      icon: cat.icon || 'fa-tag',
+      builtin: false,
+      sortOrder: cat.sortOrder ?? customIndex++,
+      playerUsable: cat.playerUsable ?? true,
+      defaults: cat.defaults || emptyDefaults(),
+      overrides: cat.overrides || emptyOverrides()
+    });
+  }
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, migrated);
+  await game.settings.set(MODULE.ID, KEY, true);
+  return true;
 }

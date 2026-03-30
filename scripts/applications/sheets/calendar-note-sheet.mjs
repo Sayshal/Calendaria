@@ -4,16 +4,30 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { MODULE, TEMPLATES } from '../../constants.mjs';
-import { addCustomCategory, deleteCustomCategory, getAllCategories, getRepeatOptions, isCustomCategory } from '../../notes/note-data.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
-import { generateRandomOccurrences, getRecurrenceDescription, needsRandomRegeneration } from '../../notes/recurrence.mjs';
-import { ComputedEventBuilder } from '../dialogs/computed-event-builder.mjs';
-import { format, localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
+import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
+import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import {
+  addCustomPreset,
+  applyPresetDefaultsToNoteData,
+  deleteCustomPreset,
+  describeConditionTree,
+  detectCycles,
+  extractEventDependencies,
+  getAllPresets,
+  getConditionPresets,
+  getNextOccurrences,
+  getRecurrenceDescription,
+  groupPresets,
+  isCustomPreset,
+  summarizeConditionTree,
+  validateConditions,
+  wrapInRootGroup
+} from '../../notes/_module.mjs';
+import { CalendariaSocket, convertToConditionTree, format, localize, log } from '../../utils/_module.mjs';
+import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
+const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
 /**
  * Sheet application for calendar note journal entry pages.
@@ -23,22 +37,17 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** @override */
   static DEFAULT_OPTIONS = {
     classes: ['calendaria', 'calendar-note-sheet'],
-    position: { width: 650, height: 850 },
+    tag: 'form',
+    position: { width: 820, height: 'auto' },
     actions: {
       selectIcon: this._onSelectIcon,
       selectDate: this._onSelectDate,
       saveAndClose: this._onSaveAndClose,
-      reset: this._onReset,
       deleteNote: this._onDeleteNote,
-      addCategory: this._onAddCategory,
+      addPreset: this._onAddPreset,
       toggleMode: this._onToggleMode,
-      addMoonCondition: this._onAddMoonCondition,
-      removeMoonCondition: this._onRemoveMoonCondition,
-      regenerateSeed: this._onRegenerateSeed,
-      clearLinkedEvent: this._onClearLinkedEvent,
-      addCondition: this._onAddCondition,
-      removeCondition: this._onRemoveCondition,
-      openComputedBuilder: this._onOpenComputedBuilder
+      openConditionBuilder: this._onOpenConditionBuilder,
+      openFestivalEditor: this._onOpenFestivalEditor
     },
     form: { submitOnChange: true, closeOnSubmit: false }
   };
@@ -50,7 +59,24 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static VIEW_PARTS = { view: { template: TEMPLATES.SHEETS.CALENDAR_NOTE_VIEW } };
 
   /** @type {Object<string, {template: string}>} */
-  static EDIT_PARTS = { form: { template: TEMPLATES.SHEETS.CALENDAR_NOTE_FORM } };
+  static EDIT_PARTS = {
+    tabs: { template: TEMPLATES.TAB_NAVIGATION },
+    content: { template: TEMPLATES.SHEETS.NOTE_TAB_CONTENT, scrollable: [''] },
+    schedule: { template: TEMPLATES.SHEETS.NOTE_TAB_SCHEDULE, scrollable: [''] },
+    settings: { template: TEMPLATES.SHEETS.NOTE_TAB_SETTINGS, scrollable: [''] }
+  };
+
+  /** @override */
+  static TABS = {
+    primary: {
+      tabs: [
+        { id: 'content', group: 'primary', label: 'CALENDARIA.Common.Content' },
+        { id: 'schedule', group: 'primary', label: 'CALENDARIA.Note.Tab.Schedule' },
+        { id: 'settings', group: 'primary', label: 'CALENDARIA.Common.Settings' }
+      ],
+      initial: 'content'
+    }
+  };
 
   /** Current sheet mode. */
   _mode = CalendarNoteSheet.MODES.VIEW;
@@ -131,60 +157,53 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       categoriesContainer.addEventListener('contextmenu', (event) => {
         const tag = event.target.closest('.tag');
         if (!tag) return;
-        const categoryId = tag.dataset.key;
-        if (!categoryId || !isCustomCategory(categoryId)) return;
+        const presetId = tag.dataset.key;
+        if (!presetId || !isCustomPreset(presetId)) return;
         event.preventDefault();
-        this.#showDeleteCategoryMenu(event, categoryId, tag.textContent.trim());
+        this.#showDeletePresetMenu(event, presetId, tag.textContent.trim());
       });
     }
-    const moonSelect = htmlElement.querySelector('select[name="newMoonCondition.moonIndex"]');
-    const phaseSelect = htmlElement.querySelector('select[name="newMoonCondition.phase"]');
-    if (moonSelect && phaseSelect) {
-      moonSelect.addEventListener('change', () => {
-        const selectedMoon = moonSelect.value;
-        const phaseOptions = phaseSelect.querySelectorAll('option[data-moon]');
-        phaseOptions.forEach((opt) => {
-          opt.hidden = selectedMoon !== '' && opt.dataset.moon !== selectedMoon;
-        });
-        if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
+    const presetSelect = htmlElement.querySelector('.preset-select');
+    if (presetSelect) {
+      presetSelect.addEventListener('change', () => {
+        if (presetSelect.value === '__clear__') this.#clearConditions();
+        else if (presetSelect.value) this.#applyPreset(presetSelect.value);
       });
     }
-    const rangeTypeSelects = htmlElement.querySelectorAll('.range-type-select');
-    rangeTypeSelects.forEach((select) => {
-      select.addEventListener('change', async () => {
-        const component = select.dataset.rangeType;
-        const type = select.value;
-        const rangePattern = foundry.utils.deepClone(this.document.system.rangePattern || {});
-        if (type === 'any') {
-          rangePattern[component] = [null, null];
-        } else if (type === 'exact') {
-          const defaults = { year: new Date().getFullYear(), month: 0, dayOfMonth: 1 };
-          rangePattern[component] = defaults[component];
-        } else if (type === 'range') {
-          rangePattern[component] = [0, 0];
-        }
-        await this.document.update({ 'system.rangePattern': rangePattern });
-      });
+    new ContextMenu(htmlElement, '.condition-pill[data-path]', [], {
+      fixed: true,
+      jQuery: false,
+      onOpen: (target) => {
+        const path = target.dataset.path;
+        if (!path) return;
+        ui.context.menuItems = [
+          {
+            name: localize('CALENDARIA.Common.Delete'),
+            icon: '<i class="fas fa-trash"></i>',
+            callback: () => this.#removeConditionAtPath(path)
+          }
+        ];
+      }
     });
   }
 
   /**
-   * Show context menu to delete a custom category.
+   * Show context menu to delete a custom preset.
    * @param {MouseEvent} _event - The context menu event
-   * @param {string} categoryId - The category ID
-   * @param {string} categoryLabel - The category label for display
+   * @param {string} presetId - The preset ID
+   * @param {string} presetLabel - The preset label for display
    */
-  async #showDeleteCategoryMenu(_event, categoryId, categoryLabel) {
+  async #showDeletePresetMenu(_event, presetId, presetLabel) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Note.DeleteCategoryTitle') },
-      content: `<p>${format('CALENDARIA.Note.DeleteCategoryConfirm', { label: categoryLabel })}</p><p class="hint">${localize('CALENDARIA.Note.DeleteCategoryHint')}</p>`,
+      window: { title: localize('CALENDARIA.Common.DeletePreset') },
+      content: `<p>${format('CALENDARIA.Note.DeletePresetConfirm', { label: presetLabel })}</p><p class="hint">${localize('CALENDARIA.Note.DeletePresetHint')}</p>`,
       rejectClose: false,
       modal: true
     });
     if (confirmed) {
-      const deleted = await deleteCustomCategory(categoryId);
+      const deleted = await deleteCustomPreset(presetId);
       if (deleted) {
-        ui.notifications.info(format('CALENDARIA.Info.CategoryDeleted', { label: categoryLabel }));
+        ui.notifications.info(format('CALENDARIA.Info.PresetDeleted', { label: presetLabel }));
         this.render();
       }
     }
@@ -201,6 +220,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         titleInput.select();
       }
     }
+    if (this.isEditMode) this.#autoConvertLegacy();
   }
 
   /** @override */
@@ -209,22 +229,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.#renderHeaderControls();
     this.element.classList.toggle('view-mode', this.isViewMode);
     this.element.classList.toggle('edit-mode', this.isEditMode);
+    this.element.classList.remove('dnd5e2', 'dnd5e-journal');
   }
 
   /**
    * Selectors for temporary form fields not backed by the data model.
    * @type {string[]}
    */
-  static TRANSIENT_FIELDS = [
-    'select[name="newCondition.field"]',
-    'select[name="newCondition.op"]',
-    'input[name="newCondition.value"]',
-    'input[name="newCondition.offset"]',
-    'select[name="newMoonCondition.moonIndex"]',
-    'select[name="newMoonCondition.phase"]',
-    'select[name="newMoonCondition.modifier"]',
-    '.new-category-input'
-  ];
+  static TRANSIENT_FIELDS = ['.new-preset-input'];
 
   /** @override */
   _preSyncPartState(partId, newElement, priorElement, state) {
@@ -263,13 +275,16 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (this.document.isOwner) {
       const modeBtn = document.createElement('button');
       modeBtn.type = 'button';
-      modeBtn.className = `header-control icon fas ${this.isViewMode ? 'fa-pen' : 'fa-eye'}`;
+      modeBtn.className = `header-control icon fas ${this.isViewMode ? 'fa-pen-to-square' : 'fa-eye'}`;
       modeBtn.dataset.action = 'toggleMode';
       modeBtn.dataset.tooltip = this.isViewMode ? 'Edit Note' : 'View Note';
       modeBtn.setAttribute('aria-label', this.isViewMode ? 'Edit Note' : 'View Note');
       controlsContainer.appendChild(modeBtn);
     }
     if (this.isEditMode) {
+      const divider = document.createElement('span');
+      divider.className = 'header-divider';
+      controlsContainer.appendChild(divider);
       const saveBtn = document.createElement('button');
       saveBtn.type = 'button';
       saveBtn.className = 'header-control icon fas fa-save';
@@ -277,13 +292,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       saveBtn.dataset.tooltip = 'Save & Close';
       saveBtn.setAttribute('aria-label', 'Save & Close');
       controlsContainer.appendChild(saveBtn);
-      const resetBtn = document.createElement('button');
-      resetBtn.type = 'button';
-      resetBtn.className = 'header-control icon fas fa-undo';
-      resetBtn.dataset.action = 'reset';
-      resetBtn.dataset.tooltip = 'Reset Form';
-      resetBtn.setAttribute('aria-label', 'Reset Form');
-      controlsContainer.appendChild(resetBtn);
       if ((this.isAuthor || game.user.isGM) && this.document.id) {
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
@@ -294,6 +302,23 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         controlsContainer.appendChild(deleteBtn);
       }
     }
+  }
+
+  /**
+   * Prepare grouped and ungrouped tabs for template rendering.
+   * @returns {{ungroupedTabs: Array<object>, tabGroups: Array<object>}} Tab data
+   */
+  #prepareTabGroups() {
+    const activeTab = this.tabGroups.primary || 'content';
+    const ungroupedTabs = CalendarNoteSheet.TABS.primary.tabs.map((tab) => ({ ...tab, group: 'primary', active: tab.id === activeTab, cssClass: tab.id === activeTab ? 'active' : '' }));
+    return { ungroupedTabs, tabGroups: [] };
+  }
+
+  /** @override */
+  async _preparePartContext(partId, context, options) {
+    context = await super._preparePartContext(partId, context, options);
+    context.tab = context.tabs[partId];
+    return context;
   }
 
   /** @override */
@@ -307,214 +332,85 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const currentYear = components.year + yearZero;
     const currentMonth = components.month ?? 0;
     const currentDay = (components.dayOfMonth ?? 0) + 1;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     if (context.system.icon && context.system.icon.startsWith('fa')) context.iconType = 'fontawesome';
     else context.iconType = context.system.iconType || 'image';
     const startYear = this.document.system.startDate.year || currentYear;
     const startMonth = this.document.system.startDate.month ?? currentMonth;
     const startDay = (this.document.system.startDate.dayOfMonth ?? 0) + 1 || currentDay;
     context.startDateDisplay = this._formatDateDisplay(calendar, startYear, startMonth, startDay);
-    const endYear = this.document.system.endDate?.year || startYear;
-    const endMonth = this.document.system.endDate?.month ?? startMonth;
-    const endDay = (this.document.system.endDate?.dayOfMonth ?? 0) + 1 || startDay;
+    const endDateRaw = this.document.system.endDate;
+    const endYear = endDateRaw?.year || startYear;
+    const endMonth = endDateRaw?.month ?? startMonth;
+    const endDay = endDateRaw ? (endDateRaw.dayOfMonth ?? 0) + 1 : startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
-    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     context.maxHour = hoursPerDay - 1;
-    const repeatType = this.document.system.repeat;
-    const hasLinkedEvent = !!this.document.system.linkedEvent?.noteId;
-    const isMonthless = calendar?.isMonthless ?? false;
-    const allRepeatOptions = getRepeatOptions(repeatType);
-    context.repeatOptions = isMonthless ? allRepeatOptions.filter((opt) => !['monthly', 'weekOfMonth'].includes(opt.value)) : allRepeatOptions;
-    context.isMonthless = isMonthless;
-    context.showRepeatOptions = repeatType !== 'never';
-    context.moons =
-      calendar?.moonsArray?.map((moon, index) => ({
-        index,
-        name: localize(moon.name),
-        phases: Object.values(moon.phases ?? {}).map((phase) => ({ name: localize(phase.name), start: phase.start, end: phase.end }))
-      })) ?? [];
-    context.hasMoons = context.moons.length > 0;
-    const modifierLabels = {
-      any: null,
-      rising: localize('CALENDARIA.Note.MoonModifier.Rising'),
-      true: localize('CALENDARIA.Note.MoonModifier.True'),
-      fading: localize('CALENDARIA.Note.MoonModifier.Fading')
+    context.isFestival = !!this.document.system.linkedFestival;
+    const visibility = this.document.system.visibility || 'visible';
+    const visibilityConfig = {
+      visible: { icon: 'fa-eye', label: 'CALENDARIA.Note.Visibility.Visible', badge: null },
+      hidden: { icon: 'fa-eye-slash', label: 'CALENDARIA.Common.Hidden', badge: localize('CALENDARIA.Common.Hidden') },
+      secret: { icon: 'fa-lock', label: 'CALENDARIA.Note.Visibility.Secret', badge: localize('CALENDARIA.Note.Visibility.Secret') }
     };
-    context.moonConditions = (this.document.system.moonConditions || []).map((cond, index) => {
-      const moon = context.moons[cond.moonIndex];
-      const matchingPhase = Object.values(moon?.phases ?? {}).find((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
-      const modifier = cond.modifier || 'any';
-      return {
-        index,
-        moonIndex: cond.moonIndex,
-        moonName: moon?.name,
-        phaseStart: cond.phaseStart,
-        phaseEnd: cond.phaseEnd,
-        phaseName: matchingPhase?.name,
-        modifier,
-        modifierLabel: modifierLabels[modifier]
-      };
-    });
-    context.showMoonConditions = this.document.system.repeat === 'moon' || this.document.system.moonConditions?.length > 0;
-    context.showRandomConfig = this.document.system.repeat === 'random';
-    const randomConfig = this.document.system.randomConfig || {};
-    context.randomConfig = {
-      seed: randomConfig.seed ?? Math.floor(Math.random() * 1000000),
-      probability: randomConfig.probability ?? 10,
-      checkInterval: randomConfig.checkInterval ?? 'daily',
-      checkIntervalLabel: randomConfig.checkInterval === 'weekly' ? 'week' : randomConfig.checkInterval === 'monthly' ? 'month' : 'day'
-    };
-    context.randomIntervalOptions = [
-      { value: 'daily', label: localize('CALENDARIA.Note.IntervalDaily'), selected: context.randomConfig.checkInterval === 'daily' },
-      { value: 'weekly', label: localize('CALENDARIA.Note.IntervalWeekly'), selected: context.randomConfig.checkInterval === 'weekly' },
-      { value: 'monthly', label: localize('CALENDARIA.Note.IntervalMonthly'), selected: context.randomConfig.checkInterval === 'monthly' }
-    ];
-    context.showLinkedConfig = hasLinkedEvent || this.document.system.repeat === 'linked';
-    const linkedEvent = this.document.system.linkedEvent || {};
-    context.linkedEvent = { noteId: linkedEvent.noteId, offset: linkedEvent.offset ?? 0 };
-    const allNotes = NoteManager.getAllNotes() || [];
-    context.availableNotes = allNotes.filter((note) => note.id !== this.document.id).map((note) => ({ id: note.id, name: note.name, selected: note.id === linkedEvent.noteId }));
-    if (linkedEvent.noteId) {
-      const linkedNote = NoteManager.getNote(linkedEvent.noteId);
-      context.linkedNoteName = linkedNote?.name || localize('CALENDARIA.Note.UnknownEvent');
-    }
-    context.showRangeConfig = this.document.system.repeat === 'range';
-    const rangePattern = this.document.system.rangePattern || {};
-    const getRangeType = (bit) => {
-      if (bit == null || (Array.isArray(bit) && bit[0] === null && bit[1] === null)) return 'any';
-      if (typeof bit === 'number') return 'exact';
-      if (Array.isArray(bit)) return 'range';
-      return 'any';
-    };
-    const yearType = getRangeType(rangePattern.year);
-    context.rangeYearAny = yearType === 'any';
-    context.rangeYearExact = yearType === 'exact';
-    context.rangeYearRange = yearType === 'range';
-    context.rangeYearValue = yearType === 'exact' ? rangePattern.year : '';
-    context.rangeYearMin = yearType === 'range' ? (rangePattern.year[0] ?? '') : '';
-    context.rangeYearMax = yearType === 'range' ? (rangePattern.year[1] ?? '') : '';
-    const monthType = getRangeType(rangePattern.month);
-    context.rangeMonthAny = monthType === 'any';
-    context.rangeMonthExact = monthType === 'exact';
-    context.rangeMonthRange = monthType === 'range';
-    const rangeMonthValue = monthType === 'exact' ? rangePattern.month : null;
-    const rangeMonthMin = monthType === 'range' ? rangePattern.month[0] : null;
-    const rangeMonthMax = monthType === 'range' ? rangePattern.month[1] : null;
-    const months = calendar?.monthsArray ?? [];
-    context.monthOptions = months.map((m, idx) => ({ index: idx, name: localize(m.name), selected: rangeMonthValue === idx, selectedMin: rangeMonthMin === idx, selectedMax: rangeMonthMax === idx }));
-    const dayType = getRangeType(rangePattern.dayOfMonth);
-    context.rangeDayAny = dayType === 'any';
-    context.rangeDayExact = dayType === 'exact';
-    context.rangeDayRange = dayType === 'range';
-    context.rangeDayValue = dayType === 'exact' ? rangePattern.dayOfMonth : '';
-    context.rangeDayMin = dayType === 'range' ? (rangePattern.dayOfMonth[0] ?? '') : '';
-    context.rangeDayMax = dayType === 'range' ? (rangePattern.dayOfMonth[1] ?? '') : '';
-    context.showWeekOfMonthConfig = this.document.system.repeat === 'weekOfMonth';
-    context.weekNumber = this.document.system.weekNumber ?? 1;
-    const weekdays = calendar?.weekdaysArray ?? [];
-    const selectedWeekday = this.document.system.weekday ?? 0;
-    context.weekdayOptions = weekdays.map((wd, idx) => ({ index: idx, name: localize(wd.name), selected: idx === selectedWeekday }));
-    const selectedWeekNumber = this.document.system.weekNumber ?? 1;
-    context.weekNumberOptions = [
-      { value: 1, label: localize('CALENDARIA.Note.WeekOrdinal1st'), selected: selectedWeekNumber === 1 },
-      { value: 2, label: localize('CALENDARIA.Note.WeekOrdinal2nd'), selected: selectedWeekNumber === 2 },
-      { value: 3, label: localize('CALENDARIA.Note.WeekOrdinal3rd'), selected: selectedWeekNumber === 3 },
-      { value: 4, label: localize('CALENDARIA.Note.WeekOrdinal4th'), selected: selectedWeekNumber === 4 },
-      { value: 5, label: localize('CALENDARIA.Note.WeekOrdinal5th'), selected: selectedWeekNumber === 5 },
-      { value: -1, label: localize('CALENDARIA.Note.WeekOrdinalLast'), selected: selectedWeekNumber === -1 },
-      { value: -2, label: localize('CALENDARIA.Note.WeekOrdinal2ndLast'), selected: selectedWeekNumber === -2 }
-    ];
-    if (context.showWeekOfMonthConfig) {
-      /** @todo compute this from data */
-      const ordinals =
-        context.weekNumber > 0
-          ? [
-              localize('CALENDARIA.Note.WeekOrdinal1st'),
-              localize('CALENDARIA.Note.WeekOrdinal2nd'),
-              localize('CALENDARIA.Note.WeekOrdinal3rd'),
-              localize('CALENDARIA.Note.WeekOrdinal4th'),
-              localize('CALENDARIA.Note.WeekOrdinal5th')
-            ]
-          : [localize('CALENDARIA.Note.WeekOrdinalLast'), localize('CALENDARIA.Note.WeekOrdinal2ndLast')];
-      const ordinal =
-        context.weekNumber > 0 ? ordinals[context.weekNumber - 1] || `${context.weekNumber}th` : ordinals[Math.abs(context.weekNumber) - 1] || localize('CALENDARIA.Note.WeekOrdinalLast');
-      const weekdayName = context.weekdayOptions[selectedWeekday]?.name || localize('CALENDARIA.Common.Day');
-      context.weekOfMonthDescription = format('CALENDARIA.Note.WeekOfMonthDescription', { ordinal, weekday: weekdayName });
-    }
-    context.showSeasonalConfig = this.document.system.repeat === 'seasonal';
-    const seasonalConfig = this.document.system.seasonalConfig || { seasonIndex: 0, trigger: 'entire' };
-    context.seasonalTrigger = seasonalConfig.trigger || 'entire';
-    const seasons = calendar?.seasonsArray ?? [];
-    context.seasonOptions = seasons.map((s, idx) => ({ index: idx, name: localize(s.name), selected: idx === seasonalConfig.seasonIndex }));
-    context.hasSeasons = seasons.length > 0;
-    const triggerChoices = this.document.system.schema.fields.seasonalConfig?.fields?.trigger?.choices || ['entire', 'firstDay', 'lastDay'];
-    const triggerLabels = { entire: 'Entire Season', firstDay: 'First Day', lastDay: 'Last Day' };
-    context.seasonalTriggerOptions = triggerChoices.map((value) => ({ value, label: triggerLabels[value] || value, selected: seasonalConfig.trigger === value }));
-    if (context.showSeasonalConfig && context.hasSeasons) {
-      const seasonName = context.seasonOptions[seasonalConfig.seasonIndex]?.name;
-      /** @todo localize */
-      switch (seasonalConfig.trigger) {
-        case 'firstDay':
-          context.seasonalDescription = `Occurs on the first day of ${seasonName}`;
-          break;
-        case 'lastDay':
-          context.seasonalDescription = `Occurs on the last day of ${seasonName}`;
-          break;
-        default:
-          context.seasonalDescription = `Occurs every day during ${seasonName}`;
-      }
-    }
-    context.showComputedConfig = this.document.system.repeat === 'computed';
-    const computedConfig = this.document.system.computedConfig;
-    context.computedStepCount = computedConfig?.chain?.length ?? 0;
-    context.computedOverrideCount = Object.keys(computedConfig?.yearOverrides ?? {}).length;
-    context.showConditionsUI = repeatType !== 'never';
-    context.hasCycles = (calendar?.cyclesArray?.length ?? 0) > 0;
-    context.hasEras = (calendar?.erasArray?.length ?? 0) > 0;
-    context.showRepeatConfigGrid =
-      context.showMoonConditions ||
-      context.showRandomConfig ||
-      context.showLinkedConfig ||
-      context.showRangeConfig ||
-      context.showWeekOfMonthConfig ||
-      context.showSeasonalConfig ||
-      context.showComputedConfig ||
-      context.showConditionsUI;
-    const rawConditions = this.document.system.conditions || [];
-    context.conditions = rawConditions.map((cond, idx) => ({ ...cond, index: idx, description: this.#getConditionDescription(cond, calendar) }));
-    const currentReminderType = this.document.system.reminderType || 'toast';
-    context.reminderTypeOptions = [
-      { value: 'none', label: localize('CALENDARIA.Common.None'), selected: currentReminderType === 'none' },
-      { value: 'toast', label: localize('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
-      { value: 'chat', label: localize('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
-      { value: 'dialog', label: localize('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }
-    ];
-    context.showReminderOptions = currentReminderType !== 'none';
-    const currentReminderTargets = this.document.system.reminderTargets || 'all';
-    context.reminderTargetOptions = [
-      { value: 'all', label: localize('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
-      { value: 'gm', label: localize('CALENDARIA.Note.ReminderTargetGM'), selected: currentReminderTargets === 'gm' },
-      { value: 'author', label: localize('CALENDARIA.Note.ReminderTargetAuthor'), selected: currentReminderTargets === 'author' },
-      { value: 'specific', label: localize('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
-    ];
-    context.showReminderUsers = currentReminderTargets === 'specific';
-    const selectedReminderUsers = this.document.system.reminderUsers || [];
-    context.userOptions = game.users.contents.map((u) => ({ id: u.id, name: u.name, selected: selectedReminderUsers.includes(u.id) }));
-    const selectedCategories = this.document.system.categories || [];
-    context.categoryOptions = getAllCategories().map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));
-    const currentMacro = this.document.system.macro || '';
-    context.availableMacros = game.macros.contents.map((m) => ({ id: m.id, name: m.name, selected: m.id === currentMacro }));
+    const vis = visibilityConfig[visibility] || visibilityConfig.visible;
+    context.visibilityIcon = vis.icon;
+    context.visibilityLabel = vis.label;
+    context.visibilityBadge = vis.badge;
     context.isViewMode = this.isViewMode;
     context.isEditMode = this.isEditMode;
     context.isGM = game.user.isGM;
     context.canEdit = this.document.isOwner;
+    if (this.isEditMode) {
+      const { ungroupedTabs, tabGroups } = this.#prepareTabGroups();
+      context.ungroupedTabs = ungroupedTabs;
+      context.tabGroups = tabGroups;
+      context.showSearch = false;
+      context.horizontalTabs = true;
+      const selectedCategories = this.document.system.categories || [];
+      const allCats = getAllPresets();
+      const availableCats = game.user.isGM ? allCats : allCats.filter((c) => c.playerUsable || selectedCategories.includes(c.id));
+      context.presetOptions = availableCats.map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));
+      const currentMacro = this.document.system.macro || '';
+      context.availableMacros = game.macros.contents.map((m) => ({ id: m.id, name: m.name, selected: m.id === currentMacro }));
+      const flatPresets = getConditionPresets(this.document.system.startDate);
+      context.presets = flatPresets;
+      context.presetGroups = groupPresets(flatPresets);
+      const conditionTree = this.#getConditionTreeSummary(calendar);
+      context.conditionSummaryHtml = conditionTree ? this.#renderConditionGroup(conditionTree) : '';
+      context.occurrences = this.#computeOccurrencePreview(calendar);
+      const currentReminderType = this.document.system.reminderType || 'toast';
+      context.reminderTypeOptions = [
+        { value: 'none', label: localize('CALENDARIA.Common.None'), selected: currentReminderType === 'none' },
+        { value: 'toast', label: localize('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
+        { value: 'chat', label: localize('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
+        { value: 'dialog', label: localize('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }
+      ];
+      context.showReminderOptions = currentReminderType !== 'none';
+      const currentReminderTargets = this.document.system.reminderTargets || 'all';
+      context.reminderTargetOptions = [
+        { value: 'all', label: localize('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
+        { value: 'gm', label: localize('CALENDARIA.Common.GMOnly'), selected: currentReminderTargets === 'gm' },
+        { value: 'author', label: localize('CALENDARIA.Note.ReminderTargetAuthor'), selected: currentReminderTargets === 'author' },
+        { value: 'viewers', label: localize('CALENDARIA.Note.ReminderTargetViewers'), selected: currentReminderTargets === 'viewers' },
+        { value: 'specific', label: localize('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
+      ];
+      context.showReminderUsers = currentReminderTargets === 'specific';
+      const selectedReminderUsers = this.document.system.reminderUsers || [];
+      context.userOptions = game.users.contents.map((u) => ({ id: u.id, name: u.name, selected: selectedReminderUsers.includes(u.id) }));
+      context.ownershipEntries = this.#prepareOwnershipEntries();
+    }
     if (this.isViewMode) {
+      const selectedCategories = this.document.system.categories || [];
       context.enrichedContent = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.document.text?.content || '', {
         async: true,
         relativeTo: this.document,
         secrets: this.document.isOwner
       });
-      const allCategories = getAllCategories();
-      context.displayCategories = selectedCategories.map((id) => allCategories.find((c) => c.id === id)?.label).filter(Boolean);
+      const allPresets = getAllPresets();
+      context.displayPresets = selectedCategories
+        .map((id) => allPresets.find((c) => c.id === id))
+        .filter(Boolean)
+        .map((p) => ({ label: p.label, color: p.color, icon: p.icon }));
       context.hasEndDate = endYear !== startYear || endMonth !== startMonth || endDay !== startDay;
       const startHour = String(this.document.system.startDate.hour ?? 12).padStart(2, '0');
       const startMinute = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
@@ -523,11 +419,179 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.startTimeDisplay = `${startHour}:${startMinute}`;
       context.endTimeDisplay = `${endHour}:${endMinute}`;
       context.hasEndTime = this.document.system.endDate?.hour !== undefined || this.document.system.endDate?.minute !== undefined;
-      const repeatLabels = { never: null, daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly', moon: 'Moon Phase' };
-      context.repeatLabel = repeatLabels[this.document.system.repeat] || null;
+      context.repeatLabel = this.#getRepeatLabel(calendar) || null;
       if (this.document.system.moonConditions?.length > 0) context.moonConditionsDisplay = getRecurrenceDescription(this.document.system);
+      const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
+      if (eqCalendars.size) {
+        const noteCalendarId = this.document.parent?.getFlag?.(MODULE.ID, 'calendarId') ?? CalendarRegistry.getActiveId();
+        const startDateInternal = { year: startYear, month: startMonth, dayOfMonth: startDay - 1 };
+        context.equivalentDates = getEquivalentDates(startDateInternal, noteCalendarId, [...eqCalendars]);
+      }
     }
     return context;
+  }
+
+  /**
+   * Build a repeat/schedule label for the view mode.
+   * Produces friendly text for common conditionTree patterns, falls back to generic description.
+   * @param {object} calendar - Active calendar
+   * @returns {string|null} Label or null
+   * @private
+   */
+  #getRepeatLabel(calendar) {
+    const noteData = this.document.system;
+    const tree = noteData.conditionTree;
+    if (tree && (noteData.repeat === 'never' || !noteData.repeat)) {
+      const summary = summarizeConditionTree(tree, calendar);
+      if (summary) return summary;
+    }
+    return getRecurrenceDescription(noteData);
+  }
+
+  /**
+   * Get a structured summary of the current condition tree for grouped pill display.
+   * @param {object} calendar - Active calendar
+   * @returns {object|null} Root group or null if empty
+   * @private
+   */
+  #getConditionTreeSummary(calendar) {
+    const tree = this.document.system.conditionTree;
+    const rawConditions = this.document.system.conditions || [];
+    if (!tree && !rawConditions.length) return null;
+    if (!tree) return { mode: null, items: rawConditions.map((cond) => this.#getConditionDescription(cond, calendar)) };
+    return this.#describeTreeGrouped(tree, calendar);
+  }
+
+  /**
+   * Recursively build a nested group description from a condition tree node.
+   * @param {object} node - Condition or group node
+   * @param {object} calendar - Active calendar
+   * @param {string} basePath - Dot-separated path prefix for condition indexing
+   * @returns {object} { mode: string|null, items: ({text,path}|object)[] }
+   */
+  #describeTreeGrouped(node, calendar, basePath = '') {
+    if (!node) return { mode: null, items: [] };
+    if (node.type !== 'group') {
+      const desc = describeConditionTree({ type: 'group', mode: 'and', children: [node] }, calendar);
+      return { mode: null, items: desc.map((text) => ({ text, path: basePath })) };
+    }
+    const children = node.children ?? [];
+    if (!children.length) return { mode: null, items: [] };
+    const modeLabel = node.mode === 'count' ? `≥${node.threshold ?? 1}` : localize(`CALENDARIA.Condition.Group.Mode.${node.mode || 'and'}`);
+    const items = [];
+    for (let i = 0; i < children.length; i++) {
+      const childPath = basePath ? `${basePath}.${i}` : `${i}`;
+      const child = children[i];
+      if (child.type === 'group') {
+        items.push(this.#describeTreeGrouped(child, calendar, childPath));
+      } else {
+        const desc = describeConditionTree({ type: 'group', mode: 'and', children: [child] }, calendar);
+        items.push(...desc.map((text) => ({ text, path: childPath })));
+      }
+    }
+    return { mode: children.length > 1 ? modeLabel : null, items };
+  }
+
+  /**
+   * Render a condition group tree node to HTML.
+   * @param {object} group - { mode: string|null, items: ({text,path}|object)[] }
+   * @returns {string} HTML string
+   */
+  #renderConditionGroup(group) {
+    if (!group?.items?.length) return '';
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const modeHtml = group.mode ? `<span class="group-mode">${esc(group.mode)}</span>` : '';
+    const itemsHtml = group.items
+      .map((item) => {
+        if (item.text != null) return `<span class="condition-pill" data-path="${esc(item.path)}">${esc(item.text)}</span>`;
+        return this.#renderConditionGroup(item);
+      })
+      .join('');
+    return `<div class="condition-group">${modeHtml}<div class="group-pills">${itemsHtml}</div></div>`;
+  }
+
+  /**
+   * Remove a condition from the tree at the given dot-separated path and save.
+   * @param {string} path - Dot-separated child indices (e.g. "0", "2.1")
+   */
+  async #removeConditionAtPath(path) {
+    const tree = foundry.utils.deepClone(this.document.system.conditionTree);
+    if (!tree) return;
+    const indices = path.split('.').map(Number);
+    const childIndex = indices.pop();
+    let parent = tree;
+    for (const idx of indices) {
+      parent = parent?.children?.[idx];
+      if (!parent) return;
+    }
+    if (!parent?.children || childIndex >= parent.children.length) return;
+    parent.children.splice(childIndex, 1);
+    const isEmpty = !tree.children?.length;
+    const updateData = {
+      'system.conditionTree': isEmpty ? null : tree,
+      'system.conditions': isEmpty ? [] : (tree.children ?? [])
+    };
+    if (!isEmpty) {
+      const deps = extractEventDependencies(tree);
+      updateData['system.connectedEvents'] = deps.length ? deps : [];
+    } else {
+      updateData['system.connectedEvents'] = [];
+    }
+    await this.document.update(updateData);
+    this.render();
+  }
+
+  /**
+   * Compute the next N occurrences for the occurrence preview panel.
+   * @param {object} calendar - Active calendar
+   * @returns {string[]} Formatted date strings
+   */
+  #computeOccurrencePreview(calendar) {
+    const noteData = this.document.system;
+    if (!noteData.conditionTree && noteData.repeat === 'never' && !noteData.conditions?.length) return [];
+    const components = game.time.components || {};
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const fromDate = { year: (components.year ?? 0) + yearZero, month: components.month ?? 0, dayOfMonth: components.dayOfMonth ?? 0 };
+    try {
+      const occurrences = getNextOccurrences(noteData, fromDate, 5, 730);
+      return occurrences.map((occ) => this._formatDateDisplay(calendar, occ.year, occ.month, (occ.dayOfMonth ?? 0) + 1));
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Prepare ownership entries for the ownership tab.
+   * @returns {object[]} Array of ownership entries per user
+   */
+  #prepareOwnershipEntries() {
+    const journal = this.document.parent;
+    const ownership = journal?.ownership ?? {};
+    const authorId = this.document.system.author?._id;
+    return game.users.contents
+      .filter((u) => !u.isGM || u.id === game.user.id)
+      .map((u) => {
+        const level = ownership[u.id] ?? ownership.default ?? -1;
+        return { userId: u.id, name: u.name, color: u.color, level, isAuthorEntry: u.id === authorId, isGMEntry: u.isGM };
+      });
+  }
+
+  /**
+   * Auto-convert legacy repeat data to condition tree format.
+   * @private
+   */
+  async #autoConvertLegacy() {
+    const noteData = this.document.system;
+    if (noteData.conditionTree) return;
+    if ((noteData.repeat === 'never' || !noteData.repeat) && !noteData.conditions?.length) return;
+    const tree = convertToConditionTree(noteData);
+    if (!tree) return;
+    const updateData = { 'system.conditionTree': tree };
+    const deps = extractEventDependencies(tree);
+    if (deps.length) updateData['system.connectedEvents'] = deps;
+    await this.document.update(updateData);
+    ui.notifications.info(localize('CALENDARIA.Note.AutoConverted'));
+    log(3, `Auto-converted legacy repeat "${noteData.repeat}" for note "${this.document.name}"`);
   }
 
   /** @override */
@@ -549,88 +613,145 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
     if (target?.name === 'system.reminderType') {
       const disabled = target.value === 'none';
-      this.element.querySelector('select[name="system.reminderTargets"]').disabled = disabled;
-      this.element.querySelector('input[name="system.reminderOffset"]').disabled = disabled;
+      this.element.querySelector('select[name="system.reminderTargets"]')?.setAttribute('disabled', disabled);
+      this.element.querySelector('input[name="system.reminderOffset"]')?.setAttribute('disabled', disabled);
+    }
+    if (target?.name === 'system.visibility') {
+      const fieldset = this.element.querySelector('.ownership-fieldset');
+      if (fieldset) {
+        const isVisible = target.value === 'visible';
+        fieldset.disabled = !isVisible;
+        const tooltip = isVisible ? game.i18n.localize('CALENDARIA.Note.Tooltip.Ownership') : game.i18n.localize('CALENDARIA.Note.Ownership.DisabledByVisibility');
+        fieldset.setAttribute('aria-label', tooltip);
+      }
     }
   }
 
   /**
-   * Offer to apply icon and color from a newly added category.
-   * @param {string} categoryId - The ID of the newly added category
+   * Offer to apply icon and color from a newly added preset.
+   * @param {string} presetId - The ID of the newly added preset
    * @private
    */
-  async #applyCategoryStyle(categoryId) {
-    const category = getAllCategories().find((c) => c.id === categoryId);
-    if (!category) return;
-    const updates = {};
-    if (category.icon) updates['system.icon'] = `fas ${category.icon}`;
-    if (category.color) updates['system.color'] = category.color;
-    if (Object.keys(updates).length === 0) return;
+  async #applyPresetStyle(presetId) {
+    const preset = getAllPresets().find((c) => c.id === presetId);
+    if (!preset) return;
+    const hasDefaults = preset.icon || preset.color || preset.defaults;
+    if (!hasDefaults) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Note.ApplyCategoryStyleTitle') },
-      content: `<p style="text-align:center;font-size:2rem;margin:0.5rem 0"><i class="fas ${category.icon}" style="color:${category.color}"></i></p><p>${format('CALENDARIA.Note.ApplyCategoryStyleConfirm', { label: category.label })}</p>`,
+      window: { title: localize('CALENDARIA.Note.ApplyPresetStyleTitle') },
+      content: `<p style="text-align:center;font-size:2rem;margin:0.5rem 0"><i class="fas ${preset.icon}" style="color:${preset.color}"></i></p><p>${format('CALENDARIA.Note.ApplyPresetStyleConfirm', { label: preset.label })}</p>`,
       rejectClose: false,
       modal: true
     });
     if (!confirmed) return;
+    const noteData = { ...this.document.system };
+    applyPresetDefaultsToNoteData(noteData, [presetId]);
+    const updates = {};
+    if (preset.icon) updates['system.icon'] = `fas ${preset.icon}`;
+    if (preset.color) updates['system.color'] = preset.color;
+    const defaultFields = ['displayStyle', 'visibility', 'allDay', 'reminderType', 'reminderOffset', 'hasDuration', 'duration', 'macro'];
+    for (const field of defaultFields) if (noteData[field] !== this.document.system[field]) updates[`system.${field}`] = noteData[field];
+    if (noteData.remindUsers?.length && noteData.remindUsers.length !== (this.document.system.remindUsers?.length ?? 0)) updates['system.remindUsers'] = noteData.remindUsers;
+    if (Object.keys(updates).length === 0) return;
     await this.document.update(updates);
   }
 
+  /** Clear all conditions from this note. */
+  async #clearConditions() {
+    const hasExisting = this.document.system.conditionTree?.children?.length > 0 || this.document.system.conditions?.length > 0;
+    if (hasExisting) {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: localize('CALENDARIA.Note.Schedule.ClearConditionsTitle') },
+        content: `<p>${localize('CALENDARIA.Note.Schedule.ClearConditionsConfirm')}</p>`,
+        rejectClose: false,
+        modal: true
+      });
+      if (!confirmed) return;
+    }
+    await this.document.update({ 'system.conditionTree': null, 'system.conditions': [], 'system.connectedEvents': [] });
+    ui.notifications.info(localize('CALENDARIA.Note.Schedule.ConditionsCleared'));
+    this.render();
+  }
+
   /**
-   * Process form data to convert range pattern UI fields into proper structure.
-   * @param {Event} event - Form submission event
-   * @param {HTMLFormElement} form - The form element
-   * @param {object} formData - Extended form data
-   * @inheritdoc
+   * Apply a condition preset by ID.
+   * @param {string} presetId - The preset ID
    */
-  _processFormData(event, form, formData) {
-    const data = super._processFormData(event, form, formData);
-    const repeatType = data.system?.repeat;
-    if (repeatType !== 'linked') data.system.linkedEvent = null;
-    else if (data.system.linkedEvent && !data.system.linkedEvent.noteId) data.system.linkedEvent = null;
-    if (repeatType !== 'random') data.system.randomConfig = null;
-    if (repeatType !== 'moon' && data.system.moonConditions === undefined) data.system.moonConditions = [];
-    if (repeatType !== 'weekOfMonth') {
-      data.system.weekday = null;
-      data.system.weekNumber = null;
+  async #applyPreset(presetId) {
+    const presets = getConditionPresets(this.document.system.startDate);
+    const preset = presets.find((p) => p.id === presetId);
+    if (!preset) return;
+    const existingTree = this.document.system.conditionTree;
+    const hasExisting = existingTree?.children?.length > 0 || this.document.system.conditions?.length > 0;
+    let merge = false;
+    if (hasExisting) {
+      const result = await foundry.applications.api.DialogV2.wait({
+        window: { title: localize('CALENDARIA.Note.Preset.ReplaceTitle') },
+        content: `<p>${localize('CALENDARIA.Note.Preset.ReplaceConfirm')}</p>
+          <label class="checkbox-label"><input type="checkbox" name="merge"> ${localize('CALENDARIA.Note.Preset.MergeOption')}</label>`,
+        rejectClose: false,
+        modal: true,
+        buttons: [
+          {
+            action: 'apply',
+            label: localize('CALENDARIA.Common.Apply'),
+            icon: 'fas fa-check',
+            default: true,
+            callback: (_event, button) => ({ merge: button.form.elements.merge?.checked ?? false })
+          },
+          {
+            action: 'cancel',
+            label: localize('CALENDARIA.Common.Cancel'),
+            icon: 'fas fa-times'
+          }
+        ]
+      });
+      if (!result || result === 'cancel') return;
+      merge = result.merge ?? false;
     }
-    if (repeatType !== 'seasonal') data.system.seasonalConfig = null;
-    if (repeatType !== 'computed') data.system.computedConfig = null;
-    if (repeatType === 'range') {
-      const rangePattern = {};
-      const getRangeValue = (component) => {
-        const typeSelect = form.querySelector(`select[data-range-type="${component}"]`);
-        if (!typeSelect) return null;
-        const type = typeSelect.value;
-        if (type === 'any') return [null, null];
-        if (type === 'exact') {
-          const valueInput =
-            form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}"]`) ||
-            form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}"]`);
-          if (!valueInput || valueInput.value === '') return null;
-          return Number(valueInput.value);
-        }
-        if (type === 'range') {
-          const minInput =
-            form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Min"]`) ||
-            form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Min"]`);
-          const maxInput =
-            form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Max"]`) ||
-            form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Max"]`);
-          const min = minInput && minInput.value !== '' ? Number(minInput.value) : null;
-          const max = maxInput && maxInput.value !== '' ? Number(maxInput.value) : null;
-          return [min, max];
-        }
-        return null;
-      };
-      rangePattern.year = getRangeValue('year');
-      rangePattern.month = getRangeValue('month');
-      rangePattern.dayOfMonth = getRangeValue('day');
-      data.system.rangePattern = rangePattern;
+    let tree;
+    if (merge && existingTree?.children && preset.tree?.children) {
+      tree = foundry.utils.deepClone(existingTree);
+      tree.children.push(...foundry.utils.deepClone(preset.tree.children));
     } else {
-      data.system.rangePattern = null;
+      tree = preset.tree ?? null;
     }
-    return data;
+    const updateData = { 'system.conditionTree': tree, 'system.conditions': tree?.children ?? [] };
+    const deps = tree ? extractEventDependencies(tree) : [];
+    if (deps.length) updateData['system.connectedEvents'] = deps;
+    await this.document.update(updateData);
+    log(3, `Applied condition preset: ${preset.label}${merge ? ' (merged)' : ''}`);
+  }
+
+  /** @override */
+  async _processSubmitData(event, form, submitData, options = {}) {
+    const newCategories = submitData.system?.categories || [];
+    const oldCategories = this.document.system.categories || [];
+    const addedPreset = newCategories.find((id) => !oldCategories.includes(id));
+    await super._processSubmitData(event, form, submitData, options);
+    if (addedPreset) await this.#applyPresetStyle(addedPreset);
+    const ownershipSelects = form.querySelectorAll('select[data-ownership-user]');
+    if (ownershipSelects.length) {
+      const ownershipUpdates = {};
+      let hasChanges = false;
+      for (const select of ownershipSelects) {
+        const userId = select.dataset.ownershipUser;
+        const level = parseInt(select.value);
+        const current = this.document.parent?.ownership?.[userId] ?? -1;
+        if (level !== current) {
+          ownershipUpdates[userId] = level;
+          hasChanges = true;
+        }
+      }
+      if (hasChanges) {
+        if (game.user.isGM) {
+          const journal = this.document.parent;
+          if (journal) await journal.update({ ownership: ownershipUpdates });
+        } else {
+          CalendariaSocket.emit(SOCKET_TYPES.OWNERSHIP_UPDATE, { journalId: this.document.parent?.id, ownership: ownershipUpdates });
+        }
+      }
+    }
   }
 
   /**
@@ -716,13 +837,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Format a date for display using the calendar system
+   * Format a date for display using the calendar system.
    * @param {object} calendar - The calendar to use
    * @param {number} year - The year
    * @param {number} month - The month index (0-based)
    * @param {number} day - The day
-   * @returns {string} - Formatted date string
-   * @private
+   * @returns {string} Formatted date string
    */
   _formatDateDisplay(calendar, year, month, day) {
     const isMonthless = calendar?.isMonthless ?? false;
@@ -734,7 +854,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Handle date selection button click
+   * Handle date selection button click.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
@@ -777,13 +897,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Show date picker dialog
+   * Show date picker dialog.
    * @param {object} calendar - The calendar to use
    * @param {number} currentYear - Current year
    * @param {number} currentMonth - Current month (0-based)
    * @param {number} currentDay - Current day
-   * @returns {Promise<{year: number, month: number, day: number}|null>} Dialog
-   * @private
+   * @returns {Promise<{year: number, month: number, day: number}|null>} Selected date or null
    */
   static async _showDatePickerDialog(calendar, currentYear, currentMonth, currentDay) {
     const isMonthless = calendar?.isMonthless ?? false;
@@ -824,7 +943,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Handle save and close button click
+   * Handle save and close button click.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
@@ -837,14 +956,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Handle delete note button click
+   * Handle delete note button click.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onDeleteNote(_event, _target) {
     if (!this.isAuthor && !game.user.isGM) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+      window: { title: localize('CALENDARIA.Common.DeleteNote') },
       content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
       rejectClose: false,
       modal: true
@@ -858,110 +977,23 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Handle reset button click
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onReset(_event, _target) {
-    const calendar = CalendarManager.getActiveCalendar();
-    const currentDateTime = CalendarManager.getCurrentDateTime();
-    const currentYear = currentDateTime.year;
-    const currentMonth = currentDateTime.month;
-    const currentDay = currentDateTime.dayOfMonth;
-    const currentHour = currentDateTime.hour;
-    const currentMinute = currentDateTime.minute;
-    const form = this.element;
-    const titleInput = form.querySelector('input[name="name"]');
-    if (titleInput) titleInput.value = localize('CALENDARIA.Note.NewNote');
-    const iconInput = form.querySelector('input[name="system.icon"]');
-    const iconTypeInput = form.querySelector('input[name="system.iconType"]');
-    const colorInput = form.querySelector('color-picker[name="system.color"]');
-    if (iconInput) iconInput.value = 'icons/svg/book.svg';
-    if (iconTypeInput) iconTypeInput.value = 'image';
-    if (colorInput) colorInput.value = '#4a9eff';
-    const iconPicker = form.querySelector('.icon-picker');
-    if (iconPicker) {
-      iconPicker.dataset.iconType = 'image';
-      const existingIcon = iconPicker.querySelector('i, img');
-      if (existingIcon) {
-        const img = document.createElement('img');
-        img.src = 'icons/svg/book.svg';
-        img.alt = 'Note Icon';
-        img.className = 'icon-preview';
-        img.style.filter = 'drop-shadow(0px 1000px 0 #4a9eff)';
-        img.style.transform = 'translateY(-1000px)';
-        existingIcon.replaceWith(img);
-      }
-    }
-    const gmOnlyInput = form.querySelector('input[name="system.gmOnly"]');
-    if (gmOnlyInput) gmOnlyInput.checked = game.user.isGM;
-    const startYearInput = form.querySelector('input[name="system.startDate.year"]');
-    const startMonthInput = form.querySelector('input[name="system.startDate.month"]');
-    const startDayInput = form.querySelector('input[name="system.startDate.dayOfMonth"]');
-    if (startYearInput) startYearInput.value = currentYear;
-    if (startMonthInput) startMonthInput.value = currentMonth;
-    if (startDayInput) startDayInput.value = currentDay;
-    const endYearInput = form.querySelector('input[name="system.endDate.year"]');
-    const endMonthInput = form.querySelector('input[name="system.endDate.month"]');
-    const endDayInput = form.querySelector('input[name="system.endDate.dayOfMonth"]');
-    if (endYearInput) endYearInput.value = currentYear;
-    if (endMonthInput) endMonthInput.value = currentMonth;
-    if (endDayInput) endDayInput.value = currentDay;
-    const dateDisplay = this._formatDateDisplay(calendar, currentYear, currentMonth, currentDay + 1);
-    const startDateDisplay = form.querySelector('[data-date-field="startDate"] .date-display');
-    const endDateDisplay = form.querySelector('[data-date-field="endDate"] .date-display');
-    if (startDateDisplay) startDateDisplay.textContent = dateDisplay;
-    if (endDateDisplay) endDateDisplay.textContent = dateDisplay;
-    const startHourInput = form.querySelector('input[name="system.startDate.hour"]');
-    const startMinuteInput = form.querySelector('input[name="system.startDate.minute"]');
-    const endHourInput = form.querySelector('input[name="system.endDate.hour"]');
-    const endMinuteInput = form.querySelector('input[name="system.endDate.minute"]');
-    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-    if (startHourInput) startHourInput.value = currentHour;
-    if (startMinuteInput) startMinuteInput.value = currentMinute;
-    if (endHourInput) endHourInput.value = (currentHour + 1) % hoursPerDay;
-    if (endMinuteInput) endMinuteInput.value = currentMinute;
-    const allDayInput = form.querySelector('input[name="system.allDay"]');
-    if (allDayInput) {
-      allDayInput.checked = false;
-      const timeInputs = form.querySelectorAll('.time-inputs input[type="number"]');
-      timeInputs.forEach((input) => (input.disabled = false));
-    }
-    const repeatSelect = form.querySelector('select[name="system.repeat"]');
-    if (repeatSelect) repeatSelect.value = 'never';
-    const multiSelect = form.querySelector('multi-select[name="system.categories"]');
-    if (multiSelect) {
-      multiSelect.querySelectorAll('option').forEach((opt) => (opt.selected = false));
-      multiSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    const newCategoryInput = form.querySelector('.new-category-input');
-    if (newCategoryInput) newCategoryInput.value = '';
-    const proseMirror = form.querySelector('prose-mirror#note-content');
-    if (proseMirror) {
-      proseMirror.value = '';
-      const editorContent = proseMirror.querySelector('.ProseMirror');
-      if (editorContent) editorContent.innerHTML = '<p></p>';
-    }
-  }
-
-  /**
-   * Handle add custom category button click
+   * Handle add custom preset button click.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onAddCategory(_event, target) {
+  static async _onAddPreset(_event, target) {
     const form = target.closest('form');
-    const input = form?.querySelector('.new-category-input');
+    const input = form?.querySelector('.new-preset-input');
     const label = input?.value?.trim();
     if (!label) return;
-    const newCategory = await addCustomCategory(label);
+    const newPreset = await addCustomPreset(label);
     input.value = '';
     this.render();
-    ui.notifications.info(format('CALENDARIA.Info.CategoryAdded', { label: newCategory.label }));
+    ui.notifications.info(format('CALENDARIA.Info.PresetAdded', { label: newPreset.label }));
   }
 
   /**
-   * Handle mode toggle button click
+   * Handle mode toggle button click.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
@@ -974,190 +1006,91 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Handle add moon condition button click.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async _onAddMoonCondition(_event, target) {
-    const form = target.closest('form');
-    const moonSelect = form?.querySelector('select[name="newMoonCondition.moonIndex"]');
-    const phaseSelect = form?.querySelector('select[name="newMoonCondition.phase"]');
-    const modifierSelect = form?.querySelector('select[name="newMoonCondition.modifier"]');
-    if (!moonSelect || !phaseSelect) return;
-    const moonIndex = parseInt(moonSelect.value);
-    const phaseValue = phaseSelect.value;
-    const modifier = modifierSelect?.value || 'any';
-    if (isNaN(moonIndex) || !phaseValue) return;
-    const [phaseStart, phaseEnd] = phaseValue.split('-').map(Number);
-    const currentConditions = foundry.utils.deepClone(this.document.system.moonConditions || []);
-    const isDuplicate = currentConditions.some((c) => c.moonIndex === moonIndex && c.phaseStart === phaseStart && c.phaseEnd === phaseEnd && c.modifier === modifier);
-    if (isDuplicate) return;
-    currentConditions.push({ moonIndex, phaseStart, phaseEnd, modifier });
-    await this.document.update({ 'system.moonConditions': currentConditions });
-  }
-
-  /**
-   * Handle remove moon condition button click.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async _onRemoveMoonCondition(_event, target) {
-    const conditionIndex = parseInt(target.dataset.index);
-    if (isNaN(conditionIndex)) return;
-    const currentConditions = foundry.utils.deepClone(this.document.system.moonConditions || []);
-    currentConditions.splice(conditionIndex, 1);
-    await this.document.update({ 'system.moonConditions': currentConditions });
-  }
-
-  /**
-   * Handle regenerate seed button click.
+   * Open the condition builder dialog.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
-  static async _onRegenerateSeed(_event, _target) {
-    const newSeed = Math.floor(Math.random() * 1000000);
-    const currentConfig = foundry.utils.deepClone(this.document.system.randomConfig || {});
-    currentConfig.seed = newSeed;
-    await this.document.update({ 'system.randomConfig': currentConfig });
-    await this.#regenerateRandomOccurrences();
-  }
-
-  /**
-   * Regenerate cached random occurrences for this note.
-   * @returns {Promise<void>}
-   */
-  async #regenerateRandomOccurrences() {
-    if (this.document.system.repeat !== 'random') return;
-    const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar?.monthsArray) return;
-    const components = game.time.components || {};
-    const yearZero = calendar?.years?.yearZero ?? 0;
-    const currentYear = (components.year ?? 0) + yearZero;
-    const generateNextYear = needsRandomRegeneration({ year: currentYear, occurrences: [] });
-    const targetYear = generateNextYear ? currentYear + 1 : currentYear;
-    const noteData = { startDate: this.document.system.startDate, randomConfig: this.document.system.randomConfig, repeatEndDate: this.document.system.repeatEndDate };
-    const occurrences = generateRandomOccurrences(noteData, targetYear);
-    await this.document.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
-    log(3, `Generated ${occurrences.length} random occurrences for ${this.document.name} until year ${targetYear}`);
-  }
-
-  /** @override */
-  async _processSubmitData(event, form, submitData, options = {}) {
-    const newCategories = submitData.system?.categories || [];
-    const oldCategories = this.document.system.categories || [];
-    const addedCategory = newCategories.find((id) => !oldCategories.includes(id));
-    await super._processSubmitData(event, form, submitData, options);
-    if (submitData.system?.repeat === 'random') setTimeout(() => this.#regenerateRandomOccurrences(), 100);
-    if (addedCategory) await this.#applyCategoryStyle(addedCategory);
-  }
-
-  /**
-   * Handle clear linked event button click.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onClearLinkedEvent(_event, _target) {
-    await this.document.update({ 'system.linkedEvent': null });
-  }
-
-  /**
-   * Open the computed event builder dialog.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onOpenComputedBuilder(_event, _target) {
-    const config = this.document.system.computedConfig || { chain: [], yearOverrides: {} };
-    new ComputedEventBuilder({
-      config,
+  static async _onOpenConditionBuilder(_event, _target) {
+    const tree = this.document.system.conditionTree;
+    const conditions = tree?.children?.length ? tree.children : this.document.system.conditions || [];
+    new ConditionBuilderDialog({
+      conditions,
       onChange: async (updated) => {
-        await this.document.update({ 'system.computedConfig': updated });
+        const validation = validateConditions(updated);
+        if (!validation.valid) {
+          ui.notifications.error(localize('CALENDARIA.Condition.Builder.ValidationError'));
+          log(2, 'Condition validation errors:', validation.errors);
+          return;
+        }
+        const tree = updated.length ? wrapInRootGroup(updated) : null;
+        const deps = tree ? extractEventDependencies(tree) : [];
+        const updateData = { 'system.conditions': updated, 'system.conditionTree': tree };
+        if (deps.length) {
+          const { hasCycle } = detectCycles(this.document.id, deps);
+          if (hasCycle) {
+            ui.notifications.error(localize('CALENDARIA.Condition.Builder.CycleError'));
+            return;
+          }
+          updateData['system.connectedEvents'] = deps;
+        } else {
+          updateData['system.connectedEvents'] = [];
+        }
+        await this.document.update(updateData);
         this.render();
       }
     }).render(true);
   }
 
   /**
-   * Handle add condition button click.
+   * Open the calendar editor to the festivals tab, focused on the linked festival.
    * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async _onAddCondition(_event, target) {
-    const form = target.closest('form');
-    const fieldSelect = form?.querySelector('select[name="newCondition.field"]');
-    const opSelect = form?.querySelector('select[name="newCondition.op"]');
-    const valueInput = form?.querySelector('input[name="newCondition.value"]');
-    const offsetInput = form?.querySelector('input[name="newCondition.offset"]');
-    if (!fieldSelect || !opSelect || !valueInput) return;
-    const field = fieldSelect.value;
-    const op = opSelect.value;
-    const rawValue = valueInput.value;
-    const offset = parseInt(offsetInput?.value) || 0;
-    if (!field || rawValue === '') return;
-    let value;
-    const booleanFields = ['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary'];
-    if (booleanFields.includes(field)) {
-      value = rawValue === 'true' || rawValue === '1';
-    } else {
-      value = parseFloat(rawValue);
-      if (isNaN(value)) value = parseInt(rawValue);
-    }
-    const currentConditions = foundry.utils.deepClone(this.document.system.conditions || []);
-    const newCondition = { field, op, value };
-    if (op === '%' && offset !== 0) newCondition.offset = offset;
-    currentConditions.push(newCondition);
-    await this.document.update({ 'system.conditions': currentConditions });
-    valueInput.value = '';
-    if (offsetInput) offsetInput.value = '';
-  }
-
-  /**
-   * Handle remove condition button click.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async _onRemoveCondition(_event, target) {
-    const conditionIndex = parseInt(target.dataset.index);
-    if (isNaN(conditionIndex)) return;
-    const currentConditions = foundry.utils.deepClone(this.document.system.conditions || []);
-    currentConditions.splice(conditionIndex, 1);
-    await this.document.update({ 'system.conditions': currentConditions });
+  static _onOpenFestivalEditor(_event, _target) {
+    const linked = this.document.system.linkedFestival;
+    if (!linked?.calendarId) return;
+    new CalendarEditor({
+      calendarId: linked.calendarId,
+      initialTab: 'festivals',
+      focusFestivalKey: linked.festivalKey
+    }).render(true);
   }
 
   /**
    * Generate human-readable description for a condition.
    * @param {object} condition - Condition object
    * @param {object} calendar - Active calendar
-   * @returns {string} - Localized description
+   * @returns {string} Localized description
    */
   #getConditionDescription(condition, calendar) {
     const { field, op, value, offset } = condition;
     const fieldLabels = {
-      year: localize('CALENDARIA.Note.Condition.Year'),
-      month: localize('CALENDARIA.Note.Condition.Month'),
-      day: localize('CALENDARIA.Note.Condition.Day'),
+      year: localize('CALENDARIA.Common.Year'),
+      month: localize('CALENDARIA.Common.Month'),
+      day: localize('CALENDARIA.Common.Day'),
       dayOfYear: localize('CALENDARIA.Note.Condition.DayInYear'),
-      daysBeforeMonthEnd: localize('CALENDARIA.Note.Condition.DaysBeforeMonthEnd'),
-      weekday: localize('CALENDARIA.Note.Condition.Weekday'),
+      daysBeforeMonthEnd: localize('CALENDARIA.Condition.Field.daysBeforeMonthEnd'),
+      weekday: localize('CALENDARIA.Common.Weekday'),
       weekNumberInMonth: localize('CALENDARIA.Note.Condition.WeekdayNumInMonth'),
       inverseWeekNumber: localize('CALENDARIA.Note.Condition.InverseWeekNumber'),
-      weekInMonth: localize('CALENDARIA.Note.Condition.WeekInMonth'),
-      weekInYear: localize('CALENDARIA.Note.Condition.WeekInYear'),
+      weekInMonth: localize('CALENDARIA.Condition.Field.weekInMonth'),
+      weekInYear: localize('CALENDARIA.Condition.Field.weekInYear'),
       totalWeek: localize('CALENDARIA.Note.Condition.TotalWeek'),
-      weeksBeforeMonthEnd: localize('CALENDARIA.Note.Condition.WeeksBeforeMonthEnd'),
-      weeksBeforeYearEnd: localize('CALENDARIA.Note.Condition.WeeksBeforeYearEnd'),
-      season: localize('CALENDARIA.Note.Condition.Season'),
+      weeksBeforeMonthEnd: localize('CALENDARIA.Condition.Field.weeksBeforeMonthEnd'),
+      weeksBeforeYearEnd: localize('CALENDARIA.Condition.Field.weeksBeforeYearEnd'),
+      season: localize('CALENDARIA.Common.Season'),
       seasonPercent: localize('CALENDARIA.Note.Condition.SeasonPercent'),
-      seasonDay: localize('CALENDARIA.Note.Condition.DayInSeason'),
-      isLongestDay: localize('CALENDARIA.Note.Condition.IsLongestDay'),
-      isShortestDay: localize('CALENDARIA.Note.Condition.IsShortestDay'),
-      isSpringEquinox: localize('CALENDARIA.Note.Condition.IsSpringEquinox'),
-      isAutumnEquinox: localize('CALENDARIA.Note.Condition.IsAutumnEquinox'),
-      moonPhaseIndex: localize('CALENDARIA.Note.Condition.MoonPhase'),
+      seasonDay: localize('CALENDARIA.Condition.Field.seasonDay'),
+      isLongestDay: localize('CALENDARIA.Condition.Field.isLongestDay'),
+      isShortestDay: localize('CALENDARIA.Condition.Field.isShortestDay'),
+      isSpringEquinox: localize('CALENDARIA.Condition.Field.isSpringEquinox'),
+      isAutumnEquinox: localize('CALENDARIA.Condition.Field.isAutumnEquinox'),
+      moonPhaseIndex: localize('CALENDARIA.Common.MoonPhase'),
       moonPhaseCountMonth: localize('CALENDARIA.Note.Condition.MoonPhaseCountMonth'),
       moonPhaseCountYear: localize('CALENDARIA.Note.Condition.MoonPhaseCountYear'),
-      cycle: localize('CALENDARIA.Note.Condition.Cycle'),
-      era: localize('CALENDARIA.Note.Condition.Era'),
-      eraYear: localize('CALENDARIA.Note.Condition.EraYear'),
+      cycle: localize('CALENDARIA.Common.Cycle'),
+      era: localize('CALENDARIA.Common.Era'),
+      eraYear: localize('CALENDARIA.Condition.Field.eraYear'),
       intercalary: localize('CALENDARIA.Note.Condition.IsIntercalaryDay')
     };
     const opLabels = {

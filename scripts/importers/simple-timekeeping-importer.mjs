@@ -4,13 +4,11 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import { localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
-import { getDefaultZoneConfig } from '../weather/data/climate-data.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
+import { NoteManager } from '../notes/_module.mjs';
+import { format, localize, log } from '../utils/_module.mjs';
+import { WeatherManager, getDefaultZoneConfig } from '../weather/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -219,7 +217,9 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       seasons: { values: transformedSeasons },
       festivals: this.#extractFestivals(rawMonths),
       metadata: {
-        description: calendar.description || (calendar._isCustom ? 'Custom calendar imported from Simple Timekeeping' : `Imported from Simple Timekeeping: ${config.calendar}`),
+        description:
+          calendar.description ||
+          (calendar._isCustom ? localize('CALENDARIA.Importer.ImportedFrom.SimpleTimekeepingCustom') : format('CALENDARIA.Importer.ImportedFrom.SimpleTimekeeping', { name: config.calendar })),
         system: calendar.system || calendar.name || config.calendar,
         importedFrom: 'simple-timekeeping'
       },
@@ -547,7 +547,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   async importWeather(weather) {
     if (!weather?.label) return false;
     try {
-      await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: 'Imported from Simple Timekeeping' });
+      await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: localize('CALENDARIA.Importer.ImportedFrom.SimpleTimekeepingCustom') });
       return true;
     } catch (error) {
       log(1, 'Error importing weather:', error);

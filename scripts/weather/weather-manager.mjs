@@ -6,14 +6,15 @@
 
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
+import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './data/climate-data.mjs';
-import { ALL_PRESETS, getAllPresets, getPreset, getPresetAlias, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
-import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
+import { ALL_PRESETS, expandLegacySoundKey, getAllPresets, getPreset, getPresetAlias, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
+import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateIntradayWeather, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
 
 /**
  * Weather Manager.
@@ -45,12 +46,23 @@ export default class WeatherManager {
   /**
    * Resolve the effective soundFx for a preset, checking visual overrides for built-in presets.
    * @param {object} preset - Weather preset object
-   * @returns {string|null} Sound effect filename (without extension) or null
+   * @returns {string|null} Full Foundry-resolvable sound path or null
    */
   static #resolveSoundFx(preset) {
     const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
-    if (overrides?.soundFx !== undefined) return overrides.soundFx;
-    return preset.soundFx ?? null;
+    if (overrides?.soundFx !== undefined) return expandLegacySoundKey(overrides.soundFx);
+    return expandLegacySoundKey(preset.soundFx);
+  }
+
+  /**
+   * Resolve the effective fxMacro for a preset, checking visual overrides.
+   * @param {object} preset - Weather preset object
+   * @returns {string|null} Macro ID or null
+   */
+  static #resolveFxMacro(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    if (overrides?.fxMacro !== undefined) return overrides.fxMacro;
+    return preset.fxMacro ?? null;
   }
 
   /**
@@ -91,6 +103,38 @@ export default class WeatherManager {
   }
 
   /**
+   * Build a full weather state object from a generator result.
+   * @param {object} result - Generator result { preset, temperature, wind, precipitation }
+   * @param {string} [season] - Current season name
+   * @returns {object} Full weather object ready for storage
+   * @private
+   */
+  static #buildWeatherFromResult(result, season = null) {
+    return {
+      id: result.preset.id,
+      label: result.preset.label,
+      description: result.preset.description,
+      icon: result.preset.icon,
+      color: result.preset.color,
+      category: result.preset.category,
+      temperature: result.temperature,
+      wind: result.wind ?? { speed: 0, direction: null, forced: false },
+      precipitation: result.precipitation ?? { type: null, intensity: 0 },
+      darknessPenalty: result.preset.darknessPenalty ?? 0,
+      environmentBase: this.#resolveEnvironmentBase(result.preset),
+      environmentDark: this.#resolveEnvironmentDark(result.preset),
+      environmentCycle: this.#resolveEnvironmentCycle(result.preset),
+      fxPreset: this.#resolveFxPreset(result.preset),
+      soundFx: this.#resolveSoundFx(result.preset),
+      fxMacro: this.#resolveFxMacro(result.preset),
+      setAt: game.time.worldTime,
+      setBy: game.user.id,
+      generated: true,
+      season
+    };
+  }
+
+  /**
    * Initialize the weather manager.
    */
   static async initialize() {
@@ -105,29 +149,37 @@ export default class WeatherManager {
       }
     }
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
-    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) {
-      await this.#migrateWeatherDayIndex();
-    }
+    Hooks.on('updateScene', this.#onSceneActivated.bind(this));
+    Hooks.on(HOOKS.MIDNIGHT, () => this.#onPeriodThreshold(WEATHER_PERIODS.NIGHT.id));
+    Hooks.on(HOOKS.SUNRISE, () => this.#onPeriodThreshold(WEATHER_PERIODS.MORNING.id));
+    Hooks.on(HOOKS.MIDDAY, () => this.#onPeriodThreshold(WEATHER_PERIODS.AFTERNOON.id));
+    Hooks.on(HOOKS.SUNSET, () => this.#onPeriodThreshold(WEATHER_PERIODS.EVENING.id));
+    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) await this.#migrateWeatherDayIndex();
+    if (CalendariaSocket.isPrimaryGM()) await this.#migrateLegacySoundKeys();
     if (CalendariaSocket.isPrimaryGM()) {
       const calendar = CalendarManager.getActiveCalendar();
-      if (calendar?.weather?.autoGenerate !== undefined) {
-        const calendarId = calendar.metadata?.id;
-        if (calendarId) {
-          await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!calendar.weather.autoGenerate);
-          log(3, `Migrated autoGenerate=${calendar.weather.autoGenerate} to world setting`);
-        }
-      }
+      if (calendar?.weather?.autoGenerate !== undefined) if (calendar.metadata?.id) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!calendar.weather.autoGenerate);
+      const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER);
       if (Object.keys(this.#currentWeatherByZone).length) {
         const components = game.time.components;
-        const yearZero = calendar?.years?.yearZero ?? 0;
         const zones = this.#getEffectiveZones();
         for (const zone of zones) {
           const weather = this.#currentWeatherByZone[zone.id];
-          if (!weather) continue;
-          const existing = this.getWeatherForDate(components.year + yearZero, components.month, components.dayOfMonth ?? 0, zone.id);
-          if (!existing) await this.#recordWeatherHistory(weather, zone.id);
+          if (weather) {
+            const existing = this.getWeatherForDate(components.year, components.month, components.dayOfMonth ?? 0, zone.id);
+            if (!existing) await this.#recordWeatherHistory(weather, zone.id);
+          } else if (autoGenerate) {
+            await this.generateAndSetWeather({ zoneId: zone.id, broadcast: false, _fromPlan: true });
+          }
         }
-        if (game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) await this.#ensureForecastPlan();
+        if (autoGenerate) await this.#ensureForecastPlan();
+      } else if (autoGenerate) {
+        const zones = this.#getEffectiveZones();
+        for (const zone of zones) await this.generateAndSetWeather({ zoneId: zone.id, broadcast: false, _fromPlan: true });
+        await this.#ensureForecastPlan();
+        Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
+        CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
+        log(3, 'Generated initial weather and forecast plan for fresh world');
       }
     }
     this.#initialized = true;
@@ -162,6 +214,74 @@ export default class WeatherManager {
   }
 
   /**
+   * Determine the current intraday period based on the world clock.
+   * @returns {string} Period ID: 'night', 'morning', 'afternoon', or 'evening'
+   */
+  static getCurrentPeriod() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return WEATHER_PERIODS.MORNING.id;
+    const zone = this.getActiveZone(null, game.scenes?.active);
+    const sunrise = calendar.sunrise?.(undefined, zone) ?? 6;
+    const sunset = calendar.sunset?.(undefined, zone) ?? 18;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    const midday = hoursPerDay / 2;
+    const components = game.time.components;
+    const hour = components.hour + (components.minute ?? 0) / (calendar?.days?.minutesPerHour ?? 60);
+    if (hour < sunrise) return WEATHER_PERIODS.NIGHT.id;
+    if (hour < midday) return WEATHER_PERIODS.MORNING.id;
+    if (hour < sunset) return WEATHER_PERIODS.AFTERNOON.id;
+    return WEATHER_PERIODS.EVENING.id;
+  }
+
+  /**
+   * Handle a time-of-day threshold crossing for intraday weather.
+   * @param {string} periodId - The new period ID
+   * @private
+   */
+  static async #onPeriodThreshold(periodId) {
+    if (!game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER)) return;
+    if (!CalendariaSocket.isPrimaryGM()) return;
+    const zones = this.#getEffectiveZones();
+    let anyChanged = false;
+    for (const zone of zones) {
+      const weather = this.#currentWeatherByZone[zone.id];
+      if (!weather?.periods) continue;
+      const periodWeather = weather.periods[periodId];
+      if (!periodWeather) continue;
+      Object.assign(weather, {
+        id: periodWeather.preset?.id ?? periodWeather.id,
+        label: periodWeather.preset?.label ?? periodWeather.label,
+        description: periodWeather.preset?.description ?? periodWeather.description ?? '',
+        icon: periodWeather.preset?.icon ?? periodWeather.icon,
+        color: periodWeather.preset?.color ?? periodWeather.color,
+        category: periodWeather.preset?.category ?? periodWeather.category,
+        temperature: periodWeather.temperature,
+        wind: periodWeather.wind ?? { speed: 0, direction: null, forced: false },
+        precipitation: periodWeather.precipitation ?? { type: null, intensity: 0 },
+        darknessPenalty: periodWeather.preset?.darknessPenalty ?? periodWeather.darknessPenalty ?? 0,
+        activePeriod: periodId
+      });
+      const customPresets = this.getCustomPresets();
+      const preset = getPreset(weather.id, customPresets);
+      if (preset) {
+        weather.environmentBase = this.#resolveEnvironmentBase(preset);
+        weather.environmentDark = this.#resolveEnvironmentDark(preset);
+        weather.environmentCycle = this.#resolveEnvironmentCycle(preset);
+        weather.fxPreset = this.#resolveFxPreset(preset);
+        weather.soundFx = this.#resolveSoundFx(preset);
+        weather.fxMacro = this.#resolveFxMacro(preset);
+      }
+      anyChanged = true;
+    }
+    if (!anyChanged) return;
+    await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
+    Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
+    Hooks.callAll(HOOKS.WEATHER_PERIOD_CHANGE, { period: periodId });
+    CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
+    log(3, `Intraday weather period changed to: ${periodId}`);
+  }
+
+  /**
    * Get temperature for current weather, generating if missing.
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @returns {number|null} Temperature or null if no weather/zone
@@ -182,10 +302,12 @@ export default class WeatherManager {
    * @param {object} [options.precipitation] - Precipitation override { type, intensity }
    * @param {boolean} [options.broadcast] - Whether to broadcast to other clients
    * @param {boolean} [options.fromSocket] - Whether this is a GM executing a socket request
+   * @param {string} [options.period] - Specific period to set (when intraday enabled; defaults to current period)
+   * @param {boolean} [options.allPeriods] - Set all periods to this weather (when intraday enabled)
    * @returns {Promise<object>} The set weather
    */
   static async setWeather(presetId, options = {}) {
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to set weather');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
@@ -219,13 +341,38 @@ export default class WeatherManager {
       environmentCycle: this.#resolveEnvironmentCycle(preset),
       fxPreset: options.fxPreset ?? this.#resolveFxPreset(preset),
       soundFx: options.soundFx ?? this.#resolveSoundFx(preset),
+      fxMacro: options.fxMacro ?? this.#resolveFxMacro(preset),
       fxDensity: options.fxDensity ?? preset.fxDensity ?? null,
       fxSpeed: options.fxSpeed ?? preset.fxSpeed ?? null,
       fxColor: options.fxColor ?? preset.fxColor ?? null,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
-    await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+    const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+    if (intradayEnabled && !options.allPeriods) {
+      const targetPeriod = options.period ?? this.getCurrentPeriod();
+      const currentPeriod = this.getCurrentPeriod();
+      const existing = this.#currentWeatherByZone[zoneId];
+      const periods = existing?.periods ? { ...existing.periods } : {};
+      periods[targetPeriod] = { ...weather };
+      if (targetPeriod !== currentPeriod && existing) {
+        // Saving to a non-current period: keep the root weather showing the current period
+        existing.periods = periods;
+        await this.#saveWeather(existing, options.broadcast !== false, zoneId);
+      } else {
+        weather.activePeriod = currentPeriod;
+        weather.periods = periods;
+        await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+      }
+    } else if (intradayEnabled && options.allPeriods) {
+      const periods = {};
+      for (const p of Object.values(WEATHER_PERIODS)) periods[p.id] = { ...weather };
+      weather.activePeriod = this.getCurrentPeriod();
+      weather.periods = periods;
+      await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+    } else {
+      await this.#saveWeather(weather, options.broadcast !== false, zoneId);
+    }
     if (game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
       await this.#clearForecastPlan(zoneId);
       await this.#ensureForecastPlan();
@@ -241,11 +388,13 @@ export default class WeatherManager {
    * @param {string} [weatherData.color] - Display color
    * @param {string} [weatherData.description] - Description
    * @param {number} [weatherData.temperature] - Temperature
+   * @param {string} [weatherData.period] - Specific period to set (when intraday enabled)
+   * @param {boolean} [weatherData.allPeriods] - Set all periods to this weather
    * @param {boolean} [broadcast] - Whether to broadcast
    * @returns {Promise<object>} The set weather
    */
   static async setCustomWeather(weatherData, broadcast = true) {
-    const zoneId = weatherData.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = weatherData.zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     if (!canChangeWeather()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this.getCurrentWeather(zoneId);
@@ -269,13 +418,37 @@ export default class WeatherManager {
       environmentDark: weatherData.environmentDark ?? null,
       fxPreset: weatherData.fxPreset ?? null,
       soundFx: weatherData.soundFx ?? null,
+      fxMacro: weatherData.fxMacro ?? null,
       fxDensity: weatherData.fxDensity ?? null,
       fxSpeed: weatherData.fxSpeed ?? null,
       fxColor: weatherData.fxColor ?? null,
       setAt: game.time.worldTime,
       setBy: game.user.id
     };
-    await this.#saveWeather(weather, broadcast, zoneId);
+    const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+    if (intradayEnabled && !weatherData.allPeriods) {
+      const targetPeriod = weatherData.period ?? this.getCurrentPeriod();
+      const currentPeriod = this.getCurrentPeriod();
+      const existing = this.#currentWeatherByZone[zoneId];
+      const periods = existing?.periods ? { ...existing.periods } : {};
+      periods[targetPeriod] = { ...weather };
+      if (targetPeriod !== currentPeriod && existing) {
+        existing.periods = periods;
+        await this.#saveWeather(existing, broadcast, zoneId);
+      } else {
+        weather.activePeriod = currentPeriod;
+        weather.periods = periods;
+        await this.#saveWeather(weather, broadcast, zoneId);
+      }
+    } else if (intradayEnabled && weatherData.allPeriods) {
+      const periods = {};
+      for (const p of Object.values(WEATHER_PERIODS)) periods[p.id] = { ...weather };
+      weather.activePeriod = this.getCurrentPeriod();
+      weather.periods = periods;
+      await this.#saveWeather(weather, broadcast, zoneId);
+    } else {
+      await this.#saveWeather(weather, broadcast, zoneId);
+    }
     if (game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
       await this.#clearForecastPlan(zoneId);
       await this.#ensureForecastPlan();
@@ -292,7 +465,7 @@ export default class WeatherManager {
    */
   static async clearWeather(broadcast = true, fromSocket = false, zoneId) {
     if (!fromSocket && !canChangeWeather()) return;
-    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     if (!fromSocket && !game.user.isGM && canChangeWeather()) {
       CalendariaSocket.emit('weatherRequest', { action: 'clear', options: { zoneId: resolvedZoneId } });
       return;
@@ -318,6 +491,7 @@ export default class WeatherManager {
     if (weather && CalendariaSocket.isPrimaryGM()) await this.#recordWeatherHistory(weather, zoneId);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous, current: weather, zoneId });
     if (broadcast) CalendariaSocket.emit('weatherChange', { weather, zoneId });
+    if (weather?.fxMacro && CalendariaSocket.isPrimaryGM()) executeMacroById(weather.fxMacro, { weather, previousWeather: previous, zoneId });
     log(3, `Weather changed for zone ${zoneId}:`, weather?.id ?? 'cleared');
   }
 
@@ -343,10 +517,11 @@ export default class WeatherManager {
    * @param {string} [options.zoneId] - Zone ID override (uses active if not provided)
    * @param {string} [options.season] - Season name override (uses current if not provided)
    * @param {boolean} [options.broadcast] - Whether to broadcast
+   * @param {boolean} [options.randomize] - Use true randomness instead of date-seeded generation
    * @returns {Promise<object>} Generated weather
    */
   static async generateAndSetWeather(options = {}) {
-    const zoneId = 'zoneId' in options ? options.zoneId : this.getActiveZone(null, game.scenes?.active)?.id;
+    const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     if (!options.fromSocket && !canChangeWeather()) {
       log(1, 'User lacks permission to generate weather');
       return this.getCurrentWeather(zoneId);
@@ -365,28 +540,41 @@ export default class WeatherManager {
     let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
     if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
     const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
-    const result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId, inertia, previousWeather: prevWeather });
-    const weather = {
-      id: result.preset.id,
-      label: result.preset.label,
-      description: result.preset.description,
-      icon: result.preset.icon,
-      color: result.preset.color,
-      category: result.preset.category,
-      temperature: result.temperature,
-      wind: result.wind ?? { speed: 0, direction: null, forced: false },
-      precipitation: result.precipitation ?? { type: null, intensity: 0 },
-      darknessPenalty: result.preset.darknessPenalty ?? 0,
-      environmentBase: this.#resolveEnvironmentBase(result.preset),
-      environmentDark: this.#resolveEnvironmentDark(result.preset),
-      environmentCycle: this.#resolveEnvironmentCycle(result.preset),
-      fxPreset: this.#resolveFxPreset(result.preset),
-      soundFx: this.#resolveSoundFx(result.preset),
-      setAt: game.time.worldTime,
-      setBy: game.user.id,
-      generated: true,
-      season
-    };
+    const components = game.time.components;
+    const yearZero = game.time.calendar?.years?.yearZero ?? 0;
+    let seed;
+    if (options.randomize) {
+      seed = null;
+    } else {
+      seed = dateSeed(components.year + yearZero, components.month, components.dayOfMonth ?? 0);
+    }
+    const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+    let weather;
+    if (intradayEnabled && !options.randomize) {
+      const carryOverChance = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_CARRY_OVER) ?? 50;
+      const intradayResult = generateIntradayWeather({
+        seasonClimate,
+        zoneConfig,
+        season,
+        year: components.year + yearZero,
+        month: components.month,
+        dayOfMonth: components.dayOfMonth ?? 0,
+        customPresets,
+        carryOverChance,
+        currentWeatherId,
+        inertia,
+        previousWeather: prevWeather
+      });
+      const activePeriod = this.getCurrentPeriod();
+      const activeResult = intradayResult.periods[activePeriod];
+      weather = this.#buildWeatherFromResult(activeResult, season);
+      weather.activePeriod = activePeriod;
+      weather.periods = {};
+      for (const [periodId, periodResult] of Object.entries(intradayResult.periods)) weather.periods[periodId] = this.#buildWeatherFromResult(periodResult, season);
+    } else {
+      const result = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId, inertia, previousWeather: prevWeather });
+      weather = this.#buildWeatherFromResult(result, season);
+    }
     await this.#saveWeather(weather, options.broadcast !== false, zoneId);
     log(3, `Weather generated for zone ${zoneId}: ${weather.preset}`);
     if (!options._fromPlan && game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
@@ -401,9 +589,7 @@ export default class WeatherManager {
    */
   static async regenerateAllWeather() {
     const zones = this.#getEffectiveZones();
-    for (const zone of zones) {
-      await this.generateAndSetWeather({ zoneId: zone.id, broadcast: false });
-    }
+    for (const zone of zones) await this.generateAndSetWeather({ zoneId: zone.id, broadcast: false });
     await this.#clearForecastPlan();
     await this.#ensureForecastPlan();
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
@@ -433,7 +619,7 @@ export default class WeatherManager {
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
     const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
-    let year = components.year + yearZero;
+    let year = components.year;
     let month = components.month;
     let dayOfMonth = components.dayOfMonth ?? 0;
     const result = [];
@@ -450,10 +636,12 @@ export default class WeatherManager {
         darknessPenalty: entry.darknessPenalty ?? 0
       };
       let forecastEntry = { year, month, dayOfMonth, preset, temperature: entry.temperature, wind: entry.wind, precipitation: entry.precipitation, isVaried: false };
+      if (entry.periods) forecastEntry.periods = entry.periods;
       if (!isGM && accuracy < 100) {
         const seed = dateSeed(year, month, dayOfMonth);
         const varied = applyForecastVariance({ preset, temperature: entry.temperature }, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
         forecastEntry = { year, month, dayOfMonth, ...varied, wind: entry.wind, precipitation: entry.precipitation };
+        if (entry.periods) forecastEntry.periods = entry.periods;
       }
       result.push(forecastEntry);
       dayOfMonth++;
@@ -495,7 +683,7 @@ export default class WeatherManager {
     const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
     const forecast = generateForecast({
       zoneConfig,
-      startYear: components.year + yearZero,
+      startYear: components.year,
       startMonth: components.month,
       startDayOfMonth: components.dayOfMonth ?? 0,
       days,
@@ -512,6 +700,28 @@ export default class WeatherManager {
   }
 
   /**
+   * Handle scene activation — sync weather to the new scene's climate zone.
+   * @param {object} scene - The activated scene document
+   * @param {object} change - The change data
+   * @private
+   */
+  static async #onSceneActivated(scene, change) {
+    if (!change.active) return;
+    if (!CalendariaSocket.isPrimaryGM()) return;
+    const zone = this.getActiveZone(null, scene) ?? this.getActiveZone();
+    const zoneId = zone?.id ?? this.DEFAULT_ZONE;
+    const weather = this.#currentWeatherByZone[zoneId];
+    if (weather) {
+      Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous: null, current: weather, zoneId });
+      return;
+    }
+    if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return;
+    await this.generateAndSetWeather({ zoneId });
+    await this.#ensureForecastPlan();
+    log(3, `Auto-generated weather for zone "${zoneId}" on scene activation`);
+  }
+
+  /**
    * Handle day change for auto-generation.
    * @param {object} data - Hook data with previous/current components and calendar
    * @private
@@ -524,15 +734,17 @@ export default class WeatherManager {
     const zones = this.#getEffectiveZones();
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS) ?? 365;
     const components = game.time.components;
-    const yearZero = calendar?.years?.yearZero ?? 0;
-    const year = components.year + yearZero;
+    const year = components.year;
     const month = components.month;
     const dayOfMonth = components.dayOfMonth ?? 0;
     const history = maxDays > 0 ? game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {} : null;
-    if (history) {
+    if (history && data.previous) {
+      const prevYear = data.previous.year;
+      const prevMonth = data.previous.month;
+      const prevDay = data.previous.dayOfMonth ?? 0;
       for (const zone of zones) {
         const weather = this.#currentWeatherByZone[zone.id];
-        if (weather) this.#addHistoryEntry(history, year, month, dayOfMonth, zone.id, weather);
+        if (weather) this.#addHistoryEntry(history, prevYear, prevMonth, prevDay, zone.id, weather);
       }
     }
     if (!autoGenerate) {
@@ -551,59 +763,100 @@ export default class WeatherManager {
     const seasonData = calendar.getCurrentSeason?.(data.current);
     const season = seasonData?.name ?? null;
     const customPresets = this.getCustomPresets();
+    const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+    const activePeriod = intradayEnabled ? this.getCurrentPeriod() : null;
     const weatherUpdates = {};
     for (const zone of zones) {
       const planEntry = this.#getFromForecastPlan(data.current.year, data.current.month, data.current.dayOfMonth ?? 0, zone.id);
       if (planEntry) {
+        const activeEntry = intradayEnabled && planEntry.periods?.[activePeriod] ? planEntry.periods[activePeriod] : planEntry;
         weatherUpdates[zone.id] = {
-          id: planEntry.id,
-          label: planEntry.label,
-          description: planEntry.description ?? '',
-          icon: planEntry.icon,
-          color: planEntry.color,
-          category: planEntry.category,
-          temperature: planEntry.temperature,
-          wind: planEntry.wind ?? { speed: 0, direction: null, forced: false },
-          precipitation: planEntry.precipitation ?? { type: null, intensity: 0 },
-          darknessPenalty: planEntry.darknessPenalty ?? 0,
-          environmentBase: planEntry.environmentBase ?? null,
-          environmentDark: planEntry.environmentDark ?? null,
-          fxPreset: planEntry.fxPreset ?? null,
-          soundFx: planEntry.soundFx ?? null,
+          id: activeEntry.id,
+          label: activeEntry.label,
+          description: activeEntry.description ?? '',
+          icon: activeEntry.icon,
+          color: activeEntry.color,
+          category: activeEntry.category,
+          temperature: activeEntry.temperature,
+          wind: activeEntry.wind ?? { speed: 0, direction: null, forced: false },
+          precipitation: activeEntry.precipitation ?? { type: null, intensity: 0 },
+          darknessPenalty: activeEntry.darknessPenalty ?? 0,
+          environmentBase: activeEntry.environmentBase ?? null,
+          environmentDark: activeEntry.environmentDark ?? null,
+          fxPreset: activeEntry.fxPreset ?? null,
+          soundFx: activeEntry.soundFx ?? null,
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
           season
         };
+        if (intradayEnabled && planEntry.periods) {
+          weatherUpdates[zone.id].activePeriod = activePeriod;
+          weatherUpdates[zone.id].periods = planEntry.periods;
+        }
       } else {
-        const zoneConfig = this.getActiveZone(zone.id);
-        const seasonClimate = seasonData?.climate ?? null;
-        const currentWeather = this.#currentWeatherByZone[zone.id];
-        let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
-        if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
-        const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
-        const result = generateWeather({ seasonClimate, zoneConfig, season, customPresets, currentWeatherId: currentWeather?.id ?? null, inertia, previousWeather: prevWeather });
-        weatherUpdates[zone.id] = {
-          id: result.preset.id,
-          label: result.preset.label,
-          description: result.preset.description,
-          icon: result.preset.icon,
-          color: result.preset.color,
-          category: result.preset.category,
-          temperature: result.temperature,
-          wind: result.wind ?? { speed: 0, direction: null, forced: false },
-          precipitation: result.precipitation ?? { type: null, intensity: 0 },
-          darknessPenalty: result.preset.darknessPenalty ?? 0,
-          environmentBase: this.#resolveEnvironmentBase(result.preset),
-          environmentDark: this.#resolveEnvironmentDark(result.preset),
-          environmentCycle: this.#resolveEnvironmentCycle(result.preset),
-          fxPreset: this.#resolveFxPreset(result.preset),
-          soundFx: this.#resolveSoundFx(result.preset),
-          setAt: game.time.worldTime,
-          setBy: game.user.id,
-          generated: true,
-          season
-        };
+        const curDay = data.current.dayOfMonth ?? 0;
+        const histEntry = history?.[data.current.year]?.[data.current.month]?.[curDay]?.[zone.id];
+        if (histEntry) {
+          const preset = getPreset(histEntry.id, customPresets) ?? {};
+          weatherUpdates[zone.id] = {
+            id: histEntry.id,
+            label: histEntry.label,
+            description: preset.description ?? '',
+            icon: histEntry.icon,
+            color: histEntry.color,
+            category: histEntry.category,
+            temperature: histEntry.temperature,
+            wind: histEntry.wind ?? { speed: 0, direction: null, forced: false },
+            precipitation: histEntry.precipitation ?? { type: null, intensity: 0 },
+            darknessPenalty: preset.darknessPenalty ?? 0,
+            environmentBase: this.#resolveEnvironmentBase(preset),
+            environmentDark: this.#resolveEnvironmentDark(preset),
+            environmentCycle: this.#resolveEnvironmentCycle(preset),
+            fxPreset: this.#resolveFxPreset(preset),
+            soundFx: this.#resolveSoundFx(preset),
+            fxMacro: this.#resolveFxMacro(preset),
+            setAt: game.time.worldTime,
+            setBy: game.user.id,
+            generated: true,
+            season
+          };
+        } else {
+          const zoneConfig = this.getActiveZone(zone.id);
+          const seasonClimate = seasonData?.climate ?? null;
+          const currentWeather = this.#currentWeatherByZone[zone.id];
+          let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+          if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
+          const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
+          if (intradayEnabled) {
+            const carryOverChance = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_CARRY_OVER) ?? 50;
+            const yearZero = calendar.years?.yearZero ?? 0;
+            const intradayResult = generateIntradayWeather({
+              seasonClimate,
+              zoneConfig,
+              season,
+              year: data.current.year + yearZero,
+              month: data.current.month,
+              dayOfMonth: curDay,
+              customPresets,
+              carryOverChance,
+              currentWeatherId: currentWeather?.id ?? null,
+              inertia,
+              previousWeather: prevWeather
+            });
+            const activeResult = intradayResult.periods[activePeriod];
+            weatherUpdates[zone.id] = this.#buildWeatherFromResult(activeResult, season);
+            weatherUpdates[zone.id].activePeriod = activePeriod;
+            weatherUpdates[zone.id].periods = {};
+            for (const [periodId, periodResult] of Object.entries(intradayResult.periods)) {
+              weatherUpdates[zone.id].periods[periodId] = this.#buildWeatherFromResult(periodResult, season);
+            }
+          } else {
+            const seed = dateSeed(data.current.year, data.current.month, curDay);
+            const result = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId: currentWeather?.id ?? null, inertia, previousWeather: prevWeather });
+            weatherUpdates[zone.id] = this.#buildWeatherFromResult(result, season);
+          }
+        }
       }
     }
     for (const [zid, weather] of Object.entries(weatherUpdates)) this.#currentWeatherByZone[zid] = weather;
@@ -747,6 +1000,7 @@ export default class WeatherManager {
           environmentCycle: this.#resolveEnvironmentCycle(todayF.preset),
           fxPreset: this.#resolveFxPreset(todayF.preset),
           soundFx: this.#resolveSoundFx(todayF.preset),
+          fxMacro: this.#resolveFxMacro(todayF.preset),
           setAt: game.time.worldTime,
           setBy: game.user.id,
           generated: true,
@@ -802,9 +1056,7 @@ export default class WeatherManager {
     if (maxDays === 0) return;
     const resolvedZoneId = zoneId ?? this.getActiveZone()?.id ?? this.DEFAULT_ZONE;
     const components = game.time.components;
-    const calendar = CalendarManager.getActiveCalendar();
-    const yearZero = calendar?.years?.yearZero ?? 0;
-    const year = components.year + yearZero;
+    const year = components.year;
     const month = components.month;
     const dayOfMonth = components.dayOfMonth ?? 0;
     const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
@@ -842,14 +1094,17 @@ export default class WeatherManager {
     const toRemove = unique.length - maxDays;
     for (let i = 0; i < toRemove; i++) {
       const [y, m, d] = unique[i];
+      if (!history[y]?.[m]) continue;
       delete history[y][m][d];
       if (!Object.keys(history[y][m]).length) delete history[y][m];
-      if (!Object.keys(history[y]).length) delete history[y];
+      if (history[y] && !Object.keys(history[y]).length) delete history[y];
     }
   }
 
   /**
    * Migrate weather history and forecast plan day keys from 1-indexed to 0-indexed.
+   * @since 0.11.0
+   * @deprecated Remove in 1.1.0
    * @private
    */
   static async #migrateWeatherDayIndex() {
@@ -869,6 +1124,38 @@ export default class WeatherManager {
     }
     if (changed) log(3, 'Weather day index migration complete');
     await game.settings.set(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED, true);
+  }
+
+  /**
+   * Migrate legacy bare-key soundFx values to full paths in custom presets and current weather.
+   * @since 1.0.0
+   * @deprecated Remove in 1.2.0
+   * @private
+   */
+  static async #migrateLegacySoundKeys() {
+    let changed = false;
+    const customPresets = this.getCustomPresets();
+    for (const preset of customPresets) {
+      if (preset.soundFx && !preset.soundFx.includes('/')) {
+        preset.soundFx = expandLegacySoundKey(preset.soundFx);
+        changed = true;
+      }
+    }
+    if (changed) {
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
+      log(3, 'Migrated custom preset soundFx keys to full paths');
+    }
+    let weatherChanged = false;
+    for (const weather of Object.values(this.#currentWeatherByZone)) {
+      if (weather?.soundFx && !weather.soundFx.includes('/')) {
+        weather.soundFx = expandLegacySoundKey(weather.soundFx);
+        weatherChanged = true;
+      }
+    }
+    if (weatherChanged) {
+      await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
+      log(3, 'Migrated current weather soundFx keys to full paths');
+    }
   }
 
   /**
@@ -904,7 +1191,7 @@ export default class WeatherManager {
     const forecastDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const todayYear = components.year + yearZero;
+    const todayYear = components.year;
     const todayMonth = components.month;
     const todayDayOfMonth = components.dayOfMonth ?? 0;
     const todayKey = todayYear * 10000 + todayMonth * 100 + todayDayOfMonth;
@@ -912,6 +1199,8 @@ export default class WeatherManager {
     const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
     const customPresets = this.getCustomPresets();
     const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
+    const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+    const carryOverChance = intradayEnabled ? (game.settings.get(MODULE.ID, SETTINGS.INTRADAY_CARRY_OVER) ?? 50) : undefined;
     const needed = forecastDays + 1;
     let anyChanged = false;
     for (const zone of zones) {
@@ -942,7 +1231,8 @@ export default class WeatherManager {
         startYear = lastFuture.year;
         startMonth = lastFuture.month;
         startDayOfMonth = lastFuture.dayOfMonth + 1;
-        chainWeatherId = lastFuture.entry.id;
+        const lastEntry = lastFuture.entry;
+        chainWeatherId = intradayEnabled && lastEntry.periods?.evening ? lastEntry.periods.evening.id : lastEntry.id;
         const dim = getDaysInMonth(startMonth, startYear);
         if (startDayOfMonth >= dim) {
           startDayOfMonth = 0;
@@ -956,11 +1246,18 @@ export default class WeatherManager {
         startYear = todayYear;
         startMonth = todayMonth;
         startDayOfMonth = todayDayOfMonth;
-        chainWeatherId = this.#currentWeatherByZone[zone.id]?.id ?? null;
+        const currentWeather = this.#currentWeatherByZone[zone.id];
+        chainWeatherId = intradayEnabled && currentWeather?.periods?.evening ? currentWeather.periods.evening.id : (currentWeather?.id ?? null);
       }
       const toGenerate = needed - futureEntries.length;
       const chainWeather = lastFuture?.entry ?? this.#currentWeatherByZone[zone.id];
-      const chainPrevWeather = chainWeather ? { temperature: chainWeather.temperature, wind: chainWeather.wind } : null;
+      let chainPrevWeather;
+      if (intradayEnabled && chainWeather?.periods?.evening) {
+        const ev = chainWeather.periods.evening;
+        chainPrevWeather = { temperature: ev.temperature, wind: ev.wind };
+      } else {
+        chainPrevWeather = chainWeather ? { temperature: chainWeather.temperature, wind: chainWeather.wind } : null;
+      }
       const forecast = generateForecast({
         zoneConfig: zone,
         startYear,
@@ -973,12 +1270,14 @@ export default class WeatherManager {
         accuracy: 100,
         previousWeather: chainPrevWeather,
         getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
-        getDaysInMonth
+        getDaysInMonth,
+        intraday: intradayEnabled,
+        carryOverChance
       });
       for (const f of forecast) {
         zonePlan[f.year] ??= {};
         zonePlan[f.year][f.month] ??= {};
-        zonePlan[f.year][f.month][f.dayOfMonth] = {
+        const planEntry = {
           id: f.preset.id,
           label: f.preset.label,
           icon: f.preset.icon,
@@ -993,13 +1292,45 @@ export default class WeatherManager {
           environmentDark: this.#resolveEnvironmentDark(f.preset),
           environmentCycle: this.#resolveEnvironmentCycle(f.preset),
           fxPreset: this.#resolveFxPreset(f.preset),
-          soundFx: this.#resolveSoundFx(f.preset)
+          soundFx: this.#resolveSoundFx(f.preset),
+          fxMacro: this.#resolveFxMacro(f.preset)
         };
+        if (intradayEnabled && f.periods) {
+          planEntry.periods = {};
+          for (const [periodId, periodResult] of Object.entries(f.periods)) {
+            const pPreset = periodResult.preset ?? getPreset(periodResult.id, customPresets);
+            planEntry.periods[periodId] = {
+              id: periodResult.preset?.id ?? periodResult.id,
+              label: periodResult.preset?.label ?? periodResult.label,
+              icon: periodResult.preset?.icon ?? periodResult.icon,
+              color: periodResult.preset?.color ?? periodResult.color,
+              category: periodResult.preset?.category ?? periodResult.category,
+              description: periodResult.preset?.description ?? '',
+              temperature: periodResult.temperature,
+              wind: periodResult.wind ?? null,
+              precipitation: periodResult.precipitation ?? null,
+              darknessPenalty: periodResult.preset?.darknessPenalty ?? periodResult.darknessPenalty ?? 0,
+              environmentBase: pPreset ? this.#resolveEnvironmentBase(pPreset) : null,
+              environmentDark: pPreset ? this.#resolveEnvironmentDark(pPreset) : null,
+              fxPreset: pPreset ? this.#resolveFxPreset(pPreset) : null,
+              soundFx: pPreset ? this.#resolveSoundFx(pPreset) : null
+            };
+          }
+        }
+        zonePlan[f.year][f.month][f.dayOfMonth] = planEntry;
       }
       this.#prunePlanEntries(zonePlan, todayKey);
       plan[zone.id] = zonePlan;
       anyChanged = true;
       log(3, `Forecast plan updated for zone ${zone.id}: ${toGenerate} entries generated`);
+    }
+    const activeZoneIds = new Set(zones.map((z) => z.id));
+    for (const planZoneId of Object.keys(plan)) {
+      if (!activeZoneIds.has(planZoneId)) {
+        delete plan[planZoneId];
+        anyChanged = true;
+        log(3, `Removed stale forecast plan for defunct zone ${planZoneId}`);
+      }
     }
     if (anyChanged) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, plan);
   }
@@ -1015,7 +1346,7 @@ export default class WeatherManager {
    */
   static #getFromForecastPlan(year, month, dayOfMonth, zoneId) {
     const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
-    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id;
+    const resolvedZoneId = zoneId ?? this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     return plan[resolvedZoneId]?.[year]?.[month]?.[dayOfMonth] ?? null;
   }
 
@@ -1150,10 +1481,8 @@ export default class WeatherManager {
       for (const y of Object.keys(history)) for (const m of Object.keys(history[y] ?? {})) removed += Object.keys(history[y][m] ?? {}).length;
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
     } else if (options.future) {
-      const calendar = CalendarManager.getActiveCalendar();
       const components = game.time.components;
-      const yearZero = calendar?.years?.yearZero ?? 0;
-      const todayYear = components.year + yearZero;
+      const todayYear = components.year;
       const todayMonth = components.month;
       const todayDay = components.dayOfMonth ?? 0;
       const todayKey = todayYear * 10000 + todayMonth * 100 + todayDay;
@@ -1355,6 +1684,7 @@ export default class WeatherManager {
       ...(preset.hudEffect && { hudEffect: preset.hudEffect }),
       ...(preset.fxPreset && { fxPreset: preset.fxPreset }),
       ...(preset.soundFx && { soundFx: preset.soundFx }),
+      ...(preset.fxMacro && { fxMacro: preset.fxMacro }),
       ...(preset.inertiaWeight != null && { inertiaWeight: preset.inertiaWeight }),
       ...(preset.chance != null && { chance: preset.chance }),
       ...(preset.darknessPenalty != null && { darknessPenalty: preset.darknessPenalty })
@@ -1636,12 +1966,13 @@ export default class WeatherManager {
    * @param {string} [options.description] - Weather description
    * @param {string} [options.temp] - Formatted temperature string
    * @param {number} [options.windSpeed] - Wind speed (0-5 scale)
+   * @param {number|null} [options.windKph] - Pre-computed wind speed in kph (avoids re-randomizing)
    * @param {number|null} [options.windDirection] - Wind direction in degrees
    * @param {string|null} [options.precipType] - Precipitation type key
    * @param {number} [options.precipIntensity] - Precipitation intensity (0-1)
    * @returns {string} HTML-encoded string for data-tooltip-html
    */
-  static buildWeatherTooltip({ label, description, temp, windSpeed, windDirection, precipType, precipIntensity }) {
+  static buildWeatherTooltip({ label, description, temp, windSpeed, windKph, windDirection, precipType, precipIntensity }) {
     const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const rows = [];
     const desc = description && description !== label ? esc(description) : '';
@@ -1649,8 +1980,8 @@ export default class WeatherManager {
     if (temp != null) rows.push(`<div class="row"><i class="fas fa-temperature-half"></i> ${esc(temp)}</div>`);
     if (windSpeed > 0) {
       const windLabel = this.getWindSpeedLabel(windSpeed);
-      const windKph = this.getWindSpeedKph(windSpeed);
-      const windFormatted = this.formatWindSpeed(windKph);
+      const resolvedKph = windKph ?? this.getWindSpeedKph(windSpeed);
+      const windFormatted = this.formatWindSpeed(resolvedKph);
       const dirLabel = this.getWindDirectionLabel(windDirection);
       rows.push(`<div class="row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
     }
@@ -1658,6 +1989,35 @@ export default class WeatherManager {
       const precipLabel = localize(`CALENDARIA.Weather.Precipitation.${precipType.charAt(0).toUpperCase() + precipType.slice(1)}`);
       const rate = this.formatPrecipitation((precipIntensity ?? 0) * 10);
       rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
+    }
+    const html = `<div class="calendaria"><div class="weather-tooltip">${rows.join('')}</div></div>`;
+    return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /**
+   * Build a weather tooltip with intraday period breakdown appended.
+   * @param {object} mainTooltipArgs - Arguments for buildWeatherTooltip()
+   * @param {object} [periods] - Period data { night, morning, afternoon, evening }
+   * @param {string} [activePeriod] - Currently active period ID
+   * @returns {string} HTML-encoded tooltip string
+   */
+  static buildWeatherTooltipWithPeriods(mainTooltipArgs, periods, activePeriod) {
+    if (!periods) return this.buildWeatherTooltip(mainTooltipArgs);
+    const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const rows = [];
+    const desc = mainTooltipArgs.description && mainTooltipArgs.description !== mainTooltipArgs.label ? esc(mainTooltipArgs.description) : '';
+    rows.push(`<div class="header"><strong>${esc(mainTooltipArgs.label)}</strong>${desc ? ` — ${desc}` : ''}</div>`);
+    if (mainTooltipArgs.temp != null) rows.push(`<div class="row"><i class="fas fa-temperature-half"></i> ${esc(mainTooltipArgs.temp)}</div>`);
+    rows.push('<hr>');
+    for (const period of Object.values(WEATHER_PERIODS)) {
+      const pw = periods[period.id];
+      if (!pw) continue;
+      const pLabel = localize(pw.preset?.label ?? pw.label ?? pw.id);
+      const pTemp = this.formatTemperature(pw.temperature);
+      const isActive = activePeriod === period.id;
+      const periodLabel = localize(period.label);
+      const marker = isActive ? ' ●' : '';
+      rows.push(`<div class="row period-row"><i class="fas ${period.icon}"></i> <strong>${esc(periodLabel)}${marker}</strong>: ${esc(pLabel)} · ${esc(pTemp)}</div>`);
     }
     const html = `<div class="calendaria"><div class="weather-tooltip">${rows.join('')}</div></div>`;
     return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

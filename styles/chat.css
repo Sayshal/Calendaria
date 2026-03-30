@@ -41,13 +41,13 @@
 
   &.chat-announcement {
     .announcement-date {
-      color: var(--color-text-dark-primary, var(--calendaria-text));
+      color: var(--calendaria-text);
       font-weight: 500;
       font-size: 0.9em;
     }
 
     .announcement-content {
-      color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
+      color: var(--calendaria-text-secondary);
       font-size: 0.85em;
       line-height: 1.4;
     }
@@ -55,11 +55,11 @@
 
   &.chat-reminder {
     .reminder-message {
-      color: var(--color-text-dark-primary, var(--calendaria-text));
+      color: var(--calendaria-text);
       font-size: 0.9em;
 
       strong {
-        color: var(--color-text-dark-heading, var(--calendaria-text));
+        color: var(--calendaria-text-heading);
       }
     }
   }
@@ -84,7 +84,7 @@
 
       .release-patreon {
         padding: 0.5rem;
-        border: 0.0625rem solid var(--color-border-light-2, var(--calendaria-border));
+        border: 0.0625rem solid var(--calendaria-border);
         border-radius: 0.25rem;
 
         strong {
@@ -92,7 +92,7 @@
           margin-bottom: 0.25rem;
 
           a {
-            color: var(--color-text-hyperlink, var(--calendaria-link));
+            color: var(--calendaria-link);
             text-decoration: none;
 
             &:hover {
@@ -108,7 +108,7 @@
 
       .release-blurb {
         a {
-          color: var(--color-text-hyperlink, var(--calendaria-link));
+          color: var(--calendaria-link);
         }
       }
 
@@ -130,7 +130,7 @@
 
     .forecast-zone {
       margin-bottom: 0.35rem;
-      color: var(--color-text-dark-secondary, var(--calendaria-text-secondary));
+      color: var(--calendaria-text-secondary);
       font-size: 0.8rem;
     }
   }
@@ -139,7 +139,7 @@
     gap: 0.35rem;
     display: inline-flex;
     align-items: center;
-    color: var(--color-text-hyperlink, var(--calendaria-link));
+    color: var(--calendaria-link);
     font-size: 0.85em;
     text-decoration: none;
     cursor: pointer;

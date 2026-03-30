@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { resolveRandomizedPhase } from '../../data/_module.mjs';
 import { format, localize } from '../localization.mjs';
 
 /**
@@ -67,7 +68,7 @@ export function dateFormattingParts(calendar, components) {
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
-  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
+  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Common.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = resolveArray(calendar, 'weekdaysArray', 'days.values');
   let daysInMonthsBefore = 0;
@@ -335,7 +336,8 @@ export function formatApproximateTime(calendar, components, zone = null) {
   else if (dayProgress >= 0.5 && dayProgress <= 0.85) formatter = 'Afternoon';
   else if (dayProgress > 0.85 && nightProgress < 0) formatter = 'Evening';
   else formatter = 'Night';
-  return localize(`CALENDARIA.Format.ApproxTime.${formatter}`);
+  const COMMON_OVERRIDES = { Midnight: 'CALENDARIA.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
+  return localize(COMMON_OVERRIDES[formatter] ?? `CALENDARIA.Format.ApproxTime.${formatter}`);
 }
 
 /**
@@ -349,9 +351,13 @@ export function formatApproximateDate(calendar, components) {
   const season = calendar?.getCurrentSeason?.(components);
   if (!season) return parts.MMMM;
   const seasonName = localize(season.name);
-  let dayOfYear = components.dayOfMonth;
   const monthsValues = resolveArray(calendar, 'monthsArray', 'months.values');
-  for (let i = 0; i < components.month; i++) dayOfYear += monthsValues[i]?.days ?? 0;
+  let dayOfYear;
+  if (calendar?._calculateDayOfYear) dayOfYear = calendar._calculateDayOfYear(components);
+  else {
+    dayOfYear = components.dayOfMonth;
+    for (let i = 0; i < components.month; i++) dayOfYear += monthsValues[i]?.days ?? 0;
+  }
   let seasonStart = 0;
   let seasonEnd = 365;
   const seasonsArray = resolveArray(calendar, 'seasonsArray', 'seasons.values');
@@ -362,7 +368,7 @@ export function formatApproximateDate(calendar, components) {
     seasonEnd = season.dayEnd ?? (monthsValues[season.monthEnd]?.days ?? 30) - 1;
     for (let i = 0; i < season.monthEnd; i++) seasonEnd += monthsValues[i]?.days ?? 0;
   } else if (seasonIdx >= 0 && calendar?.seasons?.type === 'periodic' && calendar?._calculatePeriodicSeasonBounds) {
-    const bounds = calendar._calculatePeriodicSeasonBounds(seasonIdx);
+    const bounds = calendar._calculatePeriodicSeasonBounds(seasonIdx, calendar.getDaysInYear?.(components.year));
     seasonStart = bounds.dayStart;
     seasonEnd = bounds.dayEnd;
   } else if (season.dayStart !== undefined) {
@@ -502,6 +508,13 @@ export function formatCustom(calendar, components, formatStr) {
         if (field === 'cycle') return String(getCycleNumber(calendar, components, idx));
         return '';
       }
+      if (customToken.startsWith('moon=')) {
+        const paramPart = customToken.slice(5);
+        let moonSelector;
+        if ((paramPart.startsWith("'") && paramPart.endsWith("'")) || (paramPart.startsWith('"') && paramPart.endsWith('"'))) moonSelector = paramPart.slice(1, -1);
+        else moonSelector = /^\d+$/.test(paramPart) ? parseInt(paramPart, 10) : paramPart;
+        return getMoonPhaseName(calendar, components, moonSelector);
+      }
       if (customToken.startsWith('moonIcon')) {
         const paramPart = customToken.slice(9);
         let moonSelector;
@@ -544,29 +557,65 @@ export function validateFormatString(formatStr, calendar, components) {
 }
 
 /**
- * Get moon phase name for the given date.
- * @param {object} calendar - Calendar data
- * @param {object} components - Date components
- * @returns {string} Moon phase name
+ * Resolve a moon selector (index, name string, or undefined) to a numeric index.
+ * @param {object[]} moons - Array of moon definitions
+ * @param {string|number} [moonSelector] - Moon name or index
+ * @returns {number} Resolved moon index
  */
-function getMoonPhaseName(calendar, components) {
-  const moons = resolveArray(calendar, 'moonsArray', 'moons');
-  if (!moons.length) return '';
-  if (calendar.getMoonPhase && calendar.componentsToTime) {
-    const worldTime = calendar.componentsToTime(components);
-    const phaseData = calendar.getMoonPhase(0, worldTime);
-    return phaseData?.subPhaseName || phaseData?.name || '';
-  }
-  const moon = moons[0];
-  const phasesArr = Object.values(moon.phases ?? {});
-  if (!phasesArr.length) return '';
+function resolveMoonIndex(moons, moonSelector) {
+  if (moonSelector === undefined || moonSelector === null || moonSelector === '') return 0;
+  if (typeof moonSelector === 'number') return moonSelector;
+  if (/^\d+$/.test(moonSelector)) return parseInt(moonSelector, 10);
+  const selectorLower = String(moonSelector).toLowerCase();
+  const foundIndex = moons.findIndex((m) => {
+    const moonName = localize(m.name).toLowerCase();
+    const rawName = (m.name || '').toLowerCase();
+    return moonName === selectorLower || rawName === selectorLower;
+  });
+  return foundIndex >= 0 ? foundIndex : 0;
+}
+
+/**
+ * Get fallback phase position for a moon when calendar.getMoonPhase is unavailable.
+ * @param {object} moon - Moon definition
+ * @param {object} components - Date components {year, month, dayOfMonth}
+ * @returns {number} Phase position 0-1
+ */
+function getFallbackPhasePosition(moon, components) {
   const { year, month, dayOfMonth } = components;
   const cycleLength = moon.cycleLength || 29;
   const refDate = moon.referenceDate || { year: 0, month: 0, dayOfMonth: 0 };
   const refDays = refDate.year * 365 + refDate.month * 30 + (refDate.dayOfMonth ?? 0);
   const currentDays = year * 365 + month * 30 + dayOfMonth;
+  if (moon.phaseMode === 'randomized') {
+    return resolveRandomizedPhase(moon, currentDays, { year, month, dayOfMonth });
+  }
   const daysSinceRef = currentDays - refDays;
-  const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+  return (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+}
+
+/**
+ * Get moon phase name for the given date.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @param {string|number} [moonSelector] - Moon name or index (default: first moon)
+ * @returns {string} Moon phase name
+ */
+function getMoonPhaseName(calendar, components, moonSelector) {
+  const moons = resolveArray(calendar, 'moonsArray', 'moons');
+  if (!moons.length) return '';
+  let moonIndex = resolveMoonIndex(moons, moonSelector);
+  if (calendar.getMoonPhase && calendar.componentsToTime) {
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const internalComponents = { ...components, year: components.year - yearZero };
+    const worldTime = calendar.componentsToTime(internalComponents);
+    const phaseData = calendar.getMoonPhase(moonIndex, worldTime);
+    return phaseData?.subPhaseName || phaseData?.name || '';
+  }
+  const moon = moons[moonIndex];
+  const phasesArr = Object.values(moon.phases ?? {});
+  if (!phasesArr.length) return '';
+  const cyclePosition = getFallbackPhasePosition(moon, components);
   const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
   const phase = phasesArr[phaseIndex];
   return phase ? localize(phase.name) : '';
@@ -582,20 +631,7 @@ function getMoonPhaseName(calendar, components) {
 function getMoonPhaseIcon(calendar, components, moonSelector) {
   const moons = resolveArray(calendar, 'moonsArray', 'moons');
   if (!moons.length) return '';
-  let moonIndex = 0;
-  if (moonSelector !== undefined && moonSelector !== null && moonSelector !== '') {
-    if (typeof moonSelector === 'number') moonIndex = moonSelector;
-    else if (/^\d+$/.test(moonSelector)) moonIndex = parseInt(moonSelector, 10);
-    else {
-      const selectorLower = String(moonSelector).toLowerCase();
-      const foundIndex = moons.findIndex((m) => {
-        const moonName = localize(m.name).toLowerCase();
-        const rawName = (m.name || '').toLowerCase();
-        return moonName === selectorLower || rawName === selectorLower;
-      });
-      if (foundIndex >= 0) moonIndex = foundIndex;
-    }
-  }
+  const moonIndex = resolveMoonIndex(moons, moonSelector);
   const moon = moons[moonIndex];
   if (!moon) return '';
   let phase;
@@ -612,13 +648,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
   if (!phase) {
     const phasesArr = Object.values(moon.phases ?? {});
     if (phasesArr.length) {
-      const { year, month, dayOfMonth } = components;
-      const cycleLength = moon.cycleLength || 29;
-      const refDate = moon.referenceDate || { year: 0, month: 0, dayOfMonth: 0 };
-      const refDays = refDate.year * 365 + refDate.month * 30 + (refDate.dayOfMonth ?? 0);
-      const currentDays = year * 365 + month * 30 + dayOfMonth;
-      const daysSinceRef = currentDays - refDays;
-      const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+      const cyclePosition = getFallbackPhasePosition(moon, components);
       const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
       phase = phasesArr[phaseIndex];
     }
@@ -965,14 +995,14 @@ export function formatForLocation(calendar, components, locationId) {
  */
 export function getDisplayLocationDefinitions() {
   return [
-    { id: 'hudDate', label: 'CALENDARIA.Format.Location.HudDate', category: 'hud' },
-    { id: 'hudTime', label: 'CALENDARIA.Format.Location.HudTime', category: 'hud' },
+    { id: 'hudDate', label: 'CALENDARIA.Common.DateDisplay', category: 'hud' },
+    { id: 'hudTime', label: 'CALENDARIA.Common.TimeDisplay', category: 'hud' },
     { id: 'microCalHeader', label: 'CALENDARIA.Format.Location.MicroCalHeader', category: 'miniCal' },
     { id: 'miniCalHeader', label: 'CALENDARIA.Format.Location.MiniCalHeader', category: 'miniCal' },
-    { id: 'miniCalTime', label: 'CALENDARIA.Format.Location.MiniCalTime', category: 'miniCal' },
+    { id: 'miniCalTime', label: 'CALENDARIA.Common.TimeDisplay', category: 'miniCal' },
     { id: 'bigCalHeader', label: 'CALENDARIA.Format.Location.BigCalHeader', category: 'bigcal' },
-    { id: 'bigCalWeekHeader', label: 'CALENDARIA.Format.Location.BigCalWeekHeader', category: 'bigcal' },
-    { id: 'bigCalYearHeader', label: 'CALENDARIA.Format.Location.BigCalYearHeader', category: 'bigcal' },
+    { id: 'bigCalWeekHeader', label: 'CALENDARIA.Common.WeekViewHeader', category: 'bigcal' },
+    { id: 'bigCalYearHeader', label: 'CALENDARIA.Common.YearViewHeader', category: 'bigcal' },
     { id: 'bigCalYearLabel', label: 'CALENDARIA.Format.Location.BigCalYearLabel', category: 'bigcal' },
     { id: 'chatTimestamp', label: 'CALENDARIA.Format.Location.ChatTimestamp', category: 'chat' }
   ];
@@ -1001,16 +1031,16 @@ export function timeSince(targetDate, currentDate) {
   const days = absDiff;
   let unit, count;
   if (years >= 1) {
-    unit = years === 1 ? localize('CALENDARIA.Format.Year') : localize('CALENDARIA.Format.Years');
+    unit = years === 1 ? localize('CALENDARIA.Common.UnitYear') : localize('CALENDARIA.Common.UnitYears');
     count = years;
   } else if (months >= 1) {
-    unit = months === 1 ? localize('CALENDARIA.Format.Month') : localize('CALENDARIA.Format.Months');
+    unit = months === 1 ? localize('CALENDARIA.Common.UnitMonth') : localize('CALENDARIA.Common.UnitMonths');
     count = months;
   } else if (weeks >= 1) {
-    unit = weeks === 1 ? localize('CALENDARIA.Format.Week') : localize('CALENDARIA.Format.Weeks');
+    unit = weeks === 1 ? localize('CALENDARIA.Common.UnitWeek') : localize('CALENDARIA.Common.UnitWeeks');
     count = weeks;
   } else {
-    unit = days === 1 ? localize('CALENDARIA.Format.Day') : localize('CALENDARIA.Format.Days');
+    unit = days === 1 ? localize('CALENDARIA.Common.UnitDay') : localize('CALENDARIA.Common.UnitDays');
     count = days;
   }
   if (isFuture) return format('CALENDARIA.Format.InFuture', { count, unit });
@@ -1037,9 +1067,9 @@ export function getAvailableTokens() {
     { token: 'Do', descriptionKey: 'CALENDARIA.Format.Token.Do', type: 'standard' },
     { token: 'DDD', descriptionKey: 'CALENDARIA.Format.Token.DDD', type: 'standard' },
     { token: 'EEEE', descriptionKey: 'CALENDARIA.Format.Token.EEEE', type: 'standard' },
-    { token: 'EEE', descriptionKey: 'CALENDARIA.Format.Token.EEE', type: 'standard' },
-    { token: 'EE', descriptionKey: 'CALENDARIA.Format.Token.EE', type: 'standard' },
-    { token: 'E', descriptionKey: 'CALENDARIA.Format.Token.E', type: 'standard' },
+    { token: 'EEE', descriptionKey: 'CALENDARIA.Common.FormatWeekdayShort', type: 'standard' },
+    { token: 'EE', descriptionKey: 'CALENDARIA.Common.FormatWeekdayShort', type: 'standard' },
+    { token: 'E', descriptionKey: 'CALENDARIA.Common.FormatWeekdayShort', type: 'standard' },
     { token: 'EEEEE', descriptionKey: 'CALENDARIA.Format.Token.EEEEE', type: 'standard' },
     { token: 'e', descriptionKey: 'CALENDARIA.Format.Token.e', type: 'standard' },
     { token: 'w', descriptionKey: 'CALENDARIA.Format.Token.w', type: 'standard' },
@@ -1048,9 +1078,9 @@ export function getAvailableTokens() {
     { token: '[namedWeek]', descriptionKey: 'CALENDARIA.Format.Token.namedWeek', type: 'custom' },
     { token: '[namedWeekAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedWeekAbbr', type: 'custom' },
     { token: 'GGGG', descriptionKey: 'CALENDARIA.Format.Token.GGGG', type: 'standard' },
-    { token: 'GGG', descriptionKey: 'CALENDARIA.Format.Token.GGG', type: 'standard' },
-    { token: 'GG', descriptionKey: 'CALENDARIA.Format.Token.GG', type: 'standard' },
-    { token: 'G', descriptionKey: 'CALENDARIA.Format.Token.G', type: 'standard' },
+    { token: 'GGG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
+    { token: 'GG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
+    { token: 'G', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
     { token: '[yearInEra]', descriptionKey: 'CALENDARIA.Format.Token.yearInEra', type: 'custom' },
     { token: '[era=N]', descriptionKey: 'CALENDARIA.Format.Token.eraIndex', type: 'custom' },
     { token: '[eraAbbr=N]', descriptionKey: 'CALENDARIA.Format.Token.eraAbbrIndex', type: 'custom' },

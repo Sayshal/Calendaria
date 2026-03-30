@@ -4,10 +4,9 @@
  * @author Tyler
  */
 
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS } from '../constants.mjs';
-import { format, localize } from '../utils/localization.mjs';
-import { log } from '../utils/logger.mjs';
+import { format, localize, log } from '../utils/_module.mjs';
 
 /**
  * Abstract base class for calendar importers.

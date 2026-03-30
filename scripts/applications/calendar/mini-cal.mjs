@@ -1,29 +1,87 @@
 /**
  * MiniCal - All-in-one calendar widget with timekeeping.
- * Frameless, draggable, with persistent position and open state.
  * @module Applications/MiniCal
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
-import { dayOfWeek } from '../../notes/date-utils.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
-import { isRecurringMatch } from '../../notes/recurrence.mjs';
-import TimeClock, { getTimeIncrements } from '../../time/time-clock.mjs';
-import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../../utils/formatting/format-utils.mjs';
-import { format, localize } from '../../utils/localization.mjs';
-import { canChangeDateTime, canChangeWeather, canViewMiniCal } from '../../utils/permissions.mjs';
-import SearchManager from '../../utils/search-manager.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
-import * as ViewUtils from '../../utils/ui/calendar-view-utils.mjs';
-import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import * as WidgetManager from '../../utils/widget-manager.mjs';
-import { getPresetAlias } from '../../weather/data/weather-presets.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { SettingsPanel } from '../settings/settings-panel.mjs';
-import WeatherPickerApp from '../weather/weather-picker.mjs';
-import { BigCal } from './big-cal.mjs';
+import {
+  NoteManager,
+  clearDisplayPropsCache,
+  dayOfWeek,
+  enrichNoteForDisplay,
+  extractNoteMatchData,
+  getAllPresets,
+  isRecurringMatch,
+  resolveNoteDisplayProps,
+  summarizeConditionTree,
+  topologicalSortNotes
+} from '../../notes/_module.mjs';
+import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
+import {
+  CalendariaSocket,
+  attachWidgetListeners,
+  buildOpenAppsMenuItem,
+  buildWeatherLookup,
+  buildWeatherPillData,
+  canChangeDateTime,
+  canChangeWeather,
+  canViewMiniCal,
+  checkStickyZones,
+  cleanupSnapIndicator,
+  closeMoonPicker,
+  encodeHtmlAttribute,
+  enrichSeasonData,
+  escapeText,
+  finalizeDrag,
+  format,
+  formatForLocation,
+  generateDayTooltip,
+  getAllMoonPhases,
+  getCalendarNotes,
+  getCurrentViewedDate,
+  getDayWeather,
+  getEquivalentDateTooltip,
+  getFestivalNoteForDay,
+  getFirstMoonPhase,
+  getLeadingDays,
+  getRestorePosition,
+  getSelectedMoon,
+  getSidebarBuffer,
+  getVisibleNotes,
+  hasFogRevealedMonthInDirection,
+  hasMoonIconMarkers,
+  hasWidgetsForPoint,
+  isCombatBlocked,
+  isFogEnabled,
+  isMonthFullyFogged,
+  isRevealed,
+  isToday,
+  localize,
+  pinToZone,
+  previewSnippet,
+  registerForZoneUpdates,
+  renderCycleIndicator,
+  renderEraIndicator,
+  renderMoonIcons,
+  renderReplacementOrOriginal,
+  renderSeasonIndicator,
+  renderWeatherIndicator,
+  renderWidgetsForPoint,
+  restorePinnedState,
+  setDateTo,
+  setSelectedMoon,
+  setupDayContextMenu,
+  showMoonPicker,
+  stripSecrets,
+  unpinFromZone,
+  unregisterFromZoneUpdates,
+  usesDomParenting,
+  warnShowToAll
+} from '../../utils/_module.mjs';
+import { WeatherManager, getPresetAlias } from '../../weather/_module.mjs';
+import { BigCal, NoteViewer, SecondaryCalendar, SettingsPanel, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -82,17 +140,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether sidebar is locked due to notes panel */
   #sidebarLocked = false;
 
-  /** @type {boolean} Search panel visibility state */
-  #searchOpen = false;
+  /** @type {string|null} Notes panel category filter */
+  #noteFilterPreset = null;
 
-  /** @type {string} Current search term */
-  #searchTerm = '';
+  /** @type {string|null} Notes panel visibility filter */
+  #noteFilterVisibility = null;
 
-  /** @type {object[]|null} Current search results */
-  #searchResults = null;
-
-  /** @type {Function|null} Click-outside handler for search panel */
-  #clickOutsideHandler = null;
+  /** @type {string|null} Notes panel display style filter */
+  #noteFilterDisplayStyle = null;
 
   /** @override */
   static DEFAULT_OPTIONS = {
@@ -124,12 +179,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       toSunset: MiniCal._onToSunset,
       toMidnight: MiniCal._onToMidnight,
       openWeatherPicker: MiniCal._onOpenWeatherPicker,
+      openChronicle: MiniCal._onOpenChronicle,
       openSettings: MiniCal._onOpenSettings,
-      toggleSearch: MiniCal._onToggleSearch,
-      closeSearch: MiniCal._onCloseSearch,
-      openSearchResult: MiniCal._onOpenSearchResult,
       showMoons: MiniCal._onShowMoons,
-      closeMoonsPanel: MiniCal._onCloseMoonsPanel
+      closeMoonsPanel: MiniCal._onCloseMoonsPanel,
+      clearNoteFilters: MiniCal._onClearNoteFilters,
+      openSecondaryCalendar: MiniCal._onOpenSecondaryCalendar,
+      openNoteViewer: MiniCal._onOpenNoteViewer
     }
   };
 
@@ -150,7 +206,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   get viewedDate() {
     if (this._viewedDate) return this._viewedDate;
-    return ViewUtils.getCurrentViewedDate(this.calendar);
+    return getCurrentViewedDate(this.calendar);
   }
 
   /**
@@ -161,16 +217,28 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._viewedDate = date;
   }
 
+  /**
+   * Navigate the calendar view to a specific date and select it.
+   * @param {object} date - Date to select {year, month, dayOfMonth}
+   */
+  selectDate(date) {
+    this._viewedDate = { year: date.year, month: date.month };
+    this._selectedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
+  }
+
   /** @override */
   async _prepareContext(options) {
+    clearDisplayPropsCache();
     const context = await super._prepareContext(options);
     const calendar = this.calendar;
     const viewedDate = this.viewedDate;
     context.isGM = game.user.isGM;
+    context.showChronicleButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_MINI_CAL_BUTTON);
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
     context.running = TimeClock.running;
-    context.clockLocked = TimeClock.locked;
+    context.clockDisabled = TimeClock.disabled;
+    context.clockLocked = TimeClock.locked || TimeClock.disabled;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const rawTime = calendar ? formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: components.dayOfMonth ?? 0 }, 'miniCalTime') : TimeClock.getFormattedTime();
@@ -184,12 +252,16 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const customJumps = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS) || {};
     const currentJumps = customJumps[appSettings.incrementKey] || {};
     context.customJumps = { dec2: currentJumps.dec2 ?? null, dec1: currentJumps.dec1 ?? null, inc1: currentJumps.inc1 ?? null, inc2: currentJumps.inc2 ?? null };
-    const allNotes = ViewUtils.getCalendarNotes();
-    const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
+    const allNotes = getCalendarNotes();
+    const visibleNotes = topologicalSortNotes(getVisibleNotes(allNotes));
     if (calendar) context.calendarData = this._generateMiniCalData(calendar, viewedDate, visibleNotes);
+    if (!game.user.isGM && isFogEnabled() && game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_NAV_MODE) === 'skip' && calendar) {
+      context.fogNavDisablePrev = !hasFogRevealedMonthInDirection(viewedDate.year, viewedDate.month, -1, calendar);
+      context.fogNavDisableNext = !hasFogRevealedMonthInDirection(viewedDate.year, viewedDate.month, 1, calendar);
+    }
     context.disableSetCurrentDate = true;
     if (game.user.isGM && this._selectedDate) {
-      const today = ViewUtils.getCurrentViewedDate(calendar);
+      const today = getCurrentViewedDate(calendar);
       context.disableSetCurrentDate = this._selectedDate.year === today.year && this._selectedDate.month === today.month && this._selectedDate.dayOfMonth === today.dayOfMonth;
     }
     context.sidebarVisible = this.#sidebarVisible || this.#sidebarLocked || this.#stickySidebar;
@@ -202,19 +274,31 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.stickyPosition = this.#stickyPosition;
     context.hasAnyStickyMode = this.#stickyTimeControls || this.#stickySidebar || this.#stickyPosition;
     if (this.#notesPanelVisible && this._selectedDate) {
-      context.selectedDateNotes = this._getSelectedDateNotes(visibleNotes);
+      const selectedFogged = isFogEnabled() && !isRevealed(this._selectedDate.year, this._selectedDate.month, this._selectedDate.dayOfMonth);
+      const allPanelNotes = selectedFogged ? [] : this._getSelectedDateNotes(visibleNotes);
+      context.selectedDateNotes = allPanelNotes;
       context.selectedDateLabel = this._formatSelectedDate();
+      context.noteFilterPreset = this.#noteFilterPreset;
+      context.hasActiveFilters = !!this.#noteFilterPreset;
+      const { year, month, dayOfMonth } = this._selectedDate;
+      const targetDate = { year, month, dayOfMonth };
+      const unfilteredNotes = visibleNotes.filter((page) => isRecurringMatch(extractNoteMatchData(page), targetDate));
+      const activePresetIds = new Set(unfilteredNotes.flatMap((p) => p.system.categories || []));
+      const hasFestivals = unfilteredNotes.some((p) => resolveNoteDisplayProps(p).isFestival);
+      context.noteFilterPresets = [
+        { id: '__festival__', label: localize('CALENDARIA.Common.Festivals'), selected: this.#noteFilterPreset === '__festival__', hasNotes: hasFestivals },
+        ...getAllPresets().map((c) => ({ id: c.id, label: c.label, selected: c.id === this.#noteFilterPreset, hasNotes: activePresetIds.has(c.id) }))
+      ];
     }
+    context.hasMultipleCalendars = CalendarRegistry.getAll().size > 1;
     context.disableViewNotes = true;
-    const checkDate = this._selectedDate || ViewUtils.getCurrentViewedDate(calendar);
+    const checkDate = this._selectedDate || getCurrentViewedDate(calendar);
     if (checkDate) {
-      const { count } = this._getNotesOnDay(visibleNotes, checkDate.year, checkDate.month, checkDate.dayOfMonth);
-      context.disableViewNotes = count === 0;
+      const checkFogged = isFogEnabled() && !isRevealed(checkDate.year, checkDate.month, checkDate.dayOfMonth);
+      const { count, hasFestival } = checkFogged ? { count: 0, hasFestival: false } : this._getNotesOnDay(visibleNotes, checkDate.year, checkDate.month, checkDate.dayOfMonth);
+      context.disableViewNotes = count === 0 && !hasFestival;
     }
     context.weather = this._getWeatherContext();
-    context.searchOpen = this.#searchOpen;
-    context.searchTerm = this.#searchTerm;
-    context.searchResults = this.#searchResults || [];
     context.showWeather = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
     context.showSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
     context.showEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
@@ -251,11 +335,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #prepareWidgetContext(context) {
     const widgets = {};
-    widgets.sidebar = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.MINICAL_SIDEBAR, 'minical');
+    widgets.sidebar = renderWidgetsForPoint(WIDGET_POINTS.MINICAL_SIDEBAR, 'minical');
     const weatherObj = context.showWeather && context.weather ? { ...context.weather, icon: this.#normalizeWeatherIcon(context.weather.icon) } : null;
-    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.weatherIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.WEATHER_INDICATOR,
-      ViewUtils.renderWeatherIndicator({
+      renderWeatherIndicator({
         weather: weatherObj,
         displayMode: context.weatherDisplayMode,
         canInteract: context.canChangeWeather,
@@ -264,21 +348,17 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       'minical'
     );
     const season = context.showSeason ? this.#normalizeSeasonData(context.calendarData?.currentSeason) : null;
-    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(
-      REPLACEABLE_ELEMENTS.SEASON_INDICATOR,
-      ViewUtils.renderSeasonIndicator({ season, displayMode: context.seasonDisplayMode }),
-      'minical'
-    );
+    widgets.seasonIndicator = renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, renderSeasonIndicator({ season, displayMode: context.seasonDisplayMode }), 'minical');
     const era = context.showEra ? this.#normalizeEraData(context.calendarData?.currentEra) : null;
-    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, ViewUtils.renderEraIndicator({ era, displayMode: context.eraDisplayMode }), 'minical');
+    widgets.eraIndicator = renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, renderEraIndicator({ era, displayMode: context.eraDisplayMode }), 'minical');
     const cycleData = context.showCycles ? context.cycleData : null;
-    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(
+    widgets.cycleIndicator = renderReplacementOrOriginal(
       REPLACEABLE_ELEMENTS.CYCLE_INDICATOR,
-      ViewUtils.renderCycleIndicator({ cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
+      renderCycleIndicator({ cycleData, displayMode: context.cyclesDisplayMode, cycleText: context.cycleText }),
       'minical'
     );
-    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'minical');
-    widgets.hasIndicators = WidgetManager.hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
+    widgets.indicators = renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'minical');
+    widgets.hasIndicators = hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
     return widgets;
   }
 
@@ -329,16 +409,18 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;
     const temp = WeatherManager.formatTemperature(WeatherManager.getTemperature());
+    const windKph = weather.wind?.kph ?? null;
     const tooltipHtml = WeatherManager.buildWeatherTooltip({
       label,
       description: weather.description ? localize(weather.description) : null,
       temp,
       windSpeed,
+      windKph,
       windDirection,
       precipType,
       precipIntensity: weather.precipitation?.intensity
     });
-    return { id: weather.id, label, icon: weather.icon, color: weather.color, temperature: temp, tooltipHtml, windSpeed, windDirection, precipType };
+    return { id: weather.id, label, icon: weather.icon, color: weather.color, temperature: temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };
   }
 
   /**
@@ -363,62 +445,47 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     if (startDayOfWeek > 0) {
-      const totalMonths = calendar.monthsArray.length ?? 12;
-      let prevDays = [];
-      let remainingSlots = startDayOfWeek;
-      let checkMonth = month === 0 ? totalMonths - 1 : month - 1;
-      let checkYear = month === 0 ? year - 1 : year;
-      let checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
-      while (remainingSlots > 0 && checkDay > 0) {
-        const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: checkDay - 1 });
-        const isIntercalary = festivalDay?.countsForWeekday === false;
-        if (!isIntercalary) {
-          prevDays.unshift({ day: checkDay, dayOfMonth: checkDay - 1, year: checkYear, month: checkMonth });
-          remainingSlots--;
-        }
-        checkDay--;
-        if (checkDay < 1 && remainingSlots > 0) {
-          checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
-          if (checkMonth === totalMonths - 1) checkYear--;
-          checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
-        }
-      }
-      for (const pd of prevDays)
-        currentWeek.push({ day: pd.day, dayOfMonth: pd.dayOfMonth, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: ViewUtils.isToday(pd.year, pd.month, pd.dayOfMonth, calendar) });
+      const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
+      for (const pd of prevDays) currentWeek.push({ ...pd, isToday: isToday(pd.year, pd.month, pd.dayOfMonth, calendar) });
     }
     const showWeatherIcons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
     let weatherLookup = null;
-    if (showWeatherIcons) weatherLookup = ViewUtils.buildWeatherLookup();
+    if (showWeatherIcons) weatherLookup = buildWeatherLookup();
     const intercalaryDays = [];
+    const fogEnabled = isFogEnabled();
     for (let dayOfMonth = 0; dayOfMonth < daysInMonth; dayOfMonth++) {
       const displayDay = dayOfMonth + 1;
-      const noteInfo = this._getNotesOnDay(visibleNotes, year, month, dayOfMonth);
-      const noteCount = noteInfo.count;
-      const noteBadgeColor = noteInfo.color;
-      const noteBadgeTextColor = noteBadgeColor ? MiniCal._getContrastTextColor(noteBadgeColor) : null;
-      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth });
-      const moonData = showMoons ? ViewUtils.getFirstMoonPhase(calendar, year, month, dayOfMonth) : null;
-      const wd = weatherLookup ? ViewUtils.getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
-      const isIntercalary = festivalDay?.countsForWeekday === false;
-      const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
-      const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
-      const dayTooltip = ViewUtils.generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd);
+      const isFogged = fogEnabled && !isRevealed(year, month, dayOfMonth);
+      const noteInfo = isFogged ? { count: 0, color: null, enriched: [], hasFestival: false, festivalColor: null } : this._getNotesOnDay(visibleNotes, year, month, dayOfMonth);
+      const noteColor = noteInfo.color;
+      const noteTextColor = noteColor ? MiniCal._getContrastTextColor(noteColor) : null;
+      const festivalDay = isFogged ? null : calendar.findFestivalDay({ year: internalYear, month, dayOfMonth });
+      const fi = isFogged ? null : getFestivalNoteForDay(visibleNotes, year, month, dayOfMonth);
+      const moonData = showMoons && !isFogged ? getFirstMoonPhase(calendar, year, month, dayOfMonth) : null;
+      const wd = weatherLookup && !isFogged ? getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
+      const isIntercalary = fi ? !fi.countsForWeekday : festivalDay?.countsForWeekday === false;
+      const festivalInfo = fi ? { name: fi.name, description: fi.description, color: fi.color, position: fi.position } : null;
+
+      const dayTooltip = isFogged ? '' : generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd, noteInfo.enriched);
       if (isIntercalary) {
         intercalaryDays.push({
           day: displayDay,
           dayOfMonth,
           year,
           month,
-          isToday: ViewUtils.isToday(year, month, dayOfMonth, calendar),
+          isFogged,
+          isToday: isToday(year, month, dayOfMonth, calendar),
           isSelected: this._isSelected(year, month, dayOfMonth),
-          hasNotes: noteCount > 0,
-          noteCount,
-          noteBadgeColor,
-          noteBadgeTextColor,
-          isFestival: true,
-          festivalName: festivalNameStr,
-          festivalColor: festivalDay?.color || '',
-          festivalDescription: festivalDay?.description || '',
+          hasNotes: noteInfo.count > 0,
+          noteCount: noteInfo.count,
+          noteColor,
+          noteTextColor,
+          hasFestivalNote: noteInfo.hasFestival,
+          festivalNoteColor: noteInfo.festivalColor,
+          isFestival: !!fi?.showVisuals,
+          festivalName: fi?.showVisuals ? fi.name : '',
+          festivalColor: fi?.showVisuals ? fi.color : '',
+          festivalDescription: fi?.description || '',
           dayTooltip,
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
@@ -426,7 +493,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isIntercalary: true,
           weatherIcon: wd?.icon ?? null,
           weatherColor: wd?.color ?? null,
-          weatherTooltipHtml: ViewUtils.buildWeatherPillData(wd).weatherTooltipHtml,
+          weatherTooltipHtml: buildWeatherPillData(wd).weatherTooltipHtml,
           isForecast: wd?.isForecast ?? false
         });
       } else {
@@ -435,23 +502,26 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           dayOfMonth,
           year,
           month,
-          isToday: ViewUtils.isToday(year, month, dayOfMonth, calendar),
+          isFogged,
+          isToday: isToday(year, month, dayOfMonth, calendar),
           isSelected: this._isSelected(year, month, dayOfMonth),
-          hasNotes: noteCount > 0,
-          noteCount,
-          noteBadgeColor,
-          noteBadgeTextColor,
-          isFestival: !!festivalDay,
-          festivalName: festivalNameStr,
-          festivalColor: festivalDay?.color || '',
-          festivalDescription: festivalDay?.description || '',
+          hasNotes: noteInfo.count > 0,
+          noteCount: noteInfo.count,
+          noteColor,
+          noteTextColor,
+          hasFestivalNote: noteInfo.hasFestival,
+          festivalNoteColor: noteInfo.festivalColor,
+          isFestival: !!fi?.showVisuals,
+          festivalName: fi?.showVisuals ? fi.name : '',
+          festivalColor: fi?.showVisuals ? fi.color : '',
+          festivalDescription: fi?.description || '',
           dayTooltip,
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
           weatherIcon: wd?.icon ?? null,
           weatherColor: wd?.color ?? null,
-          weatherTooltipHtml: ViewUtils.buildWeatherPillData(wd).weatherTooltipHtml,
+          weatherTooltipHtml: buildWeatherPillData(wd).weatherTooltipHtml,
           isForecast: wd?.isForecast ?? false
         });
         if (currentWeek.length === daysInWeek) {
@@ -492,7 +562,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
             year: checkYear,
             month: checkMonth,
             isFromOtherMonth: true,
-            isToday: ViewUtils.isToday(checkYear, checkMonth, dayInMonth - 1, calendar)
+            isToday: isToday(checkYear, checkMonth, dayInMonth - 1, calendar)
           });
           remainingSlots--;
         }
@@ -507,7 +577,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       else if (lastRegularWeek) lastRegularWeek.push(...currentWeek);
     }
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
-    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED);
@@ -517,13 +587,39 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       year: headerDate.year,
       month: headerDate.month,
       dayOfMonth: headerDate.dayOfMonth ?? 0,
-      ...(compact ? { hour: game.time.components.hour, minute: game.time.components.minute, second: game.time.components.second } : {})
+      hour: game.time.components.hour,
+      minute: game.time.components.minute,
+      second: game.time.components.second
     };
     const headerLocation = compact ? 'microCalHeader' : 'miniCalHeader';
     const rawHeader = formatForLocation(calendar, headerComponents, headerLocation);
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     const weekdays = monthWeekdays.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }));
-    return { year, month, monthName: localize(monthData.name), yearDisplay: String(year), formattedHeader, currentSeason, currentEra, weeks, daysInWeek, weekdays };
+    const headerEquivalentTooltip = getEquivalentDateTooltip(headerDate.year, headerDate.month, headerDate.dayOfMonth ?? 0);
+    const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
+    let equivalentDates = [];
+    if (eqCalendars.size) {
+      const activeId = CalendarRegistry.getActiveId();
+      equivalentDates = getEquivalentDates({ year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.dayOfMonth ?? 0 }, activeId, [...eqCalendars]).map((eq) => ({
+        label: eq.formatted,
+        calendarName: eq.calendarName,
+        calendarId: eq.calendarId
+      }));
+    }
+    return {
+      year,
+      month,
+      monthName: localize(monthData.name),
+      yearDisplay: String(year),
+      formattedHeader,
+      headerEquivalentTooltip,
+      equivalentDates,
+      currentSeason,
+      currentEra,
+      weeks,
+      daysInWeek,
+      weekdays
+    };
   }
 
   /**
@@ -541,6 +637,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
+    const fogEnabled = isFogEnabled();
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
@@ -559,12 +656,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           dayYear--;
         }
         const dayOfMonth = dayNum - 1;
-        const noteInfo = this._getNotesOnDay(visibleNotes, dayYear, 0, dayOfMonth);
-        const noteCount = noteInfo.count;
-        const noteBadgeColor = noteInfo.color;
-        const noteBadgeTextColor = noteBadgeColor ? MiniCal._getContrastTextColor(noteBadgeColor) : null;
-        const festivalDay = calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
-        const moonData = ViewUtils.getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth);
+        const dayIsFogged = fogEnabled && !isRevealed(dayYear, 0, dayOfMonth);
+        const noteInfo = dayIsFogged ? { count: 0, color: null, enriched: [], hasFestival: false, festivalColor: null } : this._getNotesOnDay(visibleNotes, dayYear, 0, dayOfMonth);
+        const noteColor = noteInfo.color;
+        const noteTextColor = noteColor ? MiniCal._getContrastTextColor(noteColor) : null;
+        const festivalDay = dayIsFogged ? null : calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
+        const moonData = !dayIsFogged ? getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth) : null;
         const isIntercalary = festivalDay?.countsForWeekday === false;
         const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
@@ -573,17 +670,20 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           dayOfMonth,
           year: dayYear,
           month: 0,
-          isToday: ViewUtils.isToday(dayYear, 0, dayOfMonth, calendar),
+          isFogged: dayIsFogged,
+          isToday: isToday(dayYear, 0, dayOfMonth, calendar),
           isSelected: this._isSelected(dayYear, 0, dayOfMonth),
-          hasNotes: noteCount > 0,
-          noteCount,
-          noteBadgeColor,
-          noteBadgeTextColor,
-          isFestival: !!festivalDay,
-          festivalName: festivalNameStr,
-          festivalColor: festivalDay?.color || '',
-          festivalDescription: festivalDay?.description || '',
-          dayTooltip: ViewUtils.generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo),
+          hasNotes: noteInfo.count > 0,
+          noteCount: noteInfo.count,
+          noteColor,
+          noteTextColor,
+          hasFestivalNote: noteInfo.hasFestival,
+          festivalNoteColor: noteInfo.festivalColor,
+          isFestival: !dayIsFogged && !!festivalDay,
+          festivalName: dayIsFogged ? null : festivalNameStr,
+          festivalColor: dayIsFogged ? '' : festivalDay?.color || '',
+          festivalDescription: dayIsFogged ? '' : festivalDay?.description || '',
+          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo),
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
@@ -595,7 +695,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       weeks.push(currentWeek);
     }
     const viewedComponents = { month: 0, dayOfMonth: viewedDayOfMonth };
-    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
     const weekdayData = calendar.weekdaysArray ?? [];
     const displayWeek = weekNumber + 1;
@@ -618,7 +718,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Get contrasting text color (black or white) for a given hex background.
+   * Return a contrast text color (black or white) for a given hex background.
    * @param {string} hex - Hex color string (e.g. "#ff0000")
    * @returns {string} "#000000" or "#ffffff"
    */
@@ -635,30 +735,26 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} year - Year
    * @param {number} month - Month index
    * @param {number} dayOfMonth - Day of month index
-   * @returns {{ count: number, color: string|null }} Note count and first note's color
+   * @returns {{ count: number, color: string|null, hasFestival: boolean, festivalColor: string|null, festivalNote: object|null, enriched: object[] }} Note display info
    */
   _getNotesOnDay(notes, year, month, dayOfMonth) {
     const targetDate = { year, month, dayOfMonth };
-    const matching = notes.filter((page) => {
-      const noteData = {
-        startDate: page.system.startDate,
-        endDate: page.system.endDate,
-        repeat: page.system.repeat,
-        repeatInterval: page.system.repeatInterval,
-        repeatEndDate: page.system.repeatEndDate,
-        maxOccurrences: page.system.maxOccurrences,
-        moonConditions: page.system.moonConditions,
-        randomConfig: page.system.randomConfig,
-        cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-        linkedEvent: page.system.linkedEvent,
-        weekday: page.system.weekday,
-        weekNumber: page.system.weekNumber,
-        seasonalConfig: page.system.seasonalConfig,
-        conditions: page.system.conditions
-      };
-      return isRecurringMatch(noteData, targetDate);
-    });
-    return { count: matching.length, color: matching[0]?.system?.color || null };
+    const matching = notes.filter((page) => isRecurringMatch(extractNoteMatchData(page), targetDate));
+    let hasFestival = false;
+    let festivalColor = null;
+    let festivalNote = null;
+    for (const page of matching) {
+      const props = resolveNoteDisplayProps(page);
+      if (props.isFestival && !hasFestival) {
+        hasFestival = true;
+        festivalColor = props.color;
+        festivalNote = page;
+        break;
+      }
+    }
+    const nonFestival = matching.filter((p) => !resolveNoteDisplayProps(p).isFestival);
+    const enriched = matching.map((p) => enrichNoteForDisplay(p));
+    return { count: nonFestival.length, color: nonFestival[0]?.system?.color || null, hasFestival, festivalColor, festivalNote, enriched };
   }
 
   /**
@@ -670,59 +766,48 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this._selectedDate) return [];
     const { year, month, dayOfMonth } = this._selectedDate;
     const targetDate = { year, month, dayOfMonth };
-    const notes = visibleNotes.filter((page) => {
-      const noteData = {
-        startDate: page.system.startDate,
-        endDate: page.system.endDate,
-        repeat: page.system.repeat,
-        repeatInterval: page.system.repeatInterval,
-        repeatEndDate: page.system.repeatEndDate,
-        maxOccurrences: page.system.maxOccurrences,
-        moonConditions: page.system.moonConditions,
-        randomConfig: page.system.randomConfig,
-        cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
-        linkedEvent: page.system.linkedEvent,
-        weekday: page.system.weekday,
-        weekNumber: page.system.weekNumber,
-        seasonalConfig: page.system.seasonalConfig,
-        conditions: page.system.conditions
-      };
-      return isRecurringMatch(noteData, targetDate);
-    });
-    return notes
+    const notes = visibleNotes.filter((page) => isRecurringMatch(extractNoteMatchData(page), targetDate));
+    let filtered = notes;
+    if (this.#noteFilterPreset === '__festival__') filtered = filtered.filter((p) => resolveNoteDisplayProps(p).isFestival);
+    else if (this.#noteFilterPreset) filtered = filtered.filter((p) => (p.system.categories || []).includes(this.#noteFilterPreset));
+    if (this.#noteFilterVisibility) filtered = filtered.filter((p) => resolveNoteDisplayProps(p).visibility === this.#noteFilterVisibility);
+    if (this.#noteFilterDisplayStyle) filtered = filtered.filter((p) => resolveNoteDisplayProps(p).displayStyle === this.#noteFilterDisplayStyle);
+    return filtered
       .map((page) => {
+        const enriched = enrichNoteForDisplay(page);
         const start = page.system.startDate;
         const end = page.system.endDate;
-        const isAllDay = page.system.allDay;
-        const icon = page.system.icon || 'fas fa-sticky-note';
-        const color = page.system.color || '#4a90e2';
+        const isAllDay = enriched.allDay;
         let timeLabel = '';
         if (isAllDay) {
-          timeLabel = localize('CALENDARIA.MiniCal.AllDay');
+          timeLabel = localize('CALENDARIA.Common.AllDay');
         } else {
           const startTime = this._formatTime(start.hour, start.minute);
-          const endTime = this._formatTime(end.hour, end.minute);
+          const endTime = this._formatTime(end?.hour, end?.minute);
           timeLabel = `${startTime} - ${endTime}`;
         }
-        const authorName = page.system.author?.name || localize('CALENDARIA.Common.Unknown');
+        const authorName = enriched.author || localize('CALENDARIA.Common.Unknown');
+        let repeatLabel = MiniCal._getRepeatLabel(page.system.repeat);
+        if (!repeatLabel && page.system.conditionTree) {
+          const calendar = CalendarManager.getActiveCalendar();
+          repeatLabel = summarizeConditionTree(page.system.conditionTree, calendar) || null;
+        }
+        const tooltipHtml = MiniCal._buildNoteTooltip(page, enriched, timeLabel, repeatLabel);
         return {
-          id: page.id,
-          parentId: page.parent.id,
-          name: page.name,
-          icon,
-          isImageIcon: icon.includes('/'),
-          color,
+          ...enriched,
+          isImageIcon: enriched.icon.includes('/'),
           timeLabel,
-          isAllDay,
+          repeatLabel,
           startHour: start.hour ?? 0,
           startMinute: start.minute ?? 0,
-          author: authorName,
-          isOwner: page.isOwner
+          authorLabel: authorName,
+          tooltipHtml
         };
       })
       .sort((a, b) => {
-        if (a.isAllDay && !b.isAllDay) return -1;
-        if (!a.isAllDay && b.isAllDay) return 1;
+        if (a.isFestival !== b.isFestival) return a.isFestival ? -1 : 1;
+        if (a.allDay && !b.allDay) return -1;
+        if (!a.allDay && b.allDay) return 1;
         if (a.startHour !== b.startHour) return a.startHour - b.startHour;
         return a.startMinute - b.startMinute;
       });
@@ -757,6 +842,60 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const components = { year: 0, month: 0, dayOfMonth: 0, hour: hour ?? 0, minute: minute ?? 0, second: 0 };
     return formatForLocation(calendar, components, 'miniCalTime');
+  }
+
+  /**
+   * Get a human-readable label for a repeat type.
+   * @param {string} repeat - Repeat type from note data
+   * @returns {string|null} Localized label or null for non-repeating
+   */
+  static _getRepeatLabel(repeat) {
+    if (!repeat || repeat === 'never') return null;
+    const key = `CALENDARIA.Notes.Repeat.${repeat.charAt(0).toUpperCase()}${repeat.slice(1)}`;
+    return localize(key);
+  }
+
+  /**
+   * Build an HTML tooltip summarizing a note's properties.
+   * @param {object} page - The note page document
+   * @param {object} enriched - Enriched note display data
+   * @param {string} timeLabel - Formatted time label
+   * @param {string|null} repeatLabel - Repeat frequency label
+   * @returns {string} HTML tooltip content
+   */
+  static _buildNoteTooltip(page, enriched, timeLabel, repeatLabel) {
+    const esc = escapeText;
+    const lines = [];
+    lines.push(`<strong style="color: ${enriched.color}">${esc(enriched.name)}</strong>`);
+    lines.push(`<span>${esc(timeLabel)}</span>`);
+    if (enriched.visibility !== 'visible') {
+      const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
+      const visIcon = enriched.visibility === 'hidden' ? 'fa-eye-slash' : 'fa-lock';
+      lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(localize(visKey))}</span>`);
+    }
+    const categories = enriched.categories || [];
+    if (categories.length) {
+      const presets = getAllPresets();
+      const labels = categories.map((id) => presets.find((p) => p.id === id)?.label).filter(Boolean);
+      if (labels.length) lines.push(`<span><i class="fas fa-tag"></i> ${esc(labels.join(', '))}</span>`);
+    }
+    const conditionTree = page.system.conditionTree;
+    if (conditionTree) {
+      const calendar = CalendarManager.getActiveCalendar();
+      const summary = summarizeConditionTree(conditionTree, calendar);
+      if (summary) lines.push(`<span><i class="fas fa-repeat"></i> ${esc(summary)}</span>`);
+    } else if (repeatLabel) {
+      lines.push(`<span><i class="fas fa-repeat"></i> ${esc(repeatLabel)}</span>`);
+    }
+    const content = stripSecrets(page.text?.content?.trim());
+    if (content) {
+      const snippet = previewSnippet(content, 120);
+      if (snippet) {
+        lines.push(`<hr style="margin: 0.25rem 0; border-color: var(--calendaria-border-light)"><span style="font-style: italic">${snippet}</span>`);
+      }
+    }
+    const rawHtml = `<div class="calendaria"><div class="day-tooltip">${lines.join('<br>')}</div></div>`;
+    return encodeHtmlAttribute(rawHtml);
   }
 
   /** @override */
@@ -797,19 +936,19 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.VISUAL_TICK, this.#onVisualTick.bind(this));
     if (!this.#worldTimeHookId) this.#worldTimeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
     if (!this.#hooks.some((h) => h.name === HOOKS.CLOCK_START_STOP)) this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this)) });
-    const container = this.element.querySelector('.container');
-    const sidebar = this.element.querySelector('.sidebar');
+    const container = this.element.querySelector('.minical-container');
+    const sidebar = this.element.querySelector('.minical-sidebar');
     container?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-badge')) return;
       e.preventDefault();
-      this.close();
-      new BigCal().render(true);
+      this.close({ animate: false });
+      BigCal.show({ animate: false });
     });
     container?.addEventListener('contextmenu', (e) => {
-      if (e.target.closest('#context-menu, .day')) return;
+      if (e.target.closest('#context-menu, .minical-day')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', this.#getContextMenuItems(), {
+      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.minical-container', this.#getContextMenuItems(), {
         fixed: true,
         jQuery: false,
         onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
@@ -831,34 +970,19 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }, delay);
       });
     }
-    const searchInput = this.element.querySelector('.calendaria-search .search-input');
-    if (searchInput) {
-      if (this.#searchOpen) searchInput.focus();
-      const debouncedSearch = foundry.utils.debounce((term) => {
-        this.#searchTerm = term;
-        if (term.length >= 2) this.#searchResults = SearchManager.search(term, { searchContent: true });
-        else this.#searchResults = null;
-        this.#updateSearchResults();
-      }, 300);
-      searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') this.#closeSearch();
+    const filterSelects = this.element.querySelectorAll('.notes-filter-select');
+    for (const select of filterSelects) {
+      select.addEventListener('change', (e) => {
+        const filterType = e.target.dataset.filterType;
+        const value = e.target.value || null;
+        if (filterType === 'preset') this.#noteFilterPreset = value;
+        else if (filterType === 'visibility') this.#noteFilterVisibility = value;
+        else if (filterType === 'displayStyle') this.#noteFilterDisplayStyle = value;
+        this.render();
       });
     }
-    if (this.#searchOpen) {
-      this.#positionSearchPanel();
-      const panel = this.element.querySelector('.calendaria-search');
-      if (panel && !this.#clickOutsideHandler) {
-        setTimeout(() => {
-          this.#clickOutsideHandler = (event) => {
-            if (!panel.contains(event.target) && !this.element.contains(event.target)) this.#closeSearch();
-          };
-          document.addEventListener('mousedown', this.#clickOutsideHandler);
-        }, 100);
-      }
-    }
-    const timeDisplay = this.element.querySelector('.time-display');
-    const timeControls = this.element.querySelector('.time-controls');
+    const timeDisplay = this.element.querySelector('.minical-time-display');
+    const timeControls = this.element.querySelector('.minical-time-controls');
     if (timeControls) {
       const showControls = () => {
         clearTimeout(this.#hideTimeout);
@@ -880,14 +1004,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       timeControls.addEventListener('mouseenter', showControls);
       timeControls.addEventListener('mouseleave', hideControls);
       if (compact) {
-        const grid = this.element.querySelector('.grid');
+        const grid = this.element.querySelector('.minical-grid');
         if (grid) {
           grid.addEventListener('mouseenter', showControls);
           grid.addEventListener('mouseleave', hideControls);
         }
       }
     }
-    WidgetManager.attachWidgetListeners(this.element);
+    attachWidgetListeners(this.element);
   }
 
   /** @override */
@@ -896,7 +1020,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#restoreStickyStates();
     const c = game.time.components;
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
-    ViewUtils.setupDayContextMenu(this.element, '.day:not(.empty)', this.calendar, {
+    setupDayContextMenu(this.element, '.minical-day:not(.empty)', this.calendar, {
       onSetDate: () => {
         this._selectedDate = null;
         this.render();
@@ -912,6 +1036,18 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       })
     });
     this.#hooks.push({
+      name: 'updateJournalEntry',
+      id: Hooks.on('updateJournalEntry', (journal, changes) => {
+        if (changes.ownership && journal.getFlag?.(MODULE.ID, 'isCalendarNote')) debouncedRender();
+      })
+    });
+    this.#hooks.push({
+      name: 'createJournalEntry',
+      id: Hooks.on('createJournalEntry', (journal) => {
+        if (journal.getFlag?.(MODULE.ID, 'isCalendarNote')) debouncedRender();
+      })
+    });
+    this.#hooks.push({
       name: 'createJournalEntryPage',
       id: Hooks.on('createJournalEntryPage', (page) => {
         if (page.type === 'calendaria.calendarnote') debouncedRender();
@@ -920,22 +1056,27 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({
       name: 'deleteJournalEntry',
       id: Hooks.on('deleteJournalEntry', (journal) => {
-        if (journal.pages.some((p) => p.type === 'calendaria.calendarnote')) debouncedRender();
+        if (journal.getFlag?.(MODULE.ID, 'isCalendarNote') || journal.pages.some((p) => p.type === 'calendaria.calendarnote')) debouncedRender();
       })
     });
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
     this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render()) });
     this.#hooks.push({ name: HOOKS.DISPLAY_FORMATS_CHANGED, id: Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.render()) });
-    new foundry.applications.ux.ContextMenu.implementation(this.element, '.container', [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() }], {
-      fixed: true,
-      jQuery: false,
-      onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
-    });
+    new foundry.applications.ux.ContextMenu.implementation(
+      this.element,
+      '.minical-container',
+      [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() }],
+      {
+        fixed: true,
+        jQuery: false,
+        onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
+      }
+    );
   }
 
   /** @override */
   async close(options = {}) {
-    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
@@ -954,14 +1095,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.#hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
     this.#hooks = [];
-    if (this.#clickOutsideHandler) {
-      document.removeEventListener('mousedown', this.#clickOutsideHandler);
-      this.#clickOutsideHandler = null;
-    }
     this.#closeMoonsTooltip();
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
-    StickyZones.cleanupSnapIndicator();
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
+    cleanupSnapIndicator();
     await super._onClose(options);
   }
 
@@ -970,7 +1107,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @override
    */
   setPosition(position) {
-    if (this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) {
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) {
       if (position?.width || position?.height) {
         const limited = {};
         if (position.width) limited.width = position.width;
@@ -989,16 +1126,16 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_POSITION);
     if (savedPos && Number.isFinite(savedPos.top) && Number.isFinite(savedPos.left)) {
       this.#snappedZoneId = savedPos.zoneId || null;
-      if (this.#snappedZoneId && StickyZones.restorePinnedState(this.element, this.#snappedZoneId)) {
-        StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      if (this.#snappedZoneId && restorePinnedState(this.element, this.#snappedZoneId)) {
+        registerForZoneUpdates(this, this.#snappedZoneId);
         return;
       }
       if (this.#snappedZoneId) {
         const rect = this.element.getBoundingClientRect();
-        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+        const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
         if (zonePos) {
           this.setPosition({ left: zonePos.left, top: zonePos.top });
-          StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+          registerForZoneUpdates(this, this.#snappedZoneId);
           return;
         }
       }
@@ -1019,8 +1156,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
-    let rightBuffer = StickyZones.getSidebarBuffer();
-    const sidebarEl = this.element.querySelector('.sidebar');
+    let rightBuffer = getSidebarBuffer();
+    const sidebarEl = this.element.querySelector('.minical-sidebar');
     if (sidebarEl) rightBuffer += sidebarEl.offsetWidth;
     let { left, top } = this.position;
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
@@ -1033,14 +1170,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #updateDockedPosition() {
     if (!this.#snappedZoneId) return;
-    if (StickyZones.usesDomParenting(this.#snappedZoneId)) {
+    if (usesDomParenting(this.#snappedZoneId)) {
       requestAnimationFrame(() => {
-        if (this.rendered && this.#snappedZoneId && StickyZones.usesDomParenting(this.#snappedZoneId)) StickyZones.pinToZone(this.element, this.#snappedZoneId);
+        if (this.rendered && this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) pinToZone(this.element, this.#snappedZoneId);
       });
       return;
     }
     const rect = this.element.getBoundingClientRect();
-    const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+    const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
     if (zonePos) this.setPosition({ left: zonePos.left, top: zonePos.top });
   }
 
@@ -1054,8 +1191,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickySidebar = states.sidebar ?? false;
     this.#stickyPosition = states.position ?? false;
     if (!this.element) return;
-    const timeControls = this.element.querySelector('.time-controls');
-    const sidebar = this.element.querySelector('.sidebar');
+    const timeControls = this.element.querySelector('.minical-time-controls');
+    const sidebar = this.element.querySelector('.minical-sidebar');
     if (this.#stickyTimeControls) {
       timeControls?.classList.add('visible');
       this.#controlsVisible = true;
@@ -1070,17 +1207,6 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       sidebar?.classList.remove('visible');
       this.#sidebarVisible = false;
     }
-  }
-
-  /**
-   * Save sticky states to settings.
-   */
-  async #saveStickyStates() {
-    await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
-      timeControls: this.#stickyTimeControls,
-      sidebar: this.#stickySidebar,
-      position: this.#stickyPosition
-    });
   }
 
   /**
@@ -1102,10 +1228,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
       items.push({
-        name: forceMiniCal ? 'CALENDARIA.MiniCal.ContextMenu.HideFromAll' : 'CALENDARIA.MiniCal.ContextMenu.ShowToAll',
+        name: forceMiniCal ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: forceMiniCal ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>',
         callback: async () => {
           const newValue = !forceMiniCal;
+          if (newValue) warnShowToAll('viewMiniCal', game.i18n.localize('CALENDARIA.Permissions.ViewMiniCal'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CAL, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.MINI_CAL_VISIBILITY, { visible: newValue });
         }
@@ -1119,13 +1246,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE, !compact);
       }
     });
-    items.push({ name: 'CALENDARIA.MiniCal.ContextMenu.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => MiniCal.resetPosition() });
+    items.push({ name: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => MiniCal.resetPosition() });
     items.push({
-      name: this.#stickyPosition ? 'CALENDARIA.MiniCal.ContextMenu.UnlockPosition' : 'CALENDARIA.MiniCal.ContextMenu.LockPosition',
+      name: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
       callback: () => this._toggleStickyPosition()
     });
-    items.push(ViewUtils.buildOpenAppsMenuItem());
+    items.push(buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() });
     return items;
   }
@@ -1135,7 +1262,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _toggleStickyPosition() {
     this.#stickyPosition = !this.#stickyPosition;
-    this.#saveStickyStates();
+    game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, { timeControls: this.#stickyTimeControls, sidebar: this.#stickySidebar, position: this.#stickyPosition });
   }
 
   /**
@@ -1155,8 +1282,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (event.target.closest('button, a, input, select, [data-action], .time-toggle')) return;
       previousZoneId = this.#snappedZoneId;
       this.#snappedZoneId = null;
-      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
-        const preserved = StickyZones.unpinFromZone(this.element);
+      if (previousZoneId && usesDomParenting(previousZoneId)) {
+        const preserved = unpinFromZone(this.element);
         if (preserved) {
           elementStartLeft = preserved.left;
           elementStartTop = preserved.top;
@@ -1179,24 +1306,24 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-      let rightBuffer = StickyZones.getSidebarBuffer();
-      const sidebarEl = this.element.querySelector('.sidebar');
+      let rightBuffer = getSidebarBuffer();
+      const sidebarEl = this.element.querySelector('.minical-sidebar');
       if (sidebarEl) rightBuffer += sidebarEl.offsetWidth;
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
-      this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
+      this.#activeSnapZone = checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
     };
     drag._onDragMouseUp = async (event) => {
       event.preventDefault();
       window.removeEventListener(...drag.handlers.dragMove);
       window.removeEventListener(...drag.handlers.dragUp);
       const rect = this.element.getBoundingClientRect();
-      const result = StickyZones.finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
+      const result = finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
       this.#snappedZoneId = result.zoneId;
-      StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      registerForZoneUpdates(this, this.#snappedZoneId);
       this.#activeSnapZone = null;
       previousZoneId = null;
       const finalRect = this.element.getBoundingClientRect();
@@ -1274,7 +1401,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onNavigate(_event, target) {
+  static _onNavigate(_event, target) {
     const direction = target.dataset.direction === 'next' ? 1 : -1;
     const current = this.viewedDate;
     const calendar = this.calendar;
@@ -1293,7 +1420,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         newYear--;
       }
       this.viewedDate = { year: newYear, month: 0, dayOfMonth: newDayOfMonth };
-      await this.render();
+      this.render();
       return;
     }
     let newMonth = current.month + direction;
@@ -1319,8 +1446,24 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       attempts++;
     }
+    if (!game.user.isGM && isFogEnabled() && game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_NAV_MODE) === 'skip') {
+      let fogAttempts = 0;
+      const maxFogAttempts = calendar.monthsArray.length * 10;
+      while (isMonthFullyFogged(newYear, newMonth) && fogAttempts < maxFogAttempts) {
+        newMonth += direction;
+        if (newMonth >= calendar.monthsArray.length) {
+          newMonth = 0;
+          newYear++;
+        } else if (newMonth < 0) {
+          newMonth = calendar.monthsArray.length - 1;
+          newYear--;
+        }
+        fogAttempts++;
+      }
+      if (isMonthFullyFogged(newYear, newMonth)) return;
+    }
     this.viewedDate = { year: newYear, month: newMonth, dayOfMonth: 0 };
-    await this.render();
+    this.render();
   }
 
   /**
@@ -1328,11 +1471,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onNavigateToMonth(_event, target) {
+  static _onNavigateToMonth(_event, target) {
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
     this.viewedDate = { year, month, dayOfMonth: 0 };
-    await this.render();
+    this.render();
   }
 
   /**
@@ -1340,10 +1483,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
-  static async _onToday(_event, _target) {
+  static _onToday(_event, _target) {
     this._viewedDate = null;
     this._selectedDate = null;
-    await this.render();
+    this.render();
   }
 
   /**
@@ -1351,7 +1494,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onSelectDay(_event, target) {
+  static _onSelectDay(_event, target) {
     const dayOfMonth = parseInt(target.dataset.day);
     const month = parseInt(target.dataset.month);
     const year = parseInt(target.dataset.year);
@@ -1359,8 +1502,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     else this._selectedDate = { year, month, dayOfMonth };
     if (game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES)) {
       if (this._selectedDate) {
-        const allNotes = ViewUtils.getCalendarNotes();
-        const visibleNotes = ViewUtils.getVisibleNotes(allNotes);
+        const allNotes = getCalendarNotes();
+        const visibleNotes = getVisibleNotes(allNotes);
         const { count } = this._getNotesOnDay(visibleNotes, year, month, dayOfMonth);
         if (count > 0) {
           this.#notesPanelVisible = true;
@@ -1373,8 +1516,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#notesPanelVisible = false;
       }
     }
-
-    await this.render();
+    this.render();
   }
 
   /**
@@ -1399,7 +1541,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 12, minute: 0 },
         endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 13, minute: 0 }
-      }
+      },
+      source: 'ui'
     });
   }
 
@@ -1409,8 +1552,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onOpenFull(_event, _target) {
-    await this.close();
-    new BigCal().render(true);
+    await this.close({ animate: false });
+    BigCal.show({ animate: false });
   }
 
   /**
@@ -1435,9 +1578,15 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static #updateClockIcon(el) {
     const toggles = el.querySelectorAll('.time-toggle');
     if (!toggles.length) return;
-    const locked = TimeClock.locked;
+    const locked = TimeClock.locked || TimeClock.disabled;
     const running = TimeClock.running;
-    const tooltip = locked ? localize('CALENDARIA.TimeClock.Locked') : running ? localize('CALENDARIA.TimeKeeper.Stop') : localize('CALENDARIA.TimeKeeper.Start');
+    const tooltip = TimeClock.disabled
+      ? localize('CALENDARIA.TimeClock.Disabled')
+      : locked
+        ? localize('CALENDARIA.TimeClock.Locked')
+        : running
+          ? localize('CALENDARIA.TimeKeeper.Stop')
+          : localize('CALENDARIA.TimeKeeper.Start');
     for (const timeToggle of toggles) {
       timeToggle.classList.toggle('active', running);
       timeToggle.classList.toggle('clock-locked', locked);
@@ -1531,9 +1680,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!confirmed) return;
     }
     const { year, month, dayOfMonth } = this._selectedDate;
-    await ViewUtils.setDateTo(year, month, dayOfMonth, this.calendar);
+    await setDateTo(year, month, dayOfMonth, this.calendar);
     this._selectedDate = null;
-    await this.render();
+    this.render();
   }
 
   /**
@@ -1541,17 +1690,17 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onViewNotes(_event, target) {
+  static _onViewNotes(_event, target) {
     if (target.disabled) return;
     if (!this._selectedDate) {
-      const today = ViewUtils.getCurrentViewedDate(this.calendar);
+      const today = getCurrentViewedDate(this.calendar);
       if (today) this._selectedDate = { year: today.year, month: today.month, dayOfMonth: today.dayOfMonth };
     }
     if (!this._selectedDate) return;
     this.#notesPanelVisible = true;
     this.#sidebarLocked = true;
     this.#sidebarVisible = true;
-    await this.render();
+    this.render();
   }
 
   /**
@@ -1559,10 +1708,51 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
-  static async _onCloseNotesPanel(_event, _target) {
+  static _onCloseNotesPanel(_event, _target) {
     this.#notesPanelVisible = false;
     this.#sidebarLocked = false;
-    await this.render();
+    this.#noteFilterPreset = null;
+    this.#noteFilterVisibility = null;
+    this.#noteFilterDisplayStyle = null;
+    this.render();
+  }
+
+  /**
+   * Clear all notes panel filters.
+   */
+  static _onClearNoteFilters() {
+    this.#noteFilterPreset = null;
+    this.#noteFilterVisibility = null;
+    this.#noteFilterDisplayStyle = null;
+    this.render();
+  }
+
+  /**
+   * Open a secondary calendar viewer. Shows a picker if no calendarId on the target.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onOpenSecondaryCalendar(_event, target) {
+    const calendarId = target.dataset.calendarId;
+    if (calendarId) {
+      SecondaryCalendar.open(calendarId);
+      return;
+    }
+    const activeId = CalendarRegistry.getActiveId();
+    const calendars = [...CalendarRegistry.getAll().entries()].filter(([id]) => id !== activeId).map(([id, cal]) => ({ id, name: cal.name ? localize(cal.name) : id }));
+    if (!calendars.length) return;
+    if (calendars.length === 1) {
+      SecondaryCalendar.open(calendars[0].id);
+      return;
+    }
+    const options = calendars.map((c) => `<option value="${c.id}">${c.name}</option>`).join('');
+    const content = `<form><div class="form-group"><label>${localize('CALENDARIA.Common.Calendar')}</label><select name="calendarId">${options}</select></div></form>`;
+    const result = await foundry.applications.api.DialogV2.prompt({
+      window: { title: localize('CALENDARIA.MiniCal.SecondaryCalendar') },
+      content,
+      ok: { label: localize('CALENDARIA.Common.Open'), callback: (_event, button) => button.form.elements.calendarId.value }
+    });
+    if (result) SecondaryCalendar.open(result);
   }
 
   /**
@@ -1671,133 +1861,25 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-  /**
-   * Cycle through weather presets or open weather picker.
-   * For now, generates new weather based on climate/season.
-   */
+  /** Cycle through weather presets or open weather picker. */
   static async _onOpenWeatherPicker() {
     if (!canChangeWeather()) return;
     new WeatherPickerApp().render({ force: true });
   }
 
-  /**
-   * Open the settings panel.
-   */
+  /** Open the Chronicle chronicle. */
+  static _onOpenChronicle() {
+    CALENDARIA.apps.Chronicle.toggle();
+  }
+
+  /** Open the Note Viewer. */
+  static _onOpenNoteViewer() {
+    NoteViewer.toggle();
+  }
+
+  /** Open the settings panel. */
   static _onOpenSettings() {
     new SettingsPanel().render(true);
-  }
-
-  /**
-   * Toggle the search panel.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onToggleSearch(_event, _target) {
-    this.#searchOpen = !this.#searchOpen;
-    if (!this.#searchOpen) {
-      this.#searchTerm = '';
-      this.#searchResults = null;
-    }
-    await this.render();
-  }
-
-  /**
-   * Close the search panel.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onCloseSearch(_event, _target) {
-    this.#closeSearch();
-  }
-
-  /**
-   * Open a search result (note).
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async _onOpenSearchResult(_event, target) {
-    const id = target.dataset.id;
-    const journalId = target.dataset.journalId;
-    const page = NoteManager.getFullNote(id);
-    if (page) page.sheet.render(true, { mode: 'view' });
-    else if (journalId) {
-      const journal = game.journal.get(journalId);
-      if (journal) journal.sheet.render(true, { pageId: id });
-    }
-    this.#closeSearch();
-  }
-
-  /**
-   * Update search results without full re-render.
-   */
-  #updateSearchResults() {
-    const panel = this.element.querySelector('.calendaria-search');
-    if (!panel) return;
-    const resultsContainer = panel.querySelector('.search-panel-results');
-    if (!resultsContainer) return;
-    if (this.#searchResults?.length) {
-      resultsContainer.innerHTML = this.#searchResults
-        .map((r) => {
-          const icons = [];
-          if (r.data?.icon) icons.push(`<i class="result-note-icon ${r.data.icon}" style="color: ${r.data.color || '#4a9eff'}" data-tooltip="${localize('CALENDARIA.Search.NoteIcon')}"></i>`);
-          if (r.data?.gmOnly) icons.push(`<i class="result-gm-icon fas fa-lock" data-tooltip="${localize('CALENDARIA.Search.GMOnly')}"></i>`);
-          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}"${r.data.repeatTooltip ? ` data-tooltip="${r.data.repeatTooltip}"` : ''}></i>`);
-          if (r.data?.categoryIcons?.length) {
-            for (const cat of r.data.categoryIcons) icons.push(`<i class="result-category-icon fas ${cat.icon}" style="color: ${cat.color}" data-tooltip="${cat.label}"></i>`);
-          }
-          return `<div class="search-result-item" data-action="openSearchResult" data-id="${r.id}" data-journal-id="${r.data?.journalId || ''}">
-            <div class="result-content">
-              <span class="result-name">${r.name}</span>
-              ${r.description ? `<span class="result-description">${r.description}</span>` : ''}
-            </div>
-            ${icons.length ? `<div class="result-icons">${icons.join('')}</div>` : ''}
-          </div>`;
-        })
-        .join('');
-      resultsContainer.classList.add('has-results');
-    } else if (this.#searchTerm?.length >= 2) {
-      resultsContainer.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><span>${localize('CALENDARIA.Search.NoResults')}</span></div>`;
-      resultsContainer.classList.add('has-results');
-    } else {
-      resultsContainer.innerHTML = '';
-      resultsContainer.classList.remove('has-results');
-    }
-  }
-
-  /**
-   * Position search panel with edge awareness.
-   */
-  #positionSearchPanel() {
-    const panel = this.element.querySelector('.calendaria-search');
-    const button = this.element.querySelector('[data-action="toggleSearch"]');
-    if (!panel || !button) return;
-    const buttonRect = button.getBoundingClientRect();
-    const panelWidth = 280;
-    const panelMaxHeight = 300;
-    let left = buttonRect.left - panelWidth - 8;
-    let top = buttonRect.top;
-    if (left < 10) left = buttonRect.right + 8;
-    if (top + panelMaxHeight > window.innerHeight - 10) top = window.innerHeight - panelMaxHeight - 10;
-    top = Math.max(10, top);
-    panel.style.position = 'fixed';
-    panel.style.left = `${left}px`;
-    panel.style.top = `${top}px`;
-    panel.style.width = `${panelWidth}px`;
-    panel.style.maxHeight = `${panelMaxHeight}px`;
-  }
-
-  /**
-   * Close search and clean up.
-   */
-  #closeSearch() {
-    if (this.#clickOutsideHandler) {
-      document.removeEventListener('mousedown', this.#clickOutsideHandler);
-      this.#clickOutsideHandler = null;
-    }
-    this.#searchTerm = '';
-    this.#searchResults = null;
-    this.#searchOpen = false;
-    this.render();
   }
 
   /**
@@ -1805,18 +1887,18 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static _onShowMoons(_event, target) {
+  static async _onShowMoons(_event, target) {
     this.#closeMoonsTooltip();
     const dayCell = target.closest('[data-year][data-month][data-day]');
     if (!dayCell) return;
     const year = parseInt(dayCell.dataset.year);
     const month = parseInt(dayCell.dataset.month);
     const dayOfMonth = parseInt(dayCell.dataset.day);
-    const moons = ViewUtils.getAllMoonPhases(this.calendar, year, month, dayOfMonth);
+    const moons = getAllMoonPhases(this.calendar, year, month, dayOfMonth);
     if (!moons?.length) return;
-    const selectedMoon = ViewUtils.getSelectedMoon() || moons[0]?.moonName;
-    ViewUtils.showMoonPicker(target, moons, selectedMoon, (moonName) => {
-      ViewUtils.setSelectedMoon(moonName);
+    const selectedMoon = getSelectedMoon() || moons[0]?.moonName;
+    await showMoonPicker(target, moons, selectedMoon, (moonName) => {
+      setSelectedMoon(moonName);
       this.render();
     });
   }
@@ -1834,7 +1916,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Close moons tooltip and clean up.
    */
   #closeMoonsTooltip() {
-    ViewUtils.closeMoonPicker();
+    closeMoonPicker();
   }
 
   /**
@@ -1869,15 +1951,17 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Show the MiniCal singleton.
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
+   * @param {boolean} [options.animate] - Whether to animate the show
    * @returns {MiniCal} The singleton instance
    */
-  static show({ silent = false } = {}) {
+  static show({ silent = false, animate = true } = {}) {
     if (!canViewMiniCal()) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
+    if (isCombatBlocked(SETTINGS.MINI_CAL_COMBAT_MODE)) return null;
     const instance = this.instance ?? new MiniCal();
-    instance.render({ force: true });
+    instance.render({ force: true, animate });
     return instance;
   }
 
@@ -1912,7 +1996,6 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Refresh sticky states from settings on the current instance.
-   * Called when settings change externally (e.g., from settings panel).
    */
   static refreshStickyStates() {
     const instance = this.instance;

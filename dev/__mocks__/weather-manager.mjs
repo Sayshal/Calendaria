@@ -1,13 +1,9 @@
-/**
- * WeatherManager mock for testing.
- * @module Mocks/WeatherManager
- */
-
 import { vi } from 'vitest';
 
 const WeatherManager = {
   getActiveZone: vi.fn(() => null),
   getCurrentWeather: vi.fn(() => null),
+  getWeatherForDate: vi.fn(() => null),
   getCalendarZones: vi.fn(() => []),
   setSceneZoneOverride: vi.fn(),
   addCustomPreset: vi.fn(),

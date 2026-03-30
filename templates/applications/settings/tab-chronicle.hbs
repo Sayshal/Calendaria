@@ -1,0 +1,161 @@
+<section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  {{#if isGM}}
+    <div class="button-row app-controls">
+      <button type="button" data-action="resetPosition" data-target="chronicle">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.ResetPosition"}}
+      </button>
+      <button type="button" data-action="closeChronicle">
+        <i class="fas fa-times"></i>
+        {{localize "CALENDARIA.SettingsPanel.CloseChronicle"}}
+      </button>
+      <button type="button" data-action="openChronicle">
+        <i class="fas fa-external-link-alt"></i>
+        {{localize "CALENDARIA.Common.OpenChronicle"}}
+      </button>
+    </div>
+    <p class="hint section-hint">{{openHint}}</p>
+  {{/if}}
+
+  <fieldset data-section="chronicle-visibility">
+    <legend>
+      {{localize "CALENDARIA.Common.Visibility"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-visibility"
+        data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="showChronicle">{{localize "CALENDARIA.Settings.ShowChronicle.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="showChronicle" name="showChronicle" {{#if showChronicle}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ShowChronicle.Hint"}}</p>
+    </div>
+    {{#if isGM}}
+      <div class="form-group">
+        <label for="forceChronicle">{{localize "CALENDARIA.Common.ForceDisplayForAll"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceChronicle" name="forceChronicle" {{#if forceChronicle}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceChronicle.Hint"}}</p>
+      </div>
+    {{/if}}
+
+    {{#if isGM}}
+      <div class="form-group">
+        <label for="chronicleBigCalButton">{{localize "CALENDARIA.Chronicle.Settings.BigCalButton.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="chronicleBigCalButton" name="chronicleBigCalButton"
+            {{#if chronicleBigCalButton}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.BigCalButton.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="chronicleMiniCalButton">{{localize "CALENDARIA.Chronicle.Settings.MiniCalButton.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="chronicleMiniCalButton" name="chronicleMiniCalButton"
+            {{#if chronicleMiniCalButton}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.MiniCalButton.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="chronicleHudButton">{{localize "CALENDARIA.Chronicle.Settings.HudButton.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="chronicleHudButton" name="chronicleHudButton"
+            {{#if chronicleHudButton}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.HudButton.Hint"}}</p>
+      </div>
+    {{/if}}
+
+    <div class="form-group">
+      <label for="chronicleCombatMode">{{localize "CALENDARIA.Common.CombatBehavior"}}</label>
+      <div class="form-fields">
+        <select id="chronicleCombatMode" name="chronicleCombatMode">
+          <option value="none" {{#if (eq chronicleCombatMode "none")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.None"}}
+          </option>
+          <option value="hideCombat" {{#if (eq chronicleCombatMode "hideCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.HideOnCombatStart"}}
+          </option>
+          <option value="hideEncounter" {{#if (eq chronicleCombatMode "hideEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Common.HideOnEncounter"}}
+          </option>
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.WidgetCombatMode.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset data-section="chronicle-display">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Display"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-display"
+        data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="chronicleEntryDepth">{{localize "CALENDARIA.Chronicle.Settings.EntryDepth.Name"}}</label>
+      <div class="form-fields">
+        <select id="chronicleEntryDepth" name="chronicleEntryDepth">
+          {{#each depthOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.EntryDepth.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="chronicleShowEmpty">{{localize "CALENDARIA.Chronicle.Settings.ShowEmpty.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="chronicleShowEmpty" name="chronicleShowEmpty"
+          {{#if chronicleShowEmpty}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowEmpty.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset data-section="chronicle-content">
+    <legend>
+      {{localize "CALENDARIA.Common.Content"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-content"
+        data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="chronicleShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="chronicleShowWeather" name="chronicleShowWeather"
+          {{#if chronicleShowWeather}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowWeather.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="chronicleShowMoonPhases">{{localize "CALENDARIA.Common.ShowMoonPhases"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="chronicleShowMoonPhases" name="chronicleShowMoonPhases"
+          {{#if chronicleShowMoonPhases}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowMoonPhases.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label
+        for="chronicleShowSeasonChanges">{{localize "CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="chronicleShowSeasonChanges" name="chronicleShowSeasonChanges"
+          {{#if chronicleShowSeasonChanges}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Hint"}}</p>
+    </div>
+  </fieldset>
+
+</section>

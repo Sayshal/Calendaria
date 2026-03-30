@@ -1,111 +1,25 @@
 # Notes and Events
 
-Calendar notes are journal entry pages that attach to specific dates. Notes support rich text content, custom icons, recurrence patterns, categories, and macro triggers.
+Calendar notes are journal entry pages attached to specific dates, with rich text content, custom icons, recurrence patterns, categories, and macro triggers.
 
 ## Note Storage
 
-Notes are stored as individual `JournalEntry` documents within a dedicated folder per calendar. Each note contains a single `JournalEntryPage` of type `calendaria.calendarnote`.
-
-Calendar infrastructure folders are hidden from the Journal sidebar to reduce clutter. Access notes through the calendar UI instead.
+Notes are stored as journal entries within a folder per calendar. These folders are hidden from the Journal sidebar. Access notes through the calendar UI or the [Note Viewer](Note-Viewer).
 
 ## Creating a Note
 
-### From the Calendar UI
-
 1. Click a date on the calendar grid
 2. Click **Add Note** to open the note editor
-3. Configure title, icon, dates, times, and content
-4. Click **Save & Close**
-
-### From the API
-
-```javascript
-await CALENDARIA.api.createNote({
-  name: 'Council Meeting',
-  content: "<p>Meeting with the Lords' Alliance</p>",
-  startDate: { year: 1492, month: 5, day: 15, hour: 14, minute: 0 },
-  allDay: false,
-  categories: ['meeting']
-});
-```
-
-## Note Properties
-
-### Core Fields
-
-| Field          | Type   | Description                     |
-| -------------- | ------ | ------------------------------- |
-| `name`         | String | Note title                      |
-| `text.content` | HTML   | Rich text content (ProseMirror) |
-| `author`       | String | User ID of the note creator     |
-
-### Date & Time Fields
-
-| Field       | Type    | Description                        |
-| ----------- | ------- | ---------------------------------- |
-| `startDate` | Object  | `{year, month, day, hour, minute}` |
-| `endDate`   | Object  | Optional end date/time             |
-| `allDay`    | Boolean | Ignores time fields when true      |
-
-### Recurrence Fields
-
-| Field            | Type   | Description                                                           |
-| ---------------- | ------ | --------------------------------------------------------------------- |
-| `repeat`         | String | Recurrence pattern                                                    |
-| `repeatInterval` | Number | Interval for repeating (e.g., every N days/weeks)                     |
-| `repeatEndDate`  | Object | Stop repeating after this date `{year, month, day}`                   |
-| `maxOccurrences` | Number | Limit total recurrences (0 = unlimited)                               |
-| `weekday`        | Number | Target weekday for `weekOfMonth` pattern (0-indexed)                  |
-| `weekNumber`     | Number | Week ordinal for `weekOfMonth` (1-5, or -1 to -5 for last)            |
-| `moonConditions` | Array  | Moon phase conditions `[{moonIndex, phaseStart, phaseEnd, modifier}]` |
-| `randomConfig`   | Object | Random event config `{seed, probability, checkInterval}`              |
-| `linkedEvent`    | Object | Linked event config `{noteId, offset}`                                |
-| `rangePattern`   | Object | Range pattern `{year, month, day}` with values or `[min, max]`        |
-| `seasonalConfig` | Object | Seasonal config `{seasonIndex, trigger}`                              |
-| `computedConfig` | Object | Computed event chain `{chain, yearOverrides}`                         |
-| `conditions`     | Array  | Advanced conditions `[{field, op, value, value2?, offset?}]`          |
-
-### Display Fields
-
-| Field        | Type     | Description                        |
-| ------------ | -------- | ---------------------------------- |
-| `categories` | String[] | Category IDs                       |
-| `color`      | Hex      | Display color (default: `#4a9eff`) |
-| `icon`       | String   | FontAwesome class or image path    |
-| `iconType`   | String   | `fontawesome` or `image`           |
-
-### Visibility Fields
-
-| Field    | Type    | Description                            |
-| -------- | ------- | -------------------------------------- |
-| `gmOnly` | Boolean | Visible only to GMs                    |
-| `silent` | Boolean | Suppresses reminders and announcements |
-
-### Reminder Fields
-
-| Field             | Type     | Description                                               |
-| ----------------- | -------- | --------------------------------------------------------- |
-| `reminderType`    | String   | `none`, `toast`, `chat`, or `dialog`                      |
-| `reminderOffset`  | Number   | Minutes before event to trigger reminder                  |
-| `reminderTargets` | String   | Who receives reminders: `all`, `gm`, `author`, `specific` |
-| `reminderUsers`   | String[] | User IDs when `reminderTargets` is `specific`             |
-
-### Trigger Fields
-
-| Field        | Type   | Description                              |
-| ------------ | ------ | ---------------------------------------- |
-| `macro`      | String | Macro ID to execute on trigger           |
-| `sceneId`    | String | Scene ID to activate when event triggers |
-| `playlistId` | String | Playlist ID to play when event triggers  |
+3. A preset selection dialog appears where you can pick a category (or skip)
+4. Configure title, icon, dates, times, and content
+5. Click **Save & Close**
 
 ## Editing and Deleting
-
-When multiple notes exist on the same day, they are displayed in alphabetical order by title.
 
 ### Edit a Note
 
 1. Click the note to open it in view mode
-2. Click the pencil icon in the header to switch to edit mode
+2. Click the edit icon in the header to switch to edit mode
 3. Make changes
 4. Click the save icon or close the window
 
@@ -115,259 +29,228 @@ When multiple notes exist on the same day, they are displayed in alphabetical or
 2. Click the trash icon in the header
 3. Confirm deletion
 
-## Recurrence Patterns
+---
 
-Set the **Repeat** dropdown to enable recurrence. Available patterns:
+## Note Sheet
 
-| Pattern       | Description                               |
-| ------------- | ----------------------------------------- |
-| `never`       | One-time event (default)                  |
-| `daily`       | Every N days                              |
-| `weekly`      | Same weekday every N weeks                |
-| `monthly`     | Same day of month every N months          |
-| `yearly`      | Same month/day every N years              |
-| `weekOfMonth` | Ordinal weekday (e.g., "2nd Tuesday")     |
-| `seasonal`    | Based on season boundaries                |
-| `moon`        | Based on moon phase conditions            |
-| `random`      | Probability-based with seeded randomness  |
-| `range`       | Pattern matching on year/month/day values |
-| `linked`      | Relative to another note's occurrences    |
-| `computed`    | Complex moveable feast calculations       |
+The note editor has three tabs: **Content**, **Schedule**, and **Settings**.
 
-### Repeat Options
+### Content Tab
 
-- **Repeat Interval**: For `daily`, `weekly`, `monthly`, and `yearly` patterns, set how often the event repeats (e.g., every 2 weeks)
-- **Max Occurrences**: Limits total recurrences (0 = unlimited)
-- **Repeat End Date**: Stop repeating after this date
+- **Title**: Note name
+- **Emblem**: FontAwesome class or image file (right-click to switch modes)
+- **Color**: Note color via color picker
+- **Content**: Rich text editor for the note body
 
-> [!NOTE]
-> For monthless calendars (e.g., Traveller), the `monthly` and `weekOfMonth` patterns are hidden since they don't apply.
+Festival notes display an info banner on each tab, linking to the calendar editor (GM-only).
 
-### Week of Month
+### Schedule Tab
 
-Schedule events like "Second Tuesday of each month":
+- **Start Date / End Date**: Click to open a date picker
+- **Start Time / End Time**: Hour and minute inputs (hidden when All Day is checked)
+- **All Day**: Checkbox to hide time fields
+- **Condition Presets**: Dropdown with presets that reflect your calendar's weekdays, months, seasons, and moon phases (e.g., "Every Monday", "Monthly on the 15th", "Every Full Moon")
+- **Edit in Builder**: Opens the visual condition builder with the note's current conditions loaded
+- **Condition Summary**: Displays the note's recurrence rules as readable pills. Right-click a pill to delete it.
+- **Max Occurrences**: Limit how many times a recurring note appears (leave blank for unlimited)
+- **Occurrence Preview**: Read-only list of the next upcoming dates for recurring notes
 
-1. Set Repeat to **weekOfMonth**
-2. Choose the occurrence (1st through 5th, or Last / 2nd Last)
-3. Choose the weekday
+### Settings Tab
 
-### Seasonal
+#### Display
 
-Events tied to seasons:
+- **Visibility**: Visible, Hidden, or Secret (GM only)
+- **Silent**: Suppress reminders and event announcements
+- **Display Style**: Icon, pip, or banner
+- **Macro**: Select a macro to execute when the event triggers
 
-1. Set Repeat to **seasonal**
-2. Select the season
-3. Choose trigger: **Entire Season**, **First Day**, or **Last Day**
+#### Duration
 
-### Moon Phase
+- **Has Duration**: Toggle to make the note span multiple days
+- **Duration**: Number of days the event spans
+- **Show Bookends**: Start/end markers on the first and last days
+- **Limited Repeat**: Cap how far back the system searches for historical occurrences
+- **Limited Repeat Days**: Search window in days (default 365)
 
-Events triggered by moon phases:
+#### Reminders
 
-1. Set Repeat to **moon**
-2. Add moon conditions by selecting a moon and phase
-3. Optionally select a modifier to target a specific portion of the phase:
-   - **Any**: Triggers during any part of the phase (default)
-   - **Rising**: First third of the phase
-   - **True**: Middle third of the phase
-   - **Fading**: Last third of the phase
-4. Multiple conditions can be added (any match triggers)
+- **Reminder Type**: None, Toast, Chat, or Dialog
+- **Reminder Targets**: All, GM, Author, Viewers, or Specific users
+- **Reminder Offset**: Minutes before the event to trigger (0 = at event start, max 720)
+- **Reminder Users**: User list (only shown when target is Specific)
 
-Moon conditions specify a phase range (0-1 position in cycle). The modifier label is shown in parentheses after the phase name (e.g., "Full Moon (Rising)").
+#### Categories
 
-### Random Events
+- Select from existing categories
+- Add new categories inline
+- Categories with the player-usable flag disabled are hidden from non-GM users unless already assigned to the note
 
-Probability-based occurrence:
+#### Ownership
 
-1. Set Repeat to **random**
-2. Configure probability (0-100%)
-3. Set check interval: daily, weekly, or monthly
-4. Seed value ensures deterministic randomness across clients
+Per-user permission dropdowns. Each user can be set to **None**, **Observer**, or **Owner**. GM and note author are fixed at Owner. Ownership dropdowns are disabled for hidden and secret notes.
 
-Random occurrences are pre-generated and cached to ensure consistency.
+---
 
-### Linked Events
+## Condition Engine
 
-Events relative to another note:
+Rule-based scheduling for notes. Conditions check date, weekday, season, moon phase, and more to decide whether a note shows on a given day.
 
-1. Set Repeat to **linked**
-2. Select the parent note
-3. Set offset in days (negative = before, positive = after)
+### Condition Fields
 
-Example: "-3" offset creates an event 3 days before each occurrence of the linked event.
+Conditions check:
 
-### Computed Events (Moveable Feasts)
+- **Date fields**: year, month, day, day of year, full date comparison, and more
+- **Weekday fields**: weekday, week number in month (e.g., "3rd Tuesday"), inverse week number
+- **Season fields**: current season, percentage through the season, season day, solstices, equinoxes
+- **Moon fields**: moon phase, named phase (New, Full, etc.), sub-phase (Rising, True, Fading), phase occurrence counts
+- **Cycle and Era fields**: current cycle entry and era (when the calendar defines them)
+- **Other fields**: intercalary days, leap years, weather, eclipses, random values, event references
 
-Events that follow complex calculation rules, like Easter:
+See [API Reference](API-Reference) for the complete field list.
 
-1. Set Repeat to **computed**
-2. Configure a calculation chain with steps:
-   - **Anchor**: Starting point (`springEquinox`, `autumnEquinox`, `summerSolstice`, `winterSolstice`, `seasonStart:N`, `seasonEnd:N`, `event:noteId`)
-   - **First After**: Find first occurrence of a condition after the anchor (`moonPhase`, `weekday`)
-   - **Days After**: Add a fixed number of days
-   - **Weekday On Or After**: Find the next occurrence of a weekday on or after the current date
-3. Optionally set year overrides for manual exceptions
+### Condition Operators
 
-Example chain for Easter: Spring Equinox -> First Full Moon After -> First Sunday After
+- **Comparison**: equals, not equals, greater than, less than, greater or equal, less or equal
+- **Modulo**: repeating intervals like "every 4th year" with an optional offset
+- **Event-relative**: days ago, days from now, within the last N days, within the next N days
 
-### Range Pattern
+See [API Reference](API-Reference) for the complete operator list.
 
-Match dates using exact values, ranges, or wildcards:
+### Condition Groups
 
-1. Set Repeat to **range**
-2. For each component (year, month, day), choose:
-   - **Any**: Matches all values
-   - **Exact**: Matches a specific value
-   - **Range**: Matches a min-max range
+Organize conditions into groups with boolean logic:
 
-### Advanced Conditions
+- **AND**: All conditions must pass (default)
+- **OR**: At least one condition must pass
+- **NAND**: Passes when not all conditions pass (negated AND)
+- **XOR**: Passes when exactly one condition passes
+- **COUNT**: Passes when a specific number of conditions pass
 
-Additional filters applied on top of recurrence patterns. All conditions must pass (AND logic).
+Groups nest inside other groups for complex rules.
 
-Available condition fields:
+**Example**: "Every 3rd Tuesday in winter during a full moon" uses an AND group with conditions for weekday, week number, season, and moon phase.
 
-| Category | Fields                                                                                          |
-| -------- | ----------------------------------------------------------------------------------------------- |
-| Date     | year, month, day, dayOfYear, daysBeforeMonthEnd                                                 |
-| Weekday  | weekday, weekNumberInMonth, inverseWeekNumber                                                   |
-| Week     | weekInMonth, weekInYear, totalWeek, weeksBeforeMonthEnd, weeksBeforeYearEnd                     |
-| Season   | season, seasonPercent, seasonDay, isLongestDay, isShortestDay, isSpringEquinox, isAutumnEquinox |
-| Moon     | moonPhase, moonPhaseIndex, moonPhaseCountMonth, moonPhaseCountYear                              |
-| Cycle    | cycle (if calendar has cycles)                                                                  |
-| Era      | era, eraYear (if calendar has eras)                                                             |
-| Other    | intercalary (for intercalary days)                                                              |
+### Event-Based Conditions
 
-Operators: `==`, `!=`, `>=`, `<=`, `>`, `<`, `%` (modulo)
+A note's schedule can depend on another note's occurrences: "3 days after Festival X" or "within 5 days of Event Y".
 
-The `%` (modulo) operator supports an optional offset for patterns like "every 3rd year starting from year 2".
+- Select the target note using the note picker in the condition builder
+- Use event-relative operators: days ago, days from now, within last, within next
+- Circular references are prevented
+
+### Condition Builder
+
+Visual editor for condition trees.
+
+1. Open a note in edit mode
+2. Go to the **Schedule** tab
+3. Click **Edit in Builder**
+
+In the builder:
+
+- Select a **field** from the dropdown (grouped by category)
+- Choose an **operator** for the field type
+- Enter a **value** using the field-specific input
+- Add **groups** to organize conditions with boolean logic
+- **Reorder** with move up/down controls
+- **Delete** via right-click context menu
+
+**Presets** are available from a dropdown (Basic, Weekly, Monthly, Yearly, Every Nth, Seasons, Moons, Eclipses). A merge checkbox appends conditions instead of replacing the tree.
+
+---
 
 ## Categories
 
-Predefined categories:
+Organize notes by type. Every world starts with 8 built-in presets (Birthday, Deadline, Downtime, Lore, Meeting, Quest, Reminder, Session), and you can create your own.
 
-| ID         | Label    |
-| ---------- | -------- |
-| `holiday`  | Holiday  |
-| `festival` | Festival |
-| `quest`    | Quest    |
-| `session`  | Session  |
-| `combat`   | Combat   |
-| `meeting`  | Meeting  |
-| `birthday` | Birthday |
-| `deadline` | Deadline |
-| `reminder` | Reminder |
-| `other`    | Other    |
+Open the [Note Preset Editor](Note-Preset-Editor) from the Settings Panel to create, edit, delete, and reorder presets.
 
-### Custom Categories
+### Defaults and Overrides
 
-1. Type a category name in the input field next to the multi-select
-2. Click the + button to create
-3. Right-click a custom category tag to delete it
+Categories define **defaults** that auto-apply when creating a note: display style, visibility, reminder settings, and duration.
 
-Custom categories are stored in world settings and available to all notes.
+Categories also define **overrides** that force specific values on all notes in the category. Overridden fields are locked in the note editor. Use the lock toggle in the Note Preset Editor to promote a field from default to override.
 
-### Category Style Confirmation
+### Player-Usable Flag
 
-When adding a category to a note, a confirmation dialog appears offering to apply that category's icon and color to the note. The dialog previews the category's emblem and lets you accept or decline.
+Each category has a **player-usable** flag. When disabled, non-GM users don't see that category when creating or editing notes.
 
-- Triggers each time a new category is added
-- Detects the specific newly-added category rather than always using the first one
-- Declining keeps the note's current icon and color unchanged
-
-## Icons
-
-Notes support two icon types:
-
-- **FontAwesome**: Enter a class like `fas fa-dragon`
-- **Image**: Select an image file via file picker
-
-Right-click the icon picker to switch between modes. The icon color is controlled by the color picker.
+---
 
 ## Visibility
 
-- **GM Only**: Note is only visible to GMs (uses Foundry ownership system). This checkbox is only visible to GMs.
-- **Silent**: Suppresses reminders and event announcements
+Three visibility levels:
 
-Note visibility also respects Foundry's journal-level permissions. Non-GM users must have at least OBSERVER permission on the parent journal entry to see a note on the calendar and in search results.
+| Level       | Icon      | Who Can See                                           |
+| ----------- | --------- | ----------------------------------------------------- |
+| **Visible** | _(none)_  | All users with journal permissions                    |
+| **Hidden**  | Eye-slash | GM only                                               |
+| **Secret**  | Lock      | GM only, and only when "Show Secret Notes" is enabled |
 
-## Reminders
+- Hidden notes are always visible to GMs
+- Secret notes are hidden from everyone by default, including GMs. Enable **Show Secret Notes** in the Settings Panel to see them.
+- The **Silent** flag suppresses reminders and announcements independently
+- Non-GM users need at least Observer permission on the parent journal entry to see a visible note
 
-Notes can trigger reminders before the event starts.
+---
 
-### Reminder Types
+## Duration and Display Styles
 
-| Type     | Description           |
-| -------- | --------------------- |
-| `none`   | No reminder           |
-| `toast`  | UI notification popup |
-| `chat`   | Message in chat log   |
-| `dialog` | Modal dialog box      |
+### Duration
 
-### Reminder Targets
+Enable **Has Duration** to make a note span multiple days. Multi-day events render as continuous bars across calendar days in BigCal.
 
-| Target     | Description                |
-| ---------- | -------------------------- |
-| `all`      | All connected users        |
-| `gm`       | Game Master only           |
-| `author`   | Note creator only          |
-| `specific` | Selected users from a list |
+- **Show Bookends**: Start/end markers on the first and last days
+- **Limited Repeat**: Caps how far back the system searches for historical occurrences
 
-### Reminder Offset
+### Display Styles
 
-Set how many minutes before the event the reminder should trigger. Set to 0 for reminders at event start time.
+| Style      | Description                                              |
+| ---------- | -------------------------------------------------------- |
+| **Icon**   | Default inline icon next to the note name                |
+| **Pip**    | Compact dot indicator with minimal footprint             |
+| **Banner** | Full-width bar spanning the event's duration across days |
 
-## Event Triggers
+Notes sort by display priority: banner > icon > pip, with festivals first.
 
-Notes can trigger actions when the event starts.
+---
 
-### Scene Activation
+## Festival Notes
 
-Select a scene to automatically activate when the event triggers. Useful for transitioning to specific locations at scheduled times.
+Calendar festivals are created as journal notes using the condition engine. Festivals act as templates that produce independent notes.
 
-### Playlist Playback
+- After creation, festival notes are independent. Editing a festival note does not change the template.
+- An info banner on the note editor links to the calendar editor (GM-only)
+- Reminder settings are preserved across festival updates
+- Festivals support leap-year-only scheduling via the Is Leap Year condition field
+- Non-GM users cannot delete festival notes
+- GMs can re-sync festival notes from **Settings Panel > Notes tab**
 
-Select a playlist to start playing when the event triggers. Useful for ambient music or sound effects tied to in-game events.
-
-### Macro Execution
-
-Select a macro to execute when the event triggers. The macro runs when the event scheduler detects the event has started.
+---
 
 ## Player Permissions
 
-Players can create and edit notes based on Calendaria permissions. Ownership is determined by standard Foundry document permissions combined with the "Edit Notes" permission.
+Players create and edit notes based on Calendaria permissions, combined with Foundry document permissions.
 
 > [!NOTE]
-> Players with the "Manage Notes" Calendaria permission but without Foundry's core `JOURNAL_CREATE` permission can still create notes. The request is relayed via socket to a connected GM who creates the note on their behalf.
+> Players with the "Add Notes" permission but without Foundry's core Journal Create permission can still create notes as long as a GM is present. The request is relayed to a connected GM.
 
 ### What Players Can Do
 
-- **Create notes**: Using the Add Note button on calendar UI
-- **Edit own notes**: Notes they created (Owner permission)
-- **Edit others' notes**: If granted the "Edit Notes" permission (does not apply to GM-only notes)
-- **Delete own notes**: Authors can delete notes they created
-- **View shared notes**: Notes with appropriate permissions
+- Create notes using the Add Note button
+- Edit notes they created (Owner permission)
+- Edit others' notes if granted "Edit Notes" permission (not hidden/secret notes)
+- Delete notes they created
+- View notes with appropriate permissions
 
 ### What Players Cannot Do
 
-- **View GM-only notes**: Hidden via ownership settings
-- **Delete others' notes**: Only the original author or a GM can delete
-- **Modify time/date**: All time controls are GM-only
-- **Change weather**: Weather picker is GM-only
+- View hidden or secret notes
+- Delete others' notes or festival notes
+- Modify time, date, or weather
 
-### Note Ownership
-
-When a player creates a note:
-
-1. The JournalEntry is created with the player as owner
-2. Users with the "Edit Notes" permission automatically receive owner-level access
-3. Other players see it based on default permissions
-4. GM always has full access
-
-When a GM creates a note:
-
-1. "GM Only" checkbox controls player visibility
-2. If checked, ownership is set to GM-only (Edit Notes permission does not apply)
-3. If unchecked, users with "Edit Notes" permission receive owner-level access
+---
 
 ## For Developers
 
-See [API Reference](API-Reference#notes) for note methods including `getNotesForDate()`, `getNotesInRange()`, `createNote()`, `updateNote()`, `deleteNote()`, and more.
+See [API Reference](API-Reference) and [Hooks](Hooks).

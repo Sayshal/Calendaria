@@ -4,9 +4,9 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { TEMPLATES } from '../../constants.mjs';
-import { localize } from '../../utils/localization.mjs';
+import { localize } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -37,7 +37,7 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
     id: 'calendaria-computed-event-builder',
     classes: ['calendaria', 'computed-event-builder', 'standard-form'],
     tag: 'form',
-    window: { title: 'CALENDARIA.Note.Computed', icon: 'fas fa-calculator', resizable: true },
+    window: { title: 'CALENDARIA.Common.ComputedEvent', icon: 'fas fa-calculator', resizable: true },
     position: { width: 500, height: 'auto' },
     actions: {
       addStep: ComputedEventBuilder.#onAddStep,
@@ -74,8 +74,8 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
       { value: 'weekdayOnOrAfter', label: localize('CALENDARIA.Note.ComputedWeekdayOnOrAfter') }
     ];
     const conditionTypes = [
-      { value: 'moonPhase', label: localize('CALENDARIA.Note.ComputedMoonPhase') },
-      { value: 'weekday', label: localize('CALENDARIA.Note.ComputedWeekday') }
+      { value: 'moonPhase', label: localize('CALENDARIA.Common.MoonPhase') },
+      { value: 'weekday', label: localize('CALENDARIA.Common.Weekday') }
     ];
     const moonPhases = ['new', 'waxingCrescent', 'firstQuarter', 'waxingGibbous', 'full', 'waningGibbous', 'lastQuarter', 'waningCrescent'];
     const chain = this.#config.chain.map((step, idx) => ({

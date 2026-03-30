@@ -1,0 +1,149 @@
+{{!-- Recursive partial for rendering condition tree entries --}}
+{{#*inline "renderEntry"}}
+  {{#if (eq entryType "group")}}
+    <fieldset class="cb-group depth-{{depth}}" data-path="{{path}}">
+      <legend class="cb-group-legend">s
+        {{localize "CALENDARIA.Condition.Builder.MatchLabel"}}
+        <select name="group.{{path}}.mode"
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Common.All'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.andHint'}}<br><b>{{localize 'CALENDARIA.Common.Any'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.orHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.nand'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.nandHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.xor'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.xorHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.count'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.countHint'}}">
+          {{#each modeOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+        {{#if isCountMode}}
+          {{localize "CALENDARIA.Common.Threshold"}}:
+          <input type="number" name="group.{{path}}.threshold" value="{{threshold}}" min="1" class="cb-threshold">
+        {{/if}}
+        {{#unless isRoot}}
+          <a class="cb-remove-group" data-action="removeEntry" data-path="{{path}}" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Condition.Builder.RemoveGroup'}}">
+            <i class="fas fa-times"></i>
+          </a>
+        {{/unless}}
+      </legend>
+
+      {{#if hasChildren}}
+        {{#each children}}
+          {{> renderEntry}}
+        {{/each}}
+      {{else}}
+        <p class="cb-empty">{{localize "CALENDARIA.Condition.Group.EmptyGroup"}}</p>
+      {{/if}}
+
+      <div class="cb-group-actions">
+        <button type="button" class="cb-add-btn" data-action="addCondition" data-path="{{path}}">
+          <i class="fas fa-plus"></i> {{localize "CALENDARIA.Condition.Group.AddCondition"}}
+        </button>
+        {{#if canAddGroup}}
+          <button type="button" class="cb-add-btn" data-action="addGroup" data-path="{{path}}">
+            <i class="fas fa-layer-group"></i> {{localize "CALENDARIA.Condition.Group.AddGroup"}}
+          </button>
+        {{/if}}
+      </div>
+    </fieldset>
+  {{else}}
+    <fieldset class="cb-condition" data-path="{{path}}">
+      <legend class="cb-condition-legend">
+        {{localize "CALENDARIA.Condition.Builder.ConditionLabel"}} #{{conditionNumber}}
+        <a class="cb-remove" data-action="removeEntry" data-path="{{path}}" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Condition.Builder.RemoveCondition'}}">
+          <i class="fas fa-times"></i>
+        </a>
+      </legend>
+      <div class="cb-condition-row">
+        {{#if isSpecialField}}
+          <span class="cb-special-label"><i class="fas fa-lock"></i> {{specialLabel}}</span>
+          <span class="cb-special-value">
+            {{localize "CALENDARIA.Condition.Builder.ComputedReadOnly"}}
+          </span>
+        {{else}}
+          <select name="condition.{{path}}.field" class="cb-field-select" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Field'}}">
+            {{#each fieldOptions}}
+              <optgroup label="{{label}}">
+                {{#each options}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </optgroup>
+            {{/each}}
+          </select>
+
+          <select name="condition.{{path}}.op" class="cb-op-select" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Operator'}}">
+            {{#each opOptions}}
+              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+
+          {{#if isBooleanField}}
+            <select name="condition.{{path}}.value" class="cb-value-select" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Value'}}">
+              <option value="true" {{#if boolTrue}}selected{{/if}}>{{localize "Yes"}}</option>
+              <option value="false" {{#if boolFalse}}selected{{/if}}>{{localize "No"}}</option>
+            </select>
+          {{else if isSelectField}}
+            <select name="condition.{{path}}.value" class="cb-value-select" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Value'}}">
+              {{#each valueOptions}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          {{else if isDateField}}
+            <div class="cb-date-inputs">
+              <select name="condition.{{path}}.dateMonth" class="cb-date-month" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateMonth'}}">
+                {{#each monthOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="number" name="condition.{{path}}.dateDay" value="{{dateDay}}" min="0" max="{{maxDay}}"
+                class="cb-date-day" placeholder="{{localize 'CALENDARIA.Common.Day'}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateDay'}}">
+              <input type="number" name="condition.{{path}}.dateYear" value="{{dateYear}}" class="cb-date-year"
+                placeholder="{{localize 'CALENDARIA.Common.Year'}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateYear'}}">
+            </div>
+          {{else}}
+            <span class="cb-labeled-input">
+              <span class="cb-inline-label">{{localize "CALENDARIA.Condition.Builder.ValueLabel"}}</span>
+              <input type="number" name="condition.{{path}}.value" value="{{value}}" step="any" class="cb-value-input"
+                data-tooltip aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Value'}}">
+            </span>
+          {{/if}}
+
+          {{#if hasValue2Select}}
+            <span class="cb-labeled-input">
+              {{#if value2Label}}<span class="cb-inline-label">{{value2Label}}</span>{{/if}}
+              <select name="condition.{{path}}.value2" class="cb-value2-select" data-tooltip
+                aria-label="{{value2Hint}}">
+                {{#each value2Options}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+            </span>
+          {{/if}}
+          {{#if hasValue2Number}}
+            <span class="cb-labeled-input">
+              {{#if value2Label}}<span class="cb-inline-label">{{value2Label}}</span>{{/if}}
+              <input type="number" name="condition.{{path}}.value2" value="{{value2}}" class="cb-value2-input"
+                data-tooltip aria-label="{{value2Hint}}">
+            </span>
+          {{/if}}
+
+          {{#if showOffset}}
+            <span class="cb-offset-group">
+              <span class="cb-inline-label">{{localize "CALENDARIA.Condition.Builder.OffsetLabel"}}</span>
+              <input type="number" name="condition.{{path}}.offset" value="{{offset}}" placeholder="0"
+                class="cb-offset-input" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Offset'}}">
+            </span>
+          {{/if}}
+        {{/if}}
+      </div>
+    </fieldset>
+  {{/if}}
+{{/inline}}
+
+<section class="cb-content standard-form">
+  {{> renderEntry tree}}
+</section>

@@ -1,0 +1,604 @@
+{
+  "id": "pact-standard",
+  "name": "CALENDARIA.Calendar.PactStandard.Name",
+  "years": {
+    "yearZero": -1700,
+    "firstWeekday": 6,
+    "leapYear": {
+      "leapStart": 0,
+      "leapInterval": 4
+    }
+  },
+  "months": {
+    "values": {
+      "abadius000000000": {
+        "name": "Abadius",
+        "abbreviation": "Aba",
+        "ordinal": 1,
+        "days": 31
+      },
+      "calistril0000000": {
+        "name": "Calistril",
+        "abbreviation": "Cal",
+        "ordinal": 2,
+        "days": 28,
+        "leapDays": 29
+      },
+      "pharast000000000": {
+        "name": "Pharast",
+        "abbreviation": "Pha",
+        "ordinal": 3,
+        "days": 31
+      },
+      "gozran0000000000": {
+        "name": "Gozran",
+        "abbreviation": "Goz",
+        "ordinal": 4,
+        "days": 30
+      },
+      "desnus0000000000": {
+        "name": "Desnus",
+        "abbreviation": "Des",
+        "ordinal": 5,
+        "days": 31
+      },
+      "sarenith00000000": {
+        "name": "Sarenith",
+        "abbreviation": "Sar",
+        "ordinal": 6,
+        "days": 30
+      },
+      "erastus000000000": {
+        "name": "Erastus",
+        "abbreviation": "Era",
+        "ordinal": 7,
+        "days": 31
+      },
+      "arodus0000000000": {
+        "name": "Arodus",
+        "abbreviation": "Aro",
+        "ordinal": 8,
+        "days": 31
+      },
+      "rova000000000000": {
+        "name": "Rova",
+        "abbreviation": "Rov",
+        "ordinal": 9,
+        "days": 30
+      },
+      "lamashan0000000": {
+        "name": "Lamashan",
+        "abbreviation": "Lam",
+        "ordinal": 10,
+        "days": 31
+      },
+      "neth000000000000": {
+        "name": "Neth",
+        "abbreviation": "Net",
+        "ordinal": 11,
+        "days": 30
+      },
+      "kuthona000000000": {
+        "name": "Kuthona",
+        "abbreviation": "Kut",
+        "ordinal": 12,
+        "days": 31
+      }
+    }
+  },
+  "days": {
+    "values": {
+      "firstday00000000": {
+        "name": "Firstday",
+        "abbreviation": "1st",
+        "ordinal": 1
+      },
+      "seconday0000000": {
+        "name": "Seconday",
+        "abbreviation": "2nd",
+        "ordinal": 2
+      },
+      "thirday000000000": {
+        "name": "Thirday",
+        "abbreviation": "3rd",
+        "ordinal": 3
+      },
+      "fourthday0000000": {
+        "name": "Fourthday",
+        "abbreviation": "4th",
+        "ordinal": 4
+      },
+      "fifthday00000000": {
+        "name": "Fifthday",
+        "abbreviation": "5th",
+        "ordinal": 5
+      },
+      "sixthday00000000": {
+        "name": "Sixthday",
+        "abbreviation": "6th",
+        "ordinal": 6
+      },
+      "seventhday000000": {
+        "name": "Seventhday",
+        "abbreviation": "7th",
+        "ordinal": 7,
+        "isRestDay": true
+      }
+    },
+    "daysPerYear": 365,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "festivals": {},
+  "seasons": {
+    "values": {
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "monthStart": 11,
+        "monthEnd": 1,
+        "dayStart": 0,
+        "dayEnd": 27,
+        "abbreviation": "Win"
+      },
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "monthStart": 2,
+        "monthEnd": 4,
+        "dayStart": 0,
+        "dayEnd": 30,
+        "abbreviation": "Spr"
+      },
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "monthStart": 5,
+        "monthEnd": 7,
+        "dayStart": 0,
+        "dayEnd": 30,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "monthStart": 8,
+        "monthEnd": 10,
+        "dayStart": 0,
+        "dayEnd": 29,
+        "abbreviation": "Fal"
+      }
+    }
+  },
+  "eras": {
+    "aftergap000000000": {
+      "name": "After Gap",
+      "abbreviation": "AG",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "somal00000000000": {
+      "name": "Somal",
+      "cycleLength": 29,
+      "color": "#E8E8E8",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 0
+      }
+    }
+  },
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 355,
+    "summerSolstice": 172
+  },
+  "cycles": {},
+  "canonicalHours": {},
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y GGGG",
+    "full": "MMMM D, Y",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "pact-standard",
+    "description": "CALENDARIA.Calendar.PactStandard.Description",
+    "author": "calendaria",
+    "system": "Starfinder2e (Golarion)"
+  },
+  "weather": {
+    "activeZone": "temperate",
+    "zones": {
+      "temperate000000": {
+        "id": "temperate",
+        "name": "CALENDARIA.Weather.Climate.Temperate",
+        "description": "CALENDARIA.Weather.Climate.TemperateDesc",
+        "windSpeedRange": {
+          "min": 0,
+          "max": 3
+        },
+        "windDirections": {
+          "W": 20,
+          "WSW": 15,
+          "SW": 12,
+          "WNW": 10,
+          "NW": 8,
+          "S": 8,
+          "N": 5,
+          "NNW": 5,
+          "E": 4,
+          "SE": 4,
+          "NE": 3,
+          "SSW": 3,
+          "SSE": 1,
+          "ESE": 1,
+          "ENE": 1
+        },
+        "brightnessMultiplier": 1,
+        "shortestDay": 8,
+        "longestDay": 16,
+        "temperatures": {
+          "_default": {
+            "min": 8,
+            "max": 20
+          }
+        },
+        "presets": {
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "drizzle00000000": {
+            "id": "drizzle",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "mist00000000000": {
+            "id": "mist",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "thunderstorm000": {
+            "id": "thunderstorm",
+            "enabled": true
+          },
+          "fog000000000000": {
+            "id": "fog",
+            "enabled": true
+          },
+          "windy0000000000": {
+            "id": "windy",
+            "enabled": true
+          },
+          "snow00000000000": {
+            "id": "snow",
+            "enabled": true
+          },
+          "blizzard0000000": {
+            "id": "blizzard",
+            "enabled": true
+          },
+          "overcast0000000": {
+            "id": "overcast",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "CALENDARIA.Season.Winter": {
+            "temperatures": {
+              "min": -5,
+              "max": 5
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 26
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 11
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 11
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 16
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 11
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 11
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 5
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Spring": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "rain": {
+                "id": "rain",
+                "chance": 25
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 19
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 19
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 13
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 13
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 13
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Summer": {
+            "temperatures": {
+              "min": 18,
+              "max": 30
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 35
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 24
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 12
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 12
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 6
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Autumn": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 24
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 18
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 18
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 12
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 12
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

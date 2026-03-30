@@ -4,22 +4,36 @@
  * @author Tyler
  */
 
-import CalendarManager from '../../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
-import NoteManager from '../../notes/note-manager.mjs';
-import TimeClock from '../../time/time-clock.mjs';
-import { formatForLocation } from '../../utils/formatting/format-utils.mjs';
-import { getMoonPhasePosition } from '../../utils/formatting/moon-utils.mjs';
-import { localize } from '../../utils/localization.mjs';
-import { log } from '../../utils/logger.mjs';
-import { canViewSunDial } from '../../utils/permissions.mjs';
-import { CalendariaSocket } from '../../utils/socket.mjs';
-import { applyWeatherSkyTint, buildOpenAppsMenuItem, computeStarAlpha, getSkyColorsRgb } from '../../utils/ui/_module.mjs';
-import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import { getPreset } from '../../weather/data/weather-presets.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
-import { HudSceneRenderer } from '../hud/hud-scene-renderer.mjs';
-import { SettingsPanel } from '../settings/settings-panel.mjs';
+import { CalendarManager } from '../../calendar/_module.mjs';
+import { HOOKS, MODULE, REDUCED_FX_DENSITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import { NoteManager } from '../../notes/_module.mjs';
+import { TimeClock } from '../../time/_module.mjs';
+import {
+  CalendariaSocket,
+  applyWeatherSkyTint,
+  buildOpenAppsMenuItem,
+  canViewSunDial,
+  checkStickyZones,
+  cleanupSnapIndicator,
+  computeStarAlpha,
+  finalizeDrag,
+  formatForLocation,
+  getMoonPhasePosition,
+  getRestorePosition,
+  getSidebarBuffer,
+  getSkyColorsRgb,
+  isCombatBlocked,
+  localize,
+  log,
+  registerForZoneUpdates,
+  restorePinnedState,
+  unpinFromZone,
+  unregisterFromZoneUpdates,
+  usesDomParenting,
+  warnShowToAll
+} from '../../utils/_module.mjs';
+import { WeatherManager, getPreset } from '../../weather/_module.mjs';
+import { HudSceneRenderer, SettingsPanel } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -114,6 +128,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return;
     }
+    if (isCombatBlocked(SETTINGS.SUN_DIAL_COMBAT_MODE)) return;
     const existing = foundry.applications.instances.get('calendaria-sun-dial');
     if (existing) {
       existing.render({ force: true });
@@ -159,7 +174,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     context.currentTime = this.#formatDialTime(hours, minutes);
     context.hourMarkers = this.#generateHourMarkers();
     context.running = TimeClock.running;
-    context.clockLocked = game.settings.get(MODULE.ID, SETTINGS.CLOCK_LOCKED);
+    context.clockDisabled = TimeClock.disabled;
+    context.clockLocked = TimeClock.locked || TimeClock.disabled;
     return context;
   }
 
@@ -208,9 +224,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onClose(options) {
     const pos = this.position;
-    if (pos.top != null && pos.left != null) {
-      game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_POSITION, { top: pos.top, left: pos.left, size: this.#getSize(), zoneId: this.#snappedZoneId });
-    }
+    if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_POSITION, { top: pos.top, left: pos.left, size: this.#getSize(), zoneId: this.#snappedZoneId });
     if (this.#sceneRenderer) {
       this.#sceneRenderer.destroy();
       this.#sceneRenderer = null;
@@ -239,15 +253,15 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#boundMouseUp = null;
     this.#boundEscape = null;
     this.#boundClickOutside = null;
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
-    StickyZones.cleanupSnapIndicator();
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
+    cleanupSnapIndicator();
     super._onClose(options);
   }
 
   /** @override */
   async close(options = {}) {
-    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL)) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
@@ -267,13 +281,16 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
-    const disableFx = game.settings.get(MODULE.ID, SETTINGS.HUD_DISABLE_WEATHER_FX);
-    const effect = disableFx ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
+    const fxMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_FX_MODE);
+    const fxOff = fxMode === 'off';
+    const effect = fxOff ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
+    const densityScale = fxMode === 'reduced' ? REDUCED_FX_DENSITY : 1;
     const { visualOverrides } = resolved;
     this.#sceneRenderer.setEffect(
       effect,
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
-      disableFx ? null : visualOverrides
+      fxOff ? null : visualOverrides,
+      densityScale
     );
   }
 
@@ -294,13 +311,16 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
-    const disableFx = game.settings.get(MODULE.ID, SETTINGS.HUD_DISABLE_WEATHER_FX);
-    const effect = disableFx ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
+    const fxMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_FX_MODE);
+    const fxOff = fxMode === 'off';
+    const effect = fxOff ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
+    const densityScale = fxMode === 'reduced' ? REDUCED_FX_DENSITY : 1;
     const { visualOverrides } = resolved;
     this.#sceneRenderer.setEffect(
       effect,
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
-      disableFx ? null : visualOverrides
+      fxOff ? null : visualOverrides,
+      densityScale
     );
     this.#updateSceneForHour({ hours: this.#currentHours, minutes: this.#currentMinutes });
   }
@@ -441,10 +461,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!handleContainer) return;
     const time = this.#angleToTime(angle);
     const timeDisplay = this.element.querySelector('.time');
-    if (timeDisplay && document.activeElement !== timeDisplay) {
-      timeDisplay.value = this.#formatDialTime(time.hours, time.minutes);
-    }
-    // Update day offset indicator for crank mode
+    if (timeDisplay && document.activeElement !== timeDisplay) timeDisplay.value = this.#formatDialTime(time.hours, time.minutes);
     this.#updateDayOffsetDisplay(time);
     handleContainer.style.transform = `rotate(${angle}deg)`;
     this.#currentHours = time.hours;
@@ -470,7 +487,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const sign = dayOffset > 0 ? '+' : '';
-    label.textContent = `${sign}${dayOffset} ${localize('CALENDARIA.SunDial.Days')}`;
+    label.textContent = `${sign}${dayOffset} ${localize('CALENDARIA.Common.UnitDays')}`;
   }
 
   /** Setup handle drag and time input interaction. */
@@ -483,7 +500,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     let initialDialAngle = 0;
     let prevMouseAngle = 0;
     let unwrappedMouseAngle = 0;
-
     const getAngleFromEvent = (event) => {
       const rect = sky.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -492,8 +508,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       const deltaY = event.clientY - centerY;
       return (Math.atan2(deltaY, deltaX) * 180) / Math.PI + 90;
     };
-
-    /** Cancel the current drag and reset dial to world time. */
     const cancelDrag = () => {
       isDragging = false;
       dragCancelled = true;
@@ -507,7 +521,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       const angle = this.#timeToAngle(this.#currentHours, this.#currentMinutes);
       this.#updateDialRotation(angle);
     };
-
     const onMouseDown = (event) => {
       if (event.button !== 0) return;
       isDragging = true;
@@ -520,26 +533,19 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       event.stopPropagation();
     };
-
     const onMouseMove = (event) => {
       if (!isDragging) return;
       const rawMouseAngle = getAngleFromEvent(event);
-
-      // Accumulate unwrapped mouse delta (handles atan2 ±180 jumps)
       let mouseDelta = rawMouseAngle - prevMouseAngle;
       if (mouseDelta > 180) mouseDelta -= 360;
       else if (mouseDelta < -180) mouseDelta += 360;
       unwrappedMouseAngle += mouseDelta;
       prevMouseAngle = rawMouseAngle;
-
-      // Cumulative angle tracks total rotation from drag start
       this.#cumulativeAngle = unwrappedMouseAngle;
-
       const newAngle = initialDialAngle + unwrappedMouseAngle;
       this.#updateDialRotation(newAngle);
       event.preventDefault();
     };
-
     const onMouseUp = async (event) => {
       if (!isDragging || event.button !== 0) return;
       if (dragCancelled) {
@@ -554,23 +560,18 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       if (label) label.textContent = '';
       event.preventDefault();
     };
-
-    // Right-click during drag cancels crank accumulation and resets to current time
     const onRightMouseDown = (event) => {
       if (event.button !== 2 || !isDragging) return;
       event.preventDefault();
       event.stopPropagation();
       cancelDrag();
     };
-
     handle.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousedown', onRightMouseDown, true);
     this.#boundMouseMove = onMouseMove;
     this.#boundMouseUp = onMouseUp;
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
-
-    // Time input handlers
     const timeInput = this.element.querySelector('.time');
     if (!timeInput) return;
     const applyTimeFromInput = async () => {
@@ -644,12 +645,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const secondsPerDay = secondsPerHour * hoursPerDay;
     const crankMode = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE);
     let timeDiff;
-
     if (crankMode) {
-      // Crank mode: derive time diff from cumulative unwrapped rotation
       timeDiff = Math.round((this.#cumulativeAngle / 360) * secondsPerDay);
     } else {
-      // Standard mode: shortest-path within a single day
       const initialComponents = cal?.timeToComponents?.(this.#initialTime) ?? game.time.components;
       const initialHours = initialComponents.hour ?? 0;
       const initialMinutes = initialComponents.minute ?? 0;
@@ -662,7 +660,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
         else timeDiff += secondsPerDay;
       }
     }
-
     if (timeDiff !== 0) {
       if (!game.user.isGM) {
         CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: timeDiff });
@@ -693,43 +690,38 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #getContextMenuItems() {
     const items = [];
-    // Crank mode toggle
     const crankMode = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE);
     items.push({
       name: crankMode ? 'CALENDARIA.SunDial.ContextMenu.DisableCrankMode' : 'CALENDARIA.SunDial.ContextMenu.EnableCrankMode',
       icon: `<i class="fas fa-${crankMode ? 'toggle-on' : 'toggle-off'}"></i>`,
       callback: () => this.#toggleCrankMode()
     });
-    // Reset position
     items.push({
-      name: 'CALENDARIA.SunDial.ContextMenu.ResetPosition',
+      name: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
       callback: () => this.resetPosition()
     });
-    // Lock/unlock position
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.SunDial.ContextMenu.UnlockPosition' : 'CALENDARIA.SunDial.ContextMenu.LockPosition',
+      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this.#toggleStickyPosition()
     });
-    // Show/Hide from all players (GM only)
     if (game.user.isGM) {
       const forceSunDial = game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL);
       items.push({
-        name: forceSunDial ? 'CALENDARIA.SunDial.ContextMenu.HideFromAll' : 'CALENDARIA.SunDial.ContextMenu.ShowToAll',
+        name: forceSunDial ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceSunDial ? 'eye-slash' : 'eye'}"></i>`,
         callback: async () => {
           const newValue = !forceSunDial;
+          if (newValue) warnShowToAll('viewSunDial', game.i18n.localize('CALENDARIA.Permissions.ViewSunDial'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_SUN_DIAL, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.SUN_DIAL_VISIBILITY, { visible: newValue });
         }
       });
     }
-    // Open submenu
     items.push(buildOpenAppsMenuItem());
-    // Close
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
   }
@@ -755,11 +747,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} event - The triggering click event
    */
   static #onToggleClock(event) {
-    if (event.shiftKey) {
-      TimeClock.toggleLock();
-    } else {
-      TimeClock.toggle();
-    }
+    if (event.shiftKey) TimeClock.toggleLock();
+    else TimeClock.toggle();
     this.render();
   }
 
@@ -773,7 +762,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
         endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
-      }
+      },
+      source: 'ui'
     });
   }
 
@@ -784,8 +774,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Reset position to default center. */
   async resetPosition() {
-    StickyZones.unregisterFromZoneUpdates(this);
-    StickyZones.unpinFromZone(this.element);
+    unregisterFromZoneUpdates(this);
+    unpinFromZone(this.element);
     this.#snappedZoneId = null;
     const w = this.#getSize();
     const h = w;
@@ -857,15 +847,15 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const h = w;
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
       this.#snappedZoneId = savedPos.zoneId || null;
-      if (this.#snappedZoneId && StickyZones.restorePinnedState(this.element, this.#snappedZoneId)) {
-        StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      if (this.#snappedZoneId && restorePinnedState(this.element, this.#snappedZoneId)) {
+        registerForZoneUpdates(this, this.#snappedZoneId);
         return;
       }
       if (this.#snappedZoneId) {
-        const zonePos = StickyZones.getRestorePosition(this.#snappedZoneId, w, h);
+        const zonePos = getRestorePosition(this.#snappedZoneId, w, h);
         if (zonePos) {
           this.setPosition({ left: zonePos.left, top: zonePos.top });
-          StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+          registerForZoneUpdates(this, this.#snappedZoneId);
           return;
         }
       }
@@ -889,7 +879,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       w = rect.width || 300;
       h = rect.height || 300;
     }
-    const rightBuffer = StickyZones.getSidebarBuffer();
+    const rightBuffer = getSidebarBuffer();
     let { left, top } = this.position;
     left = Math.max(0, Math.min(left, window.innerWidth - w - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - h));
@@ -906,22 +896,20 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     let elementStartLeft = 0;
     let elementStartTop = 0;
     let previousZoneId = null;
-
     const onMouseMove = (event) => {
       if (!isDragging) return;
       event.preventDefault();
       const deltaX = event.clientX - dragStartX;
       const deltaY = event.clientY - dragStartY;
       const rect = this.element.getBoundingClientRect();
-      const rightBuffer = StickyZones.getSidebarBuffer();
+      const rightBuffer = getSidebarBuffer();
       let newLeft = elementStartLeft + deltaX;
       let newTop = elementStartTop + deltaY;
       newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width - rightBuffer));
       newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
       this.setPosition({ left: newLeft, top: newTop });
-      this.#activeSnapZone = StickyZones.checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
+      this.#activeSnapZone = checkStickyZones(dragHandle, newLeft, newTop, rect.width, rect.height);
     };
-
     const onMouseUp = async (event) => {
       if (!isDragging) return;
       isDragging = false;
@@ -929,14 +917,13 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       const rect = this.element.getBoundingClientRect();
-      const result = StickyZones.finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
+      const result = finalizeDrag(dragHandle, this.#activeSnapZone, this, rect.width, rect.height, previousZoneId);
       this.#snappedZoneId = result.zoneId;
-      StickyZones.registerForZoneUpdates(this, this.#snappedZoneId);
+      registerForZoneUpdates(this, this.#snappedZoneId);
       this.#activeSnapZone = null;
       previousZoneId = null;
       await this.#savePosition();
     };
-
     dragHandle.addEventListener('mousedown', (event) => {
       if (this.#stickyPosition) return;
       if (event.button !== 0) return;
@@ -944,8 +931,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       isDragging = true;
       previousZoneId = this.#snappedZoneId;
-      if (previousZoneId && StickyZones.usesDomParenting(previousZoneId)) {
-        const preserved = StickyZones.unpinFromZone(this.element);
+      if (previousZoneId && usesDomParenting(previousZoneId)) {
+        const preserved = unpinFromZone(this.element);
         if (preserved) {
           elementStartLeft = preserved.left;
           elementStartTop = preserved.top;

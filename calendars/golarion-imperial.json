@@ -1,0 +1,2345 @@
+{
+  "id": "golarion-imperial",
+  "name": "CALENDARIA.Calendar.GolarionImperial.Name",
+  "years": {
+    "yearZero": 5200,
+    "firstWeekday": 6,
+    "leapYear": {
+      "leapStart": 0,
+      "leapInterval": 4
+    }
+  },
+  "months": {
+    "values": {
+      "abadius000000000": {
+        "name": "Abadius",
+        "abbreviation": "Aba",
+        "ordinal": 1,
+        "days": 31
+      },
+      "calistril0000000": {
+        "name": "Calistril",
+        "abbreviation": "Cal",
+        "ordinal": 2,
+        "days": 28,
+        "leapDays": 29
+      },
+      "pharast000000000": {
+        "name": "Pharast",
+        "abbreviation": "Pha",
+        "ordinal": 3,
+        "days": 31
+      },
+      "gozran0000000000": {
+        "name": "Gozran",
+        "abbreviation": "Goz",
+        "ordinal": 4,
+        "days": 30
+      },
+      "desnus0000000000": {
+        "name": "Desnus",
+        "abbreviation": "Des",
+        "ordinal": 5,
+        "days": 31
+      },
+      "sarenith00000000": {
+        "name": "Sarenith",
+        "abbreviation": "Sar",
+        "ordinal": 6,
+        "days": 30
+      },
+      "erastus000000000": {
+        "name": "Erastus",
+        "abbreviation": "Era",
+        "ordinal": 7,
+        "days": 31
+      },
+      "arodus0000000000": {
+        "name": "Arodus",
+        "abbreviation": "Aro",
+        "ordinal": 8,
+        "days": 31
+      },
+      "rova000000000000": {
+        "name": "Rova",
+        "abbreviation": "Rov",
+        "ordinal": 9,
+        "days": 30
+      },
+      "lamashan00000000": {
+        "name": "Lamashan",
+        "abbreviation": "Lam",
+        "ordinal": 10,
+        "days": 31
+      },
+      "neth000000000000": {
+        "name": "Neth",
+        "abbreviation": "Net",
+        "ordinal": 11,
+        "days": 30
+      },
+      "kuthona000000000": {
+        "name": "Kuthona",
+        "abbreviation": "Kut",
+        "ordinal": 12,
+        "days": 31
+      }
+    }
+  },
+  "days": {
+    "values": {
+      "moonday000000000": {
+        "name": "Moonday",
+        "abbreviation": "Moo",
+        "ordinal": 1
+      },
+      "toilday000000000": {
+        "name": "Toilday",
+        "abbreviation": "Toi",
+        "ordinal": 2
+      },
+      "wealday000000000": {
+        "name": "Wealday",
+        "abbreviation": "Wea",
+        "ordinal": 3
+      },
+      "oathday000000000": {
+        "name": "Oathday",
+        "abbreviation": "Oat",
+        "ordinal": 4
+      },
+      "fireday000000000": {
+        "name": "Fireday",
+        "abbreviation": "Fir",
+        "ordinal": 5
+      },
+      "starday000000000": {
+        "name": "Starday",
+        "abbreviation": "Sta",
+        "ordinal": 6
+      },
+      "sunday0000000000": {
+        "name": "Sunday",
+        "abbreviation": "Sun",
+        "ordinal": 7,
+        "isRestDay": true
+      }
+    },
+    "daysPerYear": 365,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "festivals": {
+    "foundationday000": {
+      "name": "Foundation Day",
+      "month": 0,
+      "icon": "fa-city",
+      "color": "#B8860B",
+      "description": "Absalom's celebration of both its founding and the new year.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "longnight0000000": {
+      "name": "Longnight",
+      "month": 0,
+      "icon": "fa-moon",
+      "color": "#4169E1",
+      "description": "Revelers stay awake through the longest winter night to defy the darkness and greet the dawn.",
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "vaultday00000000": {
+      "name": "Vault Day",
+      "month": 0,
+      "icon": "fa-vault",
+      "color": "#EDB509",
+      "description": "Annual holiday held in honor of Abadar.",
+      "dayOfMonth": 5,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 6
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ascensiondayaraz": {
+      "name": "Ascension Day (Arazni)",
+      "month": 0,
+      "icon": "fa-crown",
+      "color": "#701B0B",
+      "description": "The day chosen by Arazni to celebrate her regaining her freedom and emerging as a full-fledged god.",
+      "dayOfMonth": 10,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 11
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ritualwhipsting0": {
+      "name": "Ritual of the Whip Sting",
+      "month": 1,
+      "icon": "fa-forumbee",
+      "color": "#FFF700",
+      "description": "The clergy of Calistria act as intermediaries in deciding a public act of vengeance to settle a personal dispute.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "merrymead0000000": {
+      "name": "Merrymead",
+      "month": 1,
+      "icon": "fa-wine-bottle",
+      "color": "#FFD700",
+      "description": "A celebration of approaching spring where the previous year's alcohol is consumed.",
+      "dayOfMonth": 1,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 2
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "feastofvigor0000": {
+      "name": "Feast of Vigor",
+      "month": 1,
+      "icon": "fa-heart",
+      "color": "#FF3B14",
+      "description": "A Calistril celebration, the feast refers to a celebration of pleasure between lovers and strangers.",
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "loyaltyday000000": {
+      "name": "Loyalty Day",
+      "month": 1,
+      "icon": "fa-flag",
+      "color": "#B22E3D",
+      "description": "Chelaxian holiday also celebrated by the Church of Asmodeus, observing the Treaty of Egorian that declared House Thrune the victors of the Chelaxian Civil War.",
+      "dayOfMonth": 18,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 19
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "leapday000000000": {
+      "name": "Leap Day",
+      "month": 1,
+      "leapYearOnly": true,
+      "icon": "fa-infinity",
+      "color": "#9370DB",
+      "description": "Followers of Mahathallah mark this rare day as Fateless Day, a time outside normal fate.",
+      "dayOfMonth": 28,
+      "duration": 1,
+      "countsForWeekday": true,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "isLeapYear",
+            "op": "==",
+            "value": true
+          },
+          {
+            "type": "group",
+            "mode": "and",
+            "children": [
+              {
+                "type": "condition",
+                "field": "month",
+                "op": "==",
+                "value": 2
+              },
+              {
+                "type": "condition",
+                "field": "day",
+                "op": "==",
+                "value": 29
+              }
+            ]
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "dayofbones000000": {
+      "name": "Day of Bones",
+      "month": 2,
+      "icon": "fa-skull",
+      "color": "#696969",
+      "description": "A solemn holiday honoring Pharasma where the dead are remembered and tombs are tended.",
+      "dayOfMonth": 4,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 5
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "mourningfell0000": {
+      "name": "Mourningfell",
+      "month": 2,
+      "icon": "fa-star",
+      "color": "#701B0B",
+      "description": "The day Arazni was slain in battle by the Whispering Tyrant in 3823, the church of Iomedae is solemn, paying respects to the memory of Aroden's herald, while the church of Arazni celebrates the day in honor of their goddess's resilience.",
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "firstbloom000000": {
+      "name": "Firstbloom",
+      "month": 2,
+      "icon": "fa-seedling",
+      "color": "#32CD32",
+      "description": "Fertility dances celebrate the coming of spring at the vernal equinox.",
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "daysofwrathspr00": {
+      "name": "Days of Wrath",
+      "month": 2,
+      "icon": "fa-archway",
+      "color": "#B22E3D",
+      "description": "A Chelaxian and Asmodean holiday celebrated each solstice and equinox. Various contests and blood sports are held, through which slaves and servants can be freed, debts can be erased, and gold can be won.",
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "plantingweek0000": {
+      "name": "Planting Week",
+      "month": 2,
+      "icon": "fa-trowel",
+      "color": "#8B4513",
+      "description": "A holy week dedicated to Erastil when farmers engage in heavy field work.",
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "currentseve0000": {
+      "name": "Currentseve",
+      "month": 3,
+      "icon": "fa-leaf",
+      "color": "#05F756",
+      "description": "A solemn occasion where families of sailors and rivermen pray to Gozreh for safe passage during the year.",
+      "dayOfMonth": 6,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 7
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "taxfest000000000": {
+      "name": "Taxfest",
+      "month": 3,
+      "icon": "fa-coins",
+      "color": "#DAA520",
+      "description": "Priests of Abadar accompany tax collectors to ensure fair taxation, followed by a feast.",
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "findcayhound0000": {
+      "name": "Find of the Cayhound",
+      "month": 3,
+      "icon": "fa-paw",
+      "color": "#C6C2BF",
+      "description": "Celebrating the day god Cayden Cailean met his loyal companion Thunder, abandoned dogs find new homes among his followers and competitions are held where owner and dog must work together to win.",
+      "dayOfMonth": 23,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 24
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "remembrancemoon0": {
+      "name": "Remembrance Moon",
+      "month": 4,
+      "icon": "fa-monument",
+      "color": "#708090",
+      "description": "A solemn holiday honoring those who fell in the Shining Crusade against the Whispering Tyrant.",
+      "dayOfMonth": 14,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 15
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ascendnorgorber0": {
+      "name": "Ascendance Night (Norgorber)",
+      "month": 4,
+      "icon": "fa-moon",
+      "color": "#6E6E6E",
+      "description": "A celebration of the secretive former-mortal Norgorber's ascension to divinity.",
+      "dayOfMonth": 1,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 2
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "apprenticeday000": {
+      "name": "Apprentice Appreciation Day",
+      "month": 4,
+      "icon": "fa-graduation-cap",
+      "color": "#FFFFFF",
+      "description": "Celebration observed by followers of Nethys, an apprentice's work is praised by the master, and the apprentice can demonstrate their improvement with a duel. If the master sees improvement in the duel, the master is to give their apprentice a gift of gratitude.",
+      "dayOfMonth": 30,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 31
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "burningblades000": {
+      "name": "Burning Blades",
+      "month": 5,
+      "icon": "fa-fire",
+      "color": "#FF4500",
+      "description": "A festival for Sarenrae culminating in sacred dances performed with flaming blades.",
+      "dayOfMonth": 9,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 10
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "darknesseternal0": {
+      "name": "Darkness Eternal",
+      "month": 5,
+      "icon": "fa-temperature-high",
+      "color": "#DB3535",
+      "description": "Followers of Asmodeus lament the beginning of summer.",
+      "dayOfMonth": 9,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 10
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "sunwroughtfestiv": {
+      "name": "Sunwrought Festival",
+      "month": 5,
+      "icon": "fa-sun",
+      "color": "#FF6347",
+      "description": "The summer solstice honors Sarenrae with fireworks and reenactments of her battle with Rovagug.",
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "daysofwrathsum00": {
+      "name": "Days of Wrath",
+      "month": 5,
+      "icon": "fa-archway",
+      "color": "#B22E3D",
+      "description": "A Chelaxian and Asmodean holiday celebrated each solstice and equinox. Various contests and blood sports are held, through which slaves and servants can be freed, debts can be erased, and gold can be won.",
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ritualstardustsm": {
+      "name": "Ritual of Stardust",
+      "month": 5,
+      "icon": "fa-star-half-stroke",
+      "color": "#8164B1",
+      "description": "One of the few holidays in honor of Desna. Held of both the summer and winter solstices, the best day for travel and best night for stargazing. Followers gather at dusk, light enormous bonfires, and hold feasts.",
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "archersday000000": {
+      "name": "Archer's Day",
+      "month": 6,
+      "icon": "fa-bullseye",
+      "color": "#228B22",
+      "description": "Erastil's holy day celebrated with archery contests and livestock bartering.",
+      "dayOfMonth": 2,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 3
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "inheritorsascen": {
+      "name": "Inheritor's Ascendance (Iomedae)",
+      "month": 7,
+      "icon": "fa-sun",
+      "color": "#F00C0C",
+      "description": "Originally called Herald's Day, this date honors when Aroden chose Iomedae to become his herald, replacing Arazni after her death. The day was renamed after the death of Aroden.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "armasse000000000": {
+      "name": "Armasse",
+      "month": 7,
+      "icon": "fa-shield-halved",
+      "color": "#DC143C",
+      "description": "A day to train commoners in combat, honoring Iomedae's martial legacy.",
+      "dayOfMonth": 15,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 8
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 16
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "dayofinheritor00": {
+      "name": "Day of the Inheritor (Iomedae)",
+      "month": 8,
+      "icon": "fa-sun",
+      "color": "#F00C0C",
+      "description": "This day marks the welcoming of Aroden's faithful into the flock of Iomedae after the death of Aroden.",
+      "dayOfMonth": 18,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 19
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "daysofwrathaut00": {
+      "name": "Days of Wrath",
+      "month": 8,
+      "icon": "fa-archway",
+      "color": "#B22E3D",
+      "description": "A Chelaxian and Asmodean holiday celebrated each solstice and equinox. Various contests and blood sports are held, through which slaves and servants can be freed, debts can be erased, and gold can be won.",
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "swallowtailfesti": {
+      "name": "Swallowtail Festival",
+      "month": 8,
+      "icon": "fa-dove",
+      "color": "#87CEEB",
+      "description": "The first day of autumn honors Desna with feasting and the release of butterflies.",
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "harvestfeast0000": {
+      "name": "Harvest Feast",
+      "month": 8,
+      "icon": "fa-wheat-awn",
+      "color": "#D2691E",
+      "description": "The autumnal equinox celebration marks the harvest's end.",
+      "dayOfMonth": 22,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 23
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ascendanceday000": {
+      "name": "Ascendance Day",
+      "month": 9,
+      "icon": "fa-crown",
+      "color": "#FFD700",
+      "description": "Iomedae's divine ascension is celebrated with ceremonies honoring her rise to goddess.",
+      "dayOfMonth": 5,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 6
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "jestercap0000000": {
+      "name": "Jestercap",
+      "month": 9,
+      "icon": "fa-hat-wizard",
+      "color": "#FF1493",
+      "description": "A day of pranks and practical jokes particularly favored by gnomes.",
+      "dayOfMonth": 26,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 27
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "allbirth00000000": {
+      "name": "Allbirth",
+      "month": 9,
+      "icon": "fa-eye",
+      "color": "#EFFF14",
+      "description": "A Lamashran occult celebration of monsters. In Katapesh, and increasingly elsewhere, it is more broadly celebrated as a gruesome masquerade popular among dromaars and goblins.",
+      "dayOfMonth": 29,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 10
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 30
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "sevenveils000000": {
+      "name": "Seven Veils",
+      "month": 10,
+      "icon": "fa-masks-theater",
+      "color": "#9932CC",
+      "description": "Sivanah's sacred masquerade ball where participants disguise their identity behind magical veils.",
+      "dayOfMonth": 6,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 7
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "abjurantday00000": {
+      "name": "Abjurant Day",
+      "month": 10,
+      "icon": "fa-tents",
+      "color": "#FFFFFF",
+      "description": "A Nethysian holiday of cooperation between neighbors to shore up mutual defenses and train allies in magic.",
+      "dayOfMonth": 7,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 8
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "evokingday000000": {
+      "name": "Evoking Day",
+      "month": 10,
+      "icon": "fa-burst",
+      "color": "#FFFFFF",
+      "description": "A longstanding Nethysian holiday, it has always featured a grand meal in the afternoon and a wondrous exhibition of brilliant and explosive magic once the sun sets.",
+      "dayOfMonth": 17,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 18
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "transmutatum0000": {
+      "name": "Transmutatum",
+      "month": 10,
+      "icon": "fa-masks-theater",
+      "color": "#FFFFFF",
+      "description": "A day of reflection and self-improvement, many followers of Nethys begin research and crafting projects on this day.",
+      "dayOfMonth": 27,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "shadowchaining00": {
+      "name": "The Shadowchaining",
+      "month": 11,
+      "icon": "fa-link",
+      "color": "#4A4A4A",
+      "description": "Clerics of Zon-Kuthon commemorate the animals that have been influenced by the shadows over the milennia that Nidal has been under their god's protection. Those with animal companions walk the streets receiving prayers from passerby, and afterwards these animals are sent to attack a captured enemy of the faith.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "winterweek000000": {
+      "name": "Winter Week",
+      "month": 11,
+      "icon": "fa-snowflake",
+      "color": "#ADD8E6",
+      "description": "A traditional feast serving as a time for courting and gathering with friends.",
+      "dayOfMonth": 7,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 8
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ascendcayden0000": {
+      "name": "Ascension Day (Cayden Cailean)",
+      "month": 11,
+      "icon": "fa-beer-mug-empty",
+      "color": "#C6C2BF",
+      "description": "A very informal holiday for a very informal deity, it commemorates the day Cayden Cailean ascended to godhood. The exact date of his ascension is unknown, as he was drunk when it happened.",
+      "dayOfMonth": 10,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 11
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "dayoforder000000": {
+      "name": "Day of Order",
+      "month": 11,
+      "icon": "fa-file-contract",
+      "color": "#DB3535",
+      "description": "Commemorating the murder of Ihys at the hands of his brother Asmodeus, while the exact date is unknown the church chose the 11th to coincide with the ascension of Cayden Cailean, another god who represents chaos.",
+      "dayOfMonth": 10,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 11
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "candlemark000000": {
+      "name": "Candlemark",
+      "month": 11,
+      "icon": "fa-fire-flame-simple",
+      "color": "#FFA500",
+      "description": "The winter solstice honors Sarenrae's healing power on the sun's weakest day.",
+      "dayOfMonth": 20,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 21
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "crystalhue000000": {
+      "name": "Crystalhue",
+      "month": 11,
+      "icon": "fa-gem",
+      "color": "#00CED1",
+      "description": "A winter solstice celebration of art and courtship honoring Shelyn with crystal prisms.",
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "daysofwrathwin00": {
+      "name": "Days of Wrath",
+      "month": 11,
+      "icon": "fa-archway",
+      "color": "#B22E3D",
+      "description": "A Chelaxian and Asmodean holiday celebrated each solstice and equinox. Various contests and blood sports are held, through which slaves and servants can be freed, debts can be erased, and gold can be won. One this final event of the year, victors of the last three bouts fight to the death, with the final champion being named a baronet and granted a plot of land.",
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "ritualstardustwn": {
+      "name": "Ritual of Stardust",
+      "month": 11,
+      "icon": "fa-star-half-stroke",
+      "color": "#8164B1",
+      "description": "One of the few holidays in honor of Desna. Held for both the summer and winter solstices, the best day for travel and best night for stargazing. Followers gather at dusk, light enormous bonfires, and hold feasts.",
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "nightofthepale00": {
+      "name": "Night of the Pale",
+      "month": 11,
+      "icon": "fa-ghost",
+      "color": "#E6E6FA",
+      "description": "The last night of the year when ghosts of the recently dead manifest to visit their former homes.",
+      "dayOfMonth": 30,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 31
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    }
+  },
+  "seasons": {
+    "values": {
+      "winter0000000000": {
+        "name": "CALENDARIA.Season.Winter",
+        "icon": "fas fa-snowflake",
+        "color": "#87ceeb",
+        "seasonalType": "winter",
+        "monthStart": 11,
+        "monthEnd": 1,
+        "dayStart": 0,
+        "dayEnd": 27,
+        "abbreviation": "Win"
+      },
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "monthStart": 2,
+        "monthEnd": 4,
+        "dayStart": 0,
+        "dayEnd": 30,
+        "abbreviation": "Spr"
+      },
+      "summer0000000000": {
+        "name": "CALENDARIA.Season.Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffd700",
+        "seasonalType": "summer",
+        "monthStart": 5,
+        "monthEnd": 7,
+        "dayStart": 0,
+        "dayEnd": 30,
+        "abbreviation": "Sum"
+      },
+      "autumn0000000000": {
+        "name": "CALENDARIA.Season.Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "monthStart": 8,
+        "monthEnd": 10,
+        "dayStart": 0,
+        "dayEnd": 29,
+        "abbreviation": "Fal"
+      }
+    }
+  },
+  "eras": {
+    "imperialcalendar": {
+      "name": "Imperial Calendar",
+      "abbreviation": "IC",
+      "startYear": 1,
+      "endYear": null
+    }
+  },
+  "moons": {
+    "somal00000000000": {
+      "name": "Somal",
+      "cycleLength": 29,
+      "color": "#E8E8E8",
+      "phases": {
+        "newmoon000000000": {
+          "name": "CALENDARIA.MoonPhase.NewMoon",
+          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
+          "start": 0,
+          "end": 0.125
+        },
+        "waxingcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
+          "start": 0.125,
+          "end": 0.25
+        },
+        "firstquarter0000": {
+          "name": "CALENDARIA.MoonPhase.FirstQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
+          "start": 0.25,
+          "end": 0.375
+        },
+        "waxinggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
+          "start": 0.375,
+          "end": 0.5
+        },
+        "fullmoon00000000": {
+          "name": "CALENDARIA.MoonPhase.FullMoon",
+          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
+          "start": 0.5,
+          "end": 0.625
+        },
+        "waninggibbous000": {
+          "name": "CALENDARIA.MoonPhase.WaningGibbous",
+          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
+          "start": 0.625,
+          "end": 0.75
+        },
+        "lastquarter00000": {
+          "name": "CALENDARIA.MoonPhase.LastQuarter",
+          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
+          "start": 0.75,
+          "end": 0.875
+        },
+        "waningcrescent00": {
+          "name": "CALENDARIA.MoonPhase.WaningCrescent",
+          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
+          "start": 0.875,
+          "end": 1
+        }
+      },
+      "referenceDate": {
+        "year": 0,
+        "month": 0,
+        "dayOfMonth": 0
+      }
+    }
+  },
+  "daylight": {
+    "enabled": true,
+    "shortestDay": 8,
+    "longestDay": 16,
+    "winterSolstice": 355,
+    "summerSolstice": 172
+  },
+  "cycles": {},
+  "canonicalHours": {},
+  "weeks": {
+    "enabled": false,
+    "type": "year-based",
+    "names": {}
+  },
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "D MMMM, Y GGGG",
+    "full": "MMMM D, Y",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Week] W [of] MMMM, Y",
+    "yearHeader": "Y",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "golarion-imperial",
+    "description": "CALENDARIA.Calendar.GolarionImperial.Description",
+    "author": "calendaria",
+    "system": "Pathfinder2e (Golarion — Tian Xia)"
+  },
+  "weather": {
+    "activeZone": "temperate",
+    "zones": {
+      "temperate000000": {
+        "id": "temperate",
+        "name": "CALENDARIA.Weather.Climate.Temperate",
+        "description": "CALENDARIA.Weather.Climate.TemperateDesc",
+        "windSpeedRange": {
+          "min": 0,
+          "max": 3
+        },
+        "windDirections": {
+          "W": 20,
+          "WSW": 15,
+          "SW": 12,
+          "WNW": 10,
+          "NW": 8,
+          "S": 8,
+          "N": 5,
+          "NNW": 5,
+          "E": 4,
+          "SE": 4,
+          "NE": 3,
+          "SSW": 3,
+          "SSE": 1,
+          "ESE": 1,
+          "ENE": 1
+        },
+        "brightnessMultiplier": 1,
+        "shortestDay": 8,
+        "longestDay": 16,
+        "temperatures": {
+          "_default": {
+            "min": 8,
+            "max": 20
+          }
+        },
+        "presets": {
+          "rain00000000000": {
+            "id": "rain",
+            "enabled": true
+          },
+          "drizzle00000000": {
+            "id": "drizzle",
+            "enabled": true
+          },
+          "partlycloudy000": {
+            "id": "partly-cloudy",
+            "enabled": true
+          },
+          "clear0000000000": {
+            "id": "clear",
+            "enabled": true
+          },
+          "mist00000000000": {
+            "id": "mist",
+            "enabled": true
+          },
+          "cloudy000000000": {
+            "id": "cloudy",
+            "enabled": true
+          },
+          "thunderstorm000": {
+            "id": "thunderstorm",
+            "enabled": true
+          },
+          "fog000000000000": {
+            "id": "fog",
+            "enabled": true
+          },
+          "windy0000000000": {
+            "id": "windy",
+            "enabled": true
+          },
+          "snow00000000000": {
+            "id": "snow",
+            "enabled": true
+          },
+          "blizzard0000000": {
+            "id": "blizzard",
+            "enabled": true
+          },
+          "overcast0000000": {
+            "id": "overcast",
+            "enabled": true
+          }
+        },
+        "seasonOverrides": {
+          "CALENDARIA.Season.Winter": {
+            "temperatures": {
+              "min": -5,
+              "max": 5
+            },
+            "presets": {
+              "snow": {
+                "id": "snow",
+                "chance": 26
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 11
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 11
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 16
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 11
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 5
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 11
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 5
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 5
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 0
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Spring": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "rain": {
+                "id": "rain",
+                "chance": 25
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 19
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 19
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 13
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 13
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 13
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Summer": {
+            "temperatures": {
+              "min": 18,
+              "max": 30
+            },
+            "presets": {
+              "clear": {
+                "id": "clear",
+                "chance": 35
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 24
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 12
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 12
+              },
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 6
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 0
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          },
+          "CALENDARIA.Season.Autumn": {
+            "temperatures": {
+              "min": 8,
+              "max": 18
+            },
+            "presets": {
+              "cloudy": {
+                "id": "cloudy",
+                "chance": 24
+              },
+              "rain": {
+                "id": "rain",
+                "chance": 18
+              },
+              "fog": {
+                "id": "fog",
+                "chance": 18
+              },
+              "partly-cloudy": {
+                "id": "partly-cloudy",
+                "chance": 12
+              },
+              "windy": {
+                "id": "windy",
+                "chance": 12
+              },
+              "mist": {
+                "id": "mist",
+                "chance": 6
+              },
+              "drizzle": {
+                "id": "drizzle",
+                "chance": 6
+              },
+              "clear": {
+                "id": "clear",
+                "chance": 6
+              },
+              "thunderstorm": {
+                "id": "thunderstorm",
+                "chance": 0
+              },
+              "snow": {
+                "id": "snow",
+                "chance": 0
+              },
+              "blizzard": {
+                "id": "blizzard",
+                "chance": 0
+              },
+              "overcast": {
+                "id": "overcast",
+                "chance": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -274,6 +274,30 @@ Common import errors and solutions:
 - "Failed to import theme. Check the file format."
 - **Solution:** Ensure the JSON file contains a valid `colors` object exported from Calendaria
 
+### Reset Weather Data
+
+Clears all weather history, forecast plans, and current weather for a fresh start. Does not affect climate zone configuration.
+
+```javascript
+if (!game.user.isGM) {
+  ui.notifications.error('Only GMs can reset weather');
+  return;
+}
+
+const confirm = await foundry.applications.api.DialogV2.confirm({
+  window: { title: 'Reset Weather Data' },
+  content: '<p>This will clear all current weather, weather history, and forecast plans. Climate zone settings will not be affected.</p><p>Are you sure?</p>',
+  yes: { default: false },
+  no: { default: true }
+});
+
+if (!confirm) return;
+await game.settings.set('calendaria', 'currentWeather', {});
+await game.settings.set('calendaria', 'weatherHistory', {});
+await game.settings.set('calendaria', 'weatherForecastPlan', {});
+ui.notifications.info('Weather data cleared. Refresh to regenerate.');
+```
+
 ### Full Settings Reset
 
 > [!CAUTION]

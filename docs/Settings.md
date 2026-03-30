@@ -1,8 +1,8 @@
 # Settings
 
-Calendaria settings are accessed via **Settings > Module Settings > Calendaria > Calendaria Settings**.
+Access via **Settings > Module Settings > Calendaria > Calendaria Settings**.
 
-The settings panel is organized into tabs. GM-only tabs are marked below.
+Organized into tabs. GM-only tabs are marked below.
 
 ![Settings Navigation](https://github.com/Sayshal/Calendaria/blob/main/.github/assets/settings-navigation.png)
 
@@ -10,7 +10,7 @@ The settings panel is organized into tabs. GM-only tabs are marked below.
 
 ## Searching Settings
 
-A search input at the top of the sidebar navigation allows quick access to any setting.
+Search input at the top of the sidebar for quick access to any setting.
 
 - Type 2+ characters to see matching results
 - Results match setting labels, hints, and section headings
@@ -21,7 +21,7 @@ A search input at the top of the sidebar navigation allows quick access to any s
 
 ## Per-Section Reset Buttons
 
-Each settings section has a reset button in the fieldset legend. Clicking shows a confirmation dialog listing the affected settings before resetting them to defaults.
+Each section has a reset button in its fieldset legend. Clicking shows a confirmation dialog listing affected settings before resetting to defaults.
 
 ---
 
@@ -35,18 +35,18 @@ Select which calendar system to use. Changing this requires a world reload.
 
 ### Open Calendar Editor
 
-Button to launch the Calendar Editor for creating/modifying calendars.
+Launch the Calendar Editor for creating/modifying calendars.
 
 ### Import Calendar
 
-Button to open the calendar importer for Simple Calendar, Fantasy Calendar, and other formats.
+Open the calendar importer for Simple Calendar, Fantasy Calendar, and other formats.
 
 ### Open/Close Buttons
 
 Context-specific buttons to open or close the HUD, MiniCal, and Time Keeper applications.
 
 > [!NOTE]
-> Changes in the Calendar tab are automatically saved. An "Changes saved automatically" indicator confirms this.
+> Calendar tab changes save automatically. A "Changes saved automatically" indicator confirms this.
 
 ---
 
@@ -60,8 +60,11 @@ Configure which user roles can access Calendaria features.
 | ------------------------- | ------------------------------------------------------ |
 | **View BigCal**           | Can see the BigCal                                     |
 | **View MiniCal**          | Can see the MiniCal widget                             |
+| **View HUD**              | Can see the HUD                                        |
 | **View Time Keeper**      | Can see the Time Keeper                                |
 | **View Sun Dial**         | Can see the Sun Dial                                   |
+| **View Chronicle**        | Can see the Chronicle                                  |
+| **View Stopwatch**        | Can see the Stop Watch                                 |
 | **Manage Notes**          | Can create own calendar notes                          |
 | **Edit Notes**            | Can edit calendar notes owned by other players         |
 | **Delete Notes**          | Can delete own calendar notes                          |
@@ -71,13 +74,8 @@ Configure which user roles can access Calendaria features.
 | **Change Calendar**       | Can switch the active calendar                         |
 | **Edit Calendars**        | Can access the Calendar Editor                         |
 
-### Configurable Roles
-
-The permissions grid shows columns for:
-
-- **Player** — Standard player role
-- **Trusted** — Trusted player role
-- **Assistant** — Assistant GM role
+> [!TIP]
+> All widgets check view permissions before rendering. Players without permission see nothing. When a GM clicks "Show to All" and a permission mismatch exists, a notification lists the blocked users.
 
 See [Permissions](Permissions) for detailed documentation.
 
@@ -85,15 +83,13 @@ See [Permissions](Permissions) for detailed documentation.
 
 ## Notes (GM Only)
 
-### Custom Categories
+### Manage Presets
 
-Create custom note categories with:
+Opens the [Note Preset Editor](Note-Preset-Editor) for creating, editing, and deleting note presets.
 
-- **Name**: Category display name
-- **Color**: Category color
-- **Icon**: FontAwesome icon class (e.g., `fas fa-bookmark`)
+### Re-sync Festival Notes
 
-Each category row has an icon button that opens a dialog for editing the icon class and color.
+Regenerates festival journal notes from the current calendar's festival definitions. Creates missing festival notes or restores accidentally deleted ones. Existing notes are not duplicated.
 
 ---
 
@@ -109,10 +105,12 @@ Advance world time when players take short/long rests.
 
 Configure how fast the in-game clock advances in real-time mode.
 
-- **Multiplier**: How many units pass per real second (minimum 1)
+- **Multiplier**: How many units pass per real second
 - **Unit**: What time unit advances (second, round, minute, hour, day, week, month, season, year)
 - Example: "10 minutes per second" means 1 real second = 10 in-game minutes
 - Default: `1 second per second`
+
+Setting the multiplier to **0** disables automatic time advancement. A lock icon with "Clock Disabled" tooltip appears on all play/pause buttons. Manual forward/reverse time jumps and rest-based advancement still work.
 
 > [!TIP]
 > Hover over the HUD and press the pause button to stop real-time clock advancement without disabling the feature.
@@ -153,7 +151,7 @@ When enabled, the real-time clock continues running during active combat. Foundr
 
 #### Auto-Generate Weather
 
-Automatically generate weather on day change based on climate zone and season configuration.
+Generate weather on day change based on climate zone and season configuration.
 
 - Default: `true`
 
@@ -190,9 +188,31 @@ Controls weather ambient sound volume.
 - Range: `0` to `100` (percentage)
 - Default: `100`
 
+#### Intraday Weather
+
+4-period intraday weather system (Night, Morning, Afternoon, Evening). Each time-of-day period can have different weather, with transitions at sunrise, midday, sunset, and midnight.
+
+- Default: `false`
+
+#### Period Carry-Over Chance
+
+Controls how often weather persists unchanged between intraday periods. Higher values mean weather is more likely to stay the same across period transitions.
+
+- Range: `0` to `100` (percentage)
+- Default: `50`
+
+> [!NOTE]
+> Only visible when Intraday Weather is enabled.
+
+#### Force Downward Weather
+
+Clamps FXMaster weather particle angles to ±45° from vertical so weather always falls from above. Useful for side-view scenes where diagonal particles look unnatural.
+
+- Default: `false`
+
 #### Regenerate All Weather
 
-Button that clears and rebuilds weather forecasts for all climate zones. A confirmation dialog is shown before proceeding.
+Clears and rebuilds weather forecasts for all climate zones. Confirmation dialog shown before proceeding.
 
 ### Forecast
 
@@ -265,7 +285,7 @@ Button to open the [Weather Probability dialog](Weather-System#probability-guide
 
 #### Darkness Sync
 
-Automatically adjust scene darkness based on time of day.
+Adjust scene darkness based on time of day.
 
 - Default: `true`
 
@@ -283,13 +303,13 @@ Adjust scene darkness based on current weather conditions.
 
 #### Sync Scene Ambience with Weather
 
-Automatically update scene environment lighting (hue/saturation) based on weather and climate zone.
+Update scene environment lighting (hue/saturation) based on weather and climate zone.
 
 - Default: `true`
 
 #### Sync Scene Ambience with Time of Day
 
-Shift scene ambient color based on time of day — warm tones at dawn/dusk, cool blue at night. Requires "Sync Scene Ambience with Weather" to be enabled.
+Shift scene ambient color based on time of day (warm tones at dawn/dusk, cool blue at night). Requires "Sync Scene Ambience with Weather" to be enabled.
 
 - Default: `true`
 
@@ -320,14 +340,177 @@ Allow draggable windows (HUD, MiniCal, Time Keeper) to snap to predefined positi
 
 ### Theme Mode
 
-Select the visual theme for Calendaria UI components.
+Visual theme for Calendaria UI components. 15 built-in presets plus a customizable option.
 
-- Options: `Dark`, `High Contrast`, `Custom`
+- Options: `Dark`, `Light`, `High Contrast`, `Parchment`, `Arcane`, `Verdant`, `Infernal`, `Frost`, `Steampunk`, `Neon`, `Minimalist`, `Solarized`, `Royal`, `Sakura`, `Slate`, `Custom`
 - Default: `Dark`
+
+Selected preset applies to all Calendaria applications.
 
 ### Theme Colors
 
 When Theme Mode is set to `Custom`, you can customize all UI colors. See [Theming](Theming) for details on color categories, export/import, and CSS variables.
+
+---
+
+## Chronicle (GM Only)
+
+[Chronicle](Chronicle) timeline viewer settings.
+
+### Open / Close / Reset
+
+Open, close, or reset the Chronicle. Reset clears scroll position and returns to default state.
+
+### Show Chronicle on World Load
+
+Show Chronicle on world load.
+
+- Default: `false`
+
+### Force Chronicle
+
+Force Chronicle for all connected clients.
+
+- Default: `false`
+
+### Depth Mode
+
+Controls how much content is shown for each entry in the Chronicle.
+
+- `Title Only`: Only note titles
+- `Excerpts`: Title with a short text preview
+- `Full`: Title with full note content
+- Default: `Excerpts`
+
+### Visibility Toggles
+
+Toggle which content types appear in the Chronicle:
+
+- **Show Notes**: Display calendar notes
+- **Show Festivals**: Display festival entries
+- **Show Season Banners**: Display season transition banners
+- **Show Moon Phase Banners**: Display moon phase banners
+- **Show Weather History**: Display historical weather entries
+
+### Combat Behavior
+
+Controls Chronicle behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
+
+- Default: `None`
+
+> [!NOTE]
+> The Chronicle inherits the global theme preset and does not have its own theme selector.
+
+---
+
+## Fog of War (GM Only)
+
+[Fog of War](Fog-of-War) progressive calendar revelation system.
+
+### Enable Fog of War
+
+Master toggle. When enabled, players only see dates the GM has explicitly revealed.
+
+- Default: `false`
+
+### Campaign Start Date
+
+Earliest date players can see. Dates before start are always fogged. Acts as a lower bound for revealed ranges.
+
+### Auto-Reveal on Day Change
+
+Reveal dates as the calendar advances forward.
+
+- Default: `true`
+
+### Reveal Radius
+
+Number of days to reveal around the current date when auto-reveal triggers.
+
+- Range: `0` to `30`
+- Default: `0`
+
+### Reveal Intermediate Days
+
+When advancing multiple days at once, reveal all intermediate days between the previous and new date (not just the landing date).
+
+- Default: `true`
+
+### Player Navigation Mode
+
+Controls how players navigate fogged calendars:
+
+- `Skip`: Previous/next buttons skip over fogged months, jumping to the nearest revealed month
+- `Block`: Previous/next buttons are disabled at fogged boundaries
+
+### Reset
+
+Clears all revealed ranges and re-creates the initial range from the campaign start date.
+
+---
+
+## Cinematic (GM Only)
+
+[Cinematic Time Skip](Cinematic-Time-Skip) fullscreen animation overlay.
+
+### Enable Cinematic
+
+Master toggle for cinematic time skip overlay.
+
+- Default: `true`
+
+### Threshold
+
+Minimum time advance to trigger the cinematic. Smaller advances play without it.
+
+- Options: `Day`, `Week`, `Month`, `Season`, `Year`
+- Default: `Week`
+
+> [!NOTE]
+> Only the dedicated "Cinematic Advance" button in the Set Date dialog triggers the cinematic. Normal Set Date, API calls, and socket requests do not.
+
+### Panel Duration
+
+How long each intermediate day panel shows during the animation.
+
+- Range: `1000` to `6000` (milliseconds)
+- Default: `3000`
+
+### Per-Element Toggles
+
+Toggle individual animation elements on/off:
+
+- **Sky**: Day/night sky cycle
+- **Stars**: Twinkling star field
+- **Sun**: Sun arc across the sky
+- **Shooting Stars**: Random shooting star effects
+- **Moon Orbs**: Moon phase orbs with trailing arcs
+- **Weather Transitions**: Weather and season visual transitions
+- **Event Cards**: Note title cards displayed during the animation
+
+### Event Weighting
+
+Controls how prominently events are featured in the cinematic display.
+
+- Default: `Normal`
+
+### Show During Rest
+
+When enabled, rest-based time advances that exceed the threshold also trigger the cinematic.
+
+- Default: `false`
+
+---
+
+## Module (GM Only)
+
+### Show Equivalent Dates
+
+Cross-calendar date display. When enabled, equivalent dates from other loaded calendars appear in day tooltips, note sheets, and calendar headers.
+
+- Default: `false`
+
+See [Secondary Calendar](Secondary-Calendar) for more details on multi-calendar support.
 
 ---
 
@@ -428,7 +611,7 @@ Opens an export dialog with options:
 
 - **Include active calendar**: When checked, exports the active calendar data along with settings. The exported file can then be used with the Calendar Importer or Import Settings.
 
-Downloads all Calendaria settings as a JSON file for backup or transfer between worlds.
+Downloads all settings as JSON for backup or transfer between worlds.
 
 #### Import Settings
 
@@ -445,7 +628,7 @@ Loads settings from a previously exported JSON file.
 
 ### Show on World Load
 
-Display the HUD when the world loads.
+Show HUD on world load.
 
 - Default: `false`
 
@@ -474,7 +657,7 @@ Choose how the sun/moon are displayed:
 - Default: `dome`
 
 > [!NOTE]
-> Compact mode forces slice style. When switching back to fullsize mode, your saved dial style preference is automatically restored.
+> Compact mode forces slice style. Switching back to fullsize restores your saved dial style preference.
 
 ### Calendar Button
 
@@ -483,18 +666,23 @@ Choose which calendar the HUD button opens.
 - Options: `BigCal`, `MiniCal`
 - Default: `bigcal`
 
-### Combat Mode
+### Combat Behavior
 
-Controls HUD behavior during combat.
+Controls HUD behavior during combat. This is a per-user setting.
 
-- Options: `None`, `Compact on Combat`, `Compact on Encounter`, `Hide on Combat`, `Hide on Encounter`
-- Default: `Compact on Combat`
+- `None`: No change during combat
+- `Hide on Combat Start`: Automatically hide when combat begins
+- `Hide on Encounter Creation`: Automatically hide when a combat encounter is created
+- Default: `None`
 
-"On Encounter" modes trigger when a combat encounter is created. "On Combat" modes trigger when combat actively starts.
+Widgets automatically restore when combat ends. Manually calling `show()` is blocked while the hide mode is active.
+
+> [!NOTE]
+> All widget tabs (HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Sun Dial, Chronicle) have this same Combat Behavior dropdown with the same three options.
 
 ### Color Shift Sync
 
-Enable time-of-day color shifting of the HUD scene. Disabled by default — opt in to enable dawn/dusk atmospheric tinting (15% intensity, no midday tint).
+Time-of-day color shifting on the HUD. Opt in for dawn/dusk atmospheric tinting (15% intensity, no midday tint).
 
 - Default: `false`
 
@@ -506,7 +694,7 @@ Fade and hide the sundial dome as the HUD approaches the top of the viewport.
 
 ### Block Visibility
 
-Toggle visibility of indicator blocks in the HUD bar. Hiding blocks automatically shrinks HUD width. Settings are user-scoped (each player can customize their view).
+Toggle indicator blocks in the HUD bar. Hiding blocks shrinks HUD width. User-scoped (each player customizes their own view).
 
 #### Show Weather
 
@@ -575,11 +763,20 @@ Display all configured moons in the HUD dome (secondary moons trail with size sc
 
 - Default: `false`
 
-#### Disable Weather Effects
+#### Weather FX Mode
 
-Disable weather particle effects in the HUD dome and Sun Dial. Sky, sun, moon, and stars are unaffected. This is a per-client setting.
+Controls weather particle effects in the HUD dome and Sun Dial. Sky, sun, moon, and stars are unaffected. This is a per-client setting.
 
-- Default: `false`
+- `Full`: All weather particle effects at normal density
+- `Reduced`: Lower particle density for better performance
+- `Off`: No weather particle effects
+- Default: `Full`
+
+#### Event Border Glow
+
+Glow effect around the HUD border when events exist on the current day. Disabling removes only the glow; event icons, tooltips, and note actions remain.
+
+- Default: `true`
 
 #### Dome Below Bar
 
@@ -599,7 +796,7 @@ Allow HUD to snap to predefined positions when dragging:
 - `below-controls`: Below the scene controls
 - Default: `true`
 
-Position is preserved when switching between display modes (dome/slice/compact). Bottom-anchored zones (like above-hotbar) maintain position relative to the bar bottom across mode changes.
+Position preserved when switching display modes (dome/slice/compact). Bottom-anchored zones (like above-hotbar) maintain position relative to bar bottom across mode changes.
 
 #### Sticky Tray
 
@@ -657,7 +854,7 @@ Button to reset HUD to default position.
 
 ### Show on World Load
 
-Display the MiniCal when the world loads.
+Show MiniCal on world load.
 
 - Default: `true`
 
@@ -666,7 +863,7 @@ Display the MiniCal when the world loads.
 
 ### Compact Mode
 
-Toggle compact mode for a minimal-footprint MiniCal with circular day cells, icon-only indicators, and full-app drag.
+Compact mode: minimal-footprint MiniCal with circular day cells, icon-only indicators, and full-app drag.
 
 - Default: `false`
 
@@ -684,13 +881,13 @@ Show a confirmation dialog before changing the world date via the "Set Current D
 
 ### Auto-Open Notes Panel
 
-Automatically open the notes panel when selecting a day that has notes.
+Open notes panel when selecting a day that has notes.
 
 - Default: `false`
 
 ### Block Visibility
 
-Toggle visibility of indicator blocks in the MiniCal. Settings are user-scoped (each player can customize their view).
+Toggle indicator blocks in the MiniCal. User-scoped (each player customizes their own view).
 
 #### Show Weather
 
@@ -802,6 +999,12 @@ Opacity level when MiniCal is faded (when Auto-Fade is enabled).
 - Range: `0` to `100` (percentage)
 - Default: `40`
 
+### Combat Behavior
+
+Controls MiniCal behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
+
+- Default: `None`
+
 ### Force MiniCal (GM Only)
 
 Force MiniCal display for all connected clients.
@@ -818,7 +1021,7 @@ Button to reset position to default.
 
 ### Show on World Load (GM Only)
 
-Display BigCal when the world loads.
+Show BigCal on world load.
 
 - Default: `false`
 
@@ -843,7 +1046,7 @@ Force BigCal display for all connected clients.
 
 ### Block Visibility
 
-Toggle visibility of indicator blocks in the BigCal. Settings are user-scoped (each player can customize their view).
+Toggle indicator blocks in BigCal. User-scoped (each player customizes their own view).
 
 #### Show Weather
 
@@ -906,15 +1109,21 @@ Display moon phase indicators.
 
 - Default: `true`
 
+### Combat Behavior
+
+Controls BigCal behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
+
+- Default: `None`
+
 ---
 
 ## Time Keeper
 
-The Time Keeper tab is visible to any user with the **View Time Keeper** permission.
+Visible to any user with the **View Time Keeper** permission.
 
 ### Show on World Load (GM Only)
 
-Display the Time Keeper when the world loads.
+Show Time Keeper on world load.
 
 - Default: `false`
 
@@ -929,7 +1138,7 @@ Force Time Keeper display for all connected clients.
 
 ### Custom Time Jumps
 
-Configure custom time jump buttons per increment. Each increment can have its own forward/reverse jump values.
+Custom time jump buttons per increment, each with its own forward/reverse values.
 
 > [!TIP]
 > Leave a field blank (empty) to hide that button. This applies to both increment and decrement buttons.
@@ -961,6 +1170,12 @@ Opacity level when Time Keeper is faded (when Auto-Fade is enabled).
 - Range: `0` to `100` (percentage)
 - Default: `40`
 
+### Combat Behavior
+
+Controls Time Keeper behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
+
+- Default: `None`
+
 ### Reset Position
 
 Button to reset position to default.
@@ -983,7 +1198,7 @@ Force Stop Watch display for all connected clients.
 
 ### Display Formats
 
-Configure display format for stopwatch time. A live preview appears next to GM/Player format labels showing how the format will render.
+Display format for stopwatch time. Live preview next to GM/Player format labels.
 
 #### Elapsed Time (Real Time)
 
@@ -1010,11 +1225,17 @@ Prevent dragging the Stop Watch.
 
 - Default: `false`
 
+### Combat Behavior
+
+Controls Stop Watch behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
+
+- Default: `None`
+
 ---
 
 ## Sun Dial
 
-The Sun Dial tab is visible to any user with the **View Sun Dial** permission.
+Visible to any user with the **View Sun Dial** permission.
 
 ### Options
 
@@ -1061,19 +1282,25 @@ Prevent dragging the Sun Dial.
 
 - Default: `false`
 
+### Combat Behavior
+
+Controls Sun Dial behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
+
+- Default: `None`
+
 ---
 
 ## Display Formats Reference
 
-Display format settings appear throughout various app tabs (HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Chat). Each location supports separate GM and player formats.
+Format settings appear across app tabs (HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Chat). Each location supports separate GM and player formats.
 
 ### Format Preview
 
-A live preview appears next to GM/Player format labels showing how the format will render with the current date. Invalid custom formats display an error message.
+Live preview next to GM/Player format labels shows how the format renders with the current date. Invalid custom formats show an error message.
 
 ### Token Reference Dialog
 
-Click the help icon (?) next to Display Formats headings to open an interactive reference showing all format tokens organized by category with examples.
+Click the help icon (?) next to Display Formats headings for an interactive reference of all format tokens organized by category with examples.
 
 ### Format Presets
 
@@ -1230,7 +1457,7 @@ Click the help icon (?) next to Display Formats headings to open an interactive 
 
 ## Per-Scene Settings
 
-Override global settings on individual scenes via the dedicated **Scene Configuration > Calendaria** tab:
+Override global settings on individual scenes via **Scene Configuration > Calendaria** tab:
 
 ### Darkness Sync Override
 
@@ -1247,7 +1474,7 @@ Override the global brightness multiplier for this specific scene.
 
 ### Hide HUD for Players
 
-Automatically hide the Calendaria HUD for players when this scene becomes active. When navigating to a non-hidden scene, HUD visibility is restored for users who have "Show HUD on load" enabled.
+Hide the Calendaria HUD from players when this scene becomes active. Navigating to a non-hidden scene restores HUD visibility for users with "Show HUD on load" enabled.
 
 - Default: `false`
 

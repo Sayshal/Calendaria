@@ -4,17 +4,12 @@
  * @author Tyler
  */
 
-import { BigCal } from '../applications/calendar/big-cal.mjs';
-import { MiniCal } from '../applications/calendar/mini-cal.mjs';
-import { HUD } from '../applications/hud/hud.mjs';
-import { Stopwatch } from '../applications/time/stopwatch.mjs';
-import { SunDial } from '../applications/time/sun-dial.mjs';
-import { TimeKeeper } from '../applications/time/time-keeper.mjs';
-import CalendarManager from '../calendar/calendar-manager.mjs';
+import { BigCal, Chronicle, CinematicOverlay, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../applications/_module.mjs';
+import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import NoteManager from '../notes/note-manager.mjs';
-import WeatherManager from '../weather/weather-manager.mjs';
-import { log } from './logger.mjs';
+import { NoteManager } from '../notes/_module.mjs';
+import { WeatherManager } from '../weather/_module.mjs';
+import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper, log } from './_module.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
@@ -102,6 +97,23 @@ export class CalendariaSocket {
   }
 
   /**
+   * Broadcast cinematic play payload to all clients.
+   * @param {object} payload - CinematicPayload
+   */
+  static emitCinematicPlay(payload) {
+    if (!this.isPrimaryGM()) return;
+    this.emit(SOCKET_TYPES.CINEMATIC_PLAY, payload);
+  }
+
+  /**
+   * Broadcast cinematic abort to all clients.
+   */
+  static emitCinematicAbort() {
+    if (!this.isPrimaryGM()) return;
+    this.emit(SOCKET_TYPES.CINEMATIC_ABORT, {});
+  }
+
+  /**
    * Handle incoming socket messages and route to appropriate handlers.
    * @private
    * @param {object} message - The incoming socket message
@@ -126,6 +138,9 @@ export class CalendariaSocket {
       case SOCKET_TYPES.NOTE_UPDATE:
         this.#handleNoteUpdate(data);
         break;
+      case SOCKET_TYPES.OWNERSHIP_UPDATE:
+        this.#handleOwnershipUpdate(data);
+        break;
       case SOCKET_TYPES.CALENDAR_SWITCH:
         this.#handleCalendarSwitch(data);
         break;
@@ -144,8 +159,17 @@ export class CalendariaSocket {
       case SOCKET_TYPES.REMINDER_NOTIFY:
         this.#handleReminderNotify(data);
         break;
+      case SOCKET_TYPES.CINEMATIC_PLAY:
+        this.#handleCinematicPlay(data);
+        break;
+      case SOCKET_TYPES.CINEMATIC_ABORT:
+        this.#handleCinematicAbort();
+        break;
       case SOCKET_TYPES.BIG_CAL_VISIBILITY:
         this.#handleBigCalVisibility(data);
+        break;
+      case SOCKET_TYPES.CHRONICLE_VISIBILITY:
+        this.#handleChronicleVisibility(data);
         break;
       case SOCKET_TYPES.HUD_VISIBILITY:
         this.#handleHUDVisibility(data);
@@ -165,6 +189,25 @@ export class CalendariaSocket {
       default:
         log(1, `Unknown socket message type: ${type}`);
     }
+  }
+
+  /**
+   * Handle remote cinematic play command.
+   * @private
+   * @param {object} data - CinematicPayload
+   */
+  static #handleCinematicPlay(data) {
+    log(3, 'Handling remote cinematic play');
+    CinematicOverlay.play(data);
+  }
+
+  /**
+   * Handle remote cinematic abort command.
+   * @private
+   */
+  static #handleCinematicAbort() {
+    log(3, 'Handling remote cinematic abort');
+    CinematicOverlay.abort();
   }
 
   /**
@@ -220,6 +263,23 @@ export class CalendariaSocket {
         Hooks.callAll(HOOKS.NOTE_DELETED, id);
         break;
     }
+  }
+
+  /**
+   * Handle ownership update request from a player.
+   * @private
+   * @param {object} data - The ownership update data
+   * @param {string} data.journalId - The journal entry ID
+   * @param {object} data.ownership - Ownership updates {userId: level}
+   */
+  static async #handleOwnershipUpdate(data) {
+    if (!this.isPrimaryGM()) return;
+    const { journalId, ownership } = data;
+    if (!journalId || !ownership) return;
+    const journal = game.journal.get(journalId);
+    if (!journal) return;
+    log(3, `Primary GM handling ownership update for journal: ${journalId}`);
+    await journal.update({ ownership });
   }
 
   /**
@@ -331,7 +391,7 @@ export class CalendariaSocket {
     log(3, `Primary GM handling time request: ${action}`, data);
     switch (action) {
       case 'advance':
-        await game.time.advance(delta);
+        await CinematicOverlay.gatedAdvance(delta);
         break;
       case 'set': {
         const calendar = CalendarManager.getActiveCalendar();
@@ -340,7 +400,7 @@ export class CalendariaSocket {
         const merged = { ...currentComponents, ...components };
         const targetSeconds = calendar.componentsToTime(merged);
         const timeDelta = targetSeconds - game.time.worldTime;
-        await game.time.advance(timeDelta);
+        await CinematicOverlay.gatedAdvance(timeDelta);
         break;
       }
       case 'jump': {
@@ -350,7 +410,7 @@ export class CalendariaSocket {
         const targetComponents = { ...current, year: date.year, month: date.month, dayOfMonth: date.day };
         const targetSeconds = calendar.componentsToTime(targetComponents);
         const timeDelta = targetSeconds - game.time.worldTime;
-        await game.time.advance(timeDelta);
+        await CinematicOverlay.gatedAdvance(timeDelta);
         break;
       }
     }
@@ -392,8 +452,23 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling BigCal visibility: ${visible}`);
-    if (visible) BigCal.show();
-    else BigCal.hide();
+    if (visible && canViewBigCal()) BigCal.show();
+    else if (!visible) BigCal.hide();
+  }
+
+  /**
+   * Handle Chronicle visibility commands from GM.
+   * @private
+   * @param {object} data - The Chronicle visibility data
+   * @param {boolean} data.visible - Whether Chronicle should be visible
+   * @returns {void}
+   */
+  static #handleChronicleVisibility(data) {
+    if (game.user.isGM) return;
+    const { visible } = data;
+    log(3, `Handling Chronicle visibility: ${visible}`);
+    if (visible && canViewChronicle()) Chronicle.show({ silent: true });
+    else if (!visible) Chronicle.hide();
   }
 
   /**
@@ -407,8 +482,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling HUD visibility: ${visible}`);
-    if (visible && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
-    else HUD.hide();
+    if (visible && canViewHUD()) HUD.show();
+    else if (!visible) HUD.hide();
   }
 
   /**
@@ -422,8 +497,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling MiniCal visibility: ${visible}`);
-    if (visible) MiniCal.show();
-    else MiniCal.hide();
+    if (visible && canViewMiniCal()) MiniCal.show({ silent: true });
+    else if (!visible) MiniCal.hide();
   }
 
   /**
@@ -437,8 +512,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling TimeKeeper visibility: ${visible}`);
-    if (visible) TimeKeeper.show();
-    else TimeKeeper.hide();
+    if (visible && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
+    else if (!visible) TimeKeeper.hide();
   }
 
   /**
@@ -452,8 +527,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling Stop Watch visibility: ${visible}`);
-    if (visible) Stopwatch.show();
-    else Stopwatch.hide();
+    if (visible && canViewStopwatch()) Stopwatch.show();
+    else if (!visible) Stopwatch.hide();
   }
 
   /**
@@ -467,8 +542,8 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling Sun Dial visibility: ${visible}`);
-    if (visible) SunDial.show({ silent: true });
-    else SunDial.hide();
+    if (visible && canViewSunDial()) SunDial.show({ silent: true });
+    else if (!visible) SunDial.hide();
   }
 
   /**

@@ -1,67 +1,7 @@
 .calendaria {
   &.set-date-dialog {
-    .dialog-date-picker {
-      .form-grid {
-        gap: 0.75rem;
-        grid-template-columns: 1fr 1fr 1fr;
-        display: grid;
-      }
-
-      .form-group {
-        gap: 0.25rem;
-        display: flex;
-        flex-direction: column;
-
-        > label {
-          color: var(--calendaria-text-dim);
-          font-weight: 500;
-          font-size: var(--font-size-11);
-        }
-
-        input:not([type='checkbox']),
-        select {
-          box-sizing: border-box;
-          height: 1.875rem;
-          padding: 0 0.5rem;
-          border: 0.0625rem solid var(--calendaria-border);
-          border-radius: 0.25rem;
-          color: var(--calendaria-text);
-          font-size: var(--font-size-13);
-          line-height: 1.75rem;
-          text-align: center;
-          background: var(--calendaria-input-bg);
-
-          &:focus {
-            border-color: var(--calendaria-primary);
-            outline: none;
-          }
-        }
-
-        select {
-          appearance: none;
-          padding-right: 1.5rem;
-          cursor: pointer;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-          background-repeat: no-repeat;
-          background-position: right 0.5rem center;
-          background-size: 0.625rem;
-        }
-
-        input[type='number'] {
-          -moz-appearance: textfield;
-          appearance: textfield;
-
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-          }
-        }
-      }
-    }
-
     .timepoints-section {
-      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border: 0.0625rem solid var(--calendaria-border-light);
       border-radius: 0.25rem;
 
       .timepoints-header {
@@ -92,7 +32,7 @@
 
       .timepoints-content {
         padding: 0.5rem;
-        border-top: 0.0625rem solid var(--color-border-light-tertiary);
+        border-top: 0.0625rem solid var(--calendaria-border-light);
       }
 
       .timepoints-list {
@@ -148,7 +88,7 @@
           cursor: pointer;
 
           &.delete:hover {
-            color: var(--color-level-error);
+            color: var(--calendaria-error);
           }
         }
       }
@@ -168,15 +108,15 @@
         align-items: center;
         width: 100%;
         padding: 0.5rem;
-        border: 0.0625rem dashed var(--color-border-light-tertiary);
+        border: 0.0625rem dashed var(--calendaria-border-light);
         border-radius: 0.25rem;
         font-size: var(--font-size-12);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          border-color: var(--color-warm-1);
-          color: var(--color-warm-1);
+          border-color: var(--calendaria-accent);
+          color: var(--calendaria-accent);
         }
       }
     }
@@ -187,7 +127,7 @@
       margin: 0.5rem 0 0 1.5rem;
       padding: 0;
       list-style-type: disc;
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-size: var(--font-size-13);
 
       li {
@@ -213,7 +153,7 @@
 
     .custom-weekday-header {
       span {
-        color: var(--color-text-dark-secondary);
+        color: var(--calendaria-text-dim);
         font-weight: 600;
         font-size: var(--font-size-14);
         text-align: center;
@@ -267,7 +207,7 @@
       h3.group-header {
         margin: 0 0 0.375rem;
         padding-bottom: 0.25rem;
-        border-bottom: 0.0625rem solid var(--color-border-light-tertiary);
+        border-bottom: 0.0625rem solid var(--calendaria-border-light);
         font-size: var(--font-size-h4);
       }
 
@@ -298,7 +238,7 @@
           flex-shrink: 0;
           min-width: 5rem;
           padding: 0.125rem 0.375rem;
-          border: 0.0625rem solid var(--color-border-light-tertiary);
+          border: 0.0625rem solid var(--calendaria-border-light);
           border-radius: 0.1875rem;
           font-size: var(--font-size-11);
           font-family: var(--font-mono);
@@ -316,7 +256,7 @@
 
     .token-syntax-help {
       padding: 0.75rem;
-      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border: 0.0625rem solid var(--calendaria-border-light);
       border-radius: 0.25rem;
       font-size: var(--font-size-12);
 
@@ -340,7 +280,7 @@
 
         code {
           padding: 0.125rem 0.25rem;
-          border: 0.0625rem solid var(--color-border-light-tertiary);
+          border: 0.0625rem solid var(--calendaria-border-light);
           border-radius: 0.125rem;
           font-size: var(--font-size-11);
         }
@@ -360,14 +300,14 @@
       margin: 0;
       padding: 0.75rem;
       border-radius: 0.25rem;
-      color: var(--color-warm-2);
+      color: var(--calendaria-accent);
       font-size: var(--font-size-12);
-      background: var(--color-cool-5-25);
+      background: var(--calendaria-surface-dim-25);
     }
 
     fieldset {
       padding: 0.75rem;
-      border: 0.0625rem solid var(--color-border-light-tertiary);
+      border: 0.0625rem solid var(--calendaria-border-light);
       border-radius: 0.25rem;
 
       legend {
@@ -378,9 +318,9 @@
     .chain-step {
       margin-bottom: 0.75rem;
       padding: 0.75rem;
-      border: 0.0625rem solid var(--color-border-light-secondary);
+      border: 0.0625rem solid var(--calendaria-border);
       border-radius: 0.25rem;
-      background: var(--color-cool-5-10);
+      background: var(--calendaria-surface-dim-10);
 
       &:last-of-type {
         margin-bottom: 0;
@@ -393,7 +333,7 @@
       align-items: center;
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 0.0625rem solid var(--color-border-light-secondary);
+      border-bottom: 0.0625rem solid var(--calendaria-border);
     }
 
     .step-label {
@@ -406,13 +346,13 @@
       padding: 0.25rem 0.5rem;
       border: none;
       border-radius: 0.1875rem;
-      color: var(--color-level-error);
+      color: var(--calendaria-error);
       font-size: var(--font-size-11);
       cursor: pointer;
       background: transparent;
 
       &:hover {
-        background: var(--color-level-error-bg);
+        background: var(--calendaria-error-bg);
       }
     }
 
@@ -447,9 +387,9 @@
       align-items: center;
       margin-top: 0.5rem;
       padding: 0.5rem;
-      border: 0.0625rem dashed var(--color-border-light-tertiary);
+      border: 0.0625rem dashed var(--calendaria-border-light);
       border-radius: 0.25rem;
-      color: var(--color-text-secondary);
+      color: var(--calendaria-text-secondary);
       font-size: var(--font-size-12);
       cursor: pointer;
       background: transparent;
@@ -459,9 +399,9 @@
         background 0.15s ease;
 
       &:hover {
-        border-color: var(--color-border-highlight);
-        color: var(--color-text-primary);
-        background: var(--color-cool-5-10);
+        border-color: var(--calendaria-primary);
+        color: var(--calendaria-text);
+        background: var(--calendaria-surface-dim-10);
       }
     }
 
@@ -497,7 +437,7 @@
     .form-footer {
       justify-content: flex-end;
       padding-top: 0.5rem;
-      border-top: 0.0625rem solid var(--color-border-light-tertiary);
+      border-top: 0.0625rem solid var(--calendaria-border-light);
     }
   }
 
@@ -521,7 +461,7 @@
           color: transparent;
           font-size: 0;
           line-height: 0;
-          background: var(--group-color, var(--color-cool-4));
+          background: var(--group-color, var(--calendaria-border));
         }
       }
 
@@ -536,6 +476,45 @@
         > i {
           margin: 0;
         }
+      }
+    }
+  }
+}
+
+.dialog-date-picker {
+  .form-grid {
+    gap: 0.75rem;
+    grid-template-columns: 1fr 1fr 1fr;
+    display: grid;
+  }
+
+  .form-group {
+    gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
+
+    > label {
+      font-weight: 500;
+      font-size: var(--font-size-11);
+    }
+
+    input:not([type='checkbox']),
+    select {
+      box-sizing: border-box;
+      height: 2rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: var(--font-size-13);
+    }
+
+    input[type='number'] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
     }
   }
