@@ -3028,7 +3028,7 @@ const fields = CALENDARIA.api.conditionFields;
 // { MONTH: 'month', WEEKDAY: 'weekday', SEASON: 'season', MOON_PHASE: 'moonPhase', ... }
 ```
 
-**Returns:** `object` - CONDITION_FIELDS enum (41 fields).
+**Returns:** `object` - CONDITION_FIELDS enum (45 fields).
 
 ---
 

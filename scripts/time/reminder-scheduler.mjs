@@ -117,7 +117,8 @@ export default class ReminderScheduler {
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const offsetMinutes = (note.flagData.reminderOffset ?? 0) * minutesPerHour;
     const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
-    const hasConditions = note.flagData.conditions?.length > 0 || note.flagData.conditionTree?.children?.length > 0;
+    const tree = note.flagData.conditionTree;
+    const hasConditions = note.flagData.conditions?.length > 0 || (tree && (tree.children?.length > 0 || (tree.type === 'condition' && tree.field)));
     if (hasRecurrence || hasConditions) {
       const occursToday = isRecurringMatch(note.flagData, currentDate);
       let occursTomorrow = false;

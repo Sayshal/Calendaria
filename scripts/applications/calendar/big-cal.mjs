@@ -1577,7 +1577,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       dayOfMonth = target.dataset.day;
       month = target.dataset.month;
       year = target.dataset.year;
-      hour = target.dataset.hour ?? 12;
+      hour = target.dataset.hour ?? game.time.components?.hour ?? 0;
     }
     const calendar = this.calendar;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
@@ -1608,14 +1608,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       minute = 0;
     } else if (this._selectedDate) {
       ({ dayOfMonth, month, year } = this._selectedDate);
-      hour = 12;
+      hour = game.time.components?.hour ?? 0;
       minute = 0;
     } else {
       const today = game.time.components;
       year = today.year + yearZero;
       month = today.month;
       dayOfMonth = today.dayOfMonth ?? 0;
-      hour = today.hour ?? 12;
+      hour = today.hour ?? 0;
       minute = today.minute ?? 0;
     }
     const endHour = (parseInt(hour) + 1) % hoursPerDay;

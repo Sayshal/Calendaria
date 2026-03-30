@@ -333,6 +333,48 @@ const FIELD_REGISTRY = {
     category: 'other',
     label: 'CALENDARIA.Condition.Field.isLeapYear'
   },
+  [CONDITION_FIELDS.ECLIPSE]: {
+    inputType: 'select',
+    operators: EQUALITY_OPS,
+    category: 'other',
+    label: 'CALENDARIA.Condition.Field.eclipse',
+    getOptions: () => [
+      { value: 'totalSolar', label: localize('CALENDARIA.Eclipse.TotalSolar') },
+      { value: 'partialSolar', label: localize('CALENDARIA.Eclipse.PartialSolar') },
+      { value: 'annularSolar', label: localize('CALENDARIA.Eclipse.AnnularSolar') },
+      { value: 'totalLunar', label: localize('CALENDARIA.Eclipse.TotalLunar') },
+      { value: 'partialLunar', label: localize('CALENDARIA.Eclipse.PartialLunar') },
+      { value: 'penumbralLunar', label: localize('CALENDARIA.Eclipse.PenumbralLunar') }
+    ],
+    needsValue2: true,
+    value2Label: 'CALENDARIA.Common.Moon',
+    value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
+    value2Type: 'number',
+    value2Semantic: 'moonIndex',
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
+  },
+  [CONDITION_FIELDS.IS_ECLIPSE]: {
+    inputType: 'boolean',
+    operators: BOOLEAN_OPS,
+    category: 'other',
+    label: 'CALENDARIA.Condition.Field.isEclipse',
+    available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
+  },
+  [CONDITION_FIELDS.IS_SOLAR_ECLIPSE]: {
+    inputType: 'boolean',
+    operators: BOOLEAN_OPS,
+    category: 'other',
+    label: 'CALENDARIA.Condition.Field.isSolarEclipse',
+    available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
+  },
+  [CONDITION_FIELDS.IS_LUNAR_ECLIPSE]: {
+    inputType: 'boolean',
+    operators: BOOLEAN_OPS,
+    category: 'other',
+    label: 'CALENDARIA.Condition.Field.isLunarEclipse',
+    available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
+  },
   [CONDITION_FIELDS.RANDOM]: {
     inputType: 'number',
     operators: COMPARE_OPS,

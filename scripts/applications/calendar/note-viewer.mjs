@@ -604,7 +604,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         if (canEditNotes()) {
           items.push({
             name: localize('CALENDARIA.Common.Edit'),
-            icon: '<i class="fas fa-edit"></i>',
+            icon: '<i class="fas fa-pen-to-square"></i>',
             callback: () => {
               const page = NoteManager.getFullNote(pageId);
               if (page) page.sheet.render(true, { mode: 'edit' });
