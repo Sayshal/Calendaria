@@ -715,17 +715,12 @@ export function stripSecrets(html) {
  */
 export function previewSnippet(html, maxLength = 120) {
   if (!html) return '';
-  const sanitized = html
-    .replace(/<br\s*\/?>/gi, '<br>')
-    .replace(/<\/p>/gi, '</p>')
-    .replace(/<p[^>]*>/gi, '<p>')
-    .replace(/<(?!\/?(?:p|br)(?:>|\s))[^>]+>/gi, '')
-    .trim();
-  const temp = document.createElement('div');
-  temp.innerHTML = sanitized;
-  const text = temp.textContent || '';
+  const clean = foundry.utils.cleanHTML(html);
+  const container = document.createElement('div');
+  container.innerHTML = clean;
+  const text = container.textContent || '';
   if (!text.trim()) return '';
-  if (text.length <= maxLength) return sanitized;
+  if (text.length <= maxLength) return clean;
   let count = 0;
   const truncate = (node) => {
     for (const child of [...node.childNodes]) {
@@ -746,10 +741,8 @@ export function previewSnippet(html, maxLength = 120) {
       }
     }
   };
-  const output = document.createElement('div');
-  output.innerHTML = sanitized;
-  truncate(output);
-  return output.innerHTML;
+  truncate(container);
+  return container.innerHTML;
 }
 
 /**
@@ -775,7 +768,9 @@ export function getFestivalNoteForDay(notes, year, month, dayOfMonth) {
   const isMiddle = !isStart && !isEnd;
   const showBookends = fn.system?.showBookends || false;
   const name = fn.name || '';
-  const description = fn.text?.content?.replace(/<[^>]*>/g, '') || '';
+  const descEl = document.createElement('div');
+  descEl.innerHTML = foundry.utils.cleanHTML(fn.text?.content || '');
+  const description = descEl.textContent || '';
   const color = fn.system?.color || '';
   const icon = fn.system?.icon || '';
   const iconType = fn.system?.iconType || 'fontawesome';
