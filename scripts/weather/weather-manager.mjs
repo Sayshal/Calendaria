@@ -540,12 +540,12 @@ export default class WeatherManager {
     let inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
     if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
     const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
+    const components = game.time.components;
+    const yearZero = game.time.calendar?.years?.yearZero ?? 0;
     let seed;
     if (options.randomize) {
       seed = null;
     } else {
-      const components = game.time.components;
-      const yearZero = game.time.calendar?.years?.yearZero ?? 0;
       seed = dateSeed(components.year + yearZero, components.month, components.dayOfMonth ?? 0);
     }
     const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
