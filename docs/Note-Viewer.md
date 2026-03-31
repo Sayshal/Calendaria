@@ -57,12 +57,12 @@ Filter notes by the user who created them.
 
 ### Checkbox Filters
 
-| Filter       | Description                            |
-| ------------ | -------------------------------------- |
-| All Day      | Show only all-day notes                |
-| Has Duration | Show only notes with a duration set    |
-| Is Recurring | Show only notes with a condition tree  |
-| Is Festival  | Show only notes linked to a festival   |
+| Filter       | Description                           |
+| ------------ | ------------------------------------- |
+| All Day      | Show only all-day notes               |
+| Has Duration | Show only notes with a duration set   |
+| Is Recurring | Show only notes with a condition tree |
+| Is Festival  | Show only notes linked to a festival  |
 
 ### Text Search
 

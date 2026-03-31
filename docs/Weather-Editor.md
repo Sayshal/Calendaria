@@ -22,14 +22,14 @@ Click a preset to load it in the main editor area.
 
 ### Weather Info
 
-| Field               | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| **Name**            | Display name (localized for built-in, editable for custom)     |
-| **Icon**            | FontAwesome icon class                                         |
-| **Color**           | Hex color                                                      |
-| **HUD Effect**      | Dropdown to assign a particle effect for the HUD dome renderer |
-| **FXMaster Preset** | Dropdown of available FXMaster effects (or "None")             |
-| **Sound Effect**    | Dropdown of ambient sound loops (or "None")                    |
+| Field               | Description                                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Name**            | Display name (localized for built-in, editable for custom)                                                                                                                |
+| **Icon**            | FontAwesome icon class                                                                                                                                                    |
+| **Color**           | Hex color                                                                                                                                                                 |
+| **HUD Effect**      | Dropdown to assign a particle effect for the HUD dome renderer                                                                                                            |
+| **FXMaster Preset** | Dropdown of available FXMaster effects (or "None")                                                                                                                        |
+| **Sound Effect**    | Dropdown of ambient sound loops (or "None")                                                                                                                               |
 | **Effect Macro**    | Dropdown of world macros to execute when this weather activates. Runs on the primary GM client only. The macro receives `{ weather, previousWeather, zoneId }` as context |
 
 ### Environment Lighting
@@ -38,14 +38,14 @@ Per-preset overrides for scene environment properties, split into Day (Base) and
 
 #### Day (Base)
 
-| Field              | Description                                 |
-| ------------------ | ------------------------------------------- |
-| **Hue**            | Hue angle (0–360°) for daytime lighting     |
-| **Intensity**      | Hue intensity (0 to 1)                      |
-| **Luminosity**     | Scene luminosity (-1 to 1)                  |
-| **Saturation**     | Color saturation (-1 to 1)                  |
-| **Shadows**        | Shadow intensity (0 to 1)                   |
-| **Blend Ambience** | Checkbox. Enable ambience blending (cycle)  |
+| Field              | Description                                |
+| ------------------ | ------------------------------------------ |
+| **Hue**            | Hue angle (0–360°) for daytime lighting    |
+| **Intensity**      | Hue intensity (0 to 1)                     |
+| **Luminosity**     | Scene luminosity (-1 to 1)                 |
+| **Saturation**     | Color saturation (-1 to 1)                 |
+| **Shadows**        | Shadow intensity (0 to 1)                  |
+| **Blend Ambience** | Checkbox. Enable ambience blending (cycle) |
 
 #### Night (Dark)
 

@@ -7,6 +7,7 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { dayOfWeek, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';
 import { log } from './logger.mjs';
+import { DEFAULT_COLORS } from './theme-utils.mjs';
 
 /** Converter dispatch table. */
 const CONDITION_TREE_CONVERTERS = {
@@ -437,7 +438,27 @@ async function migrateFestivalPresetRemoval() {
 }
 
 /**
- * Run all migrations
+ * Migrate flat CUSTOM_THEME_COLORS to new multi-theme map format.
+ * @since 1.0.0
+ * @deprecated Remove in 1.2.0
+ */
+async function migrateCustomThemeColors() {
+  const stored = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+  const keys = Object.keys(stored);
+  if (keys.length === 0) {
+    if (game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) === 'custom') await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, 'dark');
+    return;
+  }
+  const isOldFormat = keys.some((k) => k in DEFAULT_COLORS);
+  if (!isOldFormat) return;
+  const newMap = { custom_legacy: { name: 'Custom Legacy', basePreset: 'dark', colors: { ...stored } } };
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, newMap);
+  if (game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) === 'custom') await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, 'custom_legacy');
+  log(3, 'Migrated flat custom theme colors to multi-theme map format');
+}
+
+/**
+ * Run all migrations.
  * @returns {Promise<void>}
  */
 export async function runAllMigrations() {
@@ -446,4 +467,5 @@ export async function runAllMigrations() {
   await migrateNoteVisibility();
   await migratePresetSchema();
   await migrateFestivalPresetRemoval();
+  await migrateCustomThemeColors();
 }

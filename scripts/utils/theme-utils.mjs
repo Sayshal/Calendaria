@@ -787,31 +787,121 @@ export function applyCustomColors(colors) {
 }
 
 /**
- * Apply a preset theme by name.
- * @param {string} presetName - Preset name (dark, light, highContrast)
+ * Check if a theme key is a user-created custom theme.
+ * @param {string} key - Theme key
+ * @returns {boolean} True if the key identifies a custom theme
+ */
+export function isCustomThemeKey(key) {
+  return !!key && key.startsWith('custom_') && !THEME_PRESETS[key];
+}
+
+/**
+ * Get all user-created custom themes.
+ * @returns {Object<string, {name: string, basePreset: string, colors: object}>} Custom theme map
+ */
+export function getCustomThemes() {
+  return game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+}
+
+/**
+ * Get a single custom theme entry.
+ * @param {string} key - Custom theme key
+ * @returns {{name: string, basePreset: string, colors: object}|null} Theme entry or null
+ */
+export function getCustomTheme(key) {
+  return getCustomThemes()[key] || null;
+}
+
+/**
+ * Resolve full colors for any theme key (built-in or custom).
+ * @param {string} key - Theme key
+ * @returns {Object<string, string>} Full color object
+ */
+export function getColorsForTheme(key) {
+  if (THEME_PRESETS[key]) return { ...THEME_PRESETS[key].colors };
+  if (isCustomThemeKey(key)) {
+    const custom = getCustomTheme(key);
+    if (custom) {
+      const base = THEME_PRESETS[custom.basePreset]?.colors || DEFAULT_COLORS;
+      return { ...base, ...custom.colors };
+    }
+  }
+  return { ...DEFAULT_COLORS };
+}
+
+/**
+ * Create a new custom theme seeded from a preset.
+ * @param {string} basePresetKey - Built-in preset key to base from
+ * @returns {{key: string, entry: {name: string, basePreset: string, colors: object}}} New theme key and entry
+ */
+export function createCustomTheme(basePresetKey) {
+  const themes = getCustomThemes();
+  const presetName = THEME_PRESETS[basePresetKey] ? game.i18n.localize(THEME_PRESETS[basePresetKey].name) : basePresetKey;
+  let n = 1;
+  const prefix = `custom_${basePresetKey}_`;
+  while (themes[`${prefix}${n}`]) n++;
+  const key = `${prefix}${n}`;
+  const entry = { name: `Custom ${presetName} #${n}`, basePreset: basePresetKey, colors: {} };
+  return { key, entry };
+}
+
+/**
+ * Delete a custom theme. Falls back to 'dark' if the deleted theme was active.
+ * @param {string} key - Custom theme key to delete
+ */
+export async function deleteCustomTheme(key) {
+  const themes = getCustomThemes();
+  delete themes[key];
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+  if (game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) === key) {
+    await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, 'dark');
+    applyCustomColors(THEME_PRESETS.dark.colors);
+  }
+}
+
+/**
+ * Save color overrides for a custom theme.
+ * @param {string} themeKey - Custom theme key
+ * @param {object} overrides - Color overrides (only keys that differ from base)
+ */
+export async function saveCustomThemeColors(themeKey, overrides) {
+  const themes = getCustomThemes();
+  if (!themes[themeKey]) return;
+  themes[themeKey].colors = overrides;
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+}
+
+/**
+ * Apply a preset theme by name (visual only, no save).
+ * @param {string} presetName - Preset name
  */
 export function applyPreset(presetName) {
-  const preset = THEME_PRESETS[presetName];
-  if (!preset) return;
-  applyCustomColors(preset.colors);
-  game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, preset.colors);
+  const colors = getColorsForTheme(presetName);
+  applyCustomColors(colors);
 }
 
 /**
- * Get current theme colors (merged with defaults).
- * @returns {Object<string, string>} - Current colors
+ * Get current theme colors.
+ * @returns {Object<string, string>} Full resolved colors
  */
 export function getCurrentColors() {
-  const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-  return { ...DEFAULT_COLORS, ...customColors };
+  const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
+  return getColorsForTheme(themeMode);
 }
 
 /**
- * Reset theme to defaults.
+ * Reset the active custom theme's overrides, or re-apply a built-in preset.
  */
 export async function resetTheme() {
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {});
-  applyCustomColors(DEFAULT_COLORS);
+  const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
+  if (isCustomThemeKey(themeMode)) {
+    const themes = getCustomThemes();
+    if (themes[themeMode]) {
+      themes[themeMode].colors = {};
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+    }
+  }
+  applyCustomColors(getColorsForTheme(themeMode));
 }
 
 /**
@@ -821,7 +911,7 @@ export async function resetTheme() {
 export function initializeTheme() {
   const forced = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
   if (forced && forced !== 'none') {
-    if (forced === 'custom') {
+    if (forced === 'custom' || isCustomThemeKey(forced)) {
       const forcedColors = game.settings.get(MODULE.ID, SETTINGS.FORCED_THEME_COLORS) || {};
       applyCustomColors({ ...DEFAULT_COLORS, ...forcedColors });
     } else if (THEME_PRESETS[forced]) {
@@ -829,14 +919,12 @@ export function initializeTheme() {
     }
     return;
   }
-  const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
+  let themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
   if (themeMode === 'custom') {
-    const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-    const colors = { ...DEFAULT_COLORS, ...customColors };
-    applyCustomColors(colors);
-  } else if (THEME_PRESETS[themeMode]) {
-    applyCustomColors(THEME_PRESETS[themeMode].colors);
+    themeMode = 'dark';
+    game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, 'dark');
   }
+  applyCustomColors(getColorsForTheme(themeMode));
 }
 
 /**

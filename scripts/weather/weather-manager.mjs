@@ -547,7 +547,6 @@ export default class WeatherManager {
     if (currentWeather?.season && season !== currentWeather.season) inertia *= 0.5;
     const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
     const components = game.time.components;
-    const yearZero = game.time.calendar?.years?.yearZero ?? 0;
     let seed;
     if (options.randomize) {
       seed = null;
@@ -623,7 +622,6 @@ export default class WeatherManager {
     const fullPlan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const plan = zoneId ? (fullPlan[zoneId] ?? {}) : {};
     const components = game.time.components;
-    const yearZero = calendar.years?.yearZero ?? 0;
     const getDaysInMonth = this.#makeDaysInMonth(calendar);
     let year = components.year;
     let month = components.month;
@@ -677,7 +675,6 @@ export default class WeatherManager {
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
     const components = game.time.components;
-    const yearZero = calendar.years?.yearZero ?? 0;
     const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
     const cacheKey = `${zoneId}|${components.year}|${components.month}|${components.dayOfMonth}|${days}|${accuracy}`;
     if (this.#legacyForecastCache?.key === cacheKey) return this.#legacyForecastCache.forecast;
@@ -1196,7 +1193,6 @@ export default class WeatherManager {
     const zones = this.#getEffectiveZones();
     const forecastDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const components = game.time.components;
-    const yearZero = calendar.years?.yearZero ?? 0;
     const todayYear = components.year;
     const todayMonth = components.month;
     const todayDayOfMonth = components.dayOfMonth ?? 0;

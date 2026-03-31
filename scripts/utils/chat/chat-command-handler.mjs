@@ -554,7 +554,7 @@ export function cmdWeatherProb(args) {
 /** @type {string} Flag key for identifying the enricher reference journal. */
 const ENRICHER_JOURNAL_FLAG = 'isEnricherReference';
 
-/** @type {Array<{label: string, keys: string[], examples?: object}>} Enricher categories for the reference journal. */
+/** @type {Array<{label: string, keys: string[]}>} Enricher categories for the reference journal. */
 const ENRICHER_CATEGORIES = [
   { label: 'CALENDARIA.Enricher.Category.DateTime', keys: ['date', 'time', 'weekday', 'season', 'era', 'cycle', 'festival', 'restday'] },
   {

@@ -12,13 +12,11 @@ import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
   COLOR_CATEGORIES,
   COLOR_DEFINITIONS,
-  COMPONENT_CATEGORIES,
   DEFAULT_COLORS,
-  THEME_PRESETS,
   DEFAULT_FORMAT_PRESETS,
   LOCATION_DEFAULTS,
+  THEME_PRESETS,
   applyCustomColors,
-  applyPreset,
   canChangeActiveCalendar,
   canViewBigCal,
   canViewChronicle,
@@ -27,11 +25,17 @@ import {
   canViewStopwatch,
   canViewSunDial,
   canViewTimeKeeper,
+  createCustomTheme,
+  deleteCustomTheme,
   exportSettings,
   format,
+  getColorsForTheme,
+  getCustomTheme,
+  getCustomThemes,
   getForcedTheme,
   importSettings,
   initializeTheme,
+  isCustomThemeKey,
   localize,
   validateFormatString
 } from '../../utils/_module.mjs';
@@ -81,6 +85,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openPresetManager: SettingsPanel.#onOpenPresetManager,
       openEnricherReference: SettingsPanel.#onOpenEnricherReference,
       resetColor: SettingsPanel.#onResetColor,
+      customizeTheme: SettingsPanel.#onCustomizeTheme,
+      deleteCustomTheme: SettingsPanel.#onDeleteCustomTheme,
       exportTheme: SettingsPanel.#onExportTheme,
       importTheme: SettingsPanel.#onImportTheme,
       openHUD: SettingsPanel.#onOpenHUD,
@@ -236,10 +242,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         const mode = e.target.value;
         if (!mode) return;
         await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, mode);
-        if (mode === 'custom') {
-          const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-          applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
-        } else applyPreset(mode);
+        applyCustomColors(getColorsForTheme(mode));
         this.render({ force: true, parts: ['theme'] });
       });
     }
@@ -1541,35 +1544,43 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareThemeContext(context) {
     const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-    const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
     const forcedTheme = getForcedTheme();
+    const themes = getCustomThemes();
     if (context.isGM) {
       const forceTheme = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME) || 'none';
       const forcePresets = Object.keys(THEME_PRESETS)
         .map((v) => ({ value: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
         .sort((a, b) => a.label.localeCompare(b.label));
-      context.forceThemeOptions = [
-        { value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' },
-        ...forcePresets,
-        { value: 'custom', label: localize('CALENDARIA.Common.Custom'), selected: forceTheme === 'custom' }
-      ];
+      const forceCustom = Object.entries(themes)
+        .map(([key, entry]) => ({ value: key, label: entry.name, selected: forceTheme === key }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      context.forceThemeOptions = [{ value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' }, ...forcePresets, ...forceCustom];
     }
     context.themeForced = !!forcedTheme;
-    context.forcedThemeName = forcedTheme ? localize(`CALENDARIA.ThemeEditor.Presets.${forcedTheme.charAt(0).toUpperCase() + forcedTheme.slice(1)}`) || forcedTheme : '';
     const displayMode = forcedTheme || themeMode;
-    const modePresets = Object.keys(THEME_PRESETS)
+    context.builtInThemes = Object.keys(THEME_PRESETS)
       .map((v) => ({ key: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
       .sort((a, b) => a.label.localeCompare(b.label));
-    context.themeModes = [...modePresets, { key: 'custom', label: localize('CALENDARIA.Common.Custom'), selected: displayMode === 'custom' }];
-    context.showCustomColors = themeMode === 'custom' && !forcedTheme;
+    context.customThemes = Object.entries(themes)
+      .map(([key, entry]) => ({ key, label: entry.name, selected: displayMode === key }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+    context.isCustomThemeActive = isCustomThemeKey(themeMode);
+    context.canDeleteTheme = isCustomThemeKey(themeMode) && !forcedTheme;
+    context.showCustomColors = isCustomThemeKey(displayMode) && !forcedTheme;
+    if (context.isCustomThemeActive) {
+      const activeCustom = getCustomTheme(themeMode);
+      context.activeCustomThemeName = activeCustom?.name || themeMode;
+    }
     if (context.showCustomColors) {
+      const activeCustom = getCustomTheme(displayMode);
+      const baseColors = THEME_PRESETS[activeCustom?.basePreset]?.colors || DEFAULT_COLORS;
+      const mergedColors = { ...baseColors, ...(activeCustom?.colors || {}) };
       const categories = {};
       for (const [catKey, catLabel] of Object.entries(COLOR_CATEGORIES)) categories[catKey] = { key: catKey, label: catLabel, colors: [] };
       for (const def of COLOR_DEFINITIONS) {
-        const value = customColors[def.key] || DEFAULT_COLORS[def.key];
-        const isCustom = customColors[def.key] !== undefined;
-        const componentLabel = COMPONENT_CATEGORIES[def.component] || '';
-        categories[def.category].colors.push({ key: def.key, label: def.label, value, defaultValue: DEFAULT_COLORS[def.key], isCustom, component: def.component, componentLabel });
+        const value = mergedColors[def.key] || baseColors[def.key];
+        const isCustom = activeCustom?.colors?.[def.key] !== undefined;
+        categories[def.category].colors.push({ key: def.key, label: def.label, value, defaultValue: baseColors[def.key], isCustom });
       }
       context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
     }
@@ -2067,21 +2078,25 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (this.rendered) this.render({ parts: ['fogofwar'] });
     }
     if (data.colors) {
-      const customColors = {};
-      for (const def of COLOR_DEFINITIONS) {
-        const key = def.key;
-        if (data.colors[key] && data.colors[key] !== DEFAULT_COLORS[key]) customColors[key] = data.colors[key];
+      const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE);
+      if (isCustomThemeKey(themeMode)) {
+        const themes = getCustomThemes();
+        const entry = themes[themeMode];
+        if (entry) {
+          const baseColors = THEME_PRESETS[entry.basePreset]?.colors || DEFAULT_COLORS;
+          const overrides = {};
+          for (const def of COLOR_DEFINITIONS) if (data.colors[def.key] && data.colors[def.key] !== baseColors[def.key]) overrides[def.key] = data.colors[def.key];
+          entry.colors = overrides;
+          await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+          applyCustomColors({ ...baseColors, ...overrides });
+        }
       }
-      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
-      applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
     }
     if ('forceTheme' in data && game.user.isGM) {
       const oldForce = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
       await game.settings.set(MODULE.ID, SETTINGS.FORCE_THEME, data.forceTheme);
-      if (data.forceTheme === 'custom') {
-        const gmColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-        await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, { ...DEFAULT_COLORS, ...gmColors });
-      }
+      if (isCustomThemeKey(data.forceTheme)) await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, getColorsForTheme(data.forceTheme));
+      else if (data.forceTheme !== 'none') await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, {});
       if (oldForce !== data.forceTheme) initializeTheme();
     }
     if (data.showSecretNotes !== undefined) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SECRET_NOTES, !!data.showSecretNotes);
@@ -2275,11 +2290,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetColor(_event, target) {
     const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const key = target.dataset.key;
-    const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-    delete customColors[key];
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
-    applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
+    const colorKey = target.dataset.key;
+    const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE);
+    if (!isCustomThemeKey(themeMode)) return;
+    const themes = getCustomThemes();
+    if (themes[themeMode]) {
+      delete themes[themeMode].colors[colorKey];
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+    }
+    applyCustomColors(getColorsForTheme(themeMode));
     app?.render({ force: true, parts: ['theme'] });
   }
 
@@ -2356,9 +2375,22 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onExportTheme(_event, _target) {
-    const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-    const exportData = { colors: { ...DEFAULT_COLORS, ...customColors }, version: game.modules.get(MODULE.ID)?.version || '1.0.0' };
-    const filename = `calendaria-theme-${Date.now()}.json`;
+    const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
+    const colors = getColorsForTheme(themeMode);
+    let themeName;
+    if (isCustomThemeKey(themeMode)) {
+      const custom = getCustomTheme(themeMode);
+      themeName = custom?.name || themeMode;
+    } else {
+      themeName = localize(THEME_PRESETS[themeMode]?.name) || themeMode;
+    }
+    const exportData = {
+      name: themeName,
+      basePreset: isCustomThemeKey(themeMode) ? getCustomTheme(themeMode)?.basePreset : themeMode,
+      colors,
+      version: game.modules.get(MODULE.ID)?.version
+    };
+    const filename = `calendaria-theme-${themeName.toLowerCase().replace(/\s+/g, '-')}.json`;
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2370,7 +2402,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Import theme from JSON file.
+   * Import theme from JSON file — creates a new custom theme entry.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
@@ -2386,18 +2418,60 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         const text = await file.text();
         const importData = JSON.parse(text);
         if (!importData.colors) throw new Error('Invalid theme file format');
-        const customColors = {};
-        for (const [key, value] of Object.entries(importData.colors)) if (DEFAULT_COLORS[key] !== value) customColors[key] = value;
-        await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, customColors);
-        applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
+        const basePreset = importData.basePreset && THEME_PRESETS[importData.basePreset] ? importData.basePreset : 'dark';
+        const baseColors = THEME_PRESETS[basePreset]?.colors || DEFAULT_COLORS;
+        const overrides = {};
+        for (const [key, value] of Object.entries(importData.colors)) if (key in DEFAULT_COLORS && baseColors[key] !== value) overrides[key] = value;
+        const themes = getCustomThemes();
+        const importName = importData.name || `Imported ${new Date().toLocaleDateString()}`;
+        const safeKey = `custom_imported_${Date.now()}`;
+        themes[safeKey] = { name: importName, basePreset, colors: overrides };
+        await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+        await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, safeKey);
+        applyCustomColors({ ...baseColors, ...overrides });
         ui.notifications.info('CALENDARIA.ThemeEditor.ImportSuccess', { localize: true });
-        app?.render();
+        app?.render({ force: true, parts: ['theme'] });
       } catch (err) {
         log(1, 'Theme import failed:', err);
         ui.notifications.error('CALENDARIA.ThemeEditor.ImportError', { localize: true });
       }
     });
     input.click();
+  }
+
+  /** Create a new custom theme from the current preset. */
+  static async #onCustomizeTheme() {
+    const app = foundry.applications.instances.get('calendaria-settings-panel');
+    const currentMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
+    let basePreset = currentMode;
+    if (isCustomThemeKey(currentMode)) {
+      const custom = getCustomTheme(currentMode);
+      basePreset = custom?.basePreset || 'dark';
+    }
+    const { key, entry } = createCustomTheme(basePreset);
+    const themes = getCustomThemes();
+    themes[key] = entry;
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
+    await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, key);
+    applyCustomColors(getColorsForTheme(key));
+    app?.render({ force: true, parts: ['theme'] });
+  }
+
+  /** Delete the active custom theme after confirmation. */
+  static async #onDeleteCustomTheme() {
+    const app = foundry.applications.instances.get('calendaria-settings-panel');
+    const currentMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE);
+    if (!isCustomThemeKey(currentMode)) return;
+    const custom = getCustomTheme(currentMode);
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize('CALENDARIA.ThemeEditor.DeleteCustom.Title') },
+      content: `<p>${format('CALENDARIA.ThemeEditor.DeleteCustom.Content', { name: custom?.name || currentMode })}</p>`,
+      yes: { label: localize('CALENDARIA.Common.Delete'), icon: 'fas fa-trash' },
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+    });
+    if (!confirmed) return;
+    await deleteCustomTheme(currentMode);
+    app?.render({ force: true, parts: ['theme'] });
   }
 
   /**

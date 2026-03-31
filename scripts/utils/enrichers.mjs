@@ -1362,8 +1362,7 @@ function enrichWeatherIcon(_config, label) {
 
 /**
  * Climate zone name.
- * @param {object} config - Parsed enricher config
- * @param _config
+ * @param {object} _config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
