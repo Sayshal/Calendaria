@@ -1,3 +1,7 @@
+## Video Walkthrough
+
+A walkthrough of most major features, graciously created by the BaileyWiki team: https://youtu.be/yrl0Wh54ypQ
+
 ## Headline Features
 - **Category Overhaul** — New Category Manager with defaults, forced overrides, player-usable flags, groups, and import/export. Preset selection on note creation.
 - **Chronicle** — Infinite-scroll timeline viewer with notes, festivals, seasons, moons, and weather. Three depth modes, two layouts, fog-of-war awareness.

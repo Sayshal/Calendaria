@@ -14,6 +14,12 @@ Your campaign's time deserves more than a number in the corner.
 
 **[Read the Wiki](https://github.com/Sayshal/calendaria/wiki)** for guides, API docs, and tips.
 
+### Video Walkthrough
+
+[![Calendaria Walkthrough](https://img.youtube.com/vi/yrl0Wh54ypQ/maxresdefault.jpg)](https://youtu.be/yrl0Wh54ypQ)
+
+A walkthrough of most major features, graciously created by the BaileyWiki team.
+
 ---
 
 ## What You Get
