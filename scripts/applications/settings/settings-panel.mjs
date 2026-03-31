@@ -7,7 +7,7 @@
 import { BUNDLED_CALENDARS, CalendarManager, CalendarRegistry } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
-import { getAllPresets } from '../../notes/_module.mjs';
+import { addDays, getAllPresets } from '../../notes/_module.mjs';
 import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
   COLOR_CATEGORIES,
@@ -2063,6 +2063,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         const current = { year: components.year + yz, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
         await revealRange({ year: y, month: m - 1, dayOfMonth: d - 1 }, current);
       }
+      if (this.rendered) this.render({ parts: ['fogofwar'] });
     }
     if (data.colors) {
       const customColors = {};
@@ -2327,8 +2328,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (calId) {
         const yz = cal?.years?.yearZero ?? 0;
         const components = game.time.components;
-        const current = { year: components.year + yz, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
-        newRanges[calId] = [{ start: { year: startDate.year, month: startDate.month, dayOfMonth: startDate.dayOfMonth }, end: current }];
+        let current = { year: components.year + yz, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
+        let start = { year: startDate.year, month: startDate.month, dayOfMonth: startDate.dayOfMonth };
+        const config = game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_CONFIG);
+        const radius = config.revealRadius || 0;
+        if (radius > 0) {
+          start = addDays(start, -radius);
+          current = addDays(current, radius);
+        }
+        newRanges[calId] = [{ start, end: current }];
       }
     }
     await game.settings.set(MODULE.ID, SETTINGS.FOG_OF_WAR_RANGES, newRanges);

@@ -36,7 +36,12 @@ export function isRevealed(year, month, dayOfMonth, calendarId = null) {
   if (!calendarId) return true;
   const date = { year, month, dayOfMonth };
   const startDate = getCompleteStartDate();
-  if (startDate && compareDays(date, startDate) < 0) return false;
+  if (startDate) {
+    const config = game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_CONFIG);
+    const radius = config.revealRadius || 0;
+    const floor = radius > 0 ? addDays(startDate, -radius) : startDate;
+    if (compareDays(date, floor) < 0) return false;
+  }
   const ranges = getRevealedRanges(calendarId);
   for (const range of ranges) if (compareDays(date, range.start) >= 0 && compareDays(date, range.end) <= 0) return true;
   return false;

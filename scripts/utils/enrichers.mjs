@@ -531,12 +531,11 @@ function enrichWeekday(config, label) {
  */
 function enrichSeason(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const seasonIndex = components.season ?? 0;
-  const season = calendar?.seasonsArray?.[seasonIndex];
+  const season = calendar?.getCurrentSeason?.(components);
   if (!season) return createErrorElement('CALENDARIA.Enricher.Error.NoSeasons');
   const name = game.i18n.localize(season.name);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Season', { value: name });
-  return createElement('season', label || name, '', true, 'fa-leaf', tooltip);
+  return createElement('season', label || name, '', true, season.icon || 'fa-leaf', tooltip);
 }
 
 /**
@@ -1390,6 +1389,14 @@ function enrichForecast(config, label) {
   const forecast = WeatherManager.getForecast({ days });
   if (!forecast?.length) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   if (label) return createElement('forecast', label, '', true);
+  const currentWeather = WeatherManager.getCurrentWeather();
+  if (currentWeather && forecast.length > 0) {
+    const today = game.time.components;
+    const first = forecast[0];
+    if (first.year === today.year && first.month === today.month && first.dayOfMonth === today.dayOfMonth) {
+      forecast[0] = { ...first, preset: currentWeather.preset ?? first.preset, temperature: currentWeather.temperature ?? first.temperature, wind: currentWeather.wind ?? first.wind };
+    }
+  }
   const container = document.createElement('span');
   container.classList.add('calendaria-enricher', 'calendaria-enricher--almanac', 'calendaria-enricher--live');
   container.dataset.calType = 'forecast';
