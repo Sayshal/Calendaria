@@ -1592,6 +1592,10 @@ export const CalendariaAPI = {
    */
   async clearWeatherHistory(options = {}) {
     const converted = { ...options };
+    if (converted.year != null) {
+      const yearZero = CalendarManager.getActiveCalendar()?.years?.yearZero ?? 0;
+      converted.year = converted.year - yearZero;
+    }
     if (converted.month != null) converted.month = converted.month - 1;
     return WeatherManager.clearWeatherHistory(converted);
   },
@@ -1633,7 +1637,8 @@ export const CalendariaAPI = {
    * @returns {object|null} Historical weather entry or null
    */
   getWeatherForDate(year, month, day, zoneId) {
-    return WeatherManager.getWeatherForDate(year, month - 1, day - 1, zoneId);
+    const yearZero = CalendarManager.getActiveCalendar()?.years?.yearZero ?? 0;
+    return WeatherManager.getWeatherForDate(year - yearZero, month - 1, day - 1, zoneId);
   },
 
   /**
@@ -1645,6 +1650,10 @@ export const CalendariaAPI = {
    */
   getWeatherHistory(options = {}) {
     const converted = { ...options };
+    if (converted.year != null) {
+      const yearZero = CalendarManager.getActiveCalendar()?.years?.yearZero ?? 0;
+      converted.year = converted.year - yearZero;
+    }
     if (converted.month != null) converted.month = converted.month - 1;
     return WeatherManager.getWeatherHistory(converted);
   },

@@ -156,6 +156,12 @@ export default class WeatherManager {
     Hooks.on(HOOKS.SUNSET, () => this.#onPeriodThreshold(WEATHER_PERIODS.EVENING.id));
     if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) await this.#migrateWeatherDayIndex();
     if (CalendariaSocket.isPrimaryGM()) await this.#migrateLegacySoundKeys();
+    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED)) {
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED, true);
+      log(3, 'Cleared weather history and forecast plan for year key migration');
+    }
     if (CalendariaSocket.isPrimaryGM()) {
       const calendar = CalendarManager.getActiveCalendar();
       if (calendar?.weather?.autoGenerate !== undefined) if (calendar.metadata?.id) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!calendar.weather.autoGenerate);
@@ -546,7 +552,7 @@ export default class WeatherManager {
     if (options.randomize) {
       seed = null;
     } else {
-      seed = dateSeed(components.year + yearZero, components.month, components.dayOfMonth ?? 0);
+      seed = dateSeed(components.year, components.month, components.dayOfMonth ?? 0);
     }
     const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
     let weather;
@@ -556,7 +562,7 @@ export default class WeatherManager {
         seasonClimate,
         zoneConfig,
         season,
-        year: components.year + yearZero,
+        year: components.year,
         month: components.month,
         dayOfMonth: components.dayOfMonth ?? 0,
         customPresets,
@@ -618,7 +624,7 @@ export default class WeatherManager {
     const plan = zoneId ? (fullPlan[zoneId] ?? {}) : {};
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
+    const getDaysInMonth = this.#makeDaysInMonth(calendar);
     let year = components.year;
     let month = components.month;
     let dayOfMonth = components.dayOfMonth ?? 0;
@@ -692,8 +698,8 @@ export default class WeatherManager {
       inertia,
       accuracy,
       previousWeather: prevWeather,
-      getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
-      getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
+      getSeasonForDate: this.#makeSeasonResolver(calendar),
+      getDaysInMonth: this.#makeDaysInMonth(calendar)
     });
     this.#legacyForecastCache = { key: cacheKey, forecast };
     return forecast;
@@ -738,8 +744,9 @@ export default class WeatherManager {
     const month = components.month;
     const dayOfMonth = components.dayOfMonth ?? 0;
     const history = maxDays > 0 ? game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {} : null;
+    const yearZero = calendar?.years?.yearZero ?? 0;
     if (history && data.previous) {
-      const prevYear = data.previous.year;
+      const prevYear = data.previous.year - yearZero;
       const prevMonth = data.previous.month;
       const prevDay = data.previous.dayOfMonth ?? 0;
       for (const zone of zones) {
@@ -760,14 +767,14 @@ export default class WeatherManager {
       return;
     }
     await this.#ensureForecastPlan();
-    const seasonData = calendar.getCurrentSeason?.(data.current);
+    const seasonData = calendar.getCurrentSeason?.({ ...data.current, year: data.current.year - yearZero });
     const season = seasonData?.name ?? null;
     const customPresets = this.getCustomPresets();
     const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
     const activePeriod = intradayEnabled ? this.getCurrentPeriod() : null;
     const weatherUpdates = {};
     for (const zone of zones) {
-      const planEntry = this.#getFromForecastPlan(data.current.year, data.current.month, data.current.dayOfMonth ?? 0, zone.id);
+      const planEntry = this.#getFromForecastPlan(data.current.year - yearZero, data.current.month, data.current.dayOfMonth ?? 0, zone.id);
       if (planEntry) {
         const activeEntry = intradayEnabled && planEntry.periods?.[activePeriod] ? planEntry.periods[activePeriod] : planEntry;
         weatherUpdates[zone.id] = {
@@ -830,12 +837,11 @@ export default class WeatherManager {
           const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
           if (intradayEnabled) {
             const carryOverChance = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_CARRY_OVER) ?? 50;
-            const yearZero = calendar.years?.yearZero ?? 0;
             const intradayResult = generateIntradayWeather({
               seasonClimate,
               zoneConfig,
               season,
-              year: data.current.year + yearZero,
+              year: data.current.year - yearZero,
               month: data.current.month,
               dayOfMonth: curDay,
               customPresets,
@@ -852,7 +858,7 @@ export default class WeatherManager {
               weatherUpdates[zone.id].periods[periodId] = this.#buildWeatherFromResult(periodResult, season);
             }
           } else {
-            const seed = dateSeed(data.current.year, data.current.month, curDay);
+            const seed = dateSeed(data.current.year - yearZero, data.current.month, curDay);
             const result = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId: currentWeather?.id ?? null, inertia, previousWeather: prevWeather });
             weatherUpdates[zone.id] = this.#buildWeatherFromResult(result, season);
           }
@@ -909,7 +915,7 @@ export default class WeatherManager {
     const currentTime = calendar.componentsToTime({ year: currentYear - yearZero, month: currentMonth, dayOfMonth: data.current.dayOfMonth ?? 0, hour: 0, minute: 0, second: 0 });
     const startTime = currentTime - daysToFill * secondsPerDay;
     const startComponents = calendar.timeToComponents(startTime);
-    const startYear = startComponents.year + yearZero;
+    const startYear = startComponents.year;
     const startMonth = startComponents.month;
     const startDayOfMonth = startComponents.dayOfMonth ?? 0;
     const fullPlan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
@@ -928,8 +934,8 @@ export default class WeatherManager {
         customPresets,
         currentWeatherId: null,
         inertia,
-        getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
-        getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
+        getSeasonForDate: this.#makeSeasonResolver(calendar),
+        getDaysInMonth: this.#makeDaysInMonth(calendar)
       });
       for (let i = 0; i < forecast.length - 1; i++) {
         const f = forecast[i];
@@ -1196,7 +1202,7 @@ export default class WeatherManager {
     const todayDayOfMonth = components.dayOfMonth ?? 0;
     const todayKey = todayYear * 10000 + todayMonth * 100 + todayDayOfMonth;
     const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
-    const getDaysInMonth = this.#makeDaysInMonth(calendar, yearZero);
+    const getDaysInMonth = this.#makeDaysInMonth(calendar);
     const customPresets = this.getCustomPresets();
     const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
     const intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
@@ -1269,7 +1275,7 @@ export default class WeatherManager {
         inertia,
         accuracy: 100,
         previousWeather: chainPrevWeather,
-        getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
+        getSeasonForDate: this.#makeSeasonResolver(calendar),
         getDaysInMonth,
         intraday: intradayEnabled,
         carryOverChance
@@ -1389,12 +1395,11 @@ export default class WeatherManager {
   /**
    * Build a getDaysInMonth callback for generateForecast.
    * @param {object} calendar - Active calendar
-   * @param {number} yearZero - Year zero offset
-   * @returns {Function} getDaysInMonth(month, year)
+   * @returns {Function} getDaysInMonth(month, internalYear)
    * @private
    */
-  static #makeDaysInMonth(calendar, yearZero) {
-    const fn = (month, year) => calendar.getDaysInMonth?.(month, year - yearZero) ?? 30;
+  static #makeDaysInMonth(calendar) {
+    const fn = (month, year) => calendar.getDaysInMonth?.(month, year) ?? 30;
     fn._monthsPerYear = calendar.monthsArray?.length ?? 12;
     return fn;
   }
@@ -1402,13 +1407,12 @@ export default class WeatherManager {
   /**
    * Build a getSeasonForDate callback for generateForecast.
    * @param {object} calendar - Active calendar
-   * @param {number} yearZero - Year zero offset
-   * @returns {Function} getSeasonForDate(year, month, day)
+   * @returns {Function} getSeasonForDate(internalYear, month, day)
    * @private
    */
-  static #makeSeasonResolver(calendar, yearZero) {
+  static #makeSeasonResolver(calendar) {
     return (year, month, dayOfMonth) => {
-      const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth });
+      const season = calendar.getCurrentSeason?.({ year, month, dayOfMonth });
       if (!season) return null;
       return { name: season.name, climate: season.climate };
     };
@@ -2008,6 +2012,18 @@ export default class WeatherManager {
     const desc = mainTooltipArgs.description && mainTooltipArgs.description !== mainTooltipArgs.label ? esc(mainTooltipArgs.description) : '';
     rows.push(`<div class="header"><strong>${esc(mainTooltipArgs.label)}</strong>${desc ? ` — ${desc}` : ''}</div>`);
     if (mainTooltipArgs.temp != null) rows.push(`<div class="row"><i class="fas fa-temperature-half"></i> ${esc(mainTooltipArgs.temp)}</div>`);
+    if (mainTooltipArgs.windSpeed > 0) {
+      const windLabel = this.getWindSpeedLabel(mainTooltipArgs.windSpeed);
+      const resolvedKph = mainTooltipArgs.windKph ?? this.getWindSpeedKph(mainTooltipArgs.windSpeed);
+      const windFormatted = this.formatWindSpeed(resolvedKph);
+      const dirLabel = this.getWindDirectionLabel(mainTooltipArgs.windDirection);
+      rows.push(`<div class="row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
+    }
+    if (mainTooltipArgs.precipType) {
+      const precipLabel = localize(`CALENDARIA.Weather.Precipitation.${mainTooltipArgs.precipType.charAt(0).toUpperCase() + mainTooltipArgs.precipType.slice(1)}`);
+      const rate = this.formatPrecipitation((mainTooltipArgs.precipIntensity ?? 0) * 10);
+      rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
+    }
     rows.push('<hr>');
     for (const period of Object.values(WEATHER_PERIODS)) {
       const pw = periods[period.id];

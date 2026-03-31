@@ -33,6 +33,7 @@
     }
 
     .header-row-equivalent {
+      margin-top: -0.5rem;
       contain: inline-size;
       gap: 0;
       flex-wrap: wrap;

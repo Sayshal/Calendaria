@@ -181,7 +181,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
       return note;
     });
     if (showWeather && isPastOrToday) {
-      const weatherData = WeatherManager.getWeatherForDate(year, month, dayOfMonth);
+      const weatherData = WeatherManager.getWeatherForDate(year - yearZero, month, dayOfMonth);
       const sentence = buildWeatherSentence(weatherData);
       if (sentence) {
         const icon = weatherData.icon ? `fas ${weatherData.icon}` : 'fas fa-cloud';

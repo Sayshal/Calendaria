@@ -457,7 +457,8 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
     }
     return result;
   }
-  const hist = WeatherManager.getWeatherForDate(year, month, dayOfMonth, zoneId);
+  const yz = CalendarManager.getActiveCalendar()?.years?.yearZero ?? 0;
+  const hist = WeatherManager.getWeatherForDate(year - yz, month, dayOfMonth, zoneId);
   if (hist)
     return {
       icon: hist.icon,

@@ -284,7 +284,8 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
       return cache('totalDays', () => getTotalDaysSinceEpoch(date));
     case CONDITION_FIELDS.WEATHER: {
       const zoneId = value2 ?? undefined;
-      const historical = WeatherManager.getWeatherForDate(date.year, date.month, date.dayOfMonth, zoneId);
+      const yz = calendar?.years?.yearZero ?? 0;
+      const historical = WeatherManager.getWeatherForDate(date.year - yz, date.month, date.dayOfMonth, zoneId);
       if (historical) return historical.id ?? null;
       const weather = WeatherManager.getCurrentWeather(zoneId);
       return weather?.id ?? null;

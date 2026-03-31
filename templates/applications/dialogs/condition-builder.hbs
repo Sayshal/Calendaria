@@ -2,7 +2,7 @@
 {{#*inline "renderEntry"}}
   {{#if (eq entryType "group")}}
     <fieldset class="cb-group depth-{{depth}}" data-path="{{path}}">
-      <legend class="cb-group-legend">s
+      <legend class="cb-group-legend">
         {{localize "CALENDARIA.Condition.Builder.MatchLabel"}}
         <select name="group.{{path}}.mode"
           data-tooltip-html="<b>{{localize 'CALENDARIA.Common.All'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.andHint'}}<br><b>{{localize 'CALENDARIA.Common.Any'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.orHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.nand'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.nandHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.xor'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.xorHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.count'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.countHint'}}">

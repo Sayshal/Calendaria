@@ -201,6 +201,7 @@ export const SETTINGS = {
   TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
   TOOLBAR_APPS: 'toolbarApps',
   WEATHER_DAY_INDEX_MIGRATED: 'weatherDayIndexMigrated',
+  WEATHER_YEAR_KEY_MIGRATED: 'weatherYearKeyMigrated',
   WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
   WEATHER_HISTORY_DAYS: 'weatherHistoryDays',
   WEATHER_HISTORY: 'weatherHistory',
@@ -390,8 +391,8 @@ export const COMPASS_DIRECTIONS = { N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, E
 /** @type {Object<string, object>} Intraday weather period definitions tied to threshold hooks */
 export const WEATHER_PERIODS = {
   NIGHT: { id: 'night', index: 0, label: 'CALENDARIA.Common.Night', icon: 'fa-moon' },
-  MORNING: { id: 'morning', index: 1, label: 'CALENDARIA.Format.ApproxTime.Morning', icon: 'fa-sun-bright' },
-  AFTERNOON: { id: 'afternoon', index: 2, label: 'CALENDARIA.Format.ApproxTime.Afternoon', icon: 'fa-sun' },
+  MORNING: { id: 'morning', index: 1, label: 'CALENDARIA.Format.ApproxTime.Morning', icon: 'fa-sun' },
+  AFTERNOON: { id: 'afternoon', index: 2, label: 'CALENDARIA.Format.ApproxTime.Afternoon', icon: 'fa-cloud-sun' },
   EVENING: { id: 'evening', index: 3, label: 'CALENDARIA.Format.ApproxTime.Evening', icon: 'fa-cloud-moon' }
 };
 

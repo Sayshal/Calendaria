@@ -213,7 +213,8 @@ export function cmdWeather(args) {
     const year = parseInt(match[1], 10);
     const month = parseInt(match[2], 10) - 1;
     const day = parseInt(match[3], 10) - 1;
-    const weather = WeatherManager.getWeatherForDate(year, month, day);
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const weather = WeatherManager.getWeatherForDate(year - yearZero, month, day);
     if (!weather) return { content: format('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` }) };
     const tempStr = weather.temperature != null ? ` (${WeatherManager.formatTemperature(weather.temperature)})` : '';
     const windStr = weather.wind?.speed > 0 ? ` · ${WeatherManager.getWindSpeedLabel(weather.wind.speed)}` : '';
