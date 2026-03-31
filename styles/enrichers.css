@@ -103,27 +103,30 @@
     line-height: 1.4;
     background: var(--calendaria-bg-lighter);
   }
+}
 
-  &--moon-icon {
-    display: inline;
-    width: auto;
-    height: 1.1em;
-    vertical-align: middle;
-  }
+.calendaria-enricher--moon-icon {
+  display: inline;
+  width: auto;
+  height: 1em;
+  max-height: 1rem;
+  vertical-align: middle;
+}
 
-  &--moon-icon-wrapper {
-    display: inline-block;
-    border-radius: 50%;
-    overflow: hidden;
-    line-height: 0;
-    vertical-align: middle;
+.calendaria-enricher--moon-icon-wrapper {
+  display: inline-block;
+  max-width: 1rem;
+  max-height: 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 0;
+  vertical-align: middle;
 
-    &.tinted {
-      background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
+  &.tinted {
+    background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
 
-      img {
-        mix-blend-mode: multiply;
-      }
+    img {
+      mix-blend-mode: multiply;
     }
   }
 }

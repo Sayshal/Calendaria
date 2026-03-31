@@ -397,8 +397,6 @@ function appendMoonIcon(parent, iconPath, color = null) {
   if (!iconPath) return;
   const img = document.createElement('img');
   img.src = iconPath;
-  img.width = 510;
-  img.height = 510;
   img.classList.add('calendaria-enricher--moon-icon');
   if (color) {
     const wrapper = document.createElement('span');
@@ -1124,7 +1122,7 @@ function enrichMoon(config, label) {
     return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
   }
   if (config.cycleday) {
-    const moon = calendar?.getCurrentMoonPhase?.(moonIndex);
+    const moon = calendar?.getMoonPhase?.(moonIndex);
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
     const text = String(moon.dayInCycle ?? '');
     const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MoonCycleDay', { value: text });
@@ -1141,7 +1139,7 @@ function enrichMoon(config, label) {
     const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.FullMoon', { value: text });
     return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
   }
-  const moon = calendar?.getCurrentMoonPhase?.(moonIndex);
+  const moon = calendar?.getMoonPhase?.(moonIndex);
   if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const moonDef = calendar?.moonsArray?.[moonIndex];
   const phaseName = game.i18n.localize(moon.name);
@@ -1365,12 +1363,12 @@ function enrichWeatherIcon(_config, label) {
 /**
  * Climate zone name.
  * @param {object} config - Parsed enricher config
+ * @param _config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
-function enrichZone(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const zone = calendar?.getActiveClimateZone?.();
+function enrichZone(_config, label) {
+  const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
   const name = zone?.name ? game.i18n.localize(zone.name) : zone?.id || '';
   if (!name) return createErrorElement('CALENDARIA.Enricher.Error.NoZone');
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.ClimateZone', { value: name });

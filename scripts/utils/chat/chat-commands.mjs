@@ -27,7 +27,8 @@ import {
   cmdToday,
   cmdWeather,
   cmdWeatherProb,
-  cmdWeekday
+  cmdWeekday,
+  cmdEnrichers
 } from './chat-command-handler.mjs';
 
 /** Command patterns for parsing chat input. */
@@ -52,7 +53,8 @@ const COMMAND_PATTERNS = {
   weekday: /^\/weekday$/i,
   cycle: /^\/(?:cycle|zodiac)$/i,
   forecast: /^\/(?:forecast|fc)(?:\s+(\d+))?$/i,
-  weatherprob: /^\/(?:weatherprob|wp)(?:\s+(.*))?$/i
+  weatherprob: /^\/(?:weatherprob|wp)(?:\s+(.*))?$/i,
+  enrichers: /^\/enrichers$/i
 };
 
 /**
@@ -170,6 +172,10 @@ async function handleCommand(cmd, match) {
       if (result.error) return ui.notifications.warn(result.content);
       if (result.whisper) return sendWhisperChat(result.content);
       sendChat(result.content);
+    },
+    enrichers: async () => {
+      const result = await cmdEnrichers();
+      if (result?.content) sendChat(result.content);
     }
   };
   await handlers[cmd]?.();

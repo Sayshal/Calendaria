@@ -1,19 +1,4 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
-  {{#if isGM}}
-    <fieldset data-section="presets">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Presets"}}</legend>
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.SettingsPanel.OpenPresetManager"}}</label>
-        <div class="form-fields">
-          <button type="button" data-action="openPresetManager" class="open-manager-btn">
-            <i class="fas fa-tags"></i>
-            {{localize "CALENDARIA.SettingsPanel.OpenPresetManager"}}
-          </button>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.Presets"}}</p>
-      </div>
-    </fieldset>
-  {{/if}}
   <fieldset data-section="default-preset">
     <legend>{{localize "CALENDARIA.Settings.DefaultNotePreset.Name"}}</legend>
     <div class="form-group">
@@ -29,6 +14,19 @@
     </div>
   </fieldset>
   {{#if isGM}}
+    <fieldset data-section="presets">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Presets"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.SettingsPanel.OpenPresetManager"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="openPresetManager" class="open-manager-btn">
+            <i class="fas fa-tags"></i>
+            {{localize "CALENDARIA.SettingsPanel.OpenPresetManager"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.Presets"}}</p>
+      </div>
+    </fieldset>
     <fieldset data-section="visibility">
       <legend>{{localize "CALENDARIA.Common.Visibility"}}</legend>
       <div class="form-group">
@@ -52,6 +50,19 @@
       </div>
     </fieldset>
   {{/if}}
+  <fieldset data-section="enricher-reference">
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.Enrichers"}}</legend>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.SettingsPanel.OpenEnricherReference"}}</label>
+      <div class="form-fields">
+        <button type="button" data-action="openEnricherReference" class="open-manager-btn">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          {{localize "CALENDARIA.SettingsPanel.OpenEnricherReference"}}
+        </button>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.Enrichers"}}</p>
+    </div>
+  </fieldset>
   {{#unless isGM}}
     <div class="info-box">
       <i class="fas fa-info-circle"></i>

@@ -79,6 +79,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openImporter: SettingsPanel.#onOpenImporter,
       resetPosition: SettingsPanel.#onResetPosition,
       openPresetManager: SettingsPanel.#onOpenPresetManager,
+      openEnricherReference: SettingsPanel.#onOpenEnricherReference,
       resetColor: SettingsPanel.#onResetColor,
       exportTheme: SettingsPanel.#onExportTheme,
       importTheme: SettingsPanel.#onImportTheme,
@@ -2259,6 +2260,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenPresetManager() {
     new PresetManager().render(true);
+  }
+
+  /** Open or create the Enricher Reference journal. */
+  static async #onOpenEnricherReference() {
+    const { cmdEnrichers } = await import('../../utils/chat/chat-command-handler.mjs');
+    await cmdEnrichers();
   }
 
   /**

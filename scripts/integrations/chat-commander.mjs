@@ -28,7 +28,8 @@ import {
   cmdToday,
   cmdWeather,
   cmdWeatherProb,
-  cmdWeekday
+  cmdWeekday,
+  cmdEnrichers
 } from '../utils/chat/chat-command-handler.mjs';
 
 /** @type {{key: string, example: string}[]} Date format presets for autocomplete. */
@@ -298,6 +299,16 @@ function registerCommands() {
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdWeatherProb(parameters?.trim() || '')),
       autocompleteCallback: autocompleteWeatherProb
+    },
+    {
+      name: '/enrichers',
+      description: localize('CALENDARIA.ChatCommander.EnrichersDesc'),
+      icon: '<i class="fas fa-wand-magic-sparkles"></i>',
+      requiredRole: 'NONE',
+      callback: async () => {
+        const result = await cmdEnrichers();
+        return result ?? {};
+      }
     }
   ];
   for (const cmd of commands) game.chatCommands.register({ ...cmd, module: MODULE.ID });

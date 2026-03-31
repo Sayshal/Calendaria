@@ -550,3 +550,53 @@ export function cmdWeatherProb(args) {
   const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${localize('CALENDARIA.Common.TemperatureRange')}: ${tempStr}</div>`;
   return { content: `${header}${subtitle}${rows.join('<br>')}${footer}`, whisper: true };
 }
+
+/** @type {string} Flag key for identifying the enricher reference journal. */
+const ENRICHER_JOURNAL_FLAG = 'isEnricherReference';
+
+/** @type {Array<{label: string, keys: string[], examples?: object}>} Enricher categories for the reference journal. */
+const ENRICHER_CATEGORIES = [
+  { label: 'CALENDARIA.Enricher.Category.DateTime', keys: ['date', 'time', 'weekday', 'season', 'era', 'cycle', 'festival', 'restday'] },
+  {
+    label: 'CALENDARIA.Enricher.Category.TimeMath',
+    keys: ['countdown', 'countup', 'between', 'timeuntil', 'datemath'],
+    examples: { countdown: '1 1 2030 cal=gregorian', countup: '1 1 2020 cal=gregorian', between: '1 1 2020 to 1 6 2025 cal=gregorian', timeuntil: 'sunset', datemath: '+30d' }
+  },
+  { label: 'CALENDARIA.Enricher.Category.Calendar', keys: ['calname', 'month', 'year', 'dayofyear', 'yearprogress', 'leapyear', 'intercalary', 'daysinyear'] },
+  { label: 'CALENDARIA.Enricher.Category.Sun', keys: ['sunrise', 'sunset', 'daylight', 'isdaytime', 'dayprogress', 'nightprogress', 'untilsunrise', 'untilsunset'] },
+  { label: 'CALENDARIA.Enricher.Category.Moon', keys: ['moon', 'moons', 'nextfullmoon', 'convergence', 'eclipse', 'nexteclipse'] },
+  { label: 'CALENDARIA.Enricher.Category.Weather', keys: ['weather', 'temperature', 'wind', 'precipitation', 'weathericon', 'zone', 'forecast'] },
+  { label: 'CALENDARIA.Enricher.Category.Notes', keys: ['event', 'notes', 'next', 'category'], examples: { event: 'Winter Solstice', category: 'quest' } },
+  { label: 'CALENDARIA.Enricher.Category.Composite', keys: ['summary', 'almanac', 'format', 'compare', 'peek'], examples: { format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' } }
+];
+
+/**
+ * /enrichers — create or open the enricher reference journal.
+ * @returns {{ content: string }} Chat result
+ */
+export async function cmdEnrichers() {
+  const existing = game.journal.find((j) => j.getFlag(MODULE.ID, ENRICHER_JOURNAL_FLAG));
+  if (existing) {
+    existing.sheet.render(true);
+    return { content: `<i class="fas fa-book-open"></i> ${localize('CALENDARIA.Enricher.Reference.Opened')}` };
+  }
+  const { handlers: enricherHandlers } = await import('../enrichers.mjs');
+  const syntaxHeader = localize('CALENDARIA.Enricher.Reference.Syntax');
+  const outputHeader = localize('CALENDARIA.Enricher.Reference.Output');
+  const sections = ENRICHER_CATEGORIES.map((cat) => {
+    const examples = cat.examples ?? {};
+    const rows = cat.keys
+      .filter((k) => enricherHandlers[k])
+      .map((k) => {
+        const args = examples[k] ? ` ${examples[k]}` : '';
+        return `<tr><td><code>[\u200B[cal.${k}${args}]\u200B]</code></td><td>[[cal.${k}${args}]]</td></tr>`;
+      });
+    return `<h2>${localize(cat.label)}</h2><table><thead><tr><th>${syntaxHeader}</th><th>${outputHeader}</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
+  });
+  const wikiLink = `<p><a href="https://github.com/Sayshal/calendaria/wiki/Text-Enrichers">${localize('CALENDARIA.Enricher.Reference.WikiLink')}</a></p>`;
+  const content = `${wikiLink}${sections.join('')}`;
+  const journalName = localize('CALENDARIA.Enricher.Reference.Title');
+  const journal = await JournalEntry.create({ name: journalName, pages: [{ name: journalName, type: 'text', text: { content } }], flags: { [MODULE.ID]: { [ENRICHER_JOURNAL_FLAG]: true } } });
+  journal.sheet.render(true);
+  return { content: `<i class="fas fa-book-open"></i> ${localize('CALENDARIA.Enricher.Reference.Created')}` };
+}
