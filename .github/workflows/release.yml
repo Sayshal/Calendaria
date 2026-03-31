@@ -102,27 +102,30 @@ jobs:
           echo "title=$(jq -r '.title' dist/module.json)" >> $GITHUB_OUTPUT
           echo "compat_min=$(jq -r '.compatibility.minimum' dist/module.json)" >> $GITHUB_OUTPUT
           echo "compat_verified=$(jq -r '.compatibility.verified' dist/module.json)" >> $GITHUB_OUTPUT
-          echo "compat_max=$(jq -r '.compatibility.maximum' dist/module.json)" >> $GITHUB_OUTPUT
+          COMPAT_MAX=$(jq -r '.compatibility.maximum // empty' dist/module.json)
+          echo "compat_max=$COMPAT_MAX" >> $GITHUB_OUTPUT
 
       # Optional: Release to Foundry Package API (if you have the token)
       - name: Release Foundry Package
         run: |
-          cat << EOF > payload.json
-          {
-            "id": "calendaria",
-            "release": {
-              "version": "${{ env.VERSION }}",
-              "manifest": "${{ env.RELEASE_MANIFEST_URL }}",
-              "download": "${{ env.RELEASE_DOWNLOAD_URL }}",
-              "notes": "${{ env.REPO_URL }}/releases/tag/${{ env.TAG_NAME }}",
-              "compatibility": {
-                "minimum": "${{ steps.module.outputs.compat_min }}",
-                "verified": "${{ steps.module.outputs.compat_verified }}",
-                "maximum": "${{ steps.module.outputs.compat_max }}"
-              }
-            }
-          }
-          EOF
+          COMPAT_MAX="${{ steps.module.outputs.compat_max }}"
+          if [ -n "$COMPAT_MAX" ]; then
+            MAX_LINE="\"maximum\": \"$COMPAT_MAX\""
+          else
+            MAX_LINE=""
+          fi
+
+          jq -n \
+            --arg id "calendaria" \
+            --arg version "${{ env.VERSION }}" \
+            --arg manifest "${{ env.RELEASE_MANIFEST_URL }}" \
+            --arg download "${{ env.RELEASE_DOWNLOAD_URL }}" \
+            --arg notes "${{ env.REPO_URL }}/releases/tag/${{ env.TAG_NAME }}" \
+            --arg min "${{ steps.module.outputs.compat_min }}" \
+            --arg verified "${{ steps.module.outputs.compat_verified }}" \
+            --arg max "$COMPAT_MAX" \
+            '{id: $id, release: {version: $version, manifest: $manifest, download: $download, notes: $notes, compatibility: ({minimum: $min, verified: $verified} + if $max != "" then {maximum: $max} else {} end)}}' \
+            > payload.json
 
           cat payload.json
 
