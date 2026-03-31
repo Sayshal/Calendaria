@@ -153,13 +153,26 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ min: 1, max: 10, step: 1, integer: true, initial: 3 })
       },
-      [SETTINGS.MINI_CAL_STICKY_STATES]: { name: 'MiniCal Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { timeControls: false, sidebar: false, position: false } }) },
+      [SETTINGS.MINI_CAL_STICKY_STATES]: {
+        name: 'MiniCal Sticky States',
+        scope: 'user',
+        config: false,
+        type: new ObjectField({ initial: { timeControls: false, sidebar: false, position: false, increment: 'minute' } })
+      },
       [SETTINGS.MINI_CAL_CONFIRM_SET_DATE]: {
         name: 'CALENDARIA.Settings.ConfirmSetDate.Name',
         hint: 'CALENDARIA.Settings.ConfirmSetDate.Hint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.MINI_CAL_SHOW_TIME]: {
+        name: 'CALENDARIA.Settings.MiniCalShowTime.Name',
+        hint: 'CALENDARIA.Settings.MiniCalShowTime.Hint',
+        scope: 'user',
+        config: false,
+        type: new BooleanField({ initial: true }),
+        onChange: renderMiniCal
       },
       [SETTINGS.MINI_CAL_SHOW_WEATHER]: {
         name: 'CALENDARIA.Common.ShowWeather',
@@ -517,7 +530,7 @@ export default class CalendariaSettings {
           }
         })
       },
-      [SETTINGS.TIMEKEEPER_STICKY_STATES]: { name: 'TimeKeeper Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { position: false } }) },
+      [SETTINGS.TIMEKEEPER_STICKY_STATES]: { name: 'TimeKeeper Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { position: false, increment: 'minute' } }) },
       [SETTINGS.MINI_CAL_TIME_JUMPS]: {
         name: 'MiniCal Time Jumps',
         scope: 'world',
@@ -817,7 +830,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: true })
       },
       [SETTINGS.CALENDAR_HUD_LOCKED]: { name: 'Calendar HUD Locked', scope: 'user', config: false, type: new BooleanField({ initial: false }) },
-      [SETTINGS.HUD_STICKY_STATES]: { name: 'Calendar HUD Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { tray: false, position: false } }) },
+      [SETTINGS.HUD_STICKY_STATES]: { name: 'Calendar HUD Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { tray: false, position: false, increment: 'minute' } }) },
       [SETTINGS.CALENDAR_HUD_POSITION]: { name: 'Calendar HUD Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.CUSTOM_TIME_JUMPS]: {
         name: 'Custom Time Jumps',

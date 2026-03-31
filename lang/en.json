@@ -2075,6 +2075,8 @@
   "CALENDARIA.Settings.MiniCalShowEra.Hint": "Show or hide the era indicator on the MiniCal.",
   "CALENDARIA.Settings.MiniCalShowMoonPhases.Hint": "Show or hide moon phase indicators on the MiniCal.",
   "CALENDARIA.Settings.MiniCalShowSeason.Hint": "Show or hide the season indicator on the MiniCal.",
+  "CALENDARIA.Settings.MiniCalShowTime.Hint": "Show or hide the time display and time controls at the bottom of the MiniCal.",
+  "CALENDARIA.Settings.MiniCalShowTime.Name": "Show Time",
   "CALENDARIA.Settings.MiniCalShowWeather.Hint": "Show or hide the weather indicator on the MiniCal.",
   "CALENDARIA.Settings.MiniCalWeatherDisplayMode.Hint": "How much weather information to display on the MiniCal.",
   "CALENDARIA.Settings.PrecipitationUnit.Hint": "Display precipitation rates in millimeters or inches per hour.",

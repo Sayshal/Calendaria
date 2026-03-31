@@ -132,6 +132,7 @@ export const SETTINGS = {
   MINI_CAL_SHOW_ERA: 'miniCalShowEra',
   MINI_CAL_SHOW_MOON_PHASES: 'miniCalShowMoonPhases',
   MINI_CAL_SHOW_SEASON: 'miniCalShowSeason',
+  MINI_CAL_SHOW_TIME: 'miniCalShowTime',
   MINI_CAL_SHOW_WEATHER: 'miniCalShowWeather',
   MINI_CAL_STICKY_STATES: 'miniCalStickyStates',
   MINI_CAL_TIME_JUMPS: 'miniCalTimeJumps',

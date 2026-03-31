@@ -245,7 +245,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.currentTime = hasMoonIconMarkers(rawTime) ? renderMoonIcons(rawTime) : rawTime;
     context.currentDate = TimeClock.getFormattedDate();
     const isMonthless = calendar?.isMonthless ?? false;
+    const stickyIncrement = (game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {}).increment;
     const appSettings = TimeClock.getAppSettings('mini-calendar');
+    if (stickyIncrement && stickyIncrement !== appSettings.incrementKey) {
+      TimeClock.setAppIncrement('mini-calendar', stickyIncrement);
+      TimeClock.setIncrement(stickyIncrement);
+    }
     context.increments = Object.entries(getTimeIncrements())
       .filter(([key]) => !isMonthless || key !== 'month')
       .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === appSettings.incrementKey }));
@@ -299,6 +304,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       context.disableViewNotes = count === 0 && !hasFestival;
     }
     context.weather = this._getWeatherContext();
+    context.showTime = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_TIME);
     context.showWeather = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
     context.showSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
     context.showEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
@@ -910,6 +916,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     incrementSelect?.addEventListener('change', (event) => {
       TimeClock.setAppIncrement('mini-calendar', event.target.value);
       TimeClock.setIncrement(event.target.value);
+      game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+        timeControls: this.#stickyTimeControls,
+        sidebar: this.#stickySidebar,
+        position: this.#stickyPosition,
+        increment: event.target.value
+      });
       this.render();
     });
     if (incrementSelect && canChangeDateTime()) {
@@ -928,6 +940,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           if (newIndex === currentIndex) return;
           TimeClock.setAppIncrement('mini-calendar', incrementKeys[newIndex]);
           TimeClock.setIncrement(incrementKeys[newIndex]);
+          game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+            timeControls: this.#stickyTimeControls,
+            sidebar: this.#stickySidebar,
+            position: this.#stickyPosition,
+            increment: incrementKeys[newIndex]
+          });
           this.render();
         },
         { passive: false }
@@ -1262,7 +1280,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _toggleStickyPosition() {
     this.#stickyPosition = !this.#stickyPosition;
-    game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, { timeControls: this.#stickyTimeControls, sidebar: this.#stickySidebar, position: this.#stickyPosition });
+    game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+      timeControls: this.#stickyTimeControls,
+      sidebar: this.#stickySidebar,
+      position: this.#stickyPosition,
+      increment: TimeClock.getAppSettings('mini-calendar').incrementKey
+    });
   }
 
   /**

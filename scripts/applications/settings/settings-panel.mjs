@@ -1055,6 +1055,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
     context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
     context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
+    context.miniCalShowTime = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_TIME);
     context.miniCalShowWeather = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
     context.miniCalShowSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
     context.miniCalShowEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
@@ -1939,6 +1940,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudSeasonDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE, data.hudSeasonDisplayMode);
     if ('hudEraDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_ERA_DISPLAY_MODE, data.hudEraDisplayMode);
     if ('hudCyclesDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_CYCLES_DISPLAY_MODE, data.hudCyclesDisplayMode);
+    if ('miniCalShowTime' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_TIME, data.miniCalShowTime);
     if ('miniCalShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER, data.miniCalShowWeather);
     if ('miniCalShowSeason' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON, data.miniCalShowSeason);
     if ('miniCalShowEra' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA, data.miniCalShowEra);
@@ -2193,6 +2195,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'miniCalStickyTimeControls',
       'miniCalStickySidebar',
       'miniCalStickyPosition',
+      'miniCalShowTime',
       'miniCalShowWeather',
       'miniCalWeatherDisplayMode',
       'miniCalShowSeason',

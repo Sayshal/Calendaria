@@ -208,73 +208,75 @@
       {{/each}}
     </div>
   </div>
-  <div class="minical-time-display" {{#if canChangeDateTime}}data-action="toggle" {{/if}}>
-    <span class="time-value">{{{currentTime}}}</span>
-    <span class="date-value hidden">{{currentDate}}</span>
-    {{#if canChangeDateTime}}
-      <div class="time-toggle {{#if running}}active{{/if}}{{#if clockLocked}} clock-locked{{/if}}" data-tooltip
-        aria-label="{{#if clockDisabled}}{{localize 'CALENDARIA.TimeClock.Disabled'}}{{else if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
-        <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
-      </div>
-    {{/if}}
-  </div>
-  {{#if canChangeDateTime}}
-    <div class="minical-time-controls{{#if controlsVisible}} visible{{/if}}">
-      <div class="controls-group">
-        <button type="button" class="time-btn time-shortcut" data-action="toSunrise" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Common.Sunrise'}}">
-          <i class="fas fa-sun"></i>
-        </button>
-        <button type="button" class="time-btn time-shortcut" data-action="toMidday" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Common.Midday'}}">
-          <i class="fas fa-cloud-sun"></i>
-        </button>
-        {{#if customJumps.dec2}}
-          <button type="button" class="time-btn custom-jump" data-action="customDec2" data-tooltip
-            aria-label="{{customJumps.dec2}}">
-            {{customJumps.dec2}}
-          </button>
-        {{/if}}
-        {{#if customJumps.dec1}}
-          <button type="button" class="time-btn custom-jump" data-action="customDec1" data-tooltip
-            aria-label="{{customJumps.dec1}}">
-            {{customJumps.dec1}}
-          </button>
-        {{/if}}
-        <button type="button" class="time-btn" data-action="reverse" data-tooltip
-          aria-label="{{localize 'CALENDARIA.HUD.Reverse'}}">
-          <i class="fas fa-backward"></i>
-        </button>
-        <select class="increment-select" data-action="increment">
-          {{#each increments}}
-            <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-          {{/each}}
-        </select>
-        <button type="button" class="time-btn" data-action="forward" data-tooltip
-          aria-label="{{localize 'CALENDARIA.HUD.Forward'}}">
-          <i class="fas fa-forward"></i>
-        </button>
-        {{#if customJumps.inc1}}
-          <button type="button" class="time-btn custom-jump" data-action="customInc1" data-tooltip
-            aria-label="+{{customJumps.inc1}}">
-            +{{customJumps.inc1}}
-          </button>
-        {{/if}}
-        {{#if customJumps.inc2}}
-          <button type="button" class="time-btn custom-jump" data-action="customInc2" data-tooltip
-            aria-label="+{{customJumps.inc2}}">
-            +{{customJumps.inc2}}
-          </button>
-        {{/if}}
-        <button type="button" class="time-btn time-shortcut" data-action="toSunset" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Common.Sunset'}}">
-          <i class="fas fa-cloud-moon"></i>
-        </button>
-        <button type="button" class="time-btn time-shortcut" data-action="toMidnight" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Common.Midnight'}}">
-          <i class="fas fa-moon"></i>
-        </button>
-      </div>
+  {{#if showTime}}
+    <div class="minical-time-display" {{#if canChangeDateTime}}data-action="toggle" {{/if}}>
+      <span class="time-value">{{{currentTime}}}</span>
+      <span class="date-value hidden">{{currentDate}}</span>
+      {{#if canChangeDateTime}}
+        <div class="time-toggle {{#if running}}active{{/if}}{{#if clockLocked}} clock-locked{{/if}}" data-tooltip
+          aria-label="{{#if clockDisabled}}{{localize 'CALENDARIA.TimeClock.Disabled'}}{{else if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
+          <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
+        </div>
+      {{/if}
     </div>
+    {{#if canChangeDateTime}}
+      <div class="minical-time-controls{{#if controlsVisible}} visible{{/if}}">
+        <div class="controls-group">s
+          <button type="button" class="time-btn time-shortcut" data-action="toSunrise" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Sunrise'}}">
+            <i class="fas fa-sun"></i>
+          </button>
+          <button type="button" class="time-btn time-shortcut" data-action="toMidday" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Midday'}}">
+            <i class="fas fa-cloud-sun"></i>
+          </button>
+          {{#if customJumps.dec2}}
+            <button type="button" class="time-btn custom-jump" data-action="customDec2" data-tooltip
+              aria-label="{{customJumps.dec2}}">
+              {{customJumps.dec2}}
+            </button>
+          {{/if}}
+          {{#if customJumps.dec1}}
+            <button type="button" class="time-btn custom-jump" data-action="customDec1" data-tooltip
+              aria-label="{{customJumps.dec1}}">
+              {{customJumps.dec1}}
+            </button>
+          {{/if}}
+          <button type="button" class="time-btn" data-action="reverse" data-tooltip
+            aria-label="{{localize 'CALENDARIA.HUD.Reverse'}}">
+            <i class="fas fa-backward"></i>
+          </button>
+          <select class="increment-select" data-action="increment">
+            {{#each increments}}
+              <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          <button type="button" class="time-btn" data-action="forward" data-tooltip
+            aria-label="{{localize 'CALENDARIA.HUD.Forward'}}">
+            <i class="fas fa-forward"></i>
+          </button>
+          {{#if customJumps.inc1}}
+            <button type="button" class="time-btn custom-jump" data-action="customInc1" data-tooltip
+              aria-label="+{{customJumps.inc1}}">
+              +{{customJumps.inc1}}
+            </button>
+          {{/if}}
+          {{#if customJumps.inc2}}
+            <button type="button" class="time-btn custom-jump" data-action="customInc2" data-tooltip
+              aria-label="+{{customJumps.inc2}}">
+              +{{customJumps.inc2}}
+            </button>
+          {{/if}}
+          <button type="button" class="time-btn time-shortcut" data-action="toSunset" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Sunset'}}">
+            <i class="fas fa-cloud-moon"></i>
+          </button>
+          <button type="button" class="time-btn time-shortcut" data-action="toMidnight" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Common.Midnight'}}">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
+  {{/if}}
   {{/if}}
 </div>

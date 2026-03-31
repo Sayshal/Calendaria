@@ -153,6 +153,14 @@
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.BlockVisibility"}}</p>
 
     <div class="form-group">
+      <label for="miniCalShowTime">{{localize "CALENDARIA.Settings.MiniCalShowTime.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="miniCalShowTime" name="miniCalShowTime" {{#if miniCalShowTime}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.MiniCalShowTime.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="miniCalShowWeather">{{localize "CALENDARIA.Common.ShowWeather"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="miniCalShowWeather" name="miniCalShowWeather"

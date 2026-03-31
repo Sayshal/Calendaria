@@ -82,9 +82,15 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     const calendar = game.time?.calendar;
     const isMonthless = calendar?.isMonthless ?? false;
+    const stickyIncrement = (game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {}).increment;
+    const appSettings = TimeClock.getAppSettings('time-keeper');
+    if (stickyIncrement && stickyIncrement !== appSettings.incrementKey) {
+      TimeClock.setAppIncrement('time-keeper', stickyIncrement);
+      TimeClock.setIncrement(stickyIncrement);
+    }
     context.increments = Object.entries(getTimeIncrements())
       .filter(([key]) => !isMonthless || key !== 'month')
-      .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeClock.incrementKey }));
+      .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === appSettings.incrementKey }));
     context.running = TimeClock.running;
     context.clockDisabled = TimeClock.disabled;
     context.clockLocked = TimeClock.locked || TimeClock.disabled;
@@ -117,7 +123,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#enableDragging();
     const incrementSelect = this.element.querySelector('[data-action="increment"]');
     incrementSelect?.addEventListener('change', (e) => {
+      TimeClock.setAppIncrement('time-keeper', e.target.value);
       TimeClock.setIncrement(e.target.value);
+      game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: this.#stickyPosition, increment: e.target.value });
       this.render();
     });
     if (incrementSelect && canChangeDateTime()) {
@@ -126,12 +134,16 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
         (event) => {
           event.preventDefault();
           const incrementKeys = Object.keys(getTimeIncrements());
-          const currentIndex = incrementKeys.indexOf(TimeClock.incrementKey);
+          const currentKey = TimeClock.getAppSettings('time-keeper').incrementKey || 'minute';
+          const currentIndex = incrementKeys.indexOf(currentKey);
           if (currentIndex === -1) return;
           const direction = event.deltaY < 0 ? -1 : 1;
           const newIndex = Math.max(0, Math.min(incrementKeys.length - 1, currentIndex + direction));
           if (newIndex === currentIndex) return;
-          TimeClock.setIncrement(incrementKeys[newIndex]);
+          const newKey = incrementKeys[newIndex];
+          TimeClock.setAppIncrement('time-keeper', newKey);
+          TimeClock.setIncrement(newKey);
+          game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: this.#stickyPosition, increment: newKey });
           this.render();
         },
         { passive: false }
