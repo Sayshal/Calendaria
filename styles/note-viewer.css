@@ -54,6 +54,7 @@
         border: 0.0625rem solid var(--calendaria-border);
         border-radius: 0.25rem;
         background: var(--calendaria-bg);
+        overflow: hidden;
 
         .search-icon {
           color: var(--calendaria-text-dim);
@@ -76,6 +77,7 @@
 
         .search-clear {
           display: flex;
+          flex-shrink: 0;
           justify-content: center;
           align-items: center;
           width: 1.25rem;
@@ -220,18 +222,18 @@
       grid-area: results;
       position: relative;
       overflow-y: auto;
+      scrollbar-gutter: stable;
 
       .create-note-fab {
         display: flex;
         z-index: 1;
-        position: sticky;
+        position: absolute;
         bottom: 0.75rem;
+        right: 0.75rem;
         justify-content: center;
         align-items: center;
-        float: right;
         width: 2.25rem;
         height: 2.25rem;
-        margin-right: 0.75rem;
         padding: 0;
         border: none;
         border-radius: 50%;

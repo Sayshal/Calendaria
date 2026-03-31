@@ -107,6 +107,7 @@
       grid-template-rows: 1fr auto;
       display: grid;
       height: 100%;
+      max-width: 100%;
       padding: 0;
       overflow: hidden;
     }
@@ -182,12 +183,20 @@
       }
     }
 
+    nav.sheet-tabs {
+      grid-column: 1;
+      grid-row: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
     section.tab {
       grid-column: 2;
       grid-row: 1;
       display: none;
       padding: 1rem;
       overflow-y: auto;
+      min-width: 0;
 
       &.active {
         gap: 1rem;

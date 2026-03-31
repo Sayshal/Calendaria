@@ -72,7 +72,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       title: 'CALENDARIA.SettingsPanel.Title',
       controls: [{ action: 'toggleNavCollapse', icon: 'fa-solid fa-bars', label: 'CALENDARIA.SettingsPanel.NavCollapse.Tooltip' }]
     },
-    position: { width: 900, height: 835 },
+    position: { width: 900, height: 860 },
     form: { handler: SettingsPanel.#onSubmit, submitOnChange: true, closeOnSubmit: false },
     actions: {
       openCalendarEditor: SettingsPanel.#onOpenCalendarEditor,
