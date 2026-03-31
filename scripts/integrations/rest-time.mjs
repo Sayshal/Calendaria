@@ -20,32 +20,32 @@ let pf2eRestTimer = null;
 
 /**
  * Handle pre-rest hook to enable time advancement.
- * @param {object} _actor - The actor taking the rest
+ * @param {object} actor - The actor taking the rest
  * @param {object} config - Rest configuration
  * @returns {void}
  */
-export function onPreRest(_actor, config) {
+export function onPreRest(actor, config) {
   if (TimeClock.locked) {
     log(2, 'Rest time advancement blocked (clock locked)');
     return;
   }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
-  if (advanceTime) {
-    config.advanceTime = true;
-    log(3, `Rest time advancement enabled for ${config.type} rest`);
-  }
+  if (!advanceTime) return;
+  if (config.advanceTime === false && actor?.type !== 'group') return;
+  config.advanceTime = true;
+  log(3, `Rest time advancement enabled for ${config.type} rest`);
 }
 
 /**
  * Handle long rest after dialog completes.
- * @param {object} _actor - The actor taking the rest
+ * @param {object} actor - The actor taking the rest
  * @param {object} config - Rest configuration (with user's dialog choices)
  * @returns {void}
  */
-export function onLongRest(_actor, config) {
+export function onLongRest(actor, config) {
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (!advanceTime) return;
-  if (config.advanceTime === false) return;
+  if (config.advanceTime === false && actor?.type !== 'group') return;
   const restVariant = game.settings.get('dnd5e', 'restVariant');
   const isLongRest = config.type === 'long' || config.longRest === true;
   const isGritty = restVariant === 'gritty';

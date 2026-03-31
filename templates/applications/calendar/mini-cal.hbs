@@ -217,11 +217,11 @@
           aria-label="{{#if clockDisabled}}{{localize 'CALENDARIA.TimeClock.Disabled'}}{{else if clockLocked}}{{localize 'CALENDARIA.TimeClock.Locked'}}{{else if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
           <i class="fas {{#if clockLocked}}fa-lock{{else}}{{#if running}}fa-pause{{else}}fa-play{{/if}}{{/if}}"></i>
         </div>
-      {{/if}
+      {{/if}}
     </div>
     {{#if canChangeDateTime}}
       <div class="minical-time-controls{{#if controlsVisible}} visible{{/if}}">
-        <div class="controls-group">s
+        <div class="controls-group">
           <button type="button" class="time-btn time-shortcut" data-action="toSunrise" data-tooltip
             aria-label="{{localize 'CALENDARIA.Common.Sunrise'}}">
             <i class="fas fa-sun"></i>
