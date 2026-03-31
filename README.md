@@ -82,7 +82,7 @@ Forgotten Realms, Greyhawk, Eberron, Exandria, Golarion, Warhammer, Starfinder, 
 
 15 theme presets, custom color editor, and a searchable settings panel. Export your setup to share between worlds.
 
-![Theme Comparison](.github/assets/theme-comparison.png)
+<img src=".github/assets/theme-comparison.png" alt="Theme Comparison" width="750">
 
 ---
 
