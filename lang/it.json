@@ -1649,8 +1649,6 @@
   "CALENDARIA.ThemeEditor.Component.DomeHud": "Cupola HUD",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Tema esportato con successo.",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Clicca per aprire il selettore colore",
-  "CALENDARIA.ThemeEditor.Header.Location": "Posizione",
-  "CALENDARIA.ThemeEditor.Header.LocationHint": "Quale componente dell'interfaccia utente usa questo colore (Comune = tutti i componenti)",
   "CALENDARIA.ThemeEditor.Header.ResetDisabledTitle": "Il colore non è personalizzato",
   "CALENDARIA.ThemeEditor.Header.ResetHint": "Ripristina al valore predefinito",
   "CALENDARIA.ThemeEditor.Header.Usage": "Utilizzo",
