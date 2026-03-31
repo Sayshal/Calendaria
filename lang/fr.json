@@ -1575,8 +1575,6 @@
   "CALENDARIA.ThemeEditor.Component.DomeHud": "Dôme HUD",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Thème exporté",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Ouvrir sélecteur",
-  "CALENDARIA.ThemeEditor.Header.Location": "Lieu",
-  "CALENDARIA.ThemeEditor.Header.LocationHint": "Composant utilisant cette couleur",
   "CALENDARIA.ThemeEditor.Header.ResetDisabledTitle": "Non personnalisé",
   "CALENDARIA.ThemeEditor.Header.ResetHint": "Valeur par défaut",
   "CALENDARIA.ThemeEditor.Header.Usage": "Usage",
