@@ -1810,8 +1810,6 @@
   "CALENDARIA.ThemeEditor.Component.DomeHud": "Купол HUD",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Тема успешно экспортирована.",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Нажмите, чтобы открыть палитру цветов",
-  "CALENDARIA.ThemeEditor.Header.Location": "Расположение",
-  "CALENDARIA.ThemeEditor.Header.LocationHint": "Какие компоненты интерфейса используют этот цвет (Общие = все компоненты)",
   "CALENDARIA.ThemeEditor.Header.ResetDisabledTitle": "Цвет не настроен",
   "CALENDARIA.ThemeEditor.Header.ResetHint": "Сброшено до стандартных значений",
   "CALENDARIA.ThemeEditor.Header.Usage": "Использование",

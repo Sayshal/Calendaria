@@ -1649,8 +1649,6 @@
   "CALENDARIA.ThemeEditor.Component.DomeHud": "HUD Kopułowy",
   "CALENDARIA.ThemeEditor.ExportSuccess": "Motyw wyeksportowano pomyślnie.",
   "CALENDARIA.ThemeEditor.Header.ColorHint": "Kliknij, aby otworzyć wybieracz koloru",
-  "CALENDARIA.ThemeEditor.Header.Location": "Lokalizacja",
-  "CALENDARIA.ThemeEditor.Header.LocationHint": "Który komponent UI używa tego koloru (Wspólne = wszystkie komponenty)",
   "CALENDARIA.ThemeEditor.Header.ResetDisabledTitle": "Kolor nie jest dostosowany",
   "CALENDARIA.ThemeEditor.Header.ResetHint": "Resetuj do wartości domyślnej",
   "CALENDARIA.ThemeEditor.Header.Usage": "Użycie",
