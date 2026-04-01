@@ -26,7 +26,12 @@ function resolveArray(calendar, getter, path) {
  * @returns {string} - Number with ordinal suffix (1st, 2nd, 3rd, etc.)
  */
 export function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd'];
+  const s = [
+    game.i18n.localize('CALENDARIA.Format.Ordinal.th'),
+    game.i18n.localize('CALENDARIA.Format.Ordinal.st'),
+    game.i18n.localize('CALENDARIA.Format.Ordinal.nd'),
+    game.i18n.localize('CALENDARIA.Format.Ordinal.rd')
+  ];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
@@ -248,7 +253,7 @@ export function formatFull(calendar, components) {
  */
 export function formatOrdinal(calendar, components) {
   const parts = dateFormattingParts(calendar, components);
-  let result = `${parts.Do} of ${parts.MMMM}`;
+  let result = game.i18n.format('CALENDARIA.Format.OrdinalDate', { day: parts.Do, month: parts.MMMM });
   if (parts.era) result += `, ${parts.era}`;
   return result;
 }
