@@ -1293,8 +1293,8 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false })
       },
       [SETTINGS.FXMASTER_SOUND_FX]: {
-        name: 'CALENDARIA.Settings.Weather.fxmasterSoundFx.Name',
-        hint: 'CALENDARIA.Settings.Weather.fxmasterSoundFx.Hint',
+        name: 'CALENDARIA.Settings.FXMaster.soundFX.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.soundFX.Hint',
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: false })
