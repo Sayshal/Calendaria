@@ -6,7 +6,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: vi.fn((key) => key),
   format: vi.fn((key, _data) => key)
 }));
-vi.mock('../../scripts/constants.mjs', () => ({
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: { CUSTOM_PRESETS: 'customPresets' },
   NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' },

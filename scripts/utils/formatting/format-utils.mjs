@@ -1017,17 +1017,18 @@ export function getDisplayLocationDefinitions() {
  * Get relative time description between two dates.
  * @param {object} targetDate - Target date { year, month, dayOfMonth }
  * @param {object} currentDate - Current date { year, month, dayOfMonth }
+ * @param simple
  * @returns {string} Relative time string (e.g., "3 days ago", "in 2 weeks")
  */
-export function timeSince(targetDate, currentDate) {
+export function timeSince(targetDate, currentDate, simple = false) {
   const daysPerMonth = 30;
   const daysPerYear = 365;
   const targetDays = targetDate.year * daysPerYear + targetDate.month * daysPerMonth + targetDate.dayOfMonth;
   const currentDays = currentDate.year * daysPerYear + currentDate.month * daysPerMonth + currentDate.dayOfMonth;
   const diff = targetDays - currentDays;
-  if (diff === 0) return localize('CALENDARIA.Format.Today');
-  if (diff === 1) return localize('CALENDARIA.Format.Tomorrow');
-  if (diff === -1) return localize('CALENDARIA.Format.Yesterday');
+  if (diff === 0) return simple ? '0' : localize('CALENDARIA.Format.Today');
+  if (diff === 1) return simple ? '1' : localize('CALENDARIA.Format.Tomorrow');
+  if (diff === -1) return simple ? '1' : localize('CALENDARIA.Format.Yesterday');
   const absDiff = Math.abs(diff);
   const isFuture = diff > 0;
   const years = Math.floor(absDiff / daysPerYear);
@@ -1048,6 +1049,7 @@ export function timeSince(targetDate, currentDate) {
     unit = days === 1 ? localize('CALENDARIA.Common.UnitDay') : localize('CALENDARIA.Common.UnitDays');
     count = days;
   }
+  if (simple) return String(count);
   if (isFuture) return format('CALENDARIA.Format.InFuture', { count, unit });
   else return format('CALENDARIA.Format.InPast', { count, unit });
 }

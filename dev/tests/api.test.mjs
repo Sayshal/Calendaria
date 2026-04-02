@@ -77,7 +77,7 @@ vi.mock('../../scripts/utils/permissions.mjs', () => ({ canAddNotes: vi.fn(() =>
 vi.mock('../../scripts/time/time-clock.mjs', () => ({ default: { running: false, realTimeSpeed: 1, start: vi.fn(), stop: vi.fn(), toggle: vi.fn(), gatedAdvance: vi.fn(async () => true) } }));
 vi.mock('../../scripts/time/time-tracker.mjs', () => ({ default: {} }));
 vi.mock('../../scripts/utils/search-manager.mjs', () => ({ default: { search: vi.fn(() => []) } }));
-vi.mock('../../scripts/constants.mjs', () => ({
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   HOOKS: { DATE_TIME_CHANGE: 'calendaria.dateTimeChange', DAY_CHANGE: 'calendaria.dayChange', CONDITION_EVALUATED: 'calendaria.conditionEvaluated' },
   CONDITION_FIELDS: { YEAR: 'year', MONTH: 'month', DAY: 'day', WEEKDAY: 'weekday' },
@@ -87,7 +87,6 @@ vi.mock('../../scripts/constants.mjs', () => ({
   NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' },
   SOCKET_TYPES: { TIME_REQUEST: 'timeRequest', CALENDAR_REQUEST: 'calendarRequest', REMINDER_NOTIFY: 'reminderNotify' },
   REPLACEABLE_ELEMENTS: { CLOCK: 'clock' },
-  TEMPLATES: { PARTIALS: { DATE_PICKER: 'modules/calendaria/templates/partials/dialog-date-picker.hbs' } },
   WIDGET_POINTS: { HUD_TOP: 'hud-top' }
 }));
 vi.mock('../../scripts/festivals/festival-manager.mjs', () => ({ default: { getFestivalNotes: vi.fn(() => []) } }));
@@ -351,40 +350,34 @@ describe('moon phases', () => {
     const moon = { cycleLength: 28 };
     CalendariaAPI.getMoonPhasePosition(moon);
     expect(getMoonPhasePosition).toHaveBeenCalledWith(moon, game.time.components);
-    const customDate = { year: 5, month: 2, day: 10 };
-    CalendariaAPI.getMoonPhasePosition(moon, customDate);
-    expect(getMoonPhasePosition).toHaveBeenCalledWith(moon, customDate);
+    CalendariaAPI.getMoonPhasePosition(moon, { year: 5, month: 2, day: 10 });
+    expect(getMoonPhasePosition).toHaveBeenCalledWith(moon, { year: 5, month: 1, dayOfMonth: 9 });
   });
   it('isMoonFull passes date or defaults to components', () => {
     const moon = { cycleLength: 28 };
     CalendariaAPI.isMoonFull(moon);
     expect(isMoonFull).toHaveBeenCalledWith(moon, game.time.components);
-    const customDate = { year: 5, month: 2, day: 10 };
-    CalendariaAPI.isMoonFull(moon, customDate);
-    expect(isMoonFull).toHaveBeenCalledWith(moon, customDate);
+    CalendariaAPI.isMoonFull(moon, { year: 5, month: 2, day: 10 });
+    expect(isMoonFull).toHaveBeenCalledWith(moon, { year: 5, month: 1, dayOfMonth: 9 });
   });
   it('getNextConvergence passes startDate or defaults to components', () => {
     const moons = [{ cycleLength: 28 }];
     CalendariaAPI.getNextConvergence(moons);
     expect(getNextConvergence).toHaveBeenCalledWith(moons, game.time.components, {});
-    const date = { year: 5, month: 0, day: 1 };
-    CalendariaAPI.getNextConvergence(moons, date, { maxDays: 500 });
-    expect(getNextConvergence).toHaveBeenCalledWith(moons, date, { maxDays: 500 });
+    CalendariaAPI.getNextConvergence(moons, { year: 5, month: 0, day: 1 }, { maxDays: 500 });
+    expect(getNextConvergence).toHaveBeenCalledWith(moons, { year: 5, month: -1, dayOfMonth: 0 }, { maxDays: 500 });
   });
   it('getNextFullMoon passes startDate or defaults to components', () => {
     const moon = { cycleLength: 28 };
     CalendariaAPI.getNextFullMoon(moon);
     expect(getNextFullMoon).toHaveBeenCalledWith(moon, game.time.components, {});
-    const date = { year: 5, month: 0, day: 1 };
-    CalendariaAPI.getNextFullMoon(moon, date);
-    expect(getNextFullMoon).toHaveBeenCalledWith(moon, date, {});
+    CalendariaAPI.getNextFullMoon(moon, { year: 5, month: 0, day: 1 });
+    expect(getNextFullMoon).toHaveBeenCalledWith(moon, { year: 5, month: -1, dayOfMonth: 0 }, {});
   });
   it('getConvergencesInRange delegates to moon-utils', () => {
     const moons = [{ cycleLength: 28 }];
-    const start = { year: 1, month: 0, day: 1 };
-    const end = { year: 1, month: 11, day: 30 };
-    CalendariaAPI.getConvergencesInRange(moons, start, end, { maxDays: 100 });
-    expect(getConvergencesInRange).toHaveBeenCalledWith(moons, start, end, { maxDays: 100 });
+    CalendariaAPI.getConvergencesInRange(moons, { year: 1, month: 0, day: 1 }, { year: 1, month: 11, day: 30 }, { maxDays: 100 });
+    expect(getConvergencesInRange).toHaveBeenCalledWith(moons, { year: 1, month: -1, dayOfMonth: 0 }, { year: 1, month: 10, dayOfMonth: 29 }, { maxDays: 100 });
   });
 });
 
@@ -618,13 +611,13 @@ describe('formatting helpers', () => {
   it('timeSince defaults currentDate to game.time.components', () => {
     const target = { year: 0, month: 0, dayOfMonth: 0 };
     CalendariaAPI.timeSince(target);
-    expect(timeSince).toHaveBeenCalledWith(target, game.time.components);
+    expect(timeSince).toHaveBeenCalledWith({ year: 0, month: -1, dayOfMonth: 0 }, game.time.components);
   });
   it('timeSince uses provided currentDate', () => {
     const target = { year: 0, month: 0, dayOfMonth: 0 };
     const current = { year: 1, month: 0, dayOfMonth: 0 };
     CalendariaAPI.timeSince(target, current);
-    expect(timeSince).toHaveBeenCalledWith(target, current);
+    expect(timeSince).toHaveBeenCalledWith({ year: 0, month: -1, dayOfMonth: 0 }, current);
   });
   it('getFormatTokens delegates to getAvailableTokens', () => {
     const result = CalendariaAPI.getFormatTokens();

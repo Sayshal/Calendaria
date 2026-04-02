@@ -450,7 +450,7 @@ describe('dateFormattingParts()', () => {
     it('handles null calendar gracefully', () => {
       const parts = dateFormattingParts(null, components);
       expect(parts.y).toBe(2024);
-      expect(parts.MMMM).toBe('CALENDARIA.Calendar.MonthFallback');
+      expect(parts.MMMM).toBe('CALENDARIA.Common.MonthFallback');
     });
   });
 });
@@ -552,7 +552,7 @@ describe('formatApproximateTime()', () => {
   it('returns Morning for early day hours', () => { expect(formatApproximateTime(mockCalendar, { hour: 8 })).toBe('CALENDARIA.Format.ApproxTime.Morning'); });
   it('returns Noon for midday', () => { expect(formatApproximateTime(mockCalendar, { hour: 12 })).toBe('CALENDARIA.Format.ApproxTime.Noon'); });
   it('returns Afternoon for post-noon hours', () => { expect(formatApproximateTime(mockCalendar, { hour: 14 })).toBe('CALENDARIA.Format.ApproxTime.Afternoon'); });
-  it('returns Night for late night hours', () => { expect(formatApproximateTime(mockCalendar, { hour: 2 })).toBe('CALENDARIA.Format.ApproxTime.Night'); });
+  it('returns Night for late night hours', () => { expect(formatApproximateTime(mockCalendar, { hour: 2 })).toBe('CALENDARIA.Common.Night'); });
   it('returns Midnight for middle of the night', () => { expect(formatApproximateTime(mockCalendar, { hour: 0 })).toBe('CALENDARIA.Common.Midnight'); });
   it('defaults hour to 0 when missing', () => { expect(formatApproximateTime(mockCalendar, {})).toBe('CALENDARIA.Common.Midnight'); });
   it('uses custom sunrise/sunset from calendar', () => {

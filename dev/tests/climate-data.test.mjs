@@ -16,7 +16,7 @@ import {
 import { ALL_PRESETS } from '../../scripts/weather/data/weather-presets.mjs';
 
 vi.mock('../../scripts/utils/localization.mjs', () => ({ localize: vi.fn((key) => key), format: vi.fn((key) => key) }));
-vi.mock('../../scripts/constants.mjs', () => ({ MODULE: { ID: 'calendaria' }, SETTINGS: { TEMPERATURE_UNIT: 'temperatureUnit' } }));
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()), MODULE: { ID: 'calendaria' }, SETTINGS: { TEMPERATURE_UNIT: 'temperatureUnit' } }));
 
 describe('celsiusToFahrenheit()', () => {
   it('converts 0°C to 32°F', () => expect(celsiusToFahrenheit(0)).toBe(32));

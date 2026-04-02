@@ -7,7 +7,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: vi.fn((key) => key),
   format: vi.fn((key, _data) => key)
 }));
-vi.mock('../../scripts/constants.mjs', () => ({
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: { CUSTOM_PRESETS: 'customPresets' },
   NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' },
@@ -109,10 +109,13 @@ describe('getEffectiveDuration()', () => {
 });
 
 describe('isRecurringMatch with hasDuration', () => {
-  it('matches within duration span of a yearly event', () => {
+  it('matches within duration span of a yearly event', async () => {
+    const { evaluateEntry } = await import('../../scripts/notes/condition-engine.mjs');
+    evaluateEntry.mockImplementation((_tree, date) => date.dayOfMonth === 0);
     const noteData = {
       startDate: { year: 1, month: 0, dayOfMonth: 0 }, endDate: null, repeat: 'yearly', repeatInterval: 1, hasDuration: true, duration: 3,
-      repeatEndDate: null, maxOccurrences: 0, moonConditions: [], randomConfig: null, linkedEvent: null, weekday: null, weekNumber: null, seasonalConfig: null, conditions: []
+      repeatEndDate: null, maxOccurrences: 0, moonConditions: [], randomConfig: null, linkedEvent: null, weekday: null, weekNumber: null, seasonalConfig: null, conditions: [],
+      conditionTree: { type: 'entry', field: 'day', op: '==', value: 1 }
     };
     // duration: 3 = 3 total days (start + 2 more)
     expect(isRecurringMatch(noteData, { year: 1, month: 0, dayOfMonth: 0 })).toBe(true);

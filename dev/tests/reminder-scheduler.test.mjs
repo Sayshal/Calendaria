@@ -15,7 +15,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   })
 }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() }}));
-vi.mock('../../scripts/constants.mjs', () => ({MODULE: { ID: 'calendaria' },HOOKS: {EVENT_TRIGGERED: 'calendaria.eventTriggered',REMINDER_RECEIVED: 'calendaria.reminderReceived'},SOCKET_TYPES: { REMINDER_NOTIFY: 'reminderNotify' }}));
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),MODULE: { ID: 'calendaria' },HOOKS: {EVENT_TRIGGERED: 'calendaria.eventTriggered',REMINDER_RECEIVED: 'calendaria.reminderReceived'},SOCKET_TYPES: { REMINDER_NOTIFY: 'reminderNotify' }}));
 vi.mock('../../scripts/notes/date-utils.mjs', () => {
   let currentDate = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 };
   return {

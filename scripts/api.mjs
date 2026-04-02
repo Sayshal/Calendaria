@@ -88,6 +88,7 @@ import {
   timeSince
 } from './utils/_module.mjs';
 import { clearRanges as fogClearRanges, getRevealedRanges as fogGetRevealedRanges, isRevealed as fogIsRevealed, revealRange as fogRevealRange, isFogEnabled } from './utils/fog-of-war.mjs';
+import * as Permissions from './utils/permissions.mjs';
 import { WeatherManager, playStandaloneSound, stopStandaloneSound } from './weather/_module.mjs';
 
 /**

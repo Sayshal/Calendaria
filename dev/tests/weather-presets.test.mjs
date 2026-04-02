@@ -98,7 +98,7 @@ describe('getPreset()', () => {
   it('prefers built-in over custom with same ID', () => {
     const custom = [{ id: 'clear', label: 'Custom Clear' }];
     const result = getPreset('clear', custom);
-    expect(result.label).toBe('CALENDARIA.Weather.Clear');
+    expect(result.label).toBe('CALENDARIA.Common.Clear');
   });
 });
 

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 import { ECLIPSE_TYPES, getEclipseAtDate, getEclipseOnDate, getEclipsesInRange, getNextEclipse, isEclipseOnDate, isLunarEclipse, isSolarEclipse } from '../../scripts/utils/eclipse-calculator.mjs';
 
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()) }));
+vi.mock('../../scripts/utils/enrichers.mjs', () => ({ handlers: {}, registerEnrichers: vi.fn() }));
 vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
   const { default: CalendarManager } = await import('../__mocks__/calendar-manager.mjs');
   return { default: CalendarManager };

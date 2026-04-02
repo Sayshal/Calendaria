@@ -27,7 +27,7 @@ vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { executeAs
 vi.mock('../../scripts/applications/_module.mjs', () => ({ BigCal: { show: vi.fn(), hide: vi.fn(), toggle: vi.fn() }, HUD: { show: vi.fn(), hide: vi.fn() }, MiniCal: { show: vi.fn(), hide: vi.fn() }, Stopwatch: { show: vi.fn() }, SunDial: { show: vi.fn() }, TimeKeeper: { show: vi.fn() } }));
 vi.mock('../../scripts/applications/calendar/note-viewer.mjs', () => ({ NoteViewer: class {} }));
 vi.mock('../../scripts/utils/fog-of-war.mjs', () => ({ isFogEnabled: vi.fn(() => false), isRevealed: vi.fn(() => true), revealRange: vi.fn() }));
-vi.mock('../../scripts/constants.mjs', () => ({ MODULE: { ID: 'calendaria' }, NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' }, SETTINGS: {}, SOCKET_TYPES: {}, TEMPLATES: {} }));
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()), MODULE: { ID: 'calendaria' }, NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' }, SETTINGS: {}, SOCKET_TYPES: {}, TEMPLATES: {} }));
 vi.mock('../../scripts/notes/date-utils.mjs', () => ({ addDays: vi.fn((date, n) => ({ ...date, dayOfMonth: date.dayOfMonth + n })), compareDays: vi.fn(() => 0) }));
 vi.mock('../../scripts/notes/recurrence.mjs', () => ({ isRecurringMatch: vi.fn(() => false), getEffectiveDuration: vi.fn(() => null) }));
 

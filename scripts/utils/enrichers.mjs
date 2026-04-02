@@ -637,21 +637,31 @@ function enrichCountup(config, label) {
   const { calendar, components } = resolveCalendar(config);
   const target = parseDateFromValues(config.values);
   if (!target) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
+  let endDate, endComponents;
+  const isStatic = config.to != null;
+  if (isStatic) {
+    const toValues = String(config.to).split(/\s+/);
+    endDate = parseDateFromValues(toValues);
+    if (!endDate) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
+    endComponents = toInternal(endDate);
+  } else {
+    endDate = getCurrentDateTime(calendar, components);
+    endComponents = components;
+  }
   if (config.relative) {
     const yearZero = calendar?.years?.yearZero ?? 0;
-    const text = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, components);
-    const sinceDays = Math.abs(daysBetween(toInternal(target), toInternal(getCurrentDateTime(calendar, components))));
+    const text = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, endComponents, !!config.simple);
+    const sinceDays = Math.abs(daysBetween(toInternal(target), toInternal(endDate)));
     const sinceUnit = sinceDays === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
     const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: formatDate(target, 'dateLong', calendar), value: `${sinceDays} ${sinceUnit}` });
-    return createContentLink('countup', label || text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
+    return createContentLink('countup', label || text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, isStatic ? null : config.raw);
   }
-  const current = getCurrentDateTime(calendar, components);
-  const days = daysBetween(toInternal(target), toInternal(current));
+  const days = daysBetween(toInternal(target), toInternal(endDate));
   const abs = Math.abs(days);
   const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
-  const text = label || `${abs} ${unit}`;
+  const text = label || (config.simple ? String(abs) : `${abs} ${unit}`);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
-  return createContentLink('countup', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
+  return createContentLink('countup', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, isStatic ? null : config.raw);
 }
 
 /**

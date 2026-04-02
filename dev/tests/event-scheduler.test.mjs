@@ -16,10 +16,9 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
 vi.mock('../../scripts/utils/socket.mjs', () => ({
   CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() }
 }));
-vi.mock('../../scripts/constants.mjs', () => ({
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
-  HOOKS: { EVENT_TRIGGERED: 'calendaria.eventTriggered', EVENT_DAY_CHANGED: 'calendaria.eventDayChanged' },
-  TEMPLATES: { PARTIALS: { CHAT_ANNOUNCEMENT: 'chat-announcement.hbs' } }
+  HOOKS: { EVENT_TRIGGERED: 'calendaria.eventTriggered', EVENT_DAY_CHANGED: 'calendaria.eventDayChanged' }
 }));
 vi.mock('../../scripts/notes/date-utils.mjs', () => {
   let currentDate = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 };

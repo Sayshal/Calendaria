@@ -14,7 +14,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
 vi.mock('../../scripts/utils/macro-utils.mjs', () => ({
   executeMacroById: vi.fn()
 }));
-vi.mock('../../scripts/constants.mjs', () => ({
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: { MACRO_TRIGGERS: 'macroTriggers' },
   HOOKS: {

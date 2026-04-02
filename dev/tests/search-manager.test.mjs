@@ -11,7 +11,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
     return result;
   })
 }));
-vi.mock('../../scripts/constants.mjs', () => ({ MODULE: { ID: 'calendaria' }, SETTINGS: { CUSTOM_PRESETS: 'customPresets' }}));
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()), MODULE: { ID: 'calendaria' }, SETTINGS: { CUSTOM_PRESETS: 'customPresets' }}));
 vi.mock('../../scripts/utils/ui/calendar-view-utils.mjs', () => ({ stripSecrets: vi.fn((html) => html ?? '') }));
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   default: {

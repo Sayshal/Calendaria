@@ -123,14 +123,19 @@ Days until a target date. Clickable: navigates to target.
 Days since a target date. Clickable: navigates to target.
 
 ```text
-[[cal.countup 1 Mirtul 1490]]               → 730 days
-[[cal.countup 1 Mirtul 1490 relative=true]] → in 2 years
-[[cal.elapsed 1 Mirtul 1490]]               → 730 days
+[[cal.countup 1 Mirtul 1490]]                                               → 730 days
+[[cal.countup 1 Mirtul 1490 relative=true]]                                 → in 2 years
+[[cal.countup 1 Mirtul 1490 relative=true simple=true]]                     → 2
+[[cal.countup 1 Mirtul 1490 to="1 Mirtul 1492"]]                           → 730 days
+[[cal.countup 1 Mirtul 1490 to="1 Mirtul 1492" relative=true simple=true]]  → 2
+[[cal.elapsed 1 Mirtul 1490]]                                               → 730 days
 ```
 
-| Parameter  | Type      | Description                  |
-| ---------- | --------- | ---------------------------- |
-| `relative` | `boolean` | Human-readable relative text |
+| Parameter  | Type      | Description                                                    |
+| ---------- | --------- | -------------------------------------------------------------- |
+| `relative` | `boolean` | Human-readable relative text (years/months/weeks)              |
+| `simple`   | `boolean` | Return only the numeric count (e.g. `42` not `42 years ago`)  |
+| `to`       | `string`  | End date to count to instead of today (e.g. `to="1 Mirtul 1492"`) |
 
 ---
 

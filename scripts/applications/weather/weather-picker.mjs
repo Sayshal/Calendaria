@@ -149,7 +149,15 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       context.selectedPeriod = selected;
     }
     const enabledPresetIds = new Set();
-    if (sceneZone?.presets) for (const p of Object.values(sceneZone.presets)) if (p.enabled !== false) enabledPresetIds.add(p.id);
+    if (sceneZone?.presets) {
+      const calendar = CalendarManager.getActiveCalendar();
+      const currentSeason = calendar?.getCurrentSeason?.(game.time.components);
+      const seasonPresets = currentSeason ? (sceneZone.seasonOverrides?.[currentSeason.name]?.presets ?? {}) : {};
+      for (const p of Object.values(sceneZone.presets)) {
+        const seasonP = seasonPresets[p.id];
+        if ((seasonP?.enabled ?? p.enabled) !== false) enabledPresetIds.add(p.id);
+      }
+    }
     const hasZoneFilter = sceneZone && enabledPresetIds.size > 0;
     context.categories = [];
     context.selectedPresetId = this.#selectedPresetId;
