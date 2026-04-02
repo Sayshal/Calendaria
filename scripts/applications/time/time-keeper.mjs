@@ -59,6 +59,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether position dragging is locked */
   #stickyPosition = false;
 
+  /** @type {Function|null} Debounced viewport resize handler */
+  #resizeHandler = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-timekeeper',
@@ -119,7 +122,11 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
     this.#stickyPosition = stickyStates.position ?? false;
-    if (options.isFirstRender) this.#restorePosition();
+    if (options.isFirstRender) {
+      this.#restorePosition();
+      this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
+      window.addEventListener('resize', this.#resizeHandler);
+    }
     this.#enableDragging();
     const incrementSelect = this.element.querySelector('[data-action="increment"]');
     incrementSelect?.addEventListener('change', (e) => {
@@ -165,7 +172,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Restore saved position from settings.
-   * @private
    */
   #restorePosition() {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION);
@@ -192,8 +198,26 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Handle viewport resize — restore from saved position then clamp.
+   */
+  #onViewportResize() {
+    if (!this.rendered || !this.element) return;
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) return;
+    if (this.#snappedZoneId) {
+      const rect = this.element.getBoundingClientRect();
+      const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+      if (zonePos) this.setPosition({ left: zonePos.left, top: zonePos.top });
+    } else {
+      const savedPos = game.settings.get(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION);
+      if (savedPos && Number.isFinite(savedPos.left) && Number.isFinite(savedPos.top)) {
+        this.setPosition({ left: savedPos.left, top: savedPos.top });
+      }
+    }
+    this.#clampToViewport();
+  }
+
+  /**
    * Clamp position to viewport bounds.
-   * @private
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
@@ -206,7 +230,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Enable dragging on the time display.
-   * @private
    */
   #enableDragging() {
     const dragHandle = this.element.querySelector('.time-display');
@@ -278,6 +301,10 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   _onClose(options) {
+    if (this.#resizeHandler) {
+      window.removeEventListener('resize', this.#resizeHandler);
+      this.#resizeHandler = null;
+    }
     const pos = this.position;
     if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { top: pos.top, left: pos.left, zoneId: this.#snappedZoneId });
     unregisterFromZoneUpdates(this);
@@ -305,7 +332,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get context menu items for the TimeKeeper.
    * @returns {object[]} Array of context menu item configs
-   * @private
    */
   #getContextMenuItems() {
     const items = [];
@@ -352,7 +378,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Save sticky states to settings.
    * @param {object} updates - The state updates to save
-   * @private
    */
   async #saveStickyStates(updates) {
     const current = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
@@ -429,7 +454,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle clock state changes.
-   * @private
    */
   #onClockStateChange() {
     this.render();
@@ -437,7 +461,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle visual tick - update clock display without full re-render.
-   * @private
    */
   #onVisualTick() {
     if (!this.rendered) return;
@@ -458,7 +481,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get time components, using predicted world time when clock is running.
    * @returns {object} Time components
-   * @private
    */
   #getComponents() {
     if (TimeClock.running) {
@@ -471,7 +493,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Format time using the timekeeperTime format location.
    * @returns {string} Formatted time
-   * @private
    */
   #formatTime() {
     const calendar = CalendarManager.getActiveCalendar();
@@ -484,7 +505,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Format date using the timekeeperDate format location.
    * @returns {string} Formatted date
-   * @private
    */
   #formatDate() {
     const calendar = CalendarManager.getActiveCalendar();
@@ -498,7 +518,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    * Format increment key for display.
    * @param {string} key - Increment key
    * @returns {string} Formatted label
-   * @private
    */
   #formatIncrementLabel(key) {
     const labels = {
@@ -518,7 +537,6 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get tooltip strings for time jump buttons based on current increment and jump settings.
    * @returns {{dec2Tooltip: string|null, dec1Tooltip: string|null, inc1Tooltip: string|null, inc2Tooltip: string|null, dec2: number|null, dec1: number|null, inc1: number|null, inc2: number|null}} Tooltip strings and values
-   * @private
    */
   #getJumpTooltips() {
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};

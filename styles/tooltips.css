@@ -6,25 +6,21 @@
     .date {
       margin-bottom: 0.125rem;
       font-size: 0.9rem;
-
-      strong {
-        color: var(--calendaria-text);
-      }
     }
 
     .festival {
-      color: var(--calendaria-primary, rgb(74 158 255));
+      color: rgb(74 158 255);
       font-size: 0.85rem;
     }
 
     .season {
-      color: var(--calendaria-text-secondary);
+      opacity: 0.7;
       font-size: 0.8rem;
     }
 
     .sun {
+      opacity: 0.7;
       margin-top: 0.25rem;
-      color: var(--calendaria-text-secondary);
       font-size: 0.8rem;
 
       i {
@@ -49,7 +45,7 @@
     }
 
     .equivalent-date {
-      color: var(--calendaria-text-secondary);
+      opacity: 0.7;
       font-size: 0.75rem;
       line-height: 1.5;
 
@@ -70,7 +66,7 @@
       gap: 0.25rem;
       display: flex;
       align-items: center;
-      color: var(--calendaria-text-secondary);
+      opacity: 0.7;
       font-size: 0.75rem;
       line-height: 1.5;
 
@@ -99,14 +95,10 @@
     .header {
       margin-bottom: 0.125rem;
       font-size: 0.9rem;
-
-      strong {
-        color: var(--calendaria-text);
-      }
     }
 
     .row {
-      color: var(--calendaria-text-secondary);
+      opacity: 0.7;
       font-size: 0.8rem;
 
       i {

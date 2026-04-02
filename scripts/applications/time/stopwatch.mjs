@@ -73,6 +73,9 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether position dragging is locked */
   #stickyPosition = false;
 
+  /** @type {Function|null} Debounced viewport resize handler */
+  #resizeHandler = null;
+
   /** @type {object|null} Notification settings */
   #notification = null;
 
@@ -141,6 +144,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.isFirstRender) {
       this.#restoreState();
       this.#restorePosition();
+      this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
+      window.addEventListener('resize', this.#resizeHandler);
     }
     this.#initPixi();
     this.#enableDragging();
@@ -163,6 +168,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#saveState();
     this.#destroyPixi();
     this.#unregisterTimeHook();
+    if (this.#resizeHandler) {
+      window.removeEventListener('resize', this.#resizeHandler);
+      this.#resizeHandler = null;
+    }
     unregisterFromZoneUpdates(this);
     unpinFromZone(this.element);
     cleanupSnapIndicator();
@@ -171,7 +180,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Initialize the PixiJS application and build the stopwatch face.
-   * @private
    */
   #initPixi() {
     const canvas = this.element.querySelector('.stopwatch-canvas');
@@ -187,7 +195,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Destroy the PixiJS application and clean up references.
-   * @private
    */
   #destroyPixi() {
     if (this.#pixiApp) {
@@ -202,7 +209,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Rebuild the dial after resize.
-   * @private
    */
   #rebuildDial() {
     if (!this.#pixiApp) return;
@@ -225,7 +231,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} prop - CSS variable name
    * @param {number} fallback - Fallback hex color
    * @returns {number} Hex color value
-   * @private
    */
   #cssColor(prop, fallback) {
     const raw = getComputedStyle(this.element).getPropertyValue(prop)?.trim();
@@ -249,7 +254,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Build all static and dynamic stopwatch face elements.
-   * @private
    */
   #buildStopwatchFace() {
     const app = this.#pixiApp;
@@ -288,7 +292,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} outerR - Radius
    * @param {number} size - Stopwatch diameter
    * @param {number} color - Fill/stroke color
-   * @private
    */
   #drawCrownRing(cx, cy, outerR, size, color) {
     const g = new PIXI.Graphics();
@@ -307,7 +310,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} outerR - Radius
    * @param {number} size - Stopwatch diameter
    * @param {number} color - Fill/stroke color
-   * @private
    */
   #drawCrownStem(cx, cy, outerR, size, color) {
     const g = new PIXI.Graphics();
@@ -331,7 +333,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} outerR - Radius
    * @param {number} bezelWidth - Bezel ring width
    * @param {number} color - Fill/stroke color
-   * @private
    */
   #drawBezel(cx, cy, outerR, bezelWidth, color) {
     const g = new PIXI.Graphics();
@@ -357,7 +358,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} cy - Center Y coordinate
    * @param {number} dialR - Radius
    * @param {number} bgColor - Fill color
-   * @private
    */
   #drawDialFace(cx, cy, dialR, bgColor) {
     const g = new PIXI.Graphics();
@@ -376,7 +376,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} cy - Center Y coordinate
    * @param {number} dialR - Radius
    * @param {number} color - Fill/stroke color
-   * @private
    */
   #drawMinuteTrack(cx, cy, dialR, color) {
     const g = new PIXI.Graphics();
@@ -400,7 +399,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} dialR - Radius
    * @param {number} color - Fill/stroke color
    * @param {number} size - Stopwatch diameter
-   * @private
    */
   #drawNumerals(cx, cy, dialR, color, size) {
     const numeralR = dialR * 0.7;
@@ -430,7 +428,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} color - Fill/stroke color
    * @param {number} bgColor - Fill color
    * @param {number} size - Stopwatch diameter
-   * @private
    */
   #drawSubDial(subCx, subCy, subR, color, bgColor, size) {
     const g = new PIXI.Graphics();
@@ -469,7 +466,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} dialR - Radius
    * @param {number} color - Fill/stroke color
    * @param {number} size - Stopwatch diameter
-   * @private
    */
   #drawBrandText(cx, cy, dialR, color, size) {
     const fontSize = Math.max(6, size * 0.045);
@@ -489,7 +485,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} color - Hand color
    * @param {number} size - Total size
    * @returns {PIXI.Graphics} The second hand graphic
-   * @private
    */
   #drawSecondHand(cx, cy, dialR, color, size) {
     const g = new PIXI.Graphics();
@@ -525,7 +520,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} color - Hand color
    * @param {number} size - Total size
    * @returns {PIXI.Graphics} The minute sub-hand graphic
-   * @private
    */
   #drawMinuteSubHand(subCx, subCy, subR, color, size) {
     const g = new PIXI.Graphics();
@@ -552,7 +546,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} cy - Center Y coordinate
    * @param {number} size - Stopwatch diameter
    * @param {number} color - Fill/stroke color
-   * @private
    */
   #drawCenterPivot(cx, cy, size, color) {
     const g = new PIXI.Graphics();
@@ -568,7 +561,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * PixiJS ticker callback — update hand rotations each frame.
-   * @private
    */
   #onPixiTick() {
     if (!this.#secondHand || !this.#minuteSubHand) return;
@@ -585,7 +577,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get total elapsed seconds for hand positioning.
    * @returns {number} Total seconds
-   * @private
    */
   #getTotalSeconds() {
     if (this.#mode === 'realtime') {
@@ -604,7 +595,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get the current format setting based on mode.
    * @returns {string} Format string
-   * @private
    */
   #getFormat() {
     const locationId = this.#mode === 'realtime' ? 'stopwatchRealtime' : 'stopwatchGametime';
@@ -616,7 +606,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get formatted display time based on current mode.
    * @returns {string} Formatted elapsed time
-   * @private
    */
   #getDisplayTime() {
     const format = this.#getFormat();
@@ -642,7 +631,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * Format lap time based on current mode.
    * @param {number} elapsed - Elapsed time
    * @returns {string} Formatted lap time
-   * @private
    */
   #formatLapTime(elapsed) {
     const format = this.#getFormat();
@@ -653,7 +641,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get current total elapsed time.
    * @returns {number} Total elapsed (ms for realtime, seconds for gametime)
-   * @private
    */
   #getCurrentElapsed() {
     if (this.#mode === 'realtime') {
@@ -671,7 +658,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Start the stopwatch.
-   * @private
    */
   static #onStart() {
     this.#running = true;
@@ -690,7 +676,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Pause the stopwatch and accumulate elapsed time.
-   * @private
    */
   static #onPause() {
     if (this.#mode === 'realtime') {
@@ -712,7 +697,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Reset the stopwatch to zero and clear laps.
-   * @private
    */
   static #onReset() {
     this.#unregisterTimeHook();
@@ -730,7 +714,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Record a lap at the current elapsed time.
-   * @private
    */
   static #onLap() {
     if (!this.#running) return;
@@ -743,7 +726,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Toggle between realtime and gametime modes.
-   * @private
    */
   static #onToggleMode() {
     if (this.#running) {
@@ -771,7 +753,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Clear all recorded laps.
-   * @private
    */
   static #onClearLaps() {
     this.#laps = [];
@@ -781,7 +762,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Open the notification configuration dialog.
-   * @private
    */
   static async #onOpenNotification() {
     const currentSound = this.#notification?.sound || 'sounds/notify.wav';
@@ -859,7 +839,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Register hooks for game-time updates.
-   * @private
    */
   #registerTimeHook() {
     if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, this.#onWorldTimeUpdated.bind(this));
@@ -868,7 +847,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Unregister game-time hooks.
-   * @private
    */
   #unregisterTimeHook() {
     if (this.#timeHookId) {
@@ -883,7 +861,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle visual tick for game-time display updates.
-   * @private
    */
   #onVisualTick() {
     if (!this.#running || this.#mode !== 'gametime') return;
@@ -893,7 +870,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle world time update for notification checks.
-   * @private
    */
   #onWorldTimeUpdated() {
     if (!this.#running || this.#mode !== 'gametime') return;
@@ -902,7 +878,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Check if elapsed time has reached the notification threshold.
-   * @private
    */
   #checkNotification() {
     if (!this.#notificationThreshold || this.#notificationFired) return;
@@ -916,7 +891,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Fire the notification toast and/or sound.
-   * @private
    */
   #fireNotification() {
     const type = this.#notification?.type || 'toast';
@@ -928,7 +902,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Persist stopwatch state to world settings.
-   * @private
    */
   #saveState() {
     const state = {
@@ -948,7 +921,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Restore state synchronously in constructor (for template context).
-   * @private
    */
   #restoreStateSync() {
     const state = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STATE);
@@ -965,7 +937,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Restore running state after render, accounting for elapsed offline time.
-   * @private
    */
   #restoreState() {
     const state = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STATE);
@@ -982,7 +953,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Restore saved position from settings.
-   * @private
    */
   #restorePosition() {
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_POSITION);
@@ -1012,8 +982,26 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Reposition the stopwatch after viewport resize.
+   */
+  #onViewportResize() {
+    if (!this.rendered || !this.element) return;
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) return;
+    if (this.#snappedZoneId) {
+      const rect = this.element.getBoundingClientRect();
+      const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+      if (zonePos) this.setPosition({ left: zonePos.left, top: zonePos.top });
+    } else {
+      const savedPos = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_POSITION);
+      if (savedPos && Number.isFinite(savedPos.left) && Number.isFinite(savedPos.top)) {
+        this.setPosition({ left: savedPos.left, top: savedPos.top });
+      }
+    }
+    this.#clampToViewport();
+  }
+
+  /**
    * Clamp the stopwatch position within the viewport bounds.
-   * @private
    */
   #clampToViewport() {
     const rect = this.element.getBoundingClientRect();
@@ -1046,7 +1034,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Set up mouse-based dragging on the stopwatch face.
-   * @private
    */
   #enableDragging() {
     const dragHandle = this.element.querySelector('.face');
@@ -1111,7 +1098,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Set up mouse-based resizing via the resize handle.
-   * @private
    */
   #enableResizing() {
     const handle = this.element.querySelector('.resize-handle');
@@ -1143,7 +1129,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Save current position and size to settings.
-   * @private
    */
   async #savePosition() {
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: this.position.left, top: this.position.top, size: this.#getSize(), zoneId: this.#snappedZoneId });
@@ -1151,7 +1136,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Set up the right-click context menu on the stopwatch face.
-   * @private
    */
   #setupContextMenu() {
     const container = this.element.querySelector('.face');
@@ -1167,7 +1151,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get context menu items for the Stopwatch.
    * @returns {object[]} Array of context menu item configs
-   * @private
    */
   #getContextMenuItems() {
     const items = [];
@@ -1203,7 +1186,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Toggle position lock state.
-   * @private
    */
   async #toggleStickyPosition() {
     const current = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};

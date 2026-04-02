@@ -137,6 +137,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} ID of zone HUD is currently snapped to */
   #snappedZoneId = null;
 
+  /** @type {Function|null} Debounced resize handler */
+  #resizeHandler = null;
+
   /** @type {boolean} Whether sidebar is locked due to notes panel */
   #sidebarLocked = false;
 
@@ -1036,6 +1039,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
     this.#restoreStickyStates();
+    this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
+    window.addEventListener('resize', this.#resizeHandler);
     const c = game.time.components;
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
     setupDayContextMenu(this.element, '.minical-day:not(.empty)', this.calendar, {
@@ -1103,6 +1108,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async _onClose(options) {
+    if (this.#resizeHandler) {
+      window.removeEventListener('resize', this.#resizeHandler);
+      this.#resizeHandler = null;
+    }
     if (this.#timeHookId) {
       Hooks.off(HOOKS.VISUAL_TICK, this.#timeHookId);
       this.#timeHookId = null;
@@ -1181,6 +1190,25 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     left = Math.max(0, Math.min(left, window.innerWidth - rect.width - rightBuffer));
     top = Math.max(0, Math.min(top, window.innerHeight - rect.height));
     this.setPosition({ left, top });
+  }
+
+  /**
+   * Handle viewport resize — restore from saved position then clamp.
+   */
+  #onViewportResize() {
+    if (!this.rendered || !this.element) return;
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) return;
+    if (this.#snappedZoneId) {
+      const rect = this.element.getBoundingClientRect();
+      const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+      if (zonePos) this.setPosition({ left: zonePos.left, top: zonePos.top });
+    } else {
+      const savedPos = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_POSITION);
+      if (savedPos && Number.isFinite(savedPos.left) && Number.isFinite(savedPos.top)) {
+        this.setPosition({ left: savedPos.left, top: savedPos.top });
+      }
+    }
+    this.#clampToViewport();
   }
 
   /**

@@ -93,6 +93,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   #stickyPosition = false;
   #lastSize = 300;
 
+  /** @type {Function|null} Debounced viewport resize handler */
+  #resizeHandler = null;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-sun-dial',
@@ -195,7 +198,11 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#initialTime = game.time.worldTime;
     const sunDialStickyStates = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
     this.#stickyPosition = sunDialStickyStates.position ?? false;
-    if (options.isFirstRender) this.#restorePosition();
+    if (options.isFirstRender) {
+      this.#restorePosition();
+      this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
+      window.addEventListener('resize', this.#resizeHandler);
+    }
     this.#enableDragging();
     this.#enableResizing();
     this.#initSceneRenderer();
@@ -253,6 +260,10 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#boundMouseUp = null;
     this.#boundEscape = null;
     this.#boundClickOutside = null;
+    if (this.#resizeHandler) {
+      window.removeEventListener('resize', this.#resizeHandler);
+      this.#resizeHandler = null;
+    }
     unregisterFromZoneUpdates(this);
     unpinFromZone(this.element);
     cleanupSnapIndicator();
@@ -866,6 +877,23 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       this.setPosition({ left, top });
     }
     this.#clampToViewport(w, h);
+  }
+
+  /** Reposition the dial after the browser viewport is resized. */
+  #onViewportResize() {
+    if (!this.rendered || !this.element) return;
+    if (this.#snappedZoneId && usesDomParenting(this.#snappedZoneId)) return;
+    if (this.#snappedZoneId) {
+      const rect = this.element.getBoundingClientRect();
+      const zonePos = getRestorePosition(this.#snappedZoneId, rect.width, rect.height);
+      if (zonePos) this.setPosition({ left: zonePos.left, top: zonePos.top });
+    } else {
+      const savedPos = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_POSITION);
+      if (savedPos && Number.isFinite(savedPos.left) && Number.isFinite(savedPos.top)) {
+        this.setPosition({ left: savedPos.left, top: savedPos.top });
+      }
+    }
+    this.#clampToViewport();
   }
 
   /**

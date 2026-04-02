@@ -52,6 +52,7 @@ import {
   stripSecrets,
   unpinFromZone,
   unregisterFromZoneUpdates,
+  updateAllZonePositions,
   usesDomParenting,
   warnShowToAll
 } from '../../utils/_module.mjs';
@@ -424,7 +425,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       id: Hooks.on('updateCombat', () => this.#onCombatChange(!!game.combat?.started))
     });
     this.#inCombat = !!game.combat?.started;
-    this.#resizeHandler = foundry.utils.debounce(() => this.#onViewportResize(), 100);
+    this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
     window.addEventListener('resize', this.#resizeHandler);
     this.#fullscreenHandler = foundry.utils.debounce(() => this.#onViewportResize(), 50);
     document.addEventListener('fullscreenchange', this.#fullscreenHandler);
@@ -862,6 +863,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.#clampToViewport();
     this.#updateDomeVisibility();
+    updateAllZonePositions();
   }
 
   /**

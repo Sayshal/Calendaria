@@ -400,3 +400,15 @@ export function updateZonePositions(zoneId) {
     }
   }
 }
+
+/**
+ * Update all registered apps to their current zone positions.
+ */
+export function updateAllZonePositions() {
+  const seen = new Set();
+  for (const { app, zoneId } of registeredApps) {
+    if (seen.has(zoneId) || !app.rendered) continue;
+    seen.add(zoneId);
+    updateZonePositions(zoneId);
+  }
+}

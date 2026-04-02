@@ -1017,7 +1017,7 @@ export function getDisplayLocationDefinitions() {
  * Get relative time description between two dates.
  * @param {object} targetDate - Target date { year, month, dayOfMonth }
  * @param {object} currentDate - Current date { year, month, dayOfMonth }
- * @param simple
+ * @param {boolean} simple - Whether to return a simplified numeric string
  * @returns {string} Relative time string (e.g., "3 days ago", "in 2 weeks")
  */
 export function timeSince(targetDate, currentDate, simple = false) {
