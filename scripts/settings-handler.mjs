@@ -342,7 +342,7 @@ export default class CalendariaSettings {
             full: 'CALENDARIA.Common.DisplayIconText',
             icon: 'CALENDARIA.Common.DisplayIconOnly',
             text: 'CALENDARIA.Common.DisplayTextOnly',
-            abbr: 'CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'
+            abbr: 'CALENDARIA.Settings.BigCalEraDisplayMode.Abbreviation'
           },
           initial: 'full'
         }),
@@ -365,8 +365,8 @@ export default class CalendariaSettings {
           choices: {
             name: 'CALENDARIA.Common.Name',
             icon: 'CALENDARIA.Common.DisplayIconOnly',
-            number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
-            roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
+            number: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Number',
+            roman: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Roman'
           },
           initial: 'icon'
         }),

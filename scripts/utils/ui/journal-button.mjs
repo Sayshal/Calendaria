@@ -29,10 +29,8 @@ function replaceFooter({ element }) {
   const footer = element.querySelector('.directory-footer');
   if (!footer) return;
   if (footer.querySelector('.calendaria-footer')) return;
-  footer.innerHTML = '';
-  footer.classList.add('calendaria-footer');
   const buttons = document.createElement('div');
-  buttons.className = 'footer-buttons';
+  buttons.className = 'calendaria-footer footer-buttons';
   const apps = [
     { id: 'bigcal', icon: 'fa-calendar-days', tooltip: 'CALENDARIA.Common.BigCal', toggle: () => BigCal.toggle() },
     { id: 'minical', icon: 'fa-compress', tooltip: 'CALENDARIA.Common.MiniCal', toggle: () => MiniCal.toggle() },

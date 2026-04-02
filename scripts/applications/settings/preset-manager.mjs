@@ -182,6 +182,11 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onSelectPreset(_event, target) {
     const id = target.closest('[data-preset-id]')?.dataset.presetId;
     if (!id) return;
+    const form = this.element;
+    if (form) {
+      const formData = new foundry.applications.ux.FormDataExtended(form);
+      PresetManager.#onSubmit.call(this, null, form, formData);
+    }
     this._selectedId = id;
     this.render();
   }

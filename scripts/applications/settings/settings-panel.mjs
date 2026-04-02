@@ -1216,14 +1216,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: bigCalEraDisplayMode === 'full' },
       { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalEraDisplayMode === 'icon' },
       { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: bigCalEraDisplayMode === 'text' },
-      { value: 'abbr', label: localize('CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'), selected: bigCalEraDisplayMode === 'abbr' }
+      { value: 'abbr', label: localize('CALENDARIA.Settings.BigCalEraDisplayMode.Abbreviation'), selected: bigCalEraDisplayMode === 'abbr' }
     ];
     const bigCalCyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE);
     context.bigCalCyclesDisplayModeOptions = [
       { value: 'name', label: localize('CALENDARIA.Common.Name'), selected: bigCalCyclesDisplayMode === 'name' },
       { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalCyclesDisplayMode === 'icon' },
-      { value: 'number', label: localize('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: bigCalCyclesDisplayMode === 'number' },
-      { value: 'roman', label: localize('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: bigCalCyclesDisplayMode === 'roman' }
+      { value: 'number', label: localize('CALENDARIA.Settings.BigCalCyclesDisplayMode.Number'), selected: bigCalCyclesDisplayMode === 'number' },
+      { value: 'roman', label: localize('CALENDARIA.Settings.BigCalCyclesDisplayMode.Roman'), selected: bigCalCyclesDisplayMode === 'roman' }
     ];
   }
 

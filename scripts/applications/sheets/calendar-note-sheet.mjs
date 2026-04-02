@@ -19,6 +19,7 @@ import {
   getRecurrenceDescription,
   groupPresets,
   isCustomPreset,
+  NoteManager,
   summarizeConditionTree,
   validateConditions,
   wrapInRootGroup
@@ -728,29 +729,34 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const newCategories = submitData.system?.categories || [];
     const oldCategories = this.document.system.categories || [];
     const addedPreset = newCategories.find((id) => !oldCategories.includes(id));
-    await super._processSubmitData(event, form, submitData, options);
-    if (addedPreset) await this.#applyPresetStyle(addedPreset);
-    const ownershipSelects = form.querySelectorAll('select[data-ownership-user]');
-    if (ownershipSelects.length) {
-      const ownershipUpdates = {};
-      let hasChanges = false;
-      for (const select of ownershipSelects) {
-        const userId = select.dataset.ownershipUser;
-        const level = parseInt(select.value);
-        const current = this.document.parent?.ownership?.[userId] ?? -1;
-        if (level !== current) {
-          ownershipUpdates[userId] = level;
-          hasChanges = true;
+    NoteManager.enableSuppressOwnershipRebuild();
+    try {
+      await super._processSubmitData(event, form, submitData, options);
+      if (addedPreset) await this.#applyPresetStyle(addedPreset);
+      const ownershipSelects = form.querySelectorAll('select[data-ownership-user]');
+      if (ownershipSelects.length) {
+        const ownershipUpdates = {};
+        let hasChanges = false;
+        for (const select of ownershipSelects) {
+          const userId = select.dataset.ownershipUser;
+          const level = parseInt(select.value);
+          const current = this.document.parent?.ownership?.[userId] ?? -1;
+          if (level !== current) {
+            ownershipUpdates[userId] = level;
+            hasChanges = true;
+          }
+        }
+        if (hasChanges) {
+          if (game.user.isGM) {
+            const journal = this.document.parent;
+            if (journal) await journal.update({ ownership: ownershipUpdates });
+          } else {
+            CalendariaSocket.emit(SOCKET_TYPES.OWNERSHIP_UPDATE, { journalId: this.document.parent?.id, ownership: ownershipUpdates });
+          }
         }
       }
-      if (hasChanges) {
-        if (game.user.isGM) {
-          const journal = this.document.parent;
-          if (journal) await journal.update({ ownership: ownershipUpdates });
-        } else {
-          CalendariaSocket.emit(SOCKET_TYPES.OWNERSHIP_UPDATE, { journalId: this.document.parent?.id, ownership: ownershipUpdates });
-        }
-      }
+    } finally {
+      NoteManager.disableSuppressOwnershipRebuild();
     }
   }
 

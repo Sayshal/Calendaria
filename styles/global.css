@@ -144,17 +144,14 @@
 
 #journal {
   .directory-footer {
-    &.calendaria-footer {
-      gap: 0.125rem;
+    .calendaria-footer {
+      gap: 0.25rem;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      width: 100%;
+      padding-top: 0.125rem;
       border-top: 0.0625rem solid var(--calendaria-border-light);
-
-      .footer-buttons {
-        gap: 0.25rem;
-        display: flex;
-      }
 
       .calendaria-footer-btn {
         border: none;

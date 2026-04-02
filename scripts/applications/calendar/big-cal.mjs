@@ -501,8 +501,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     weeks.forEach((week, weekIndex) => {
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
     });
-    const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
-    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const seasonDay = this._selectedDate ?? date;
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
@@ -605,8 +605,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       weeks.push(currentWeek);
     }
-    const viewedComponents = { month: 0, dayOfMonth: viewedDayOfMonth };
-    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const seasonDay = this._selectedDate ?? date;
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
     const weekdayData = calendar.weekdaysArray ?? [];
     const displayWeek = weekNumber + 1;
@@ -741,9 +741,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let dayOfYear = viewedDayOfMonth + 1;
     for (let m = 0; m < month; m++) dayOfYear += calendar.getDaysInMonth(m, year - yearZero);
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
-    const midWeekDay = days[Math.floor(days.length / 2)];
-    const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: midWeekDay?.dayOfMonth ?? date.dayOfMonth ?? 0 };
-    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const seasonDay = this._selectedDate ?? date;
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
     const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.weekdaysArray ?? [];
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
@@ -814,8 +813,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       yearGrid.push(yearRow);
     }
-    const viewedComponents = { month: 0, dayOfMonth: 0 };
-    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
+    const seasonDay = this._selectedDate ?? date;
+    const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
     const startYearComponents = { year: startYear, month: 0, dayOfMonth: 0 };
     const endYearComponents = { year: startYear + 8, month: 0, dayOfMonth: 0 };

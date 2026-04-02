@@ -42,6 +42,9 @@ export default class NoteManager {
   /** @type {boolean} Guard flag to prevent festival name sync loops */
   static #suppressFestivalNameSync = false;
 
+  /** @type {boolean} Guard flag to prevent ownership rebuild during sheet form submission */
+  static #suppressOwnershipRebuild = false;
+
   /** @type {Map<string, object>} Festival removals captured in preDelete, persisted in deleteJournalEntry */
   static #pendingFestivalRemovals = new Map();
 
@@ -190,7 +193,7 @@ export default class NoteManager {
             if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalNameToCalendar(linked, changes.name);
           }
         }
-        if (changes.system?.visibility !== undefined) {
+        if (changes.system?.visibility !== undefined && !NoteManager.#suppressOwnershipRebuild) {
           const journal = page.parent;
           if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
             const ownership = this.#buildOwnership(changes.system.visibility, page.system?.author?._id);
@@ -270,7 +273,7 @@ export default class NoteManager {
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
-    if (!game.user.isGM) return;
+    if (!game.user.isGM || NoteManager.#suppressOwnershipRebuild) return;
     const page = journal.pages.contents[0];
     if (!page) return;
     const visibility = page.system?.visibility;
@@ -932,6 +935,20 @@ export default class NoteManager {
    */
   static disableSuppressFestivalNameSync() {
     this.#suppressFestivalNameSync = false;
+  }
+
+  /**
+   * Enable suppression of ownership rebuild (prevents race condition during note sheet form submission).
+   */
+  static enableSuppressOwnershipRebuild() {
+    this.#suppressOwnershipRebuild = true;
+  }
+
+  /**
+   * Disable suppression of ownership rebuild.
+   */
+  static disableSuppressOwnershipRebuild() {
+    this.#suppressOwnershipRebuild = false;
   }
 
   /**
