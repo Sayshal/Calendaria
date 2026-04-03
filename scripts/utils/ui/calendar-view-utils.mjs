@@ -222,7 +222,8 @@ export function hasNotesOnDay(notes, year, month, dayOfMonth) {
 export function buildWeatherPillData(wd) {
   if (!wd) return { weatherIcon: null, weatherColor: null, weatherLabel: null, weatherTemp: null, weatherWindDir: null, weatherTooltipHtml: null, isForecast: false };
   const temp = wd.temperature != null ? WeatherManager.formatTemperature(wd.temperature) : null;
-  const windDir = wd.wind?.direction != null ? WeatherManager.getWindDirectionLabel(wd.wind.direction) : null;
+  const showBothUnits = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_SHOW_BOTH);
+  const windDir = !showBothUnits && wd.wind?.direction != null ? WeatherManager.getWindDirectionLabel(wd.wind.direction) : null;
   const tooltipArgs = {
     label: wd.label,
     description: wd.description ?? null,
