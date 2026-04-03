@@ -1125,8 +1125,6 @@
   "CALENDARIA.Permissions.DeleteNotesHint": "Erlaube Nutzern, Kalendernotizen massenweise zu löschen.",
   "CALENDARIA.Permissions.EditCalendars": "Kalender bearbeiten",
   "CALENDARIA.Permissions.EditCalendarsHint": "Erlaube Nutzern, den Kalender-Editor zu öffnen und Kalenderdefinitionen zu ändern.",
-  "CALENDARIA.Permissions.EditNotes": "Notizen bearbeiten",
-  "CALENDARIA.Permissions.EditNotesHint": "Erlaube Nutzern, Kalendernotizen anderer Spieler zu bearbeiten. Gilt nicht für SL-exklusive Notizen.",
   "CALENDARIA.Permissions.NoAccess": "Du hast keine Berechtigung, auf diese Funktion zuzugreifen",
   "CALENDARIA.Permissions.ViewBigCal": "BigCal anzeigen",
   "CALENDARIA.Permissions.ViewBigCalHint": "Erlaube Nutzern, BigCal zu verwenden.",
