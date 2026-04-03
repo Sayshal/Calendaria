@@ -600,8 +600,27 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const target = event.target;
     super._onChangeForm(formConfig, event);
     if (target?.name === 'system.allDay') {
+      const checked = target.checked;
       const timeInputs = this.element.querySelectorAll('.time-inputs input[type="number"]');
-      timeInputs.forEach((input) => (input.disabled = target.checked));
+      timeInputs.forEach((input) => (input.disabled = checked));
+      const endDateBtn = this.element.querySelector('[data-date-field="endDate"]');
+      if (endDateBtn) endDateBtn.disabled = checked;
+      if (checked) {
+        const startYear = this.element.querySelector('[name="system.startDate.year"]');
+        const startMonth = this.element.querySelector('[name="system.startDate.month"]');
+        const startDay = this.element.querySelector('[name="system.startDate.dayOfMonth"]');
+        const endYear = this.element.querySelector('[name="system.endDate.year"]');
+        const endMonth = this.element.querySelector('[name="system.endDate.month"]');
+        const endDay = this.element.querySelector('[name="system.endDate.dayOfMonth"]');
+        if (startYear && endYear) endYear.value = startYear.value;
+        if (startMonth && endMonth) endMonth.value = startMonth.value;
+        if (startDay && endDay) endDay.value = startDay.value;
+        if (endDateBtn) {
+          const startLabel = this.element.querySelector('[data-date-field="startDate"] span');
+          const endLabel = endDateBtn.querySelector('span');
+          if (startLabel && endLabel) endLabel.textContent = startLabel.textContent;
+        }
+      }
     }
     if (target?.name === 'system.color') {
       const iconPreview = this.element.querySelector('.icon-picker i.icon-preview');

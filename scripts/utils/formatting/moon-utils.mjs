@@ -5,7 +5,7 @@
  */
 
 import { CalendarManager } from '../../calendar/_module.mjs';
-import { resolveRandomizedPhase } from '../../data/_module.mjs';
+import { findAnchorPhasePosition, resolveRandomizedPhase } from '../../data/_module.mjs';
 
 /**
  * Get the current phase position (0-1) for a moon at a given date.
@@ -21,6 +21,8 @@ export function getMoonPhasePosition(moon, date, calendar = null) {
     const absoluteDay = dateToDayNumber(date, calendar);
     return resolveRandomizedPhase(moon, absoluteDay, date);
   }
+  const anchorPos = findAnchorPhasePosition(moon, date);
+  if (anchorPos !== null) return anchorPos;
   const daysBetween = calculateDaysBetween(moon.referenceDate, date, calendar);
   const cyclePosition = ((daysBetween % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
   return cyclePosition / moon.cycleLength;

@@ -119,6 +119,17 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowEmpty.Hint"}}</p>
     </div>
+    <div class="form-group{{#if chronicleShowEmpty}} disabled{{/if}}">
+      <label>{{localize "CALENDARIA.Chronicle.Settings.EmptyContentTypes.Name"}}</label>
+      <div class="form-fields">
+        <multi-select name="chronicleEmptyContentTypes" {{#if chronicleShowEmpty}}disabled{{/if}}>
+          {{#each chronicleEmptyContentOptions}}
+            <option value="{{this.value}}" {{#if this.checked}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </multi-select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.EmptyContentTypes.Hint"}}</p>
+    </div>
   </fieldset>
 
   <fieldset data-section="chronicle-content">

@@ -31,9 +31,9 @@
         <div class="form-group">
           <label>{{localize "CALENDARIA.Common.End"}}</label>
           <button type="button" class="date-picker-btn" data-action="selectDate" data-date-field="endDate" data-tooltip
-            aria-label="{{localize 'CALENDARIA.UI.EndDateTooltip'}}">
+            aria-label="{{localize 'CALENDARIA.UI.EndDateTooltip'}}" {{#if system.allDay}}disabled{{/if}}>
             <i class="fas fa-calendar-alt"></i>
-            <span>{{endDateDisplay}}</span>
+            <span>{{#if system.allDay}}{{startDateDisplay}}{{else}}{{endDateDisplay}}{{/if}}</span>
           </button>
           <input type="hidden" name="system.endDate.year" value="{{system.endDate.year}}">
           <input type="hidden" name="system.endDate.month" value="{{system.endDate.month}}">

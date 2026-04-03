@@ -1187,7 +1187,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           year: yearRaw === '' || yearRaw == null ? null : parseInt(yearRaw),
           month: parseInt(data[`moons.${mKey}.anchorPhases.${aKey}.month`]) || 0,
           dayOfMonth: (parseInt(data[`moons.${mKey}.anchorPhases.${aKey}.dayOfMonth`]) || 1) - 1,
-          phaseIndex: parseInt(data[`moons.${mKey}.anchorPhases.${aKey}.phaseIndex`]) || 0
+          phaseIndex: parseInt(data[`moons.${mKey}.anchorPhases.${aKey}.phaseIndex`]) || 0,
+          resetCycle: data[`moons.${mKey}.anchorPhases.${aKey}.resetCycle`] === true || data[`moons.${mKey}.anchorPhases.${aKey}.resetCycle`] === 'true'
         };
       }
       const eclipseMode = data[`moons.${mKey}.eclipseMode`] || existingMoon?.eclipseMode || 'never';
@@ -1916,7 +1917,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!moon) return;
     if (!moon.anchorPhases) moon.anchorPhases = {};
     const newKey = foundry.utils.randomID();
-    moon.anchorPhases[newKey] = { year: null, month: 0, dayOfMonth: 0, phaseIndex: 0 };
+    moon.anchorPhases[newKey] = { year: null, month: 0, dayOfMonth: 0, phaseIndex: 0, resetCycle: false };
     this.#isDirty = true;
     this.render();
   }

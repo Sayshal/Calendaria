@@ -98,6 +98,13 @@ export default class CalendariaSettings {
       [SETTINGS.CHRONICLE_MINI_CAL_BUTTON]: { name: 'Chronicle MiniCal Button', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.CHRONICLE_ENTRY_DEPTH]: { name: 'Chronicle Entry Depth', scope: 'client', config: false, type: new StringField({ initial: 'excerpt' }) },
       [SETTINGS.CHRONICLE_SHOW_EMPTY]: { name: 'Chronicle Show Empty', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES]: {
+        name: 'Chronicle Empty Content Types',
+        scope: 'client',
+        config: false,
+        type: new SetField(new StringField()),
+        default: ['weather', 'moon', 'season']
+      },
       [SETTINGS.CHRONICLE_SHOW_WEATHER]: { name: 'Chronicle Show Weather', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { name: 'Chronicle Show Moon Phases', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { name: 'Chronicle Show Season Changes', scope: 'client', config: false, type: new BooleanField({ initial: true }) },

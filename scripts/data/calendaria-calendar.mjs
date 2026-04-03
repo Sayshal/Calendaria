@@ -8,7 +8,7 @@
 import { CalendarRegistry, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { format, localize } from '../utils/_module.mjs';
-import { resolveRandomizedPhase } from './_module.mjs';
+import { findAnchorPhasePosition, getPhasePositionFromIndex, resolveRandomizedPhase } from './_module.mjs';
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
 
@@ -501,7 +501,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               year: new NumberField({ required: false, nullable: true, integer: true }),
               month: new NumberField({ required: true, integer: true, min: 0 }),
               dayOfMonth: new NumberField({ required: true, integer: true, min: 0 }),
-              phaseIndex: new NumberField({ required: true, integer: true, min: 0 })
+              phaseIndex: new NumberField({ required: true, integer: true, min: 0 }),
+              resetCycle: new BooleanField({ required: false, initial: false })
             })
           ),
           phases: new TypedObjectField(
@@ -1221,13 +1222,33 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       return { name: phases[0].name, subPhaseName: phases[0].name, icon: phases[0].icon || '', position: 0, dayInCycle: 0 };
     }
     if (moon.phaseMode === 'randomized') return this.#resolveRandomizedMoonPhase(moon, phases, currentDays, components);
-    const refPhase = phases[moon.referencePhase ?? 0];
-    const phaseOffset = (refPhase?.start ?? 0) * moon.cycleLength;
-    const cycleDayAdjust = Number.isFinite(moon.cycleDayAdjust) ? moon.cycleDayAdjust : 0;
-    const daysIntoCycleRaw = (((daysSinceReference % moon.cycleLength) + moon.cycleLength) % moon.cycleLength) + phaseOffset + cycleDayAdjust;
-    const daysIntoCycle = ((daysIntoCycleRaw % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
-    const normalizedPosition = daysIntoCycle / moon.cycleLength;
-    const dayIndex = Math.floor(daysIntoCycle);
+    const dateComp = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
+    const anchorPos = findAnchorPhasePosition(moon, dateComp);
+    let normalizedPosition;
+    let dayIndex;
+    if (anchorPos !== null) {
+      normalizedPosition = anchorPos;
+      dayIndex = Math.floor(anchorPos * moon.cycleLength);
+    } else {
+      const resetAnchor = this.#findMostRecentResetAnchor(moon, dateComp, currentDays);
+      if (resetAnchor) {
+        const anchorDays = this._componentsToDays({ year: resetAnchor.year ?? dateComp.year, month: resetAnchor.month, dayOfMonth: resetAnchor.dayOfMonth });
+        const daysSinceAnchor = currentDays - anchorDays;
+        const anchorPhasePos = getPhasePositionFromIndex(moon, resetAnchor.phaseIndex);
+        const anchorCycleDay = anchorPhasePos * moon.cycleLength;
+        const daysIntoCycle = (((daysSinceAnchor + anchorCycleDay) % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
+        normalizedPosition = daysIntoCycle / moon.cycleLength;
+        dayIndex = Math.floor(daysIntoCycle);
+      } else {
+        const refPhase = phases[moon.referencePhase ?? 0];
+        const phaseOffset = (refPhase?.start ?? 0) * moon.cycleLength;
+        const cycleDayAdjust = Number.isFinite(moon.cycleDayAdjust) ? moon.cycleDayAdjust : 0;
+        const daysIntoCycleRaw = (((daysSinceReference % moon.cycleLength) + moon.cycleLength) % moon.cycleLength) + phaseOffset + cycleDayAdjust;
+        const daysIntoCycle = ((daysIntoCycleRaw % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
+        normalizedPosition = daysIntoCycle / moon.cycleLength;
+        dayIndex = Math.floor(daysIntoCycle);
+      }
+    }
     const hasRanges = phases.length > 0 && phases[0].start !== undefined && phases[0].end !== undefined;
     let phaseArrayIndex = 0;
     let dayWithinPhase = 0;
@@ -1264,6 +1285,37 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!matchedPhase) return null;
     const subPhaseName = CalendariaCalendar.#getSubPhaseName(matchedPhase, dayWithinPhase, phaseDuration);
     return { name: matchedPhase.name, subPhaseName, icon: matchedPhase.icon || '', position: normalizedPosition, dayInCycle: dayIndex, phaseIndex: phaseArrayIndex, dayWithinPhase, phaseDuration };
+  }
+
+  /**
+   * Find the most recent anchor with resetCycle enabled that's before the given date.
+   * @param {object} moon - Moon definition
+   * @param {object} dateComp - Current date {year, month, dayOfMonth}
+   * @param {number} currentDays - Current absolute day number
+   * @returns {object|null} The most recent reset anchor or null
+   */
+  #findMostRecentResetAnchor(moon, dateComp, currentDays) {
+    if (!moon.anchorPhases) return null;
+    const anchors = Object.values(moon.anchorPhases).filter((a) => a.resetCycle);
+    if (!anchors.length) return null;
+    let best = null;
+    let bestDays = -Infinity;
+    for (const anchor of anchors) {
+      const year = anchor.year ?? dateComp.year;
+      const anchorDays = this._componentsToDays({ year, month: anchor.month, dayOfMonth: anchor.dayOfMonth });
+      if (anchorDays <= currentDays && anchorDays > bestDays) {
+        best = { ...anchor, year };
+        bestDays = anchorDays;
+      }
+      if (anchor.year == null) {
+        const prevYearDays = this._componentsToDays({ year: dateComp.year - 1, month: anchor.month, dayOfMonth: anchor.dayOfMonth });
+        if (prevYearDays <= currentDays && prevYearDays > bestDays) {
+          best = { ...anchor, year: dateComp.year - 1 };
+          bestDays = prevYearDays;
+        }
+      }
+    }
+    return best;
   }
 
   /**

@@ -49,6 +49,7 @@ import {
   ImporterApp,
   MiniCal,
   PresetManager,
+  SetDateDialog,
   Stopwatch,
   SunDial,
   TimeKeeper,
@@ -81,6 +82,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     actions: {
       openCalendarEditor: SettingsPanel.#onOpenCalendarEditor,
       openImporter: SettingsPanel.#onOpenImporter,
+      openSetDateDialog: SettingsPanel.#onOpenSetDateDialog,
       resetPosition: SettingsPanel.#onResetPosition,
       openPresetManager: SettingsPanel.#onOpenPresetManager,
       openEnricherReference: SettingsPanel.#onOpenEnricherReference,
@@ -933,7 +935,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.CHRONICLE_MINI_CAL_BUTTON,
       SETTINGS.CHRONICLE_HUD_BUTTON
     ],
-    'chronicle-display': [SETTINGS.CHRONICLE_ENTRY_DEPTH, SETTINGS.CHRONICLE_SHOW_EMPTY],
+    'chronicle-display': [SETTINGS.CHRONICLE_ENTRY_DEPTH, SETTINGS.CHRONICLE_SHOW_EMPTY, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES],
     'chronicle-content': [SETTINGS.CHRONICLE_SHOW_WEATHER, SETTINGS.CHRONICLE_SHOW_MOON_PHASES, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES],
     'fog-of-war': [SETTINGS.FOG_OF_WAR_ENABLED, SETTINGS.FOG_OF_WAR_CONFIG, SETTINGS.FOG_OF_WAR_START_DATE, SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE, SETTINGS.FOG_OF_WAR_NAV_MODE],
     'cinematic-behavior': [SETTINGS.CINEMATIC_ENABLED, SETTINGS.CINEMATIC_THRESHOLD, SETTINGS.CINEMATIC_THRESHOLD_UNIT, SETTINGS.CINEMATIC_ON_REST],
@@ -1390,6 +1392,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.chronicleCombatMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_COMBAT_MODE);
     context.chronicleEntryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH);
     context.chronicleShowEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY);
+    const emptyContentTypes = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES);
+    context.chronicleEmptyContentOptions = [
+      { value: 'weather', label: localize('CALENDARIA.Common.Weather'), checked: emptyContentTypes.has('weather') },
+      { value: 'moon', label: localize('CALENDARIA.Common.MoonPhase'), checked: emptyContentTypes.has('moon') },
+      { value: 'season', label: localize('CALENDARIA.Common.Seasons'), checked: emptyContentTypes.has('season') }
+    ];
     context.chronicleShowWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
     context.chronicleShowMoonPhases = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES);
     context.chronicleShowSeasonChanges = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES);
@@ -1778,6 +1786,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('chronicleCombatMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_COMBAT_MODE, data.chronicleCombatMode);
     if ('chronicleEntryDepth' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH, data.chronicleEntryDepth);
     if ('chronicleShowEmpty' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY, data.chronicleShowEmpty);
+    if ('chronicleEmptyContentTypes' in data) {
+      const types = Array.isArray(data.chronicleEmptyContentTypes) ? data.chronicleEmptyContentTypes : data.chronicleEmptyContentTypes ? [data.chronicleEmptyContentTypes] : [];
+      await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES, new Set(types));
+    }
     if ('chronicleShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER, data.chronicleShowWeather);
     if ('chronicleShowMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES, data.chronicleShowMoonPhases);
     if ('chronicleShowSeasonChanges' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES, data.chronicleShowSeasonChanges);
@@ -2246,6 +2258,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenImporter(_event, _target) {
     new ImporterApp().render(true);
+  }
+
+  /**
+   * Open the Set Date & Time dialog.
+   */
+  static #onOpenSetDateDialog() {
+    SetDateDialog.open();
   }
 
   /**

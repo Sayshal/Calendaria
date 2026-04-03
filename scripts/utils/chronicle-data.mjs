@@ -98,6 +98,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
   const showWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
   const showMoons = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES);
   const showSeasons = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES);
+  const emptyContentTypes = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES);
   const currentComponents = calendar.timeToComponents(game.time.worldTime);
   const today = { year: currentComponents.year + yearZero, month: currentComponents.month, dayOfMonth: currentComponents.dayOfMonth };
   let prevSeasonName = null;
@@ -189,19 +190,10 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
       }
     }
     const hasFestival = notes.some((n) => n.isFestival);
-    const isEmpty = notes.length === 0 && banners.length === 0;
+    const contentBanners = banners.filter((b) => emptyContentTypes.has(b.type));
+    const isEmpty = notes.length === 0 && contentBanners.length === 0;
     if (!isEmpty || showEmpty) {
-      entries.push({
-        date: { year, month, dayOfMonth },
-        formattedDate: `${parts.D} ${parts.MMMM} ${parts.y}`,
-        weekday: weekdayName,
-        fogged: false,
-        isToday,
-        notes,
-        banners,
-        hasFestival,
-        isEmpty
-      });
+      entries.push({ date: { year, month, dayOfMonth }, formattedDate: `${parts.D} ${parts.MMMM} ${parts.y}`, weekday: weekdayName, fogged: false, isToday, notes, banners, hasFestival, isEmpty });
     }
     current = addDays(current, 1);
   }

@@ -80,7 +80,7 @@ export function resolveRandomizedPhase(moon, absoluteDay, dateComponents = null)
  * @param {object} dateComponents - {year, month, dayOfMonth}
  * @returns {number|null} Phase position if anchored, null otherwise
  */
-function findAnchorPhasePosition(moon, dateComponents) {
+export function findAnchorPhasePosition(moon, dateComponents) {
   if (!dateComponents || !moon.anchorPhases) return null;
   const anchors = Object.values(moon.anchorPhases);
   if (!anchors.length) return null;
@@ -99,7 +99,7 @@ function findAnchorPhasePosition(moon, dateComponents) {
  * @param {number} phaseIndex - Index of the phase
  * @returns {number} Midpoint position 0-1
  */
-function getPhasePositionFromIndex(moon, phaseIndex) {
+export function getPhasePositionFromIndex(moon, phaseIndex) {
   const phases = moon.phases ? Object.values(moon.phases) : [];
   if (!phases.length) return 0;
   const phase = phases[Math.min(phaseIndex, phases.length - 1)];
