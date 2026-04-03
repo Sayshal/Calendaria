@@ -943,8 +943,7 @@
         margin-bottom: 0.75rem;
       }
 
-      .preset-icon-btn,
-      .lock-toggle {
+      .preset-icon-btn {
         &,
         &:focus,
         &:focus-visible,
@@ -952,46 +951,6 @@
           border: none;
           outline: none;
           box-shadow: none;
-        }
-      }
-
-      .lockable-field {
-        gap: 0.375rem;
-        display: flex;
-        align-items: center;
-
-        select,
-        input:not([type='hidden']) {
-          flex: 1;
-        }
-      }
-
-      .lock-toggle {
-        display: flex;
-        flex-shrink: 0;
-        justify-content: center;
-        align-items: center;
-        width: 1.75rem;
-        height: 1.75rem;
-        padding: 0;
-        border: 0.0625rem solid transparent;
-        border-radius: 0.1875rem;
-        color: var(--calendaria-text-dim);
-        cursor: pointer;
-        background: none;
-
-        &:hover {
-          color: var(--calendaria-text-heading);
-          background: var(--calendaria-surface-dim-50);
-        }
-
-        &.locked {
-          color: var(--calendaria-accent);
-          background: color-mix(in srgb, var(--calendaria-accent) 10%, transparent);
-
-          &:hover {
-            background: color-mix(in srgb, var(--calendaria-accent) 10%, transparent);
-          }
         }
       }
 

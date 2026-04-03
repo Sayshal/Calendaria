@@ -5,7 +5,7 @@
  */
 
 import { CalendarManager } from '../calendar/_module.mjs';
-import { NoteManager, getAllPresets, getPresetOverrides } from '../notes/_module.mjs';
+import { NoteManager, getAllPresets } from '../notes/_module.mjs';
 import { format, localize } from './localization.mjs';
 import { stripSecrets } from './ui/calendar-view-utils.mjs';
 
@@ -111,15 +111,7 @@ export default class SearchManager {
    * @returns {object} - Icon data for template
    */
   static #extractIconData(flagData) {
-    const overrides = getPresetOverrides(flagData.categories);
-    const result = {
-      icon: flagData.icon || null,
-      color: flagData.color || '#4a9eff',
-      visibility: overrides.visibility || flagData.visibility || 'visible',
-      repeatIcon: null,
-      repeatTooltip: null,
-      presetIcons: []
-    };
+    const result = { icon: flagData.icon || null, color: flagData.color || '#4a9eff', visibility: flagData.visibility || 'visible', repeatIcon: null, repeatTooltip: null, presetIcons: [] };
     if (flagData.conditionTree) {
       result.repeatIcon = 'fas fa-rotate';
       result.repeatTooltip = localize('CALENDARIA.Note.HasConditions');

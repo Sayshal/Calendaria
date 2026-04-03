@@ -31,7 +31,6 @@ vi.mock('../../scripts/notes/note-data.mjs', () => ({
     { id: 'quest', label: 'Quest', color: '#4a9eff', icon: 'fa-scroll' },
     { id: 'holiday', label: 'Holiday', color: '#ff6b6b', icon: 'fa-gift' }
   ]),
-  getPresetOverrides: vi.fn(() => ({ displayStyle: null, visibility: null }))
 }));
 const makeNote = (id, name, flagData = {}) => ({id,name,visible: true,flagData: { startDate: { year: 1, month: 0, day: 1 }, ...flagData },journalId: `journal-${id}`});
 

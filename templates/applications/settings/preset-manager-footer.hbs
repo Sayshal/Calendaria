@@ -13,10 +13,17 @@
       </button>
     {{/if}}
     {{#if selected}}
-      <button type="button" data-action="removePreset" data-preset-id="{{selected.id}}">
-        <i class="fas fa-trash"></i>
-        {{localize "CALENDARIA.Common.Delete"}}
-      </button>
+      {{#unless selected.isDefault}}
+        <button type="button" data-action="syncPreset"
+          data-tooltip="{{localize 'CALENDARIA.PresetManager.SyncTooltip'}}">
+          <i class="fas fa-sync"></i>
+          {{localize "CALENDARIA.PresetManager.SyncButton"}}
+        </button>
+        <button type="button" data-action="removePreset" data-preset-id="{{selected.id}}">
+          <i class="fas fa-trash"></i>
+          {{localize "CALENDARIA.Common.Delete"}}
+        </button>
+      {{/unless}}
     {{/if}}
     <button type="button" data-action="addPreset">
       <i class="fas fa-plus"></i>

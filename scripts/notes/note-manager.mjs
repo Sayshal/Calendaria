@@ -8,6 +8,7 @@ import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { CalendariaSocket, canAddNotes, canDeleteNotes, format, localize, log } from '../utils/_module.mjs';
 import {
+  DEFAULT_PRESET_ID,
   applyPresetDefaultsToNoteData,
   compareDates,
   createNoteStub,
@@ -16,6 +17,7 @@ import {
   getOccurrencesInRange,
   getPlayerUsablePresets,
   getPresetContentTemplate,
+  getPresetDefaults,
   getPresetDefinition,
   getRecurrenceDescription,
   isRecurringMatch,
@@ -336,7 +338,8 @@ export default class NoteManager {
       const result = await this.#resolvePresetForNewNote(sanitized);
       if (result === false) return null;
     }
-    if (!content && sanitized.categories?.length) content = getPresetContentTemplate(sanitized.categories) || '';
+    applyPresetDefaultsToNoteData(sanitized, sanitized.categories);
+    if (!content) content = getPresetContentTemplate(sanitized.categories) || '';
     if (!calendarId) {
       const activeCalendar = CalendarManager.getActiveCalendar();
       if (!activeCalendar?.metadata?.id) throw new Error('No active calendar found');
@@ -352,7 +355,19 @@ export default class NoteManager {
     const folder = await this.getCalendarFolder(calendarId, calendar);
     if (!folder) throw new Error('Failed to get or create calendar folder');
     const actualCreatorId = creatorId || game.user.id;
+    const presetMerged = getPresetDefaults(sanitized.categories);
+    if (presetMerged.name && name === localize('CALENDARIA.Note.NewNote')) name = presetMerged.name;
+    if (!sanitized.categories?.length) {
+      const defaultPreset = getPresetDefinition(DEFAULT_PRESET_ID);
+      sanitized.icon = defaultPreset.icon;
+      sanitized.color = defaultPreset.color;
+    }
     const ownership = this.#buildOwnership(sanitized.visibility, actualCreatorId);
+    if (presetMerged.defaultOwnership != null) {
+      const level = presetMerged.defaultOwnership;
+      for (const user of game.users) if (!user.isGM && ownership[user.id] !== undefined) ownership[user.id] = Math.max(ownership[user.id], level);
+      ownership.default = Math.max(ownership.default ?? 0, level);
+    }
     const journal = await JournalEntry.create({ name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } }, ...journalData });
     const page = await JournalEntryPage.create(
       { name, type: 'calendaria.calendarnote', system: sanitized, text: { content }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
@@ -768,7 +783,6 @@ export default class NoteManager {
       const preset = getPresetDefinition(storedDefault);
       if (preset) {
         sanitized.categories = [storedDefault];
-        applyPresetDefaultsToNoteData(sanitized, [storedDefault]);
         if (preset.icon) sanitized.icon = preset.icon;
         if (preset.color) sanitized.color = preset.color;
         return storedDefault;
@@ -833,7 +847,6 @@ export default class NoteManager {
     if (alwaysUse && presetIds.length === 1) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET, presetIds[0]);
     if (presetIds.length) {
       sanitized.categories = presetIds;
-      applyPresetDefaultsToNoteData(sanitized, presetIds);
       const firstPreset = getPresetDefinition(presetIds[0]);
       if (firstPreset?.icon) sanitized.icon = firstPreset.icon;
       if (firstPreset?.color) sanitized.color = firstPreset.color;

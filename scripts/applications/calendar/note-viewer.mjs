@@ -6,7 +6,7 @@
 
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
-import { NoteManager, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors, getPresetOverrides } from '../../notes/_module.mjs';
+import { NoteManager, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors } from '../../notes/_module.mjs';
 import { canAddNotes, canDeleteNotes, localize } from '../../utils/_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -214,9 +214,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #enrichNoteRow(stub) {
     const flagData = stub.flagData || {};
-    const overrides = getPresetOverrides(flagData.categories);
-    const visibility = overrides.visibility || flagData.visibility || NOTE_VISIBILITY.VISIBLE;
-    const displayStyle = overrides.displayStyle || flagData.displayStyle || DISPLAY_STYLES.ICON;
+    const visibility = flagData.visibility || NOTE_VISIBILITY.VISIBLE;
+    const displayStyle = flagData.displayStyle || DISPLAY_STYLES.ICON;
     const allPresets = getAllPresets();
     const presetBadges = (flagData.categories || [])
       .slice(0, 4)

@@ -239,6 +239,7 @@ export function getRepeatOptions(selected = 'never') {
  */
 function emptyDefaults() {
   return {
+    name: null,
     allDay: null,
     displayStyle: null,
     visibility: null,
@@ -246,29 +247,46 @@ function emptyDefaults() {
     icon: null,
     reminderType: null,
     reminderOffset: null,
+    reminderTargets: null,
     hasDuration: null,
     duration: null,
+    maxOccurrences: null,
+    silent: null,
+    showBookends: null,
+    limitedRepeat: null,
+    limitedRepeatDays: null,
+    defaultOwnership: null,
     macro: null,
     owners: [],
     content: null
   };
 }
 
-/**
- * Default preset overrides shape.
- * @returns {object} Empty overrides with null values
- */
-function emptyOverrides() {
-  return { displayStyle: null, visibility: null };
-}
+/** Reserved ID for the built-in Default preset. */
+export const DEFAULT_PRESET_ID = '__default__';
 
 /**
- * Seed definitions for the 10 built-in presets.
+ * Seed definitions for built-in presets.
  * Used only for initial migration — after that, everything lives in CUSTOM_PRESETS setting.
  * @returns {object[]} Array of built-in preset seed objects
  */
 export function getBuiltinPresetSeeds() {
   return [
+    {
+      id: DEFAULT_PRESET_ID,
+      label: localize('CALENDARIA.Preset.Default'),
+      color: '#4a9eff',
+      icon: 'fas fa-calendar',
+      defaults: {
+        name: localize('CALENDARIA.Note.NewNote'),
+        visibility: 'visible',
+        displayStyle: 'banner',
+        reminderType: 'chat',
+        reminderTargets: 'all',
+        reminderOffset: 1,
+        defaultOwnership: 2
+      }
+    },
     { id: 'quest', label: localize('CALENDARIA.Preset.Quest'), color: '#4a9eff', icon: 'fas fa-scroll', defaults: { displayStyle: 'icon' } },
     {
       id: 'session',
@@ -278,8 +296,7 @@ export function getBuiltinPresetSeeds() {
       defaults: {
         displayStyle: 'icon',
         allDay: true,
-        content:
-          '<p><strong>Recap</strong></p><p></p><p><strong>Key Events</strong></p><p></p><p><strong>NPCs Met</strong></p><p></p><p><strong>Loot &amp; Rewards</strong></p><p></p><p><strong>Notes for Next Session</strong></p><p></p>'
+        content: `<p><strong>${localize('CALENDARIA.Preset.SessionContent.Recap')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.KeyEvents')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.NPCsMet')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.LootRewards')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.NextSession')}</strong></p><p></p>`
       }
     },
     { id: 'meeting', label: localize('CALENDARIA.Preset.Meeting'), color: '#845ef7', icon: 'fas fa-handshake', defaults: { reminderType: 'toast', reminderOffset: 1 } },
@@ -313,7 +330,7 @@ export function clearDisplayPropsCache() {
  */
 export function getAllPresets() {
   if (_presetCache) return _presetCache;
-  _presetCache = getAllPresetsIncludingHidden().filter((c) => !c.hidden);
+  _presetCache = getAllPresetsIncludingHidden().filter((c) => !c.hidden && c.id !== DEFAULT_PRESET_ID);
   return _presetCache;
 }
 
@@ -326,7 +343,7 @@ export function getAllPresetsIncludingHidden() {
   const savedIds = new Set(raw.map((c) => c.id));
   const seeds = getBuiltinPresetSeeds()
     .filter((s) => !savedIds.has(s.id))
-    .map((c) => ({ ...c, builtin: true, playerUsable: true, defaults: { ...emptyDefaults(), ...c.defaults }, overrides: emptyOverrides() }));
+    .map((c) => ({ ...c, builtin: true, playerUsable: true, defaults: { ...emptyDefaults(), ...c.defaults } }));
   return [...raw, ...seeds].map((c) => ({ ...c, icon: c.icon && !c.icon.includes(' ') ? `fas ${c.icon}` : c.icon })).sort((a, b) => (a.label || '').localeCompare(b.label || ''));
 }
 
@@ -336,6 +353,7 @@ export function getAllPresetsIncludingHidden() {
  * @returns {object|null} Preset definition or null if not found
  */
 export function getPresetDefinition(presetId) {
+  if (presetId === DEFAULT_PRESET_ID) return getAllPresetsIncludingHidden().find((c) => c.id === DEFAULT_PRESET_ID) || null;
   return getAllPresets().find((c) => c.id === presetId) || null;
 }
 
@@ -373,7 +391,7 @@ export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-t
   const existing = getAllPresets();
   if (existing.find((c) => c.id === id)) return existing.find((c) => c.id === id);
   const maxSort = existing.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
-  const newPreset = { id, label, color, icon, builtin: false, sortOrder: maxSort + 1, playerUsable: true, defaults: emptyDefaults(), overrides: emptyOverrides() };
+  const newPreset = { id, label, color, icon, builtin: false, sortOrder: maxSort + 1, playerUsable: true, defaults: emptyDefaults() };
   const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
   raw.push(newPreset);
   invalidatePresetCache();
@@ -411,7 +429,6 @@ export async function updatePreset(presetId, updates) {
   const fields = ['label', 'color', 'icon', 'sortOrder', 'playerUsable'];
   for (const key of fields) if (updates[key] !== undefined) cat[key] = updates[key];
   if (updates.defaults !== undefined) cat.defaults = { ...(cat.defaults || emptyDefaults()), ...updates.defaults };
-  if (updates.overrides !== undefined) cat.overrides = { ...(cat.overrides || emptyOverrides()), ...updates.overrides };
   invalidatePresetCache();
   await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
   Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
@@ -451,13 +468,16 @@ export async function saveAllPresets(presets) {
  * @returns {object}  Merged defaults (non-null values only)
  */
 export function getPresetDefaults(presetIds) {
-  if (!presetIds?.length) return {};
-  const allCats = getAllPresets();
+  const allCats = getAllPresetsIncludingHidden();
+  const defaultPreset = allCats.find((c) => c.id === DEFAULT_PRESET_ID);
+  const merged = {};
+  for (const [key, val] of Object.entries(defaultPreset.defaults)) if (val !== null && val !== undefined && !(Array.isArray(val) && val.length === 0)) merged[key] = val;
+  if (!presetIds?.length) return merged;
   const matched = presetIds
+    .filter((id) => id !== DEFAULT_PRESET_ID)
     .map((id) => allCats.find((c) => c.id === id))
     .filter(Boolean)
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-  const merged = {};
   for (const cat of matched) {
     const d = cat.defaults;
     if (!d) continue;
@@ -472,35 +492,15 @@ export function getPresetDefaults(presetIds) {
  * @returns {string|null}  Content template HTML or null
  */
 export function getPresetContentTemplate(presetIds) {
-  if (!presetIds?.length) return null;
-  const allCats = getAllPresets();
-  for (const id of presetIds) {
-    const cat = allCats.find((c) => c.id === id);
-    if (cat?.defaults?.content) return cat.defaults.content;
-  }
-  return null;
-}
-
-/**
- * Get merged preset overrides for a set of preset IDs.
- * @param {string[]} presetIds  Array of preset IDs
- * @returns {object}  Override values (non-null fields only)
- */
-export function getPresetOverrides(presetIds) {
-  if (!presetIds?.length) return { displayStyle: null, visibility: null };
-  const allCats = getAllPresets();
-  const matched = presetIds
-    .map((id) => allCats.find((c) => c.id === id))
-    .filter(Boolean)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-  const result = { displayStyle: null, visibility: null };
-  for (const cat of matched) {
-    if (!cat.overrides) continue;
-    for (const [key, val] of Object.entries(cat.overrides)) {
-      if (val != null) result[key] = val;
+  if (presetIds?.length) {
+    const allCats = getAllPresets();
+    for (const id of presetIds) {
+      const cat = allCats.find((c) => c.id === id);
+      if (cat?.defaults?.content) return cat.defaults.content;
     }
   }
-  return result;
+  const defaultPreset = getPresetDefinition(DEFAULT_PRESET_ID);
+  return defaultPreset.defaults?.content || null;
 }
 
 /**
@@ -520,8 +520,14 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
     icon: 'icon',
     reminderType: 'reminderType',
     reminderOffset: 'reminderOffset',
+    reminderTargets: 'reminderTargets',
     hasDuration: 'hasDuration',
     duration: 'duration',
+    showBookends: 'showBookends',
+    limitedRepeat: 'limitedRepeat',
+    limitedRepeatDays: 'limitedRepeatDays',
+    maxOccurrences: 'maxOccurrences',
+    silent: 'silent',
     macro: 'macro'
   };
   const noteDefaults = getDefaultNoteData();
@@ -538,7 +544,7 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
 }
 
 /**
- * Resolve the effective display properties for a note page, applying preset overrides.
+ * Resolve the effective display properties for a note page.
  * @param {object} page - JournalEntryPage document (calendaria.calendarnote type)
  * @returns {{ displayStyle: string, visibility: string, color: string, icon: string, iconType: string }} Resolved display properties
  */
@@ -546,10 +552,9 @@ export function resolveNoteDisplayProps(page) {
   const id = page.id;
   if (_displayPropsCache.has(id)) return _displayPropsCache.get(id);
   const sys = page.system;
-  const overrides = getPresetOverrides(sys.categories);
   const result = {
-    displayStyle: overrides.displayStyle || sys.displayStyle || DISPLAY_STYLES.ICON,
-    visibility: overrides.visibility || sys.visibility || NOTE_VISIBILITY.VISIBLE,
+    displayStyle: sys.displayStyle || DISPLAY_STYLES.ICON,
+    visibility: sys.visibility || NOTE_VISIBILITY.VISIBLE,
     color: sys.color || '#4a9eff',
     icon: sys.icon || 'fas fa-calendar',
     iconType: sys.iconType || 'fontawesome',
@@ -643,11 +648,10 @@ export async function migratePresetSchema() {
         builtin: true,
         sortOrder: existing.sortOrder ?? i,
         playerUsable: existing.playerUsable ?? true,
-        defaults: existing.defaults || emptyDefaults(),
-        overrides: existing.overrides || emptyOverrides()
+        defaults: existing.defaults || emptyDefaults()
       });
     } else {
-      migrated.push({ ...seed, builtin: true, sortOrder: i, playerUsable: true, defaults: emptyDefaults(), overrides: emptyOverrides() });
+      migrated.push({ ...seed, builtin: true, sortOrder: i, playerUsable: true, defaults: emptyDefaults() });
     }
   }
   const builtinIds = new Set(seeds.map((s) => s.id));
@@ -662,8 +666,7 @@ export async function migratePresetSchema() {
       builtin: false,
       sortOrder: cat.sortOrder ?? customIndex++,
       playerUsable: cat.playerUsable ?? true,
-      defaults: cat.defaults || emptyDefaults(),
-      overrides: cat.overrides || emptyOverrides()
+      defaults: cat.defaults || emptyDefaults()
     });
   }
   invalidatePresetCache();

@@ -7,7 +7,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { NOTE_VISIBILITY } from '../constants.mjs';
 import { localize } from '../utils/_module.mjs';
-import { NoteManager, compareDates, getPresetOverrides } from './_module.mjs';
+import { NoteManager, compareDates } from './_module.mjs';
 
 /**
  * Filter and sort an array of note stubs based on filter state.
@@ -28,15 +28,13 @@ export function filterNotes(notes, state, options = {}) {
   if (!options.isGM) {
     result = result.filter((n) => {
       if (!n.visible) return false;
-      const overrides = getPresetOverrides(n.flagData.categories);
-      const effective = overrides.visibility || n.flagData.visibility || NOTE_VISIBILITY.VISIBLE;
+      const effective = n.flagData.visibility || NOTE_VISIBILITY.VISIBLE;
       return effective === NOTE_VISIBILITY.VISIBLE;
     });
   }
   if (state.visibility && state.visibility !== 'all') {
     result = result.filter((n) => {
-      const overrides = getPresetOverrides(n.flagData.categories);
-      const effective = overrides.visibility || n.flagData.visibility || NOTE_VISIBILITY.VISIBLE;
+      const effective = n.flagData.visibility || NOTE_VISIBILITY.VISIBLE;
       return effective === state.visibility;
     });
   }

@@ -5,7 +5,7 @@
  */
 
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY } from '../../constants.mjs';
-import { NoteManager, getAllPresetsIncludingHidden, getBuiltinPresetSeeds, saveAllPresets } from '../../notes/_module.mjs';
+import { DEFAULT_PRESET_ID, NoteManager, getAllPresetsIncludingHidden, getBuiltinPresetSeeds, saveAllPresets } from '../../notes/_module.mjs';
 import { format, localize } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -30,11 +30,11 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       removePreset: PresetManager.#onRemovePreset,
       editIcon: PresetManager.#onEditIcon,
       savePresets: PresetManager.#onSave,
-      toggleLock: PresetManager.#onToggleLock,
       restorePresets: PresetManager.#onRestorePresets,
       resetSection: PresetManager.#onResetSection,
       exportPreset: PresetManager.#onExportPreset,
-      importPreset: PresetManager.#onImportPreset
+      importPreset: PresetManager.#onImportPreset,
+      syncPreset: PresetManager.#onSyncPreset
     }
   };
 
@@ -61,7 +61,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       this._originalPresets = structuredClone(this._presets);
     }
-    if (!this._selectedId && this._presets.length) this._selectedId = this._presets[0].id;
+    if (!this._selectedId && this._presets.length) this._selectedId = DEFAULT_PRESET_ID;
     const selected = this._presets.find((c) => c.id === this._selectedId) || null;
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
     const displayStyleOptions = Object.values(DISPLAY_STYLES).map((v) => ({ value: v, label: localize(`CALENDARIA.Note.DisplayStyle.${capitalize(v)}`) }));
@@ -69,109 +69,174 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const macroOptions = game.macros?.contents?.map((m) => ({ value: m.id, label: m.name })) || [];
     const presets = this._presets
       .filter((c) => !c.hidden)
-      .map((c) => ({ ...c, selected: c.id === this._selectedId }))
-      .sort((a, b) => (a.label || '').localeCompare(b.label || ''));
-    let defaultFields = [];
+      .map((c) => ({ ...c, selected: c.id === this._selectedId, isDefault: c.id === DEFAULT_PRESET_ID }))
+      .sort((a, b) => {
+        if (a.id === DEFAULT_PRESET_ID) return -1;
+        if (b.id === DEFAULT_PRESET_ID) return 1;
+        return (a.label || '').localeCompare(b.label || '');
+      });
+    let contentFields = [];
+    let scheduleFields = [];
+    let settingsFields = [];
     if (selected) {
       const defaults = selected.defaults || {};
-      const overrides = selected.overrides || {};
-      defaultFields = this.#buildDefaultFields(defaults, overrides, displayStyleOptions, visibilityOptions, macroOptions);
+      const groups = this.#buildDefaultFields(defaults, displayStyleOptions, visibilityOptions, macroOptions);
+      contentFields = groups.content;
+      scheduleFields = groups.schedule;
+      settingsFields = groups.settings;
     }
     const hasHiddenBuiltins = this._presets.some((c) => c.builtin && c.hidden);
-    return { ...context, presets, selected, defaultFields, hasHiddenBuiltins };
+    const selectedContext = selected ? { ...selected, isDefault: selected.id === DEFAULT_PRESET_ID } : null;
+    return { ...context, presets, selected: selectedContext, contentFields, scheduleFields, settingsFields, hasHiddenBuiltins };
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+    this.element.querySelectorAll('[data-toggles]').forEach((checkbox) => {
+      checkbox.addEventListener('change', () => {
+        const ids = checkbox.dataset.toggles.split(',');
+        for (const id of ids) {
+          const target = this.element.querySelector(`#${id}`);
+          if (target) target.disabled = !checkbox.checked;
+        }
+      });
+    });
   }
 
   /**
-   * Build the default fields array for the template.
+   * Build the default fields grouped by note tab.
    * @param {object} defaults - Preset defaults
-   * @param {object} overrides - Preset overrides
    * @param {object[]} displayStyleOptions - Display style options
    * @param {object[]} visibilityOptions - Visibility options
    * @param {object[]} macroOptions - Macro options
-   * @returns {object[]} Array of field descriptors
+   * @returns {{ content: object[], schedule: object[], settings: object[] }} Grouped field descriptors
    */
-  #buildDefaultFields(defaults, overrides, displayStyleOptions, visibilityOptions, macroOptions) {
+  #buildDefaultFields(defaults, displayStyleOptions, visibilityOptions, macroOptions) {
     const noDefault = localize('CALENDARIA.PresetManager.NoDefault');
     const esc = (s) => (s ?? '').toString().replace(/"/g, '&quot;');
     const selectHtml = (name, value, options) => {
       let html = `<select id="cat-def-${name}" name="selected.defaults.${name}">`;
-      html += `<option value="null" ${!value ? 'selected' : ''}>${noDefault}</option>`;
-      for (const opt of options) html += `<option value="${esc(opt.value)}" ${opt.value === value ? 'selected' : ''}>${opt.label}</option>`;
+      html += `<option value="null" ${value === null || value === undefined ? 'selected' : ''}>${noDefault}</option>`;
+      for (const opt of options) html += `<option value="${esc(opt.value)}" ${String(opt.value) === String(value) ? 'selected' : ''}>${opt.label}</option>`;
       html += '</select>';
       return html;
     };
-    const boolSelectHtml = (name, value) => {
-      return `<select id="cat-def-${name}" name="selected.defaults.${name}">
-        <option value="null" ${value === null || value === undefined ? 'selected' : ''}>${noDefault}</option>
-        <option value="true" ${value === true ? 'selected' : ''}>${localize('CALENDARIA.Common.Yes')}</option>
-        <option value="false" ${value === false ? 'selected' : ''}>${localize('CALENDARIA.Common.No')}</option>
-      </select>`;
+    const checkboxHtml = (name, value, extra = '') => {
+      return `<input type="hidden" name="selected.defaults.${name}" value="false"><input type="checkbox" id="cat-def-${name}" name="selected.defaults.${name}" value="true" ${value === true ? 'checked' : ''} ${extra}>`;
     };
     const numberHtml = (name, value, extra = '') => {
       return `<input type="number" id="cat-def-${name}" name="selected.defaults.${name}" value="${value ?? ''}" placeholder="${noDefault}" ${extra}>`;
     };
-    return [
-      {
-        key: 'allDay',
-        label: localize('CALENDARIA.Common.AllDay'),
-        locked: overrides.allDay != null,
-        inputHtml: boolSelectHtml('allDay', overrides.allDay ?? defaults.allDay),
-        hint: localize('CALENDARIA.PresetManager.DefaultAllDayHint')
-      },
-      {
-        key: 'displayStyle',
-        label: localize('CALENDARIA.Note.DisplayStyleLabel'),
-        locked: overrides.displayStyle != null,
-        inputHtml: selectHtml('displayStyle', overrides.displayStyle ?? defaults.displayStyle, displayStyleOptions),
-        hint: localize('CALENDARIA.PresetManager.DefaultDisplayStyleHint')
-      },
-      {
-        key: 'visibility',
-        label: localize('CALENDARIA.Common.Visibility'),
-        locked: overrides.visibility != null,
-        inputHtml: selectHtml('visibility', overrides.visibility ?? defaults.visibility, visibilityOptions),
-        hint: localize('CALENDARIA.PresetManager.DefaultVisibilityHint')
-      },
-      {
-        key: 'reminderType',
-        label: localize('CALENDARIA.Common.NotifType'),
-        locked: overrides.reminderType != null,
-        inputHtml: selectHtml('reminderType', overrides.reminderType ?? defaults.reminderType, [
-          { value: 'toast', label: 'Toast' },
-          { value: 'chat', label: 'Chat' },
-          { value: 'dialog', label: 'Dialog' }
-        ]),
-        hint: localize('CALENDARIA.PresetManager.DefaultReminderTypeHint')
-      },
-      {
-        key: 'reminderOffset',
-        label: localize('CALENDARIA.Note.ReminderOffset'),
-        locked: overrides.reminderOffset != null,
-        inputHtml: numberHtml('reminderOffset', overrides.reminderOffset ?? defaults.reminderOffset),
-        hint: localize('CALENDARIA.Note.ReminderOffsetTooltip')
-      },
-      {
-        key: 'hasDuration',
-        label: localize('CALENDARIA.Common.HasDuration'),
-        locked: overrides.hasDuration != null,
-        inputHtml: boolSelectHtml('hasDuration', overrides.hasDuration ?? defaults.hasDuration),
-        hint: localize('CALENDARIA.PresetManager.DefaultHasDurationHint')
-      },
-      {
-        key: 'duration',
-        label: localize('CALENDARIA.Common.Duration'),
-        locked: overrides.duration != null,
-        inputHtml: numberHtml('duration', overrides.duration ?? defaults.duration, 'min="1"'),
-        hint: localize('CALENDARIA.PresetManager.DefaultDurationHint')
-      },
-      {
-        key: 'macro',
-        label: localize('CALENDARIA.Common.Macro'),
-        locked: overrides.macro != null,
-        inputHtml: selectHtml('macro', overrides.macro ?? defaults.macro, macroOptions),
-        hint: localize('CALENDARIA.PresetManager.DefaultMacroHint')
-      }
+    const textHtml = (name, value, placeholder = '') => {
+      return `<input type="text" id="cat-def-${name}" name="selected.defaults.${name}" value="${esc(value ?? '')}" placeholder="${placeholder || noDefault}">`;
+    };
+    const reminderTargetOptions = [
+      { value: 'all', label: localize('CALENDARIA.Note.ReminderTargetAll') },
+      { value: 'gm', label: localize('CALENDARIA.Common.GMOnly') },
+      { value: 'author', label: localize('CALENDARIA.Note.ReminderTargetAuthor') },
+      { value: 'viewers', label: localize('CALENDARIA.Note.ReminderTargetViewers') }
     ];
+    const ownershipOptions = [
+      { value: 0, label: localize('CALENDARIA.PresetManager.OwnershipNone') },
+      { value: 2, label: localize('CALENDARIA.PresetManager.OwnershipObserver') },
+      { value: 3, label: localize('CALENDARIA.PresetManager.OwnershipOwner') }
+    ];
+    const hasDur = defaults.hasDuration === true;
+    const hasLimited = defaults.limitedRepeat === true;
+    return {
+      content: [
+        {
+          key: 'name',
+          label: localize('CALENDARIA.Note.Title'),
+          inputHtml: textHtml('name', defaults.name, localize('CALENDARIA.PresetManager.TitleTemplatePlaceholder')),
+          hint: localize('CALENDARIA.PresetManager.TitleTemplateHint')
+        }
+      ],
+      schedule: [
+        { key: 'allDay', label: localize('CALENDARIA.Common.AllDay'), inputHtml: checkboxHtml('allDay', defaults.allDay), hint: localize('CALENDARIA.PresetManager.DefaultAllDayHint') },
+        {
+          key: 'maxOccurrences',
+          label: localize('CALENDARIA.PresetManager.MaxOccurrences'),
+          inputHtml: numberHtml('maxOccurrences', defaults.maxOccurrences, 'min="0"'),
+          hint: localize('CALENDARIA.PresetManager.DefaultMaxOccurrencesHint')
+        }
+      ],
+      settings: [
+        {
+          key: 'visibility',
+          label: localize('CALENDARIA.Common.Visibility'),
+          inputHtml: selectHtml('visibility', defaults.visibility, visibilityOptions),
+          hint: localize('CALENDARIA.PresetManager.DefaultVisibilityHint')
+        },
+        { key: 'silent', label: localize('CALENDARIA.Note.Silent'), inputHtml: checkboxHtml('silent', defaults.silent), hint: localize('CALENDARIA.PresetManager.DefaultSilentHint') },
+        {
+          key: 'displayStyle',
+          label: localize('CALENDARIA.Note.DisplayStyleLabel'),
+          inputHtml: selectHtml('displayStyle', defaults.displayStyle, displayStyleOptions),
+          hint: localize('CALENDARIA.PresetManager.DefaultDisplayStyleHint')
+        },
+        { key: 'macro', label: localize('CALENDARIA.Common.Macro'), inputHtml: selectHtml('macro', defaults.macro, macroOptions), hint: localize('CALENDARIA.PresetManager.DefaultMacroHint') },
+        {
+          key: 'hasDuration',
+          label: localize('CALENDARIA.Common.HasDuration'),
+          inputHtml: checkboxHtml('hasDuration', defaults.hasDuration, 'data-toggles="cat-def-duration,cat-def-showBookends,cat-def-limitedRepeat,cat-def-limitedRepeatDays"'),
+          hint: localize('CALENDARIA.PresetManager.DefaultHasDurationHint')
+        },
+        {
+          key: 'duration',
+          label: localize('CALENDARIA.Common.Duration'),
+          inputHtml: numberHtml('duration', defaults.duration, `min="1" ${hasDur ? '' : 'disabled'}`),
+          hint: localize('CALENDARIA.PresetManager.DefaultDurationHint')
+        },
+        {
+          key: 'showBookends',
+          label: localize('CALENDARIA.Note.Duration.ShowBookends'),
+          inputHtml: checkboxHtml('showBookends', defaults.showBookends, hasDur ? '' : 'disabled'),
+          hint: localize('CALENDARIA.Note.Duration.ShowBookendsHint')
+        },
+        {
+          key: 'limitedRepeat',
+          label: localize('CALENDARIA.Note.Duration.LimitedRepeat'),
+          inputHtml: checkboxHtml('limitedRepeat', defaults.limitedRepeat, `${hasDur ? '' : 'disabled'} data-toggles="cat-def-limitedRepeatDays"`),
+          hint: localize('CALENDARIA.Note.Duration.LimitedRepeatHint')
+        },
+        {
+          key: 'limitedRepeatDays',
+          label: localize('CALENDARIA.Note.Duration.LimitedRepeatDays'),
+          inputHtml: numberHtml('limitedRepeatDays', defaults.limitedRepeatDays, `min="1" ${hasDur && hasLimited ? '' : 'disabled'}`),
+          hint: localize('CALENDARIA.Note.Duration.LimitedRepeatHint')
+        },
+        {
+          key: 'reminderType',
+          label: localize('CALENDARIA.Common.NotifType'),
+          inputHtml: selectHtml('reminderType', defaults.reminderType, [
+            { value: 'toast', label: 'Toast' },
+            { value: 'chat', label: 'Chat' },
+            { value: 'dialog', label: 'Dialog' }
+          ]),
+          hint: localize('CALENDARIA.PresetManager.DefaultReminderTypeHint')
+        },
+        {
+          key: 'reminderTargets',
+          label: localize('CALENDARIA.PresetManager.ReminderTargets'),
+          inputHtml: selectHtml('reminderTargets', defaults.reminderTargets, reminderTargetOptions),
+          hint: localize('CALENDARIA.PresetManager.DefaultReminderTargetsHint')
+        },
+        {
+          key: 'reminderOffset',
+          label: localize('CALENDARIA.Note.ReminderOffset'),
+          inputHtml: numberHtml('reminderOffset', defaults.reminderOffset),
+          hint: localize('CALENDARIA.Note.ReminderOffsetTooltip')
+        },
+        {
+          key: 'defaultOwnership',
+          label: localize('CALENDARIA.PresetManager.DefaultOwnership'),
+          inputHtml: selectHtml('defaultOwnership', defaults.defaultOwnership, ownershipOptions),
+          hint: localize('CALENDARIA.PresetManager.DefaultOwnershipHint')
+        }
+      ]
+    };
   }
 
   /**
@@ -207,8 +272,27 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       builtin: false,
       sortOrder: maxSort + 1,
       playerUsable: true,
-      defaults: { allDay: null, displayStyle: null, visibility: null, color: null, icon: null, reminderType: null, reminderOffset: null, hasDuration: null, duration: null, macro: null, owners: [] },
-      overrides: {}
+      defaults: {
+        name: null,
+        allDay: null,
+        displayStyle: null,
+        visibility: null,
+        color: null,
+        icon: null,
+        reminderType: null,
+        reminderOffset: null,
+        reminderTargets: null,
+        hasDuration: null,
+        duration: null,
+        maxOccurrences: null,
+        silent: null,
+        showBookends: null,
+        limitedRepeat: null,
+        limitedRepeatDays: null,
+        defaultOwnership: null,
+        macro: null,
+        owners: []
+      }
     });
     this._selectedId = id;
     this.render();
@@ -224,6 +308,10 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!id) return;
     const cat = this._presets.find((c) => c.id === id);
     if (!cat) return;
+    if (id === DEFAULT_PRESET_ID) {
+      ui.notifications.warn('CALENDARIA.PresetManager.CannotDeleteDefault', { localize: true });
+      return;
+    }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Common.DeletePreset') },
       content: `<p>${format('CALENDARIA.PresetManager.ConfirmDeleteMessage', { name: cat.label })}</p>`,
@@ -234,26 +322,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     else this._presets = this._presets.filter((c) => c.id !== id);
     if (this._selectedId === id) this._selectedId = this._presets.find((c) => !c.hidden)?.id || null;
     this.render();
-  }
-
-  /**
-   * Toggle lock state on a default field.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked button
-   */
-  static #onToggleLock(_event, target) {
-    const field = target.dataset.field;
-    if (!field) return;
-    const hiddenInput = target.parentElement.querySelector(`input[name="selected.locks.${field}"]`);
-    const isLocked = hiddenInput?.value === 'true';
-    if (hiddenInput) hiddenInput.value = isLocked ? 'false' : 'true';
-    target.classList.toggle('locked', !isLocked);
-    const icon = target.querySelector('i');
-    if (icon) {
-      icon.classList.toggle('fa-lock', !isLocked);
-      icon.classList.toggle('fa-lock-open', isLocked);
-    }
-    target.dataset.tooltip = !isLocked ? localize('CALENDARIA.PresetManager.ForcedTooltip') : localize('CALENDARIA.PresetManager.DefaultTooltip');
   }
 
   /**
@@ -351,31 +419,29 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!cat || !data.selected) return;
     const s = data.selected;
     cat.label = s.label || cat.label;
-    cat.playerUsable = !!s.playerUsable;
-    const locks = s.locks || {};
+    cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : !!s.playerUsable;
     const raw = s.defaults || {};
     cat.defaults = cat.defaults || {};
-    cat.overrides = cat.overrides || {};
     const fieldTypes = {
+      name: 'string',
       allDay: 'bool',
       displayStyle: 'string',
       visibility: 'string',
       reminderType: 'string',
       reminderOffset: 'number',
+      reminderTargets: 'string',
       hasDuration: 'bool',
       duration: 'number',
+      maxOccurrences: 'number',
+      silent: 'bool',
+      showBookends: 'bool',
+      limitedRepeat: 'bool',
+      limitedRepeatDays: 'number',
+      defaultOwnership: 'number',
       macro: 'string'
     };
     for (const [key, type] of Object.entries(fieldTypes)) {
-      const value = PresetManager.#parseValue(raw[key], type);
-      const locked = locks[key] === 'true';
-      if (locked) {
-        cat.overrides[key] = value;
-        cat.defaults[key] = null;
-      } else {
-        cat.defaults[key] = value;
-        cat.overrides[key] = null;
-      }
+      cat.defaults[key] = PresetManager.#parseValue(raw[key], type);
     }
     cat.defaults.color = cat.defaults.color ?? null;
     cat.defaults.icon = cat.defaults.icon ?? null;
@@ -404,9 +470,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       const cats = stub.flagData?.categories;
       if (!Array.isArray(cats) || !cats.length) continue;
       const filtered = cats.filter((id) => savedIds.has(id));
-      if (filtered.length !== cats.length) {
-        orphanUpdates.push(NoteManager.updateNote(stub.id, { noteData: { categories: filtered } }));
-      }
+      if (filtered.length !== cats.length) orphanUpdates.push(NoteManager.updateNote(stub.id, { noteData: { categories: filtered } }));
     }
     if (orphanUpdates.length) await Promise.all(orphanUpdates);
     const changedPresets = this._presets.filter((p) => {
@@ -442,6 +506,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     this._originalPresets = structuredClone(this._presets);
+    ui.notifications.clear();
     ui.notifications.info(localize('CALENDARIA.PresetManager.Saved'));
   }
 
@@ -462,55 +527,43 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     if (!confirmed) return;
     const seed = cat.builtin ? getBuiltinPresetSeeds().find((s) => s.id === cat.id) : null;
-    if (section === 'basic') {
+    const sd = seed?.defaults || {};
+    const resetNull = (keys) => {
+      for (const k of keys) cat.defaults[k] = sd[k] ?? null;
+    };
+    cat.defaults = cat.defaults || {};
+    if (section === 'content') {
       if (seed) {
-        cat.label = seed.label;
+        if (cat.id !== DEFAULT_PRESET_ID) cat.label = seed.label;
         cat.icon = seed.icon;
         cat.color = seed.color;
-        cat.playerUsable = true;
+        cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : (seed.playerUsable ?? true);
       } else {
         cat.label = localize('CALENDARIA.Common.NewPreset');
         cat.icon = 'fas fa-bookmark';
         cat.color = '#4a90e2';
         cat.playerUsable = true;
       }
-    } else if (section === 'defaults') {
-      if (seed) {
-        const seedDefaults = seed.defaults || {};
-        cat.defaults = {
-          allDay: seedDefaults.allDay ?? null,
-          displayStyle: seedDefaults.displayStyle ?? null,
-          visibility: seedDefaults.visibility ?? null,
-          color: null,
-          icon: null,
-          reminderType: seedDefaults.reminderType ?? null,
-          reminderOffset: seedDefaults.reminderOffset ?? null,
-          hasDuration: seedDefaults.hasDuration ?? null,
-          duration: seedDefaults.duration ?? null,
-          macro: null,
-          owners: [],
-          content: null
-        };
-      } else {
-        cat.defaults = {
-          allDay: null,
-          displayStyle: null,
-          visibility: null,
-          color: null,
-          icon: null,
-          reminderType: null,
-          reminderOffset: null,
-          hasDuration: null,
-          duration: null,
-          macro: null,
-          owners: [],
-          content: null
-        };
-      }
-      cat.overrides = { displayStyle: null, visibility: null };
-    } else if (section === 'content') {
-      cat.defaults = cat.defaults || {};
-      cat.defaults.content = seed?.defaults?.content ?? null;
+      resetNull(['name']);
+      cat.defaults.content = sd.content ?? null;
+    } else if (section === 'schedule') {
+      resetNull(['allDay', 'maxOccurrences']);
+    } else if (section === 'settings') {
+      resetNull([
+        'displayStyle',
+        'visibility',
+        'silent',
+        'reminderType',
+        'reminderOffset',
+        'reminderTargets',
+        'hasDuration',
+        'duration',
+        'showBookends',
+        'limitedRepeat',
+        'limitedRepeatDays',
+        'defaultOwnership',
+        'macro'
+      ]);
     }
     this.render();
   }
@@ -575,6 +628,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           playerUsable: raw.playerUsable ?? true,
           hidden: false,
           defaults: {
+            name: raw.defaults?.name ?? null,
             allDay: raw.defaults?.allDay ?? null,
             displayStyle: raw.defaults?.displayStyle ?? null,
             visibility: raw.defaults?.visibility ?? null,
@@ -582,15 +636,18 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: raw.defaults?.icon ?? null,
             reminderType: raw.defaults?.reminderType ?? null,
             reminderOffset: raw.defaults?.reminderOffset ?? null,
+            reminderTargets: raw.defaults?.reminderTargets ?? null,
             hasDuration: raw.defaults?.hasDuration ?? null,
             duration: raw.defaults?.duration ?? null,
+            maxOccurrences: raw.defaults?.maxOccurrences ?? null,
+            silent: raw.defaults?.silent ?? null,
+            showBookends: raw.defaults?.showBookends ?? null,
+            limitedRepeat: raw.defaults?.limitedRepeat ?? null,
+            limitedRepeatDays: raw.defaults?.limitedRepeatDays ?? null,
+            defaultOwnership: raw.defaults?.defaultOwnership ?? null,
             macro: raw.defaults?.macro ?? null,
             owners: raw.defaults?.owners ?? [],
             content: raw.defaults?.content ?? null
-          },
-          overrides: {
-            displayStyle: raw.overrides?.displayStyle ?? null,
-            visibility: raw.overrides?.visibility ?? null
           }
         });
         manager._selectedId = newId;
@@ -601,6 +658,71 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     input.click();
+  }
+
+  /**
+   * Sync preset defaults to all existing notes with this preset's category.
+   * Skips title, content, and schedule dates. Syncs all other defaults.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onSyncPreset(_event, _target) {
+    const form = this.element;
+    if (form) {
+      const formData = new foundry.applications.ux.FormDataExtended(form);
+      await PresetManager.#onSubmit.call(this, null, form, formData);
+    }
+    const preset = this._presets.find((c) => c.id === this._selectedId);
+    if (!preset) return;
+    if (preset.id === DEFAULT_PRESET_ID) {
+      ui.notifications.warn('CALENDARIA.PresetManager.SyncDefaultNotAllowed', { localize: true });
+      return;
+    }
+    const allNotes = NoteManager.getAllNotes();
+    const affected = allNotes.filter((stub) => {
+      const cats = stub.flagData?.categories;
+      return Array.isArray(cats) && cats.includes(preset.id);
+    });
+    if (!affected.length) {
+      ui.notifications.info('CALENDARIA.PresetManager.SyncNoNotes', { localize: true });
+      return;
+    }
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize('CALENDARIA.PresetManager.SyncTitle') },
+      content: `<p>${format('CALENDARIA.PresetManager.SyncConfirm', { count: affected.length, name: preset.label })}</p>`,
+      rejectClose: false,
+      modal: true
+    });
+    if (!confirmed) return;
+    const defaults = preset.defaults || {};
+    const syncFields = [
+      'allDay',
+      'displayStyle',
+      'visibility',
+      'reminderType',
+      'reminderOffset',
+      'reminderTargets',
+      'hasDuration',
+      'duration',
+      'showBookends',
+      'limitedRepeat',
+      'limitedRepeatDays',
+      'maxOccurrences',
+      'silent',
+      'macro'
+    ];
+    const updates = [];
+    for (const stub of affected) {
+      const noteUpdates = {};
+      for (const key of syncFields) if (defaults[key] != null) noteUpdates[key] = defaults[key];
+      if (defaults.color) noteUpdates.color = defaults.color;
+      if (defaults.icon) noteUpdates.icon = defaults.icon;
+      if (preset.icon) noteUpdates.icon = preset.icon;
+      if (preset.color) noteUpdates.color = preset.color;
+      if (Object.keys(noteUpdates).length) updates.push(NoteManager.updateNote(stub.id, { noteData: noteUpdates }));
+    }
+    if (updates.length) await Promise.all(updates);
+    ui.notifications.info(format('CALENDARIA.PresetManager.SyncComplete', { count: affected.length }));
   }
 
   /** @override */
