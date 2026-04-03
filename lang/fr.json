@@ -1110,8 +1110,6 @@
   "CALENDARIA.Permissions.DeleteNotesHint": "Autoriser la suppression groupée de notes",
   "CALENDARIA.Permissions.EditCalendars": "Modifier les Calendriers",
   "CALENDARIA.Permissions.EditCalendarsHint": "Autoriser l'accès à l'éditeur de calendriers",
-  "CALENDARIA.Permissions.EditNotes": "Modifier les Notes",
-  "CALENDARIA.Permissions.EditNotesHint": "Autoriser la modification des notes appartenant à d'autres joueurs (hors notes MJ)",
   "CALENDARIA.Permissions.NoAccess": "Vous n'avez pas la permission",
   "CALENDARIA.Permissions.ViewBigCal": "Voir BigCal",
   "CALENDARIA.Permissions.ViewBigCalHint": "Autoriser l'utilisation de BigCal",

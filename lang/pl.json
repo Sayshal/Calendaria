@@ -1129,8 +1129,6 @@
   "CALENDARIA.Permissions.DeleteNotesHint": "Pozwól użytkownikom masowo usuwać notatki kalendarza.",
   "CALENDARIA.Permissions.EditCalendars": "Edycja Kalendarzy",
   "CALENDARIA.Permissions.EditCalendarsHint": "Pozwól użytkownikom otwierać edytor kalendarza i modyfikować definicje kalendarzy.",
-  "CALENDARIA.Permissions.EditNotes": "Edycja Notatek",
-  "CALENDARIA.Permissions.EditNotesHint": "Pozwól użytkownikom modyfikować notatki kalendarza należące do innych graczy. Nie dotyczy notatek dostępnych jedynie dla MG.",
   "CALENDARIA.Permissions.NoAccess": "Nie masz uprawnień do dostępu do tej funkcji",
   "CALENDARIA.Permissions.ViewBigCal": "Wyświetlanie DużyKal",
   "CALENDARIA.Permissions.ViewBigCalHint": "Pozwól użytkownikom używać DużyKal.",
