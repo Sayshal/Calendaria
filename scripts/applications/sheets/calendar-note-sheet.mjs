@@ -231,6 +231,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.element.classList.toggle('view-mode', this.isViewMode);
     this.element.classList.toggle('edit-mode', this.isEditMode);
     this.element.classList.remove('dnd5e2', 'dnd5e-journal');
+    for (const select of this.element.querySelectorAll('select[data-ownership-user]')) select.addEventListener('change', (e) => this.#onOwnershipChange(e));
   }
 
   /**
@@ -752,28 +753,26 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     try {
       await super._processSubmitData(event, form, submitData, options);
       if (addedPreset) await this.#applyPresetStyle(addedPreset);
-      const ownershipSelects = form.querySelectorAll('select[data-ownership-user]');
-      if (ownershipSelects.length) {
-        const ownershipUpdates = {};
-        let hasChanges = false;
-        for (const select of ownershipSelects) {
-          const userId = select.dataset.ownershipUser;
-          const level = parseInt(select.value);
-          const current = this.document.parent?.ownership?.[userId] ?? -1;
-          if (level !== current) {
-            ownershipUpdates[userId] = level;
-            hasChanges = true;
-          }
-        }
-        if (hasChanges) {
-          if (game.user.isGM) {
-            const journal = this.document.parent;
-            if (journal) await journal.update({ ownership: ownershipUpdates });
-          } else {
-            CalendariaSocket.emit(SOCKET_TYPES.OWNERSHIP_UPDATE, { journalId: this.document.parent?.id, ownership: ownershipUpdates });
-          }
-        }
-      }
+    } finally {
+      NoteManager.disableSuppressOwnershipRebuild();
+    }
+  }
+
+  /**
+   * Handle ownership dropdown change directly (bypasses form submission).
+   * @param {Event} event - The change event
+   */
+  async #onOwnershipChange(event) {
+    const select = event.target;
+    const userId = select.dataset.ownershipUser;
+    const level = parseInt(select.value);
+    if (!userId || !Number.isFinite(level)) return;
+    const journal = this.document.parent;
+    if (!journal) return;
+    NoteManager.enableSuppressOwnershipRebuild();
+    try {
+      if (game.user.isGM) await journal.update({ ownership: { [userId]: level } });
+      else CalendariaSocket.emit(SOCKET_TYPES.OWNERSHIP_UPDATE, { journalId: journal.id, ownership: { [userId]: level } });
     } finally {
       NoteManager.disableSuppressOwnershipRebuild();
     }

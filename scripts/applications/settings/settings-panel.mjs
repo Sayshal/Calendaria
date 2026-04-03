@@ -920,7 +920,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.DARKNESS_MOON_SYNC,
       SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER
     ],
-    'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.PRECIPITATION_UNIT],
+    'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.TEMPERATURE_SHOW_BOTH, SETTINGS.PRECIPITATION_UNIT],
     'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX, SETTINGS.WEATHER_SOUND_VOLUME],
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_FORCE_DOWNWARD, SETTINGS.FXMASTER_BELOW_TOKENS, SETTINGS.FXMASTER_SOUND_FX],
     'module-sync': [SETTINGS.PRIMARY_GM],
@@ -1514,6 +1514,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
     context.temperatureUnitSymbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
+    context.temperatureShowBoth = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_SHOW_BOTH);
     const precipUnit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
     context.precipitationUnitOptions = [
       { value: 'metric', label: localize('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
@@ -1727,7 +1728,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       changeDateTime: { player: false, trusted: false, assistant: true },
       changeActiveCalendar: { player: false, trusted: false, assistant: false },
       changeWeather: { player: false, trusted: false, assistant: true },
-      editNotes: { player: false, trusted: true, assistant: true },
       deleteNotes: { player: false, trusted: false, assistant: true },
       editCalendars: { player: false, trusted: false, assistant: false },
       viewWeatherForecast: { player: false, trusted: true, assistant: true }
@@ -1894,6 +1894,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if ('autoGenerateWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!data.autoGenerateWeather);
     if ('temperatureUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, data.temperatureUnit);
+    if ('temperatureShowBoth' in data) await game.settings.set(MODULE.ID, SETTINGS.TEMPERATURE_SHOW_BOTH, data.temperatureShowBoth);
     if ('precipitationUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, data.precipitationUnit);
     if ('windSpeedUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.WIND_SPEED_UNIT, data.windSpeedUnit);
     if ('weatherInertia' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_INERTIA, parseFloat(data.weatherInertia));
@@ -2033,7 +2034,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         'changeDateTime',
         'changeActiveCalendar',
         'changeWeather',
-        'editNotes',
         'deleteNotes',
         'editCalendars',
         'viewWeatherForecast'

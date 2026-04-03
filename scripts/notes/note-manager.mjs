@@ -6,7 +6,7 @@
 
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, canAddNotes, canDeleteNotes, format, getUsersWithPermission, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, canAddNotes, canDeleteNotes, format, localize, log } from '../utils/_module.mjs';
 import {
   applyPresetDefaultsToNoteData,
   compareDates,
@@ -56,51 +56,9 @@ export default class NoteManager {
     if (game.user.isGM) {
       await this.getCalendarNotesFolder();
       await this.#initializeActiveCalendarFolder();
-      await this.#syncNoteOwnership();
     }
     this.#initialized = true;
     log(3, 'Note Manager initialized');
-  }
-
-  /**
-   * Re-sync note ownership after editNotes permissions change.
-   * @returns {Promise<void>}
-   */
-  static async syncNoteOwnership() {
-    if (game.user.isGM) await this.#syncNoteOwnership();
-  }
-
-  /**
-   * Sync ownership for all calendar notes based on editNotes permission.
-   * @returns {Promise<void>}
-   * @private
-   */
-  static async #syncNoteOwnership() {
-    const usersWithPermission = getUsersWithPermission('editNotes');
-    const permittedIds = new Set(usersWithPermission.map((u) => u.id));
-    let updated = 0;
-    for (const journal of game.journal) {
-      if (!journal.getFlag(MODULE.ID, 'isCalendarNote')) continue;
-      const page = journal.pages.contents[0];
-      if (!page || page.system?.visibility !== NOTE_VISIBILITY.VISIBLE) continue;
-      const currentOwnership = journal.ownership || {};
-      const authorId = page.system?.author?._id;
-      const updateData = {};
-      for (const id of permittedIds) if (currentOwnership[id] !== 3) updateData[`ownership.${id}`] = 3;
-      for (const [userId, level] of Object.entries(currentOwnership)) {
-        if (userId === 'default') continue;
-        if (level !== 3) continue;
-        if (permittedIds.has(userId)) continue;
-        if (game.users.get(userId)?.isGM) continue;
-        if (userId === authorId) continue;
-        updateData[`ownership.-=${userId}`] = null;
-      }
-      if (Object.keys(updateData).length > 0) {
-        await journal.update(updateData);
-        updated++;
-      }
-    }
-    if (updated > 0) log(3, `Synced ownership for ${updated} calendar notes`);
   }
 
   /**
@@ -898,7 +856,6 @@ export default class NoteManager {
       case NOTE_VISIBILITY.VISIBLE:
         ownership.default = 2;
         if (authorId) ownership[authorId] = 3;
-        for (const user of getUsersWithPermission('editNotes')) ownership[user.id] = 3;
         break;
       case NOTE_VISIBILITY.HIDDEN:
         if (authorId) ownership[authorId] = 3;

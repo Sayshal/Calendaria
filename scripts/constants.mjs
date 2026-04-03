@@ -194,6 +194,7 @@ export const SETTINGS = {
   SUN_DIAL_STICKY_STATES: 'sunDialStickyStates',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
   TEMPERATURE_UNIT: 'temperatureUnit',
+  TEMPERATURE_SHOW_BOTH: 'temperatureShowBoth',
   THEME_MODE: 'themeMode',
   TIME_ADVANCE_INTERVAL: 'timeAdvanceInterval',
   TIME_KEEPER_POSITION: 'timeKeeperPosition',

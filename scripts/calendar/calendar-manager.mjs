@@ -463,7 +463,7 @@ export default class CalendarManager {
    * Re-render all calendar-related UI applications.
    */
   static rerenderCalendarUIs() {
-    const ids = ['calendaria-hud', 'calendaria-timekeeper', 'calendaria-mini-cal', 'calendaria-big-cal'];
+    const ids = ['calendaria-hud', 'calendaria-timekeeper', 'calendaria-mini-cal', 'calendaria-big-cal', 'calendaria-settings-panel'];
     for (const id of ids) foundry.applications.instances.get(id)?.render();
   }
 

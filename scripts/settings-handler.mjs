@@ -6,7 +6,7 @@
 
 import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
-import { NoteManager, invalidatePresetCache } from './notes/_module.mjs';
+import { invalidatePresetCache } from './notes/_module.mjs';
 import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 
@@ -1178,13 +1178,11 @@ export default class CalendariaSettings {
             changeDateTime: { player: false, trusted: false, assistant: true },
             changeActiveCalendar: { player: false, trusted: false, assistant: false },
             changeWeather: { player: false, trusted: false, assistant: true },
-            editNotes: { player: false, trusted: true, assistant: true },
             deleteNotes: { player: false, trusted: false, assistant: true },
             editCalendars: { player: false, trusted: false, assistant: false },
             viewWeatherForecast: { player: false, trusted: true, assistant: true }
           }
-        }),
-        onChange: () => NoteManager.syncNoteOwnership()
+        })
       },
       [SETTINGS.AUTO_GENERATE_WEATHER]: {
         name: 'CALENDARIA.Settings.AutoGenerate.Name',
@@ -1200,6 +1198,13 @@ export default class CalendariaSettings {
         scope: 'world',
         config: false,
         type: new StringField({ choices: { celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius', fahrenheit: 'CALENDARIA.Settings.TemperatureUnit.Fahrenheit' }, initial: 'celsius' })
+      },
+      [SETTINGS.TEMPERATURE_SHOW_BOTH]: {
+        name: 'CALENDARIA.Settings.TemperatureShowBoth.Name',
+        hint: 'CALENDARIA.Settings.TemperatureShowBoth.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.PRECIPITATION_UNIT]: {
         name: 'CALENDARIA.Common.Precipitation',

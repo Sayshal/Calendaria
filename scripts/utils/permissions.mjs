@@ -19,7 +19,6 @@ const DEFAULTS = {
   changeDateTime: { player: false, trusted: false, assistant: true },
   changeActiveCalendar: { player: false, trusted: false, assistant: false },
   changeWeather: { player: false, trusted: false, assistant: true },
-  editNotes: { player: false, trusted: true, assistant: true },
   deleteNotes: { player: false, trusted: false, assistant: true },
   editCalendars: { player: false, trusted: false, assistant: false },
   viewWeatherForecast: { player: false, trusted: true, assistant: true }
@@ -126,14 +125,6 @@ export function canChangeActiveCalendar() {
  */
 export function canChangeWeather() {
   return hasPermission('changeWeather');
-}
-
-/**
- * Check if the current user can edit existing notes.
- * @returns {boolean} True if user has permission
- */
-export function canEditNotes() {
-  return hasPermission('editNotes');
 }
 
 /**

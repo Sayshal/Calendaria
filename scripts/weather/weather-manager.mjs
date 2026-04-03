@@ -1774,8 +1774,11 @@ export default class WeatherManager {
   static formatTemperature(celsius) {
     if (celsius == null) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
-    if (unit === 'fahrenheit') return `${Math.round((celsius * 9) / 5 + 32)}°F`;
-    return `${Math.round(celsius)}°C`;
+    const showBoth = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_SHOW_BOTH);
+    const c = `${Math.round(celsius)}°C`;
+    const f = `${Math.round((celsius * 9) / 5 + 32)}°F`;
+    if (!showBoth) return unit === 'fahrenheit' ? f : c;
+    return unit === 'fahrenheit' ? `${f} (${c})` : `${c} (${f})`;
   }
 
   /**
@@ -1830,7 +1833,7 @@ export default class WeatherManager {
         closest = [id, deg];
       }
     }
-    return closest[0];
+    return localize(`CALENDARIA.Wind.${closest[0]}`);
   }
 
   /**

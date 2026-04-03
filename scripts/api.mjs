@@ -66,7 +66,6 @@ import {
   canChangeActiveCalendar,
   canChangeDateTime,
   canEditCalendars,
-  canEditNotes,
   canViewWeatherForecast,
   formatCustom,
   getAvailableTokens,
@@ -813,7 +812,8 @@ export const CalendariaAPI = {
    * @returns {Promise<object>} Updated note page
    */
   async updateNote(pageId, updates) {
-    if (!canEditNotes()) {
+    const page = NoteManager.getFullNote(pageId);
+    if (!game.user.isGM && !page?.parent?.isOwner) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
@@ -2252,7 +2252,7 @@ export const CalendariaAPI = {
    * @returns {Promise<object|null>} Created note page, or null on failure
    */
   async createFestival(calendarId, festivalData) {
-    if (!canEditNotes()) {
+    if (!canEditCalendars()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }

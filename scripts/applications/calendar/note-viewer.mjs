@@ -7,7 +7,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors, getPresetOverrides } from '../../notes/_module.mjs';
-import { canAddNotes, canDeleteNotes, canEditNotes, localize } from '../../utils/_module.mjs';
+import { canAddNotes, canDeleteNotes, localize } from '../../utils/_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
@@ -484,8 +484,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!row) return;
       const pageId = row.dataset.noteId;
       if (!pageId) return;
-      if (!canEditNotes()) return;
       const page = NoteManager.getFullNote(pageId);
+      if (!page?.parent?.isOwner && !game.user.isGM) return;
       if (page) page.sheet.render(true, { mode: 'edit' });
     });
   }
@@ -601,13 +601,13 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
             }
           }
         ];
-        if (canEditNotes()) {
+        const editPage = NoteManager.getFullNote(pageId);
+        if (game.user.isGM || editPage?.parent?.isOwner) {
           items.push({
             name: localize('CALENDARIA.Common.Edit'),
             icon: '<i class="fas fa-pen-to-square"></i>',
             callback: () => {
-              const page = NoteManager.getFullNote(pageId);
-              if (page) page.sheet.render(true, { mode: 'edit' });
+              if (editPage) editPage.sheet.render(true, { mode: 'edit' });
             }
           });
         }

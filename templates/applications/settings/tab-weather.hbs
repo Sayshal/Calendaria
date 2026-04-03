@@ -242,6 +242,15 @@
       </div>
 
       <div class="form-group">
+        <label for="temperatureShowBoth">{{localize "CALENDARIA.Settings.TemperatureShowBoth.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="temperatureShowBoth" name="temperatureShowBoth"
+            {{#if temperatureShowBoth}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.TemperatureShowBoth.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
         <label for="precipitationUnit">{{localize "CALENDARIA.Common.Precipitation"}}</label>
         <div class="form-fields">
           <select id="precipitationUnit" name="precipitationUnit">

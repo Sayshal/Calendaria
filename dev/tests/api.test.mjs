@@ -11,7 +11,7 @@ import { getNextOccurrences, getOccurrencesInRange, isRecurringMatch } from '../
 import TimeClock from '../../scripts/time/time-clock.mjs';
 import { PRESET_FORMATTERS, formatCustom, getAvailableTokens, resolveFormatString, timeSince } from '../../scripts/utils/formatting/format-utils.mjs';
 import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from '../../scripts/utils/formatting/moon-utils.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes, canViewWeatherForecast } from '../../scripts/utils/permissions.mjs';
+import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canViewWeatherForecast } from '../../scripts/utils/permissions.mjs';
 import SearchManager from '../../scripts/utils/search-manager.mjs';
 import { CalendariaSocket } from '../../scripts/utils/socket.mjs';
 import { getRegisteredWidgets, getWidgetByReplacement, refreshWidgets, registerWidget } from '../../scripts/utils/widget-manager.mjs';
@@ -73,7 +73,7 @@ vi.mock('../../scripts/weather/weather-manager.mjs', () => ({
   }
 }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
-vi.mock('../../scripts/utils/permissions.mjs', () => ({ canAddNotes: vi.fn(() => true), canChangeActiveCalendar: vi.fn(() => true), canChangeDateTime: vi.fn(() => true), canEditCalendars: vi.fn(() => true), canEditNotes: vi.fn(() => true), canViewWeatherForecast: vi.fn(() => true) }));
+vi.mock('../../scripts/utils/permissions.mjs', () => ({ canAddNotes: vi.fn(() => true), canChangeActiveCalendar: vi.fn(() => true), canChangeDateTime: vi.fn(() => true), canEditCalendars: vi.fn(() => true), canViewWeatherForecast: vi.fn(() => true) }));
 vi.mock('../../scripts/time/time-clock.mjs', () => ({ default: { running: false, realTimeSpeed: 1, start: vi.fn(), stop: vi.fn(), toggle: vi.fn(), gatedAdvance: vi.fn(async () => true) } }));
 vi.mock('../../scripts/time/time-tracker.mjs', () => ({ default: {} }));
 vi.mock('../../scripts/utils/search-manager.mjs', () => ({ default: { search: vi.fn(() => []) } }));
@@ -750,14 +750,16 @@ describe('createNote', () => {
 });
 
 describe('updateNote', () => {
-  it('returns null when permission denied', async () => {
-    canEditNotes.mockReturnValue(false);
+  it('returns null when not owner', async () => {
+    NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: false } });
+    game.user.isGM = false;
     const result = await CalendariaAPI.updateNote('1', { name: 'Updated' });
     expect(result).toBeNull();
     expect(ui.notifications.error).toHaveBeenCalled();
+    game.user.isGM = true;
   });
   it('passes name and noteData to NoteManager', async () => {
-    canEditNotes.mockReturnValue(true);
+    NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: true } });
     NoteManager.updateNote.mockResolvedValue({ id: '1' });
     await CalendariaAPI.updateNote('1', { name: 'Updated', startDate: { year: 2 }, categories: ['quest'] });
     expect(NoteManager.updateNote).toHaveBeenCalledWith(
@@ -766,7 +768,7 @@ describe('updateNote', () => {
     );
   });
   it('passes undefined noteData when no note fields provided', async () => {
-    canEditNotes.mockReturnValue(true);
+    NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: true } });
     NoteManager.updateNote.mockResolvedValue({ id: '1' });
     await CalendariaAPI.updateNote('1', { name: 'Updated' });
     const call = NoteManager.updateNote.mock.calls[0][1];
@@ -1553,18 +1555,17 @@ describe('setNoteDisplayStyle', () => {
 
 describe('createFestival', () => {
   it('returns null when permission denied', async () => {
-    canEditNotes.mockReturnValue(false);
+    canEditCalendars.mockReturnValue(false);
     const result = await CalendariaAPI.createFestival('cal1', { name: 'Fest', startDate: { year: 1, month: 1, day: 1 } });
     expect(result).toBeNull();
+    canEditCalendars.mockReturnValue(true);
   });
   it('returns null when required fields missing', async () => {
-    canEditNotes.mockReturnValue(true);
     expect(await CalendariaAPI.createFestival(null, { name: 'Fest', startDate: { year: 1, month: 1, day: 1 } })).toBeNull();
     expect(await CalendariaAPI.createFestival('cal1', { startDate: { year: 1, month: 1, day: 1 } })).toBeNull();
     expect(await CalendariaAPI.createFestival('cal1', { name: 'Fest' })).toBeNull();
   });
   it('creates a festival note with correct defaults', async () => {
-    canEditNotes.mockReturnValue(true);
     NoteManager.createNote.mockResolvedValue({ id: 'page1' });
     await CalendariaAPI.createFestival('cal1', { name: 'Harvest Festival', startDate: { year: 1, month: 9, day: 21 } });
     expect(NoteManager.createNote).toHaveBeenCalledWith(
@@ -1606,14 +1607,14 @@ describe('createNote conditionTree support', () => {
 
 describe('updateNote conditionTree & displayStyle support', () => {
   it('passes conditionTree to noteData', async () => {
-    canEditNotes.mockReturnValue(true);
+    NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: true } });
     NoteManager.updateNote.mockResolvedValue({});
     const tree = { field: 'weekday', operator: '==', value: 0 };
     await CalendariaAPI.updateNote('page1', { conditionTree: tree });
     expect(NoteManager.updateNote).toHaveBeenCalledWith('page1', { name: undefined, noteData: expect.objectContaining({ conditionTree: tree }) });
   });
   it('passes displayStyle to noteData', async () => {
-    canEditNotes.mockReturnValue(true);
+    NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: true } });
     NoteManager.updateNote.mockResolvedValue({});
     await CalendariaAPI.updateNote('page1', { displayStyle: 'pip' });
     expect(NoteManager.updateNote).toHaveBeenCalledWith('page1', { name: undefined, noteData: expect.objectContaining({ displayStyle: 'pip' }) });
