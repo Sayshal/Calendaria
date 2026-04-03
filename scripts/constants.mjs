@@ -88,6 +88,7 @@ export const SETTINGS = {
   DARKNESS_WEATHER_SYNC: 'darknessWeatherSync',
   DEFAULT_BRIGHTNESS_MULTIPLIER: 'defaultBrightnessMultiplier',
   DEFAULT_NOTE_PRESET: 'defaultNotePreset',
+  NOTE_OPEN_MODE: 'noteOpenMode',
   DEFAULT_OVERRIDES: 'defaultOverrides',
   DEV_MODE: 'devMode',
   DISPLAY_FORMATS: 'displayFormats',

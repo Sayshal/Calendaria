@@ -114,6 +114,15 @@ export default class CalendariaSettings {
       [SETTINGS.SUN_DIAL_STICKY_STATES]: { name: 'Sun Dial Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { position: false } }) },
       [SETTINGS.STOPWATCH_STATE]: { name: 'Stopwatch State', scope: 'client', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.DEFAULT_NOTE_PRESET]: { name: 'Default Note Preset', scope: 'client', config: false, type: new StringField({ nullable: true, initial: null }) },
+      [SETTINGS.NOTE_OPEN_MODE]: {
+        name: 'Note Open Mode',
+        scope: 'client',
+        config: false,
+        type: new StringField({
+          choices: { default: 'CALENDARIA.Settings.NoteOpenMode.Default', edit: 'CALENDARIA.Settings.NoteOpenMode.Edit', view: 'CALENDARIA.Settings.NoteOpenMode.View' },
+          initial: 'default'
+        })
+      },
       [SETTINGS.STOPWATCH_AUTO_START_TIME]: {
         name: 'CALENDARIA.Settings.StopwatchAutoStartTime.Name',
         hint: 'CALENDARIA.Settings.StopwatchAutoStartTime.Hint',

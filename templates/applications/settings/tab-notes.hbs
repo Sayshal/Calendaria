@@ -1,6 +1,6 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset data-section="default-preset">
-    <legend>{{localize "CALENDARIA.Settings.DefaultNotePreset.Name"}}</legend>
+    <legend>{{localize "CALENDARIA.Settings.NoteDefaults.Legend"}}</legend>
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.DefaultNotePreset.Name"}}</label>
       <div class="form-fields">
@@ -11,6 +11,17 @@
         </select>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.DefaultNotePreset.Hint"}}</p>
+    </div>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.NoteOpenMode.Name"}}</label>
+      <div class="form-fields">
+        <select name="noteOpenMode">
+          {{#each noteOpenModeOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.NoteOpenMode.Hint"}}</p>
     </div>
   </fieldset>
   {{#if isGM}}

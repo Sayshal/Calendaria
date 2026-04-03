@@ -103,7 +103,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** @override */
   _configureRenderOptions(options) {
     if (options.isFirstRender) {
-      if (options.mode === 'edit' && this.document.isOwner) {
+      const settingMode = game.settings.get(MODULE.ID, SETTINGS.NOTE_OPEN_MODE);
+      const mode = options.forceMode ? options.forceMode : settingMode !== 'default' ? settingMode : options.mode || 'view';
+      if (mode === 'edit' && this.document.isOwner) {
         this._mode = CalendarNoteSheet.MODES.EDIT;
         const defaultName = localize('CALENDARIA.Note.NewNote');
         const hasDefaultName = this.document.name === defaultName;

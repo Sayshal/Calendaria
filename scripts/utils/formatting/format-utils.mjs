@@ -72,7 +72,7 @@ export function dateFormattingParts(calendar, components) {
   const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
-  const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
+  const intercalaryName = isIntercalaryMonth && monthData ? localize(monthData.name) : festivalDay ? localize(festivalDay.name) : '';
   const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Common.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = resolveArray(calendar, 'weekdaysArray', 'days.values');
@@ -161,9 +161,9 @@ export function dateFormattingParts(calendar, components) {
     MMM: monthAbbr,
     MMMM: monthName,
     Mo: isIntercalaryFestival || isMonthless ? '' : ordinal(month + 1),
-    D: isIntercalaryFestival ? '' : isMonthless ? dayOfYear + 1 : dayOfMonth + 1,
-    DD: isIntercalaryFestival ? '' : isMonthless ? String(dayOfYear + 1).padStart(2, '0') : String(dayOfMonth + 1).padStart(2, '0'),
-    Do: isIntercalaryFestival ? '' : isMonthless ? ordinal(dayOfYear + 1) : ordinal(dayOfMonth + 1),
+    D: isMonthless ? dayOfYear + 1 : dayOfMonth + 1,
+    DD: isMonthless ? String(dayOfYear + 1).padStart(2, '0') : String(dayOfMonth + 1).padStart(2, '0'),
+    Do: isMonthless ? ordinal(dayOfYear + 1) : ordinal(dayOfMonth + 1),
     DDD: String(dayOfYear + 1).padStart(3, '0'),
     E: weekdayAbbr,
     EE: weekdayAbbr,

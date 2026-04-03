@@ -359,7 +359,7 @@ export default class NoteManager {
       { parent: journal }
     );
     log(3, `Created calendar note: ${name}`);
-    if (openSheet && (!creatorId || creatorId === game.user.id)) page.sheet.render(true, { mode: openSheet });
+    if (openSheet && (!creatorId || creatorId === game.user.id)) page.sheet.render(true, { mode: openSheet, forceMode: openSheet });
     return page;
   }
 

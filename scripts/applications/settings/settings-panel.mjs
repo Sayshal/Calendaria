@@ -1003,6 +1003,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: '', label: localize('CALENDARIA.Settings.DefaultNotePreset.AskEveryTime'), selected: !currentDefault },
       ...presets.map((p) => ({ value: p.id, label: p.label, selected: currentDefault === p.id }))
     ];
+    const noteOpenMode = game.settings.get(MODULE.ID, SETTINGS.NOTE_OPEN_MODE);
+    context.noteOpenModeOptions = [
+      { value: 'default', label: localize('CALENDARIA.Settings.NoteOpenMode.Default'), selected: noteOpenMode === 'default' },
+      { value: 'edit', label: localize('CALENDARIA.Settings.NoteOpenMode.Edit'), selected: noteOpenMode === 'edit' },
+      { value: 'view', label: localize('CALENDARIA.Settings.NoteOpenMode.View'), selected: noteOpenMode === 'view' }
+    ];
   }
 
   /**
@@ -2115,6 +2121,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if (data.showSecretNotes !== undefined) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SECRET_NOTES, !!data.showSecretNotes);
     if ('defaultNotePreset' in data) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET, data.defaultNotePreset || null);
+    if ('noteOpenMode' in data) await game.settings.set(MODULE.ID, SETTINGS.NOTE_OPEN_MODE, data.noteOpenMode);
     if (data.defaultBrightnessMultiplier != null) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER, Number(data.defaultBrightnessMultiplier));
     if (data.macroTriggers) {
       const globalTriggerKeys = ['dawn', 'dusk', 'midday', 'midnight', 'newDay'];

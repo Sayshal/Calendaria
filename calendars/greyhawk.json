@@ -11,8 +11,7 @@
         "name": "Needfest",
         "abbreviation": "Need",
         "ordinal": 1,
-        "days": 7,
-        "type": "intercalary"
+        "days": 7
       },
       "fireseek00000000": {
         "name": "Fireseek",
@@ -36,8 +35,7 @@
         "name": "Growfest",
         "abbreviation": "Grow",
         "ordinal": 4,
-        "days": 7,
-        "type": "intercalary"
+        "days": 7
       },
       "planting00000000": {
         "name": "Planting",
@@ -61,8 +59,7 @@
         "name": "Richfest",
         "abbreviation": "Rich",
         "ordinal": 7,
-        "days": 7,
-        "type": "intercalary"
+        "days": 7
       },
       "reaping000000000": {
         "name": "Reaping",
@@ -86,8 +83,7 @@
         "name": "Brewfest",
         "abbreviation": "Brew",
         "ordinal": 10,
-        "days": 7,
-        "type": "intercalary"
+        "days": 7
       },
       "patchwall0000000": {
         "name": "Patchwall",

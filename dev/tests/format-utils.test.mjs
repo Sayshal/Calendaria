@@ -402,12 +402,12 @@ describe('dateFormattingParts()', () => {
   });
 
   describe('Intercalary handling', () => {
-    it('returns empty D/DD/Do for intercalary festival days', () => {
+    it('returns day number for intercalary festival days', () => {
       const intercalaryCal = addCalendarGetters({ ...mockCalendar, findFestivalDay: () => ({ name: 'Midwinter', countsForWeekday: false }) });
       const parts = dateFormattingParts(intercalaryCal, components);
-      expect(parts.D).toBe('');
-      expect(parts.DD).toBe('');
-      expect(parts.Do).toBe('');
+      expect(parts.D).toBe(15);
+      expect(parts.DD).toBe('15');
+      expect(parts.Do).toBe('15th');
       expect(parts.M).toBe('');
       expect(parts.MM).toBe('');
       expect(parts.MMMM).toBe('Midwinter');
