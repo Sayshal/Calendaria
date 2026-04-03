@@ -1749,8 +1749,6 @@
   "CALENDARIA.Permissions.DeleteNotesHint": "Разрешает пользователям удалять заметки из календаря группами.",
   "CALENDARIA.Permissions.EditCalendars": "Изменять календари",
   "CALENDARIA.Permissions.EditCalendarsHint": "Разрешает пользователям открывать редактор календаря и менять настройки.",
-  "CALENDARIA.Permissions.EditNotes": "Изменять заметки",
-  "CALENDARIA.Permissions.EditNotesHint": "Разрешает пользователям редактировать заметки, принадлежащие другим игрокам. Не распространяется на заметки с меткой только GM.",
   "CALENDARIA.Permissions.MismatchWarning": "Пользователи {names} не могут использовать функцию: {feature}",
   "CALENDARIA.Permissions.NoAccess": "У вас нет разрешения на доступ к этой функции",
   "CALENDARIA.Permissions.ViewBigCal": "Просмотр BigCal",

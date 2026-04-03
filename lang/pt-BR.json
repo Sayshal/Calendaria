@@ -1749,8 +1749,6 @@
   "CALENDARIA.Permissions.DeleteNotesHint": "Permitir que os usuários excluam notas do calendário em massa.",
   "CALENDARIA.Permissions.EditCalendars": "Editar Calendários",
   "CALENDARIA.Permissions.EditCalendarsHint": "Permitir que os usuários abram o editor de calendário e modifiquem as definições do calendário.",
-  "CALENDARIA.Permissions.EditNotes": "Editar Notas",
-  "CALENDARIA.Permissions.EditNotesHint": "Permite que os usuários editem notas de calendário pertencentes a outros jogadores. Não se aplica a notas exclusivas do Mestre.",
   "CALENDARIA.Permissions.MismatchWarning": "Os usuários {names} não podem usar o recurso: {feature}",
   "CALENDARIA.Permissions.NoAccess": "Você não tem permissão para acessar este recurso",
   "CALENDARIA.Permissions.ViewBigCal": "Ver BigCal",

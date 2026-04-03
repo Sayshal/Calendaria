@@ -1127,8 +1127,6 @@
   "CALENDARIA.Permissions.DeleteNotesHint": "Consenti agli utenti di eliminare le note del calendario in blocco.",
   "CALENDARIA.Permissions.EditCalendars": "Modifica Calendari",
   "CALENDARIA.Permissions.EditCalendarsHint": "Consenti agli utenti di aprire l'editor del calendario e modificare le definizioni del calendario.",
-  "CALENDARIA.Permissions.EditNotes": "Modifica Note",
-  "CALENDARIA.Permissions.EditNotesHint": "Consenti agli utenti di modificare le note del calendario possedute da altri giocatori. Non si applica alle note esclusive del DM.",
   "CALENDARIA.Permissions.NoAccess": "Non hai il permesso di accedere a questa funzione",
   "CALENDARIA.Permissions.ViewBigCal": "Visualizza BigCal",
   "CALENDARIA.Permissions.ViewBigCalHint": "Consenti agli utenti di usare il BigCal.",
