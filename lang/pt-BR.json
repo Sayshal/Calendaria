@@ -2548,6 +2548,7 @@
   "CALENDARIA.Weather.Climate.ArcticDesc": "Frio extremo durante todo o ano, com gelo e neve",
   "CALENDARIA.Weather.Climate.Arid": "Árido/Deserto",
   "CALENDARIA.Weather.Climate.AridDesc": "Quente e seco, com oscilações extremas de temperatura",
+  "CALENDARIA.Weather.Climate.Custom": "Personalizado",
   "CALENDARIA.Weather.Climate.Polar": "Polar",
   "CALENDARIA.Weather.Climate.PolarDesc": "Extremamente frio, com invernos longos e verões curtos",
   "CALENDARIA.Weather.Climate.Subarctic": "Subártico",
