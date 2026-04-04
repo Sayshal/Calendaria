@@ -1,3 +1,9 @@
+.calendaria.minimizing {
+  opacity: 0;
+  max-height: none !important;
+  transition: opacity 0.25s ease-out;
+}
+
 .calendaria {
   .hidden {
     display: none !important;

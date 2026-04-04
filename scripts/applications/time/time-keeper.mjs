@@ -296,7 +296,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
-    return super.close({ animate: false, ...options });
+    return super.close(options);
   }
 
   /** @override */

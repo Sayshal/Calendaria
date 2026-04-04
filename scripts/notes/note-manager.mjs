@@ -357,7 +357,7 @@ export default class NoteManager {
     const actualCreatorId = creatorId || game.user.id;
     const presetMerged = getPresetDefaults(sanitized.categories);
     if (presetMerged.name && name === localize('CALENDARIA.Note.NewNote')) name = presetMerged.name;
-    if (!sanitized.categories?.length) {
+    if (!sanitized.categories?.length && !sanitized.linkedFestival) {
       const defaultPreset = getPresetDefinition(DEFAULT_PRESET_ID);
       sanitized.icon = defaultPreset.icon;
       sanitized.color = defaultPreset.color;

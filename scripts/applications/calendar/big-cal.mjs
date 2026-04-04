@@ -157,7 +157,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
-    return super.close({ animate: false, ...options });
+    return super.close(options);
   }
 
   /** @override */
@@ -997,15 +997,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         multiDayEvents.push({ note, start, end: effectiveEnd, startDayOfMonth, endDayOfMonth, priority, isContinuation });
       }
     }
-    multiDayEvents.sort((a, b) => a.priority - b.priority);
+    multiDayEvents.sort((a, b) => a.startDayOfMonth - b.startDayOfMonth || a.priority - b.priority);
     const singleDayWidth = (1 / daysInWeek) * 100;
-    const PRIMARY_HEIGHT = 1;
-    const SECONDARY_HEIGHT = 0.1875;
+    const BAR_HEIGHT = 1;
+    const CONDENSED_HEIGHT = 0.375;
+    const CONDENSED_GAP = 0.125;
     const BAR_OFFSET = 1.625;
-    const getBarTop = (row) => {
-      if (row === 0) return BAR_OFFSET;
-      return BAR_OFFSET + PRIMARY_HEIGHT + (row - 1) * SECONDARY_HEIGHT;
-    };
     multiDayEvents.forEach(({ note, end, startDayOfMonth, endDayOfMonth, isContinuation }) => {
       const endsInMonth = end.month === month && end.year === year;
       const resolved = resolveNoteDisplayProps(note);
@@ -1025,8 +1022,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             weekIndex: Math.floor(startPosition / daysInWeek),
             left: (col / daysInWeek) * 100,
             width: singleDayWidth,
-            top: getBarTop(0),
-            isSecondary: false,
+            row: 0,
+            top: BAR_OFFSET,
+            isCondensed: false,
             isContinuation: false,
             isStart: true,
             isEnd: false
@@ -1040,8 +1038,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             weekIndex: Math.floor(endPosition / daysInWeek),
             left: (col / daysInWeek) * 100,
             width: singleDayWidth,
-            top: getBarTop(0),
-            isSecondary: false,
+            row: 0,
+            top: BAR_OFFSET,
+            isCondensed: false,
             isContinuation: false,
             isStart: false,
             isEnd: true
@@ -1078,8 +1077,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           weekIndex: startWeekIndex,
           left,
           width,
-          top: getBarTop(eventRow),
-          isSecondary: eventRow > 0,
+          row: eventRow,
+          top: 0,
+          isCondensed: false,
           isContinuation,
           isStart: !isContinuation,
           isEnd: endsInMonth,
@@ -1108,8 +1108,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             weekIndex: weekIdx,
             left,
             width,
-            top: getBarTop(eventRow),
-            isSecondary: eventRow > 0,
+            row: eventRow,
+            top: 0,
+            isCondensed: false,
             isSegment: true,
             isContinuation: showContinuationIcon,
             isStart: weekIdx === startWeekIndex && !isContinuation,
@@ -1122,6 +1123,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       }
     });
+    const hasOverlaps = rows.length > 1;
+    for (const event of events) {
+      if (hasOverlaps) {
+        event.isCondensed = true;
+        event.top = BAR_OFFSET + event.row * (CONDENSED_HEIGHT + CONDENSED_GAP);
+      } else {
+        event.top = BAR_OFFSET + event.row * BAR_HEIGHT;
+      }
+    }
     return events;
   }
 
@@ -1253,8 +1263,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     header?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-item, .event-block, .multi-day-event')) return;
       e.preventDefault();
-      this.close({ animate: false });
-      MiniCal.show({ animate: false });
+      this.close();
+      MiniCal.show();
     });
     attachWidgetListeners(this.element);
     Hooks.callAll(HOOKS.RENDER_CALENDAR, { app: this, element: this.element, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
@@ -1752,8 +1762,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onToggleCompact(_event, _target) {
-    await this.close({ animate: false });
-    MiniCal.show({ animate: false });
+    await this.close();
+    MiniCal.show();
   }
 
   /**
@@ -1891,15 +1901,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Show the BigCal application.
    * @param {object} [options] - Show options
-   * @param {boolean} [options.animate] - Whether to animate the show
    * @param {boolean} [options.silent] - If true, don't show permission warning
    * @static
    * @returns {BigCal} The BigCal instance
    */
-  static show({ animate = true, silent = false } = {}) {
+  static show({ silent = false } = {}) {
     if (isCombatBlocked(SETTINGS.BIG_CAL_COMBAT_MODE)) return null;
     const instance = this.instance ?? new BigCal();
-    instance.render({ force: true, animate, silent });
+    instance.render({ force: true, silent });
     return instance;
   }
 

@@ -962,8 +962,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     container?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-badge')) return;
       e.preventDefault();
-      this.close({ animate: false });
-      BigCal.show({ animate: false });
+      this.close();
+      BigCal.show();
     });
     container?.addEventListener('contextmenu', (e) => {
       if (e.target.closest('#context-menu, .minical-day')) return;
@@ -1103,7 +1103,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
-    return super.close({ animate: false, ...options });
+    return super.close(options);
   }
 
   /** @override */
@@ -1603,8 +1603,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onOpenFull(_event, _target) {
-    await this.close({ animate: false });
-    BigCal.show({ animate: false });
+    await this.close();
+    BigCal.show();
   }
 
   /**
@@ -2002,17 +2002,16 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * Show the MiniCal singleton.
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
-   * @param {boolean} [options.animate] - Whether to animate the show
    * @returns {MiniCal} The singleton instance
    */
-  static show({ silent = false, animate = true } = {}) {
+  static show({ silent = false } = {}) {
     if (!canViewMiniCal()) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
     if (isCombatBlocked(SETTINGS.MINI_CAL_COMBAT_MODE)) return null;
     const instance = this.instance ?? new MiniCal();
-    instance.render({ force: true, animate });
+    instance.render({ force: true });
     return instance;
   }
 

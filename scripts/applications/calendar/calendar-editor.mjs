@@ -2338,7 +2338,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (calendar) {
         this.#isDirty = false;
-        if (calendarId) await this.#syncFestivalNamesToNotes(calendarId);
+        if (calendarId) {
+          await FestivalManager.ensureFestivalNotes(calendarId, calendar);
+          await this.#syncFestivalNamesToNotes(calendarId);
+        }
         log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {
           const importer = createImporter(this.#pendingImporterId);

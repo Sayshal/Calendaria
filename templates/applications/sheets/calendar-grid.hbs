@@ -164,21 +164,19 @@
             {{/each}}
             {{#each multiDayEvents}}
               <div
-                class="event-bar{{#if isSecondary}} event-bar-secondary{{/if}}{{#if isContinuation}} continuation{{/if}}{{#if showBookends}}{{#if isStart}} bookend-start{{/if}}{{#if isEnd}} bookend-end{{/if}}{{/if}}"
+                class="event-bar{{#if isCondensed}} event-bar-condensed{{/if}}{{#if isContinuation}} continuation{{/if}}{{#if showBookends}}{{#if isStart}} bookend-start{{/if}}{{#if isEnd}} bookend-end{{/if}}{{/if}}"
                 style="left: {{left}}%; width: {{width}}%; top: {{top}}rem; background-color: {{color}};" data-tooltip
                 aria-label="{{name}}" data-action="editNote" data-note-id="{{id}}">
-                {{#unless isSecondary}}
-                  {{#if isContinuation}}
-                    <i class="fas fa-angles-right event-bar-continuation"></i>
-                  {{else}}
-                    {{#if (eq iconType "fontawesome")}}
-                      <i class="{{icon}} event-bar-icon"></i>
-                    {{else if icon}}
-                      <img src="{{icon}}" alt="{{name}}" class="event-bar-icon">
-                    {{/if}}
+                {{#if isContinuation}}
+                  <i class="fas fa-angles-right event-bar-continuation"></i>
+                {{else}}
+                  {{#if (eq iconType "fontawesome")}}
+                    <i class="{{icon}} event-bar-icon"></i>
+                  {{else if icon}}
+                    <img src="{{icon}}" alt="{{name}}" class="event-bar-icon">
                   {{/if}}
-                  <span class="event-bar-text">{{name}}</span>
-                {{/unless}}
+                {{/if}}
+                <span class="event-bar-text">{{name}}</span>
               </div>
             {{/each}}
           </div>
