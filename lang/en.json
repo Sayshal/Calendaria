@@ -2544,6 +2544,7 @@
   "CALENDARIA.Weather.Category.Environmental": "Environmental",
   "CALENDARIA.Weather.ClearDesc": "Clear skies",
   "CALENDARIA.Weather.ClickToGenerate": "Click to generate weather",
+  "CALENDARIA.Weather.Climate.Custom": "Custom",
   "CALENDARIA.Weather.Climate.Arctic": "Arctic",
   "CALENDARIA.Weather.Climate.ArcticDesc": "Extremely cold year-round with ice and snow",
   "CALENDARIA.Weather.Climate.Arid": "Arid/Desert",

@@ -1761,6 +1761,22 @@ export const CalendariaAPI = {
   },
 
   /**
+   * Create a new climate zone on the active calendar.
+   * @param {object} zoneConfig - Zone configuration object
+   * @param {string} zoneConfig.name - Zone name (required)
+   * @param {string} [zoneConfig.id] - Zone ID (auto-generated from name if omitted)
+   * @param {object} [zoneConfig.temperatures] - Temperature ranges by season
+   * @param {Array|object} [zoneConfig.presets] - Weather preset configs
+   * @param {object} [zoneConfig.seasonOverrides] - Per-season overrides
+   * @param {object} [zoneConfig.windSpeedRange] - Wind speed range
+   * @param {object} [zoneConfig.windDirections] - Wind direction weights
+   * @returns {Promise<object|null>} The created zone or null on failure
+   */
+  async createClimateZone(zoneConfig) {
+    return WeatherManager.createClimateZone(zoneConfig);
+  },
+
+  /**
    * Check if a calendar is a bundled (built-in) calendar.
    * @param {string} calendarId - Calendar ID to check
    * @returns {boolean} True if bundled calendar

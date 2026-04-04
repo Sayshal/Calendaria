@@ -1649,6 +1649,66 @@ export default class WeatherManager {
   }
 
   /**
+   * Create a new climate zone on the active calendar.
+   * @param {object} zoneConfig - Zone configuration
+   * @param {string} zoneConfig.name - Zone name (required)
+   * @param {string} [zoneConfig.id] - Zone ID (auto-generated from name if omitted)
+   * @returns {Promise<object|null>} Created zone or null on failure
+   */
+  static async createClimateZone(zoneConfig) {
+    if (!game.user.isGM) {
+      log(1, 'createClimateZone: GM only');
+      return null;
+    }
+    if (!zoneConfig?.name) {
+      log(1, 'createClimateZone: name is required');
+      return null;
+    }
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) {
+      log(1, 'createClimateZone: no active calendar');
+      return null;
+    }
+    const calendarData = calendar.toObject();
+    if (!calendarData.weather) calendarData.weather = { activeZone: null, zones: {} };
+    if (!calendarData.weather.zones) calendarData.weather.zones = {};
+    const id =
+      zoneConfig.id ||
+      zoneConfig.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\da-z-]/g, '');
+    const existingIds = Object.values(calendarData.weather.zones).map((z) => z.id);
+    if (existingIds.includes(id)) {
+      log(1, `createClimateZone: zone ID "${id}" already exists`);
+      return null;
+    }
+    const zone = {
+      id,
+      name: zoneConfig.name,
+      description: zoneConfig.description ?? '',
+      brightnessMultiplier: zoneConfig.brightnessMultiplier ?? 1.0,
+      environmentBase: zoneConfig.environmentBase ?? null,
+      environmentDark: zoneConfig.environmentDark ?? null,
+      windSpeedRange: zoneConfig.windSpeedRange ?? null,
+      windDirections: zoneConfig.windDirections ?? {},
+      shortestDay: zoneConfig.shortestDay ?? null,
+      longestDay: zoneConfig.longestDay ?? null,
+      colorShift: zoneConfig.colorShift ?? null,
+      temperatures: zoneConfig.temperatures ?? { _default: { min: 10, max: 22 } },
+      presets: zoneConfig.presets ?? [],
+      seasonOverrides: zoneConfig.seasonOverrides ?? {}
+    };
+    const zoneKey = foundry.utils.randomID();
+    calendarData.weather.zones[zoneKey] = zone;
+    if (!calendarData.weather.activeZone) calendarData.weather.activeZone = id;
+    const calendarId = calendar.metadata.id;
+    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, calendarData);
+    else await CalendarManager.updateCustomCalendar(calendarId, calendarData);
+    return zone;
+  }
+
+  /**
    * Get custom weather presets.
    * @returns {object[]} Custom presets
    */

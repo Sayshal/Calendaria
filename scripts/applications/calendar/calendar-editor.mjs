@@ -10,7 +10,7 @@ import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
 import { RangeSlider, format, localize, log, validateFormatString } from '../../utils/_module.mjs';
-import { CLIMATE_ZONE_TEMPLATES, getClimateTemplateOptions, getDefaultZoneConfig } from '../../weather/_module.mjs';
+import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -291,7 +291,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         window: { title: localize('CALENDARIA.Editor.UnsavedChanges') },
         content: `<p>${localize('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
         yes: { label: localize('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        rejectClose: false
       });
       if (!confirmed) throw new Error('Close cancelled by user');
     }
@@ -2164,7 +2165,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!result) return;
     const seasonNames = Object.values(this.#calendarData.seasons?.values ?? {}).map((s) => s.name);
     if (!seasonNames.length) seasonNames.push('CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter');
-    const zoneConfig = getDefaultZoneConfig(result.template, seasonNames);
+    const zoneConfig = result.template === 'custom' ? getBlankZoneConfig(seasonNames) : getDefaultZoneConfig(result.template, seasonNames);
     if (!zoneConfig) return;
     const baseId = result.name?.toLowerCase().replace(/\s+/g, '-') || result.template;
     let zoneId = baseId;

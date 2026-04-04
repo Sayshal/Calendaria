@@ -138,9 +138,10 @@ describe('getClimateZoneTemplateIds()', () => {
 });
 
 describe('getClimateTemplateOptions()', () => {
-  it('returns options with value and label', () => {
+  it('returns options with value and label, custom first', () => {
     const options = getClimateTemplateOptions();
-    expect(options.length).toBe(Object.keys(CLIMATE_ZONE_TEMPLATES).length);
+    expect(options.length).toBe(Object.keys(CLIMATE_ZONE_TEMPLATES).length + 1);
+    expect(options[0].value).toBe('custom');
     for (const opt of options) {
       expect(opt).toHaveProperty('value');
       expect(opt).toHaveProperty('label');

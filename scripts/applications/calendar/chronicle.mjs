@@ -118,6 +118,12 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       entryDepth: this._entryDepth
     });
     const isGM = game.user.isGM;
+    for (const entry of this._entries) {
+      if (!entry.notes) continue;
+      for (const note of entry.notes) {
+        if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content, { async: true });
+      }
+    }
     context.entries = this._entries.map((e) => ({ ...e, isGM }));
     context.entryDepth = this._entryDepth;
     context.showEmpty = this._showEmpty;

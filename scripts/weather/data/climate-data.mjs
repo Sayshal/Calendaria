@@ -319,5 +319,37 @@ export function normalizeSeasonName(seasonName) {
  * @returns {Array<{value: string, label: string}>} Options array
  */
 export function getClimateTemplateOptions() {
-  return Object.values(CLIMATE_ZONE_TEMPLATES).map((t) => ({ value: t.id, label: t.name }));
+  const templates = Object.values(CLIMATE_ZONE_TEMPLATES)
+    .map((t) => ({ value: t.id, label: t.name }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  return [{ value: 'custom', label: localize('CALENDARIA.Weather.Climate.Custom') }, ...templates];
+}
+
+/**
+ * Create a blank zone config with no presets, weights, or temperatures.
+ * @param {string[]} [seasonNames] - Season names for empty override slots
+ * @returns {object} Blank zone config
+ */
+export function getBlankZoneConfig(seasonNames = []) {
+  const presets = ALL_PRESETS.map((p) => ({ id: p.id, enabled: false, tempMin: null, tempMax: null }));
+  const seasonOverrides = {};
+  for (const season of seasonNames) {
+    seasonOverrides[season] = { temperatures: null, presets: {} };
+  }
+  return {
+    id: 'custom',
+    name: localize('CALENDARIA.Weather.Climate.Custom'),
+    description: '',
+    brightnessMultiplier: 1.0,
+    environmentBase: null,
+    environmentDark: null,
+    windSpeedRange: null,
+    windDirections: {},
+    shortestDay: null,
+    longestDay: null,
+    colorShift: null,
+    temperatures: { _default: { min: 0, max: 0 } },
+    presets,
+    seasonOverrides
+  };
 }
