@@ -415,12 +415,13 @@ When phase mode is set to **Randomized**, additional controls appear:
 
 Guaranteed phase overrides on specific dates. The moon is always at the specified phase on that date regardless of randomization.
 
-| Column    | Description                                                                            |
-| --------- | -------------------------------------------------------------------------------------- |
-| **Year**  | The year this anchor applies to (leave blank to apply every year)                      |
-| **Month** | Which month the anchor falls in                                                        |
-| **Day**   | Day of the month                                                                       |
-| **Phase** | Which phase the moon is forced to on this date (dropdown of the moon's defined phases) |
+| Column          | Description                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Year**        | The year this anchor applies to (leave blank to apply every year)                                                                                 |
+| **Month**       | Which month the anchor falls in                                                                                                                   |
+| **Day**         | Day of the month                                                                                                                                  |
+| **Phase**       | Which phase the moon is forced to on this date (dropdown of the moon's defined phases)                                                            |
+| **Reset Cycle** | Checkbox (fixed-mode moons only). When enabled, restarts the phase cycle from this anchor point instead of just overriding the phase for one day. |
 
 - **Add Anchor.** Add a new anchor phase entry
 - **Remove** (trash icon): Delete an anchor phase

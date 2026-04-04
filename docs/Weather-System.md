@@ -58,6 +58,20 @@ Climate settings follow a layered approach. The first matching value wins:
 1. **Zone season override.** Per-season weight and temperature overrides within a zone
 2. **Season base.** Season climate temperatures and preset weights
 3. **Zone base.** Enabled/disabled filter and base temperatures
+
+### Temperature Constraint Resolution
+
+Temperature ranges follow a three-tier fallback chain:
+
+1. **Season preset override.** Per-season temp min/max set in the Climate Editor for a specific preset
+2. **Zone preset override.** Zone-level temp min/max override for the preset
+3. **Built-in preset constraint.** The preset's own `tempMin`/`tempMax` values (e.g., Snow requires cold temperatures)
+
+When multiple tiers provide ranges, they are **intersected** (`Math.max` for min, `Math.min` for max) rather than replaced, preventing impossible temperature outputs.
+
+### Preset Selection Filtering
+
+Before weather generation, presets whose temperature range has zero overlap with the current season's temperature range are automatically excluded. This prevents selecting a preset (e.g., Snow) when the season's temperatures make it impossible.
 4. **Global defaults.** Fallback values
 
 ### Configuring Season Climate

@@ -2670,6 +2670,54 @@ const templates = CALENDARIA.api.getClimateZoneTemplates();
 
 ---
 
+### createClimateZone(zoneConfig)
+
+Create a new climate zone on the active calendar. GM-only.
+
+```javascript
+// Minimal: just a name
+const zone = await CALENDARIA.api.createClimateZone({ name: 'Frozen Wastes' });
+
+// Full config
+const zone = await CALENDARIA.api.createClimateZone({
+  name: 'Frozen Wastes',
+  id: 'frozen-wastes',
+  description: 'A harsh frozen climate zone',
+  temperatures: { Winter: { min: -40, max: -10 }, Summer: { min: -20, max: 5 } },
+  presets: [],
+  seasonOverrides: {},
+  windSpeedRange: { min: 2, max: 5 },
+  windDirections: { N: 30, NE: 20, E: 10 },
+  brightnessMultiplier: 0.8,
+  environmentBase: { hue: 200, intensity: 0.3, luminosity: 0, saturation: -0.2, shadows: 0.5 },
+  environmentDark: { hue: 240, intensity: 0.5, luminosity: -0.5, saturation: -0.3, shadows: 0.8 },
+  shortestDay: 6,
+  longestDay: 18,
+  colorShift: { dawn: 30, dusk: 280, night: 240, transitionDuration: 1 }
+});
+```
+
+| Parameter              | Type            | Required | Description                                                                                                              |
+| ---------------------- | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `name`                 | `string`        | Yes      | Zone display name                                                                                                        |
+| `id`                   | `string`        | No       | Zone ID (auto-generated from name if omitted). Must be unique.                                                           |
+| `description`          | `string`        | No       | Zone description text                                                                                                    |
+| `temperatures`         | `object`        | No       | Temperature ranges keyed by season name (`{ 'Winter': { min, max } }`). Defaults to `{ _default: { min: 10, max: 22 } }` |
+| `presets`              | `Array\|object` | No       | Weather preset configurations                                                                                            |
+| `seasonOverrides`      | `object`        | No       | Per-season overrides                                                                                                     |
+| `windSpeedRange`       | `object`        | No       | Wind speed range (`{ min, max }`, tiers 0-5)                                                                             |
+| `windDirections`       | `object`        | No       | Wind direction weights by cardinal direction                                                                             |
+| `brightnessMultiplier` | `number`        | No       | Scene darkness scaling (default: `1.0`)                                                                                  |
+| `environmentBase`      | `object`        | No       | Base (day) lighting overrides (hue, intensity, luminosity, saturation, shadows)                                          |
+| `environmentDark`      | `object`        | No       | Dark (night) lighting overrides                                                                                          |
+| `shortestDay`          | `number`        | No       | Manual shortest day hours override                                                                                       |
+| `longestDay`           | `number`        | No       | Manual longest day hours override                                                                                        |
+| `colorShift`           | `object`        | No       | Time-of-day color shift settings (dawn/dusk/night hue, transition duration)                                              |
+
+**Returns:** `Promise<object|null>` - The created zone object, or `null` on failure.
+
+---
+
 ### getWeatherProbabilities(options)
 
 Get the weather probability breakdown for a zone and season.

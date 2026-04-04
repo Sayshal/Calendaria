@@ -202,6 +202,11 @@ Common import errors and solutions:
 - Attempting to delete a calendar-specific subfolder
 - **Solution:** This folder contains all notes for this calendar and is protected
 
+### Missing or orphaned presets
+
+- Custom presets can be silently lost during module updates if the presets setting had no explicit `initial` value
+- **Solution:** Calendaria automatically recovers orphaned presets on world load. The `recoverOrphanedPresets` migration scans all notes for category references to deleted presets and reconstructs stub definitions. Recovered presets appear in the Preset Editor with their original name and can be edited normally.
+
 ---
 
 ## UI Issues

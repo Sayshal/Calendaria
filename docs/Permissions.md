@@ -50,7 +50,6 @@ When a GM uses **Show to All**, Calendaria checks whether any active players are
 | Permission                | Key                    | Description                                            |
 | ------------------------- | ---------------------- | ------------------------------------------------------ |
 | **Manage Notes**          | `addNotes`             | Can create own calendar notes                          |
-| **Edit Notes**            | `editNotes`            | Can edit calendar notes owned by other players         |
 | **Delete Notes**          | `deleteNotes`          | Can delete own calendar notes                          |
 | **Change Date/Time**      | `changeDateTime`       | Can modify the world date and time                     |
 | **Change Weather**        | `changeWeather`        | Can set weather conditions                             |
@@ -74,7 +73,6 @@ By default, all non-GM roles have restricted access:
 | View Chronicle        |   -    |    ✓    |      ✓       |
 | View Stopwatch        |   -    |    ✓    |      ✓       |
 | Manage Notes          |   ✓    |    ✓    |      ✓       |
-| Edit Notes            |   -    |    ✓    |      ✓       |
 | Delete Notes          |   -    |    -    |      ✓       |
 | Change Date/Time      |   -    |    -    |      ✓       |
 | Change Weather        |   -    |    -    |      ✓       |
@@ -131,14 +129,9 @@ Permission UI has cascade-up behavior:
 - Users can only delete their own notes (original author); GMs can delete any note
 - If the user lacks Foundry's core `JOURNAL_CREATE` permission, note creation is relayed to a connected GM via socket
 
-### Edit Notes
+### Note Editing
 
-- Edit calendar notes owned by other players
-- Does not apply to GM-only notes
-- Ownership syncs on world load and when the permission setting changes
-- Removing a user revokes their ownership on all calendar notes (author and GM ownership preserved)
-- Toggling off a note's "GM Only" flag grants owner-level access to users with this permission
-- Only the original author or a GM can delete a note (regardless of this permission)
+Note editing is gated exclusively by per-note Foundry document ownership. Each note's ownership is set via the Ownership section on the note sheet's Settings tab. Users with at least Owner-level permission on a note can edit it. GMs can always edit any note.
 
 ### View Weather Forecast
 

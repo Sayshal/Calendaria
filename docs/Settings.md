@@ -41,6 +41,10 @@ Launch the Calendar Editor for creating/modifying calendars.
 
 Open the calendar importer for Simple Calendar, Fantasy Calendar, and other formats.
 
+### Set Date & Time
+
+Opens a dialog to set the world date and time directly. GM only.
+
 ### Open/Close Buttons
 
 Context-specific buttons to open or close the HUD, MiniCal, and Time Keeper applications.
@@ -66,7 +70,6 @@ Configure which user roles can access Calendaria features.
 | **View Chronicle**        | Can see the Chronicle                                  |
 | **View Stopwatch**        | Can see the Stop Watch                                 |
 | **Manage Notes**          | Can create own calendar notes                          |
-| **Edit Notes**            | Can edit calendar notes owned by other players         |
 | **Delete Notes**          | Can delete own calendar notes                          |
 | **Change Date/Time**      | Can modify the world date and time                     |
 | **Change Weather**        | Can set weather conditions                             |
@@ -90,6 +93,17 @@ Opens the [Note Preset Editor](Note-Preset-Editor) for creating, editing, and de
 ### Re-sync Festival Notes
 
 Regenerates festival journal notes from the current calendar's festival definitions. Creates missing festival notes or restores accidentally deleted ones. Existing notes are not duplicated.
+
+### Default Note Settings
+
+#### Note Open Mode
+
+Controls how existing notes open by default when clicked.
+
+- Options: `Default`, `Edit`, `View`
+- Default: `Default`
+
+When set to Edit or View, notes always open in that mode. New notes always open in Edit mode regardless of this setting.
 
 ---
 
@@ -262,6 +276,12 @@ Choose temperature display format.
 - Options: `Celsius`, `Fahrenheit`
 - Default: `Celsius`
 
+#### Show Both Temperature Units
+
+Display both Celsius and Fahrenheit side by side in weather pills and tooltips.
+
+- Default: `false`
+
 #### Precipitation Unit
 
 Choose precipitation display format.
@@ -391,6 +411,16 @@ Toggle which content types appear in the Chronicle:
 - **Show Season Banners**: Display season transition banners
 - **Show Moon Phase Banners**: Display moon phase banners
 - **Show Weather History**: Display historical weather entries
+
+### Count as Not Empty
+
+Multi-select setting controlling which banner types count as content when determining whether a day has entries. When "Show Empty Days" is toggled off, days with only unchecked banner types are treated as empty.
+
+- **Weather**: Weather history banners
+- **Moon Phases**: Moon phase milestone banners
+- **Season Changes**: Season transition banners
+
+By default, all banner types count as content.
 
 ### Combat Behavior
 

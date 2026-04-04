@@ -4,23 +4,46 @@ A walkthrough of most major features, graciously created by the BaileyWiki team:
 
 ## New Features
 
-- `/enrichers` command creates a reference journal with live examples for all 51 enrichers
-- "Show Time" toggle to hide time display and controls on MiniCal
-- Time increment selection persists across reloads for all widgets
+- "Count as Not Empty" multi-select for Chronicle banner types
+- "Note Open Mode" setting (Default / Edit / View) for controlling how notes open
+- "Set Date & Time" button on Settings Calendar tab
+- "Show Both Temperature Units" setting for dual Celsius/Fahrenheit display
+- `CALENDARIA.api.createClimateZone()` for programmatic zone creation
+- `simple` and `to` parameters for countup/elapsed enrichers
+- Chronicle content now renders @UUID links and other Foundry enrichers
+- Cinematic CSS scoped to prevent class collisions
+- Custom climate zone template option (blank zone, all presets disabled)
+- Frameless apps fade out on close
+- Localized wind cardinal directions
+- Moon anchor "Reset Cycle" toggle for fixed-mode moons
+- Multi-day event bars condense when overlapping, expand on hover
+- Preset Editor overhaul with Default preset, 18 configurable fields, and Sync to Notes
 
 ## Bug Fixes
 
-- Fixed rest advancing time once per player instead of once per rest
-- Fixed theme preset switching reverting to previous theme
-- Fixed season enricher always returning first season
-- Fixed moon/zone enrichers calling non-existent methods
-- Fixed settings panel sidebar overflowing at large font sizes
-- Fixed Note Viewer FAB jumping with scrollbar changes
-- Fixed missing Sunrise/Sunset localization for approximate time
-- Fixed HUD not restoring increment selection on fresh worlds
+- Chronicle show-on-load no longer mutated by open/close
+- Festival notes auto-created on calendar save
+- Fixed apps losing position after browser resize
+- Fixed climate editor environment lighting not saving when empty
+- Fixed custom presets silently deleted during module updates
+- Fixed FXMaster Windy preset error and broken sound labels
+- Fixed Greyhawk intercalary festival months not advancing weekdays
+- Fixed journal sidebar footer being cleared on load
+- Fixed note ownership dropdowns not saving changes
+- Fixed preset editor losing data when switching presets
+- Fixed tooltip text unreadable in light mode
+- Fixed weather picker showing "Not active" for enabled presets
+- Orphaned presets auto-recovered from note references on world load
+- Presets with zero temp overlap filtered out before weather selection
+- Replaced corrupted weather sound files
+- Weather presets with built-in temp constraints now enforce limits properly
 
 ## Changes
 
-- Replaced single "Custom" theme with per-preset Customize workflow
-- Theme editor redesigned -- removed Location column, compact headers, preset hint
-- Settings panel height increased to 860px
+- 20 bundled calendar JSON files updated with corrected data format
+- Climate Editor shows preset temp constraints as input placeholders
+- Default preset hidden from category pickers, badges, and filters
+- Multi-day events sorted by start date instead of alphabetically
+- Ordinal suffixes and date format now localizable
+- Removed "Edit Notes" global permission -- note editing gated by per-note ownership
+- Removed override system (lock buttons, forced overrides) -- presets now only set defaults

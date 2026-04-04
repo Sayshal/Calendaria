@@ -135,7 +135,7 @@ Events with duration span multiple days, rendered as horizontal bars across the 
 - Color-coded with the note's custom color
 - Show note icon and title
 - Arrow indicators mark events continuing from previous weeks
-- Overlapping events stack in separate rows
+- When multiple events overlap, bars condense to thin lines. On hover, they expand to full height showing icon and title with a smooth CSS transition.
 - Click any bar to open the note
 - Optional bookend markers indicate the start and end days of the event
 
@@ -149,7 +149,7 @@ Multi-day events render differently depending on their display style:
 | **Pip**    | Compact dot indicator. A minimal colored bar with reduced height for less visual weight  |
 | **Banner** | Full-width bar. A prominent colored bar emphasizing the event across its entire duration |
 
-Events sort by display priority: banners first, then icons, then pips. Festival notes always sort above regular notes.
+Events sort by start date, then by display priority: banners first, then icons, then pips. Festival notes always sort above regular notes.
 
 ---
 

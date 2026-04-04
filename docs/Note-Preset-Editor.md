@@ -8,7 +8,7 @@ Two-panel app for creating and managing note presets. Presets define icon, color
 
 ### Left Panel: Preset List
 
-A scrollable list of all presets, sorted alphabetically. Each entry shows:
+A scrollable list of all presets. The **Default** preset is always sorted first; remaining presets are sorted alphabetically. Each entry shows:
 
 - **Label.** The preset name (click to select)
 - **Icon button.** Colored icon; click to edit icon and color via dialog
@@ -17,7 +17,19 @@ If any built-in presets have been hidden (soft-deleted), a **Restore Hidden Pres
 
 ### Right Panel: Preset Editor
 
-Displays the editor for the currently selected preset, split into two fieldsets: Basic Settings and Defaults.
+Displays the editor for the currently selected preset, organized into three sections: **Content**, **Schedule**, and **Settings** (mirroring the note sheet tab structure).
+
+---
+
+## Default Preset
+
+A special built-in preset that:
+
+- **Cannot be deleted.** The delete button is disabled when the Default preset is selected.
+- **Auto-applied.** Any note without an explicit category assignment uses the Default preset's defaults.
+- **Hidden from pickers.** The Default preset does not appear in category dropdowns on the note sheet, note badge displays, or filter dropdowns. It acts as a fallback, not a visible category.
+
+The Default preset can be edited like any other preset (name, icon, color, defaults). It is always the first entry in the preset list.
 
 ---
 
@@ -35,45 +47,79 @@ When disabled, the preset is hidden from the category dropdown for non-GM users.
 
 ---
 
-## Defaults & Overrides
+## Content Section
 
-The Defaults fieldset defines values that apply when a note is created with this preset. Each field has a **lock toggle** button beside it:
+### Title Template
 
-- **Unlocked** (default). The value acts as a default. It is applied to new notes but can be changed per-note afterward.
-- **Locked.** The value becomes an override. Only displayStyle and visibility overrides are enforced at display time. Other locked fields apply at creation time only.
+Optional default title for new notes created with this preset. Leave blank for no default title.
 
-### Configurable Fields
+### Content Template
 
-| Field               | Type    | Description                                                 |
-| ------------------- | ------- | ----------------------------------------------------------- |
-| **All Day**         | Boolean | Whether new notes default to all-day events                 |
-| **Display Style**   | Select  | How the note renders on the calendar (banner, icon, or pip) |
-| **Visibility**      | Select  | Note visibility level (visible, hidden, or secret)          |
-| **Reminder Type**   | Select  | Default notification type (Toast, Chat, or Dialog)          |
-| **Reminder Offset** | Number  | Hours before the event to trigger the reminder              |
-| **Has Duration**    | Boolean | Whether the note has a duration by default                  |
-| **Duration**        | Number  | Default duration in days (minimum 1)                        |
-| **Macro**           | Select  | Macro to execute when the note triggers (from world macros) |
-
-Any field set to "No Default" is left to the user's choice at note creation time.
-
----
-
-## Content Template
-
-The Content Template fieldset provides an optional editor for defining default note content. When a note is created with this preset and no content is provided, the template HTML is pre-filled into the note body.
+Optional editor for defining default note content. When a note is created with this preset and no content is provided, the template HTML is pre-filled into the note body.
 
 - Leave the editor empty for no template
 - Use the reset button to restore the built-in seed template (if one exists for this preset)
-- Content templates only apply to **new** notes — they do not affect existing notes
+- Content templates only apply to **new** notes
 
 > [!TIP]
 > Content templates are useful for standardizing session logs, quest write-ups, or any recurring note format. The template is inserted as the note's initial content and can be freely edited afterward.
 
-### How Overrides Work
+---
 
-- When displaying notes on the calendar, overridden display styles and visibility take effect
-- Notes sort by display style: banner > icon > pip
+## Schedule Section
+
+- **All Day**: Whether new notes default to all-day events
+- **Max Occurrences**: Default maximum occurrences for recurring notes (0 = unlimited)
+
+---
+
+## Settings Section
+
+#### Display
+
+- **Display Style**: How the note renders on the calendar (banner, icon, or pip)
+- **Visibility**: Note visibility level (visible, hidden, or secret)
+- **Silent**: Suppress chat announcements and reminders for this note
+- **Color**: Default note color
+- **Icon**: Default FontAwesome icon class
+
+#### Duration
+
+- **Has Duration**: Whether the note has a duration by default
+- **Duration**: Default duration in days (minimum 1)
+- **Show Bookends**: Show start/end markers on multi-day events
+- **Limited Repeat**: Cap how far back the recurrence engine searches for historical occurrences
+- **Limited Repeat Days**: Number of days to search back
+
+When **Has Duration** is unchecked, the Duration, Show Bookends, and Limited Repeat fields are disabled. When **Limited Repeat** is unchecked, the Limited Repeat Days field is disabled.
+
+#### Reminders
+
+- **Reminder Type**: Default notification type (Toast, Chat, or Dialog)
+- **Reminder Targets**: Who receives reminders (All, GM, Author, Viewers, Specific)
+- **Reminder Offset**: Hours before the event to trigger the reminder
+
+#### Ownership & Automation
+
+- **Ownership**: Default player ownership level for new notes (None / Observer / Owner)
+- **Macro**: Macro to execute when the note triggers (selected from world macros)
+
+Any field left unset uses the system default at note creation time.
+
+---
+
+## Sync to Notes
+
+The **Sync to Notes** button in the footer batch-updates all existing notes that use the selected preset to match its current defaults. A confirmation dialog shows the number of affected notes before proceeding.
+
+Synced fields include all Settings and Schedule defaults. The following fields are **not** synced to preserve per-note customization:
+
+- Title
+- Content
+- Schedule dates and conditions
+
+> [!NOTE]
+> Sync only affects notes that already use this preset as their category. It does not assign the preset to uncategorized notes.
 
 ---
 
@@ -81,11 +127,11 @@ The Content Template fieldset provides an optional editor for defining default n
 
 ### Built-in Presets
 
-8 built-in presets ship with every world (Birthday, Deadline, Downtime, Lore, Meeting, Quest, Reminder, Session). Built-in presets:
+8 built-in presets ship with every world (Birthday, Deadline, Downtime, Lore, Meeting, Quest, Reminder, Session), plus the Default preset. Built-in presets:
 
-- Can be edited (name, icon, color, defaults, overrides)
-- Can be **soft-deleted** (hidden) rather than permanently removed. A "Restore Hidden Presets" button appears when any are hidden
-- Support **per-fieldset reset**: the reset button on the Basic Settings fieldset restores the original seed data (name, icon, color, player usable flag); the reset button on Defaults restores seed defaults and clears overrides
+- Can be edited (name, icon, color, defaults)
+- Can be **soft-deleted** (hidden) rather than permanently removed. A "Restore Hidden Presets" button appears when any are hidden. The Default preset cannot be soft-deleted.
+- Support **per-section reset**: the reset button on Basic Settings restores the original seed data; the reset button on each section restores seed defaults
 
 ### Custom Presets
 
@@ -93,7 +139,7 @@ Custom presets are fully user-created. They:
 
 - Store all fields directly (no seed data to restore)
 - Can be permanently deleted
-- Support **per-fieldset reset**: the reset button clears fields to empty defaults
+- Support **per-section reset**: the reset button clears fields to empty defaults
 
 ---
 
@@ -103,7 +149,7 @@ Export and import individual presets as JSON files.
 
 ### Export
 
-Click **Export** in the footer to download the selected preset as a `.json` file. The file includes all preset data: label, icon, color, defaults, and overrides.
+Click **Export** in the footer to download the selected preset as a `.json` file. The file includes all preset data: label, icon, color, and defaults.
 
 ### Import
 
@@ -117,13 +163,14 @@ Click **Import** in the footer and select a `.json` file. On import:
 
 ## Footer Actions
 
-| Action     | Description                                           |
-| ---------- | ----------------------------------------------------- |
-| **Import** | Import a preset from a JSON file                      |
-| **Export** | Export the selected preset to a JSON file             |
-| **Delete** | Remove the selected preset (soft-delete for built-in) |
-| **Add**    | Create a new custom preset                            |
-| **Save**   | Save all changes to settings                          |
+| Action            | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| **Import**        | Import a preset from a JSON file                      |
+| **Export**        | Export the selected preset to a JSON file             |
+| **Sync to Notes** | Batch-update existing notes to match preset defaults  |
+| **Delete**        | Remove the selected preset (soft-delete for built-in) |
+| **Add**           | Create a new custom preset                            |
+| **Save**          | Save all changes to settings                          |
 
 ---
 

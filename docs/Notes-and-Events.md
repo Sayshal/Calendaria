@@ -48,7 +48,7 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 
 - **Start Date / End Date**: Click to open a date picker
 - **Start Time / End Time**: Hour and minute inputs (hidden when All Day is checked)
-- **All Day**: Checkbox to hide time fields
+- **All Day**: Checkbox to hide time fields. When checked, end date fields are disabled and synced to match the start date.
 - **Condition Presets**: Dropdown with presets that reflect your calendar's weekdays, months, seasons, and moon phases (e.g., "Every Monday", "Monthly on the 15th", "Every Full Moon")
 - **Edit in Builder**: Opens the visual condition builder with the note's current conditions loaded
 - **Condition Summary**: Displays the note's recurrence rules as readable pills. Right-click a pill to delete it.
@@ -84,6 +84,7 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 - Select from existing categories
 - Add new categories inline
 - Categories with the player-usable flag disabled are hidden from non-GM users unless already assigned to the note
+- The Default preset does not appear as a selectable category. It acts as a fallback for uncategorized notes and is hidden from category pickers and badge displays
 
 #### Ownership
 
