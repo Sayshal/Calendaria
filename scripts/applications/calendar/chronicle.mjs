@@ -89,14 +89,12 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.startDate) instance._startDate = options.startDate;
     if (options.endDate) instance._endDate = options.endDate;
     if (options.calendarId) instance._calendarId = options.calendarId;
-    if (!options.silent) game.settings.set(MODULE.ID, SETTINGS.SHOW_CHRONICLE, true);
     instance.render({ force: true });
     return instance;
   }
 
   /** Hide the chronicle. */
   static hide() {
-    game.settings.set(MODULE.ID, SETTINGS.SHOW_CHRONICLE, false);
     this.instance?.close();
   }
 

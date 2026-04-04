@@ -38,7 +38,7 @@ const WIDGET_COMBAT_CONFIGS = [
   },
   { settingKey: SETTINGS.STOPWATCH_COMBAT_MODE, showSettingKey: SETTINGS.SHOW_STOPWATCH, getInstance: () => Stopwatch.instance, showWidget: () => Stopwatch.show({ silent: true }) },
   { settingKey: SETTINGS.BIG_CAL_COMBAT_MODE, showSettingKey: SETTINGS.SHOW_BIG_CAL, getInstance: () => BigCal.instance, showWidget: () => BigCal.show({ silent: true }) },
-  { settingKey: SETTINGS.CHRONICLE_COMBAT_MODE, showSettingKey: SETTINGS.SHOW_CHRONICLE, getInstance: () => Chronicle.instance, showWidget: () => Chronicle.show({ silent: true }) }
+  { settingKey: SETTINGS.CHRONICLE_COMBAT_MODE, showSettingKey: SETTINGS.SHOW_CHRONICLE, getInstance: () => Chronicle.instance, showWidget: () => Chronicle.show() }
 ];
 
 /**
