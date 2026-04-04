@@ -468,4 +468,47 @@ export async function runAllMigrations() {
   await migratePresetSchema();
   await migrateFestivalPresetRemoval();
   await migrateCustomThemeColors();
+  await recoverOrphanedPresets();
+}
+
+/**
+ * Detect notes referencing preset IDs that no longer exist and reconstruct stub presets.
+ * Protects against custom presets lost during module updates.
+ * @returns {Promise<void>}
+ */
+async function recoverOrphanedPresets() {
+  if (!game.user?.isGM) return;
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  const savedIds = new Set(raw.map((c) => c.id));
+  const builtinIds = new Set(['__default__', 'quest', 'session', 'meeting', 'birthday', 'deadline', 'reminder', 'downtime', 'lore']);
+  const orphanIds = new Map();
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const cats = page.system?.categories;
+      if (!Array.isArray(cats)) continue;
+      for (const id of cats) {
+        if (savedIds.has(id) || builtinIds.has(id) || orphanIds.has(id)) continue;
+        orphanIds.set(id, { color: page.system.color, icon: page.system.icon });
+      }
+    }
+  }
+  if (!orphanIds.size) return;
+  let sortOrder = raw.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1) + 1;
+  for (const [id, data] of orphanIds) {
+    raw.push({
+      id,
+      label: id,
+      color: data.color || '#868e96',
+      icon: data.icon || 'fas fa-tag',
+      builtin: false,
+      sortOrder: sortOrder++,
+      playerUsable: true,
+      defaults: {}
+    });
+    log(2, `Recovered orphaned preset "${id}" from note data`);
+  }
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  log(2, `Recovered ${orphanIds.size} orphaned preset(s)`);
 }

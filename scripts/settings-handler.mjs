@@ -1070,7 +1070,7 @@ export default class CalendariaSettings {
         requiresReload: true
       },
       [SETTINGS.DEFAULT_OVERRIDES]: { name: 'Default Calendar Overrides', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
-      [SETTINGS.CUSTOM_PRESETS]: { name: 'Custom Presets', scope: 'world', config: false, type: new ArrayField(new ObjectField()), onChange: () => invalidatePresetCache() },
+      [SETTINGS.CUSTOM_PRESETS]: { name: 'Custom Presets', scope: 'world', config: false, type: new ArrayField(new ObjectField(), { initial: [] }), onChange: () => invalidatePresetCache() },
       [SETTINGS.CHAT_TIMESTAMP_MODE]: {
         name: 'CALENDARIA.Settings.ChatTimestampMode.Name',
         hint: 'CALENDARIA.Settings.ChatTimestampMode.Hint',
