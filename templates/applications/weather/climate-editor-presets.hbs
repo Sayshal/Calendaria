@@ -69,9 +69,9 @@
                 class="preset-season-chance {{#if this.isRelativeChance}}modifier-relative{{/if}} {{#if this.enabledNoWeight}}zero-weight-warning{{/if}}"
                 {{#if this.enabledNoWeight}}data-tooltip
                 aria-label="{{localize 'CALENDARIA.ClimateEditor.Presets.ZeroWeightWarning'}}" {{/if}}>
-              <input type="text" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
+              <input type="text" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="{{#if this.defaultTempMin}}{{this.defaultTempMin}}{{else}}—{{/if}}"
                 class="preset-temp-input {{#if this.isRelativeTempMin}}modifier-relative{{/if}}">
-              <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"
+              <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="{{#if this.defaultTempMax}}{{this.defaultTempMax}}{{else}}—{{/if}}"
                 class="preset-temp-input {{#if this.isRelativeTempMax}}modifier-relative{{/if}}">
               <input type="number" name="preset_{{this.id}}_inertiaWeight" value="{{this.inertiaWeight}}"
                 placeholder="{{this.defaultInertiaWeight}}" min="0" max="2" step="0.1" class="preset-inertia-input"

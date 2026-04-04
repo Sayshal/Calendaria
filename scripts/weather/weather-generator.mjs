@@ -185,16 +185,21 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
     if (Object.keys(probabilities).length === 0) for (const preset of getAllPresets(customPresets)) probabilities[preset.id] = 1;
     if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
   }
+  for (const [id, weight] of Object.entries(probabilities)) {
+    if (weight <= 0) continue;
+    const p = getPreset(id, customPresets);
+    if (p?.tempMin != null && p?.tempMax != null && (p.tempMin > tempRange.max || p.tempMax < tempRange.min)) probabilities[id] = 0;
+  }
   if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig, season);
   const weatherId = weightedSelect(probabilities, randomFn);
   const preset = getPreset(weatherId, customPresets);
   let finalTempRange = { ...tempRange };
   const seasonPresetConfig = zoneOverride?.presets?.[weatherId];
   const zonePresetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
-  const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin;
-  const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax;
-  if (effectiveTempMin != null) finalTempRange.min = applyTempModifier(effectiveTempMin, tempRange.min);
-  if (effectiveTempMax != null) finalTempRange.max = applyTempModifier(effectiveTempMax, tempRange.max);
+  const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
+  const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
+  if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
+  if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
   let temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);

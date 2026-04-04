@@ -446,40 +446,68 @@
           "_default": {
             "min": 15,
             "max": 35
+          },
+          "High Sun": {
+            "min": 28,
+            "max": 48
+          },
+          "Sun Descending": {
+            "min": 28,
+            "max": 48
+          },
+          "Sun Ascending": {
+            "min": 28,
+            "max": 48
           }
         },
         "presets": {
           "clear0000000000": {
             "id": "clear",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "partlycloudy000": {
             "id": "partly-cloudy",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "windy0000000000": {
             "id": "windy",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "sandstorm000000": {
             "id": "sandstorm",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "cloudy000000000": {
             "id": "cloudy",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "heathaze0000000": {
             "id": "heat-haze",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "rain00000000000": {
             "id": "rain",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "fog000000000000": {
             "id": "fog",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           }
         },
         "seasonOverrides": {
@@ -491,35 +519,43 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 56
+                "chance": 56,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 17
+                "chance": 17,
+                "enabled": true
               },
               "sandstorm": {
                 "id": "sandstorm",
-                "chance": 11
+                "chance": 11,
+                "enabled": true
               },
               "windy": {
                 "id": "windy",
-                "chance": 11
+                "chance": 11,
+                "enabled": true
               },
               "heat-haze": {
                 "id": "heat-haze",
-                "chance": 6
+                "chance": 6,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "rain": {
                 "id": "rain",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "fog": {
                 "id": "fog",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           },
@@ -531,35 +567,43 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 56
+                "chance": 56,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 17
+                "chance": 17,
+                "enabled": true
               },
               "sandstorm": {
                 "id": "sandstorm",
-                "chance": 11
+                "chance": 11,
+                "enabled": true
               },
               "windy": {
                 "id": "windy",
-                "chance": 11
+                "chance": 11,
+                "enabled": true
               },
               "heat-haze": {
                 "id": "heat-haze",
-                "chance": 6
+                "chance": 6,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "rain": {
                 "id": "rain",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "fog": {
                 "id": "fog",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           },
@@ -571,35 +615,43 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 56
+                "chance": 56,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 17
+                "chance": 17,
+                "enabled": true
               },
               "sandstorm": {
                 "id": "sandstorm",
-                "chance": 11
+                "chance": 11,
+                "enabled": true
               },
               "windy": {
                 "id": "windy",
-                "chance": 11
+                "chance": 11,
+                "enabled": true
               },
               "heat-haze": {
                 "id": "heat-haze",
-                "chance": 6
+                "chance": 6,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "rain": {
                 "id": "rain",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "fog": {
                 "id": "fog",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           }

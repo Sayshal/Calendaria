@@ -260,10 +260,10 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
     if (templateTemp) temperatures[season] = { ...templateTemp };
   }
   const presets = [];
-  const defaultWeather = template.weather?.default ?? {};
+  const allWeatherKeys = template.weather ?? {};
   for (const preset of ALL_PRESETS) {
-    const weight = defaultWeather[preset.id] ?? 0;
-    presets.push({ id: preset.id, enabled: weight > 0, tempMin: null, tempMax: null });
+    const enabled = Object.values(allWeatherKeys).some((seasonWeights) => (seasonWeights[preset.id] ?? 0) > 0);
+    presets.push({ id: preset.id, enabled, tempMin: null, tempMax: null });
   }
   const seasonOverrides = {};
   const defaultWeatherWeights = template.weather?.default ?? {};
@@ -276,7 +276,7 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
     const seasonPresets = {};
     for (const [presetId, weight] of Object.entries(effectiveWeather)) {
       const chance = Math.round((weight / seasonTotal) * 100 * 100) / 100;
-      seasonPresets[presetId] = { id: presetId, chance };
+      seasonPresets[presetId] = { id: presetId, chance, enabled: chance > 0 };
     }
     const seasonTemp = template.temperatures[season] ?? template.temperatures[normalizedSeason.charAt(0).toUpperCase() + normalizedSeason.slice(1)];
     seasonOverrides[season] = { temperatures: seasonTemp ? { min: seasonTemp.min, max: seasonTemp.max } : null, presets: seasonPresets };

@@ -603,48 +603,82 @@
           "_default": {
             "min": 12,
             "max": 28
+          },
+          "Winter": {
+            "min": 5,
+            "max": 17
+          },
+          "Spring": {
+            "min": 15,
+            "max": 28
+          },
+          "Summer": {
+            "min": 22,
+            "max": 35
+          },
+          "Autumn": {
+            "min": 15,
+            "max": 28
           }
         },
         "presets": {
           "clear0000000000": {
             "id": "clear",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "partlycloudy000": {
             "id": "partly-cloudy",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "cloudy000000000": {
             "id": "cloudy",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "rain00000000000": {
             "id": "rain",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "drizzle00000000": {
             "id": "drizzle",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "thunderstorm000": {
             "id": "thunderstorm",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "sunshower000000": {
             "id": "sunshower",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "mist00000000000": {
             "id": "mist",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           },
           "fog000000000000": {
             "id": "fog",
-            "enabled": true
+            "enabled": true,
+            "tempMin": null,
+            "tempMax": null
           }
         },
         "seasonOverrides": {
-          "CALENDARIA.Season.Winter": {
+          "Winter": {
             "temperatures": {
               "min": 5,
               "max": 17
@@ -652,43 +686,52 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 13
+                "chance": 13,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 20
+                "chance": 20,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 27
+                "chance": 27,
+                "enabled": true
               },
               "rain": {
                 "id": "rain",
-                "chance": 20
+                "chance": 20,
+                "enabled": true
               },
               "mist": {
                 "id": "mist",
-                "chance": 13
+                "chance": 13,
+                "enabled": true
               },
               "fog": {
                 "id": "fog",
-                "chance": 7
+                "chance": 7,
+                "enabled": true
               },
               "drizzle": {
                 "id": "drizzle",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "thunderstorm": {
                 "id": "thunderstorm",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "sunshower": {
                 "id": "sunshower",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           },
-          "CALENDARIA.Season.Spring": {
+          "Spring": {
             "temperatures": {
               "min": 15,
               "max": 28
@@ -696,43 +739,52 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 29
+                "chance": 29,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 29
+                "chance": 29,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 21
+                "chance": 21,
+                "enabled": true
               },
               "rain": {
                 "id": "rain",
-                "chance": 21
+                "chance": 21,
+                "enabled": true
               },
               "drizzle": {
                 "id": "drizzle",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "thunderstorm": {
                 "id": "thunderstorm",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "sunshower": {
                 "id": "sunshower",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "mist": {
                 "id": "mist",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "fog": {
                 "id": "fog",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           },
-          "CALENDARIA.Season.Summer": {
+          "Summer": {
             "temperatures": {
               "min": 22,
               "max": 35
@@ -740,43 +792,52 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 23
+                "chance": 23,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 18
+                "chance": 18,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 9
+                "chance": 9,
+                "enabled": true
               },
               "rain": {
                 "id": "rain",
-                "chance": 23
+                "chance": 23,
+                "enabled": true
               },
               "drizzle": {
                 "id": "drizzle",
-                "chance": 9
+                "chance": 9,
+                "enabled": true
               },
               "thunderstorm": {
                 "id": "thunderstorm",
-                "chance": 14
+                "chance": 14,
+                "enabled": true
               },
               "sunshower": {
                 "id": "sunshower",
-                "chance": 5
+                "chance": 5,
+                "enabled": true
               },
               "mist": {
                 "id": "mist",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "fog": {
                 "id": "fog",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           },
-          "CALENDARIA.Season.Autumn": {
+          "Autumn": {
             "temperatures": {
               "min": 15,
               "max": 28
@@ -784,39 +845,48 @@
             "presets": {
               "clear": {
                 "id": "clear",
-                "chance": 21
+                "chance": 21,
+                "enabled": true
               },
               "partly-cloudy": {
                 "id": "partly-cloudy",
-                "chance": 29
+                "chance": 29,
+                "enabled": true
               },
               "cloudy": {
                 "id": "cloudy",
-                "chance": 29
+                "chance": 29,
+                "enabled": true
               },
               "rain": {
                 "id": "rain",
-                "chance": 21
+                "chance": 21,
+                "enabled": true
               },
               "drizzle": {
                 "id": "drizzle",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "thunderstorm": {
                 "id": "thunderstorm",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "sunshower": {
                 "id": "sunshower",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "mist": {
                 "id": "mist",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               },
               "fog": {
                 "id": "fog",
-                "chance": 0
+                "chance": 0,
+                "enabled": false
               }
             }
           }

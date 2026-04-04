@@ -189,6 +189,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               isRelativeChance,
               tempMin: ClimateEditor.#formatTempValue(effectiveTempMin),
               tempMax: ClimateEditor.#formatTempValue(effectiveTempMax),
+              defaultTempMin: preset.tempMin != null ? String(toDisplayUnit(preset.tempMin)) : '',
+              defaultTempMax: preset.tempMax != null ? String(toDisplayUnit(preset.tempMax)) : '',
               isRelativeTempMin: typeof effectiveTempMin === 'string' && /[+-]$/.test(effectiveTempMin),
               isRelativeTempMax: typeof effectiveTempMax === 'string' && /[+-]$/.test(effectiveTempMax),
               inertiaWeight: effectiveInertia ?? '',

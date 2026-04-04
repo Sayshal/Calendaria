@@ -1547,9 +1547,13 @@ export default class WeatherManager {
     const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
     const { tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
     let finalRange = { ...tempRange };
+    const customPresets = this.getCustomPresets();
+    const preset = getPreset(presetId, customPresets);
     const presetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === presetId && p.enabled !== false);
-    if (presetConfig?.tempMin != null) finalRange.min = applyTempModifier(presetConfig.tempMin, tempRange.min);
-    if (presetConfig?.tempMax != null) finalRange.max = applyTempModifier(presetConfig.tempMax, tempRange.max);
+    const effectiveMin = presetConfig?.tempMin ?? preset?.tempMin;
+    const effectiveMax = presetConfig?.tempMax ?? preset?.tempMax;
+    if (effectiveMin != null) finalRange.min = Math.max(finalRange.min, applyTempModifier(effectiveMin, tempRange.min));
+    if (effectiveMax != null) finalRange.max = Math.min(finalRange.max, applyTempModifier(effectiveMax, tempRange.max));
     return Math.round(finalRange.min + Math.random() * (finalRange.max - finalRange.min));
   }
 
