@@ -640,12 +640,11 @@ export default class WeatherManager {
         darknessPenalty: entry.darknessPenalty ?? 0
       };
       let forecastEntry = { year, month, dayOfMonth, preset, temperature: entry.temperature, wind: entry.wind, precipitation: entry.precipitation, isVaried: false };
-      if (entry.periods) forecastEntry.periods = entry.periods;
+      if (entry.periods && isGM) forecastEntry.periods = entry.periods;
       if (!isGM && accuracy < 100) {
         const seed = dateSeed(year, month, dayOfMonth);
         const varied = applyForecastVariance({ preset, temperature: entry.temperature }, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
         forecastEntry = { year, month, dayOfMonth, ...varied, wind: entry.wind, precipitation: entry.precipitation };
-        if (entry.periods) forecastEntry.periods = entry.periods;
       }
       result.push(forecastEntry);
       dayOfMonth++;
@@ -699,6 +698,7 @@ export default class WeatherManager {
       getDaysInMonth: this.#makeDaysInMonth(calendar)
     });
     this.#legacyForecastCache = { key: cacheKey, forecast };
+    if (!game.user.isGM) return forecast.map(({ periods: _, ...rest }) => rest);
     return forecast;
   }
 

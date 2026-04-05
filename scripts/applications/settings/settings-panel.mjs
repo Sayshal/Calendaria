@@ -1905,7 +1905,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('precipitationUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.PRECIPITATION_UNIT, data.precipitationUnit);
     if ('windSpeedUnit' in data) await game.settings.set(MODULE.ID, SETTINGS.WIND_SPEED_UNIT, data.windSpeedUnit);
     if ('weatherInertia' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_INERTIA, parseFloat(data.weatherInertia));
-    if ('intradayWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.INTRADAY_WEATHER, !!data.intradayWeather);
+    if ('intradayWeather' in data) {
+      const wasEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
+      await game.settings.set(MODULE.ID, SETTINGS.INTRADAY_WEATHER, !!data.intradayWeather);
+      if (!wasEnabled && !!data.intradayWeather) await WeatherManager.regenerateAllWeather();
+    }
     if ('intradayCarryOver' in data) await game.settings.set(MODULE.ID, SETTINGS.INTRADAY_CARRY_OVER, parseInt(data.intradayCarryOver));
     if ('weatherHistoryDays' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY_DAYS, parseInt(data.weatherHistoryDays));
     if ('forecastAccuracy' in data) await game.settings.set(MODULE.ID, SETTINGS.FORECAST_ACCURACY, parseInt(data.forecastAccuracy));

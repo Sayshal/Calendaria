@@ -2086,7 +2086,7 @@
   "CALENDARIA.Settings.Importer.Name": "Calendar Importer",
   "CALENDARIA.Settings.IntradayCarryOver.Hint": "Chance that a time period keeps the previous period's weather instead of generating new. Higher = more full-day consistency. 0% = always different, 100% = always same.",
   "CALENDARIA.Settings.IntradayCarryOver.Name": "Period Carry-Over Chance",
-  "CALENDARIA.Settings.IntradayWeather.Hint": "Enable weather variation within a day. Weather changes at sunrise, midday, sunset, and midnight.",
+  "CALENDARIA.Settings.IntradayWeather.Hint": "Enable weather variation within a day. Weather changes at sunrise, midday, sunset, and midnight. Enabling this will irreversibly regenerate all current weather and forecasts.",
   "CALENDARIA.Settings.IntradayWeather.Name": "Intraday Weather",
   "CALENDARIA.Settings.Logger.Choices.Errors": "Errors Only",
   "CALENDARIA.Settings.Logger.Choices.Verbose": "Verbose (All)",

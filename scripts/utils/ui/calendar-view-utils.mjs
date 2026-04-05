@@ -452,7 +452,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
       isForecast: false,
       isVaried: false
     };
-    if (w.periods) {
+    if (w.periods && (game.user.isGM || canViewWeatherForecast())) {
       result.periods = w.periods;
       result.activePeriod = w.activePeriod;
     }
