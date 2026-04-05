@@ -80,7 +80,7 @@ import {
   usesDomParenting,
   warnShowToAll
 } from '../../utils/_module.mjs';
-import { WeatherManager, getPresetAlias } from '../../weather/_module.mjs';
+import { WeatherManager } from '../../weather/_module.mjs';
 import { BigCal, NoteViewer, SecondaryCalendar, SettingsPanel, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -412,8 +412,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weather = WeatherManager.getCurrentWeather(zoneId);
     if (!weather) return null;
     const calendarId = this.calendar?.metadata?.id;
-    const alias = getPresetAlias(weather.id, calendarId, zoneId);
-    const label = alias || localize(weather.label);
+    const label = WeatherManager.resolveDisplayLabel(weather.id, weather.label, calendarId, zoneId);
     const windSpeed = weather.wind?.speed ?? 0;
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;

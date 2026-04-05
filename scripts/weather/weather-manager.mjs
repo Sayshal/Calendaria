@@ -13,7 +13,7 @@ import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './data/climate-data.mjs';
-import { ALL_PRESETS, expandLegacySoundKey, getAllPresets, getPreset, getPresetAlias, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
+import { ALL_PRESETS, expandLegacySoundKey, getAllPresets, getPreset, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
 import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateIntradayWeather, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
 
 /**
@@ -217,6 +217,25 @@ export default class WeatherManager {
   static getCurrentWeather(zoneId, scene) {
     const resolvedZoneId = zoneId ?? this.getActiveZone(null, scene ?? game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
     return this.#currentWeatherByZone[resolvedZoneId] ?? null;
+  }
+
+  /**
+   * Resolve the display label for a weather preset, checking per-zone alias then Weather Editor override.
+   * @param {string} presetId - Preset ID
+   * @param {string} fallbackLabel - Fallback label (localization key or plain text)
+   * @param {string} [calendarId] - Calendar ID for alias lookup
+   * @param {string} [zoneId] - Zone ID for alias lookup
+   * @returns {string} Resolved display label
+   */
+  static resolveDisplayLabel(presetId, fallbackLabel, calendarId, zoneId) {
+    if (calendarId && zoneId) {
+      const aliases = game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
+      const alias = aliases[calendarId]?.[zoneId]?.[presetId];
+      if (alias) return alias;
+    }
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[presetId];
+    if (overrides?.label) return overrides.label;
+    return localize(fallbackLabel);
   }
 
   /**
@@ -1975,10 +1994,9 @@ export default class WeatherManager {
     const entries = Object.entries(probabilities)
       .map(([id, weight]) => {
         const preset = getPreset(id, customPresets);
-        const alias = calendarId && zone?.id ? getPresetAlias(id, calendarId, zone.id) : null;
         return {
           id,
-          label: alias || (preset ? localize(preset.label) : id),
+          label: preset ? this.resolveDisplayLabel(id, preset.label, calendarId, zone?.id) : id,
           icon: preset?.icon ?? 'fa-question',
           color: preset?.color ?? '#888888',
           weight,
@@ -2013,10 +2031,9 @@ export default class WeatherManager {
     const entries = Object.entries(probabilities)
       .map(([id, weight]) => {
         const preset = getPreset(id, customPresets);
-        const alias = calendarId && zoneId ? getPresetAlias(id, calendarId, zoneId) : null;
         return {
           id,
-          label: alias || (preset ? localize(preset.label) : id),
+          label: preset ? this.resolveDisplayLabel(id, preset.label, calendarId, zoneId) : id,
           icon: preset?.icon ?? 'fa-question',
           color: preset?.color ?? '#888888',
           weight,
