@@ -131,6 +131,14 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  bringToFront() {
+    if (!this.element) return;
+    this.position.zIndex = ++ApplicationV2._maxZ;
+    this.element.style.zIndex = String(this.position.zIndex);
+    ui.activeWindow = this;
+  }
+
+  /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const isGM = game.user.isGM;

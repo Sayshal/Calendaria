@@ -202,6 +202,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._selectedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
   }
 
+  /** @override */
+  bringToFront() {
+    if (!this.element) return;
+    this.position.zIndex = ++ApplicationV2._maxZ;
+    this.element.style.zIndex = String(this.position.zIndex);
+    ui.activeWindow = this;
+  }
+
   /**
    * Prepare context data for rendering.
    * @param {object} options - Render options
