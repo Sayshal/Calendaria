@@ -1617,6 +1617,8 @@ export default class WeatherManager {
     calendarData.weather.activeZone = zoneId ?? null;
     if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, calendarData);
     else await CalendarManager.updateCustomCalendar(calendarId, calendarData);
+    Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
+    CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
     log(3, `Active climate zone set to: ${zoneId}`);
   }
 
