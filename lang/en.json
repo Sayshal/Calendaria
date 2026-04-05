@@ -1820,6 +1820,8 @@
   "CALENDARIA.PresetManager.PlayerUsable": "Player Usable",
   "CALENDARIA.PresetManager.PlayerUsableHint": "Allow non-GM users to assign notes to this preset.",
   "CALENDARIA.PresetManager.ReminderTargets": "Reminder Targets",
+  "CALENDARIA.PresetManager.ResetPresetConfirm": "Reset all defaults for this preset? Built-in presets will revert to their original values. Custom presets will be cleared.",
+  "CALENDARIA.PresetManager.ResetPresetTooltip": "Reset all defaults for this preset.",
   "CALENDARIA.PresetManager.RestorePresets": "Restore Presets",
   "CALENDARIA.PresetManager.RestorePresetsMessage": "Restore all deleted built-in presets?",
   "CALENDARIA.PresetManager.Saved": "Presets saved.",

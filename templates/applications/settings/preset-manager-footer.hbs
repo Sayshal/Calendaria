@@ -13,6 +13,11 @@
       </button>
     {{/if}}
     {{#if selected}}
+      <button type="button" data-action="resetPreset"
+        data-tooltip="{{localize 'CALENDARIA.PresetManager.ResetPresetTooltip'}}">
+        <i class="fas fa-undo"></i>
+        {{localize "CALENDARIA.Common.Reset"}}
+      </button>
       {{#unless selected.isDefault}}
         <button type="button" data-action="syncPreset"
           data-tooltip="{{localize 'CALENDARIA.PresetManager.SyncTooltip'}}">

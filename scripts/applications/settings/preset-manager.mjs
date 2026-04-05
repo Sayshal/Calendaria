@@ -31,7 +31,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       editIcon: PresetManager.#onEditIcon,
       savePresets: PresetManager.#onSave,
       restorePresets: PresetManager.#onRestorePresets,
-      resetSection: PresetManager.#onResetSection,
+      resetPreset: PresetManager.#onResetPreset,
       exportPreset: PresetManager.#onExportPreset,
       importPreset: PresetManager.#onImportPreset,
       syncPreset: PresetManager.#onSyncPreset
@@ -52,6 +52,9 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {boolean} Whether the editor has unsaved changes */
   #isDirty = false;
+
+  /** @type {boolean} Skip flush during reset to prevent old form data from overwriting reset values */
+  #skipFlush = false;
 
   /** @override */
   async _prepareContext(options) {
@@ -96,6 +99,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
+    this.element.addEventListener('change', () => (this.#isDirty = true));
     this.element.querySelectorAll('[data-toggles]').forEach((checkbox) => {
       checkbox.addEventListener('change', () => {
         const ids = checkbox.dataset.toggles.split(',');
@@ -110,7 +114,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _preSyncPartState(partId, newElement, priorElement, state) {
     super._preSyncPartState(partId, newElement, priorElement, state);
-    if (partId === 'main' && priorElement) this.#flushFormData();
+    if (partId === 'main' && priorElement && !this.#skipFlush) this.#flushFormData();
   }
 
   /** @override */
@@ -168,7 +172,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     cat.defaults.owners = cat.defaults.owners ?? [];
     const rawContent = raw.content?.trim();
     cat.defaults.content = rawContent && rawContent !== '<p></p>' ? rawContent : null;
-    this.#isDirty = true;
   }
 
   /**
@@ -543,17 +546,16 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reset a fieldset section to default values.
+   * Reset the selected preset to its seed/default values.
    * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked button
+   * @param {HTMLElement} _target - The clicked element
    */
-  static async #onResetSection(_event, target) {
-    const section = target.dataset.section;
+  static async #onResetPreset(_event, _target) {
     const cat = this._presets.find((c) => c.id === this._selectedId);
-    if (!cat || !section) return;
+    if (!cat) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria', 'reset-section-dialog'] },
-      content: `<p>${localize('CALENDARIA.SettingsPanel.ResetSection.Content')}</p>`,
+      window: { title: localize('CALENDARIA.Common.Reset') },
+      content: `<p>${localize('CALENDARIA.PresetManager.ResetPresetConfirm')}</p>`,
       yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
       no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
@@ -561,45 +563,45 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!confirmed) return;
     const seed = cat.builtin ? getBuiltinPresetSeeds().find((s) => s.id === cat.id) : null;
     const sd = seed?.defaults || {};
-    const resetNull = (keys) => {
-      for (const k of keys) cat.defaults[k] = sd[k] ?? null;
-    };
-    cat.defaults = cat.defaults || {};
-    if (section === 'content') {
-      if (seed) {
-        if (cat.id !== DEFAULT_PRESET_ID) cat.label = seed.label;
-        cat.icon = seed.icon;
-        cat.color = seed.color;
-        cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : (seed.playerUsable ?? true);
-      } else {
-        cat.label = localize('CALENDARIA.Common.NewPreset');
-        cat.icon = 'fas fa-bookmark';
-        cat.color = '#4a90e2';
-        cat.playerUsable = true;
-      }
-      resetNull(['name']);
-      cat.defaults.content = sd.content ?? null;
-    } else if (section === 'schedule') {
-      resetNull(['allDay', 'maxOccurrences']);
-    } else if (section === 'settings') {
-      resetNull([
-        'displayStyle',
-        'visibility',
-        'silent',
-        'reminderType',
-        'reminderOffset',
-        'reminderTargets',
-        'hasDuration',
-        'duration',
-        'showBookends',
-        'limitedRepeat',
-        'limitedRepeatDays',
-        'defaultOwnership',
-        'macro'
-      ]);
+    if (seed) {
+      if (cat.id !== DEFAULT_PRESET_ID) cat.label = seed.label;
+      cat.icon = seed.icon;
+      cat.color = seed.color;
+      cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : (seed.playerUsable ?? true);
+    } else {
+      cat.label = localize('CALENDARIA.Common.NewPreset');
+      cat.icon = 'fas fa-bookmark';
+      cat.color = '#4a90e2';
+      cat.playerUsable = true;
     }
+    const allKeys = [
+      'name',
+      'allDay',
+      'displayStyle',
+      'visibility',
+      'reminderType',
+      'reminderOffset',
+      'reminderTargets',
+      'hasDuration',
+      'duration',
+      'maxOccurrences',
+      'silent',
+      'showBookends',
+      'limitedRepeat',
+      'limitedRepeatDays',
+      'defaultOwnership',
+      'macro'
+    ];
+    cat.defaults = cat.defaults || {};
+    for (const k of allKeys) cat.defaults[k] = sd[k] ?? null;
+    cat.defaults.content = sd.content ?? null;
+    cat.defaults.color = sd.color ?? null;
+    cat.defaults.icon = sd.icon ?? null;
+    cat.defaults.owners = sd.owners ?? [];
     this.#isDirty = true;
+    this.#skipFlush = true;
     this.render();
+    this.#skipFlush = false;
   }
 
   /**
@@ -757,6 +759,17 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       if (Object.keys(noteUpdates).length) updates.push(NoteManager.updateNote(stub.id, { noteData: noteUpdates }));
     }
     if (updates.length) await Promise.all(updates);
+    if (defaults.defaultOwnership != null) {
+      NoteManager.enableSuppressOwnershipRebuild();
+      try {
+        for (const stub of affected) {
+          const journal = game.journal.get(stub.journalId);
+          if (journal) await journal.update({ ownership: { default: defaults.defaultOwnership } });
+        }
+      } finally {
+        NoteManager.disableSuppressOwnershipRebuild();
+      }
+    }
     ui.notifications.info(format('CALENDARIA.PresetManager.SyncComplete', { count: affected.length }));
   }
 
