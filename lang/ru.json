@@ -2548,6 +2548,7 @@
   "CALENDARIA.Weather.Climate.ArcticDesc": "Чрезвычайно холодно круглый год, с гололедом и снегом",
   "CALENDARIA.Weather.Climate.Arid": "Засушливый/Пустынный",
   "CALENDARIA.Weather.Climate.AridDesc": "Жаркая и сухая погода с резкими перепадами температуры",
+  "CALENDARIA.Weather.Climate.Custom": "Пользовательский",
   "CALENDARIA.Weather.Climate.Polar": "Полярный",
   "CALENDARIA.Weather.Climate.PolarDesc": "Чрезвычайно холодный климат с длинными зимами и короткими летами",
   "CALENDARIA.Weather.Climate.Subarctic": "Субарктический",
