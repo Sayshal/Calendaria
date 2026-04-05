@@ -412,6 +412,7 @@ export function formatCustom(calendar, components, formatStr) {
     era: parts.era,
     eraAbbr: parts.eraAbbr,
     yearInEra: parts.eraYear,
+    yearInEraOrdinal: parts.eraYear != null ? ordinal(parts.eraYear) : '',
     season: parts.season,
     seasonAbbr: parts.seasonAbbr,
     namedWeek: parts.namedWeek,
@@ -492,13 +493,14 @@ export function formatCustom(calendar, components, formatStr) {
         const value = customContext[primary] ?? '';
         return value || String(resolveToken(fallback));
       }
-      const eraIndexMatch = customToken.match(/^(era|eraAbbr|yearInEra)=(\d+)$/);
+      const eraIndexMatch = customToken.match(/^(era|eraAbbr|yearInEra|yearInEraOrdinal)=(\d+)$/);
       if (eraIndexMatch) {
         const [, field, idxStr] = eraIndexMatch;
         const era = parts.matchingEras?.[parseInt(idxStr)] || {};
         if (field === 'era') return era.name || '';
         if (field === 'eraAbbr') return era.abbr || '';
         if (field === 'yearInEra') return era.yearInEra != null ? String(era.yearInEra) : '';
+        if (field === 'yearInEraOrdinal') return era.yearInEra != null ? ordinal(era.yearInEra) : '';
         return '';
       }
       const cycleIndexMatch = customToken.match(/^(cycle|cycleName|cycleRoman)=(\d+)$/);
@@ -1089,9 +1091,11 @@ export function getAvailableTokens() {
     { token: 'GG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
     { token: 'G', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
     { token: '[yearInEra]', descriptionKey: 'CALENDARIA.Format.Token.yearInEra', type: 'custom' },
+    { token: '[yearInEraOrdinal]', descriptionKey: 'CALENDARIA.Format.Token.yearInEraOrdinal', type: 'custom' },
     { token: '[era=N]', descriptionKey: 'CALENDARIA.Format.Token.eraIndex', type: 'custom' },
     { token: '[eraAbbr=N]', descriptionKey: 'CALENDARIA.Format.Token.eraAbbrIndex', type: 'custom' },
     { token: '[yearInEra=N]', descriptionKey: 'CALENDARIA.Format.Token.yearInEraIndex', type: 'custom' },
+    { token: '[yearInEraOrdinal=N]', descriptionKey: 'CALENDARIA.Format.Token.yearInEraOrdinalIndex', type: 'custom' },
     { token: 'QQQQ', descriptionKey: 'CALENDARIA.Format.Token.QQQQ', type: 'standard' },
     { token: 'QQQ', descriptionKey: 'CALENDARIA.Format.Token.QQQ', type: 'standard' },
     { token: 'QQ', descriptionKey: 'CALENDARIA.Format.Token.QQ', type: 'standard' },

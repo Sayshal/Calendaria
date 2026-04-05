@@ -1236,6 +1236,8 @@
   "CALENDARIA.Format.Token.Y": "Year (541, 2026)",
   "CALENDARIA.Format.Token.yearInEra": "Year within era (1, 541)",
   "CALENDARIA.Format.Token.yearInEraIndex": "Year in era by index [yearInEra=0]",
+  "CALENDARIA.Format.Token.yearInEraOrdinal": "Year within era, ordinal (1st, 541st)",
+  "CALENDARIA.Format.Token.yearInEraOrdinalIndex": "Year in era ordinal by index [yearInEraOrdinal=0]",
   "CALENDARIA.Format.Token.yearName": "Named year, with fallback: [yearName|YYYY]",
   "CALENDARIA.Format.Token.YY": "Year, 2-digit (26 from 2026)",
   "CALENDARIA.Format.Token.YYYY": "Year, 4-digit (2026)",
