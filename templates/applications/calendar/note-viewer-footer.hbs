@@ -42,4 +42,10 @@
       </button>
     </div>
   {{/if}}
+  {{#if canAdd}}
+    <button type="button" class="create-note-fab" data-action="createNote"
+      data-tooltip="{{localize 'CALENDARIA.Common.AddNote'}}" data-tooltip-direction="LEFT">
+      <i class="fas fa-plus"></i>
+    </button>
+  {{/if}}
 </div>

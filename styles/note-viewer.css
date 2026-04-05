@@ -224,34 +224,6 @@
       overflow-y: auto;
       scrollbar-gutter: stable;
 
-      .create-note-fab {
-        display: flex;
-        z-index: 1;
-        position: absolute;
-        bottom: 0.75rem;
-        right: 0.75rem;
-        justify-content: center;
-        align-items: center;
-        width: 2.25rem;
-        height: 2.25rem;
-        padding: 0;
-        border: none;
-        border-radius: 50%;
-        color: var(--calendaria-text-on-color);
-        font-size: var(--font-size-14, 0.875rem);
-        cursor: pointer;
-        background: var(--calendaria-primary);
-        box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 30%);
-        transition:
-          background 0.15s ease,
-          transform 0.15s ease;
-
-        &:hover {
-          background: var(--calendaria-primary-hover, color-mix(in srgb, var(--calendaria-primary) 85%, rgb(255 255 255)));
-          transform: scale(1.1);
-        }
-      }
-
       .note-list {
         display: flex;
         flex-direction: column;
@@ -379,6 +351,34 @@
       padding: 0 0.75rem;
       border-top: 0.0625rem solid var(--calendaria-border);
       background: var(--calendaria-bg-lighter);
+
+      .create-note-fab {
+        display: flex;
+        z-index: 1;
+        position: absolute;
+        bottom: 2.75rem;
+        right: 0.75rem;
+        justify-content: center;
+        align-items: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        color: var(--calendaria-text-on-color);
+        font-size: var(--font-size-14, 0.875rem);
+        cursor: pointer;
+        background: var(--calendaria-primary);
+        box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 30%);
+        transition:
+          background 0.15s ease,
+          transform 0.15s ease;
+
+        &:hover {
+          background: var(--calendaria-primary-hover, color-mix(in srgb, var(--calendaria-primary) 85%, rgb(255 255 255)));
+          transform: scale(1.1);
+        }
+      }
 
       .note-count {
         color: var(--calendaria-text-dim);
