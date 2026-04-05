@@ -1721,7 +1721,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       else calendar = await CalendarManager.updateCustomCalendar(this.#calendarId, this.#calendarData);
       if (calendar) {
         const page = await FestivalManager.createFestivalNote(this.#calendarId, newKey, newFestival, calendar);
-        if (page) page.sheet.render(true, { mode: 'edit' });
+        if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
       }
     }
     this.render();
@@ -1754,7 +1754,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const page = NoteManager.getFullNote(stub.id);
-    if (page) page.sheet.render(true, { mode: 'edit' });
+    if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
   }
 
   /**

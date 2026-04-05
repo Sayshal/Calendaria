@@ -484,7 +484,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!pageId) return;
       const page = NoteManager.getFullNote(pageId);
       if (!page?.parent?.isOwner && !game.user.isGM) return;
-      if (page) page.sheet.render(true, { mode: 'edit' });
+      if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
     });
   }
 
@@ -605,7 +605,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
             name: localize('CALENDARIA.Common.Edit'),
             icon: '<i class="fas fa-pen-to-square"></i>',
             callback: () => {
-              if (editPage) editPage.sheet.render(true, { mode: 'edit' });
+              if (editPage) editPage.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
             }
           });
         }

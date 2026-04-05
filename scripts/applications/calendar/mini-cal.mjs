@@ -1830,7 +1830,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const journalId = target.dataset.journalId;
     const journal = game.journal.get(journalId);
     const page = journal?.pages.get(pageId);
-    if (page) page.sheet.render(true, { mode: 'edit' });
+    if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
   }
 
   /**

@@ -922,7 +922,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               e.stopPropagation();
               const action = e.target.closest('[data-action]')?.dataset?.action;
               if (action === 'edit') {
-                note.sheet.render(true, { mode: 'edit' });
+                note.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
                 ui.context?.close();
               } else if (action === 'delete') {
                 ui.context?.close();
