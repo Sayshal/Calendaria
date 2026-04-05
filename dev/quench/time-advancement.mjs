@@ -36,6 +36,27 @@ export function registerTimeAdvancement(quench) {
           const changed = dtBefore.hour !== dtAfter.hour || dtBefore.dayOfMonth !== dtAfter.dayOfMonth || dtBefore.minute !== dtAfter.minute;
           assert.ok(changed, 'DateTime should reflect time advancement');
         });
+        it('should advance time by 1 day using object form', async function () {
+          const timeBefore = game.time.worldTime;
+          const calendar = CALENDARIA.api.getActiveCalendar();
+          const hpd = calendar?.days?.hoursPerDay ?? 24;
+          const mph = calendar?.days?.minutesPerHour ?? 60;
+          const spm = calendar?.days?.secondsPerMinute ?? 60;
+          const expectedDelta = hpd * mph * spm;
+          const result = await api.advanceTime({ day: 1 });
+          assert.typeOf(result, 'number');
+          assert.strictEqual(game.time.worldTime - timeBefore, expectedDelta, 'Should advance by exactly 1 day in seconds');
+        });
+        it('should advance time using mixed object form', async function () {
+          const timeBefore = game.time.worldTime;
+          const calendar = CALENDARIA.api.getActiveCalendar();
+          const mph = calendar?.days?.minutesPerHour ?? 60;
+          const spm = calendar?.days?.secondsPerMinute ?? 60;
+          const expectedDelta = 2 * mph * spm + 30 * spm;
+          const result = await api.advanceTime({ hour: 2, minute: 30 });
+          assert.typeOf(result, 'number');
+          assert.strictEqual(game.time.worldTime - timeBefore, expectedDelta, 'Should advance by 2h30m in seconds');
+        });
         it('should advance to midday preset', async function () {
           const result = await api.advanceTimeToPreset('midday');
           assert.typeOf(result, 'number');

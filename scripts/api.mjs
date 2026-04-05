@@ -198,19 +198,29 @@ export const CalendariaAPI = {
 
   /**
    * Advance the current time by a delta.
-   * @param {number} delta - Time delta in seconds to advance
+   * @param {number|object} delta - Seconds to advance, or an object with day/hour/minute/second keys
+   * @param {object} [options] - Options
+   * @param {boolean} [options.cinematic] - Whether to trigger the cinematic overlay
    * @returns {Promise<number>} New world time after advancement
    */
-  async advanceTime(delta) {
+  async advanceTime(delta, { cinematic = false } = {}) {
     if (!canChangeDateTime()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return game.time.worldTime;
+    }
+    if (typeof delta === 'object' && delta !== null) {
+      const calendar = CalendarManager.getActiveCalendar();
+      const hpd = calendar?.days?.hoursPerDay ?? 24;
+      const mph = calendar?.days?.minutesPerHour ?? 60;
+      const spm = calendar?.days?.secondsPerMinute ?? 60;
+      delta = (delta.day ?? 0) * hpd * mph * spm + (delta.hour ?? 0) * mph * spm + (delta.minute ?? 0) * spm + (delta.second ?? 0);
     }
     if (!game.user.isGM) {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
       return game.time.worldTime;
     }
-    await CinematicOverlay.gatedAdvance(delta);
+    if (cinematic) await CinematicOverlay.triggerFromAdvance(delta);
+    else await game.time.advance(delta);
     return game.time.worldTime;
   },
 
@@ -1411,9 +1421,11 @@ export const CalendariaAPI = {
   /**
    * Advance time to the next occurrence of a preset time.
    * @param {string} preset - Time preset: 'sunrise', 'midday', 'sunset', 'midnight'
+   * @param {object} [options] - Options
+   * @param {boolean} [options.cinematic] - Whether to trigger the cinematic overlay
    * @returns {Promise<number>} New world time
    */
-  async advanceTimeToPreset(preset) {
+  async advanceTimeToPreset(preset, { cinematic = false } = {}) {
     if (!canChangeDateTime()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return game.time.worldTime;
@@ -1451,7 +1463,8 @@ export const CalendariaAPI = {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: secondsUntil });
       return game.time.worldTime;
     }
-    await CinematicOverlay.gatedAdvance(secondsUntil);
+    if (cinematic) await CinematicOverlay.triggerFromAdvance(secondsUntil);
+    else await game.time.advance(secondsUntil);
     return game.time.worldTime;
   },
 
