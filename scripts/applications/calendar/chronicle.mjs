@@ -168,6 +168,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     requestAnimationFrame(() => {
       this._loading = false;
+      const container = this.element?.querySelector('.scroll-container');
+      if (container && container.scrollHeight <= container.clientHeight) this.#loadEarlier(container);
     });
   }
 
