@@ -128,9 +128,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     const isGM = game.user.isGM;
     for (const entry of this._entries) {
       if (!entry.notes) continue;
-      for (const note of entry.notes) {
-        if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content, { async: true });
-      }
+      for (const note of entry.notes) if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content);
     }
     context.entries = this._entries.map((e) => ({ ...e, isGM }));
     context.entryDepth = this._entryDepth;
@@ -429,6 +427,12 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #renderEntryBatch(entries) {
     const template = this._viewMode === 'timeline' ? TEMPLATES.CHRONICLE_TIMELINE_ENTRY : TEMPLATES.CHRONICLE_ENTRY;
+    for (const entry of entries) {
+      if (!entry.notes) continue;
+      for (const note of entry.notes) {
+        if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content);
+      }
+    }
     const parts = [];
     for (const entry of entries) {
       const html = await foundry.applications.handlebars.renderTemplate(template, { ...entry, isGM: game.user.isGM });
