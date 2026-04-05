@@ -16,7 +16,6 @@ const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 const SEARCH_DEBOUNCE = 200;
 /** @type {number} Debounce delay for date range input (ms). */
 const DATE_RANGE_DEBOUNCE = 300;
-
 /** @type {number} Number of notes per render batch. */
 const BATCH_SIZE = 50;
 /** @type {number} Scroll threshold to trigger next batch (px). */
@@ -629,7 +628,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
               const confirmed = await foundry.applications.api.DialogV2.confirm({
                 window: { title: localize('CALENDARIA.Common.DeleteNote') },
                 content: `<p>${stub?.name || 'this note'}</p>`,
-                yes: { default: false }
+                yes: { default: false },
+                rejectClose: false
               });
               if (confirmed) await NoteManager.deleteNote(pageId);
             }
@@ -785,7 +785,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.NoteViewer.BulkDeleteTitle') },
       content: `<p>${countLabel}</p>`,
-      yes: { default: false }
+      yes: { default: false },
+      rejectClose: false
     });
     if (!confirmed) return false;
     let deleted = 0;

@@ -1893,7 +1893,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           window: { title: localize('CALENDARIA.SettingsPanel.ReloadRequired.Title') },
           content: `<p>${localize('CALENDARIA.SettingsPanel.ReloadRequired.Content')}</p>`,
           yes: { label: localize('CALENDARIA.SettingsPanel.ReloadRequired.Reload') },
-          no: { label: localize('CALENDARIA.SettingsPanel.ReloadRequired.Later') }
+          no: { label: localize('CALENDARIA.SettingsPanel.ReloadRequired.Later') },
+          rejectClose: false
         });
         if (confirmed) foundry.utils.debouncedReload();
       }
@@ -2351,7 +2352,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria', 'reset-section-dialog'] },
       content: `<p>${localize('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-list">${listHtml}</ul>`,
       yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      rejectClose: false
     });
     if (!confirmed) return;
     for (const key of settingKeys) {
@@ -2372,7 +2374,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.Settings.FogOfWar.ResetRanges') },
       content: `<p>${localize('CALENDARIA.Settings.FogOfWar.ResetRangesConfirm')}</p>`,
       yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      rejectClose: false
     });
     if (!confirmed) return;
     const startDate = game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_START_DATE);
@@ -2496,7 +2499,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.ThemeEditor.DeleteCustom.Title') },
       content: `<p>${format('CALENDARIA.ThemeEditor.DeleteCustom.Content', { name: custom?.name || currentMode })}</p>`,
       yes: { label: localize('CALENDARIA.Common.Delete'), icon: 'fas fa-trash' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      rejectClose: false
     });
     if (!confirmed) return;
     await deleteCustomTheme(currentMode);
@@ -2762,7 +2766,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onRegenerateAllWeather() {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Settings.RegenerateWeather.Name') },
-      content: `<p>${localize('CALENDARIA.Settings.RegenerateWeather.Confirm')}</p>`
+      content: `<p>${localize('CALENDARIA.Settings.RegenerateWeather.Confirm')}</p>`,
+      rejectClose: false
     });
     if (!confirmed) return;
     await WeatherManager.regenerateAllWeather();

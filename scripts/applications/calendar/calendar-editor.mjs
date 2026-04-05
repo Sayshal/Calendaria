@@ -294,7 +294,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
         rejectClose: false
       });
-      if (!confirmed) throw new Error('Close cancelled by user');
+      if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
     }
     return super._preClose(options);
   }
@@ -310,7 +310,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.Editor.UnsavedChanges') },
       content: `<p>${localize('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
       yes: { label: localize('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      rejectClose: false
     });
   }
 
@@ -2234,7 +2235,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!zone) return;
     const confirm = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Editor.Weather.Zone.Delete') },
-      content: `<p>${format('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`
+      content: `<p>${format('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`,
+      rejectClose: false
     });
     if (!confirm) return;
     const wasActive = this.#calendarData.weather.activeZone === zone.id;
@@ -2459,7 +2461,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.Common.Reset') },
       content: `<p>${localize('CALENDARIA.Editor.ConfirmReset')}</p>`,
       yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      rejectClose: false
     });
     if (confirmed) {
       if (this.#calendarId) await FestivalManager.deleteAllFestivalNotes(this.#calendarId);
@@ -2490,7 +2493,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         window: { title: localize('CALENDARIA.Editor.ResetToDefault') },
         content: `<p>${localize('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
         yes: { label: localize('CALENDARIA.Editor.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
-        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        rejectClose: false
       });
       if (!confirmed) return;
       await FestivalManager.deleteAllFestivalNotes(this.#calendarId);
@@ -2506,7 +2510,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: localize('CALENDARIA.Common.DeleteCalendar') },
       content: `<p>${format('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
       yes: { label: localize('CALENDARIA.Common.DeleteCalendar'), icon: 'fas fa-trash', callback: () => true },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      rejectClose: false
     });
     if (!confirmed) return;
     await FestivalManager.deleteAllFestivalNotes(this.#calendarId);

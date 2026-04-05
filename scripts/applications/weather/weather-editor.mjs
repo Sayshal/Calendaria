@@ -434,7 +434,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!presetId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Common.Delete') },
-      content: `<p>${localize('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`
+      content: `<p>${localize('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
+      rejectClose: false
     });
     if (!confirmed) return;
     const presets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
