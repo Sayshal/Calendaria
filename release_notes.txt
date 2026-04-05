@@ -4,46 +4,36 @@ A walkthrough of most major features, graciously created by the BaileyWiki team:
 
 ## New Features
 
-- "Count as Not Empty" multi-select for Chronicle banner types
-- "Note Open Mode" setting (Default / Edit / View) for controlling how notes open
-- "Set Date & Time" button on Settings Calendar tab
-- "Show Both Temperature Units" setting for dual Celsius/Fahrenheit display
-- `CALENDARIA.api.createClimateZone()` for programmatic zone creation
-- `simple` and `to` parameters for countup/elapsed enrichers
-- Chronicle content now renders @UUID links and other Foundry enrichers
-- Cinematic CSS scoped to prevent class collisions
-- Custom climate zone template option (blank zone, all presets disabled)
-- Frameless apps fade out on close
-- Localized wind cardinal directions
-- Moon anchor "Reset Cycle" toggle for fixed-mode moons
-- Multi-day event bars condense when overlapping, expand on hover
-- Preset Editor overhaul with Default preset, 18 configurable fields, and Sync to Notes
+- `[yearInEraOrdinal]` and `[yearInEraOrdinal=N]` format tokens for ordinal year-in-era display
+- `advanceTime()` API now accepts object form `{ day, hour, minute, second }` and explicit `{ cinematic }` option
+- Long rest time advancement for Pathfinder 1e
+- Unsaved changes confirmation dialog in the Preset Manager
 
 ## Bug Fixes
 
-- Chronicle show-on-load no longer mutated by open/close
-- Festival notes auto-created on calendar save
-- Fixed apps losing position after browser resize
-- Fixed climate editor environment lighting not saving when empty
-- Fixed custom presets silently deleted during module updates
-- Fixed FXMaster Windy preset error and broken sound labels
-- Fixed Greyhawk intercalary festival months not advancing weekdays
-- Fixed journal sidebar footer being cleared on load
-- Fixed note ownership dropdowns not saving changes
-- Fixed preset editor losing data when switching presets
-- Fixed tooltip text unreadable in light mode
-- Fixed weather picker showing "Not active" for enabled presets
-- Orphaned presets auto-recovered from note references on world load
-- Presets with zero temp overlap filtered out before weather selection
-- Replaced corrupted weather sound files
-- Weather presets with built-in temp constraints now enforce limits properly
+- Chronicle entries loaded via infinite scroll not rendering rich text
+- Chronicle not loading past entries on initial open
+- Climate zone environment lighting and color shift settings not persisting
+- D&D 5e long rests double-advancing time
+- Explicit Edit actions ignoring Note Open Mode setting
+- Intraday weather periods visible to non-GM players
+- MiniCal close animation hanging
+- Note permissions resetting on every save
+- Notes Viewer FAB scrolling with page content
+- Preset editor checkboxes always reading as false
+- Preset reset not clearing color, icon, and owners
+- Settings panel rendering on top of frameless Calendaria windows
+- Stale ownership entries not cleaned up on visibility change
+- Switching active climate zone not updating weather displays
+- Sync to Notes not syncing ownership to journal documents
+- Weather Editor name overrides not appearing in display paths
+- Weather sounds persisting across scene and weather changes
 
 ## Changes
 
-- 20 bundled calendar JSON files updated with corrected data format
-- Climate Editor shows preset temp constraints as input placeholders
-- Default preset hidden from category pickers, badges, and filters
-- Multi-day events sorted by start date instead of alphabetically
-- Ordinal suffixes and date format now localizable
-- Removed "Edit Notes" global permission -- note editing gated by per-note ownership
-- Removed override system (lock buttons, forced overrides) -- presets now only set defaults
+- D&D 5e long rests now trigger cinematic overlay when enabled (matching PF2e/PF1e)
+- Enabling Intraday Weather regenerates all weather and forecasts
+- Ownership controls on notes are GM-only
+- Preset Manager reset consolidated to a single footer button
+- Weather preset display names resolve: per-zone alias > Weather Editor override > built-in label
+- Weather tooltip period breakdown requires GM or viewWeatherForecast permission

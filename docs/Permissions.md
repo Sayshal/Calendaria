@@ -131,13 +131,14 @@ Permission UI has cascade-up behavior:
 
 ### Note Editing
 
-Note editing is gated exclusively by per-note Foundry document ownership. Each note's ownership is set via the Ownership section on the note sheet's Settings tab. Users with at least Owner-level permission on a note can edit it. GMs can always edit any note.
+Note editing is gated exclusively by per-note Foundry document ownership. Each note's ownership is set via the Ownership section on the note sheet's Settings tab. The Ownership fieldset on the note sheet is only available to GMs. Players cannot change who has access to a note, even their own notes.
 
 ### View Weather Forecast
 
 - Gates access to the `getWeatherForecast()` API method
 - Gates the `/forecast` chat command
 - Controls visibility of forecast weather icons on calendar day cells
+- Controls visibility of intraday period breakdown in weather tooltips and forecast data. Without this permission, players see only the daily aggregate weather, not per-period details.
 - GMs always have access regardless of this setting
 
 ### Change Date/Time

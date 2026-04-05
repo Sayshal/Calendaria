@@ -725,8 +725,10 @@ Fired when weather changes. Note: This hook is fired with varying payloads depen
 - `data` (object|undefined) - May be undefined when triggered from UI picker
   - `previous` (object|null) - Previous weather state
   - `current` (object|null) - Current weather state
+  - `zoneId` (string|undefined) - Climate zone ID for the change
   - `remote` (boolean) - True if change originated from another client (optional)
   - `visualOnly` (boolean) - True when fired from Weather Editor preview (FX and sound handlers should skip processing)
+  - `bulk` (boolean) - True when the change affects all zones at once (e.g., day change, regeneration, active zone switch, intraday period change, initial generation, time-jump backfill). When `bulk` is true, `previous`, `current`, and `zoneId` are not provided -- listeners should re-read weather state from the API
 
 ```javascript
 Hooks.on('calendaria.weatherChange', (data) => {

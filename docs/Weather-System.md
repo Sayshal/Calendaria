@@ -71,8 +71,7 @@ When multiple tiers provide ranges, they are **intersected** (`Math.max` for min
 
 ### Preset Selection Filtering
 
-Before weather generation, presets whose temperature range has zero overlap with the current season's temperature range are automatically excluded. This prevents selecting a preset (e.g., Snow) when the season's temperatures make it impossible.
-4. **Global defaults.** Fallback values
+Before weather generation, presets whose temperature range has zero overlap with the current season's temperature range are automatically excluded. This prevents selecting a preset (e.g., Snow) when the season's temperatures make it impossible. 4. **Global defaults.** Fallback values
 
 ### Configuring Season Climate
 
@@ -251,7 +250,10 @@ The evening period's weather influences the next day's night period for smooth o
 
 ### HUD and Tooltip Display
 
-When intraday weather is enabled, the HUD and calendar day tooltips show a per-period weather breakdown instead of a single daily condition.
+When intraday weather is enabled, the HUD and calendar day tooltips show a per-period weather breakdown instead of a single daily condition. The per-period breakdown in tooltips is only visible to GMs and users with the `viewWeatherForecast` permission. Players without forecast permission see only the aggregate daily condition.
+
+> [!CAUTION]
+> Enabling intraday weather triggers irreversible regeneration of the forecast plan. Existing single-period forecasts are replaced with multi-period data and cannot be reverted by toggling the setting off.
 
 ### Weather Picker Integration
 
@@ -441,6 +443,16 @@ Weather tooltips throughout the UI (HUD, MiniCal, BigCal, calendar day cells) di
 GMs can rename any weather preset on a per-zone basis. Aliases appear everywhere the preset name is displayed.
 
 Aliases are **zone-scoped**: each calendar + zone combination can have different names for the same preset. Configure aliases in the [Climate Editor](Climate-Editor) > Preset Overrides tab.
+
+### Display Name Resolution
+
+Display names resolve in priority order:
+
+1. **Per-zone alias** from the [Climate Editor](Climate-Editor) > Preset Overrides tab
+2. **Name override** from the [Weather Editor](Weather-Editor)
+3. **Built-in localized name**
+
+This resolution applies to the HUD, MiniCal, BigCal day cells, Weather Picker grid, and probability views.
 
 ---
 
