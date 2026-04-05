@@ -1040,6 +1040,10 @@
       }
     }
 
+    .ownership-fieldset:disabled {
+      opacity: 0.45;
+    }
+
     .ownership-list {
       gap: 0.375rem;
       display: flex;

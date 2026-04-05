@@ -153,11 +153,13 @@ export default class NoteManager {
             if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalNameToCalendar(linked, changes.name);
           }
         }
-        if (changes.system?.visibility !== undefined && !NoteManager.#suppressOwnershipRebuild) {
+        if (changes.system?.visibility !== undefined) {
           const journal = page.parent;
           if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
             const ownership = this.#buildOwnership(changes.system.visibility, page.system?.author?._id);
-            await journal.update({ ownership });
+            const update = { ownership };
+            for (const key of Object.keys(journal.ownership)) if (key !== 'default' && !(key in ownership)) update[`ownership.-=${key}`] = null;
+            await journal.update(update);
             log(3, `Updated journal ownership for visibility change: ${changes.system.visibility}`);
           }
         }
@@ -240,9 +242,10 @@ export default class NoteManager {
     if (!visibility) return;
     const expected = this.#buildOwnership(visibility, page.system?.author?._id);
     const current = journal.ownership || {};
-    const needsRepair = Object.entries(expected).some(([k, v]) => current[k] !== v);
-    if (needsRepair) {
-      await journal.update({ ownership: expected });
+    const repair = {};
+    for (const [key, value] of Object.entries(expected)) if (current[key] !== value) repair[key] = value;
+    if (Object.keys(repair).length) {
+      await journal.update({ ownership: repair });
       log(3, `Re-synced ownership for "${journal.name}" after external edit`);
     }
   }
@@ -862,9 +865,7 @@ export default class NoteManager {
    * @private
    */
   static #buildOwnership(visibility, authorId) {
-    const ownership = {};
-    for (const user of game.users) if (!user.isGM) ownership[user.id] = 0;
-    ownership.default = 0;
+    const ownership = { default: 0 };
     switch (visibility) {
       case NOTE_VISIBILITY.VISIBLE:
         ownership.default = 2;

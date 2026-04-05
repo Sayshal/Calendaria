@@ -1584,7 +1584,7 @@
   "CALENDARIA.Note.Op.LessEquals": "≤",
   "CALENDARIA.Note.Op.NotEquals": "≠",
   "CALENDARIA.Note.OpenComputedBuilder": "Configure Chain",
-  "CALENDARIA.Note.Ownership.DisabledByVisibility": "Ownership is controlled by the Visibility setting. Set visibility to Visible to manage per-user permissions.",
+  "CALENDARIA.Note.Ownership.DisabledByVisibility": "Per-user permissions are only available when visibility is set to Visible. Hidden and Secret notes restrict access automatically.",
   "CALENDARIA.Note.Ownership.Level": "Permission",
   "CALENDARIA.Note.Ownership.Observer": "Observer",
   "CALENDARIA.Note.Ownership.Owner": "Owner",

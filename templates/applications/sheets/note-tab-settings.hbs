@@ -171,9 +171,10 @@
     </fieldset>
 
     {{!-- Ownership --}}
-    <fieldset class="ownership-fieldset" {{#unless (eq system.visibility "visible")}}disabled{{/unless}} data-tooltip
-      data-tooltip-direction="UP"
-      aria-label="{{#unless (eq system.visibility "visible")}}{{localize 'CALENDARIA.Note.Ownership.DisabledByVisibility'}}{{else}}{{localize 'CALENDARIA.Note.Tooltip.Ownership'}}{{/unless}}">
+    <fieldset class="ownership-fieldset"
+      {{#unless isGM}}disabled{{else}}{{#unless (eq system.visibility "visible")}}disabled{{/unless}}{{/unless}}
+      data-tooltip data-tooltip-direction="UP"
+      aria-label="{{#unless isGM}}{{localize 'CALENDARIA.Note.Ownership.PlayerHint'}}{{else}}{{#unless (eq system.visibility "visible")}}{{localize 'CALENDARIA.Note.Ownership.DisabledByVisibility'}}{{else}}{{localize 'CALENDARIA.Note.Tooltip.Ownership'}}{{/unless}}{{/unless}}">
       <legend>{{localize "CALENDARIA.Note.Tab.Ownership"}}</legend>
       <div class="ownership-list">
         {{#each ownershipEntries}}
