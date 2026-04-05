@@ -61,7 +61,9 @@ export function onLongRest(actor, config) {
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const daysToAdvance = isGritty ? 7 : 1;
   const minutesUntilTarget = daysToAdvance * minutesInDay - currentMinutes + targetMinutes;
-  config.duration = minutesUntilTarget;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  config.advanceTime = false;
+  CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
   log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
 }
 
