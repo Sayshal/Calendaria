@@ -25,7 +25,7 @@ Displays the editor for the currently selected preset, organized into three sect
 
 A special built-in preset that:
 
-- **Cannot be deleted.** The delete button is disabled when the Default preset is selected.
+- **Cannot be deleted.** The Delete and Sync to Notes buttons are hidden when the Default preset is selected.
 - **Auto-applied.** Any note without an explicit category assignment uses the Default preset's defaults.
 - **Hidden from pickers.** The Default preset does not appear in category dropdowns on the note sheet, note badge displays, or filter dropdowns. It acts as a fallback, not a visible category.
 
@@ -58,7 +58,7 @@ Optional default title for new notes created with this preset. Leave blank for n
 Optional editor for defining default note content. When a note is created with this preset and no content is provided, the template HTML is pre-filled into the note body.
 
 - Leave the editor empty for no template
-- Use the reset button to restore the built-in seed template (if one exists for this preset)
+- Use the Reset button in the footer to restore all fields to their original values (built-in presets) or clear all fields to empty defaults (custom presets)
 - Content templates only apply to **new** notes
 
 > [!TIP]
@@ -131,7 +131,7 @@ Synced fields include all Settings and Schedule defaults. The following fields a
 
 - Can be edited (name, icon, color, defaults)
 - Can be **soft-deleted** (hidden) rather than permanently removed. A "Restore Hidden Presets" button appears when any are hidden. The Default preset cannot be soft-deleted.
-- Support **per-section reset**: the reset button on Basic Settings restores the original seed data; the reset button on each section restores seed defaults
+- Support **reset**: the Reset button in the footer restores all fields to their original seed values
 
 ### Custom Presets
 
@@ -139,7 +139,7 @@ Custom presets are fully user-created. They:
 
 - Store all fields directly (no seed data to restore)
 - Can be permanently deleted
-- Support **per-section reset**: the reset button clears fields to empty defaults
+- Support **reset**: the Reset button in the footer clears all fields to empty defaults
 
 ---
 
@@ -163,14 +163,15 @@ Click **Import** in the footer and select a `.json` file. On import:
 
 ## Footer Actions
 
-| Action            | Description                                           |
-| ----------------- | ----------------------------------------------------- |
-| **Import**        | Import a preset from a JSON file                      |
-| **Export**        | Export the selected preset to a JSON file             |
-| **Sync to Notes** | Batch-update existing notes to match preset defaults  |
-| **Delete**        | Remove the selected preset (soft-delete for built-in) |
-| **Add**           | Create a new custom preset                            |
-| **Save**          | Save all changes to settings                          |
+| Action            | Description                                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------------------------- |
+| **Import**        | Import a preset from a JSON file. Always visible.                                                         |
+| **Export**        | Export the selected preset to a JSON file. Requires a selected preset.                                    |
+| **Reset**         | Reset all defaults for the selected preset (reverts built-in, clears custom). Requires a selected preset. |
+| **Sync to Notes** | Batch-update existing notes to match preset defaults. Hidden for Default preset.                          |
+| **Delete**        | Remove the selected preset (soft-delete for built-in). Hidden for Default preset.                         |
+| **Add**           | Create a new custom preset. Always visible.                                                               |
+| **Save**          | Save all changes to settings. Always visible.                                                             |
 
 ---
 
@@ -185,4 +186,4 @@ When a preset is deleted and saved, notes that referenced it have the preset rem
 When creating a new note, a preset selection dialog appears. A per-user default preset can be set in **Settings Panel > Notes tab > Default Note Category**, which pre-selects that preset in the dialog.
 
 > [!NOTE]
-> Changes in the Preset Manager are held in memory until you click **Save**. Closing the window without saving discards all changes.
+> Changes in the Preset Manager are held in memory until you click **Save**. Closing the window with unsaved changes prompts a confirmation dialog. Clicking Discard discards changes; clicking Cancel keeps the editor open.

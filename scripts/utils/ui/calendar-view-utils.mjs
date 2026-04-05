@@ -436,6 +436,8 @@ export function buildWeatherLookup() {
  */
 export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup) {
   const { todayYear, todayMonth, todayDayOfMonth, zoneId } = todayInfo;
+  const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+  const resolveLabel = (id, label) => WeatherManager.resolveDisplayLabel(id, label, calendarId, zoneId);
   const isCurrentDay = year === todayYear && month === todayMonth && dayOfMonth === todayDayOfMonth;
   if (isCurrentDay) {
     const w = WeatherManager.getCurrentWeather(zoneId);
@@ -444,7 +446,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
     const result = {
       icon: w.icon,
       color: w.color,
-      label: localize(w.label),
+      label: resolveLabel(w.id, w.label),
       description: w.description ? localize(w.description) : null,
       temperature: temp,
       wind: w.wind ?? null,
@@ -452,7 +454,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
       isForecast: false,
       isVaried: false
     };
-    if (w.periods) {
+    if (w.periods && (game.user.isGM || canViewWeatherForecast())) {
       result.periods = w.periods;
       result.activePeriod = w.activePeriod;
     }
@@ -464,7 +466,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
     return {
       icon: hist.icon,
       color: hist.color,
-      label: localize(hist.label),
+      label: resolveLabel(hist.id, hist.label),
       description: null,
       temperature: hist.temperature ?? null,
       wind: hist.wind ?? null,
@@ -478,7 +480,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
       const result = {
         icon: f.preset.icon,
         color: f.preset.color,
-        label: localize(f.preset.label),
+        label: resolveLabel(f.preset.id, f.preset.label),
         description: f.preset.description ? localize(f.preset.description) : null,
         temperature: f.temperature ?? null,
         wind: f.wind ?? null,
@@ -922,7 +924,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               e.stopPropagation();
               const action = e.target.closest('[data-action]')?.dataset?.action;
               if (action === 'edit') {
-                note.sheet.render(true, { mode: 'edit' });
+                note.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
                 ui.context?.close();
               } else if (action === 'delete') {
                 ui.context?.close();

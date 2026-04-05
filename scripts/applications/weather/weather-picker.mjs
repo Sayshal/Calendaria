@@ -8,7 +8,7 @@ import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SETTINGS, TEMPLATES, WEATHER_PERIODS, WIND_SPEEDS } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
 import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';
-import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetAlias, getPresetsByCategory, getTemperatureUnit, toDisplayUnit } from '../../weather/_module.mjs';
+import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetsByCategory, getTemperatureUnit, toDisplayUnit } from '../../weather/_module.mjs';
 import { CalendarEditor, WeatherProbabilityDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -170,8 +170,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       if (presets.length === 0) continue;
       const mappedPresets = presets
         .map((p) => {
-          const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
-          const label = alias || localize(p.label);
+          const label = WeatherManager.resolveDisplayLabel(p.id, p.label, calendarId, selectedZoneId);
           const description = p.description ? localize(p.description) : label;
           const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
           const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
@@ -186,8 +185,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     if (customPresets.length > 0) {
       const mappedCustom = customPresets
         .map((p) => {
-          const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
-          const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
+          const label = WeatherManager.resolveDisplayLabel(p.id, p.label, calendarId, selectedZoneId);
           const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
           const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
           const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
@@ -205,8 +203,8 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const currentWeather = WeatherManager.getCurrentWeather(selectedZoneId);
     const currentTemp = WeatherManager.getTemperature(selectedZoneId);
     context.selectedZoneId = selectedZoneId;
-    const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id, calendarId, selectedZoneId) : null;
-    context.customLabel = this.#customLabel ?? (currentWeatherAlias || (currentWeather?.label ? localize(currentWeather.label) : ''));
+    const resolvedLabel = currentWeather?.id ? WeatherManager.resolveDisplayLabel(currentWeather.id, currentWeather.label, calendarId, selectedZoneId) : '';
+    context.customLabel = this.#customLabel ?? resolvedLabel;
     context.customTemp = this.#customTemp ?? (currentTemp != null ? toDisplayUnit(currentTemp) : '');
     context.customIcon = this.#customIcon ?? (currentWeather?.icon || 'fa-question');
     context.customColor = this.#customColor ?? (currentWeather?.color || '#888888');
@@ -440,8 +438,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const calendarId = calendar?.metadata?.id;
     const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
     const zoneId = sceneZone?.id ?? null;
-    const alias = getPresetAlias(presetId, calendarId, zoneId);
-    this.#customLabel = alias || localize(preset.label);
+    this.#customLabel = WeatherManager.resolveDisplayLabel(presetId, preset.label, calendarId, zoneId);
     this.#customTemp = null;
     this.#customIcon = preset.icon || 'fa-question';
     this.#customColor = preset.color || '#888888';

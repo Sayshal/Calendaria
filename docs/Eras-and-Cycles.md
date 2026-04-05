@@ -25,13 +25,15 @@ When displaying a year, Calendaria finds all matching eras by checking which era
 
 Use era format tokens in date format strings to include era information:
 
-| Token           | Description                                              |
-| --------------- | -------------------------------------------------------- |
-| `G`             | Era abbreviation (e.g., DR)                              |
-| `GGGG`          | Full era name (e.g., Dale Reckoning)                     |
-| `[era=N]`       | Full name of the Nth matching era (for overlapping eras) |
-| `[eraAbbr=N]`   | Abbreviation of the Nth matching era                     |
-| `[yearInEra=N]` | Year within the Nth matching era                         |
+| Token                  | Description                                              |
+| ---------------------- | -------------------------------------------------------- |
+| `G`                    | Era abbreviation (e.g., DR)                              |
+| `GGGG`                 | Full era name (e.g., Dale Reckoning)                     |
+| `[era=N]`              | Full name of the Nth matching era (for overlapping eras) |
+| `[eraAbbr=N]`          | Abbreviation of the Nth matching era                     |
+| `[yearInEra=N]`        | Year within the Nth matching era                         |
+| `[yearInEraOrdinal]`   | Year within era, ordinal (1st, 541st)                    |
+| `[yearInEraOrdinal=N]` | Ordinal year within the Nth matching era                 |
 
 Examples:
 

@@ -115,7 +115,8 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: localize('CALENDARIA.Condition.Builder.ConfirmDeleteTitle') },
         content: `<p>${localize('CALENDARIA.Condition.Builder.ConfirmDeleteGroup')}</p>`,
-        yes: { default: true }
+        yes: { default: true },
+        rejectClose: false
       });
       if (!confirmed) return;
     }

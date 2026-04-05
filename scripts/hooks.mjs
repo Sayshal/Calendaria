@@ -9,7 +9,7 @@ import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from 
 import { CalendarManager } from './calendar/_module.mjs';
 import { HOOKS, SETTINGS } from './constants.mjs';
 import { FestivalManager } from './festivals/_module.mjs';
-import { onLongRest, onPF2eRest, onPreRest } from './integrations/_module.mjs';
+import { onLongRest, onPF1eRest, onPF2eRest, onPreRest } from './integrations/_module.mjs';
 import { NoteManager, clearComputedDateCache } from './notes/_module.mjs';
 import { TimeClock, onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/_module.mjs';
 import {
@@ -62,6 +62,7 @@ export function registerHooks() {
   Hooks.on('dnd5e.longRest', onLongRest);
   Hooks.on('dnd5e.preLongRest', onPreRest);
   Hooks.on('dnd5e.preShortRest', onPreRest);
+  Hooks.on('pf1ActorRest', onPF1eRest);
   Hooks.on('pf2e.restForTheNight', onPF2eRest);
   Hooks.on('getSceneControlButtons', onGetSceneControlButtons);
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);

@@ -202,6 +202,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this._selectedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
   }
 
+  /** @override */
+  bringToFront() {
+    if (!this.element) return;
+    this.position.zIndex = ++ApplicationV2._maxZ;
+    this.element.style.zIndex = String(this.position.zIndex);
+    ui.activeWindow = this;
+  }
+
   /**
    * Prepare context data for rendering.
    * @param {object} options - Render options
@@ -1648,7 +1656,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let pageId = target.dataset.noteId;
     if (pageId.includes('-week-')) pageId = pageId.split('-week-')[0];
     const page = game.journal.find((j) => j.pages.get(pageId))?.pages.get(pageId);
-    if (page) page.sheet.render(true, { mode: 'edit' });
+    if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
   }
 
   /**

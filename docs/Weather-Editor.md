@@ -22,15 +22,15 @@ Click a preset to load it in the main editor area.
 
 ### Weather Info
 
-| Field               | Description                                                                                                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Name**            | Display name (localized for built-in, editable for custom)                                                                                                                |
-| **Icon**            | FontAwesome icon class                                                                                                                                                    |
-| **Color**           | Hex color                                                                                                                                                                 |
-| **HUD Effect**      | Dropdown to assign a particle effect for the HUD dome renderer                                                                                                            |
-| **FXMaster Preset** | Dropdown of available FXMaster effects (or "None")                                                                                                                        |
-| **Sound Effect**    | Dropdown of ambient sound loops (or "None")                                                                                                                               |
-| **Effect Macro**    | Dropdown of world macros to execute when this weather activates. Runs on the primary GM client only. The macro receives `{ weather, previousWeather, zoneId }` as context |
+| Field               | Description                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Name**            | Display name. Editing the name for a built-in preset creates a global name override when no per-zone alias is configured. See [display name resolution](Weather-System#display-name-resolution) |
+| **Icon**            | FontAwesome icon class                                                                                                                                                                          |
+| **Color**           | Hex color                                                                                                                                                                                       |
+| **HUD Effect**      | Dropdown to assign a particle effect for the HUD dome renderer                                                                                                                                  |
+| **FXMaster Preset** | Dropdown of available FXMaster effects (or "None")                                                                                                                                              |
+| **Sound Effect**    | Dropdown of ambient sound loops (or "None")                                                                                                                                                     |
+| **Effect Macro**    | Dropdown of world macros to execute when this weather activates. Runs on the primary GM client only. The macro receives `{ weather, previousWeather, zoneId }` as context                       |
 
 ### Environment Lighting
 

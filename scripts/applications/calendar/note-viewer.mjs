@@ -16,7 +16,6 @@ const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 const SEARCH_DEBOUNCE = 200;
 /** @type {number} Debounce delay for date range input (ms). */
 const DATE_RANGE_DEBOUNCE = 300;
-
 /** @type {number} Number of notes per render batch. */
 const BATCH_SIZE = 50;
 /** @type {number} Scroll threshold to trigger next batch (px). */
@@ -129,6 +128,14 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
   static toggle() {
     if (this.instance?.rendered) this.hide();
     else this.show();
+  }
+
+  /** @override */
+  bringToFront() {
+    if (!this.element) return;
+    this.position.zIndex = ++ApplicationV2._maxZ;
+    this.element.style.zIndex = String(this.position.zIndex);
+    ui.activeWindow = this;
   }
 
   /** @override */
@@ -485,7 +492,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!pageId) return;
       const page = NoteManager.getFullNote(pageId);
       if (!page?.parent?.isOwner && !game.user.isGM) return;
-      if (page) page.sheet.render(true, { mode: 'edit' });
+      if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
     });
   }
 
@@ -606,7 +613,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
             name: localize('CALENDARIA.Common.Edit'),
             icon: '<i class="fas fa-pen-to-square"></i>',
             callback: () => {
-              if (editPage) editPage.sheet.render(true, { mode: 'edit' });
+              if (editPage) editPage.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
             }
           });
         }
@@ -629,7 +636,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
               const confirmed = await foundry.applications.api.DialogV2.confirm({
                 window: { title: localize('CALENDARIA.Common.DeleteNote') },
                 content: `<p>${stub?.name || 'this note'}</p>`,
-                yes: { default: false }
+                yes: { default: false },
+                rejectClose: false
               });
               if (confirmed) await NoteManager.deleteNote(pageId);
             }
@@ -785,7 +793,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.NoteViewer.BulkDeleteTitle') },
       content: `<p>${countLabel}</p>`,
-      yes: { default: false }
+      yes: { default: false },
+      rejectClose: false
     });
     if (!confirmed) return false;
     let deleted = 0;

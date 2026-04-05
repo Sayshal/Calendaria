@@ -228,6 +228,7 @@ export function getDefaultDateRange(_calendarId = null) {
   const month = components.month;
   const dayOfMonth = components.dayOfMonth;
   const today = { year, month, dayOfMonth };
+  const startDate = addDays(today, -30);
   const endDate = addDays(today, 30);
-  return { startDate: today, endDate };
+  return { startDate, endDate };
 }

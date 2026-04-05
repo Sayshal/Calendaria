@@ -80,7 +80,7 @@ import {
   usesDomParenting,
   warnShowToAll
 } from '../../utils/_module.mjs';
-import { WeatherManager, getPresetAlias } from '../../weather/_module.mjs';
+import { WeatherManager } from '../../weather/_module.mjs';
 import { BigCal, NoteViewer, SecondaryCalendar, SettingsPanel, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -227,6 +227,14 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   selectDate(date) {
     this._viewedDate = { year: date.year, month: date.month };
     this._selectedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
+  }
+
+  /** @override */
+  bringToFront() {
+    if (!this.element) return;
+    this.position.zIndex = ++ApplicationV2._maxZ;
+    this.element.style.zIndex = String(this.position.zIndex);
+    ui.activeWindow = this;
   }
 
   /** @override */
@@ -412,8 +420,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weather = WeatherManager.getCurrentWeather(zoneId);
     if (!weather) return null;
     const calendarId = this.calendar?.metadata?.id;
-    const alias = getPresetAlias(weather.id, calendarId, zoneId);
-    const label = alias || localize(weather.label);
+    const label = WeatherManager.resolveDisplayLabel(weather.id, weather.label, calendarId, zoneId);
     const windSpeed = weather.wind?.speed ?? 0;
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;
@@ -1830,7 +1837,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const journalId = target.dataset.journalId;
     const journal = game.journal.get(journalId);
     const page = journal?.pages.get(pageId);
-    if (page) page.sheet.render(true, { mode: 'edit' });
+    if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
   }
 
   /**

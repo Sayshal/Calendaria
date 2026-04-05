@@ -1,10 +1,10 @@
-.calendaria.minimizing {
-  opacity: 0;
-  max-height: none !important;
-  transition: opacity 0.25s ease-out;
-}
-
 .calendaria {
+  &.minimizing {
+    opacity: 0 !important;
+    max-height: none !important;
+    transition: opacity 0.25s ease-out !important;
+  }
+
   .hidden {
     display: none !important;
   }

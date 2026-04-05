@@ -56,7 +56,7 @@ import {
   usesDomParenting,
   warnShowToAll
 } from '../../utils/_module.mjs';
-import { WeatherManager, getPreset, getPresetAlias } from '../../weather/_module.mjs';
+import { WeatherManager, getPreset } from '../../weather/_module.mjs';
 import { BigCal, Chronicle, CinematicOverlay, HudSceneRenderer, MiniCal, NoteViewer, SetDateDialog, SettingsPanel, SunDial, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -1222,8 +1222,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     let icon = weather.icon || 'fa-cloud';
     if (icon && !icon.includes('fa-solid') && !icon.includes('fa-regular') && !icon.includes('fa-light') && !icon.includes('fas ') && !icon.includes('far ')) icon = `fa-solid ${icon}`;
     const calendarId = this.calendar?.metadata?.id;
-    const alias = getPresetAlias(weather.id, calendarId, zoneId);
-    const label = alias || localize(weather.label);
+    const label = WeatherManager.resolveDisplayLabel(weather.id, weather.label, calendarId, zoneId);
     const windSpeed = weather.wind?.speed ?? 0;
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;

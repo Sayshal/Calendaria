@@ -18,6 +18,9 @@ const NEW_DAY_HOUR = 8;
 /** @type {number|null} Debounce timer for PF2E rest handler */
 let pf2eRestTimer = null;
 
+/** @type {number|null} Debounce timer for PF1E rest handler */
+let pf1eRestTimer = null;
+
 /**
  * Handle pre-rest hook to enable time advancement.
  * @param {object} actor - The actor taking the rest
@@ -61,7 +64,9 @@ export function onLongRest(actor, config) {
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const daysToAdvance = isGritty ? 7 : 1;
   const minutesUntilTarget = daysToAdvance * minutesInDay - currentMinutes + targetMinutes;
-  config.duration = minutesUntilTarget;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  config.advanceTime = false;
+  CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
   log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
 }
 
@@ -92,6 +97,35 @@ export function onPF2eRest() {
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
   CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
   log(3, `PF2E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
+}
+
+/**
+ * Handle PF1E rest hook. Debounced since it fires per-actor.
+ * @returns {void}
+ */
+export function onPF1eRest() {
+  if (pf1eRestTimer) return;
+  pf1eRestTimer = setTimeout(() => {
+    pf1eRestTimer = null;
+  }, 500);
+  if (TimeClock.locked) {
+    log(2, 'PF1E rest time advancement blocked (clock locked)');
+    return;
+  }
+  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+  if (!advanceTime) return;
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return;
+  const targetHour = getTargetHour(calendar);
+  const currentDate = getCurrentDate();
+  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+  const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
+  const targetMinutes = targetHour * minutesPerHour;
+  const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
+  const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
+  log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
 }
 
 /**

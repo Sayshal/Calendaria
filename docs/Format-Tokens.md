@@ -83,16 +83,18 @@ Format tokens are placeholders used in display format strings.
 
 ## Era
 
-| Token           | Description                                              |
-| --------------- | -------------------------------------------------------- |
-| `GGGG`          | Era full (Anno Domini)                                   |
-| `GGG`           | Era short (AD, BC)                                       |
-| `GG`            | Era short (AD, BC)                                       |
-| `G`             | Era short (AD, BC)                                       |
-| `[yearInEra]`   | Year within era (1, 541)                                 |
-| `[era=N]`       | Full name of the Nth matching era (for overlapping eras) |
-| `[eraAbbr=N]`   | Abbreviation of the Nth matching era                     |
-| `[yearInEra=N]` | Year within the Nth matching era                         |
+| Token                  | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `GGGG`                 | Era full (Anno Domini)                   |
+| `GGG`                  | Era short (AD, BC)                       |
+| `GG`                   | Era short (AD, BC)                       |
+| `G`                    | Era short (AD, BC)                       |
+| `[yearInEra]`          | Year within era (1, 541)                 |
+| `[era=N]`              | Full name of the Nth matching era        |
+| `[eraAbbr=N]`          | Abbreviation of the Nth matching era     |
+| `[yearInEra=N]`        | Year within the Nth matching era         |
+| `[yearInEraOrdinal]`   | Year within era, ordinal (1st, 541st)    |
+| `[yearInEraOrdinal=N]` | Ordinal year within the Nth matching era |
 
 ---
 

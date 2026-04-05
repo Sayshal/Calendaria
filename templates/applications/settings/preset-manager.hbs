@@ -21,12 +21,7 @@
   <div class="preset-editor-panel standard-form">
     {{#if selected}}
       <fieldset data-section="content">
-        <legend>
-          {{localize "CALENDARIA.Common.Content"}}
-          <button type="button" class="reset-section" data-action="resetSection" data-section="content" data-tooltip
-            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
-              class="fas fa-undo"></i></button>
-        </legend>
+        <legend>{{localize "CALENDARIA.Common.Content"}}</legend>
         <div class="form-group">
           <label for="preset-name">{{localize "CALENDARIA.Common.Name"}}</label>
           <div class="form-fields">
@@ -70,12 +65,7 @@
         </div>
       </fieldset>
       <fieldset data-section="schedule">
-        <legend>
-          {{localize "CALENDARIA.Note.Tab.Schedule"}}
-          <button type="button" class="reset-section" data-action="resetSection" data-section="schedule" data-tooltip
-            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
-              class="fas fa-undo"></i></button>
-        </legend>
+        <legend>{{localize "CALENDARIA.Note.Tab.Schedule"}}</legend>
         {{#each scheduleFields}}
           <div class="form-group">
             <label for="cat-def-{{this.key}}">{{this.label}}</label>
@@ -87,12 +77,7 @@
         {{/each}}
       </fieldset>
       <fieldset data-section="settings">
-        <legend>
-          {{localize "CALENDARIA.Common.Settings"}}
-          <button type="button" class="reset-section" data-action="resetSection" data-section="settings" data-tooltip
-            aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
-              class="fas fa-undo"></i></button>
-        </legend>
+        <legend>{{localize "CALENDARIA.Common.Settings"}}</legend>
         {{#each settingsFields}}
           <div class="form-group">
             <label for="cat-def-{{this.key}}">{{this.label}}</label>

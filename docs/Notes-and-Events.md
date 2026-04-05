@@ -90,6 +90,8 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 
 Per-user permission dropdowns. Each user can be set to **None**, **Observer**, or **Owner**. GM and note author are fixed at Owner. Ownership dropdowns are disabled for hidden and secret notes.
 
+Only GMs can manage note permissions. Non-GM users see a disabled ownership fieldset with a tooltip explaining that permission management is restricted to the GM.
+
 ---
 
 ## Condition Engine

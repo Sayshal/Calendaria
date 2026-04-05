@@ -99,8 +99,11 @@ function onWeatherChange({ current, bulk, visualOnly } = {}) {
  * @param {object} sound - The sound to fade out
  */
 async function fadeOutAndStop(sound) {
-  await sound.fade(0, { duration: FADE_MS });
-  sound.stop();
+  try {
+    await sound.fade(0, { duration: FADE_MS });
+  } finally {
+    sound.stop();
+  }
 }
 
 /**
@@ -130,9 +133,9 @@ async function playSound(weather) {
   const src = expandLegacySoundKey(soundKey);
   if (src === activeSoundKey && activeSound?.playing) return;
   const oldSound = activeSound;
-  if (oldSound) fadeOutAndStop(oldSound);
   activeSound = null;
   activeSoundKey = null;
+  if (oldSound) await fadeOutAndStop(oldSound);
   if (!src) return;
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
@@ -189,9 +192,9 @@ export async function playStandaloneSound(src, options = {}) {
   }
   if (src === activeSoundKey && activeSound?.playing) return true;
   const oldSound = activeSound;
-  if (oldSound) fadeOutAndStop(oldSound);
   activeSound = null;
   activeSoundKey = null;
+  if (oldSound) await fadeOutAndStop(oldSound);
   const fadeDuration = options.fade ?? FADE_MS;
   try {
     const sound = await game.audio.play(src, { loop: options.loop ?? true, volume: 0, context: options.context ?? game.audio.environment });

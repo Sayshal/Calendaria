@@ -59,15 +59,15 @@ A **Weather Probabilities** button at the top of this tab opens a dialog showing
 
 Per-preset overrides for this zone:
 
-| Column       | Description                                                                                                                                                                              |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Enabled**  | Checkbox. Disabled presets are excluded from generation and dimmed in the picker. Enabled state is derived from whether the preset has a nonzero weight in any season. Saved per-season. |
-| **Icon**     | Preset icon (read-only)                                                                                                                                                                  |
-| **Name**     | Preset name with alias input (type to override, empty for default)                                                                                                                       |
-| **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers                                                                            |
-| **Temp Min** | Minimum temperature override (supports relative modifiers). Saved per-season. Placeholder shows the preset's built-in constraint when no override is set.                                |
-| **Temp Max** | Maximum temperature override (supports relative modifiers). Saved per-season. Placeholder shows the preset's built-in constraint when no override is set.                                |
-| **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default). Saved per-season.                                                                                                |
+| Column       | Description                                                                                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Enabled**  | Checkbox. Disabled presets are excluded from generation and dimmed in the picker. Enabled state is derived from whether the preset has a nonzero weight in any season. Saved per-season.                     |
+| **Icon**     | Preset icon (read-only)                                                                                                                                                                                      |
+| **Name**     | Preset name with alias input (type to override, empty for default). Per-zone aliases take priority over Weather Editor name overrides. See [display name resolution](Weather-System#display-name-resolution) |
+| **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers                                                                                                |
+| **Temp Min** | Minimum temperature override (supports relative modifiers). Saved per-season. Placeholder shows the preset's built-in constraint when no override is set.                                                    |
+| **Temp Max** | Maximum temperature override (supports relative modifiers). Saved per-season. Placeholder shows the preset's built-in constraint when no override is set.                                                    |
+| **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default). Saved per-season.                                                                                                                    |
 
 Each column header has a tooltip explaining the field. Presets are grouped by category.
 

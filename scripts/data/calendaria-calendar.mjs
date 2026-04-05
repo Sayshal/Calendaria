@@ -631,6 +631,21 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
                   description: new StringField({ required: false })
                 })
               ),
+              brightnessMultiplier: new NumberField({ required: false, initial: 1.0, min: 0 }),
+              environmentBase: new SchemaField(
+                {
+                  hue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  saturation: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 1 })
+                },
+                { required: false, nullable: true, initial: null }
+              ),
+              environmentDark: new SchemaField(
+                {
+                  hue: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 360 }),
+                  saturation: new NumberField({ required: false, nullable: true, initial: null, min: 0, max: 1 })
+                },
+                { required: false, nullable: true, initial: null }
+              ),
               seasonOverrides: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               windDirections: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               windSpeedRange: new SchemaField(

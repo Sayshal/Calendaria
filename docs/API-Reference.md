@@ -22,18 +22,23 @@ const now = CALENDARIA.api.getCurrentDateTime();
 
 ---
 
-### advanceTime(delta)
+### advanceTime(delta, options)
 
-Advance time by a delta. GM only.
+Advance time by a delta. GM only. When `delta` is an object with `day`, `hour`, `minute`, `second` keys, it is converted to seconds using the active calendar's time configuration.
 
 ```javascript
 await CALENDARIA.api.advanceTime({ hour: 8 });
 await CALENDARIA.api.advanceTime({ day: 1, hour: 6 });
+await CALENDARIA.api.advanceTime(3600); // advance by raw seconds
+await CALENDARIA.api.advanceTime({ hour: 8 }, { cinematic: true });
 ```
 
-| Parameter | Type     | Description                            |
-| --------- | -------- | -------------------------------------- |
-| `delta`   | `object` | Time delta (e.g., `{day: 1, hour: 2}`) |
+| Parameter           | Type             | Description                                                                     |
+| ------------------- | ---------------- | ------------------------------------------------------------------------------- |
+| `delta`             | `number\|object` | Seconds or time delta object (e.g., `{day: 1, hour: 2}`)                        |
+| `options.cinematic` | `boolean`        | Trigger the cinematic overlay, bypassing the threshold check (default: `false`) |
+
+> **Note:** API calls do not trigger the cinematic overlay by default. Pass `cinematic: true` to opt in.
 
 **Returns:** `Promise<number>` - New world time in seconds.
 
@@ -83,18 +88,22 @@ await CALENDARIA.api.jumpToDate({
 
 ---
 
-### advanceTimeToPreset(preset)
+### advanceTimeToPreset(preset, options)
 
 Advance time to the next occurrence of a preset time. GM only.
 
 ```javascript
 await CALENDARIA.api.advanceTimeToPreset('sunrise');
 await CALENDARIA.api.advanceTimeToPreset('midnight');
+await CALENDARIA.api.advanceTimeToPreset('sunrise', { cinematic: true });
 ```
 
-| Parameter | Type     | Description                                                    |
-| --------- | -------- | -------------------------------------------------------------- |
-| `preset`  | `string` | `'sunrise'`, `'midday'`, `'noon'`, `'sunset'`, or `'midnight'` |
+| Parameter           | Type      | Description                                                                     |
+| ------------------- | --------- | ------------------------------------------------------------------------------- |
+| `preset`            | `string`  | `'sunrise'`, `'midday'`, `'noon'`, `'sunset'`, or `'midnight'`                  |
+| `options.cinematic` | `boolean` | Trigger the cinematic overlay, bypassing the threshold check (default: `false`) |
+
+> **Note:** API calls do not trigger the cinematic overlay by default. Pass `cinematic: true` to opt in.
 
 **Returns:** `Promise<number>` - New world time in seconds.
 
@@ -2271,7 +2280,7 @@ const forecast = CALENDARIA.api.getWeatherForecast({ zoneId: 'desert', accuracy:
 | `options.accuracy` | `number` | Override forecast accuracy (0–100). GMs default to 100.    |
 | `options.days`     | `number` | Number of days (defaults to Forecast Days setting)         |
 
-**Returns:** `object[]` - Array of forecast entries. Each entry includes an `isVaried` flag indicating whether variance was applied.
+**Returns:** `object[]` - Array of forecast entries. Each entry includes an `isVaried` flag indicating whether variance was applied. Forecast entries include a `periods` property only for GM users; non-GM users receive entries without period breakdown data.
 
 **Permission:** Requires `viewWeatherForecast` permission for non-GM users.
 
@@ -2408,6 +2417,28 @@ CALENDARIA.managers.WeatherManager.refreshEnvironmentOverrides('thunderstorm');
 
 ---
 
+### resolveDisplayLabel(presetId, fallbackLabel, calendarId, zoneId)
+
+Resolve the display label for a weather preset. Resolution priority: (1) per-zone alias from the Climate Editor, (2) name override from the Weather Editor, (3) localized fallback label. Useful for module developers who need to display weather names consistent with all override layers.
+
+```javascript
+const label = CALENDARIA.managers.WeatherManager.resolveDisplayLabel('rain', 'Rain', 'harptos', 'desert');
+// Returns: "Monsoon" (if aliased) or "Rain" (fallback)
+```
+
+> **Note:** This method is on `WeatherManager`, not on the public API object.
+
+| Parameter       | Type     | Description                             |
+| --------------- | -------- | --------------------------------------- |
+| `presetId`      | `string` | Weather preset ID                       |
+| `fallbackLabel` | `string` | Default label if no alias is configured |
+| `calendarId`    | `string` | Calendar ID for alias lookup            |
+| `zoneId`        | `string` | Zone ID for alias lookup                |
+
+**Returns:** `string` - Resolved display label.
+
+---
+
 ### getActiveZone()
 
 Get the active climate zone.
@@ -2422,7 +2453,7 @@ const zone = CALENDARIA.api.getActiveZone();
 
 ### setActiveZone(zoneId)
 
-Set the active climate zone.
+Set the active climate zone. Fires the `calendaria.weatherChange` hook and broadcasts the change to all connected clients, so weather displays update immediately.
 
 ```javascript
 await CALENDARIA.api.setActiveZone('desert');

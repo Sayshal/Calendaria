@@ -208,6 +208,9 @@ Controls weather ambient sound volume.
 
 - Default: `false`
 
+> [!WARNING]
+> Enabling this setting triggers an irreversible regeneration of all current weather and forecast data.
+
 #### Period Carry-Over Chance
 
 Controls how often weather persists unchanged between intraday periods. Higher values mean weather is more likely to stay the same across period transitions.
@@ -526,9 +529,11 @@ Controls how prominently events are featured in the cinematic display.
 
 ### Show During Rest
 
-When enabled, rest-based time advances that exceed the threshold also trigger the cinematic.
+When enabled, rest-based time advances trigger the cinematic regardless of the threshold setting.
 
 - Default: `false`
+
+Rest integration supports D&D 5e, Pathfinder 2e, and Pathfinder 1e long rests.
 
 ---
 
