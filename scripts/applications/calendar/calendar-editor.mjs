@@ -10,7 +10,7 @@ import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
 import { RangeSlider, format, localize, log, validateFormatString } from '../../utils/_module.mjs';
-import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig } from '../../weather/_module.mjs';
+import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -147,6 +147,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {{year: number, month: number, day: number}|null} Pending current date to apply after import */
   #pendingCurrentDate = null;
 
+  /** @type {object|null} Pending preset aliases to restore after import */
+  #pendingPresetAliases = null;
+
   /** @type {boolean} Whether the editor has unsaved changes */
   #isDirty = false;
 
@@ -272,6 +275,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#calendarData._pendingCurrentDate) {
       this.#pendingCurrentDate = this.#calendarData._pendingCurrentDate;
       delete this.#calendarData._pendingCurrentDate;
+    }
+    if (this.#calendarData.presetAliases) {
+      this.#pendingPresetAliases = this.#calendarData.presetAliases;
+      delete this.#calendarData.presetAliases;
     }
     preLocalizeCalendar(this.#calendarData);
     this.#isDirty = true;
@@ -2203,6 +2210,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       zoneKey,
       calendarId: this.#calendarId,
       calendarData: this.#calendarData,
+      pendingAliases: this.#pendingPresetAliases,
       seasonNames,
       onSave: (result) => {
         zone.description = result.description;
@@ -2361,6 +2369,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           const importer = createImporter(this.#pendingImporterId);
           if (importer) await importer.applyCurrentDate(this.#pendingCurrentDate, calendarId);
         }
+        if (this.#pendingPresetAliases && calendarId) {
+          for (const [zoneId, presets] of Object.entries(this.#pendingPresetAliases)) {
+            for (const [presetId, alias] of Object.entries(presets)) {
+              await setPresetAlias(presetId, alias, calendarId, zoneId);
+            }
+          }
+          log(3, `Restored ${Object.keys(this.#pendingPresetAliases).length} zone preset aliases`);
+          this.#pendingPresetAliases = null;
+        }
         this.#pendingCurrentDate = null;
         this.#pendingImporterId = null;
         if (setActive && calendarId) {
@@ -2437,6 +2454,22 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     exportData.metadata.version = game.modules.get('calendaria')?.version || '1.0.0';
     const activeCalendar = CalendarManager.getActiveCalendar();
     if (activeCalendar && this.#calendarId && CalendarRegistry.getActiveId() === this.#calendarId) exportData.currentDate = activeCalendar.currentDate;
+    if (this.#calendarId && exportData.weather?.zones) {
+      const presetAliases = {};
+      for (const zoneKey of Object.keys(exportData.weather.zones)) {
+        const zone = exportData.weather.zones[zoneKey];
+        if (!zone.presets) continue;
+        const zoneId = zone.id || zoneKey;
+        for (const presetId of Object.keys(zone.presets)) {
+          const alias = getPresetAlias(presetId, this.#calendarId, zoneId);
+          if (alias) {
+            presetAliases[zoneId] ??= {};
+            presetAliases[zoneId][presetId] = alias;
+          }
+        }
+      }
+      if (Object.keys(presetAliases).length) exportData.presetAliases = presetAliases;
+    }
     const filename = this.#calendarData.name
       .toLowerCase()
       .replace(/[^\da-z]+/g, '-')
