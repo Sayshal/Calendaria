@@ -9,7 +9,7 @@ import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.m
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
-import { RangeSlider, format, localize, log, validateFormatString } from '../../utils/_module.mjs';
+import { RangeSlider, format, localize, log, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
 
@@ -2482,6 +2482,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       }
       if (Object.keys(presetAliases).length) exportData.presetAliases = presetAliases;
+    }
+    if (this.#calendarId) {
+      const notes = serializeNotes(this.#calendarId);
+      if (notes.length) {
+        exportData.notes = notes;
+        log(3, `Included ${notes.length} calendar notes in export`);
+      }
     }
     const filename = this.#calendarData.name
       .toLowerCase()
