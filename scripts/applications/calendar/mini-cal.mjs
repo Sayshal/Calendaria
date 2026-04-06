@@ -923,10 +923,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     else this.#updateDockedPosition();
     this.#enableDragging();
     const incrementSelect = this.element.querySelector('[data-action="increment"]');
-    incrementSelect?.addEventListener('change', (event) => {
+    incrementSelect?.addEventListener('change', async (event) => {
       TimeClock.setAppIncrement('mini-calendar', event.target.value);
       TimeClock.setIncrement(event.target.value);
-      game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
+      await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES, {
         timeControls: this.#stickyTimeControls,
         sidebar: this.#stickySidebar,
         position: this.#stickyPosition,
