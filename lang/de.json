@@ -2211,7 +2211,6 @@
   "CALENDARIA.SettingsPanel.ExportSettings.DialogText": "Alle Calendaria-Einstellungen in eine JSON-Datei für Backup oder Transfer in eine andere Welt exportieren.",
   "CALENDARIA.SettingsPanel.ExportSettings.Hint": "Alle Einstellungen als JSON-Datei für Backup oder Transfer in eine andere Welt herunterladen.",
   "CALENDARIA.SettingsPanel.ExportSettings.IncludeCalendar": "Aktiven Kalender einschließen: {name}",
-  "CALENDARIA.SettingsPanel.ExportSettings.IncludeNotes": "Kalendernotizen einbeziehen ({count})",
   "CALENDARIA.SettingsPanel.ExportSettings.Success": "Einstellungen erfolgreich exportiert.",
   "CALENDARIA.SettingsPanel.Field.ClimateZone": "Aktive Klimazone",
   "CALENDARIA.SettingsPanel.FogOfWar.Note": "Steuert, welche Kalenderdaten für Spieler sichtbar sind.",

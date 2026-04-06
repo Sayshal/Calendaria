@@ -2211,7 +2211,6 @@
   "CALENDARIA.SettingsPanel.ExportSettings.DialogText": "Exporte todas as configurações do Calendaria para um arquivo JSON para backup ou transferência para outro mundo.",
   "CALENDARIA.SettingsPanel.ExportSettings.Hint": "Baixe todas as configurações como um arquivo JSON para backup ou transferência para outro mundo.",
   "CALENDARIA.SettingsPanel.ExportSettings.IncludeCalendar": "Incluir calendário ativo: {name}",
-  "CALENDARIA.SettingsPanel.ExportSettings.IncludeNotes": "Incluir notas do calendário ({count})",
   "CALENDARIA.SettingsPanel.ExportSettings.Success": "Configurações exportadas com sucesso.",
   "CALENDARIA.SettingsPanel.Field.ClimateZone": "Ativar Zona Climática",
   "CALENDARIA.SettingsPanel.FogOfWar.Note": "Controle quais datas do calendário estão visíveis para os jogadores.",

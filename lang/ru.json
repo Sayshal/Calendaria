@@ -2215,7 +2215,6 @@
   "CALENDARIA.SettingsPanel.ExportSettings.DialogText": "Экспортировать все настройки Calendaria в файл JSON для резервного копирования или переноса в другой мир.",
   "CALENDARIA.SettingsPanel.ExportSettings.Hint": "Скачать все настройки в виде JSON-файла для резервного копирования или переноса в другой мир.",
   "CALENDARIA.SettingsPanel.ExportSettings.IncludeCalendar": "Включить активный календарь: {name}",
-  "CALENDARIA.SettingsPanel.ExportSettings.IncludeNotes": "Включить заметки календаря ({count})",
   "CALENDARIA.SettingsPanel.ExportSettings.Success": "Настройки успешно экспортированы.",
   "CALENDARIA.SettingsPanel.Field.ClimateZone": "Активная климатическая зона",
   "CALENDARIA.SettingsPanel.FogOfWar.Note": "Настройте какие даты календаря видимы игрокам.",
