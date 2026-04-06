@@ -5,7 +5,7 @@
  */
 
 import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalendar } from '../../calendar/_module.mjs';
-import { ASSETS, DEFAULT_MOON_PHASES, TEMPLATES } from '../../constants.mjs';
+import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
@@ -152,6 +152,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {boolean} Whether the editor has unsaved changes */
   #isDirty = false;
+
+  /** @type {number|null} Hook ID for note update listener */
+  #noteUpdateHookId = null;
 
   /** @type {string|null} Festival key to scroll to on first render */
   #focusFestivalKey = null;
@@ -303,6 +306,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
       if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
     }
+    if (this.#noteUpdateHookId) {
+      Hooks.off(HOOKS.NOTE_UPDATED, this.#noteUpdateHookId);
+      this.#noteUpdateHookId = null;
+    }
     return super._preClose(options);
   }
 
@@ -364,8 +371,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }));
     const festivalsArr = Object.entries(this.#calendarData.festivals);
     context.festivalsWithNav = festivalsArr.map(([key, festival]) => {
-      let conditionSummary = festival.conditionTree ? summarizeConditionTree(festival.conditionTree, this.#calendarData) : '';
       const noteStub = this.#calendarId ? FestivalManager.getFestivalNoteByKey(this.#calendarId, key) : null;
+      const effectiveTree = noteStub?.flagData?.conditionTree ?? festival.conditionTree;
+      let conditionSummary = effectiveTree ? summarizeConditionTree(effectiveTree, this.#calendarData) : '';
       const noteDuration = noteStub?.flagData?.duration ?? festival.duration ?? 1;
       if (conditionSummary && noteDuration > 1) conditionSummary += ` (${noteDuration} ${localize('CALENDARIA.Common.UnitDays')})`;
       return { ...festival, key, conditionSummary };
@@ -582,6 +590,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender?.(context, options);
+    if (!this.#noteUpdateHookId) {
+      this.#noteUpdateHookId = Hooks.on(HOOKS.NOTE_UPDATED, (stub) => {
+        if (stub.flagData?.linkedFestival?.calendarId === this.#calendarId) this.render();
+      });
+    }
     if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     this.#setupLeapRuleListener();
     this.#setupWeekNumberDuplicateListener();
