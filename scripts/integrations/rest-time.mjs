@@ -101,9 +101,12 @@ export function onPF2eRest() {
 
 /**
  * Handle PF1E rest hook. Debounced since it fires per-actor.
+ * @param {object} _actor - The resting actor
+ * @param {object} options - Rest options from performRest()
  * @returns {void}
  */
-export function onPF1eRest() {
+export function onPF1eRest(_actor, options = {}) {
+  if (!options.hours) return;
   if (pf1eRestTimer) return;
   pf1eRestTimer = setTimeout(() => {
     pf1eRestTimer = null;
@@ -112,20 +115,25 @@ export function onPF1eRest() {
     log(2, 'PF1E rest time advancement blocked (clock locked)');
     return;
   }
-  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
-  if (!advanceTime) return;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return;
-  const targetHour = getTargetHour(calendar);
-  const currentDate = getCurrentDate();
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
-  const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-  const targetMinutes = targetHour * minutesPerHour;
-  const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
-  const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
-  CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
-  log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
+  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+  if (advanceTime) {
+    const targetHour = getTargetHour(calendar);
+    const currentDate = getCurrentDate();
+    const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
+    const targetMinutes = targetHour * minutesPerHour;
+    const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
+    const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
+    CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
+    log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
+  } else {
+    const restSeconds = options.hours * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(restSeconds, { source: 'rest' });
+    log(3, `PF1E rest advancing ${options.hours} hours`);
+  }
 }
 
 /**
