@@ -217,11 +217,17 @@ describe('advanceTime', () => {
     expect(CalendariaSocket.emit).toHaveBeenCalledWith('timeRequest', { action: 'advance', delta: 100 });
     expect(result).toBe(50);
   });
-  it('calls CinematicOverlay.gatedAdvance for GM users', async () => {
-    const CinematicOverlay = (await import('../../scripts/applications/cinematics/cinematic-overlay.mjs')).default;
+  it('calls game.time.advance directly for GM users (skips cinematics by default)', async () => {
     canChangeDateTime.mockReturnValue(true);
-    const result = await CalendariaAPI.advanceTime(100);
-    expect(CinematicOverlay.gatedAdvance).toHaveBeenCalledWith(100);
+    await CalendariaAPI.advanceTime(100);
+    expect(game.time.advance).toHaveBeenCalledWith(100);
+  });
+  it('routes through CinematicOverlay.triggerFromAdvance when cinematic flag is set', async () => {
+    const CinematicOverlay = (await import('../../scripts/applications/cinematics/cinematic-overlay.mjs')).default;
+    CinematicOverlay.triggerFromAdvance = vi.fn(async () => true);
+    canChangeDateTime.mockReturnValue(true);
+    await CalendariaAPI.advanceTime(100, { cinematic: true });
+    expect(CinematicOverlay.triggerFromAdvance).toHaveBeenCalledWith(100);
   });
 });
 
@@ -960,12 +966,10 @@ describe('isDaytime / isNighttime', () => {
 });
 
 describe('advanceTimeToPreset', () => {
-  let CinematicOverlay;
-  beforeEach(async () => {
-    CinematicOverlay = (await import('../../scripts/applications/cinematics/cinematic-overlay.mjs')).default;
+  beforeEach(() => {
     canChangeDateTime.mockReturnValue(true);
     game.time.components = { hour: 10, minute: 0, second: 0 };
-    CinematicOverlay.gatedAdvance.mockClear();
+    game.time.advance.mockClear();
   });
   it('returns worldTime when permission denied', async () => {
     canChangeDateTime.mockReturnValue(false);
@@ -977,33 +981,33 @@ describe('advanceTimeToPreset', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({ sunrise: vi.fn(() => 6) });
     game.time.components = { hour: 22, minute: 0, second: 0 };
     await CalendariaAPI.advanceTimeToPreset('sunrise');
-    expect(CinematicOverlay.gatedAdvance).toHaveBeenCalled();
-    const delta = CinematicOverlay.gatedAdvance.mock.calls[0][0];
+    expect(game.time.advance).toHaveBeenCalled();
+    const delta = game.time.advance.mock.calls[0][0];
     expect(delta).toBe(8 * 3600);
   });
   it('advances to midday/noon', async () => {
     game.time.components = { hour: 10, minute: 0, second: 0 };
     await CalendariaAPI.advanceTimeToPreset('midday');
-    const delta = CinematicOverlay.gatedAdvance.mock.calls[0][0];
+    const delta = game.time.advance.mock.calls[0][0];
     expect(delta).toBe(2 * 3600);
   });
   it('accepts "noon" as alias for midday', async () => {
     game.time.components = { hour: 10, minute: 0, second: 0 };
     await CalendariaAPI.advanceTimeToPreset('noon');
-    const delta = CinematicOverlay.gatedAdvance.mock.calls[0][0];
+    const delta = game.time.advance.mock.calls[0][0];
     expect(delta).toBe(2 * 3600);
   });
   it('advances to sunset', async () => {
     CalendarManager.getActiveCalendar.mockReturnValue({ sunset: vi.fn(() => 18) });
     game.time.components = { hour: 16, minute: 0, second: 0 };
     await CalendariaAPI.advanceTimeToPreset('sunset');
-    const delta = CinematicOverlay.gatedAdvance.mock.calls[0][0];
+    const delta = game.time.advance.mock.calls[0][0];
     expect(delta).toBe(2 * 3600);
   });
   it('advances to midnight', async () => {
     game.time.components = { hour: 22, minute: 0, second: 0 };
     await CalendariaAPI.advanceTimeToPreset('midnight');
-    const delta = CinematicOverlay.gatedAdvance.mock.calls[0][0];
+    const delta = game.time.advance.mock.calls[0][0];
     expect(delta).toBe(2 * 3600);
   });
   it('returns worldTime for unknown preset', async () => {

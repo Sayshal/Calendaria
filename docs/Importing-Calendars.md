@@ -4,15 +4,17 @@ Calendaria can import calendars from other modules and websites to migrate exist
 
 ## Supported Sources
 
-| Source                 | Live | JSON |
-| ---------------------- | :--: | :--: |
-| Calendaria JSON        |      |  ✓   |
-| Calendarium (Obsidian) |      |  ✓   |
-| Fantasy-Calendar.com   |      |  ✓   |
-| Mini Calendar          |  ✓   |  ✓   |
-| Seasons & Stars        |  ✓   |  ✓   |
-| Simple Calendar        |  ✓   |  ✓   |
-| Simple Timekeeping     |  ✓   |      |
+| Source                 | Live |  JSON  |
+| ---------------------- | :--: | :----: |
+| Calendaria JSON        |      |   ✓    |
+| Calendarium (Obsidian) |      |   ✓    |
+| Fantasy-Calendar.com   |      |   ✓    |
+| Mini Calendar          |  ✓   |   ✓    |
+| Seasons & Stars        |  ✓   |   ✓    |
+| Simple Calendar        |  ✓   |   ✓    |
+| Simple Timekeeping     |      | macro¹ |
+
+¹ Simple Timekeeping uses a special macro-based export flow — see [Simple Timekeeping](#simple-timekeeping) below.
 
 Missing your calendar source? [Request a new importer](https://github.com/Sayshal/Calendaria/issues/new?labels=type:feature&title=Importer%20Request%3A%20).
 
@@ -60,6 +62,17 @@ For each detected note, use the radio buttons to choose:
 - **Note.** Import as a calendar note (linked to a journal entry)
 
 Use the **Set All** buttons to quickly mark all notes as Skip, Festival, or Note.
+
+---
+
+## Simple Timekeeping
+
+STK requires a two-step macro export because date conversion has to happen inside STK's environment, not Calendaria's.
+
+1. Select **Simple Timekeeping** in the importer and click **Copy Macro**. Paste it into a new script macro and save.
+2. Disable Calendaria, ensure Simple Timekeeping is enabled, reload the world.
+3. Run the macro. It downloads `stk-export-*.json`.
+4. Re-enable Calendaria, reload, then upload the JSON through the importer.
 
 ---
 

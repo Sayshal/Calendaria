@@ -131,10 +131,10 @@ Days since a target date. Clickable: navigates to target.
 [[cal.elapsed 1 Mirtul 1490]]                                               → 730 days
 ```
 
-| Parameter  | Type      | Description                                                    |
-| ---------- | --------- | -------------------------------------------------------------- |
-| `relative` | `boolean` | Human-readable relative text (years/months/weeks)              |
-| `simple`   | `boolean` | Return only the numeric count (e.g. `42` not `42 years ago`)  |
+| Parameter  | Type      | Description                                                       |
+| ---------- | --------- | ----------------------------------------------------------------- |
+| `relative` | `boolean` | Human-readable relative text (years/months/weeks)                 |
+| `simple`   | `boolean` | Return only the numeric count (e.g. `42` not `42 years ago`)      |
 | `to`       | `string`  | End date to count to instead of today (e.g. `to="1 Mirtul 1492"`) |
 
 ---

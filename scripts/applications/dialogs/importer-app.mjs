@@ -6,7 +6,7 @@
 
 import { TEMPLATES } from '../../constants.mjs';
 import { createImporter, getImporterOptions } from '../../importers/_module.mjs';
-import { format, log } from '../../utils/_module.mjs';
+import { format, localize, log } from '../../utils/_module.mjs';
 import { CalendarEditor } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -27,7 +27,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       uploadFile: ImporterApp.#onUploadFile,
       importFromModule: ImporterApp.#onImportFromModule,
       clearData: ImporterApp.#onClearData,
-      setAllNoteTypes: ImporterApp.#onSetAllNoteTypes
+      setAllNoteTypes: ImporterApp.#onSetAllNoteTypes,
+      copyMacro: ImporterApp.#onCopyMacro
     }
   };
 
@@ -91,6 +92,20 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       context.canUpload = context.selectedImporter.supportsFileUpload;
       context.canImportFromModule = context.selectedImporter.supportsLiveImport && context.selectedImporter.detected;
       context.fileExtensions = this.#getSelectedImporter()?.constructor.fileExtensions?.join(',') || '.json';
+      if (context.selectedImporter.instructions) {
+        const base = context.selectedImporter.instructions;
+        const steps = [];
+        for (let i = 1; i <= 8; i++) {
+          const key = `${base}.Step${i}`;
+          const text = localize(key);
+          if (text && text !== key) steps.push(text);
+        }
+        context.importerInstructions = {
+          title: localize(`${base}.Title`),
+          steps,
+          macro: context.selectedImporter.exportMacro
+        };
+      }
     }
     context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'CALENDARIA.Common.Import', disabled: !context.hasData || this.#importing }];
     return context;
@@ -336,6 +351,24 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Copy the selected importer's export macro to the clipboard.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} _target - Button element
+   */
+  static async #onCopyMacro(_event, _target) {
+    const importer = getImporterOptions().find((i) => i.value === this.#selectedImporterId);
+    const macro = importer?.exportMacro;
+    if (!macro) return;
+    try {
+      await navigator.clipboard.writeText(macro);
+      ui.notifications.info('CALENDARIA.Importer.MacroCopied', { localize: true });
+    } catch (error) {
+      log(2, 'Failed to copy macro to clipboard:', error);
+      ui.notifications.warn('CALENDARIA.Importer.MacroCopyFailed', { localize: true });
+    }
+  }
+
+  /**
    * Handle form submission (import).
    * Opens the Calendar Editor with the imported data for polishing before saving.
    * @param {Event} _event - Submit event
@@ -359,7 +392,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       const festivals = [];
       this.#extractedNotes.forEach((note, index) => {
         const noteType = noteTypes[index] || note.suggestedType;
-        if (noteType === 'festival') festivals.push({ name: note.name, month: (note.startDate?.month ?? 0) + 1, day: (note.startDate?.day ?? 0) + 1 });
+        if (noteType === 'festival') festivals.push({ name: note.name, month: note.startDate?.month ?? 0, dayOfMonth: note.startDate?.dayOfMonth ?? 0, countsForWeekday: false });
       });
       if (festivals.length > 0) {
         if (!this.#transformedData.festivals) this.#transformedData.festivals = [];
