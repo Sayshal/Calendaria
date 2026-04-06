@@ -1874,8 +1874,8 @@ export default class WeatherManager {
   static formatWindSpeed(kph) {
     if (kph == null) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.WIND_SPEED_UNIT);
-    if (unit === 'mph') return `${Math.round(kph * 0.621371)} mph`;
-    return `${Math.round(kph)} kph`;
+    if (unit === 'mph') return `${Math.round(kph * 0.621371)} ${localize('CALENDARIA.Settings.WindSpeedUnit.MphAbbr')}`;
+    return `${Math.round(kph)} ${localize('CALENDARIA.Settings.WindSpeedUnit.KphAbbr')}`;
   }
 
   /**
@@ -1886,8 +1886,8 @@ export default class WeatherManager {
   static formatPrecipitation(mmhr) {
     if (mmhr == null || mmhr === 0) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
-    if (unit === 'imperial') return `${(mmhr * 0.03937).toFixed(2)} in/hr`;
-    return `${mmhr.toFixed(1)} mm/hr`;
+    if (unit === 'imperial') return `${(mmhr * 0.03937).toFixed(2)} ${localize('CALENDARIA.Settings.PrecipitationUnit.ImperialAbbr')}`;
+    return `${mmhr.toFixed(1)} ${localize('CALENDARIA.Settings.PrecipitationUnit.MetricAbbr')}`;
   }
 
   /**
