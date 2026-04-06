@@ -160,9 +160,9 @@ const CALENDAR_DATA_SETTINGS = [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVER
  * @param {string} calendarId - Calendar ID to export notes for
  * @returns {object[]} Serialized note objects
  */
-function serializeNotes(calendarId) {
+export function serializeNotes(calendarId) {
   const allNotes = NoteManager.getAllNotes();
-  const calendarNotes = calendarId ? allNotes.filter((n) => n.calendarId === calendarId) : allNotes;
+  const calendarNotes = (calendarId ? allNotes.filter((n) => n.calendarId === calendarId) : allNotes).filter((n) => !n.flagData?.linkedFestival);
   return calendarNotes.map((stub) => {
     const page = NoteManager.getFullNote(stub.id);
     const systemData = page?.system?.toObject?.() ?? page?.system ?? stub.flagData;
@@ -233,7 +233,6 @@ export async function exportSettings() {
   const activeCalendar = CalendarManager.getActiveCalendar();
   const calendarName = activeCalendar?.name ? localize(activeCalendar.name) : null;
   const calendarId = activeCalendar?.metadata?.id;
-  const noteCount = calendarId ? NoteManager.getAllNotes().filter((n) => n.calendarId === calendarId).length : 0;
   let content = `<p>${localize('CALENDARIA.SettingsPanel.ExportSettings.DialogText')}</p>`;
   if (calendarName) {
     content += `
@@ -243,15 +242,6 @@ export async function exportSettings() {
           <input type="checkbox" id="includeCalendar" name="includeCalendar" checked>
         </div>
       </div>`;
-    if (noteCount > 0) {
-      content += `
-        <div class="form-group">
-          <label for="includeNotes">${format('CALENDARIA.SettingsPanel.ExportSettings.IncludeNotes', { count: noteCount })}</label>
-          <div class="form-fields">
-            <input type="checkbox" id="includeNotes" name="includeNotes" checked>
-          </div>
-        </div>`;
-    }
   }
   let dialogElement = null;
   const result = await foundry.applications.api.DialogV2.wait({
@@ -268,7 +258,6 @@ export async function exportSettings() {
   });
   if (result !== 'export') return;
   const includeCalendar = dialogElement?.querySelector('input[name="includeCalendar"]')?.checked ?? false;
-  const includeNotes = dialogElement?.querySelector('input[name="includeNotes"]')?.checked ?? false;
   const exportData = { version: game.modules.get(MODULE.ID)?.version, exportedAt: new Date().toISOString(), settings: {} };
   for (const key of EXPORTABLE_SETTINGS) {
     if (includeCalendar && CALENDAR_DATA_SETTINGS.includes(key)) continue;
@@ -280,10 +269,13 @@ export async function exportSettings() {
     calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
     log(3, `Included active calendar data: ${calendarData.name}`);
-  }
-  if (includeNotes && noteCount > 0) {
-    exportData.notes = serializeNotes(calendarId);
-    log(3, `Included ${exportData.notes.length} calendar notes`);
+    if (calendarId) {
+      const notes = serializeNotes(calendarId);
+      if (notes.length) {
+        exportData.notes = notes;
+        log(3, `Included ${notes.length} calendar notes`);
+      }
+    }
   }
   const filename = `calendaria-settings-${Date.now()}.json`;
   foundry.utils.saveDataToFile(JSON.stringify(exportData, null, 2), 'application/json', filename);

@@ -24,6 +24,12 @@ export default class BaseImporter {
   /** @type {string} Localization key for importer description */
   static description = 'CALENDARIA.Importer.BaseDescription';
 
+  /** @type {string|null} Optional localization key for an instructions panel rendered above the upload zone. */
+  static instructions = null;
+
+  /** @type {string|null} Optional macro source displayed alongside instructions for the user to copy. */
+  static exportMacro = null;
+
   /** @type {boolean} Whether this importer supports file upload */
   static supportsFileUpload = true;
 

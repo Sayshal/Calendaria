@@ -66,6 +66,8 @@ export function getImporterOptions() {
     label: importer.label,
     icon: importer.icon,
     description: importer.description,
+    instructions: importer.instructions,
+    exportMacro: importer.exportMacro,
     supportsFileUpload: importer.supportsFileUpload,
     supportsLiveImport: importer.supportsLiveImport,
     detected: importer.supportsLiveImport && importer.detect()

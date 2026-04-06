@@ -75,8 +75,6 @@ Hooks.once('init', async () => {
   Object.assign(CONFIG.JournalEntryPage.dataModels, { [JOURNALS.CALENDAR_NOTE]: CalendarNoteDataModel });
   CONFIG.JournalEntryPage.sheetClasses[JOURNALS.CALENDAR_NOTE] = {};
   foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, SHEETS.CALENDARIA, CalendarNoteSheet, { types: [JOURNALS.CALENDAR_NOTE], makeDefault: true, label: 'Calendar Note' });
-  foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Scene, 'core', foundry.applications.sheets.SceneConfig);
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Scene, MODULE.ID, CalendariaSceneConfig, { makeDefault: true, label: 'Calendaria Scene Config' });
   CalendariaSceneConfig.patchBaseSceneConfig();
   await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES).flatMap((v) => (typeof v === 'string' ? v : Object.values(v))));
   log(3, 'Calendaria module initialized.');

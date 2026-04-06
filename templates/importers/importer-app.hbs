@@ -32,6 +32,26 @@
               <p class="description hint">{{localize selectedImporter.description}}</p>
             {{/if}}
 
+            {{#if importerInstructions}}
+              <div class="importer-instructions">
+                <p class="instructions-title"><i class="fas fa-info-circle"></i> {{importerInstructions.title}}</p>
+                <ol class="instructions-steps">
+                  {{#each importerInstructions.steps}}
+                    <li>{{this}}</li>
+                  {{/each}}
+                </ol>
+                {{#if importerInstructions.macro}}
+                  <div class="macro-block">
+                    <button type="button" class="copy-macro-btn" data-action="copyMacro">
+                      <i class="fas fa-copy"></i>
+                      {{localize "CALENDARIA.Importer.CopyMacro"}}
+                    </button>
+                    <pre class="macro-source"><code>{{importerInstructions.macro}}</code></pre>
+                  </div>
+                {{/if}}
+              </div>
+            {{/if}}
+
             {{#if canUpload}}
               <div class="file-upload-zone {{#if loadedFileName}}has-file{{/if}}" data-action="uploadFile">
                 {{#if loadedFileName}}

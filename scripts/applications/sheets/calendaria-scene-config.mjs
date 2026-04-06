@@ -12,25 +12,30 @@ import { WeatherManager } from '../../weather/_module.mjs';
  */
 export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConfig {
   /**
-   * Mutates SceneConfig.TABS so all subclasses inherit the Calendaria tab.
-   * @returns {object} The extended TABS configuration
-   */
-  static buildTabs() {
-    super.TABS.sheet.tabs.push({ id: 'calendaria', icon: 'fa-solid fa-calendar-days', label: 'CALENDARIA.Scene.Tab' });
-    return super.TABS;
-  }
-
-  static TABS = CalendariaSceneConfig.buildTabs();
-
-  /**
    * Patch the base SceneConfig to add the Calendaria part and context handling.
    */
   static patchBaseSceneConfig() {
     const Base = foundry.applications.sheets.SceneConfig;
+    const calPart = { template: TEMPLATES.SCENE.CONFIG_CALENDARIA, scrollable: [''] };
+    const calTab = { id: 'calendaria', icon: 'fa-solid fa-calendar-days', label: 'CALENDARIA.Scene.Tab' };
     const footer = Base.PARTS.footer;
     delete Base.PARTS.footer;
-    Base.PARTS.calendaria = { template: TEMPLATES.SCENE.CONFIG_CALENDARIA, scrollable: [''] };
+    Base.PARTS.calendaria = calPart;
     Base.PARTS.footer = footer;
+    Base.TABS.sheet.tabs.push(calTab);
+    const origConfigure = Base.prototype._configureRenderOptions;
+    Base.prototype._configureRenderOptions = function (options) {
+      if (!this.constructor.PARTS.calendaria) {
+        const f = this.constructor.PARTS.footer;
+        delete this.constructor.PARTS.footer;
+        this.constructor.PARTS.calendaria = calPart;
+        this.constructor.PARTS.footer = f;
+      }
+      const tabs = this.constructor.TABS?.sheet?.tabs;
+      if (tabs && !tabs.find((t) => t.id === 'calendaria')) tabs.push(calTab);
+      return origConfigure.call(this, options);
+    };
+
     const origPrepare = Base.prototype._preparePartContext;
     Base.prototype._preparePartContext = async function (partId, context, options) {
       context = await origPrepare.call(this, partId, context, options);

@@ -169,6 +169,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return this.weather?.zones ? Object.values(this.weather.zones) : [];
   }
 
+  /** @returns {object|null} The active climate zone config (including scene override), or null if none set */
+  getActiveClimateZone() {
+    const zones = this.weatherZonesArray;
+    if (!zones.length) return null;
+    const sceneOverride = game.scenes?.active?.getFlag?.('calendaria', 'climateZoneOverride') || null;
+    if (sceneOverride === 'none') return null;
+    const targetId = sceneOverride ?? this.weather?.activeZone;
+    if (!targetId) return null;
+    return zones.find((z) => z.id === targetId) ?? null;
+  }
+
   /** @returns {number} Number of days in a week (weekday count, defaults to 7) */
   get daysInWeek() {
     return this.weekdaysArray.length || 7;

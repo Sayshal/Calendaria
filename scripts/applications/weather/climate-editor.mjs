@@ -63,6 +63,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #calendarId;
   #calendarData;
 
+  /** @type {object|null} Pending aliases from import (used before calendar is saved) */
+  #pendingAliases;
+
   /** @type {string[]} Season names for zone temperature rows */
   #seasonNames;
 
@@ -105,6 +108,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#zoneKey = options.zoneKey ?? null;
     this.#calendarId = options.calendarId;
     this.#calendarData = options.calendarData ?? null;
+    this.#pendingAliases = options.pendingAliases ?? null;
     this.#seasonNames = options.seasonNames ?? [];
     this.#selectedSeason = this.#seasonNames[0] ?? null;
     this.#onSave = options.onSave;
@@ -166,7 +170,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           if (isZoneMode) {
             const savedPresets = this.#data.presets ? Object.values(this.#data.presets) : [];
             const saved = savedPresets.find((s) => s.id === preset.id) || {};
-            const alias = getPresetAlias(preset.id, this.#calendarId, this.#data.id) || '';
+            const alias = this.#pendingAliases?.[this.#data.id]?.[preset.id] || getPresetAlias(preset.id, this.#calendarId, this.#data.id) || '';
             const seasonPresets = selectedSeason ? (this.#data.seasonOverrides?.[selectedSeason]?.presets ?? {}) : {};
             const seasonOverride = seasonPresets[preset.id] ?? {};
             const seasonChance = seasonOverride.chance;
