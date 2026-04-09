@@ -101,6 +101,90 @@ describe('FestivalManager', () => {
       expect(tree.children[0]).toEqual({ type: 'condition', field: CONDITION_FIELDS.IS_LEAP_YEAR, op: '==', value: 1 });
       expect(tree.children[1]).toEqual({ type: 'condition', field: CONDITION_FIELDS.DAY_OF_YEAR, op: '==', value: 214 });
     });
+    it('derives startDate from conditionTree when month/dayOfMonth are stale defaults (#628)', async () => {
+      const conditionTree = {
+        type: 'group', mode: 'and',
+        children: [
+          { type: 'condition', field: 'month', op: '==', value: 8 },
+          { type: 'condition', field: 'day', op: '==', value: 12 }
+        ]
+      };
+      const festival = { name: 'Harvest Eve', month: 0, dayOfMonth: 0, conditionTree, duration: 1 };
+      const calendar = { festivals: { fest1: festival }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      await FestivalManager.createFestivalNote('test', 'fest1', festival, calendar);
+      const noteData = NoteManager.getAllNotes()[0].flagData;
+      expect(noteData.startDate.month).toBe(7);
+      expect(noteData.startDate.dayOfMonth).toBe(11);
+    });
+  });
+
+  describe('applyFestivalDatesToCalendarData', () => {
+    it('patches festival month/dayOfMonth from a linked notes condition tree', () => {
+      const calendarData = { festivals: { fest1: { name: 'Stale', month: 0, dayOfMonth: 0, conditionTree: { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'month', op: '==', value: 1 }, { type: 'condition', field: 'day', op: '==', value: 1 }] } } } };
+      const notes = [{
+        system: {
+          linkedFestival: { calendarId: 'old', festivalKey: 'fest1' },
+          startDate: { year: 1, month: 5, dayOfMonth: 17 },
+          conditionTree: { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'month', op: '==', value: 6 }, { type: 'condition', field: 'day', op: '==', value: 18 }] }
+        }
+      }];
+      const patched = FestivalManager.applyFestivalDatesToCalendarData(calendarData, notes);
+      expect(patched).toBe(1);
+      expect(calendarData.festivals.fest1.month).toBe(5);
+      expect(calendarData.festivals.fest1.dayOfMonth).toBe(17);
+      expect(calendarData.festivals.fest1.conditionTree.children[0].value).toBe(6);
+    });
+    it('falls back to startDate when conditionTree is missing', () => {
+      const calendarData = { festivals: { fest1: { name: 'Stale', month: 0, dayOfMonth: 0 } } };
+      const notes = [{
+        system: {
+          linkedFestival: { festivalKey: 'fest1' },
+          startDate: { year: 1, month: 3, dayOfMonth: 7 },
+          conditionTree: null
+        }
+      }];
+      FestivalManager.applyFestivalDatesToCalendarData(calendarData, notes);
+      expect(calendarData.festivals.fest1.month).toBe(3);
+      expect(calendarData.festivals.fest1.dayOfMonth).toBe(7);
+    });
+    it('ignores notes without a linkedFestival pointer', () => {
+      const calendarData = { festivals: { fest1: { name: 'Untouched', month: 4, dayOfMonth: 5 } } };
+      const notes = [{ system: { startDate: { month: 1, dayOfMonth: 1 } } }];
+      expect(FestivalManager.applyFestivalDatesToCalendarData(calendarData, notes)).toBe(0);
+      expect(calendarData.festivals.fest1).toEqual({ name: 'Untouched', month: 4, dayOfMonth: 5 });
+    });
+  });
+
+  describe('deriveDateFromConditionTree', () => {
+    it('extracts month and day from a simple month/day group', () => {
+      const tree = { type: 'group', mode: 'and', children: [
+        { type: 'condition', field: 'month', op: '==', value: 12 },
+        { type: 'condition', field: 'day', op: '==', value: 13 }
+      ]};
+      expect(FestivalManager.deriveDateFromConditionTree(tree)).toEqual({ month: 11, dayOfMonth: 12 });
+    });
+    it('handles isLeapYear wrapper', () => {
+      const tree = { type: 'group', mode: 'and', children: [
+        { type: 'condition', field: 'isLeapYear', op: '==', value: 1 },
+        { type: 'group', mode: 'and', children: [
+          { type: 'condition', field: 'month', op: '==', value: 7 },
+          { type: 'condition', field: 'day', op: '==', value: 30 }
+        ]}
+      ]};
+      expect(FestivalManager.deriveDateFromConditionTree(tree)).toEqual({ month: 6, dayOfMonth: 29 });
+    });
+    it('returns null for non-fixed-date trees', () => {
+      expect(FestivalManager.deriveDateFromConditionTree(null)).toBeNull();
+      expect(FestivalManager.deriveDateFromConditionTree({ type: 'condition', field: 'dayOfYear', op: '==', value: 80 })).toBeNull();
+      expect(FestivalManager.deriveDateFromConditionTree({ type: 'group', mode: 'or', children: [] })).toBeNull();
+    });
+    it('coerces string values from legacy condition arrays', () => {
+      const tree = { type: 'group', mode: 'and', children: [
+        { type: 'condition', field: 'month', op: '==', value: '3' },
+        { type: 'condition', field: 'day', op: '==', value: '15' }
+      ]};
+      expect(FestivalManager.deriveDateFromConditionTree(tree)).toEqual({ month: 2, dayOfMonth: 14 });
+    });
   });
 
   describe('note creation properties', () => {

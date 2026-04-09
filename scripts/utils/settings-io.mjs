@@ -5,8 +5,9 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
-import NoteManager from '../notes/note-manager.mjs';
+import { FestivalManager } from '../festivals/_module.mjs';
 import { sanitizeNoteData } from '../notes/_module.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
 
@@ -187,27 +188,20 @@ async function importNotes(notes, calendarId) {
   const idMap = new Map();
   let imported = 0;
   for (const note of notes) {
+    if (note.system?.linkedFestival) continue;
     const targetCalendarId = calendarId || note.calendarId;
     const noteData = sanitizeNoteData(note.system || {});
-    // Clear references that won't resolve in the new world
     noteData.macro = null;
     noteData.sceneId = null;
     noteData.playlistId = null;
     noteData.linkedEvent = null;
     noteData.connectedEvents = undefined;
-    const page = await NoteManager.createNote({
-      name: note.name,
-      content: note.content || '',
-      noteData,
-      calendarId: targetCalendarId,
-      openSheet: false
-    });
+    const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId: targetCalendarId, openSheet: false });
     if (page) {
       idMap.set(note.id, page.id);
       imported++;
     }
   }
-  // Second pass: re-link notes that reference each other
   for (const note of notes) {
     const linked = note.system?.linkedEvent;
     const connected = note.system?.connectedEvents;
@@ -264,9 +258,11 @@ export async function exportSettings() {
     exportData.settings[key] = game.settings.get(MODULE.ID, key);
   }
   if (includeCalendar && activeCalendar) {
-    const calendarData = activeCalendar.toObject();
+    if (calendarId) await FestivalManager.syncFestivalDefinitionsFromNotes(calendarId);
+    const refreshedCalendar = (calendarId && CalendarManager.getCalendar(calendarId)) || activeCalendar;
+    const calendarData = refreshedCalendar.toObject();
     const currentDate = CalendarManager.getCurrentDateTime();
-    calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
+    calendarData.currentDate = { year: currentDate.year - (refreshedCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
     log(3, `Included active calendar data: ${calendarData.name}`);
     if (calendarId) {
@@ -354,6 +350,7 @@ export async function importSettings(onComplete) {
       let importedCalendarId = null;
       if (hasCalendarData && doImportCalendar) {
         const calendarData = importData.calendarData;
+        if (hasNotes && calendarData.festivals) FestivalManager.applyFestivalDatesToCalendarData(calendarData, importData.notes);
         const calendarId = calendarData.name
           .toLowerCase()
           .replace(/[^\da-z]+/g, '-')

@@ -6,6 +6,7 @@
 
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
+import { FestivalManager } from '../festivals/_module.mjs';
 import { CalendariaSocket, canAddNotes, canDeleteNotes, format, localize, log } from '../utils/_module.mjs';
 import {
   DEFAULT_PRESET_ID,
@@ -44,11 +45,20 @@ export default class NoteManager {
   /** @type {boolean} Guard flag to prevent festival name sync loops */
   static #suppressFestivalNameSync = false;
 
+  /** @type {boolean} Guard flag to prevent festival date sync loops */
+  static #suppressFestivalDateSync = false;
+
   /** @type {boolean} Guard flag to prevent ownership rebuild during sheet form submission */
   static #suppressOwnershipRebuild = false;
 
   /** @type {Map<string, object>} Festival removals captured in preDelete, persisted in deleteJournalEntry */
   static #pendingFestivalRemovals = new Map();
+
+  /** @type {Map<string, Promise<Folder|null>>} In-flight calendar folder lookups, keyed by calendarId */
+  static #calendarFolderPromises = new Map();
+
+  /** @type {Promise<Folder|null>|null} In-flight Calendar Notes folder lookup */
+  static #notesFolderPromise = null;
 
   /**
    * Initialize the note manager.
@@ -152,6 +162,10 @@ export default class NoteManager {
             const linked = page.system?.linkedFestival;
             if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalNameToCalendar(linked, changes.name);
           }
+        }
+        if (!NoteManager.#suppressFestivalDateSync && (changes.system?.startDate !== undefined || changes.system?.conditionTree !== undefined)) {
+          const linked = page.system?.linkedFestival;
+          if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalDateToCalendar(linked, page.system);
         }
         if (changes.system?.visibility !== undefined) {
           const journal = page.parent;
@@ -618,6 +632,23 @@ export default class NoteManager {
       log(2, `Cannot get calendar folder: calendar ${calendarId} not found`);
       return null;
     }
+    const inFlight = this.#calendarFolderPromises.get(calendarId);
+    if (inFlight) return inFlight;
+    const promise = this.#resolveCalendarFolder(calendarId, calendar).finally(() => {
+      this.#calendarFolderPromises.delete(calendarId);
+    });
+    this.#calendarFolderPromises.set(calendarId, promise);
+    return promise;
+  }
+
+  /**
+   * Internal implementation of calendar folder lookup/creation.
+   * @param {string} calendarId  Calendar ID
+   * @param {object} calendar  Calendar data
+   * @returns {Promise<Folder|null>} The resolved or newly created calendar folder, or null if unavailable
+   * @private
+   */
+  static async #resolveCalendarFolder(calendarId, calendar) {
     const parentFolder = await this.getCalendarNotesFolder();
     if (!parentFolder) return null;
     const allMatching = game.folders.filter((f) => f.type === 'JournalEntry' && f.getFlag(MODULE.ID, 'calendarId') === calendarId);
@@ -625,11 +656,15 @@ export default class NoteManager {
       const [keep, ...duplicates] = allMatching;
       this.#bypassDeleteProtection = true;
       for (const dup of duplicates) {
-        for (const journal of game.journal.filter((j) => j.folder === dup)) {
-          await journal.update({ folder: keep.id });
+        if (!game.folders.get(dup.id)) continue;
+        for (const journal of game.journal.filter((j) => j.folder?.id === dup.id)) await journal.update({ folder: keep.id });
+        try {
+          await dup.delete();
+          log(3, `Merged duplicate calendar folder for ${calendarId}: ${dup.name}`);
+        } catch (error) {
+          if (!game.folders.get(dup.id)) log(3, `Duplicate calendar folder ${dup.id} already removed`);
+          else throw error;
         }
-        await dup.delete();
-        log(3, `Merged duplicate calendar folder for ${calendarId}: ${dup.name}`);
       }
       this.#bypassDeleteProtection = false;
       return keep;
@@ -708,6 +743,32 @@ export default class NoteManager {
   }
 
   /**
+   * Sync a festival note's date and conditionTree to the calendar festival definition.
+   * @param {{ calendarId: string, festivalKey: string }} linkedFestival - Festival link data
+   * @param {object} pageSystem - Updated page system data (post-update)
+   * @private
+   */
+  static async #syncFestivalDateToCalendar({ calendarId, festivalKey }, pageSystem) {
+    const calendar = CalendarManager.getCalendar(calendarId);
+    const festival = calendar?.festivals?.[festivalKey];
+    if (!festival) return;
+    const newTree = pageSystem?.conditionTree ?? null;
+    const newStart = pageSystem?.startDate ?? null;
+    const derived = newTree ? FestivalManager.deriveDateFromConditionTree(newTree) : null;
+    const nextMonth = derived?.month ?? newStart?.month ?? festival.month ?? 0;
+    const nextDay = derived?.dayOfMonth ?? newStart?.dayOfMonth ?? festival.dayOfMonth ?? 0;
+    const treeUnchanged = JSON.stringify(festival.conditionTree ?? null) === JSON.stringify(newTree);
+    if (festival.month === nextMonth && festival.dayOfMonth === nextDay && treeUnchanged) return;
+    const data = calendar.toObject();
+    data.festivals[festivalKey].month = nextMonth;
+    data.festivals[festivalKey].dayOfMonth = nextDay;
+    data.festivals[festivalKey].conditionTree = newTree;
+    log(3, `Synced festival date for "${festivalKey}" → month=${nextMonth} day=${nextDay} in calendar ${calendarId}`);
+    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
+    else await CalendarManager.updateCustomCalendar(calendarId, data);
+  }
+
+  /**
    * Get or create the Calendar Notes folder.
    * @returns {Promise<Folder|null>}  Folder document or null
    */
@@ -716,19 +777,34 @@ export default class NoteManager {
       const folder = game.folders.get(this.#notesFolderId);
       if (folder) return folder;
     }
+    if (this.#notesFolderPromise) return this.#notesFolderPromise;
+    this.#notesFolderPromise = this.#resolveNotesFolder().finally(() => {
+      this.#notesFolderPromise = null;
+    });
+    return this.#notesFolderPromise;
+  }
+
+  /**
+   * Internal implementation of Calendar Notes folder lookup/creation.
+   * @returns {Promise<Folder|null>} The resolved or newly created Calendar Notes folder, or null if unavailable
+   * @private
+   */
+  static async #resolveNotesFolder() {
     const allMatching = game.folders.filter((f) => f.type === 'JournalEntry' && f.getFlag(MODULE.ID, 'isCalendarNotesFolder'));
     if (allMatching.length > 1 && game.user.isGM) {
       const [keep, ...duplicates] = allMatching;
       this.#bypassDeleteProtection = true;
       for (const dup of duplicates) {
-        for (const child of game.folders.filter((f) => f.folder === dup)) {
-          await child.update({ folder: keep.id });
+        if (!game.folders.get(dup.id)) continue;
+        for (const child of game.folders.filter((f) => f.folder?.id === dup.id)) await child.update({ folder: keep.id });
+        for (const journal of game.journal.filter((j) => j.folder?.id === dup.id)) await journal.update({ folder: keep.id });
+        try {
+          await dup.delete();
+          log(3, `Merged duplicate Calendar Notes folder: ${dup.name}`);
+        } catch (error) {
+          if (!game.folders.get(dup.id)) log(3, `Duplicate Calendar Notes folder ${dup.id} already removed`);
+          else throw error;
         }
-        for (const journal of game.journal.filter((j) => j.folder === dup)) {
-          await journal.update({ folder: keep.id });
-        }
-        await dup.delete();
-        log(3, `Merged duplicate Calendar Notes folder: ${dup.name}`);
       }
       this.#bypassDeleteProtection = false;
       this.#notesFolderId = keep.id;
@@ -906,6 +982,20 @@ export default class NoteManager {
    */
   static disableSuppressFestivalNameSync() {
     this.#suppressFestivalNameSync = false;
+  }
+
+  /**
+   * Enable suppression of festival date sync (prevents loops during editor→note sync).
+   */
+  static enableSuppressFestivalDateSync() {
+    this.#suppressFestivalDateSync = true;
+  }
+
+  /**
+   * Disable suppression of festival date sync.
+   */
+  static disableSuppressFestivalDateSync() {
+    this.#suppressFestivalDateSync = false;
   }
 
   /**

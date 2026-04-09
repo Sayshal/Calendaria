@@ -370,6 +370,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       typeOptions: monthTypeOptions.map((opt) => ({ ...opt, selected: (opt.value || null) === (month.type || null) }))
     }));
     const festivalsArr = Object.entries(this.#calendarData.festivals);
+    context.festivalsCanEditNotes = !!(this.#isEditing && this.#calendarId);
     context.festivalsWithNav = festivalsArr.map(([key, festival]) => {
       const noteStub = this.#calendarId ? FestivalManager.getFestivalNoteByKey(this.#calendarId, key) : null;
       const effectiveTree = noteStub?.flagData?.conditionTree ?? festival.conditionTree;
@@ -1730,7 +1731,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterKey = target.dataset.key;
     const totalFestivals = Object.keys(this.#calendarData.festivals ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
-    const newFestival = { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 0, dayOfMonth: 0, conditionTree: null, description: '', color: '', icon: '' };
+    const today = game.time?.components ?? { month: 0, dayOfMonth: 0 };
+    const newFestival = {
+      name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }),
+      month: today.month ?? 0,
+      dayOfMonth: today.dayOfMonth ?? 0,
+      conditionTree: null,
+      description: '',
+      color: '',
+      icon: ''
+    };
     if (afterKey) this.#calendarData.festivals = this.#insertAfterKey(this.#calendarData.festivals, afterKey, newKey, newFestival);
     else this.#calendarData.festivals[newKey] = newFestival;
     this.#isDirty = true;

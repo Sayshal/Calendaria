@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { localize, log } from '../utils/_module.mjs';
@@ -111,6 +112,77 @@ export default class FestivalManager {
   }
 
   /**
+   * Patch a calendar data object's festival definitions in-place using dates
+   * from any festival-linked notes in the supplied note bundle. Used during
+   * import to heal v1.0.3-era exports whose festival definitions kept the
+   * editor default of month 0 / day 0 even though the user edited the linked
+   * notes to the correct dates. Pure (mutates `calendarData`, no Foundry API).
+   * @param {object} calendarData - Mutable calendarData
+   * @param {object[]} notes - Serialized note array (entries with `system.linkedFestival`)
+   * @returns {number} Number of festival definitions patched
+   */
+  static applyFestivalDatesToCalendarData(calendarData, notes) {
+    if (!calendarData?.festivals || !Array.isArray(notes)) return 0;
+    let patched = 0;
+    for (const note of notes) {
+      const linked = note?.system?.linkedFestival;
+      if (!linked?.festivalKey) continue;
+      const festival = calendarData.festivals[linked.festivalKey];
+      if (!festival) continue;
+      const tree = note.system.conditionTree ?? null;
+      const derived = this.deriveDateFromConditionTree(tree);
+      const nextMonth = derived?.month ?? note.system.startDate?.month ?? festival.month ?? 0;
+      const nextDay = derived?.dayOfMonth ?? note.system.startDate?.dayOfMonth ?? festival.dayOfMonth ?? 0;
+      festival.month = nextMonth;
+      festival.dayOfMonth = nextDay;
+      if (tree) festival.conditionTree = tree;
+      patched++;
+    }
+    return patched;
+  }
+
+  /**
+   * Walk all festival notes for a calendar and write each note's date and
+   * conditionTree back into the calendar's festival definition. Heals
+   * calendars whose festival definitions drifted from their notes (e.g.
+   * pre-fix worlds where editing a festival via the note sheet never
+   * propagated month/dayOfMonth back to the calendar).
+   * @param {string} calendarId - Calendar ID
+   * @returns {Promise<number>} Number of festivals updated
+   */
+  static async syncFestivalDefinitionsFromNotes(calendarId) {
+    if (!game.user.isGM) return 0;
+    const calendar = CalendarManager.getCalendar(calendarId);
+    if (!calendar?.festivals) return 0;
+    const data = calendar.toObject();
+    let changed = 0;
+    for (const stub of this.getFestivalNotes(calendarId)) {
+      const key = stub.flagData?.linkedFestival?.festivalKey;
+      const festival = key ? data.festivals[key] : null;
+      if (!festival) continue;
+      const page = NoteManager.getFullNote(stub.id);
+      const pageSystem = page?.system?.toObject?.() ?? page?.system ?? stub.flagData;
+      if (!pageSystem) continue;
+      const newTree = pageSystem.conditionTree ?? null;
+      const derived = newTree ? this.deriveDateFromConditionTree(newTree) : null;
+      const nextMonth = derived?.month ?? pageSystem.startDate?.month ?? festival.month ?? 0;
+      const nextDay = derived?.dayOfMonth ?? pageSystem.startDate?.dayOfMonth ?? festival.dayOfMonth ?? 0;
+      const treeUnchanged = JSON.stringify(festival.conditionTree ?? null) === JSON.stringify(newTree);
+      if (festival.month === nextMonth && festival.dayOfMonth === nextDay && treeUnchanged) continue;
+      festival.month = nextMonth;
+      festival.dayOfMonth = nextDay;
+      festival.conditionTree = newTree;
+      changed++;
+    }
+    if (changed) {
+      if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
+      else await CalendarManager.updateCustomCalendar(calendarId, data);
+      log(3, `Synced ${changed} festival definitions from notes for ${calendarId}`);
+    }
+    return changed;
+  }
+
+  /**
    * Delete all festival notes for a calendar (used on calendar reset/delete).
    * @param {string} calendarId - Calendar ID
    * @returns {Promise<number>} Number of notes deleted
@@ -187,6 +259,10 @@ export default class FestivalManager {
 
   /**
    * Compute a start date for the festival note (used as the note's anchor date).
+   * Prefers a fixed month/day encoded in the festival's conditionTree (the
+   * authoritative source after a user edit) before falling back to the
+   * legacy month/dayOfMonth fields, so re-imports of older data with stale
+   * (0, 0) defaults still resolve to the correct date.
    * @param {object} festival - Festival definition
    * @param {object} currentDate - Current game time components
    * @param {object} calendar - Calendar instance
@@ -194,6 +270,8 @@ export default class FestivalManager {
    * @private
    */
   static #getFestivalStartDate(festival, currentDate, calendar) {
+    const fromTree = this.deriveDateFromConditionTree(festival.conditionTree);
+    if (fromTree) return { year: currentDate.year, month: fromTree.month, dayOfMonth: fromTree.dayOfMonth, hour: 0, minute: 0 };
     if (festival.month != null && festival.dayOfMonth != null) {
       return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
     }
@@ -214,6 +292,45 @@ export default class FestivalManager {
       return { year: currentDate.year, month, dayOfMonth: remaining, hour: 0, minute: 0 };
     }
     return { year: currentDate.year, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
+  }
+
+  /**
+   * Extract a fixed { month, dayOfMonth } (0-indexed) from a simple
+   * "month == M AND day == D" condition tree, optionally wrapped in an
+   * isLeapYear group. Returns null for trees that aren't a fixed date.
+   * @param {object|null} tree - Condition tree from a festival or note
+   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null if the tree isn't a fixed-date pattern
+   */
+  static deriveDateFromConditionTree(tree) {
+    if (!tree || typeof tree !== 'object') return null;
+    const inner = this.#unwrapLeapYearGroup(tree);
+    if (!inner || inner.type !== 'group' || inner.mode !== 'and' || !Array.isArray(inner.children)) return null;
+    let month = null;
+    let day = null;
+    for (const child of inner.children) {
+      if (child?.type !== 'condition' || child.op !== '==') continue;
+      const value = Number(child.value);
+      if (!Number.isFinite(value)) continue;
+      if (child.field === 'month') month = value - 1;
+      else if (child.field === 'day') day = value - 1;
+    }
+    if (month == null || day == null || month < 0 || day < 0) return null;
+    return { month, dayOfMonth: day };
+  }
+
+  /**
+   * If the tree is `isLeapYear AND <inner>`, return the inner group; otherwise return the tree as-is.
+   * @param {object} tree - Condition tree
+   * @returns {object|null} The inner group if leap-year wrapped, the original tree otherwise
+   * @private
+   */
+  static #unwrapLeapYearGroup(tree) {
+    if (tree?.type !== 'group' || tree.mode !== 'and' || !Array.isArray(tree.children) || tree.children.length !== 2) return tree;
+    const [a, b] = tree.children;
+    const isLeapCheck = (c) => c?.type === 'condition' && c.field === 'isLeapYear';
+    if (isLeapCheck(a)) return b;
+    if (isLeapCheck(b)) return a;
+    return tree;
   }
 
   /**
