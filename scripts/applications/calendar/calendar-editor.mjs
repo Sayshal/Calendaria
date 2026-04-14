@@ -985,15 +985,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateObjectFromFormData(data, prefix, targetObj, fields) {
-    const keys = new Set();
+    const formKeys = new Set();
     for (const key of Object.keys(data)) {
       const match = key.match(new RegExp(`^${prefix}\\.([^.]+)\\.`));
-      if (match) keys.add(match[1]);
+      if (match) formKeys.add(match[1]);
     }
-    for (const k of Object.keys(targetObj)) delete targetObj[k];
+    const existingKeys = Object.keys(targetObj);
+    const orderedKeys = existingKeys.filter((k) => formKeys.has(k));
+    for (const k of formKeys) if (!orderedKeys.includes(k)) orderedKeys.push(k);
+    for (const k of existingKeys) if (!formKeys.has(k)) delete targetObj[k];
     let ordinal = 1;
-    for (const itemKey of keys) {
-      const item = { ordinal: ordinal++ };
+    for (const itemKey of orderedKeys) {
+      const existing = targetObj[itemKey] || {};
+      const item = { ...existing, ordinal: ordinal++ };
       for (const field of fields) {
         const key = `${prefix}.${itemKey}.${field}`;
         if (data[key] !== undefined) {
@@ -1006,6 +1010,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           else item[field] = data[key];
         }
       }
+      delete targetObj[itemKey];
       targetObj[itemKey] = item;
     }
   }
