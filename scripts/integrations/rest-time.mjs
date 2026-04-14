@@ -34,7 +34,7 @@ export function onPreRest(actor, config) {
   }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (!advanceTime) return;
-  if (config.advanceTime === false && actor?.type !== 'group') return;
+  if (config.advanceTime === false && (config.request || config.dialog === false)) return;
   config.advanceTime = true;
   log(3, `Rest time advancement enabled for ${config.type} rest`);
 }
@@ -46,6 +46,7 @@ export function onPreRest(actor, config) {
  * @returns {void}
  */
 export function onLongRest(actor, config) {
+  if (TimeClock.locked) return;
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (!advanceTime) return;
   if (config.advanceTime === false && actor?.type !== 'group') return;
@@ -53,7 +54,6 @@ export function onLongRest(actor, config) {
   const isLongRest = config.type === 'long' || config.longRest === true;
   const isGritty = restVariant === 'gritty';
   if (!isLongRest) return;
-  if (!config.newDay && !isGritty) return;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return;
   const targetHour = getTargetHour(calendar);

@@ -182,6 +182,7 @@
   "CALENDARIA.Cinematic.Settings.Fieldset.Behavior": "Behavior",
   "CALENDARIA.Cinematic.Settings.OnRest.Hint": "Play a cinematic when time advances due to a long rest.",
   "CALENDARIA.Cinematic.Settings.OnRest.Name": "Trigger on Rest",
+  "CALENDARIA.Cinematic.Settings.OnRest.RequiresAdvanceTime": "Requires 'Advance Time on Rest' to be enabled in the Time tab.",
   "CALENDARIA.Cinematic.Settings.PanelDuration.Hint": "How long each date panel stays on screen (in milliseconds). Higher values give more time to read events and see phase changes.",
   "CALENDARIA.Cinematic.Settings.PanelDuration.Name": "Panel Duration",
   "CALENDARIA.Cinematic.Settings.Preview": "Preview Cinematic",

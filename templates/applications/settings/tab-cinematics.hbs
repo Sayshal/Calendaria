@@ -30,10 +30,11 @@
       <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.Threshold.Hint"}}</p>
     </div>
 
-    <div class="form-group" data-depends-on="cinematicEnabled">
+    <div class="form-group {{#if cinematicOnRestDisabled}}disabled{{/if}}" data-depends-on="cinematicEnabled">
       <label for="cinematicOnRest">{{localize "CALENDARIA.Cinematic.Settings.OnRest.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" id="cinematicOnRest" name="cinematicOnRest" {{#if cinematicOnRest}}checked{{/if}}>
+        <input type="checkbox" id="cinematicOnRest" name="cinematicOnRest" {{#if cinematicOnRest}}checked{{/if}}
+          {{#if cinematicOnRestDisabled}}disabled data-force-disabled data-tooltip aria-label="{{localize 'CALENDARIA.Cinematic.Settings.OnRest.RequiresAdvanceTime'}}"{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.OnRest.Hint"}}</p>
     </div>

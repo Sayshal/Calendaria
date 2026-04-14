@@ -265,7 +265,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const toggle = () => {
         const enabled = parentInput.checked;
         group.classList.toggle('disabled', !enabled);
-        for (const input of group.querySelectorAll('input, select')) input.disabled = !enabled;
+        for (const input of group.querySelectorAll('input, select')) {
+          input.disabled = !enabled || input.hasAttribute('data-force-disabled');
+        }
       };
       toggle();
       if (!parentInput.dataset.dependencyAttached) {
@@ -1434,6 +1436,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cinematicEventWeighting = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_EVENT_WEIGHTING);
     context.cinematicEventMaxCards = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_EVENT_MAX_CARDS);
     context.cinematicOnRest = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_ON_REST);
+    context.cinematicOnRestDisabled = !game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     const unit = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_THRESHOLD_UNIT);
     context.thresholdUnits = [
       { value: 'day', label: localize('CALENDARIA.Common.Day'), selected: unit === 'day' },
