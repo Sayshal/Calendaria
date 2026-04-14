@@ -7,6 +7,7 @@
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
+import { getMidpoint } from '../utils/calendar-math.mjs';
 import { localize, log } from '../utils/_module.mjs';
 
 /**
@@ -272,6 +273,8 @@ export default class FestivalManager {
   static #getFestivalStartDate(festival, currentDate, calendar) {
     const fromTree = this.deriveDateFromConditionTree(festival.conditionTree);
     if (fromTree) return { year: currentDate.year, month: fromTree.month, dayOfMonth: fromTree.dayOfMonth, hour: 0, minute: 0 };
+    const fromAstro = this.#resolveAstronomicalDate(festival.conditionTree, currentDate, calendar);
+    if (fromAstro) return { year: currentDate.year, month: fromAstro.month, dayOfMonth: fromAstro.dayOfMonth, hour: 0, minute: 0 };
     if (festival.month != null && festival.dayOfMonth != null) {
       return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
     }
@@ -331,6 +334,83 @@ export default class FestivalManager {
     if (isLeapCheck(a)) return b;
     if (isLeapCheck(b)) return a;
     return tree;
+  }
+
+  /**
+   * Resolve an astronomical date (equinox/solstice) from a condition tree.
+   * @param {object|null} tree - Condition tree
+   * @param {object} currentDate - Current date components
+   * @param {object} calendar - Calendar instance
+   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null
+   * @private
+   */
+  static #resolveAstronomicalDate(tree, currentDate, calendar) {
+    if (!tree || !calendar) return null;
+    const astroField = this.#findAstronomicalField(tree);
+    if (!astroField) return null;
+    const seasons = calendar.seasonsArray ?? [];
+    if (!seasons.length) return null;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const totalDays = calendar.getDaysInYear?.(currentDate.year - yearZero) ?? 365;
+    let summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
+    let winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
+    let springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
+    let autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
+    if (summerIdx === -1 && seasons.length >= 4) summerIdx = 1;
+    if (winterIdx === -1 && seasons.length >= 4) winterIdx = 3;
+    if (springIdx === -1 && seasons.length >= 4) springIdx = 0;
+    if (autumnIdx === -1 && seasons.length >= 4) autumnIdx = 2;
+    let dayOfYear = null;
+    switch (astroField) {
+      case 'isLongestDay': {
+        if (summerIdx === -1) return null;
+        const s = seasons[summerIdx];
+        dayOfYear = getMidpoint(s.dayStart ?? 0, s.dayEnd ?? 0, totalDays);
+        break;
+      }
+      case 'isShortestDay': {
+        if (winterIdx === -1) return null;
+        const s = seasons[winterIdx];
+        dayOfYear = getMidpoint(s.dayStart ?? 0, s.dayEnd ?? 0, totalDays);
+        break;
+      }
+      case 'isSpringEquinox':
+        if (springIdx === -1) return null;
+        dayOfYear = seasons[springIdx].dayStart ?? 0;
+        break;
+      case 'isAutumnEquinox':
+        if (autumnIdx === -1) return null;
+        dayOfYear = seasons[autumnIdx].dayStart ?? 0;
+        break;
+    }
+    if (dayOfYear == null) return null;
+    const months = calendar.monthsArray ?? [];
+    let remaining = dayOfYear;
+    for (let m = 0; m < months.length; m++) {
+      const daysInMonth = calendar.getDaysInMonth(m, currentDate.year - yearZero);
+      if (remaining < daysInMonth) return { month: m, dayOfMonth: remaining };
+      remaining -= daysInMonth;
+    }
+    return null;
+  }
+
+  /**
+   * Find an astronomical condition field in a condition tree.
+   * @param {object} node - Condition tree node
+   * @returns {string|null} Field name or null
+   * @private
+   */
+  static #findAstronomicalField(node) {
+    if (!node) return null;
+    const astroFields = new Set(['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox']);
+    if (node.type === 'condition' && astroFields.has(node.field)) return node.field;
+    if (node.children) {
+      for (const child of node.children) {
+        const found = this.#findAstronomicalField(child);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
   /**
