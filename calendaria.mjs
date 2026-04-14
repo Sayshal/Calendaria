@@ -111,11 +111,6 @@ Hooks.once('ready', async () => {
   MiniCal.updateIdleOpacity();
   SunDial.updateIdleOpacity();
   Stopwatch.updateIdleOpacity();
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL) && canViewSunDial()) SunDial.show({ silent: true });
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_STOPWATCH) && canViewStopwatch()) Stopwatch.show({ silent: true });
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL) && canViewBigCal()) BigCal.show();
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CHRONICLE) && canViewChronicle()) Chronicle.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_CHRONICLE)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CHRONICLE, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, true);
@@ -123,7 +118,6 @@ Hooks.once('ready', async () => {
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, true);
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CAL) && canViewMiniCal()) MiniCal.show({ silent: true });
   if (game.system.id === 'dnd5e' && foundry.utils.isNewerVersion(game.system.version, '5.1.10')) {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');
     if (calendarConfig?.enabled) {
@@ -140,7 +134,6 @@ Hooks.once('ready', async () => {
       ui.notifications.warn('CALENDARIA.Notification.PF2eDarknessSyncDisabled', { localize: true });
     }
   }
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD) && canViewHUD()) HUD.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) showDebugZones();
   Hooks.on('renderSceneControls', () => updateZonePositions('below-controls'));
   initializeChatCommander();
@@ -148,6 +141,14 @@ Hooks.once('ready', async () => {
   initializeWeatherSound();
   await checkReleaseMessage();
   Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL) && canViewSunDial()) SunDial.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_STOPWATCH) && canViewStopwatch()) Stopwatch.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL) && canViewBigCal()) BigCal.show();
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CHRONICLE) && canViewChronicle()) Chronicle.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CAL) && canViewMiniCal()) MiniCal.show({ silent: true });
+  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD) && canViewHUD()) HUD.show({ silent: true });
+  Hooks.callAll(HOOKS.RENDERED);
 });
 Hooks.once('setup', () => {
   CONFIG.time.worldCalendarClass = CalendariaCalendar;
