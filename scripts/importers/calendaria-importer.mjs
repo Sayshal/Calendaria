@@ -5,7 +5,7 @@
  */
 
 import { FestivalManager } from '../festivals/_module.mjs';
-import { NoteManager, sanitizeNoteData } from '../notes/_module.mjs';
+import { NoteManager, getAllPresets, sanitizeNoteData } from '../notes/_module.mjs';
 import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
@@ -142,6 +142,10 @@ export default class CalendariaImporter extends BaseImporter {
         noteData.linkedEvent = null;
         noteData.linkedFestival = null;
         noteData.connectedEvents = undefined;
+        if (Array.isArray(noteData.categories)) {
+          const knownIds = new Set(getAllPresets().map((p) => p.id));
+          noteData.categories = noteData.categories.filter((id) => knownIds.has(id));
+        }
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);

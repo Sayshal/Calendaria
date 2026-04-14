@@ -6,7 +6,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
-import { sanitizeNoteData } from '../notes/_module.mjs';
+import { getAllPresets, sanitizeNoteData } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
@@ -187,6 +187,14 @@ async function importNotes(notes, calendarId) {
   if (!notes?.length) return 0;
   const idMap = new Map();
   let imported = 0;
+  const existingNotes = NoteManager.getAllNotes();
+  const existingKeys = new Set(
+    existingNotes.map((n) => {
+      const sd = n.flagData?.startDate;
+      return `${n.name}|${sd?.year ?? ''}|${sd?.month ?? ''}|${sd?.dayOfMonth ?? ''}`;
+    })
+  );
+  const knownPresetIds = new Set(getAllPresets().map((p) => p.id));
   for (const note of notes) {
     if (note.system?.linkedFestival) continue;
     const targetCalendarId = calendarId || note.calendarId;
@@ -196,6 +204,11 @@ async function importNotes(notes, calendarId) {
     noteData.playlistId = null;
     noteData.linkedEvent = null;
     noteData.connectedEvents = undefined;
+    if (Array.isArray(noteData.categories)) noteData.categories = noteData.categories.filter((id) => knownPresetIds.has(id));
+    const sd = noteData.startDate;
+    const noteKey = `${note.name}|${sd?.year ?? ''}|${sd?.month ?? ''}|${sd?.dayOfMonth ?? ''}`;
+    if (existingKeys.has(noteKey)) continue;
+    existingKeys.add(noteKey);
     const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId: targetCalendarId, openSheet: false });
     if (page) {
       idMap.set(note.id, page.id);

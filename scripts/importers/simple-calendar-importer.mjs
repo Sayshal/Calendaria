@@ -533,7 +533,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
-    if (this.#scNoteCategories.length) await this.#importNoteCategories(this.#scNoteCategories);
+    const categoryMap = this.#scNoteCategories.length ? await this.#importNoteCategories(this.#scNoteCategories) : new Map();
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     log(3, `Calendar yearZero: ${yearZero}`);
@@ -541,7 +541,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
       try {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
-        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories };
+        const mappedCategories = (note.categories || []).map((id) => categoryMap.get(id) ?? id);
+        const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: mappedCategories };
         const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
@@ -560,16 +561,20 @@ export default class SimpleCalendarImporter extends BaseImporter {
   async #importNoteCategories(scCategories) {
     const existing = getAllPresets();
     const existingIds = new Set(existing.map((c) => c.id));
+    const categoryMap = new Map();
     for (const cat of scCategories) {
-      const id = cat.name
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\da-z-]/g, '');
+      const id =
+        cat.name
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\da-z-]/g, '') || foundry.utils.randomID();
+      categoryMap.set(cat.id ?? cat.name, id);
       if (!existingIds.has(id)) {
         await addCustomPreset(cat.name, cat.color, 'fa-tag');
-        log(3, `Imported SC note category: ${cat.name}`);
+        log(3, `Imported SC note category: ${cat.name} (${cat.id} -> ${id})`);
       }
     }
+    return categoryMap;
   }
 
   /** @override */
